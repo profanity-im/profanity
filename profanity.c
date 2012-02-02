@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <string.h>
+#include <strophe/strophe.h>
 
 void init()
 {
