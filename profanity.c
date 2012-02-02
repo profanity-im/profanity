@@ -47,14 +47,6 @@ void close()
     endwin();
 }
 
-void get_name(char *name)
-{
-}
-
-void show_name(char *name)
-{
-}
-
 int main()
 {   
     int ypos = 2;
