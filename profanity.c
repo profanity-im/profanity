@@ -53,7 +53,7 @@ int main()
     int ypos = 2;
     int xpos = 2;
     int ch;
-    char *name;
+    char name[20];
 
     init();
 
