@@ -5,6 +5,12 @@
 #include <strophe/strophe.h>
 
 static FILE *logp;
+static WINDOW *incoming_border;
+static WINDOW *outgoing_border;
+static WINDOW *incoming;
+static WINDOW *outgoing;
+static int incoming_ypos = 0;
+static int inc_scroll_max = 0;
 
 xmpp_log_t *xmpp_get_file_logger();
 
@@ -25,6 +31,9 @@ void init(void);
 void print_title(void);
 
 void close(void);
+
+WINDOW *create_win(int, int, int, int, int);
+void create_conversation(void);
 
 int main(void)
 {   
@@ -68,7 +77,11 @@ int main(void)
     xmpp_connect_client(conn, NULL, 0, conn_handler, ctx);
     
     clear();
+    print_title();
     refresh();
+    move(3, 0);
+
+    create_conversation();
 
     xmpp_run(ctx);
 
@@ -100,10 +113,18 @@ int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     intext = xmpp_stanza_get_text(xmpp_stanza_get_child_by_name(stanza, "body"));
 
-    printw("Incoming message from %s: %s\n", xmpp_stanza_get_attribute(stanza, "from"), 
-        intext);
+    char in_line[100];    
+    sprintf(in_line, "%s: %s\n", xmpp_stanza_get_attribute(stanza, "from"), intext);
 
-    refresh();
+    if (incoming_ypos == inc_scroll_max-1) {
+        scroll(incoming);
+        mvwaddstr(incoming, incoming_ypos-1, 0, in_line);
+    } else {
+        mvwaddstr(incoming, incoming_ypos, 0, in_line);
+        incoming_ypos++;
+    }
+
+    wrefresh(incoming);
 
     reply = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(reply, "message");
@@ -129,7 +150,6 @@ int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     return 1;
 }
-
 
 xmpp_log_t *xmpp_get_file_logger()
 {
@@ -180,6 +200,52 @@ void init(void)
 
     attron(A_BOLD);
     attron(COLOR_PAIR(1));
+}
+
+WINDOW *create_win(int height, int width, int starty, int startx, int border)
+{   
+    WINDOW *local_win;
+
+    local_win = newwin(height, width, starty, startx);
+    if (border)    
+        box(local_win, 0 , 0);     
+    wrefresh(local_win);
+
+    return local_win;
+}
+
+void create_conversation()
+{
+    int rows, cols;
+    char *title = "PROFANITY";
+
+    getmaxyx(stdscr, rows, cols);
+    
+    curs_set(0);
+    attron(COLOR_PAIR(3));
+    mvprintw(1, (cols - strlen(title))/2, title);
+    attroff(COLOR_PAIR(3));
+
+    int in_height, in_width, in_y, in_x;
+    int out_height, out_width, out_y, out_x;
+
+    out_height = 5;
+    out_width = cols;
+    out_y = rows - 5;
+    out_x = 0;
+
+    in_height = (rows - 3) - (out_height);
+    in_width = cols;
+    in_y = 3;
+    in_x = 0;
+    
+    incoming_border = create_win(in_height, in_width, in_y, in_x, 1);
+    outgoing_border = create_win(out_height, out_width, out_y, out_x, 1);
+    inc_scroll_max = in_height-2;
+    incoming = create_win(in_height-2, in_width-2, in_y+1, in_x+1, 0);
+    scrollok(incoming, TRUE);
+    outgoing = create_win(out_height-2, out_width-2, out_y+1, out_x+1, 0);
+    
 }
 
 void print_title(void)
