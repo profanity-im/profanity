@@ -5,3 +5,8 @@
 # *.[oa]
 # *~
 profanity
+active
+roster
+basic
+bot
+*.o
