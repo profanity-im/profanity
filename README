@@ -1,1 +1,9 @@
-Curses based jabber client
+Ncurses based jabber client.
+
+To make:
+
+    make
+
+To run:
+
+    ./profanity
