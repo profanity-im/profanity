@@ -10,3 +10,4 @@ roster
 basic
 bot
 *.o
+*.log

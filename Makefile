@@ -8,6 +8,7 @@ profanity: clean
 	$(CC) active.c $(LIBS) -o active
 	$(CC) basic.c $(LIBS) -o basic
 	$(CC) bot.c $(LIBS) -o bot
+	$(CC) curses_example.c -lncurses -o curses_example
 
 .PHONY: clean
 clean:
@@ -16,3 +17,4 @@ clean:
 	rm -f active
 	rm -f basic
 	rm -f bot
+	rm -f curses_example
