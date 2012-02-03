@@ -5,9 +5,6 @@
 # *.[oa]
 # *~
 profanity
-active
-roster
-basic
-bot
+curses_example
 *.o
 *.log
