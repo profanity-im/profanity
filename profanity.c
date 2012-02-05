@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <ncurses.h>
 #include <string.h>
 #include <strophe/strophe.h>
@@ -22,9 +23,6 @@ static WINDOW *main_win;
 int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     void * const userdata);
 
-int out_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
-    void * const userdata);
-
 // connection handler
 void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status, 
           const int error, xmpp_stream_error_t * const stream_error,
@@ -37,7 +35,7 @@ void create_command_bar(void);
 void create_command_window(void);
 void create_main_window(void);
 
-int main_runner(WINDOW *win, void* data) ;
+void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn);
 
 struct receiver {
     xmpp_ctx_t *ctx;
@@ -92,12 +90,10 @@ int main(void)
             mvwgetstr(cmd_win, 0, 0, passwd);
             echo();
 
-            wprintw(main_win, "Connecting as: %s/%s\n", user, passwd);
-            wrefresh(main_win);
+            mvwprintw(cmd_bar, 0, 0, "%s", user);
+            wrefresh(cmd_bar);
             
             wclear(cmd_win);
-            wclear(cmd_bar);
-            wrefresh(cmd_bar);
             wmove(cmd_win, 0, 0);
             wrefresh(cmd_win);
 
@@ -113,18 +109,11 @@ int main(void)
 
             xmpp_conn_set_jid(conn, user);
             xmpp_conn_set_pass(conn, passwd);
-
             xmpp_connect_client(conn, NULL, 0, conn_handler, ctx);
 
-            struct receiver a_receiver;
-            a_receiver.ctx = ctx;
-            a_receiver.conn = conn;
+            event_loop(ctx, conn);
 
-            use_window(main_win, &main_runner, &a_receiver);
-
-            wprintw(cmd_win, "WORKED!");
-            wrefresh(cmd_win);
-
+            break;
         } else {
             // echo ignore
             wclear(cmd_win);
@@ -138,17 +127,76 @@ int main(void)
     return 0;
 }
 
-int main_runner(WINDOW *win, void* data) 
+void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn)
 {
-    struct receiver *rec = (struct receiver*) data;
-    xmpp_run(rec->ctx);
+    int cmd_y = 0;
+    int cmd_x = 0;
 
-    xmpp_conn_release(rec->conn);
-    xmpp_ctx_free(rec->ctx);
+    wtimeout(cmd_win, 0);
+
+    while(TRUE) {
+        char ch = 0;
+        char command[100];
+        int size = 0;
+        
+        // while not enter
+        while(ch != '\n') {
+            usleep(1);
+            // handle incoming messages
+            xmpp_run_once(ctx, 10);
+
+            // move cursor back to cmd_win
+            getyx(cmd_win, cmd_y, cmd_x);
+            wmove(cmd_win, cmd_y, cmd_x);
+            
+            // get some more input
+            ch = wgetch(cmd_win);
+            if (ch > 0 && ch != '\n') {
+                command[size++] = ch;
+            }
+        }
+
+        command[size++] = '\0';
+
+        // newline was hit, check if /quit command issued
+        if (strcmp(command, "/quit") == 0) {
+            break;
+        } else {
+            // send the message
+            xmpp_stanza_t *reply, *body, *text;
+
+            reply = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(reply, "message");
+            xmpp_stanza_set_type(reply, "chat");
+            xmpp_stanza_set_attribute(reply, "to", "boothj5@localhost");
+
+            body = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(body, "body");
+
+            text = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_text(text, command);
+            xmpp_stanza_add_child(body, text);
+            xmpp_stanza_add_child(reply, body);
+
+            xmpp_send(conn, reply);
+            xmpp_stanza_release(reply);
+
+            // show it in the main window
+            wprintw(main_win, "me: %s\n", command);
+            wrefresh(main_win);
+
+            // move back to the command window and clear it
+            wclear(cmd_win);
+            wmove(cmd_win, 0, 0);
+            wrefresh(cmd_win);
+        }
+    }
+
+    xmpp_conn_release(conn);
+    xmpp_ctx_free(ctx);
 
     xmpp_shutdown();
 
-    return 1;
 }
 
 void wait_command(void)
@@ -169,51 +217,15 @@ int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     intext = xmpp_stanza_get_text(xmpp_stanza_get_child_by_name(stanza, "body"));
 
-    char in_line[200];    
-    sprintf(in_line, "%s: %s\n", xmpp_stanza_get_attribute(stanza, "from"), intext);
+    char in_line[200];
+    char *from = xmpp_stanza_get_attribute(stanza, "from");
+
+    char *short_from = strtok(from, "@");
+
+    sprintf(in_line, "%s: %s\n", short_from, intext);
 
     wprintw(main_win, in_line);
     wrefresh(main_win);
-    wmove(cmd_win, 0, 0);
-    wrefresh(cmd_win);
-
-    return 1;
-}
-
-int out_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
-    void * const userdata)
-{
-    char replytxt[100];;
-
-    echo();
-    wgetstr(cmd_win, replytxt);
-    wclear(cmd_win);
-    wmove(cmd_win, 0, 0);
-    wrefresh(cmd_win);
-
-    xmpp_stanza_t *reply, *body, *text;
-    xmpp_ctx_t *ctx = (xmpp_ctx_t*)userdata;
-
-    reply = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(reply, "message");
-    xmpp_stanza_set_type(reply, 
-        xmpp_stanza_get_type(stanza)?xmpp_stanza_get_type(stanza):"chat");
-    xmpp_stanza_set_attribute(reply, "to", xmpp_stanza_get_attribute(stanza, "from"));
-
-    body = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(body, "body");
-
-    text = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(text, replytxt);
-    xmpp_stanza_add_child(body, text);
-    xmpp_stanza_add_child(reply, body);
-
-    xmpp_send(conn, reply);
-    xmpp_stanza_release(reply);
-
-    wprintw(main_win, "me: %s\n", replytxt);    
-    wrefresh(main_win);
-    wmove(cmd_win, 0, 0);
 
     return 1;
 }
@@ -228,7 +240,6 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
         xmpp_stanza_t* pres;
         fprintf(logp, "DEBUG: connected\n");
         xmpp_handler_add(conn,in_message_handler, NULL, "message", NULL, ctx);
-    //    xmpp_handler_add(conn,out_message_handler, NULL, "message", NULL, ctx);
 
         pres = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(pres, "presence");
@@ -294,4 +305,5 @@ void create_main_window(void)
     getmaxyx(stdscr, rows, cols);
     
     main_win = newwin(rows-3, cols, 1, 0);
+    scrollok(main_win, TRUE);
 }
