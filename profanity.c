@@ -6,6 +6,7 @@
 #include <strophe/strophe.h>
 
 #include "log.h"
+#include "windows.h"
 
 // refernce to log
 extern FILE *logp;
@@ -13,11 +14,11 @@ extern FILE *logp;
 // area for log message in profanity
 static const char *prof = "prof";
 
-// static windows
-static WINDOW *title_bar;
-static WINDOW *cmd_bar;
-static WINDOW *cmd_win;
-static WINDOW *main_win;
+// window references
+extern WINDOW *title_bar;
+extern WINDOW *cmd_bar;
+extern WINDOW *cmd_win;
+extern WINDOW *main_win;
 
 // message handlers
 int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
@@ -30,17 +31,7 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
 
 // curses functions
 void init(void);
-void create_title_bar(void);
-void create_command_bar(void);
-void create_command_window(void);
-void create_main_window(void);
-
 void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn);
-
-struct receiver {
-    xmpp_ctx_t *ctx;
-    xmpp_conn_t *conn;
-};
 
 int main(void)
 {   
@@ -268,42 +259,4 @@ void init(void)
 
     attron(A_BOLD);
     attron(COLOR_PAIR(1));
-}
-
-void create_title_bar(void)
-{
-    char *title = "Profanity";
-    
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    
-    title_bar = newwin(1, cols, 0, 0);
-    wbkgd(title_bar, COLOR_PAIR(3));
-    mvwprintw(title_bar, 0, 0, title);
-}
-
-void create_command_bar(void)
-{
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    
-    cmd_bar = newwin(1, cols, rows-2, 0);
-    wbkgd(cmd_bar, COLOR_PAIR(3));
-}
-
-void create_command_window(void)
-{
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    
-    cmd_win = newwin(1, cols, rows-1, 0);
-}
-
-void create_main_window(void)
-{
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    
-    main_win = newwin(rows-3, cols, 1, 0);
-    scrollok(main_win, TRUE);
 }
