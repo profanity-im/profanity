@@ -19,7 +19,10 @@ void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
 
 static const xmpp_log_t file_log = { &xmpp_file_logger, XMPP_LEVEL_DEBUG };
 
-int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
+int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
+    void * const userdata);
+
+int out_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     void * const userdata);
 
 void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status, 
@@ -97,7 +100,7 @@ int main(void)
     return 0;
 }
 
-int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
+int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     void * const userdata)
 {
     char *append_reply = ", recieved";
@@ -126,6 +129,23 @@ int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     wrefresh(incoming);
 
+    return 1;
+}
+
+int out_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
+    void * const userdata)
+{
+    char replytxt[100];;
+
+    echo();
+    wgetstr(outgoing, replytxt);
+        
+    wrefresh(outgoing);
+    refresh();
+
+    xmpp_stanza_t *reply, *body, *text;
+    xmpp_ctx_t *ctx = (xmpp_ctx_t*)userdata;
+
     reply = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(reply, "message");
     xmpp_stanza_set_type(reply, 
@@ -135,18 +155,13 @@ int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     body = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(body, "body");
 
-    replytext = malloc(strlen(append_reply) + strlen(intext) + 1);
-    strcpy(replytext, intext);
-    strcat(replytext, append_reply);
-
     text = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(text, replytext);
+    xmpp_stanza_set_text(text, replytxt);
     xmpp_stanza_add_child(body, text);
     xmpp_stanza_add_child(reply, body);
 
     xmpp_send(conn, reply);
     xmpp_stanza_release(reply);
-    free(replytext);
 
     return 1;
 }
@@ -171,7 +186,8 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
     if (status == XMPP_CONN_CONNECT) {
         xmpp_stanza_t* pres;
         fprintf(logp, "DEBUG: connected\n");
-        xmpp_handler_add(conn,message_handler, NULL, "message", NULL, ctx);
+        xmpp_handler_add(conn,in_message_handler, NULL, "message", NULL, ctx);
+        xmpp_handler_add(conn,out_message_handler, NULL, "message", NULL, ctx);
 
         pres = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(pres, "presence");
@@ -245,7 +261,7 @@ void create_conversation()
     incoming = create_win(in_height-2, in_width-2, in_y+1, in_x+1, 0);
     scrollok(incoming, TRUE);
     outgoing = create_win(out_height-2, out_width-2, out_y+1, out_x+1, 0);
-    
+    scrollok(outgoing, TRUE);
 }
 
 void print_title(void)
