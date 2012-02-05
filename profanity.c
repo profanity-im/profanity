@@ -4,7 +4,12 @@
 #include <string.h>
 #include <strophe/strophe.h>
 
-static FILE *logp;
+#include "log.h"
+
+// refernce to log
+extern FILE *logp;
+
+// chat windows
 static WINDOW *incoming_border;
 static WINDOW *outgoing_border;
 static WINDOW *incoming;
@@ -12,27 +17,21 @@ static WINDOW *outgoing;
 static int incoming_ypos = 0;
 static int inc_scroll_max = 0;
 
-xmpp_log_t *xmpp_get_file_logger();
-
-void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
-    const char * const area, const char * const msg);
-
-static const xmpp_log_t file_log = { &xmpp_file_logger, XMPP_LEVEL_DEBUG };
-
+// message handlers
 int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     void * const userdata);
 
 int out_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     void * const userdata);
 
+// connection handler
 void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status, 
           const int error, xmpp_stream_error_t * const stream_error,
           void * const userdata);
 
+// curses functions
 void init(void);
-
 void print_title(void);
-
 void close(void);
 
 WINDOW *create_win(int, int, int, int, int);
@@ -42,7 +41,6 @@ int main(void)
 {   
     int ypos = 2;
     int xpos = 2;
-    int ch;
     char user[50];
     char passwd[50];
 
@@ -103,11 +101,7 @@ int main(void)
 int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     void * const userdata)
 {
-    char *append_reply = ", recieved";
-
-    xmpp_stanza_t *reply, *body, *text;
-    char *intext, *replytext;
-    xmpp_ctx_t *ctx = (xmpp_ctx_t*)userdata;
+    char *intext;
 
     if(!xmpp_stanza_get_child_by_name(stanza, "body")) 
         return 1;
@@ -164,17 +158,6 @@ int out_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_release(reply);
 
     return 1;
-}
-
-xmpp_log_t *xmpp_get_file_logger()
-{
-    return (xmpp_log_t*) &file_log;
-}
-
-void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
-    const char * const area, const char * const msg)
-{
-    fprintf(logp, "%s %s %s\n", area, XMPP_LEVEL_DEBUG, msg);
 }
 
 void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status, 
