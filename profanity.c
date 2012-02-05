@@ -7,6 +7,7 @@
 
 #include "log.h"
 #include "windows.h"
+#include "jabber.h"
 
 // refernce to log
 extern FILE *logp;
@@ -20,17 +21,7 @@ extern WINDOW *cmd_bar;
 extern WINDOW *cmd_win;
 extern WINDOW *main_win;
 
-// message handlers
-int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
-    void * const userdata);
-
-// connection handler
-void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status, 
-          const int error, xmpp_stream_error_t * const stream_error,
-          void * const userdata);
-
 // curses functions
-void init(void);
 void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn);
 
 int main(void)
@@ -44,21 +35,10 @@ int main(void)
     logp = fopen("profanity.log", "a");
     logmsg(prof, "Starting Profanity...");
 
-    // initialise curses
-    init();
-    refresh();
-    
-    // create windows
-    create_title_bar();
-    wrefresh(title_bar);
-    create_command_bar();
-    wrefresh(cmd_bar);
-    create_command_window();
-    wrefresh(cmd_win);
-    create_main_window();
-    wrefresh(main_win);
+    // initialise curses, and create windows
+    initgui();
 
-    // set cursor in command window and loop in input
+    // set cursor in command window and loop on input
     wmove(cmd_win, 0, 0);
     while (TRUE) {
         wgetstr(cmd_win, cmd);
@@ -190,73 +170,3 @@ void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn)
 
 }
 
-void wait_command(void)
-{
-    wclear(cmd_win);
-    wmove(cmd_win, 0, 0);
-}
-
-int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
-    void * const userdata)
-{
-    char *intext;
-
-    if(!xmpp_stanza_get_child_by_name(stanza, "body")) 
-        return 1;
-    if(!strcmp(xmpp_stanza_get_attribute(stanza, "type"), "error")) 
-        return 1;
-
-    intext = xmpp_stanza_get_text(xmpp_stanza_get_child_by_name(stanza, "body"));
-
-    char in_line[200];
-    char *from = xmpp_stanza_get_attribute(stanza, "from");
-
-    char *short_from = strtok(from, "@");
-
-    sprintf(in_line, "%s: %s\n", short_from, intext);
-
-    wprintw(main_win, in_line);
-    wrefresh(main_win);
-
-    return 1;
-}
-
-void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status, 
-          const int error, xmpp_stream_error_t * const stream_error,
-          void * const userdata)
-{
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
-
-    if (status == XMPP_CONN_CONNECT) {
-        xmpp_stanza_t* pres;
-        fprintf(logp, "DEBUG: connected\n");
-        xmpp_handler_add(conn,in_message_handler, NULL, "message", NULL, ctx);
-
-        pres = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(pres, "presence");
-        xmpp_send(conn, pres);
-        xmpp_stanza_release(pres);
-    }
-    else {
-        fprintf(logp, "DEBUG: disconnected\n");
-        xmpp_stop(ctx);
-    }
-}
-
-void init(void)
-{
-    initscr();
-    cbreak();
-    keypad(stdscr, TRUE);
-    start_color();
-
-    init_color(COLOR_WHITE, 1000, 1000, 1000);
-    init_pair(1, COLOR_WHITE, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-
-    init_color(COLOR_BLUE, 0, 0, 250);
-    init_pair(3, COLOR_WHITE, COLOR_BLUE);
-
-    attron(A_BOLD);
-    attron(COLOR_PAIR(1));
-}

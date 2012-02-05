@@ -8,9 +8,6 @@ WINDOW *cmd_win;
 WINDOW *main_win;
 
 // window creation
-void create_title_bar(void);
-void create_command_bar(void);
-void create_command_window(void);
-void create_main_window(void);
+void initgui(void);
 
 #endif

@@ -8,7 +8,41 @@ extern WINDOW *cmd_bar;
 extern WINDOW *cmd_win;
 extern WINDOW *main_win;
 
-void create_title_bar(void)
+static void create_title_bar(void);
+static void create_command_bar(void);
+static void create_command_window(void);
+static void create_main_window(void);
+
+void initgui(void)
+{
+    initscr();
+    cbreak();
+    keypad(stdscr, TRUE);
+    start_color();
+
+    init_color(COLOR_WHITE, 1000, 1000, 1000);
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+
+    init_color(COLOR_BLUE, 0, 0, 250);
+    init_pair(3, COLOR_WHITE, COLOR_BLUE);
+
+    attron(A_BOLD);
+    attron(COLOR_PAIR(1));
+
+    refresh();
+
+    create_title_bar();
+    wrefresh(title_bar);
+    create_command_bar();
+    wrefresh(cmd_bar);
+    create_command_window();
+    wrefresh(cmd_win);
+    create_main_window();
+    wrefresh(main_win);
+}
+
+static void create_title_bar(void)
 {
     char *title = "Profanity";
 
@@ -20,7 +54,7 @@ void create_title_bar(void)
     mvwprintw(title_bar, 0, 0, title);
 }
 
-void create_command_bar(void)
+static void create_command_bar(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -29,7 +63,7 @@ void create_command_bar(void)
     wbkgd(cmd_bar, COLOR_PAIR(3));
 }
 
-void create_command_window(void)
+static void create_command_window(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -37,7 +71,7 @@ void create_command_window(void)
     cmd_win = newwin(1, cols, rows-1, 0);
 }
 
-void create_main_window(void)
+static void create_main_window(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
