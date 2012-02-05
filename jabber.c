@@ -9,7 +9,6 @@ extern FILE *logp;
 
 extern WINDOW *main_win;
 
-
 int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
@@ -57,7 +56,26 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
     }
 }
 
+void prof_send(char *msg, xmpp_ctx_t *ctx, xmpp_conn_t *conn)
+{
+    xmpp_stanza_t *reply, *body, *text;
 
+    reply = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(reply, "message");
+    xmpp_stanza_set_type(reply, "chat");
+    xmpp_stanza_set_attribute(reply, "to", "boothj5@localhost");
+
+    body = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(body, "body");
+
+    text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(text, msg);
+    xmpp_stanza_add_child(body, text);
+    xmpp_stanza_add_child(reply, body);
+
+    xmpp_send(conn, reply);
+    xmpp_stanza_release(reply);
+}
 
 
 

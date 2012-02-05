@@ -134,24 +134,8 @@ void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn)
             break;
         } else {
             // send the message
-            xmpp_stanza_t *reply, *body, *text;
-
-            reply = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_name(reply, "message");
-            xmpp_stanza_set_type(reply, "chat");
-            xmpp_stanza_set_attribute(reply, "to", "boothj5@localhost");
-
-            body = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_name(body, "body");
-
-            text = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_text(text, command);
-            xmpp_stanza_add_child(body, text);
-            xmpp_stanza_add_child(reply, body);
-
-            xmpp_send(conn, reply);
-            xmpp_stanza_release(reply);
-
+            prof_send(command, ctx, conn);
+            
             // show it in the main window
             wprintw(main_win, "me: %s\n", command);
             wrefresh(main_win);
