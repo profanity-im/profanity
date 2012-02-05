@@ -37,6 +37,13 @@ void create_command_bar(void);
 void create_command_window(void);
 void create_main_window(void);
 
+int main_runner(WINDOW *win, void* data) ;
+
+struct receiver {
+    xmpp_ctx_t *ctx;
+    xmpp_conn_t *conn;
+};
+
 int main(void)
 {   
     char cmd[50];
@@ -97,7 +104,7 @@ int main(void)
             char loginmsg[100];
             sprintf(loginmsg, "User <%s> logged in", user);
             logmsg(prof, loginmsg);
-            
+           
             xmpp_initialize();
             
             log = xmpp_get_file_logger(); 
@@ -108,17 +115,18 @@ int main(void)
             xmpp_conn_set_pass(conn, passwd);
 
             xmpp_connect_client(conn, NULL, 0, conn_handler, ctx);
-            
-            xmpp_run(ctx);
 
-            xmpp_conn_release(conn);
-            xmpp_ctx_free(ctx);
+            struct receiver a_receiver;
+            a_receiver.ctx = ctx;
+            a_receiver.conn = conn;
 
-            xmpp_shutdown();
+            use_window(main_win, &main_runner, &a_receiver);
+
+            wprintw(cmd_win, "WORKED!");
+            wrefresh(cmd_win);
+
         } else {
-            // echo it to the main window
-            wprintw(main_win, "%s\n", cmd);
-            wrefresh(main_win);
+            // echo ignore
             wclear(cmd_win);
             wmove(cmd_win, 0, 0);
         }
@@ -128,6 +136,25 @@ int main(void)
     fclose(logp);
 
     return 0;
+}
+
+int main_runner(WINDOW *win, void* data) 
+{
+    struct receiver *rec = (struct receiver*) data;
+    xmpp_run(rec->ctx);
+
+    xmpp_conn_release(rec->conn);
+    xmpp_ctx_free(rec->ctx);
+
+    xmpp_shutdown();
+
+    return 1;
+}
+
+void wait_command(void)
+{
+    wclear(cmd_win);
+    wmove(cmd_win, 0, 0);
 }
 
 int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
@@ -147,6 +174,8 @@ int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     wprintw(main_win, in_line);
     wrefresh(main_win);
+    wmove(cmd_win, 0, 0);
+    wrefresh(cmd_win);
 
     return 1;
 }
@@ -199,7 +228,7 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
         xmpp_stanza_t* pres;
         fprintf(logp, "DEBUG: connected\n");
         xmpp_handler_add(conn,in_message_handler, NULL, "message", NULL, ctx);
-        xmpp_handler_add(conn,out_message_handler, NULL, "message", NULL, ctx);
+    //    xmpp_handler_add(conn,out_message_handler, NULL, "message", NULL, ctx);
 
         pres = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(pres, "presence");
