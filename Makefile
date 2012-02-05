@@ -13,3 +13,5 @@ profanity.o: log.h
 .PHONY: clean
 clean:
 	rm -f profanity
+	rm -f profanity.log
+	rm *.o

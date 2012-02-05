@@ -9,6 +9,9 @@
 // refernce to log
 extern FILE *logp;
 
+// area for log message in profanity
+static const char *prof = "prof";
+
 // chat windows
 static WINDOW *incoming_border;
 static WINDOW *outgoing_border;
@@ -49,7 +52,7 @@ int main(void)
     xmpp_log_t *log;
 
     logp = fopen("profanity.log", "a");
-    fprintf(logp, "Starting Profanity...\n");
+    logmsg(prof, "Starting Profanity...");
 
     init();
     print_title();
@@ -64,7 +67,10 @@ int main(void)
     getstr(passwd);
     echo();
     
-    fprintf(logp, "Log in, user = %s\n", user);
+    char loginmsg[100];
+    sprintf(loginmsg, "User <%s> logged in", user);
+    logmsg(prof, loginmsg);
+    //fprintf(logp, "Log in, user = %s\n", user);
     
     xmpp_initialize();
     

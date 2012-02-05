@@ -18,6 +18,11 @@ xmpp_log_t *xmpp_get_file_logger()
 void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg)
 {
+    logmsg(area, msg);
+}
+
+void logmsg(const char * const area, const char * const msg)
+{
     fprintf(logp, "%s DEBUG %s\n", area, msg);
 }
 
