@@ -9,11 +9,8 @@
 #include "windows.h"
 #include "jabber.h"
 
-// refernce to log
+// reference to log
 extern FILE *logp;
-
-// area for log message in profanity
-static const char *prof = "prof";
 
 // window references
 extern WINDOW *title_bar;
@@ -32,8 +29,7 @@ int main(void)
     xmpp_conn_t *conn;
     xmpp_log_t *log;
 
-    logp = fopen("profanity.log", "a");
-    logmsg(prof, "Starting Profanity...");
+    start_log();
 
     // initialise curses, and create windows
     initgui();
@@ -70,7 +66,7 @@ int main(void)
 
             char loginmsg[100];
             sprintf(loginmsg, "User <%s> logged in", user);
-            logmsg(prof, loginmsg);
+            logmsg(PROF, loginmsg);
            
             xmpp_initialize();
             

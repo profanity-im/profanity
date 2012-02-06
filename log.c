@@ -23,6 +23,11 @@ void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
 
 void logmsg(const char * const area, const char * const msg)
 {
-    fprintf(logp, "%s DEBUG %s\n", area, msg);
+    fprintf(logp, "%s DEBUG: %s\n", area, msg);
 }
 
+void start_log(void)
+{
+    logp = fopen("profanity.log", "a");
+    logmsg(PROF, "Starting Profanity...");
+}

@@ -80,3 +80,12 @@ static void create_main_window(void)
     main_win = newwin(rows-3, cols, 1, 0);
     scrollok(main_win, TRUE);
 }
+
+void show_incomming_msg(char *from, char *message) 
+{
+    char line[100];
+    sprintf(line, "%s: %s\n", from, message);
+
+    wprintw(main_win, line);
+    wrefresh(main_win);
+}

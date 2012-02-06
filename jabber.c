@@ -12,24 +12,18 @@ extern WINDOW *main_win;
 int in_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    char *intext;
+    char *message;
 
     if(!xmpp_stanza_get_child_by_name(stanza, "body"))
         return 1;
     if(!strcmp(xmpp_stanza_get_attribute(stanza, "type"), "error"))
         return 1;
 
-    intext = xmpp_stanza_get_text(xmpp_stanza_get_child_by_name(stanza, "body"));
+    message = xmpp_stanza_get_text(xmpp_stanza_get_child_by_name(stanza, "body"));
 
-    char in_line[200];
     char *from = xmpp_stanza_get_attribute(stanza, "from");
-
     char *short_from = strtok(from, "@");
-
-    sprintf(in_line, "%s: %s\n", short_from, intext);
-
-    wprintw(main_win, in_line);
-    wrefresh(main_win);
+    show_incomming_msg(short_from, message);
 
     return 1;
 }
@@ -42,7 +36,7 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
 
     if (status == XMPP_CONN_CONNECT) {
         xmpp_stanza_t* pres;
-        fprintf(logp, "DEBUG: connected\n");
+        logmsg(CONN, "connected");
         xmpp_handler_add(conn,in_message_handler, NULL, "message", NULL, ctx);
 
         pres = xmpp_stanza_new(ctx);
@@ -51,7 +45,7 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
         xmpp_stanza_release(pres);
     }
     else {
-        fprintf(logp, "DEBUG: disconnected\n");
+        logmsg(CONN, "disconnected");
         xmpp_stop(ctx);
     }
 }

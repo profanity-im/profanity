@@ -9,5 +9,6 @@ WINDOW *main_win;
 
 // window creation
 void initgui(void);
+void show_incomming_msg(char *from, char *message);
 
 #endif
