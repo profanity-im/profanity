@@ -126,10 +126,12 @@ void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn)
 
             // if delete pressed, go back and delete it
             if (ch == 127) {
-                getyx(cmd_win, cmd_y, cmd_x);
-                wmove(cmd_win, cmd_y, cmd_x-1);
-                wdelch(cmd_win);
-                size--;
+                if (size > 0) {
+                    getyx(cmd_win, cmd_y, cmd_x);
+                    wmove(cmd_win, cmd_y, cmd_x-1);
+                    wdelch(cmd_win);
+                    size--;
+                }
             }
             // else if not error or newline, show it and store it
             else if (ch != ERR && ch != '\n') {
