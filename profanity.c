@@ -106,7 +106,7 @@ void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn)
     wtimeout(cmd_win, 0);
 
     while(TRUE) {
-        char ch = 0;
+        int ch = ERR;
         char command[100];
         int size = 0;
         
@@ -120,11 +120,24 @@ void event_loop(xmpp_ctx_t *ctx, xmpp_conn_t *conn)
             getyx(cmd_win, cmd_y, cmd_x);
             wmove(cmd_win, cmd_y, cmd_x);
             
-            // get some more input
+            // echo off, and get some more input
+            noecho();
             ch = wgetch(cmd_win);
-            if (ch > 0 && ch != '\n') {
+
+            // if delete pressed, go back and delete it
+            if (ch == 127) {
+                getyx(cmd_win, cmd_y, cmd_x);
+                wmove(cmd_win, cmd_y, cmd_x-1);
+                wdelch(cmd_win);
+                size--;
+            }
+            // else if not error or newline, show it and store it
+            else if (ch != ERR && ch != '\n') {
+                waddch(cmd_win, ch);
                 command[size++] = ch;
             }
+
+            echo();
         }
 
         command[size++] = '\0';

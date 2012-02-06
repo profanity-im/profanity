@@ -69,6 +69,7 @@ static void create_command_window(void)
     getmaxyx(stdscr, rows, cols);
 
     cmd_win = newwin(1, cols, rows-1, 0);
+    keypad(cmd_win, TRUE);
 }
 
 static void create_main_window(void)
