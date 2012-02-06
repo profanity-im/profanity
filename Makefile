@@ -16,4 +16,4 @@ profanity.o: log.h
 clean:
 	rm -f profanity
 	rm -f profanity.log
-	rm *.o
+	rm -f *.o
