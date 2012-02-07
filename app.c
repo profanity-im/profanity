@@ -91,9 +91,13 @@ static void main_event_loop(void)
             }
             inp_clear();
         } else {
-            jabber_send(command);
-            show_outgoing_msg("me", command);
-            if (showing == CHAT) {
+            if (showing == CONS) {
+                cons_bad_command(command);
+                cons_show();
+            }
+            else {
+                jabber_send(command);
+                show_outgoing_msg("me", command);
                 chat_show();
             }
             inp_clear();
