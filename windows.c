@@ -3,10 +3,10 @@
 #include "windows.h"
 
 // window references
-extern WINDOW *title_bar;
-extern WINDOW *cmd_bar;
-extern WINDOW *cmd_win;
-extern WINDOW *main_win;
+static WINDOW *title_bar;
+static WINDOW *cmd_bar;
+static WINDOW *cmd_win;
+static WINDOW *main_win;
 
 static void create_title_bar(void);
 static void create_command_bar(void);
@@ -58,10 +58,64 @@ void show_incomming_msg(char *from, char *message)
     wrefresh(main_win);
 }
 
+void show_outgoing_msg(char *from, char* message)
+{
+    char line[100];
+    sprintf(line, "%s: %s\n", from, message);
+
+    wprintw(main_win, line);
+    wrefresh(main_win);
+}
+
 void cmd_get_command_str(char *cmd)
 {
     wmove(cmd_win, 0, 0);
     wgetstr(cmd_win, cmd);
+}
+
+void cmd_clear(void)
+{
+    wclear(cmd_win);
+    wmove(cmd_win, 0, 0);
+    wrefresh(cmd_win);
+}
+
+void cmd_non_block(void)
+{
+    wtimeout(cmd_win, 0);
+}
+
+void cmd_poll_char(int *ch, char command[], int *size)
+{
+    int cmd_y = 0;
+    int cmd_x = 0;
+
+    // move cursor back to cmd_win
+    getyx(cmd_win, cmd_y, cmd_x);
+    wmove(cmd_win, cmd_y, cmd_x);
+
+    // echo off, and get some more input
+    noecho();
+    *ch = wgetch(cmd_win);
+
+    // if delete pressed, go back and delete it
+    if (*ch == 127) {
+        if (*size > 0) {
+            getyx(cmd_win, cmd_y, cmd_x);
+            wmove(cmd_win, cmd_y, cmd_x-1);
+            wdelch(cmd_win);
+            (*size)--;
+        }
+    }
+    // else if not error or newline, show it and store it
+    else if (*ch != ERR && *ch != '\n') {
+        waddch(cmd_win, *ch);
+        command[(*size)++] = *ch;
+    }
+
+    echo();
+
+
 }
 
 void cmd_get_password(char *passwd)
