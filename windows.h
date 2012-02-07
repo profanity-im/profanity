@@ -8,11 +8,14 @@ void gui_init(void);
 void gui_close(void);
 void show_incomming_msg(char *from, char *message);
 void show_outgoing_msg(char *from, char *message);
-void cmd_get_command_str(char *cmd);
-void cmd_poll_char(int *ch, char command[], int *size);
-void cmd_clear(void);
-void cmd_non_block(void);
-void cmd_get_password(char *passwd);
+void inp_get_command_str(char *cmd);
+void inp_poll_char(int *ch, char command[], int *size);
+void inp_clear(void);
+void inp_non_block(void);
+void inp_get_password(char *passwd);
 void bar_print_message(char *msg);
-
+void cons_help(void);
+void cons_show(void);
+void chat_show(void);
+void cons_bad_command(char *cmd);
 #endif
