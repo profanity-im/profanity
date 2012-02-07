@@ -2,15 +2,16 @@ CC = gcc
 WARNS = -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-variable
 LIBS = -lxml2 -lssl -lresolv -lncurses -lstrophe
 CFLAGS = -O3 $(WARNS) $(LIBS)
-OBJS = log.o windows.o jabber.o profanity.o
+OBJS = log.o windows.o jabber.o app.o profanity.o
 
 profanity: $(OBJS)
 	$(CC) -o profanity $(OBJS) $(LIBS)
 
 log.o: log.h
 windows.o: windows.h
-jabber.o: log.h windows.h
-profanity.o: log.h
+jabber.o: jabber.h log.h windows.h
+app.o: log.h windows.h jabber.h
+profanity.o: log.h windows.h app.h
 
 .PHONY: clean
 clean:

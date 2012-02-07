@@ -13,7 +13,7 @@ static void create_command_bar(void);
 static void create_command_window(void);
 static void create_main_window(void);
 
-void initgui(void)
+void gui_init(void)
 {
     initscr();
     cbreak();
@@ -40,6 +40,42 @@ void initgui(void)
     wrefresh(cmd_win);
     create_main_window();
     wrefresh(main_win);
+
+    wmove(cmd_win, 0, 0);
+}
+
+void gui_close(void)
+{
+    endwin();
+}
+
+void show_incomming_msg(char *from, char *message) 
+{
+    char line[100];
+    sprintf(line, "%s: %s\n", from, message);
+
+    wprintw(main_win, line);
+    wrefresh(main_win);
+}
+
+void cmd_get_command_str(char *cmd)
+{
+    wmove(cmd_win, 0, 0);
+    wgetstr(cmd_win, cmd);
+}
+
+void cmd_get_password(char *passwd)
+{
+    wclear(cmd_win);
+    noecho();
+    mvwgetstr(cmd_win, 0, 0, passwd);
+    echo();
+}
+
+void bar_print_message(char *msg)
+{
+    mvwprintw(cmd_bar, 0, 0, msg);
+    wrefresh(cmd_bar);
 }
 
 static void create_title_bar(void)
@@ -81,11 +117,3 @@ static void create_main_window(void)
     scrollok(main_win, TRUE);
 }
 
-void show_incomming_msg(char *from, char *message) 
-{
-    char line[100];
-    sprintf(line, "%s: %s\n", from, message);
-
-    wprintw(main_win, line);
-    wrefresh(main_win);
-}

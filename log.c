@@ -18,16 +18,21 @@ xmpp_log_t *xmpp_get_file_logger()
 void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg)
 {
-    logmsg(area, msg);
+    log_msg(area, msg);
 }
 
-void logmsg(const char * const area, const char * const msg)
+void log_msg(const char * const area, const char * const msg)
 {
     fprintf(logp, "%s DEBUG: %s\n", area, msg);
 }
 
-void start_log(void)
+void log_init(void)
 {
     logp = fopen("profanity.log", "a");
-    logmsg(PROF, "Starting Profanity...");
+    log_msg(PROF, "Starting Profanity...");
+}
+
+void log_close(void)
+{
+    fclose(logp);
 }

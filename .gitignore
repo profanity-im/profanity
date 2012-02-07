@@ -8,3 +8,4 @@ profanity
 curses_example
 *.o
 *.log
+*.swp
