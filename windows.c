@@ -113,7 +113,7 @@ void inp_poll_char(int *ch, char command[], int *size)
     }
 
     // else if not error or newline, show it and store it
-    else if (*ch != ERR && *ch != '\n') {
+    else if (*ch != ERR && *ch != '\n' && *ch != KEY_F(1) && *ch != KEY_F(2)) {
         waddch(inp_win, *ch);
         command[(*size)++] = *ch;
     }
