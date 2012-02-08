@@ -12,6 +12,7 @@ struct prof_win {
 void gui_init(void);
 void gui_close(void);
 void switch_to(int i);
+void close_win(void);
 int in_chat(void);
 void get_recipient(char *recipient);
 void show_incomming_msg(char *from, char *message);
@@ -23,7 +24,5 @@ void inp_non_block(void);
 void inp_get_password(char *passwd);
 void bar_print_message(char *msg);
 void cons_help(void);
-void cons_show(void);
-void chat_show(void);
 void cons_bad_command(char *cmd);
 #endif

@@ -19,7 +19,6 @@ void start_profanity(void)
             break;
         } else if (strncmp(cmd, "/help", 5) == 0) {
             cons_help();
-            cons_show();
             inp_clear();
         } else if (strncmp(cmd, "/connect ", 9) == 0) {
             char *user;
@@ -35,7 +34,6 @@ void start_profanity(void)
             break;
         } else {
             cons_bad_command(cmd);
-            cons_show();
             inp_clear();
         }
     }
@@ -98,15 +96,26 @@ static void main_event_loop(void)
             cons_help();
             inp_clear();
 
-        // send message to recipient if chat window
+        // /close -> close the current chat window, if in chat
+        } else if (strncmp(command, "/close", 6) == 0) {
+            if (in_chat()) {
+                close_win();
+            } else {
+                cons_bad_command(command);
+            }
+            inp_clear();
+
+        // send message to recipient, if in chat
         } else {
             if (in_chat()) {
                 char recipient[100] = "";
                 get_recipient(recipient);
                 jabber_send(command, recipient);
                 show_outgoing_msg("me", command);
-                inp_clear();
+            } else {
+                cons_bad_command(command);
             }
+            inp_clear();
         }
     }
 

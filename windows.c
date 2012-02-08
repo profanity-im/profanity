@@ -60,6 +60,23 @@ void switch_to(int i)
     curr_win = i;
 }
 
+void close_win(void)
+{
+    // reset the chat win to unused
+    strcpy(wins[curr_win].from, "");
+    wclear(wins[curr_win].win);
+
+    // set it as inactive in the status bar
+    mvwaddch(inp_bar, 0, 30 + curr_win, ' ');
+    if (curr_win == 9)
+        mvwaddch(inp_bar, 0, 30 + curr_win + 1, ' ');
+    wrefresh(inp_bar);
+    
+    // go back to console window
+    touchwin(wins[0].win);
+    wrefresh(wins[0].win);
+}
+
 int in_chat(void)
 {
     return (curr_win != 0);
@@ -213,17 +230,23 @@ void cons_help(void)
     waddstr(wins[0].win, "----\n");
     waddstr(wins[0].win, "/quit - Quits Profanity.\n");
     waddstr(wins[0].win, "/connect <username@host> - Login to jabber.\n");
+
+    // if its the current window, draw it
+    if (curr_win == 0) {
+        touchwin(wins[0].win);
+        wrefresh(wins[0].win);
+    }
 }
 
 void cons_bad_command(char *cmd)
 {
     wprintw(wins[0].win, "Unknown command: %s\n", cmd);
-}
-
-void cons_show(void)
-{
-    touchwin(wins[0].win);
-    wrefresh(wins[0].win);
+    
+    // if its the current window, draw it
+    if (curr_win == 0) {
+        touchwin(wins[0].win);
+        wrefresh(wins[0].win);
+    }
 }
 
 static void create_title_bar(void)
