@@ -24,11 +24,11 @@ void start_profanity(void)
             char *user;
             user = strndup(cmd+9, strlen(cmd)-9);
 
-            bar_print_message("Enter password:");
+            inp_bar_print_message("Enter password:");
             char passwd[20];
             inp_get_password(passwd);
 
-            bar_print_message(user);
+            inp_bar_print_message(user);
             jabber_connect(user, passwd);
             main_event_loop();
             break;
