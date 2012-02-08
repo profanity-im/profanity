@@ -7,9 +7,6 @@
 #include "windows.h"
 #include "jabber.h"
 
-#define CHAT 0
-#define CONS 1
-
 static void main_event_loop(void);
 
 void start_profanity(void)
@@ -34,7 +31,6 @@ void start_profanity(void)
 
             bar_print_message(user);
             jabber_connect(user, passwd);
-            chat_show();
             main_event_loop();
             break;
         } else {
@@ -47,8 +43,6 @@ void start_profanity(void)
 
 static void main_event_loop(void)
 {
-    int showing = CHAT;
-
     inp_non_block();
 
     while(TRUE) {
@@ -62,18 +56,30 @@ static void main_event_loop(void)
         
             // handle incoming messages
             jabber_process_events();
-            if (showing == CHAT) {
-                chat_show();
-            }
 
             // determine if they changed windows
             if (ch == KEY_F(1)) {
-                cons_show();
-                showing = CONS;
+                switch_to(0);
             } else if (ch == KEY_F(2)) {
-                chat_show();
-                showing = CHAT;
+                switch_to(1);
+            } else if (ch == KEY_F(3)) {
+                switch_to(2);
+            } else if (ch == KEY_F(4)) {
+                switch_to(3);
+            } else if (ch == KEY_F(5)) {
+                switch_to(4);
+            } else if (ch == KEY_F(6)) {
+                switch_to(5);
+            } else if (ch == KEY_F(7)) {
+                switch_to(6);
+            } else if (ch == KEY_F(8)) {
+                switch_to(7);
+            } else if (ch == KEY_F(9)) {
+                switch_to(8);
+            } else if (ch == KEY_F(10)) {
+                switch_to(9);
             }
+
             // get another character from the command box
             inp_poll_char(&ch, command, &size);
         }
@@ -86,20 +92,10 @@ static void main_event_loop(void)
             break;
         } else if (strncmp(command, "/help", 5) == 0) {
             cons_help();
-            if (showing == CONS) {
-                cons_show();
-            }
             inp_clear();
         } else {
-            if (showing == CONS) {
-                cons_bad_command(command);
-                cons_show();
-            }
-            else {
-                jabber_send(command);
-                show_outgoing_msg("me", command);
-                chat_show();
-            }
+            jabber_send(command);
+            show_outgoing_msg("me", command);
             inp_clear();
         }
     }

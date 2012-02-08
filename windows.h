@@ -4,8 +4,14 @@
 #include <strophe/strophe.h>
 #include <ncurses.h>
 
+struct prof_win {
+    char from[70];
+    WINDOW *win;
+};
+
 void gui_init(void);
 void gui_close(void);
+void switch_to(int i);
 void show_incomming_msg(char *from, char *message);
 void show_outgoing_msg(char *from, char *message);
 void inp_get_command_str(char *cmd);

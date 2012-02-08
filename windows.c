@@ -1,5 +1,5 @@
+#include <string.h>
 #include <ncurses.h>
-
 #include "windows.h"
 
 // common window references
@@ -7,16 +7,15 @@ static WINDOW *title_bar;
 static WINDOW *inp_bar;
 static WINDOW *inp_win;
 
-// main windows
-static WINDOW *chat_win;
-static WINDOW *cons_win;
+static struct prof_win wins[10];
+static int curr_win = 0;
 
+// main windows
 static void create_title_bar(void);
 static void create_input_bar(void);
 static void create_input_window(void);
 
-static void create_chat_window(void);
-static void create_console_window(void);
+static void create_windows(void);
 
 void gui_init(void)
 {
@@ -44,8 +43,7 @@ void gui_init(void)
     create_input_window();
     wrefresh(inp_win);
 
-    create_chat_window();
-    create_console_window();
+    create_windows();
 
     wmove(inp_win, 0, 0);
 }
@@ -55,12 +53,63 @@ void gui_close(void)
     endwin();
 }
 
+void switch_to(int i)
+{
+    touchwin(wins[i].win);
+    wrefresh(wins[i].win);
+    curr_win = i;
+}
+
 void show_incomming_msg(char *from, char *message) 
 {
     char line[100];
     sprintf(line, "%s: %s\n", from, message);
 
-    wprintw(chat_win, line);
+    // find the chat window for sender
+    int i;
+    for (i = 1; i < 10; i++)
+        if (strcmp(wins[i].from, from) == 0)
+            break;
+
+    // if we didn't find a window
+    if (i == 10) {
+        // find the first unused one
+        for (i = 1; i < 10; i++)
+            if (strcmp(wins[i].from, "") == 0)
+                break;
+
+        // set it up and print the message to it
+        strcpy(wins[i].from, from);
+        wclear(wins[i].win);
+        wprintw(wins[i].win, line);
+        
+        // signify active window in status bar
+        mvwprintw(inp_bar, 0, 30 + i, "%d", i+1);
+        touchwin(inp_bar);
+        wrefresh(inp_bar);
+        
+        // if its the current window, draw it
+        if (curr_win == i) {
+            touchwin(wins[i].win);
+            wrefresh(wins[i].win);
+        }
+    }
+    // otherwise 
+    else {
+        // add the line to the senders window
+        wprintw(wins[i].win, line);
+        
+        // signify active window in status bar
+        mvwprintw(inp_bar, 0, 30 + i, "%d", i+1);
+        touchwin(inp_bar);
+        wrefresh(inp_bar);
+        
+        // if its the current window, draw it
+        if (curr_win == i) {
+            touchwin(wins[i].win);
+            wrefresh(wins[i].win);
+        }
+    }
 }
 
 void show_outgoing_msg(char *from, char* message)
@@ -68,7 +117,7 @@ void show_outgoing_msg(char *from, char* message)
     char line[100];
     sprintf(line, "%s: %s\n", from, message);
 
-    wprintw(chat_win, line);
+//    wprintw(chat_win, line);
 }
 
 void inp_get_command_str(char *cmd)
@@ -113,7 +162,18 @@ void inp_poll_char(int *ch, char command[], int *size)
     }
 
     // else if not error or newline, show it and store it
-    else if (*ch != ERR && *ch != '\n' && *ch != KEY_F(1) && *ch != KEY_F(2)) {
+    else if (*ch != ERR && 
+             *ch != '\n' && 
+             *ch != KEY_F(1) && 
+             *ch != KEY_F(2) && 
+             *ch != KEY_F(3) && 
+             *ch != KEY_F(4) && 
+             *ch != KEY_F(5) && 
+             *ch != KEY_F(6) && 
+             *ch != KEY_F(7) && 
+             *ch != KEY_F(8) && 
+             *ch != KEY_F(9) && 
+             *ch != KEY_F(10)) {
         waddch(inp_win, *ch);
         command[(*size)++] = *ch;
     }
@@ -137,27 +197,21 @@ void bar_print_message(char *msg)
 
 void cons_help(void)
 {
-    waddstr(cons_win, "Help\n");
-    waddstr(cons_win, "----\n");
-    waddstr(cons_win, "/quit - Quits Profanity.\n");
-    waddstr(cons_win, "/connect <username@host> - Login to jabber.\n");
+    waddstr(wins[9].win, "Help\n");
+    waddstr(wins[0].win, "----\n");
+    waddstr(wins[0].win, "/quit - Quits Profanity.\n");
+    waddstr(wins[0].win, "/connect <username@host> - Login to jabber.\n");
 }
 
 void cons_bad_command(char *cmd)
 {
-    wprintw(cons_win, "Unknown command: %s\n", cmd);
+    wprintw(wins[0].win, "Unknown command: %s\n", cmd);
 }
 
 void cons_show(void)
 {
-    touchwin(cons_win);
-    wrefresh(cons_win);
-}
-
-void chat_show(void)
-{
-    touchwin(chat_win);
-    wrefresh(chat_win);
+    touchwin(wins[0].win);
+    wrefresh(wins[0].win);
 }
 
 static void create_title_bar(void)
@@ -190,25 +244,29 @@ static void create_input_window(void)
     keypad(inp_win, TRUE);
 }
 
-static void create_chat_window(void)
+static void create_windows(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    chat_win = newwin(rows-3, cols, 1, 0);
-    scrollok(chat_win, TRUE);
-}
-
-static void create_console_window(void)
-{
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-
-    cons_win = newwin(rows-3, cols, 1, 0);
-    scrollok(cons_win, TRUE);
+    // create the console window in 0
+    struct prof_win cons;
+    strcpy(cons.from, "_cons");
+    cons.win = newwin(rows-3, cols, 1, 0);
+    scrollok(cons.win, TRUE);
     
-    waddstr(cons_win, "Welcome to Profanity.\n");
-    touchwin(cons_win);
-    wrefresh(cons_win);
-
+    waddstr(cons.win, "Welcome to Profanity.\n");
+    touchwin(cons.win);
+    wrefresh(cons.win);
+    wins[0] = cons;
+    
+    // create the chat windows
+    int i;
+    for (i = 1; i < 10; i++) {
+        struct prof_win chat;
+        strcpy(chat.from, "");
+        chat.win = newwin(rows-3, cols, 1, 0);
+        scrollok(chat.win, TRUE);
+        wins[i] = chat;
+    }    
 }
