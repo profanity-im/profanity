@@ -87,16 +87,26 @@ static void main_event_loop(void)
         // null terminate the input    
         command[size++] = '\0';
 
-        // newline was hit, check if /quit command issued
+        // deal with input
+
+        // /quit command -> exit
         if (strcmp(command, "/quit") == 0) {
             break;
+
+        // /help -> print help to console
         } else if (strncmp(command, "/help", 5) == 0) {
             cons_help();
             inp_clear();
+
+        // send message to recipient if chat window
         } else {
-            jabber_send(command);
-            show_outgoing_msg("me", command);
-            inp_clear();
+            if (in_chat()) {
+                char recipient[100] = "";
+                get_recipient(recipient);
+                jabber_send(command, recipient);
+                show_outgoing_msg("me", command);
+                inp_clear();
+            }
         }
     }
 

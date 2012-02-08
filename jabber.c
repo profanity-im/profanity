@@ -46,14 +46,14 @@ void jabber_process_events(void)
 }
 
 
-void jabber_send(char *msg)
+void jabber_send(char *msg, char *recipient)
 {
     xmpp_stanza_t *reply, *body, *text;
 
     reply = xmpp_stanza_new(_ctx);
     xmpp_stanza_set_name(reply, "message");
     xmpp_stanza_set_type(reply, "chat");
-    xmpp_stanza_set_attribute(reply, "to", "boothj5@localhost");
+    xmpp_stanza_set_attribute(reply, "to", recipient);
 
     body = xmpp_stanza_new(_ctx);
     xmpp_stanza_set_name(body, "body");
@@ -80,8 +80,7 @@ static int _jabber_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * con
     message = xmpp_stanza_get_text(xmpp_stanza_get_child_by_name(stanza, "body"));
 
     char *from = xmpp_stanza_get_attribute(stanza, "from");
-    char *short_from = strtok(from, "@");
-    show_incomming_msg(short_from, message);
+    show_incomming_msg(from, message);
 
     return 1;
 }

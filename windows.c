@@ -60,6 +60,16 @@ void switch_to(int i)
     curr_win = i;
 }
 
+int in_chat(void)
+{
+    return (curr_win != 0);
+}
+
+void get_recipient(char *recipient)
+{
+    strcpy(recipient, wins[curr_win].from);
+}
+
 void show_incomming_msg(char *from, char *message) 
 {
     char line[100];
@@ -117,7 +127,9 @@ void show_outgoing_msg(char *from, char* message)
     char line[100];
     sprintf(line, "%s: %s\n", from, message);
 
-//    wprintw(chat_win, line);
+    wprintw(wins[curr_win].win, line);
+    touchwin(wins[curr_win].win);
+    wrefresh(wins[curr_win].win);
 }
 
 void inp_get_command_str(char *cmd)
