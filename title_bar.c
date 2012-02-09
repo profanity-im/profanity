@@ -15,3 +15,11 @@ void create_title_bar(void)
     mvwprintw(title_bar, 0, 0, title);
     wrefresh(title_bar);
 }
+
+void title_bar_show(char *title)
+{
+    wclear(title_bar);
+    mvwprintw(title_bar, 0, 0, title);
+    wrefresh(title_bar);
+}
+

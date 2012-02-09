@@ -15,7 +15,6 @@ WORKLIST:
 Features:
     Show login attempts in console
     Show roster on login
-    Add /msg command
     Handle resize terminal in X windows
     Secure XMPP
     Window buffers for scrolling, with page up and down
@@ -30,3 +29,4 @@ One day:
     Other IM protocols
     Log chat history to file option
     Tab completion on commands
+    Tab completion on users

@@ -27,12 +27,13 @@ void inp_bar_print_message(char *msg);
 
 void gui_init(void);
 void gui_close(void);
+void title_bar_show(char *title);
 void switch_to(int i);
 void close_win(void);
 int in_chat(void);
 void get_recipient(char *recipient);
 void show_incomming_msg(char *from, char *message);
-void show_outgoing_msg(char *from, char *message);
+void show_outgoing_msg(char *from, char *to, char *message);
 void cons_help(void);
 void cons_bad_command(char *cmd);
 void cons_show(char *cmd);

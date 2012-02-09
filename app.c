@@ -101,6 +101,25 @@ static void main_event_loop(void)
             jabber_roster_request();
             inp_clear();
 
+        // /msg -> send message to a user
+        } else if (strncmp(command, "/msg ", 5) == 0) {
+            char *usr_msg = NULL;
+            char *usr = NULL;
+            char *msg = NULL;
+            
+            usr_msg = strndup(command+5, strlen(command)-5);
+            cons_show(usr_msg);
+            
+            usr = strtok(usr_msg, " ");
+            if (usr != NULL) {
+                msg = strndup(command+5+strlen(usr)+1, strlen(command)-(5+strlen(usr)+1));
+                if (msg != NULL) {
+                    jabber_send(msg, usr);
+                    show_outgoing_msg("me", usr, msg);
+                }
+            }
+            inp_clear();
+
         // /close -> close the current chat window, if in chat
         } else if (strncmp(command, "/close", 6) == 0) {
             if (in_chat()) {
@@ -116,7 +135,7 @@ static void main_event_loop(void)
                 char recipient[100] = "";
                 get_recipient(recipient);
                 jabber_send(command, recipient);
-                show_outgoing_msg("me", command);
+                show_outgoing_msg("me", recipient, command);
             } else {
                 cons_bad_command(command);
             }
