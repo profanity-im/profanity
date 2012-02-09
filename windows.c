@@ -150,7 +150,8 @@ void cons_help(void)
     wprintw(wins[0].win, " [%s]     /close : Close a chat window.\n", tstmp);
     wprintw(wins[0].win, " [%s]     /quit : Quits Profanity.\n", tstmp);
     wprintw(wins[0].win, " [%s]   Shortcuts:\n", tstmp);
-    wprintw(wins[0].win, " [%s]     F Keys : Chat windows.\n", tstmp);
+    wprintw(wins[0].win, " [%s]     F1 : Console window.\n", tstmp);
+    wprintw(wins[0].win, " [%s]     F2-10 : Chat windows.\n", tstmp);
 
     // if its the current window, draw it
     if (curr_win == 0) {

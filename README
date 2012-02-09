@@ -9,3 +9,24 @@ To make:
 To run:
 
     ./profanity
+
+WORKLIST:
+
+Features:
+    Show login attempts in console
+    Show roster on login
+    Add /msg command
+    Handle resize terminal in X windows
+    Secure XMPP
+    Window buffers for scrolling, with page up and down
+    Left right arrow keys whilst typing commands
+    Up down arrow keys for command history
+    
+Bugs:
+    Glitch with something flashing in status bar on login
+    Correctly handling string lengths
+
+One day:
+    Other IM protocols
+    Log chat history to file option
+    Tab completion on commands

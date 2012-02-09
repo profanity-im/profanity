@@ -146,15 +146,13 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
                 item = xmpp_stanza_get_next(item)) {
             if ((name = xmpp_stanza_get_attribute(item, "name"))) {
                 char line[200];
-                sprintf(line, "  %s (%s) sub=%s", name,
-                    xmpp_stanza_get_attribute(item, "jid"),
-                    xmpp_stanza_get_attribute(item, "subscription"));
+                sprintf(line, "  %s (%s)", name,
+                    xmpp_stanza_get_attribute(item, "jid"));
                 cons_show(line);
             } else {
                 char line[200];
-                sprintf(line, "  %s sub=%s",
-                    xmpp_stanza_get_attribute(item, "jid"),
-                    xmpp_stanza_get_attribute(item, "subscription"));
+                sprintf(line, "  %s",
+                    xmpp_stanza_get_attribute(item, "jid"));
                 cons_show(line);
             }
         }
