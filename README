@@ -1,4 +1,6 @@
-Ncurses based jabber client.
+Ncurses based Irssi inspired IM client.
+
+Requires ncurses and libstrophe.
 
 To make:
 
