@@ -7,36 +7,56 @@
 #include "windows.h"
 #include "jabber.h"
 
+#define AWAIT_COMMAND 1
+#define START_MAIN 2
+#define QUIT_PROF 3
+
 static void main_event_loop(void);
+static int handle_pre_command(char *cmd);
 
 void start_profanity(void)
 {
+    int cmd_result = AWAIT_COMMAND;
     char cmd[50];
-    while (TRUE) {
+
+    while (cmd_result == AWAIT_COMMAND) {
         inp_get_command_str(cmd);
-
-        if (strcmp(cmd, "/quit") == 0) {
-            break;
-        } else if (strncmp(cmd, "/help", 5) == 0) {
-            cons_help();
-            inp_clear();
-        } else if (strncmp(cmd, "/connect ", 9) == 0) {
-            char *user;
-            user = strndup(cmd+9, strlen(cmd)-9);
-
-            inp_bar_print_message("Enter password:");
-            char passwd[20];
-            inp_get_password(passwd);
-
-            inp_bar_print_message(user);
-            jabber_connect(user, passwd);
-            main_event_loop();
-            break;
-        } else {
-            cons_bad_command(cmd);
-            inp_clear();
-        }
+        cmd_result = handle_pre_command(cmd);
     }
+
+    if (cmd_result == START_MAIN) {
+        main_event_loop();
+    }
+}
+
+static int handle_pre_command(char *cmd)
+{
+    int result;
+
+    if (strcmp(cmd, "/quit") == 0) {
+        result = QUIT_PROF;
+    } else if (strncmp(cmd, "/help", 5) == 0) {
+        cons_help();
+        inp_clear();
+        result = AWAIT_COMMAND;
+    } else if (strncmp(cmd, "/connect ", 9) == 0) {
+        char *user;
+        user = strndup(cmd+9, strlen(cmd)-9);
+
+        inp_bar_print_message("Enter password:");
+        char passwd[20];
+        inp_get_password(passwd);
+
+        inp_bar_print_message(user);
+        jabber_connect(user, passwd);
+        result = START_MAIN;
+    } else {
+        cons_bad_command(cmd);
+        inp_clear();
+        result = AWAIT_COMMAND;
+    }
+
+    return result;
 }
 
 static void main_event_loop(void)
@@ -108,8 +128,6 @@ static void main_event_loop(void)
             char *msg = NULL;
             
             usr_msg = strndup(command+5, strlen(command)-5);
-            cons_show(usr_msg);
-            
             usr = strtok(usr_msg, " ");
             if (usr != NULL) {
                 msg = strndup(command+5+strlen(usr)+1, strlen(command)-(5+strlen(usr)+1));
