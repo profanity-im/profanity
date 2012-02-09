@@ -142,12 +142,30 @@ void cons_help(void)
     char tstmp[80];
     get_time(tstmp);
 
-    wprintw(wins[0].win, " [%s] Help\n", tstmp);
-    wprintw(wins[0].win, " [%s] ----\n", tstmp);
-    wprintw(wins[0].win, " [%s] /help                    - This help.\n", tstmp);
-    wprintw(wins[0].win, " [%s] /connect <username@host> - Login to jabber.\n", tstmp);
-    wprintw(wins[0].win, " [%s] /quit                    - Quits Profanity.\n", tstmp);
+    wprintw(wins[0].win, " [%s] Help:\n", tstmp);
+    wprintw(wins[0].win, " [%s]   Commands:\n", tstmp);
+    wprintw(wins[0].win, " [%s]     /help : This help.\n", tstmp);
+    wprintw(wins[0].win, " [%s]     /connect <username@host> : Login to jabber.\n", tstmp);
+    wprintw(wins[0].win, " [%s]     /who : Get roster.\n", tstmp);
+    wprintw(wins[0].win, " [%s]     /close : Close a chat window.\n", tstmp);
+    wprintw(wins[0].win, " [%s]     /quit : Quits Profanity.\n", tstmp);
+    wprintw(wins[0].win, " [%s]   Shortcuts:\n", tstmp);
+    wprintw(wins[0].win, " [%s]     F Keys : Chat windows.\n", tstmp);
 
+    // if its the current window, draw it
+    if (curr_win == 0) {
+        touchwin(wins[0].win);
+        wrefresh(wins[0].win);
+    }
+}
+
+void cons_show(char *msg)
+{
+    char tstmp[80];
+    get_time(tstmp);
+   
+    wprintw(wins[0].win, " [%s] %s\n", tstmp, msg); 
+    
     // if its the current window, draw it
     if (curr_win == 0) {
         touchwin(wins[0].win);

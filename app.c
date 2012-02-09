@@ -96,6 +96,11 @@ static void main_event_loop(void)
             cons_help();
             inp_clear();
 
+        // /who -> request roster
+        } else if (strncmp(command, "/who", 4) == 0) {
+            jabber_roster_request();
+            inp_clear();
+
         // /close -> close the current chat window, if in chat
         } else if (strncmp(command, "/close", 6) == 0) {
             if (in_chat()) {

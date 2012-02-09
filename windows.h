@@ -35,4 +35,5 @@ void show_incomming_msg(char *from, char *message);
 void show_outgoing_msg(char *from, char *message);
 void cons_help(void);
 void cons_bad_command(char *cmd);
+void cons_show(char *cmd);
 #endif
