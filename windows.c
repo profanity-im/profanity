@@ -61,7 +61,7 @@ void close_win(void)
 
 int in_chat(void)
 {
-    return (curr_win != 0);
+    return ((curr_win != 0) && (strcmp(wins[curr_win].from, "") != 0));
 }
 
 void get_recipient(char *recipient)
