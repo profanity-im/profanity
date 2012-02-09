@@ -1,6 +1,7 @@
 #include <string.h>
 #include <ncurses.h>
 #include "windows.h"
+#include "util.h"
 
 static struct prof_win wins[10];
 static int curr_win = 0;
@@ -71,8 +72,15 @@ void get_recipient(char *recipient)
 
 void show_incomming_msg(char *from, char *message) 
 {
+    char from_cpy[100];
+    strcpy(from_cpy, from);
+    
     char line[100];
-    sprintf(line, "%s: %s\n", from, message);
+    char *short_from = strtok(from_cpy, "@");
+    char tstmp[80];
+    get_time(tstmp);
+
+    sprintf(line, " [%s] %s: %s\n", tstmp, short_from, message);
 
     // find the chat window for sender
     int i;
@@ -120,7 +128,9 @@ void show_incomming_msg(char *from, char *message)
 void show_outgoing_msg(char *from, char* message)
 {
     char line[100];
-    sprintf(line, "%s: %s\n", from, message);
+    char tstmp[80];
+    get_time(tstmp);
+    sprintf(line, " [%s] %s: %s\n", tstmp, from, message);
 
     wprintw(wins[curr_win].win, line);
     touchwin(wins[curr_win].win);
@@ -129,10 +139,14 @@ void show_outgoing_msg(char *from, char* message)
 
 void cons_help(void)
 {
-    waddstr(wins[9].win, "Help\n");
-    waddstr(wins[0].win, "----\n");
-    waddstr(wins[0].win, "/quit - Quits Profanity.\n");
-    waddstr(wins[0].win, "/connect <username@host> - Login to jabber.\n");
+    char tstmp[80];
+    get_time(tstmp);
+
+    wprintw(wins[0].win, " [%s] Help\n", tstmp);
+    wprintw(wins[0].win, " [%s] ----\n", tstmp);
+    wprintw(wins[0].win, " [%s] /help                    - This help.\n", tstmp);
+    wprintw(wins[0].win, " [%s] /connect <username@host> - Login to jabber.\n", tstmp);
+    wprintw(wins[0].win, " [%s] /quit                    - Quits Profanity.\n", tstmp);
 
     // if its the current window, draw it
     if (curr_win == 0) {
@@ -143,7 +157,10 @@ void cons_help(void)
 
 void cons_bad_command(char *cmd)
 {
-    wprintw(wins[0].win, "Unknown command: %s\n", cmd);
+    char tstmp[80];
+    get_time(tstmp);
+
+    wprintw(wins[0].win, " [%s] Unknown command: %s\n", tstmp, cmd);
     
     // if its the current window, draw it
     if (curr_win == 0) {
@@ -162,8 +179,11 @@ static void create_windows(void)
     strcpy(cons.from, "_cons");
     cons.win = newwin(rows-3, cols, 1, 0);
     scrollok(cons.win, TRUE);
+
+    char tstmp[80];
+    get_time(tstmp);
     
-    waddstr(cons.win, "Welcome to Profanity.\n");
+    wprintw(cons.win, " [%s] Welcome to Profanity.\n", tstmp);
     touchwin(cons.win);
     wrefresh(cons.win);
     wins[0] = cons;
