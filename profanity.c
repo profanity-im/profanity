@@ -7,14 +7,13 @@
 #include "log.h"
 #include "windows.h"
 #include "jabber.h"
+#include "command.h"
 
 #define AWAIT_COMMAND 1
 #define START_MAIN 2
 #define QUIT_PROF 3
-#define CONTINUE_EVENT_LOOP 4
 
 static int handle_start_command(char *cmd);
-static int handle_main_command(char *cmd);
 
 static void profanity_main(void);
 static void profanity_event_loop(int *ch, char *cmd, int *size);
@@ -36,10 +35,10 @@ void profanity_start(void)
 
 static void profanity_main(void)
 {
-    int cmd_result = CONTINUE_EVENT_LOOP;
+    int cmd_result = TRUE;
 
     inp_non_block();
-    while(cmd_result == CONTINUE_EVENT_LOOP) {
+    while(cmd_result == TRUE) {
         int ch = ERR;
         char cmd[100];
         int size = 0;
@@ -48,7 +47,7 @@ static void profanity_main(void)
             profanity_event_loop(&ch, cmd, &size);
 
         cmd[size++] = '\0';
-        cmd_result = handle_main_command(cmd);
+        cmd_result = handle_command(cmd);
     }
 
     jabber_disconnect();
@@ -118,67 +117,3 @@ static int handle_start_command(char *cmd)
     return result;
 }
 
-static int handle_main_command(char *cmd)
-{
-    int result;
-
-    // /quit command -> exit
-    if (strcmp(cmd, "/quit") == 0) {
-        result = QUIT_PROF;
-
-    // /help -> print help to console
-    } else if (strncmp(cmd, "/help", 5) == 0) {
-        cons_help();
-        inp_clear();
-        result = CONTINUE_EVENT_LOOP;
-
-    // /who -> request roster
-    } else if (strncmp(cmd, "/who", 4) == 0) {
-        jabber_roster_request();
-        inp_clear();
-        result = CONTINUE_EVENT_LOOP;
-
-    // /msg -> send message to a user
-    } else if (strncmp(cmd, "/msg ", 5) == 0) {
-        char *usr_msg = NULL;
-        char *usr = NULL;
-        char *msg = NULL;
-        
-        usr_msg = strndup(cmd+5, strlen(cmd)-5);
-        usr = strtok(usr_msg, " ");
-        if (usr != NULL) {
-            msg = strndup(cmd+5+strlen(usr)+1, strlen(cmd)-(5+strlen(usr)+1));
-            if (msg != NULL) {
-                jabber_send(msg, usr);
-                show_outgoing_msg("me", usr, msg);
-            }
-        }
-        inp_clear();
-        result = CONTINUE_EVENT_LOOP;
-
-    // /close -> close the current chat window, if in chat
-    } else if (strncmp(cmd, "/close", 6) == 0) {
-        if (in_chat()) {
-            close_win();
-        } else {
-            cons_bad_command(cmd);
-        }
-        inp_clear();
-        result = CONTINUE_EVENT_LOOP;
-
-    // send message to recipient, if in chat
-    } else {
-        if (in_chat()) {
-            char recipient[100] = "";
-            get_recipient(recipient);
-            jabber_send(cmd, recipient);
-            show_outgoing_msg("me", recipient, cmd);
-        } else {
-            cons_bad_command(cmd);
-        }
-        inp_clear();
-        result = CONTINUE_EVENT_LOOP;
-    }
-
-    return result;
-}
