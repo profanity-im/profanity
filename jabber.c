@@ -13,12 +13,12 @@ static xmpp_ctx_t *_ctx;
 static xmpp_conn_t *_conn;
 
 // private XMPP handlers
-static void _jabber_conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
-          const int error, xmpp_stream_error_t * const stream_error,
-          void * const userdata);
+static void _jabber_conn_handler(xmpp_conn_t * const conn, 
+    const xmpp_conn_event_t status, const int error, 
+    xmpp_stream_error_t * const stream_error, void * const userdata);
 
-static int _jabber_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata);
+static int _jabber_message_handler(xmpp_conn_t * const conn, 
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
@@ -88,8 +88,8 @@ void jabber_roster_request(void)
     xmpp_stanza_release(iq);
 }
 
-static int _jabber_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+static int _jabber_message_handler(xmpp_conn_t * const conn, 
+    xmpp_stanza_t * const stanza, void * const userdata)
 {
     char *message;
 
@@ -106,9 +106,9 @@ static int _jabber_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * con
     return 1;
 }
 
-static void _jabber_conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status,
-          const int error, xmpp_stream_error_t * const stream_error,
-          void * const userdata)
+static void _jabber_conn_handler(xmpp_conn_t * const conn, 
+    const xmpp_conn_event_t status, const int error, 
+    xmpp_stream_error_t * const stream_error, void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
 
