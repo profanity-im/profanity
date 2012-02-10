@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include "windows.h"
+#include "util.h"
 
 static WINDOW *inp_bar;
 
@@ -30,7 +31,18 @@ void inp_bar_active(int win)
 
 void inp_bar_print_message(char *msg)
 {
-    mvwprintw(inp_bar, 0, 0, msg);
+    mvwprintw(inp_bar, 0, 9, msg);
     wrefresh(inp_bar);
 }
 
+void inp_bar_update_time(void)
+{
+    char bar_time[8];
+    char tstmp[80];
+    get_time(tstmp);
+    sprintf(bar_time, "[%s]", tstmp);
+
+    mvwprintw(inp_bar, 0, 1, bar_time);
+    wrefresh(inp_bar);
+    inp_put_back();
+}

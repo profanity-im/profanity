@@ -11,7 +11,7 @@ profanity: $(OBJS)
 log.o: log.h
 windows.o: windows.h util.h
 title_bar.o: windows.h
-input_bar.o: windows.h
+input_bar.o: windows.h util.h
 input_win.o: windows.h
 jabber.o: jabber.h log.h windows.h
 profanity.o: log.h windows.h jabber.h command.h

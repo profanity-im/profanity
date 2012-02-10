@@ -82,3 +82,7 @@ void inp_get_password(char *passwd)
     echo();
 }
 
+void inp_put_back(void)
+{
+    wrefresh(inp_win);
+}

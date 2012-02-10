@@ -86,7 +86,7 @@ void show_incomming_msg(char *from, char *message)
     char tstmp[80];
     get_time(tstmp);
 
-    sprintf(line, " [%s] %s: %s\n", tstmp, short_from, message);
+    sprintf(line, " [%s] <%s> %s\n", tstmp, short_from, message);
 
     // find the chat window for sender
     int i;
@@ -136,7 +136,7 @@ void show_outgoing_msg(char *from, char *to, char *message)
     char line[100];
     char tstmp[80];
     get_time(tstmp);
-    sprintf(line, " [%s] %s: %s\n", tstmp, from, message);
+    sprintf(line, " [%s] <%s> %s\n", tstmp, from, message);
 
     // find the chat window for recipient
     int i;

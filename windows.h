@@ -14,16 +14,18 @@ void create_input_bar(void);
 void create_input_window(void);
 
 // input bar actions
+void inp_bar_print_message(char *msg);
 void inp_bar_inactive(int win);
 void inp_bar_active(int win);
+void inp_bar_update_time(void);
 
 // input window actions
 void inp_get_command_str(char *cmd);
 void inp_poll_char(int *ch, char command[], int *size);
 void inp_clear(void);
+void inp_put_back(void);
 void inp_non_block(void);
 void inp_get_password(char *passwd);
-void inp_bar_print_message(char *msg);
 
 void gui_init(void);
 void gui_close(void);
