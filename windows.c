@@ -45,7 +45,11 @@ void switch_to(int i)
     wrefresh(wins[i].win);
     curr_win = i;
 
-    title_bar_show(wins[i].from);
+    if (i == 0) {
+        title_bar_show("Console, type /help for help information");
+    } else {
+        title_bar_show(wins[i].from);
+    }
 }
 
 void close_win(void)
