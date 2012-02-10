@@ -9,12 +9,6 @@
 #include "jabber.h"
 #include "command.h"
 
-#define AWAIT_COMMAND 1
-#define START_MAIN 2
-#define QUIT_PROF 3
-
-static int handle_start_command(char *cmd);
-
 static void profanity_main(void);
 static void profanity_event_loop(int *ch, char *cmd, int *size);
 
@@ -88,34 +82,3 @@ static void profanity_event_loop(int *ch, char *cmd, int *size)
     // get another character from the command box
     inp_poll_char(ch, cmd, size);
 } 
-
-static int handle_start_command(char *cmd)
-{
-    int result;
-
-    if (strcmp(cmd, "/quit") == 0) {
-        result = QUIT_PROF;
-    } else if (strncmp(cmd, "/help", 5) == 0) {
-        cons_help();
-        inp_clear();
-        result = AWAIT_COMMAND;
-    } else if (strncmp(cmd, "/connect ", 9) == 0) {
-        char *user;
-        user = strndup(cmd+9, strlen(cmd)-9);
-
-        inp_bar_get_password();
-        char passwd[20];
-        inp_get_password(passwd);
-
-        inp_bar_print_message(user);
-        jabber_connect(user, passwd);
-        result = START_MAIN;
-    } else {
-        cons_bad_command(cmd);
-        inp_clear();
-        result = AWAIT_COMMAND;
-    }
-
-    return result;
-}
-
