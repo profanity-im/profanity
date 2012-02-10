@@ -10,19 +10,20 @@ void create_input_window(void)
 
     inp_win = newwin(1, cols, rows-1, 0);
     keypad(inp_win, TRUE);
+    wmove(inp_win, 0, 1);
     wrefresh(inp_win);
 }
 
 void inp_get_command_str(char *cmd)
 {
-    wmove(inp_win, 0, 0);
+    wmove(inp_win, 0, 1);
     wgetstr(inp_win, cmd);
 }
 
 void inp_clear(void)
 {
     wclear(inp_win);
-    wmove(inp_win, 0, 0);
+    wmove(inp_win, 0, 1);
     wrefresh(inp_win);
 }
 
@@ -78,8 +79,10 @@ void inp_get_password(char *passwd)
 {
     wclear(inp_win);
     noecho();
-    mvwgetstr(inp_win, 0, 0, passwd);
+    mvwgetstr(inp_win, 0, 1, passwd);
+    wmove(inp_win, 0, 1);
     echo();
+    inp_bar_clear();
 }
 
 void inp_put_back(void)

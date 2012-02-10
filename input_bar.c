@@ -29,6 +29,12 @@ void inp_bar_active(int win)
     wrefresh(inp_bar);
 }
 
+void inp_bar_get_password(void)
+{
+    mvwprintw(inp_bar, 0, 1, "Enter password:");
+    wrefresh(inp_bar);
+}
+
 void inp_bar_print_message(char *msg)
 {
     mvwprintw(inp_bar, 0, 9, msg);
@@ -45,4 +51,10 @@ void inp_bar_update_time(void)
     mvwprintw(inp_bar, 0, 1, bar_time);
     wrefresh(inp_bar);
     inp_put_back();
+}
+
+void inp_bar_clear(void)
+{
+    wclear(inp_bar);
+    wrefresh(inp_bar);
 }

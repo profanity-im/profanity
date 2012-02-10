@@ -103,7 +103,7 @@ static int handle_start_command(char *cmd)
         char *user;
         user = strndup(cmd+9, strlen(cmd)-9);
 
-        inp_bar_print_message("Enter password:");
+        inp_bar_get_password();
         char passwd[20];
         inp_get_password(passwd);
 

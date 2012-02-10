@@ -14,6 +14,8 @@ void create_input_bar(void);
 void create_input_window(void);
 
 // input bar actions
+void inp_bar_clear(void);
+void inp_bar_get_password(void);
 void inp_bar_print_message(char *msg);
 void inp_bar_inactive(int win);
 void inp_bar_active(int win);
