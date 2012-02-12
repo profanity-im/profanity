@@ -3,6 +3,7 @@
 #include "util.h"
 
 static WINDOW *status_bar;
+static char _active[29] = "[ ][ ][ ][ ][ ][ ][ ][ ][  ]";
 
 static void _status_bar_update_time(void);
 
@@ -26,14 +27,27 @@ void status_bar_refresh(void)
 
 void status_bar_inactive(int win)
 {
-    mvwaddch(status_bar, 0, 30 + win, ' ');
+    _active[1 + ((win - 1) * 3)] = ' ';
     if (win == 9)
-        mvwaddch(status_bar, 0, 30 + win + 1, ' ');
+        _active[1 + ((win -1) * 3)] = ' ';
+        
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    mvwprintw(status_bar, 0, cols - 29, _active);
 }
 
 void status_bar_active(int win)
 {
-    mvwprintw(status_bar, 0, 30 + win, "%d", win+1);
+    if (win < 9) {
+        _active[1 + ((win -1) * 3)] = (char)( ((int)'0') + (win + 1));
+    } else {
+        _active[25] = '1';
+        _active[26] = '0';
+    }
+    
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    mvwprintw(status_bar, 0, cols - 29, _active);
 }
 
 void status_bar_get_password(void)
