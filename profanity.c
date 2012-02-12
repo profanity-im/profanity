@@ -9,8 +9,8 @@
 #include "jabber.h"
 #include "command.h"
 
-static void profanity_main(void);
-static void profanity_event_loop(int *ch, char *cmd, int *size);
+static void _profanity_main(void);
+static void _profanity_event_loop(int *ch, char *cmd, int *size);
 
 void profanity_start(void)
 {
@@ -23,11 +23,11 @@ void profanity_start(void)
     }
 
     if (cmd_result == START_MAIN) {
-        profanity_main();
+        _profanity_main();
     }
 }
 
-static void profanity_main(void)
+static void _profanity_main(void)
 {
     int cmd_result = TRUE;
 
@@ -38,7 +38,7 @@ static void profanity_main(void)
         int size = 0;
 
         while(ch != '\n')
-            profanity_event_loop(&ch, cmd, &size);
+            _profanity_event_loop(&ch, cmd, &size);
 
         cmd[size++] = '\0';
         cmd_result = handle_command(cmd);
@@ -47,7 +47,7 @@ static void profanity_main(void)
     jabber_disconnect();
 }
 
-static void profanity_event_loop(int *ch, char *cmd, int *size)
+static void _profanity_event_loop(int *ch, char *cmd, int *size)
 {
     usleep(1);
 
@@ -58,35 +58,35 @@ static void profanity_event_loop(int *ch, char *cmd, int *size)
 
     // determine if they changed windows
     if (*ch == KEY_F(1)) {
-        if (is_active(0))
-            switch_to(0);
+        if (win_is_active(0))
+            win_switch_to(0);
     } else if (*ch == KEY_F(2)) {
-        if (is_active(1))
-            switch_to(1);
+        if (win_is_active(1))
+            win_switch_to(1);
     } else if (*ch == KEY_F(3)) {
-        if (is_active(2))
-            switch_to(2);
+        if (win_is_active(2))
+            win_switch_to(2);
     } else if (*ch == KEY_F(4)) {
-        if (is_active(3))
-            switch_to(3);
+        if (win_is_active(3))
+            win_switch_to(3);
     } else if (*ch == KEY_F(5)) {
-        if (is_active(4))
-            switch_to(4);
+        if (win_is_active(4))
+            win_switch_to(4);
     } else if (*ch == KEY_F(6)) {
-        if (is_active(5))
-            switch_to(5);
+        if (win_is_active(5))
+            win_switch_to(5);
     } else if (*ch == KEY_F(7)) {
-        if (is_active(6))
-            switch_to(6);
+        if (win_is_active(6))
+            win_switch_to(6);
     } else if (*ch == KEY_F(8)) {
-        if (is_active(7))
-            switch_to(7);
+        if (win_is_active(7))
+            win_switch_to(7);
     } else if (*ch == KEY_F(9)) {
-        if (is_active(8))
-            switch_to(8);
+        if (win_is_active(8))
+            win_switch_to(8);
     } else if (*ch == KEY_F(10)) {
-        if (is_active(9))
-            switch_to(9);
+        if (win_is_active(9))
+            win_switch_to(9);
     }
 
     // get another character from the command box

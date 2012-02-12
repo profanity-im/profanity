@@ -8,6 +8,10 @@ struct prof_win {
     WINDOW *win;
 };
 
+// gui startup and shutdown
+void gui_init(void);
+void gui_close(void);
+
 // create windows
 void create_title_bar(void);
 void create_input_bar(void);
@@ -29,17 +33,17 @@ void inp_put_back(void);
 void inp_non_block(void);
 void inp_get_password(char *passwd);
 
-void gui_init(void);
-void gui_close(void);
-void title_bar_show(char *title);
-int is_active(int i);
-void switch_to(int i);
-void close_win(void);
-int in_chat(void);
-void get_recipient(char *recipient);
-void show_incomming_msg(char *from, char *message);
-void show_outgoing_msg(char *from, char *to, char *message);
-void cons_help(void);
-void cons_bad_command(char *cmd);
-void cons_show(char *cmd);
+// main window actions
+void win_title_bar_show(char *title);
+int win_is_active(int i);
+void win_switch_to(int i);
+void win_close_win(void);
+int win_in_chat(void);
+void win_get_recipient(char *recipient);
+void win_show_incomming_msg(char *from, char *message);
+void win_show_outgoing_msg(char *from, char *to, char *message);
+void win_cons_help(void);
+void win_cons_bad_command(char *cmd);
+void win_cons_show(char *cmd);
+
 #endif
