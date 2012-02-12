@@ -18,6 +18,7 @@ void create_status_bar(void);
 void create_input_window(void);
 
 // title bar actions
+void title_bar_refresh(void);
 void title_bar_show(char *title);
 
 // main window actions

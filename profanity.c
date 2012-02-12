@@ -18,6 +18,7 @@ void profanity_start(void)
     char cmd[50];
 
     while (cmd_result == AWAIT_COMMAND) {
+        title_bar_refresh();
         status_bar_refresh();
         inp_get_command_str(cmd);
         cmd_result = handle_start_command(cmd);
@@ -52,6 +53,7 @@ static void _profanity_event_loop(int *ch, char *cmd, int *size)
 {
     usleep(1);
 
+    title_bar_refresh();
     status_bar_refresh();
 
     // handle incoming messages

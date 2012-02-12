@@ -15,10 +15,16 @@ void create_title_bar(void)
     title_bar_show(title);
 }
 
+void title_bar_refresh(void)
+{
+    touchwin(title_bar);
+    wrefresh(title_bar);
+    inp_put_back();
+}
+
 void title_bar_show(char *title)
 {
     wclear(title_bar);
     mvwprintw(title_bar, 0, 0, " %s", title);
-    wrefresh(title_bar);
 }
 
