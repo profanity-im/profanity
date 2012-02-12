@@ -14,16 +14,16 @@ void gui_close(void);
 
 // create windows
 void create_title_bar(void);
-void create_input_bar(void);
+void create_status_bar(void);
 void create_input_window(void);
 
-// input bar actions
-void inp_bar_clear(void);
-void inp_bar_get_password(void);
-void inp_bar_print_message(char *msg);
-void inp_bar_inactive(int win);
-void inp_bar_active(int win);
-void inp_bar_update_time(void);
+// status bar actions
+void status_bar_clear(void);
+void status_bar_get_password(void);
+void status_bar_print_message(char *msg);
+void status_bar_inactive(int win);
+void status_bar_active(int win);
+void status_bar_update_time(void);
 
 // input window actions
 void inp_get_command_str(char *cmd);

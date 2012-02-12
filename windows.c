@@ -28,7 +28,7 @@ void gui_init(void)
     refresh();
 
     create_title_bar();
-    create_input_bar();
+    create_status_bar();
     create_input_window();
 
     _create_windows();
@@ -67,7 +67,7 @@ void win_close_win(void)
     wclear(_wins[_curr_win].win);
 
     // set it as inactive in the status bar
-    inp_bar_inactive(_curr_win);
+    status_bar_inactive(_curr_win);
     
     // go back to console window
     touchwin(_wins[0].win);
@@ -117,7 +117,7 @@ void win_show_incomming_msg(char *from, char *message)
         wprintw(_wins[i].win, line);
         
         // signify active window in status bar
-        inp_bar_active(i);
+        status_bar_active(i);
         
         // if its the current window, draw it
         if (_curr_win == i) {
@@ -131,7 +131,7 @@ void win_show_incomming_msg(char *from, char *message)
         wprintw(_wins[i].win, line);
         
         // signify active window in status bar
-        inp_bar_active(i);
+        status_bar_active(i);
         
         // if its the current window, draw it
         if (_curr_win == i) {
@@ -167,7 +167,7 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
         wprintw(_wins[i].win, line);
 
         // signify active window in status bar
-        inp_bar_active(i);
+        status_bar_active(i);
 
         // if its the current window, draw it
         if (_curr_win == i) {
@@ -181,7 +181,7 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
         wprintw(_wins[i].win, line);
 
         // signify active window in status bar
-        inp_bar_active(i);
+        status_bar_active(i);
 
         // if its the current window, draw it
         if (_curr_win == i) {

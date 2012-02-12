@@ -82,7 +82,7 @@ void inp_get_password(char *passwd)
     mvwgetstr(inp_win, 0, 1, passwd);
     wmove(inp_win, 0, 1);
     echo();
-    inp_bar_clear();
+    status_bar_clear();
 }
 
 void inp_put_back(void)

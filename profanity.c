@@ -51,7 +51,7 @@ static void _profanity_event_loop(int *ch, char *cmd, int *size)
 {
     usleep(1);
 
-    inp_bar_update_time();
+    status_bar_update_time();
 
     // handle incoming messages
     jabber_process_events();
