@@ -5,7 +5,7 @@ static WINDOW *title_bar;
 
 void create_title_bar(void)
 {
-    char *title = "Profanity";
+    char *title = "Profanity. Type /help for help information.";
 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);

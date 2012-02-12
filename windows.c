@@ -39,8 +39,16 @@ void gui_close(void)
     endwin();
 }
 
-void switch_to(int i)
+int is_active(int i)
 {
+    if (strcmp(wins[i].from, "") == 0)
+        return FALSE;
+    else
+        return TRUE;
+}
+
+void switch_to(int i)
+{    
     touchwin(wins[i].win);
     wrefresh(wins[i].win);
     curr_win = i;
@@ -64,6 +72,8 @@ void close_win(void)
     // go back to console window
     touchwin(wins[0].win);
     wrefresh(wins[0].win);
+
+    title_bar_show("Console, type /help for help information");
 }
 
 int in_chat(void)

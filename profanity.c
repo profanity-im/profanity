@@ -58,25 +58,35 @@ static void profanity_event_loop(int *ch, char *cmd, int *size)
 
     // determine if they changed windows
     if (*ch == KEY_F(1)) {
-        switch_to(0);
+        if (is_active(0))
+            switch_to(0);
     } else if (*ch == KEY_F(2)) {
-        switch_to(1);
+        if (is_active(1))
+            switch_to(1);
     } else if (*ch == KEY_F(3)) {
-        switch_to(2);
+        if (is_active(2))
+            switch_to(2);
     } else if (*ch == KEY_F(4)) {
-        switch_to(3);
+        if (is_active(3))
+            switch_to(3);
     } else if (*ch == KEY_F(5)) {
-        switch_to(4);
+        if (is_active(4))
+            switch_to(4);
     } else if (*ch == KEY_F(6)) {
-        switch_to(5);
+        if (is_active(5))
+            switch_to(5);
     } else if (*ch == KEY_F(7)) {
-        switch_to(6);
+        if (is_active(6))
+            switch_to(6);
     } else if (*ch == KEY_F(8)) {
-        switch_to(7);
+        if (is_active(7))
+            switch_to(7);
     } else if (*ch == KEY_F(9)) {
-        switch_to(8);
+        if (is_active(8))
+            switch_to(8);
     } else if (*ch == KEY_F(10)) {
-        switch_to(9);
+        if (is_active(9))
+            switch_to(9);
     }
 
     // get another character from the command box

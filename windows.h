@@ -32,6 +32,7 @@ void inp_get_password(char *passwd);
 void gui_init(void);
 void gui_close(void);
 void title_bar_show(char *title);
+int is_active(int i);
 void switch_to(int i);
 void close_win(void);
 int in_chat(void);
