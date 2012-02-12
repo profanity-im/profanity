@@ -18,7 +18,7 @@ int handle_start_command(char *cmd)
     if (strcmp(cmd, "/quit") == 0) {
         result = QUIT_PROF;
     } else if (strncmp(cmd, "/help", 5) == 0) {
-        win_cons_help();
+        cons_help();
         result = AWAIT_COMMAND;
     } else if (strncmp(cmd, "/connect ", 9) == 0) {
         char *user;
@@ -32,7 +32,7 @@ int handle_start_command(char *cmd)
         jabber_connect(user, passwd);
         result = START_MAIN;
     } else {
-        win_cons_bad_command(cmd);
+        cons_bad_command(cmd);
         result = AWAIT_COMMAND;
     }
 
@@ -71,7 +71,7 @@ static int _cmd_quit(void)
 
 static int _cmd_help(void)
 {
-    win_cons_help();
+    cons_help();
 
     return TRUE;
 }
@@ -107,7 +107,7 @@ static int _cmd_close(char *cmd)
     if (win_in_chat()) {
         win_close_win();
     } else {
-        win_cons_bad_command(cmd);
+        cons_bad_command(cmd);
     }
     
     return TRUE;
@@ -121,7 +121,7 @@ static int _cmd_default(char *cmd)
         jabber_send(cmd, recipient);
         win_show_outgoing_msg("me", recipient, cmd);
     } else {
-        win_cons_bad_command(cmd);
+        cons_bad_command(cmd);
     }
 
     return TRUE;

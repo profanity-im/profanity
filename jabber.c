@@ -157,19 +157,19 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
         log_msg(CONN, "ERROR: query failed");
     else {
         query = xmpp_stanza_get_child_by_name(stanza, "query");
-        win_cons_show("Roster:");
+        cons_show("Roster:");
         for (item = xmpp_stanza_get_children(query); item; 
                 item = xmpp_stanza_get_next(item)) {
             if ((name = xmpp_stanza_get_attribute(item, "name"))) {
                 char line[200];
                 sprintf(line, "  %s (%s)", name,
                     xmpp_stanza_get_attribute(item, "jid"));
-                win_cons_show(line);
+                cons_show(line);
             } else {
                 char line[200];
                 sprintf(line, "  %s",
                     xmpp_stanza_get_attribute(item, "jid"));
-                win_cons_show(line);
+                cons_show(line);
             }
         }
     }

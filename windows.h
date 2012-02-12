@@ -42,8 +42,10 @@ int win_in_chat(void);
 void win_get_recipient(char *recipient);
 void win_show_incomming_msg(char *from, char *message);
 void win_show_outgoing_msg(char *from, char *to, char *message);
-void win_cons_help(void);
-void win_cons_bad_command(char *cmd);
-void win_cons_show(char *cmd);
+
+// console window actions
+void cons_help(void);
+void cons_bad_command(char *cmd);
+void cons_show(char *cmd);
 
 #endif

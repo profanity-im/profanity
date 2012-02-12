@@ -191,7 +191,7 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
     }
 }
 
-void win_cons_help(void)
+void cons_help(void)
 {
     char tstmp[80];
     get_time(tstmp);
@@ -224,7 +224,7 @@ void win_cons_help(void)
     }
 }
 
-void win_cons_show(char *msg)
+void cons_show(char *msg)
 {
     char tstmp[80];
     get_time(tstmp);
@@ -238,7 +238,7 @@ void win_cons_show(char *msg)
     }
 }
 
-void win_cons_bad_command(char *cmd)
+void cons_bad_command(char *cmd)
 {
     char tstmp[80];
     get_time(tstmp);
