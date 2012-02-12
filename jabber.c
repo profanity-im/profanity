@@ -12,6 +12,22 @@ static xmpp_log_t *_log;
 static xmpp_ctx_t *_ctx;
 static xmpp_conn_t *_conn;
 
+void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
+    const char * const area, const char * const msg);
+
+static const xmpp_log_t file_log = { &xmpp_file_logger, XMPP_LEVEL_DEBUG };
+
+xmpp_log_t *xmpp_get_file_logger()
+{
+    return (xmpp_log_t*) &file_log;
+}
+
+void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
+    const char * const area, const char * const msg)
+{
+    log_msg(area, msg);
+}
+
 // private XMPP handlers
 static void _jabber_conn_handler(xmpp_conn_t * const conn, 
     const xmpp_conn_event_t status, const int error, 
