@@ -18,6 +18,7 @@ void profanity_start(void)
     char cmd[50];
 
     while (cmd_result == AWAIT_COMMAND) {
+        status_bar_refresh();
         inp_get_command_str(cmd);
         cmd_result = handle_start_command(cmd);
     }
@@ -51,7 +52,7 @@ static void _profanity_event_loop(int *ch, char *cmd, int *size)
 {
     usleep(1);
 
-    status_bar_update_time();
+    status_bar_refresh();
 
     // handle incoming messages
     jabber_process_events();

@@ -18,6 +18,7 @@ void create_status_bar(void);
 void create_input_window(void);
 
 // status bar actions
+void status_bar_refresh(void);
 void status_bar_clear(void);
 void status_bar_get_password(void);
 void status_bar_print_message(char *msg);

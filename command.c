@@ -25,10 +25,12 @@ int handle_start_command(char *cmd)
         user = strndup(cmd+9, strlen(cmd)-9);
 
         status_bar_get_password();
+        status_bar_refresh();
         char passwd[20];
         inp_get_password(passwd);
 
         status_bar_print_message(user);
+        status_bar_refresh();
         jabber_connect(user, passwd);
         result = START_MAIN;
     } else {
