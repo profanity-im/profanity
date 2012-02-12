@@ -54,9 +54,9 @@ void win_switch_to(int i)
     _curr_win = i;
 
     if (i == 0) {
-        win_title_bar_show("Console, type /help for help information");
+        title_bar_show("Console, type /help for help information");
     } else {
-        win_title_bar_show(_wins[i].from);
+        title_bar_show(_wins[i].from);
     }
 }
 
@@ -73,7 +73,7 @@ void win_close_win(void)
     touchwin(_wins[0].win);
     wrefresh(_wins[0].win);
 
-    win_title_bar_show("Console, type /help for help information");
+    title_bar_show("Console, type /help for help information");
 }
 
 int win_in_chat(void)

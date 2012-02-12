@@ -12,10 +12,10 @@ void create_title_bar(void)
 
     title_bar = newwin(1, cols, 0, 0);
     wbkgd(title_bar, COLOR_PAIR(3));
-    win_title_bar_show(title);
+    title_bar_show(title);
 }
 
-void win_title_bar_show(char *title)
+void title_bar_show(char *title)
 {
     wclear(title_bar);
     mvwprintw(title_bar, 0, 0, " %s", title);
