@@ -19,7 +19,6 @@ int handle_start_command(char *cmd)
         result = QUIT_PROF;
     } else if (strncmp(cmd, "/help", 5) == 0) {
         cons_help();
-        inp_clear();
         result = AWAIT_COMMAND;
     } else if (strncmp(cmd, "/connect ", 9) == 0) {
         char *user;
@@ -34,9 +33,10 @@ int handle_start_command(char *cmd)
         result = START_MAIN;
     } else {
         cons_bad_command(cmd);
-        inp_clear();
         result = AWAIT_COMMAND;
     }
+
+    inp_clear();
 
     return result;
 }
@@ -58,6 +58,8 @@ int handle_command(char *cmd)
         result = cmd_default(cmd);
     }
 
+    inp_clear();
+
     return result;
 
 }
@@ -70,7 +72,6 @@ static int cmd_quit(void)
 static int cmd_help(void)
 {
     cons_help();
-    inp_clear();
 
     return TRUE;
 }
@@ -78,7 +79,6 @@ static int cmd_help(void)
 static int cmd_who(void)
 {
     jabber_roster_request();
-    inp_clear();
 
     return TRUE;
 }
@@ -99,8 +99,6 @@ static int cmd_msg(char *cmd)
         }
     }
 
-    inp_clear();
-    
     return TRUE;
 }
 
@@ -111,8 +109,6 @@ static int cmd_close(char *cmd)
     } else {
         cons_bad_command(cmd);
     }
-    
-    inp_clear();
     
     return TRUE;
 }
@@ -127,8 +123,6 @@ static int cmd_default(char *cmd)
     } else {
         cons_bad_command(cmd);
     }
-
-    inp_clear();
 
     return TRUE;
 }
