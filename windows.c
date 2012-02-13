@@ -8,6 +8,7 @@ static int _curr_win = 0;
 
 static void _create_windows(void);
 static void _send_message_to_win(char *contact, char *line);
+static void _refresh_if_current(int i);
 
 void gui_init(void)
 {
@@ -140,11 +141,7 @@ void cons_help(void)
     wprintw(_wins[0].win, 
         " [%s]     F2-10 : Chat windows.\n", tstmp);
 
-    // if its the current window, draw it
-    if (_curr_win == 0) {
-        touchwin(_wins[0].win);
-        wrefresh(_wins[0].win);
-    }
+    _refresh_if_current(0);
 }
 
 void cons_show(char *msg)
@@ -153,12 +150,7 @@ void cons_show(char *msg)
     get_time(tstmp);
    
     wprintw(_wins[0].win, " [%s] %s\n", tstmp, msg); 
-    
-    // if its the current window, draw it
-    if (_curr_win == 0) {
-        touchwin(_wins[0].win);
-        wrefresh(_wins[0].win);
-    }
+    _refresh_if_current(0);
 }
 
 void cons_bad_command(char *cmd)
@@ -167,12 +159,7 @@ void cons_bad_command(char *cmd)
     get_time(tstmp);
 
     wprintw(_wins[0].win, " [%s] Unknown command: %s\n", tstmp, cmd);
-    
-    // if its the current window, draw it
-    if (_curr_win == 0) {
-        touchwin(_wins[0].win);
-        wrefresh(_wins[0].win);
-    }
+    _refresh_if_current(0);
 }
 
 static void _create_windows(void)
@@ -220,33 +207,25 @@ static void _send_message_to_win(char *contact, char *line)
             if (strcmp(_wins[i].from, "") == 0)
                 break;
 
-        // set it up and print the message to it
+        // set it up and use it
         strcpy(_wins[i].from, contact);
         wclear(_wins[i].win);
         wprintw(_wins[i].win, line);
-
-        // signify active window in status bar
         status_bar_active(i);
-
-        // if its the current window, draw it
-        if (_curr_win == i) {
-            touchwin(_wins[i].win);
-            wrefresh(_wins[i].win);
-        }
+        _refresh_if_current(i);
     }
-    // otherwise 
+    // otherwise, just use it
     else {
-        // add the line to the senders window
         wprintw(_wins[i].win, line);
-
-        // signify active window in status bar
         status_bar_active(i);
-
-        // if its the current window, draw it
-        if (_curr_win == i) {
-            touchwin(_wins[i].win);
-            wrefresh(_wins[i].win);
-        }
+        _refresh_if_current(i);
     }
 }
 
+static void _refresh_if_current(int i)
+{
+    if (_curr_win == i) {
+        touchwin(_wins[i].win);
+        wrefresh(_wins[i].win);
+    }
+}
