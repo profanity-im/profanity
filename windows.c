@@ -70,6 +70,7 @@ void win_close_win(void)
     status_bar_inactive(_curr_win);
     
     // go back to console window
+    _curr_win = 0;
     touchwin(_wins[0].win);
     wrefresh(_wins[0].win);
 
@@ -201,19 +202,21 @@ void cons_help(void)
     wprintw(_wins[0].win, 
         " [%s]   Commands:\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     /help : This help.\n", tstmp);
+        " [%s]     /help                : This help.\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     /connect <username@host> : Login to jabber.\n", tstmp);
+        " [%s]     /connect user@host   : Login to jabber.\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     /who : Get roster.\n", tstmp);
+        " [%s]     /who                 : Get roster.\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     /close : Close a chat window.\n", tstmp);
+        " [%s]     /close               : Close a chat window.\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     /quit : Quits Profanity.\n", tstmp);
+        " [%s]     /msg user@host       : Send a message to user.\n", tstmp);
+    wprintw(_wins[0].win, 
+        " [%s]     /quit                : Quit Profanity.\n", tstmp);
     wprintw(_wins[0].win, 
         " [%s]   Shortcuts:\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     F1 : Console window.\n", tstmp);
+        " [%s]     F1    : Console window.\n", tstmp);
     wprintw(_wins[0].win, 
         " [%s]     F2-10 : Chat windows.\n", tstmp);
 
