@@ -10,6 +10,7 @@ struct prof_win {
 
 // gui startup and shutdown
 void gui_init(void);
+void gui_refresh(void);
 void gui_close(void);
 
 // create windows

@@ -8,7 +8,7 @@ static int _curr_win = 0;
 
 static void _create_windows(void);
 static void _send_message_to_win(char *contact, char *line);
-static void _refresh_if_current(int i);
+static void _current_window_refresh();
 
 void gui_init(void)
 {
@@ -34,6 +34,14 @@ void gui_init(void)
     _create_windows();
 }
 
+void gui_refresh(void)
+{
+    title_bar_refresh();
+    status_bar_refresh();
+    _current_window_refresh();
+    inp_put_back();
+}
+
 void gui_close(void)
 {
     endwin();
@@ -49,8 +57,6 @@ int win_is_active(int i)
 
 void win_switch_to(int i)
 {    
-    touchwin(_wins[i].win);
-    wrefresh(_wins[i].win);
     _curr_win = i;
 
     if (i == 0) {
@@ -71,8 +77,6 @@ void win_close_win(void)
     
     // go back to console window
     _curr_win = 0;
-    touchwin(_wins[0].win);
-    wrefresh(_wins[0].win);
     title_bar_show("Console, type /help for help information");
 }
 
@@ -137,8 +141,6 @@ void cons_help(void)
         " [%s]     F1    : Console window.\n", tstmp);
     wprintw(_wins[0].win, 
         " [%s]     F2-10 : Chat windows.\n", tstmp);
-
-    _refresh_if_current(0);
 }
 
 void cons_show(char *msg)
@@ -147,7 +149,6 @@ void cons_show(char *msg)
     get_time(tstmp);
    
     wprintw(_wins[0].win, " [%s] %s\n", tstmp, msg); 
-    _refresh_if_current(0);
 }
 
 void cons_bad_command(char *cmd)
@@ -156,7 +157,6 @@ void cons_bad_command(char *cmd)
     get_time(tstmp);
 
     wprintw(_wins[0].win, " [%s] Unknown command: %s\n", tstmp, cmd);
-    _refresh_if_current(0);
 }
 
 static void _create_windows(void)
@@ -212,13 +212,10 @@ static void _send_message_to_win(char *contact, char *line)
     // send message to it
     wprintw(_wins[i].win, line);
     status_bar_active(i);
-    _refresh_if_current(i);
 }
 
-static void _refresh_if_current(int i)
+static void _current_window_refresh()
 {
-    if (_curr_win == i) {
-        touchwin(_wins[i].win);
-        wrefresh(_wins[i].win);
-    }
+    touchwin(_wins[_curr_win].win);
+    wrefresh(_wins[_curr_win].win);
 }

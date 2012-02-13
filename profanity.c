@@ -53,24 +53,14 @@ static void _profanity_main(void)
 static void _profanity_event_loop(int *ch, char *cmd, int *size)
 {
     usleep(1);
-
-    // refresh gui
-    title_bar_refresh();
-    status_bar_refresh();
-
-    // handle XMPP events
+    gui_refresh();
     jabber_process_events();
-
-    // deal with special keys
     _process_special_keys(ch);
-
-    // try for another character on input
     inp_poll_char(ch, cmd, size);
 } 
 
 static void _process_special_keys(int *ch)
 {
-    // change window
     if (*ch == KEY_F(1)) {
         if (win_is_active(0))
             win_switch_to(0);
