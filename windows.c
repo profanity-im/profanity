@@ -15,12 +15,11 @@ void gui_init(void)
     initscr();
     cbreak();
     keypad(stdscr, TRUE);
+    
     start_color();
-
     init_color(COLOR_WHITE, 1000, 1000, 1000);
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
-
     init_color(COLOR_BLUE, 0, 0, 250);
     init_pair(3, COLOR_WHITE, COLOR_BLUE);
 
@@ -32,7 +31,6 @@ void gui_init(void)
     create_title_bar();
     create_status_bar();
     create_input_window();
-
     _create_windows();
 }
 
@@ -75,7 +73,6 @@ void win_close_win(void)
     _curr_win = 0;
     touchwin(_wins[0].win);
     wrefresh(_wins[0].win);
-
     title_bar_show("Console, type /help for help information");
 }
 
@@ -207,19 +204,15 @@ static void _send_message_to_win(char *contact, char *line)
             if (strcmp(_wins[i].from, "") == 0)
                 break;
 
-        // set it up and use it
+        // set it up
         strcpy(_wins[i].from, contact);
         wclear(_wins[i].win);
-        wprintw(_wins[i].win, line);
-        status_bar_active(i);
-        _refresh_if_current(i);
     }
-    // otherwise, just use it
-    else {
-        wprintw(_wins[i].win, line);
-        status_bar_active(i);
-        _refresh_if_current(i);
-    }
+
+    // send message to it
+    wprintw(_wins[i].win, line);
+    status_bar_active(i);
+    _refresh_if_current(i);
 }
 
 static void _refresh_if_current(int i)
