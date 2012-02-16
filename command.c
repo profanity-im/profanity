@@ -28,9 +28,6 @@ int handle_start_command(char *cmd)
         status_bar_refresh();
         char passwd[20];
         inp_get_password(passwd);
-
-        status_bar_print_message(user);
-        status_bar_refresh();
         jabber_connect(user, passwd);
         result = START_MAIN;
     } else {

@@ -42,14 +42,20 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
 void jabber_connect(char *user, char *passwd)
 {
     xmpp_initialize();
+
     _log = xmpp_get_file_logger();
     _ctx = xmpp_ctx_new(NULL, _log);
     _conn = xmpp_conn_new(_ctx);
 
     xmpp_conn_set_jid(_conn, user);
     xmpp_conn_set_pass(_conn, passwd);
-    xmpp_connect_client(_conn, NULL, 0, _jabber_conn_handler, _ctx);
 
+    int connect_status = xmpp_connect_client(_conn, NULL, 0, _jabber_conn_handler, _ctx);
+
+    if (connect_status == -1)
+        cons_show("XMPP connection failure");
+    else 
+        cons_show("Connecting...");
 }
 
 void jabber_disconnect(void)
@@ -129,8 +135,14 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
 
     if (status == XMPP_CONN_CONNECT) {
+        char line[100];
+        sprintf(line, "%s logged in successfully.", xmpp_conn_get_jid(conn));
+
+        cons_show(line);
+        status_bar_print_message(xmpp_conn_get_jid(conn));
+        status_bar_refresh();
+
         xmpp_stanza_t* pres;
-        log_msg(CONN, "connected");
         xmpp_handler_add(conn, _jabber_message_handler, NULL, "message", NULL, ctx);
         xmpp_id_handler_add(conn, _roster_handler, "roster", ctx);
 
@@ -140,6 +152,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_stanza_release(pres);
     }
     else {
+        cons_show("Login failed.");
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
     }

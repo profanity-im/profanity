@@ -55,7 +55,7 @@ void status_bar_get_password(void)
     mvwprintw(status_bar, 0, 9, "Enter password:");
 }
 
-void status_bar_print_message(char *msg)
+void status_bar_print_message(const char *msg)
 {
     mvwprintw(status_bar, 0, 9, msg);
 }

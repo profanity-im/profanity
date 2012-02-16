@@ -40,7 +40,7 @@ void cons_show(char *cmd);
 void status_bar_refresh(void);
 void status_bar_clear(void);
 void status_bar_get_password(void);
-void status_bar_print_message(char *msg);
+void status_bar_print_message(const char *msg);
 void status_bar_inactive(int win);
 void status_bar_active(int win);
 void status_bar_update_time(void);
