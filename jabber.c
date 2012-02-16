@@ -150,6 +150,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_stanza_set_name(pres, "presence");
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
+        jabber_roster_request();
     }
     else {
         cons_show("Login failed.");
