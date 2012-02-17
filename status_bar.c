@@ -14,6 +14,7 @@ void create_status_bar(void)
 
     status_bar = newwin(1, cols, rows-2, 0);
     wbkgd(status_bar, COLOR_PAIR(3));
+    mvwprintw(status_bar, 0, cols - 29, _active);
     wrefresh(status_bar);
 }
 
@@ -63,6 +64,10 @@ void status_bar_print_message(const char *msg)
 void status_bar_clear(void)
 {
     wclear(status_bar);
+
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    mvwprintw(status_bar, 0, cols - 29, _active);
 }
 
 static void _status_bar_update_time(void)

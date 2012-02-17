@@ -132,15 +132,15 @@ void cons_help(void)
     wprintw(_wins[0].win, 
         " [%s]     /close               : Close a chat window.\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     /msg user@host       : Send a message to user.\n", tstmp);
+        " [%s]     /msg user@host mesg  : Send mesg to user.\n", tstmp);
     wprintw(_wins[0].win, 
         " [%s]     /quit                : Quit Profanity.\n", tstmp);
     wprintw(_wins[0].win, 
         " [%s]   Shortcuts:\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     F1    : Console window.\n", tstmp);
+        " [%s]     F1                   : This console window.\n", tstmp);
     wprintw(_wins[0].win, 
-        " [%s]     F2-10 : Chat windows.\n", tstmp);
+        " [%s]     F2-10                : Chat windows.\n", tstmp);
 }
 
 void cons_show(char *msg)
