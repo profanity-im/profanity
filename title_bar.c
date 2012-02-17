@@ -20,7 +20,7 @@ void title_bar_connected(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
    
-    mvwprintw(title_bar, 0, cols - 13, "   connected");
+    mvwprintw(title_bar, 0, cols - 14, "[ ...online ]");
 }
 
 void title_bar_disconnected(void)
@@ -28,7 +28,7 @@ void title_bar_disconnected(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
    
-    mvwprintw(title_bar, 0, cols - 13, "disconnected");
+    mvwprintw(title_bar, 0, cols - 14, "[ ..offline ]");
 }
 
 void title_bar_refresh(void)
