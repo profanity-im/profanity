@@ -20,7 +20,7 @@ void title_bar_connected(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
    
-    mvwprintw(title_bar, 0, cols - 12, "   connected");
+    mvwprintw(title_bar, 0, cols - 13, "   connected");
 }
 
 void title_bar_disconnected(void)
@@ -28,7 +28,7 @@ void title_bar_disconnected(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
    
-    mvwprintw(title_bar, 0, cols - 12, "disconnected");
+    mvwprintw(title_bar, 0, cols - 13, "disconnected");
 }
 
 void title_bar_refresh(void)
