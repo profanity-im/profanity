@@ -1,6 +1,9 @@
 #ifndef PROFANITY_H
 #define PROFANITY_H
 
-void profanity_start(void);
+#define QUIT 0
+#define LOGIN_FAIL 1
+
+int profanity_start(void);
 
 #endif

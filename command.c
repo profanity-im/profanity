@@ -19,6 +19,7 @@ int handle_start_command(char *cmd)
         result = QUIT_PROF;
     } else if (strncmp(cmd, "/help", 5) == 0) {
         cons_help();
+        gui_refresh();
         result = AWAIT_COMMAND;
     } else if (strncmp(cmd, "/connect ", 9) == 0) {
         char *user;
@@ -28,10 +29,14 @@ int handle_start_command(char *cmd)
         status_bar_refresh();
         char passwd[20];
         inp_get_password(passwd);
-        jabber_connect(user, passwd);
-        result = START_MAIN;
+        int connect_status = jabber_connect(user, passwd);
+        if (connect_status == CONNECTING)
+            result = START_MAIN;
+        else
+            result = AWAIT_COMMAND;
     } else {
         cons_bad_command(cmd);
+        gui_refresh();
         result = AWAIT_COMMAND;
     }
 

@@ -15,6 +15,22 @@ void create_title_bar(void)
     title_bar_show(title);
 }
 
+void title_bar_connected(void)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+   
+    mvwprintw(title_bar, 0, cols - 12, "   connected");
+}
+
+void title_bar_disconnected(void)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+   
+    mvwprintw(title_bar, 0, cols - 12, "disconnected");
+}
+
 void title_bar_refresh(void)
 {
     touchwin(title_bar);

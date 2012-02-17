@@ -12,6 +12,9 @@ static xmpp_log_t *_log;
 static xmpp_ctx_t *_ctx;
 static xmpp_conn_t *_conn;
 
+// connection status
+static int _conn_status = CONNECTING;
+
 void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg);
 
@@ -39,7 +42,12 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
 static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
 
-void jabber_connect(char *user, char *passwd)
+int jabber_connection_status(void)
+{
+    return (_conn_status);
+}
+
+int jabber_connect(char *user, char *passwd)
 {
     xmpp_initialize();
 
@@ -52,10 +60,16 @@ void jabber_connect(char *user, char *passwd)
 
     int connect_status = xmpp_connect_client(_conn, NULL, 0, _jabber_conn_handler, _ctx);
 
-    if (connect_status == -1)
-        cons_show("XMPP connection failure");
-    else 
+    if (connect_status == 0) {
         cons_show("Connecting...");
+        _conn_status = CONNECTING;
+    }
+    else { 
+        cons_show("XMPP connection failure");
+        _conn_status = DISCONNECTED;
+    }
+
+    return _conn_status;
 }
 
 void jabber_disconnect(void)
@@ -63,6 +77,7 @@ void jabber_disconnect(void)
     xmpp_conn_release(_conn);
     xmpp_ctx_free(_ctx);
     xmpp_shutdown();
+    _conn_status = DISCONNECTED;
 }
 
 void jabber_process_events(void)
@@ -137,6 +152,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
     if (status == XMPP_CONN_CONNECT) {
         char line[100];
         sprintf(line, "%s logged in successfully.", xmpp_conn_get_jid(conn));
+        title_bar_connected();
 
         cons_show(line);
         status_bar_print_message(xmpp_conn_get_jid(conn));
@@ -151,11 +167,13 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
         jabber_roster_request();
+        _conn_status = CONNECTED;
     }
     else {
         cons_show("Login failed.");
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
+        _conn_status = DISCONNECTED;
     }
 }
 

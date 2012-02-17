@@ -21,6 +21,8 @@ void create_input_window(void);
 // title bar actions
 void title_bar_refresh(void);
 void title_bar_show(char *title);
+void title_bar_connected(void);
+void title_bar_disconnected(void);
 
 // main window actions
 int win_is_active(int i);
@@ -51,6 +53,7 @@ void inp_poll_char(int *ch, char command[], int *size);
 void inp_clear(void);
 void inp_put_back(void);
 void inp_non_block(void);
+void inp_block(void);
 void inp_get_password(char *passwd);
 
 #endif

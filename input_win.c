@@ -32,6 +32,11 @@ void inp_non_block(void)
     wtimeout(inp_win, 0);
 }
 
+void inp_block(void)
+{
+    wtimeout(inp_win, -1);
+}
+
 void inp_poll_char(int *ch, char command[], int *size)
 {
     int inp_y = 0;

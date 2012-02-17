@@ -9,14 +9,18 @@
 #include "jabber.h"
 #include "command.h"
 
-static void _profanity_main(void);
+static int _profanity_main(void);
 static void _profanity_event_loop(int *ch, char *cmd, int *size);
 static void _process_special_keys(int *ch);
 
-void profanity_start(void)
+int profanity_start(void)
 {
+    int exit_status = QUIT;
     int cmd_result = AWAIT_COMMAND;
     char cmd[50];
+
+    title_bar_disconnected();
+    gui_refresh();
 
     while (cmd_result == AWAIT_COMMAND) {
         title_bar_refresh();
@@ -26,11 +30,13 @@ void profanity_start(void)
     }
 
     if (cmd_result == START_MAIN) {
-        _profanity_main();
+        exit_status = _profanity_main();
     }
+
+    return exit_status;
 }
 
-static void _profanity_main(void)
+static int _profanity_main(void)
 {
     int cmd_result = TRUE;
 
@@ -40,14 +46,22 @@ static void _profanity_main(void)
         char cmd[100];
         int size = 0;
 
-        while(ch != '\n')
+        while(ch != '\n') {
             _profanity_event_loop(&ch, cmd, &size);
+
+            int conn_status = jabber_connection_status();
+            if (conn_status == DISCONNECTED) {
+                inp_block();
+                return LOGIN_FAIL;
+            }
+        }
 
         cmd[size++] = '\0';
         cmd_result = handle_command(cmd);
     }
 
     jabber_disconnect();
+    return QUIT;
 }
 
 static void _profanity_event_loop(int *ch, char *cmd, int *size)
