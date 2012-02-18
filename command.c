@@ -55,21 +55,28 @@ int handle_start_command(char *inp)
     return result;
 }
 
-int handle_command(char *cmd)
+int handle_command(char *inp)
 {
     int result = FALSE;
-    if (strcmp(cmd, "/quit") == 0) {
+
+    // handle nothing
+    if (strlen(inp) == 0) {
+        gui_refresh();
+        return TRUE;
+    }
+
+    if (strcmp(inp, "/quit") == 0) {
         result = _cmd_quit();
-    } else if (strncmp(cmd, "/help", 5) == 0) {
+    } else if (strncmp(inp, "/help", 5) == 0) {
         result = _cmd_help();
-    } else if (strncmp(cmd, "/who", 4) == 0) {
+    } else if (strncmp(inp, "/who", 4) == 0) {
         result = _cmd_who();
-    } else if (strncmp(cmd, "/msg ", 5) == 0) {
-        result = _cmd_msg(cmd);
-    } else if (strncmp(cmd, "/close", 6) == 0) {
-        result = _cmd_close(cmd);
+    } else if (strncmp(inp, "/msg ", 5) == 0) {
+        result = _cmd_msg(inp);
+    } else if (strncmp(inp, "/close", 6) == 0) {
+        result = _cmd_close(inp);
     } else {
-        result = _cmd_default(cmd);
+        result = _cmd_default(inp);
     }
 
     inp_clear();

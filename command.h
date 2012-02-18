@@ -6,6 +6,6 @@
 #define QUIT_PROF 3
 
 int handle_start_command(char *inp);
-int handle_command(char *cmd);
+int handle_command(char *inp);
 
 #endif
