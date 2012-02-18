@@ -76,11 +76,18 @@ void status_bar_clear(void)
 
 static void _status_bar_update_time(void)
 {
-    char bar_time[8];
+    char bar_time[6];
     char tstmp[80];
     get_time(tstmp);
-    sprintf(bar_time, "[%s]", tstmp);
+    sprintf(bar_time, "%s", tstmp);
 
-    mvwprintw(status_bar, 0, 1, bar_time);
+    wattron(status_bar, COLOR_PAIR(4));
+    mvwaddch(status_bar, 0, 1, '[');
+    wattroff(status_bar, COLOR_PAIR(4));
+    mvwprintw(status_bar, 0, 2, bar_time);
+    wattron(status_bar, COLOR_PAIR(4));
+    mvwaddch(status_bar, 0, 7, ']');
+    wattroff(status_bar, COLOR_PAIR(4));
+    
 }
 
