@@ -7,7 +7,7 @@ static struct prof_win _wins[10];
 static int _curr_win = 0;
 
 static void _create_windows(void);
-static void _send_message_to_win(char *contact, char *line);
+static int _find_win(char *contact);
 static void _current_window_refresh();
 
 void gui_init(void)
@@ -100,7 +100,11 @@ void win_show_incomming_msg(char *from, char *message)
     get_time(tstmp);
 
     sprintf(line, " [%s] <%s> %s\n", tstmp, short_from, message);
-    _send_message_to_win(short_from, line);
+
+    int win = _find_win(short_from);
+
+    wprintw(_wins[win].win, line);
+    status_bar_active(win);
 }
 
 void win_show_outgoing_msg(char *from, char *to, char *message)
@@ -110,7 +114,11 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
     get_time(tstmp);
 
     sprintf(line, " [%s] <%s> %s\n", tstmp, from, message);
-    _send_message_to_win(to, line);
+
+    int win = _find_win(to);
+
+    wprintw(_wins[win].win, line);
+    status_bar_active(win);
 }
 
 void cons_help(void)
@@ -188,7 +196,7 @@ static void _create_windows(void)
     }    
 }
 
-static void _send_message_to_win(char *contact, char *line)
+static int _find_win(char *contact)
 {
     // find the chat window for recipient
     int i;
@@ -208,9 +216,7 @@ static void _send_message_to_win(char *contact, char *line)
         wclear(_wins[i].win);
     }
 
-    // send message to it
-    wprintw(_wins[i].win, line);
-    status_bar_active(i);
+    return i;
 }
 
 static void _current_window_refresh()
