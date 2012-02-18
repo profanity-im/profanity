@@ -14,7 +14,9 @@ void create_status_bar(void)
 
     status_bar = newwin(1, cols, rows-2, 0);
     wbkgd(status_bar, COLOR_PAIR(3));
+    wattron(status_bar, COLOR_PAIR(4));
     mvwprintw(status_bar, 0, cols - 29, _active);
+    wattroff(status_bar, COLOR_PAIR(4));
     wrefresh(status_bar);
 }
 
@@ -28,27 +30,27 @@ void status_bar_refresh(void)
 
 void status_bar_inactive(int win)
 {
-    _active[1 + ((win - 1) * 3)] = ' ';
-    if (win == 9)
-        _active[1 + ((win -1) * 3)] = ' ';
-        
+    int active_pos = 1 + ((win -1) * 3);
+
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    mvwprintw(status_bar, 0, cols - 29, _active);
+ 
+    mvwaddch(status_bar, 0, cols - 29 + active_pos, ' ');
+    if (win == 9)
+        mvwaddch(status_bar, 0, cols - 29 + active_pos + 1, ' ');
 }
 
 void status_bar_active(int win)
 {
-    if (win < 9) {
-        _active[1 + ((win -1) * 3)] = (char)( ((int)'0') + (win + 1));
-    } else {
-        _active[25] = '1';
-        _active[26] = '0';
-    }
-    
+    int active_pos = 1 + ((win -1) * 3);
+
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    mvwprintw(status_bar, 0, cols - 29, _active);
+ 
+    if (win < 9)
+        mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
+    else
+        mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
 }
 
 void status_bar_get_password(void)
@@ -67,7 +69,9 @@ void status_bar_clear(void)
 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
+    wattron(status_bar, COLOR_PAIR(4));
     mvwprintw(status_bar, 0, cols - 29, _active);
+    wattroff(status_bar, COLOR_PAIR(4));
 }
 
 static void _status_bar_update_time(void)

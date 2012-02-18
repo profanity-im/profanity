@@ -19,8 +19,16 @@ void title_bar_connected(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-   
-    mvwprintw(title_bar, 0, cols - 14, "[ ...online ]");
+
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 14, '[');
+    wattroff(title_bar, COLOR_PAIR(4));
+
+    mvwprintw(title_bar, 0, cols - 13, " ...online ");
+    
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 2, ']');
+    wattroff(title_bar, COLOR_PAIR(4));
 }
 
 void title_bar_disconnected(void)
@@ -28,7 +36,15 @@ void title_bar_disconnected(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
    
-    mvwprintw(title_bar, 0, cols - 14, "[ ..offline ]");
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 14, '[');
+    wattroff(title_bar, COLOR_PAIR(4));
+    
+    mvwprintw(title_bar, 0, cols - 13, " ..offline ");
+    
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 2, ']');
+    wattroff(title_bar, COLOR_PAIR(4));
 }
 
 void title_bar_refresh(void)
@@ -40,7 +56,10 @@ void title_bar_refresh(void)
 
 void title_bar_show(char *title)
 {
-    wclear(title_bar);
+    wmove(title_bar, 0, 0);
+    int i;
+    for (i = 0; i < 45; i++)
+        waddch(title_bar, ' ');
     mvwprintw(title_bar, 0, 0, " %s", title);
 }
 

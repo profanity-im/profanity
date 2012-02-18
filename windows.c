@@ -15,16 +15,15 @@ void gui_init(void)
     initscr();
     cbreak();
     keypad(stdscr, TRUE);
-    
-    start_color();
-    init_color(COLOR_WHITE, 1000, 1000, 1000);
-    init_pair(1, COLOR_WHITE, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_color(COLOR_BLUE, 0, 0, 250);
-    init_pair(3, COLOR_WHITE, COLOR_BLUE);
 
-    attron(A_BOLD);
-    attron(COLOR_PAIR(1));
+    if (has_colors()) {    
+        start_color();
+        
+        init_pair(1, COLOR_WHITE, COLOR_BLACK);
+        init_pair(2, COLOR_GREEN, COLOR_BLACK);
+        init_pair(3, COLOR_WHITE, COLOR_BLUE);
+        init_pair(4, COLOR_CYAN, COLOR_BLUE);
+    }
 
     refresh();
 
@@ -60,7 +59,7 @@ void win_switch_to(int i)
     _curr_win = i;
 
     if (i == 0) {
-        title_bar_show("Profanity. Type /help for help information");
+        title_bar_show("Profanity. Type /help for help information.");
     } else {
         title_bar_show(_wins[i].from);
     }
@@ -77,7 +76,7 @@ void win_close_win(void)
     
     // go back to console window
     _curr_win = 0;
-    title_bar_show("Profanity. Type /help for help information");
+    title_bar_show("Profanity. Type /help for help information.");
 }
 
 int win_in_chat(void)
