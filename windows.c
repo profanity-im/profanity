@@ -23,6 +23,7 @@ void gui_init(void)
         init_pair(2, COLOR_GREEN, COLOR_BLACK);
         init_pair(3, COLOR_WHITE, COLOR_BLUE);
         init_pair(4, COLOR_CYAN, COLOR_BLUE);
+        init_pair(5, COLOR_CYAN, COLOR_BLACK);
     }
 
     refresh();
@@ -94,16 +95,42 @@ void win_show_incomming_msg(char *from, char *message)
     char from_cpy[100];
     strcpy(from_cpy, from);
     
-    char line[100];
     char *short_from = strtok(from_cpy, "/");
     char tstmp[80];
     get_time(tstmp);
 
-    sprintf(line, " [%s] <%s> %s\n", tstmp, short_from, message);
-
     int win = _find_win(short_from);
 
-    wprintw(_wins[win].win, line);
+    // print time   
+    wattron(_wins[win].win, COLOR_PAIR(5));
+    wprintw(_wins[win].win, " [");
+    wattroff(_wins[win].win, COLOR_PAIR(5));
+
+    wprintw(_wins[win].win, "%s", tstmp);
+
+    wattron(_wins[win].win, COLOR_PAIR(5));
+    wprintw(_wins[win].win, "] ");
+    wattroff(_wins[win].win, COLOR_PAIR(5));
+    
+    // print user
+    wattron(_wins[win].win, A_DIM);
+    wprintw(_wins[win].win, "<");
+    wattroff(_wins[win].win, A_DIM);
+
+    wattron(_wins[win].win, COLOR_PAIR(2));
+    wattron(_wins[win].win, A_BOLD);
+    wprintw(_wins[win].win, "%s", short_from);
+    wattroff(_wins[win].win, COLOR_PAIR(2));
+    wattroff(_wins[win].win, A_BOLD);
+
+    wattron(_wins[win].win, A_DIM);
+    wprintw(_wins[win].win, "> ");
+    wattroff(_wins[win].win, A_DIM);
+
+    // print message
+    wprintw(_wins[win].win, "%s\n", message);
+
+    // update window
     status_bar_active(win);
 }
 
@@ -117,7 +144,34 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
 
     int win = _find_win(to);
 
-    wprintw(_wins[win].win, line);
+    // print time   
+    wattron(_wins[win].win, COLOR_PAIR(5));
+    wprintw(_wins[win].win, " [");
+    wattroff(_wins[win].win, COLOR_PAIR(5));
+
+    wprintw(_wins[win].win, "%s", tstmp);
+
+    wattron(_wins[win].win, COLOR_PAIR(5));
+    wprintw(_wins[win].win, "] ");
+    wattroff(_wins[win].win, COLOR_PAIR(5));
+
+    // print user
+    wattron(_wins[win].win, A_DIM);
+    wprintw(_wins[win].win, "<");
+    wattroff(_wins[win].win, A_DIM);
+
+    wattron(_wins[win].win, A_BOLD);
+    wprintw(_wins[win].win, "%s", from);
+    wattroff(_wins[win].win, A_BOLD);
+
+    wattron(_wins[win].win, A_DIM);
+    wprintw(_wins[win].win, "> ");
+    wattroff(_wins[win].win, A_DIM);
+
+    // print message
+    wprintw(_wins[win].win, "%s\n", message);
+
+    // update window
     status_bar_active(win);
 }
 
