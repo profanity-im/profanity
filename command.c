@@ -3,6 +3,7 @@
 #include "command.h"
 #include "jabber.h"
 #include "windows.h"
+#include "util.h"
 
 static int _cmd_quit(void);
 static int _cmd_help(void);
@@ -10,32 +11,58 @@ static int _cmd_who(void);
 static int _cmd_msg(char *cmd);
 static int _cmd_close(char *cmd);
 static int _cmd_default(char *cmd);
+static int _valid_start_command(char *cmd);
 
-int handle_start_command(char *cmd)
+int handle_start_command(char *inp)
 {
     int result;
+    
+    // trim input and take a copy
+    char inp_cpy[100];
+    inp = trim(inp);
+    strcpy(inp_cpy, inp);
+    
+    // get the command "/command"
+    char *command = strtok(inp_cpy, " ");
 
-    if (strcmp(cmd, "/quit") == 0) {
+    // handle invalid commands
+    if (!_valid_start_command(command)) {
+        cons_bad_command(command);
+        gui_refresh();
+        result = AWAIT_COMMAND;
+
+    // quit
+    } else if (strcmp(command, "/quit") == 0) {
         result = QUIT_PROF;
-    } else if (strncmp(cmd, "/help", 5) == 0) {
+
+    // help
+    } else if (strcmp(command, "/help") == 0) {
         cons_help();
         gui_refresh();
         result = AWAIT_COMMAND;
-    } else if (strncmp(cmd, "/connect ", 9) == 0) {
-        char *user;
-        user = strndup(cmd+9, strlen(cmd)-9);
 
-        status_bar_get_password();
-        status_bar_refresh();
-        char passwd[20];
-        inp_get_password(passwd);
-        int connect_status = jabber_connect(user, passwd);
-        if (connect_status == CONNECTING)
-            result = START_MAIN;
-        else
+    // connect
+    } else if (strcmp(command, "/connect") == 0) {
+        if (strlen(inp) < 10) {
+            cons_bad_connect();
+            gui_refresh();
             result = AWAIT_COMMAND;
+        } else {
+            char *user;
+            user = strndup(inp+9, strlen(inp)-9);
+
+            status_bar_get_password();
+            status_bar_refresh();
+            char passwd[20];
+            inp_get_password(passwd);
+            int connect_status = jabber_connect(user, passwd);
+            if (connect_status == CONNECTING)
+                result = START_MAIN;
+            else
+                result = AWAIT_COMMAND;
+            }
     } else {
-        cons_bad_command(cmd);
+        cons_bad_command(inp);
         gui_refresh();
         result = AWAIT_COMMAND;
     }
@@ -129,4 +156,11 @@ static int _cmd_default(char *cmd)
     }
 
     return TRUE;
+}
+
+static int _valid_start_command(char *cmd)
+{
+    return ((strcmp(cmd, "/quit") == 0) || 
+            (strcmp(cmd, "/help") == 0) ||
+            (strcmp(cmd, "/connect") == 0));
 }

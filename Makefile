@@ -16,7 +16,7 @@ input_win.o: windows.h
 jabber.o: jabber.h log.h windows.h
 profanity.o: log.h windows.h jabber.h command.h
 util.o: util.h
-command.o: command.h
+command.o: command.h util.h
 main.o: log.h windows.h profanity.h
 
 .PHONY: clean

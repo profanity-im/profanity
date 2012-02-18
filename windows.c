@@ -220,6 +220,15 @@ void cons_bad_command(char *cmd)
     wprintw(_wins[0].win, " [%s] Unknown command: %s\n", tstmp, cmd);
 }
 
+void cons_bad_connect(void)
+{
+    char tstmp[80];
+    get_time(tstmp);
+
+    wprintw(_wins[0].win, 
+        " [%s] Usage: /connect user@host\n", tstmp);
+}
+
 static void _create_windows(void)
 {
     int rows, cols;
