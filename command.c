@@ -16,6 +16,12 @@ static int _valid_start_command(char *cmd);
 int handle_start_command(char *inp)
 {
     int result;
+
+    // handle nothing
+    if (strlen(inp) == 0) {
+        gui_refresh();
+        return AWAIT_COMMAND;
+    }
     
     // trim input and take a copy
     char inp_cpy[100];
