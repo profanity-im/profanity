@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <ncurses.h>
 #include "command.h"
 #include "jabber.h"
@@ -176,7 +177,7 @@ static int _cmd_msg(char *inp)
     char *msg = NULL;
 
     // copy input    
-    char inp_cpy[100];
+    char inp_cpy[strlen(inp) + 1];
     strcpy(inp_cpy, inp);
 
     // get user
@@ -211,10 +212,10 @@ static int _cmd_close(char *inp)
 static int _cmd_default(char *inp)
 {
     if (win_in_chat()) {
-        char recipient[100] = "";
-        win_get_recipient(recipient);
+        char *recipient = win_get_recipient();
         jabber_send(inp, recipient);
         win_show_outgoing_msg("me", recipient, inp);
+        free(recipient);
     } else {
         cons_bad_command(inp);
     }

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <ncurses.h>
 #include "windows.h"
 #include "util.h"
@@ -86,9 +87,11 @@ int win_in_chat(void)
     return ((_curr_win != 0) && (strcmp(_wins[_curr_win].from, "") != 0));
 }
 
-void win_get_recipient(char *recipient)
+char *win_get_recipient(void)
 {
+    char *recipient = (char *) malloc(sizeof(char) * (strlen(_wins[_curr_win].from) + 1));
     strcpy(recipient, _wins[_curr_win].from);
+    return recipient;
 }
 
 void win_show_incomming_msg(char *from, char *message) 
