@@ -128,15 +128,15 @@ void jabber_roster_request(void)
 static int _jabber_message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
-    char *message;
-
-    if(!xmpp_stanza_get_child_by_name(stanza, "body"))
-        return 1;
-    if(!strcmp(xmpp_stanza_get_attribute(stanza, "type"), "error"))
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
+    if(body == NULL)
         return 1;
 
-    message = xmpp_stanza_get_text(xmpp_stanza_get_child_by_name(stanza, "body"));
+    char *type = xmpp_stanza_get_attribute(stanza, "type");
+    if(strcmp(type, "error") == 0)
+        return 1;
 
+    char *message = xmpp_stanza_get_text(body);
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     win_show_incomming_msg(from, message);
 
