@@ -152,7 +152,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
     if (status == XMPP_CONN_CONNECT) {
         const char *jid = xmpp_conn_get_jid(conn);
         const char *msg = " logged in successfully.";
-        char line[strlen(jid) + strlen(msg) + 2];
+        char line[strlen(jid) + 1 + strlen(msg) + 1];
         sprintf(line, "%s %s", xmpp_conn_get_jid(conn), msg);
         title_bar_connected();
 
@@ -183,7 +183,7 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
     void * const userdata)
 {
     xmpp_stanza_t *query, *item;
-    char *type, *name;
+    char *type, *name, *jid;
 
     type = xmpp_stanza_get_type(stanza);
     
@@ -192,17 +192,19 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
     else {
         query = xmpp_stanza_get_child_by_name(stanza, "query");
         cons_highlight_show("Roster:");
+
         for (item = xmpp_stanza_get_children(query); item; 
                 item = xmpp_stanza_get_next(item)) {
-            if ((name = xmpp_stanza_get_attribute(item, "name"))) {
-                char line[200];
-                sprintf(line, "  %s (%s)", name,
-                    xmpp_stanza_get_attribute(item, "jid"));
+            name = xmpp_stanza_get_attribute(item, "name");
+            jid = xmpp_stanza_get_attribute(item, "jid");
+            if (name != NULL) {
+                char line[2 + strlen(name) + 2 + strlen(jid) + 1 + 1];
+                sprintf(line, "  %s (%s)", name, jid);
                 cons_show(line);
+
             } else {
-                char line[200];
-                sprintf(line, "  %s",
-                    xmpp_stanza_get_attribute(item, "jid"));
+                char line[2 + strlen(jid) + 1];
+                sprintf(line, "  %s", jid);
                 cons_show(line);
             }
         }
