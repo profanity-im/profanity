@@ -150,8 +150,10 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
 
     if (status == XMPP_CONN_CONNECT) {
-        char line[100];
-        sprintf(line, "%s logged in successfully.", xmpp_conn_get_jid(conn));
+        const char *jid = xmpp_conn_get_jid(conn);
+        const char *msg = " logged in successfully.";
+        char line[strlen(jid) + strlen(msg) + 2];
+        sprintf(line, "%s %s", xmpp_conn_get_jid(conn), msg);
         title_bar_connected();
 
         cons_good_show(line);
