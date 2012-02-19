@@ -24,6 +24,7 @@ void gui_init(void)
         init_pair(3, COLOR_WHITE, COLOR_BLUE);
         init_pair(4, COLOR_CYAN, COLOR_BLUE);
         init_pair(5, COLOR_CYAN, COLOR_BLACK);
+        init_pair(6, COLOR_RED, COLOR_BLACK);
     }
 
     refresh();
@@ -180,8 +181,11 @@ void cons_help(void)
     char tstmp[80];
     get_time(tstmp);
 
-    wprintw(_wins[0].win, 
-        " [%s] Help:\n", tstmp);
+    wprintw(_wins[0].win, " [%s] ", tstmp);
+    wattron(_wins[0].win, A_BOLD);
+    wprintw(_wins[0].win, "Help:\n");
+    wattroff(_wins[0].win, A_BOLD);
+
     wprintw(_wins[0].win, 
         " [%s]   Commands:\n", tstmp);
     wprintw(_wins[0].win, 
@@ -202,6 +206,43 @@ void cons_help(void)
         " [%s]     F1                   : This console window.\n", tstmp);
     wprintw(_wins[0].win, 
         " [%s]     F2-10                : Chat windows.\n", tstmp);
+}
+
+void cons_good_show(char *msg)
+{
+    char tstmp[80];
+    get_time(tstmp);
+   
+    wprintw(_wins[0].win, " [%s] ", tstmp);
+    wattron(_wins[0].win, A_BOLD);
+    wattron(_wins[0].win, COLOR_PAIR(2));
+    wprintw(_wins[0].win, "%s\n", msg);
+    wattroff(_wins[0].win, A_BOLD);
+    wattroff(_wins[0].win, COLOR_PAIR(2));
+}
+
+void cons_bad_show(char *msg)
+{
+    char tstmp[80];
+    get_time(tstmp);
+   
+    wprintw(_wins[0].win, " [%s] ", tstmp);
+    wattron(_wins[0].win, A_BOLD);
+    wattron(_wins[0].win, COLOR_PAIR(6));
+    wprintw(_wins[0].win, "%s\n", msg);
+    wattroff(_wins[0].win, A_BOLD);
+    wattroff(_wins[0].win, COLOR_PAIR(6));
+}
+
+void cons_highlight_show(char *msg)
+{
+    char tstmp[80];
+    get_time(tstmp);
+   
+    wprintw(_wins[0].win, " [%s] ", tstmp);
+    wattron(_wins[0].win, A_BOLD);
+    wprintw(_wins[0].win, "%s\n", msg);
+    wattroff(_wins[0].win, A_BOLD);
 }
 
 void cons_show(char *msg)
@@ -252,7 +293,10 @@ static void _create_windows(void)
     char tstmp[80];
     get_time(tstmp);
     
-    wprintw(cons.win, " [%s] Welcome to Profanity.\n", tstmp);
+    wprintw(cons.win, " [%s] ", tstmp);
+    wattron(cons.win, A_BOLD);
+    wprintw(cons.win, "Welcome to Profanity.\n");
+    wattroff(cons.win, A_BOLD);
     touchwin(cons.win);
     wrefresh(cons.win);
     _wins[0] = cons;

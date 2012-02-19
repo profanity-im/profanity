@@ -61,11 +61,11 @@ int jabber_connect(char *user, char *passwd)
     int connect_status = xmpp_connect_client(_conn, NULL, 0, _jabber_conn_handler, _ctx);
 
     if (connect_status == 0) {
-        cons_show("Connecting...");
+        cons_good_show("Connecting...");
         _conn_status = CONNECTING;
     }
     else { 
-        cons_show("XMPP connection failure");
+        cons_bad_show("XMPP connection failure");
         _conn_status = DISCONNECTED;
     }
 
@@ -154,7 +154,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         sprintf(line, "%s logged in successfully.", xmpp_conn_get_jid(conn));
         title_bar_connected();
 
-        cons_show(line);
+        cons_good_show(line);
         status_bar_print_message(xmpp_conn_get_jid(conn));
         status_bar_refresh();
 
@@ -170,7 +170,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         _conn_status = CONNECTED;
     }
     else {
-        cons_show("Login failed.");
+        cons_bad_show("Login failed.");
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
         _conn_status = DISCONNECTED;
@@ -189,7 +189,7 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
         log_msg(CONN, "ERROR: query failed");
     else {
         query = xmpp_stanza_get_child_by_name(stanza, "query");
-        cons_show("Roster:");
+        cons_highlight_show("Roster:");
         for (item = xmpp_stanza_get_children(query); item; 
                 item = xmpp_stanza_get_next(item)) {
             if ((name = xmpp_stanza_get_attribute(item, "name"))) {

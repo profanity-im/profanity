@@ -40,6 +40,9 @@ void cons_bad_command(char *cmd);
 void cons_bad_connect(void);
 void cons_bad_message(void);
 void cons_show(char *cmd);
+void cons_good_show(char *cmd);
+void cons_bad_show(char *cmd);
+void cons_highlight_show(char *cmd);
 
 // status bar actions
 void status_bar_refresh(void);
