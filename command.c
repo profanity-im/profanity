@@ -30,8 +30,8 @@ int handle_start_command(char *inp)
     }
     
     // trim input and take a copy
-    char inp_cpy[100];
     inp = trim(inp);
+    char inp_cpy[strlen(inp) + 1];
     strcpy(inp_cpy, inp);
     
     // get the command "/command"
@@ -70,8 +70,8 @@ int handle_command(char *inp)
     if (inp[0] == '/') {
 
         // trim input and take a copy
-        char inp_cpy[100];
         inp = trim(inp);
+        char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
 
         // get the command "/command"
@@ -131,7 +131,7 @@ static int _cmd_start_connect(char *inp)
 
         status_bar_get_password();
         status_bar_refresh();
-        char passwd[20];
+        char passwd[21];
         inp_get_password(passwd);
         int connect_status = jabber_connect(user, passwd);
         if (connect_status == CONNECTING)

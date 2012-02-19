@@ -84,7 +84,7 @@ void inp_get_password(char *passwd)
 {
     wclear(inp_win);
     noecho();
-    mvwgetstr(inp_win, 0, 1, passwd);
+    mvwgetnstr(inp_win, 0, 1, passwd, 20);
     wmove(inp_win, 0, 1);
     echo();
     status_bar_clear();
