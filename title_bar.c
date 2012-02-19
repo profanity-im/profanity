@@ -5,13 +5,17 @@ static WINDOW *title_bar;
 
 void create_title_bar(void)
 {
-    char *title = "Profanity. Type /help for help information.";
-
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
     title_bar = newwin(1, cols, 0, 0);
     wbkgd(title_bar, COLOR_PAIR(3));
+    title_bar_title();
+}
+
+void title_bar_title()
+{
+    char *title = "Profanity. Type /help for help information.";
     title_bar_show(title);
 }
 

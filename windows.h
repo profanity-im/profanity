@@ -21,6 +21,7 @@ void create_input_window(void);
 // title bar actions
 void title_bar_refresh(void);
 void title_bar_show(char *title);
+void title_bar_title(void);
 void title_bar_connected(void);
 void title_bar_disconnected(void);
 

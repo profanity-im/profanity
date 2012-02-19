@@ -60,7 +60,7 @@ void win_switch_to(int i)
     _curr_win = i;
 
     if (i == 0) {
-        title_bar_show("Profanity. Type /help for help information.");
+        title_bar_title();
     } else {
         title_bar_show(_wins[i].from);
     }
@@ -77,7 +77,7 @@ void win_close_win(void)
     
     // go back to console window
     _curr_win = 0;
-    title_bar_show("Profanity. Type /help for help information.");
+    title_bar_title();
 }
 
 int win_in_chat(void)
