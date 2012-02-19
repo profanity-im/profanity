@@ -93,7 +93,7 @@ void win_get_recipient(char *recipient)
 
 void win_show_incomming_msg(char *from, char *message) 
 {
-    char from_cpy[100];
+    char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
     
     char *short_from = strtok(from_cpy, "/");
