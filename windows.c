@@ -229,6 +229,15 @@ void cons_bad_connect(void)
         " [%s] Usage: /connect user@host\n", tstmp);
 }
 
+void cons_bad_message(void)
+{
+    char tstmp[80];
+    get_time(tstmp);
+
+    wprintw(_wins[0].win, 
+        " [%s] Usage: /msg user@host message\n", tstmp);
+}
+
 static void _create_windows(void)
 {
     int rows, cols;

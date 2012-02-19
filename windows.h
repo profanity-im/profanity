@@ -37,6 +37,7 @@ void win_show_outgoing_msg(char *from, char *to, char *message);
 void cons_help(void);
 void cons_bad_command(char *cmd);
 void cons_bad_connect(void);
+void cons_bad_message(void);
 void cons_show(char *cmd);
 
 // status bar actions

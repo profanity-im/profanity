@@ -9,13 +9,14 @@ static int _cmd_start_quit(void);
 static int _cmd_start_help(void);
 static int _cmd_start_connect(char *inp);
 static int _cmd_start_default(char *inp);
+static int _valid_command(char *cmd);
 
 static int _cmd_quit(void);
 static int _cmd_help(void);
 static int _cmd_who(void);
-static int _cmd_msg(char *cmd);
-static int _cmd_close(char *cmd);
-static int _cmd_default(char *cmd);
+static int _cmd_msg(char *inp);
+static int _cmd_close(char *inp);
+static int _cmd_default(char *inp);
 static int _valid_start_command(char *cmd);
 
 int handle_start_command(char *inp)
@@ -65,16 +66,35 @@ int handle_command(char *inp)
         return TRUE;
     }
 
-    if (strcmp(inp, "/quit") == 0) {
-        result = _cmd_quit();
-    } else if (strncmp(inp, "/help", 5) == 0) {
-        result = _cmd_help();
-    } else if (strncmp(inp, "/who", 4) == 0) {
-        result = _cmd_who();
-    } else if (strncmp(inp, "/msg ", 5) == 0) {
-        result = _cmd_msg(inp);
-    } else if (strncmp(inp, "/close", 6) == 0) {
-        result = _cmd_close(inp);
+    // if it was a command, dispatch it
+    if (inp[0] == '/') {
+
+        // trim input and take a copy
+        char inp_cpy[100];
+        inp = trim(inp);
+        strcpy(inp_cpy, inp);
+
+        // get the command "/command"
+        char *command = strtok(inp_cpy, " ");
+
+        // if we don't know it, treat it as a message
+        if (!_valid_command(command)) {
+            result = _cmd_default(inp);
+        
+        // otherwise handle it
+        } else if (strcmp(inp, "/quit") == 0) {
+            result = _cmd_quit();
+        } else if (strncmp(inp, "/help", 5) == 0) {
+            result = _cmd_help();
+        } else if (strncmp(inp, "/who", 4) == 0) {
+            result = _cmd_who();
+        } else if (strncmp(inp, "/msg", 4) == 0) {
+            result = _cmd_msg(inp);
+        } else if (strncmp(inp, "/close", 6) == 0) {
+            result = _cmd_close(inp);
+        }
+
+    // was just text, send it
     } else {
         result = _cmd_default(inp);
     }
@@ -150,45 +170,53 @@ static int _cmd_who(void)
     return TRUE;
 }
 
-static int _cmd_msg(char *cmd)
+static int _cmd_msg(char *inp)
 {
-    char *usr_msg = NULL;
     char *usr = NULL;
     char *msg = NULL;
 
-    usr_msg = strndup(cmd+5, strlen(cmd)-5);
-    usr = strtok(usr_msg, " ");
-    if (usr != NULL) {
-        msg = strndup(cmd+5+strlen(usr)+1, strlen(cmd)-(5+strlen(usr)+1));
+    // copy input    
+    char inp_cpy[100];
+    strcpy(inp_cpy, inp);
+
+    // get user
+    strtok(inp_cpy, " ");
+    usr = strtok(NULL, " ");
+    if ((usr != NULL) && (strlen(inp) > (5 + strlen(usr) + 1))) {
+        msg = strndup(inp+5+strlen(usr)+1, strlen(inp)-(5+strlen(usr)+1));
         if (msg != NULL) {
             jabber_send(msg, usr);
             win_show_outgoing_msg("me", usr, msg);
+        } else {
+            cons_bad_message();
         }
+    } else {
+        cons_bad_message();
     }
 
     return TRUE;
 }
 
-static int _cmd_close(char *cmd)
+static int _cmd_close(char *inp)
 {
     if (win_in_chat()) {
         win_close_win();
     } else {
-        cons_bad_command(cmd);
+        cons_bad_command(inp);
     }
     
     return TRUE;
 }
 
-static int _cmd_default(char *cmd)
+static int _cmd_default(char *inp)
 {
     if (win_in_chat()) {
         char recipient[100] = "";
         win_get_recipient(recipient);
-        jabber_send(cmd, recipient);
-        win_show_outgoing_msg("me", recipient, cmd);
+        jabber_send(inp, recipient);
+        win_show_outgoing_msg("me", recipient, inp);
     } else {
-        cons_bad_command(cmd);
+        cons_bad_command(inp);
     }
 
     return TRUE;
@@ -199,4 +227,13 @@ static int _valid_start_command(char *cmd)
     return ((strcmp(cmd, "/quit") == 0) || 
             (strcmp(cmd, "/help") == 0) ||
             (strcmp(cmd, "/connect") == 0));
+}
+
+static int _valid_command(char *cmd)
+{
+    return ((strcmp(cmd, "/quit") == 0) || 
+            (strcmp(cmd, "/help") == 0) ||
+            (strcmp(cmd, "/who") == 0) ||
+            (strcmp(cmd, "/msg") == 0) ||
+            (strcmp(cmd, "/close") == 0));
 }
