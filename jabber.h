@@ -1,9 +1,10 @@
 #ifndef JABBER_H
 #define JABBER_H
 
-#define CONNECTING 0
-#define CONNECTED 1
-#define DISCONNECTED 2
+#define STARTED 0
+#define CONNECTING 1
+#define CONNECTED 2
+#define DISCONNECTED 3
 
 int jabber_connection_status(void);
 int jabber_connect(char *user, char *passwd);

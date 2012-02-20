@@ -11,6 +11,7 @@ void create_title_bar(void)
     title_bar = newwin(1, cols, 0, 0);
     wbkgd(title_bar, COLOR_PAIR(3));
     title_bar_title();
+    title_bar_disconnected();
 }
 
 void title_bar_title()

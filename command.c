@@ -6,96 +6,27 @@
 #include "windows.h"
 #include "util.h"
 
-static int _cmd_start_quit(void);
-static int _cmd_start_help(void);
-static int _cmd_start_connect(char *inp);
-static int _cmd_start_default(char *inp);
-static int _valid_command(char *cmd);
-
+static int _handle_command(char *command, char *inp);
 static int _cmd_quit(void);
 static int _cmd_help(void);
 static int _cmd_who(void);
+static int _cmd_connect(char *inp);
 static int _cmd_msg(char *inp);
 static int _cmd_close(char *inp);
 static int _cmd_default(char *inp);
-static int _valid_start_command(char *cmd);
 
-int handle_start_command(char *inp)
-{
-    int result;
-
-    // handle nothing
-    if (strlen(inp) == 0) {
-        gui_refresh();
-        return AWAIT_COMMAND;
-    }
-    
-    // trim input and take a copy
-    inp = trim(inp);
-    char inp_cpy[strlen(inp) + 1];
-    strcpy(inp_cpy, inp);
-    
-    // get the command "/command"
-    char *command = strtok(inp_cpy, " ");
-
-    if (!_valid_start_command(command)) {
-        cons_bad_command(command);
-        gui_refresh();
-        result = AWAIT_COMMAND;
-    } else if (strcmp(command, "/quit") == 0) {
-        result = _cmd_start_quit();
-    } else if (strcmp(command, "/help") == 0) {
-        result = _cmd_start_help();
-    } else if (strcmp(command, "/connect") == 0) {
-        result = _cmd_start_connect(inp);
-    } else {
-        result = _cmd_start_default(inp);
-    }
-
-    inp_clear();
-
-    return result;
-}
-
-int handle_command(char *inp)
+int process_input(char *inp)
 {
     int result = FALSE;
 
-    // handle nothing
     if (strlen(inp) == 0) {
-        gui_refresh();
-        return TRUE;
-    }
-
-    // if it was a command, dispatch it
-    if (inp[0] == '/') {
-
-        // trim input and take a copy
+        result = TRUE;
+    } else if (inp[0] == '/') {
         inp = trim(inp);
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
-
-        // get the command "/command"
         char *command = strtok(inp_cpy, " ");
-
-        // if we don't know it, treat it as a message
-        if (!_valid_command(command)) {
-            result = _cmd_default(inp);
-        
-        // otherwise handle it
-        } else if (strcmp(inp, "/quit") == 0) {
-            result = _cmd_quit();
-        } else if (strncmp(inp, "/help", 5) == 0) {
-            result = _cmd_help();
-        } else if (strncmp(inp, "/who", 4) == 0) {
-            result = _cmd_who();
-        } else if (strncmp(inp, "/msg", 4) == 0) {
-            result = _cmd_msg(inp);
-        } else if (strncmp(inp, "/close", 6) == 0) {
-            result = _cmd_close(inp);
-        }
-
-    // was just text, send it
+        result = _handle_command(command, inp);
     } else {
         result = _cmd_default(inp);
     }
@@ -103,53 +34,56 @@ int handle_command(char *inp)
     inp_clear();
 
     return result;
-
 }
 
-static int _cmd_start_quit(void)
+static int _handle_command(char *command, char *inp)
 {
-    return QUIT_PROF;
-}
+    int result = FALSE;
 
-static int _cmd_start_help(void)
-{
-    cons_help();
-    gui_refresh();
-    return AWAIT_COMMAND;
-}
-
-static int _cmd_start_connect(char *inp)
-{
-    int result = AWAIT_COMMAND;
-
-    if (strlen(inp) < 10) {
-        cons_bad_connect();
-        gui_refresh();
-        result = AWAIT_COMMAND;
+    if (strcmp(command, "/quit") == 0) {
+        result = _cmd_quit();
+    } else if (strcmp(command, "/help") == 0) {
+        result = _cmd_help();
+    } else if (strcmp(command, "/who") == 0) {
+        result = _cmd_who();
+    } else if (strcmp(command, "/msg") == 0) {
+        result = _cmd_msg(inp);
+    } else if (strcmp(command, "/close") == 0) {
+        result = _cmd_close(inp);
+    } else if (strcmp(command, "/connect") == 0) {
+        result = _cmd_connect(inp);
     } else {
-        char *user;
-        user = strndup(inp+9, strlen(inp)-9);
-
-        status_bar_get_password();
-        status_bar_refresh();
-        char passwd[21];
-        inp_get_password(passwd);
-        int connect_status = jabber_connect(user, passwd);
-        if (connect_status == CONNECTING)
-            result = START_MAIN;
-        else
-            result = AWAIT_COMMAND;
+        result = _cmd_default(inp);
     }
-    
+
     return result;
 }
 
-static int _cmd_start_default(char *inp)
+static int _cmd_connect(char *inp)
 {
-    cons_bad_command(inp);
-    gui_refresh();
+    int result = FALSE;
+    int conn_status = jabber_connection_status();
 
-    return AWAIT_COMMAND;
+    if ((conn_status != DISCONNECTED) && (conn_status != STARTED)) {
+        cons_not_disconnected();
+        result = TRUE;
+    } else if (strlen(inp) < 10) {
+        cons_bad_connect();
+        result = TRUE;
+    } else {
+        char *user;
+        user = strndup(inp+9, strlen(inp)-9);
+        status_bar_get_password();
+        status_bar_refresh();
+        char passwd[21];
+        inp_block();
+        inp_get_password(passwd);
+        inp_non_block();
+        jabber_connect(user, passwd);
+        result = TRUE;
+    }
+    
+    return result;
 }
 
 static int _cmd_quit(void)
@@ -166,7 +100,12 @@ static int _cmd_help(void)
 
 static int _cmd_who(void)
 {
-    jabber_roster_request();
+    int conn_status = jabber_connection_status();
+
+    if (conn_status != CONNECTED)
+        cons_not_connected();
+    else
+        jabber_roster_request();
 
     return TRUE;
 }
@@ -176,23 +115,29 @@ static int _cmd_msg(char *inp)
     char *usr = NULL;
     char *msg = NULL;
 
-    // copy input    
-    char inp_cpy[strlen(inp) + 1];
-    strcpy(inp_cpy, inp);
+    int conn_status = jabber_connection_status();
 
-    // get user
-    strtok(inp_cpy, " ");
-    usr = strtok(NULL, " ");
-    if ((usr != NULL) && (strlen(inp) > (5 + strlen(usr) + 1))) {
-        msg = strndup(inp+5+strlen(usr)+1, strlen(inp)-(5+strlen(usr)+1));
-        if (msg != NULL) {
-            jabber_send(msg, usr);
-            win_show_outgoing_msg("me", usr, msg);
+    if (conn_status != CONNECTED) {
+        cons_not_connected();
+    } else {
+        // copy input    
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
+
+        // get user
+        strtok(inp_cpy, " ");
+        usr = strtok(NULL, " ");
+        if ((usr != NULL) && (strlen(inp) > (5 + strlen(usr) + 1))) {
+            msg = strndup(inp+5+strlen(usr)+1, strlen(inp)-(5+strlen(usr)+1));
+            if (msg != NULL) {
+                jabber_send(msg, usr);
+                win_show_outgoing_msg("me", usr, msg);
+            } else {
+                cons_bad_message();
+            }
         } else {
             cons_bad_message();
         }
-    } else {
-        cons_bad_message();
     }
 
     return TRUE;
@@ -221,20 +166,4 @@ static int _cmd_default(char *inp)
     }
 
     return TRUE;
-}
-
-static int _valid_start_command(char *cmd)
-{
-    return ((strcmp(cmd, "/quit") == 0) || 
-            (strcmp(cmd, "/help") == 0) ||
-            (strcmp(cmd, "/connect") == 0));
-}
-
-static int _valid_command(char *cmd)
-{
-    return ((strcmp(cmd, "/quit") == 0) || 
-            (strcmp(cmd, "/help") == 0) ||
-            (strcmp(cmd, "/who") == 0) ||
-            (strcmp(cmd, "/msg") == 0) ||
-            (strcmp(cmd, "/close") == 0));
 }

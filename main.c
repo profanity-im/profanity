@@ -4,15 +4,11 @@
 
 int main(void)
 {   
-    int exit_status;
-    
     log_init();
     gui_init();
 
-    do { 
-        exit_status = profanity_start();
-    } while (exit_status == LOGIN_FAIL);
-    
+    profanity_main();
+        
     gui_close();
     log_close();
 

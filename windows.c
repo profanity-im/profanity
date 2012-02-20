@@ -61,11 +61,10 @@ void win_switch_to(int i)
 {    
     _curr_win = i;
 
-    if (i == 0) {
+    if (i == 0)
         title_bar_title();
-    } else {
+    else
         title_bar_show(_wins[i].from);
-    }
 }
 
 void win_close_win(void)
@@ -271,6 +270,24 @@ void cons_bad_connect(void)
 
     wprintw(_wins[0].win, 
         " [%s] Usage: /connect user@host\n", tstmp);
+}
+
+void cons_not_disconnected(void)
+{
+    char tstmp[80];
+    get_time(tstmp);
+
+    wprintw(_wins[0].win, 
+        " [%s] You are either connected already, or a login is in process.\n", tstmp);
+}
+
+void cons_not_connected(void)
+{
+    char tstmp[80];
+    get_time(tstmp);
+
+    wprintw(_wins[0].win, 
+        " [%s] You are not currently connected.\n", tstmp);
 }
 
 void cons_bad_message(void)

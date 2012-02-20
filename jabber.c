@@ -13,7 +13,7 @@ static xmpp_ctx_t *_ctx;
 static xmpp_conn_t *_conn;
 
 // connection status
-static int _conn_status = CONNECTING;
+static int _conn_status = STARTED;
 
 void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg);
@@ -74,15 +74,18 @@ int jabber_connect(char *user, char *passwd)
 
 void jabber_disconnect(void)
 {
-    xmpp_conn_release(_conn);
-    xmpp_ctx_free(_ctx);
-    xmpp_shutdown();
-    _conn_status = DISCONNECTED;
+    if (_conn_status == CONNECTED) {
+        xmpp_conn_release(_conn);
+        xmpp_ctx_free(_ctx);
+        xmpp_shutdown();
+        _conn_status = DISCONNECTED;
+    }
 }
 
 void jabber_process_events(void)
 {
-    xmpp_run_once(_ctx, 10);
+    if (_conn_status == CONNECTED || _conn_status == CONNECTING)
+        xmpp_run_once(_ctx, 10);
 }
 
 void jabber_send(char *msg, char *recipient)
@@ -153,11 +156,11 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         const char *jid = xmpp_conn_get_jid(conn);
         const char *msg = " logged in successfully.";
         char line[strlen(jid) + 1 + strlen(msg) + 1];
-        sprintf(line, "%s %s", xmpp_conn_get_jid(conn), msg);
+        sprintf(line, "%s %s", jid, msg);
         title_bar_connected();
 
         cons_good_show(line);
-        status_bar_print_message(xmpp_conn_get_jid(conn));
+        status_bar_print_message(jid);
         status_bar_refresh();
 
         xmpp_stanza_t* pres;
