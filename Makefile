@@ -1,7 +1,7 @@
 CC = gcc
 WARNS = -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-variable
-LIBS = -lxml2 -lssl -lresolv -lncurses -lstrophe
-CFLAGS = -O3 $(WARNS) $(LIBS)
+LIBS = -lxml2 -lexpat -lssl -lresolv -lncurses -L ~/lib -lstrophe
+CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS)
 OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
        profanity.o util.o command.o main.o
 
