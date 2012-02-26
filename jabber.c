@@ -30,13 +30,13 @@
 // log reference
 extern FILE *logp;
 
-// private XMPP structs
-static xmpp_log_t *_log;
-static xmpp_ctx_t *_ctx;
-static xmpp_conn_t *_conn;
-
-// connection status
-static jabber_status_t _conn_status = JABBER_STARTED;
+static struct _jabber_conn_t {
+    xmpp_log_t *log;
+    xmpp_ctx_t *ctx;
+    xmpp_conn_t *conn;
+    jabber_status_t conn_status;
+    int tls_disabled;
+} jabber_conn;
 
 void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg);
@@ -65,72 +65,77 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
 static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
 
+void init_jabber(int disable_tls)
+{
+    jabber_conn.conn_status = JABBER_STARTED;
+    jabber_conn.tls_disabled = disable_tls;
+}
+
 jabber_status_t jabber_connection_status(void)
 {
-    return (_conn_status);
+    return (jabber_conn.conn_status);
 }
 
 jabber_status_t jabber_connect(char *user, char *passwd)
 {
     xmpp_initialize();
 
-    _log = xmpp_get_file_logger();
-    _ctx = xmpp_ctx_new(NULL, _log);
-    _conn = xmpp_conn_new(_ctx);
+    jabber_conn.log = xmpp_get_file_logger();
+    jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
+    jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
 
-    xmpp_conn_set_jid(_conn, user);
-    xmpp_conn_set_pass(_conn, passwd);
+    xmpp_conn_set_jid(jabber_conn.conn, user);
+    xmpp_conn_set_pass(jabber_conn.conn, passwd);
 
-    // hack to not attempt tls on framework
-    char *domain = strchr(user, '@');
-    domain++;
-    if (strcmp(domain, "framework") == 0)
-        xmpp_conn_disable_tls(_conn);
+    if (jabber_conn.tls_disabled)
+        xmpp_conn_disable_tls(jabber_conn.conn);
 
-    int connect_status = xmpp_connect_client(_conn, NULL, 0, _jabber_conn_handler, _ctx);
+    int connect_status = xmpp_connect_client(jabber_conn.conn, NULL, 0, 
+        _jabber_conn_handler, jabber_conn.ctx);
 
     if (connect_status == 0)
-        _conn_status = JABBER_CONNECTING;
+        jabber_conn.conn_status = JABBER_CONNECTING;
     else  
-        _conn_status = JABBER_DISCONNECTED;
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
 
-    return _conn_status;
+    return jabber_conn.conn_status;
 }
 
 void jabber_disconnect(void)
 {
-    if (_conn_status == JABBER_CONNECTED) {
-        xmpp_conn_release(_conn);
-        xmpp_ctx_free(_ctx);
+    if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        xmpp_conn_release(jabber_conn.conn);
+        xmpp_ctx_free(jabber_conn.ctx);
         xmpp_shutdown();
-        _conn_status = JABBER_DISCONNECTED;
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
     }
 }
 
 void jabber_process_events(void)
 {
-    if (_conn_status == JABBER_CONNECTED || _conn_status == JABBER_CONNECTING)
-        xmpp_run_once(_ctx, 10);
+    if (jabber_conn.conn_status == JABBER_CONNECTED 
+            || jabber_conn.conn_status == JABBER_CONNECTING)
+        xmpp_run_once(jabber_conn.ctx, 10);
 }
 
 void jabber_send(char *msg, char *recipient)
 {
     xmpp_stanza_t *reply, *body, *text;
 
-    reply = xmpp_stanza_new(_ctx);
+    reply = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(reply, "message");
     xmpp_stanza_set_type(reply, "chat");
     xmpp_stanza_set_attribute(reply, "to", recipient);
 
-    body = xmpp_stanza_new(_ctx);
+    body = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(body, "body");
 
-    text = xmpp_stanza_new(_ctx);
+    text = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_text(text, msg);
     xmpp_stanza_add_child(body, text);
     xmpp_stanza_add_child(reply, body);
 
-    xmpp_send(_conn, reply);
+    xmpp_send(jabber_conn.conn, reply);
     xmpp_stanza_release(reply);
 }
 
@@ -138,18 +143,18 @@ void jabber_roster_request(void)
 {
     xmpp_stanza_t *iq, *query;
 
-    iq = xmpp_stanza_new(_ctx);
+    iq = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(iq, "iq");
     xmpp_stanza_set_type(iq, "get");
     xmpp_stanza_set_id(iq, "roster");
 
-    query = xmpp_stanza_new(_ctx);
+    query = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(query, "query");
     xmpp_stanza_set_ns(query, XMPP_NS_ROSTER);
 
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_release(query);
-    xmpp_send(_conn, iq);
+    xmpp_send(jabber_conn.conn, iq);
     xmpp_stanza_release(iq);
 }
 
@@ -197,13 +202,13 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
         jabber_roster_request();
-        _conn_status = JABBER_CONNECTED;
+        jabber_conn.conn_status = JABBER_CONNECTED;
     }
     else {
         cons_bad_show("Login failed.");
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
-        _conn_status = JABBER_DISCONNECTED;
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
     }
 }
 

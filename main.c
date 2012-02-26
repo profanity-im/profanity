@@ -20,16 +20,37 @@
  *
  */
 
+#include <stdio.h>
+#include <string.h>
+
 #include "log.h"
 #include "windows.h"
 #include "profanity.h"
 
-int main(void)
+int main(int argc, char **argv)
 {   
+    int disable_tls = 0;
+
+    // more than one argument
+    if (argc > 2) {
+        printf("Usage: profanity [-notls]\n");
+        return 1;
+
+    // argument is not -notls
+    } else if (argc == 2) {
+        char *arg1 = argv[1];
+        if (strcmp(arg1, "-notls") != 0) {
+            printf("Usage: profanity [-notls]\n");
+            return 1;
+        } else {
+            disable_tls = 1;
+        }
+    }
+
     log_init();
     gui_init();
 
-    profanity_main();
+    profanity_main(disable_tls);
         
     gui_close();
     log_close();

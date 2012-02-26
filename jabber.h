@@ -30,6 +30,7 @@ typedef enum {
     JABBER_DISCONNECTED
 } jabber_status_t;
 
+void init_jabber(int disable_tls);
 jabber_status_t jabber_connection_status(void);
 jabber_status_t jabber_connect(char *user, char *passwd);
 void jabber_disconnect(void);

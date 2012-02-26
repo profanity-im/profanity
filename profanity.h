@@ -23,6 +23,6 @@
 #ifndef PROFANITY_H
 #define PROFANITY_H
 
-void profanity_main(void);
+void profanity_main(int disable_tls);
 
 #endif
