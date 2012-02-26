@@ -26,6 +26,6 @@
 
 void inpbuf_init(void);
 void inpbuf_append(char *inp);
-char *inp_buf_get_previous(void);
+char *inpbuf_get_previous(void);
 
 #endif

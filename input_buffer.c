@@ -44,7 +44,7 @@ void inpbuf_append(char *inp)
     }
 }
 
-char *inp_buf_get_previous(void)
+char *inpbuf_get_previous(void)
 {
     if (_buf_size == 0 || _buf_prev == -1)
         return NULL;

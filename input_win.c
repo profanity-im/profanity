@@ -64,7 +64,7 @@ void inp_block(void)
  * *ch    - getch will put a charater here if there was any input
  * 
  * The example below shows the values of size, input, a call to wgetyx to
- * find the current cursor location, and the index if the input string.
+ * find the current cursor location, and the index of the input string.
  *
  * size  : "       7 "
  * input : " example "
@@ -125,7 +125,7 @@ void inp_poll_char(int *ch, char *input, int *size)
 
     // up arrow
     } else if (*ch == KEY_UP) {
-        char *prev = inp_buf_get_previous();
+        char *prev = inpbuf_get_previous();
         if (prev) {
             strcpy(input, prev);
             *size = strlen(input);
