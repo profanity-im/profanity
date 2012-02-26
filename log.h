@@ -25,8 +25,6 @@
 
 #include <stdio.h>
 
-#include <strophe/strophe.h>
-
 // log areas
 #define PROF "prof"
 #define CONN "conn"

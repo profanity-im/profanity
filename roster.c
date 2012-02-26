@@ -156,6 +156,14 @@ int main(int argc, char **argv)
     xmpp_conn_set_pass(conn, argv[2]);
 
     /* initiate connection */
+    char *domain = strchr(argv[1], '@');
+    domain++;
+
+    printf("Domain = %s\n", domain);
+
+    if (strcmp(domain, "framework") == 0)
+        xmpp_conn_disable_tls(conn);
+
     xmpp_connect_client(conn, NULL, 0, conn_handler, ctx);
 
     printf("CONNECT CLIENT CALLED\n");

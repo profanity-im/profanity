@@ -21,6 +21,7 @@
  */
 
 #include <string.h>
+#include <strophe.h>
 
 #include "jabber.h"
 #include "log.h"
@@ -79,6 +80,12 @@ int jabber_connect(char *user, char *passwd)
 
     xmpp_conn_set_jid(_conn, user);
     xmpp_conn_set_pass(_conn, passwd);
+
+    // hack to not attempt tls on framework
+    char *domain = strchr(user, '@');
+    domain++;
+    if (strcmp(domain, "framework") == 0)
+        xmpp_conn_disable_tls(_conn);
 
     int connect_status = xmpp_connect_client(_conn, NULL, 0, _jabber_conn_handler, _ctx);
 
