@@ -231,9 +231,6 @@ static void _create_windows(void)
     cons.win = newwin(rows-3, cols, 1, 0);
     scrollok(cons.win, TRUE);
 
-    char tstmp[80];
-    get_time(tstmp);
-    
     _wins[0] = cons;
     _win_show_time(0);
     wattron(_wins[0].win, A_BOLD);
