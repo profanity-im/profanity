@@ -37,12 +37,6 @@ void create_input_window(void)
     wrefresh(inp_win);
 }
 
-void inp_get_command_str(char *cmd)
-{
-    wmove(inp_win, 0, 1);
-    wgetstr(inp_win, cmd);
-}
-
 void inp_clear(void)
 {
     wclear(inp_win);

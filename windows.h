@@ -78,7 +78,6 @@ void status_bar_active(int win);
 void status_bar_update_time(void);
 
 // input window actions
-void inp_get_command_str(char *cmd);
 void inp_poll_char(int *ch, char command[], int *size);
 void inp_clear(void);
 void inp_put_back(void);
