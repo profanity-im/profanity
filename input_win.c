@@ -20,6 +20,7 @@
  *
  */
 
+#include <string.h>
 #include <ncurses.h>
 #include "windows.h"
 
@@ -59,6 +60,12 @@ void inp_block(void)
     wtimeout(inp_win, -1);
 }
 
+/*
+ * size  : "       7 "
+ * input : " example "
+ * inp_x : "012345678"
+ * index : " 0123456 " (inp_x - 1)
+ */
 void inp_poll_char(int *ch, char *command, int *size)
 {
     int inp_y = 0;
@@ -91,7 +98,7 @@ void inp_poll_char(int *ch, char *command, int *size)
     // right arrow
     } else if (*ch == KEY_RIGHT) {
         getyx(inp_win, inp_y, inp_x);
-        if (inp_x < *size + 1) {
+        if (inp_x <= *size ) {
             wmove(inp_win, inp_y, inp_x+1);
         }
 
@@ -113,8 +120,26 @@ void inp_poll_char(int *ch, char *command, int *size)
              *ch != KEY_F(8) &&
              *ch != KEY_F(9) &&
              *ch != KEY_F(10)) {
-        waddch(inp_win, *ch);
-        command[(*size)++] = *ch;
+
+        getyx(inp_win, inp_y, inp_x);
+       
+        // handle insert if not at end of input
+        if (inp_x <= *size) {
+            winsch(inp_win, *ch);
+            wmove(inp_win, inp_y, inp_x+1);
+
+            int i;
+            for (i = *size; i > inp_x -1; i--)
+                command[i] = command[i-1];
+            command[inp_x -1] = *ch;
+
+            (*size)++;
+
+        // otherwise just append
+        } else {
+            waddch(inp_win, *ch);
+            command[(*size)++] = *ch;
+        }
     }
 
     echo();
