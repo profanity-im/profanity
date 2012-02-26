@@ -143,42 +143,26 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
 
 void cons_help(void)
 {
-    char tstmp[80];
-    get_time(tstmp);
-
-    wprintw(_wins[0].win, " [%s] ", tstmp);
+    _win_show_time(0);
     wattron(_wins[0].win, A_BOLD);
     wprintw(_wins[0].win, "Help:\n");
     wattroff(_wins[0].win, A_BOLD);
 
-    wprintw(_wins[0].win, 
-        " [%s]   Commands:\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     /help                : This help.\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     /connect user@host   : Login to jabber.\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     /who                 : Get roster.\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     /close               : Close a chat window.\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     /msg user@host mesg  : Send mesg to user.\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     /quit                : Quit Profanity.\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]   Shortcuts:\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     F1                   : This console window.\n", tstmp);
-    wprintw(_wins[0].win, 
-        " [%s]     F2-10                : Chat windows.\n", tstmp);
+    cons_show("  Commands:");
+    cons_show("    /help                : This help.");
+    cons_show("    /connect user@host   : Login to jabber.");
+    cons_show("    /who                 : Get roster.");
+    cons_show("    /close               : Close a chat window.");
+    cons_show("    /msg user@host mesg  : Send mesg to user.");
+    cons_show("    /quit                : Quit Profanity.");
+    cons_show("  Shortcuts:");
+    cons_show("    F1                   : This console window.");
+    cons_show("    F2-10                : Chat windows.");
 }
 
 void cons_good_show(char *msg)
 {
-    char tstmp[80];
-    get_time(tstmp);
-   
-    wprintw(_wins[0].win, " [%s] ", tstmp);
+    _win_show_time(0);    
     wattron(_wins[0].win, A_BOLD);
     wattron(_wins[0].win, COLOR_PAIR(2));
     wprintw(_wins[0].win, "%s\n", msg);
@@ -188,10 +172,7 @@ void cons_good_show(char *msg)
 
 void cons_bad_show(char *msg)
 {
-    char tstmp[80];
-    get_time(tstmp);
-   
-    wprintw(_wins[0].win, " [%s] ", tstmp);
+    _win_show_time(0);
     wattron(_wins[0].win, A_BOLD);
     wattron(_wins[0].win, COLOR_PAIR(6));
     wprintw(_wins[0].win, "%s\n", msg);
@@ -199,67 +180,44 @@ void cons_bad_show(char *msg)
     wattroff(_wins[0].win, COLOR_PAIR(6));
 }
 
+void cons_show(char *msg)
+{
+    _win_show_time(0);
+    wprintw(_wins[0].win, "%s\n", msg); 
+}
+
 void cons_highlight_show(char *msg)
 {
-    char tstmp[80];
-    get_time(tstmp);
-   
-    wprintw(_wins[0].win, " [%s] ", tstmp);
+    _win_show_time(0);
     wattron(_wins[0].win, A_BOLD);
     wprintw(_wins[0].win, "%s\n", msg);
     wattroff(_wins[0].win, A_BOLD);
 }
 
-void cons_show(char *msg)
-{
-    char tstmp[80];
-    get_time(tstmp);
-   
-    wprintw(_wins[0].win, " [%s] %s\n", tstmp, msg); 
-}
-
 void cons_bad_command(char *cmd)
 {
-    char tstmp[80];
-    get_time(tstmp);
-
-    wprintw(_wins[0].win, " [%s] Unknown command: %s\n", tstmp, cmd);
+    _win_show_time(0);
+    wprintw(_wins[0].win, "Unknown command: %s\n", cmd);
 }
 
 void cons_bad_connect(void)
 {
-    char tstmp[80];
-    get_time(tstmp);
-
-    wprintw(_wins[0].win, 
-        " [%s] Usage: /connect user@host\n", tstmp);
+    cons_show("Usage: /connect user@host");
 }
 
 void cons_not_disconnected(void)
 {
-    char tstmp[80];
-    get_time(tstmp);
-
-    wprintw(_wins[0].win, 
-        " [%s] You are either connected already, or a login is in process.\n", tstmp);
+    cons_show("You are either connected already, or a login is in process.");
 }
 
 void cons_not_connected(void)
 {
-    char tstmp[80];
-    get_time(tstmp);
-
-    wprintw(_wins[0].win, 
-        " [%s] You are not currently connected.\n", tstmp);
+    cons_show("You are not currently connected.");
 }
 
 void cons_bad_message(void)
 {
-    char tstmp[80];
-    get_time(tstmp);
-
-    wprintw(_wins[0].win, 
-        " [%s] Usage: /msg user@host message\n", tstmp);
+    cons_show("Usage: /msg user@host message");
 }
 
 static void _create_windows(void)
@@ -276,13 +234,13 @@ static void _create_windows(void)
     char tstmp[80];
     get_time(tstmp);
     
-    wprintw(cons.win, " [%s] ", tstmp);
-    wattron(cons.win, A_BOLD);
-    wprintw(cons.win, "Welcome to Profanity.\n");
-    wattroff(cons.win, A_BOLD);
-    touchwin(cons.win);
-    wrefresh(cons.win);
     _wins[0] = cons;
+    _win_show_time(0);
+    wattron(_wins[0].win, A_BOLD);
+    wprintw(_wins[0].win, "Welcome to Profanity.\n");
+    wattroff(_wins[0].win, A_BOLD);
+    touchwin(_wins[0].win);
+    wrefresh(_wins[0].win);
     
     // create the chat windows
     int i;
