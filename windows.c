@@ -33,6 +33,7 @@ static void _create_windows(void);
 static int _find_win(char *contact);
 static void _current_window_refresh();
 static void _win_show_time(int win);
+static void _win_show_user(int win, char *user, int colour);
 
 void gui_init(void)
 {
@@ -116,21 +117,6 @@ char *win_get_recipient(void)
     return recipient;
 }
 
-static void _win_show_time(int win)
-{
-    char tstmp[80];
-    get_time(tstmp);
-    wattron(_wins[win].win, COLOR_PAIR(5));
-    wprintw(_wins[win].win, " [");
-    wattroff(_wins[win].win, COLOR_PAIR(5));
-
-    wprintw(_wins[win].win, "%s", tstmp);
-
-    wattron(_wins[win].win, COLOR_PAIR(5));
-    wprintw(_wins[win].win, "] ");
-    wattroff(_wins[win].win, COLOR_PAIR(5));
-}
-
 void win_show_incomming_msg(char *from, char *message) 
 {
     char from_cpy[strlen(from) + 1];
@@ -138,54 +124,20 @@ void win_show_incomming_msg(char *from, char *message)
     char *short_from = strtok(from_cpy, "/");
 
     int win = _find_win(short_from);
-
     _win_show_time(win);
-    
-    // print user
-    wattron(_wins[win].win, A_DIM);
-    wprintw(_wins[win].win, "<");
-    wattroff(_wins[win].win, A_DIM);
-
-    wattron(_wins[win].win, COLOR_PAIR(2));
-    wattron(_wins[win].win, A_BOLD);
-    wprintw(_wins[win].win, "%s", short_from);
-    wattroff(_wins[win].win, COLOR_PAIR(2));
-    wattroff(_wins[win].win, A_BOLD);
-
-    wattron(_wins[win].win, A_DIM);
-    wprintw(_wins[win].win, "> ");
-    wattroff(_wins[win].win, A_DIM);
-
-    // print message
+    _win_show_user(win, short_from, 1);
     wprintw(_wins[win].win, "%s\n", message);
 
-    // update window
     status_bar_active(win);
 }
 
 void win_show_outgoing_msg(char *from, char *to, char *message)
 {
     int win = _find_win(to);
-
     _win_show_time(win);
-
-    // print user
-    wattron(_wins[win].win, A_DIM);
-    wprintw(_wins[win].win, "<");
-    wattroff(_wins[win].win, A_DIM);
-
-    wattron(_wins[win].win, A_BOLD);
-    wprintw(_wins[win].win, "%s", from);
-    wattroff(_wins[win].win, A_BOLD);
-
-    wattron(_wins[win].win, A_DIM);
-    wprintw(_wins[win].win, "> ");
-    wattroff(_wins[win].win, A_DIM);
-
-    // print message
+    _win_show_user(win, from, 0);
     wprintw(_wins[win].win, "%s\n", message);
-
-    // update window
+    
     status_bar_active(win);
 }
 
@@ -364,6 +316,40 @@ static int _find_win(char *contact)
     }
 
     return i;
+}
+
+static void _win_show_time(int win)
+{
+    char tstmp[80];
+    get_time(tstmp);
+    wattron(_wins[win].win, COLOR_PAIR(5));
+    wprintw(_wins[win].win, " [");
+    wattroff(_wins[win].win, COLOR_PAIR(5));
+
+    wprintw(_wins[win].win, "%s", tstmp);
+
+    wattron(_wins[win].win, COLOR_PAIR(5));
+    wprintw(_wins[win].win, "] ");
+    wattroff(_wins[win].win, COLOR_PAIR(5));
+}
+
+static void _win_show_user(int win, char *user, int colour)
+{
+    wattron(_wins[win].win, A_DIM);
+    wprintw(_wins[win].win, "<");
+    wattroff(_wins[win].win, A_DIM);
+
+    if (colour)
+        wattron(_wins[win].win, COLOR_PAIR(2));
+    wattron(_wins[win].win, A_BOLD);
+    wprintw(_wins[win].win, "%s", user);
+    if (colour)
+        wattroff(_wins[win].win, COLOR_PAIR(2));
+    wattroff(_wins[win].win, A_BOLD);
+
+    wattron(_wins[win].win, A_DIM);
+    wprintw(_wins[win].win, "> ");
+    wattroff(_wins[win].win, A_DIM);
 }
 
 static void _current_window_refresh()
