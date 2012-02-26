@@ -32,6 +32,7 @@ static int _curr_win = 0;
 static void _create_windows(void);
 static int _find_win(char *contact);
 static void _current_window_refresh();
+static void _win_show_time(int win);
 
 void gui_init(void)
 {
@@ -115,18 +116,10 @@ char *win_get_recipient(void)
     return recipient;
 }
 
-void win_show_incomming_msg(char *from, char *message) 
+static void _win_show_time(int win)
 {
-    char from_cpy[strlen(from) + 1];
-    strcpy(from_cpy, from);
-    
-    char *short_from = strtok(from_cpy, "/");
     char tstmp[80];
     get_time(tstmp);
-
-    int win = _find_win(short_from);
-
-    // print time   
     wattron(_wins[win].win, COLOR_PAIR(5));
     wprintw(_wins[win].win, " [");
     wattroff(_wins[win].win, COLOR_PAIR(5));
@@ -136,6 +129,17 @@ void win_show_incomming_msg(char *from, char *message)
     wattron(_wins[win].win, COLOR_PAIR(5));
     wprintw(_wins[win].win, "] ");
     wattroff(_wins[win].win, COLOR_PAIR(5));
+}
+
+void win_show_incomming_msg(char *from, char *message) 
+{
+    char from_cpy[strlen(from) + 1];
+    strcpy(from_cpy, from);
+    char *short_from = strtok(from_cpy, "/");
+
+    int win = _find_win(short_from);
+
+    _win_show_time(win);
     
     // print user
     wattron(_wins[win].win, A_DIM);
@@ -161,24 +165,9 @@ void win_show_incomming_msg(char *from, char *message)
 
 void win_show_outgoing_msg(char *from, char *to, char *message)
 {
-    char line[100];
-    char tstmp[80];
-    get_time(tstmp);
-
-    sprintf(line, " [%s] <%s> %s\n", tstmp, from, message);
-
     int win = _find_win(to);
 
-    // print time   
-    wattron(_wins[win].win, COLOR_PAIR(5));
-    wprintw(_wins[win].win, " [");
-    wattroff(_wins[win].win, COLOR_PAIR(5));
-
-    wprintw(_wins[win].win, "%s", tstmp);
-
-    wattron(_wins[win].win, COLOR_PAIR(5));
-    wprintw(_wins[win].win, "] ");
-    wattroff(_wins[win].win, COLOR_PAIR(5));
+    _win_show_time(win);
 
     // print user
     wattron(_wins[win].win, A_DIM);
