@@ -13,7 +13,6 @@ WORKLIST
 --------
 
 Features:
-    Disable server tls with command line parameter
     Trim domain/resourse from usernames in UI
     Allow subscription management
     Allow presence notification
