@@ -84,9 +84,9 @@ static int _handle_command(char *command, char *inp)
 static int _cmd_connect(char *inp)
 {
     int result = FALSE;
-    int conn_status = jabber_connection_status();
+    jabber_status_t conn_status = jabber_connection_status();
 
-    if ((conn_status != DISCONNECTED) && (conn_status != STARTED)) {
+    if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
         cons_not_disconnected();
         result = TRUE;
     } else if (strlen(inp) < 10) {
@@ -101,7 +101,13 @@ static int _cmd_connect(char *inp)
         inp_block();
         inp_get_password(passwd);
         inp_non_block();
-        jabber_connect(user, passwd);
+        
+        conn_status = jabber_connect(user, passwd);
+        if (conn_status == JABBER_CONNECTING)
+            cons_good_show("Connecting...");
+        if (conn_status == JABBER_DISCONNECTED)
+            cons_bad_show("Connection to server failed.");
+
         result = TRUE;
     }
     
@@ -122,9 +128,9 @@ static int _cmd_help(void)
 
 static int _cmd_who(void)
 {
-    int conn_status = jabber_connection_status();
+    jabber_status_t conn_status = jabber_connection_status();
 
-    if (conn_status != CONNECTED)
+    if (conn_status != JABBER_CONNECTED)
         cons_not_connected();
     else
         jabber_roster_request();
@@ -137,9 +143,9 @@ static int _cmd_msg(char *inp)
     char *usr = NULL;
     char *msg = NULL;
 
-    int conn_status = jabber_connection_status();
+    jabber_status_t conn_status = jabber_connection_status();
 
-    if (conn_status != CONNECTED) {
+    if (conn_status != JABBER_CONNECTED) {
         cons_not_connected();
     } else {
         // copy input    

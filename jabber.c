@@ -36,7 +36,7 @@ static xmpp_ctx_t *_ctx;
 static xmpp_conn_t *_conn;
 
 // connection status
-static int _conn_status = STARTED;
+static jabber_status_t _conn_status = JABBER_STARTED;
 
 void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg);
@@ -65,12 +65,12 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
 static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
 
-int jabber_connection_status(void)
+jabber_status_t jabber_connection_status(void)
 {
     return (_conn_status);
 }
 
-int jabber_connect(char *user, char *passwd)
+jabber_status_t jabber_connect(char *user, char *passwd)
 {
     xmpp_initialize();
 
@@ -89,31 +89,27 @@ int jabber_connect(char *user, char *passwd)
 
     int connect_status = xmpp_connect_client(_conn, NULL, 0, _jabber_conn_handler, _ctx);
 
-    if (connect_status == 0) {
-        cons_good_show("Connecting...");
-        _conn_status = CONNECTING;
-    }
-    else { 
-        cons_bad_show("XMPP connection failure");
-        _conn_status = DISCONNECTED;
-    }
+    if (connect_status == 0)
+        _conn_status = JABBER_CONNECTING;
+    else  
+        _conn_status = JABBER_DISCONNECTED;
 
     return _conn_status;
 }
 
 void jabber_disconnect(void)
 {
-    if (_conn_status == CONNECTED) {
+    if (_conn_status == JABBER_CONNECTED) {
         xmpp_conn_release(_conn);
         xmpp_ctx_free(_ctx);
         xmpp_shutdown();
-        _conn_status = DISCONNECTED;
+        _conn_status = JABBER_DISCONNECTED;
     }
 }
 
 void jabber_process_events(void)
 {
-    if (_conn_status == CONNECTED || _conn_status == CONNECTING)
+    if (_conn_status == JABBER_CONNECTED || _conn_status == JABBER_CONNECTING)
         xmpp_run_once(_ctx, 10);
 }
 
@@ -201,13 +197,13 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
         jabber_roster_request();
-        _conn_status = CONNECTED;
+        _conn_status = JABBER_CONNECTED;
     }
     else {
         cons_bad_show("Login failed.");
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
-        _conn_status = DISCONNECTED;
+        _conn_status = JABBER_DISCONNECTED;
     }
 }
 
