@@ -1,30 +1,29 @@
-Ncurses based Irssi inspired IM client.
+Ncurses based Irssi inspired Jabber client.
 
-Requires ncurses and libstrophe.
+Requires ncurses.
 
-To make:
+Note
+----
+Currently requires modified version of libstrophe
+found at:
+    
+    git://github.com/boothj5/libstrophe.git
 
-    make
-
-To run:
-
-    ./profanity
-
-WORKLIST:
+WORKLIST
+--------
 
 Features:
+    Disable server tls with command line parameter
+    Trim domain/resourse from usernames in UI
+    Allow subscription management
+    Allow presence notification
     Dont start chat window when no such recipient
-    Handle resize terminal in X windows
-    Secure XMPP
-    Window buffers for scrolling, with page up and down
+    Handle resize terminal
+    Window buffers for scrolling
     Left right arrow keys whilst typing commands
     Up down arrow keys for command history
-    
-Bugs:
-    Correctly handling string lengths
-
-One day:
+    Managing and storing user profiles
     Other IM protocols
-    Log chat history to file option
+    Support chat logging
     Tab completion on commands
     Tab completion on users
