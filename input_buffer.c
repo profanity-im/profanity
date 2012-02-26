@@ -1,5 +1,5 @@
 /* 
- * jabber.h
+ * input_buffer.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
  * 
@@ -20,22 +20,35 @@
  *
  */
 
-#ifndef JABBER_H
-#define JABBER_H
+#include <string.h>
 
-typedef enum {
-    JABBER_STARTED,
-    JABBER_CONNECTING,
-    JABBER_CONNECTED,
-    JABBER_DISCONNECTED
-} jabber_status_t;
+#define BUFMAX 100
 
-void jabber_init(int disable_tls);
-jabber_status_t jabber_connection_status(void);
-jabber_status_t jabber_connect(char *user, char *passwd);
-void jabber_disconnect(void);
-void jabber_roster_request(void);
-void jabber_process_events(void);
-void jabber_send(char *msg, char *recipient);
+static char *_inp_buf[BUFMAX];
+static int _buf_size;
+static int _buf_prev;
 
-#endif
+void inpbuf_init(void)
+{
+    _buf_size = 0;
+    _buf_prev = -1;
+}
+
+void inpbuf_append(char *inp)
+{
+    if (_buf_size < BUFMAX) {
+        _inp_buf[_buf_size] = (char*) malloc(strlen(inp) * sizeof(char));
+        strcpy(_inp_buf[_buf_size], inp);
+        _buf_prev = _buf_size;
+        _buf_size++;
+    }
+}
+
+char *inp_buf_get_previous(void)
+{
+    if (_buf_size == 0 || _buf_prev == -1)
+        return NULL;
+    return _inp_buf[_buf_prev--];
+}
+
+

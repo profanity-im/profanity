@@ -30,15 +30,22 @@
 #include "windows.h"
 #include "jabber.h"
 #include "command.h"
+#include "input_buffer.h"
 
 static void _profanity_event_loop(int *ch, char *cmd, int *size);
 static void _process_special_keys(int *ch);
+
+static void profanity_init(int disable_tls)
+{
+    jabber_init(disable_tls);
+    inpbuf_init();
+}
 
 void profanity_main(int disable_tls)
 {
     int cmd_result = TRUE;
 
-    init_jabber(disable_tls);
+    profanity_init(disable_tls);
 
     inp_non_block();
     while(cmd_result == TRUE) {

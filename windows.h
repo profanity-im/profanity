@@ -78,7 +78,7 @@ void status_bar_active(int win);
 void status_bar_update_time(void);
 
 // input window actions
-void inp_poll_char(int *ch, char command[], int *size);
+void inp_poll_char(int *ch, char *input, int *size);
 void inp_clear(void);
 void inp_put_back(void);
 void inp_non_block(void);

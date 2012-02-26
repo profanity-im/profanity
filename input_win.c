@@ -23,6 +23,7 @@
 #include <string.h>
 #include <ncurses.h>
 #include "windows.h"
+#include "input_buffer.h"
 
 static WINDOW *inp_win;
 
@@ -41,6 +42,7 @@ void inp_clear(void)
 {
     wclear(inp_win);
     wmove(inp_win, 0, 1);
+    touchwin(inp_win);
     wrefresh(inp_win);
 }
 
@@ -55,12 +57,21 @@ void inp_block(void)
 }
 
 /*
+ * Non blocking input char handling
+ *
+ * *size  - holds the current size of input
+ * *input - holds the current input string
+ * *ch    - getch will put a charater here if there was any input
+ * 
+ * The example below shows the values of size, input, a call to wgetyx to
+ * find the current cursor location, and the index if the input string.
+ *
  * size  : "       7 "
  * input : " example "
  * inp_x : "012345678"
  * index : " 0123456 " (inp_x - 1)
  */
-void inp_poll_char(int *ch, char *command, int *size)
+void inp_poll_char(int *ch, char *input, int *size)
 {
     int inp_y = 0;
     int inp_x = 0;
@@ -77,9 +88,25 @@ void inp_poll_char(int *ch, char *command, int *size)
     if (*ch == 127) {
         if (*size > 0) {
             getyx(inp_win, inp_y, inp_x);
-            wmove(inp_win, inp_y, inp_x-1);
-            wdelch(inp_win);
-            (*size)--;
+
+            // if at end, delete last char
+            if (inp_x > *size) {
+                wmove(inp_win, inp_y, inp_x-1);
+                wdelch(inp_win);
+                (*size)--;
+
+            // if in middle, delete and shift chars left
+            } else if (inp_x > 1 && inp_x <= *size) {
+                int i;
+                for (i = inp_x-1; i < *size; i++)
+                    input[i-1] = input[i];
+                (*size)--;
+
+                inp_clear();
+                for (i = 0; i < *size; i++)
+                    waddch(inp_win, input[i]);
+                wmove(inp_win, 0, inp_x -1);
+            }
         }
 
     // left arrow
@@ -94,6 +121,18 @@ void inp_poll_char(int *ch, char *command, int *size)
         getyx(inp_win, inp_y, inp_x);
         if (inp_x <= *size ) {
             wmove(inp_win, inp_y, inp_x+1);
+        }
+
+    // up arrow
+    } else if (*ch == KEY_UP) {
+        char *prev = inp_buf_get_previous();
+        if (prev) {
+            strcpy(input, prev);
+            *size = strlen(input);
+            inp_clear();
+            int i;
+            for (i = 0; i < *size; i++)
+                waddch(inp_win, input[i]);
         }
 
     // else if not error, newline or special key, 
@@ -124,15 +163,15 @@ void inp_poll_char(int *ch, char *command, int *size)
 
             int i;
             for (i = *size; i > inp_x -1; i--)
-                command[i] = command[i-1];
-            command[inp_x -1] = *ch;
+                input[i] = input[i-1];
+            input[inp_x -1] = *ch;
 
             (*size)++;
 
         // otherwise just append
         } else {
             waddch(inp_win, *ch);
-            command[(*size)++] = *ch;
+            input[(*size)++] = *ch;
         }
     }
 

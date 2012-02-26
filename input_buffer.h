@@ -1,5 +1,5 @@
 /* 
- * jabber.h
+ * input_buffer.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
  * 
@@ -20,22 +20,12 @@
  *
  */
 
-#ifndef JABBER_H
-#define JABBER_H
 
-typedef enum {
-    JABBER_STARTED,
-    JABBER_CONNECTING,
-    JABBER_CONNECTED,
-    JABBER_DISCONNECTED
-} jabber_status_t;
+#ifndef INPUT_BUFFER_H
+#define INPUT_BUFFER_H
 
-void jabber_init(int disable_tls);
-jabber_status_t jabber_connection_status(void);
-jabber_status_t jabber_connect(char *user, char *passwd);
-void jabber_disconnect(void);
-void jabber_roster_request(void);
-void jabber_process_events(void);
-void jabber_send(char *msg, char *recipient);
+void inpbuf_init(void);
+void inpbuf_append(char *inp);
+char *inp_buf_get_previous(void);
 
 #endif

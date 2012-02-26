@@ -65,7 +65,7 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
 static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
 
-void init_jabber(int disable_tls)
+void jabber_init(int disable_tls)
 {
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.tls_disabled = disable_tls;

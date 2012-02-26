@@ -23,6 +23,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+void cmd_init(void);
 int process_input(char *inp);
 
 #endif
