@@ -59,7 +59,7 @@ void inp_block(void)
     wtimeout(inp_win, -1);
 }
 
-void inp_poll_char(int *ch, char command[], int *size)
+void inp_poll_char(int *ch, char *command, int *size)
 {
     int inp_y = 0;
     int inp_x = 0;
@@ -80,11 +80,29 @@ void inp_poll_char(int *ch, char command[], int *size)
             wdelch(inp_win);
             (*size)--;
         }
-    }
 
-    // else if not error or newline, show it and store it
-    else if (*ch != ERR &&
+    // left arrow
+    } else if (*ch == KEY_LEFT) {
+        getyx(inp_win, inp_y, inp_x);
+        if (inp_x > 1) {
+            wmove(inp_win, inp_y, inp_x-1);
+        }
+
+    // right arrow
+    } else if (*ch == KEY_RIGHT) {
+        getyx(inp_win, inp_y, inp_x);
+        if (inp_x < *size + 1) {
+            wmove(inp_win, inp_y, inp_x+1);
+        }
+
+    // else if not error, newline or special key, 
+    // show it and store it
+    } else if (*ch != ERR &&
              *ch != '\n' &&
+             *ch != KEY_LEFT &&
+             *ch != KEY_RIGHT &&
+             *ch != KEY_UP &&
+             *ch != KEY_DOWN &&
              *ch != KEY_F(1) &&
              *ch != KEY_F(2) &&
              *ch != KEY_F(3) &&
