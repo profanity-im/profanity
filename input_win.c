@@ -125,9 +125,21 @@ void inp_poll_char(int *ch, char *input, int *size)
 
     // up arrow
     } else if (*ch == KEY_UP) {
-        char *prev = inpbuf_get_previous();
+        char *prev = inpbuf_previous();
         if (prev) {
             strcpy(input, prev);
+            *size = strlen(input);
+            inp_clear();
+            int i;
+            for (i = 0; i < *size; i++)
+                waddch(inp_win, input[i]);
+        }
+
+    // down arrow
+    } else if (*ch == KEY_DOWN) {
+        char *next = inpbuf_next();
+        if (next) {
+            strcpy(input, next);
             *size = strlen(input);
             inp_clear();
             int i;

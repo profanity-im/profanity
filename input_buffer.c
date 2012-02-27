@@ -26,12 +26,12 @@
 
 static char *_inp_buf[BUFMAX];
 static int _buf_size;
-static int _buf_prev;
+static int _buf_pos;
 
 void inpbuf_init(void)
 {
     _buf_size = 0;
-    _buf_prev = -1;
+    _buf_pos = -1;
 }
 
 void inpbuf_append(char *inp)
@@ -39,16 +39,31 @@ void inpbuf_append(char *inp)
     if (_buf_size < BUFMAX) {
         _inp_buf[_buf_size] = (char*) malloc(strlen(inp) * sizeof(char));
         strcpy(_inp_buf[_buf_size], inp);
-        _buf_prev = _buf_size;
+        _buf_pos = _buf_size;
         _buf_size++;
     }
 }
 
-char *inpbuf_get_previous(void)
+char *inpbuf_previous(void)
 {
-    if (_buf_size == 0 || _buf_prev == -1)
+    if (_buf_size == 0 || _buf_pos == -1)
         return NULL;
-    return _inp_buf[_buf_prev--];
+
+    return _inp_buf[_buf_pos--];
 }
 
+char *inpbuf_next(void)
+{
+    if (_buf_size == 0)
+        return NULL;
+    if (_buf_pos == (_buf_size - 1))
+        return NULL;
+    if (_buf_pos + 2 >= _buf_size)
+        return NULL;
+    
+    int pos = _buf_pos + 2;
+    _buf_pos++;
+ 
+    return _inp_buf[pos];
+}
 
