@@ -48,13 +48,12 @@ void title_bar_connected(void);
 void title_bar_disconnected(void);
 
 // main window actions
-int win_is_active(int i);
-void win_switch_to(int i);
 void win_close_win(void);
 int win_in_chat(void);
 char *win_get_recipient(void);
 void win_show_incomming_msg(char *from, char *message);
 void win_show_outgoing_msg(char *from, char *to, char *message);
+void win_handle_switch(int *ch);
 
 // console window actions
 void cons_help(void);

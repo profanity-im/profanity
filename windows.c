@@ -32,6 +32,7 @@ static int _curr_win = 0;
 static void _create_windows(void);
 static int _find_win(char *contact);
 static void _current_window_refresh();
+static void _win_switch_if_active(int i);
 static void _win_show_time(int win);
 static void _win_show_user(int win, char *user, int colour);
 
@@ -71,24 +72,6 @@ void gui_refresh(void)
 void gui_close(void)
 {
     endwin();
-}
-
-int win_is_active(int i)
-{
-    if (strcmp(_wins[i].from, "") == 0)
-        return FALSE;
-    else
-        return TRUE;
-}
-
-void win_switch_to(int i)
-{    
-    _curr_win = i;
-
-    if (i == 0)
-        title_bar_title();
-    else
-        title_bar_show(_wins[i].from);
 }
 
 void win_close_win(void)
@@ -220,6 +203,31 @@ void cons_bad_message(void)
     cons_show("Usage: /msg user@host message");
 }
 
+void win_handle_switch(int *ch)
+{
+    if (*ch == KEY_F(1)) {
+        _win_switch_if_active(0);
+    } else if (*ch == KEY_F(2)) {
+        _win_switch_if_active(1);
+    } else if (*ch == KEY_F(3)) {
+        _win_switch_if_active(2);
+    } else if (*ch == KEY_F(4)) {
+        _win_switch_if_active(3);
+    } else if (*ch == KEY_F(5)) {
+        _win_switch_if_active(4);
+    } else if (*ch == KEY_F(6)) {
+        _win_switch_if_active(5);
+    } else if (*ch == KEY_F(7)) {
+        _win_switch_if_active(6);
+    } else if (*ch == KEY_F(8)) {
+        _win_switch_if_active(7);
+    } else if (*ch == KEY_F(9)) {
+        _win_switch_if_active(8);
+    } else if (*ch == KEY_F(10)) {
+        _win_switch_if_active(9);
+    }
+}
+
 static void _create_windows(void)
 {
     int rows, cols;
@@ -271,6 +279,18 @@ static int _find_win(char *contact)
     }
 
     return i;
+}
+
+static void _win_switch_if_active(int i)
+{
+    if (strcmp(_wins[i].from, "") != 0) {
+        _curr_win = i;
+
+        if (i == 0)
+            title_bar_title();
+        else
+            title_bar_show(_wins[i].from);
+    }
 }
 
 static void _win_show_time(int win)
