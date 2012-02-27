@@ -85,7 +85,7 @@ void inp_poll_char(int *ch, char *input, int *size)
     *ch = wgetch(inp_win);
 
     // if delete pressed, go back and delete it
-    if (*ch == 127) {
+    if (*ch == 127 || *ch == KEY_BACKSPACE) {
         if (*size > 0) {
             getyx(inp_win, inp_y, inp_x);
 
