@@ -259,42 +259,31 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
 
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 {
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
-    
-    xmpp_stanza_t *iq, *ping;
+    if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
+        
+        xmpp_stanza_t *iq, *ping;
 
-    iq = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(iq, "iq");
-    xmpp_stanza_set_type(iq, "get");
-    xmpp_stanza_set_id(iq, "c2s1");
+        iq = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(iq, "iq");
+        xmpp_stanza_set_type(iq, "get");
+        xmpp_stanza_set_id(iq, "c2s1");
 
-    ping = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(ping, "ping");
+        ping = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(ping, "ping");
 
-    // FIXME add ping namespace to libstrophe
-    xmpp_stanza_set_ns(ping, "urn:xmpp:ping");
+        // FIXME add ping namespace to libstrophe
+        xmpp_stanza_set_ns(ping, "urn:xmpp:ping");
 
-    xmpp_stanza_add_child(iq, ping);
-    xmpp_stanza_release(ping);
-    xmpp_send(conn, iq);
-    xmpp_stanza_release(iq);
+        xmpp_stanza_add_child(iq, ping);
+        xmpp_stanza_release(ping);
+        xmpp_send(conn, iq);
+        xmpp_stanza_release(iq);
+    }
 
     return 1;
 }
 
-/*
-
-<presence to="james.booth@framework" from="stephen.rank@framework/framework.corelogic.local">
-    <show>away</show>
-    <status>I'm not here right now</status>
-    <c hash="sha-1" xmlns="http://jabber.org/protocol/caps" 
-        ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" node="http://pidgin.im/"/>
-    <x xmlns="vcard-temp:x:update"><photo/></x>
-</presence>
-
-    Lack of attribute means online.
-
-*/
 static int _jabber_presence_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
