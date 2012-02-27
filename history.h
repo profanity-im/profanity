@@ -1,5 +1,5 @@
 /* 
- * input_buffer.h
+ * history.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
  * 
@@ -21,12 +21,12 @@
  */
 
 
-#ifndef INPUT_BUFFER_H
-#define INPUT_BUFFER_H
+#ifndef HISTORY_H
+#define HISTORY_H
 
-void inpbuf_init(void);
-void inpbuf_append(char *inp);
-char *inpbuf_previous(void);
-char *inpbuf_next(void);
+void history_init(void);
+void history_append(char *inp);
+char *history_previous(void);
+char *history_next(void);
 
 #endif

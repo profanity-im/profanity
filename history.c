@@ -1,5 +1,5 @@
 /* 
- * input_buffer.c
+ * history.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
  * 
@@ -22,48 +22,48 @@
 
 #include <string.h>
 
-#define BUFMAX 100
+#define MAX_HISTORY 100
 
-static char *_inp_buf[BUFMAX];
-static int _buf_size;
-static int _buf_pos;
+static char *_history[MAX_HISTORY];
+static int _size;
+static int _pos;
 
-void inpbuf_init(void)
+void history_init(void)
 {
-    _buf_size = 0;
-    _buf_pos = -1;
+    _size = 0;
+    _pos = -1;
 }
 
-void inpbuf_append(char *inp)
+void history_append(char *inp)
 {
-    if (_buf_size < BUFMAX) {
-        _inp_buf[_buf_size] = (char*) malloc(strlen(inp) * sizeof(char));
-        strcpy(_inp_buf[_buf_size], inp);
-        _buf_pos = _buf_size;
-        _buf_size++;
+    if (_size < MAX_HISTORY) {
+        _history[_size] = (char*) malloc(strlen(inp) * sizeof(char));
+        strcpy(_history[_size], inp);
+        _pos = _size;
+        _size++;
     }
 }
 
-char *inpbuf_previous(void)
+char *history_previous(void)
 {
-    if (_buf_size == 0 || _buf_pos == -1)
+    if (_size == 0 || _pos == -1)
         return NULL;
 
-    return _inp_buf[_buf_pos--];
+    return _history[_pos--];
 }
 
-char *inpbuf_next(void)
+char *history_next(void)
 {
-    if (_buf_size == 0)
+    if (_size == 0)
         return NULL;
-    if (_buf_pos == (_buf_size - 1))
+    if (_pos == (_size - 1))
         return NULL;
-    if (_buf_pos + 2 >= _buf_size)
+    if (_pos + 2 >= _size)
         return NULL;
     
-    int pos = _buf_pos + 2;
-    _buf_pos++;
+    int pos = _pos + 2;
+    _pos++;
  
-    return _inp_buf[pos];
+    return _history[pos];
 }
 

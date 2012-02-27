@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include "command.h"
-#include "input_buffer.h"
+#include "history.h"
 #include "jabber.h"
 #include "windows.h"
 #include "util.h"
@@ -43,7 +43,7 @@ int process_input(char *inp)
     int result = FALSE;
 
     if (strlen(inp) > 0)
-        inpbuf_append(inp);
+        history_append(inp);
 
     if (strlen(inp) == 0) {
         result = TRUE;

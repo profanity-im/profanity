@@ -23,7 +23,7 @@
 #include <string.h>
 #include <ncurses.h>
 #include "windows.h"
-#include "input_buffer.h"
+#include "history.h"
 
 static WINDOW *inp_win;
 
@@ -125,7 +125,7 @@ void inp_poll_char(int *ch, char *input, int *size)
 
     // up arrow
     } else if (*ch == KEY_UP) {
-        char *prev = inpbuf_previous();
+        char *prev = history_previous();
         if (prev) {
             strcpy(input, prev);
             *size = strlen(input);
@@ -137,7 +137,7 @@ void inp_poll_char(int *ch, char *input, int *size)
 
     // down arrow
     } else if (*ch == KEY_DOWN) {
-        char *next = inpbuf_next();
+        char *next = history_next();
         if (next) {
             strcpy(input, next);
             *size = strlen(input);
