@@ -32,20 +32,15 @@
 #include "command.h"
 #include "history.h"
 
+static void _profanity_init(int disable_tls);
 static void _profanity_event_loop(int *ch, char *cmd, int *size);
 static void _process_special_keys(int *ch);
-
-static void profanity_init(int disable_tls)
-{
-    jabber_init(disable_tls);
-    history_init();
-}
 
 void profanity_main(int disable_tls)
 {
     int cmd_result = TRUE;
 
-    profanity_init(disable_tls);
+    _profanity_init(disable_tls);
 
     inp_non_block();
     while(cmd_result == TRUE) {
@@ -61,6 +56,12 @@ void profanity_main(int disable_tls)
     }
 
     jabber_disconnect();
+}
+
+static void _profanity_init(int disable_tls)
+{
+    jabber_init(disable_tls);
+    history_init();
 }
 
 static void _profanity_event_loop(int *ch, char *cmd, int *size)
