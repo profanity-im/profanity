@@ -17,10 +17,7 @@ Features:
     Allow subscription management
     Allow presence notification
     Dont start chat window when no such recipient
-    Handle resize terminal
     Window buffers for scrolling
-    Left right arrow keys whilst typing commands
-    Up down arrow keys for command history
     Managing and storing user profiles
     Other IM protocols
     Support chat logging
