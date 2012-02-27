@@ -51,6 +51,7 @@ void gui_init(void)
         init_pair(4, COLOR_CYAN, COLOR_BLUE);
         init_pair(5, COLOR_CYAN, COLOR_BLACK);
         init_pair(6, COLOR_RED, COLOR_BLACK);
+        init_pair(7, COLOR_MAGENTA, COLOR_BLACK);
     }
 
     refresh();
@@ -201,6 +202,32 @@ void cons_not_connected(void)
 void cons_bad_message(void)
 {
     cons_show("Usage: /msg user@host message");
+}
+
+void cons_show_contact_online(char *from, char *show, char *status)
+{
+    _win_show_time(0);    
+    wattron(_wins[0].win, COLOR_PAIR(2));
+
+    if (status != NULL) 
+        wprintw(_wins[0].win, "+ %s is %s, \"%s\"\n", from, show, status);
+    else 
+        wprintw(_wins[0].win, "+ %s is %s\n", from, show);
+    
+    wattroff(_wins[0].win, COLOR_PAIR(2));
+}
+
+void cons_show_contact_offline(char *from, char *show, char *status)
+{
+    _win_show_time(0);    
+    wattron(_wins[0].win, COLOR_PAIR(7));
+
+    if (status != NULL) 
+        wprintw(_wins[0].win, "- %s is %s, \"%s\"\n", from, show, status);
+    else 
+        wprintw(_wins[0].win, "- %s is %s\n", from, show);
+    
+    wattroff(_wins[0].win, COLOR_PAIR(7));
 }
 
 void win_handle_switch(int *ch)

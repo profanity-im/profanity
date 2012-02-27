@@ -67,6 +67,9 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
 static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
 
+static int _jabber_presence_handler(xmpp_conn_t * const conn, 
+    xmpp_stanza_t * const stanza, void * const userdata);
+
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
 void jabber_init(int disable_tls)
@@ -199,6 +202,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
 
         xmpp_stanza_t* pres;
         xmpp_handler_add(conn, _jabber_message_handler, NULL, "message", NULL, ctx);
+        xmpp_handler_add(conn, _jabber_presence_handler, NULL, "presence", NULL, ctx);
         xmpp_id_handler_add(conn, _roster_handler, "roster", ctx);
         xmpp_timed_handler_add(conn, _ping_timed_handler, PING_INTERVAL, ctx);
 
@@ -206,7 +210,6 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_stanza_set_name(pres, "presence");
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
-        jabber_roster_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
     }
     else {
@@ -278,3 +281,57 @@ static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 
     return 1;
 }
+
+/*
+
+<presence to="james.booth@framework" from="stephen.rank@framework/framework.corelogic.local">
+    <show>away</show>
+    <status>I'm not here right now</status>
+    <c hash="sha-1" xmlns="http://jabber.org/protocol/caps" 
+        ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" node="http://pidgin.im/"/>
+    <x xmlns="vcard-temp:x:update"><photo/></x>
+</presence>
+
+    Lack of attribute means online.
+
+*/
+static int _jabber_presence_handler(xmpp_conn_t * const conn, 
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    char *from = xmpp_stanza_get_attribute(stanza, "from");
+    char *short_from = strtok(from, "@");
+    char *type = xmpp_stanza_get_attribute(stanza, "type");
+
+   
+    if (type == NULL) { // online
+        xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
+        if (show != NULL) {
+            char *show_str = xmpp_stanza_get_text(show);
+            xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
+            
+            if (status != NULL) {
+                char *status_str = xmpp_stanza_get_text(status);
+            
+                if (show_str != NULL)
+                    cons_show_contact_online(short_from, show_str, status_str);
+            }
+        }
+    } else { // offline
+        xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
+        if (show != NULL) {
+            char *show_str = xmpp_stanza_get_text(show);
+            xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
+            
+            if (status != NULL) {
+                char *status_str = xmpp_stanza_get_text(status);
+            
+                if (show_str != NULL)
+                    cons_show_contact_offline(short_from, show_str, status_str);
+            }
+        }
+    }
+
+    return 1;
+}
+
+
