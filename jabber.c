@@ -302,33 +302,24 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
     char *short_from = strtok(from, "@");
     char *type = xmpp_stanza_get_attribute(stanza, "type");
 
+    char *show_str, *status_str;
    
+    xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
+    if (show != NULL)
+        show_str = xmpp_stanza_get_text(show);
+    else
+        show_str = NULL;
+
+    xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
+    if (status != NULL)    
+        status_str = xmpp_stanza_get_text(status);
+    else 
+        status_str = NULL;
+
     if (type == NULL) { // online
-        xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
-        if (show != NULL) {
-            char *show_str = xmpp_stanza_get_text(show);
-            xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
-            
-            if (status != NULL) {
-                char *status_str = xmpp_stanza_get_text(status);
-            
-                if (show_str != NULL)
-                    cons_show_contact_online(short_from, show_str, status_str);
-            }
-        }
+        cons_show_contact_online(short_from, show_str, status_str);
     } else { // offline
-        xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
-        if (show != NULL) {
-            char *show_str = xmpp_stanza_get_text(show);
-            xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
-            
-            if (status != NULL) {
-                char *status_str = xmpp_stanza_get_text(status);
-            
-                if (show_str != NULL)
-                    cons_show_contact_offline(short_from, show_str, status_str);
-            }
-        }
+        cons_show_contact_offline(short_from, show_str, status_str);
     }
 
     return 1;

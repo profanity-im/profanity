@@ -128,9 +128,7 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
 void cons_help(void)
 {
     _win_show_time(0);
-    wattron(_wins[0].win, A_BOLD);
     wprintw(_wins[0].win, "Help:\n");
-    wattroff(_wins[0].win, A_BOLD);
 
     cons_show("  Commands:");
     cons_show("    /help                : This help.");
@@ -148,20 +146,18 @@ void cons_good_show(char *msg)
 {
     _win_show_time(0);    
     wattron(_wins[0].win, A_BOLD);
-    wattron(_wins[0].win, COLOR_PAIR(2));
     wprintw(_wins[0].win, "%s\n", msg);
     wattroff(_wins[0].win, A_BOLD);
-    wattroff(_wins[0].win, COLOR_PAIR(2));
 }
 
 void cons_bad_show(char *msg)
 {
     _win_show_time(0);
-    wattron(_wins[0].win, A_BOLD);
     wattron(_wins[0].win, COLOR_PAIR(6));
+    wattron(_wins[0].win, A_BOLD);
     wprintw(_wins[0].win, "%s\n", msg);
-    wattroff(_wins[0].win, A_BOLD);
     wattroff(_wins[0].win, COLOR_PAIR(6));
+    wattroff(_wins[0].win, A_BOLD);
 }
 
 void cons_show(char *msg)
@@ -208,26 +204,36 @@ void cons_show_contact_online(char *from, char *show, char *status)
 {
     _win_show_time(0);    
     wattron(_wins[0].win, COLOR_PAIR(2));
+    wattron(_wins[0].win, A_BOLD);
+   
+    wprintw(_wins[0].win, "++ %s", from);
 
-    if (status != NULL) 
-        wprintw(_wins[0].win, "+ %s is %s, \"%s\"\n", from, show, status);
-    else 
-        wprintw(_wins[0].win, "+ %s is %s\n", from, show);
+    if (show != NULL) 
+        wprintw(_wins[0].win, " is %s", show);
+    if (status != NULL)
+        wprintw(_wins[0].win, ", \"%s\"", status);
+
+    wprintw(_wins[0].win, "\n");
     
     wattroff(_wins[0].win, COLOR_PAIR(2));
+    wattroff(_wins[0].win, A_BOLD);
 }
 
 void cons_show_contact_offline(char *from, char *show, char *status)
 {
     _win_show_time(0);    
-    wattron(_wins[0].win, COLOR_PAIR(7));
+    wattron(_wins[0].win, COLOR_PAIR(5));
 
-    if (status != NULL) 
-        wprintw(_wins[0].win, "- %s is %s, \"%s\"\n", from, show, status);
-    else 
-        wprintw(_wins[0].win, "- %s is %s\n", from, show);
+    wprintw(_wins[0].win, "-- %s", from);
+
+    if (show != NULL) 
+        wprintw(_wins[0].win, " is %s", show);
+    if (status != NULL)
+        wprintw(_wins[0].win, ", \"%s\"", status);
     
-    wattroff(_wins[0].win, COLOR_PAIR(7));
+    wprintw(_wins[0].win, "\n");
+    
+    wattroff(_wins[0].win, COLOR_PAIR(5));
 }
 
 void win_handle_switch(int *ch)
