@@ -188,7 +188,9 @@ void win_show_contact_offline(char *from, char *show, char *status)
 void cons_help(void)
 {
     _win_show_time(0);
+    wattron(_wins[0].win, A_BOLD);
     wprintw(_wins[0].win, "Help:\n");
+    wattroff(_wins[0].win, A_BOLD);
 
     cons_show("  Commands:");
     cons_show("    /help                : This help.");
@@ -223,21 +225,17 @@ void cons_bad_show(char *msg)
 void cons_show(char *msg)
 {
     _win_show_time(0);
-    wprintw(_wins[0].win, "%s\n", msg); 
-}
-
-void cons_highlight_show(char *msg)
-{
-    _win_show_time(0);
     wattron(_wins[0].win, A_BOLD);
-    wprintw(_wins[0].win, "%s\n", msg);
+    wprintw(_wins[0].win, "%s\n", msg); 
     wattroff(_wins[0].win, A_BOLD);
 }
 
 void cons_bad_command(char *cmd)
 {
     _win_show_time(0);
+    wattron(_wins[0].win, A_BOLD);
     wprintw(_wins[0].win, "Unknown command: %s\n", cmd);
+    wattroff(_wins[0].win, A_BOLD);
 }
 
 void cons_bad_connect(void)
@@ -396,34 +394,20 @@ static void _win_show_time(int win)
 {
     char tstmp[80];
     get_time(tstmp);
-    wattron(_wins[win].win, COLOR_PAIR(5));
-    wprintw(_wins[win].win, " [");
-    wattroff(_wins[win].win, COLOR_PAIR(5));
-
-    wprintw(_wins[win].win, "%s", tstmp);
-
-    wattron(_wins[win].win, COLOR_PAIR(5));
-    wprintw(_wins[win].win, "] ");
-    wattroff(_wins[win].win, COLOR_PAIR(5));
+    wattron(_wins[win].win, A_BOLD);
+    wprintw(_wins[win].win, "%s - ", tstmp);
+    wattroff(_wins[win].win, A_BOLD);
 }
 
 static void _win_show_user(int win, char *user, int colour)
 {
-    wattron(_wins[win].win, A_DIM);
-    wprintw(_wins[win].win, "<");
-    wattroff(_wins[win].win, A_DIM);
-
     if (colour)
         wattron(_wins[win].win, COLOR_PAIR(2));
     wattron(_wins[win].win, A_BOLD);
-    wprintw(_wins[win].win, "%s", user);
+    wprintw(_wins[win].win, "%s: ", user);
     if (colour)
         wattroff(_wins[win].win, COLOR_PAIR(2));
     wattroff(_wins[win].win, A_BOLD);
-
-    wattron(_wins[win].win, A_DIM);
-    wprintw(_wins[win].win, "> ");
-    wattroff(_wins[win].win, A_DIM);
 }
 
 static void _current_window_refresh()
