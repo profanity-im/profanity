@@ -34,6 +34,7 @@ void create_input_window(void)
 
     inp_win = newwin(1, cols, rows-1, 0);
     keypad(inp_win, TRUE);
+    wattron(inp_win, A_BOLD);
     wmove(inp_win, 0, 1);
     wrefresh(inp_win);
 }
