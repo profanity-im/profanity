@@ -54,6 +54,8 @@ char *win_get_recipient(void);
 void win_show_incomming_msg(char *from, char *message);
 void win_show_outgoing_msg(char *from, char *to, char *message);
 void win_handle_switch(int *ch);
+void win_show_contact_online(char *from, char *show, char *status);
+void win_show_contact_offline(char *from, char *show, char *status);
 
 // console window actions
 void cons_help(void);

@@ -288,7 +288,7 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     char *from = xmpp_stanza_get_attribute(stanza, "from");
-    char *short_from = strtok(from, "@");
+    char *short_from = strtok(from, "/");
     char *type = xmpp_stanza_get_attribute(stanza, "type");
 
     char *show_str, *status_str;
@@ -307,8 +307,10 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
 
     if (type == NULL) { // online
         cons_show_contact_online(short_from, show_str, status_str);
+        win_show_contact_online(short_from, show_str, status_str);
     } else { // offline
         cons_show_contact_offline(short_from, show_str, status_str);
+        win_show_contact_offline(short_from, show_str, status_str);
     }
 
     return 1;
