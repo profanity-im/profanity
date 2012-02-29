@@ -35,6 +35,7 @@ static void _current_window_refresh();
 static void _win_switch_if_active(int i);
 static void _win_show_time(int win);
 static void _win_show_user(int win, char *user, int colour);
+static void _win_show_message(WINDOW *win, char *message);
 
 void gui_init(void)
 {
@@ -110,9 +111,7 @@ void win_show_incomming_msg(char *from, char *message)
     int win = _find_win(short_from);
     _win_show_time(win);
     _win_show_user(win, short_from, 1);
-    wattroff(_wins[win].win, A_BOLD);
-    wprintw(_wins[win].win, "%s\n", message);
-    wattron(_wins[win].win, A_BOLD);
+    _win_show_message(_wins[win].win, message);
 
     status_bar_active(win);
 }
@@ -122,9 +121,7 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
     int win = _find_win(to);
     _win_show_time(win);
     _win_show_user(win, from, 0);
-    wattroff(_wins[win].win, A_BOLD);
-    wprintw(_wins[win].win, "%s\n", message);
-    wattron(_wins[win].win, A_BOLD);
+    _win_show_message(_wins[win].win, message);
     
     status_bar_active(win);
 }
@@ -397,6 +394,13 @@ static void _win_show_user(int win, char *user, int colour)
     wprintw(_wins[win].win, "%s: ", user);
     if (colour)
         wattroff(_wins[win].win, COLOR_PAIR(2));
+}
+
+static void _win_show_message(WINDOW *win, char *message)
+{
+    wattroff(win, A_BOLD);
+    wprintw(win, "%s\n", message);
+    wattron(win, A_BOLD);
 }
 
 static void _current_window_refresh()
