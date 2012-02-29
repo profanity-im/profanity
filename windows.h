@@ -54,8 +54,8 @@ char *win_get_recipient(void);
 void win_show_incomming_msg(char *from, char *message);
 void win_show_outgoing_msg(char *from, char *to, char *message);
 void win_handle_switch(int *ch);
-void win_show_contact_online(char *from, char *show, char *status);
-void win_show_contact_offline(char *from, char *show, char *status);
+void win_contact_online(char *from, char *show, char *status);
+void win_contact_offline(char *from, char *show, char *status);
 
 // console window actions
 void cons_help(void);
@@ -68,8 +68,6 @@ void cons_show(char *cmd);
 void cons_good_show(char *cmd);
 void cons_bad_show(char *cmd);
 void cons_highlight_show(char *cmd);
-void cons_show_contact_online(char *from, char *show, char *status);
-void cons_show_contact_offline(char *from, char *show, char *status);
 
 // status bar actions
 void status_bar_refresh(void);

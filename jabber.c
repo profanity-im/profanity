@@ -305,13 +305,10 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
     else 
         status_str = NULL;
 
-    if (type == NULL) { // online
-        cons_show_contact_online(short_from, show_str, status_str);
-        win_show_contact_online(short_from, show_str, status_str);
-    } else { // offline
-        cons_show_contact_offline(short_from, show_str, status_str);
-        win_show_contact_offline(short_from, show_str, status_str);
-    }
+    if (type == NULL) // online
+        win_contact_online(short_from, show_str, status_str);
+    else // offline
+        win_contact_offline(short_from, show_str, status_str);
 
     return 1;
 }

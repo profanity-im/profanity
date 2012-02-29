@@ -36,6 +36,10 @@ static void _win_switch_if_active(int i);
 static void _win_show_time(int win);
 static void _win_show_user(int win, char *user, int colour);
 static void _win_show_message(WINDOW *win, char *message);
+static void _win_show_contact_online(char *from, char *show, char *status);
+static void _win_show_contact_offline(char *from, char *show, char *status);
+static void _cons_show_contact_online(char *from, char *show, char *status);
+static void _cons_show_contact_offline(char *from, char *show, char *status);
 
 void gui_init(void)
 {
@@ -126,63 +130,16 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
     status_bar_active(win);
 }
 
-void win_show_contact_online(char *from, char *show, char *status)
+void win_contact_online(char *from, char *show, char *status)
 {
-    // find the chat window for recipient
-    int i;
-    for (i = 1; i < 10; i++)
-        if (strcmp(_wins[i].from, from) == 0)
-            break;
-
-    // if we found a window
-    if (i != 10) {
-        _win_show_time(i);    
-        wattron(_wins[i].win, COLOR_PAIR(2));
-        wprintw(_wins[i].win, "++ %s", from);
-
-        if (show != NULL) 
-            wprintw(_wins[i].win, " is %s", show);
-        else
-            wprintw(_wins[i].win, " is online");
-            
-        if (status != NULL)
-            wprintw(_wins[i].win, ", \"%s\"", status);
-
-        wprintw(_wins[i].win, "\n");
-        
-        wattroff(_wins[i].win, COLOR_PAIR(2));
-    }
+    _cons_show_contact_online(from, show, status);
+    _win_show_contact_online(from, show, status);
 }
 
-void win_show_contact_offline(char *from, char *show, char *status)
+void win_contact_offline(char *from, char *show, char *status)
 {
-    // find the chat window for recipient
-    int i;
-    for (i = 1; i < 10; i++)
-        if (strcmp(_wins[i].from, from) == 0)
-            break;
-
-    // if we found a window
-    if (i != 10) {
-        _win_show_time(i);    
-        wattron(_wins[i].win, COLOR_PAIR(5));
-        wattroff(_wins[i].win, A_BOLD);
-
-        wprintw(_wins[i].win, "-- %s", from);
-
-        if (show != NULL) 
-            wprintw(_wins[i].win, " is %s", show);
-        else
-            wprintw(_wins[i].win, " is offline");
-        
-        if (status != NULL)
-            wprintw(_wins[i].win, ", \"%s\"", status);
-        
-        wprintw(_wins[i].win, "\n");
-        
-        wattroff(_wins[i].win, COLOR_PAIR(5));
-        wattron(_wins[i].win, A_BOLD);
-    }
+    _cons_show_contact_offline(from, show, status);
+    _win_show_contact_offline(from, show, status);
 }
 
 void cons_help(void)
@@ -246,48 +203,6 @@ void cons_not_connected(void)
 void cons_bad_message(void)
 {
     cons_show("Usage: /msg user@host message");
-}
-
-void cons_show_contact_online(char *from, char *show, char *status)
-{
-    _win_show_time(0);    
-    wattron(_wins[0].win, COLOR_PAIR(2));
-   
-    wprintw(_wins[0].win, "++ %s", from);
-
-    if (show != NULL) 
-        wprintw(_wins[0].win, " is %s", show);
-    else
-        wprintw(_wins[0].win, " is online");
-        
-    if (status != NULL)
-        wprintw(_wins[0].win, ", \"%s\"", status);
-
-    wprintw(_wins[0].win, "\n");
-    
-    wattroff(_wins[0].win, COLOR_PAIR(2));
-}
-
-void cons_show_contact_offline(char *from, char *show, char *status)
-{
-    _win_show_time(0);    
-    wattron(_wins[0].win, COLOR_PAIR(5));
-    wattroff(_wins[0].win, A_BOLD);
-
-    wprintw(_wins[0].win, "-- %s", from);
-
-    if (show != NULL) 
-        wprintw(_wins[0].win, " is %s", show);
-    else
-        wprintw(_wins[0].win, " is offline");
-        
-    if (status != NULL)
-        wprintw(_wins[0].win, ", \"%s\"", status);
-    
-    wprintw(_wins[0].win, "\n");
-    
-    wattroff(_wins[0].win, COLOR_PAIR(5));
-    wattron(_wins[0].win, A_BOLD);
 }
 
 void win_handle_switch(int *ch)
@@ -408,3 +323,105 @@ static void _current_window_refresh()
     touchwin(_wins[_curr_win].win);
     wrefresh(_wins[_curr_win].win);
 }
+
+static void _win_show_contact_online(char *from, char *show, char *status)
+{
+    // find the chat window for recipient
+    int i;
+    for (i = 1; i < 10; i++)
+        if (strcmp(_wins[i].from, from) == 0)
+            break;
+
+    // if we found a window
+    if (i != 10) {
+        _win_show_time(i);    
+        wattron(_wins[i].win, COLOR_PAIR(2));
+        wprintw(_wins[i].win, "++ %s", from);
+
+        if (show != NULL) 
+            wprintw(_wins[i].win, " is %s", show);
+        else
+            wprintw(_wins[i].win, " is online");
+            
+        if (status != NULL)
+            wprintw(_wins[i].win, ", \"%s\"", status);
+
+        wprintw(_wins[i].win, "\n");
+        
+        wattroff(_wins[i].win, COLOR_PAIR(2));
+    }
+}
+
+static void _win_show_contact_offline(char *from, char *show, char *status)
+{
+    // find the chat window for recipient
+    int i;
+    for (i = 1; i < 10; i++)
+        if (strcmp(_wins[i].from, from) == 0)
+            break;
+
+    // if we found a window
+    if (i != 10) {
+        _win_show_time(i);    
+        wattron(_wins[i].win, COLOR_PAIR(5));
+        wattroff(_wins[i].win, A_BOLD);
+
+        wprintw(_wins[i].win, "-- %s", from);
+
+        if (show != NULL) 
+            wprintw(_wins[i].win, " is %s", show);
+        else
+            wprintw(_wins[i].win, " is offline");
+        
+        if (status != NULL)
+            wprintw(_wins[i].win, ", \"%s\"", status);
+        
+        wprintw(_wins[i].win, "\n");
+        
+        wattroff(_wins[i].win, COLOR_PAIR(5));
+        wattron(_wins[i].win, A_BOLD);
+    }
+}
+
+static void _cons_show_contact_online(char *from, char *show, char *status)
+{
+    _win_show_time(0);    
+    wattron(_wins[0].win, COLOR_PAIR(2));
+   
+    wprintw(_wins[0].win, "++ %s", from);
+
+    if (show != NULL) 
+        wprintw(_wins[0].win, " is %s", show);
+    else
+        wprintw(_wins[0].win, " is online");
+        
+    if (status != NULL)
+        wprintw(_wins[0].win, ", \"%s\"", status);
+
+    wprintw(_wins[0].win, "\n");
+    
+    wattroff(_wins[0].win, COLOR_PAIR(2));
+}
+
+static void _cons_show_contact_offline(char *from, char *show, char *status)
+{
+    _win_show_time(0);    
+    wattron(_wins[0].win, COLOR_PAIR(5));
+    wattroff(_wins[0].win, A_BOLD);
+
+    wprintw(_wins[0].win, "-- %s", from);
+
+    if (show != NULL) 
+        wprintw(_wins[0].win, " is %s", show);
+    else
+        wprintw(_wins[0].win, " is offline");
+        
+    if (status != NULL)
+        wprintw(_wins[0].win, ", \"%s\"", status);
+    
+    wprintw(_wins[0].win, "\n");
+    
+    wattroff(_wins[0].win, COLOR_PAIR(5));
+    wattron(_wins[0].win, A_BOLD);
+}
+
