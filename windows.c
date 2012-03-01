@@ -27,6 +27,7 @@
 #include "util.h"
 
 #define CONS_WIN_TITLE "_cons"
+#define WIN_NOT_FOUND -1
 
 // holds console at index 0 and chat wins 1 through to 9
 static struct prof_win _wins[10];
@@ -38,7 +39,8 @@ static int _curr_prof_win = 0;
 static WINDOW * _cons_win = NULL;
 
 static void _create_windows(void);
-static int _find_win_index(char *contact);
+static int _find_prof_win_index(char *contact);
+static int _new_prof_win(char *contact);
 static void _current_window_refresh();
 static void _win_switch_if_active(int i);
 static void _win_show_time(WINDOW *win);
@@ -130,7 +132,9 @@ void win_show_incomming_msg(char *from, char *message)
     strcpy(from_cpy, from);
     char *short_from = strtok(from_cpy, "/");
 
-    int win_index = _find_win_index(short_from);
+    int win_index = _find_prof_win_index(short_from);
+    if (win_index == WIN_NOT_FOUND)
+        win_index = _new_prof_win(short_from);
 
     WINDOW *win = _wins[win_index].win;
     _win_show_time(win);
@@ -142,7 +146,9 @@ void win_show_incomming_msg(char *from, char *message)
 
 void win_show_outgoing_msg(char *from, char *to, char *message)
 {
-    int win_index = _find_win_index(to);
+    int win_index = _find_prof_win_index(to);
+    if (win_index == WIN_NOT_FOUND)
+        win_index = _new_prof_win(to);
 
     WINDOW *win = _wins[win_index].win;
     _win_show_time(win);
@@ -278,7 +284,7 @@ static void _create_windows(void)
     }    
 }
 
-static int _find_win_index(char *contact)
+static int _find_prof_win_index(char *contact)
 {
     // find the chat window for recipient
     int i;
@@ -286,21 +292,26 @@ static int _find_win_index(char *contact)
         if (strcmp(_wins[i].from, contact) == 0)
             break;
 
-    // if we didn't find a window
-    if (i == 10) {
-        // find the first unused one
-        for (i = 1; i < 10; i++)
-            if (strcmp(_wins[i].from, "") == 0)
-                break;
+    if (i == 10)
+        return WIN_NOT_FOUND;
+    else
+        return i;
+}
 
-        // set it up
-        strcpy(_wins[i].from, contact);
-        wclear(_wins[i].win);
-    }
+static int _new_prof_win(char *contact)
+{
+    int i;
+    // find the first unused one
+    for (i = 1; i < 10; i++)
+        if (strcmp(_wins[i].from, "") == 0)
+            break;
+
+    // set it up
+    strcpy(_wins[i].from, contact);
+    wclear(_wins[i].win);
 
     return i;
 }
-
 static void _win_switch_if_active(int i)
 {
     if (strcmp(_wins[i].from, "") != 0) {
@@ -345,15 +356,9 @@ static void _current_window_refresh()
 
 static void _win_show_contact_online(char *from, char *show, char *status)
 {
-    // find the chat window for recipient
-    int i;
-    for (i = 1; i < 10; i++)
-        if (strcmp(_wins[i].from, from) == 0)
-            break;
-
-    // if we found a window
-    if (i != 10) {
-        WINDOW *win = _wins[i].win;
+    int win_index = _find_prof_win_index(from);
+    if (win_index != WIN_NOT_FOUND) {
+        WINDOW *win = _wins[win_index].win;
         _win_show_time(win);    
         wattron(win, COLOR_PAIR(2));
         wprintw(win, "++ %s", from);
@@ -374,15 +379,9 @@ static void _win_show_contact_online(char *from, char *show, char *status)
 
 static void _win_show_contact_offline(char *from, char *show, char *status)
 {
-    // find the chat window for recipient
-    int i;
-    for (i = 1; i < 10; i++)
-        if (strcmp(_wins[i].from, from) == 0)
-            break;
-
-    // if we found a window
-    if (i != 10) {
-        WINDOW *win = _wins[i].win;
+    int win_index = _find_prof_win_index(from);
+    if (win_index != WIN_NOT_FOUND) {
+        WINDOW *win = _wins[win_index].win;
         _win_show_time(win);    
         wattron(win, COLOR_PAIR(5));
         wattroff(win, A_BOLD);
