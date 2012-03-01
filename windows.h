@@ -48,7 +48,7 @@ void title_bar_connected(void);
 void title_bar_disconnected(void);
 
 // main window actions
-void win_close_win(void);
+int win_close_win(void);
 int win_in_chat(void);
 char *win_get_recipient(void);
 void win_show_incomming_msg(char *from, char *message);

@@ -177,11 +177,8 @@ static int _cmd_msg(char *inp)
 
 static int _cmd_close(char *inp)
 {
-    if (win_in_chat()) {
-        win_close_win();
-    } else {
+    if (!win_close_win())
         cons_bad_command(inp);
-    }
     
     return TRUE;
 }

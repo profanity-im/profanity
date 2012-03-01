@@ -28,8 +28,13 @@
 
 #define CONS_WIN_TITLE "_cons"
 
+// holds console at index 0 and chat wins 1 through to 9
 static struct prof_win _wins[10];
+
+// the window currently being displayed
 static int _curr_prof_win = 0;
+
+// shortcut pointer to console window
 static WINDOW * _cons_win = NULL;
 
 static void _create_windows(void);
@@ -83,18 +88,26 @@ void gui_close(void)
     endwin();
 }
 
-void win_close_win(void)
+int win_close_win(void)
 {
-    // reset the chat win to unused
-    strcpy(_wins[_curr_prof_win].from, "");
-    wclear(_wins[_curr_prof_win].win);
+    if (win_in_chat()) {
+        // reset the chat win to unused
+        strcpy(_wins[_curr_prof_win].from, "");
+        wclear(_wins[_curr_prof_win].win);
 
-    // set it as inactive in the status bar
-    status_bar_inactive(_curr_prof_win);
+        // set it as inactive in the status bar
+        status_bar_inactive(_curr_prof_win);
+        
+        // go back to console window
+        _curr_prof_win = 0;
+        title_bar_title();
     
-    // go back to console window
-    _curr_prof_win = 0;
-    title_bar_title();
+        // success
+        return 1;
+    } else {
+        // didn't close anything
+        return 0;
+    }
 }
 
 int win_in_chat(void)
