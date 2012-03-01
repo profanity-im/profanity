@@ -26,15 +26,18 @@
 #include "windows.h"
 #include "util.h"
 
+#define CONS_WIN_TITLE "_cons"
+
 static struct prof_win _wins[10];
-static int _curr_win = 0;
+static int _curr_prof_win = 0;
+static WINDOW * _cons_win = NULL;
 
 static void _create_windows(void);
-static int _find_win(char *contact);
+static int _find_win_index(char *contact);
 static void _current_window_refresh();
 static void _win_switch_if_active(int i);
-static void _win_show_time(int win);
-static void _win_show_user(int win, char *user, int colour);
+static void _win_show_time(WINDOW *win);
+static void _win_show_user(WINDOW *win, char *user, int colour);
 static void _win_show_message(WINDOW *win, char *message);
 static void _win_show_contact_online(char *from, char *show, char *status);
 static void _win_show_contact_offline(char *from, char *show, char *status);
@@ -83,26 +86,28 @@ void gui_close(void)
 void win_close_win(void)
 {
     // reset the chat win to unused
-    strcpy(_wins[_curr_win].from, "");
-    wclear(_wins[_curr_win].win);
+    strcpy(_wins[_curr_prof_win].from, "");
+    wclear(_wins[_curr_prof_win].win);
 
     // set it as inactive in the status bar
-    status_bar_inactive(_curr_win);
+    status_bar_inactive(_curr_prof_win);
     
     // go back to console window
-    _curr_win = 0;
+    _curr_prof_win = 0;
     title_bar_title();
 }
 
 int win_in_chat(void)
 {
-    return ((_curr_win != 0) && (strcmp(_wins[_curr_win].from, "") != 0));
+    return ((_curr_prof_win != 0) && 
+        (strcmp(_wins[_curr_prof_win].from, "") != 0));
 }
 
 char *win_get_recipient(void)
 {
-    char *recipient = (char *) malloc(sizeof(char) * (strlen(_wins[_curr_win].from) + 1));
-    strcpy(recipient, _wins[_curr_win].from);
+    struct prof_win current = _wins[_curr_prof_win];
+    char *recipient = (char *) malloc(sizeof(char) * (strlen(current.from) + 1));
+    strcpy(recipient, current.from);
     return recipient;
 }
 
@@ -112,22 +117,26 @@ void win_show_incomming_msg(char *from, char *message)
     strcpy(from_cpy, from);
     char *short_from = strtok(from_cpy, "/");
 
-    int win = _find_win(short_from);
+    int win_index = _find_win_index(short_from);
+
+    WINDOW *win = _wins[win_index].win;
     _win_show_time(win);
     _win_show_user(win, short_from, 1);
-    _win_show_message(_wins[win].win, message);
+    _win_show_message(win, message);
 
-    status_bar_active(win);
+    status_bar_active(win_index);
 }
 
 void win_show_outgoing_msg(char *from, char *to, char *message)
 {
-    int win = _find_win(to);
+    int win_index = _find_win_index(to);
+
+    WINDOW *win = _wins[win_index].win;
     _win_show_time(win);
     _win_show_user(win, from, 0);
-    _win_show_message(_wins[win].win, message);
+    _win_show_message(win, message);
     
-    status_bar_active(win);
+    status_bar_active(win_index);
 }
 
 void win_contact_online(char *from, char *show, char *status)
@@ -144,8 +153,8 @@ void win_contact_offline(char *from, char *show, char *status)
 
 void cons_help(void)
 {
-    _win_show_time(0);
-    wprintw(_wins[0].win, "Help:\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Help:\n");
 
     cons_show("  Commands:");
     cons_show("    /help                : This help.");
@@ -161,28 +170,28 @@ void cons_help(void)
 
 void cons_good_show(char *msg)
 {
-    _win_show_time(0);    
-    wprintw(_wins[0].win, "%s\n", msg);
+    _win_show_time(_cons_win);    
+    wprintw(_cons_win, "%s\n", msg);
 }
 
 void cons_bad_show(char *msg)
 {
-    _win_show_time(0);
-    wattron(_wins[0].win, COLOR_PAIR(6));
-    wprintw(_wins[0].win, "%s\n", msg);
-    wattroff(_wins[0].win, COLOR_PAIR(6));
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOR_PAIR(6));
+    wprintw(_cons_win, "%s\n", msg);
+    wattroff(_cons_win, COLOR_PAIR(6));
 }
 
 void cons_show(char *msg)
 {
-    _win_show_time(0);
-    wprintw(_wins[0].win, "%s\n", msg); 
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "%s\n", msg); 
 }
 
 void cons_bad_command(char *cmd)
 {
-    _win_show_time(0);
-    wprintw(_wins[0].win, "Unknown command: %s\n", cmd);
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Unknown command: %s\n", cmd);
 }
 
 void cons_bad_connect(void)
@@ -237,16 +246,18 @@ static void _create_windows(void)
 
     // create the console window in 0
     struct prof_win cons;
-    strcpy(cons.from, "_cons");
+    strcpy(cons.from, CONS_WIN_TITLE);
     cons.win = newwin(rows-3, cols, 1, 0);
     scrollok(cons.win, TRUE);
 
     _wins[0] = cons;
-    wattrset(_wins[0].win, A_BOLD);
-    _win_show_time(0);
-    wprintw(_wins[0].win, "Welcome to Profanity.\n");
-    touchwin(_wins[0].win);
-    wrefresh(_wins[0].win);
+    _cons_win = _wins[0].win;
+    
+    wattrset(_cons_win, A_BOLD);
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Welcome to Profanity.\n");
+    touchwin(_cons_win);
+    wrefresh(_cons_win);
     
     // create the chat windows
     int i;
@@ -260,7 +271,7 @@ static void _create_windows(void)
     }    
 }
 
-static int _find_win(char *contact)
+static int _find_win_index(char *contact)
 {
     // find the chat window for recipient
     int i;
@@ -286,7 +297,7 @@ static int _find_win(char *contact)
 static void _win_switch_if_active(int i)
 {
     if (strcmp(_wins[i].from, "") != 0) {
-        _curr_win = i;
+        _curr_prof_win = i;
 
         if (i == 0)
             title_bar_title();
@@ -295,20 +306,20 @@ static void _win_switch_if_active(int i)
     }
 }
 
-static void _win_show_time(int win)
+static void _win_show_time(WINDOW *win)
 {
     char tstmp[80];
     get_time(tstmp);
-    wprintw(_wins[win].win, "%s - ", tstmp);
+    wprintw(win, "%s - ", tstmp);
 }
 
-static void _win_show_user(int win, char *user, int colour)
+static void _win_show_user(WINDOW *win, char *user, int colour)
 {
     if (colour)
-        wattron(_wins[win].win, COLOR_PAIR(2));
-    wprintw(_wins[win].win, "%s: ", user);
+        wattron(win, COLOR_PAIR(2));
+    wprintw(win, "%s: ", user);
     if (colour)
-        wattroff(_wins[win].win, COLOR_PAIR(2));
+        wattroff(win, COLOR_PAIR(2));
 }
 
 static void _win_show_message(WINDOW *win, char *message)
@@ -320,8 +331,9 @@ static void _win_show_message(WINDOW *win, char *message)
 
 static void _current_window_refresh()
 {
-    touchwin(_wins[_curr_win].win);
-    wrefresh(_wins[_curr_win].win);
+    WINDOW *current = _wins[_curr_prof_win].win;
+    touchwin(current);
+    wrefresh(current);
 }
 
 static void _win_show_contact_online(char *from, char *show, char *status)
@@ -334,21 +346,22 @@ static void _win_show_contact_online(char *from, char *show, char *status)
 
     // if we found a window
     if (i != 10) {
-        _win_show_time(i);    
-        wattron(_wins[i].win, COLOR_PAIR(2));
-        wprintw(_wins[i].win, "++ %s", from);
+        WINDOW *win = _wins[i].win;
+        _win_show_time(win);    
+        wattron(win, COLOR_PAIR(2));
+        wprintw(win, "++ %s", from);
 
         if (show != NULL) 
-            wprintw(_wins[i].win, " is %s", show);
+            wprintw(win, " is %s", show);
         else
-            wprintw(_wins[i].win, " is online");
+            wprintw(win, " is online");
             
         if (status != NULL)
-            wprintw(_wins[i].win, ", \"%s\"", status);
+            wprintw(win, ", \"%s\"", status);
 
-        wprintw(_wins[i].win, "\n");
+        wprintw(win, "\n");
         
-        wattroff(_wins[i].win, COLOR_PAIR(2));
+        wattroff(win, COLOR_PAIR(2));
     }
 }
 
@@ -362,66 +375,67 @@ static void _win_show_contact_offline(char *from, char *show, char *status)
 
     // if we found a window
     if (i != 10) {
-        _win_show_time(i);    
-        wattron(_wins[i].win, COLOR_PAIR(5));
-        wattroff(_wins[i].win, A_BOLD);
+        WINDOW *win = _wins[i].win;
+        _win_show_time(win);    
+        wattron(win, COLOR_PAIR(5));
+        wattroff(win, A_BOLD);
 
-        wprintw(_wins[i].win, "-- %s", from);
+        wprintw(win, "-- %s", from);
 
         if (show != NULL) 
-            wprintw(_wins[i].win, " is %s", show);
+            wprintw(win, " is %s", show);
         else
-            wprintw(_wins[i].win, " is offline");
+            wprintw(win, " is offline");
         
         if (status != NULL)
-            wprintw(_wins[i].win, ", \"%s\"", status);
+            wprintw(win, ", \"%s\"", status);
         
-        wprintw(_wins[i].win, "\n");
+        wprintw(win, "\n");
         
-        wattroff(_wins[i].win, COLOR_PAIR(5));
-        wattron(_wins[i].win, A_BOLD);
+        wattroff(win, COLOR_PAIR(5));
+        wattron(win, A_BOLD);
     }
 }
 
 static void _cons_show_contact_online(char *from, char *show, char *status)
 {
-    _win_show_time(0);    
-    wattron(_wins[0].win, COLOR_PAIR(2));
+    _win_show_time(_cons_win);    
+    wattron(_cons_win, COLOR_PAIR(2));
    
-    wprintw(_wins[0].win, "++ %s", from);
+    wprintw(_cons_win, "++ %s", from);
 
     if (show != NULL) 
-        wprintw(_wins[0].win, " is %s", show);
+        wprintw(_cons_win, " is %s", show);
     else
-        wprintw(_wins[0].win, " is online");
+        wprintw(_cons_win, " is online");
         
     if (status != NULL)
-        wprintw(_wins[0].win, ", \"%s\"", status);
+        wprintw(_cons_win, ", \"%s\"", status);
 
-    wprintw(_wins[0].win, "\n");
+    wprintw(_cons_win, "\n");
     
-    wattroff(_wins[0].win, COLOR_PAIR(2));
+    wattroff(_cons_win, COLOR_PAIR(2));
 }
 
 static void _cons_show_contact_offline(char *from, char *show, char *status)
 {
-    _win_show_time(0);    
-    wattron(_wins[0].win, COLOR_PAIR(5));
-    wattroff(_wins[0].win, A_BOLD);
+    _win_show_time(_cons_win);    
+    wattron(_cons_win, COLOR_PAIR(5));
+    wattroff(_cons_win, A_BOLD);
 
-    wprintw(_wins[0].win, "-- %s", from);
+    wprintw(_cons_win, "-- %s", from);
 
     if (show != NULL) 
-        wprintw(_wins[0].win, " is %s", show);
+        wprintw(_cons_win, " is %s", show);
     else
-        wprintw(_wins[0].win, " is offline");
+        wprintw(_cons_win, " is offline");
         
     if (status != NULL)
-        wprintw(_wins[0].win, ", \"%s\"", status);
+        wprintw(_cons_win, ", \"%s\"", status);
     
-    wprintw(_wins[0].win, "\n");
+    wprintw(_cons_win, "\n");
     
-    wattroff(_wins[0].win, COLOR_PAIR(5));
-    wattron(_wins[0].win, A_BOLD);
+    wattroff(_cons_win, COLOR_PAIR(5));
+    wattron(_cons_win, A_BOLD);
 }
 
