@@ -23,8 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "log.h"
-#include "windows.h"
 #include "profanity.h"
 
 int main(int argc, char **argv)
@@ -47,13 +45,9 @@ int main(int argc, char **argv)
         }
     }
 
-    log_init();
-    gui_init();
-
-    profanity_main(disable_tls);
-        
-    gui_close();
-    log_close();
+    profanity_init(disable_tls);
+    profanity_run();
+    profanity_shutdown();
 
     return 0;
 }

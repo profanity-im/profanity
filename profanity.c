@@ -32,14 +32,11 @@
 #include "command.h"
 #include "history.h"
 
-static void _profanity_init(int disable_tls);
 static void _profanity_event_loop(int *ch, char *cmd, int *size);
 
-void profanity_main(int disable_tls)
+void profanity_run(void)
 {
     int cmd_result = TRUE;
-
-    _profanity_init(disable_tls);
 
     inp_non_block();
     while(cmd_result == TRUE) {
@@ -54,13 +51,21 @@ void profanity_main(int disable_tls)
         cmd_result = process_input(inp);
     }
 
-    jabber_disconnect();
 }
 
-static void _profanity_init(int disable_tls)
+void profanity_init(int disable_tls)
 {
+    log_init();
+    gui_init();
     jabber_init(disable_tls);
     history_init();
+}
+
+void profanity_shutdown(void)
+{
+    jabber_disconnect();
+    gui_close();
+    log_close();
 }
 
 static void _profanity_event_loop(int *ch, char *cmd, int *size)
@@ -70,4 +75,4 @@ static void _profanity_event_loop(int *ch, char *cmd, int *size)
     jabber_process_events();
     win_handle_switch(ch);
     inp_poll_char(ch, cmd, size);
-} 
+}
