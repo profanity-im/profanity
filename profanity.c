@@ -32,8 +32,6 @@
 #include "command.h"
 #include "history.h"
 
-static void _profanity_event_loop(int *ch, char *cmd, int *size);
-
 void profanity_run(void)
 {
     int cmd_result = TRUE;
@@ -44,8 +42,13 @@ void profanity_run(void)
         char inp[100];
         int size = 0;
 
-        while(ch != '\n')
-            _profanity_event_loop(&ch, inp, &size);
+        while(ch != '\n') {
+            usleep(1);
+            gui_refresh();
+            jabber_process_events();
+            win_handle_switch(&ch);
+            inp_poll_char(&ch, inp, &size);
+        }
 
         inp[size++] = '\0';
         cmd_result = process_input(inp);
@@ -66,13 +69,4 @@ void profanity_shutdown(void)
     jabber_disconnect();
     gui_close();
     log_close();
-}
-
-static void _profanity_event_loop(int *ch, char *cmd, int *size)
-{
-    usleep(1);
-    gui_refresh();
-    jabber_process_events();
-    win_handle_switch(ch);
-    inp_poll_char(ch, cmd, size);
 }
