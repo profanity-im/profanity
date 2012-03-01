@@ -18,7 +18,7 @@ profanity.o: log.h windows.h jabber.h command.h history.h
 util.o: util.h
 command.o: command.h util.h history.h
 history.o: history.h
-main.o: log.h windows.h profanity.h
+main.o: profanity.h
 
 .PHONY: clean
 clean:
