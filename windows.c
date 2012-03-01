@@ -46,10 +46,8 @@ static void _win_switch_if_active(int i);
 static void _win_show_time(WINDOW *win);
 static void _win_show_user(WINDOW *win, char *user, int colour);
 static void _win_show_message(WINDOW *win, char *message);
-static void _win_show_contact_online(char *from, char *show, char *status);
-static void _win_show_contact_offline(char *from, char *show, char *status);
-static void _cons_show_contact_online(char *from, char *show, char *status);
-static void _cons_show_contact_offline(char *from, char *show, char *status);
+static void _show_status_string(WINDOW *win, char *from, char *show, char *status, 
+    char *pre, char *default_show);
 
 void gui_init(void)
 {
@@ -160,14 +158,24 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
 
 void win_contact_online(char *from, char *show, char *status)
 {
-    _cons_show_contact_online(from, show, status);
-    _win_show_contact_online(from, show, status);
+    _show_status_string(_cons_win, from, show, status, "++", "online");
+
+    int win_index = _find_prof_win_index(from);
+    if (win_index != NUM_WINS) {
+        WINDOW *win = _wins[win_index].win;
+        _show_status_string(win, from, show, status, "++", "online");
+    }
 }
 
 void win_contact_offline(char *from, char *show, char *status)
 {
-    _cons_show_contact_offline(from, show, status);
-    _win_show_contact_offline(from, show, status);
+    _show_status_string(_cons_win, from, show, status, "--", "offline");
+
+    int win_index = _find_prof_win_index(from);
+    if (win_index != NUM_WINS) {
+        WINDOW *win = _wins[win_index].win;
+        _show_status_string(win, from, show, status, "--", "offline");
+    }
 }
 
 void cons_help(void)
@@ -351,94 +359,34 @@ static void _current_window_refresh()
     wrefresh(current);
 }
 
-static void _win_show_contact_online(char *from, char *show, char *status)
+static void _show_status_string(WINDOW *win, char *from, char *show, char *status, 
+    char *pre, char *default_show)
 {
-    int win_index = _find_prof_win_index(from);
-    if (win_index != NUM_WINS) {
-        WINDOW *win = _wins[win_index].win;
-        _win_show_time(win);    
+    _win_show_time(win);    
+    if (strcmp(default_show, "online") == 0) {
         wattron(win, COLOR_PAIR(2));
-        wprintw(win, "++ %s", from);
-
-        if (show != NULL) 
-            wprintw(win, " is %s", show);
-        else
-            wprintw(win, " is online");
-            
-        if (status != NULL)
-            wprintw(win, ", \"%s\"", status);
-
-        wprintw(win, "\n");
-        
-        wattroff(win, COLOR_PAIR(2));
-    }
-}
-
-static void _win_show_contact_offline(char *from, char *show, char *status)
-{
-    int win_index = _find_prof_win_index(from);
-    if (win_index != NUM_WINS) {
-        WINDOW *win = _wins[win_index].win;
-        _win_show_time(win);    
+    } else {
         wattron(win, COLOR_PAIR(5));
         wattroff(win, A_BOLD);
+    }
 
-        wprintw(win, "-- %s", from);
+    wprintw(win, "%s %s", pre, from);
 
-        if (show != NULL) 
-            wprintw(win, " is %s", show);
-        else
-            wprintw(win, " is offline");
+    if (show != NULL) 
+        wprintw(win, " is %s", show);
+    else
+        wprintw(win, " is %s", default_show);
         
-        if (status != NULL)
-            wprintw(win, ", \"%s\"", status);
-        
-        wprintw(win, "\n");
-        
+    if (status != NULL)
+        wprintw(win, ", \"%s\"", status);
+    
+    wprintw(win, "\n");
+    
+    if (strcmp(default_show, "online") == 0) {
+        wattroff(win, COLOR_PAIR(2));
+    } else {
         wattroff(win, COLOR_PAIR(5));
         wattron(win, A_BOLD);
     }
-}
-
-static void _cons_show_contact_online(char *from, char *show, char *status)
-{
-    _win_show_time(_cons_win);    
-    wattron(_cons_win, COLOR_PAIR(2));
-   
-    wprintw(_cons_win, "++ %s", from);
-
-    if (show != NULL) 
-        wprintw(_cons_win, " is %s", show);
-    else
-        wprintw(_cons_win, " is online");
-        
-    if (status != NULL)
-        wprintw(_cons_win, ", \"%s\"", status);
-
-    wprintw(_cons_win, "\n");
-    
-    wattroff(_cons_win, COLOR_PAIR(2));
-}
-
-static void _cons_show_contact_offline(char *from, char *show, char *status)
-{
-    _win_show_time(_cons_win);    
-    wattron(_cons_win, COLOR_PAIR(5));
-    wattroff(_cons_win, A_BOLD);
-
-    wprintw(_cons_win, "-- %s", from);
-
-    if (show != NULL) 
-        wprintw(_cons_win, " is %s", show);
-    else
-        wprintw(_cons_win, " is offline");
-        
-    if (status != NULL)
-        wprintw(_cons_win, ", \"%s\"", status);
-    
-    wprintw(_cons_win, "\n");
-    
-    wattroff(_cons_win, COLOR_PAIR(5));
-    wattron(_cons_win, A_BOLD);
 }
 
