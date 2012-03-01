@@ -196,7 +196,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         sprintf(line, "%s %s", jid, msg);
         title_bar_connected();
 
-        cons_good_show(line);
+        cons_show(line);
         status_bar_print_message(jid);
         status_bar_refresh();
 

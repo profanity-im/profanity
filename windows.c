@@ -181,12 +181,6 @@ void cons_help(void)
     cons_show("    F2-10                : Chat windows.");
 }
 
-void cons_good_show(char *msg)
-{
-    _win_show_time(_cons_win);    
-    wprintw(_cons_win, "%s\n", msg);
-}
-
 void cons_bad_show(char *msg)
 {
     _win_show_time(_cons_win);

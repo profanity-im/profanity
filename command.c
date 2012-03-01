@@ -108,7 +108,7 @@ static int _cmd_connect(char *inp)
         
         conn_status = jabber_connect(user, passwd);
         if (conn_status == JABBER_CONNECTING)
-            cons_good_show("Connecting...");
+            cons_show("Connecting...");
         if (conn_status == JABBER_DISCONNECTED)
             cons_bad_show("Connection to server failed.");
 
