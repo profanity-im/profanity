@@ -20,6 +20,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #define MAX_HISTORY 100
@@ -30,6 +31,10 @@ static int _pos;
 
 void history_init(void)
 {
+    int i;
+    for (i = 0; i < _size; i++)
+        free(_history[i]);
+    
     _size = 0;
     _pos = -1;
 }

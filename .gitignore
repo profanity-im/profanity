@@ -10,3 +10,4 @@ roster
 *.o
 *.log
 *.swp
+testsuite

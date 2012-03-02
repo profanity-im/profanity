@@ -1,9 +1,12 @@
 CC = gcc
 WARNS = -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-variable
 LIBS = -lxml2 -lexpat -lssl -lresolv -lncurses -L ~/lib -lstrophe
+TESTLIB = -L ~/lib -l headunit
+CPPLIB = -lstdc++
 CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS)
 OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
        profanity.o util.o command.o history.o main.o
+TESTOBJS = test_history.o history.o
 
 profanity: $(OBJS)
 	$(CC) -o profanity $(OBJS) $(LIBS)
@@ -20,8 +23,18 @@ command.o: command.h util.h history.h
 history.o: history.h
 main.o: profanity.h
 
+test_history.o: history.h
+
+testsuite: testsuite.h $(TESTOBJS)
+	$(CC) $(CFLAGS) $(CPPLIB) testsuite.c $(TESTOBJS) -o testsuite $(TESTLIB)
+
+.PHONY: test
+test: testsuite
+	./testsuite
+
 .PHONY: clean
 clean:
 	rm -f profanity
 	rm -f profanity.log
 	rm -f *.o
+	rm -f testsuite
