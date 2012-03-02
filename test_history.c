@@ -10,13 +10,13 @@ static void beforetest(void)
 static void previous_returns_null_after_init(void)
 {
     char *prev = history_previous();
-    assert_true(prev == NULL);
+    assert_is_null(prev);
 }
 
 static void next_returns_null_after_init(void)
 {
     char *next = history_next();
-    assert_true(next == NULL);
+    assert_is_null(next);
 }
 
 static void append_after_init_doesnt_fail(void)
@@ -36,7 +36,7 @@ static void append_then_next_returns_null(void)
 {
     history_append("try append");
     char *next = history_next();
-    assert_true(next == NULL);
+    assert_is_null(next);
 }
 
 static void hits_null_at_top(void)
@@ -46,7 +46,7 @@ static void hits_null_at_top(void)
     history_previous(); // cmd2
     history_previous(); // cmd1
     char *prev = history_previous();
-    assert_true(prev == NULL);
+    assert_is_null(prev);
 }
 
 static void navigate_to_correct_item(void)
@@ -112,7 +112,7 @@ static void append_previous_item(void)
     assert_string_equals(cmd1, "cmd1");
 
     char *end = history_previous();
-    assert_true(end == NULL);
+    assert_is_null(end);
 }
 
 void register_history_tests(void)
