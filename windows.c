@@ -191,9 +191,12 @@ void cons_help(void)
     cons_show("    /close               : Close a chat window.");
     cons_show("    /msg user@host mesg  : Send mesg to user.");
     cons_show("    /quit                : Quit Profanity.");
-    cons_show("  Shortcuts:");
+    cons_show("  Keys:");
     cons_show("    F1                   : This console window.");
     cons_show("    F2-10                : Chat windows.");
+    cons_show("    UP, DOWN             : Navigate input history.");
+    cons_show("    LEFT, RIGHT          : Edit current input.");
+    cons_show("    PAGE UP, PAGE DOWN   : Page the chat window.");
 }
 
 void cons_bad_show(char *msg)

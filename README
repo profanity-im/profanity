@@ -17,7 +17,6 @@ Features:
     Allow subscription management
     Allow presence notification
     Dont start chat window when no such recipient
-    Window buffers for scrolling
     Managing and storing user profiles
     Other IM protocols
     Support chat logging
