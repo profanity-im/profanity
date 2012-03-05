@@ -27,6 +27,7 @@
 #include "util.h"
 
 #define CONS_WIN_TITLE "_cons"
+#define PAD_SIZE 200
 #define NUM_WINS 10
 
 // holds console at index 0 and chat wins 1 through to 9
@@ -260,6 +261,52 @@ void win_handle_switch(int *ch)
     }
 }
 
+void win_page_off(void)
+{
+    int rows, cols;
+        getmaxyx(stdscr, rows, cols);
+    if (_curr_prof_win == 0) {
+        _wins[0].paged = 0;
+        
+        int y, x;
+        getyx(_cons_win, y, x);
+
+        int size = rows - 3;
+
+        _wins[0].y_pos = y - (size - 1);
+        if (_wins[0].y_pos < 0)
+            _wins[0].y_pos = 0;
+    }
+}
+
+void win_handle_page(int *ch)
+{
+    if (*ch == KEY_PPAGE) {
+        int rows, cols;
+        getmaxyx(stdscr, rows, cols);
+
+        if (_curr_prof_win == 0) {
+            _wins[0].y_pos = _wins[0].y_pos - (rows - 4);
+            if (_wins[0].y_pos < 0)
+                _wins[0].y_pos = 0;
+        }
+           
+        _wins[0].paged = 1;
+    } else if (*ch == KEY_NPAGE) {
+        int rows, cols, y, x;
+        getmaxyx(stdscr, rows, cols);
+        getyx(_cons_win, y, x);
+
+        if (_curr_prof_win == 0) {
+            _wins[0].y_pos = _wins[0].y_pos + (rows - 4);
+            if (_wins[0].y_pos >= y)
+                _wins[0].y_pos = y - 1;
+        }
+           
+        _wins[0].paged = 1;
+    }
+}
+
 static void _create_windows(void)
 {
     int rows, cols;
@@ -268,7 +315,9 @@ static void _create_windows(void)
     // create the console window in 0
     struct prof_win cons;
     strcpy(cons.from, CONS_WIN_TITLE);
-    cons.win = newwin(rows-3, cols, 1, 0);
+    cons.win = newpad(PAD_SIZE, cols);
+    cons.y_pos = 0;
+    cons.paged = 0;
     scrollok(cons.win, TRUE);
 
     _wins[0] = cons;
@@ -278,7 +327,7 @@ static void _create_windows(void)
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Welcome to Profanity.\n");
     touchwin(_cons_win);
-    wrefresh(_cons_win);
+    prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
     
     // create the chat windows
     int i;
@@ -354,9 +403,17 @@ static void _win_show_message(WINDOW *win, char *message)
 
 static void _current_window_refresh()
 {
-    WINDOW *current = _wins[_curr_prof_win].win;
-    touchwin(current);
-    wrefresh(current);
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    
+    if (_curr_prof_win == 0) {
+        touchwin(_cons_win);
+        prefresh(_cons_win, _wins[0].y_pos, 0, 1, 0, rows-3, cols-1);
+    } else {
+        WINDOW *current = _wins[_curr_prof_win].win;
+        touchwin(current);
+        wrefresh(current);
+    }
 }
 
 static void _show_status_string(WINDOW *win, char *from, char *show, char *status, 

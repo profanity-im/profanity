@@ -47,11 +47,13 @@ void profanity_run(void)
             gui_refresh();
             jabber_process_events();
             win_handle_switch(&ch);
+            win_handle_page(&ch);
             inp_poll_char(&ch, inp, &size);
         }
 
         inp[size++] = '\0';
         cmd_result = process_input(inp);
+        win_page_off();
     }
 
 }

@@ -199,7 +199,7 @@ static int _handle_edit(int ch, char *input, int *size)
 
 static int _printable(int ch)
 {
-   return (ch != ERR && ch != '\n' &&
+   return (ch != ERR && ch != '\n' && ch != KEY_PPAGE && ch != KEY_NPAGE &&
             ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) && 
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&

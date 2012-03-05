@@ -28,6 +28,8 @@
 struct prof_win {
     char from[100];
     WINDOW *win;
+    int y_pos;
+    int paged;
 };
 
 // gui startup and shutdown
@@ -54,6 +56,8 @@ char *win_get_recipient(void);
 void win_show_incomming_msg(char *from, char *message);
 void win_show_outgoing_msg(char *from, char *to, char *message);
 void win_handle_switch(int *ch);
+void win_handle_page(int *ch);
+void win_page_off(void);
 void win_contact_online(char *from, char *show, char *status);
 void win_contact_offline(char *from, char *show, char *status);
 
