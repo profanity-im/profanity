@@ -264,19 +264,17 @@ void win_handle_switch(int *ch)
 void win_page_off(void)
 {
     int rows, cols;
-        getmaxyx(stdscr, rows, cols);
-    if (_curr_prof_win == 0) {
-        _wins[0].paged = 0;
-        
-        int y, x;
-        getyx(_cons_win, y, x);
+    getmaxyx(stdscr, rows, cols);
+    _wins[_curr_prof_win].paged = 0;
+    
+    int y, x;
+    getyx(_wins[_curr_prof_win].win, y, x);
 
-        int size = rows - 3;
+    int size = rows - 3;
 
-        _wins[0].y_pos = y - (size - 1);
-        if (_wins[0].y_pos < 0)
-            _wins[0].y_pos = 0;
-    }
+    _wins[_curr_prof_win].y_pos = y - (size - 1);
+    if (_wins[_curr_prof_win].y_pos < 0)
+        _wins[_curr_prof_win].y_pos = 0;
 }
 
 void win_handle_page(int *ch)
@@ -285,25 +283,21 @@ void win_handle_page(int *ch)
         int rows, cols;
         getmaxyx(stdscr, rows, cols);
 
-        if (_curr_prof_win == 0) {
-            _wins[0].y_pos = _wins[0].y_pos - (rows - 4);
-            if (_wins[0].y_pos < 0)
-                _wins[0].y_pos = 0;
-        }
-           
-        _wins[0].paged = 1;
+        _wins[_curr_prof_win].y_pos = _wins[_curr_prof_win].y_pos - (rows - 4);
+        if (_wins[_curr_prof_win].y_pos < 0)
+            _wins[_curr_prof_win].y_pos = 0;
+       
+        _wins[_curr_prof_win].paged = 1;
     } else if (*ch == KEY_NPAGE) {
         int rows, cols, y, x;
         getmaxyx(stdscr, rows, cols);
-        getyx(_cons_win, y, x);
+        getyx(_wins[_curr_prof_win].win, y, x);
 
-        if (_curr_prof_win == 0) {
-            _wins[0].y_pos = _wins[0].y_pos + (rows - 4);
-            if (_wins[0].y_pos >= y)
-                _wins[0].y_pos = y - 1;
-        }
+        _wins[_curr_prof_win].y_pos = _wins[_curr_prof_win].y_pos + (rows - 4);
+        if (_wins[_curr_prof_win].y_pos >= y)
+            _wins[_curr_prof_win].y_pos = y - 1;
            
-        _wins[0].paged = 1;
+        _wins[_curr_prof_win].paged = 1;
     }
 }
 
@@ -334,7 +328,9 @@ static void _create_windows(void)
     for (i = 1; i < NUM_WINS; i++) {
         struct prof_win chat;
         strcpy(chat.from, "");
-        chat.win = newwin(rows-3, cols, 1, 0);
+        chat.win = newpad(PAD_SIZE, cols);
+        chat.y_pos = 0;
+        chat.paged = 0;
         wattrset(chat.win, A_BOLD);
         scrollok(chat.win, TRUE);
         _wins[i] = chat;
@@ -368,8 +364,10 @@ static int _new_prof_win(char *contact)
 }
 static void _win_switch_if_active(int i)
 {
+    win_page_off();
     if (strcmp(_wins[i].from, "") != 0) {
         _curr_prof_win = i;
+        win_page_off();
 
         if (i == 0)
             title_bar_title();
@@ -405,15 +403,10 @@ static void _current_window_refresh()
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    
-    if (_curr_prof_win == 0) {
-        touchwin(_cons_win);
-        prefresh(_cons_win, _wins[0].y_pos, 0, 1, 0, rows-3, cols-1);
-    } else {
-        WINDOW *current = _wins[_curr_prof_win].win;
-        touchwin(current);
-        wrefresh(current);
-    }
+
+    WINDOW *current = _wins[_curr_prof_win].win;
+    touchwin(current);
+    prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
 static void _show_status_string(WINDOW *win, char *from, char *show, char *status, 

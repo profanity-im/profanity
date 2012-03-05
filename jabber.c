@@ -179,6 +179,7 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
     char *message = xmpp_stanza_get_text(body);
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     win_show_incomming_msg(from, message);
+    win_page_off();
 
     return 1;
 }
@@ -197,6 +198,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         title_bar_connected();
 
         cons_show(line);
+        win_page_off();
         status_bar_print_message(jid);
         status_bar_refresh();
 
@@ -214,6 +216,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
     }
     else {
         cons_bad_show("Login failed.");
+        win_page_off();
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
         jabber_conn.conn_status = JABBER_DISCONNECTED;
@@ -251,6 +254,8 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
             }
         
             item = xmpp_stanza_get_next(item);
+
+            win_page_off();
         }
     }
     
@@ -309,6 +314,8 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
         win_contact_online(short_from, show_str, status_str);
     else // offline
         win_contact_offline(short_from, show_str, status_str);
+
+    win_page_off();
 
     return 1;
 }
