@@ -24,6 +24,7 @@
 #include "windows.h"
 
 static WINDOW *title_bar;
+static int dirty;
 
 void create_title_bar(void)
 {
@@ -34,12 +35,14 @@ void create_title_bar(void)
     wbkgd(title_bar, COLOR_PAIR(3));
     title_bar_title();
     title_bar_disconnected();
+    dirty = TRUE;
 }
 
 void title_bar_title()
 {
     char *title = "Profanity. Type /help for help information.";
     title_bar_show(title);
+    dirty = TRUE;
 }
 
 void title_bar_connected(void)
@@ -56,6 +59,8 @@ void title_bar_connected(void)
     wattron(title_bar, COLOR_PAIR(4));
     mvwaddch(title_bar, 0, cols - 2, ']');
     wattroff(title_bar, COLOR_PAIR(4));
+    
+    dirty = TRUE;
 }
 
 void title_bar_disconnected(void)
@@ -72,13 +77,17 @@ void title_bar_disconnected(void)
     wattron(title_bar, COLOR_PAIR(4));
     mvwaddch(title_bar, 0, cols - 2, ']');
     wattroff(title_bar, COLOR_PAIR(4));
+    
+    dirty = TRUE;
 }
 
 void title_bar_refresh(void)
 {
-    touchwin(title_bar);
-    wrefresh(title_bar);
-    inp_put_back();
+    if (dirty) {
+        wrefresh(title_bar);
+        inp_put_back();
+        dirty = FALSE;
+    }
 }
 
 void title_bar_show(char *title)
@@ -88,5 +97,7 @@ void title_bar_show(char *title)
     for (i = 0; i < 45; i++)
         waddch(title_bar, ' ');
     mvwprintw(title_bar, 0, 0, " %s", title);
+    
+    dirty = TRUE;
 }
 

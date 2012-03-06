@@ -39,6 +39,9 @@ static int _curr_prof_win = 0;
 // shortcut pointer to console window
 static WINDOW * _cons_win = NULL;
 
+// current window state
+static int dirty;
+
 static void _create_windows(void);
 static int _find_prof_win_index(char *contact);
 static int _new_prof_win(char *contact);
@@ -74,13 +77,20 @@ void gui_init(void)
     create_status_bar();
     create_input_window();
     _create_windows();
+
+    dirty = TRUE;
 }
 
 void gui_refresh(void)
 {
     title_bar_refresh();
     status_bar_refresh();
-    _current_window_refresh();
+
+    if (dirty) {
+        _current_window_refresh();
+        dirty = FALSE;
+    }
+
     inp_put_back();
 }
 
@@ -102,6 +112,8 @@ int win_close_win(void)
         // go back to console window
         _curr_prof_win = 0;
         title_bar_title();
+
+        dirty = TRUE;
     
         // success
         return 1;
@@ -141,6 +153,9 @@ void win_show_incomming_msg(char *from, char *message)
     _win_show_message(win, message);
 
     status_bar_active(win_index);
+
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
 }
 
 void win_show_outgoing_msg(char *from, char *to, char *message)
@@ -155,6 +170,9 @@ void win_show_outgoing_msg(char *from, char *to, char *message)
     _win_show_message(win, message);
     
     status_bar_active(win_index);
+    
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
 }
 
 void win_contact_online(char *from, char *show, char *status)
@@ -166,6 +184,9 @@ void win_contact_online(char *from, char *show, char *status)
         WINDOW *win = _wins[win_index].win;
         _show_status_string(win, from, show, status, "++", "online");
     }
+    
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
 }
 
 void win_contact_offline(char *from, char *show, char *status)
@@ -177,6 +198,9 @@ void win_contact_offline(char *from, char *show, char *status)
         WINDOW *win = _wins[win_index].win;
         _show_status_string(win, from, show, status, "--", "offline");
     }
+    
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
 }
 
 void cons_help(void)
@@ -197,6 +221,9 @@ void cons_help(void)
     cons_show("    UP, DOWN             : Navigate input history.");
     cons_show("    LEFT, RIGHT          : Edit current input.");
     cons_show("    PAGE UP, PAGE DOWN   : Page the chat window.");
+
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
 }
 
 void cons_bad_show(char *msg)
@@ -205,18 +232,27 @@ void cons_bad_show(char *msg)
     wattron(_cons_win, COLOR_PAIR(6));
     wprintw(_cons_win, "%s\n", msg);
     wattroff(_cons_win, COLOR_PAIR(6));
+    
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
 }
 
 void cons_show(char *msg)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "%s\n", msg); 
+    
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
 }
 
 void cons_bad_command(char *cmd)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Unknown command: %s\n", cmd);
+    
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
 }
 
 void cons_bad_connect(void)
@@ -278,6 +314,8 @@ void win_page_off(void)
     _wins[_curr_prof_win].y_pos = y - (size - 1);
     if (_wins[_curr_prof_win].y_pos < 0)
         _wins[_curr_prof_win].y_pos = 0;
+
+    dirty = TRUE;
 }
 
 void win_handle_page(int *ch)
@@ -291,17 +329,26 @@ void win_handle_page(int *ch)
             _wins[_curr_prof_win].y_pos = 0;
        
         _wins[_curr_prof_win].paged = 1;
+        dirty = TRUE;
     } else if (*ch == KEY_NPAGE) {
         int rows, cols, y, x;
         getmaxyx(stdscr, rows, cols);
         getyx(_wins[_curr_prof_win].win, y, x);
 
         _wins[_curr_prof_win].y_pos = _wins[_curr_prof_win].y_pos + (rows - 4);
-        if (_wins[_curr_prof_win].y_pos >= y)
-            _wins[_curr_prof_win].y_pos = y - 1;
+
+        // only got half a screen, show full screen
+        if ((y - _wins[_curr_prof_win].y_pos) < (rows - 4))
+            _wins[_curr_prof_win].y_pos = y - (rows - 4);
+
+        // went past end, show full screen
+        else if (_wins[_curr_prof_win].y_pos >= y)
+            _wins[_curr_prof_win].y_pos = y - (rows - 4);
            
         _wins[_curr_prof_win].paged = 1;
+        dirty = TRUE;
     }
+
 }
 
 static void _create_windows(void)
@@ -323,8 +370,9 @@ static void _create_windows(void)
     wattrset(_cons_win, A_BOLD);
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Welcome to Profanity.\n");
-    touchwin(_cons_win);
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
+
+    dirty = TRUE;
     
     // create the chat windows
     int i;
@@ -377,6 +425,8 @@ static void _win_switch_if_active(int i)
         else
             title_bar_show(_wins[i].from);
     }
+
+    dirty = TRUE;
 }
 
 static void _win_show_time(WINDOW *win)
@@ -408,7 +458,6 @@ static void _current_window_refresh()
     getmaxyx(stdscr, rows, cols);
 
     WINDOW *current = _wins[_curr_prof_win].win;
-    touchwin(current);
     prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
 }
 

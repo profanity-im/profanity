@@ -63,7 +63,6 @@ void inp_clear(void)
 {
     wclear(inp_win);
     wmove(inp_win, 0, 1);
-    touchwin(inp_win);
     wrefresh(inp_win);
 }
 

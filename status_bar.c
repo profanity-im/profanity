@@ -20,12 +20,17 @@
  *
  */
 
+#include <string.h>
+
 #include <ncurses.h>
 #include "windows.h"
 #include "util.h"
 
 static WINDOW *status_bar;
 static char _active[29] = "[ ][ ][ ][ ][ ][ ][ ][ ][  ]";
+
+static int dirty;
+static char curr_time[80];
 
 static void _status_bar_update_time(void);
 
@@ -39,15 +44,27 @@ void create_status_bar(void)
     wattron(status_bar, COLOR_PAIR(4));
     mvwprintw(status_bar, 0, cols - 29, _active);
     wattroff(status_bar, COLOR_PAIR(4));
-    wrefresh(status_bar);
+
+    get_time(curr_time);
+    dirty = TRUE;
 }
 
 void status_bar_refresh(void)
 {
-    _status_bar_update_time();
-    touchwin(status_bar);
-    wrefresh(status_bar);
-    inp_put_back();
+    char new_time[80];
+    get_time(new_time);
+
+    if (strcmp(new_time, curr_time) != 0) {
+        dirty = TRUE;
+        strcpy(curr_time, new_time);
+    }
+
+    if (dirty) {
+        _status_bar_update_time();
+        wrefresh(status_bar);
+        inp_put_back();
+        dirty = FALSE;
+    }
 }
 
 void status_bar_inactive(int win)
@@ -60,6 +77,8 @@ void status_bar_inactive(int win)
     mvwaddch(status_bar, 0, cols - 29 + active_pos, ' ');
     if (win == 9)
         mvwaddch(status_bar, 0, cols - 29 + active_pos + 1, ' ');
+
+    dirty = TRUE;
 }
 
 void status_bar_active(int win)
@@ -73,16 +92,22 @@ void status_bar_active(int win)
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
     else
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
+
+    dirty = TRUE;
 }
 
 void status_bar_get_password(void)
 {
     mvwprintw(status_bar, 0, 9, "Enter password:");
+
+    dirty = TRUE;
 }
 
 void status_bar_print_message(const char *msg)
 {
     mvwprintw(status_bar, 0, 9, msg);
+
+    dirty = TRUE;
 }
 
 void status_bar_clear(void)
@@ -94,6 +119,8 @@ void status_bar_clear(void)
     wattron(status_bar, COLOR_PAIR(4));
     mvwprintw(status_bar, 0, cols - 29, _active);
     wattroff(status_bar, COLOR_PAIR(4));
+
+    dirty = TRUE;
 }
 
 static void _status_bar_update_time(void)
@@ -110,6 +137,7 @@ static void _status_bar_update_time(void)
     wattron(status_bar, COLOR_PAIR(4));
     mvwaddch(status_bar, 0, 7, ']');
     wattroff(status_bar, COLOR_PAIR(4));
-    
+
+    dirty = TRUE;
 }
 
