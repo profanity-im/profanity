@@ -320,35 +320,39 @@ void win_page_off(void)
 
 void win_handle_page(int *ch)
 {
-    if (*ch == KEY_PPAGE) {
-        int rows, cols;
-        getmaxyx(stdscr, rows, cols);
+    int rows, cols, y, x;
+    getmaxyx(stdscr, rows, cols);
+    getyx(_wins[_curr_prof_win].win, y, x);
 
-        _wins[_curr_prof_win].y_pos = _wins[_curr_prof_win].y_pos - (rows - 4);
-        if (_wins[_curr_prof_win].y_pos < 0)
-            _wins[_curr_prof_win].y_pos = 0;
+    int page_space = rows - 4;
+    int *page_start = &_wins[_curr_prof_win].y_pos;
+    
+    // page up
+    if (*ch == KEY_PPAGE) {
+        *page_start -= page_space;
+    
+        // went past beginning, show first page
+        if (*page_start < 0)
+            *page_start = 0;
        
         _wins[_curr_prof_win].paged = 1;
         dirty = TRUE;
-    } else if (*ch == KEY_NPAGE) {
-        int rows, cols, y, x;
-        getmaxyx(stdscr, rows, cols);
-        getyx(_wins[_curr_prof_win].win, y, x);
 
-        _wins[_curr_prof_win].y_pos = _wins[_curr_prof_win].y_pos + (rows - 4);
+    // page down
+    } else if (*ch == KEY_NPAGE) {
+        *page_start += page_space;
 
         // only got half a screen, show full screen
-        if ((y - _wins[_curr_prof_win].y_pos) < (rows - 4))
-            _wins[_curr_prof_win].y_pos = y - (rows - 4);
+        if ((y - (*page_start)) < page_space)
+            *page_start = y - page_space;
 
         // went past end, show full screen
-        else if (_wins[_curr_prof_win].y_pos >= y)
-            _wins[_curr_prof_win].y_pos = y - (rows - 4);
+        else if (*page_start >= y)
+            *page_start = y - page_space;
            
         _wins[_curr_prof_win].paged = 1;
         dirty = TRUE;
     }
-
 }
 
 static void _create_windows(void)
