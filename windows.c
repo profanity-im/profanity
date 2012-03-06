@@ -52,6 +52,7 @@ static void _win_show_user(WINDOW *win, char *user, int colour);
 static void _win_show_message(WINDOW *win, char *message);
 static void _show_status_string(WINDOW *win, char *from, char *show, char *status, 
     char *pre, char *default_show);
+static void _cons_show_incoming_message(char *short_from, int win_index);
 
 void gui_init(void)
 {
@@ -69,6 +70,7 @@ void gui_init(void)
         init_pair(5, COLOR_CYAN, COLOR_BLACK);
         init_pair(6, COLOR_RED, COLOR_BLACK);
         init_pair(7, COLOR_MAGENTA, COLOR_BLACK);
+        init_pair(8, COLOR_YELLOW, COLOR_BLACK);
     }
 
     refresh();
@@ -153,6 +155,7 @@ void win_show_incomming_msg(char *from, char *message)
     _win_show_message(win, message);
 
     status_bar_active(win_index);
+    _cons_show_incoming_message(short_from, win_index);
 
     if (win_index == _curr_prof_win)
         dirty = TRUE;
@@ -494,5 +497,14 @@ static void _show_status_string(WINDOW *win, char *from, char *show, char *statu
         wattroff(win, COLOR_PAIR(5));
         wattron(win, A_BOLD);
     }
+}
+
+
+static void _cons_show_incoming_message(char *short_from, int win_index)
+{
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOR_PAIR(8));
+    wprintw(_cons_win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
+    wattroff(_cons_win, COLOR_PAIR(8));
 }
 
