@@ -213,9 +213,10 @@ void cons_help(void)
 
     cons_show("/help                : This help.");
     cons_show("/connect user@host   : Login to jabber.");
-    cons_show("/who                 : Get roster.");
-    cons_show("/close               : Close a chat window.");
     cons_show("/msg user@host mesg  : Send mesg to user.");
+    cons_show("/who                 : Find out who is online.");
+    cons_show("/ros                 : List all contacts.");
+    cons_show("/close               : Close a chat window.");
     cons_show("/quit                : Quit Profanity.");
     cons_show("F1                   : This console window.");
     cons_show("F2-10                : Chat windows.");
@@ -235,7 +236,10 @@ void cons_show_online_contacts(struct contact_list *list)
     int i;
     for (i = 0; i < list->size; i++) {
         char *contact = list->contacts[i];
-        cons_show(contact);
+        _win_show_time(_cons_win);
+        wattron(_cons_win, COLOR_PAIR(2));
+        wprintw(_cons_win, "%s\n", contact);
+        wattroff(_cons_win, COLOR_PAIR(2));
     }
 
 }

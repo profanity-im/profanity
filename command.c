@@ -34,7 +34,7 @@ static int _handle_command(char *command, char *inp);
 static int _cmd_quit(void);
 static int _cmd_help(void);
 static int _cmd_who(void);
-static int _cmd_pres(void);
+static int _cmd_ros(void);
 static int _cmd_connect(char *inp);
 static int _cmd_msg(char *inp);
 static int _cmd_close(char *inp);
@@ -72,10 +72,10 @@ static int _handle_command(char *command, char *inp)
         result = _cmd_quit();
     } else if (strcmp(command, "/help") == 0) {
         result = _cmd_help();
+    } else if (strcmp(command, "/ros") == 0) {
+        result = _cmd_ros();
     } else if (strcmp(command, "/who") == 0) {
         result = _cmd_who();
-    } else if (strcmp(command, "/pres") == 0) {
-        result = _cmd_pres();
     } else if (strcmp(command, "/msg") == 0) {
         result = _cmd_msg(inp);
     } else if (strcmp(command, "/close") == 0) {
@@ -134,7 +134,7 @@ static int _cmd_help(void)
     return TRUE;
 }
 
-static int _cmd_who(void)
+static int _cmd_ros(void)
 {
     jabber_status_t conn_status = jabber_connection_status();
 
@@ -146,10 +146,16 @@ static int _cmd_who(void)
     return TRUE;
 }
 
-static int _cmd_pres(void)
+static int _cmd_who(void)
 {
-    struct contact_list *list = get_contact_list();
-    cons_show_online_contacts(list);
+    jabber_status_t conn_status = jabber_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_not_connected();
+    } else {
+        struct contact_list *list = get_contact_list();
+        cons_show_online_contacts(list);
+    }
 
     return TRUE;
 }
