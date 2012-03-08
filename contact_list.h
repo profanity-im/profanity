@@ -8,6 +8,7 @@ struct contact_list {
 
 void contact_list_clear(void);
 int contact_list_add(char *contact);
+int contact_list_remove(char *contact);
 struct contact_list *get_contact_list(void);
 
 #endif

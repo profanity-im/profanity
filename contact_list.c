@@ -1,103 +1,103 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "contact_list.h"
 
-// internal contact list
+// contact list node
 struct _contact_t {
     char *contact;    
     struct _contact_t *next;
-    int last;
 };
 
 // the contact list
 static struct _contact_t *_contact_list = NULL;
 
+static struct _contact_t * _make_contact(char *contact);
+
 void contact_list_clear(void)
 {
-    if (_contact_list == NULL) {
-        return;
-    }
-    else {
-        struct _contact_t *curr = _contact_list;
-        while(!curr->last) {
+    struct _contact_t *curr = _contact_list;
+    
+    if (curr) {
+        while(curr) {
             free(curr->contact);
             curr = curr->next;
         }
+
         free(_contact_list);
+        _contact_list = NULL;
     }
-    
-    _contact_list = NULL;
+}
+
+int contact_list_remove(char *contact)
+{
+    return 0;
 }
 
 int contact_list_add(char *contact)
 {
-    if (_contact_list == NULL) {
-        // create the new one
-        _contact_list = (struct _contact_t *) malloc(sizeof(struct _contact_t));
-        _contact_list->contact = 
-            (char *) malloc((strlen(contact)+1) * sizeof(char));
-        strcpy(_contact_list->contact, contact);
-        _contact_list->last = 1;
-
-        // complete the circle
-        _contact_list->next = _contact_list;
-
+    if (!_contact_list) {
+        _contact_list = _make_contact(contact);
+        
+        return 1;
     } else {
-        // go through entries
         struct _contact_t *curr = _contact_list;
-        while (!curr->last) {
-            // if already there, return without adding
-            if (strcmp(curr->contact, contact) == 0)
-                return 1;
+        struct _contact_t *prev = NULL;
 
-           // move on  
-           curr = curr->next;
+        while(curr) {
+            if (strcmp(curr->contact, contact) == 0)
+                return 0;
+
+            prev = curr;
+            curr = curr->next;
         }
 
-        // create the new one
-        struct _contact_t *new = 
-            (struct _contact_t *) malloc(sizeof(struct _contact_t));
-        new->contact = (char *) malloc((strlen(contact)+1) * sizeof(char));
-        strcpy(new->contact, contact);
-        new->last = 1;
+        curr = _make_contact(contact);        
+        
+        if (prev)
+            prev->next = curr;
 
-        // point the old one to it
-        curr->next = new;
-        curr->last = 0;
+        return 1;
     }
-
-    return 0;
 }
 
 struct contact_list *get_contact_list(void)
 {
+    int count = 0;
+    
     struct contact_list *list = 
         (struct contact_list *) malloc(sizeof(struct contact_list));
 
-    if (_contact_list == NULL) {
+    struct _contact_t *curr = _contact_list;
+    
+    if (!curr) {
         list->contacts = NULL;
-        list->size = 0;
-        return list;
     } else {
-        struct _contact_t *curr = _contact_list;
         list->contacts = (char **) malloc(sizeof(char **));
-        int count = 0;
-        while(1) {
+
+        while(curr) {
             list->contacts[count] = 
-                (char *) malloc((strlen(curr->contact)+1) * sizeof(char));
+                (char *) malloc((strlen(curr->contact) + 1) * sizeof(char));
             strcpy(list->contacts[count], curr->contact);
             count++;
             
-            if (curr->last)
-                break;
-            else {
-                curr = curr->next;
-            }
+            curr = curr->next;
         }
-    
-        list->size = count;
-
-        return list;
     }
+
+    list->size = count;
+
+    return list;
 }
+
+static struct _contact_t * _make_contact(char *contact)
+{
+    struct _contact_t *new = (struct _contact_t *) malloc(sizeof(struct _contact_t));
+    new->contact = (char *) malloc((strlen(contact) + 1) * sizeof(char));
+    strcpy(new->contact, contact);
+    new->next = NULL;
+
+    return new;
+}
+
