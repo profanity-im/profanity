@@ -24,6 +24,7 @@
 #define WINDOWS_h
 
 #include <ncurses.h>
+#include "contact_list.h"
 
 struct prof_win {
     char from[100];
@@ -60,6 +61,7 @@ void win_handle_page(int *ch);
 void win_page_off(void);
 void win_contact_online(char *from, char *show, char *status);
 void win_contact_offline(char *from, char *show, char *status);
+void cons_show_online_contacts(struct contact_list *list);
 
 // console window actions
 void cons_help(void);

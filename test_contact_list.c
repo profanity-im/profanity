@@ -113,7 +113,7 @@ static void add_twice_at_end_adds_once(void)
     assert_string_equals("Bob", list->contacts[2]);
 
 }
-/*
+
 static void remove_when_none_does_nothing(void)
 {
     contact_list_remove("James");
@@ -195,7 +195,7 @@ static void remove_third_when_three(void)
     assert_int_equals(2, list->size);
     assert_string_equals("James", list->contacts[0]);
     assert_string_equals("Dave", list->contacts[1]);
-}*/
+}
 
 void register_contact_list_tests(void)
 {
@@ -211,12 +211,11 @@ void register_contact_list_tests(void)
     TEST(add_twice_at_beginning_adds_once);
     TEST(add_twice_in_middle_adds_once);
     TEST(add_twice_at_end_adds_once);
-/*    TEST(remove_when_none_does_nothing);
+    TEST(remove_when_none_does_nothing);
     TEST(remove_when_one_removes);
     TEST(remove_first_when_two);
     TEST(remove_second_when_two);
     TEST(remove_first_when_three);
     TEST(remove_second_when_three);
     TEST(remove_third_when_three);
-*/
 }

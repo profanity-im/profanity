@@ -244,13 +244,13 @@ static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
             jid = xmpp_stanza_get_attribute(item, "jid");
 
             if (name != NULL) {
-                char line[2 + strlen(name) + 2 + strlen(jid) + 1 + 1];
-                sprintf(line, "  %s (%s)", name, jid);
+                char line[strlen(name) + 2 + strlen(jid) + 1 + 1];
+                sprintf(line, "%s (%s)", name, jid);
                 cons_show(line);
 
             } else {
-                char line[2 + strlen(jid) + 1];
-                sprintf(line, "  %s", jid);
+                char line[strlen(jid) + 1];
+                sprintf(line, "%s", jid);
                 cons_show(line);
             }
         
@@ -316,6 +316,7 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
         contact_list_add(short_from);
     } else {// offline
         win_contact_offline(short_from, show_str, status_str);
+        contact_list_remove(short_from);
     }
 
     win_page_off();

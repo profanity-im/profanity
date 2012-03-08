@@ -32,7 +32,31 @@ void contact_list_clear(void)
 
 int contact_list_remove(char *contact)
 {
-    return 0;
+    if (!_contact_list) {
+        return 0;
+    } else {
+        struct _contact_t *curr = _contact_list;
+        struct _contact_t *prev = NULL;
+        
+        while(curr) {
+            if (strcmp(curr->contact, contact) == 0) {
+                if (prev)
+                    prev->next = curr->next;
+                else
+                    _contact_list = curr->next;
+                
+                free(curr->contact);
+                free(curr);
+
+                return 1;
+            }
+
+            prev = curr;
+            curr = curr->next;
+        }
+
+        return 0;
+    }
 }
 
 int contact_list_add(char *contact)
@@ -81,7 +105,6 @@ struct contact_list *get_contact_list(void)
                 (char *) malloc((strlen(curr->contact) + 1) * sizeof(char));
             strcpy(list->contacts[count], curr->contact);
             count++;
-            
             curr = curr->next;
         }
     }

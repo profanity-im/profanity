@@ -211,22 +211,33 @@ void cons_help(void)
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Help:\n");
 
-    cons_show("  Commands:");
-    cons_show("    /help                : This help.");
-    cons_show("    /connect user@host   : Login to jabber.");
-    cons_show("    /who                 : Get roster.");
-    cons_show("    /close               : Close a chat window.");
-    cons_show("    /msg user@host mesg  : Send mesg to user.");
-    cons_show("    /quit                : Quit Profanity.");
-    cons_show("  Keys:");
-    cons_show("    F1                   : This console window.");
-    cons_show("    F2-10                : Chat windows.");
-    cons_show("    UP, DOWN             : Navigate input history.");
-    cons_show("    LEFT, RIGHT          : Edit current input.");
-    cons_show("    PAGE UP, PAGE DOWN   : Page the chat window.");
+    cons_show("/help                : This help.");
+    cons_show("/connect user@host   : Login to jabber.");
+    cons_show("/who                 : Get roster.");
+    cons_show("/close               : Close a chat window.");
+    cons_show("/msg user@host mesg  : Send mesg to user.");
+    cons_show("/quit                : Quit Profanity.");
+    cons_show("F1                   : This console window.");
+    cons_show("F2-10                : Chat windows.");
+    cons_show("UP, DOWN             : Navigate input history.");
+    cons_show("LEFT, RIGHT          : Edit current input.");
+    cons_show("PAGE UP, PAGE DOWN   : Page the chat window.");
 
     if (_curr_prof_win == 0)
         dirty = TRUE;
+}
+
+void cons_show_online_contacts(struct contact_list *list)
+{
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Online contacts:\n");
+
+    int i;
+    for (i = 0; i < list->size; i++) {
+        char *contact = list->contacts[i];
+        cons_show(contact);
+    }
+
 }
 
 void cons_bad_show(char *msg)

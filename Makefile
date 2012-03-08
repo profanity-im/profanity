@@ -12,7 +12,7 @@ profanity: $(OBJS)
 	$(CC) -o profanity $(OBJS) $(LIBS)
 
 log.o: log.h
-windows.o: windows.h util.h
+windows.o: windows.h util.h contact_list.h
 title_bar.o: windows.h
 status_bar.o: windows.h util.h
 input_win.o: windows.h

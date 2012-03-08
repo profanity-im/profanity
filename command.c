@@ -149,12 +149,7 @@ static int _cmd_who(void)
 static int _cmd_pres(void)
 {
     struct contact_list *list = get_contact_list();
-
-    int i;
-    for (i = 0; i < list->size; i++) {
-        char *contact = list->contacts[i];
-        cons_show(contact);
-    }
+    cons_show_online_contacts(list);
 
     return TRUE;
 }
