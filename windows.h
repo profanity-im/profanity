@@ -61,7 +61,6 @@ void win_handle_page(int *ch);
 void win_page_off(void);
 void win_contact_online(char *from, char *show, char *status);
 void win_contact_offline(char *from, char *show, char *status);
-void cons_show_online_contacts(struct contact_list *list);
 
 // console window actions
 void cons_help(void);
@@ -73,6 +72,7 @@ void cons_bad_message(void);
 void cons_show(char *cmd);
 void cons_bad_show(char *cmd);
 void cons_highlight_show(char *cmd);
+void cons_show_online_contacts(struct contact_list *list);
 
 // status bar actions
 void status_bar_refresh(void);
