@@ -25,6 +25,7 @@
 
 #include "jabber.h"
 #include "log.h"
+#include "contact_list.h"
 #include "windows.h"
 
 #define PING_INTERVAL 120000 // 2 minutes
@@ -310,10 +311,12 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
     else 
         status_str = NULL;
 
-    if (type == NULL) // online
+    if (type == NULL) {// online
         win_contact_online(short_from, show_str, status_str);
-    else // offline
+        contact_list_add(short_from);
+    } else {// offline
         win_contact_offline(short_from, show_str, status_str);
+    }
 
     win_page_off();
 

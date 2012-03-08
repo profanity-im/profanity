@@ -29,7 +29,7 @@ static void append_then_previous_returns_appended(void)
 {
     history_append("try append");
     char *prev = history_previous();
-    assert_string_equals(prev, "try append"); 
+    assert_string_equals("try append", prev); 
 }
 
 static void append_then_next_returns_null(void)
@@ -67,7 +67,7 @@ static void navigate_to_correct_item(void)
     history_previous(); // cmd2
     char *str = history_next(); // cmd3
 
-    assert_string_equals(str, "cmd3");
+    assert_string_equals("cmd3", str);
 }
 
 static void append_previous_item(void)
@@ -91,25 +91,25 @@ static void append_previous_item(void)
     history_append(str);
 
     char *cmd3_1 = history_previous();
-    assert_string_equals(cmd3_1, "cmd3");
+    assert_string_equals("cmd3", cmd3_1);
 
     char *cmd6 = history_previous();
-    assert_string_equals(cmd6, "cmd6");
+    assert_string_equals("cmd6", cmd6);
 
     char *cmd5 = history_previous();
-    assert_string_equals(cmd5, "cmd5");
+    assert_string_equals("cmd5", cmd5);
 
     char *cmd4 = history_previous();
-    assert_string_equals(cmd4, "cmd4");
+    assert_string_equals("cmd4", cmd4);
 
     char *cmd3 = history_previous();
-    assert_string_equals(cmd3, "cmd3");
+    assert_string_equals("cmd3", cmd3);
 
     char *cmd2 = history_previous();
-    assert_string_equals(cmd2, "cmd2");
+    assert_string_equals("cmd2", cmd2);
 
     char *cmd1 = history_previous();
-    assert_string_equals(cmd1, "cmd1");
+    assert_string_equals("cmd1", cmd1);
 
     char *end = history_previous();
     assert_is_null(end);

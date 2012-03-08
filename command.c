@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include "command.h"
+#include "contact_list.h"
 #include "history.h"
 #include "jabber.h"
 #include "windows.h"
@@ -33,6 +34,7 @@ static int _handle_command(char *command, char *inp);
 static int _cmd_quit(void);
 static int _cmd_help(void);
 static int _cmd_who(void);
+static int _cmd_pres(void);
 static int _cmd_connect(char *inp);
 static int _cmd_msg(char *inp);
 static int _cmd_close(char *inp);
@@ -72,6 +74,8 @@ static int _handle_command(char *command, char *inp)
         result = _cmd_help();
     } else if (strcmp(command, "/who") == 0) {
         result = _cmd_who();
+    } else if (strcmp(command, "/pres") == 0) {
+        result = _cmd_pres();
     } else if (strcmp(command, "/msg") == 0) {
         result = _cmd_msg(inp);
     } else if (strcmp(command, "/close") == 0) {
@@ -138,6 +142,19 @@ static int _cmd_who(void)
         cons_not_connected();
     else
         jabber_roster_request();
+
+    return TRUE;
+}
+
+static int _cmd_pres(void)
+{
+    struct contact_list *list = get_contact_list();
+
+    int i;
+    for (i = 0; i < list->size; i++) {
+        char *contact = list->contacts[i];
+        cons_show(contact);
+    }
 
     return TRUE;
 }
