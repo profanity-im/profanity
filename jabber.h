@@ -37,5 +37,6 @@ void jabber_disconnect(void);
 void jabber_roster_request(void);
 void jabber_process_events(void);
 void jabber_send(const char * const msg, const char * const recipient);
+const char * jabber_get_jid(void);
 
 #endif

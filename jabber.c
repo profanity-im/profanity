@@ -109,6 +109,11 @@ jabber_status_t jabber_connect(const char * const user, const char * const passw
     return jabber_conn.conn_status;
 }
 
+const char * jabber_get_jid(void)
+{
+    return xmpp_conn_get_jid(jabber_conn.conn);
+}
+
 void jabber_disconnect(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
@@ -293,6 +298,11 @@ static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 static int _jabber_presence_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
+    char jid_cpy[strlen(jid) + 1];
+    strcpy(jid_cpy, jid);
+    char *short_jid = strtok(jid_cpy, "/");
+    
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     char *short_from = strtok(from, "/");
     char *type = xmpp_stanza_get_attribute(stanza, "type");
@@ -311,15 +321,17 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
     else 
         status_str = NULL;
 
-    if (type == NULL) {// online
-        win_contact_online(short_from, show_str, status_str);
-        contact_list_add(short_from, show_str);
-    } else {// offline
-        win_contact_offline(short_from, show_str, status_str);
-        contact_list_remove(short_from);
-    }
+    if (strcmp(short_jid, short_from) !=0) {
+        if (type == NULL) {// online
+            win_contact_online(short_from, show_str, status_str);
+            contact_list_add(short_from, show_str);
+        } else {// offline
+            win_contact_offline(short_from, show_str, status_str);
+            contact_list_remove(short_from);
+        }
 
-    win_page_off();
+        win_page_off();
+    }
 
     return 1;
 }
