@@ -43,9 +43,9 @@
 
 static WINDOW *inp_win;
 
-static int _handle_edit(int ch, char *input, int *size);
-static int _printable(int ch);
-static void _replace_input(char *input, char *new_input, int *size);
+static int _handle_edit(const int ch, char *input, int *size);
+static int _printable(const int ch);
+static void _replace_input(char *input, const char * const new_input, int *size);
 
 void create_input_window(void)
 {
@@ -133,7 +133,7 @@ void inp_put_back(void)
  * key press: up, down, left, right or backspace
  * return 0 if it wasnt
  */
-static int _handle_edit(int ch, char *input, int *size)
+static int _handle_edit(const int ch, char *input, int *size)
 {
     int i;
     char *prev = NULL;
@@ -196,7 +196,7 @@ static int _handle_edit(int ch, char *input, int *size)
     }
 }
 
-static int _printable(int ch)
+static int _printable(const int ch)
 {
    return (ch != ERR && ch != '\n' && ch != KEY_PPAGE && ch != KEY_NPAGE &&
             ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) && 
@@ -205,7 +205,7 @@ static int _printable(int ch)
             ch != KEY_F(10));
 }
 
-static void _replace_input(char *input, char *new_input, int *size)
+static void _replace_input(char *input, const char * const new_input, int *size)
 {
     int i;
 

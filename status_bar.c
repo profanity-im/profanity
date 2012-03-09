@@ -67,7 +67,7 @@ void status_bar_refresh(void)
     }
 }
 
-void status_bar_inactive(int win)
+void status_bar_inactive(const int win)
 {
     int active_pos = 1 + ((win -1) * 3);
 
@@ -81,7 +81,7 @@ void status_bar_inactive(int win)
     dirty = TRUE;
 }
 
-void status_bar_active(int win)
+void status_bar_active(const int win)
 {
     int active_pos = 1 + ((win -1) * 3);
 
@@ -103,7 +103,7 @@ void status_bar_get_password(void)
     dirty = TRUE;
 }
 
-void status_bar_print_message(const char *msg)
+void status_bar_print_message(const char * const msg)
 {
     mvwprintw(status_bar, 0, 9, msg);
 

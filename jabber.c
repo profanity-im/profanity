@@ -65,15 +65,15 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
 static int _jabber_message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata);
 
-static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata);
+static int _roster_handler(xmpp_conn_t * const conn, 
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 static int _jabber_presence_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata);
 
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
-void jabber_init(int disable_tls)
+void jabber_init(const int disable_tls)
 {
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.tls_disabled = disable_tls;
@@ -84,7 +84,7 @@ jabber_status_t jabber_connection_status(void)
     return (jabber_conn.conn_status);
 }
 
-jabber_status_t jabber_connect(char *user, char *passwd)
+jabber_status_t jabber_connect(const char * const user, const char * const passwd)
 {
     xmpp_initialize();
 
@@ -126,7 +126,7 @@ void jabber_process_events(void)
         xmpp_run_once(jabber_conn.ctx, 10);
 }
 
-void jabber_send(char *msg, char *recipient)
+void jabber_send(const char * const msg, const char * const recipient)
 {
     xmpp_stanza_t *reply, *body, *text;
 
@@ -224,8 +224,8 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
     }
 }
 
-static int _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+static int _roster_handler(xmpp_conn_t * const conn, 
+    xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *query, *item;
     char *type, *name, *jid;

@@ -20,7 +20,6 @@
  *
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -35,7 +34,7 @@ struct _contact_t {
 // the contact list
 static struct _contact_t *_contact_list = NULL;
 
-static struct _contact_t * _make_contact(char *contact);
+static struct _contact_t * _make_contact(const char * const contact);
 
 void contact_list_clear(void)
 {
@@ -52,7 +51,7 @@ void contact_list_clear(void)
     }
 }
 
-int contact_list_remove(char *contact)
+int contact_list_remove(const char * const contact)
 {
     if (!_contact_list) {
         return 0;
@@ -81,7 +80,7 @@ int contact_list_remove(char *contact)
     }
 }
 
-int contact_list_add(char *contact)
+int contact_list_add(const char * const contact)
 {
     if (!_contact_list) {
         _contact_list = _make_contact(contact);
@@ -136,7 +135,7 @@ struct contact_list *get_contact_list(void)
     return list;
 }
 
-static struct _contact_t * _make_contact(char *contact)
+static struct _contact_t * _make_contact(const char * const contact)
 {
     struct _contact_t *new = (struct _contact_t *) malloc(sizeof(struct _contact_t));
     new->contact = (char *) malloc((strlen(contact) + 1) * sizeof(char));

@@ -38,7 +38,7 @@ void create_title_bar(void)
     dirty = TRUE;
 }
 
-void title_bar_title()
+void title_bar_title(void)
 {
     char *title = "Profanity. Type /help for help information.";
     title_bar_show(title);
@@ -90,7 +90,7 @@ void title_bar_refresh(void)
     }
 }
 
-void title_bar_show(char *title)
+void title_bar_show(const char * const title)
 {
     wmove(title_bar, 0, 0);
     int i;

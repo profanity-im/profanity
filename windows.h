@@ -45,7 +45,7 @@ void create_input_window(void);
 
 // title bar actions
 void title_bar_refresh(void);
-void title_bar_show(char *title);
+void title_bar_show(const char * const title);
 void title_bar_title(void);
 void title_bar_connected(void);
 void title_bar_disconnected(void);
@@ -54,33 +54,36 @@ void title_bar_disconnected(void);
 int win_close_win(void);
 int win_in_chat(void);
 char *win_get_recipient(void);
-void win_show_incomming_msg(char *from, char *message);
-void win_show_outgoing_msg(char *from, char *to, char *message);
-void win_handle_switch(int *ch);
-void win_handle_page(int *ch);
+void win_show_incomming_msg(const char * const from, const char * const message);
+void win_show_outgoing_msg(const char * const from, const char * const to, 
+    const char * const message);
+void win_handle_switch(const int * const ch);
+void win_handle_page(const int * const ch);
 void win_page_off(void);
-void win_contact_online(char *from, char *show, char *status);
-void win_contact_offline(char *from, char *show, char *status);
+void win_contact_online(const char * const from, const char * const show, 
+    const char * const status);
+void win_contact_offline(const char * const from, const char * const show, 
+    const char * const status);
 
 // console window actions
 void cons_help(void);
-void cons_bad_command(char *cmd);
+void cons_bad_command(const char * const cmd);
 void cons_bad_connect(void);
 void cons_not_disconnected(void);
 void cons_not_connected(void);
 void cons_bad_message(void);
-void cons_show(char *cmd);
-void cons_bad_show(char *cmd);
-void cons_highlight_show(char *cmd);
-void cons_show_online_contacts(struct contact_list *list);
+void cons_show(const char * const cmd);
+void cons_bad_show(const char * const cmd);
+void cons_highlight_show(const char * const cmd);
+void cons_show_online_contacts(const struct contact_list * const list);
 
 // status bar actions
 void status_bar_refresh(void);
 void status_bar_clear(void);
 void status_bar_get_password(void);
-void status_bar_print_message(const char *msg);
-void status_bar_inactive(int win);
-void status_bar_active(int win);
+void status_bar_print_message(const char * const msg);
+void status_bar_inactive(const int win);
+void status_bar_active(const int win);
 void status_bar_update_time(void);
 
 // input window actions

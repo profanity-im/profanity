@@ -39,7 +39,8 @@ void history_init(void)
     _pos = -1;
 }
 
-void history_append(char *inp)
+// FIXME: Roll history when full
+void history_append(const char * const inp)
 {
     if (_size < MAX_HISTORY) {
         _history[_size] = (char*) malloc(strlen(inp) * sizeof(char));

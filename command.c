@@ -30,15 +30,15 @@
 #include "windows.h"
 #include "util.h"
 
-static int _handle_command(char *command, char *inp);
+static int _handle_command(const char * const command, const char * const inp);
 static int _cmd_quit(void);
 static int _cmd_help(void);
 static int _cmd_who(void);
 static int _cmd_ros(void);
-static int _cmd_connect(char *inp);
-static int _cmd_msg(char *inp);
-static int _cmd_close(char *inp);
-static int _cmd_default(char *inp);
+static int _cmd_connect(const char * const inp);
+static int _cmd_msg(const char * const inp);
+static int _cmd_close(const char * const inp);
+static int _cmd_default(const char * const inp);
 
 int process_input(char *inp)
 {
@@ -64,7 +64,7 @@ int process_input(char *inp)
     return result;
 }
 
-static int _handle_command(char *command, char *inp)
+static int _handle_command(const char * const command, const char * const inp)
 {
     int result = FALSE;
 
@@ -89,7 +89,7 @@ static int _handle_command(char *command, char *inp)
     return result;
 }
 
-static int _cmd_connect(char *inp)
+static int _cmd_connect(const char * const inp)
 {
     int result = FALSE;
     jabber_status_t conn_status = jabber_connection_status();
@@ -160,7 +160,7 @@ static int _cmd_who(void)
     return TRUE;
 }
 
-static int _cmd_msg(char *inp)
+static int _cmd_msg(const char * const inp)
 {
     char *usr = NULL;
     char *msg = NULL;
@@ -178,6 +178,7 @@ static int _cmd_msg(char *inp)
         strtok(inp_cpy, " ");
         usr = strtok(NULL, " ");
         if ((usr != NULL) && (strlen(inp) > (5 + strlen(usr) + 1))) {
+            // get message
             msg = strndup(inp+5+strlen(usr)+1, strlen(inp)-(5+strlen(usr)+1));
             if (msg != NULL) {
                 jabber_send(msg, usr);
@@ -193,7 +194,7 @@ static int _cmd_msg(char *inp)
     return TRUE;
 }
 
-static int _cmd_close(char *inp)
+static int _cmd_close(const char * const inp)
 {
     if (!win_close_win())
         cons_bad_command(inp);
@@ -201,7 +202,7 @@ static int _cmd_close(char *inp)
     return TRUE;
 }
 
-static int _cmd_default(char *inp)
+static int _cmd_default(const char * const inp)
 {
     if (win_in_chat()) {
         char *recipient = win_get_recipient();

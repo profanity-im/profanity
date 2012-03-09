@@ -58,7 +58,7 @@ void profanity_run(void)
 
 }
 
-void profanity_init(int disable_tls)
+void profanity_init(const int disable_tls)
 {
     log_init();
     gui_init();
