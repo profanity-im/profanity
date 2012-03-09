@@ -98,8 +98,20 @@ int contact_list_add(const char * const name, const char * const show)
 
         while(curr) {
             contact_t *curr_contact = curr->contact;
-            if (strcmp(curr_contact->name, name) == 0)
+            if (strcmp(curr_contact->name, name) == 0) {
+                if (curr_contact->show != NULL) {
+                    free(curr_contact->show);
+                    curr_contact->show = NULL;
+                    
+                    if (show != NULL) {
+                        curr_contact->show = 
+                            (char *) malloc((strlen(show) + 1) * sizeof(char));
+                        strcpy(curr_contact->show, show);
+                    }
+                }
+                
                 return 0;
+            }
 
             prev = curr;
             curr = curr->next;
@@ -159,7 +171,7 @@ static contact_t * _new_contact(const char * const name, const char * const show
     new->name = (char *) malloc((strlen(name) + 1) * sizeof(char));
     strcpy(new->name, name);
     
-    if (show) {
+    if (show != NULL) {
         new->show = (char *) malloc((strlen(show) + 1) * sizeof(char));
         strcpy(new->show, show);
     } else {
@@ -173,7 +185,7 @@ static void _destroy_contact(contact_t *contact)
 {
     free(contact->name);
 
-    if (contact->show) {
+    if (contact->show != NULL) {
         free(contact->show);
     }
 
