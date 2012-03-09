@@ -26,19 +26,19 @@
 #include "contact_list.h"
 
 // contact list node
-struct _contact_t {
+struct _contact_node_t {
     char *contact;    
-    struct _contact_t *next;
+    struct _contact_node_t *next;
 };
 
 // the contact list
-static struct _contact_t *_contact_list = NULL;
+static struct _contact_node_t *_contact_list = NULL;
 
-static struct _contact_t * _make_contact(const char * const contact);
+static struct _contact_node_t * _make_contact_node(const char * const contact);
 
 void contact_list_clear(void)
 {
-    struct _contact_t *curr = _contact_list;
+    struct _contact_node_t *curr = _contact_list;
     
     if (curr) {
         while(curr) {
@@ -56,8 +56,8 @@ int contact_list_remove(const char * const contact)
     if (!_contact_list) {
         return 0;
     } else {
-        struct _contact_t *curr = _contact_list;
-        struct _contact_t *prev = NULL;
+        struct _contact_node_t *curr = _contact_list;
+        struct _contact_node_t *prev = NULL;
         
         while(curr) {
             if (strcmp(curr->contact, contact) == 0) {
@@ -83,12 +83,12 @@ int contact_list_remove(const char * const contact)
 int contact_list_add(const char * const contact)
 {
     if (!_contact_list) {
-        _contact_list = _make_contact(contact);
+        _contact_list = _make_contact_node(contact);
         
         return 1;
     } else {
-        struct _contact_t *curr = _contact_list;
-        struct _contact_t *prev = NULL;
+        struct _contact_node_t *curr = _contact_list;
+        struct _contact_node_t *prev = NULL;
 
         while(curr) {
             if (strcmp(curr->contact, contact) == 0)
@@ -98,7 +98,7 @@ int contact_list_add(const char * const contact)
             curr = curr->next;
         }
 
-        curr = _make_contact(contact);        
+        curr = _make_contact_node(contact);        
         
         if (prev)
             prev->next = curr;
@@ -107,14 +107,14 @@ int contact_list_add(const char * const contact)
     }
 }
 
-struct contact_list *get_contact_list(void)
+contact_list_t *get_contact_list(void)
 {
     int count = 0;
     
-    struct contact_list *list = 
-        (struct contact_list *) malloc(sizeof(struct contact_list));
+    contact_list_t *list = 
+        (contact_list_t *) malloc(sizeof(contact_list_t));
 
-    struct _contact_t *curr = _contact_list;
+    struct _contact_node_t *curr = _contact_list;
     
     if (!curr) {
         list->contacts = NULL;
@@ -135,9 +135,10 @@ struct contact_list *get_contact_list(void)
     return list;
 }
 
-static struct _contact_t * _make_contact(const char * const contact)
+struct _contact_node_t * _make_contact_node(const char * const contact)
 {
-    struct _contact_t *new = (struct _contact_t *) malloc(sizeof(struct _contact_t));
+    struct _contact_node_t *new = 
+        (struct _contact_node_t *) malloc(sizeof(struct _contact_node_t));
     new->contact = (char *) malloc((strlen(contact) + 1) * sizeof(char));
     strcpy(new->contact, contact);
     new->next = NULL;

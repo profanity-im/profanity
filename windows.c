@@ -233,7 +233,7 @@ void cons_help(void)
         dirty = TRUE;
 }
 
-void cons_show_online_contacts(const struct contact_list * const list)
+void cons_show_online_contacts(const contact_list_t * const list)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Online contacts:\n");

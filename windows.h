@@ -75,7 +75,7 @@ void cons_bad_message(void);
 void cons_show(const char * const cmd);
 void cons_bad_show(const char * const cmd);
 void cons_highlight_show(const char * const cmd);
-void cons_show_online_contacts(const struct contact_list * const list);
+void cons_show_online_contacts(const contact_list_t * const list);
 
 // status bar actions
 void status_bar_refresh(void);

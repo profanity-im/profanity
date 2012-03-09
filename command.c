@@ -153,7 +153,7 @@ static int _cmd_who(void)
     if (conn_status != JABBER_CONNECTED) {
         cons_not_connected();
     } else {
-        struct contact_list *list = get_contact_list();
+        contact_list_t *list = get_contact_list();
         cons_show_online_contacts(list);
     }
 
