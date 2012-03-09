@@ -27,14 +27,17 @@
 
 // contact list node
 struct _contact_node_t {
-    char *contact;    
+    contact_t *contact;    
     struct _contact_node_t *next;
 };
 
 // the contact list
 static struct _contact_node_t *_contact_list = NULL;
 
-static struct _contact_node_t * _make_contact_node(const char * const contact);
+static struct _contact_node_t * _make_contact_node(const char * const name, 
+    const char * const show);
+static contact_t * _new_contact(const char * const name, const char * const show);
+static void _destroy_contact(contact_t *contact);
 
 void contact_list_clear(void)
 {
@@ -42,7 +45,8 @@ void contact_list_clear(void)
     
     if (curr) {
         while(curr) {
-            free(curr->contact);
+            contact_t *contact = curr->contact;
+            _destroy_contact(contact);
             curr = curr->next;
         }
 
@@ -51,7 +55,7 @@ void contact_list_clear(void)
     }
 }
 
-int contact_list_remove(const char * const contact)
+int contact_list_remove(const char * const name)
 {
     if (!_contact_list) {
         return 0;
@@ -60,13 +64,14 @@ int contact_list_remove(const char * const contact)
         struct _contact_node_t *prev = NULL;
         
         while(curr) {
-            if (strcmp(curr->contact, contact) == 0) {
+            contact_t *contact = curr->contact;
+            if (strcmp(contact->name, name) == 0) {
                 if (prev)
                     prev->next = curr->next;
                 else
                     _contact_list = curr->next;
-                
-                free(curr->contact);
+
+                _destroy_contact(contact);
                 free(curr);
 
                 return 1;
@@ -80,10 +85,11 @@ int contact_list_remove(const char * const contact)
     }
 }
 
-int contact_list_add(const char * const contact)
+int contact_list_add(const char * const name, const char * const show)
 {
+
     if (!_contact_list) {
-        _contact_list = _make_contact_node(contact);
+        _contact_list = _make_contact_node(name, show);
         
         return 1;
     } else {
@@ -91,14 +97,15 @@ int contact_list_add(const char * const contact)
         struct _contact_node_t *prev = NULL;
 
         while(curr) {
-            if (strcmp(curr->contact, contact) == 0)
+            contact_t *curr_contact = curr->contact;
+            if (strcmp(curr_contact->name, name) == 0)
                 return 0;
 
             prev = curr;
             curr = curr->next;
         }
 
-        curr = _make_contact_node(contact);        
+        curr = _make_contact_node(name, show);    
         
         if (prev)
             prev->next = curr;
@@ -119,12 +126,12 @@ contact_list_t *get_contact_list(void)
     if (!curr) {
         list->contacts = NULL;
     } else {
-        list->contacts = (char **) malloc(sizeof(char **));
+        list->contacts = (contact_t **) malloc(sizeof(contact_t *));
 
         while(curr) {
+            contact_t *curr_contact = curr->contact;
             list->contacts[count] = 
-                (char *) malloc((strlen(curr->contact) + 1) * sizeof(char));
-            strcpy(list->contacts[count], curr->contact);
+                _new_contact(curr_contact->name, curr_contact->show);
             count++;
             curr = curr->next;
         }
@@ -135,14 +142,41 @@ contact_list_t *get_contact_list(void)
     return list;
 }
 
-struct _contact_node_t * _make_contact_node(const char * const contact)
+struct _contact_node_t * _make_contact_node(const char * const name, 
+    const char * const show)
 {
     struct _contact_node_t *new = 
         (struct _contact_node_t *) malloc(sizeof(struct _contact_node_t));
-    new->contact = (char *) malloc((strlen(contact) + 1) * sizeof(char));
-    strcpy(new->contact, contact);
+    new->contact = _new_contact(name, show);
     new->next = NULL;
 
     return new;
+}
+
+static contact_t * _new_contact(const char * const name, const char * const show)
+{
+    contact_t *new = (contact_t *) malloc(sizeof(contact_t));
+    new->name = (char *) malloc((strlen(name) + 1) * sizeof(char));
+    strcpy(new->name, name);
+    
+    if (show) {
+        new->show = (char *) malloc((strlen(show) + 1) * sizeof(char));
+        strcpy(new->show, show);
+    } else {
+        new->show = NULL;
+    }
+
+    return new;
+}
+
+static void _destroy_contact(contact_t *contact)
+{
+    free(contact->name);
+
+    if (contact->show) {
+        free(contact->show);
+    }
+
+    free(contact);
 }
 

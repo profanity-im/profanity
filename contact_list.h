@@ -23,14 +23,19 @@
 #ifndef CONTACT_LIST_H
 #define CONTACT_LIST_H
 
+typedef struct _contact {
+    char *name;
+    char *show;
+} contact_t;
+
 typedef struct _contact_list_t {
-    char **contacts;
+    contact_t **contacts;
     int size;
 } contact_list_t;
 
 void contact_list_clear(void);
-int contact_list_add(const char * const contact);
-int contact_list_remove(const char * const contact);
-contact_list_t *get_contact_list(void);
+int contact_list_add(const char * const name, const char * const show);
+int contact_list_remove(const char * const name);
+contact_list_t * get_contact_list(void);
 
 #endif

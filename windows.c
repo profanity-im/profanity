@@ -240,13 +240,15 @@ void cons_show_online_contacts(const contact_list_t * const list)
 
     int i;
     for (i = 0; i < list->size; i++) {
-        char *contact = list->contacts[i];
+        contact_t *contact = list->contacts[i];
         _win_show_time(_cons_win);
         wattron(_cons_win, COLOR_PAIR(2));
-        wprintw(_cons_win, "%s\n", contact);
+        wprintw(_cons_win, "%s", contact->name);
+        if (contact->show)
+            wprintw(_cons_win, ", %s", contact->show);
+        wprintw(_cons_win, "\n");
         wattroff(_cons_win, COLOR_PAIR(2));
     }
-
 }
 
 void cons_bad_show(const char * const msg)
