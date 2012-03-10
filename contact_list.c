@@ -35,6 +35,9 @@ struct _contact_node_t {
 // the contact list
 static struct _contact_node_t *_contact_list = NULL;
 
+// number of tabs pressed whilst searching
+static int _search_attempts = 0;
+
 static struct _contact_node_t * _make_contact_node(const char * const name, 
     const char * const show, const char * const status);
 static contact_t * _new_contact(const char * const name, const char * const show,
@@ -55,6 +58,11 @@ void contact_list_clear(void)
         free(_contact_list);
         _contact_list = NULL;
     }
+}
+
+void reset_search_attempts(void)
+{
+    _search_attempts = 0;
 }
 
 int contact_list_remove(const char * const name)
@@ -173,9 +181,13 @@ char * find_contact(const char * const search_str)
     } else {
         while(curr) {
             contact_t *curr_contact = curr->contact;
+            
+            // match found
             if (strncmp(curr_contact->name, search_str, strlen(search_str)) == 0) {
                 char *result = 
                     (char *) malloc((strlen(curr_contact->name) + 1) * sizeof(char));
+                
+                // return the contact, must be free'd by caller
                 strcpy(result, curr_contact->name);
                 return result;
             }

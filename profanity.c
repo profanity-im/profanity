@@ -53,7 +53,6 @@ void profanity_run(void)
 
         inp[size++] = '\0';
         cmd_result = process_input(inp);
-        win_page_off();
     }
 
 }

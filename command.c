@@ -44,6 +44,7 @@ int process_input(char *inp)
 {
     int result = FALSE;
 
+
     if (strlen(inp) > 0)
         history_append(inp);
 
@@ -60,6 +61,8 @@ int process_input(char *inp)
     }
 
     inp_clear();
+    reset_search_attempts();
+    win_page_off();
 
     return result;
 }
