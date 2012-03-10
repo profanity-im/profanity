@@ -265,6 +265,54 @@ static void test_status_when_no_value(void)
     assert_is_null(james->status);
 }
 
+static void update_show(void)
+{
+    contact_list_add("James", "away", NULL);
+    contact_list_add("James", "dnd", NULL);
+    contact_list_t *list = get_contact_list();
+
+    assert_int_equals(1, list->size);
+    contact_t *james = list->contacts[0];
+    assert_string_equals("James", james->name);
+    assert_string_equals("dnd", james->show);
+}
+
+static void set_show_to_null(void)
+{
+    contact_list_add("James", "away", NULL);
+    contact_list_add("James", NULL, NULL);
+    contact_list_t *list = get_contact_list();
+
+    assert_int_equals(1, list->size);
+    contact_t *james = list->contacts[0];
+    assert_string_equals("James", james->name);
+    assert_string_equals("online", james->show);
+}
+
+static void update_status(void)
+{
+    contact_list_add("James", NULL, "I'm not here right now");
+    contact_list_add("James", NULL, "Gone to lunch");
+    contact_list_t *list = get_contact_list();
+
+    assert_int_equals(1, list->size);
+    contact_t *james = list->contacts[0];
+    assert_string_equals("James", james->name);
+    assert_string_equals("Gone to lunch", james->status);
+}
+
+static void set_status_to_null(void)
+{
+    contact_list_add("James", NULL, "Gone to lunch");
+    contact_list_add("James", NULL, NULL);
+    contact_list_t *list = get_contact_list();
+
+    assert_int_equals(1, list->size);
+    contact_t *james = list->contacts[0];
+    assert_string_equals("James", james->name);
+    assert_is_null(james->status);
+}
+
 void register_contact_list_tests(void)
 {
     TEST_MODULE("contact_list tests");
@@ -291,4 +339,8 @@ void register_contact_list_tests(void)
     TEST(test_show_online_when_empty_string);
     TEST(test_status_when_value);
     TEST(test_status_when_no_value);
+    TEST(update_show);
+    TEST(set_show_to_null);
+    TEST(update_status);
+    TEST(set_status_to_null);
 }
