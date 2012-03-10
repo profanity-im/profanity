@@ -148,7 +148,7 @@ contact_list_t *get_contact_list(void)
     return list;
 }
 
-struct _contact_node_t * _make_contact_node(const char * const name, 
+static struct _contact_node_t * _make_contact_node(const char * const name, 
     const char * const show, const char * const status)
 {
     struct _contact_node_t *new = 
