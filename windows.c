@@ -55,6 +55,8 @@ static void _show_status_string(WINDOW *win, const char * const from,
     const char * const default_show);
 static void _cons_show_incoming_message(const char * const short_from, 
     const int win_index);
+static void _win_handle_switch(const int * const ch);
+static void _win_handle_page(const int * const ch);
 
 void gui_init(void)
 {
@@ -302,29 +304,10 @@ void cons_bad_message(void)
     cons_show("Usage: /msg user@host message");
 }
 
-void win_handle_switch(const int * const ch)
+void win_handle_special_keys(const int * const ch)
 {
-    if (*ch == KEY_F(1)) {
-        _win_switch_if_active(0);
-    } else if (*ch == KEY_F(2)) {
-        _win_switch_if_active(1);
-    } else if (*ch == KEY_F(3)) {
-        _win_switch_if_active(2);
-    } else if (*ch == KEY_F(4)) {
-        _win_switch_if_active(3);
-    } else if (*ch == KEY_F(5)) {
-        _win_switch_if_active(4);
-    } else if (*ch == KEY_F(6)) {
-        _win_switch_if_active(5);
-    } else if (*ch == KEY_F(7)) {
-        _win_switch_if_active(6);
-    } else if (*ch == KEY_F(8)) {
-        _win_switch_if_active(7);
-    } else if (*ch == KEY_F(9)) {
-        _win_switch_if_active(8);
-    } else if (*ch == KEY_F(10)) {
-        _win_switch_if_active(9);
-    }
+    _win_handle_switch(ch);
+    _win_handle_page(ch);
 }
 
 void win_page_off(void)
@@ -343,43 +326,6 @@ void win_page_off(void)
         _wins[_curr_prof_win].y_pos = 0;
 
     dirty = TRUE;
-}
-
-void win_handle_page(const int * const ch)
-{
-    int rows, cols, y, x;
-    getmaxyx(stdscr, rows, cols);
-    getyx(_wins[_curr_prof_win].win, y, x);
-
-    int page_space = rows - 4;
-    int *page_start = &_wins[_curr_prof_win].y_pos;
-    
-    // page up
-    if (*ch == KEY_PPAGE) {
-        *page_start -= page_space;
-    
-        // went past beginning, show first page
-        if (*page_start < 0)
-            *page_start = 0;
-       
-        _wins[_curr_prof_win].paged = 1;
-        dirty = TRUE;
-
-    // page down
-    } else if (*ch == KEY_NPAGE) {
-        *page_start += page_space;
-
-        // only got half a screen, show full screen
-        if ((y - (*page_start)) < page_space)
-            *page_start = y - page_space;
-
-        // went past end, show full screen
-        else if (*page_start >= y)
-            *page_start = y - page_space;
-           
-        _wins[_curr_prof_win].paged = 1;
-        dirty = TRUE;
-    }
 }
 
 static void _create_windows(void)
@@ -531,5 +477,67 @@ static void _cons_show_incoming_message(const char * const short_from, const int
     wattron(_cons_win, COLOR_PAIR(8));
     wprintw(_cons_win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
     wattroff(_cons_win, COLOR_PAIR(8));
+}
+
+static void _win_handle_switch(const int * const ch)
+{
+    if (*ch == KEY_F(1)) {
+        _win_switch_if_active(0);
+    } else if (*ch == KEY_F(2)) {
+        _win_switch_if_active(1);
+    } else if (*ch == KEY_F(3)) {
+        _win_switch_if_active(2);
+    } else if (*ch == KEY_F(4)) {
+        _win_switch_if_active(3);
+    } else if (*ch == KEY_F(5)) {
+        _win_switch_if_active(4);
+    } else if (*ch == KEY_F(6)) {
+        _win_switch_if_active(5);
+    } else if (*ch == KEY_F(7)) {
+        _win_switch_if_active(6);
+    } else if (*ch == KEY_F(8)) {
+        _win_switch_if_active(7);
+    } else if (*ch == KEY_F(9)) {
+        _win_switch_if_active(8);
+    } else if (*ch == KEY_F(10)) {
+        _win_switch_if_active(9);
+    }
+}
+
+static void _win_handle_page(const int * const ch)
+{
+    int rows, cols, y, x;
+    getmaxyx(stdscr, rows, cols);
+    getyx(_wins[_curr_prof_win].win, y, x);
+
+    int page_space = rows - 4;
+    int *page_start = &_wins[_curr_prof_win].y_pos;
+    
+    // page up
+    if (*ch == KEY_PPAGE) {
+        *page_start -= page_space;
+    
+        // went past beginning, show first page
+        if (*page_start < 0)
+            *page_start = 0;
+       
+        _wins[_curr_prof_win].paged = 1;
+        dirty = TRUE;
+
+    // page down
+    } else if (*ch == KEY_NPAGE) {
+        *page_start += page_space;
+
+        // only got half a screen, show full screen
+        if ((y - (*page_start)) < page_space)
+            *page_start = y - page_space;
+
+        // went past end, show full screen
+        else if (*page_start >= y)
+            *page_start = y - page_space;
+           
+        _wins[_curr_prof_win].paged = 1;
+        dirty = TRUE;
+    }
 }
 

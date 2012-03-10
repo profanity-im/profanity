@@ -76,7 +76,7 @@ void inp_block(void)
     wtimeout(inp_win, -1);
 }
 
-void inp_poll_char(int *ch, char *input, int *size)
+void inp_get_char(int *ch, char *input, int *size)
 {
     int inp_y = 0;
     int inp_x = 0;

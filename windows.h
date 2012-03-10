@@ -57,8 +57,7 @@ char *win_get_recipient(void);
 void win_show_incomming_msg(const char * const from, const char * const message);
 void win_show_outgoing_msg(const char * const from, const char * const to, 
     const char * const message);
-void win_handle_switch(const int * const ch);
-void win_handle_page(const int * const ch);
+void win_handle_special_keys(const int * const ch);
 void win_page_off(void);
 void win_contact_online(const char * const from, const char * const show, 
     const char * const status);
@@ -87,7 +86,7 @@ void status_bar_active(const int win);
 void status_bar_update_time(void);
 
 // input window actions
-void inp_poll_char(int *ch, char *input, int *size);
+void inp_get_char(int *ch, char *input, int *size);
 void inp_clear(void);
 void inp_put_back(void);
 void inp_non_block(void);
