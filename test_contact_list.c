@@ -220,6 +220,51 @@ static void remove_third_when_three(void)
     assert_string_equals("Dave", dave->name);
 }
 
+static void test_show_when_value(void)
+{
+    contact_list_add("James", "away", NULL);
+    contact_list_t *list = get_contact_list();
+    contact_t *james = list->contacts[0];
+    
+    assert_string_equals("away", james->show);
+}
+
+static void test_show_online_when_no_value(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_t *list = get_contact_list();
+    contact_t *james = list->contacts[0];
+    
+    assert_string_equals("online", james->show);
+}
+
+static void test_show_online_when_empty_string(void)
+{
+    contact_list_add("James", "", NULL);
+    contact_list_t *list = get_contact_list();
+    contact_t *james = list->contacts[0];
+    
+    assert_string_equals("online", james->show);
+}
+
+static void test_status_when_value(void)
+{
+    contact_list_add("James", NULL, "I'm not here right now");
+    contact_list_t *list = get_contact_list();
+    contact_t *james = list->contacts[0];
+    
+    assert_string_equals("I'm not here right now", james->status);
+}
+
+static void test_status_when_no_value(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_t *list = get_contact_list();
+    contact_t *james = list->contacts[0];
+    
+    assert_is_null(james->status);
+}
+
 void register_contact_list_tests(void)
 {
     TEST_MODULE("contact_list tests");
@@ -241,4 +286,9 @@ void register_contact_list_tests(void)
     TEST(remove_first_when_three);
     TEST(remove_second_when_three);
     TEST(remove_third_when_three);
+    TEST(test_show_when_value);
+    TEST(test_show_online_when_no_value);
+    TEST(test_show_online_when_empty_string);
+    TEST(test_status_when_value);
+    TEST(test_status_when_no_value);
 }
