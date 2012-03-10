@@ -39,5 +39,6 @@ int contact_list_add(const char * const name, const char * const show,
     const char * const status);
 int contact_list_remove(const char * const name);
 contact_list_t * get_contact_list(void);
+char * find_contact(const char * const search_str);
 
 #endif

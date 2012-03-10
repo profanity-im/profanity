@@ -20,6 +20,7 @@
  *
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -134,7 +135,7 @@ int contact_list_add(const char * const name, const char * const show,
     }
 }
 
-contact_list_t *get_contact_list(void)
+contact_list_t * get_contact_list(void)
 {
     int count = 0;
     
@@ -161,6 +162,29 @@ contact_list_t *get_contact_list(void)
     list->size = count;
 
     return list;
+}
+
+char * find_contact(const char * const search_str)
+{
+    struct _contact_node_t *curr = _contact_list;
+
+    if (!curr) {
+        return NULL;
+    } else {
+        while(curr) {
+            contact_t *curr_contact = curr->contact;
+            if (strncmp(curr_contact->name, search_str, strlen(search_str)) == 0) {
+                char *result = 
+                    (char *) malloc((strlen(curr_contact->name) + 1) * sizeof(char));
+                strcpy(result, curr_contact->name);
+                return result;
+            }
+
+            curr = curr->next;
+        }
+
+        return NULL;
+    }
 }
 
 static struct _contact_node_t * _make_contact_node(const char * const name, 

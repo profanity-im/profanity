@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #include <head-unit.h>
 #include "contact_list.h"
 
@@ -314,6 +313,46 @@ static void set_status_to_null(void)
     assert_is_null(james->status);
 }
 
+static void find_first_exists(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_add("Dave", NULL, NULL);
+    contact_list_add("Bob", NULL, NULL);
+
+    char *result = find_contact("B");
+    assert_string_equals("Bob", result);
+}
+
+static void find_second_exists(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_add("Dave", NULL, NULL);
+    contact_list_add("Bob", NULL, NULL);
+
+    char *result = find_contact("Dav");
+    assert_string_equals("Dave", result);
+}
+
+static void find_third_exists(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_add("Dave", NULL, NULL);
+    contact_list_add("Bob", NULL, NULL);
+
+    char *result = find_contact("Ja");
+    assert_string_equals("James", result);
+}
+
+static void find_returns_null(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_add("Dave", NULL, NULL);
+    contact_list_add("Bob", NULL, NULL);
+
+    char *result = find_contact("Mike");
+    assert_is_null(result);
+}
+
 void register_contact_list_tests(void)
 {
     TEST_MODULE("contact_list tests");
@@ -344,4 +383,8 @@ void register_contact_list_tests(void)
     TEST(set_show_to_null);
     TEST(update_status);
     TEST(set_status_to_null);
+    TEST(find_first_exists);
+    TEST(find_second_exists);
+    TEST(find_third_exists);
+    TEST(find_returns_null);
 }
