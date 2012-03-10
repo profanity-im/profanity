@@ -208,6 +208,7 @@ static int _handle_edit(const int ch, char *input, int *size)
                 strcat(auto_msg, found);
                 _replace_input(input, auto_msg, size);
                 free(auto_msg);
+                free(found);
             }
         }
         return 1;
