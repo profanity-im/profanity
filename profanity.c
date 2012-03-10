@@ -21,7 +21,7 @@
  */
 
 #include <string.h>
-#include <unistd.h>
+#include <stdlib.h>
 
 #include <ncurses.h>
 
@@ -31,6 +31,8 @@
 #include "jabber.h"
 #include "command.h"
 #include "history.h"
+
+static void _profanity_shutdown(void);
 
 void profanity_run(void)
 {
@@ -43,7 +45,6 @@ void profanity_run(void)
         int size = 0;
 
         while(ch != '\n') {
-            usleep(1);
             gui_refresh();
             jabber_process_events();
             win_handle_switch(&ch);
@@ -64,9 +65,10 @@ void profanity_init(const int disable_tls)
     gui_init();
     jabber_init(disable_tls);
     history_init();
+    atexit(_profanity_shutdown);
 }
 
-void profanity_shutdown(void)
+void _profanity_shutdown(void)
 {
     jabber_disconnect();
     gui_close();

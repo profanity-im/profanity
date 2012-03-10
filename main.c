@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
     profanity_init(disable_tls);
     profanity_run();
-    profanity_shutdown();
+    //profanity_shutdown();
 
     return 0;
 }
