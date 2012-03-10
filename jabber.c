@@ -324,7 +324,7 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
     if (strcmp(short_jid, short_from) !=0) {
         if (type == NULL) {// online
             win_contact_online(short_from, show_str, status_str);
-            contact_list_add(short_from, show_str);
+            contact_list_add(short_from, show_str, status_str);
         } else {// offline
             win_contact_offline(short_from, show_str, status_str);
             contact_list_remove(short_from);

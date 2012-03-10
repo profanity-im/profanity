@@ -245,7 +245,9 @@ void cons_show_online_contacts(const contact_list_t * const list)
         wattron(_cons_win, COLOR_PAIR(2));
         wprintw(_cons_win, "%s", contact->name);
         if (contact->show)
-            wprintw(_cons_win, ", %s", contact->show);
+            wprintw(_cons_win, " is %s", contact->show);
+        if (contact->status)
+            wprintw(_cons_win, ", \"%s\"", contact->status);
         wprintw(_cons_win, "\n");
         wattroff(_cons_win, COLOR_PAIR(2));
     }

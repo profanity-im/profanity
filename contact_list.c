@@ -35,8 +35,9 @@ struct _contact_node_t {
 static struct _contact_node_t *_contact_list = NULL;
 
 static struct _contact_node_t * _make_contact_node(const char * const name, 
-    const char * const show);
-static contact_t * _new_contact(const char * const name, const char * const show);
+    const char * const show, const char * const status);
+static contact_t * _new_contact(const char * const name, const char * const show,
+    const char * const status);
 static void _destroy_contact(contact_t *contact);
 
 void contact_list_clear(void)
@@ -85,11 +86,12 @@ int contact_list_remove(const char * const name)
     }
 }
 
-int contact_list_add(const char * const name, const char * const show)
+int contact_list_add(const char * const name, const char * const show, 
+    const char * const status)
 {
 
     if (!_contact_list) {
-        _contact_list = _make_contact_node(name, show);
+        _contact_list = _make_contact_node(name, show, status);
         
         return 1;
     } else {
@@ -99,17 +101,8 @@ int contact_list_add(const char * const name, const char * const show)
         while(curr) {
             contact_t *curr_contact = curr->contact;
             if (strcmp(curr_contact->name, name) == 0) {
-                if (curr_contact->show != NULL) {
-                    free(curr_contact->show);
-                    curr_contact->show = NULL;
-                    
-                    if (show != NULL) {
-                        curr_contact->show = 
-                            (char *) malloc((strlen(show) + 1) * sizeof(char));
-                        strcpy(curr_contact->show, show);
-                    }
-                }
-                
+                _destroy_contact(curr->contact);
+                curr->contact = _new_contact(name, show, status);
                 return 0;
             }
 
@@ -117,7 +110,7 @@ int contact_list_add(const char * const name, const char * const show)
             curr = curr->next;
         }
 
-        curr = _make_contact_node(name, show);    
+        curr = _make_contact_node(name, show, status);    
         
         if (prev)
             prev->next = curr;
@@ -143,7 +136,8 @@ contact_list_t *get_contact_list(void)
         while(curr) {
             contact_t *curr_contact = curr->contact;
             list->contacts[count] = 
-                _new_contact(curr_contact->name, curr_contact->show);
+                _new_contact(curr_contact->name, curr_contact->show,
+                    curr_contact->status);
             count++;
             curr = curr->next;
         }
@@ -155,27 +149,36 @@ contact_list_t *get_contact_list(void)
 }
 
 struct _contact_node_t * _make_contact_node(const char * const name, 
-    const char * const show)
+    const char * const show, const char * const status)
 {
     struct _contact_node_t *new = 
         (struct _contact_node_t *) malloc(sizeof(struct _contact_node_t));
-    new->contact = _new_contact(name, show);
+    new->contact = _new_contact(name, show, status);
     new->next = NULL;
 
     return new;
 }
 
-static contact_t * _new_contact(const char * const name, const char * const show)
+static contact_t * _new_contact(const char * const name, const char * const show,
+    const char * const status)
 {
     contact_t *new = (contact_t *) malloc(sizeof(contact_t));
     new->name = (char *) malloc((strlen(name) + 1) * sizeof(char));
     strcpy(new->name, name);
     
-    if (show != NULL) {
+    if (show == NULL || (strcmp(show, "") == 0)) {
+        new->show = (char *) malloc((strlen("online") + 1) * sizeof(char));
+        strcpy(new->show, "online");
+    } else {
         new->show = (char *) malloc((strlen(show) + 1) * sizeof(char));
         strcpy(new->show, show);
+    }
+
+    if (status != NULL) {
+        new->status = (char *) malloc((strlen(status) + 1) * sizeof(char));
+        strcpy(new->status, status);
     } else {
-        new->show = NULL;
+        new->status = NULL;
     }
 
     return new;
@@ -185,9 +188,10 @@ static void _destroy_contact(contact_t *contact)
 {
     free(contact->name);
 
-    if (contact->show != NULL) {
+    if (contact->show != NULL)
         free(contact->show);
-    }
+    if (contact->status != NULL)
+        free(contact->status);
 
     free(contact);
 }

@@ -26,6 +26,7 @@
 typedef struct _contact {
     char *name;
     char *show;
+    char *status;
 } contact_t;
 
 typedef struct _contact_list_t {
@@ -34,7 +35,8 @@ typedef struct _contact_list_t {
 } contact_list_t;
 
 void contact_list_clear(void);
-int contact_list_add(const char * const name, const char * const show);
+int contact_list_add(const char * const name, const char * const show,
+    const char * const status);
 int contact_list_remove(const char * const name);
 contact_list_t * get_contact_list(void);
 
