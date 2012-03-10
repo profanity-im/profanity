@@ -37,6 +37,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 #include <ncurses.h>
 #include "windows.h"
 #include "history.h"
@@ -138,8 +139,11 @@ static int _handle_edit(const int ch, char *input, int *size)
     int i;
     char *prev = NULL;
     char *next = NULL;
+    char *found = NULL;
+    char *auto_msg = NULL;
     int inp_y = 0;
     int inp_x = 0;
+    char inp_cpy[*size];
     
     getyx(inp_win, inp_y, inp_x);
 
@@ -191,6 +195,23 @@ static int _handle_edit(const int ch, char *input, int *size)
             _replace_input(input, next, size);
         return 1;
 
+    case 9: // tab
+        if ((strncmp(input, "/msg ", 5) == 0) && (*size > 5)) {
+            for(i = 5; i < *size; i++) {
+                inp_cpy[i-5] = input[i];
+            }
+            inp_cpy[(*size) - 5] = '\0';
+            found = find_contact(inp_cpy);
+            if (found != NULL) {
+                auto_msg = (char *) malloc((5 + (strlen(found) + 1)) * sizeof(char));
+                strcpy(auto_msg, "/msg ");
+                strcat(auto_msg, found);
+                _replace_input(input, auto_msg, size);
+                free(auto_msg);
+            }
+        }
+        return 1;
+
     default:
         return 0;
     }
@@ -198,7 +219,8 @@ static int _handle_edit(const int ch, char *input, int *size)
 
 static int _printable(const int ch)
 {
-   return (ch != ERR && ch != '\n' && ch != KEY_PPAGE && ch != KEY_NPAGE &&
+   return (ch != ERR && ch != '\n' && 
+            ch != KEY_PPAGE && ch != KEY_NPAGE &&
             ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) && 
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&

@@ -353,6 +353,12 @@ static void find_returns_null(void)
     assert_is_null(result);
 }
 
+static void find_on_empty_returns_null(void)
+{
+    char *result = find_contact("James");
+    assert_is_null(result);
+}
+
 void register_contact_list_tests(void)
 {
     TEST_MODULE("contact_list tests");
@@ -387,4 +393,5 @@ void register_contact_list_tests(void)
     TEST(find_second_exists);
     TEST(find_third_exists);
     TEST(find_returns_null);
+    TEST(find_on_empty_returns_null);
 }
