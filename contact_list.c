@@ -100,12 +100,27 @@ int contact_list_add(const char * const name, const char * const show,
 
         while(curr) {
             contact_t *curr_contact = curr->contact;
-            if (strcmp(curr_contact->name, name) == 0) {
+
+            // insert    
+            if (strcmp(curr_contact->name, name) > 0) {
+                if (prev) {
+                    struct _contact_node_t *new = _make_contact_node(name, show, status);
+                    new->next = curr;
+                    prev->next = new;
+                } else {
+                    struct _contact_node_t *new = _make_contact_node(name, show, status);
+                    new->next = _contact_list;
+                    _contact_list = new;
+                }
+                return 0;
+            // update
+            } else if (strcmp(curr_contact->name, name) == 0) {
                 _destroy_contact(curr->contact);
                 curr->contact = _new_contact(name, show, status);
                 return 0;
             }
 
+            // move on
             prev = curr;
             curr = curr->next;
         }

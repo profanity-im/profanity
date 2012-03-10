@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <head-unit.h>
 #include "contact_list.h"
 
@@ -43,8 +44,8 @@ static void first_and_second_elements_correct(void)
     contact_list_add("James", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
     contact_list_t *list = get_contact_list();
-    contact_t *james = list->contacts[0];
-    contact_t *dave = list->contacts[1];
+    contact_t *dave = list->contacts[0];
+    contact_t *james = list->contacts[1];
     
     assert_string_equals("James", james->name);
     assert_string_equals("Dave", dave->name);
@@ -53,8 +54,8 @@ static void first_and_second_elements_correct(void)
 static void contains_three_elements(void)
 {
     contact_list_add("James", NULL, NULL);
-    contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
+    contact_list_add("Dave", NULL, NULL);
     contact_list_t *list = get_contact_list();
     
     assert_int_equals(3, list->size);
@@ -62,13 +63,13 @@ static void contains_three_elements(void)
 
 static void first_three_elements_correct(void)
 {
-    contact_list_add("James", NULL, NULL);
-    contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
+    contact_list_add("Dave", NULL, NULL);
+    contact_list_add("James", NULL, NULL);
     contact_list_t *list = get_contact_list();
-    contact_t *james = list->contacts[0];
+    contact_t *bob = list->contacts[0];
     contact_t *dave = list->contacts[1];
-    contact_t *bob = list->contacts[2];
+    contact_t *james = list->contacts[2];
     
     assert_string_equals("James", james->name);
     assert_string_equals("Dave", dave->name);
@@ -82,9 +83,9 @@ static void add_twice_at_beginning_adds_once(void)
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
     contact_list_t *list = get_contact_list();
-    contact_t *james = list->contacts[0];
+    contact_t *bob = list->contacts[0];
     contact_t *dave = list->contacts[1];
-    contact_t *bob = list->contacts[2];
+    contact_t *james = list->contacts[2];
     
     assert_int_equals(3, list->size);    
     assert_string_equals("James", james->name);
@@ -99,9 +100,9 @@ static void add_twice_in_middle_adds_once(void)
     contact_list_add("James", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
     contact_list_t *list = get_contact_list();
-    contact_t *james = list->contacts[0];
+    contact_t *bob = list->contacts[0];
     contact_t *dave = list->contacts[1];
-    contact_t *bob = list->contacts[2];
+    contact_t *james = list->contacts[2];
     
     assert_int_equals(3, list->size);    
     assert_string_equals("James", james->name);
@@ -116,9 +117,9 @@ static void add_twice_at_end_adds_once(void)
     contact_list_add("Bob", NULL, NULL);
     contact_list_add("James", NULL, NULL);
     contact_list_t *list = get_contact_list();
-    contact_t *james = list->contacts[0];
+    contact_t *bob = list->contacts[0];
     contact_t *dave = list->contacts[1];
-    contact_t *bob = list->contacts[2];
+    contact_t *james = list->contacts[2];
     
     assert_int_equals(3, list->size);    
     assert_string_equals("James", james->name);
@@ -179,8 +180,8 @@ static void remove_first_when_three(void)
     contact_list_t *list = get_contact_list();
     
     assert_int_equals(2, list->size);
-    contact_t *dave = list->contacts[0];
-    contact_t *bob = list->contacts[1];
+    contact_t *bob = list->contacts[0];
+    contact_t *dave = list->contacts[1];
     
     assert_string_equals("Dave", dave->name);
     assert_string_equals("Bob", bob->name);
@@ -196,8 +197,8 @@ static void remove_second_when_three(void)
     contact_list_t *list = get_contact_list();
     
     assert_int_equals(2, list->size);
-    contact_t *james = list->contacts[0];
-    contact_t *bob = list->contacts[1];
+    contact_t *bob = list->contacts[0];
+    contact_t *james = list->contacts[1];
     
     assert_string_equals("James", james->name);
     assert_string_equals("Bob", bob->name);
@@ -213,8 +214,8 @@ static void remove_third_when_three(void)
     contact_list_t *list = get_contact_list();
     
     assert_int_equals(2, list->size);
-    contact_t *james = list->contacts[0];
-    contact_t *dave = list->contacts[1];
+    contact_t *dave = list->contacts[0];
+    contact_t *james = list->contacts[1];
     
     assert_string_equals("James", james->name);
     assert_string_equals("Dave", dave->name);
