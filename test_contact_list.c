@@ -359,6 +359,44 @@ static void find_on_empty_returns_null(void)
     assert_is_null(result);
 }
 
+static void find_twice_returns_second_when_two_match(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_add("Jamie", NULL, NULL);
+    contact_list_add("Bob", NULL, NULL);
+
+    char *result1 = find_contact("Jam");
+    char *result2 = find_contact(result1);
+    assert_string_equals("Jamie", result2);
+}
+
+static void find_twice_returns_first_when_two_match_and_reset(void)
+{
+    contact_list_add("James", NULL, NULL);
+    contact_list_add("Jamie", NULL, NULL);
+    contact_list_add("Bob", NULL, NULL);
+
+    char *result1 = find_contact("Jam");
+    reset_search_attempts();
+    char *result2 = find_contact(result1);
+    assert_string_equals("James", result2);
+}
+
+static void removed_contact_not_in_search(void)
+{
+    contact_list_add("Jamatron", NULL, NULL);
+    contact_list_add("Bob", NULL, NULL);
+    contact_list_add("Jambo", NULL, NULL);
+    contact_list_add("James", NULL, NULL);
+    contact_list_add("Jamie", NULL, NULL);
+
+    char *result1 = find_contact("Jam"); // Jamatron
+    char *result2 = find_contact(result1); // Jambo
+    contact_list_remove("James");
+    char *result3 = find_contact(result2);
+    assert_string_equals("Jamie", result3);
+}
+
 void register_contact_list_tests(void)
 {
     TEST_MODULE("contact_list tests");
@@ -394,4 +432,7 @@ void register_contact_list_tests(void)
     TEST(find_third_exists);
     TEST(find_returns_null);
     TEST(find_on_empty_returns_null);
+    TEST(find_twice_returns_second_when_two_match);
+    TEST(find_twice_returns_first_when_two_match_and_reset);
+    TEST(removed_contact_not_in_search);
 }

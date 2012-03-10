@@ -108,6 +108,8 @@ void inp_get_char(int *ch, char *input, int *size)
                 waddch(inp_win, *ch);
                 input[(*size)++] = *ch;
             }
+
+            reset_search_attempts();
         }
     }
 
@@ -151,6 +153,7 @@ static int _handle_edit(const int ch, char *input, int *size)
     
     case 127:
     case KEY_BACKSPACE:
+        reset_search_attempts();
         if (*size > 0) {
 
             // if at end, delete last char
