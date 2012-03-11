@@ -370,6 +370,27 @@ static void find_twice_returns_second_when_two_match(void)
     assert_string_equals("Jamie", result2);
 }
 
+static void find_five_times_finds_fifth(void)
+{
+    contact_list_add("Jama", NULL, NULL);
+    contact_list_add("Jamb", NULL, NULL);
+    contact_list_add("Mike", NULL, NULL);
+    contact_list_add("Dave", NULL, NULL);
+    contact_list_add("Jamm", NULL, NULL);
+    contact_list_add("Jamn", NULL, NULL);
+    contact_list_add("Matt", NULL, NULL);
+    contact_list_add("Jamo", NULL, NULL);
+    contact_list_add("Jamy", NULL, NULL);
+    contact_list_add("Jamz", NULL, NULL);
+
+    char *result1 = find_contact("Jam");
+    char *result2 = find_contact(result1);
+    char *result3 = find_contact(result2);
+    char *result4 = find_contact(result3);
+    char *result5 = find_contact(result4);
+    assert_string_equals("Jamo", result5);
+}
+
 static void find_twice_returns_first_when_two_match_and_reset(void)
 {
     contact_list_add("James", NULL, NULL);
@@ -435,4 +456,5 @@ void register_contact_list_tests(void)
     TEST(find_twice_returns_second_when_two_match);
     TEST(find_twice_returns_first_when_two_match_and_reset);
     TEST(removed_contact_not_in_search);
+    TEST(find_five_times_finds_fifth);
 }
