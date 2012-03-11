@@ -11,14 +11,9 @@ found at:
 
 WORKLIST
 --------
-
-Features:
-    Trim domain/resourse from usernames in UI
-    Allow subscription management
-    Allow presence notification
-    Dont start chat window when no such recipient
-    Managing and storing user profiles
-    Other IM protocols
-    Support chat logging
-    Tab completion on commands
-    Tab completion on users
+Allow subscription management
+Dont start chat window when no such recipient
+Managing and storing user profiles
+Other IM protocols
+Support chat logging
+Tab completion on commands

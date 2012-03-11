@@ -215,9 +215,9 @@ void win_contact_offline(const char * const from, const char * const show,
 
 void cons_help(void)
 {
-    _win_show_time(_cons_win);
-    wprintw(_cons_win, "Help:\n");
-
+    cons_show("");
+    cons_show("Commands:");
+    cons_show("");
     cons_show("/help                : This help.");
     cons_show("/connect user@host   : Login to jabber.");
     cons_show("/msg user@host mesg  : Send mesg to user.");
@@ -225,10 +225,14 @@ void cons_help(void)
     cons_show("/ros                 : List all contacts.");
     cons_show("/close               : Close a chat window.");
     cons_show("/quit                : Quit Profanity.");
+    cons_show("");
+    cons_show("Keys:");
+    cons_show("");
     cons_show("F1                   : This console window.");
-    cons_show("F2-10                : Chat windows.");
+    cons_show("F2-F10               : Chat windows.");
     cons_show("UP, DOWN             : Navigate input history.");
     cons_show("LEFT, RIGHT          : Edit current input.");
+    cons_show("TAB                  : Autocomplete recipient.");
     cons_show("PAGE UP, PAGE DOWN   : Page the chat window.");
 
     if (_curr_prof_win == 0)
