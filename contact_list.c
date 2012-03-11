@@ -32,13 +32,14 @@ struct _contact_node_t {
     struct _contact_node_t *next;
 };
 
-// the contact list
+// contact list
 static struct _contact_node_t * _contact_list = NULL;
 
-// number of tabs pressed whilst searching
+// state of current tab completion, currrent node and current search pattern
 static struct _contact_node_t * _last_found = NULL;
 static char * _search_str = NULL;
 
+static char * _search_contact_list_from(struct _contact_node_t * curr);
 static struct _contact_node_t * _make_contact_node(const char * const name, 
     const char * const show, const char * const status);
 static contact_t * _new_contact(const char * const name, const char * const show,
@@ -186,86 +187,60 @@ contact_list_t * get_contact_list(void)
 
 char * find_contact(const char * const search_str)
 {
-    struct _contact_node_t *curr = _contact_list;
+    char *found = NULL;
 
-    // no contact
-    if (!curr) {
+    // no contacts to search
+    if (!_contact_list)
         return NULL;
 
-    // not first search attempt
-    } else if (_last_found != NULL) {
-        
-        // search from here+1 to end 
-        curr = _last_found->next;
-        while(curr) {
-            contact_t *curr_contact = curr->contact;
-            
-            // match found
-            if (strncmp(curr_contact->name, _search_str, strlen(_search_str)) == 0) {
-                char *result = 
-                    (char *) malloc((strlen(curr_contact->name) + 1) * sizeof(char));
-
-                // set pointer to last found
-                _last_found = curr;
-                
-                // return the contact, must be free'd by caller
-                strcpy(result, curr_contact->name);
-                return result;
-            }
-
-            curr = curr->next;
-        }
-
-        // search from beginning to last found
-        curr = _contact_list;
-        while(curr) {
-            contact_t *curr_contact = curr->contact;
-            
-            // match found
-            if (strncmp(curr_contact->name, _search_str, strlen(_search_str)) == 0) {
-                char *result = 
-                    (char *) malloc((strlen(curr_contact->name) + 1) * sizeof(char));
-
-                // set pointer to last found
-                _last_found = curr;
-                
-                // return the contact, must be free'd by caller
-                strcpy(result, curr_contact->name);
-                return result;
-            }
-
-            curr = curr->next;
-        }
-
-        // we found nothing, reset last_found
-        reset_search_attempts();
-        return NULL;
-
-    // first attempt at searching
-    } else {
+    // first search attempt
+    if (_last_found == NULL) {
         _search_str = (char *) malloc((strlen(search_str) + 1) * sizeof(char));
         strcpy(_search_str, search_str);
-        while(curr) {
-            contact_t *curr_contact = curr->contact;
-            
-            // match found
-            if (strncmp(curr_contact->name, _search_str, strlen(_search_str)) == 0) {
-                char *result = 
-                    (char *) malloc((strlen(curr_contact->name) + 1) * sizeof(char));
 
-                // set pointer to last found
-                _last_found = curr;
-                
-                // return the contact, must be free'd by caller
-                strcpy(result, curr_contact->name);
-                return result;
-            }
+        found = _search_contact_list_from(_contact_list);
+        return found;
 
-            curr = curr->next;
-        }
+    // subsequent search attempt
+    } else {
+        // search from here+1 to end 
+        found = _search_contact_list_from(_last_found->next);
+        if (found != NULL)
+            return found;
 
+        // search from beginning
+        found = _search_contact_list_from(_contact_list);
+        if (found != NULL)
+            return found;
+
+        // we found nothing, reset search
+        reset_search_attempts();
         return NULL;
     }
+}
+
+static char * _search_contact_list_from(struct _contact_node_t * curr)
+{
+    while(curr) {
+        contact_t *curr_contact = curr->contact;
+        
+        // match found
+        if (strncmp(curr_contact->name, _search_str, strlen(_search_str)) == 0) {
+            char *result = 
+                (char *) malloc((strlen(curr_contact->name) + 1) * sizeof(char));
+
+            // set pointer to last found
+            _last_found = curr;
+            
+            // return the contact, must be free'd by caller
+            strcpy(result, curr_contact->name);
+            return result;
+        }
+
+        curr = curr->next;
+    }
+
+    return NULL;
 }
 
 static struct _contact_node_t * _make_contact_node(const char * const name, 
