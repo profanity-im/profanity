@@ -26,33 +26,29 @@
 
 #include "contact_list.h"
 
-// contact list node
-struct _contact_node_t {
-    contact_t *contact;    
-    struct _contact_node_t *next;
-};
+// internal contact list
+static struct contact_node_t * _contact_list = NULL;
 
-// contact list
-static struct _contact_node_t * _contact_list = NULL;
-
-// state of current tab completion, currrent node and current search pattern
-static struct _contact_node_t * _last_found = NULL;
+// state of current tab completion, currrent node 
+static struct contact_node_t * _last_found = NULL;
+// and current search pattern
 static char * _search_str = NULL;
 
-static char * _search_contact_list_from(struct _contact_node_t * curr);
-static struct _contact_node_t * _make_contact_node(const char * const name, 
+static char * _search_contact_list_from(struct contact_node_t * curr);
+static struct contact_node_t * _make_contact_node(const char * const name, 
     const char * const show, const char * const status);
-static contact_t * _new_contact(const char * const name, const char * const show,
+static struct contact_t * _new_contact(const char * const name, const char * const show,
     const char * const status);
-static void _destroy_contact(contact_t *contact);
+static void _destroy_contact(struct contact_t *contact);
+static struct contact_node_t * _copy_contact_list(struct contact_node_t *node);
 
 void contact_list_clear(void)
 {
-    struct _contact_node_t *curr = _contact_list;
+    struct contact_node_t *curr = _contact_list;
     
     if (curr) {
         while(curr) {
-            contact_t *contact = curr->contact;
+            struct contact_t *contact = curr->contact;
             _destroy_contact(contact);
             curr = curr->next;
         }
@@ -62,6 +58,18 @@ void contact_list_clear(void)
         
         reset_search_attempts();
     }
+}
+
+void destroy_list(struct contact_node_t *list)
+{
+    while(list) {
+        struct contact_t *contact = list->contact;
+        _destroy_contact(contact);
+        list = list->next;
+    }
+
+    free(list);
+    list = NULL;
 }
 
 void reset_search_attempts(void)
@@ -78,11 +86,11 @@ int contact_list_remove(const char * const name)
     if (!_contact_list) {
         return 0;
     } else {
-        struct _contact_node_t *curr = _contact_list;
-        struct _contact_node_t *prev = NULL;
+        struct contact_node_t *curr = _contact_list;
+        struct contact_node_t *prev = NULL;
         
         while(curr) {
-            contact_t *contact = curr->contact;
+            struct contact_t *contact = curr->contact;
             if (strcmp(contact->name, name) == 0) {
                 if (prev)
                     prev->next = curr->next;
@@ -117,20 +125,20 @@ int contact_list_add(const char * const name, const char * const show,
         
         return 1;
     } else {
-        struct _contact_node_t *curr = _contact_list;
-        struct _contact_node_t *prev = NULL;
+        struct contact_node_t *curr = _contact_list;
+        struct contact_node_t *prev = NULL;
 
         while(curr) {
-            contact_t *curr_contact = curr->contact;
+            struct contact_t *curr_contact = curr->contact;
 
             // insert    
             if (strcmp(curr_contact->name, name) > 0) {
                 if (prev) {
-                    struct _contact_node_t *new = _make_contact_node(name, show, status);
+                    struct contact_node_t *new = _make_contact_node(name, show, status);
                     new->next = curr;
                     prev->next = new;
                 } else {
-                    struct _contact_node_t *new = _make_contact_node(name, show, status);
+                    struct contact_node_t *new = _make_contact_node(name, show, status);
                     new->next = _contact_list;
                     _contact_list = new;
                 }
@@ -156,36 +164,32 @@ int contact_list_add(const char * const name, const char * const show,
     }
 }
 
-contact_list_t * get_contact_list(void)
+struct contact_node_t * get_contact_list(void)
 {
-    int count = 0;
+    struct contact_node_t *copy = NULL;
+    struct contact_node_t *curr = _contact_list;
     
-    contact_list_t *list = 
-        (contact_list_t *) malloc(sizeof(contact_list_t));
+    copy = _copy_contact_list(curr);
 
-    struct _contact_node_t *curr = _contact_list;
-    
-    if (!curr) {
-        list->contacts = NULL;
-    } else {
-        list->contacts = (contact_t **) malloc(sizeof(contact_t *));
-
-        while(curr) {
-            contact_t *curr_contact = curr->contact;
-            list->contacts[count] = 
-                _new_contact(curr_contact->name, curr_contact->show,
-                    curr_contact->status);
-            count++;
-            curr = curr->next;
-        }
-    }
-
-    list->size = count;
-
-    return list;
+    return copy;
 }
 
-char * find_contact(const char * const search_str)
+struct contact_node_t * _copy_contact_list(struct contact_node_t *node)
+{
+    if (node == NULL) {
+        return NULL;
+    } else {
+        struct contact_t *curr_contact = node->contact;
+        struct contact_node_t *copy = 
+            _make_contact_node(curr_contact->name, curr_contact->show, curr_contact->status);
+
+        copy->next = _copy_contact_list(node->next);
+
+        return copy;
+    }
+}
+
+char * find_contact(char *search_str)
 {
     char *found = NULL;
 
@@ -219,10 +223,22 @@ char * find_contact(const char * const search_str)
     }
 }
 
-static char * _search_contact_list_from(struct _contact_node_t * curr)
+int get_size(struct contact_node_t *list)
+{
+    int size = 0;
+
+    while(list) {
+        size++;
+        list = list->next;
+    }
+
+    return size;
+}
+
+static char * _search_contact_list_from(struct contact_node_t * curr)
 {
     while(curr) {
-        contact_t *curr_contact = curr->contact;
+        struct contact_t *curr_contact = curr->contact;
         
         // match found
         if (strncmp(curr_contact->name, _search_str, strlen(_search_str)) == 0) {
@@ -243,21 +259,21 @@ static char * _search_contact_list_from(struct _contact_node_t * curr)
     return NULL;
 }
 
-static struct _contact_node_t * _make_contact_node(const char * const name, 
+static struct contact_node_t * _make_contact_node(const char * const name, 
     const char * const show, const char * const status)
 {
-    struct _contact_node_t *new = 
-        (struct _contact_node_t *) malloc(sizeof(struct _contact_node_t));
+    struct contact_node_t *new = 
+        (struct contact_node_t *) malloc(sizeof(struct contact_node_t));
     new->contact = _new_contact(name, show, status);
     new->next = NULL;
 
     return new;
 }
 
-static contact_t * _new_contact(const char * const name, const char * const show,
+static struct contact_t * _new_contact(const char * const name, const char * const show,
     const char * const status)
 {
-    contact_t *new = (contact_t *) malloc(sizeof(contact_t));
+    struct contact_t *new = (struct contact_t *) malloc(sizeof(struct contact_t));
     new->name = (char *) malloc((strlen(name) + 1) * sizeof(char));
     strcpy(new->name, name);
     
@@ -279,15 +295,20 @@ static contact_t * _new_contact(const char * const name, const char * const show
     return new;
 }
 
-static void _destroy_contact(contact_t *contact)
+static void _destroy_contact(struct contact_t *contact)
 {
     free(contact->name);
 
-    if (contact->show != NULL)
+    if (contact->show != NULL) {
         free(contact->show);
-    if (contact->status != NULL)
+        contact->show = NULL;
+    }
+    if (contact->status != NULL) {
         free(contact->status);
+        contact->status = NULL;
+    }
 
     free(contact);
+    contact = NULL;
 }
 

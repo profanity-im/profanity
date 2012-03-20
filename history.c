@@ -43,7 +43,7 @@ void history_init(void)
 void history_append(const char * const inp)
 {
     if (_size < MAX_HISTORY) {
-        _history[_size] = (char*) malloc(strlen(inp) * sizeof(char));
+        _history[_size] = (char*) malloc((strlen(inp) + 1) * sizeof(char));
         strcpy(_history[_size], inp);
         _pos = _size;
         _size++;

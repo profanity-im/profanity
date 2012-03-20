@@ -239,14 +239,15 @@ void cons_help(void)
         dirty = TRUE;
 }
 
-void cons_show_online_contacts(const contact_list_t * const list)
+void cons_show_online_contacts(struct contact_node_t *list)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Online contacts:\n");
 
-    int i;
-    for (i = 0; i < list->size; i++) {
-        contact_t *contact = list->contacts[i];
+    struct contact_node_t *curr = list;
+
+    while(curr) {
+        struct contact_t *contact = curr->contact;
         _win_show_time(_cons_win);
         wattron(_cons_win, COLOR_PAIR(2));
         wprintw(_cons_win, "%s", contact->name);
@@ -256,6 +257,8 @@ void cons_show_online_contacts(const contact_list_t * const list)
             wprintw(_cons_win, ", \"%s\"", contact->status);
         wprintw(_cons_win, "\n");
         wattroff(_cons_win, COLOR_PAIR(2));
+
+        curr = curr->next;
     }
 }
 

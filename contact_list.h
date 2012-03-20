@@ -23,23 +23,25 @@
 #ifndef CONTACT_LIST_H
 #define CONTACT_LIST_H
 
-typedef struct _contact {
+struct contact_t {
     char *name;
     char *show;
     char *status;
-} contact_t;
+};
 
-typedef struct _contact_list_t {
-    contact_t **contacts;
-    int size;
-} contact_list_t;
+struct contact_node_t {
+    struct contact_t *contact;    
+    struct contact_node_t *next;
+};
 
 void contact_list_clear(void);
 void reset_search_attempts(void);
 int contact_list_add(const char * const name, const char * const show,
     const char * const status);
 int contact_list_remove(const char * const name);
-contact_list_t * get_contact_list(void);
-char * find_contact(const char * const search_str);
+struct contact_node_t * get_contact_list(void);
+char * find_contact(char *search_str);
+int get_size(struct contact_node_t *list);
+void destroy_list(struct contact_node_t *list);
 
 #endif
