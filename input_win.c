@@ -198,6 +198,14 @@ static int _handle_edit(const int ch, char *input, int *size)
             _replace_input(input, next, size);
         return 1;
 
+    case KEY_HOME:
+        wmove(inp_win, inp_y, 1);
+        return 1;
+
+    case KEY_END:
+        wmove(inp_win, inp_y, (*size) + 1);
+        return 1;
+
     case 9: // tab
         if ((strncmp(input, "/msg ", 5) == 0) && (*size > 5)) {
             for(i = 5; i < *size; i++) {
@@ -215,7 +223,7 @@ static int _handle_edit(const int ch, char *input, int *size)
             }
         }
         return 1;
-
+    
     default:
         return 0;
     }
