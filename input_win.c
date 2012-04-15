@@ -250,7 +250,7 @@ static int _printable(const int ch)
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&
             ch != KEY_F(10) && ch!= KEY_F(11) && ch != KEY_F(12) &&
-            ch != KEY_IC && ch != KEY_EIC);
+            ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE);
 }
 
 static void _replace_input(char *input, const char * const new_input, int *size)
