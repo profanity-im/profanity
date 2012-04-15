@@ -88,6 +88,14 @@ void gui_init(void)
     dirty = TRUE;
 }
 
+void win_resize(void)
+{
+    create_title_bar();
+    create_status_bar();
+    create_input_window();
+    dirty = TRUE;
+}
+
 void gui_refresh(void)
 {
     title_bar_refresh();

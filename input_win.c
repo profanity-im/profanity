@@ -87,29 +87,34 @@ void inp_get_char(int *ch, char *input, int *size)
     noecho();
     *ch = wgetch(inp_win);
 
-    // if it wasn't an arrow key etc
-    if (!_handle_edit(*ch, input, size)) {
-        if (_printable(*ch)) {
-            getyx(inp_win, inp_y, inp_x);
-           
-            // handle insert if not at end of input
-            if (inp_x <= *size) {
-                winsch(inp_win, *ch);
-                wmove(inp_win, inp_y, inp_x+1);
+    if (*ch == KEY_RESIZE) {
+        cons_show("REZISE SIGNAL");
+        win_resize();
+    } else {
+        // if it wasn't an arrow key etc
+        if (!_handle_edit(*ch, input, size)) {
+            if (_printable(*ch)) {
+                getyx(inp_win, inp_y, inp_x);
+               
+                // handle insert if not at end of input
+                if (inp_x <= *size) {
+                    winsch(inp_win, *ch);
+                    wmove(inp_win, inp_y, inp_x+1);
 
-                for (i = *size; i > inp_x -1; i--)
-                    input[i] = input[i-1];
-                input[inp_x -1] = *ch;
+                    for (i = *size; i > inp_x -1; i--)
+                        input[i] = input[i-1];
+                    input[inp_x -1] = *ch;
 
-                (*size)++;
+                    (*size)++;
 
-            // otherwise just append
-            } else {
-                waddch(inp_win, *ch);
-                input[(*size)++] = *ch;
+                // otherwise just append
+                } else {
+                    waddch(inp_win, *ch);
+                    input[(*size)++] = *ch;
+                }
+
+                reset_search_attempts();
             }
-
-            reset_search_attempts();
         }
     }
 
