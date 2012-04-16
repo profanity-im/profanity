@@ -93,6 +93,7 @@ void win_resize(void)
     create_title_bar();
     create_status_bar();
     create_input_window();
+    _current_window_refresh();
     dirty = TRUE;
 }
 
