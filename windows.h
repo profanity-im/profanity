@@ -33,10 +33,12 @@ struct prof_win {
     int paged;
 };
 
-// gui startup and shutdown
+// gui startup and shutdown, resize
 void gui_init(void);
 void gui_refresh(void);
 void gui_close(void);
+void gui_resize(const int ch, const char * const input,
+    const int size);
 
 // create windows
 void create_title_bar(void);
@@ -92,5 +94,6 @@ void inp_put_back(void);
 void inp_non_block(void);
 void inp_block(void);
 void inp_get_password(char *passwd);
+void inp_win_write(const char * const new_input, const int size);
 
 #endif

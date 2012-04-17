@@ -131,6 +131,15 @@ void inp_put_back(void)
     wrefresh(inp_win);
 }
 
+void inp_win_write(const char * const new_input, const int size)
+{
+    int i;
+    inp_clear();
+    for (i = 0; i < size; i++)
+        waddch(inp_win, new_input[i]);
+}
+
+
 /*
  * Deal with command editing, return 1 if ch was an edit
  * key press: up, down, left, right or backspace

@@ -49,6 +49,9 @@ void profanity_run(void)
             jabber_process_events();
             inp_get_char(&ch, inp, &size);
             win_handle_special_keys(&ch);
+            if (ch == KEY_RESIZE) {
+                gui_resize(ch, inp, size);
+            }
         }
 
         inp[size++] = '\0';
