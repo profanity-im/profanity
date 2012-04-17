@@ -2,6 +2,9 @@ Ncurses based Irssi inspired Jabber client.
 
 Requires ncurses.
 
+Run with -notls if the Jabber server dones't
+properly support it
+
 Note
 ----
 Currently requires modified version of libstrophe
