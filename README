@@ -2,7 +2,7 @@ Ncurses based Irssi inspired Jabber client.
 
 Requires ncurses.
 
-Run with -notls if the Jabber server dones't
+Run with -notls if the Jabber server doesn't
 properly support it
 
 Note
