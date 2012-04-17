@@ -88,7 +88,6 @@ void inp_get_char(int *ch, char *input, int *size)
     *ch = wgetch(inp_win);
 
     if (*ch == KEY_RESIZE) {
-        cons_show("REZISE SIGNAL");
         win_resize();
     } else {
         // if it wasn't an arrow key etc
