@@ -57,6 +57,7 @@ static void _cons_show_incoming_message(const char * const short_from,
     const int win_index);
 static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
+static void _win_handle_resize(const int * const ch);
 
 void gui_init(void)
 {
@@ -85,15 +86,6 @@ void gui_init(void)
     create_input_window();
     _create_windows();
 
-    dirty = TRUE;
-}
-
-void win_resize(void)
-{
-    create_title_bar();
-    create_status_bar();
-    create_input_window();
-    _current_window_refresh();
     dirty = TRUE;
 }
 
@@ -325,6 +317,7 @@ void win_handle_special_keys(const int * const ch)
 {
     _win_handle_switch(ch);
     _win_handle_page(ch);
+    _win_handle_resize(ch);
 }
 
 void win_page_off(void)
@@ -518,6 +511,17 @@ static void _win_handle_switch(const int * const ch)
         _win_switch_if_active(8);
     } else if (*ch == KEY_F(10)) {
         _win_switch_if_active(9);
+    }
+}
+
+static void _win_handle_resize(const int * const ch)
+{
+    if (*ch == KEY_RESIZE) {
+        create_title_bar();
+        create_status_bar();
+        create_input_window();
+        _current_window_refresh();
+        dirty = TRUE;
     }
 }
 

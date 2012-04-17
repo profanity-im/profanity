@@ -37,7 +37,6 @@ struct prof_win {
 void gui_init(void);
 void gui_refresh(void);
 void gui_close(void);
-void win_resize(void);
 
 // create windows
 void create_title_bar(void);

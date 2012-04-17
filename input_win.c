@@ -87,33 +87,29 @@ void inp_get_char(int *ch, char *input, int *size)
     noecho();
     *ch = wgetch(inp_win);
 
-    if (*ch == KEY_RESIZE) {
-        win_resize();
-    } else {
-        // if it wasn't an arrow key etc
-        if (!_handle_edit(*ch, input, size)) {
-            if (_printable(*ch)) {
-                getyx(inp_win, inp_y, inp_x);
-               
-                // handle insert if not at end of input
-                if (inp_x <= *size) {
-                    winsch(inp_win, *ch);
-                    wmove(inp_win, inp_y, inp_x+1);
+    // if it wasn't an arrow key etc
+    if (!_handle_edit(*ch, input, size)) {
+        if (_printable(*ch)) {
+            getyx(inp_win, inp_y, inp_x);
+           
+            // handle insert if not at end of input
+            if (inp_x <= *size) {
+                winsch(inp_win, *ch);
+                wmove(inp_win, inp_y, inp_x+1);
 
-                    for (i = *size; i > inp_x -1; i--)
-                        input[i] = input[i-1];
-                    input[inp_x -1] = *ch;
+                for (i = *size; i > inp_x -1; i--)
+                    input[i] = input[i-1];
+                input[inp_x -1] = *ch;
 
-                    (*size)++;
+                (*size)++;
 
-                // otherwise just append
-                } else {
-                    waddch(inp_win, *ch);
-                    input[(*size)++] = *ch;
-                }
-
-                reset_search_attempts();
+            // otherwise just append
+            } else {
+                waddch(inp_win, *ch);
+                input[(*size)++] = *ch;
             }
+
+            reset_search_attempts();
         }
     }
 
@@ -254,7 +250,7 @@ static int _printable(const int ch)
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&
             ch != KEY_F(10) && ch!= KEY_F(11) && ch != KEY_F(12) &&
-            ch != KEY_IC && ch != KEY_EIC);
+            ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE);
 }
 
 static void _replace_input(char *input, const char * const new_input, int *size)

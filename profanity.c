@@ -47,8 +47,8 @@ void profanity_run(void)
         while(ch != '\n') {
             gui_refresh();
             jabber_process_events();
-            win_handle_special_keys(&ch);
             inp_get_char(&ch, inp, &size);
+            win_handle_special_keys(&ch);
         }
 
         inp[size++] = '\0';
