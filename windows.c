@@ -168,12 +168,15 @@ void win_show_incomming_msg(const char * const from, const char * const message)
     _win_show_time(win);
     _win_show_user(win, short_from, 1);
     _win_show_message(win, message);
-
-    status_bar_active(win_index);
-    _cons_show_incoming_message(short_from, win_index);
-
-    if (win_index == _curr_prof_win)
+    
+    if (win_index == _curr_prof_win) {
+        status_bar_active(win_index);
         dirty = TRUE;
+    } else {
+        status_bar_new(win_index);
+        _cons_show_incoming_message(short_from, win_index);
+    }
+    
 }
 
 void win_show_outgoing_msg(const char * const from, const char * const to, 
@@ -190,8 +193,11 @@ void win_show_outgoing_msg(const char * const from, const char * const to,
     
     status_bar_active(win_index);
     
-    if (win_index == _curr_prof_win)
+    if (win_index == _curr_prof_win) {
         dirty = TRUE;
+    } else {
+        status_bar_new(win_index);
+    }
 }
 
 void win_contact_online(const char * const from, const char * const show, 
@@ -222,6 +228,26 @@ void win_contact_offline(const char * const from, const char * const show,
     
     if (win_index == _curr_prof_win)
         dirty = TRUE;
+}
+
+void win_disconnected(void)
+{
+    int i;
+    // show message in all active chats
+    for (i = 1; i < NUM_WINS; i++) {
+        if (strcmp(_wins[i].from, "") != 0) {
+            WINDOW *win = _wins[_curr_prof_win].win;
+            _win_show_time(win);
+            wattron(win, COLOR_PAIR(6));
+            wprintw(win, "%s\n", "Lost connection.");
+            wattroff(win, COLOR_PAIR(6));
+    
+            // if current win, set dirty
+            if (i == _curr_prof_win) {
+                dirty = TRUE;
+            }
+        }
+    }
 }
 
 void cons_help(void)
@@ -415,10 +441,12 @@ static void _win_switch_if_active(const int i)
         _curr_prof_win = i;
         win_page_off();
 
-        if (i == 0)
+        if (i == 0) {
             title_bar_title();
-        else
+        } else {
             title_bar_show(_wins[i].from);
+            status_bar_active(i);
+        }
     }
 
     dirty = TRUE;

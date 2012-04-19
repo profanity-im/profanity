@@ -24,6 +24,8 @@
 #define UTIL_H
 
 void get_time(char *thetime);
-char *trim(char *str);
+char * trim(char *str);
+char * str_replace(const char *string, const char *substr, 
+    const char *replacement);
 
 #endif

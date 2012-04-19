@@ -27,6 +27,7 @@
 #include "log.h"
 #include "contact_list.h"
 #include "windows.h"
+#include "util.h"
 
 #define PING_INTERVAL 120000 // 2 minutes
 
@@ -133,6 +134,8 @@ void jabber_process_events(void)
 
 void jabber_send(const char * const msg, const char * const recipient)
 {
+    char *coded_msg = str_replace(msg, "&", "&amp;");
+
     xmpp_stanza_t *reply, *body, *text;
 
     reply = xmpp_stanza_new(jabber_conn.ctx);
@@ -144,7 +147,7 @@ void jabber_send(const char * const msg, const char * const recipient)
     xmpp_stanza_set_name(body, "body");
 
     text = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_text(text, msg);
+    xmpp_stanza_set_text(text, coded_msg);
     xmpp_stanza_add_child(body, text);
     xmpp_stanza_add_child(reply, body);
 
@@ -221,7 +224,12 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         jabber_conn.conn_status = JABBER_CONNECTED;
     }
     else {
-        cons_bad_show("Login failed.");
+        if (jabber_conn.conn_status == JABBER_CONNECTED) {
+            cons_bad_show("Lost connection.");
+            win_disconnected();
+        } else {
+            cons_bad_show("Login failed.");
+        }
         win_page_off();
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
