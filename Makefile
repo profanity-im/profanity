@@ -6,7 +6,8 @@ CPPLIB = -lstdc++
 CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS)
 OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
        profanity.o util.o command.o history.o contact_list.o main.o
-TESTOBJS = test_history.o history.o test_contact_list.o contact_list.o
+TESTOBJS = test_history.o history.o test_contact_list.o contact_list.o \
+	       test_util.o util.o
 
 profanity: $(OBJS)
 	$(CC) -o profanity $(OBJS) $(LIBS)
@@ -26,6 +27,7 @@ main.o: profanity.h
 
 test_history.o: history.h
 test_contact_list.o: contact_list.h
+test_util.o: util.h
 
 testsuite: testsuite.h $(TESTOBJS)
 	$(CC) $(CFLAGS) $(CPPLIB) testsuite.c $(TESTOBJS) -o testsuite $(TESTLIB)
