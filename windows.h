@@ -84,6 +84,7 @@ void status_bar_get_password(void);
 void status_bar_print_message(const char * const msg);
 void status_bar_inactive(const int win);
 void status_bar_active(const int win);
+void status_bar_new(const int win);
 void status_bar_update_time(void);
 
 // input window actions

@@ -96,6 +96,23 @@ void status_bar_active(const int win)
     dirty = TRUE;
 }
 
+void status_bar_new(const int win)
+{
+    int active_pos = 1 + ((win -1) * 3);
+
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+ 
+    wattron(status_bar, A_BLINK);
+    if (win < 9)
+        mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
+    else
+        mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
+    wattroff(status_bar, A_BLINK);
+
+    dirty = TRUE;
+}
+
 void status_bar_get_password(void)
 {
     mvwprintw(status_bar, 0, 9, "Enter password:");
