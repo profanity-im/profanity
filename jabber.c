@@ -221,7 +221,12 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         jabber_conn.conn_status = JABBER_CONNECTED;
     }
     else {
-        cons_bad_show("Login failed.");
+        if (jabber_conn.conn_status == JABBER_CONNECTED) {
+            cons_bad_show("Lost connection.");
+            win_disconnected();
+        } else {
+            cons_bad_show("Login failed.");
+        }
         win_page_off();
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);

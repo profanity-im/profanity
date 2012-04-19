@@ -63,6 +63,7 @@ void win_contact_online(const char * const from, const char * const show,
     const char * const status);
 void win_contact_offline(const char * const from, const char * const show, 
     const char * const status);
+void win_disconnected(void);
 
 // console window actions
 void cons_help(void);

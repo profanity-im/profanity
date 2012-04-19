@@ -214,6 +214,26 @@ void win_contact_offline(const char * const from, const char * const show,
         dirty = TRUE;
 }
 
+void win_disconnected(void)
+{
+    int i;
+    // show message in all active chats
+    for (i = 1; i < NUM_WINS; i++) {
+        if (strcmp(_wins[i].from, "") != 0) {
+            WINDOW *win = _wins[_curr_prof_win].win;
+            _win_show_time(win);
+            wattron(win, COLOR_PAIR(6));
+            wprintw(win, "%s\n", "Lost connection.");
+            wattroff(win, COLOR_PAIR(6));
+    
+            // if current win, set dirty
+            if (i == _curr_prof_win) {
+                dirty = TRUE;
+            }
+        }
+    }
+}
+
 void cons_help(void)
 {
     cons_show("");
