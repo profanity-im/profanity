@@ -62,7 +62,12 @@ char * str_replace (const char *string, const char *substr,
     char *oldstr = NULL;
     char *head = NULL;
  
-    if ( substr == NULL || replacement == NULL ) 
+    if (string == NULL)
+        return NULL;
+
+    if ( substr == NULL || 
+         replacement == NULL || 
+         (strcmp(substr, "") == 0)) 
         return strdup (string);
 
     newstr = strdup (string);
