@@ -28,7 +28,8 @@
 
 static WINDOW *status_bar;
 static char _active[29] = "[ ][ ][ ][ ][ ][ ][ ][ ][  ]";
-
+static int is_active[9];
+static int is_new[9];
 static int dirty;
 static char curr_time[80];
 
@@ -36,8 +37,13 @@ static void _status_bar_update_time(void);
 
 void create_status_bar(void)
 {
-    int rows, cols;
+    int rows, cols, i;
     getmaxyx(stdscr, rows, cols);
+
+    for (i = 0; i < 9; i++) {
+        is_active[i] = FALSE;
+        is_new[i] = FALSE;
+    }
 
     status_bar = newwin(1, cols, rows-2, 0);
     wbkgd(status_bar, COLOR_PAIR(3));
