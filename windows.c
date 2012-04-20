@@ -108,7 +108,7 @@ void gui_close(void)
 
 void gui_resize(const int ch, const char * const input, const int size)
 {
-    title_bar_redraw();
+    title_bar_resize();
     create_status_bar();
     create_input_window();
     inp_win_write(input, size);

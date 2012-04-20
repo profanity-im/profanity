@@ -63,7 +63,7 @@ void title_bar_disconnected(void)
     _title_bar_draw_status();
 }
 
-void title_bar_redraw(void)
+void title_bar_resize(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
