@@ -63,6 +63,18 @@ void title_bar_disconnected(void)
     _title_bar_draw_status();
 }
 
+void title_bar_redraw(void)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    title_bar = newwin(1, cols, 0, 0);
+    wbkgd(title_bar, COLOR_PAIR(3));
+    _title_bar_draw_title();
+    _title_bar_draw_status();
+    dirty = TRUE;
+}
+
 void title_bar_refresh(void)
 {
     if (dirty) {

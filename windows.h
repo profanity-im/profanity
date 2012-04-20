@@ -47,6 +47,7 @@ void create_input_window(void);
 
 // title bar actions
 void title_bar_refresh(void);
+void title_bar_redraw(void);
 void title_bar_show(const char * const title);
 void title_bar_title(void);
 void title_bar_connected(void);
