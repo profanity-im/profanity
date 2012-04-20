@@ -27,7 +27,11 @@
 
 static WINDOW *title_bar;
 static char *current_title = NULL;
+static int connected = FALSE;
 static int dirty;
+
+void _title_bar_draw_title(void);
+void _title_bar_draw_status(void);
 
 void create_title_bar(void)
 {
@@ -49,38 +53,14 @@ void title_bar_title(void)
 
 void title_bar_connected(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-
-    wattron(title_bar, COLOR_PAIR(4));
-    mvwaddch(title_bar, 0, cols - 14, '[');
-    wattroff(title_bar, COLOR_PAIR(4));
-
-    mvwprintw(title_bar, 0, cols - 13, " ...online ");
-    
-    wattron(title_bar, COLOR_PAIR(4));
-    mvwaddch(title_bar, 0, cols - 2, ']');
-    wattroff(title_bar, COLOR_PAIR(4));
-    
-    dirty = TRUE;
+    connected = TRUE;
+    _title_bar_draw_status();
 }
 
 void title_bar_disconnected(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-   
-    wattron(title_bar, COLOR_PAIR(4));
-    mvwaddch(title_bar, 0, cols - 14, '[');
-    wattroff(title_bar, COLOR_PAIR(4));
-    
-    mvwprintw(title_bar, 0, cols - 13, " ..offline ");
-    
-    wattron(title_bar, COLOR_PAIR(4));
-    mvwaddch(title_bar, 0, cols - 2, ']');
-    wattroff(title_bar, COLOR_PAIR(4));
-    
-    dirty = TRUE;
+    connected = FALSE;
+    _title_bar_draw_status();
 }
 
 void title_bar_refresh(void)
@@ -99,6 +79,11 @@ void title_bar_show(const char * const title)
 
     current_title = (char *) malloc((strlen(title) + 1) * sizeof(char));
     strcpy(current_title, title);
+    _title_bar_draw_title();
+}
+
+void _title_bar_draw_title(void)
+{
     wmove(title_bar, 0, 0);
     int i;
     for (i = 0; i < 45; i++)
@@ -108,3 +93,23 @@ void title_bar_show(const char * const title)
     dirty = TRUE;
 }
 
+void _title_bar_draw_status(void)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 14, '[');
+    wattroff(title_bar, COLOR_PAIR(4));
+
+    if (connected == TRUE)
+        mvwprintw(title_bar, 0, cols - 13, " ...online ");
+    else
+        mvwprintw(title_bar, 0, cols - 13, " ..offline ");
+    
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 2, ']');
+    wattroff(title_bar, COLOR_PAIR(4));
+    
+    dirty = TRUE;
+}
