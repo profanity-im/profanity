@@ -40,8 +40,7 @@ void create_title_bar(void)
 
 void title_bar_title(void)
 {
-    char *title = "Profanity. Type /help for help information.";
-    title_bar_show(title);
+    title_bar_show("Profanity. Type /help for help information.");
     dirty = TRUE;
 }
 
