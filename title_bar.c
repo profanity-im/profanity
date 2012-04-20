@@ -20,10 +20,13 @@
  *
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include <ncurses.h>
 #include "windows.h"
 
 static WINDOW *title_bar;
+static char *current_title = NULL;
 static int dirty;
 
 void create_title_bar(void)
@@ -91,11 +94,16 @@ void title_bar_refresh(void)
 
 void title_bar_show(const char * const title)
 {
+    if (current_title != NULL)
+        free(current_title);
+
+    current_title = (char *) malloc((strlen(title) + 1) * sizeof(char));
+    strcpy(current_title, title);
     wmove(title_bar, 0, 0);
     int i;
     for (i = 0; i < 45; i++)
         waddch(title_bar, ' ');
-    mvwprintw(title_bar, 0, 0, " %s", title);
+    mvwprintw(title_bar, 0, 0, " %s", current_title);
     
     dirty = TRUE;
 }
