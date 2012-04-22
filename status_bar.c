@@ -21,12 +21,14 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <ncurses.h>
 #include "windows.h"
 #include "util.h"
 
 static WINDOW *status_bar;
+static char *message = NULL;
 static char _active[29] = "[ ][ ][ ][ ][ ][ ][ ][ ][  ]";
 static int is_active[9];
 static int is_new[9];
@@ -72,9 +74,37 @@ void status_bar_refresh(void)
         dirty = FALSE;
     }
 }
+    
+void status_bar_resize(void)
+{
+    int rows, cols, i;
+    getmaxyx(stdscr, rows, cols);
+
+    status_bar = newwin(1, cols, rows-2, 0);
+    wbkgd(status_bar, COLOR_PAIR(3));
+    wattron(status_bar, COLOR_PAIR(4));
+    mvwprintw(status_bar, 0, cols - 29, _active);
+    wattroff(status_bar, COLOR_PAIR(4));
+
+    for(i = 0; i < 9; i++) {
+        if (is_new[i])
+            status_bar_new(i+1);
+        else if (is_active[i])
+            status_bar_active(i+1);
+    }
+
+    if (message != NULL)
+        mvwprintw(status_bar, 0, 9, message);
+
+    get_time(curr_time);
+    dirty = TRUE;
+}
 
 void status_bar_inactive(const int win)
 {
+    is_active[win-1] = FALSE;
+    is_new[win-1] = FALSE;
+
     int active_pos = 1 + ((win -1) * 3);
 
     int rows, cols;
@@ -89,6 +119,9 @@ void status_bar_inactive(const int win)
 
 void status_bar_active(const int win)
 {
+    is_active[win-1] = TRUE;
+    is_new[win-1] = FALSE;
+
     int active_pos = 1 + ((win -1) * 3);
 
     int rows, cols;
@@ -104,6 +137,9 @@ void status_bar_active(const int win)
 
 void status_bar_new(const int win)
 {
+    is_active[win-1] = TRUE;
+    is_new[win-1] = TRUE;
+
     int active_pos = 1 + ((win -1) * 3);
 
     int rows, cols;
@@ -121,20 +157,35 @@ void status_bar_new(const int win)
 
 void status_bar_get_password(void)
 {
-    mvwprintw(status_bar, 0, 9, "Enter password:");
-
+    status_bar_print_message("Enter password:");
     dirty = TRUE;
 }
 
 void status_bar_print_message(const char * const msg)
 {
-    mvwprintw(status_bar, 0, 9, msg);
+    if (message != NULL)
+        free(message);
+
+    message = (char *) malloc((strlen(msg) + 1) * sizeof(char));    
+    strcpy(message, msg);
+    mvwprintw(status_bar, 0, 9, message);
 
     dirty = TRUE;
 }
 
 void status_bar_clear(void)
 {
+    if (message != NULL) {
+        free(message);
+        message = NULL;
+    }
+    
+    int i;
+    for (i = 0; i < 9; i++) {
+        is_active[i] = FALSE;
+        is_new[i] = FALSE;
+    }
+
     wclear(status_bar);
 
     int rows, cols;

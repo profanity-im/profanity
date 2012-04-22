@@ -82,6 +82,7 @@ void cons_show_online_contacts(struct contact_node_t * list);
 
 // status bar actions
 void status_bar_refresh(void);
+void status_bar_resize(void);
 void status_bar_clear(void);
 void status_bar_get_password(void);
 void status_bar_print_message(const char * const msg);
