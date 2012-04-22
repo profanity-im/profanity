@@ -57,6 +57,7 @@ static void _cons_show_incoming_message(const char * const short_from,
     const int win_index);
 static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
+static void _win_resize_all(void);
 
 void gui_init(void)
 {
@@ -110,7 +111,7 @@ void gui_resize(const int ch, const char * const input, const int size)
 {
     title_bar_resize();
     status_bar_resize();
-    _current_window_refresh();
+    _win_resize_all();
     inp_win_resize(input, size);
     dirty = TRUE;
 }
@@ -474,12 +475,22 @@ static void _win_show_message(WINDOW *win, const char * const message)
     wattron(win, A_BOLD);
 }
 
-static void _current_window_refresh()
+static void _current_window_refresh(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
     WINDOW *current = _wins[_curr_prof_win].win;
+    prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
+}
+
+void _win_resize_all(void)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    WINDOW *current = _wins[_curr_prof_win].win;
+    wresize(current, PAD_SIZE, cols);
     prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
