@@ -110,9 +110,8 @@ void gui_resize(const int ch, const char * const input, const int size)
 {
     title_bar_resize();
     status_bar_resize();
-    create_input_window();
-    inp_win_write(input, size);
     _current_window_refresh();
+    inp_win_resize(input, size);
     dirty = TRUE;
 }
 

@@ -94,10 +94,10 @@ void status_bar_update_time(void);
 // input window actions
 void inp_get_char(int *ch, char *input, int *size);
 void inp_clear(void);
+void inp_win_resize(const char * input, const int size);
 void inp_put_back(void);
 void inp_non_block(void);
 void inp_block(void);
 void inp_get_password(char *passwd);
-void inp_win_write(const char * const new_input, const int size);
 
 #endif

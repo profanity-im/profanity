@@ -68,8 +68,9 @@ void title_bar_resize(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    title_bar = newwin(1, cols, 0, 0);
+    wresize(title_bar, 1, cols);
     wbkgd(title_bar, COLOR_PAIR(3));
+    wclear(title_bar);
     _title_bar_draw_title();
     _title_bar_draw_status();
     dirty = TRUE;

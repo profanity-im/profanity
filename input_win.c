@@ -60,6 +60,15 @@ void create_input_window(void)
     wrefresh(inp_win);
 }
 
+void inp_win_resize(const char * const input, const int size)
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    mvwin(inp_win, rows-1, 0);
+    wresize(inp_win, 1, cols);
+    wrefresh(inp_win);
+}
+
 void inp_clear(void)
 {
     wclear(inp_win);
@@ -83,7 +92,8 @@ void inp_get_char(int *ch, char *input, int *size)
     int inp_x = 0;
     int i;
 
-    // echo off, and get some more input
+    
+// echo off, and get some more input
     noecho();
     *ch = wgetch(inp_win);
 
@@ -130,15 +140,6 @@ void inp_put_back(void)
 {
     wrefresh(inp_win);
 }
-
-void inp_win_write(const char * const new_input, const int size)
-{
-    int i;
-    inp_clear();
-    for (i = 0; i < size; i++)
-        waddch(inp_win, new_input[i]);
-}
-
 
 /*
  * Deal with command editing, return 1 if ch was an edit
