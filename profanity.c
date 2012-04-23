@@ -41,7 +41,7 @@ void profanity_run(void)
     inp_non_block();
     while(cmd_result == TRUE) {
         int ch = ERR;
-        char inp[100];
+        char inp[200];
         int size = 0;
 
         while(ch != '\n') {
