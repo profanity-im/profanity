@@ -23,8 +23,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <ncurses.h>
-
 #include "profanity.h"
 #include "log.h"
 #include "windows.h"
