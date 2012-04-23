@@ -495,7 +495,6 @@ void _win_resize_all(void)
 
     // only make the pads bigger, to avoid data loss on cropping
     if (cols > max_cols) {
-        cons_show("RESIZING PAD");
         max_cols = cols;
 
         int i;
