@@ -44,7 +44,6 @@ int process_input(char *inp)
 {
     int result = FALSE;
 
-
     if (strlen(inp) > 0)
         history_append(inp);
 

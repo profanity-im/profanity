@@ -37,10 +37,13 @@ static char * _search_str = NULL;
 static char * _search_contact_list_from(struct contact_node_t * curr);
 static struct contact_node_t * _make_contact_node(const char * const name, 
     const char * const show, const char * const status);
-static struct contact_t * _new_contact(const char * const name, const char * const show,
-    const char * const status);
+static struct contact_t * _new_contact(const char * const name, 
+    const char * const show, const char * const status);
 static void _destroy_contact(struct contact_t *contact);
 static struct contact_node_t * _copy_contact_list(struct contact_node_t *node);
+static void _insert_contact(struct contact_node_t *curr, 
+    struct contact_node_t *prev, const char * const name, 
+    const char * const show, const char * const status);
 
 void contact_list_clear(void)
 {
@@ -133,15 +136,7 @@ int contact_list_add(const char * const name, const char * const show,
 
             // insert    
             if (strcmp(curr_contact->name, name) > 0) {
-                if (prev) {
-                    struct contact_node_t *new = _make_contact_node(name, show, status);
-                    new->next = curr;
-                    prev->next = new;
-                } else {
-                    struct contact_node_t *new = _make_contact_node(name, show, status);
-                    new->next = _contact_list;
-                    _contact_list = new;
-                }
+                _insert_contact(curr, prev, name, show, status);
                 return 0;
             // update
             } else if (strcmp(curr_contact->name, name) == 0) {
@@ -181,7 +176,9 @@ struct contact_node_t * _copy_contact_list(struct contact_node_t *node)
     } else {
         struct contact_t *curr_contact = node->contact;
         struct contact_node_t *copy = 
-            _make_contact_node(curr_contact->name, curr_contact->show, curr_contact->status);
+            _make_contact_node(curr_contact->name, 
+                               curr_contact->show, 
+                               curr_contact->status);
 
         copy->next = _copy_contact_list(node->next);
 
@@ -270,10 +267,11 @@ static struct contact_node_t * _make_contact_node(const char * const name,
     return new;
 }
 
-static struct contact_t * _new_contact(const char * const name, const char * const show,
-    const char * const status)
+static struct contact_t * _new_contact(const char * const name, 
+    const char * const show, const char * const status)
 {
-    struct contact_t *new = (struct contact_t *) malloc(sizeof(struct contact_t));
+    struct contact_t *new = 
+        (struct contact_t *) malloc(sizeof(struct contact_t));
     new->name = (char *) malloc((strlen(name) + 1) * sizeof(char));
     strcpy(new->name, name);
     
@@ -310,5 +308,20 @@ static void _destroy_contact(struct contact_t *contact)
 
     free(contact);
     contact = NULL;
+}
+
+static void _insert_contact(struct contact_node_t *curr, 
+    struct contact_node_t *prev, const char * const name,
+    const char * const show, const char * const status)
+{
+    if (prev) {
+        struct contact_node_t *new = _make_contact_node(name, show, status);
+        new->next = curr;
+        prev->next = new;
+    } else {
+        struct contact_node_t *new = _make_contact_node(name, show, status);
+        new->next = _contact_list;
+        _contact_list = new;
+    }
 }
 
