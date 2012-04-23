@@ -11,12 +11,3 @@ Currently requires modified version of libstrophe
 found at:
     
     git://github.com/boothj5/libstrophe.git
-
-WORKLIST
---------
-Allow subscription management
-Dont start chat window when no such recipient
-Managing and storing user profiles
-Other IM protocols
-Support chat logging
-Tab completion on commands
