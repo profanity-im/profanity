@@ -42,6 +42,9 @@ static WINDOW * _cons_win = NULL;
 // current window state
 static int dirty;
 
+// max columns for main windows, never resize below
+static int max_cols = 0;
+
 static void _create_windows(void);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact);
@@ -376,6 +379,7 @@ static void _create_windows(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
+    max_cols = cols;
 
     // create the console window in 0
     struct prof_win cons;
@@ -489,8 +493,18 @@ void _win_resize_all(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
+    // only make the pads bigger, to avoid data loss on cropping
+    if (cols > max_cols) {
+        cons_show("RESIZING PAD");
+        max_cols = cols;
+
+        int i;
+        for (i = 0; i < NUM_WINS; i++) {
+            wresize(_wins[i].win, PAD_SIZE, cols);
+        }
+    }
+    
     WINDOW *current = _wins[_curr_prof_win].win;
-    wresize(current, PAD_SIZE, cols);
     prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
