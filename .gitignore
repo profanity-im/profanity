@@ -5,8 +5,6 @@
 # *.[oa]
 # *~
 profanity
-curses_example
-roster
 *.o
 *.log
 *.swp
