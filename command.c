@@ -22,7 +22,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <ncurses.h>
 #include "command.h"
 #include "contact_list.h"
 #include "history.h"
