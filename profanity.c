@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <glib.h>
 
 #include "profanity.h"
 #include "log.h"
@@ -34,7 +35,7 @@ static void _profanity_shutdown(void);
 
 void profanity_run(void)
 {
-    int cmd_result = TRUE;
+    gboolean cmd_result = TRUE;
 
     inp_non_block();
     while(cmd_result == TRUE) {
