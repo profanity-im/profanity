@@ -45,6 +45,9 @@ static int dirty;
 // max columns for main windows, never resize below
 static int max_cols = 0;
 
+// allow beep?
+static int do_beep = TRUE;
+
 static void _create_windows(void);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact);
@@ -149,6 +152,11 @@ int win_in_chat(void)
         (strcmp(_wins[_curr_prof_win].from, "") != 0));
 }
 
+void win_set_beep(int val)
+{
+    do_beep = val;
+}
+
 char *win_get_recipient(void)
 {
     struct prof_win current = _wins[_curr_prof_win];
@@ -180,7 +188,8 @@ void win_show_incomming_msg(const char * const from, const char * const message)
         _cons_show_incoming_message(short_from, win_index);
     }
 
-    beep();
+    if (do_beep == TRUE)
+        beep();
 }
 
 void win_show_outgoing_msg(const char * const from, const char * const to, 
@@ -264,6 +273,7 @@ void cons_help(void)
     cons_show("/msg user@host mesg  : Send mesg to user.");
     cons_show("/who                 : Find out who is online.");
     cons_show("/ros                 : List all contacts.");
+    cons_show("/beep <on/off>       : Enable/disable sound notification");
     cons_show("/close               : Close a chat window.");
     cons_show("/quit                : Quit Profanity.");
     cons_show("");

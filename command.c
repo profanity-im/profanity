@@ -38,6 +38,7 @@ static int _cmd_ros(void);
 static int _cmd_connect(const char * const inp);
 static int _cmd_msg(const char * const inp);
 static int _cmd_close(const char * const inp);
+static int _cmd_set_beep(const char * const inp);
 static int _cmd_default(const char * const inp);
 
 int process_input(char *inp)
@@ -84,6 +85,8 @@ static int _handle_command(const char * const command, const char * const inp)
         result = _cmd_close(inp);
     } else if (strcmp(command, "/connect") == 0) {
         result = _cmd_connect(inp);
+    } else if (strcmp(command, "/beep") == 0) {
+        result = _cmd_set_beep(inp);
     } else {
         result = _cmd_default(inp);
     }
@@ -201,6 +204,19 @@ static int _cmd_close(const char * const inp)
     if (!win_close_win())
         cons_bad_command(inp);
     
+    return TRUE;
+}
+
+static int _cmd_set_beep(const char * const inp)
+{
+    if (strcmp(inp, "/beep on") == 0) {
+        win_set_beep(TRUE);
+    } else if (strcmp(inp, "/beep off") == 0) {
+        win_set_beep(FALSE);
+    } else {
+        cons_show("Usage: /beep <on/off>");
+    }        
+
     return TRUE;
 }
 
