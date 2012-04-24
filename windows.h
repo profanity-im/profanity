@@ -91,6 +91,7 @@ void status_bar_inactive(const int win);
 void status_bar_active(const int win);
 void status_bar_new(const int win);
 void status_bar_update_time(void);
+void status_bar_set_flash(int val);
 
 // input window actions
 void inp_get_char(int *ch, char *input, int *size);

@@ -274,6 +274,7 @@ void cons_help(void)
     cons_show("/who                 : Find out who is online.");
     cons_show("/ros                 : List all contacts.");
     cons_show("/beep <on/off>       : Enable/disable sound notification");
+    cons_show("/flash <on/off>      : Enable/disable screen flash notification");
     cons_show("/close               : Close a chat window.");
     cons_show("/quit                : Quit Profanity.");
     cons_show("");
