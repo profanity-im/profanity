@@ -179,7 +179,8 @@ void win_show_incomming_msg(const char * const from, const char * const message)
         status_bar_new(win_index);
         _cons_show_incoming_message(short_from, win_index);
     }
-    
+
+    beep();
 }
 
 void win_show_outgoing_msg(const char * const from, const char * const to, 
