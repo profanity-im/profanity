@@ -36,25 +36,6 @@ void get_time(char *thetime)
     strftime(thetime, 80, "%H:%M", timeinfo);
 }
 
-char *trim(char *str)
-{
-    char *end;
-
-    while (isspace(*str)) 
-        str++;
-
-    if (*str == 0)
-      return str;
-
-    end = str + strlen(str) - 1;
-    while (end > str && isspace(*end)) 
-        end--;
-
-    *(end+1) = 0;
-
-    return str;
-}
-
 char * str_replace (const char *string, const char *substr, 
     const char *replacement) {
     char *tok = NULL;

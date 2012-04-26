@@ -22,7 +22,9 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <ncurses.h>
+
+#include <glib.h>
+
 #include "command.h"
 #include "contact_list.h"
 #include "history.h"
@@ -30,21 +32,24 @@
 #include "windows.h"
 #include "util.h"
 
-static int _handle_command(const char * const command, const char * const inp);
-static int _cmd_quit(void);
-static int _cmd_help(void);
-static int _cmd_who(void);
-static int _cmd_ros(void);
-static int _cmd_connect(const char * const inp);
-static int _cmd_msg(const char * const inp);
-static int _cmd_close(const char * const inp);
-static int _cmd_set_beep(const char * const inp);
-static int _cmd_set_flash(const char * const inp);
-static int _cmd_default(const char * const inp);
+static gboolean _handle_command(const char * const command, 
+    const char * const inp);
+static gboolean _cmd_quit(void);
+static gboolean _cmd_help(void);
+static gboolean _cmd_who(void);
+static gboolean _cmd_ros(void);
+static gboolean _cmd_connect(const char * const inp);
+static gboolean _cmd_msg(const char * const inp);
+static gboolean _cmd_close(const char * const inp);
+static gboolean _cmd_set_beep(const char * const inp);
+static gboolean _cmd_set_flash(const char * const inp);
+static gboolean _cmd_default(const char * const inp);
 
-int process_input(char *inp)
+gboolean process_input(char *inp)
 {
-    int result = FALSE;
+    gboolean result = FALSE;
+
+    g_strstrip(inp);
 
     if (strlen(inp) > 0)
         history_append(inp);
@@ -52,7 +57,6 @@ int process_input(char *inp)
     if (strlen(inp) == 0) {
         result = TRUE;
     } else if (inp[0] == '/') {
-        inp = trim(inp);
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
         char *command = strtok(inp_cpy, " ");
@@ -68,9 +72,9 @@ int process_input(char *inp)
     return result;
 }
 
-static int _handle_command(const char * const command, const char * const inp)
+static gboolean _handle_command(const char * const command, const char * const inp)
 {
-    int result = FALSE;
+    gboolean result = FALSE;
 
     if (strcmp(command, "/quit") == 0) {
         result = _cmd_quit();
@@ -97,9 +101,9 @@ static int _handle_command(const char * const command, const char * const inp)
     return result;
 }
 
-static int _cmd_connect(const char * const inp)
+static gboolean _cmd_connect(const char * const inp)
 {
-    int result = FALSE;
+    gboolean result = FALSE;
     jabber_status_t conn_status = jabber_connection_status();
 
     if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
@@ -130,19 +134,19 @@ static int _cmd_connect(const char * const inp)
     return result;
 }
 
-static int _cmd_quit(void)
+static gboolean _cmd_quit(void)
 {
     return FALSE;
 }
 
-static int _cmd_help(void)
+static gboolean _cmd_help(void)
 {
     cons_help();
 
     return TRUE;
 }
 
-static int _cmd_ros(void)
+static gboolean _cmd_ros(void)
 {
     jabber_status_t conn_status = jabber_connection_status();
 
@@ -154,7 +158,7 @@ static int _cmd_ros(void)
     return TRUE;
 }
 
-static int _cmd_who(void)
+static gboolean _cmd_who(void)
 {
     jabber_status_t conn_status = jabber_connection_status();
 
@@ -168,7 +172,7 @@ static int _cmd_who(void)
     return TRUE;
 }
 
-static int _cmd_msg(const char * const inp)
+static gboolean _cmd_msg(const char * const inp)
 {
     char *usr = NULL;
     char *msg = NULL;
@@ -202,7 +206,7 @@ static int _cmd_msg(const char * const inp)
     return TRUE;
 }
 
-static int _cmd_close(const char * const inp)
+static gboolean _cmd_close(const char * const inp)
 {
     if (!win_close_win())
         cons_bad_command(inp);
@@ -210,7 +214,7 @@ static int _cmd_close(const char * const inp)
     return TRUE;
 }
 
-static int _cmd_set_beep(const char * const inp)
+static gboolean _cmd_set_beep(const char * const inp)
 {
     if (strcmp(inp, "/beep on") == 0) {
         cons_show("Sound enabled.");
@@ -225,7 +229,7 @@ static int _cmd_set_beep(const char * const inp)
     return TRUE;
 }
 
-static int _cmd_set_flash(const char * const inp)
+static gboolean _cmd_set_flash(const char * const inp)
 {
     if (strcmp(inp, "/flash on") == 0) {
         cons_show("Screen flash enabled.");
@@ -240,7 +244,7 @@ static int _cmd_set_flash(const char * const inp)
     return TRUE;
 }
 
-static int _cmd_default(const char * const inp)
+static gboolean _cmd_default(const char * const inp)
 {
     if (win_in_chat()) {
         char *recipient = win_get_recipient();

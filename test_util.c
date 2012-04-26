@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <head-unit.h>
 #include "util.h"
 
