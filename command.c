@@ -47,13 +47,14 @@ gboolean process_input(char *inp)
 {
     gboolean result = FALSE;
 
+    g_strstrip(inp);
+
     if (strlen(inp) > 0)
         history_append(inp);
 
     if (strlen(inp) == 0) {
         result = TRUE;
     } else if (inp[0] == '/') {
-        trim(inp);
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
         char *command = strtok(inp_cpy, " ");

@@ -25,8 +25,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include <glib.h>
-
 void get_time(char *thetime)
 {
     time_t rawtime;
@@ -36,14 +34,6 @@ void get_time(char *thetime)
     timeinfo = localtime(&rawtime);
 
     strftime(thetime, 80, "%H:%M", timeinfo);
-}
-
-char *trim(char *str)
-{
-    if (str == NULL)
-        return NULL;
-
-    return g_strstrip(str);
 }
 
 char * str_replace (const char *string, const char *substr, 
