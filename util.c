@@ -25,6 +25,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include <glib.h>
+
 void get_time(char *thetime)
 {
     time_t rawtime;
@@ -41,21 +43,7 @@ char *trim(char *str)
     if (str == NULL)
         return NULL;
 
-    char *end;
-
-    while (isspace(*str)) 
-        str++;
-
-    if (*str == 0)
-      return str;
-
-    end = str + strlen(str) - 1;
-    while (end > str && isspace(*end)) 
-        end--;
-
-    *(end+1) = 0;
-
-    return str;
+    return g_strstrip(str);
 }
 
 char * str_replace (const char *string, const char *substr, 

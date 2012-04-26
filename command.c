@@ -53,7 +53,7 @@ gboolean process_input(char *inp)
     if (strlen(inp) == 0) {
         result = TRUE;
     } else if (inp[0] == '/') {
-        inp = trim(inp);
+        trim(inp);
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
         char *command = strtok(inp_cpy, " ");

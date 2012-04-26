@@ -199,9 +199,9 @@ void trim_when_empty(void)
 void trim_when_null(void)
 {
     char *str = NULL;
-    trim(str);
+    char *result = trim(str);
 
-    assert_is_null(str);
+    assert_is_null(result);
 }
 
 void register_util_tests(void)
