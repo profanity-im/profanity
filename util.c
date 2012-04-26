@@ -38,6 +38,9 @@ void get_time(char *thetime)
 
 char *trim(char *str)
 {
+    if (str == NULL)
+        return NULL;
+
     char *end;
 
     while (isspace(*str)) 
