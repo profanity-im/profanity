@@ -34,6 +34,7 @@
 
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
+static struct command_t _parse_command(char *str);
 static gboolean _cmd_quit(void);
 static gboolean _cmd_help(void);
 static gboolean _cmd_who(void);
@@ -44,6 +45,11 @@ static gboolean _cmd_close(const char * const inp);
 static gboolean _cmd_set_beep(const char * const inp);
 static gboolean _cmd_set_flash(const char * const inp);
 static gboolean _cmd_default(const char * const inp);
+
+struct command_t {
+    char *command;
+    char **params;
+};
 
 gboolean process_input(char *inp)
 {
@@ -57,10 +63,8 @@ gboolean process_input(char *inp)
     if (strlen(inp) == 0) {
         result = TRUE;
     } else if (inp[0] == '/') {
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
-        char *command = strtok(inp_cpy, " ");
-        result = _handle_command(command, inp);
+        struct command_t cmd = _parse_command(inp);
+        result = _handle_command(cmd.command, inp);
     } else {
         result = _cmd_default(inp);
     }
@@ -70,6 +74,16 @@ gboolean process_input(char *inp)
     win_page_off();
 
     return result;
+}
+
+static struct command_t _parse_command(char *str)
+{
+    struct command_t cmd;
+    char **split = g_strsplit(str, " ", 0);
+
+    cmd.command = split[0];
+    cmd.params = NULL;
+    return cmd;
 }
 
 static gboolean _handle_command(const char * const command, const char * const inp)
