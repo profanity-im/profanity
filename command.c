@@ -65,7 +65,6 @@ gboolean process_input(char *inp)
     } else if (inp[0] == '/') {
         struct command_t cmd = _parse_command(inp);
         result = _handle_command(cmd.command, inp);
-        free(cmd.command);
     } else {
         result = _cmd_default(inp);
     }
