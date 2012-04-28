@@ -81,10 +81,8 @@ static struct command_t _parse_command(char *str)
     struct command_t cmd;
     char **split = g_strsplit(str, " ", 0);
 
-    cmd.command = malloc((strlen(split[0]) + 1) * sizeof(char));
-    strcpy(cmd.command, split[0]);
+    cmd.command = split[0];
     cmd.params = NULL;
-    g_strfreev(split);
     return cmd;
 }
 
