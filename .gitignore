@@ -9,3 +9,4 @@ profanity
 *.log
 *.swp
 testsuite
+tags
