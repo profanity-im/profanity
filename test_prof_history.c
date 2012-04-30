@@ -10,12 +10,12 @@ void previous_on_empty_returns_current(void)
     assert_string_equals("inp", item);
 }
 
-void next_on_empty_returns_null(void)
+void next_on_empty_returns_current(void)
 {
     PHistory history = p_history_new(10);
     char *item = p_history_next(history, "inp");
 
-    assert_is_null(item);
+    assert_string_equals("inp", item);
 }
 
 void previous_once_returns_last(void)
@@ -71,7 +71,7 @@ void previous_goes_to_correct_element(void)
     assert_string_equals("going", item3); 
 }
 
-void prev_then_next_returns_null(void)
+void prev_then_next_returns_empty(void)
 {
     PHistory history = p_history_new(10);
     p_history_append(history, "Hello");
@@ -79,17 +79,42 @@ void prev_then_next_returns_null(void)
     char *item1 = p_history_previous(history, NULL);
     char *item2 = p_history_next(history, item1);
 
-    assert_is_null(item2);
+    assert_string_equals("", item2);
+}
+
+void prev_with_val_then_next_returns_val(void)
+{
+    PHistory history = p_history_new(10);
+    p_history_append(history, "Hello");
+
+    char *item1 = p_history_previous(history, "Oioi");
+    char *item2 = p_history_next(history, item1);
+
+    assert_string_equals("Oioi", item2);
+}
+
+void prev_with_val_then_next_twice_returns_val(void)
+{
+    PHistory history = p_history_new(10);
+    p_history_append(history, "Hello");
+
+    char *item1 = p_history_previous(history, "Oioi");
+    char *item2 = p_history_next(history, item1);
+    char *item3 = p_history_next(history, item2);
+
+    assert_string_equals("Oioi", item3);
 }
 
 void register_prof_history_tests(void)
 {
     TEST_MODULE("prof_history tests");
     TEST(previous_on_empty_returns_current);
-    TEST(next_on_empty_returns_null);
+    TEST(next_on_empty_returns_current);
     TEST(previous_once_returns_last);
     TEST(previous_twice_when_one_returns_first);
     TEST(previous_always_stops_at_first);
     TEST(previous_goes_to_correct_element);
-    TEST(prev_then_next_returns_null);
+    TEST(prev_then_next_returns_empty);
+    TEST(prev_with_val_then_next_returns_val);
+    TEST(prev_with_val_then_next_twice_returns_val);
 }
