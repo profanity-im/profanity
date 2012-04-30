@@ -29,7 +29,6 @@
 #include "windows.h"
 #include "jabber.h"
 #include "command.h"
-#include "history.h"
 
 static void _profanity_shutdown(void);
 
@@ -67,7 +66,7 @@ void profanity_init(const int disable_tls)
     log_init();
     gui_init();
     jabber_init(disable_tls);
-    history_init();
+    command_init();
     atexit(_profanity_shutdown);
 }
 

@@ -72,6 +72,11 @@ gboolean process_input(char *inp)
     return result;
 }
 
+void command_init(void)
+{
+    history_init();
+}
+
 static gboolean _handle_command(const char * const command, const char * const inp)
 {
     gboolean result = FALSE;

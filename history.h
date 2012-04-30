@@ -25,8 +25,8 @@
 #define HISTORY_H
 
 void history_init(void);
-void history_append(const char * const inp);
-char *history_previous(void);
-char *history_next(void);
+void history_append(char *inp);
+char *history_previous(char *inp, int *size);
+char *history_next(char *inp, int *size);
 
 #endif

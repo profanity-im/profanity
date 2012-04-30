@@ -23,53 +23,43 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "prof_history.h"
+
 #define MAX_HISTORY 100
 
-static char *_history[MAX_HISTORY];
-static int _size;
-static int _pos;
+static PHistory history;
 
 void history_init(void)
 {
+    history = p_history_new(MAX_HISTORY);
+}
+
+void history_append(char *inp)
+{
+    p_history_append(history, inp);
+}
+
+char * history_previous(char *inp, int *size)
+{
+    char inp_str[*size + 1];
     int i;
-    for (i = 0; i < _size; i++)
-        free(_history[i]);
-    
-    _size = 0;
-    _pos = -1;
-}
-
-// FIXME: Roll history when full
-void history_append(const char * const inp)
-{
-    if (_size < MAX_HISTORY) {
-        _history[_size] = (char*) malloc((strlen(inp) + 1) * sizeof(char));
-        strcpy(_history[_size], inp);
-        _pos = _size;
-        _size++;
+    for (i = 0; i < *size; i++) {
+        inp_str[i] = inp[i];
     }
+    inp_str[*size] = '\0';
+
+    return p_history_previous(history, inp_str);
 }
 
-char *history_previous(void)
+char *history_next(char *inp, int *size)
 {
-    if (_size == 0 || _pos == -1)
-        return NULL;
+    char inp_str[*size + 1];
+    int i;
+    for (i = 0; i < *size; i++) {
+        inp_str[i] = inp[i];
+    }
+    inp_str[*size] = '\0';
 
-    return _history[_pos--];
-}
-
-char *history_next(void)
-{
-    if (_size == 0)
-        return NULL;
-    if (_pos == (_size - 1))
-        return NULL;
-    if (_pos + 2 >= _size)
-        return NULL;
-    
-    int pos = _pos + 2;
-    _pos++;
- 
-    return _history[pos];
+    return p_history_next(history, inp_str);
 }
 

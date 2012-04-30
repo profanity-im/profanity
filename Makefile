@@ -8,7 +8,7 @@ CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS) `pkg-config --cflags glib-2.0`
 OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
        profanity.o util.o command.o history.o contact_list.o prof_history.o \
 	   main.o
-TESTOBJS = test_history.o history.o test_contact_list.o contact_list.o \
+TESTOBJS = test_contact_list.o contact_list.o \
 	       test_util.o test_prof_history.o prof_history.o util.o
 
 profanity: $(OBJS)
@@ -20,15 +20,14 @@ title_bar.o: windows.h
 status_bar.o: windows.h util.h
 input_win.o: windows.h
 jabber.o: jabber.h log.h windows.h contact_list.h
-profanity.o: log.h windows.h jabber.h command.h history.h
+profanity.o: log.h windows.h jabber.h command.h
 util.o: util.h
 command.o: command.h util.h history.h contact_list.h
-history.o: history.h
+history.o: history.h prof_history.h
 contact_list.o: contact_list.h
 prof_history.o: prof_history.h
 main.o: profanity.h
 
-test_history.o: history.h
 test_contact_list.o: contact_list.h
 test_util.o: util.h
 test_prof_history.o: prof_history.h

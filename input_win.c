@@ -210,13 +210,13 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_UP:
-        prev = history_previous();
+        prev = history_previous(input, size);
         if (prev)
             _replace_input(input, prev, size);
         return 1;
 
     case KEY_DOWN:
-        next = history_next();
+        next = history_next(input, size);
         if (next)
             _replace_input(input, next, size);
         return 1;

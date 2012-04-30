@@ -23,7 +23,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-void cmd_init(void);
+void command_init(void);
 gboolean process_input(char *inp);
 
 #endif

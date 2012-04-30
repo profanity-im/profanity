@@ -62,26 +62,19 @@ void p_history_append(PHistory history, char *item)
     } else {
 
         // if adding a new item, copy the session over the history
-        if ((history->sess_new != NULL) && 
-                (history->sess_curr == history->sess_new)) {
+        if (history->sess_curr == history->sess_new) {
+            history->sess_curr->data = copied;
             _replace_history_with_session(history);
 
         // otherwise, adding edited history item
         } else {
-            
-            // discard the new item if there was one
             if (history->sess_new != NULL) {
-                history->session = g_list_reverse(history->session);
-                GList *first = g_list_first(history->session);
-                char *first_item = first->data;
-                history->session = g_list_remove(history->session, first_item);
-                history->session = g_list_reverse(history->session);
+                // copy the current string to the last element in session
+                history->sess_new->data = copied;
+            } else {
+                g_list_append(history->session, copied);
             }
-
-            // copy sess_curr to the end of the session
-            char *new_data = strdup(history->sess_curr->data);
-            history->session = g_list_append(history->session, new_data);
-
+            
             // replace the edited version with the data from the history
             history->sess_curr->data = strdup(history->items_curr->data);
             
@@ -114,7 +107,7 @@ char * p_history_previous(PHistory history, char *item)
 {
     // no history
     if (history->items == NULL) {
-        return item;
+        return NULL;
     }
 
     char *copied = "";
@@ -160,7 +153,7 @@ char * p_history_next(PHistory history, char *item)
 
     // no history, or no session, return item
     if ((history->items == NULL) || (history->session == NULL)) {
-        return item;
+        return NULL;
     }
 
     char *copied = "";
