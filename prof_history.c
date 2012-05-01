@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,7 +32,6 @@ PHistory p_history_new(unsigned int size)
 
 void p_history_append(PHistory history, char *item)
 {
-    printf("\n");
     // copy input, default to ""
     char *copied = "";
     if (item != NULL) {
