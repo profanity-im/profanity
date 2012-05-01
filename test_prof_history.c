@@ -197,6 +197,23 @@ void edit_previous_and_append(void)
     assert_string_equals("EDITED", item4);
 }
 
+void start_session_add_new_submit_previous(void)
+{
+    PHistory history = p_history_new(10);
+    p_history_append(history, "hello");
+
+    char *item1 = p_history_previous(history, NULL);
+    assert_string_equals("hello", item1);
+    
+    char *item2 = p_history_next(history, item1);
+    assert_is_null(item2);
+
+    char *item3 = p_history_previous(history, "new text");
+    assert_string_equals("hello", item3);
+
+    p_history_append(history, item3);
+}
+
 void register_prof_history_tests(void)
 {
     TEST_MODULE("prof_history tests");
@@ -212,4 +229,5 @@ void register_prof_history_tests(void)
     TEST(navigate_then_append_new);
     TEST(edit_item_mid_history);
     TEST(edit_previous_and_append);
+    TEST(start_session_add_new_submit_previous);
 }
