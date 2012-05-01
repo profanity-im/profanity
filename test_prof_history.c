@@ -206,7 +206,7 @@ void start_session_add_new_submit_previous(void)
     assert_string_equals("hello", item1);
     
     char *item2 = p_history_next(history, item1);
-    assert_is_null(item2);
+    assert_string_equals("", item2);
 
     char *item3 = p_history_previous(history, "new text");
     assert_string_equals("hello", item3);

@@ -16,6 +16,7 @@ struct p_history_t {
 };
 
 static void _replace_history_with_session(PHistory history);
+static gboolean _adding_new(PHistory history);
 
 PHistory p_history_new(unsigned int size)
 {
@@ -32,6 +33,8 @@ PHistory p_history_new(unsigned int size)
 
 void p_history_append(PHistory history, char *item)
 {
+    printf("\n");
+    // copy input, default to ""
     char *copied = "";
     if (item != NULL) {
         copied = strdup(item);
@@ -60,28 +63,52 @@ void p_history_append(PHistory history, char *item)
 
     // if editing history (session exists with possible changes)
     } else {
+        
+        // update the current item with the input
+        history->sess_curr->data = copied;
 
-        // if adding a new item, copy the session over the history
-        if (history->sess_curr == history->sess_new) {
-            history->sess_curr->data = copied;
+        // if current points to last we're just adding the new item, 
+        // so replace items with session removing the last element if its ""
+        if (_adding_new(history)) {
+            
+            // remove last if ""
+            if (strcmp(history->sess_curr->data, "") == 0) {
+                history->session = g_list_reverse(history->session);
+                GList *first = g_list_first(history->session);
+                history->session = g_list_remove(history->session, first->data);
+                history->session = g_list_reverse(history->session);
+            }
+            
             _replace_history_with_session(history);
 
         // otherwise, adding edited history item
         } else {
-            if (history->sess_new != NULL) {
-                // copy the current string to the last element in session
-                history->sess_new->data = copied;
-            } else {
-                g_list_append(history->session, copied);
-            }
             
-            // replace the edited version with the data from the history
+            // remove the last element, its either "" or some new data
+            // we want to discard
+            history->session = g_list_reverse(history->session);
+            GList *first = g_list_first(history->session);
+            history->session = g_list_remove(history->session, first->data);
+            history->session = g_list_reverse(history->session);
+            
+            // copy the data at the current position and append it to the 
+            // session
+            char *new = strdup(history->sess_curr->data);
+            history->session = g_list_append(history->session, new);
+            
+            // replace the edited version with the data from the original 
+            // history
             history->sess_curr->data = strdup(history->items_curr->data);
             
             // rewrite history from the session
             _replace_history_with_session(history);
         }
     }
+}
+
+static gboolean _adding_new(PHistory history)
+{
+    return (history->sess_curr == g_list_last(history->session));
 }
 
 static void _replace_history_with_session(PHistory history)
@@ -110,6 +137,7 @@ char * p_history_previous(PHistory history, char *item)
         return NULL;
     }
 
+    // copy input, default to ""
     char *copied = "";
     if (item != NULL) {
         copied = strdup(item);
@@ -135,7 +163,10 @@ char * p_history_previous(PHistory history, char *item)
         
         // move to previous
         history->sess_curr = g_list_previous(history->sess_curr);
-        history->items_curr = g_list_previous(history->items_curr);
+        if (history->items_curr == NULL)
+            history->items_curr = g_list_last(history->items);
+        else 
+            history->items_curr = g_list_previous(history->items_curr);
 
         // set to first if rolled over beginning
         if (history->sess_curr == NULL) {
@@ -151,11 +182,12 @@ char * p_history_previous(PHistory history, char *item)
 char * p_history_next(PHistory history, char *item)
 {
 
-    // no history, or no session, return item
+    // no history, or no session, return NULL
     if ((history->items == NULL) || (history->session == NULL)) {
         return NULL;
     }
 
+    // copy input, default to ""
     char *copied = "";
     if (item != NULL) {
         copied = strdup(item);
