@@ -5,127 +5,82 @@
 
 #include "prof_history.h"
 
+struct p_history_session_t {
+    GList *items;
+    GList *sess_curr;
+    GList *sess_new;
+    GList *orig_curr;
+};
+
 struct p_history_t {
-    GList *items; // the history
-    GList *items_curr; // pointer to the current line in the history
-    GList *session; // a copy of the history for edits
-    GList *sess_curr; // pointer to the current item in the session
-    GList *sess_new; // pointer to a possible new element in the session
+    GList *items;
     guint max_size;
+    struct p_history_session_t session;
 };
 
 static void _replace_history_with_session(PHistory history);
 static gboolean _adding_new(PHistory history);
+static void _reset_session(PHistory history);
+static gboolean _has_session(PHistory history);
+static void _remove_first(PHistory history);
+static void _update_current_session_item(PHistory history, char *item);
+static void _add_to_history(PHistory history, char *item);
+static void _remove_last_session_item(PHistory history);
+static void _replace_current_with_original(PHistory history);
+static void _create_session(PHistory history);
+static void _session_previous(PHistory history);
+static void _session_next(PHistory history);
 
 PHistory p_history_new(unsigned int size)
 {
     PHistory new_history = malloc(sizeof(struct p_history_t));
     new_history->items = NULL;
-    new_history->items_curr = NULL;
-    new_history->session = NULL;
-    new_history->sess_curr = NULL;
-    new_history->sess_new = NULL;
     new_history->max_size = size;
+    
+    _reset_session(new_history);
 
     return new_history;
 }
 
 void p_history_append(PHistory history, char *item)
 {
-    // copy input, default to ""
     char *copied = "";
     if (item != NULL) {
         copied = strdup(item);
     }
 
-    // if no history yet, just add the item
     if (history->items == NULL) {
-        history->items = g_list_append(history->items, copied);
+        _add_to_history(history, copied);
         return;
     }
         
-    // if not editing history (no session started)
-    if (history->session == NULL) {
-        
-        // lose first element if hit max size
+    if (!_has_session(history)) {
         if (g_list_length(history->items) == history->max_size) {
-
-            // remove first element
-            GList *first = g_list_first(history->items);
-            char *first_item = first->data;
-            history->items = g_list_remove(history->items, first_item);
+            _remove_first(history);
         }
     
-        // append the new item onto the history
-        history->items = g_list_append(history->items, copied);
+        _add_to_history(history, copied);
 
-    // if editing history (session exists with possible changes)
     } else {
-        
-        // update the current item with the input
-        history->sess_curr->data = copied;
+        _update_current_session_item(history, copied);
 
-        // if current points to last we're just adding the new item, 
-        // so replace items with session removing the last element if its ""
         if (_adding_new(history)) {
-            
-            // remove last if ""
-            if (strcmp(history->sess_curr->data, "") == 0) {
-                history->session = g_list_reverse(history->session);
-                GList *first = g_list_first(history->session);
-                history->session = g_list_remove(history->session, first->data);
-                history->session = g_list_reverse(history->session);
+            if (strcmp(history->session.sess_curr->data, "") == 0) {
+                _remove_last_session_item(history);
             }
             
             _replace_history_with_session(history);
 
-        // otherwise, adding edited history item
         } else {
+            _remove_last_session_item(history);
             
-            // remove the last element, its either "" or some new data
-            // we want to discard
-            history->session = g_list_reverse(history->session);
-            GList *first = g_list_first(history->session);
-            history->session = g_list_remove(history->session, first->data);
-            history->session = g_list_reverse(history->session);
+            char *new = strdup(history->session.sess_curr->data);
+            history->session.items = g_list_append(history->session.items, new);
             
-            // copy the data at the current position and append it to the 
-            // session
-            char *new = strdup(history->sess_curr->data);
-            history->session = g_list_append(history->session, new);
-            
-            // replace the edited version with the data from the original 
-            // history
-            history->sess_curr->data = strdup(history->items_curr->data);
-            
-            // rewrite history from the session
+            _replace_current_with_original(history);
             _replace_history_with_session(history);
         }
     }
-}
-
-static gboolean _adding_new(PHistory history)
-{
-    return (history->sess_curr == g_list_last(history->session));
-}
-
-static void _replace_history_with_session(PHistory history)
-{
-    g_list_free(history->items);
-    history->items = g_list_copy(history->session);
-    
-    // remove first if overrun max size
-    if (g_list_length(history->items) > history->max_size) {
-        GList *first = g_list_first(history->items);
-        const char *first_item = (char *) first->data;
-        history->items = g_list_remove(history->items, first_item);
-    }
-    
-    // reset the session
-    history->items_curr = NULL;
-    history->session = NULL;
-    history->sess_curr = NULL;
-    history->sess_new = NULL;
 }
 
 char * p_history_previous(PHistory history, char *item)
@@ -135,77 +90,140 @@ char * p_history_previous(PHistory history, char *item)
         return NULL;
     }
 
-    // copy input, default to ""
     char *copied = "";
     if (item != NULL) {
         copied = strdup(item);
     }
     
-    // no session, create one
-    if (history->session == NULL) {
-        history->session = g_list_copy(history->items);
-        history->sess_curr = g_list_last(history->session);
-        history->items_curr = g_list_last(history->items);
+    if (!_has_session(history)) {
+        _create_session(history);
         
-        // add the new item including empty string
-        g_list_append(history->session, copied);
-        history->sess_new = g_list_last(history->session);
+        // add the new item
+        g_list_append(history->session.items, copied);
+        history->session.sess_new = g_list_last(history->session.items);
 
-        char *result = strdup(history->sess_curr->data);
+        char *result = strdup(history->session.sess_curr->data);
         return result;
-
-    // session exists
     } else {
-        // update the currently pointed to item with passed data
-        history->sess_curr->data = copied;
-        
-        // move to previous
-        history->sess_curr = g_list_previous(history->sess_curr);
-        if (history->items_curr == NULL)
-            history->items_curr = g_list_last(history->items);
-        else 
-            history->items_curr = g_list_previous(history->items_curr);
-
-        // set to first if rolled over beginning
-        if (history->sess_curr == NULL) {
-            history->sess_curr = g_list_first(history->session);
-            history->items_curr = g_list_first(history->items);
-        }
+        _update_current_session_item(history, copied);
+        _session_previous(history);
     }
 
-    char *result = strdup(history->sess_curr->data);
+    char *result = strdup(history->session.sess_curr->data);
     return result;
 }
 
 char * p_history_next(PHistory history, char *item)
 {
-
     // no history, or no session, return NULL
-    if ((history->items == NULL) || (history->session == NULL)) {
+    if ((history->items == NULL) || (history->session.items == NULL)) {
         return NULL;
     }
 
-    // copy input, default to ""
     char *copied = "";
     if (item != NULL) {
         copied = strdup(item);
     }
 
-    // session exists
+    _update_current_session_item(history, copied);
+    _session_next(history);
     
-    // update the currently pointed to item with passed data
-    history->sess_curr->data = copied;
-    
-    // move to next
-    history->sess_curr = g_list_next(history->sess_curr);
-    history->items_curr = g_list_next(history->items_curr);
+    char *result = strdup(history->session.sess_curr->data);
+    return result;
+}
 
-    // set to last if rolled over beginning
-    if (history->sess_curr == NULL) {
-        history->sess_curr = g_list_last(history->session);
-        history->items_curr = NULL;
+static void _replace_history_with_session(PHistory history)
+{
+    g_list_free(history->items);
+    history->items = g_list_copy(history->session.items);
+    
+    if (g_list_length(history->items) > history->max_size) {
+        _remove_first(history);    
     }
 
-    char *result = strdup(history->sess_curr->data);
-    return result;
+    _reset_session(history);
+}
+
+static gboolean _adding_new(PHistory history)
+{
+    return (history->session.sess_curr == 
+        g_list_last(history->session.items));
+}
+
+static void _reset_session(PHistory history)
+{
+    history->session.items = NULL;
+    history->session.sess_curr = NULL;
+    history->session.sess_new = NULL;
+    history->session.orig_curr = NULL;
+}
+
+static gboolean _has_session(PHistory history)
+{
+    return (history->session.items != NULL);
+}
+
+static void _remove_first(PHistory history)
+{
+    GList *first = g_list_first(history->items);
+    char *first_item = first->data;
+    history->items = g_list_remove(history->items, first_item);
+}
+
+static void _update_current_session_item(PHistory history, char *item)
+{
+    history->session.sess_curr->data = item;
+}
+
+static void _add_to_history(PHistory history, char *item)
+{
+    history->items = g_list_append(history->items, item);
+}
+
+static void _remove_last_session_item(PHistory history)
+{
+    history->session.items = g_list_reverse(history->session.items);
+    GList *first = g_list_first(history->session.items);
+    history->session.items = 
+        g_list_remove(history->session.items, first->data);
+    history->session.items = g_list_reverse(history->session.items);
+}
+
+static void _replace_current_with_original(PHistory history)
+{
+    history->session.sess_curr->data = strdup(history->session.orig_curr->data);
+}
+
+static void _create_session(PHistory history)
+{
+    history->session.items = g_list_copy(history->items);
+    history->session.sess_curr = g_list_last(history->session.items);
+    history->session.orig_curr = g_list_last(history->items);
+}
+
+static void _session_previous(PHistory history)
+{
+    history->session.sess_curr = 
+        g_list_previous(history->session.sess_curr);
+    if (history->session.orig_curr == NULL)
+        history->session.orig_curr = g_list_last(history->items);
+    else 
+        history->session.orig_curr = 
+            g_list_previous(history->session.orig_curr);
+
+    if (history->session.sess_curr == NULL) {
+        history->session.sess_curr = g_list_first(history->session.items);
+        history->session.orig_curr = g_list_first(history->items);
+    }
+}
+
+static void _session_next(PHistory history)
+{
+    history->session.sess_curr = g_list_next(history->session.sess_curr);
+    history->session.orig_curr = g_list_next(history->session.orig_curr);
+
+    if (history->session.sess_curr == NULL) {
+        history->session.sess_curr = g_list_last(history->session.items);
+        history->session.orig_curr = NULL;
+    }
 }
