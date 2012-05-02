@@ -29,6 +29,8 @@
 
 static PHistory history;
 
+void _stringify_input(char *inp, int size, char *string);
+
 void history_init(void)
 {
     history = p_history_new(MAX_HISTORY);
@@ -42,24 +44,26 @@ void history_append(char *inp)
 char * history_previous(char *inp, int *size)
 {
     char inp_str[*size + 1];
-    int i;
-    for (i = 0; i < *size; i++) {
-        inp_str[i] = inp[i];
-    }
-    inp_str[*size] = '\0';
-
+    _stringify_input(inp, *size, inp_str);
+    
     return p_history_previous(history, inp_str);
 }
 
 char *history_next(char *inp, int *size)
 {
     char inp_str[*size + 1];
-    int i;
-    for (i = 0; i < *size; i++) {
-        inp_str[i] = inp[i];
-    }
-    inp_str[*size] = '\0';
+    _stringify_input(inp, *size, inp_str);
 
     return p_history_next(history, inp_str);
 }
+
+void _stringify_input(char *inp, int size, char *string)
+{
+    int i;
+    for (i = 0; i < size; i++) {
+        string[i] = inp[i];
+    }
+    string[size] = '\0';
+}
+
 
