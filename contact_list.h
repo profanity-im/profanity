@@ -25,12 +25,6 @@
 
 #include "contact.h"
 
-struct contact_t {
-    char *name;
-    char *show;
-    char *status;
-};
-
 struct contact_node_t {
     PContact contact;    
     struct contact_node_t *next;
