@@ -23,6 +23,8 @@
 #ifndef CONTACT_LIST_H
 #define CONTACT_LIST_H
 
+#include "contact.h"
+
 struct contact_t {
     char *name;
     char *show;
@@ -30,7 +32,7 @@ struct contact_t {
 };
 
 struct contact_node_t {
-    struct contact_t *contact;    
+    PContact contact;    
     struct contact_node_t *next;
 };
 

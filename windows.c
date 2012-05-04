@@ -22,9 +22,12 @@
 
 #include <string.h>
 #include <stdlib.h>
+
 #include <ncurses.h>
+
 #include "windows.h"
 #include "util.h"
+#include "contact.h"
 
 #define CONS_WIN_TITLE "_cons"
 #define PAD_SIZE 200
@@ -299,14 +302,14 @@ void cons_show_online_contacts(struct contact_node_t *list)
     struct contact_node_t *curr = list;
 
     while(curr) {
-        struct contact_t *contact = curr->contact;
+        PContact contact = curr->contact;
         _win_show_time(_cons_win);
         wattron(_cons_win, COLOR_PAIR(2));
-        wprintw(_cons_win, "%s", contact->name);
-        if (contact->show)
-            wprintw(_cons_win, " is %s", contact->show);
-        if (contact->status)
-            wprintw(_cons_win, ", \"%s\"", contact->status);
+        wprintw(_cons_win, "%s", p_contact_name(contact));
+        if (p_contact_show(contact))
+            wprintw(_cons_win, " is %s", p_contact_show(contact));
+        if (p_contact_status(contact))
+            wprintw(_cons_win, ", \"%s\"", p_contact_status(contact));
         wprintw(_cons_win, "\n");
         wattroff(_cons_win, COLOR_PAIR(2));
 
