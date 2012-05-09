@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <head-unit.h>
+#include <glib.h>
 
 #include "contact.h"
 #include "contact_list.h"
@@ -19,7 +20,7 @@ static void aftertest(void)
 
 static void empty_list_when_none_added(void)
 {
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     assert_is_null(list);
     destroy_list(list);
 }
@@ -27,7 +28,7 @@ static void empty_list_when_none_added(void)
 static void contains_one_element(void)
 {
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     assert_int_equals(1, get_size(list));
     destroy_list(list);
 }
@@ -35,8 +36,8 @@ static void contains_one_element(void)
 static void first_element_correct(void)
 {
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact james = list->contact;
+    GSList *list = get_contact_list();
+    PContact james = list->data;
 
     assert_string_equals("James", p_contact_name(james));
     destroy_list(list);
@@ -46,7 +47,7 @@ static void contains_two_elements(void)
 {
     contact_list_add("James", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
 
     assert_int_equals(2, get_size(list));
     destroy_list(list);
@@ -56,10 +57,10 @@ static void first_and_second_elements_correct(void)
 {
     contact_list_add("James", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
-    PContact dave = list->contact;
-    PContact james = (list->next)->contact;
+    PContact dave = list->data;
+    PContact james = (g_slist_next(list))->data;
     
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
@@ -71,7 +72,7 @@ static void contains_three_elements(void)
     contact_list_add("James", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
     assert_int_equals(3, get_size(list));
     destroy_list(list);
@@ -82,10 +83,10 @@ static void first_three_elements_correct(void)
     contact_list_add("Bob", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact bob = list->contact;
-    PContact dave = (list->next)->contact;
-    PContact james = ((list->next)->next)->contact;
+    GSList *list = get_contact_list();
+    PContact bob = list->data;
+    PContact dave = (g_slist_next(list))->data;
+    PContact james = (g_slist_next(g_slist_next(list)))->data;
     
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
@@ -99,10 +100,10 @@ static void add_twice_at_beginning_adds_once(void)
     contact_list_add("James", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact bob = list->contact;
-    PContact dave = (list->next)->contact;
-    PContact james = ((list->next)->next)->contact;
+    GSList *list = get_contact_list();
+    PContact bob = list->data;
+    PContact dave = (g_slist_next(list))->data;
+    PContact james = (g_slist_next(g_slist_next(list)))->data;
     
     assert_int_equals(3, get_size(list));    
     assert_string_equals("James", p_contact_name(james));
@@ -117,10 +118,10 @@ static void add_twice_in_middle_adds_once(void)
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("James", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact bob = list->contact;
-    PContact dave = (list->next)->contact;
-    PContact james = ((list->next)->next)->contact;
+    GSList *list = get_contact_list();
+    PContact bob = list->data;
+    PContact dave = (g_slist_next(list))->data;
+    PContact james = (g_slist_next(g_slist_next(list)))->data;
     
     assert_int_equals(3, get_size(list));    
     assert_string_equals("James", p_contact_name(james));
@@ -135,10 +136,10 @@ static void add_twice_at_end_adds_once(void)
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact bob = list->contact;
-    PContact dave = (list->next)->contact;
-    PContact james = ((list->next)->next)->contact;
+    GSList *list = get_contact_list();
+    PContact bob = list->data;
+    PContact dave = (g_slist_next(list))->data;
+    PContact james = (g_slist_next(g_slist_next(list)))->data;
     
     assert_int_equals(3, get_size(list));    
     assert_string_equals("James", p_contact_name(james));
@@ -150,7 +151,7 @@ static void add_twice_at_end_adds_once(void)
 static void remove_when_none_does_nothing(void)
 {
     contact_list_remove("James");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
 
     assert_int_equals(0, get_size(list));
     destroy_list(list);
@@ -160,7 +161,7 @@ static void remove_when_one_removes(void)
 {
     contact_list_add("James", NULL, NULL);
     contact_list_remove("James");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
     assert_int_equals(0, get_size(list));
     destroy_list(list);
@@ -172,10 +173,10 @@ static void remove_first_when_two(void)
     contact_list_add("Dave", NULL, NULL);
 
     contact_list_remove("James");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
     assert_int_equals(1, get_size(list));
-    PContact dave = list->contact;
+    PContact dave = list->data;
     assert_string_equals("Dave", p_contact_name(dave));
     destroy_list(list);
 }
@@ -186,10 +187,10 @@ static void remove_second_when_two(void)
     contact_list_add("Dave", NULL, NULL);
 
     contact_list_remove("Dave");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
     assert_int_equals(1, get_size(list));
-    PContact james = list->contact;
+    PContact james = list->data;
     assert_string_equals("James", p_contact_name(james));
     destroy_list(list);
 }
@@ -201,11 +202,11 @@ static void remove_first_when_three(void)
     contact_list_add("Bob", NULL, NULL);
 
     contact_list_remove("James");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
     assert_int_equals(2, get_size(list));
-    PContact bob = list->contact;
-    PContact dave = (list->next)->contact;
+    PContact bob = list->data;
+    PContact dave = (g_slist_next(list))->data;
     
     assert_string_equals("Dave", p_contact_name(dave));
     assert_string_equals("Bob", p_contact_name(bob));
@@ -219,11 +220,11 @@ static void remove_second_when_three(void)
     contact_list_add("Bob", NULL, NULL);
 
     contact_list_remove("Dave");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
     assert_int_equals(2, get_size(list));
-    PContact bob = list->contact;
-    PContact james = (list->next)->contact;
+    PContact bob = list->data;
+    PContact james = (g_slist_next(list))->data;
     
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Bob", p_contact_name(bob));
@@ -237,11 +238,11 @@ static void remove_third_when_three(void)
     contact_list_add("Bob", NULL, NULL);
 
     contact_list_remove("Bob");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
     
     assert_int_equals(2, get_size(list));
-    PContact dave = list->contact;
-    PContact james = (list->next)->contact;
+    PContact dave = list->data;
+    PContact james = (g_slist_next(list))->data;
     
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
@@ -251,8 +252,8 @@ static void remove_third_when_three(void)
 static void test_show_when_value(void)
 {
     contact_list_add("James", "away", NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact james = list->contact;
+    GSList *list = get_contact_list();
+    PContact james = list->data;
     
     assert_string_equals("away", p_contact_show(james));
     destroy_list(list);
@@ -261,8 +262,8 @@ static void test_show_when_value(void)
 static void test_show_online_when_no_value(void)
 {
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact james = list->contact;
+    GSList *list = get_contact_list();
+    PContact james = list->data;
     
     assert_string_equals("online", p_contact_show(james));
     destroy_list(list);
@@ -271,8 +272,8 @@ static void test_show_online_when_no_value(void)
 static void test_show_online_when_empty_string(void)
 {
     contact_list_add("James", "", NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact james = list->contact;
+    GSList *list = get_contact_list();
+    PContact james = list->data;
     
     assert_string_equals("online", p_contact_show(james));
     destroy_list(list);
@@ -281,8 +282,8 @@ static void test_show_online_when_empty_string(void)
 static void test_status_when_value(void)
 {
     contact_list_add("James", NULL, "I'm not here right now");
-    struct contact_node_t *list = get_contact_list();
-    PContact james = list->contact;
+    GSList *list = get_contact_list();
+    PContact james = list->data;
     
     assert_string_equals("I'm not here right now", p_contact_status(james));
     destroy_list(list);
@@ -291,8 +292,8 @@ static void test_status_when_value(void)
 static void test_status_when_no_value(void)
 {
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
-    PContact james = list->contact;
+    GSList *list = get_contact_list();
+    PContact james = list->data;
     
     assert_is_null(p_contact_status(james));
     destroy_list(list);
@@ -302,10 +303,10 @@ static void update_show(void)
 {
     contact_list_add("James", "away", NULL);
     contact_list_add("James", "dnd", NULL);
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
 
     assert_int_equals(1, get_size(list));
-    PContact james = list->contact;
+    PContact james = list->data;
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("dnd", p_contact_show(james));
     destroy_list(list);
@@ -315,10 +316,10 @@ static void set_show_to_null(void)
 {
     contact_list_add("James", "away", NULL);
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
 
     assert_int_equals(1, get_size(list));
-    PContact james = list->contact;
+    PContact james = list->data;
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("online", p_contact_show(james));
     destroy_list(list);
@@ -328,10 +329,10 @@ static void update_status(void)
 {
     contact_list_add("James", NULL, "I'm not here right now");
     contact_list_add("James", NULL, "Gone to lunch");
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
 
     assert_int_equals(1, get_size(list));
-    PContact james = list->contact;
+    PContact james = list->data;
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Gone to lunch", p_contact_status(james));
     destroy_list(list);
@@ -341,10 +342,10 @@ static void set_status_to_null(void)
 {
     contact_list_add("James", NULL, "Gone to lunch");
     contact_list_add("James", NULL, NULL);
-    struct contact_node_t *list = get_contact_list();
+    GSList *list = get_contact_list();
 
     assert_int_equals(1, get_size(list));
-    PContact james = list->contact;
+    PContact james = list->data;
     assert_string_equals("James", p_contact_name(james));
     assert_is_null(p_contact_status(james));
     destroy_list(list);

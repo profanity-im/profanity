@@ -23,6 +23,8 @@
 #ifndef CONTACT_LIST_H
 #define CONTACT_LIST_H
 
+#include <glib.h>
+
 #include "contact.h"
 
 struct contact_node_t {
@@ -35,9 +37,9 @@ void reset_search_attempts(void);
 int contact_list_add(const char * const name, const char * const show,
     const char * const status);
 int contact_list_remove(const char * const name);
-struct contact_node_t * get_contact_list(void);
+GSList * get_contact_list(void);
 char * find_contact(char *search_str);
-int get_size(struct contact_node_t *list);
-void destroy_list(struct contact_node_t *list);
+int get_size(GSList *list);
+void destroy_list(GSList *list);
 
 #endif

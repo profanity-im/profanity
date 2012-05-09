@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 #include <ncurses.h>
+#include <glib.h>
 
 #include "windows.h"
 #include "util.h"
@@ -294,15 +295,15 @@ void cons_help(void)
         dirty = TRUE;
 }
 
-void cons_show_online_contacts(struct contact_node_t *list)
+void cons_show_online_contacts(GSList *list)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Online contacts:\n");
 
-    struct contact_node_t *curr = list;
+    GSList *curr = list;
 
     while(curr) {
-        PContact contact = curr->contact;
+        PContact contact = curr->data;
         _win_show_time(_cons_win);
         wattron(_cons_win, COLOR_PAIR(2));
         wprintw(_cons_win, "%s", p_contact_name(contact));
@@ -313,7 +314,7 @@ void cons_show_online_contacts(struct contact_node_t *list)
         wprintw(_cons_win, "\n");
         wattroff(_cons_win, COLOR_PAIR(2));
 
-        curr = curr->next;
+        curr = g_slist_next(curr);
     }
 }
 
