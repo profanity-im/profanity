@@ -27,11 +27,6 @@
 
 #include "contact.h"
 
-struct contact_node_t {
-    PContact contact;    
-    struct contact_node_t *next;
-};
-
 void contact_list_clear(void);
 void reset_search_attempts(void);
 int contact_list_add(const char * const name, const char * const show,
@@ -39,7 +34,5 @@ int contact_list_add(const char * const name, const char * const show,
 int contact_list_remove(const char * const name);
 GSList * get_contact_list(void);
 char * find_contact(char *search_str);
-int get_size(GSList *list);
-void destroy_list(GSList *list);
 
 #endif

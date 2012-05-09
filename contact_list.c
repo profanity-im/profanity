@@ -47,12 +47,6 @@ void contact_list_clear(void)
     reset_search_attempts();
 }
 
-void destroy_list(GSList *list)
-{
-    g_slist_free_full(list, (GDestroyNotify)p_contact_free);
-    list = NULL;
-}
-
 void reset_search_attempts(void)
 {
     _last_found = NULL;
@@ -180,11 +174,6 @@ char * find_contact(char *search_str)
         reset_search_attempts();
         return NULL;
     }
-}
-
-int get_size(GSList *list)
-{
-    return g_slist_length(list);
 }
 
 static char * _search_contact_list_from(GSList * curr)
