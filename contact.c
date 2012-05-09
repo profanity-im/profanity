@@ -67,17 +67,17 @@ void p_contact_free(PContact contact)
     contact = NULL;
 }
 
-char * p_contact_name(PContact contact)
+const char * p_contact_name(const PContact contact)
 {
     return contact->name;
 }
 
-char * p_contact_show(PContact contact)
+const char * p_contact_show(const PContact contact)
 {
     return contact->show;
 }
 
-char * p_contact_status(PContact contact)
+const char * p_contact_status(const PContact contact)
 {
     return contact->status;
 }
