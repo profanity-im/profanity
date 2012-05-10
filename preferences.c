@@ -23,11 +23,14 @@
 #include <stdlib.h>
 #include <glib.h>
 
+static GString *prefs_loc;
 static GKeyFile *prefs;
+
+void _save_prefs(void);
 
 void prefs_load(void)
 {
-    GString *prefs_loc = g_string_new(getenv("HOME"));
+    prefs_loc = g_string_new(getenv("HOME"));
     g_string_append(prefs_loc, "/.profanity");
 
     prefs = g_key_file_new();
@@ -47,6 +50,7 @@ gboolean prefs_get_beep(void)
 void prefs_set_beep(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "beep", value);
+    _save_prefs();
 }
 
 gboolean prefs_get_flash(void)
@@ -57,4 +61,12 @@ gboolean prefs_get_flash(void)
 void prefs_set_flash(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "flash", value);
+    _save_prefs();
+}
+
+void _save_prefs(void)
+{
+    gsize g_data_size;
+    char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
+    g_file_set_contents(prefs_loc->str, g_prefs_data, g_data_size, NULL);
 }
