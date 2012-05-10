@@ -21,6 +21,8 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
+
 #include <glib.h>
 
 static GString *prefs_loc;
@@ -57,6 +59,47 @@ void prefs_set_flash(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "flash", value);
     _save_prefs();
+}
+
+void prefs_add_login(const char *jid)
+{
+    gsize njids;
+    gchar **jids = 
+        g_key_file_get_string_list(prefs, "connections", "logins", &njids, NULL);
+
+    // no logins remembered yet
+    if (jids == NULL) {
+        njids = 1;
+        jids = (gchar**) g_malloc(sizeof(gchar *) * 2);
+        jids[0] = g_strdup(jid);
+        jids[1] = NULL;
+        g_key_file_set_string_list(prefs, "connections", "logins", 
+            (const gchar * const *)jids, njids);
+        _save_prefs();
+        g_strfreev(jids);
+        
+        return;
+    } else {
+        gsize i;
+        for (i = 0; i < njids; i++) {
+            if (strcmp(jid, jids[i]) == 0) {
+                g_strfreev(jids);
+                return;
+            }
+        }
+    
+        // jid not found, add to the list
+        jids = (gchar **) g_realloc(jids, (sizeof(gchar *) * (njids+2)));
+        jids[njids] = g_strdup(jid);
+        njids++;
+        jids[njids] = NULL;
+        g_key_file_set_string_list(prefs, "connections", "logins",
+            (const gchar * const *)jids, njids);
+        _save_prefs();
+        g_strfreev(jids);
+
+        return;
+    }
 }
 
 static void _save_prefs(void)

@@ -28,6 +28,7 @@
 #include "contact_list.h"
 #include "windows.h"
 #include "util.h"
+#include "preferences.h"
 
 #define PING_INTERVAL 120000 // 2 minutes
 
@@ -221,6 +222,9 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_stanza_set_name(pres, "presence");
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
+
+        prefs_add_login(jid);
+
         jabber_conn.conn_status = JABBER_CONNECTED;
     }
     else {
