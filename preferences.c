@@ -30,11 +30,13 @@ static GKeyFile *prefs;
 
 // search logins list
 static GSList *logins = NULL;
-//static GSList *last_found = NULL;
-//static gchar *search_str = NULL;
+static GSList *last_found = NULL;
+static gchar *search_str = NULL;
 
 static void _save_prefs(void);
 static gint _compare_jids(gconstpointer a, gconstpointer b);
+static void _reset_login_search(void);
+static gchar * _search_logins_from(GSList *curr);
 
 void prefs_load(void)
 {
@@ -53,6 +55,57 @@ void prefs_load(void)
     for (i = 0; i < njids; i++) {
         logins = g_slist_insert_sorted(logins, jids[0], _compare_jids);
     }
+}
+
+char * find_login(char *search_str)
+{
+    gchar *found = NULL;
+
+    if (!logins)
+        return NULL;
+
+    if (last_found == NULL) {
+        search_str = g_strdup(search_str);
+        
+        found = _search_logins_from(logins);
+        return found;
+    } else {
+        found = _search_logins_from(g_slist_next(last_found));
+        if (found != NULL)
+            return found;
+
+        found = _search_logins_from(logins);
+        if (found != NULL)
+            return found;
+
+        _reset_login_search();
+        return NULL;
+    }
+}
+
+static void _reset_login_search(void)
+{
+    last_found = NULL;
+    if (search_str != NULL)
+        free(search_str);
+}
+
+static gchar * _search_logins_from(GSList *curr)
+{
+    while(curr) {
+        gchar *curr_jid = curr->data;
+
+        if (strncmp(curr_jid, search_str, strlen(search_str)) == 0) {
+            gchar *result = g_strdup(curr_jid);
+            last_found = curr;
+            
+            return result;
+        }
+
+        curr = g_slist_next(curr);
+    }
+
+    return NULL;
 }
 
 static gint _compare_jids(gconstpointer a, gconstpointer b)
