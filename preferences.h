@@ -23,6 +23,13 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
+#include <glib.h>
+
 void prefs_load(void);
+
+gboolean prefs_get_beep(void);
+void prefs_set_beep(gboolean value);
+gboolean prefs_get_flash(void);
+void prefs_set_flash(gboolean value);
 
 #endif

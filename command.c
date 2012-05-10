@@ -31,6 +31,7 @@
 #include "jabber.h"
 #include "windows.h"
 #include "util.h"
+#include "preferences.h"
 
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
@@ -223,10 +224,10 @@ static gboolean _cmd_set_beep(const char * const inp)
 {
     if (strcmp(inp, "/beep on") == 0) {
         cons_show("Sound enabled.");
-        win_set_beep(TRUE);
+        prefs_set_beep(TRUE);
     } else if (strcmp(inp, "/beep off") == 0) {
         cons_show("Sound disabled.");
-        win_set_beep(FALSE);
+        prefs_set_beep(FALSE);
     } else {
         cons_show("Usage: /beep <on/off>");
     }        
@@ -238,10 +239,10 @@ static gboolean _cmd_set_flash(const char * const inp)
 {
     if (strcmp(inp, "/flash on") == 0) {
         cons_show("Screen flash enabled.");
-        status_bar_set_flash(TRUE);
+        prefs_set_flash(TRUE);
     } else if (strcmp(inp, "/flash off") == 0) {
         cons_show("Screen flash disabled.");
-        status_bar_set_flash(FALSE);
+        prefs_set_flash(FALSE);
     } else {
         cons_show("Usage: /flash <on/off>");
     }        

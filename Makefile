@@ -15,7 +15,7 @@ profanity: $(OBJS)
 	$(CC) -o profanity $(OBJS) $(LIBS)
 
 log.o: log.h
-windows.o: windows.h util.h contact_list.h
+windows.o: windows.h util.h contact_list.h preferences.h
 title_bar.o: windows.h
 status_bar.o: windows.h util.h
 input_win.o: windows.h
@@ -27,7 +27,7 @@ history.o: history.h prof_history.h
 contact_list.o: contact_list.h contact.h
 prof_history.o: prof_history.h
 contact.o: contact.h
-preferences.o: preferences.h windows.h
+preferences.o: preferences.h
 main.o: profanity.h
 
 test_contact_list.o: contact_list.h contact.h

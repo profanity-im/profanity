@@ -67,7 +67,6 @@ void win_contact_online(const char * const from, const char * const show,
 void win_contact_offline(const char * const from, const char * const show, 
     const char * const status);
 void win_disconnected(void);
-void win_set_beep(int val);
 
 // console window actions
 void cons_help(void);
@@ -87,7 +86,6 @@ void status_bar_inactive(const int win);
 void status_bar_active(const int win);
 void status_bar_new(const int win);
 void status_bar_update_time(void);
-void status_bar_set_flash(int val);
 
 // input window actions
 void inp_get_char(int *ch, char *input, int *size);

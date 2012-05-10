@@ -23,25 +23,38 @@
 #include <stdlib.h>
 #include <glib.h>
 
-#include "windows.h"
+static GKeyFile *prefs;
 
 void prefs_load(void)
 {
     GString *prefs_loc = g_string_new(getenv("HOME"));
     g_string_append(prefs_loc, "/.profanity");
 
-    GKeyFile *g_prefs = g_key_file_new();
-    g_key_file_load_from_file(g_prefs, prefs_loc->str,
-        G_KEY_FILE_NONE, NULL);
-
-    gboolean beep = g_key_file_get_boolean(g_prefs, "ui", "beep", NULL);
-    gboolean flash = g_key_file_get_boolean(g_prefs, "ui", "flash", NULL);
-
-    win_set_beep(beep);
-    status_bar_set_flash(flash);
+    prefs = g_key_file_new();
+    g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_NONE, NULL);
 
 //    g_key_file_set_string(g_prefs, "settings", "somekey2", "someothervalue");
 //    gsize g_data_len;
 //    char *g_prefs_data = g_key_file_to_data(g_prefs, &g_data_len, NULL);
 //    g_file_set_contents("/home/james/.profanity", g_prefs_data, g_data_len, NULL);
+}
+
+gboolean prefs_get_beep(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "beep", NULL);
+}
+
+void prefs_set_beep(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "beep", value);
+}
+
+gboolean prefs_get_flash(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "flash", NULL);
+}
+
+void prefs_set_flash(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "flash", value);
 }

@@ -29,6 +29,7 @@
 #include "windows.h"
 #include "util.h"
 #include "contact.h"
+#include "preferences.h"
 
 #define CONS_WIN_TITLE "_cons"
 #define PAD_SIZE 200
@@ -48,9 +49,6 @@ static int dirty;
 
 // max columns for main windows, never resize below
 static int max_cols = 0;
-
-// allow beep?
-static int do_beep = FALSE;
 
 static void _create_windows(void);
 static int _find_prof_win_index(const char * const contact);
@@ -156,11 +154,6 @@ int win_in_chat(void)
         (strcmp(_wins[_curr_prof_win].from, "") != 0));
 }
 
-void win_set_beep(int val)
-{
-    do_beep = val;
-}
-
 char *win_get_recipient(void)
 {
     struct prof_win current = _wins[_curr_prof_win];
@@ -192,7 +185,7 @@ void win_show_incomming_msg(const char * const from, const char * const message)
         _cons_show_incoming_message(short_from, win_index);
     }
 
-    if (do_beep == TRUE)
+    if (prefs_get_beep())
         beep();
 }
 

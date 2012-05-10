@@ -24,8 +24,10 @@
 #include <stdlib.h>
 
 #include <ncurses.h>
+
 #include "windows.h"
 #include "util.h"
+#include "preferences.h"
 
 static WINDOW *status_bar;
 static char *message = NULL;
@@ -34,9 +36,6 @@ static int is_active[9];
 static int is_new[9];
 static int dirty;
 static char curr_time[80];
-
-// allow flash?
-static int do_flash = FALSE;
 
 static void _status_bar_update_time(void);
 
@@ -161,15 +160,10 @@ void status_bar_new(const int win)
     wattroff(status_bar, COLOR_PAIR(3));
     wattroff(status_bar, A_BLINK);
 
-    if (do_flash == TRUE)
+    if (prefs_get_flash())
         flash();
 
     dirty = TRUE;
-}
-
-void status_bar_set_flash(int val)
-{
-    do_flash = val;
 }
 
 void status_bar_get_password(void)
