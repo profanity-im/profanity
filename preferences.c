@@ -34,8 +34,8 @@ void prefs_load(void)
     g_key_file_load_from_file(g_prefs, prefs_loc->str,
         G_KEY_FILE_NONE, NULL);
 
-    gboolean beep = g_key_file_get_boolean(g_prefs, "settings", "beep", NULL);
-    gboolean flash = g_key_file_get_boolean(g_prefs, "settings", "flash", NULL);
+    gboolean beep = g_key_file_get_boolean(g_prefs, "ui", "beep", NULL);
+    gboolean flash = g_key_file_get_boolean(g_prefs, "ui", "flash", NULL);
 
     win_set_beep(beep);
     status_bar_set_flash(flash);
