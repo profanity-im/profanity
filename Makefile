@@ -7,7 +7,7 @@ CPPLIB = -lstdc++
 CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS) `pkg-config --cflags glib-2.0`
 OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
        profanity.o util.o command.o history.o contact_list.o prof_history.o \
-	   contact.o main.o
+	   contact.o preferences.o main.o
 TESTOBJS = test_contact_list.o contact_list.o contact.o \
 	       test_util.o test_prof_history.o prof_history.o util.o
 
@@ -20,13 +20,14 @@ title_bar.o: windows.h
 status_bar.o: windows.h util.h
 input_win.o: windows.h
 jabber.o: jabber.h log.h windows.h contact_list.h
-profanity.o: log.h windows.h jabber.h command.h
+profanity.o: log.h windows.h jabber.h command.h preferences.h
 util.o: util.h
 command.o: command.h util.h history.h contact_list.h
 history.o: history.h prof_history.h
 contact_list.o: contact_list.h contact.h
 prof_history.o: prof_history.h
 contact.o: contact.h
+preferences.o: preferences.h windows.h
 main.o: profanity.h
 
 test_contact_list.o: contact_list.h contact.h

@@ -29,6 +29,7 @@
 #include "windows.h"
 #include "jabber.h"
 #include "command.h"
+#include "preferences.h"
 
 static void _profanity_shutdown(void);
 
@@ -67,6 +68,7 @@ void profanity_init(const int disable_tls)
     gui_init();
     jabber_init(disable_tls);
     command_init();
+    prefs_load();
     atexit(_profanity_shutdown);
 }
 

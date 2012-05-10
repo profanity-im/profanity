@@ -50,7 +50,7 @@ static int dirty;
 static int max_cols = 0;
 
 // allow beep?
-static int do_beep = TRUE;
+static int do_beep = FALSE;
 
 static void _create_windows(void);
 static int _find_prof_win_index(const char * const contact);
