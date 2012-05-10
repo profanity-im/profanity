@@ -25,6 +25,8 @@
 
 #include <glib.h>
 
+#include "preferences.h"
+
 static GString *prefs_loc;
 static GKeyFile *prefs;
 
@@ -35,7 +37,6 @@ static gchar *search_str = NULL;
 
 static void _save_prefs(void);
 static gint _compare_jids(gconstpointer a, gconstpointer b);
-static void _reset_login_search(void);
 static gchar * _search_logins_from(GSList *curr);
 
 void prefs_load(void)
@@ -53,11 +54,11 @@ void prefs_load(void)
 
     gsize i;
     for (i = 0; i < njids; i++) {
-        logins = g_slist_insert_sorted(logins, jids[0], _compare_jids);
+        logins = g_slist_insert_sorted(logins, jids[i], _compare_jids);
     }
 }
 
-char * find_login(char *search_str)
+char * find_login(char *prefix)
 {
     gchar *found = NULL;
 
@@ -65,7 +66,7 @@ char * find_login(char *search_str)
         return NULL;
 
     if (last_found == NULL) {
-        search_str = g_strdup(search_str);
+        search_str = g_strdup(prefix);
         
         found = _search_logins_from(logins);
         return found;
@@ -78,16 +79,18 @@ char * find_login(char *search_str)
         if (found != NULL)
             return found;
 
-        _reset_login_search();
+        reset_login_search();
         return NULL;
     }
 }
 
-static void _reset_login_search(void)
+void reset_login_search(void)
 {
     last_found = NULL;
-    if (search_str != NULL)
+    if (search_str != NULL) {
         free(search_str);
+        search_str = NULL;
+    }
 }
 
 static gchar * _search_logins_from(GSList *curr)

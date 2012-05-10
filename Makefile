@@ -18,7 +18,7 @@ log.o: log.h
 windows.o: windows.h util.h contact_list.h preferences.h
 title_bar.o: windows.h
 status_bar.o: windows.h util.h
-input_win.o: windows.h
+input_win.o: windows.h preferences.h
 jabber.o: jabber.h log.h windows.h contact_list.h
 profanity.o: log.h windows.h jabber.h command.h preferences.h
 util.o: util.h

@@ -27,6 +27,9 @@
 
 void prefs_load(void);
 
+char * find_login(char *prefix);
+void reset_login_search(void);
+
 gboolean prefs_get_beep(void);
 void prefs_set_beep(gboolean value);
 gboolean prefs_get_flash(void);

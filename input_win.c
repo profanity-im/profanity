@@ -38,9 +38,12 @@
 
 #include <string.h>
 #include <stdlib.h>
+
 #include <ncurses.h>
+
 #include "windows.h"
 #include "history.h"
+#include "preferences.h"
 
 static WINDOW *inp_win;
 
@@ -120,6 +123,7 @@ void inp_get_char(int *ch, char *input, int *size)
             }
 
             reset_search_attempts();
+            reset_login_search();
         }
     }
 
@@ -239,6 +243,20 @@ static int _handle_edit(const int ch, char *input, int *size)
             if (found != NULL) {
                 auto_msg = (char *) malloc((5 + (strlen(found) + 1)) * sizeof(char));
                 strcpy(auto_msg, "/msg ");
+                strcat(auto_msg, found);
+                _replace_input(input, auto_msg, size);
+                free(auto_msg);
+                free(found);
+            }
+        } else if ((strncmp(input, "/connect ", 9) == 0) && (*size > 9)) {
+            for(i = 9; i < *size; i++) {
+                inp_cpy[i-9] = input[i];
+            }
+            inp_cpy[(*size) - 9] = '\0';
+            found = find_login(inp_cpy);
+            if (found != NULL) {
+                auto_msg = (char *) malloc((9 + (strlen(found) + 1)) * sizeof(char));
+                strcpy(auto_msg, "/connect ");
                 strcat(auto_msg, found);
                 _replace_input(input, auto_msg, size);
                 free(auto_msg);
