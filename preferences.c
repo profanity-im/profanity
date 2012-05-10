@@ -20,15 +20,18 @@
  *
  */
 
+#include <stdlib.h>
 #include <glib.h>
 
 #include "windows.h"
 
 void prefs_load(void)
 {
-    GKeyFile *g_prefs = g_key_file_new();
+    GString *prefs_loc = g_string_new(getenv("HOME"));
+    g_string_append(prefs_loc, "/.profanity");
 
-    g_key_file_load_from_file(g_prefs, "/home/james/.profanity",
+    GKeyFile *g_prefs = g_key_file_new();
+    g_key_file_load_from_file(g_prefs, prefs_loc->str,
         G_KEY_FILE_NONE, NULL);
 
     gboolean beep = g_key_file_get_boolean(g_prefs, "settings", "beep", NULL);
