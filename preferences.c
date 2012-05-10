@@ -28,7 +28,13 @@
 static GString *prefs_loc;
 static GKeyFile *prefs;
 
+// search logins list
+static GSList *logins = NULL;
+//static GSList *last_found = NULL;
+//static gchar *search_str = NULL;
+
 static void _save_prefs(void);
+static gint _compare_jids(gconstpointer a, gconstpointer b);
 
 void prefs_load(void)
 {
@@ -37,6 +43,24 @@ void prefs_load(void)
 
     prefs = g_key_file_new();
     g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_NONE, NULL);
+
+    // create the logins searchable list for autocompletion
+    gsize njids;
+    gchar **jids =
+        g_key_file_get_string_list(prefs, "connections", "logins", &njids, NULL);
+
+    gsize i;
+    for (i = 0; i < njids; i++) {
+        logins = g_slist_insert_sorted(logins, jids[0], _compare_jids);
+    }
+}
+
+static gint _compare_jids(gconstpointer a, gconstpointer b)
+{
+    const gchar *str_a = (const gchar *) a;
+    const gchar *str_b = (const gchar *) b;
+
+    return g_strcmp0(str_a, str_b);
 }
 
 gboolean prefs_get_beep(void)
