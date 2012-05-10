@@ -26,7 +26,7 @@
 static GString *prefs_loc;
 static GKeyFile *prefs;
 
-void _save_prefs(void);
+static void _save_prefs(void);
 
 void prefs_load(void)
 {
@@ -64,7 +64,7 @@ void prefs_set_flash(gboolean value)
     _save_prefs();
 }
 
-void _save_prefs(void)
+static void _save_prefs(void)
 {
     gsize g_data_size;
     char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
