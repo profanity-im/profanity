@@ -112,10 +112,10 @@ static gboolean _cmd_connect(const char * const inp)
     jabber_status_t conn_status = jabber_connection_status();
 
     if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
-        cons_not_disconnected();
+        cons_show("You are either connected already, or a login is in process.");
         result = TRUE;
     } else if (strlen(inp) < 10) {
-        cons_bad_connect();
+        cons_show("Usage: /connect user@host");
         result = TRUE;
     } else {
         char *user;
@@ -156,7 +156,7 @@ static gboolean _cmd_ros(void)
     jabber_status_t conn_status = jabber_connection_status();
 
     if (conn_status != JABBER_CONNECTED)
-        cons_not_connected();
+        cons_show("You are not currently connected.");
     else
         jabber_roster_request();
 
@@ -168,7 +168,7 @@ static gboolean _cmd_who(void)
     jabber_status_t conn_status = jabber_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_not_connected();
+        cons_show("You are not currently connected.");
     } else {
         GSList *list = get_contact_list();
         cons_show_online_contacts(list);
@@ -185,7 +185,7 @@ static gboolean _cmd_msg(const char * const inp)
     jabber_status_t conn_status = jabber_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_not_connected();
+        cons_show("You are not currently connected.");
     } else {
         // copy input    
         char inp_cpy[strlen(inp) + 1];
@@ -201,10 +201,10 @@ static gboolean _cmd_msg(const char * const inp)
                 jabber_send(msg, usr);
                 win_show_outgoing_msg("me", usr, msg);
             } else {
-                cons_bad_message();
+                cons_show("Usage: /msg user@host message");
             }
         } else {
-            cons_bad_message();
+            cons_show("Usage: /msg user@host message");
         }
     }
 

@@ -72,10 +72,6 @@ void win_set_beep(int val);
 // console window actions
 void cons_help(void);
 void cons_bad_command(const char * const cmd);
-void cons_bad_connect(void);
-void cons_not_disconnected(void);
-void cons_not_connected(void);
-void cons_bad_message(void);
 void cons_show(const char * const cmd);
 void cons_bad_show(const char * const cmd);
 void cons_highlight_show(const char * const cmd);

@@ -347,26 +347,6 @@ void cons_bad_command(const char * const cmd)
         dirty = TRUE;
 }
 
-void cons_bad_connect(void)
-{
-    cons_show("Usage: /connect user@host");
-}
-
-void cons_not_disconnected(void)
-{
-    cons_show("You are either connected already, or a login is in process.");
-}
-
-void cons_not_connected(void)
-{
-    cons_show("You are not currently connected.");
-}
-
-void cons_bad_message(void)
-{
-    cons_show("Usage: /msg user@host message");
-}
-
 void win_handle_special_keys(const int * const ch)
 {
     _win_handle_switch(ch);
