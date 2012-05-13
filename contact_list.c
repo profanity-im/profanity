@@ -56,7 +56,7 @@ void reset_search_attempts(void)
     }
 }
 
-int contact_list_remove(const char * const name)
+void contact_list_remove(const char * const name)
 {
     // reset last found if it points at the node to be removed
     if (_last_found != NULL)
@@ -64,7 +64,7 @@ int contact_list_remove(const char * const name)
             _last_found = NULL;
     
     if (!_contact_list) {
-        return 0;
+        return;
     } else {
         GSList *curr = _contact_list;
         
@@ -74,13 +74,13 @@ int contact_list_remove(const char * const name)
                 _contact_list = g_slist_remove(_contact_list, contact);
                 p_contact_free(contact);
 
-                return 1;
+                return;
             }
 
             curr = g_slist_next(curr);
         }
 
-        return 0;
+        return;
     }
 }
 
