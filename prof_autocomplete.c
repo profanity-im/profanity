@@ -34,7 +34,7 @@ struct p_autocomplete_t {
 };
 
 
-static gchar * _search_from(PAutocomplete ac, GSList *curr,  char * (*str_func)(void *));
+static gchar * _search_from(PAutocomplete ac, GSList *curr,  PStrFunc str_func);
 
 PAutocomplete p_autocomplete_new(void)
 {
@@ -63,7 +63,7 @@ void p_autocomplete_reset(PAutocomplete ac)
     }
 }
 
-void p_autocomplete_add(PAutocomplete ac, void *item, char * (*str_func)(void *), 
+void p_autocomplete_add(PAutocomplete ac, void *item, PStrFunc str_func, 
     GDestroyNotify free_func)
 {
     if (ac->items == NULL) {
@@ -97,7 +97,8 @@ void p_autocomplete_add(PAutocomplete ac, void *item, char * (*str_func)(void *)
     }
 }
 
-void p_autocomplete_remove(PAutocomplete ac, char *item, char * (*str_func)(void *),   GDestroyNotify free_func)
+void p_autocomplete_remove(PAutocomplete ac, const char * const item, 
+    PStrFunc str_func, GDestroyNotify free_func)
 {
     // reset last found if it points to the item to be removed
     if (ac->last_found != NULL)
@@ -111,8 +112,9 @@ void p_autocomplete_remove(PAutocomplete ac, char *item, char * (*str_func)(void
         
         while(curr) {
             if (g_strcmp0(str_func(curr->data), item) == 0) {
+                void *current_item = curr->data;
                 ac->items = g_slist_remove(ac->items, curr->data);
-                free_func(curr->data);
+                free_func(current_item);
                 
                 return;
             }
@@ -124,7 +126,7 @@ void p_autocomplete_remove(PAutocomplete ac, char *item, char * (*str_func)(void
     }
 }
 
-GSList * p_autocomplete_get_list(PAutocomplete ac, void * (*copy_func)(void *))
+GSList * p_autocomplete_get_list(PAutocomplete ac, PCopyFunc copy_func)
 {
     GSList *copy = NULL;
     GSList *curr = ac->items;
@@ -138,7 +140,7 @@ GSList * p_autocomplete_get_list(PAutocomplete ac, void * (*copy_func)(void *))
 }
 
 gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str, 
-    char * (*str_func)(void *))
+    PStrFunc str_func)
 {
     gchar *found = NULL;
 
@@ -173,7 +175,7 @@ gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str,
     }
 }
 
-static gchar * _search_from(PAutocomplete ac, GSList *curr,  char * (*str_func)(void *))
+static gchar * _search_from(PAutocomplete ac, GSList *curr, PStrFunc str_func)
 {
     while(curr) {
         

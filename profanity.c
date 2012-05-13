@@ -30,6 +30,7 @@
 #include "jabber.h"
 #include "command.h"
 #include "preferences.h"
+#include "contact_list.h"
 
 static void _profanity_shutdown(void);
 
@@ -69,6 +70,7 @@ void profanity_init(const int disable_tls)
     gui_init();
     jabber_init(disable_tls);
     command_init();
+    contact_list_init();
     atexit(_profanity_shutdown);
 }
 

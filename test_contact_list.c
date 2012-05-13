@@ -8,6 +8,11 @@
 #include "contact.h"
 #include "contact_list.h"
 
+static void setup(void)
+{
+    contact_list_init();
+}
+
 static void beforetest(void)
 {
     contact_list_clear();
@@ -452,6 +457,7 @@ static void removed_contact_not_in_search(void)
 void register_contact_list_tests(void)
 {
     TEST_MODULE("contact_list tests");
+    SETUP(setup);
     BEFORETEST(beforetest);
     AFTERTEST(aftertest);
     TEST(empty_list_when_none_added);

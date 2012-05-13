@@ -27,6 +27,7 @@
 
 #include "contact.h"
 
+void contact_list_init(void);
 void contact_list_clear(void);
 void reset_search_attempts(void);
 void contact_list_add(const char * const name, const char * const show,
