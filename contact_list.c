@@ -84,7 +84,7 @@ int contact_list_remove(const char * const name)
     }
 }
 
-int contact_list_add(const char * const name, const char * const show, 
+void contact_list_add(const char * const name, const char * const show, 
     const char * const status)
 {
 
@@ -93,7 +93,7 @@ int contact_list_add(const char * const name, const char * const show,
         _contact_list = g_slist_append(_contact_list, 
             p_contact_new(name, show, status));
         
-        return 1;
+        return;
     } else {
         GSList *curr = _contact_list;
 
@@ -104,12 +104,12 @@ int contact_list_add(const char * const name, const char * const show,
             if (strcmp(p_contact_name(curr_contact), name) > 0) {
                 _contact_list = g_slist_insert_before(_contact_list,
                     curr, p_contact_new(name, show, status));
-                return 0;
+                return;
             // update
             } else if (strcmp(p_contact_name(curr_contact), name) == 0) {
                 p_contact_free(curr->data);
                 curr->data = p_contact_new(name, show, status);
-                return 0;
+                return;
             }
 
             curr = g_slist_next(curr);
@@ -119,7 +119,7 @@ int contact_list_add(const char * const name, const char * const show,
         _contact_list = g_slist_append(_contact_list, 
             p_contact_new(name, show, status));
         
-        return 1;
+        return;
     }
 }
 

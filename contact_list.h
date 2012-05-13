@@ -29,7 +29,7 @@
 
 void contact_list_clear(void);
 void reset_search_attempts(void);
-int contact_list_add(const char * const name, const char * const show,
+void contact_list_add(const char * const name, const char * const show,
     const char * const status);
 int contact_list_remove(const char * const name);
 GSList * get_contact_list(void);
