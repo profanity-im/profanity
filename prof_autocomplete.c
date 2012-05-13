@@ -75,13 +75,15 @@ void p_autocomplete_add(PAutocomplete ac, void *item, PStrFunc str_func,
         while(curr) {
             
             // insert
-            if (g_strcmp0(str_func(curr->data), str_func(item)) > 0) {
+            if ( ((str_func == NULL) && (g_strcmp0(curr->data, item) > 0)) ||
+                 ((g_strcmp0(str_func(curr->data), str_func(item)) > 0)) ) {
                 ac->items = g_slist_insert_before(ac->items,
                     curr, item);
                 return;
             
             // update
-            } else if (g_strcmp0(str_func(curr->data), str_func(item)) == 0) {
+            } else if ( ((str_func == NULL) && (g_strcmp0(curr->data, item) == 0)) ||
+                        ((g_strcmp0(str_func(curr->data), str_func(item)) == 0)) ) {
                 free_func(curr->data);
                 curr->data = item;
                 return;
@@ -102,7 +104,8 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item,
 {
     // reset last found if it points to the item to be removed
     if (ac->last_found != NULL)
-        if (g_strcmp0(str_func(ac->last_found->data), item) == 0)
+        if ( ((str_func == NULL) && (g_strcmp0(ac->last_found->data, item) == 0)) ||
+             ((g_strcmp0(str_func(ac->last_found->data), item) == 0)) )
             ac->last_found = NULL;
 
     if (!ac->items) {
@@ -111,7 +114,8 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item,
         GSList *curr = ac->items;
         
         while(curr) {
-            if (g_strcmp0(str_func(curr->data), item) == 0) {
+            if ( ((str_func == NULL) && (g_strcmp0(curr->data, item) == 0)) ||
+                 ((g_strcmp0(str_func(curr->data), item) == 0)) ) {
                 void *current_item = curr->data;
                 ac->items = g_slist_remove(ac->items, curr->data);
                 free_func(current_item);
@@ -180,9 +184,11 @@ static gchar * _search_from(PAutocomplete ac, GSList *curr, PStrFunc str_func)
     while(curr) {
         
         // match found
-        if (strncmp(str_func(curr->data),
+        if ( ( (str_func == NULL) && (strncmp(curr->data, ac->search_str, 
+                                           strlen(ac->search_str)) == 0) ) ||
+             ( (strncmp(str_func(curr->data),
                 ac->search_str,
-                strlen(ac->search_str)) == 0) {
+                strlen(ac->search_str)) == 0) ) ) {
             gchar *result = 
                 (gchar *) malloc((strlen(str_func(curr->data)) + 1) * sizeof(gchar));
             
