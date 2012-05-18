@@ -10,7 +10,7 @@ OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
 	   contact.o preferences.o prof_autocomplete.o main.o
 TESTOBJS = test_contact_list.o contact_list.o contact.o \
 	       test_util.o test_prof_history.o prof_history.o util.o \
-		   prof_autocomplete.o
+		   test_prof_autocomplete.o prof_autocomplete.o
 
 profanity: $(OBJS)
 	$(CC) -o profanity $(OBJS) $(LIBS)
@@ -36,6 +36,7 @@ main.o: profanity.h
 test_contact_list.o: contact_list.h contact.h
 test_util.o: util.h
 test_prof_history.o: prof_history.h
+test_prof_autocomplete.o: contact.h prof_autocomplete.h
 
 testsuite: testsuite.h $(TESTOBJS)
 	$(CC) $(CFLAGS) $(CPPLIB) testsuite.c $(TESTOBJS) -o testsuite $(TESTLIB)

@@ -6,6 +6,7 @@ int main(void)
     register_prof_history_tests();
     register_contact_list_tests();
     register_util_tests();
+    register_prof_autocomplete_tests();
     run_suite();
     return 0;
 }

@@ -50,6 +50,20 @@ PContact p_contact_new(const char * const name, const char * const show,
     return contact;
 }
 
+PContact p_contact_copy(PContact contact)
+{
+    PContact copy = malloc(sizeof(struct p_contact_t));
+    copy->name = strdup(contact->name);
+    copy->show = strdup(contact->show);
+    
+    if (contact->status != NULL)
+        copy->status = strdup(contact->status);
+    else
+        copy->status = NULL;
+    
+    return copy;
+}
+
 void p_contact_free(PContact contact)
 {
     free(contact->name);
