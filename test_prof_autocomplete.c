@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <head-unit.h>
 #include <glib.h>
 
@@ -34,24 +35,33 @@ static void find_after_create(void)
 static void get_after_create_returns_null(void)
 {
     PAutocomplete ac = p_autocomplete_new();
-    p_autocomplete_get_list(ac, NULL);
+    GSList *result = p_autocomplete_get_list(ac, NULL);
+
+    assert_is_null(result);
+
     p_autocomplete_clear(ac, NULL);
 }
 
 static void get_after_create_with_copy_func_returns_null(void)
 {
     PAutocomplete ac = p_autocomplete_new();
-    p_autocomplete_get_list(ac, (PCopyFunc)p_contact_copy);
-    p_autocomplete_clear(ac, NULL);
+    GSList *result = p_autocomplete_get_list(ac, (PCopyFunc)p_contact_copy);
+
+    assert_is_null(result);
+    
+    p_autocomplete_clear(ac, (GDestroyNotify)p_contact_free);
 }
 
 static void add_one_and_complete(void)
 {
+    char *item = strdup("Hello");
     PAutocomplete ac = p_autocomplete_new();
-    p_autocomplete_add(ac, "Hello", NULL, NULL);
+    p_autocomplete_add(ac, item, NULL, NULL);
     char *result = p_autocomplete_complete(ac, "Hel", NULL);
 
     assert_string_equals("Hello", result);
+
+    p_autocomplete_clear(ac, (GDestroyNotify)free);
 }
 
 static void add_one_and_complete_with_funcs(void)
@@ -63,16 +73,22 @@ static void add_one_and_complete_with_funcs(void)
     char *result = p_autocomplete_complete(ac, "Jam", (PStrFunc)p_contact_name);
 
     assert_string_equals("James", result);
+    
+    p_autocomplete_clear(ac, (GDestroyNotify)p_contact_free);
 }
 
 static void add_two_and_complete_returns_first(void)
 {
+    char *item1 = strdup("Hello");
+    char *item2 = strdup("Help");
     PAutocomplete ac = p_autocomplete_new();
-    p_autocomplete_add(ac, "Hello", NULL, NULL);
-    p_autocomplete_add(ac, "Help", NULL, NULL);
+    p_autocomplete_add(ac, item1, NULL, NULL);
+    p_autocomplete_add(ac, item2, NULL, NULL);
     char *result = p_autocomplete_complete(ac, "Hel", NULL);
 
     assert_string_equals("Hello", result);
+    
+    p_autocomplete_clear(ac, (GDestroyNotify)free);
 }
 
 static void add_two_and_complete_returns_first_with_funcs(void)
@@ -87,17 +103,23 @@ static void add_two_and_complete_returns_first_with_funcs(void)
     char *result = p_autocomplete_complete(ac, "Jam", (PStrFunc)p_contact_name);
 
     assert_string_equals("James", result);
+    
+    p_autocomplete_clear(ac, (GDestroyNotify)p_contact_free);
 }
 
 static void add_two_and_complete_returns_second(void)
 {
+    char *item1 = strdup("Hello");
+    char *item2 = strdup("Help");
     PAutocomplete ac = p_autocomplete_new();
-    p_autocomplete_add(ac, "Hello", NULL, NULL);
-    p_autocomplete_add(ac, "Help", NULL, NULL);
+    p_autocomplete_add(ac, item1, NULL, NULL);
+    p_autocomplete_add(ac, item2, NULL, NULL);
     char *result1 = p_autocomplete_complete(ac, "Hel", NULL);
     char *result2 = p_autocomplete_complete(ac, result1, NULL);
 
     assert_string_equals("Help", result2);
+    
+    p_autocomplete_clear(ac, (GDestroyNotify)free);
 }
 
 static void add_two_and_complete_returns_second_with_funcs(void)
@@ -113,6 +135,8 @@ static void add_two_and_complete_returns_second_with_funcs(void)
     char *result2 = p_autocomplete_complete(ac, result1, (PStrFunc)p_contact_name);
 
     assert_string_equals("Jamie", result2);
+    
+    p_autocomplete_clear(ac, (GDestroyNotify)p_contact_free);
 }
 
 void register_prof_autocomplete_tests(void)
