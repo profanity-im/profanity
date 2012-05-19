@@ -32,16 +32,16 @@
 
 static PAutocomplete ac;
 
-static PContact _copy(PContact contact);
-
 void contact_list_init(void)
 {
-    ac = p_autocomplete_new();
+    ac = p_autocomplete_new((PStrFunc)p_contact_name, 
+                            (PCopyFunc)p_contact_copy,
+                            (GDestroyNotify)p_contact_free);
 }
 
 void contact_list_clear(void)
 {
-    p_autocomplete_clear(ac, (GDestroyNotify)p_contact_free);
+    p_autocomplete_clear(ac);
 }
 
 void reset_search_attempts(void)
@@ -51,30 +51,21 @@ void reset_search_attempts(void)
 
 void contact_list_remove(const char * const name)
 {
-    p_autocomplete_remove(ac, name, (PStrFunc)p_contact_name, (GDestroyNotify)p_contact_free);
+    p_autocomplete_remove(ac, name);
 }
 
 void contact_list_add(const char * const name, const char * const show, 
     const char * const status)
 {
-    p_autocomplete_add(ac, p_contact_new(name, show, status), (PStrFunc)p_contact_name, 
-        (GDestroyNotify)p_contact_free);
+    p_autocomplete_add(ac, p_contact_new(name, show, status));
 }
 
 GSList * get_contact_list(void)
 {
-    return p_autocomplete_get_list(ac, (PCopyFunc)_copy);
+    return p_autocomplete_get_list(ac);
 }
 
 char * find_contact(char *search_str)
 {
-    return p_autocomplete_complete(ac, search_str, (PStrFunc)p_contact_name);
+    return p_autocomplete_complete(ac, search_str);
 }
-
-static PContact _copy(PContact contact)
-{
-    return p_contact_new(p_contact_name(contact),
-                p_contact_show(contact),
-                p_contact_status(contact));
-}
-

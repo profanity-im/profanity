@@ -32,28 +32,44 @@ struct p_autocomplete_t {
     GSList *items;
     GSList *last_found;
     gchar *search_str;
+    PStrFunc str_func;
+    PCopyFunc copy_func;
+    GDestroyNotify free_func;
 };
 
-static gchar * _search_from(PAutocomplete ac, GSList *curr,  PStrFunc str_func);
+static gchar * _search_from(PAutocomplete ac, GSList *curr);
 static const char *_str_func_default(const char *orig);
 static const char *_copy_func_default(const char *orig);
 
-PAutocomplete p_autocomplete_new(void)
+PAutocomplete p_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
+    GDestroyNotify free_func)
 {
     PAutocomplete new = malloc(sizeof(struct p_autocomplete_t));
     new->items = NULL;
     new->last_found = NULL;
     new->search_str = NULL;
 
+    if (str_func)
+        new->str_func = str_func;
+    else
+        new->str_func = (PStrFunc)_str_func_default;
+
+    if (copy_func)
+        new->copy_func = copy_func;
+    else
+        new->copy_func = (PCopyFunc)_copy_func_default;
+
+    if (free_func)
+        new->free_func = free_func;
+    else
+        new->free_func = (GDestroyNotify)free;
+
     return new;
 }
 
-void p_autocomplete_clear(PAutocomplete ac, GDestroyNotify free_func)
+void p_autocomplete_clear(PAutocomplete ac)
 {
-    if (free_func == NULL)
-        free_func = (GDestroyNotify)free;
-
-    g_slist_free_full(ac->items, free_func);
+    g_slist_free_full(ac->items, ac->free_func);
     ac->items = NULL;
 
     p_autocomplete_reset(ac);
@@ -68,14 +84,8 @@ void p_autocomplete_reset(PAutocomplete ac)
     }
 }
 
-void p_autocomplete_add(PAutocomplete ac, void *item, PStrFunc str_func, 
-    GDestroyNotify free_func)
+void p_autocomplete_add(PAutocomplete ac, void *item)
 {
-    if (str_func == NULL)
-        str_func = (PStrFunc)_str_func_default;
-    if (free_func == NULL)
-        free_func = (GDestroyNotify)free;
-
     if (ac->items == NULL) {
         ac->items = g_slist_append(ac->items, item);
         return;
@@ -85,14 +95,14 @@ void p_autocomplete_add(PAutocomplete ac, void *item, PStrFunc str_func,
         while(curr) {
             
             // insert
-            if (g_strcmp0(str_func(curr->data), str_func(item)) > 0) {
+            if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) > 0) {
                 ac->items = g_slist_insert_before(ac->items,
                     curr, item);
                 return;
             
             // update
-            } else if (g_strcmp0(str_func(curr->data), str_func(item)) == 0) {
-                free_func(curr->data);
+            } else if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) == 0) {
+                ac->free_func(curr->data);
                 curr->data = item;
                 return;
             }
@@ -107,15 +117,11 @@ void p_autocomplete_add(PAutocomplete ac, void *item, PStrFunc str_func,
     }
 }
 
-void p_autocomplete_remove(PAutocomplete ac, const char * const item, 
-    PStrFunc str_func, GDestroyNotify free_func)
+void p_autocomplete_remove(PAutocomplete ac, const char * const item)
 {
-    if (str_func == NULL)
-        str_func = (PStrFunc)_str_func_default;
-
     // reset last found if it points to the item to be removed
     if (ac->last_found != NULL)
-        if (g_strcmp0(str_func(ac->last_found->data), item) == 0)
+        if (g_strcmp0(ac->str_func(ac->last_found->data), item) == 0)
             ac->last_found = NULL;
 
     if (!ac->items) {
@@ -124,10 +130,10 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item,
         GSList *curr = ac->items;
         
         while(curr) {
-            if (g_strcmp0(str_func(curr->data), item) == 0) {
+            if (g_strcmp0(ac->str_func(curr->data), item) == 0) {
                 void *current_item = curr->data;
                 ac->items = g_slist_remove(ac->items, curr->data);
-                free_func(current_item);
+                ac->free_func(current_item);
                 
                 return;
             }
@@ -139,28 +145,21 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item,
     }
 }
 
-GSList * p_autocomplete_get_list(PAutocomplete ac, PCopyFunc copy_func)
+GSList * p_autocomplete_get_list(PAutocomplete ac)
 {
-    if (copy_func == NULL)
-        copy_func = (PCopyFunc)_copy_func_default;
-
     GSList *copy = NULL;
     GSList *curr = ac->items;
 
     while(curr) {
-        copy = g_slist_append(copy, copy_func(curr->data));
+        copy = g_slist_append(copy, ac->copy_func(curr->data));
         curr = g_slist_next(curr);
     }
 
     return copy;
 }
 
-gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str, 
-    PStrFunc str_func)
+gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
 {
-    if (str_func == NULL)
-        str_func = (PStrFunc)_str_func_default;
-
     gchar *found = NULL;
 
     // no items to search
@@ -173,18 +172,18 @@ gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str,
             (gchar *) malloc((strlen(search_str) + 1) * sizeof(gchar));
         strcpy(ac->search_str, search_str);
 
-        found = _search_from(ac, ac->items, str_func);
+        found = _search_from(ac, ac->items);
         return found;
 
     // subsequent search attempt    
     } else {
         // search from here+1 tp end
-        found = _search_from(ac, g_slist_next(ac->last_found), str_func);
+        found = _search_from(ac, g_slist_next(ac->last_found));
         if (found != NULL)
             return found;
 
         // search from beginning
-        found = _search_from(ac, ac->items, str_func);
+        found = _search_from(ac, ac->items);
         if (found != NULL)
             return found;
     
@@ -194,22 +193,22 @@ gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str,
     }
 }
 
-static gchar * _search_from(PAutocomplete ac, GSList *curr, PStrFunc str_func)
+static gchar * _search_from(PAutocomplete ac, GSList *curr)
 {
     while(curr) {
         
         // match found
-        if (strncmp(str_func(curr->data),
+        if (strncmp(ac->str_func(curr->data),
                 ac->search_str,
                 strlen(ac->search_str)) == 0) {
             gchar *result = 
-                (gchar *) malloc((strlen(str_func(curr->data)) + 1) * sizeof(gchar));
+                (gchar *) malloc((strlen(ac->str_func(curr->data)) + 1) * sizeof(gchar));
             
             // set pointer to last found
             ac->last_found = curr;
 
             // return the string, must be free'd by caller
-            strcpy(result, str_func(curr->data));
+            strcpy(result, ac->str_func(curr->data));
             return result;
         }
 
