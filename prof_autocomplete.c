@@ -36,6 +36,7 @@ struct p_autocomplete_t {
 
 static gchar * _search_from(PAutocomplete ac, GSList *curr,  PStrFunc str_func);
 static const char *_str_func_default(const char *orig);
+static const char *_copy_func_default(const char *orig);
 
 PAutocomplete p_autocomplete_new(void)
 {
@@ -49,6 +50,9 @@ PAutocomplete p_autocomplete_new(void)
 
 void p_autocomplete_clear(PAutocomplete ac, GDestroyNotify free_func)
 {
+    if (free_func == NULL)
+        free_func = (GDestroyNotify)free;
+
     g_slist_free_full(ac->items, free_func);
     ac->items = NULL;
 
@@ -69,6 +73,8 @@ void p_autocomplete_add(PAutocomplete ac, void *item, PStrFunc str_func,
 {
     if (str_func == NULL)
         str_func = (PStrFunc)_str_func_default;
+    if (free_func == NULL)
+        free_func = (GDestroyNotify)free;
 
     if (ac->items == NULL) {
         ac->items = g_slist_append(ac->items, item);
@@ -135,6 +141,9 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item,
 
 GSList * p_autocomplete_get_list(PAutocomplete ac, PCopyFunc copy_func)
 {
+    if (copy_func == NULL)
+        copy_func = (PCopyFunc)_copy_func_default;
+
     GSList *copy = NULL;
     GSList *curr = ac->items;
 
@@ -213,5 +222,10 @@ static gchar * _search_from(PAutocomplete ac, GSList *curr, PStrFunc str_func)
 static const char *_str_func_default(const char *orig) 
 {
     return orig;
+}
+
+static const char *_copy_func_default(const char *orig)
+{
+    return strdup(orig);
 }
 
