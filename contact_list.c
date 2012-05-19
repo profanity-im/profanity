@@ -34,7 +34,7 @@ static PAutocomplete ac;
 
 void contact_list_init(void)
 {
-    ac = p_autocomplete_new((PStrFunc)p_contact_name, 
+    ac = p_obj_autocomplete_new((PStrFunc)p_contact_name, 
                             (PCopyFunc)p_contact_copy,
                             (GDestroyNotify)p_contact_free);
 }

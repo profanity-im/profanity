@@ -41,7 +41,12 @@ static gchar * _search_from(PAutocomplete ac, GSList *curr);
 static const char *_str_func_default(const char *orig);
 static const char *_copy_func_default(const char *orig);
 
-PAutocomplete p_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
+PAutocomplete p_autocomplete_new(void)
+{
+    return p_obj_autocomplete_new(NULL, NULL, NULL);
+}
+
+PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
     GDestroyNotify free_func)
 {
     PAutocomplete new = malloc(sizeof(struct p_autocomplete_t));
