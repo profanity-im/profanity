@@ -26,21 +26,19 @@
 #include <glib.h>
 
 #include "preferences.h"
+#include "prof_autocomplete.h"
 
 static GString *prefs_loc;
 static GKeyFile *prefs;
 
 // search logins list
-static GSList *logins = NULL;
-static GSList *last_found = NULL;
-static gchar *search_str = NULL;
+static PAutocomplete ac;
 
 static void _save_prefs(void);
-static gint _compare_jids(gconstpointer a, gconstpointer b);
-static gchar * _search_logins_from(GSList *curr);
 
 void prefs_load(void)
 {
+    ac = p_autocomplete_new();
     prefs_loc = g_string_new(getenv("HOME"));
     g_string_append(prefs_loc, "/.profanity");
 
@@ -54,69 +52,18 @@ void prefs_load(void)
 
     gsize i;
     for (i = 0; i < njids; i++) {
-        logins = g_slist_insert_sorted(logins, jids[i], _compare_jids);
+        p_autocomplete_add(ac, jids[i]);
     }
 }
 
 char * find_login(char *prefix)
 {
-    gchar *found = NULL;
-
-    if (!logins)
-        return NULL;
-
-    if (last_found == NULL) {
-        search_str = g_strdup(prefix);
-        
-        found = _search_logins_from(logins);
-        return found;
-    } else {
-        found = _search_logins_from(g_slist_next(last_found));
-        if (found != NULL)
-            return found;
-
-        found = _search_logins_from(logins);
-        if (found != NULL)
-            return found;
-
-        reset_login_search();
-        return NULL;
-    }
+    return p_autocomplete_complete(ac, prefix);
 }
 
 void reset_login_search(void)
 {
-    last_found = NULL;
-    if (search_str != NULL) {
-        free(search_str);
-        search_str = NULL;
-    }
-}
-
-static gchar * _search_logins_from(GSList *curr)
-{
-    while(curr) {
-        gchar *curr_jid = curr->data;
-
-        if (strncmp(curr_jid, search_str, strlen(search_str)) == 0) {
-            gchar *result = g_strdup(curr_jid);
-            last_found = curr;
-            
-            return result;
-        }
-
-        curr = g_slist_next(curr);
-    }
-
-    return NULL;
-}
-
-static gint _compare_jids(gconstpointer a, gconstpointer b)
-{
-    const gchar *str_a = (const gchar *) a;
-    const gchar *str_b = (const gchar *) b;
-
-    return g_strcmp0(str_a, str_b);
+    p_autocomplete_reset(ac);
 }
 
 gboolean prefs_get_beep(void)
