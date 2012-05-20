@@ -2,7 +2,7 @@ CC = gcc
 WARNS = -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-variable \
 	-Wno-unused-result
 LIBS = -lxml2 -lexpat -lssl -lresolv -lncurses -L ~/lib -lstrophe `pkg-config --libs glib-2.0`
-TESTLIB = -L ~/lib -l headunit
+TESTLIB = -L ~/lib -l headunit `pkg-config --libs glib-2.0`
 CPPLIB = -lstdc++
 CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS) `pkg-config --cflags glib-2.0`
 OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
