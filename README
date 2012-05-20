@@ -1,13 +1,10 @@
 Ncurses based Irssi inspired Jabber client.
 
-Requires ncurses.
+Requires ncurses, libstrophe and glib.
+
+Requires head-unit to run tests:
+
+    https://github.com/boothj5/head-unit
 
 Run with -notls if the Jabber server doesn't
 properly support it
-
-Note
-----
-Currently requires modified version of libstrophe
-found at:
-    
-    git://github.com/boothj5/libstrophe.git
