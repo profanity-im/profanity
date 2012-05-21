@@ -163,4 +163,19 @@ The idea is that these modules could be included in other applications.
 The "prof_" prefix is just because they were created whilst developing
 Profanity.
 
+prof_autocomplete.c
+-------------------
 
+Two type are PAutocomplete can be created.
+
+p_autocomplete_new() creates a PAutocomplete that can store strings, the
+simple case.
+
+p_obj_autocomplete_new() creates a PAutocomplete of arbitrary data 
+structures. This function must be passed function pointers of the following
+types:
+
+    PStrFunc:       A function that will get a string out of the data structure
+    PCopyFunc:      A function that will make a copy the data structure, allocating
+        memory for it.
+    GDestroyNotify: A function that will free memory for the data structure.
