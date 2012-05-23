@@ -28,6 +28,8 @@
 typedef struct p_autocomplete_t *PAutocomplete;
 typedef const char * (*PStrFunc)(const void *obj);
 typedef void * (*PCopyFunc)(const void *obj);
+typedef int (*PEqualFunc)(const void *o1, const void *o2);
+typedef int (*PEqualDeepFunc)(const void *o1, const void *o2);
 
 PAutocomplete p_autocomplete_new(void);
 PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
