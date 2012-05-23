@@ -89,11 +89,11 @@ void p_autocomplete_reset(PAutocomplete ac)
     }
 }
 
-void p_autocomplete_add(PAutocomplete ac, void *item)
+gboolean p_autocomplete_add(PAutocomplete ac, void *item)
 {
     if (ac->items == NULL) {
         ac->items = g_slist_append(ac->items, item);
-        return;
+        return TRUE;
     } else {
         GSList *curr = ac->items;
         
@@ -103,13 +103,13 @@ void p_autocomplete_add(PAutocomplete ac, void *item)
             if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) > 0) {
                 ac->items = g_slist_insert_before(ac->items,
                     curr, item);
-                return;
+                return TRUE;
             
             // update
             } else if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) == 0) {
                 ac->free_func(curr->data);
                 curr->data = item;
-                return;
+                return TRUE;
             }
             
             curr = g_slist_next(curr);
@@ -118,11 +118,11 @@ void p_autocomplete_add(PAutocomplete ac, void *item)
         // hit end, append
         ac->items = g_slist_append(ac->items, item);
 
-        return;
+        return TRUE;
     }
 }
 
-void p_autocomplete_remove(PAutocomplete ac, const char * const item)
+gboolean p_autocomplete_remove(PAutocomplete ac, const char * const item)
 {
     // reset last found if it points to the item to be removed
     if (ac->last_found != NULL)
@@ -130,7 +130,7 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item)
             ac->last_found = NULL;
 
     if (!ac->items) {
-        return;
+        return FALSE;
     } else {
         GSList *curr = ac->items;
         
@@ -140,13 +140,13 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item)
                 ac->items = g_slist_remove(ac->items, curr->data);
                 ac->free_func(current_item);
                 
-                return;
+                return TRUE;
             }
 
             curr = g_slist_next(curr);
         }
 
-        return;
+        return FALSE;
     }
 }
 
