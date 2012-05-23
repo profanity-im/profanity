@@ -95,3 +95,17 @@ const char * p_contact_status(const PContact contact)
 {
     return contact->status;
 }
+
+int p_contact_names_equal(const PContact c1, const PContact c2)
+{
+    return strcmp(c1->name, c2->name);
+}
+
+int p_contacts_equal_deep(const PContact c1, const PContact c2)
+{
+    int name_eq = strcmp(c1->name, c2->name);
+    int show_eq = strcmp(c1->show, c2->show);
+    int status_eq = strcmp(c1->status, c2->status);
+
+    return (name_eq && show_eq && status_eq);
+}
