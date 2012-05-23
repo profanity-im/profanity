@@ -1,0 +1,14 @@
+<presence to="james.booth@framework" from="tony.walsh@framework/407908c3">
+    <show>away</show>
+    <status>I'm not here right now</status>
+    <c hash="sha-1" xmlns="http://jabber.org/protocol/caps" ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" node="http://pidgin.im/"/>
+    <x xmlns="vcard-temp:x:update"><photo/></x>
+</presence>
+
+<presence to="james.booth@framework" from="tony.walsh@framework/407908c3">
+    <show>away</show>
+    <status>I'm not here right now</status>
+    <query xmlns="jabber:iq:last" seconds="302"/>
+    <c hash="sha-1" xmlns="http://jabber.org/protocol/caps" ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" node="http://pidgin.im/"/>
+    <x xmlns="vcard-temp:x:update"><photo/></x>
+</presence>
