@@ -1,14 +1,57 @@
-<presence to="james.booth@framework" from="tony.walsh@framework/407908c3">
+<presence to="james.booth@framework" 
+          from="tony.walsh@framework/407908c3">
     <show>away</show>
     <status>I'm not here right now</status>
-    <c hash="sha-1" xmlns="http://jabber.org/protocol/caps" ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" node="http://pidgin.im/"/>
+    <c hash="sha-1" 
+       xmlns="http://jabber.org/protocol/caps" 
+       ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" 
+       node="http://pidgin.im/"/>
     <x xmlns="vcard-temp:x:update"><photo/></x>
 </presence>
 
-<presence to="james.booth@framework" from="tony.walsh@framework/407908c3">
+<presence to="james.booth@framework" 
+          from="tony.walsh@framework/407908c3">
     <show>away</show>
     <status>I'm not here right now</status>
-    <query xmlns="jabber:iq:last" seconds="302"/>
-    <c hash="sha-1" xmlns="http://jabber.org/protocol/caps" ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" node="http://pidgin.im/"/>
+    <query xmlns="jabber:iq:last" 
+           seconds="302"/>
+    <c hash="sha-1" 
+       xmlns="http://jabber.org/protocol/caps" 
+       ver="I22W7CegORwdbnu0ZiQwGpxr0Go=" 
+       node="http://pidgin.im/"/>
     <x xmlns="vcard-temp:x:update"><photo/></x>
+</presence>
+
+
+
+
+
+<presence to="james.booth@framework" 
+          from="chris.hosegood@framework/e63f97b3">
+    <priority>1</priority>
+    <c hash="sha-1" 
+       xmlns="http://jabber.org/protocol/caps" 
+       ext="voice-v1 camera-v1 video-v1" 
+       ver="AcN1/PEN8nq7AHD+9jpxMV4U6YM=" 
+       node="http://pidgin.im/"/>
+    <x xmlns="vcard-temp:x:update">
+        <photo>768d0f2eb2785fb470a1a629d46b4482ebea5c55</photo>
+    </x>
+</presence>
+
+<presence to="james.booth@framework" 
+          type="unavailable" 
+          from="chris.hosegood@framework/e63f97b3"/>
+
+<presence to="james.booth@framework" 
+          from="chris.hosegood@framework/c718dfe1">
+    <priority>1</priority>
+    <c hash="sha-1" 
+       xmlns="http://jabber.org/protocol/caps" 
+       ext="voice-v1 camera-v1 video-v1" 
+       ver="AcN1/PEN8nq7AHD+9jpxMV4U6YM=" 
+       node="http://pidgin.im/"/>
+    <x xmlns="vcard-temp:x:update">
+        <photo>768d0f2eb2785fb470a1a629d46b4482ebea5c55</photo>
+    </x>
 </presence>
