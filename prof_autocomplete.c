@@ -34,20 +34,22 @@ struct p_autocomplete_t {
     gchar *search_str;
     PStrFunc str_func;
     PCopyFunc copy_func;
+    PEqualDeepFunc equal_deep_func;
     GDestroyNotify free_func;
 };
 
 static gchar * _search_from(PAutocomplete ac, GSList *curr);
 static const char *_str_func_default(const char *orig);
 static const char *_copy_func_default(const char *orig);
+static int _deep_equals_func_default(const char *o1, const char *o2);
 
 PAutocomplete p_autocomplete_new(void)
 {
-    return p_obj_autocomplete_new(NULL, NULL, NULL);
+    return p_obj_autocomplete_new(NULL, NULL, NULL, NULL);
 }
 
 PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
-    GDestroyNotify free_func)
+    PEqualDeepFunc equal_deep_func, GDestroyNotify free_func)
 {
     PAutocomplete new = malloc(sizeof(struct p_autocomplete_t));
     new->items = NULL;
@@ -68,6 +70,11 @@ PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
         new->free_func = free_func;
     else
         new->free_func = (GDestroyNotify)free;
+
+    if (equal_deep_func)
+        new->equal_deep_func = equal_deep_func;
+    else
+        new->equal_deep_func = (PEqualDeepFunc)_deep_equals_func_default;
 
     return new;
 }
@@ -107,9 +114,14 @@ gboolean p_autocomplete_add(PAutocomplete ac, void *item)
             
             // update
             } else if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) == 0) {
-                ac->free_func(curr->data);
-                curr->data = item;
-                return TRUE;
+                // only update if data different
+                if (!ac->equal_deep_func(curr->data, item)) {
+                    ac->free_func(curr->data);
+                    curr->data = item;
+                    return TRUE;
+                } else {
+                    return FALSE;
+                }
             }
             
             curr = g_slist_next(curr);
@@ -233,3 +245,7 @@ static const char *_copy_func_default(const char *orig)
     return strdup(orig);
 }
 
+static int _deep_equals_func_default(const char *o1, const char *o2)
+{
+    return (strcmp(o1, o2) == 0);
+}

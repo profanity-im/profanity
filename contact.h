@@ -32,7 +32,6 @@ void p_contact_free(PContact contact);
 const char * p_contact_name(PContact contact);
 const char * p_contact_show(PContact contact);
 const char * p_contact_status(PContact contact);
-int p_contact_names_equal(const PContact c1, const PContact c2);
 int p_contacts_equal_deep(const PContact c1, const PContact c2);
 
 #endif

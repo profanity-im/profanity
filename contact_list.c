@@ -36,6 +36,7 @@ void contact_list_init(void)
 {
     ac = p_obj_autocomplete_new((PStrFunc)p_contact_name, 
                             (PCopyFunc)p_contact_copy,
+                            (PEqualDeepFunc)p_contacts_equal_deep,
                             (GDestroyNotify)p_contact_free);
 }
 
