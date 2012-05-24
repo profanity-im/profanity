@@ -17,12 +17,12 @@ profanity: $(OBJS)
 
 common.o: common.h
 log.o: log.h
-windows.o: windows.h util.h contact_list.h preferences.h
-title_bar.o: windows.h
-status_bar.o: windows.h util.h
-input_win.o: windows.h preferences.h
-jabber.o: jabber.h log.h windows.h contact_list.h
-profanity.o: log.h windows.h jabber.h command.h preferences.h \
+windows.o: ui.h util.h contact_list.h preferences.h
+title_bar.o: ui.h
+status_bar.o: ui.h util.h
+input_win.o: ui.h preferences.h
+jabber.o: jabber.h log.h ui.h contact_list.h
+profanity.o: log.h ui.h jabber.h command.h preferences.h \
 			 contact_list.h
 util.o: util.h
 command.o: command.h util.h history.h contact_list.h

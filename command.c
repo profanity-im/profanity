@@ -29,7 +29,7 @@
 #include "contact_list.h"
 #include "history.h"
 #include "jabber.h"
-#include "windows.h"
+#include "ui.h"
 #include "util.h"
 #include "preferences.h"
 

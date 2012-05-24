@@ -26,7 +26,7 @@
 #include <ncurses.h>
 #include <glib.h>
 
-#include "windows.h"
+#include "ui.h"
 #include "util.h"
 #include "contact.h"
 #include "preferences.h"

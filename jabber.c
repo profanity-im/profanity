@@ -26,7 +26,7 @@
 #include "jabber.h"
 #include "log.h"
 #include "contact_list.h"
-#include "windows.h"
+#include "ui.h"
 #include "util.h"
 #include "preferences.h"
 

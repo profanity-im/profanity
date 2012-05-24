@@ -23,7 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ncurses.h>
-#include "windows.h"
+
+#include "ui.h"
 
 static WINDOW *title_bar;
 static char *current_title = NULL;

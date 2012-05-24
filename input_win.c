@@ -41,7 +41,7 @@
 
 #include <ncurses.h>
 
-#include "windows.h"
+#include "ui.h"
 #include "history.h"
 #include "preferences.h"
 

@@ -26,7 +26,7 @@
 
 #include "profanity.h"
 #include "log.h"
-#include "windows.h"
+#include "ui.h"
 #include "jabber.h"
 #include "command.h"
 #include "preferences.h"

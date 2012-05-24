@@ -25,7 +25,7 @@
 
 #include <ncurses.h>
 
-#include "windows.h"
+#include "ui.h"
 #include "util.h"
 #include "preferences.h"
 

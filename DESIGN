@@ -37,11 +37,11 @@ These represent the different windows in Ncurses.
     |  INPUT_WIN                                   |
     +----------------------------------------------+
 
-The interface to the UI is all through windows.h, all UI modules share this
+The interface to the UI is all through ui.h, all UI modules share this
 header:
 
 
-                            windows.h
+                               ui.h
                                 |
                                 |
           --------------------------------------------------
@@ -50,7 +50,7 @@ header:
 
 
 
-So any calls to the UI are through windows.h
+So any calls to the UI are through ui.h
 
 title_bar.c and status_bar.c are relatively trivial.
 

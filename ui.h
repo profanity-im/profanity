@@ -1,5 +1,5 @@
 /* 
- * windows.h
+ * ui.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
  * 
