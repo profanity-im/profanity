@@ -28,14 +28,16 @@
 typedef struct p_autocomplete_t *PAutocomplete;
 typedef const char * (*PStrFunc)(const void *obj);
 typedef void * (*PCopyFunc)(const void *obj);
+typedef int (*PEqualFunc)(const void *o1, const void *o2);
+typedef int (*PEqualDeepFunc)(const void *o1, const void *o2);
 
 PAutocomplete p_autocomplete_new(void);
 PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
-    GDestroyNotify free_func);
+    PEqualDeepFunc equal_deep_func, GDestroyNotify free_func);
 void p_autocomplete_clear(PAutocomplete ac);
 void p_autocomplete_reset(PAutocomplete ac);
-void p_autocomplete_add(PAutocomplete ac, void *item);
-void p_autocomplete_remove(PAutocomplete ac, const char * const item);
+gboolean p_autocomplete_add(PAutocomplete ac, void *item);
+gboolean p_autocomplete_remove(PAutocomplete ac, const char * const item);
 GSList * p_autocomplete_get_list(PAutocomplete ac);
 gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str);
 

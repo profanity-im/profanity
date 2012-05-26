@@ -179,4 +179,5 @@ types:
     PStrFunc:       A function that will get a string out of the data structure
     PCopyFunc:      A function that will make a copy the data structure, allocating
         memory for it.
+    PEqualDeepFunc: A function to compare two structures by comparing all members.
     GDestroyNotify: A function that will free memory for the data structure.

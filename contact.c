@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+
 #include "contact.h"
 
 struct p_contact_t {
@@ -94,4 +96,13 @@ const char * p_contact_show(const PContact contact)
 const char * p_contact_status(const PContact contact)
 {
     return contact->status;
+}
+
+int p_contacts_equal_deep(const PContact c1, const PContact c2)
+{
+    int name_eq = (g_strcmp0(c1->name, c2->name) == 0);
+    int show_eq = (g_strcmp0(c1->show, c2->show) == 0);
+    int status_eq = (g_strcmp0(c1->status, c2->status) == 0);
+
+    return (name_eq && show_eq && status_eq);
 }

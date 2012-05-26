@@ -34,20 +34,22 @@ struct p_autocomplete_t {
     gchar *search_str;
     PStrFunc str_func;
     PCopyFunc copy_func;
+    PEqualDeepFunc equal_deep_func;
     GDestroyNotify free_func;
 };
 
 static gchar * _search_from(PAutocomplete ac, GSList *curr);
 static const char *_str_func_default(const char *orig);
 static const char *_copy_func_default(const char *orig);
+static int _deep_equals_func_default(const char *o1, const char *o2);
 
 PAutocomplete p_autocomplete_new(void)
 {
-    return p_obj_autocomplete_new(NULL, NULL, NULL);
+    return p_obj_autocomplete_new(NULL, NULL, NULL, NULL);
 }
 
 PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
-    GDestroyNotify free_func)
+    PEqualDeepFunc equal_deep_func, GDestroyNotify free_func)
 {
     PAutocomplete new = malloc(sizeof(struct p_autocomplete_t));
     new->items = NULL;
@@ -69,6 +71,11 @@ PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
     else
         new->free_func = (GDestroyNotify)free;
 
+    if (equal_deep_func)
+        new->equal_deep_func = equal_deep_func;
+    else
+        new->equal_deep_func = (PEqualDeepFunc)_deep_equals_func_default;
+
     return new;
 }
 
@@ -89,11 +96,11 @@ void p_autocomplete_reset(PAutocomplete ac)
     }
 }
 
-void p_autocomplete_add(PAutocomplete ac, void *item)
+gboolean p_autocomplete_add(PAutocomplete ac, void *item)
 {
     if (ac->items == NULL) {
         ac->items = g_slist_append(ac->items, item);
-        return;
+        return TRUE;
     } else {
         GSList *curr = ac->items;
         
@@ -103,13 +110,18 @@ void p_autocomplete_add(PAutocomplete ac, void *item)
             if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) > 0) {
                 ac->items = g_slist_insert_before(ac->items,
                     curr, item);
-                return;
+                return TRUE;
             
             // update
             } else if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) == 0) {
-                ac->free_func(curr->data);
-                curr->data = item;
-                return;
+                // only update if data different
+                if (!ac->equal_deep_func(curr->data, item)) {
+                    ac->free_func(curr->data);
+                    curr->data = item;
+                    return TRUE;
+                } else {
+                    return FALSE;
+                }
             }
             
             curr = g_slist_next(curr);
@@ -118,11 +130,11 @@ void p_autocomplete_add(PAutocomplete ac, void *item)
         // hit end, append
         ac->items = g_slist_append(ac->items, item);
 
-        return;
+        return TRUE;
     }
 }
 
-void p_autocomplete_remove(PAutocomplete ac, const char * const item)
+gboolean p_autocomplete_remove(PAutocomplete ac, const char * const item)
 {
     // reset last found if it points to the item to be removed
     if (ac->last_found != NULL)
@@ -130,7 +142,7 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item)
             ac->last_found = NULL;
 
     if (!ac->items) {
-        return;
+        return FALSE;
     } else {
         GSList *curr = ac->items;
         
@@ -140,13 +152,13 @@ void p_autocomplete_remove(PAutocomplete ac, const char * const item)
                 ac->items = g_slist_remove(ac->items, curr->data);
                 ac->free_func(current_item);
                 
-                return;
+                return TRUE;
             }
 
             curr = g_slist_next(curr);
         }
 
-        return;
+        return FALSE;
     }
 }
 
@@ -233,3 +245,7 @@ static const char *_copy_func_default(const char *orig)
     return strdup(orig);
 }
 
+static int _deep_equals_func_default(const char *o1, const char *o2)
+{
+    return (strcmp(o1, o2) == 0);
+}
