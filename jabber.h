@@ -28,11 +28,12 @@ typedef enum {
     JABBER_CONNECTING,
     JABBER_CONNECTED,
     JABBER_DISCONNECTED
-} jabber_status_t;
+} jabber_conn_status_t;
 
 void jabber_init(const int disable_tls);
-jabber_status_t jabber_connection_status(void);
-jabber_status_t jabber_connect(const char * const user, const char * const passwd);
+jabber_conn_status_t jabber_connection_status(void);
+jabber_conn_status_t jabber_connect(const char * const user, 
+    const char * const passwd);
 void jabber_disconnect(void);
 void jabber_roster_request(void);
 void jabber_process_events(void);

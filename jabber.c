@@ -39,7 +39,7 @@ static struct _jabber_conn_t {
     xmpp_log_t *log;
     xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;
-    jabber_status_t conn_status;
+    jabber_conn_status_t conn_status;
     int tls_disabled;
 } jabber_conn;
 
@@ -81,12 +81,13 @@ void jabber_init(const int disable_tls)
     jabber_conn.tls_disabled = disable_tls;
 }
 
-jabber_status_t jabber_connection_status(void)
+jabber_conn_status_t jabber_connection_status(void)
 {
     return (jabber_conn.conn_status);
 }
 
-jabber_status_t jabber_connect(const char * const user, const char * const passwd)
+jabber_conn_status_t jabber_connect(const char * const user, 
+    const char * const passwd)
 {
     xmpp_initialize();
 
