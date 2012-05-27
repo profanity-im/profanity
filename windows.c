@@ -274,6 +274,11 @@ void cons_help(void)
     cons_show("/flash <on/off>      : Enable/disable screen flash notification");
     cons_show("/close               : Close a chat window.");
     cons_show("/quit                : Quit Profanity.");
+    cons_show("/away                : Set status to away.");
+    cons_show("/online              : Set status to online.");
+    cons_show("/dnd                 : Set status to dnd (do not disturb).");
+    cons_show("/chat                : Set status to chat (available for chat).");
+    cons_show("/xa                  : Set status to xa (extended away).");
     cons_show("");
     cons_show("Keys:");
     cons_show("");
