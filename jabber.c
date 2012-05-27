@@ -40,6 +40,7 @@ static struct _jabber_conn_t {
     xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;
     jabber_conn_status_t conn_status;
+    jabber_presence_t presence;
     int tls_disabled;
 } jabber_conn;
 
@@ -78,6 +79,7 @@ static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 void jabber_init(const int disable_tls)
 {
     jabber_conn.conn_status = JABBER_STARTED;
+    jabber_conn.presence = PRESENCE_OFFLINE;
     jabber_conn.tls_disabled = disable_tls;
 }
 
@@ -124,6 +126,7 @@ void jabber_disconnect(void)
         xmpp_ctx_free(jabber_conn.ctx);
         xmpp_shutdown();
         jabber_conn.conn_status = JABBER_DISCONNECTED;
+        jabber_conn.presence = PRESENCE_OFFLINE;
     }
 }
 
@@ -227,6 +230,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         prefs_add_login(jid);
 
         jabber_conn.conn_status = JABBER_CONNECTED;
+        jabber_conn.presence = PRESENCE_ONLINE;
     }
     else {
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
@@ -239,6 +243,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         log_msg(CONN, "disconnected");
         xmpp_stop(ctx);
         jabber_conn.conn_status = JABBER_DISCONNECTED;
+        jabber_conn.presence = PRESENCE_OFFLINE;
     }
 }
 
