@@ -189,11 +189,22 @@ void jabber_update_presence(jabber_presence_t status)
     pres = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(pres, "presence");
     
-    if (status == PRESENCE_AWAY) {
+    if (status != PRESENCE_ONLINE) {
         show = xmpp_stanza_new(jabber_conn.ctx);
         xmpp_stanza_set_name(show, "show");
         xmpp_stanza_t *text = xmpp_stanza_new(jabber_conn.ctx);
-        xmpp_stanza_set_text(text, "away");
+
+        if (status == PRESENCE_AWAY)
+            xmpp_stanza_set_text(text, "away");
+        else if (status == PRESENCE_DND)
+            xmpp_stanza_set_text(text, "dnd");
+        else if (status == PRESENCE_CHAT)
+            xmpp_stanza_set_text(text, "chat");
+        else if (status == PRESENCE_XA)
+            xmpp_stanza_set_text(text, "xa");
+        else 
+            xmpp_stanza_set_text(text, "online");
+
         xmpp_stanza_add_child(show, text);
         xmpp_stanza_add_child(pres, show);
         xmpp_stanza_release(text);

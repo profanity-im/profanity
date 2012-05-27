@@ -46,6 +46,9 @@ static gboolean _cmd_set_beep(const char * const inp);
 static gboolean _cmd_set_flash(const char * const inp);
 static gboolean _cmd_away(const char * const inp);
 static gboolean _cmd_online(const char * const inp);
+static gboolean _cmd_dnd(const char * const inp);
+static gboolean _cmd_chat(const char * const inp);
+static gboolean _cmd_xa(const char * const inp);
 static gboolean _cmd_default(const char * const inp);
 
 gboolean process_input(char *inp)
@@ -106,6 +109,12 @@ static gboolean _handle_command(const char * const command, const char * const i
         result = _cmd_away(inp);
     } else if (strcmp(command, "/online") == 0) {
         result = _cmd_online(inp);
+    } else if (strcmp(command, "/dnd") == 0) {
+        result = _cmd_dnd(inp);
+    } else if (strcmp(command, "/chat") == 0) {
+        result = _cmd_chat(inp);
+    } else if (strcmp(command, "/xa") == 0) {
+        result = _cmd_xa(inp);
     } else {
         result = _cmd_default(inp);
     }
@@ -281,6 +290,51 @@ static gboolean _cmd_online(const char * const inp)
         jabber_update_presence(PRESENCE_ONLINE);
         title_bar_set_status(PRESENCE_ONLINE);
         cons_show("Status set to \"online\"");
+    }
+
+    return TRUE;
+}
+
+static gboolean _cmd_dnd(const char * const inp)
+{
+    jabber_conn_status_t conn_status = jabber_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        jabber_update_presence(PRESENCE_DND);
+        title_bar_set_status(PRESENCE_DND);
+        cons_show("Status set to \"dnd\"");
+    }
+
+    return TRUE;
+}
+
+static gboolean _cmd_chat(const char * const inp)
+{
+    jabber_conn_status_t conn_status = jabber_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        jabber_update_presence(PRESENCE_CHAT);
+        title_bar_set_status(PRESENCE_CHAT);
+        cons_show("Status set to \"chat\"");
+    }
+
+    return TRUE;
+}
+
+static gboolean _cmd_xa(const char * const inp)
+{
+    jabber_conn_status_t conn_status = jabber_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        jabber_update_presence(PRESENCE_XA);
+        title_bar_set_status(PRESENCE_XA);
+        cons_show("Status set to \"xa\"");
     }
 
     return TRUE;

@@ -104,6 +104,12 @@ static void _title_bar_draw_status()
         mvwprintw(title_bar, 0, cols - 13, " ...online ");
     } else if (current_status == PRESENCE_AWAY) {
         mvwprintw(title_bar, 0, cols - 13, " .....away ");
+    } else if (current_status == PRESENCE_DND) {
+        mvwprintw(title_bar, 0, cols - 13, " ......dnd ");
+    } else if (current_status == PRESENCE_CHAT) {
+        mvwprintw(title_bar, 0, cols - 13, " .....chat ");
+    } else if (current_status == PRESENCE_XA) {
+        mvwprintw(title_bar, 0, cols - 13, " .......xa ");
     } else {
         mvwprintw(title_bar, 0, cols - 13, " ..offline ");
     }

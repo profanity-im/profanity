@@ -35,7 +35,10 @@ typedef enum {
 typedef enum {
     PRESENCE_OFFLINE,
     PRESENCE_ONLINE,
-    PRESENCE_AWAY
+    PRESENCE_AWAY,
+    PRESENCE_DND,
+    PRESENCE_CHAT,
+    PRESENCE_XA
 } jabber_presence_t;
 
 #if !GLIB_CHECK_VERSION(2,28,0)
