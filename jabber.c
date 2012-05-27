@@ -179,6 +179,11 @@ void jabber_roster_request(void)
     xmpp_stanza_release(iq);
 }
 
+void jabber_update_presence(jabber_presence_t status)
+{
+    jabber_conn.presence = status;
+}
+
 static int _jabber_message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
