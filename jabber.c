@@ -183,6 +183,25 @@ void jabber_roster_request(void)
 void jabber_update_presence(jabber_presence_t status)
 {
     jabber_conn.presence = status;
+
+    xmpp_stanza_t *pres, *show;
+
+    pres = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(pres, "presence");
+    
+    if (status == PRESENCE_AWAY) {
+        show = xmpp_stanza_new(jabber_conn.ctx);
+        xmpp_stanza_set_name(show, "show");
+        xmpp_stanza_t *text = xmpp_stanza_new(jabber_conn.ctx);
+        xmpp_stanza_set_text(text, "away");
+        xmpp_stanza_add_child(show, text);
+        xmpp_stanza_add_child(pres, show);
+        xmpp_stanza_release(text);
+        xmpp_stanza_release(show);
+    }
+
+    xmpp_send(jabber_conn.conn, pres);
+    xmpp_stanza_release(pres);
 }
 
 static int _jabber_message_handler(xmpp_conn_t * const conn, 
