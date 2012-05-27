@@ -45,6 +45,7 @@ static gboolean _cmd_close(const char * const inp);
 static gboolean _cmd_set_beep(const char * const inp);
 static gboolean _cmd_set_flash(const char * const inp);
 static gboolean _cmd_away(const char * const inp);
+static gboolean _cmd_online(const char * const inp);
 static gboolean _cmd_default(const char * const inp);
 
 gboolean process_input(char *inp)
@@ -103,6 +104,8 @@ static gboolean _handle_command(const char * const command, const char * const i
         result = _cmd_set_flash(inp);
     } else if (strcmp(command, "/away") == 0) {
         result = _cmd_away(inp);
+    } else if (strcmp(command, "/online") == 0) {
+        result = _cmd_online(inp);
     } else {
         result = _cmd_default(inp);
     }
@@ -261,7 +264,23 @@ static gboolean _cmd_away(const char * const inp)
         cons_show("You are not currently connected.");
     } else {
         jabber_update_presence(PRESENCE_AWAY);
+        title_bar_set_status(PRESENCE_AWAY);
         cons_show("Status set to \"away\"");
+    }
+
+    return TRUE;
+}
+
+static gboolean _cmd_online(const char * const inp)
+{
+    jabber_conn_status_t conn_status = jabber_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        jabber_update_presence(PRESENCE_ONLINE);
+        title_bar_set_status(PRESENCE_ONLINE);
+        cons_show("Status set to \"online\"");
     }
 
     return TRUE;

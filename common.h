@@ -25,6 +25,19 @@
 
 #include <glib.h>
 
+typedef enum {
+    JABBER_STARTED,
+    JABBER_CONNECTING,
+    JABBER_CONNECTED,
+    JABBER_DISCONNECTED
+} jabber_conn_status_t;
+
+typedef enum {
+    PRESENCE_OFFLINE,
+    PRESENCE_ONLINE,
+    PRESENCE_AWAY
+} jabber_presence_t;
+
 #if !GLIB_CHECK_VERSION(2,28,0)
 #define g_slist_free_full(items, free_func)      p_slist_free_full(items, free_func)
 #endif

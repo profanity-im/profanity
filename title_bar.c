@@ -24,15 +24,16 @@
 #include <string.h>
 #include <ncurses.h>
 
+#include "common.h"
 #include "ui.h"
 
 static WINDOW *title_bar;
 static char *current_title = NULL;
-static int connected = FALSE;
 static int dirty;
+static jabber_presence_t current_status;
 
-void _title_bar_draw_title(void);
-void _title_bar_draw_status(void);
+static void _title_bar_draw_title(void);
+static void _title_bar_draw_status(void);
 
 void create_title_bar(void)
 {
@@ -42,7 +43,7 @@ void create_title_bar(void)
     title_bar = newwin(1, cols, 0, 0);
     wbkgd(title_bar, COLOR_PAIR(3));
     title_bar_title();
-    title_bar_disconnected();
+    title_bar_set_status(PRESENCE_OFFLINE);
     dirty = TRUE;
 }
 
@@ -50,18 +51,6 @@ void title_bar_title(void)
 {
     title_bar_show("Profanity. Type /help for help information.");
     dirty = TRUE;
-}
-
-void title_bar_connected(void)
-{
-    connected = TRUE;
-    _title_bar_draw_status();
-}
-
-void title_bar_disconnected(void)
-{
-    connected = FALSE;
-    _title_bar_draw_status();
 }
 
 void title_bar_resize(void)
@@ -96,7 +85,37 @@ void title_bar_show(const char * const title)
     _title_bar_draw_title();
 }
 
-void _title_bar_draw_title(void)
+void title_bar_set_status(jabber_presence_t status)
+{
+    current_status = status;
+    _title_bar_draw_status();
+}
+
+static void _title_bar_draw_status()
+{
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 14, '[');
+    wattroff(title_bar, COLOR_PAIR(4));
+
+    if (current_status == PRESENCE_ONLINE) {
+        mvwprintw(title_bar, 0, cols - 13, " ...online ");
+    } else if (current_status == PRESENCE_AWAY) {
+        mvwprintw(title_bar, 0, cols - 13, " .....away ");
+    } else {
+        mvwprintw(title_bar, 0, cols - 13, " ..offline ");
+    }
+    
+    wattron(title_bar, COLOR_PAIR(4));
+    mvwaddch(title_bar, 0, cols - 2, ']');
+    wattroff(title_bar, COLOR_PAIR(4));
+    
+    dirty = TRUE;
+}
+
+static void _title_bar_draw_title(void)
 {
     wmove(title_bar, 0, 0);
     int i;
@@ -107,23 +126,3 @@ void _title_bar_draw_title(void)
     dirty = TRUE;
 }
 
-void _title_bar_draw_status(void)
-{
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-
-    wattron(title_bar, COLOR_PAIR(4));
-    mvwaddch(title_bar, 0, cols - 14, '[');
-    wattroff(title_bar, COLOR_PAIR(4));
-
-    if (connected == TRUE)
-        mvwprintw(title_bar, 0, cols - 13, " ...online ");
-    else
-        mvwprintw(title_bar, 0, cols - 13, " ..offline ");
-    
-    wattron(title_bar, COLOR_PAIR(4));
-    mvwaddch(title_bar, 0, cols - 2, ']');
-    wattroff(title_bar, COLOR_PAIR(4));
-    
-    dirty = TRUE;
-}

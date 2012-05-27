@@ -23,18 +23,7 @@
 #ifndef JABBER_H
 #define JABBER_H
 
-typedef enum {
-    JABBER_STARTED,
-    JABBER_CONNECTING,
-    JABBER_CONNECTED,
-    JABBER_DISCONNECTED
-} jabber_conn_status_t;
-
-typedef enum {
-    PRESENCE_OFFLINE,
-    PRESENCE_ONLINE,
-    PRESENCE_AWAY
-} jabber_presence_t;
+#include "common.h"
 
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connection_status(void);

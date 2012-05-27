@@ -24,6 +24,8 @@
 #define WINDOWS_h
 
 #include <ncurses.h>
+
+#include "common.h"
 #include "contact_list.h"
 
 struct prof_win {
@@ -50,8 +52,7 @@ void title_bar_refresh(void);
 void title_bar_resize(void);
 void title_bar_show(const char * const title);
 void title_bar_title(void);
-void title_bar_connected(void);
-void title_bar_disconnected(void);
+void title_bar_set_status(jabber_presence_t status);
 
 // main window actions
 int win_close_win(void);

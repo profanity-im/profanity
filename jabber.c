@@ -24,6 +24,7 @@
 #include <strophe.h>
 
 #include "jabber.h"
+#include "common.h"
 #include "log.h"
 #include "contact_list.h"
 #include "ui.h"
@@ -214,7 +215,7 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
         const char *msg = " logged in successfully.";
         char line[strlen(jid) + 1 + strlen(msg) + 1];
         sprintf(line, "%s %s", jid, msg);
-        title_bar_connected();
+        title_bar_set_status(PRESENCE_ONLINE);
 
         cons_show(line);
         win_page_off();
