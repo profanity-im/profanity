@@ -263,22 +263,28 @@ void win_disconnected(void)
 void cons_help(void)
 {
     cons_show("");
-    cons_show("Commands:");
+    cons_show("Basic Commands:");
     cons_show("");
     cons_show("/help                : This help.");
     cons_show("/connect user@host   : Login to jabber.");
     cons_show("/msg user@host mesg  : Send mesg to user.");
+    cons_show("/close               : Close a chat window.");
     cons_show("/who                 : Find out who is online.");
     cons_show("/ros                 : List all contacts.");
+    cons_show("/quit                : Quit Profanity.");
+    cons_show("");
+    cons_show("Settings:");
+    cons_show("");
     cons_show("/beep <on/off>       : Enable/disable sound notification");
     cons_show("/flash <on/off>      : Enable/disable screen flash notification");
-    cons_show("/close               : Close a chat window.");
-    cons_show("/quit                : Quit Profanity.");
-    cons_show("/away                : Set status to away.");
-    cons_show("/online              : Set status to online.");
-    cons_show("/dnd                 : Set status to dnd (do not disturb).");
-    cons_show("/chat                : Set status to chat (available for chat).");
-    cons_show("/xa                  : Set status to xa (extended away).");
+    cons_show("");
+    cons_show("Status changes (msg is optional):");
+    cons_show("");
+    cons_show("/away <msg>          : Set status to away.");
+    cons_show("/online <msg>        : Set status to online.");
+    cons_show("/dnd <msg>           : Set status to dnd (do not disturb).");
+    cons_show("/chat <msg>          : Set status to chat (available for chat).");
+    cons_show("/xa <msg>            : Set status to xa (extended away).");
     cons_show("");
     cons_show("Keys:");
     cons_show("");
@@ -288,6 +294,7 @@ void cons_help(void)
     cons_show("LEFT, RIGHT          : Edit current input.");
     cons_show("TAB                  : Autocomplete recipient.");
     cons_show("PAGE UP, PAGE DOWN   : Page the chat window.");
+    cons_show("");
 
     if (_curr_prof_win == 0)
         dirty = TRUE;

@@ -180,7 +180,7 @@ void jabber_roster_request(void)
     xmpp_stanza_release(iq);
 }
 
-void jabber_update_presence(jabber_presence_t status)
+void jabber_update_presence(jabber_presence_t status, const char * const msg)
 {
     jabber_conn.presence = status;
 
@@ -209,6 +209,19 @@ void jabber_update_presence(jabber_presence_t status)
         xmpp_stanza_add_child(pres, show);
         xmpp_stanza_release(text);
         xmpp_stanza_release(show);
+    }
+
+    if (msg != NULL) {
+        xmpp_stanza_t *status = xmpp_stanza_new(jabber_conn.ctx);
+        xmpp_stanza_set_name(status, "status");
+        xmpp_stanza_t *text = xmpp_stanza_new(jabber_conn.ctx);
+
+        xmpp_stanza_set_text(text, msg);
+
+        xmpp_stanza_add_child(status, text);
+        xmpp_stanza_add_child(pres, status);
+        xmpp_stanza_release(text);
+        xmpp_stanza_release(status);
     }
 
     xmpp_send(jabber_conn.conn, pres);

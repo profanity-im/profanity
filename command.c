@@ -51,7 +51,7 @@ static gboolean _cmd_chat(const char * const inp);
 static gboolean _cmd_xa(const char * const inp);
 static gboolean _cmd_default(const char * const inp);
 static void _update_presence(const jabber_presence_t presence, 
-    const char * const show);
+    const char * const show, const char * const inp);
 
 gboolean process_input(char *inp)
 {
@@ -269,31 +269,31 @@ static gboolean _cmd_set_flash(const char * const inp)
 
 static gboolean _cmd_away(const char * const inp)
 {
-    _update_presence(PRESENCE_AWAY, "away");
+    _update_presence(PRESENCE_AWAY, "away", inp);
     return TRUE;
 }
 
 static gboolean _cmd_online(const char * const inp)
 {
-    _update_presence(PRESENCE_ONLINE, "online");
+    _update_presence(PRESENCE_ONLINE, "online", inp);
     return TRUE;
 }
 
 static gboolean _cmd_dnd(const char * const inp)
 {
-    _update_presence(PRESENCE_DND, "dnd");
+    _update_presence(PRESENCE_DND, "dnd", inp);
     return TRUE;
 }
 
 static gboolean _cmd_chat(const char * const inp)
 {
-    _update_presence(PRESENCE_CHAT, "chat");
+    _update_presence(PRESENCE_CHAT, "chat", inp);
     return TRUE;
 }
 
 static gboolean _cmd_xa(const char * const inp)
 {
-    _update_presence(PRESENCE_XA, "xa");
+    _update_presence(PRESENCE_XA, "xa", inp);
     return TRUE;
 }
 
@@ -312,17 +312,32 @@ static gboolean _cmd_default(const char * const inp)
 }
 
 static void _update_presence(const jabber_presence_t presence, 
-    const char * const show)
+    const char * const show, const char * const inp)
 {
+    char *msg;
+    if (strlen(inp) > strlen(show) + 2) {
+        msg = strndup(inp+(strlen(show) + 2), strlen(inp)-(strlen(show) + 2));
+    } else {
+        msg = NULL;
+    }
+
     jabber_conn_status_t conn_status = jabber_connection_status();
     
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        jabber_update_presence(presence);
+        jabber_update_presence(presence, msg);
         title_bar_set_status(presence);
-        char str[16 + strlen(show) + 1];
-        sprintf(str, "Status set to \"%s\"", show);
-        cons_show(str);
+        if (msg != NULL) {
+            char str[14 + strlen(show) + 3 + strlen(msg) + 2];
+            sprintf(str, "Status set to %s, \"%s\"", show, msg);
+            cons_show(str);
+            free(msg);
+        } else {
+            char str[14 + strlen(show) + 1];
+            sprintf(str, "Status set to %s", show);
+            cons_show(str);
+        }
     }
+
 } 
