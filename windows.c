@@ -395,7 +395,14 @@ static void _create_windows(void)
     
     wattrset(_cons_win, A_BOLD);
     _win_show_time(_cons_win);
-    wprintw(_cons_win, "Welcome to Profanity.\n");
+    wprintw(_cons_win, "Welcome to\n");
+    wprintw(_cons_win, "                   ___            _           \n");
+    wprintw(_cons_win, "                  / __)          (_)_         \n");
+    wprintw(_cons_win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
+    wprintw(_cons_win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
+    wprintw(_cons_win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
+    wprintw(_cons_win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
+    wprintw(_cons_win, "|_|                                    (____/ \n");
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
