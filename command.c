@@ -44,6 +44,7 @@ static gboolean _cmd_msg(const char * const inp);
 static gboolean _cmd_close(const char * const inp);
 static gboolean _cmd_set_beep(const char * const inp);
 static gboolean _cmd_set_flash(const char * const inp);
+static gboolean _cmd_set_showsplash(const char * const inp);
 static gboolean _cmd_away(const char * const inp);
 static gboolean _cmd_online(const char * const inp);
 static gboolean _cmd_dnd(const char * const inp);
@@ -107,6 +108,8 @@ static gboolean _handle_command(const char * const command, const char * const i
         result = _cmd_set_beep(inp);
     } else if (strcmp(command, "/flash") == 0) {
         result = _cmd_set_flash(inp);
+    } else if (strcmp(command, "/showsplash") == 0) {
+        result = _cmd_set_showsplash(inp);
     } else if (strcmp(command, "/away") == 0) {
         result = _cmd_away(inp);
     } else if (strcmp(command, "/online") == 0) {
@@ -263,6 +266,21 @@ static gboolean _cmd_set_flash(const char * const inp)
     } else {
         cons_show("Usage: /flash <on/off>");
     }        
+
+    return TRUE;
+}
+
+static gboolean _cmd_set_showsplash(const char * const inp)
+{
+    if (strcmp(inp, "/showsplash on") == 0) {
+        cons_show("Splash screen enabled.");
+        prefs_set_showsplash(TRUE);
+    } else if (strcmp(inp, "/showsplash off") == 0) {
+        cons_show("Splash screen disabled.");
+        prefs_set_showsplash(FALSE);
+    } else {
+        cons_show("Usage: /showsplash <on/off>");
+    }
 
     return TRUE;
 }
