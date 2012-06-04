@@ -54,6 +54,31 @@ static gboolean _cmd_default(const char * const inp);
 static void _update_presence(const jabber_presence_t presence, 
     const char * const show, const char * const inp);
 
+struct cmd_t {
+    const gchar *cmd;
+    gboolean (*func)(const char * const inp);
+};
+
+static struct cmd_t commands[] = {
+    { "/away", _cmd_away },
+    { "/beep", _cmd_set_beep },
+    { "/chat", _cmd_chat },
+    { "/close", _cmd_close },
+    { "/connect", _cmd_connect },
+    { "/dnd", _cmd_dnd },
+    { "/flash", _cmd_set_flash },
+    { "/help", _cmd_help },
+    { "/msg", _cmd_msg },
+    { "/online", _cmd_online },
+    { "/quit", _cmd_quit },
+    { "/ros", _cmd_ros },
+    { "/showsplash", _cmd_set_showsplash },
+    { "/who", _cmd_who },
+    { "/xa", _cmd_xa },
+};
+
+static const int num_cmds = 15;
+    
 gboolean process_input(char *inp)
 {
     gboolean result = FALSE;
@@ -88,43 +113,15 @@ void command_init(void)
 
 static gboolean _handle_command(const char * const command, const char * const inp)
 {
-    gboolean result = FALSE;
-
-    if (strcmp(command, "/quit") == 0) {
-        result = _cmd_quit(inp);
-    } else if (strcmp(command, "/help") == 0) {
-        result = _cmd_help(inp);
-    } else if (strcmp(command, "/ros") == 0) {
-        result = _cmd_ros(inp);
-    } else if (strcmp(command, "/who") == 0) {
-        result = _cmd_who(inp);
-    } else if (strcmp(command, "/msg") == 0) {
-        result = _cmd_msg(inp);
-    } else if (strcmp(command, "/close") == 0) {
-        result = _cmd_close(inp);
-    } else if (strcmp(command, "/connect") == 0) {
-        result = _cmd_connect(inp);
-    } else if (strcmp(command, "/beep") == 0) {
-        result = _cmd_set_beep(inp);
-    } else if (strcmp(command, "/flash") == 0) {
-        result = _cmd_set_flash(inp);
-    } else if (strcmp(command, "/showsplash") == 0) {
-        result = _cmd_set_showsplash(inp);
-    } else if (strcmp(command, "/away") == 0) {
-        result = _cmd_away(inp);
-    } else if (strcmp(command, "/online") == 0) {
-        result = _cmd_online(inp);
-    } else if (strcmp(command, "/dnd") == 0) {
-        result = _cmd_dnd(inp);
-    } else if (strcmp(command, "/chat") == 0) {
-        result = _cmd_chat(inp);
-    } else if (strcmp(command, "/xa") == 0) {
-        result = _cmd_xa(inp);
-    } else {
-        result = _cmd_default(inp);
+    int i;
+    for (i = 0; i < num_cmds; i++) {
+        struct cmd_t *pcmd = commands+i;
+        if (strcmp(pcmd->cmd, command) == 0) {
+            return (pcmd->func(inp));
+        }
     }
 
-    return result;
+    return _cmd_default(inp);
 }
 
 static gboolean _cmd_connect(const char * const inp)
