@@ -51,6 +51,7 @@ static int dirty;
 static int max_cols = 0;
 
 static void _create_windows(void);
+static void _print_splash_logo(WINDOW *win);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact);
 static void _current_window_refresh(void);
@@ -277,6 +278,7 @@ void cons_help(void)
     cons_show("");
     cons_show("/beep <on/off>       : Enable/disable sound notification");
     cons_show("/flash <on/off>      : Enable/disable screen flash notification");
+    cons_show("/showsplash <on/off> : Enable/disable splash logo on startup");
     cons_show("");
     cons_show("Status changes (msg is optional):");
     cons_show("");
@@ -395,7 +397,11 @@ static void _create_windows(void)
     
     wattrset(_cons_win, A_BOLD);
     _win_show_time(_cons_win);
-    wprintw(_cons_win, "Welcome to Profanity.\n");
+    if (prefs_get_showsplash()) {
+        _print_splash_logo(_cons_win);
+    } else {
+        wprintw(_cons_win, "Welcome to Profanity.\n");
+    }
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
@@ -412,6 +418,20 @@ static void _create_windows(void)
         scrollok(chat.win, TRUE);
         _wins[i] = chat;
     }    
+}
+
+static void _print_splash_logo(WINDOW *win)
+{
+    wprintw(win, "Welcome to\n");
+    wattron(win, COLOR_PAIR(5));
+    wprintw(win, "                   ___            _           \n");
+    wprintw(win, "                  / __)          (_)_         \n");
+    wprintw(win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
+    wprintw(win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
+    wprintw(win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
+    wprintw(win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
+    wprintw(win, "|_|                                    (____/ \n");
+    wattroff(win, COLOR_PAIR(5));
 }
 
 static int _find_prof_win_index(const char * const contact)
