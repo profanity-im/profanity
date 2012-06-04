@@ -44,6 +44,8 @@
 #include "ui.h"
 #include "history.h"
 #include "preferences.h"
+#include "util.h"
+#include "command.h"
 
 static WINDOW *inp_win;
 
@@ -124,6 +126,7 @@ void inp_get_char(int *ch, char *input, int *size)
 
             reset_search_attempts();
             reset_login_search();
+            reset_command_completer();
         }
     }
 
@@ -234,7 +237,24 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case 9: // tab
-        if ((strncmp(input, "/msg ", 5) == 0) && (*size > 5)) {
+
+        // autocomplete commands
+        if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
+            for(i = 0; i < *size; i++) {
+                inp_cpy[i] = input[i];
+            }
+            inp_cpy[i] = '\0';
+            found = cmd_complete(inp_cpy);
+            if (found != NULL) {
+                auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
+                strcpy(auto_msg, found);
+                _replace_input(input, auto_msg, size);
+                free(auto_msg);
+                free(found);
+            }
+
+        // autcomplete /msg recipient
+        } else if ((strncmp(input, "/msg ", 5) == 0) && (*size > 5)) {
             for(i = 5; i < *size; i++) {
                 inp_cpy[i-5] = input[i];
             }
@@ -248,6 +268,8 @@ static int _handle_edit(const int ch, char *input, int *size)
                 free(auto_msg);
                 free(found);
             }
+
+        // autocomplete /connect username
         } else if ((strncmp(input, "/connect ", 9) == 0) && (*size > 9)) {
             for(i = 9; i < *size; i++) {
                 inp_cpy[i-9] = input[i];

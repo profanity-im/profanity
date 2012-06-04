@@ -25,5 +25,7 @@
 
 void command_init(void);
 gboolean process_input(char *inp);
+char * cmd_complete(char *inp);
+void reset_command_completer(void);
 
 #endif

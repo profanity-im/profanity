@@ -20,7 +20,7 @@ log.o: log.h
 windows.o: ui.h util.h contact_list.h preferences.h
 title_bar.o: ui.h
 status_bar.o: ui.h util.h
-input_win.o: ui.h preferences.h
+input_win.o: ui.h preferences.h util.h command.h
 jabber.o: jabber.h log.h ui.h contact_list.h
 profanity.o: log.h ui.h jabber.h command.h preferences.h \
 			 contact_list.h

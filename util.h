@@ -26,5 +26,6 @@
 void get_time(char *thetime);
 char * str_replace(const char *string, const char *substr, 
     const char *replacement);
+int str_contains(char str[], int size, char ch);
 
 #endif

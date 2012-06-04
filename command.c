@@ -32,6 +32,7 @@
 #include "ui.h"
 #include "util.h"
 #include "preferences.h"
+#include "prof_autocomplete.h"
 
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
@@ -58,6 +59,8 @@ struct cmd_t {
     const gchar *cmd;
     gboolean (*func)(const char * const inp);
 };
+
+static PAutocomplete commands_ac;
 
 static struct cmd_t commands[] = {
     { "/away", _cmd_away },
@@ -108,7 +111,25 @@ gboolean process_input(char *inp)
 
 void command_init(void)
 {
+    commands_ac = p_autocomplete_new();
+
+    int i;
+    for (i = 0; i < num_cmds; i++) {
+        struct cmd_t *pcmd = commands+i;
+        p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
+    }
+
     history_init();
+}
+
+char * cmd_complete(char *inp)
+{
+    return p_autocomplete_complete(commands_ac, inp);
+}
+
+void reset_command_completer(void)
+{
+    p_autocomplete_reset(commands_ac);
 }
 
 static gboolean _handle_command(const char * const command, const char * const inp)

@@ -78,3 +78,14 @@ char * str_replace (const char *string, const char *substr,
   
     return newstr;
 }
+
+int str_contains(char str[], int size, char ch)
+{
+    int i;
+    for (i = 0; i < size; i++) {
+        if (str[i] == ch)
+            return 1;
+    }
+
+    return 0;
+}
