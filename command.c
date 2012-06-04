@@ -35,10 +35,10 @@
 
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
-static gboolean _cmd_quit(void);
-static gboolean _cmd_help(void);
-static gboolean _cmd_who(void);
-static gboolean _cmd_ros(void);
+static gboolean _cmd_quit(const char * const inp);
+static gboolean _cmd_help(const char * const inp);
+static gboolean _cmd_who(const char * const inp);
+static gboolean _cmd_ros(const char * const inp);
 static gboolean _cmd_connect(const char * const inp);
 static gboolean _cmd_msg(const char * const inp);
 static gboolean _cmd_close(const char * const inp);
@@ -91,13 +91,13 @@ static gboolean _handle_command(const char * const command, const char * const i
     gboolean result = FALSE;
 
     if (strcmp(command, "/quit") == 0) {
-        result = _cmd_quit();
+        result = _cmd_quit(inp);
     } else if (strcmp(command, "/help") == 0) {
-        result = _cmd_help();
+        result = _cmd_help(inp);
     } else if (strcmp(command, "/ros") == 0) {
-        result = _cmd_ros();
+        result = _cmd_ros(inp);
     } else if (strcmp(command, "/who") == 0) {
-        result = _cmd_who();
+        result = _cmd_who(inp);
     } else if (strcmp(command, "/msg") == 0) {
         result = _cmd_msg(inp);
     } else if (strcmp(command, "/close") == 0) {
@@ -160,19 +160,19 @@ static gboolean _cmd_connect(const char * const inp)
     return result;
 }
 
-static gboolean _cmd_quit(void)
+static gboolean _cmd_quit(const char * const inp)
 {
     return FALSE;
 }
 
-static gboolean _cmd_help(void)
+static gboolean _cmd_help(const char * const inp)
 {
     cons_help();
 
     return TRUE;
 }
 
-static gboolean _cmd_ros(void)
+static gboolean _cmd_ros(const char * const inp)
 {
     jabber_conn_status_t conn_status = jabber_connection_status();
 
@@ -184,7 +184,7 @@ static gboolean _cmd_ros(void)
     return TRUE;
 }
 
-static gboolean _cmd_who(void)
+static gboolean _cmd_who(const char * const inp)
 {
     jabber_conn_status_t conn_status = jabber_connection_status();
 
