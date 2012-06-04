@@ -35,5 +35,7 @@ void prefs_set_beep(gboolean value);
 gboolean prefs_get_flash(void);
 void prefs_set_flash(gboolean value);
 void prefs_add_login(const char *jid);
+gboolean prefs_get_showsplash(void);
+void prefs_set_showsplash(gboolean value);
 
 #endif

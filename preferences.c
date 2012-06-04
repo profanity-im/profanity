@@ -129,6 +129,17 @@ void prefs_add_login(const char *jid)
     }
 }
 
+gboolean prefs_get_showsplash(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "showsplash", NULL);
+}
+
+void prefs_set_showsplash(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "showsplash", value);
+    _save_prefs();
+}
+
 static void _save_prefs(void)
 {
     gsize g_data_size;
