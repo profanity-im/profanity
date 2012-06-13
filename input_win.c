@@ -83,7 +83,7 @@ void inp_clear(void)
 
 void inp_non_block(void)
 {
-    wtimeout(inp_win, 0);
+    wtimeout(inp_win, 500);
 }
 
 void inp_block(void)
