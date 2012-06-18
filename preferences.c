@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <ncurses.h>
 #include <glib.h>
 
 #include "preferences.h"
@@ -34,6 +35,33 @@ static GKeyFile *prefs;
 // search logins list
 static PAutocomplete ac;
 
+struct colour_string_t {
+    char *str;
+    NCURSES_COLOR_T colour;
+};
+/*
+static struct colour_string_t colours[] = {
+    { "bkgnd", -1 },
+    { "white", COLOR_WHITE },
+    { "green", COLOR_GREEN },
+    { "red", COLOR_RED },
+    { "yellow", COLOR_YELLOW },
+    { "blue", COLOR_BLUE },
+    { "cyan", COLOR_CYAN },
+};
+*/
+// colour preferences
+static struct colours_t {
+        NCURSES_COLOR_T bkgnd;
+        NCURSES_COLOR_T text;
+        NCURSES_COLOR_T online;
+        NCURSES_COLOR_T err;
+        NCURSES_COLOR_T inc;
+        NCURSES_COLOR_T bar;
+        NCURSES_COLOR_T bar_text;
+} colour_prefs;
+
+static void _load_colours(void);
 static void _save_prefs(void);
 
 void prefs_load(void)
@@ -54,6 +82,19 @@ void prefs_load(void)
     for (i = 0; i < njids; i++) {
         p_autocomplete_add(ac, jids[i]);
     }
+
+    _load_colours();
+}
+
+static void _load_colours(void)
+{
+    colour_prefs.bkgnd = -1;
+    colour_prefs.text = COLOR_WHITE;
+    colour_prefs.online = COLOR_GREEN;
+    colour_prefs.err = COLOR_RED;
+    colour_prefs.inc = COLOR_YELLOW;
+    colour_prefs.bar = COLOR_BLUE;
+    colour_prefs.bar_text = COLOR_CYAN;
 }
 
 char * find_login(char *prefix)
@@ -145,4 +186,39 @@ static void _save_prefs(void)
     gsize g_data_size;
     char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
     g_file_set_contents(prefs_loc->str, g_prefs_data, g_data_size, NULL);
+}
+
+NCURSES_COLOR_T prefs_get_bkgnd() 
+{
+    return colour_prefs.bkgnd;
+}
+
+NCURSES_COLOR_T prefs_get_text() 
+{
+    return colour_prefs.text;
+}
+
+NCURSES_COLOR_T prefs_get_online() 
+{
+    return colour_prefs.online;
+}
+
+NCURSES_COLOR_T prefs_get_err() 
+{
+    return colour_prefs.err;
+}
+
+NCURSES_COLOR_T prefs_get_inc() 
+{
+    return colour_prefs.inc;
+}
+
+NCURSES_COLOR_T prefs_get_bar() 
+{
+    return colour_prefs.bar;
+}
+
+NCURSES_COLOR_T prefs_get_bar_text() 
+{
+    return colour_prefs.bar_text;
 }

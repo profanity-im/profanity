@@ -77,15 +77,14 @@ void gui_init(void)
     if (has_colors()) {    
         use_default_colors();
         start_color();
-        
-        init_pair(1, COLOR_WHITE, -1);
-        init_pair(2, COLOR_GREEN, -1);
-        init_pair(3, COLOR_WHITE, COLOR_BLUE);
-        init_pair(4, COLOR_CYAN, COLOR_BLUE);
-        init_pair(5, COLOR_CYAN, -1);
-        init_pair(6, COLOR_RED, -1);
-        init_pair(7, COLOR_MAGENTA, -1);
-        init_pair(8, COLOR_YELLOW, -1);
+
+        init_pair(1, prefs_get_text(), prefs_get_bkgnd());
+        init_pair(2, prefs_get_online(), prefs_get_bkgnd());
+        init_pair(3, prefs_get_text(), prefs_get_bar());
+        init_pair(4, prefs_get_bar_text(), prefs_get_bar());
+        init_pair(5, prefs_get_bar_text(), prefs_get_bkgnd());
+        init_pair(6, prefs_get_err(), prefs_get_bkgnd());
+        init_pair(7, prefs_get_inc(), prefs_get_bkgnd());
     }
 
     refresh();
@@ -564,9 +563,9 @@ static void _show_status_string(WINDOW *win, const char * const from,
 static void _cons_show_incoming_message(const char * const short_from, const int win_index)
 {
     _win_show_time(_cons_win);
-    wattron(_cons_win, COLOR_PAIR(8));
+    wattron(_cons_win, COLOR_PAIR(7));
     wprintw(_cons_win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
-    wattroff(_cons_win, COLOR_PAIR(8));
+    wattroff(_cons_win, COLOR_PAIR(7));
 }
 
 static void _win_handle_switch(const int * const ch)
