@@ -50,7 +50,7 @@ void create_status_bar(void)
     }
 
     status_bar = newwin(1, cols, rows-2, 0);
-    wbkgd(status_bar, COLOR_PAIR(3));
+    wbkgd(status_bar, COLOR_PAIR(8));
     wattron(status_bar, COLOR_PAIR(4));
     mvwprintw(status_bar, 0, cols - 29, _active);
     wattroff(status_bar, COLOR_PAIR(4));
@@ -84,7 +84,7 @@ void status_bar_resize(void)
 
     mvwin(status_bar, rows-2, 0);
     wresize(status_bar, 1, cols);
-    wbkgd(status_bar, COLOR_PAIR(3));
+    wbkgd(status_bar, COLOR_PAIR(8));
     wclear(status_bar);
     wattron(status_bar, COLOR_PAIR(4));
     mvwprintw(status_bar, 0, cols - 29, _active);

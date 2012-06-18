@@ -41,7 +41,7 @@ void create_title_bar(void)
     getmaxyx(stdscr, rows, cols);
 
     title_bar = newwin(1, cols, 0, 0);
-    wbkgd(title_bar, COLOR_PAIR(3));
+    wbkgd(title_bar, COLOR_PAIR(8));
     title_bar_title();
     title_bar_set_status(PRESENCE_OFFLINE);
     dirty = TRUE;
@@ -59,7 +59,7 @@ void title_bar_resize(void)
     getmaxyx(stdscr, rows, cols);
 
     wresize(title_bar, 1, cols);
-    wbkgd(title_bar, COLOR_PAIR(3));
+    wbkgd(title_bar, COLOR_PAIR(8));
     wclear(title_bar);
     _title_bar_draw_title();
     _title_bar_draw_status();
