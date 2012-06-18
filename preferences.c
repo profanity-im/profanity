@@ -57,10 +57,11 @@ static struct colours_t {
         NCURSES_COLOR_T bkgnd;
         NCURSES_COLOR_T text;
         NCURSES_COLOR_T online;
+        NCURSES_COLOR_T offline;
         NCURSES_COLOR_T err;
         NCURSES_COLOR_T inc;
         NCURSES_COLOR_T bar;
-        NCURSES_COLOR_T bar_text;
+        NCURSES_COLOR_T bar_draw;
 } colour_prefs;
 
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
@@ -129,6 +130,9 @@ static void _load_colours(void)
     gchar *online_val = g_key_file_get_string(prefs, "colours", "online", NULL);
     _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);
     
+    gchar *offline_val = g_key_file_get_string(prefs, "colours", "offline", NULL);
+    _set_colour(offline_val, &colour_prefs.offline, COLOR_CYAN);
+    
     gchar *err_val = g_key_file_get_string(prefs, "colours", "err", NULL);
     _set_colour(err_val, &colour_prefs.err, COLOR_RED);
 
@@ -138,8 +142,8 @@ static void _load_colours(void)
     gchar *bar_val = g_key_file_get_string(prefs, "colours", "bar", NULL);
     _set_colour(bar_val, &colour_prefs.bar, COLOR_BLUE);
     
-    gchar *bar_text_val = g_key_file_get_string(prefs, "colours", "bar_text", NULL);
-    _set_colour(bar_text_val, &colour_prefs.bar_text, COLOR_CYAN);
+    gchar *bar_draw_val = g_key_file_get_string(prefs, "colours", "bar_draw", NULL);
+    _set_colour(bar_draw_val, &colour_prefs.bar_draw, COLOR_CYAN);
 }
 
 char * find_login(char *prefix)
@@ -248,6 +252,11 @@ NCURSES_COLOR_T prefs_get_online()
     return colour_prefs.online;
 }
 
+NCURSES_COLOR_T prefs_get_offline() 
+{
+    return colour_prefs.offline;
+}
+
 NCURSES_COLOR_T prefs_get_err() 
 {
     return colour_prefs.err;
@@ -263,7 +272,7 @@ NCURSES_COLOR_T prefs_get_bar()
     return colour_prefs.bar;
 }
 
-NCURSES_COLOR_T prefs_get_bar_text() 
+NCURSES_COLOR_T prefs_get_bar_draw() 
 {
-    return colour_prefs.bar_text;
+    return colour_prefs.bar_draw;
 }

@@ -41,9 +41,10 @@ void prefs_set_showsplash(gboolean value);
 NCURSES_COLOR_T prefs_get_bkgnd();
 NCURSES_COLOR_T prefs_get_text();
 NCURSES_COLOR_T prefs_get_online();
+NCURSES_COLOR_T prefs_get_offline();
 NCURSES_COLOR_T prefs_get_err();
 NCURSES_COLOR_T prefs_get_inc();
 NCURSES_COLOR_T prefs_get_bar();
-NCURSES_COLOR_T prefs_get_bar_text();
+NCURSES_COLOR_T prefs_get_bar_draw();
 
 #endif

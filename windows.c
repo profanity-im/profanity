@@ -81,8 +81,8 @@ void gui_init(void)
         init_pair(1, prefs_get_text(), prefs_get_bkgnd());
         init_pair(2, prefs_get_online(), prefs_get_bkgnd());
         init_pair(3, prefs_get_text(), prefs_get_bar());
-        init_pair(4, prefs_get_bar_text(), prefs_get_bar());
-        init_pair(5, prefs_get_bar_text(), prefs_get_bkgnd());
+        init_pair(4, prefs_get_bar_draw(), prefs_get_bar());
+        init_pair(5, prefs_get_offline(), prefs_get_bkgnd());
         init_pair(6, prefs_get_err(), prefs_get_bkgnd());
         init_pair(7, prefs_get_inc(), prefs_get_bkgnd());
     }
