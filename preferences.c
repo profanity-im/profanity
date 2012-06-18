@@ -26,6 +26,7 @@
 #include <ncurses.h>
 #include <glib.h>
 
+#include "log.h"
 #include "preferences.h"
 #include "prof_autocomplete.h"
 
@@ -39,9 +40,10 @@ struct colour_string_t {
     char *str;
     NCURSES_COLOR_T colour;
 };
-/*
+
+static int num_colours = 7;
 static struct colour_string_t colours[] = {
-    { "bkgnd", -1 },
+    { "default", -1 },
     { "white", COLOR_WHITE },
     { "green", COLOR_GREEN },
     { "red", COLOR_RED },
@@ -49,7 +51,7 @@ static struct colour_string_t colours[] = {
     { "blue", COLOR_BLUE },
     { "cyan", COLOR_CYAN },
 };
-*/
+
 // colour preferences
 static struct colours_t {
         NCURSES_COLOR_T bkgnd;
@@ -61,6 +63,7 @@ static struct colours_t {
         NCURSES_COLOR_T bar_text;
 } colour_prefs;
 
+static NCURSES_COLOR_T _lookup_colour(const char * const colour);
 static void _load_colours(void);
 static void _save_prefs(void);
 
@@ -86,10 +89,61 @@ void prefs_load(void)
     _load_colours();
 }
 
+static NCURSES_COLOR_T _lookup_colour(const char * const colour)
+{
+    int i;
+    for (i = 0; i < num_colours; i++) {
+        if (strcmp(colours[i].str, colour) == 0) {
+            return colours[i].colour;
+        }
+    }
+
+    return -99;
+}
+/*
+static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, 
+    NCURSES_COLOR_T def)
+{
+    if(!val) {
+        *pref = def;
+    } else {
+        NCURSES_COLOR_T col = _lookup_colour(val);
+        if (col == -99) {
+            *pref = def;
+        } else {
+            *pref = col;   
+        }
+    }
+}
+*/
 static void _load_colours(void)
 {
-    colour_prefs.bkgnd = -1;
-    colour_prefs.text = COLOR_WHITE;
+    gchar *bkgnd_val = g_key_file_get_string(prefs, "colours", "bkgnd", NULL);
+    
+    if(!bkgnd_val) {
+        colour_prefs.bkgnd = -1;
+    } else {
+        NCURSES_COLOR_T col = _lookup_colour(bkgnd_val);
+        if (col == -99) {
+            colour_prefs.bkgnd = -1;
+        } else {
+            colour_prefs.bkgnd = col;   
+        }
+    }
+
+    gchar *text_val = g_key_file_get_string(prefs, "colours", "text", NULL);
+    
+    if(!text_val) {
+        colour_prefs.text = COLOR_WHITE;
+    } else {
+        NCURSES_COLOR_T col = _lookup_colour(text_val);
+        if (col == -99) {
+            colour_prefs.text = COLOR_WHITE;
+        } else {
+            colour_prefs.text = col;   
+        }
+    }
+
     colour_prefs.online = COLOR_GREEN;
     colour_prefs.err = COLOR_RED;
     colour_prefs.inc = COLOR_YELLOW;

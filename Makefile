@@ -30,7 +30,7 @@ history.o: history.h prof_history.h
 contact_list.o: contact_list.h contact.h prof_autocomplete.h
 prof_history.o: prof_history.h
 contact.o: contact.h
-preferences.o: preferences.h
+preferences.o: preferences.h log.h
 prof_autocomplete.o: prof_autocomplete.h common.h
 main.o: profanity.h
 

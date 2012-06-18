@@ -387,6 +387,7 @@ static void _create_windows(void)
     struct prof_win cons;
     strcpy(cons.from, CONS_WIN_TITLE);
     cons.win = newpad(PAD_SIZE, cols);
+    wbkgd(cons.win, COLOR_PAIR(1));
     cons.y_pos = 0;
     cons.paged = 0;
     scrollok(cons.win, TRUE);
@@ -411,6 +412,7 @@ static void _create_windows(void)
         struct prof_win chat;
         strcpy(chat.from, "");
         chat.win = newpad(PAD_SIZE, cols);
+        wbkgd(chat.win, COLOR_PAIR(1));
         chat.y_pos = 0;
         chat.paged = 0;
         wattrset(chat.win, A_BOLD);

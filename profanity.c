@@ -65,8 +65,8 @@ void profanity_run(void)
 
 void profanity_init(const int disable_tls)
 {
-    prefs_load();
     log_init();
+    prefs_load();
     gui_init();
     jabber_init(disable_tls);
     command_init();
