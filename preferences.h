@@ -46,5 +46,6 @@ NCURSES_COLOR_T prefs_get_err();
 NCURSES_COLOR_T prefs_get_inc();
 NCURSES_COLOR_T prefs_get_bar();
 NCURSES_COLOR_T prefs_get_bar_draw();
+NCURSES_COLOR_T prefs_get_bar_text();
 
 #endif

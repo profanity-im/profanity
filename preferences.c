@@ -41,7 +41,7 @@ struct colour_string_t {
     NCURSES_COLOR_T colour;
 };
 
-static int num_colours = 7;
+static int num_colours = 9;
 static struct colour_string_t colours[] = {
     { "default", -1 },
     { "white", COLOR_WHITE },
@@ -50,6 +50,8 @@ static struct colour_string_t colours[] = {
     { "yellow", COLOR_YELLOW },
     { "blue", COLOR_BLUE },
     { "cyan", COLOR_CYAN },
+    { "black", COLOR_BLACK },
+    { "magenta", COLOR_MAGENTA },
 };
 
 // colour preferences
@@ -62,6 +64,7 @@ static struct colours_t {
         NCURSES_COLOR_T inc;
         NCURSES_COLOR_T bar;
         NCURSES_COLOR_T bar_draw;
+        NCURSES_COLOR_T bar_text;
 } colour_prefs;
 
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
@@ -144,6 +147,9 @@ static void _load_colours(void)
     
     gchar *bar_draw_val = g_key_file_get_string(prefs, "colours", "bar_draw", NULL);
     _set_colour(bar_draw_val, &colour_prefs.bar_draw, COLOR_CYAN);
+    
+    gchar *bar_text_val = g_key_file_get_string(prefs, "colours", "bar_text", NULL);
+    _set_colour(bar_text_val, &colour_prefs.bar_text, COLOR_WHITE);
 }
 
 char * find_login(char *prefix)
@@ -275,4 +281,9 @@ NCURSES_COLOR_T prefs_get_bar()
 NCURSES_COLOR_T prefs_get_bar_draw() 
 {
     return colour_prefs.bar_draw;
+}
+
+NCURSES_COLOR_T prefs_get_bar_text() 
+{
+    return colour_prefs.bar_text;
 }
