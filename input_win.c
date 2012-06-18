@@ -61,7 +61,7 @@ void create_input_window(void)
     inp_win = newwin(1, cols, rows-1, 0);
     wbkgd(inp_win, COLOR_PAIR(1));
     keypad(inp_win, TRUE);
-    wattrset(inp_win, A_BOLD);
+//    wattrset(inp_win, A_BOLD);
     wmove(inp_win, 0, 1);
     wrefresh(inp_win);
 }

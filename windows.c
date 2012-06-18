@@ -396,7 +396,7 @@ static void _create_windows(void)
     _wins[0] = cons;
     _cons_win = _wins[0].win;
     
-    wattrset(_cons_win, A_BOLD);
+//    wattrset(_cons_win, A_BOLD);
     _win_show_time(_cons_win);
     if (prefs_get_showsplash()) {
         _print_splash_logo(_cons_win);
@@ -416,7 +416,7 @@ static void _create_windows(void)
         wbkgd(chat.win, COLOR_PAIR(1));
         chat.y_pos = 0;
         chat.paged = 0;
-        wattrset(chat.win, A_BOLD);
+//        wattrset(chat.win, A_BOLD);
         scrollok(chat.win, TRUE);
         _wins[i] = chat;
     }    
@@ -497,9 +497,9 @@ static void _win_show_user(WINDOW *win, const char * const user, const int colou
 
 static void _win_show_message(WINDOW *win, const char * const message)
 {
-    wattroff(win, A_BOLD);
+//    wattroff(win, A_BOLD);
     wprintw(win, "%s\n", message);
-    wattron(win, A_BOLD);
+//    wattron(win, A_BOLD);
 }
 
 static void _current_window_refresh(void)
@@ -539,7 +539,7 @@ static void _show_status_string(WINDOW *win, const char * const from,
         wattron(win, COLOR_PAIR(2));
     } else {
         wattron(win, COLOR_PAIR(5));
-        wattroff(win, A_BOLD);
+//        wattroff(win, A_BOLD);
     }
 
     wprintw(win, "%s %s", pre, from);
@@ -558,7 +558,7 @@ static void _show_status_string(WINDOW *win, const char * const from,
         wattroff(win, COLOR_PAIR(2));
     } else {
         wattroff(win, COLOR_PAIR(5));
-        wattron(win, A_BOLD);
+//        wattron(win, A_BOLD);
     }
 }
 
