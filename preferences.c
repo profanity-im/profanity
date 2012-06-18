@@ -64,6 +64,8 @@ static struct colours_t {
 } colour_prefs;
 
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
+static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, 
+    NCURSES_COLOR_T def);
 static void _load_colours(void);
 static void _save_prefs(void);
 
@@ -100,7 +102,7 @@ static NCURSES_COLOR_T _lookup_colour(const char * const colour)
 
     return -99;
 }
-/*
+
 static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, 
     NCURSES_COLOR_T def)
 {
@@ -115,40 +117,29 @@ static void _set_colour(gchar *val, NCURSES_COLOR_T *pref,
         }
     }
 }
-*/
+
 static void _load_colours(void)
 {
     gchar *bkgnd_val = g_key_file_get_string(prefs, "colours", "bkgnd", NULL);
-    
-    if(!bkgnd_val) {
-        colour_prefs.bkgnd = -1;
-    } else {
-        NCURSES_COLOR_T col = _lookup_colour(bkgnd_val);
-        if (col == -99) {
-            colour_prefs.bkgnd = -1;
-        } else {
-            colour_prefs.bkgnd = col;   
-        }
-    }
+    _set_colour(bkgnd_val, &colour_prefs.bkgnd, -1);
 
     gchar *text_val = g_key_file_get_string(prefs, "colours", "text", NULL);
-    
-    if(!text_val) {
-        colour_prefs.text = COLOR_WHITE;
-    } else {
-        NCURSES_COLOR_T col = _lookup_colour(text_val);
-        if (col == -99) {
-            colour_prefs.text = COLOR_WHITE;
-        } else {
-            colour_prefs.text = col;   
-        }
-    }
+    _set_colour(text_val, &colour_prefs.text, COLOR_WHITE);
 
-    colour_prefs.online = COLOR_GREEN;
-    colour_prefs.err = COLOR_RED;
-    colour_prefs.inc = COLOR_YELLOW;
-    colour_prefs.bar = COLOR_BLUE;
-    colour_prefs.bar_text = COLOR_CYAN;
+    gchar *online_val = g_key_file_get_string(prefs, "colours", "online", NULL);
+    _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);
+    
+    gchar *err_val = g_key_file_get_string(prefs, "colours", "err", NULL);
+    _set_colour(err_val, &colour_prefs.err, COLOR_RED);
+
+    gchar *inc_val = g_key_file_get_string(prefs, "colours", "inc", NULL);
+    _set_colour(inc_val, &colour_prefs.inc, COLOR_YELLOW);
+    
+    gchar *bar_val = g_key_file_get_string(prefs, "colours", "bar", NULL);
+    _set_colour(bar_val, &colour_prefs.bar, COLOR_BLUE);
+    
+    gchar *bar_text_val = g_key_file_get_string(prefs, "colours", "bar_text", NULL);
+    _set_colour(bar_text_val, &colour_prefs.bar_text, COLOR_CYAN);
 }
 
 char * find_login(char *prefix)
