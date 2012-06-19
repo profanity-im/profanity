@@ -288,13 +288,13 @@ void cons_help(void)
     cons_show("/chat <msg>          : Set status to chat (available for chat).");
     cons_show("/xa <msg>            : Set status to xa (extended away).");
     cons_show("");
-    cons_show("Keys:");
+    cons_show("Navigation:");
     cons_show("");
     cons_show("F1                   : This console window.");
     cons_show("F2-F10               : Chat windows.");
     cons_show("UP, DOWN             : Navigate input history.");
     cons_show("LEFT, RIGHT          : Edit current input.");
-    cons_show("TAB                  : Autocomplete recipient.");
+    cons_show("TAB                  : Autocomplete command/recipient/login");
     cons_show("PAGE UP, PAGE DOWN   : Page the chat window.");
     cons_show("");
 
