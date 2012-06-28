@@ -1,10 +1,11 @@
 CC = gcc
 WARNS = -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-variable \
 	-Wno-unused-result
-LIBS = -lncurses -L ~/lib -lstrophe -lxml2 -lexpat -lssl -lresolv `pkg-config --libs glib-2.0`
+LIBS = -lncurses -L ~/lib -lstrophe -lxml2 -lexpat -lssl -lresolv \
+		`pkg-config --libs glib-2.0` `pkg-config --libs libnotify`
 TESTLIB = -L ~/lib -l headunit `pkg-config --libs glib-2.0`
 CPPLIB = -lstdc++
-CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS) `pkg-config --cflags glib-2.0`
+CFLAGS = -I ~/include -O3 $(WARNS) $(LIBS) `pkg-config --cflags glib-2.0` `pkg-config --cflags libnotify`
 OBJS = log.o windows.o title_bar.o status_bar.o input_win.o jabber.o \
        profanity.o util.o command.o history.o contact_list.o prof_history.o \
 	   contact.o preferences.o prof_autocomplete.o common.o main.o

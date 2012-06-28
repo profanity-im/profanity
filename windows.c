@@ -25,6 +25,7 @@
 
 #include <ncurses.h>
 #include <glib.h>
+#include <libnotify/notify.h>
 
 #include "ui.h"
 #include "util.h"
@@ -67,6 +68,7 @@ static void _cons_show_incoming_message(const char * const short_from,
 static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
 static void _win_resize_all(void);
+static void _win_notify(char * short_from);
 
 void gui_init(void)
 {
@@ -186,10 +188,34 @@ void win_show_incomming_msg(const char * const from, const char * const message)
         _cons_show_incoming_message(short_from, win_index);
         if (prefs_get_flash())
             flash();
+        
+        _win_notify(short_from);
     }
 
     if (prefs_get_beep())
         beep();
+}
+
+static void _win_notify(char * short_from)
+{
+    notify_init("Profanity");
+    
+    // create a new notification
+    NotifyNotification *incoming;
+    incoming = notify_notification_new("Profanity", short_from, NULL);
+
+    // set the timeout of the notification to 3 secs
+    notify_notification_set_timeout(incoming, 3000);
+
+    // set the category so as to tell what kind it is
+    char category[30] = "Incoming message";
+    notify_notification_set_category(incoming, category);
+
+    // set the urgency level of the notification
+    notify_notification_set_urgency (incoming, NOTIFY_URGENCY_CRITICAL);
+
+    GError *error = NULL;
+    notify_notification_show(incoming, &error);
 }
 
 void win_show_outgoing_msg(const char * const from, const char * const to, 
