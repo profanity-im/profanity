@@ -45,6 +45,10 @@ typedef enum {
 #define g_slist_free_full(items, free_func)      p_slist_free_full(items, free_func)
 #endif
 
+#ifndef NOTIFY_CHECK_VERSION
+#define notify_notification_new(summary, body, icon) notify_notification_new(summary, body, icon, NULL)
+#endif
+
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 
 #endif
