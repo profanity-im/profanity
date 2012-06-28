@@ -184,6 +184,8 @@ void win_show_incomming_msg(const char * const from, const char * const message)
     } else {
         status_bar_new(win_index);
         _cons_show_incoming_message(short_from, win_index);
+        if (prefs_get_flash())
+            flash();
     }
 
     if (prefs_get_beep())

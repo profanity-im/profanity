@@ -27,7 +27,6 @@
 
 #include "ui.h"
 #include "util.h"
-#include "preferences.h"
 
 static WINDOW *status_bar;
 static char *message = NULL;
@@ -159,9 +158,6 @@ void status_bar_new(const int win)
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
     wattroff(status_bar, COLOR_PAIR(3));
     wattroff(status_bar, A_BLINK);
-
-    if (prefs_get_flash())
-        flash();
 
     dirty = TRUE;
 }
