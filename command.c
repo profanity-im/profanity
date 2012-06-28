@@ -44,6 +44,7 @@ static gboolean _cmd_connect(const char * const inp);
 static gboolean _cmd_msg(const char * const inp);
 static gboolean _cmd_close(const char * const inp);
 static gboolean _cmd_set_beep(const char * const inp);
+static gboolean _cmd_set_notify(const char * const inp);
 static gboolean _cmd_set_flash(const char * const inp);
 static gboolean _cmd_set_showsplash(const char * const inp);
 static gboolean _cmd_away(const char * const inp);
@@ -65,6 +66,7 @@ static PAutocomplete commands_ac;
 static struct cmd_t commands[] = {
     { "/away", _cmd_away },
     { "/beep", _cmd_set_beep },
+    { "/notify", _cmd_set_notify },
     { "/chat", _cmd_chat },
     { "/close", _cmd_close },
     { "/connect", _cmd_connect },
@@ -268,6 +270,21 @@ static gboolean _cmd_set_beep(const char * const inp)
         prefs_set_beep(FALSE);
     } else {
         cons_show("Usage: /beep <on/off>");
+    }        
+
+    return TRUE;
+}
+
+static gboolean _cmd_set_notify(const char * const inp)
+{
+    if (strcmp(inp, "/notify on") == 0) {
+        cons_show("Desktop notifications enabled.");
+        prefs_set_notify(TRUE);
+    } else if (strcmp(inp, "/notify off") == 0) {
+        cons_show("Desktop notifications disabled.");
+        prefs_set_notify(FALSE);
+    } else {
+        cons_show("Usage: /notify <on/off>");
     }        
 
     return TRUE;

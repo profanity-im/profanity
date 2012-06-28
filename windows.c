@@ -189,11 +189,12 @@ void win_show_incomming_msg(const char * const from, const char * const message)
         if (prefs_get_flash())
             flash();
         
-        _win_notify(short_from);
     }
 
     if (prefs_get_beep())
         beep();
+    if (prefs_get_notify())
+        _win_notify(short_from);
 }
 
 static void _win_notify(char * short_from)
@@ -305,6 +306,7 @@ void cons_help(void)
     cons_show("Settings:");
     cons_show("");
     cons_show("/beep <on/off>       : Enable/disable sound notification");
+    cons_show("/notify <on/off>     : Enable/disable desktop notifications");
     cons_show("/flash <on/off>      : Enable/disable screen flash notification");
     cons_show("/showsplash <on/off> : Enable/disable splash logo on startup");
     cons_show("");

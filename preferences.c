@@ -173,6 +173,17 @@ void prefs_set_beep(gboolean value)
     _save_prefs();
 }
 
+gboolean prefs_get_notify(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "notify", NULL);
+}
+
+void prefs_set_notify(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "notify", value);
+    _save_prefs();
+}
+
 gboolean prefs_get_flash(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "flash", NULL);
