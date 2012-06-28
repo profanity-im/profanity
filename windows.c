@@ -205,15 +205,15 @@ static void _win_notify(char * short_from)
     NotifyNotification *incoming;
     incoming = notify_notification_new("Profanity", short_from, NULL);
 
-    // set the timeout of the notification to 3 secs
-    notify_notification_set_timeout(incoming, 3000);
+    // set the timeout of the notification to 10 secs
+    notify_notification_set_timeout(incoming, 10000);
 
     // set the category so as to tell what kind it is
     char category[30] = "Incoming message";
     notify_notification_set_category(incoming, category);
 
     // set the urgency level of the notification
-    notify_notification_set_urgency (incoming, NOTIFY_URGENCY_CRITICAL);
+    notify_notification_set_urgency(incoming, NOTIFY_URGENCY_NORMAL);
 
     GError *error = NULL;
     notify_notification_show(incoming, &error);
