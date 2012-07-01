@@ -19,13 +19,16 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include "config.h"
 
 #include <string.h>
 #include <stdlib.h>
 
 #include <ncurses.h>
 #include <glib.h>
+#ifdef HAVE_LIBNOTIFY_NOTIFY_H
 #include <libnotify/notify.h>
+#endif
 
 #include "ui.h"
 #include "util.h"
@@ -68,7 +71,10 @@ static void _cons_show_incoming_message(const char * const short_from,
 static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
 static void _win_resize_all(void);
+
+#ifdef HAVE_LIBNOTIFY_NOTIFY_H
 static void _win_notify(char * short_from);
+#endif
 
 void gui_init(void)
 {
@@ -193,10 +199,13 @@ void win_show_incomming_msg(const char * const from, const char * const message)
 
     if (prefs_get_beep())
         beep();
+#ifdef HAVE_LIBNOTIFY_NOTIFY_H
     if (prefs_get_notify())
         _win_notify(short_from);
+#endif
 }
 
+#ifdef HAVE_LIBNOTIFY_NOTIFY_H
 static void _win_notify(char * short_from)
 {
     notify_init("Profanity");
@@ -218,6 +227,7 @@ static void _win_notify(char * short_from)
     GError *error = NULL;
     notify_notification_show(incoming, &error);
 }
+#endif
 
 void win_show_outgoing_msg(const char * const from, const char * const to, 
     const char * const message)
