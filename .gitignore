@@ -15,8 +15,8 @@ Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache/
-config.h
-config.h.in
+src/config.h
+src/config.h.in
 config.status
 configure
 configure.scan
