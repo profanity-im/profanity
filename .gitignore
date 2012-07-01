@@ -10,3 +10,17 @@ profanity
 *.swp
 testsuite
 tags
+.deps/
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+config.h
+config.h.in
+config.status
+configure
+configure.scan
+depcomp
+install-sh
+missing
+stamp-h1
