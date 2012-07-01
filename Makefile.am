@@ -1,7 +1,7 @@
 CFLAGS = -O3 -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-variable \
-	-Wno-unused-result -lncurses -lstrophe -lxml2 -lexpat -lssl -lresolv \
-		`pkg-config --libs --cflags glib-2.0` `pkg-config --libs --cflags libnotify`
-
+	-Wno-unused-result $(NCURSES_CFLAGS) $(NCURSES_LIBS) -lstrophe -lxml2 -lexpat \
+	$(OPENSSL_CFLAGS) $(OPENSSL_LIBS) -lresolv $(GLIB_CFLAGS) $(GLIB_LIBS) \
+	$(NOTIFY_CFLAGS) $(NOTIFY_LIBS)
 
 bin_PROGRAMS = profanity
 profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
