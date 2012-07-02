@@ -14,9 +14,9 @@ AC_PROG_CC
 AC_CHECK_LIB([ncurses], [main], [], [AC_MSG_ERROR([ncurses is required for profanity])])
 AC_CHECK_LIB([resolv], [main], [], [AC_MSG_ERROR([libresolv is required for profanity])])
 AC_CHECK_LIB([ssl], [main], [], [AC_MSG_ERROR([openssl is required for profanity])])
-AC_CHECK_LIB([strophe], [main], [], [AC_MSG_ERROR([libstrophe is required for profanity])])
 AC_CHECK_LIB([expat], [main], [], [AC_MSG_ERROR([expat is required for profanity])])
 AC_CHECK_LIB([xml2], [main], [], [AC_MSG_ERROR([xml2 is required for profanity])])
+AC_CHECK_LIB([strophe], [main], [], [AC_MSG_ERROR([libstrophe is required for profanity])])
 AC_CHECK_LIB([glib-2.0], [main], [], [AC_MSG_ERROR([glib-2.0 is required for profanity])])
 
 # Checks for header files.
