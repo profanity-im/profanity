@@ -3,9 +3,10 @@
 
 AC_PREREQ([2.68])
 AC_INIT([profanity], [0.10], [boothj5web@gmail.com])
-AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
+AC_CONFIG_AUX_DIR([build-aux])
+AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
 AC_PROG_CC

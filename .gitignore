@@ -11,6 +11,7 @@ profanity
 testsuite
 tags
 .deps/
+build-aux/
 Makefile
 Makefile.in
 aclocal.m4
@@ -20,8 +21,5 @@ src/config.h.in
 config.status
 configure
 configure.scan
-depcomp
-install-sh
-missing
 stamp-h1
 *~
