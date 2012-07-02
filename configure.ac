@@ -18,6 +18,7 @@ AC_CHECK_LIB([expat], [main], [], [AC_MSG_ERROR([expat is required for profanity
 AC_CHECK_LIB([xml2], [main], [], [AC_MSG_ERROR([xml2 is required for profanity])])
 AC_CHECK_LIB([strophe], [main], [], [AC_MSG_ERROR([libstrophe is required for profanity])])
 AC_CHECK_LIB([glib-2.0], [main], [], [AC_MSG_ERROR([glib-2.0 is required for profanity])])
+AC_CHECK_LIB([notify], [main], [], [AC_MSG_NOTICE([libnotify not found])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
