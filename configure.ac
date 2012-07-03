@@ -6,7 +6,7 @@ AC_INIT([profanity], [0.10], [boothj5web@gmail.com])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 # Checks for programs.
 AC_PROG_CC
