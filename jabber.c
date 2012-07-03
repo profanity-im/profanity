@@ -21,6 +21,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 #include <strophe.h>
 
 #include "jabber.h"
@@ -141,6 +142,8 @@ void jabber_process_events(void)
 void jabber_send(const char * const msg, const char * const recipient)
 {
     char *coded_msg = str_replace(msg, "&", "&amp;");
+    char *coded_msg2 = str_replace(coded_msg, "<", "&lt;");
+    char *coded_msg3 = str_replace(coded_msg2, ">", "&gt;");
 
     xmpp_stanza_t *reply, *body, *text;
 
@@ -153,12 +156,15 @@ void jabber_send(const char * const msg, const char * const recipient)
     xmpp_stanza_set_name(body, "body");
 
     text = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_text(text, coded_msg);
+    xmpp_stanza_set_text(text, coded_msg3);
     xmpp_stanza_add_child(body, text);
     xmpp_stanza_add_child(reply, body);
 
     xmpp_send(jabber_conn.conn, reply);
     xmpp_stanza_release(reply);
+    free(coded_msg);
+    free(coded_msg2);
+    free(coded_msg3);
 }
 
 void jabber_roster_request(void)
