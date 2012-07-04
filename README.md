@@ -8,6 +8,8 @@ Installation
 
 Dependencies: ncurses, libstrophe, glib, expat, xml2 and openssl.
 
+Optional Dependencies: libnotify
+
 Libstrophe can be found at: https://github.com/metajack/libstrophe
 
 To run unit tests requires head-unit: https://github.com/boothj5/head-unit
@@ -16,19 +18,25 @@ All other dependencies should have packages for your distribution.
 
 Once depdendencies have been installed, run:
 
+    ./bootstrap.sh
+    ./configure
     make
 
 To build and install in the current directory.
 
+If you wish to install on the system, switch to root, or sudo and:
+
+    make install
+
 Running
 -------
 
-    ./profanity
+    profanity
 
 Some older jabber servers advertise SSL/TLS support but don't respond to the handshake,
 if you have trouble connecting, run with the `-notls` option:
 
-    ./profanity -notls
+    profanity -notls
 
 Preferences
 -----------
