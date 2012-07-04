@@ -43,6 +43,7 @@ The following example is described below:
     beep=false
     flash=true
     showsplash=true
+    notify=true
 
     [connections]
     logins=mylogin@jabber.org;otherlogin@gmail.com
@@ -62,6 +63,7 @@ The `[ui]` section contains preferences for user interface behaviour:
 
     beep:       Try to sound beep on incoming messages if the terminal supports it
     flash:      Try to make the terminal flash on incoming messages if the terminal supports it
+    notify:     Send a desktop notification on incoming messages
     showsplash: Show the ascii logo on startup
 
 The `[connections]` section contains a history of logins you've used already, so profanity can autocomplete them for you.
