@@ -58,12 +58,11 @@ void create_input_window(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    inp_win = newwin(1, cols, rows-1, 0);
+    inp_win = newpad(1, cols);
     wbkgd(inp_win, COLOR_PAIR(1));
     keypad(inp_win, TRUE);
-//    wattrset(inp_win, A_BOLD);
     wmove(inp_win, 0, 1);
-    wrefresh(inp_win);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
 }
 
 void inp_win_resize(const char * const input, const int size)
@@ -71,15 +70,16 @@ void inp_win_resize(const char * const input, const int size)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
     mvwin(inp_win, rows-1, 0);
-    wresize(inp_win, 1, cols);
-    wrefresh(inp_win);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
 }
 
 void inp_clear(void)
 {
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
     wclear(inp_win);
     wmove(inp_win, 0, 1);
-    wrefresh(inp_win);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
 }
 
 void inp_non_block(void)
@@ -146,7 +146,9 @@ void inp_get_password(char *passwd)
 
 void inp_put_back(void)
 {
-    wrefresh(inp_win);
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
 }
 
 /*
