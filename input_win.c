@@ -48,6 +48,7 @@
 #include "command.h"
 
 static WINDOW *inp_win;
+static int MAX_INP_SIZE = 1000;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
@@ -58,19 +59,18 @@ void create_input_window(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    inp_win = newpad(1, cols);
+    inp_win = newpad(1, MAX_INP_SIZE);
     wbkgd(inp_win, COLOR_PAIR(1));
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 1);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_win_resize(const char * const input, const int size)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    mvwin(inp_win, rows-1, 0);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_clear(void)
@@ -79,7 +79,7 @@ void inp_clear(void)
     getmaxyx(stdscr, rows, cols);
     wclear(inp_win);
     wmove(inp_win, 0, 1);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_non_block(void)
@@ -148,7 +148,7 @@ void inp_put_back(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols);
+    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
 }
 
 /*
