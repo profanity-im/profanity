@@ -99,7 +99,7 @@ void inp_get_char(int *ch, char *input, int *size)
     int i;
 
     
-// echo off, and get some more input
+    // echo off, and get some more input
     noecho();
     *ch = wgetch(inp_win);
 
