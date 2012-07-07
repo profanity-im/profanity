@@ -168,7 +168,7 @@ void inp_put_back(void)
  */
 static int _handle_edit(const int ch, char *input, int *size)
 {
-    int i;
+    int i, rows, cols;
     char *prev = NULL;
     char *next = NULL;
     char *found = NULL;
@@ -177,6 +177,7 @@ static int _handle_edit(const int ch, char *input, int *size)
     int inp_x = 0;
     char inp_cpy[*size];
     
+    getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
 
     switch(ch) {
@@ -243,6 +244,8 @@ static int _handle_edit(const int ch, char *input, int *size)
 
     case KEY_HOME:
         wmove(inp_win, inp_y, 1);
+        pad_start = 0;
+        prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         return 1;
 
     case KEY_END:
