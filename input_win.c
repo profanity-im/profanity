@@ -226,7 +226,7 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_RIGHT:
-        if (inp_x <= *size )
+        if (inp_x <= *size)
             wmove(inp_win, inp_y, inp_x+1);
         return 1;
 
@@ -249,6 +249,10 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_END:
+        if (*size > cols-2) {
+            pad_start = ((*size) - cols) + 2;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        }
         wmove(inp_win, inp_y, (*size) + 1);
         return 1;
 
