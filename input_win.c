@@ -99,7 +99,6 @@ void inp_get_char(int *ch, char *input, int *size)
     int inp_y = 0;
     int inp_x = 0;
     int i;
-
     
     // echo off, and get some more input
     noecho();
