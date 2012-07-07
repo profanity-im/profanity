@@ -49,6 +49,7 @@
 
 static WINDOW *inp_win;
 static int MAX_INP_SIZE = 1000;
+static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
@@ -63,14 +64,14 @@ void create_input_window(void)
     wbkgd(inp_win, COLOR_PAIR(1));
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 1);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
+    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_win_resize(const char * const input, const int size)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
+    prefresh(inp_win, pad_start, 0, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_clear(void)
@@ -79,7 +80,8 @@ void inp_clear(void)
     getmaxyx(stdscr, rows, cols);
     wclear(inp_win);
     wmove(inp_win, 0, 1);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
+    pad_start = 0;
+    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_non_block(void)
@@ -123,6 +125,14 @@ void inp_get_char(int *ch, char *input, int *size)
             } else {
                 waddch(inp_win, *ch);
                 input[(*size)++] = *ch;
+            
+                // if gone over screen size follow input
+                int rows, cols;
+                getmaxyx(stdscr, rows, cols);
+                if (*size > cols-2) {
+                    pad_start++;
+                    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+                }
             }
 
             reset_search_attempts();
@@ -148,7 +158,7 @@ void inp_put_back(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    prefresh(inp_win, 0, 0, rows-1, 0, rows-1, cols-1);
+    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
 /*
