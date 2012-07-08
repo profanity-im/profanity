@@ -16,6 +16,5 @@ check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = tests/test_contact_list.c src/contact_list.c src/contact.c \
 	tests/test_util.c tests/test_prof_history.c src/prof_history.c src/util.c \
 	tests/test_prof_autocomplete.c src/prof_autocomplete.c src/common.c tests/testsuite.c
-tests_testsuite_CFLAGS = -I ~/include
-tests_testsuite_LDADD = -L ~/lib -lheadunit -lstdc++
+tests_testsuite_LDADD = -lheadunit -lstdc++
 
