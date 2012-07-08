@@ -128,7 +128,7 @@ void inp_get_char(int *ch, char *input, int *size)
                 // if gone over screen size follow input
                 int rows, cols;
                 getmaxyx(stdscr, rows, cols);
-                if (*size > cols-2) {
+                if (*size - pad_start > cols-2) {
                     pad_start++;
                     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
                 }
@@ -222,36 +222,48 @@ static int _handle_edit(const int ch, char *input, int *size)
     case KEY_LEFT:
         if (inp_x > 1)
             wmove(inp_win, inp_y, inp_x-1);
+    
+        // current position off screen to left
+        if (inp_x < pad_start) {
+            pad_start--;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        }
         return 1;
 
     case KEY_RIGHT:
         if (inp_x <= *size)
             wmove(inp_win, inp_y, inp_x+1);
-        return 1;
-
-    case KEY_UP:
-        prev = history_previous(input, size);
-        if (prev)
-            _replace_input(input, prev, size);
-        return 1;
-
-    case KEY_DOWN:
-        next = history_next(input, size);
-        if (next)
-            _replace_input(input, next, size);
-        return 1;
-
-    case KEY_HOME:
-        wmove(inp_win, inp_y, 1);
-        pad_start = 0;
-        prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
-        return 1;
-
-    case KEY_END:
-        if (*size > cols-2) {
-            pad_start = ((*size) - cols) + 2;
+            
+        // current position off screen to right
+        if ((inp_x - pad_start) > cols-2) {
+            pad_start++;
             prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         }
+        return 1;
+
+        case KEY_UP:
+            prev = history_previous(input, size);
+            if (prev)
+                _replace_input(input, prev, size);
+            return 1;
+
+        case KEY_DOWN:
+            next = history_next(input, size);
+            if (next)
+                _replace_input(input, next, size);
+            return 1;
+
+        case KEY_HOME:
+            wmove(inp_win, inp_y, 1);
+            pad_start = 0;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            return 1;
+
+        case KEY_END:
+            if (*size > cols-2) {
+                pad_start = ((*size) - cols) + 2;
+                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            }
         wmove(inp_win, inp_y, (*size) + 1);
         return 1;
 
