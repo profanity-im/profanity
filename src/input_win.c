@@ -30,10 +30,13 @@
  * The example below shows the values of size, input, a call to wgetyx to
  * find the current cursor location, and the index of the input string.
  *
- * size  : "       7 "
- * input : " example "
- * inp_x : "012345678"
- * index : " 0123456 " (inp_x - 1)
+ * view         :    |mple|  
+ * input        : "example te"
+ * index        : "0123456789"
+ * inp_x        : "0123456789"
+ * size         : 10
+ * pad_start    : 3
+ * cols         : 4
  */
 
 #include <string.h>
@@ -48,6 +51,8 @@
 #include "command.h"
 
 static WINDOW *inp_win;
+static int MAX_INP_SIZE = 1000;
+static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
@@ -58,28 +63,35 @@ void create_input_window(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    inp_win = newwin(1, cols, rows-1, 0);
+    inp_win = newpad(1, MAX_INP_SIZE);
     wbkgd(inp_win, COLOR_PAIR(1));
     keypad(inp_win, TRUE);
-//    wattrset(inp_win, A_BOLD);
-    wmove(inp_win, 0, 1);
-    wrefresh(inp_win);
+    wmove(inp_win, 0, 0);
+    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_win_resize(const char * const input, const int size)
 {
-    int rows, cols;
+    int rows, cols, inp_x, inp_y;
     getmaxyx(stdscr, rows, cols);
-    mvwin(inp_win, rows-1, 0);
-    wresize(inp_win, 1, cols);
-    wrefresh(inp_win);
+    getyx(inp_win, inp_y, inp_x);
+    
+    // if lost cursor off screen, move contents to show it
+    if (inp_x >= pad_start + cols) {
+        pad_start = inp_x - 10;
+    }
+
+    prefresh(inp_win, pad_start, 0, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_clear(void)
 {
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
     wclear(inp_win);
-    wmove(inp_win, 0, 1);
-    wrefresh(inp_win);
+    wmove(inp_win, 0, 0);
+    pad_start = 0;
+    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
 void inp_non_block(void)
@@ -97,9 +109,8 @@ void inp_get_char(int *ch, char *input, int *size)
     int inp_y = 0;
     int inp_x = 0;
     int i;
-
     
-// echo off, and get some more input
+    // echo off, and get some more input
     noecho();
     *ch = wgetch(inp_win);
 
@@ -109,13 +120,13 @@ void inp_get_char(int *ch, char *input, int *size)
             getyx(inp_win, inp_y, inp_x);
            
             // handle insert if not at end of input
-            if (inp_x <= *size) {
+            if (inp_x < *size) {
                 winsch(inp_win, *ch);
                 wmove(inp_win, inp_y, inp_x+1);
 
-                for (i = *size; i > inp_x -1; i--)
+                for (i = *size; i > inp_x; i--)
                     input[i] = input[i-1];
-                input[inp_x -1] = *ch;
+                input[inp_x] = *ch;
 
                 (*size)++;
 
@@ -123,6 +134,14 @@ void inp_get_char(int *ch, char *input, int *size)
             } else {
                 waddch(inp_win, *ch);
                 input[(*size)++] = *ch;
+            
+                // if gone over screen size follow input
+                int rows, cols;
+                getmaxyx(stdscr, rows, cols);
+                if (*size - pad_start > cols-2) {
+                    pad_start++;
+                    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+                }
             }
 
             reset_search_attempts();
@@ -139,14 +158,16 @@ void inp_get_password(char *passwd)
     wclear(inp_win);
     noecho();
     mvwgetnstr(inp_win, 0, 1, passwd, 20);
-    wmove(inp_win, 0, 1);
+    wmove(inp_win, 0, 0);
     echo();
     status_bar_clear();
 }
 
 void inp_put_back(void)
 {
-    wrefresh(inp_win);
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
 /*
@@ -156,7 +177,7 @@ void inp_put_back(void)
  */
 static int _handle_edit(const int ch, char *input, int *size)
 {
-    int i;
+    int i, rows, cols;
     char *prev = NULL;
     char *next = NULL;
     char *found = NULL;
@@ -165,6 +186,7 @@ static int _handle_edit(const int ch, char *input, int *size)
     int inp_x = 0;
     char inp_cpy[*size];
     
+    getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
 
     switch(ch) {
@@ -175,14 +197,14 @@ static int _handle_edit(const int ch, char *input, int *size)
         if (*size > 0) {
 
             // if at end, delete last char
-            if (inp_x > *size) {
+            if (inp_x >= *size) {
                 wmove(inp_win, inp_y, inp_x-1);
                 wdelch(inp_win);
                 (*size)--;
 
             // if in middle, delete and shift chars left
-            } else if (inp_x > 1 && inp_x <= *size) {
-                for (i = inp_x-1; i < *size; i++)
+            } else if (inp_x > 0 && inp_x < *size) {
+                for (i = inp_x; i < *size; i++)
                     input[i-1] = input[i];
                 (*size)--;
 
@@ -195,12 +217,12 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_DC: // DEL
-        if (inp_x <= *size) {
+        if (inp_x < *size) {
             wdelch(inp_win);
     
             // if not last char, shift chars left
-            if (inp_x < *size)
-                for (i = inp_x-1; i < *size; i++)
+            if (inp_x < *size - 1)
+                for (i = inp_x; i < *size; i++)
                     input[i] = input[i+1];
             
             (*size)--;
@@ -208,33 +230,58 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_LEFT:
-        if (inp_x > 1)
+        if (inp_x > 0)
             wmove(inp_win, inp_y, inp_x-1);
+    
+        // current position off screen to left
+        if (inp_x - 1 < pad_start) {
+            pad_start--;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        }
         return 1;
 
     case KEY_RIGHT:
-        if (inp_x <= *size )
+        if (inp_x < *size) {
             wmove(inp_win, inp_y, inp_x+1);
+            
+            // current position off screen to right
+            if ((inp_x + 1 - pad_start) >= cols) {
+                pad_start++;
+                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            }
+        }
         return 1;
 
     case KEY_UP:
         prev = history_previous(input, size);
-        if (prev)
+        if (prev) {
             _replace_input(input, prev, size);
+            pad_start = 0;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        }
         return 1;
 
     case KEY_DOWN:
         next = history_next(input, size);
-        if (next)
+        if (next) {
             _replace_input(input, next, size);
+            pad_start = 0;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        }
         return 1;
 
     case KEY_HOME:
-        wmove(inp_win, inp_y, 1);
+        wmove(inp_win, inp_y, 0);
+        pad_start = 0;
+        prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         return 1;
 
     case KEY_END:
-        wmove(inp_win, inp_y, (*size) + 1);
+        wmove(inp_win, inp_y, *size);
+        if (*size > cols-2) {
+            pad_start = *size - cols + 1;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        }
         return 1;
 
     case 9: // tab
