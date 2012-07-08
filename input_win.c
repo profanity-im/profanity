@@ -72,8 +72,15 @@ void create_input_window(void)
 
 void inp_win_resize(const char * const input, const int size)
 {
-    int rows, cols;
+    int rows, cols, inp_x, inp_y;
     getmaxyx(stdscr, rows, cols);
+    getyx(inp_win, inp_y, inp_x);
+    
+    // if lost cursor off screen, move contents to show it
+    if (inp_x >= pad_start + cols) {
+        pad_start = inp_x - 10;
+    }
+
     prefresh(inp_win, pad_start, 0, rows-1, 0, rows-1, cols-1);
 }
 
