@@ -28,6 +28,10 @@ If you wish to install on the system, switch to root, or sudo and:
 
     make install
 
+To run tests:
+
+    make check
+
 Running
 -------
 
