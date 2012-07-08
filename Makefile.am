@@ -8,8 +8,7 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/main.c src/profanity.h src/prof_history.h src/util.c
 profanity_CFLAGS = -O3 -Werror -Wall -Wextra -Wno-unused-parameter \
 	-Wno-unused-but-set-variable -Wno-unused-result \
-	$(NCURSES_CFLAGS) $(NCURSES_LIBS) -lstrophe -lxml2 -lexpat \
-	$(OPENSSL_CFLAGS) $(OPENSSL_LIBS) -lresolv $(GLIB_CFLAGS) $(GLIB_LIBS) \
+	-lstrophe -lxml2 -lexpat $(DEPS_CFLAGS) $(DEPS_LIBS) -lresolv \
 	$(NOTIFY_CFLAGS) $(NOTIFY_LIBS)
 
 TESTS = tests/testsuite
