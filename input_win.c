@@ -223,11 +223,11 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_LEFT:
-        if (inp_x > 1)
+        if (inp_x > 0)
             wmove(inp_win, inp_y, inp_x-1);
     
         // current position off screen to left
-        if (inp_x < pad_start) {
+        if (inp_x - 1 < pad_start) {
             pad_start--;
             prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         }
