@@ -196,8 +196,8 @@ static int _handle_edit(const int ch, char *input, int *size)
                 (*size)--;
 
             // if in middle, delete and shift chars left
-            } else if (inp_x > 1 && inp_x <= *size) {
-                for (i = inp_x-1; i < *size; i++)
+            } else if (inp_x > 0 && inp_x < *size) {
+                for (i = inp_x; i < *size; i++)
                     input[i-1] = input[i];
                 (*size)--;
 
