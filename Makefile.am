@@ -1,8 +1,3 @@
-CFLAGS = -O3 -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-but-set-variable \
-	-Wno-unused-result $(NCURSES_CFLAGS) $(NCURSES_LIBS) -lstrophe -lxml2 -lexpat \
-	$(OPENSSL_CFLAGS) $(OPENSSL_LIBS) -lresolv $(GLIB_CFLAGS) $(GLIB_LIBS) \
-	$(NOTIFY_CFLAGS) $(NOTIFY_LIBS)
-
 bin_PROGRAMS = profanity
 profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/preferences.c src/prof_autocomplete.c src/status_bar.c src/util.h \
@@ -11,4 +6,17 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/contact_list.c src/input_win.c src/log.h src/profanity.c \
 	src/prof_history.c src/ui.h src/common.h src/ contact_list.h src/jabber.c \
 	src/main.c src/profanity.h src/prof_history.h src/util.c
+profanity_CFLAGS = -O3 -Werror -Wall -Wextra -Wno-unused-parameter \
+	-Wno-unused-but-set-variable -Wno-unused-result \
+	$(NCURSES_CFLAGS) $(NCURSES_LIBS) -lstrophe -lxml2 -lexpat \
+	$(OPENSSL_CFLAGS) $(OPENSSL_LIBS) -lresolv $(GLIB_CFLAGS) $(GLIB_LIBS) \
+	$(NOTIFY_CFLAGS) $(NOTIFY_LIBS)
+
+TESTS = tests/testsuite
+check_PROGRAMS = tests/testsuite
+tests_testsuite_SOURCES = tests/test_contact_list.c src/contact_list.c src/contact.c \
+	tests/test_util.c tests/test_prof_history.c src/prof_history.c src/util.c \
+	tests/test_prof_autocomplete.c src/prof_autocomplete.c src/common.c tests/testsuite.c
+tests_testsuite_CFLAGS = -I ~/include
+tests_testsuite_LDADD = -L ~/lib -lheadunit -lstdc++
 
