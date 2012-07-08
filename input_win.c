@@ -210,12 +210,12 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_DC: // DEL
-        if (inp_x <= *size) {
+        if (inp_x < *size) {
             wdelch(inp_win);
     
             // if not last char, shift chars left
-            if (inp_x < *size)
-                for (i = inp_x-1; i < *size; i++)
+            if (inp_x < *size - 1)
+                for (i = inp_x; i < *size; i++)
                     input[i] = input[i+1];
             
             (*size)--;
