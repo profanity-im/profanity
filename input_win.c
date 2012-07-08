@@ -234,40 +234,47 @@ static int _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case KEY_RIGHT:
-        if (inp_x <= *size)
+        if (inp_x < *size) {
             wmove(inp_win, inp_y, inp_x+1);
             
-        // current position off screen to right
-        if ((inp_x - pad_start) > cols-2) {
-            pad_start++;
+            // current position off screen to right
+            if ((inp_x + 1 - pad_start) >= cols) {
+                pad_start++;
+                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            }
+        }
+        return 1;
+
+    case KEY_UP:
+        prev = history_previous(input, size);
+        if (prev) {
+            _replace_input(input, prev, size);
+            pad_start = 0;
             prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         }
         return 1;
 
-        case KEY_UP:
-            prev = history_previous(input, size);
-            if (prev)
-                _replace_input(input, prev, size);
-            return 1;
-
-        case KEY_DOWN:
-            next = history_next(input, size);
-            if (next)
-                _replace_input(input, next, size);
-            return 1;
-
-        case KEY_HOME:
-            wmove(inp_win, inp_y, 0);
+    case KEY_DOWN:
+        next = history_next(input, size);
+        if (next) {
+            _replace_input(input, next, size);
             pad_start = 0;
             prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
-            return 1;
+        }
+        return 1;
 
-        case KEY_END:
-            if (*size > cols-2) {
-                pad_start = ((*size) - cols) + 2;
-                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
-            }
-        wmove(inp_win, inp_y, (*size) + 1);
+    case KEY_HOME:
+        wmove(inp_win, inp_y, 0);
+        pad_start = 0;
+        prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        return 1;
+
+    case KEY_END:
+        wmove(inp_win, inp_y, *size);
+        if (*size > cols-2) {
+            pad_start = *size - cols + 1;
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+        }
         return 1;
 
     case 9: // tab
