@@ -157,7 +157,11 @@ void inp_get_char(int *ch, char *input, int *size)
 
 void inp_get_password(char *passwd)
 {
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    
     wclear(inp_win);
+    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
     noecho();
     mvwgetnstr(inp_win, 0, 1, passwd, 20);
     wmove(inp_win, 0, 0);
