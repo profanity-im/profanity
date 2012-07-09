@@ -28,6 +28,8 @@
 #include "common.h"
 #include "contact_list.h"
 
+#define INP_WIN_MAX 1000
+
 struct prof_win {
     char from[100];
     WINDOW *win;
