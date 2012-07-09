@@ -6,6 +6,8 @@ Profanity is a console based jabber client inspired by [Irssi](http://www.irssi.
 Installation
 ------------
 
+For a full install guide from scratch, including how to install dependencies see [the wiki install guide](https://github.com/boothj5/profanity/wiki/Installation-guide).
+
 Dependencies: ncurses, libstrophe, glib, expat, xml2 and openssl.
 
 Optional Dependencies: libnotify
