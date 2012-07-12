@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.67])
 AC_INIT([profanity], [0.10], [boothj5web@gmail.com])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
@@ -34,7 +34,7 @@ AC_CHECK_LIB([headunit], [main], [],
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
-PKG_CHECK_MODULES([DEPS], [ncurses openssl glib-2.0])
+PKG_CHECK_MODULES([DEPS], [openssl glib-2.0])
 PKG_CHECK_MODULES([NOTIFY], [libnotify], [], 
     [AC_MSG_NOTICE([libnotify module not found])])
 
