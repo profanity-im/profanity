@@ -159,8 +159,10 @@ static gboolean _cmd_connect(const char * const inp)
         cons_show("Usage: /connect user@host");
         result = TRUE;
     } else {
-        char *user;
+        char *user, *lower;
         user = strndup(inp+9, strlen(inp)-9);
+        lower = g_utf8_strdown(user, -1);
+
         status_bar_get_password();
         status_bar_refresh();
         char passwd[21];
@@ -168,7 +170,7 @@ static gboolean _cmd_connect(const char * const inp)
         inp_get_password(passwd);
         inp_non_block();
         
-        conn_status = jabber_connect(user, passwd);
+        conn_status = jabber_connect(lower, passwd);
         if (conn_status == JABBER_CONNECTING)
             cons_show("Connecting...");
         if (conn_status == JABBER_DISCONNECTED)
