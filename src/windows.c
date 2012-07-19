@@ -300,6 +300,38 @@ void win_disconnected(void)
     }
 }
 
+void cons_prefs(void)
+{
+    cons_show("");
+    cons_show("Current preferences:");
+    cons_show("");
+    
+    if (prefs_get_beep())
+        cons_show("Terminal beep         : ON");
+    else
+        cons_show("Terminal beep         : OFF");    
+    
+    if (prefs_get_flash())
+        cons_show("Terminal flash        : ON");
+    else
+        cons_show("Terminal flash        : OFF");    
+    
+    if (prefs_get_notify())
+        cons_show("Desktop notifications : ON");
+    else
+        cons_show("Desktop notifications : OFF");    
+
+    if (prefs_get_showsplash())
+        cons_show("Splash screen         : ON");
+    else
+        cons_show("Splash screen         : OFF");    
+    
+    cons_show("");
+
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
+}
+
 void cons_help(void)
 {
     cons_show("");

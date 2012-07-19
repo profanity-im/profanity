@@ -38,6 +38,7 @@ static gboolean _handle_command(const char * const command,
     const char * const inp);
 static gboolean _cmd_quit(const char * const inp);
 static gboolean _cmd_help(const char * const inp);
+static gboolean _cmd_prefs(const char * const inp);
 static gboolean _cmd_who(const char * const inp);
 static gboolean _cmd_ros(const char * const inp);
 static gboolean _cmd_connect(const char * const inp);
@@ -73,6 +74,7 @@ static struct cmd_t commands[] = {
     { "/dnd", _cmd_dnd },
     { "/flash", _cmd_set_flash },
     { "/help", _cmd_help },
+    { "/prefs", _cmd_prefs },
     { "/msg", _cmd_msg },
     { "/online", _cmd_online },
     { "/quit", _cmd_quit },
@@ -82,7 +84,7 @@ static struct cmd_t commands[] = {
     { "/xa", _cmd_xa },
 };
 
-static const int num_cmds = 15;
+static const int num_cmds = 16;
     
 gboolean process_input(char *inp)
 {
@@ -190,6 +192,13 @@ static gboolean _cmd_quit(const char * const inp)
 static gboolean _cmd_help(const char * const inp)
 {
     cons_help();
+
+    return TRUE;
+}
+
+static gboolean _cmd_prefs(const char * const inp)
+{
+    cons_prefs();
 
     return TRUE;
 }
