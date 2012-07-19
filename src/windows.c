@@ -338,6 +338,7 @@ void cons_help(void)
     cons_show("Basic Commands:");
     cons_show("");
     cons_show("/help                    : This help.");
+    cons_show("/prefs                   : Show current UI preferences.");
     cons_show("/connect user@host       : Login to jabber.");
     cons_show("/msg user@host mesg      : Send mesg to user.");
     cons_show("/close                   : Close a chat window.");
