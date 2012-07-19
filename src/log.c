@@ -21,8 +21,12 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "glib.h"
 
 #include "log.h"
+#include "common.h"
 
 extern FILE *logp;
 
@@ -33,7 +37,12 @@ void log_msg(const char * const area, const char * const msg)
 
 void log_init(void)
 {
-    logp = fopen("profanity.log", "a");
+    GString *log_file = g_string_new(getenv("HOME"));
+    g_string_append(log_file, "/.profanity/log");
+    create_dir(log_file->str);
+    g_string_append(log_file, "/profanity.log");
+    logp = fopen(log_file->str, "a");
+    g_string_free(log_file, TRUE);
     log_msg(PROF, "Starting Profanity...");
 }
 

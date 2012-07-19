@@ -28,22 +28,23 @@
 
 #include <glib.h>
 
-static void _create_dir(char *name);
+#include "common.h"
 
 void p_slist_free_full(GSList *items, GDestroyNotify free_func)
 {
-  g_slist_foreach (items, (GFunc) free_func, NULL);
-  g_slist_free (items);
+    g_slist_foreach (items, (GFunc) free_func, NULL);
+    g_slist_free (items);
 }
 
 void create_config_directory()
 {
     GString *dir = g_string_new(getenv("HOME"));
     g_string_append(dir, "/.profanity");
-    _create_dir(dir->str);
+    create_dir(dir->str);
+    g_string_free(dir, TRUE);
 }
 
-void _create_dir(char *name)
+void create_dir(char *name)
 {
     int e;
     struct stat sb;
