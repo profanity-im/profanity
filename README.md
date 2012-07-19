@@ -49,7 +49,7 @@ Preferences
 
 User preferences are stored in
 
-    ~/.profanity
+    ~/.profanity/config
 
 The following example is described below:
 
