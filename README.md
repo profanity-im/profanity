@@ -37,12 +37,18 @@ To run tests:
 Running
 -------
 
-    profanity
+Usage:
+  profanity [OPTION...]
+
+Help Options:
+  -h, --help            Show help options
+
+Application Options:
+  -v, --version         Show version information
+  -d, --disable-tls     Disable TLS
 
 Some older jabber servers advertise SSL/TLS support but don't respond to the handshake,
-if you have trouble connecting, run with the `-notls` option:
-
-    profanity -notls
+if you have trouble connecting, run with the `--disable-tls` option:
 
 Preferences
 -----------
