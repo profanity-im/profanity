@@ -77,7 +77,7 @@ void prefs_load(void)
 {
     ac = p_autocomplete_new();
     prefs_loc = g_string_new(getenv("HOME"));
-    g_string_append(prefs_loc, "/.profanity");
+    g_string_append(prefs_loc, "/.config/profanity/config");
 
     prefs = g_key_file_new();
     g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_NONE, NULL);
