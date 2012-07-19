@@ -41,6 +41,17 @@ make
 sudo make install
 
 echo
+echo Profanity installer... cleaning up
+echo
+
+echo Removing head-unit repository...
+rm -rf head-unit
+
+echo Removing libstrophe repository...
+rm -rf libstrophe
+
+echo
 echo Profanity installer... complete!
 echo
+echo Type \'profanity\' to run.
 
