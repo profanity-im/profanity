@@ -65,6 +65,7 @@ void profanity_run(void)
 
 void profanity_init(const int disable_tls)
 {
+    create_config_directory();
     log_init();
     prefs_load();
     gui_init();

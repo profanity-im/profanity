@@ -20,10 +20,39 @@
  *
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>
+
 #include <glib.h>
+
+static void _create_dir(char *name);
 
 void p_slist_free_full(GSList *items, GDestroyNotify free_func)
 {
   g_slist_foreach (items, (GFunc) free_func, NULL);
   g_slist_free (items);
+}
+
+void create_config_directory()
+{
+    GString *dir = g_string_new(getenv("HOME"));
+    g_string_append(dir, "/.config");
+    _create_dir(dir->str);
+
+    g_string_append(dir, "/profanity");
+    _create_dir(dir->str);
+}
+
+void _create_dir(char *name)
+{
+    int e;
+    struct stat sb;
+
+    e = stat(name, &sb);
+    if (e != 0)
+        if (errno == ENOENT)
+            e = mkdir(name, S_IRWXU);
 }

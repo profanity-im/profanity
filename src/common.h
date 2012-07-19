@@ -50,5 +50,6 @@ typedef enum {
 #endif
 
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
+void create_config_directory();
 
 #endif
