@@ -54,4 +54,4 @@ echo
 echo Profanity installer... complete!
 echo
 echo Type \'profanity\' to run.
-
+echo
