@@ -19,30 +19,46 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <config.h>
 
 #include <stdio.h>
 #include <string.h>
 
+#include <glib.h>
+
 #include "profanity.h"
+
+static gboolean disable_tls = FALSE;
+static gboolean version = FALSE;
 
 int main(int argc, char **argv)
 {   
-    int disable_tls = 0;
+    static GOptionEntry entries[] = 
+    {
+        { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
+        { "disable-tls", 'd', 0, G_OPTION_ARG_NONE, &disable_tls, "Disable TLS", NULL },
+        { NULL }
+    };
+  
+    GError *error = NULL;
+    GOptionContext *context;
 
-    // more than one argument
-    if (argc > 2) {
-        printf("Usage: profanity [-notls]\n");
+    context = g_option_context_new(NULL);
+    g_option_context_add_main_entries(context, entries, NULL);
+    //g_option_context_add_group(context, gtk_get_option_group (TRUE));
+    if (!g_option_context_parse(context, &argc, &argv, &error)) {
+        g_print("%s\n", error->message);
         return 1;
+    }
 
-    // argument is not -notls
-    } else if (argc == 2) {
-        char *arg1 = argv[1];
-        if (strcmp(arg1, "-notls") != 0) {
-            printf("Usage: profanity [-notls]\n");
-            return 1;
-        } else {
-            disable_tls = 1;
-        }
+    if (version == TRUE) {
+        g_print("Profanity, version %s\n", PACKAGE_VERSION);
+        g_print("Copyright (C) 2012 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+        g_print("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
+        g_print("\n");
+        g_print("This is free software; you are free to change and redistribute it.\n");
+        g_print("There is NO WARRANTY, to the extent permitted by law.\n");
+        return 0;
     }
 
     profanity_init(disable_tls);

@@ -474,7 +474,21 @@ static void _create_windows(void)
     if (prefs_get_showsplash()) {
         _print_splash_logo(_cons_win);
     } else {
-        wprintw(_cons_win, "Welcome to Profanity.\n");
+        wprintw(_cons_win, "Welcome to Profanity, version %s\n", PACKAGE_VERSION);
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "Copyright (C) 2012 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "\n");
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "This is free software; you are free to change and redistribute it.\n");
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "There is NO WARRANTY, to the extent permitted by law.\n");
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "\n");
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "Type '/help' to get started.\n");
     }
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
