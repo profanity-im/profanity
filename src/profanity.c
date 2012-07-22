@@ -28,6 +28,7 @@
 
 #include "profanity.h"
 #include "log.h"
+#include "chat_log.h"
 #include "ui.h"
 #include "jabber.h"
 #include "command.h"
@@ -69,6 +70,7 @@ void profanity_init(const int disable_tls)
 {
     create_config_directory();
     log_init();
+    chat_log_init();
     prefs_load();
     gui_init();
     jabber_init(disable_tls);
@@ -82,4 +84,5 @@ void _profanity_shutdown(void)
     jabber_disconnect();
     gui_close();
     log_close();
+    chat_log_close();
 }

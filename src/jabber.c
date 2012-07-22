@@ -27,6 +27,7 @@
 #include "jabber.h"
 #include "common.h"
 #include "log.h"
+#include "chat_log.h"
 #include "contact_list.h"
 #include "ui.h"
 #include "util.h"
@@ -165,6 +166,8 @@ void jabber_send(const char * const msg, const char * const recipient)
     free(coded_msg);
     free(coded_msg2);
     free(coded_msg3);
+
+    chat_log_chat("me", msg);
 }
 
 void jabber_roster_request(void)
@@ -249,6 +252,8 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     win_show_incomming_msg(from, message);
     win_page_off();
+
+    chat_log_chat(from, message);
 
     return 1;
 }

@@ -5,7 +5,8 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/prof_autocomplete.h src/title_bar.c src/windows.c src/common.c \
 	src/contact_list.c src/input_win.c src/log.h src/profanity.c \
 	src/prof_history.c src/ui.h src/common.h src/ contact_list.h src/jabber.c \
-	src/main.c src/profanity.h src/prof_history.h src/util.c
+	src/main.c src/profanity.h src/prof_history.h src/util.c src/chat_log.c \
+	src/chat_log.h
 profanity_CFLAGS = -O3 -Werror -Wall -Wextra -Wno-unused-parameter \
 	-Wno-unused-but-set-variable -Wno-unused-result \
 	-Wno-missing-field-initializers
