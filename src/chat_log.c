@@ -29,6 +29,7 @@
 #include "common.h"
 
 static FILE *chatlog;
+static GTimeZone *tz;
 
 void chat_log_init(void)
 {
@@ -38,15 +39,23 @@ void chat_log_init(void)
     g_string_append(log_file, "/chat.log");
     chatlog = fopen(log_file->str, "a");
     g_string_free(log_file, TRUE);
+
+    tz = g_time_zone_new_local();
 }
 
 void chat_log_chat(const char * const user, const char * const msg)
 {
-    fprintf(chatlog, "%s: %s\n", user, msg);
+    GDateTime *dt = g_date_time_new_now(tz);
+    gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
+
+    fprintf(chatlog, "%s: %s: %s\n", date_fmt, user, msg);
     fflush(chatlog);
+
+    g_date_time_unref(dt);
 }
 
 void chat_log_close(void)
 {
     fclose(chatlog);
+    g_time_zone_unref(tz);
 }
