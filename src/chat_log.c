@@ -28,34 +28,55 @@
 #include "chat_log.h"
 #include "common.h"
 
-static FILE *chatlog;
+static GHashTable *logs;
 static GTimeZone *tz;
+
+static void _close_file(gpointer key, gpointer value, gpointer user_data);
 
 void chat_log_init(void)
 {
-    GString *log_file = g_string_new(getenv("HOME"));
-    g_string_append(log_file, "/.profanity/log");
-    create_dir(log_file->str);
-    g_string_append(log_file, "/chat.log");
-    chatlog = fopen(log_file->str, "a");
-    g_string_free(log_file, TRUE);
-
     tz = g_time_zone_new_local();
+    logs = g_hash_table_new(NULL, (GEqualFunc) g_strcmp0);
 }
 
-void chat_log_chat(const char * const user, const char * const msg)
+void chat_log_chat(const char * const login, char *other, 
+    const char * const msg, chat_log_direction_t direction)
 {
+    gpointer *logpp = g_hash_table_lookup(logs, other);
+    FILE *logp;
+    
+    if (logpp == NULL) {
+        GString *log_file = g_string_new(getenv("HOME"));
+        g_string_append(log_file, "/.profanity/log");
+        create_dir(log_file->str);
+        g_string_append_printf(log_file, "/%s.log", other);
+        logp = fopen(log_file->str, "a");
+        g_string_free(log_file, TRUE);
+        g_hash_table_insert(logs, other, &logp);
+    } else {
+        logp = *logpp;
+    }
+
     GDateTime *dt = g_date_time_new_now(tz);
     gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
 
-    fprintf(chatlog, "%s: %s: %s\n", date_fmt, user, msg);
-    fflush(chatlog);
+    if (direction == IN) {
+        fprintf(logp, "%s: %s: %s\n", date_fmt, other, msg);
+    } else {
+        fprintf(logp, "%s: %s: %s\n", date_fmt, login, msg);
+    }
+    fflush(logp);
 
     g_date_time_unref(dt);
 }
 
 void chat_log_close(void)
 {
-    fclose(chatlog);
+    g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
     g_time_zone_unref(tz);
+}
+
+static void _close_file(gpointer key, gpointer value, gpointer user_data)
+{
+    fclose(value);
 }

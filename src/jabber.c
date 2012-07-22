@@ -169,7 +169,7 @@ void jabber_send(const char * const msg, const char * const recipient)
     
     const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
 
-    chat_log_chat(jid, msg);
+    chat_log_chat(jid, (char *)recipient, msg, OUT);
 }
 
 void jabber_roster_request(void)
@@ -258,8 +258,10 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
     char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
     char *short_from = strtok(from_cpy, "/");
+    const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
 
-    chat_log_chat(short_from, message);
+    
+    chat_log_chat(jid, short_from, message, IN);
 
     return 1;
 }

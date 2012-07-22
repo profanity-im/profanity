@@ -25,8 +25,14 @@
 
 #include <stdio.h>
 
+typedef enum {
+    IN,
+    OUT
+} chat_log_direction_t;
+
 void chat_log_init(void);
-void chat_log_chat(const char * const user, const char * const msg);
+void chat_log_chat(const char * const login, char *other, 
+    const char * const msg, chat_log_direction_t direction);
 void chat_log_close(void);
 
 #endif
