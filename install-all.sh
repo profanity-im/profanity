@@ -96,7 +96,7 @@ if [ $? -eq 0 ]; then
 fi
 
 case "$DIST" in
-unknown)    echo Unsupported distribution, exising.
+unknown)    echo Unsupported distribution, exiting.
             exit
             ;;
 fedora)     fedora_deps
