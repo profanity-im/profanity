@@ -31,7 +31,7 @@
 static GHashTable *logs;
 static GTimeZone *tz;
 
-static void _close_file(gpointer key, gpointer value, gpointer user_data);
+//static void _close_file(gpointer key, gpointer value, gpointer user_data);
 
 void chat_log_init(void)
 {
@@ -47,10 +47,16 @@ void chat_log_chat(const char * const login, char *other,
     
     if (logpp == NULL) {
         GString *log_file = g_string_new(getenv("HOME"));
+    
         g_string_append(log_file, "/.profanity/log");
         create_dir(log_file->str);
+    
+        g_string_append_printf(log_file, "/%s", login);
+        create_dir(log_file->str);
+
         g_string_append_printf(log_file, "/%s.log", other);
         logp = fopen(log_file->str, "a");
+    
         g_string_free(log_file, TRUE);
         g_hash_table_insert(logs, other, &logp);
     } else {
@@ -72,11 +78,11 @@ void chat_log_chat(const char * const login, char *other,
 
 void chat_log_close(void)
 {
-    g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
+//    g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
     g_time_zone_unref(tz);
 }
 
-static void _close_file(gpointer key, gpointer value, gpointer user_data)
-{
-    fclose(value);
-}
+//static void _close_file(gpointer key, gpointer value, gpointer user_data)
+//{
+//    fclose(value);
+//}
