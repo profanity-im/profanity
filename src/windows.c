@@ -326,6 +326,11 @@ void cons_prefs(void)
     else
         cons_show("Splash screen         : OFF");    
     
+    if (prefs_get_chlog())
+        cons_show("Chat logging          : ON");
+    else
+        cons_show("Chat logging          : OFF");    
+
     cons_show("");
 
     if (_curr_prof_win == 0)
