@@ -48,6 +48,7 @@ static gboolean _cmd_set_beep(const char * const inp);
 static gboolean _cmd_set_notify(const char * const inp);
 static gboolean _cmd_set_flash(const char * const inp);
 static gboolean _cmd_set_showsplash(const char * const inp);
+static gboolean _cmd_set_chlog(const char * const inp);
 static gboolean _cmd_away(const char * const inp);
 static gboolean _cmd_online(const char * const inp);
 static gboolean _cmd_dnd(const char * const inp);
@@ -80,11 +81,12 @@ static struct cmd_t commands[] = {
     { "/quit", _cmd_quit },
     { "/ros", _cmd_ros },
     { "/showsplash", _cmd_set_showsplash },
+    { "/chlog", _cmd_set_chlog },
     { "/who", _cmd_who },
     { "/xa", _cmd_xa },
 };
 
-static const int num_cmds = 16;
+static const int num_cmds = 17;
     
 gboolean process_input(char *inp)
 {
@@ -326,6 +328,21 @@ static gboolean _cmd_set_showsplash(const char * const inp)
         prefs_set_showsplash(FALSE);
     } else {
         cons_show("Usage: /showsplash <on/off>");
+    }
+
+    return TRUE;
+}
+
+static gboolean _cmd_set_chlog(const char * const inp)
+{
+    if (strcmp(inp, "/chlog on") == 0) {
+        cons_show("Chat logging enabled.");
+        prefs_set_chlog(TRUE);
+    } else if (strcmp(inp, "/chlog off") == 0) {
+        cons_show("Chat logging disabled.");
+        prefs_set_chlog(FALSE);
+    } else {
+        cons_show("Usage: /chlog <on/off>");
     }
 
     return TRUE;

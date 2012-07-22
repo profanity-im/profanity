@@ -352,6 +352,7 @@ void cons_help(void)
     cons_show("/notify <on/off>         : Enable/disable desktop notifications");
     cons_show("/flash <on/off>          : Enable/disable screen flash notification");
     cons_show("/showsplash <on/off>     : Enable/disable splash logo on startup");
+    cons_show("/chlog <on/off>          : Enable/disable chat logging");
     cons_show("");
     cons_show("Status changes (msg is optional):");
     cons_show("");

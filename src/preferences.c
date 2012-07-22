@@ -195,6 +195,17 @@ void prefs_set_flash(gboolean value)
     _save_prefs();
 }
 
+gboolean prefs_get_chlog(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "chlog", NULL);
+}
+
+void prefs_set_chlog(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "chlog", value);
+    _save_prefs();
+}
+
 void prefs_add_login(const char *jid)
 {
     gsize njids;

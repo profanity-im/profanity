@@ -36,9 +36,12 @@ gboolean prefs_get_notify(void);
 void prefs_set_notify(gboolean value);
 gboolean prefs_get_flash(void);
 void prefs_set_flash(gboolean value);
-void prefs_add_login(const char *jid);
+gboolean prefs_get_chlog(void);
+void prefs_set_chlog(gboolean value);
 gboolean prefs_get_showsplash(void);
 void prefs_set_showsplash(gboolean value);
+
+void prefs_add_login(const char *jid);
 
 NCURSES_COLOR_T prefs_get_bkgnd();
 NCURSES_COLOR_T prefs_get_text();
