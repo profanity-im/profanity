@@ -25,15 +25,10 @@
 
 #include "glib.h"
 
-#include "log.h"
+#include "chat_log.h"
 #include "common.h"
 
 static FILE *chatlog;
-
-void chat_log_chat(const char * const user, const char * const msg)
-{
-    fprintf(chatlog, "%s: %s\n", user, msg);
-}
 
 void chat_log_init(void)
 {
@@ -41,8 +36,14 @@ void chat_log_init(void)
     g_string_append(log_file, "/.profanity/log");
     create_dir(log_file->str);
     g_string_append(log_file, "/chat.log");
-    logp = fopen(log_file->str, "a");
+    chatlog = fopen(log_file->str, "a");
     g_string_free(log_file, TRUE);
+}
+
+void chat_log_chat(const char * const user, const char * const msg)
+{
+    fprintf(chatlog, "%s: %s\n", user, msg);
+    fflush(chatlog);
 }
 
 void chat_log_close(void)
