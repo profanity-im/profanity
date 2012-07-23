@@ -31,7 +31,7 @@
 static GHashTable *logs;
 static GTimeZone *tz;
 
-//static void _close_file(gpointer key, gpointer value, gpointer user_data);
+static void _close_file(gpointer key, gpointer value, gpointer user_data);
 
 void chat_log_init(void)
 {
@@ -42,7 +42,7 @@ void chat_log_init(void)
 void chat_log_chat(const char * const login, char *other, 
     const char * const msg, chat_log_direction_t direction)
 {
-    gpointer *logpp = g_hash_table_lookup(logs, other);
+    gpointer logpp = g_hash_table_lookup(logs, other);
     FILE *logp;
     
     if (logpp == NULL) {
@@ -58,9 +58,9 @@ void chat_log_chat(const char * const login, char *other,
         logp = fopen(log_file->str, "a");
     
         g_string_free(log_file, TRUE);
-        g_hash_table_insert(logs, other, &logp);
+        g_hash_table_insert(logs, other, logp);
     } else {
-        logp = *logpp;
+        logp = (FILE *) logpp;
     }
 
     GDateTime *dt = g_date_time_new_now(tz);
@@ -78,11 +78,11 @@ void chat_log_chat(const char * const login, char *other,
 
 void chat_log_close(void)
 {
-//    g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
+    g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
     g_time_zone_unref(tz);
 }
 
-//static void _close_file(gpointer key, gpointer value, gpointer user_data)
-//{
-//    fclose(value);
-//}
+static void _close_file(gpointer key, gpointer value, gpointer user_data)
+{
+    fclose(value);
+}
