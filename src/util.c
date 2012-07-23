@@ -37,7 +37,8 @@ void get_time(char *thetime)
 }
 
 char * str_replace (const char *string, const char *substr, 
-    const char *replacement) {
+    const char *replacement) 
+{
     char *tok = NULL;
     char *newstr = NULL;
     char *oldstr = NULL;

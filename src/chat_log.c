@@ -27,6 +27,7 @@
 
 #include "chat_log.h"
 #include "common.h"
+#include "util.h"
 
 static GHashTable *logs;
 static GTimeZone *tz;
@@ -51,11 +52,15 @@ void chat_log_chat(const char * const login, char *other,
         g_string_append(log_file, "/.profanity/log");
         create_dir(log_file->str);
     
-        g_string_append_printf(log_file, "/%s", login);
+        char *login_dir = str_replace(login, "@", "_at_");
+        g_string_append_printf(log_file, "/%s", login_dir);
         create_dir(log_file->str);
+        free(login_dir);
 
-        g_string_append_printf(log_file, "/%s.log", other);
+        char *other_file = str_replace(other, "@", "_at_");
+        g_string_append_printf(log_file, "/%s.log", other_file);
         logp = fopen(log_file->str, "a");
+        free(other_file);
     
         g_string_free(log_file, TRUE);
         g_hash_table_insert(logs, other, logp);
