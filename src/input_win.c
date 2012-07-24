@@ -57,7 +57,8 @@ static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
 static void _replace_input(char *input, const char * const new_input, int *size);
 
-void create_input_window(void)
+void
+create_input_window(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -69,7 +70,8 @@ void create_input_window(void)
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
-void inp_win_resize(const char * const input, const int size)
+void
+inp_win_resize(const char * const input, const int size)
 {
     int rows, cols, inp_x, inp_y;
     getmaxyx(stdscr, rows, cols);
@@ -86,7 +88,8 @@ void inp_win_resize(const char * const input, const int size)
     prefresh(inp_win, pad_start, 0, rows-1, 0, rows-1, cols-1);
 }
 
-void inp_clear(void)
+void
+inp_clear(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -96,17 +99,20 @@ void inp_clear(void)
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
-void inp_non_block(void)
+void
+inp_non_block(void)
 {
     wtimeout(inp_win, 500);
 }
 
-void inp_block(void)
+void
+inp_block(void)
 {
     wtimeout(inp_win, -1);
 }
 
-void inp_get_char(int *ch, char *input, int *size)
+void
+inp_get_char(int *ch, char *input, int *size)
 {
     int inp_y = 0;
     int inp_x = 0;
@@ -155,7 +161,8 @@ void inp_get_char(int *ch, char *input, int *size)
     echo();
 }
 
-void inp_get_password(char *passwd)
+void
+inp_get_password(char *passwd)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -169,7 +176,8 @@ void inp_get_password(char *passwd)
     status_bar_clear();
 }
 
-void inp_put_back(void)
+void
+inp_put_back(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -181,7 +189,8 @@ void inp_put_back(void)
  * key press: up, down, left, right or backspace
  * return 0 if it wasnt
  */
-static int _handle_edit(const int ch, char *input, int *size)
+static int
+_handle_edit(const int ch, char *input, int *size)
 {
     int i, rows, cols;
     char *prev = NULL;
@@ -356,7 +365,8 @@ static int _handle_edit(const int ch, char *input, int *size)
     }
 }
 
-static int _printable(const int ch)
+static int
+_printable(const int ch)
 {
    return (ch != ERR && ch != '\n' && 
             ch != KEY_PPAGE && ch != KEY_NPAGE &&
@@ -367,7 +377,8 @@ static int _printable(const int ch)
             ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE);
 }
 
-static void _replace_input(char *input, const char * const new_input, int *size)
+static void
+_replace_input(char *input, const char * const new_input, int *size)
 {
     int i;
 

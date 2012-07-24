@@ -53,7 +53,8 @@ static void _create_session(PHistory history);
 static void _session_previous(PHistory history);
 static void _session_next(PHistory history);
 
-PHistory p_history_new(unsigned int size)
+PHistory
+p_history_new(unsigned int size)
 {
     PHistory new_history = malloc(sizeof(struct p_history_t));
     new_history->items = NULL;
@@ -64,7 +65,8 @@ PHistory p_history_new(unsigned int size)
     return new_history;
 }
 
-void p_history_append(PHistory history, char *item)
+void
+p_history_append(PHistory history, char *item)
 {
     char *copied = "";
     if (item != NULL) {
@@ -105,7 +107,8 @@ void p_history_append(PHistory history, char *item)
     }
 }
 
-char * p_history_previous(PHistory history, char *item)
+char *
+p_history_previous(PHistory history, char *item)
 {
     // no history
     if (history->items == NULL) {
@@ -135,7 +138,8 @@ char * p_history_previous(PHistory history, char *item)
     return result;
 }
 
-char * p_history_next(PHistory history, char *item)
+char *
+p_history_next(PHistory history, char *item)
 {
     // no history, or no session, return NULL
     if ((history->items == NULL) || (history->session.items == NULL)) {
@@ -154,7 +158,8 @@ char * p_history_next(PHistory history, char *item)
     return result;
 }
 
-static void _replace_history_with_session(PHistory history)
+static void
+_replace_history_with_session(PHistory history)
 {
     g_list_free(history->items);
     history->items = g_list_copy(history->session.items);
@@ -166,13 +171,15 @@ static void _replace_history_with_session(PHistory history)
     _reset_session(history);
 }
 
-static gboolean _adding_new(PHistory history)
+static gboolean
+_adding_new(PHistory history)
 {
     return (history->session.sess_curr == 
         g_list_last(history->session.items));
 }
 
-static void _reset_session(PHistory history)
+static void
+_reset_session(PHistory history)
 {
     history->session.items = NULL;
     history->session.sess_curr = NULL;
@@ -180,29 +187,34 @@ static void _reset_session(PHistory history)
     history->session.orig_curr = NULL;
 }
 
-static gboolean _has_session(PHistory history)
+static gboolean
+_has_session(PHistory history)
 {
     return (history->session.items != NULL);
 }
 
-static void _remove_first(PHistory history)
+static void
+_remove_first(PHistory history)
 {
     GList *first = g_list_first(history->items);
     char *first_item = first->data;
     history->items = g_list_remove(history->items, first_item);
 }
 
-static void _update_current_session_item(PHistory history, char *item)
+static void
+_update_current_session_item(PHistory history, char *item)
 {
     history->session.sess_curr->data = item;
 }
 
-static void _add_to_history(PHistory history, char *item)
+static void
+_add_to_history(PHistory history, char *item)
 {
     history->items = g_list_append(history->items, item);
 }
 
-static void _remove_last_session_item(PHistory history)
+static void
+_remove_last_session_item(PHistory history)
 {
     history->session.items = g_list_reverse(history->session.items);
     GList *first = g_list_first(history->session.items);
@@ -211,19 +223,22 @@ static void _remove_last_session_item(PHistory history)
     history->session.items = g_list_reverse(history->session.items);
 }
 
-static void _replace_current_with_original(PHistory history)
+static void
+_replace_current_with_original(PHistory history)
 {
     history->session.sess_curr->data = strdup(history->session.orig_curr->data);
 }
 
-static void _create_session(PHistory history)
+static void
+_create_session(PHistory history)
 {
     history->session.items = g_list_copy(history->items);
     history->session.sess_curr = g_list_last(history->session.items);
     history->session.orig_curr = g_list_last(history->items);
 }
 
-static void _session_previous(PHistory history)
+static void
+_session_previous(PHistory history)
 {
     history->session.sess_curr = 
         g_list_previous(history->session.sess_curr);
@@ -239,7 +254,8 @@ static void _session_previous(PHistory history)
     }
 }
 
-static void _session_next(PHistory history)
+static void
+_session_next(PHistory history)
 {
     history->session.sess_curr = g_list_next(history->session.sess_curr);
     history->session.orig_curr = g_list_next(history->session.orig_curr);

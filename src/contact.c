@@ -33,7 +33,8 @@ struct p_contact_t {
     char *status;
 };
 
-PContact p_contact_new(const char * const name, const char * const show, 
+PContact
+p_contact_new(const char * const name, const char * const show, 
     const char * const status)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
@@ -52,7 +53,8 @@ PContact p_contact_new(const char * const name, const char * const show,
     return contact;
 }
 
-PContact p_contact_copy(PContact contact)
+PContact
+p_contact_copy(PContact contact)
 {
     PContact copy = malloc(sizeof(struct p_contact_t));
     copy->name = strdup(contact->name);
@@ -66,7 +68,8 @@ PContact p_contact_copy(PContact contact)
     return copy;
 }
 
-void p_contact_free(PContact contact)
+void
+p_contact_free(PContact contact)
 {
     free(contact->name);
 
@@ -83,22 +86,26 @@ void p_contact_free(PContact contact)
     contact = NULL;
 }
 
-const char * p_contact_name(const PContact contact)
+const char *
+p_contact_name(const PContact contact)
 {
     return contact->name;
 }
 
-const char * p_contact_show(const PContact contact)
+const char *
+p_contact_show(const PContact contact)
 {
     return contact->show;
 }
 
-const char * p_contact_status(const PContact contact)
+const char *
+p_contact_status(const PContact contact)
 {
     return contact->status;
 }
 
-int p_contacts_equal_deep(const PContact c1, const PContact c2)
+int
+p_contacts_equal_deep(const PContact c1, const PContact c2)
 {
     int name_eq = (g_strcmp0(c1->name, c2->name) == 0);
     int show_eq = (g_strcmp0(c1->show, c2->show) == 0);

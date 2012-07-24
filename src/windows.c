@@ -76,7 +76,8 @@ static void _win_resize_all(void);
 static void _win_notify(char * short_from);
 #endif
 
-void gui_init(void)
+void
+gui_init(void)
 {
     initscr();
     cbreak();
@@ -106,7 +107,8 @@ void gui_init(void)
     dirty = TRUE;
 }
 
-void gui_refresh(void)
+void
+gui_refresh(void)
 {
     title_bar_refresh();
     status_bar_refresh();
@@ -119,12 +121,14 @@ void gui_refresh(void)
     inp_put_back();
 }
 
-void gui_close(void)
+void
+gui_close(void)
 {
     endwin();
 }
 
-void gui_resize(const int ch, const char * const input, const int size)
+void
+gui_resize(const int ch, const char * const input, const int size)
 {
     title_bar_resize();
     status_bar_resize();
@@ -133,7 +137,8 @@ void gui_resize(const int ch, const char * const input, const int size)
     dirty = TRUE;
 }
 
-int win_close_win(void)
+int
+win_close_win(void)
 {
     if (win_in_chat()) {
         // reset the chat win to unused
@@ -157,13 +162,15 @@ int win_close_win(void)
     }
 }
 
-int win_in_chat(void)
+int
+win_in_chat(void)
 {
     return ((_curr_prof_win != 0) && 
         (strcmp(_wins[_curr_prof_win].from, "") != 0));
 }
 
-char *win_get_recipient(void)
+char *
+win_get_recipient(void)
 {
     struct prof_win current = _wins[_curr_prof_win];
     char *recipient = (char *) malloc(sizeof(char) * (strlen(current.from) + 1));
@@ -171,7 +178,8 @@ char *win_get_recipient(void)
     return recipient;
 }
 
-void win_show_incomming_msg(const char * const from, const char * const message) 
+void
+win_show_incomming_msg(const char * const from, const char * const message) 
 {
     char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
@@ -206,7 +214,8 @@ void win_show_incomming_msg(const char * const from, const char * const message)
 }
 
 #ifdef HAVE_LIBNOTIFY_NOTIFY_H
-static void _win_notify(char * short_from)
+static void
+_win_notify(char * short_from)
 {
     notify_init("Profanity");
     
@@ -229,7 +238,8 @@ static void _win_notify(char * short_from)
 }
 #endif
 
-void win_show_outgoing_msg(const char * const from, const char * const to, 
+void
+win_show_outgoing_msg(const char * const from, const char * const to, 
     const char * const message)
 {
     int win_index = _find_prof_win_index(to);
@@ -250,7 +260,8 @@ void win_show_outgoing_msg(const char * const from, const char * const to,
     }
 }
 
-void win_contact_online(const char * const from, const char * const show, 
+void
+win_contact_online(const char * const from, const char * const show, 
     const char * const status)
 {
     _show_status_string(_cons_win, from, show, status, "++", "online");
@@ -265,7 +276,8 @@ void win_contact_online(const char * const from, const char * const show,
         dirty = TRUE;
 }
 
-void win_contact_offline(const char * const from, const char * const show, 
+void
+win_contact_offline(const char * const from, const char * const show, 
     const char * const status)
 {
     _show_status_string(_cons_win, from, show, status, "--", "offline");
@@ -280,7 +292,8 @@ void win_contact_offline(const char * const from, const char * const show,
         dirty = TRUE;
 }
 
-void win_disconnected(void)
+void
+win_disconnected(void)
 {
     int i;
     // show message in all active chats
@@ -300,7 +313,8 @@ void win_disconnected(void)
     }
 }
 
-void cons_prefs(void)
+void
+cons_prefs(void)
 {
     cons_show("");
     cons_show("Current preferences:");
@@ -337,7 +351,8 @@ void cons_prefs(void)
         dirty = TRUE;
 }
 
-void cons_help(void)
+void
+cons_help(void)
 {
     cons_show("");
     cons_show("Basic Commands:");
@@ -381,7 +396,8 @@ void cons_help(void)
         dirty = TRUE;
 }
 
-void cons_show_online_contacts(GSList *list)
+void
+cons_show_online_contacts(GSList *list)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Online contacts:\n");
@@ -404,7 +420,8 @@ void cons_show_online_contacts(GSList *list)
     }
 }
 
-void cons_bad_show(const char * const msg)
+void
+cons_bad_show(const char * const msg)
 {
     _win_show_time(_cons_win);
     wattron(_cons_win, COLOR_PAIR(6));
@@ -415,7 +432,8 @@ void cons_bad_show(const char * const msg)
         dirty = TRUE;
 }
 
-void cons_show(const char * const msg)
+void
+cons_show(const char * const msg)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "%s\n", msg); 
@@ -424,7 +442,8 @@ void cons_show(const char * const msg)
         dirty = TRUE;
 }
 
-void cons_bad_command(const char * const cmd)
+void
+cons_bad_command(const char * const cmd)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Unknown command: %s\n", cmd);
@@ -433,13 +452,15 @@ void cons_bad_command(const char * const cmd)
         dirty = TRUE;
 }
 
-void win_handle_special_keys(const int * const ch)
+void
+win_handle_special_keys(const int * const ch)
 {
     _win_handle_switch(ch);
     _win_handle_page(ch);
 }
 
-void win_page_off(void)
+void
+win_page_off(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -457,7 +478,8 @@ void win_page_off(void)
     dirty = TRUE;
 }
 
-static void _create_windows(void)
+static void
+_create_windows(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -515,7 +537,8 @@ static void _create_windows(void)
     }    
 }
 
-static void _print_splash_logo(WINDOW *win)
+static void
+_print_splash_logo(WINDOW *win)
 {
     wprintw(win, "Welcome to\n");
     wattron(win, COLOR_PAIR(5));
@@ -529,7 +552,8 @@ static void _print_splash_logo(WINDOW *win)
     wattroff(win, COLOR_PAIR(5));
 }
 
-static int _find_prof_win_index(const char * const contact)
+static int
+_find_prof_win_index(const char * const contact)
 {
     // find the chat window for recipient
     int i;
@@ -540,7 +564,8 @@ static int _find_prof_win_index(const char * const contact)
     return i;
 }
 
-static int _new_prof_win(const char * const contact)
+static int
+_new_prof_win(const char * const contact)
 {
     int i;
     // find the first unused one
@@ -554,7 +579,9 @@ static int _new_prof_win(const char * const contact)
 
     return i;
 }
-static void _win_switch_if_active(const int i)
+
+static void
+_win_switch_if_active(const int i)
 {
     win_page_off();
     if (strcmp(_wins[i].from, "") != 0) {
@@ -572,14 +599,16 @@ static void _win_switch_if_active(const int i)
     dirty = TRUE;
 }
 
-static void _win_show_time(WINDOW *win)
+static void
+_win_show_time(WINDOW *win)
 {
     char tstmp[80];
     get_time(tstmp);
     wprintw(win, "%s - ", tstmp);
 }
 
-static void _win_show_user(WINDOW *win, const char * const user, const int colour)
+static void
+_win_show_user(WINDOW *win, const char * const user, const int colour)
 {
     if (colour)
         wattron(win, COLOR_PAIR(2));
@@ -588,14 +617,16 @@ static void _win_show_user(WINDOW *win, const char * const user, const int colou
         wattroff(win, COLOR_PAIR(2));
 }
 
-static void _win_show_message(WINDOW *win, const char * const message)
+static void
+_win_show_message(WINDOW *win, const char * const message)
 {
 //    wattroff(win, A_BOLD);
     wprintw(win, "%s\n", message);
 //    wattron(win, A_BOLD);
 }
 
-static void _current_window_refresh(void)
+static void
+_current_window_refresh(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -604,7 +635,8 @@ static void _current_window_refresh(void)
     prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
-void _win_resize_all(void)
+void
+_win_resize_all(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -623,7 +655,8 @@ void _win_resize_all(void)
     prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
-static void _show_status_string(WINDOW *win, const char * const from, 
+static void
+_show_status_string(WINDOW *win, const char * const from, 
     const char * const show, const char * const status, const char * const pre, 
     const char * const default_show)
 {
@@ -656,7 +689,8 @@ static void _show_status_string(WINDOW *win, const char * const from,
 }
 
 
-static void _cons_show_incoming_message(const char * const short_from, const int win_index)
+static void
+_cons_show_incoming_message(const char * const short_from, const int win_index)
 {
     _win_show_time(_cons_win);
     wattron(_cons_win, COLOR_PAIR(7));
@@ -664,7 +698,8 @@ static void _cons_show_incoming_message(const char * const short_from, const int
     wattroff(_cons_win, COLOR_PAIR(7));
 }
 
-static void _win_handle_switch(const int * const ch)
+static void
+_win_handle_switch(const int * const ch)
 {
     if (*ch == KEY_F(1)) {
         _win_switch_if_active(0);
@@ -689,7 +724,8 @@ static void _win_handle_switch(const int * const ch)
     }
 }
 
-static void _win_handle_page(const int * const ch)
+static void
+_win_handle_page(const int * const ch)
 {
     int rows, cols, y, x;
     getmaxyx(stdscr, rows, cols);
@@ -725,4 +761,3 @@ static void _win_handle_page(const int * const ch)
         dirty = TRUE;
     }
 }
-

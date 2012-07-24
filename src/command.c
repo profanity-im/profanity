@@ -88,7 +88,8 @@ static struct cmd_t commands[] = {
 
 static const int num_cmds = 17;
     
-gboolean process_input(char *inp)
+gboolean
+process_input(char *inp)
 {
     gboolean result = FALSE;
 
@@ -115,7 +116,8 @@ gboolean process_input(char *inp)
     return result;
 }
 
-void command_init(void)
+void
+command_init(void)
 {
     commands_ac = p_autocomplete_new();
 
@@ -128,17 +130,20 @@ void command_init(void)
     history_init();
 }
 
-char * cmd_complete(char *inp)
+char *
+cmd_complete(char *inp)
 {
     return p_autocomplete_complete(commands_ac, inp);
 }
 
-void reset_command_completer(void)
+void
+reset_command_completer(void)
 {
     p_autocomplete_reset(commands_ac);
 }
 
-static gboolean _handle_command(const char * const command, const char * const inp)
+static gboolean
+_handle_command(const char * const command, const char * const inp)
 {
     int i;
     for (i = 0; i < num_cmds; i++) {
@@ -151,7 +156,8 @@ static gboolean _handle_command(const char * const command, const char * const i
     return _cmd_default(inp);
 }
 
-static gboolean _cmd_connect(const char * const inp)
+static gboolean
+_cmd_connect(const char * const inp)
 {
     gboolean result = FALSE;
     jabber_conn_status_t conn_status = jabber_connection_status();
@@ -186,26 +192,30 @@ static gboolean _cmd_connect(const char * const inp)
     return result;
 }
 
-static gboolean _cmd_quit(const char * const inp)
+static gboolean
+_cmd_quit(const char * const inp)
 {
     return FALSE;
 }
 
-static gboolean _cmd_help(const char * const inp)
+static gboolean
+_cmd_help(const char * const inp)
 {
     cons_help();
 
     return TRUE;
 }
 
-static gboolean _cmd_prefs(const char * const inp)
+static gboolean
+_cmd_prefs(const char * const inp)
 {
     cons_prefs();
 
     return TRUE;
 }
 
-static gboolean _cmd_ros(const char * const inp)
+static gboolean
+_cmd_ros(const char * const inp)
 {
     jabber_conn_status_t conn_status = jabber_connection_status();
 
@@ -217,7 +227,8 @@ static gboolean _cmd_ros(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_who(const char * const inp)
+static gboolean
+_cmd_who(const char * const inp)
 {
     jabber_conn_status_t conn_status = jabber_connection_status();
 
@@ -231,7 +242,8 @@ static gboolean _cmd_who(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_msg(const char * const inp)
+static gboolean
+_cmd_msg(const char * const inp)
 {
     char *usr = NULL;
     char *msg = NULL;
@@ -265,7 +277,8 @@ static gboolean _cmd_msg(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_close(const char * const inp)
+static gboolean
+_cmd_close(const char * const inp)
 {
     if (!win_close_win())
         cons_bad_command(inp);
@@ -273,7 +286,8 @@ static gboolean _cmd_close(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_set_beep(const char * const inp)
+static gboolean
+_cmd_set_beep(const char * const inp)
 {
     if (strcmp(inp, "/beep on") == 0) {
         cons_show("Sound enabled.");
@@ -288,7 +302,8 @@ static gboolean _cmd_set_beep(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_set_notify(const char * const inp)
+static gboolean
+_cmd_set_notify(const char * const inp)
 {
     if (strcmp(inp, "/notify on") == 0) {
         cons_show("Desktop notifications enabled.");
@@ -303,7 +318,8 @@ static gboolean _cmd_set_notify(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_set_flash(const char * const inp)
+static gboolean
+_cmd_set_flash(const char * const inp)
 {
     if (strcmp(inp, "/flash on") == 0) {
         cons_show("Screen flash enabled.");
@@ -318,7 +334,8 @@ static gboolean _cmd_set_flash(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_set_showsplash(const char * const inp)
+static gboolean
+_cmd_set_showsplash(const char * const inp)
 {
     if (strcmp(inp, "/showsplash on") == 0) {
         cons_show("Splash screen enabled.");
@@ -333,7 +350,8 @@ static gboolean _cmd_set_showsplash(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_set_chlog(const char * const inp)
+static gboolean
+_cmd_set_chlog(const char * const inp)
 {
     if (strcmp(inp, "/chlog on") == 0) {
         cons_show("Chat logging enabled.");
@@ -348,37 +366,43 @@ static gboolean _cmd_set_chlog(const char * const inp)
     return TRUE;
 }
 
-static gboolean _cmd_away(const char * const inp)
+static gboolean
+_cmd_away(const char * const inp)
 {
     _update_presence(PRESENCE_AWAY, "away", inp);
     return TRUE;
 }
 
-static gboolean _cmd_online(const char * const inp)
+static gboolean
+_cmd_online(const char * const inp)
 {
     _update_presence(PRESENCE_ONLINE, "online", inp);
     return TRUE;
 }
 
-static gboolean _cmd_dnd(const char * const inp)
+static gboolean
+_cmd_dnd(const char * const inp)
 {
     _update_presence(PRESENCE_DND, "dnd", inp);
     return TRUE;
 }
 
-static gboolean _cmd_chat(const char * const inp)
+static gboolean
+_cmd_chat(const char * const inp)
 {
     _update_presence(PRESENCE_CHAT, "chat", inp);
     return TRUE;
 }
 
-static gboolean _cmd_xa(const char * const inp)
+static gboolean
+_cmd_xa(const char * const inp)
 {
     _update_presence(PRESENCE_XA, "xa", inp);
     return TRUE;
 }
 
-static gboolean _cmd_default(const char * const inp)
+static gboolean
+_cmd_default(const char * const inp)
 {
     if (win_in_chat()) {
         char *recipient = win_get_recipient();
@@ -392,7 +416,8 @@ static gboolean _cmd_default(const char * const inp)
     return TRUE;
 }
 
-static void _update_presence(const jabber_presence_t presence, 
+static void
+_update_presence(const jabber_presence_t presence, 
     const char * const show, const char * const inp)
 {
     char *msg;

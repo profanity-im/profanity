@@ -34,13 +34,15 @@ static GTimeZone *tz;
 
 static void _close_file(gpointer key, gpointer value, gpointer user_data);
 
-void chat_log_init(void)
+void
+chat_log_init(void)
 {
     tz = g_time_zone_new_local();
     logs = g_hash_table_new(NULL, (GEqualFunc) g_strcmp0);
 }
 
-void chat_log_chat(const char * const login, char *other, 
+void
+chat_log_chat(const char * const login, char *other, 
     const char * const msg, chat_log_direction_t direction)
 {
     gpointer logpp = g_hash_table_lookup(logs, other);
@@ -81,13 +83,15 @@ void chat_log_chat(const char * const login, char *other,
     g_date_time_unref(dt);
 }
 
-void chat_log_close(void)
+void
+chat_log_close(void)
 {
     g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
     g_time_zone_unref(tz);
 }
 
-static void _close_file(gpointer key, gpointer value, gpointer user_data)
+static void
+_close_file(gpointer key, gpointer value, gpointer user_data)
 {
     fclose(value);
 }

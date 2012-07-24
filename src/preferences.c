@@ -73,7 +73,8 @@ static void _set_colour(gchar *val, NCURSES_COLOR_T *pref,
 static void _load_colours(void);
 static void _save_prefs(void);
 
-void prefs_load(void)
+void
+prefs_load(void)
 {
     ac = p_autocomplete_new();
     prefs_loc = g_string_new(getenv("HOME"));
@@ -95,7 +96,8 @@ void prefs_load(void)
     _load_colours();
 }
 
-static NCURSES_COLOR_T _lookup_colour(const char * const colour)
+static NCURSES_COLOR_T
+_lookup_colour(const char * const colour)
 {
     int i;
     for (i = 0; i < num_colours; i++) {
@@ -107,7 +109,8 @@ static NCURSES_COLOR_T _lookup_colour(const char * const colour)
     return -99;
 }
 
-static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, 
+static void
+_set_colour(gchar *val, NCURSES_COLOR_T *pref, 
     NCURSES_COLOR_T def)
 {
     if(!val) {
@@ -122,7 +125,8 @@ static void _set_colour(gchar *val, NCURSES_COLOR_T *pref,
     }
 }
 
-static void _load_colours(void)
+static void
+_load_colours(void)
 {
     gchar *bkgnd_val = g_key_file_get_string(prefs, "colours", "bkgnd", NULL);
     _set_colour(bkgnd_val, &colour_prefs.bkgnd, -1);
@@ -152,61 +156,72 @@ static void _load_colours(void)
     _set_colour(bar_text_val, &colour_prefs.bar_text, COLOR_WHITE);
 }
 
-char * find_login(char *prefix)
+char *
+find_login(char *prefix)
 {
     return p_autocomplete_complete(ac, prefix);
 }
 
-void reset_login_search(void)
+void
+reset_login_search(void)
 {
     p_autocomplete_reset(ac);
 }
 
-gboolean prefs_get_beep(void)
+gboolean
+prefs_get_beep(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "beep", NULL);
 }
 
-void prefs_set_beep(gboolean value)
+void
+prefs_set_beep(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "beep", value);
     _save_prefs();
 }
 
-gboolean prefs_get_notify(void)
+gboolean
+prefs_get_notify(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "notify", NULL);
 }
 
-void prefs_set_notify(gboolean value)
+void
+prefs_set_notify(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "notify", value);
     _save_prefs();
 }
 
-gboolean prefs_get_flash(void)
+gboolean
+prefs_get_flash(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "flash", NULL);
 }
 
-void prefs_set_flash(gboolean value)
+void
+prefs_set_flash(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "flash", value);
     _save_prefs();
 }
 
-gboolean prefs_get_chlog(void)
+gboolean
+prefs_get_chlog(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "chlog", NULL);
 }
 
-void prefs_set_chlog(gboolean value)
+void
+prefs_set_chlog(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "chlog", value);
     _save_prefs();
 }
 
-void prefs_add_login(const char *jid)
+void
+prefs_add_login(const char *jid)
 {
     gsize njids;
     gchar **jids = 
@@ -247,65 +262,77 @@ void prefs_add_login(const char *jid)
     }
 }
 
-gboolean prefs_get_showsplash(void)
+gboolean
+prefs_get_showsplash(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "showsplash", NULL);
 }
 
-void prefs_set_showsplash(gboolean value)
+void
+prefs_set_showsplash(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "showsplash", value);
     _save_prefs();
 }
 
-static void _save_prefs(void)
+static void
+_save_prefs(void)
 {
     gsize g_data_size;
     char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
     g_file_set_contents(prefs_loc->str, g_prefs_data, g_data_size, NULL);
 }
 
-NCURSES_COLOR_T prefs_get_bkgnd() 
+NCURSES_COLOR_T
+prefs_get_bkgnd() 
 {
     return colour_prefs.bkgnd;
 }
 
-NCURSES_COLOR_T prefs_get_text() 
+NCURSES_COLOR_T
+prefs_get_text() 
 {
     return colour_prefs.text;
 }
 
-NCURSES_COLOR_T prefs_get_online() 
+NCURSES_COLOR_T
+prefs_get_online() 
 {
     return colour_prefs.online;
 }
 
-NCURSES_COLOR_T prefs_get_offline() 
+NCURSES_COLOR_T
+prefs_get_offline() 
 {
     return colour_prefs.offline;
 }
 
-NCURSES_COLOR_T prefs_get_err() 
+NCURSES_COLOR_T
+prefs_get_err() 
 {
     return colour_prefs.err;
 }
 
-NCURSES_COLOR_T prefs_get_inc() 
+NCURSES_COLOR_T
+prefs_get_inc() 
 {
     return colour_prefs.inc;
 }
 
-NCURSES_COLOR_T prefs_get_bar() 
+NCURSES_COLOR_T
+prefs_get_bar() 
 {
     return colour_prefs.bar;
 }
 
-NCURSES_COLOR_T prefs_get_bar_draw() 
+NCURSES_COLOR_T
+prefs_get_bar_draw() 
 {
     return colour_prefs.bar_draw;
 }
 
-NCURSES_COLOR_T prefs_get_bar_text() 
+NCURSES_COLOR_T
+prefs_get_bar_text() 
 {
     return colour_prefs.bar_text;
 }

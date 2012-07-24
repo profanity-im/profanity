@@ -25,7 +25,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-void get_time(char *thetime)
+void
+get_time(char *thetime)
 {
     time_t rawtime;
     struct tm *timeinfo;
@@ -36,7 +37,8 @@ void get_time(char *thetime)
     strftime(thetime, 80, "%H:%M", timeinfo);
 }
 
-char * str_replace (const char *string, const char *substr, 
+char *
+str_replace (const char *string, const char *substr, 
     const char *replacement) 
 {
     char *tok = NULL;
@@ -80,7 +82,8 @@ char * str_replace (const char *string, const char *substr,
     return newstr;
 }
 
-int str_contains(char str[], int size, char ch)
+int
+str_contains(char str[], int size, char ch)
 {
     int i;
     for (i = 0; i < size; i++) {

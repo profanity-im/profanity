@@ -32,7 +32,8 @@
 
 static PAutocomplete ac;
 
-void contact_list_init(void)
+void
+contact_list_init(void)
 {
     ac = p_obj_autocomplete_new((PStrFunc)p_contact_name, 
                             (PCopyFunc)p_contact_copy,
@@ -40,33 +41,39 @@ void contact_list_init(void)
                             (GDestroyNotify)p_contact_free);
 }
 
-void contact_list_clear(void)
+void
+contact_list_clear(void)
 {
     p_autocomplete_clear(ac);
 }
 
-void reset_search_attempts(void)
+void
+reset_search_attempts(void)
 {
     p_autocomplete_reset(ac);
 }
 
-gboolean contact_list_remove(const char * const name)
+gboolean
+contact_list_remove(const char * const name)
 {
     return p_autocomplete_remove(ac, name);
 }
 
-gboolean contact_list_add(const char * const name, const char * const show, 
+gboolean
+contact_list_add(const char * const name, const char * const show, 
     const char * const status)
 {
     return p_autocomplete_add(ac, p_contact_new(name, show, status));
 }
 
-GSList * get_contact_list(void)
+GSList *
+get_contact_list(void)
 {
     return p_autocomplete_get_list(ac);
 }
 
-char * find_contact(char *search_str)
+char *
+find_contact(char *search_str)
 {
     return p_autocomplete_complete(ac, search_str);
 }

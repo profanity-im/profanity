@@ -52,12 +52,14 @@ void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
 
 static const xmpp_log_t file_log = { &xmpp_file_logger, XMPP_LEVEL_DEBUG };
 
-xmpp_log_t *xmpp_get_file_logger()
+xmpp_log_t *
+xmpp_get_file_logger()
 {
     return (xmpp_log_t*) &file_log;
 }
 
-void xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
+void
+xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg)
 {
     log_msg(area, msg);
@@ -79,19 +81,22 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
 
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
-void jabber_init(const int disable_tls)
+void
+jabber_init(const int disable_tls)
 {
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence = PRESENCE_OFFLINE;
     jabber_conn.tls_disabled = disable_tls;
 }
 
-jabber_conn_status_t jabber_connection_status(void)
+jabber_conn_status_t
+jabber_connection_status(void)
 {
     return (jabber_conn.conn_status);
 }
 
-jabber_conn_status_t jabber_connect(const char * const user, 
+jabber_conn_status_t
+jabber_connect(const char * const user, 
     const char * const passwd)
 {
     xmpp_initialize();
@@ -117,12 +122,14 @@ jabber_conn_status_t jabber_connect(const char * const user,
     return jabber_conn.conn_status;
 }
 
-const char * jabber_get_jid(void)
+const char *
+jabber_get_jid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-void jabber_disconnect(void)
+void
+jabber_disconnect(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         xmpp_conn_release(jabber_conn.conn);
@@ -133,14 +140,16 @@ void jabber_disconnect(void)
     }
 }
 
-void jabber_process_events(void)
+void
+jabber_process_events(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED 
             || jabber_conn.conn_status == JABBER_CONNECTING)
         xmpp_run_once(jabber_conn.ctx, 10);
 }
 
-void jabber_send(const char * const msg, const char * const recipient)
+void
+jabber_send(const char * const msg, const char * const recipient)
 {
     char *coded_msg = str_replace(msg, "&", "&amp;");
     char *coded_msg2 = str_replace(coded_msg, "<", "&lt;");
@@ -173,7 +182,8 @@ void jabber_send(const char * const msg, const char * const recipient)
     }
 }
 
-void jabber_roster_request(void)
+void
+jabber_roster_request(void)
 {
     xmpp_stanza_t *iq, *query;
 
@@ -192,7 +202,8 @@ void jabber_roster_request(void)
     xmpp_stanza_release(iq);
 }
 
-void jabber_update_presence(jabber_presence_t status, const char * const msg)
+void
+jabber_update_presence(jabber_presence_t status, const char * const msg)
 {
     jabber_conn.presence = status;
 
@@ -240,7 +251,8 @@ void jabber_update_presence(jabber_presence_t status, const char * const msg)
     xmpp_stanza_release(pres);
 }
 
-static int _jabber_message_handler(xmpp_conn_t * const conn, 
+static int
+_jabber_message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
@@ -268,7 +280,8 @@ static int _jabber_message_handler(xmpp_conn_t * const conn,
     return 1;
 }
 
-static void _jabber_conn_handler(xmpp_conn_t * const conn, 
+static void
+_jabber_conn_handler(xmpp_conn_t * const conn, 
     const xmpp_conn_event_t status, const int error, 
     xmpp_stream_error_t * const stream_error, void * const userdata)
 {
@@ -317,7 +330,8 @@ static void _jabber_conn_handler(xmpp_conn_t * const conn,
     }
 }
 
-static int _roster_handler(xmpp_conn_t * const conn, 
+static int
+_roster_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *query, *item;
@@ -356,7 +370,8 @@ static int _roster_handler(xmpp_conn_t * const conn,
     return 1;
 }
 
-static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
+static int
+_ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
@@ -383,7 +398,8 @@ static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
     return 1;
 }
 
-static int _jabber_presence_handler(xmpp_conn_t * const conn, 
+static int
+_jabber_presence_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
@@ -427,5 +443,3 @@ static int _jabber_presence_handler(xmpp_conn_t * const conn,
 
     return 1;
 }
-
-

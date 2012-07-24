@@ -35,7 +35,8 @@ static jabber_presence_t current_status;
 static void _title_bar_draw_title(void);
 static void _title_bar_draw_status(void);
 
-void create_title_bar(void)
+void
+create_title_bar(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -47,13 +48,15 @@ void create_title_bar(void)
     dirty = TRUE;
 }
 
-void title_bar_title(void)
+void
+title_bar_title(void)
 {
     title_bar_show("Profanity. Type /help for help information.");
     dirty = TRUE;
 }
 
-void title_bar_resize(void)
+void
+title_bar_resize(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -66,7 +69,8 @@ void title_bar_resize(void)
     dirty = TRUE;
 }
 
-void title_bar_refresh(void)
+void
+title_bar_refresh(void)
 {
     if (dirty) {
         wrefresh(title_bar);
@@ -75,7 +79,8 @@ void title_bar_refresh(void)
     }
 }
 
-void title_bar_show(const char * const title)
+void
+title_bar_show(const char * const title)
 {
     if (current_title != NULL)
         free(current_title);
@@ -85,13 +90,15 @@ void title_bar_show(const char * const title)
     _title_bar_draw_title();
 }
 
-void title_bar_set_status(jabber_presence_t status)
+void
+title_bar_set_status(jabber_presence_t status)
 {
     current_status = status;
     _title_bar_draw_status();
 }
 
-static void _title_bar_draw_status()
+static void
+_title_bar_draw_status()
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -121,7 +128,8 @@ static void _title_bar_draw_status()
     dirty = TRUE;
 }
 
-static void _title_bar_draw_title(void)
+static void
+_title_bar_draw_title(void)
 {
     wmove(title_bar, 0, 0);
     int i;
@@ -131,4 +139,3 @@ static void _title_bar_draw_title(void)
     
     dirty = TRUE;
 }
-

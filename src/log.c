@@ -30,12 +30,14 @@
 
 extern FILE *logp;
 
-void log_msg(const char * const area, const char * const msg)
+void
+log_msg(const char * const area, const char * const msg)
 {
     fprintf(logp, "%s DEBUG: %s\n", area, msg);
 }
 
-void log_init(void)
+void
+log_init(void)
 {
     GString *log_file = g_string_new(getenv("HOME"));
     g_string_append(log_file, "/.profanity/log");
@@ -46,7 +48,8 @@ void log_init(void)
     log_msg(PROF, "Starting Profanity...");
 }
 
-void log_close(void)
+void
+log_close(void)
 {
     fclose(logp);
 }

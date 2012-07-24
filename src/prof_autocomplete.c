@@ -43,12 +43,14 @@ static const char *_str_func_default(const char *orig);
 static const char *_copy_func_default(const char *orig);
 static int _deep_equals_func_default(const char *o1, const char *o2);
 
-PAutocomplete p_autocomplete_new(void)
+PAutocomplete
+p_autocomplete_new(void)
 {
     return p_obj_autocomplete_new(NULL, NULL, NULL, NULL);
 }
 
-PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
+PAutocomplete
+p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
     PEqualDeepFunc equal_deep_func, GDestroyNotify free_func)
 {
     PAutocomplete new = malloc(sizeof(struct p_autocomplete_t));
@@ -79,7 +81,8 @@ PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
     return new;
 }
 
-void p_autocomplete_clear(PAutocomplete ac)
+void
+p_autocomplete_clear(PAutocomplete ac)
 {
     g_slist_free_full(ac->items, ac->free_func);
     ac->items = NULL;
@@ -87,7 +90,8 @@ void p_autocomplete_clear(PAutocomplete ac)
     p_autocomplete_reset(ac);
 }
 
-void p_autocomplete_reset(PAutocomplete ac)
+void
+p_autocomplete_reset(PAutocomplete ac)
 {
     ac->last_found = NULL;
     if (ac->search_str != NULL) {
@@ -96,7 +100,8 @@ void p_autocomplete_reset(PAutocomplete ac)
     }
 }
 
-gboolean p_autocomplete_add(PAutocomplete ac, void *item)
+gboolean
+p_autocomplete_add(PAutocomplete ac, void *item)
 {
     if (ac->items == NULL) {
         ac->items = g_slist_append(ac->items, item);
@@ -134,7 +139,8 @@ gboolean p_autocomplete_add(PAutocomplete ac, void *item)
     }
 }
 
-gboolean p_autocomplete_remove(PAutocomplete ac, const char * const item)
+gboolean
+p_autocomplete_remove(PAutocomplete ac, const char * const item)
 {
     // reset last found if it points to the item to be removed
     if (ac->last_found != NULL)
@@ -162,7 +168,8 @@ gboolean p_autocomplete_remove(PAutocomplete ac, const char * const item)
     }
 }
 
-GSList * p_autocomplete_get_list(PAutocomplete ac)
+GSList *
+p_autocomplete_get_list(PAutocomplete ac)
 {
     GSList *copy = NULL;
     GSList *curr = ac->items;
@@ -175,7 +182,8 @@ GSList * p_autocomplete_get_list(PAutocomplete ac)
     return copy;
 }
 
-gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
+gchar *
+p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
 {
     gchar *found = NULL;
 
@@ -210,7 +218,8 @@ gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
     }
 }
 
-static gchar * _search_from(PAutocomplete ac, GSList *curr)
+static gchar *
+_search_from(PAutocomplete ac, GSList *curr)
 {
     while(curr) {
         
@@ -235,17 +244,20 @@ static gchar * _search_from(PAutocomplete ac, GSList *curr)
     return NULL;
 }
 
-static const char *_str_func_default(const char *orig) 
+static const char *
+_str_func_default(const char *orig) 
 {
     return orig;
 }
 
-static const char *_copy_func_default(const char *orig)
+static const char *
+_copy_func_default(const char *orig)
 {
     return strdup(orig);
 }
 
-static int _deep_equals_func_default(const char *o1, const char *o2)
+static int
+_deep_equals_func_default(const char *o1, const char *o2)
 {
     return (strcmp(o1, o2) == 0);
 }

@@ -37,7 +37,8 @@
 
 static void _profanity_shutdown(void);
 
-void profanity_run(void)
+void
+profanity_run(void)
 {
     gboolean cmd_result = TRUE;
 
@@ -66,7 +67,8 @@ void profanity_run(void)
 
 }
 
-void profanity_init(const int disable_tls)
+void
+profanity_init(const int disable_tls)
 {
     create_config_directory();
     log_init();
@@ -79,7 +81,8 @@ void profanity_init(const int disable_tls)
     atexit(_profanity_shutdown);
 }
 
-void _profanity_shutdown(void)
+void
+_profanity_shutdown(void)
 {
     jabber_disconnect();
     gui_close();

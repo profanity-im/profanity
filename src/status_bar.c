@@ -38,7 +38,8 @@ static char curr_time[80];
 
 static void _status_bar_update_time(void);
 
-void create_status_bar(void)
+void
+create_status_bar(void)
 {
     int rows, cols, i;
     getmaxyx(stdscr, rows, cols);
@@ -58,7 +59,8 @@ void create_status_bar(void)
     dirty = TRUE;
 }
 
-void status_bar_refresh(void)
+void
+status_bar_refresh(void)
 {
     char new_time[80];
     get_time(new_time);
@@ -76,7 +78,8 @@ void status_bar_refresh(void)
     }
 }
     
-void status_bar_resize(void)
+void
+status_bar_resize(void)
 {
     int rows, cols, i;
     getmaxyx(stdscr, rows, cols);
@@ -103,7 +106,8 @@ void status_bar_resize(void)
     dirty = TRUE;
 }
 
-void status_bar_inactive(const int win)
+void
+status_bar_inactive(const int win)
 {
     is_active[win-1] = FALSE;
     is_new[win-1] = FALSE;
@@ -120,7 +124,8 @@ void status_bar_inactive(const int win)
     dirty = TRUE;
 }
 
-void status_bar_active(const int win)
+void
+status_bar_active(const int win)
 {
     is_active[win-1] = TRUE;
     is_new[win-1] = FALSE;
@@ -140,7 +145,8 @@ void status_bar_active(const int win)
     dirty = TRUE;
 }
 
-void status_bar_new(const int win)
+void
+status_bar_new(const int win)
 {
     is_active[win-1] = TRUE;
     is_new[win-1] = TRUE;
@@ -162,13 +168,15 @@ void status_bar_new(const int win)
     dirty = TRUE;
 }
 
-void status_bar_get_password(void)
+void
+status_bar_get_password(void)
 {
     status_bar_print_message("Enter password:");
     dirty = TRUE;
 }
 
-void status_bar_print_message(const char * const msg)
+void
+status_bar_print_message(const char * const msg)
 {
     if (message != NULL)
         free(message);
@@ -180,7 +188,8 @@ void status_bar_print_message(const char * const msg)
     dirty = TRUE;
 }
 
-void status_bar_clear(void)
+void
+status_bar_clear(void)
 {
     if (message != NULL) {
         free(message);
@@ -204,7 +213,8 @@ void status_bar_clear(void)
     dirty = TRUE;
 }
 
-static void _status_bar_update_time(void)
+static void
+_status_bar_update_time(void)
 {
     char bar_time[6];
     char tstmp[80];
@@ -221,4 +231,3 @@ static void _status_bar_update_time(void)
 
     dirty = TRUE;
 }
-

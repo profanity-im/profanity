@@ -31,7 +31,8 @@
 static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {   
     static GOptionEntry entries[] = 
     {
