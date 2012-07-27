@@ -34,6 +34,7 @@
 #include "util.h"
 #include "contact.h"
 #include "preferences.h"
+#include "tinyurl.h"
 
 #define CONS_WIN_TITLE "_cons"
 #define PAD_SIZE 200
@@ -517,6 +518,10 @@ _create_windows(void)
         wprintw(_cons_win, "\n");
         _win_show_time(_cons_win);
         wprintw(_cons_win, "Type '/help' to get started.\n");
+
+        tinyurl_init();
+        char *url = tinyurl_get("http://www.london2012.com/schedule-and-results/");
+        cons_show(url);
     }
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
