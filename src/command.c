@@ -76,7 +76,6 @@ static struct cmd_t commands[] = {
     { "/connect", _cmd_connect },
     { "/dnd", _cmd_dnd },
     { "/flash", _cmd_set_flash },
-    { "/help", _cmd_help },
     { "/prefs", _cmd_prefs },
     { "/msg", _cmd_msg },
     { "/tiny", _cmd_tiny },
@@ -87,9 +86,10 @@ static struct cmd_t commands[] = {
     { "/chlog", _cmd_set_chlog },
     { "/who", _cmd_who },
     { "/xa", _cmd_xa },
+    { "/help", _cmd_help }
 };
 
-static const int num_cmds = 17;
+static const int num_cmds = 19;
     
 gboolean
 process_input(char *inp)
