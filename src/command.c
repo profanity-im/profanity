@@ -33,6 +33,7 @@
 #include "util.h"
 #include "preferences.h"
 #include "prof_autocomplete.h"
+#include "tinyurl.h"
 
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
@@ -43,6 +44,7 @@ static gboolean _cmd_who(const char * const inp);
 static gboolean _cmd_ros(const char * const inp);
 static gboolean _cmd_connect(const char * const inp);
 static gboolean _cmd_msg(const char * const inp);
+static gboolean _cmd_tiny(const char * const inp);
 static gboolean _cmd_close(const char * const inp);
 static gboolean _cmd_set_beep(const char * const inp);
 static gboolean _cmd_set_notify(const char * const inp);
@@ -77,6 +79,7 @@ static struct cmd_t commands[] = {
     { "/help", _cmd_help },
     { "/prefs", _cmd_prefs },
     { "/msg", _cmd_msg },
+    { "/tiny", _cmd_tiny },
     { "/online", _cmd_online },
     { "/quit", _cmd_quit },
     { "/ros", _cmd_ros },
@@ -271,6 +274,42 @@ _cmd_msg(const char * const inp)
             }
         } else {
             cons_show("Usage: /msg user@host message");
+        }
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_tiny(const char * const inp)
+{
+    char *usr = NULL;
+    char *msg = NULL;
+
+    jabber_conn_status_t conn_status = jabber_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        // copy input    
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
+
+        // get user
+        strtok(inp_cpy, " ");
+        usr = strtok(NULL, " ");
+        if ((usr != NULL) && (strlen(inp) > (6 + strlen(usr) + 1))) {
+            // get message
+            msg = strndup(inp+6+strlen(usr)+1, strlen(inp)-(6+strlen(usr)+1));
+            if (msg != NULL) {
+                char *tinyurl = tinyurl_get(msg);
+                jabber_send(tinyurl, usr);
+                win_show_outgoing_msg("me", usr, tinyurl);
+            } else {
+                cons_show("Usage: /tiny user@host url");
+            }
+        } else {
+            cons_show("Usage: /tiny user@host url");
         }
     }
 

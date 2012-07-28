@@ -362,6 +362,7 @@ cons_help(void)
     cons_show("/prefs                   : Show current UI preferences.");
     cons_show("/connect user@host       : Login to jabber.");
     cons_show("/msg user@host mesg      : Send mesg to user.");
+    cons_show("/tiny user@host url      : Send url as tinyurl");
     cons_show("/close                   : Close a chat window.");
     cons_show("/who                     : Find out who is online.");
     cons_show("/ros                     : List all contacts.");
@@ -518,10 +519,6 @@ _create_windows(void)
         wprintw(_cons_win, "\n");
         _win_show_time(_cons_win);
         wprintw(_cons_win, "Type '/help' to get started.\n");
-
-        tinyurl_init();
-        char *url = tinyurl_get("http://www.london2012.com/schedule-and-results/");
-        cons_show(url);
     }
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
