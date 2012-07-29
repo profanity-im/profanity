@@ -22,7 +22,7 @@ fedora_deps()
 
     ARCH=`arch`
     
-    sudo yum -y install gcc gcc-c++ autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH libxml2-devel.$ARCH glib2-devel.$ARCH libnotify-devel.$ARCH
+    sudo yum -y install gcc gcc-c++ autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH libxml2-devel.$ARCH glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
 }
 
 install_head_unit()
