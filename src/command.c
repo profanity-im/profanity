@@ -283,34 +283,23 @@ _cmd_msg(const char * const inp)
 static gboolean
 _cmd_tiny(const char * const inp)
 {
-    char *usr = NULL;
-    char *msg = NULL;
+    char *url = strndup(inp+6, strlen(inp)-6);
 
-    jabber_conn_status_t conn_status = jabber_connection_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+    if (!tinyurl_valid(url)) {
+        GString *error = g_string_new("/tiny, badly formed URL: ");
+        g_string_append(error, url);
+        cons_bad_show(error->str);
+        g_string_free(error, TRUE);
+    } else if (win_in_chat()) {
+        char *tiny = tinyurl_get(url);
+        char *recipient = win_get_recipient();
+        jabber_send(tiny, recipient);
+        win_show_outgoing_msg("me", recipient, tiny);
+        free(recipient);
+        free(tiny);
+        free(url);
     } else {
-        // copy input    
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
-
-        // get user
-        strtok(inp_cpy, " ");
-        usr = strtok(NULL, " ");
-        if ((usr != NULL) && (strlen(inp) > (6 + strlen(usr) + 1))) {
-            // get message
-            msg = strndup(inp+6+strlen(usr)+1, strlen(inp)-(6+strlen(usr)+1));
-            if (msg != NULL) {
-                char *tinyurl = tinyurl_get(msg);
-                jabber_send(tinyurl, usr);
-                win_show_outgoing_msg("me", usr, tinyurl);
-            } else {
-                cons_show("Usage: /tiny user@host url");
-            }
-        } else {
-            cons_show("Usage: /tiny user@host url");
-        }
+        cons_bad_command(inp);
     }
 
     return TRUE;

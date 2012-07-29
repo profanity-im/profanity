@@ -41,6 +41,13 @@ tinyurl_init(void)
     curl_global_init(CURL_GLOBAL_ALL);
 }
 
+gboolean
+tinyurl_valid(char *url)
+{
+    return (g_str_has_prefix(url, "http://") || 
+        g_str_has_prefix(url, "https://"));
+}
+
 char *
 tinyurl_get(char *url)
 {
