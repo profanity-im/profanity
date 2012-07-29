@@ -290,6 +290,9 @@ _cmd_tiny(const char * const inp)
             GString *error = g_string_new("/tiny, badly formed URL: ");
             g_string_append(error, url);
             cons_bad_show(error->str);
+            if (win_in_chat()) {
+                win_bad_show(error->str);
+            }
             g_string_free(error, TRUE);
             free(url);
         } else if (win_in_chat()) {
@@ -305,7 +308,10 @@ _cmd_tiny(const char * const inp)
             free(url);
         }
     } else {
-        cons_show("usage: /tiny url");
+        cons_show("Usage: /tiny url");
+        if (win_in_chat()) {
+            win_show("Usage: /tiny url");
+        }
     }
 
     return TRUE;

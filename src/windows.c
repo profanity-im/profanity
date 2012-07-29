@@ -262,6 +262,28 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 }
 
 void
+win_show(const char * const msg)
+{
+    WINDOW *win = _wins[_curr_prof_win].win;
+    _win_show_time(win);
+    wprintw(win, "%s\n", msg); 
+
+    dirty = TRUE;
+}
+
+void
+win_bad_show(const char * const msg)
+{
+    WINDOW *win = _wins[_curr_prof_win].win;
+    _win_show_time(win);
+    wattron(win, COLOR_PAIR(6));
+    wprintw(win, "%s\n", msg);
+    wattroff(win, COLOR_PAIR(6));
+    
+    dirty = TRUE;
+}
+
+void
 win_contact_online(const char * const from, const char * const show, 
     const char * const status)
 {
@@ -362,7 +384,7 @@ cons_help(void)
     cons_show("/prefs                   : Show current UI preferences.");
     cons_show("/connect user@host       : Login to jabber.");
     cons_show("/msg user@host mesg      : Send mesg to user.");
-    cons_show("/tiny url                : Send url as tinyurl");
+    cons_show("/tiny url                : Send url as tinyurl in current chat.");
     cons_show("/close                   : Close a chat window.");
     cons_show("/who                     : Find out who is online.");
     cons_show("/ros                     : List all contacts.");
