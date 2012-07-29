@@ -26,6 +26,8 @@ AC_CHECK_LIB([strophe], [main], [],
     [AC_MSG_ERROR([libstrophe is required for profanity])])
 AC_CHECK_LIB([glib-2.0], [main], [], 
     [AC_MSG_ERROR([glib-2.0 is required for profanity])])
+AC_CHECK_LIB([curl], [main], [], 
+    [AC_MSG_ERROR([libcurl is required for profanity])])
 AC_CHECK_LIB([notify], [main], [], 
     [AC_MSG_NOTICE([libnotify not found])])
 AC_CHECK_LIB([headunit], [main], [], 
@@ -34,7 +36,7 @@ AC_CHECK_LIB([headunit], [main], [],
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
-PKG_CHECK_MODULES([DEPS], [openssl glib-2.0])
+PKG_CHECK_MODULES([DEPS], [openssl glib-2.0 libcurl])
 PKG_CHECK_MODULES([NOTIFY], [libnotify], [], 
     [AC_MSG_NOTICE([libnotify module not found])])
 

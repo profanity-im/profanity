@@ -34,6 +34,7 @@
 #include "util.h"
 #include "contact.h"
 #include "preferences.h"
+#include "tinyurl.h"
 
 #define CONS_WIN_TITLE "_cons"
 #define PAD_SIZE 200
@@ -361,6 +362,7 @@ cons_help(void)
     cons_show("/prefs                   : Show current UI preferences.");
     cons_show("/connect user@host       : Login to jabber.");
     cons_show("/msg user@host mesg      : Send mesg to user.");
+    cons_show("/tiny user@host url      : Send url as tinyurl");
     cons_show("/close                   : Close a chat window.");
     cons_show("/who                     : Find out who is online.");
     cons_show("/ros                     : List all contacts.");

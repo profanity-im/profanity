@@ -33,6 +33,7 @@
 #include "util.h"
 #include "preferences.h"
 #include "prof_autocomplete.h"
+#include "tinyurl.h"
 
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
@@ -43,6 +44,7 @@ static gboolean _cmd_who(const char * const inp);
 static gboolean _cmd_ros(const char * const inp);
 static gboolean _cmd_connect(const char * const inp);
 static gboolean _cmd_msg(const char * const inp);
+static gboolean _cmd_tiny(const char * const inp);
 static gboolean _cmd_close(const char * const inp);
 static gboolean _cmd_set_beep(const char * const inp);
 static gboolean _cmd_set_notify(const char * const inp);
@@ -76,6 +78,7 @@ static struct cmd_t commands[] = {
     { "/flash", _cmd_set_flash },
     { "/prefs", _cmd_prefs },
     { "/msg", _cmd_msg },
+    { "/tiny", _cmd_tiny },
     { "/online", _cmd_online },
     { "/quit", _cmd_quit },
     { "/ros", _cmd_ros },
@@ -86,7 +89,7 @@ static struct cmd_t commands[] = {
     { "/help", _cmd_help }
 };
 
-static const int num_cmds = 18;
+static const int num_cmds = 19;
     
 gboolean
 process_input(char *inp)
@@ -272,6 +275,31 @@ _cmd_msg(const char * const inp)
         } else {
             cons_show("Usage: /msg user@host message");
         }
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_tiny(const char * const inp)
+{
+    char *url = strndup(inp+6, strlen(inp)-6);
+
+    if (!tinyurl_valid(url)) {
+        GString *error = g_string_new("/tiny, badly formed URL: ");
+        g_string_append(error, url);
+        cons_bad_show(error->str);
+        g_string_free(error, TRUE);
+    } else if (win_in_chat()) {
+        char *tiny = tinyurl_get(url);
+        char *recipient = win_get_recipient();
+        jabber_send(tiny, recipient);
+        win_show_outgoing_msg("me", recipient, tiny);
+        free(recipient);
+        free(tiny);
+        free(url);
+    } else {
+        cons_bad_command(inp);
     }
 
     return TRUE;

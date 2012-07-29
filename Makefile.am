@@ -6,11 +6,12 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/contact_list.c src/input_win.c src/log.h src/profanity.c \
 	src/prof_history.c src/ui.h src/common.h src/ contact_list.h src/jabber.c \
 	src/main.c src/profanity.h src/prof_history.h src/util.c src/chat_log.c \
-	src/chat_log.h
+	src/chat_log.h src/tinyurl.c src/tinyurl.h
 profanity_CFLAGS = -O3 -Werror -Wall -Wextra -Wno-unused-parameter \
 	-Wno-unused-but-set-variable -Wno-unused-result \
-	-Wno-missing-field-initializers
-	-lstrophe -lxml2 -lexpat -lncurses $(DEPS_CFLAGS) $(DEPS_LIBS) -lresolv \
+	-Wno-missing-field-initializers \
+	-lstrophe -lxml2 -lexpat -lncurses -lcurl \
+	$(DEPS_CFLAGS) $(DEPS_LIBS) -lresolv \
 	$(NOTIFY_CFLAGS) $(NOTIFY_LIBS)
 
 TESTS = tests/testsuite
