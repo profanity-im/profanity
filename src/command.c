@@ -283,23 +283,29 @@ _cmd_msg(const char * const inp)
 static gboolean
 _cmd_tiny(const char * const inp)
 {
-    char *url = strndup(inp+6, strlen(inp)-6);
+    if (strlen(inp) > 6) {
+        char *url = strndup(inp+6, strlen(inp)-6);
 
-    if (!tinyurl_valid(url)) {
-        GString *error = g_string_new("/tiny, badly formed URL: ");
-        g_string_append(error, url);
-        cons_bad_show(error->str);
-        g_string_free(error, TRUE);
-    } else if (win_in_chat()) {
-        char *tiny = tinyurl_get(url);
-        char *recipient = win_get_recipient();
-        jabber_send(tiny, recipient);
-        win_show_outgoing_msg("me", recipient, tiny);
-        free(recipient);
-        free(tiny);
-        free(url);
+        if (!tinyurl_valid(url)) {
+            GString *error = g_string_new("/tiny, badly formed URL: ");
+            g_string_append(error, url);
+            cons_bad_show(error->str);
+            g_string_free(error, TRUE);
+            free(url);
+        } else if (win_in_chat()) {
+            char *tiny = tinyurl_get(url);
+            char *recipient = win_get_recipient();
+            jabber_send(tiny, recipient);
+            win_show_outgoing_msg("me", recipient, tiny);
+            free(recipient);
+            free(tiny);
+            free(url);
+        } else {
+            cons_bad_command(inp);
+            free(url);
+        }
     } else {
-        cons_bad_command(inp);
+        cons_show("usage: /tiny url");
     }
 
     return TRUE;

@@ -10,6 +10,7 @@ profanity
 *.swp
 testsuite
 tags
+cscope.out
 .deps/
 build-aux/
 Makefile
