@@ -10,7 +10,7 @@ ubuntu_deps()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install g++ autoconf libssl-dev libexpat1-dev libncurses5-dev libxml2-dev libglib2.0-dev libnotify-dev
+    sudo apt-get -y install g++ autoconf libssl-dev libexpat1-dev libncurses5-dev libxml2-dev libglib2.0-dev libnotify-dev libcurl3-dev
 
 }
 
