@@ -46,18 +46,10 @@ AM_CFLAGS="$AM_CFLAGS -Wno-missing-field-initializers "
 AM_CFLAGS="$AM_CFLAGS -lstrophe -lxml2 -lexpat -lncurses -lcurl -lresolv "
 AM_CFLAGS="$AM_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
 
-#AM_CPPFLAGS="-lstrophe -lxml2 -lexpat -lncurses -lcurl -lresolv "
-#AM_CPPFLAGS="$AM_CPPFLAGS $DEPS_CFLAGS $NOFTITY_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
-
-#CFLAGS="$CFLAGS $DEPS_CFLAGS $DEPS_LIBS $NOTIFY_CFLAGS $NOTIFY_LIBS"
-#CPPFLAGS="$CPPFLAGS $DEPS_CFLAGS $DEPS_LIBS $NOTIFY_CFLAGS $NOTIFY_LIBS"
-
-#AC_CHECK_HEADERS([libnotify/notify.h], [], 
-#    [AC_MSG_NOTICE([libnotify not found, desktop notification option not included])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
