@@ -44,10 +44,11 @@ AM_CFLAGS="-O3 -Werror -Wall -Wextra -Wno-unused-parameter "
 AM_CFLAGS="$AM_CFLAGS -Wno-unused-but-set-variable -Wno-unused-result "
 AM_CFLAGS="$AM_CFLAGS -Wno-missing-field-initializers "
 AM_CFLAGS="$AM_CFLAGS -lstrophe -lxml2 -lexpat -lncurses -lcurl -lresolv "
-AM_CFLAGS="$AM_CFLAGS $DEPS_CFLAGS $NOFTITY_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
+AM_CFLAGS="$AM_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
 
-AM_CPPFLAGS="-lstrophe -lxml2 -lexpat -lncurses -lcurl -lresolv "
-AM_CPPFLAGS="$AM_CPPFLAGS $DEPS_CFLAGS $NOFTITY_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
+#AM_CPPFLAGS="-lstrophe -lxml2 -lexpat -lncurses -lcurl -lresolv "
+#AM_CPPFLAGS="$AM_CPPFLAGS $DEPS_CFLAGS $NOFTITY_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
+AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)

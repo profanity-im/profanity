@@ -26,7 +26,7 @@
 
 #include <ncurses.h>
 #include <glib.h>
-#ifdef HAVE_LIBNOTIFY_NOTIFY_H
+#ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
 
@@ -73,7 +73,7 @@ static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
 static void _win_resize_all(void);
 
-#ifdef HAVE_LIBNOTIFY_NOTIFY_H
+#ifdef HAVE_LIBNOTIFY
 static void _win_notify(char * short_from);
 #endif
 
@@ -208,13 +208,13 @@ win_show_incomming_msg(const char * const from, const char * const message)
 
     if (prefs_get_beep())
         beep();
-#ifdef HAVE_LIBNOTIFY_NOTIFY_H
+#ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify())
         _win_notify(short_from);
 #endif
 }
 
-#ifdef HAVE_LIBNOTIFY_NOTIFY_H
+#ifdef HAVE_LIBNOTIFY
 static void
 _win_notify(char * short_from)
 {
