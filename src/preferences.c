@@ -90,7 +90,7 @@ prefs_load(void)
 
     gsize i;
     for (i = 0; i < njids; i++) {
-        p_autocomplete_add(ac, jids[i]);
+        p_autocomplete_add(ac, strdup(jids[i]));
     }
 
     for (i = 0; i < njids; i++) {
