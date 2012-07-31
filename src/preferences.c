@@ -93,6 +93,12 @@ prefs_load(void)
         p_autocomplete_add(ac, jids[i]);
     }
 
+    for (i = 0; i < njids; i++) {
+        free(jids[i]);
+    }
+    free(jids);
+
+
     _load_colours();
 }
 

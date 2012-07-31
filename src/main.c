@@ -52,6 +52,8 @@ main(int argc, char **argv)
         return 1;
     }
 
+    g_option_context_free(context);
+
     if (version == TRUE) {
         g_print("Profanity, version %s\n", PACKAGE_VERSION);
         g_print("Copyright (C) 2012 James Booth <%s>.\n", PACKAGE_BUGREPORT);
