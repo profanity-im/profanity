@@ -96,6 +96,12 @@ prefs_load(void)
     _load_colours();
 }
 
+void
+prefs_close(void)
+{
+    g_key_file_free(prefs);
+}
+
 static NCURSES_COLOR_T
 _lookup_colour(const char * const colour)
 {

@@ -26,6 +26,7 @@
 #include <glib.h>
 
 void prefs_load(void);
+void prefs_close(void);
 
 char * find_login(char *prefix);
 void reset_login_search(void);
