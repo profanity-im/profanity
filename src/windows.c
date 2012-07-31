@@ -125,13 +125,6 @@ gui_refresh(void)
 void
 gui_close(void)
 {
-    int i;
-    for (i = 0; i < NUM_WINS; i++) {
-        if (_wins[i].win != NULL) {
-            delwin(_wins[i].win);
-        }
-    }
-
     endwin();
 }
 
