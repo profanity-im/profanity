@@ -35,12 +35,6 @@ struct curl_data_t
 
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
-void
-tinyurl_init(void)
-{
-    curl_global_init(CURL_GLOBAL_ALL);
-}
-
 gboolean
 tinyurl_valid(char *url)
 {

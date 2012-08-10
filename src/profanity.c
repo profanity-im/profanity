@@ -79,7 +79,6 @@ profanity_init(const int disable_tls)
     jabber_init(disable_tls);
     command_init();
     contact_list_init();
-//    tinyurl_init();
     atexit(_profanity_shutdown);
 }
 

@@ -20,6 +20,5 @@
  *
  */
 
-void tinyurl_init(void);
 gboolean tinyurl_valid(char *url);
 char * tinyurl_get(char *url);
