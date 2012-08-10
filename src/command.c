@@ -25,6 +25,7 @@
 
 #include <glib.h>
 
+#include "common.h"
 #include "command.h"
 #include "contact_list.h"
 #include "history.h"
@@ -88,8 +89,6 @@ static struct cmd_t commands[] = {
     { "/xa", _cmd_xa },
     { "/help", _cmd_help }
 };
-
-static const int num_cmds = 19;
     
 gboolean
 process_input(char *inp)
@@ -124,8 +123,8 @@ command_init(void)
 {
     commands_ac = p_autocomplete_new();
 
-    int i;
-    for (i = 0; i < num_cmds; i++) {
+    unsigned int i;
+    for (i = 0; i < ARRAY_SIZE(commands); i++) {
         struct cmd_t *pcmd = commands+i;
         p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
     }
@@ -148,8 +147,8 @@ reset_command_completer(void)
 static gboolean
 _handle_command(const char * const command, const char * const inp)
 {
-    int i;
-    for (i = 0; i < num_cmds; i++) {
+    unsigned int i;
+    for (i = 0; i < ARRAY_SIZE(commands); i++) {
         struct cmd_t *pcmd = commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
             return (pcmd->func(inp));

@@ -49,6 +49,8 @@ typedef enum {
 #define notify_notification_new(summary, body, icon) notify_notification_new(summary, body, icon, NULL)
 #endif
 
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void create_config_directory(void);
 void create_dir(char *name);
