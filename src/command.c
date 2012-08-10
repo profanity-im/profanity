@@ -36,8 +36,14 @@
 #include "prof_autocomplete.h"
 #include "tinyurl.h"
 
+
+// helpers
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
+static void _update_presence(const jabber_presence_t presence, 
+    const char * const show, const char * const inp);
+
+// command prototypes
 static gboolean _cmd_quit(const char * const inp);
 static gboolean _cmd_help(const char * const inp);
 static gboolean _cmd_prefs(const char * const inp);
@@ -58,38 +64,89 @@ static gboolean _cmd_dnd(const char * const inp);
 static gboolean _cmd_chat(const char * const inp);
 static gboolean _cmd_xa(const char * const inp);
 static gboolean _cmd_default(const char * const inp);
-static void _update_presence(const jabber_presence_t presence, 
-    const char * const show, const char * const inp);
 
+typedef enum {                                                                   
+    CMD_BASIC,                                                              
+    CMD_SETTING,                                                           
+    CMD_STATUS                                                      
+} cmd_category_t;  
+
+
+/* command structure
+ * cmd - The actual string of the command
+ * func - The function to execute for the command
+ */
 struct cmd_t {
     const gchar *cmd;
+    cmd_category_t category;
     gboolean (*func)(const char * const inp);
+    const gchar *usage;
+    const gchar *short_help;
 };
 
-static PAutocomplete commands_ac;
-
+// The commands
 static struct cmd_t commands[] = {
-    { "/away", _cmd_away },
-    { "/beep", _cmd_set_beep },
-    { "/notify", _cmd_set_notify },
-    { "/chat", _cmd_chat },
-    { "/close", _cmd_close },
-    { "/connect", _cmd_connect },
-    { "/dnd", _cmd_dnd },
-    { "/flash", _cmd_set_flash },
-    { "/prefs", _cmd_prefs },
-    { "/msg", _cmd_msg },
-    { "/tiny", _cmd_tiny },
-    { "/online", _cmd_online },
-    { "/quit", _cmd_quit },
-    { "/ros", _cmd_ros },
-    { "/showsplash", _cmd_set_showsplash },
-    { "/chlog", _cmd_set_chlog },
-    { "/who", _cmd_who },
-    { "/xa", _cmd_xa },
-    { "/help", _cmd_help }
+
+    { "/close", CMD_BASIC, _cmd_close, NULL, 
+        "Close current chat window." },
+
+    { "/connect", CMD_BASIC, _cmd_connect, "/connect user@host",
+        "Login to jabber." },
+
+    { "/prefs", CMD_BASIC, _cmd_prefs, NULL,
+        "Show current preferences." },
+
+    { "/msg", CMD_BASIC, _cmd_msg, "/msg user@host mesg",
+        "Send mesg to user." },
+
+    { "/tiny", CMD_BASIC, _cmd_tiny, "/tiny url",
+        "Send url as tinyurl in current chat." },
+
+    { "/quit", CMD_BASIC, _cmd_quit, NULL,
+        "Quit Profanity." },
+
+    { "/ros", CMD_BASIC, _cmd_ros, NULL,
+        "List all contacts." },
+
+    { "/who", CMD_BASIC, _cmd_who, NULL,
+        "Find out who is online." },
+
+    { "/help", CMD_BASIC, _cmd_help, NULL,
+        "This help." },
+
+    { "/beep", CMD_SETTING, _cmd_set_beep, "/beep <on/off>",
+        "Enable/disable sound notifications." },
+
+    { "/notify", CMD_SETTING, _cmd_set_notify, "/notify <on/off>",
+        "Enable/disable desktop notifications." },
+
+    { "/flash", CMD_SETTING, _cmd_set_flash, "/flash <on/off>",
+        "Enable/disable screen flash notifications." },
+
+    { "/showsplash", CMD_SETTING, _cmd_set_showsplash, "/showsplash <on/off>",
+        "Enable/disable splash logo on startup." },
+
+    { "/chlog", CMD_SETTING, _cmd_set_chlog, "/chlog <on/off>",
+        "Enable/disable chat logging." },
+
+    { "/away", CMD_STATUS, _cmd_away, "/away <msg>",
+        "Set status to away." },
+
+    { "/chat", CMD_STATUS, _cmd_chat, "/chat <msg>",
+        "Set status to chat (available for chat)." },
+
+    { "/dnd", CMD_STATUS, _cmd_dnd, "/dnd <msg>",
+        "Set status to dnd (do not disturb." },
+
+    { "/online", CMD_STATUS, _cmd_online, "/online <msg>",
+        "Set status to online." },
+
+    { "/xa", CMD_STATUS, _cmd_xa, "/xa <msg>",
+        "Set status to xa (extended away)." }
 };
     
+static PAutocomplete commands_ac;
+
 gboolean
 process_input(char *inp)
 {
