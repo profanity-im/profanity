@@ -65,84 +65,44 @@ static gboolean _cmd_chat(const char * const inp);
 static gboolean _cmd_xa(const char * const inp);
 static gboolean _cmd_default(const char * const inp);
 
-typedef enum {                                                                   
-    CMD_BASIC,                                                              
-    CMD_SETTING,                                                           
-    CMD_STATUS                                                      
-} cmd_category_t;  
-
-
 /* command structure
  * cmd - The actual string of the command
  * func - The function to execute for the command
  */
 struct cmd_t {
     const gchar *cmd;
-    cmd_category_t category;
     gboolean (*func)(const char * const inp);
     const gchar *usage;
     const gchar *short_help;
 };
 
 // The commands
-static struct cmd_t commands[] = {
+static struct cmd_t main_commands[] = {
+{ "/close",   _cmd_close,   NULL,                  "Close current chat window." },
+{ "/connect", _cmd_connect, "/connect user@host",  "Login to jabber." },
+{ "/prefs",   _cmd_prefs,   NULL,                  "Show current preferences." },
+{ "/msg",     _cmd_msg,     "/msg user@host mesg", "Send mesg to user." },
+{ "/tiny",    _cmd_tiny,    "/tiny url",           "Send url as tinyurl in current chat." },
+{ "/quit",    _cmd_quit,    NULL,                  "Quit Profanity." },
+{ "/ros",     _cmd_ros,     NULL,                  "List all contacts." },
+{ "/who",     _cmd_who,     NULL,                  "Find out who is online." },
+{ "/help",    _cmd_help,    NULL,                  "This help." }
+};
 
-    { "/close", CMD_BASIC, _cmd_close, NULL, 
-        "Close current chat window." },
+static struct cmd_t setting_commands[] = {
+{ "/beep",       _cmd_set_beep,       "/beep on|off",       "Enable/disable sound notifications." },
+{ "/notify",     _cmd_set_notify,     "/notify on|off",     "Enable/disable desktop notifications." },
+{ "/flash",      _cmd_set_flash,      "/flash on|off",      "Enable/disable screen flash notifications." },
+{ "/showsplash", _cmd_set_showsplash, "/showsplash on|off", "Enable/disable splash logo on startup." },
+{ "/chlog",      _cmd_set_chlog,      "/chlog on|off",      "Enable/disable chat logging." }
+};
 
-    { "/connect", CMD_BASIC, _cmd_connect, "/connect user@host",
-        "Login to jabber." },
-
-    { "/prefs", CMD_BASIC, _cmd_prefs, NULL,
-        "Show current preferences." },
-
-    { "/msg", CMD_BASIC, _cmd_msg, "/msg user@host mesg",
-        "Send mesg to user." },
-
-    { "/tiny", CMD_BASIC, _cmd_tiny, "/tiny url",
-        "Send url as tinyurl in current chat." },
-
-    { "/quit", CMD_BASIC, _cmd_quit, NULL,
-        "Quit Profanity." },
-
-    { "/ros", CMD_BASIC, _cmd_ros, NULL,
-        "List all contacts." },
-
-    { "/who", CMD_BASIC, _cmd_who, NULL,
-        "Find out who is online." },
-
-    { "/help", CMD_BASIC, _cmd_help, NULL,
-        "This help." },
-
-    { "/beep", CMD_SETTING, _cmd_set_beep, "/beep <on/off>",
-        "Enable/disable sound notifications." },
-
-    { "/notify", CMD_SETTING, _cmd_set_notify, "/notify <on/off>",
-        "Enable/disable desktop notifications." },
-
-    { "/flash", CMD_SETTING, _cmd_set_flash, "/flash <on/off>",
-        "Enable/disable screen flash notifications." },
-
-    { "/showsplash", CMD_SETTING, _cmd_set_showsplash, "/showsplash <on/off>",
-        "Enable/disable splash logo on startup." },
-
-    { "/chlog", CMD_SETTING, _cmd_set_chlog, "/chlog <on/off>",
-        "Enable/disable chat logging." },
-
-    { "/away", CMD_STATUS, _cmd_away, "/away <msg>",
-        "Set status to away." },
-
-    { "/chat", CMD_STATUS, _cmd_chat, "/chat <msg>",
-        "Set status to chat (available for chat)." },
-
-    { "/dnd", CMD_STATUS, _cmd_dnd, "/dnd <msg>",
-        "Set status to dnd (do not disturb." },
-
-    { "/online", CMD_STATUS, _cmd_online, "/online <msg>",
-        "Set status to online." },
-
-    { "/xa", CMD_STATUS, _cmd_xa, "/xa <msg>",
-        "Set status to xa (extended away)." }
+static struct cmd_t status_commands[] = {
+{ "/away",   _cmd_away,   "/away [msg]",   "Set status to away." },
+{ "/chat",   _cmd_chat,   "/chat [msg]",   "Set status to chat (available for chat)." },
+{ "/dnd",    _cmd_dnd,    "/dnd [msg]",    "Set status to dnd (do not disturb." },
+{ "/online", _cmd_online, "/online [msg]", "Set status to online." },
+{ "/xa",     _cmd_xa,     "/xa [msg]",     "Set status to xa (extended away)." }
 };
     
 static PAutocomplete commands_ac;
@@ -181,8 +141,18 @@ command_init(void)
     commands_ac = p_autocomplete_new();
 
     unsigned int i;
-    for (i = 0; i < ARRAY_SIZE(commands); i++) {
-        struct cmd_t *pcmd = commands+i;
+    for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
+        struct cmd_t *pcmd = main_commands+i;
+        p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
+    }
+
+    for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
+        struct cmd_t *pcmd = setting_commands+i;
+        p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
+    }
+
+    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
+        struct cmd_t *pcmd = status_commands+i;
         p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
     }
 
@@ -205,8 +175,22 @@ static gboolean
 _handle_command(const char * const command, const char * const inp)
 {
     unsigned int i;
-    for (i = 0; i < ARRAY_SIZE(commands); i++) {
-        struct cmd_t *pcmd = commands+i;
+    for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
+        struct cmd_t *pcmd = main_commands+i;
+        if (strcmp(pcmd->cmd, command) == 0) {
+            return (pcmd->func(inp));
+        }
+    }
+
+    for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
+        struct cmd_t *pcmd = setting_commands+i;
+        if (strcmp(pcmd->cmd, command) == 0) {
+            return (pcmd->func(inp));
+        }
+    }
+
+    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
+        struct cmd_t *pcmd = status_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
             return (pcmd->func(inp));
         }
