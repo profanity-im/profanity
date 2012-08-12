@@ -36,6 +36,22 @@
 #include "prof_autocomplete.h"
 #include "tinyurl.h"
 
+// command help strings
+struct cmd_help_t {
+    const gchar *usage;
+    const gchar *short_help;
+};
+
+/* command structure
+ * cmd - The actual string of the command
+ * func - The function to execute for the command
+ */
+struct cmd_t {
+    const gchar *cmd;
+    gboolean (*func)(const char * const inp, struct cmd_help_t help);
+    struct cmd_help_t help;
+};
+
 
 // helpers
 static gboolean _handle_command(const char * const command, 
@@ -44,65 +60,110 @@ static void _update_presence(const jabber_presence_t presence,
     const char * const show, const char * const inp);
 
 // command prototypes
-static gboolean _cmd_quit(const char * const inp);
-static gboolean _cmd_help(const char * const inp);
-static gboolean _cmd_prefs(const char * const inp);
-static gboolean _cmd_who(const char * const inp);
-static gboolean _cmd_ros(const char * const inp);
-static gboolean _cmd_connect(const char * const inp);
-static gboolean _cmd_msg(const char * const inp);
-static gboolean _cmd_tiny(const char * const inp);
-static gboolean _cmd_close(const char * const inp);
-static gboolean _cmd_set_beep(const char * const inp);
-static gboolean _cmd_set_notify(const char * const inp);
-static gboolean _cmd_set_flash(const char * const inp);
-static gboolean _cmd_set_showsplash(const char * const inp);
-static gboolean _cmd_set_chlog(const char * const inp);
-static gboolean _cmd_away(const char * const inp);
-static gboolean _cmd_online(const char * const inp);
-static gboolean _cmd_dnd(const char * const inp);
-static gboolean _cmd_chat(const char * const inp);
-static gboolean _cmd_xa(const char * const inp);
+static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_help(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_prefs(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_who(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_ros(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_connect(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_msg(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_beep(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_notify(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_chat(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_xa(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_default(const char * const inp);
 
-/* command structure
- * cmd - The actual string of the command
- * func - The function to execute for the command
- */
-struct cmd_t {
-    const gchar *cmd;
-    gboolean (*func)(const char * const inp);
-    const gchar *usage;
-    const gchar *short_help;
-};
-
 // The commands
-static struct cmd_t main_commands[] = {
-{ "/close",   _cmd_close,   NULL,                  "Close current chat window." },
-{ "/connect", _cmd_connect, "/connect user@host",  "Login to jabber." },
-{ "/prefs",   _cmd_prefs,   NULL,                  "Show current preferences." },
-{ "/msg",     _cmd_msg,     "/msg user@host mesg", "Send mesg to user." },
-{ "/tiny",    _cmd_tiny,    "/tiny url",           "Send url as tinyurl in current chat." },
-{ "/quit",    _cmd_quit,    NULL,                  "Quit Profanity." },
-{ "/ros",     _cmd_ros,     NULL,                  "List all contacts." },
-{ "/who",     _cmd_who,     NULL,                  "Find out who is online." },
-{ "/help",    _cmd_help,    NULL,                  "This help." }
+static struct cmd_t main_commands[] = 
+{
+    { "/close", 
+        _cmd_close, 
+        { NULL, "Close current chat window." } },
+    
+    { "/connect", 
+        _cmd_connect, 
+        { "/connect user@host", "Login to jabber." } },
+    
+    { "/prefs", 
+        _cmd_prefs, 
+        { NULL, "Show current preferences." } },
+
+    { "/msg", 
+        _cmd_msg, 
+        { "/msg user@host mesg", "Send mesg to user." } },
+
+    { "/tiny", 
+        _cmd_tiny, 
+        { "/tiny url", "Send url as tinyurl in current chat." } },
+
+    { "/quit", 
+        _cmd_quit, 
+        { NULL, "Quit Profanity." } },
+
+    { "/ros", 
+        _cmd_ros,
+        { NULL, "List all contacts." } },
+
+    { "/who", 
+        _cmd_who,
+        { NULL, "Find out who is online." } },
+
+    { "/help", 
+        _cmd_help, 
+        { NULL, "This help." } }
 };
 
-static struct cmd_t setting_commands[] = {
-{ "/beep",       _cmd_set_beep,       "/beep on|off",       "Enable/disable sound notifications." },
-{ "/notify",     _cmd_set_notify,     "/notify on|off",     "Enable/disable desktop notifications." },
-{ "/flash",      _cmd_set_flash,      "/flash on|off",      "Enable/disable screen flash notifications." },
-{ "/showsplash", _cmd_set_showsplash, "/showsplash on|off", "Enable/disable splash logo on startup." },
-{ "/chlog",      _cmd_set_chlog,      "/chlog on|off",      "Enable/disable chat logging." }
+static struct cmd_t setting_commands[] = 
+{
+    { "/beep",
+        _cmd_set_beep,
+        { "/beep on|off", "Enable/disable sound notifications." } },
+    { "/notify",
+        _cmd_set_notify,
+        { "/notify on|off", "Enable/disable desktop notifications." } },
+
+    { "/flash", 
+        _cmd_set_flash,
+        { "/flash on|off", "Enable/disable screen flash notifications." } },
+
+    { "/showsplash", 
+        _cmd_set_showsplash, 
+        { "/showsplash on|off", "Enable/disable splash logo on startup." } },
+
+    { "/chlog", 
+        _cmd_set_chlog,
+        { "/chlog on|off", "Enable/disable chat logging." } }
 };
 
-static struct cmd_t status_commands[] = {
-{ "/away",   _cmd_away,   "/away [msg]",   "Set status to away." },
-{ "/chat",   _cmd_chat,   "/chat [msg]",   "Set status to chat (available for chat)." },
-{ "/dnd",    _cmd_dnd,    "/dnd [msg]",    "Set status to dnd (do not disturb." },
-{ "/online", _cmd_online, "/online [msg]", "Set status to online." },
-{ "/xa",     _cmd_xa,     "/xa [msg]",     "Set status to xa (extended away)." }
+static struct cmd_t status_commands[] = 
+{
+    { "/away",
+        _cmd_away,
+        { "/away [msg]", "Set status to away." } },
+
+    { "/chat",
+        _cmd_chat,
+        { "/chat [msg]", "Set status to chat (available for chat)." } },
+
+    { "/dnd",
+        _cmd_dnd,
+        { "/dnd [msg]", "Set status to dnd (do not disturb." } },
+
+    { "/online", 
+        _cmd_online,
+        { "/online [msg]", "Set status to online." } },
+
+    { "/xa",
+        _cmd_xa,
+        { "/xa [msg]", "Set status to xa (extended away)." } }
 };
     
 static PAutocomplete commands_ac;
@@ -178,21 +239,21 @@ _handle_command(const char * const command, const char * const inp)
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
         struct cmd_t *pcmd = main_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
-            return (pcmd->func(inp));
+            return (pcmd->func(inp, pcmd->help));
         }
     }
 
     for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
         struct cmd_t *pcmd = setting_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
-            return (pcmd->func(inp));
+            return (pcmd->func(inp, pcmd->help));
         }
     }
 
     for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
         struct cmd_t *pcmd = status_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
-            return (pcmd->func(inp));
+            return (pcmd->func(inp, pcmd->help));
         }
     }
 
@@ -200,7 +261,7 @@ _handle_command(const char * const command, const char * const inp)
 }
 
 static gboolean
-_cmd_connect(const char * const inp)
+_cmd_connect(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     jabber_conn_status_t conn_status = jabber_connection_status();
@@ -209,7 +270,9 @@ _cmd_connect(const char * const inp)
         cons_show("You are either connected already, or a login is in process.");
         result = TRUE;
     } else if (strlen(inp) < 10) {
-        cons_show("Usage: /connect user@host");
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
         result = TRUE;
     } else {
         char *user, *lower;
@@ -236,13 +299,13 @@ _cmd_connect(const char * const inp)
 }
 
 static gboolean
-_cmd_quit(const char * const inp)
+_cmd_quit(const char * const inp, struct cmd_help_t help)
 {
     return FALSE;
 }
 
 static gboolean
-_cmd_help(const char * const inp)
+_cmd_help(const char * const inp, struct cmd_help_t help)
 {
     cons_help();
 
@@ -250,7 +313,7 @@ _cmd_help(const char * const inp)
 }
 
 static gboolean
-_cmd_prefs(const char * const inp)
+_cmd_prefs(const char * const inp, struct cmd_help_t help)
 {
     cons_prefs();
 
@@ -258,7 +321,7 @@ _cmd_prefs(const char * const inp)
 }
 
 static gboolean
-_cmd_ros(const char * const inp)
+_cmd_ros(const char * const inp, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_connection_status();
 
@@ -271,7 +334,7 @@ _cmd_ros(const char * const inp)
 }
 
 static gboolean
-_cmd_who(const char * const inp)
+_cmd_who(const char * const inp, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_connection_status();
 
@@ -286,7 +349,7 @@ _cmd_who(const char * const inp)
 }
 
 static gboolean
-_cmd_msg(const char * const inp)
+_cmd_msg(const char * const inp, struct cmd_help_t help)
 {
     char *usr = NULL;
     char *msg = NULL;
@@ -310,10 +373,14 @@ _cmd_msg(const char * const inp)
                 jabber_send(msg, usr);
                 win_show_outgoing_msg("me", usr, msg);
             } else {
-                cons_show("Usage: /msg user@host message");
+                char usage[strlen(help.usage + 8)];
+                sprintf(usage, "Usage: %s", help.usage);
+                cons_show(usage);
             }
         } else {
-            cons_show("Usage: /msg user@host message");
+            char usage[strlen(help.usage + 8)];
+            sprintf(usage, "Usage: %s", help.usage);
+            cons_show(usage);
         }
     }
 
@@ -321,7 +388,7 @@ _cmd_msg(const char * const inp)
 }
 
 static gboolean
-_cmd_tiny(const char * const inp)
+_cmd_tiny(const char * const inp, struct cmd_help_t help)
 {
     if (strlen(inp) > 6) {
         char *url = strndup(inp+6, strlen(inp)-6);
@@ -348,9 +415,14 @@ _cmd_tiny(const char * const inp)
             free(url);
         }
     } else {
-        cons_show("Usage: /tiny url");
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
+        
         if (win_in_chat()) {
-            win_show("Usage: /tiny url");
+            char usage[strlen(help.usage + 8)];
+            sprintf(usage, "Usage: %s", help.usage);
+            win_show(usage);
         }
     }
 
@@ -358,7 +430,7 @@ _cmd_tiny(const char * const inp)
 }
 
 static gboolean
-_cmd_close(const char * const inp)
+_cmd_close(const char * const inp, struct cmd_help_t help)
 {
     if (!win_close_win())
         cons_bad_command(inp);
@@ -367,7 +439,7 @@ _cmd_close(const char * const inp)
 }
 
 static gboolean
-_cmd_set_beep(const char * const inp)
+_cmd_set_beep(const char * const inp, struct cmd_help_t help)
 {
     if (strcmp(inp, "/beep on") == 0) {
         cons_show("Sound enabled.");
@@ -376,14 +448,16 @@ _cmd_set_beep(const char * const inp)
         cons_show("Sound disabled.");
         prefs_set_beep(FALSE);
     } else {
-        cons_show("Usage: /beep <on/off>");
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
     }        
 
     return TRUE;
 }
 
 static gboolean
-_cmd_set_notify(const char * const inp)
+_cmd_set_notify(const char * const inp, struct cmd_help_t help)
 {
     if (strcmp(inp, "/notify on") == 0) {
         cons_show("Desktop notifications enabled.");
@@ -392,14 +466,16 @@ _cmd_set_notify(const char * const inp)
         cons_show("Desktop notifications disabled.");
         prefs_set_notify(FALSE);
     } else {
-        cons_show("Usage: /notify <on/off>");
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
     }        
 
     return TRUE;
 }
 
 static gboolean
-_cmd_set_flash(const char * const inp)
+_cmd_set_flash(const char * const inp, struct cmd_help_t help)
 {
     if (strcmp(inp, "/flash on") == 0) {
         cons_show("Screen flash enabled.");
@@ -408,14 +484,16 @@ _cmd_set_flash(const char * const inp)
         cons_show("Screen flash disabled.");
         prefs_set_flash(FALSE);
     } else {
-        cons_show("Usage: /flash <on/off>");
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
     }        
 
     return TRUE;
 }
 
 static gboolean
-_cmd_set_showsplash(const char * const inp)
+_cmd_set_showsplash(const char * const inp, struct cmd_help_t help)
 {
     if (strcmp(inp, "/showsplash on") == 0) {
         cons_show("Splash screen enabled.");
@@ -424,14 +502,16 @@ _cmd_set_showsplash(const char * const inp)
         cons_show("Splash screen disabled.");
         prefs_set_showsplash(FALSE);
     } else {
-        cons_show("Usage: /showsplash <on/off>");
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
     }
 
     return TRUE;
 }
 
 static gboolean
-_cmd_set_chlog(const char * const inp)
+_cmd_set_chlog(const char * const inp, struct cmd_help_t help)
 {
     if (strcmp(inp, "/chlog on") == 0) {
         cons_show("Chat logging enabled.");
@@ -440,42 +520,44 @@ _cmd_set_chlog(const char * const inp)
         cons_show("Chat logging disabled.");
         prefs_set_chlog(FALSE);
     } else {
-        cons_show("Usage: /chlog <on/off>");
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
     }
 
     return TRUE;
 }
 
 static gboolean
-_cmd_away(const char * const inp)
+_cmd_away(const char * const inp, struct cmd_help_t help)
 {
     _update_presence(PRESENCE_AWAY, "away", inp);
     return TRUE;
 }
 
 static gboolean
-_cmd_online(const char * const inp)
+_cmd_online(const char * const inp, struct cmd_help_t help)
 {
     _update_presence(PRESENCE_ONLINE, "online", inp);
     return TRUE;
 }
 
 static gboolean
-_cmd_dnd(const char * const inp)
+_cmd_dnd(const char * const inp, struct cmd_help_t help)
 {
     _update_presence(PRESENCE_DND, "dnd", inp);
     return TRUE;
 }
 
 static gboolean
-_cmd_chat(const char * const inp)
+_cmd_chat(const char * const inp, struct cmd_help_t help)
 {
     _update_presence(PRESENCE_CHAT, "chat", inp);
     return TRUE;
 }
 
 static gboolean
-_cmd_xa(const char * const inp)
+_cmd_xa(const char * const inp, struct cmd_help_t help)
 {
     _update_presence(PRESENCE_XA, "xa", inp);
     return TRUE;
