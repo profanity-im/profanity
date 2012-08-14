@@ -80,51 +80,61 @@ static struct cmd_t main_commands[] =
 {
     { "/help", 
         _cmd_help, 
-        { "/help", "This help.",
+        { "/help [command]", "This help, or help on a specific command",
         { "/help [command]",
+          "---------------"
           "",
-          "/help will list all commands with short help on what they do."
-          "/help [command] will give more detailed help on a specific command." } } },
+          "/help will list all commands with short help on what they do.",
+          "/help [command] will give more detailed help on a specific command.",
+          NULL } } },
 
     { "/connect", 
         _cmd_connect, 
         { "/connect user@host", "Login to jabber.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL  } } },
     
     { "/prefs", 
         _cmd_prefs, 
         { "/prefs", "Show current preferences.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/msg", 
         _cmd_msg, 
         { "/msg user@host mesg", "Send mesg to user.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/tiny", 
         _cmd_tiny, 
         { "/tiny url", "Send url as tinyurl in current chat.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/ros", 
         _cmd_ros,
         { "/ros", "List all contacts.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/who", 
         _cmd_who,
         { "/who", "Find out who is online.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/close", 
         _cmd_close, 
         { "/close", "Close current chat window.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/quit", 
         _cmd_quit, 
         { "/quit", "Quit Profanity.",
-        { "Ahh" } } }
+        { "Ahh",
+          NULL } } }
 };
 
 static struct cmd_t setting_commands[] = 
@@ -132,26 +142,32 @@ static struct cmd_t setting_commands[] =
     { "/beep",
         _cmd_set_beep,
         { "/beep on|off", "Enable/disable sound notifications.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
+
     { "/notify",
         _cmd_set_notify,
         { "/notify on|off", "Enable/disable desktop notifications.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/flash", 
         _cmd_set_flash,
         { "/flash on|off", "Enable/disable screen flash notifications.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/showsplash", 
         _cmd_set_showsplash, 
         { "/showsplash on|off", "Enable/disable splash logo on startup.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/chlog", 
         _cmd_set_chlog,
         { "/chlog on|off", "Enable/disable chat logging.",
-        { "Ahh" } } }
+        { "Ahh",
+          NULL } } }
 };
 
 static struct cmd_t status_commands[] = 
@@ -159,27 +175,32 @@ static struct cmd_t status_commands[] =
     { "/away",
         _cmd_away,
         { "/away [msg]", "Set status to away.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/chat",
         _cmd_chat,
         { "/chat [msg]", "Set status to chat (available for chat).",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/dnd",
         _cmd_dnd,
         { "/dnd [msg]", "Set status to dnd (do not disturb.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/online", 
         _cmd_online,
         { "/online [msg]", "Set status to online.",
-        { "Ahh" } } },
+        { "Ahh",
+          NULL } } },
 
     { "/xa",
         _cmd_xa,
         { "/xa [msg]", "Set status to xa (extended away).",
-        { "Ahh" } } }
+        { "Ahh",
+          NULL } } }
 };
     
 static PAutocomplete commands_ac;
@@ -362,7 +383,50 @@ _cmd_quit(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_help(const char * const inp, struct cmd_help_t help)
 {
-    cons_help();
+    if (strcmp(inp, "/help") == 0) {
+        cons_help();
+    } else {
+        char *cmd;
+        cmd = strndup(inp+6, strlen(inp)-6);
+        char cmd_with_slash[1 + strlen(cmd) + 1];
+        sprintf(cmd_with_slash, "/%s", cmd);
+
+        const gchar **help_text = NULL;
+
+        unsigned int i;
+        for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
+            struct cmd_t *pcmd = main_commands+i;
+            if (strcmp(pcmd->cmd, cmd_with_slash) == 0) {
+                help_text = pcmd->help.long_help;
+            }
+        }
+
+        for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
+            struct cmd_t *pcmd = setting_commands+i;
+            if (strcmp(pcmd->cmd, cmd_with_slash) == 0) {
+                help_text = pcmd->help.long_help;
+            }
+        }
+
+        for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
+            struct cmd_t *pcmd = status_commands+i;
+            if (strcmp(pcmd->cmd, cmd_with_slash) == 0) {
+                help_text = pcmd->help.long_help;
+            }
+        }
+
+        cons_show("");
+
+        if (help_text != NULL) {
+            for (i = 0; help_text[i] != NULL; i++) {
+                cons_show(help_text[i]);
+            }
+        } else {
+            cons_show("No such command.");
+        }
+
+        cons_show("");
+    }
 
     return TRUE;
 }
