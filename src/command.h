@@ -27,6 +27,7 @@
 struct cmd_help_t {
     const gchar *usage;
     const gchar *short_help;
+    const gchar *long_help[50];
 };
 
 void command_init(void);

@@ -80,84 +80,106 @@ static struct cmd_t main_commands[] =
 {
     { "/help", 
         _cmd_help, 
-        { "/help", "This help." } },
+        { "/help", "This help.",
+        { "/help [command]",
+          "",
+          "/help will list all commands with short help on what they do."
+          "/help [command] will give more detailed help on a specific command." } } },
 
     { "/connect", 
         _cmd_connect, 
-        { "/connect user@host", "Login to jabber." } },
+        { "/connect user@host", "Login to jabber.",
+        { "Ahh" } } },
     
     { "/prefs", 
         _cmd_prefs, 
-        { "/prefs", "Show current preferences." } },
+        { "/prefs", "Show current preferences.",
+        { "Ahh" } } },
 
     { "/msg", 
         _cmd_msg, 
-        { "/msg user@host mesg", "Send mesg to user." } },
+        { "/msg user@host mesg", "Send mesg to user.",
+        { "Ahh" } } },
 
     { "/tiny", 
         _cmd_tiny, 
-        { "/tiny url", "Send url as tinyurl in current chat." } },
+        { "/tiny url", "Send url as tinyurl in current chat.",
+        { "Ahh" } } },
 
     { "/ros", 
         _cmd_ros,
-        { "/ros", "List all contacts." } },
+        { "/ros", "List all contacts.",
+        { "Ahh" } } },
 
     { "/who", 
         _cmd_who,
-        { "/who", "Find out who is online." } },
+        { "/who", "Find out who is online.",
+        { "Ahh" } } },
 
     { "/close", 
         _cmd_close, 
-        { "/close", "Close current chat window." } }, 
+        { "/close", "Close current chat window.",
+        { "Ahh" } } },
 
     { "/quit", 
         _cmd_quit, 
-        { "/quit", "Quit Profanity." } }
+        { "/quit", "Quit Profanity.",
+        { "Ahh" } } }
 };
 
 static struct cmd_t setting_commands[] = 
 {
     { "/beep",
         _cmd_set_beep,
-        { "/beep on|off", "Enable/disable sound notifications." } },
+        { "/beep on|off", "Enable/disable sound notifications.",
+        { "Ahh" } } },
     { "/notify",
         _cmd_set_notify,
-        { "/notify on|off", "Enable/disable desktop notifications." } },
+        { "/notify on|off", "Enable/disable desktop notifications.",
+        { "Ahh" } } },
 
     { "/flash", 
         _cmd_set_flash,
-        { "/flash on|off", "Enable/disable screen flash notifications." } },
+        { "/flash on|off", "Enable/disable screen flash notifications.",
+        { "Ahh" } } },
 
     { "/showsplash", 
         _cmd_set_showsplash, 
-        { "/showsplash on|off", "Enable/disable splash logo on startup." } },
+        { "/showsplash on|off", "Enable/disable splash logo on startup.",
+        { "Ahh" } } },
 
     { "/chlog", 
         _cmd_set_chlog,
-        { "/chlog on|off", "Enable/disable chat logging." } }
+        { "/chlog on|off", "Enable/disable chat logging.",
+        { "Ahh" } } }
 };
 
 static struct cmd_t status_commands[] = 
 {
     { "/away",
         _cmd_away,
-        { "/away [msg]", "Set status to away." } },
+        { "/away [msg]", "Set status to away.",
+        { "Ahh" } } },
 
     { "/chat",
         _cmd_chat,
-        { "/chat [msg]", "Set status to chat (available for chat)." } },
+        { "/chat [msg]", "Set status to chat (available for chat).",
+        { "Ahh" } } },
 
     { "/dnd",
         _cmd_dnd,
-        { "/dnd [msg]", "Set status to dnd (do not disturb." } },
+        { "/dnd [msg]", "Set status to dnd (do not disturb.",
+        { "Ahh" } } },
 
     { "/online", 
         _cmd_online,
-        { "/online [msg]", "Set status to online." } },
+        { "/online [msg]", "Set status to online.",
+        { "Ahh" } } },
 
     { "/xa",
         _cmd_xa,
-        { "/xa [msg]", "Set status to xa (extended away)." } }
+        { "/xa [msg]", "Set status to xa (extended away).",
+        { "Ahh" } } }
 };
     
 static PAutocomplete commands_ac;
