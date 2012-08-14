@@ -48,6 +48,7 @@ struct cmd_t {
 
 
 // helpers
+static struct cmd_t * _cmd_get_command(const char * const command);
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
 static void _update_presence(const jabber_presence_t presence, 
@@ -414,32 +415,45 @@ cmd_get_help_list_status(void)
     return result;
 }
 
-static gboolean
-_handle_command(const char * const command, const char * const inp)
+static struct cmd_t *
+_cmd_get_command(const char * const command)
 {
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
         struct cmd_t *pcmd = main_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
-            return (pcmd->func(inp, pcmd->help));
+            return pcmd;
         }
     }
 
     for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
         struct cmd_t *pcmd = setting_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
-            return (pcmd->func(inp, pcmd->help));
+            return pcmd;
         }
     }
 
     for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
         struct cmd_t *pcmd = status_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
-            return (pcmd->func(inp, pcmd->help));
+            return pcmd;
         }
     }
 
-    return _cmd_default(inp);
+    return NULL;
+}
+
+
+static gboolean
+_handle_command(const char * const command, const char * const inp)
+{
+    struct cmd_t *cmd = _cmd_get_command(command);
+    
+    if (cmd != NULL) {
+        return (cmd->func(inp, cmd->help));
+    } else {
+        return _cmd_default(inp);
+    }
 }
 
 static gboolean
@@ -492,38 +506,21 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
     if (strcmp(inp, "/help") == 0) {
         cons_help();
     } else {
-        char *cmd;
-        cmd = strndup(inp+6, strlen(inp)-6);
+        char *cmd = strndup(inp+6, strlen(inp)-6);
         char cmd_with_slash[1 + strlen(cmd) + 1];
         sprintf(cmd_with_slash, "/%s", cmd);
 
         const gchar **help_text = NULL;
+        struct cmd_t *command = _cmd_get_command(cmd_with_slash);
 
-        unsigned int i;
-        for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
-            struct cmd_t *pcmd = main_commands+i;
-            if (strcmp(pcmd->cmd, cmd_with_slash) == 0) {
-                help_text = pcmd->help.long_help;
-            }
+        if (command != NULL) {
+            help_text = command->help.long_help;
         }
-
-        for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
-            struct cmd_t *pcmd = setting_commands+i;
-            if (strcmp(pcmd->cmd, cmd_with_slash) == 0) {
-                help_text = pcmd->help.long_help;
-            }
-        }
-
-        for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
-            struct cmd_t *pcmd = status_commands+i;
-            if (strcmp(pcmd->cmd, cmd_with_slash) == 0) {
-                help_text = pcmd->help.long_help;
-            }
-        }
-
+        
         cons_show("");
 
         if (help_text != NULL) {
+            int i;
             for (i = 0; help_text[i] != NULL; i++) {
                 cons_show(help_text[i]);
             }
