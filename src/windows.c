@@ -33,6 +33,7 @@
 #include "ui.h"
 #include "util.h"
 #include "contact.h"
+#include "command.h"
 #include "preferences.h"
 #include "tinyurl.h"
 
@@ -380,31 +381,58 @@ cons_help(void)
     cons_show("");
     cons_show("Basic Commands:");
     cons_show("");
-    cons_show("/help                    : This help.");
-    cons_show("/prefs                   : Show current UI preferences.");
-    cons_show("/connect user@host       : Login to jabber.");
-    cons_show("/msg user@host mesg      : Send mesg to user.");
-    cons_show("/tiny url                : Send url as tinyurl in current chat.");
-    cons_show("/close                   : Close a chat window.");
-    cons_show("/who                     : Find out who is online.");
-    cons_show("/ros                     : List all contacts.");
-    cons_show("/quit                    : Quit Profanity.");
+
+    GSList *basic_helpers = cmd_get_help_list_basic();
+    while (basic_helpers != NULL) {
+        struct cmd_help_t *help = (struct cmd_help_t *)basic_helpers->data;
+        char line[25 + 2 + strlen(help->short_help)];
+        sprintf(line, "%-25s: %s", help->usage, help->short_help);
+        cons_show(line);
+        basic_helpers = g_slist_next(basic_helpers);
+    }
+
     cons_show("");
     cons_show("Settings:");
     cons_show("");
+
+    GSList *settings_helpers = cmd_get_help_list_settings();
+    while (settings_helpers != NULL) {
+        struct cmd_help_t *help = (struct cmd_help_t *)settings_helpers->data;
+        char line[25 + 2 + strlen(help->short_help)];
+        sprintf(line, "%-25s: %s", help->usage, help->short_help);
+        cons_show(line);
+        settings_helpers = g_slist_next(settings_helpers);
+    }
+
+/*
     cons_show("/beep <on/off>           : Enable/disable sound notification");
     cons_show("/notify <on/off>         : Enable/disable desktop notifications");
     cons_show("/flash <on/off>          : Enable/disable screen flash notification");
     cons_show("/showsplash <on/off>     : Enable/disable splash logo on startup");
     cons_show("/chlog <on/off>          : Enable/disable chat logging");
+*/
+
     cons_show("");
-    cons_show("Status changes (msg is optional):");
+    cons_show("Status changes:");
     cons_show("");
+
+    GSList *status_helpers = cmd_get_help_list_status();
+    while (status_helpers != NULL) {
+        struct cmd_help_t *help = (struct cmd_help_t *)status_helpers->data;
+        char line[25 + 2 + strlen(help->short_help)];
+        sprintf(line, "%-25s: %s", help->usage, help->short_help);
+        cons_show(line);
+        status_helpers = g_slist_next(status_helpers);
+    }
+
+/*
     cons_show("/away <msg>              : Set status to away.");
     cons_show("/online <msg>            : Set status to online.");
     cons_show("/dnd <msg>               : Set status to dnd (do not disturb).");
     cons_show("/chat <msg>              : Set status to chat (available for chat).");
     cons_show("/xa <msg>                : Set status to xa (extended away).");
+*/
+
     cons_show("");
     cons_show("Navigation:");
     cons_show("");

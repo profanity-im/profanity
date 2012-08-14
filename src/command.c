@@ -36,12 +36,6 @@
 #include "prof_autocomplete.h"
 #include "tinyurl.h"
 
-// command help strings
-struct cmd_help_t {
-    const gchar *usage;
-    const gchar *short_help;
-};
-
 /* command structure
  * cmd - The actual string of the command
  * func - The function to execute for the command
@@ -84,17 +78,17 @@ static gboolean _cmd_default(const char * const inp);
 // The commands
 static struct cmd_t main_commands[] = 
 {
-    { "/close", 
-        _cmd_close, 
-        { NULL, "Close current chat window." } },
-    
+    { "/help", 
+        _cmd_help, 
+        { "/help", "This help." } },
+
     { "/connect", 
         _cmd_connect, 
         { "/connect user@host", "Login to jabber." } },
     
     { "/prefs", 
         _cmd_prefs, 
-        { NULL, "Show current preferences." } },
+        { "/prefs", "Show current preferences." } },
 
     { "/msg", 
         _cmd_msg, 
@@ -104,21 +98,21 @@ static struct cmd_t main_commands[] =
         _cmd_tiny, 
         { "/tiny url", "Send url as tinyurl in current chat." } },
 
-    { "/quit", 
-        _cmd_quit, 
-        { NULL, "Quit Profanity." } },
-
     { "/ros", 
         _cmd_ros,
-        { NULL, "List all contacts." } },
+        { "/ros", "List all contacts." } },
 
     { "/who", 
         _cmd_who,
-        { NULL, "Find out who is online." } },
+        { "/who", "Find out who is online." } },
 
-    { "/help", 
-        _cmd_help, 
-        { NULL, "This help." } }
+    { "/close", 
+        _cmd_close, 
+        { "/close", "Close current chat window." } }, 
+
+    { "/quit", 
+        _cmd_quit, 
+        { "/quit", "Quit Profanity." } }
 };
 
 static struct cmd_t setting_commands[] = 
@@ -230,6 +224,45 @@ void
 reset_command_completer(void)
 {
     p_autocomplete_reset(commands_ac);
+}
+
+GSList *
+cmd_get_help_list_basic(void)
+{
+    GSList *result = NULL;
+
+    unsigned int i;
+    for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
+        result = g_slist_append(result, &((main_commands+i)->help));
+    }
+
+    return result;
+}
+
+GSList *
+cmd_get_help_list_settings(void)
+{
+    GSList *result = NULL;
+
+    unsigned int i;
+    for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
+        result = g_slist_append(result, &((setting_commands+i)->help));
+    }
+
+    return result;
+}
+
+GSList *
+cmd_get_help_list_status(void)
+{
+    GSList *result = NULL;
+
+    unsigned int i;
+    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
+        result = g_slist_append(result, &((status_commands+i)->help));
+    }
+
+    return result;
 }
 
 static gboolean
