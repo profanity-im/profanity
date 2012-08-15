@@ -259,18 +259,22 @@ _jabber_message_handler(xmpp_conn_t * const conn,
 
     // if no message, check for chatstates
     if (body == NULL) {
-        if (xmpp_stanza_get_child_by_name(stanza, "active") != NULL) {
-            // active
-        } else if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
-            // composing
-            char *from = xmpp_stanza_get_attribute(stanza, "from");
-            cons_show(from);
-            cons_show("is composing a message");
+
+        if (prefs_get_typing()) {
+            if (xmpp_stanza_get_child_by_name(stanza, "active") != NULL) {
+                // active
+            } else if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
+                // composing
+                char *from = xmpp_stanza_get_attribute(stanza, "from");
+                win_show_typing(from);
+                win_page_off();
+            }
         }
         
         return 1;
     }
 
+    // message body recieved
     char *type = xmpp_stanza_get_attribute(stanza, "type");
     if(strcmp(type, "error") == 0)
         return 1;

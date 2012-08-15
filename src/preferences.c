@@ -207,6 +207,19 @@ prefs_set_notify(gboolean value)
 }
 
 gboolean
+prefs_get_typing(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "typing", NULL);
+}
+
+void
+prefs_set_typing(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "typing", value);
+    _save_prefs();
+}
+
+gboolean
 prefs_get_flash(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "flash", NULL);

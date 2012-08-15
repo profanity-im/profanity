@@ -66,6 +66,7 @@ static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_beep(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_notify(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_typing(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
@@ -205,6 +206,19 @@ static struct cmd_t setting_commands[] =
           "",
           "Config file section : [ui]",
           "Config file value :   notify=true|false",
+          NULL } } },
+
+    { "/typing",
+        _cmd_set_typing,
+        { "/typing on|off", "Enable/disable typing notifications.",
+        { "/typing on|off",
+          "--------------",
+          "Switch the typing notifications on or off for incoming messages",
+          "If desktop notifications are also enabled you will receive them",
+          "for typing notifications also.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   typing=true|false",
           NULL } } },
 
     { "/flash", 
@@ -687,6 +701,24 @@ _cmd_set_notify(const char * const inp, struct cmd_help_t help)
     } else if (strcmp(inp, "/notify off") == 0) {
         cons_show("Desktop notifications disabled.");
         prefs_set_notify(FALSE);
+    } else {
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
+    }        
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_set_typing(const char * const inp, struct cmd_help_t help)
+{
+    if (strcmp(inp, "/typing on") == 0) {
+        cons_show("Incoming typing notifications enabled.");
+        prefs_set_typing(TRUE);
+    } else if (strcmp(inp, "/typing off") == 0) {
+        cons_show("Incoming typing notifications disabled.");
+        prefs_set_typing(FALSE);
     } else {
         char usage[strlen(help.usage + 8)];
         sprintf(usage, "Usage: %s", help.usage);

@@ -35,6 +35,8 @@ gboolean prefs_get_beep(void);
 void prefs_set_beep(gboolean value);
 gboolean prefs_get_notify(void);
 void prefs_set_notify(gboolean value);
+gboolean prefs_get_typing(void);
+void prefs_set_typing(gboolean value);
 gboolean prefs_get_flash(void);
 void prefs_set_flash(gboolean value);
 gboolean prefs_get_chlog(void);

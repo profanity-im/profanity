@@ -60,6 +60,7 @@ void title_bar_set_status(jabber_presence_t status);
 int win_close_win(void);
 int win_in_chat(void);
 char *win_get_recipient(void);
+void win_show_typing(const char * const from);
 void win_show_incomming_msg(const char * const from, const char * const message);
 void win_show_outgoing_msg(const char * const from, const char * const to, 
     const char * const message);

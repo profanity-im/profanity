@@ -64,10 +64,12 @@ static void _current_window_refresh(void);
 static void _win_switch_if_active(const int i);
 static void _win_show_time(WINDOW *win);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
+static void _win_show_typing(WINDOW *win, const char * const short_from);
 static void _win_show_message(WINDOW *win, const char * const message);
 static void _show_status_string(WINDOW *win, const char * const from, 
     const char * const show, const char * const status, const char * const pre, 
     const char * const default_show);
+static void _cons_show_typing(const char * const short_from);
 static void _cons_show_incoming_message(const char * const short_from, 
     const int win_index);
 static void _win_handle_switch(const int * const ch);
@@ -75,7 +77,8 @@ static void _win_handle_page(const int * const ch);
 static void _win_resize_all(void);
 
 #ifdef HAVE_LIBNOTIFY
-static void _win_notify(char * short_from);
+static void _win_notify_message(char * short_from);
+static void _win_notify_typing(char * short_from);
 #endif
 
 void
@@ -180,6 +183,44 @@ win_get_recipient(void)
     return recipient;
 }
 
+void 
+win_show_typing(const char * const from)
+{
+    char from_cpy[strlen(from) + 1];
+    strcpy(from_cpy, from);
+    char *short_from = strtok(from_cpy, "/");
+
+    int win_index = _find_prof_win_index(short_from);
+
+    // no chat window for user
+    if (win_index == NUM_WINS) {
+        _cons_show_typing(short_from);
+
+    // have chat window but not currently in it
+    } else if (win_index != _curr_prof_win) {
+        WINDOW *win = _wins[win_index].win;
+        _win_show_time(win);
+        _win_show_typing(win, short_from);
+        _cons_show_typing(short_from);
+        status_bar_new(win_index);
+        dirty = TRUE;
+
+    // in chat window with user
+    } else {
+        WINDOW *win = _wins[win_index].win;
+        _win_show_time(win);
+        _win_show_typing(win, short_from);
+
+        status_bar_active(win_index);
+        dirty = TRUE;
+   }
+
+#ifdef HAVE_LIBNOTIFY
+    if (prefs_get_notify())
+        _win_notify_typing(short_from);
+#endif
+}
+
 void
 win_show_incomming_msg(const char * const from, const char * const message) 
 {
@@ -211,19 +252,48 @@ win_show_incomming_msg(const char * const from, const char * const message)
         beep();
 #ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify())
-        _win_notify(short_from);
+        _win_notify_message(short_from);
 #endif
 }
 
 #ifdef HAVE_LIBNOTIFY
 static void
-_win_notify(char * short_from)
+_win_notify_message(char * short_from)
 {
     notify_init("Profanity");
+
+    char message[strlen(short_from) + 1 + 10];
+    sprintf(message, "%s: message.", short_from);
     
     // create a new notification
     NotifyNotification *incoming;
-    incoming = notify_notification_new("Profanity", short_from, NULL);
+    incoming = notify_notification_new("Profanity", message, NULL);
+
+    // set the timeout of the notification to 10 secs
+    notify_notification_set_timeout(incoming, 10000);
+
+    // set the category so as to tell what kind it is
+    char category[30] = "Incoming message";
+    notify_notification_set_category(incoming, category);
+
+    // set the urgency level of the notification
+    notify_notification_set_urgency(incoming, NOTIFY_URGENCY_NORMAL);
+
+    GError *error = NULL;
+    notify_notification_show(incoming, &error);
+}
+
+static void
+_win_notify_typing(char * short_from)
+{
+    notify_init("Profanity");
+
+    char message[strlen(short_from) + 1 + 11];
+    sprintf(message, "%s: typing...", short_from);
+    
+    // create a new notification
+    NotifyNotification *incoming;
+    incoming = notify_notification_new("Profanity", message, NULL);
 
     // set the timeout of the notification to 10 secs
     notify_notification_set_timeout(incoming, 10000);
@@ -358,6 +428,11 @@ cons_prefs(void)
         cons_show("Desktop notifications : ON");
     else
         cons_show("Desktop notifications : OFF");    
+
+    if (prefs_get_typing())
+        cons_show("Typing notifications  : ON");
+    else
+        cons_show("Typing notifications  : OFF");    
 
     if (prefs_get_showsplash())
         cons_show("Splash screen         : ON");
@@ -670,11 +745,15 @@ _win_show_user(WINDOW *win, const char * const user, const int colour)
 }
 
 static void
+_win_show_typing(WINDOW *win, const char * const short_from)
+{
+    wprintw(win, "%s is typing...\n", short_from);
+}
+
+static void
 _win_show_message(WINDOW *win, const char * const message)
 {
-//    wattroff(win, A_BOLD);
     wprintw(win, "%s\n", message);
-//    wattron(win, A_BOLD);
 }
 
 static void
@@ -740,6 +819,14 @@ _show_status_string(WINDOW *win, const char * const from,
     }
 }
 
+static void
+_cons_show_typing(const char * const short_from)
+{
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOR_PAIR(7));
+    wprintw(_cons_win, "!! %s is typing a message...\n", short_from);
+    wattroff(_cons_win, COLOR_PAIR(7));
+}
 
 static void
 _cons_show_incoming_message(const char * const short_from, const int win_index)
