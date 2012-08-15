@@ -256,8 +256,20 @@ _jabber_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
-    if(body == NULL)
+
+    // if no message, check for chatstates
+    if (body == NULL) {
+        if (xmpp_stanza_get_child_by_name(stanza, "active") != NULL) {
+            // active
+        } else if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
+            // composing
+            char *from = xmpp_stanza_get_attribute(stanza, "from");
+            cons_show(from);
+            cons_show("is composing a message");
+        }
+        
         return 1;
+    }
 
     char *type = xmpp_stanza_get_attribute(stanza, "type");
     if(strcmp(type, "error") == 0)
