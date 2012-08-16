@@ -65,7 +65,6 @@ static void _current_window_refresh(void);
 static void _win_switch_if_active(const int i);
 static void _win_show_time(WINDOW *win);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
-static void _win_show_typing(WINDOW *win, const char * const short_from);
 static void _win_show_message(WINDOW *win, const char * const message);
 static void _show_status_string(WINDOW *win, const char * const from, 
     const char * const show, const char * const status, const char * const pre, 
@@ -199,9 +198,6 @@ win_show_typing(const char * const from)
 
     // have chat window but not currently in it
     } else if (win_index != _curr_prof_win) {
-        WINDOW *win = _wins[win_index].win;
-        _win_show_time(win);
-        _win_show_typing(win, short_from);
         _cons_show_typing(short_from);
         status_bar_new(win_index);
         dirty = TRUE;
@@ -739,12 +735,6 @@ _win_show_user(WINDOW *win, const char * const user, const int colour)
     wprintw(win, "%s: ", user);
     if (colour)
         wattroff(win, COLOR_PAIR(2));
-}
-
-static void
-_win_show_typing(WINDOW *win, const char * const short_from)
-{
-    wprintw(win, "%s is typing...\n", short_from);
 }
 
 static void
