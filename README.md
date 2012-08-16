@@ -108,4 +108,5 @@ Links
 -----
 
 Homepage: http://www.boothj5.com/profanity.shtml
+
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
