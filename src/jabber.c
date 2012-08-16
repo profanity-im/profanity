@@ -155,7 +155,11 @@ jabber_send(const char * const msg, const char * const recipient)
     char *coded_msg2 = str_replace(coded_msg, "<", "&lt;");
     char *coded_msg3 = str_replace(coded_msg2, ">", "&gt;");
 
-    xmpp_stanza_t *reply, *body, *text;
+    xmpp_stanza_t *reply, *body, *text, *active;
+    
+    active = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(active, "active");
+    xmpp_stanza_set_ns(active, "http://jabber.org/protocol/chatstates");
 
     reply = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(reply, "message");
@@ -167,6 +171,7 @@ jabber_send(const char * const msg, const char * const recipient)
 
     text = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_text(text, coded_msg3);
+    xmpp_stanza_add_child(reply, active);
     xmpp_stanza_add_child(body, text);
     xmpp_stanza_add_child(reply, body);
 
