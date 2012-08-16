@@ -199,7 +199,6 @@ win_show_typing(const char * const from)
     // have chat window but not currently in it
     } else if (win_index != _curr_prof_win) {
         _cons_show_typing(short_from);
-        status_bar_new(win_index);
         dirty = TRUE;
 
     // in chat window with user
