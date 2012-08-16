@@ -208,9 +208,8 @@ win_show_typing(const char * const from)
 
     // in chat window with user
     } else {
-        WINDOW *win = _wins[win_index].win;
-        _win_show_time(win);
-        _win_show_typing(win, short_from);
+        title_bar_set_typing(TRUE);
+        title_bar_draw();
 
         status_bar_active(win_index);
         dirty = TRUE;
@@ -239,6 +238,8 @@ win_show_incomming_msg(const char * const from, const char * const message)
     _win_show_message(win, message);
     
     if (win_index == _curr_prof_win) {
+        title_bar_set_typing(FALSE);
+        title_bar_draw();
         status_bar_active(win_index);
         dirty = TRUE;
     } else {
@@ -713,7 +714,8 @@ _win_switch_if_active(const int i)
         if (i == 0) {
             title_bar_title();
         } else {
-            title_bar_show(_wins[i].from);
+            title_bar_set_recipient(_wins[i].from);
+            title_bar_draw();;
             status_bar_active(i);
         }
     }

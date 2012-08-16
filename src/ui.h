@@ -55,6 +55,9 @@ void title_bar_resize(void);
 void title_bar_show(const char * const title);
 void title_bar_title(void);
 void title_bar_set_status(jabber_presence_t status);
+void title_bar_set_recipient(char *from);
+void title_bar_set_typing(gboolean is_typing);
+void title_bar_draw(void);
 
 // main window actions
 int win_close_win(void);

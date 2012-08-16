@@ -24,11 +24,15 @@
 #include <string.h>
 #include <ncurses.h>
 
+#include <glib.h>
+
 #include "common.h"
 #include "ui.h"
 
 static WINDOW *title_bar;
 static char *current_title = NULL;
+static char *recipient = NULL;
+static GTimer *typing_elapsed;
 static int dirty;
 static jabber_presence_t current_status;
 
@@ -51,6 +55,8 @@ create_title_bar(void)
 void
 title_bar_title(void)
 {
+    recipient = NULL;
+    typing_elapsed = NULL;
     title_bar_show("Profanity. Type /help for help information.");
     dirty = TRUE;
 }
@@ -72,6 +78,27 @@ title_bar_resize(void)
 void
 title_bar_refresh(void)
 {
+    if (recipient != NULL) {
+
+        if (typing_elapsed != NULL) {
+            gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
+
+            if (seconds >= 10) {
+                
+                if (current_title != NULL) {
+                    free(current_title);
+                }
+
+                current_title = (char *) malloc((strlen(recipient) + 1) * sizeof(char));
+                strcpy(current_title, recipient);
+
+                title_bar_draw();
+    
+                dirty = TRUE;
+            }
+        }
+    }
+
     if (dirty) {
         wrefresh(title_bar);
         inp_put_back();
@@ -97,8 +124,57 @@ title_bar_set_status(jabber_presence_t status)
     _title_bar_draw_status();
 }
 
+void
+title_bar_set_recipient(char *from)
+{
+    typing_elapsed = NULL;
+    recipient = from;
+    
+    if (current_title != NULL) {
+        free(current_title);
+    }
+
+    current_title = (char *) malloc((strlen(from) + 1) * sizeof(char));
+    strcpy(current_title, from);
+
+    dirty = TRUE;
+}
+
+void
+title_bar_set_typing(gboolean is_typing)
+{
+    if (is_typing) {
+        if (typing_elapsed != NULL) {
+            g_timer_start(typing_elapsed);
+        } else {
+            typing_elapsed = g_timer_new();
+        }
+    }
+
+    if (current_title != NULL) {
+        free(current_title);
+    }
+
+    if (is_typing) {
+        current_title = (char *) malloc((strlen(recipient) + 13) * sizeof(char));
+        sprintf(current_title, "%s (typing...)", recipient);
+    } else {
+        current_title = (char *) malloc((strlen(recipient) + 1) * sizeof(char));
+        strcpy(current_title, recipient);
+    }
+    
+    dirty = TRUE;
+}
+
+void
+title_bar_draw(void)
+{
+    _title_bar_draw_status();
+    _title_bar_draw_title();
+}
+
 static void
-_title_bar_draw_status()
+_title_bar_draw_status(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
