@@ -455,8 +455,6 @@ static void
 _cons_show_basic_help(void)
 {
     cons_show("");
-    cons_show("Basic Commands:");
-    cons_show("");
 
     GSList *basic_helpers = cmd_get_help_list_basic();
     while (basic_helpers != NULL) {
@@ -473,6 +471,8 @@ _cons_show_basic_help(void)
 void
 cons_help(void)
 {
+    cons_show("");
+    cons_show("Basic Commands:");
     _cons_show_basic_help();
 
     cons_show("Settings:");
@@ -504,6 +504,7 @@ cons_help(void)
     cons_show("Navigation:");
     cons_show("");
     cons_show("F1                       : This console window.");
+    cons_show("                           You may need to change the help key in your terminal settings.");
     cons_show("F2-F10                   : Chat windows.");
     cons_show("UP, DOWN                 : Navigate input history.");
     cons_show("LEFT, RIGHT, HOME, END   : Edit current input.");
@@ -635,11 +636,7 @@ _create_windows(void)
         _win_show_time(_cons_win);
         wprintw(_cons_win, "\n");
         _win_show_time(_cons_win);
-        wprintw(_cons_win, "Type '/help' to show all commands.\n");
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "Use page up and down keys to view.\n");
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "Use tab to autocomplete commands, logins, or usernames.\n");
+        wprintw(_cons_win, "Type '/help' to show complete help.\n");
         
         _cons_show_basic_help();
     }
