@@ -82,7 +82,7 @@ static struct cmd_t main_commands[] =
 {
     { "/help", 
         _cmd_help, 
-        { "/help [command]", "This help, or help on a specific command",
+        { "/help [command]", "Show help summary, or help on a specific command",
         { "/help [command]",
           "---------------",
           "List all commands with short help on what they do.",

@@ -58,6 +58,7 @@ static int max_cols = 0;
 
 static void _create_windows(void);
 static void _print_splash_logo(WINDOW *win);
+static void _cons_show_basic_help(void);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact);
 static void _current_window_refresh(void);
@@ -450,8 +451,8 @@ cons_prefs(void)
         dirty = TRUE;
 }
 
-void
-cons_help(void)
+static void
+_cons_show_basic_help(void)
 {
     cons_show("");
     cons_show("Basic Commands:");
@@ -467,6 +468,13 @@ cons_help(void)
     }
 
     cons_show("");
+}
+
+void
+cons_help(void)
+{
+    _cons_show_basic_help();
+
     cons_show("Settings:");
     cons_show("");
 
@@ -478,14 +486,6 @@ cons_help(void)
         cons_show(line);
         settings_helpers = g_slist_next(settings_helpers);
     }
-
-/*
-    cons_show("/beep <on/off>           : Enable/disable sound notification");
-    cons_show("/notify <on/off>         : Enable/disable desktop notifications");
-    cons_show("/flash <on/off>          : Enable/disable screen flash notification");
-    cons_show("/showsplash <on/off>     : Enable/disable splash logo on startup");
-    cons_show("/chlog <on/off>          : Enable/disable chat logging");
-*/
 
     cons_show("");
     cons_show("Status changes:");
@@ -499,14 +499,6 @@ cons_help(void)
         cons_show(line);
         status_helpers = g_slist_next(status_helpers);
     }
-
-/*
-    cons_show("/away <msg>              : Set status to away.");
-    cons_show("/online <msg>            : Set status to online.");
-    cons_show("/dnd <msg>               : Set status to dnd (do not disturb).");
-    cons_show("/chat <msg>              : Set status to chat (available for chat).");
-    cons_show("/xa <msg>                : Set status to xa (extended away).");
-*/
 
     cons_show("");
     cons_show("Navigation:");
@@ -643,7 +635,13 @@ _create_windows(void)
         _win_show_time(_cons_win);
         wprintw(_cons_win, "\n");
         _win_show_time(_cons_win);
-        wprintw(_cons_win, "Type '/help' to get started.\n");
+        wprintw(_cons_win, "Type '/help' to show all commands.\n");
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "Use page up and down keys to view.\n");
+        _win_show_time(_cons_win);
+        wprintw(_cons_win, "Use tab to autocomplete commands, logins, or usernames.\n");
+        
+        _cons_show_basic_help();
     }
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
