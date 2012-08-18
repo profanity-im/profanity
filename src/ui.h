@@ -30,6 +30,19 @@
 
 #define INP_WIN_MAX 1000
 
+#define COLOUR_TEXT     COLOR_PAIR(1)
+#define COLOUR_ONLINE   COLOR_PAIR(2)
+#define COLOUR_BAR_TEXT COLOR_PAIR(3)
+#define COLOUR_BAR_DRAW COLOR_PAIR(4)
+#define COLOUR_OFFLINE  COLOR_PAIR(5)
+#define COLOUR_ERR      COLOR_PAIR(6)
+#define COLOUR_INC      COLOR_PAIR(7)
+#define COLOUR_BAR_DEF  COLOR_PAIR(8)
+#define COLOUR_AWAY     COLOR_PAIR(9)
+#define COLOUR_CHAT     COLOR_PAIR(10)
+#define COLOUR_DND      COLOR_PAIR(11)
+#define COLOUR_XA       COLOR_PAIR(12)
+
 struct prof_win {
     char from[100];
     WINDOW *win;

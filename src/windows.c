@@ -100,6 +100,12 @@ gui_init(void)
         init_pair(6, prefs_get_err(), prefs_get_bkgnd());
         init_pair(7, prefs_get_inc(), prefs_get_bkgnd());
         init_pair(8, prefs_get_bar_text(), prefs_get_bar());
+
+        //statuses
+        init_pair(9, prefs_get_away(), prefs_get_bkgnd());
+        init_pair(10, prefs_get_chat(), prefs_get_bkgnd());
+        init_pair(11, prefs_get_dnd(), prefs_get_bkgnd());
+        init_pair(12, prefs_get_xa(), prefs_get_bkgnd());
     }
 
     refresh();
@@ -344,9 +350,9 @@ win_bad_show(const char * const msg)
 {
     WINDOW *win = _wins[_curr_prof_win].win;
     _win_show_time(win);
-    wattron(win, COLOR_PAIR(6));
+    wattron(win, COLOUR_ERR);
     wprintw(win, "%s\n", msg);
-    wattroff(win, COLOR_PAIR(6));
+    wattroff(win, COLOUR_ERR);
     
     dirty = TRUE;
 }
@@ -392,9 +398,9 @@ win_disconnected(void)
         if (strcmp(_wins[i].from, "") != 0) {
             WINDOW *win = _wins[_curr_prof_win].win;
             _win_show_time(win);
-            wattron(win, COLOR_PAIR(6));
+            wattron(win, COLOUR_ERR);
             wprintw(win, "%s\n", "Lost connection.");
-            wattroff(win, COLOR_PAIR(6));
+            wattroff(win, COLOUR_ERR);
     
             // if current win, set dirty
             if (i == _curr_prof_win) {
@@ -523,14 +529,16 @@ cons_show_online_contacts(GSList *list)
     while(curr) {
         PContact contact = curr->data;
         _win_show_time(_cons_win);
-        wattron(_cons_win, COLOR_PAIR(2));
+
+        wattron(_cons_win, COLOUR_ONLINE);
         wprintw(_cons_win, "%s", p_contact_name(contact));
-        if (p_contact_show(contact))
-            wprintw(_cons_win, " is %s", p_contact_show(contact));
+        wprintw(_cons_win, " is %s", p_contact_show(contact));
+    
         if (p_contact_status(contact))
             wprintw(_cons_win, ", \"%s\"", p_contact_status(contact));
+    
         wprintw(_cons_win, "\n");
-        wattroff(_cons_win, COLOR_PAIR(2));
+        wattroff(_cons_win, COLOUR_ONLINE);
 
         curr = g_slist_next(curr);
     }
@@ -540,9 +548,9 @@ void
 cons_bad_show(const char * const msg)
 {
     _win_show_time(_cons_win);
-    wattron(_cons_win, COLOR_PAIR(6));
+    wattron(_cons_win, COLOUR_ERR);
     wprintw(_cons_win, "%s\n", msg);
-    wattroff(_cons_win, COLOR_PAIR(6));
+    wattroff(_cons_win, COLOUR_ERR);
     
     if (_curr_prof_win == 0)
         dirty = TRUE;
@@ -605,7 +613,7 @@ _create_windows(void)
     struct prof_win cons;
     strcpy(cons.from, CONS_WIN_TITLE);
     cons.win = newpad(PAD_SIZE, cols);
-    wbkgd(cons.win, COLOR_PAIR(1));
+    wbkgd(cons.win, COLOUR_TEXT);
     cons.y_pos = 0;
     cons.paged = 0;
     scrollok(cons.win, TRUE);
@@ -646,7 +654,7 @@ _create_windows(void)
         struct prof_win chat;
         strcpy(chat.from, "");
         chat.win = newpad(PAD_SIZE, cols);
-        wbkgd(chat.win, COLOR_PAIR(1));
+        wbkgd(chat.win, COLOUR_TEXT);
         chat.y_pos = 0;
         chat.paged = 0;
 //        wattrset(chat.win, A_BOLD);
@@ -659,7 +667,7 @@ static void
 _print_splash_logo(WINDOW *win)
 {
     wprintw(win, "Welcome to\n");
-    wattron(win, COLOR_PAIR(5));
+    wattron(win, COLOUR_OFFLINE);
     wprintw(win, "                   ___            _           \n");
     wprintw(win, "                  / __)          (_)_         \n");
     wprintw(win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
@@ -667,7 +675,7 @@ _print_splash_logo(WINDOW *win)
     wprintw(win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
     wprintw(win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
     wprintw(win, "|_|                                    (____/ \n");
-    wattroff(win, COLOR_PAIR(5));
+    wattroff(win, COLOUR_OFFLINE);
 }
 
 static int
@@ -730,10 +738,10 @@ static void
 _win_show_user(WINDOW *win, const char * const user, const int colour)
 {
     if (colour)
-        wattron(win, COLOR_PAIR(2));
+        wattron(win, COLOUR_ONLINE);
     wprintw(win, "%s: ", user);
     if (colour)
-        wattroff(win, COLOR_PAIR(2));
+        wattroff(win, COLOUR_ONLINE);
 }
 
 static void
@@ -779,10 +787,9 @@ _show_status_string(WINDOW *win, const char * const from,
 {
     _win_show_time(win);    
     if (strcmp(default_show, "online") == 0) {
-        wattron(win, COLOR_PAIR(2));
+        wattron(win, COLOUR_ONLINE);
     } else {
-        wattron(win, COLOR_PAIR(5));
-//        wattroff(win, A_BOLD);
+        wattron(win, COLOUR_OFFLINE);
     }
 
     wprintw(win, "%s %s", pre, from);
@@ -798,10 +805,9 @@ _show_status_string(WINDOW *win, const char * const from,
     wprintw(win, "\n");
     
     if (strcmp(default_show, "online") == 0) {
-        wattroff(win, COLOR_PAIR(2));
+        wattroff(win, COLOUR_ONLINE);
     } else {
-        wattroff(win, COLOR_PAIR(5));
-//        wattron(win, A_BOLD);
+        wattroff(win, COLOUR_OFFLINE);
     }
 }
 
@@ -809,18 +815,18 @@ static void
 _cons_show_typing(const char * const short_from)
 {
     _win_show_time(_cons_win);
-    wattron(_cons_win, COLOR_PAIR(7));
+    wattron(_cons_win, COLOUR_INC);
     wprintw(_cons_win, "!! %s is typing a message...\n", short_from);
-    wattroff(_cons_win, COLOR_PAIR(7));
+    wattroff(_cons_win, COLOUR_INC);
 }
 
 static void
 _cons_show_incoming_message(const char * const short_from, const int win_index)
 {
     _win_show_time(_cons_win);
-    wattron(_cons_win, COLOR_PAIR(7));
+    wattron(_cons_win, COLOUR_INC);
     wprintw(_cons_win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
-    wattroff(_cons_win, COLOR_PAIR(7));
+    wattroff(_cons_win, COLOUR_INC);
 }
 
 static void

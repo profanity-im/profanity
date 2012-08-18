@@ -46,7 +46,7 @@ create_title_bar(void)
     getmaxyx(stdscr, rows, cols);
 
     title_bar = newwin(1, cols, 0, 0);
-    wbkgd(title_bar, COLOR_PAIR(8));
+    wbkgd(title_bar, COLOUR_BAR_DEF);
     title_bar_title();
     title_bar_set_status(PRESENCE_OFFLINE);
     dirty = TRUE;
@@ -68,7 +68,7 @@ title_bar_resize(void)
     getmaxyx(stdscr, rows, cols);
 
     wresize(title_bar, 1, cols);
-    wbkgd(title_bar, COLOR_PAIR(8));
+    wbkgd(title_bar, COLOUR_BAR_DEF);
     wclear(title_bar);
     _title_bar_draw_title();
     _title_bar_draw_status();
@@ -179,9 +179,9 @@ _title_bar_draw_status(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    wattron(title_bar, COLOR_PAIR(4));
+    wattron(title_bar, COLOUR_BAR_DRAW);
     mvwaddch(title_bar, 0, cols - 14, '[');
-    wattroff(title_bar, COLOR_PAIR(4));
+    wattroff(title_bar, COLOUR_BAR_DRAW);
 
     if (current_status == PRESENCE_ONLINE) {
         mvwprintw(title_bar, 0, cols - 13, " ...online ");
@@ -197,9 +197,9 @@ _title_bar_draw_status(void)
         mvwprintw(title_bar, 0, cols - 13, " ..offline ");
     }
     
-    wattron(title_bar, COLOR_PAIR(4));
+    wattron(title_bar, COLOUR_BAR_DRAW);
     mvwaddch(title_bar, 0, cols - 2, ']');
-    wattroff(title_bar, COLOR_PAIR(4));
+    wattroff(title_bar, COLOUR_BAR_DRAW);
     
     dirty = TRUE;
 }

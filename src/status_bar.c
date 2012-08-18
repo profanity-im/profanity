@@ -50,10 +50,10 @@ create_status_bar(void)
     }
 
     status_bar = newwin(1, cols, rows-2, 0);
-    wbkgd(status_bar, COLOR_PAIR(8));
-    wattron(status_bar, COLOR_PAIR(4));
+    wbkgd(status_bar, COLOUR_BAR_DEF);
+    wattron(status_bar, COLOUR_BAR_DRAW);
     mvwprintw(status_bar, 0, cols - 29, _active);
-    wattroff(status_bar, COLOR_PAIR(4));
+    wattroff(status_bar, COLOUR_BAR_DRAW);
 
     get_time(curr_time);
     dirty = TRUE;
@@ -86,11 +86,11 @@ status_bar_resize(void)
 
     mvwin(status_bar, rows-2, 0);
     wresize(status_bar, 1, cols);
-    wbkgd(status_bar, COLOR_PAIR(8));
+    wbkgd(status_bar, COLOUR_BAR_DEF);
     wclear(status_bar);
-    wattron(status_bar, COLOR_PAIR(4));
+    wattron(status_bar, COLOUR_BAR_DRAW);
     mvwprintw(status_bar, 0, cols - 29, _active);
-    wattroff(status_bar, COLOR_PAIR(4));
+    wattroff(status_bar, COLOUR_BAR_DRAW);
 
     for(i = 0; i < 9; i++) {
         if (is_new[i])
@@ -135,12 +135,12 @@ status_bar_active(const int win)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
  
-    wattron(status_bar, COLOR_PAIR(4));
+    wattron(status_bar, COLOUR_BAR_DRAW);
     if (win < 9)
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
     else
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
-    wattroff(status_bar, COLOR_PAIR(4));
+    wattroff(status_bar, COLOUR_BAR_DRAW);
 
     dirty = TRUE;
 }
@@ -156,13 +156,13 @@ status_bar_new(const int win)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
  
-    wattron(status_bar, COLOR_PAIR(3));
+    wattron(status_bar, COLOUR_BAR_TEXT);
     wattron(status_bar, A_BLINK);
     if (win < 9)
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
     else
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
-    wattroff(status_bar, COLOR_PAIR(3));
+    wattroff(status_bar, COLOUR_BAR_TEXT);
     wattroff(status_bar, A_BLINK);
 
     dirty = TRUE;
@@ -206,9 +206,9 @@ status_bar_clear(void)
 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    wattron(status_bar, COLOR_PAIR(4));
+    wattron(status_bar, COLOUR_BAR_DRAW);
     mvwprintw(status_bar, 0, cols - 29, _active);
-    wattroff(status_bar, COLOR_PAIR(4));
+    wattroff(status_bar, COLOUR_BAR_DRAW);
 
     dirty = TRUE;
 }
@@ -221,13 +221,13 @@ _status_bar_update_time(void)
     get_time(tstmp);
     sprintf(bar_time, "%s", tstmp);
 
-    wattron(status_bar, COLOR_PAIR(4));
+    wattron(status_bar, COLOUR_BAR_DRAW);
     mvwaddch(status_bar, 0, 1, '[');
-    wattroff(status_bar, COLOR_PAIR(4));
+    wattroff(status_bar, COLOUR_BAR_DRAW);
     mvwprintw(status_bar, 0, 2, bar_time);
-    wattron(status_bar, COLOR_PAIR(4));
+    wattron(status_bar, COLOUR_BAR_DRAW);
     mvwaddch(status_bar, 0, 7, ']');
-    wattroff(status_bar, COLOR_PAIR(4));
+    wattroff(status_bar, COLOUR_BAR_DRAW);
 
     dirty = TRUE;
 }
