@@ -59,6 +59,10 @@ static struct colours_t {
         NCURSES_COLOR_T bkgnd;
         NCURSES_COLOR_T text;
         NCURSES_COLOR_T online;
+        NCURSES_COLOR_T away;
+        NCURSES_COLOR_T chat;
+        NCURSES_COLOR_T dnd;
+        NCURSES_COLOR_T xa;
         NCURSES_COLOR_T offline;
         NCURSES_COLOR_T err;
         NCURSES_COLOR_T inc;
@@ -148,6 +152,18 @@ _load_colours(void)
 
     gchar *online_val = g_key_file_get_string(prefs, "colours", "online", NULL);
     _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);
+    
+    gchar *away_val = g_key_file_get_string(prefs, "colours", "away", NULL);
+    _set_colour(away_val, &colour_prefs.away, COLOR_GREEN);
+    
+    gchar *chat_val = g_key_file_get_string(prefs, "colours", "chat", NULL);
+    _set_colour(chat_val, &colour_prefs.chat, COLOR_GREEN);
+    
+    gchar *dnd_val = g_key_file_get_string(prefs, "colours", "dnd", NULL);
+    _set_colour(dnd_val, &colour_prefs.dnd, COLOR_GREEN);
+    
+    gchar *xa_val = g_key_file_get_string(prefs, "colours", "xa", NULL);
+    _set_colour(xa_val, &colour_prefs.xa, COLOR_GREEN);
     
     gchar *offline_val = g_key_file_get_string(prefs, "colours", "offline", NULL);
     _set_colour(offline_val, &colour_prefs.offline, COLOR_CYAN);
@@ -324,6 +340,30 @@ NCURSES_COLOR_T
 prefs_get_online() 
 {
     return colour_prefs.online;
+}
+
+NCURSES_COLOR_T
+prefs_get_away() 
+{
+    return colour_prefs.away;
+}
+
+NCURSES_COLOR_T
+prefs_get_chat() 
+{
+    return colour_prefs.chat;
+}
+
+NCURSES_COLOR_T
+prefs_get_dnd() 
+{
+    return colour_prefs.dnd;
+}
+
+NCURSES_COLOR_T
+prefs_get_xa() 
+{
+    return colour_prefs.xa;
 }
 
 NCURSES_COLOR_T
