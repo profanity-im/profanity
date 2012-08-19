@@ -529,16 +529,43 @@ cons_show_online_contacts(GSList *list)
     while(curr) {
         PContact contact = curr->data;
         _win_show_time(_cons_win);
+        const char *show = p_contact_show(contact);    
 
-        wattron(_cons_win, COLOUR_ONLINE);
+        if (strcmp(show, "online") == 0) {
+            wattron(_cons_win, COLOUR_ONLINE);
+        } else if (strcmp(show, "away") == 0) {
+            wattron(_cons_win, COLOUR_AWAY);
+        } else if (strcmp(show, "chat") == 0) {
+            wattron(_cons_win, COLOUR_CHAT);
+        } else if (strcmp(show, "dnd") == 0) {
+            wattron(_cons_win, COLOUR_DND);
+        } else if (strcmp(show, "xa") == 0) {
+            wattron(_cons_win, COLOUR_XA);
+        } else {
+            wattron(_cons_win, COLOUR_OFFLINE);
+        }
+
         wprintw(_cons_win, "%s", p_contact_name(contact));
-        wprintw(_cons_win, " is %s", p_contact_show(contact));
+        wprintw(_cons_win, " is %s", show);
     
         if (p_contact_status(contact))
             wprintw(_cons_win, ", \"%s\"", p_contact_status(contact));
     
         wprintw(_cons_win, "\n");
-        wattroff(_cons_win, COLOUR_ONLINE);
+
+        if (strcmp(show, "online") == 0) {
+            wattroff(_cons_win, COLOUR_ONLINE);
+        } else if (strcmp(show, "away") == 0) {
+            wattroff(_cons_win, COLOUR_AWAY);
+        } else if (strcmp(show, "chat") == 0) {
+            wattroff(_cons_win, COLOUR_CHAT);
+        } else if (strcmp(show, "dnd") == 0) {
+            wattroff(_cons_win, COLOUR_DND);
+        } else if (strcmp(show, "xa") == 0) {
+            wattroff(_cons_win, COLOUR_XA);
+        } else {
+            wattroff(_cons_win, COLOUR_OFFLINE);
+        }
 
         curr = g_slist_next(curr);
     }
@@ -786,7 +813,18 @@ _show_status_string(WINDOW *win, const char * const from,
     const char * const default_show)
 {
     _win_show_time(win);    
-    if (strcmp(default_show, "online") == 0) {
+
+    if (show != NULL) {
+        if (strcmp(show, "away") == 0) {
+            wattron(win, COLOUR_AWAY);
+        } else if (strcmp(show, "chat") == 0) {
+            wattron(win, COLOUR_CHAT);
+        } else if (strcmp(show, "dnd") == 0) {
+            wattron(win, COLOUR_DND);
+        } else if (strcmp(show, "xa") == 0) {
+            wattron(win, COLOUR_XA);
+        }
+    } else if (strcmp(default_show, "online") == 0) {
         wattron(win, COLOUR_ONLINE);
     } else {
         wattron(win, COLOUR_OFFLINE);
@@ -804,7 +842,17 @@ _show_status_string(WINDOW *win, const char * const from,
     
     wprintw(win, "\n");
     
-    if (strcmp(default_show, "online") == 0) {
+    if (show != NULL) {
+        if (strcmp(show, "away") == 0) {
+            wattroff(win, COLOUR_AWAY);
+        } else if (strcmp(show, "chat") == 0) {
+            wattroff(win, COLOUR_CHAT);
+        } else if (strcmp(show, "dnd") == 0) {
+            wattroff(win, COLOUR_DND);
+        } else if (strcmp(show, "xa") == 0) {
+            wattroff(win, COLOUR_XA);
+        }
+    } else if (strcmp(default_show, "online") == 0) {
         wattroff(win, COLOUR_ONLINE);
     } else {
         wattroff(win, COLOUR_OFFLINE);
