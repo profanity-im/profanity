@@ -28,7 +28,7 @@
 #include "log.h"
 #include "common.h"
 
-extern FILE *logp;
+static FILE *logp;
 
 static GTimeZone *tz;
 static GDateTime *dt;
