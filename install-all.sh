@@ -90,6 +90,12 @@ if [ $? -eq 0 ]; then
     DIST=fedora
 fi
 
+# quick hack check for Fedora 16
+uname -a | grep --ignore-case fc16
+if [ $? -eq 0 ]; then
+   DIST=fedora
+fi
+
 uname -a | grep --ignore-case ubuntu
 if [ $? -eq 0 ]; then
     DIST=ubuntu

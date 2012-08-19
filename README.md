@@ -103,3 +103,10 @@ Commands in profanity all start with `/`.
 To get a list of possible commands, and find out how to navigate around try:
 
     /help
+
+Links
+-----
+
+Homepage: http://www.boothj5.com/profanity.shtml
+
+Mailing List: https://groups.google.com/forum/#!forum/profanitydev
