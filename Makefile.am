@@ -15,3 +15,4 @@ tests_testsuite_SOURCES = tests/test_contact_list.c src/contact_list.c src/conta
 	tests/test_prof_autocomplete.c src/prof_autocomplete.c src/common.c tests/testsuite.c
 tests_testsuite_LDADD = -lheadunit -lstdc++
 
+man_MANS = docs/profanity.1

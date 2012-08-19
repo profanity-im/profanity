@@ -1,0 +1,104 @@
+.TH Profanity 1 "August 2012" "Profanity XMPP client"
+.SH NAME
+Profanity \- a simple console based XMPP chat client for Linux
+.SH SYNOPSIS
+.B profanity
+[-vhd] [-l level]
+.SH DESCRIPTION
+.B Profanity
+is a simple lightweight console based XMPP chat client.  It's emphasis is 
+on having a simple and configurable UI.
+.SH OPTIONS
+.TP
+.BI "\-v, \-\-version"
+Show version information.
+.TP
+.BI "\-h, \-\-help"
+Show help on command line arguments.
+.TP
+.BI "\-d, \-\-disable-tls"
+Disable TLS for servers that either don't support it, or claim to but do not
+complete the handshake.
+.TP
+.BI "\-l, \-\-log="LEVEL
+Set the logging level,
+.I LEVEL
+may be set to DEBUG, INFO (the default), WARN or ERROR.
+.SH SEE ALSO
+.B Profanity
+itself has a lot of built\-in help. Check the /help command for more information.
+Type /help help for information on how to use help itself.
+.SH CONFIGURATION
+Configuration for
+.B Profanity
+is stored in
+.I ~/.profanity/config
+, see the following example:
+.br
+.RS
+.PP
+[ui]
+.br
+beep=false
+.br
+flash=false 
+.br
+showsplash=false 
+.br
+notify=true 
+.br
+chlog=true 
+.br
+typing=true 
+.br
+.PP
+[colours]
+.br
+away=magenta
+.br
+chat=yellow
+.br
+xa=blue
+.br
+online=white
+.br
+dnd=red
+.br
+offline=cyan
+.br
+bkgnd=default
+.br
+text=white
+.br
+online=green
+.br
+offline=red
+.br
+err=red
+.br
+inc=yellow
+.br
+bar=green
+.br
+bar_draw=black
+.br
+bar_text=black
+.PP
+[connections]
+.br
+logins=user1@server1.org;myuser@server2.com;
+.PP
+.RE
+The [ui] section contains basic preferences, you can find more help on these
+settings by typing "/help beep" for example in Profanity.
+.PP
+The [colours] section allows you to tailor the colours used in Profanity to
+suit your terminal preferences.
+.PP
+The [connections] section is the list of users that will appear in tab
+completion for the /connect command.  This list is automatically populated
+when you successfully log in as a user.
+.SH AUTHORS/CREDITS
+.B Profanity
+was written by James Booth
+.B <boothj5@gmail.com>
