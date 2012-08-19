@@ -35,9 +35,6 @@
 
 #define PING_INTERVAL 120000 // 2 minutes
 
-// log reference
-extern FILE *logp;
-
 static struct _jabber_conn_t {
     xmpp_log_t *log;
     xmpp_ctx_t *ctx;
