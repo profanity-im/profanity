@@ -35,6 +35,7 @@
 #include "preferences.h"
 #include "prof_autocomplete.h"
 #include "tinyurl.h"
+#include "log.h"
 
 /* command structure
  * cmd - The actual string of the command
@@ -329,6 +330,8 @@ static PAutocomplete commands_ac;
 gboolean
 process_input(char *inp)
 {
+    log_msg(PROF_LEVEL_DEBUG, PROF, "Input recieved: %s", inp);
+
     gboolean result = FALSE;
 
     g_strstrip(inp);
@@ -495,12 +498,18 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
         inp_block();
         inp_get_password(passwd);
         inp_non_block();
+
+        log_msg(PROF_LEVEL_DEBUG, PROF, "Connecting as %s", lower);
         
         conn_status = jabber_connect(lower, passwd);
-        if (conn_status == JABBER_CONNECTING)
+        if (conn_status == JABBER_CONNECTING) {
             cons_show("Connecting...");
-        if (conn_status == JABBER_DISCONNECTED)
+            log_msg(PROF_LEVEL_DEBUG, PROF, "Connecting...");
+        }
+        if (conn_status == JABBER_DISCONNECTED) {
             cons_bad_show("Connection to server failed.");
+            log_msg(PROF_LEVEL_DEBUG, PROF, "Connection using %s failed", lower);
+        }
 
         result = TRUE;
     }

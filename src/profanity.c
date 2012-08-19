@@ -36,6 +36,7 @@
 #include "contact_list.h"
 #include "tinyurl.h"
 
+static log_level_t get_log_level(char *log_level);
 static void _profanity_shutdown(void);
 
 void
@@ -69,10 +70,12 @@ profanity_run(void)
 }
 
 void
-profanity_init(const int disable_tls)
+profanity_init(const int disable_tls, char *log_level)
 {
     create_config_directory();
-    log_init(PROF_LEVEL_DEBUG);
+    log_level_t prof_log_level = get_log_level(log_level);
+    log_init(prof_log_level);
+    log_msg(PROF_LEVEL_INFO, PROF, "Starting Profanity...");                      
     chat_log_init();
     prefs_load();
     gui_init();
@@ -85,9 +88,23 @@ profanity_init(const int disable_tls)
 void
 _profanity_shutdown(void)
 {
+    log_msg(PROF_LEVEL_INFO, PROF, "Profanity is shutting down.");
     jabber_disconnect();
     gui_close();
     log_close();
     chat_log_close();
     prefs_close();
+}
+
+static log_level_t get_log_level(char *log_level)
+{
+    if (strcmp(log_level, "DEBUG") == 0) {
+        return PROF_LEVEL_DEBUG;
+    } else if (strcmp(log_level, "INFO") == 0) {
+        return PROF_LEVEL_INFO;
+    } else if (strcmp(log_level, "WARN") == 0) {
+        return PROF_LEVEL_WARN;
+    } else {
+        return PROF_LEVEL_ERROR;
+    }
 }

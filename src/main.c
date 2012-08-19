@@ -30,6 +30,7 @@
 
 static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
+static char *log = "INFO";
 
 int
 main(int argc, char **argv)
@@ -38,6 +39,7 @@ main(int argc, char **argv)
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "disable-tls", 'd', 0, G_OPTION_ARG_NONE, &disable_tls, "Disable TLS", NULL },
+        { "log",'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
         { NULL }
     };
   
@@ -46,7 +48,6 @@ main(int argc, char **argv)
 
     context = g_option_context_new(NULL);
     g_option_context_add_main_entries(context, entries, NULL);
-    //g_option_context_add_group(context, gtk_get_option_group (TRUE));
     if (!g_option_context_parse(context, &argc, &argv, &error)) {
         g_print("%s\n", error->message);
         return 1;
@@ -64,7 +65,7 @@ main(int argc, char **argv)
         return 0;
     }
 
-    profanity_init(disable_tls);
+    profanity_init(disable_tls, log);
     profanity_run();
 
     return 0;
