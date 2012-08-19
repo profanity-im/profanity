@@ -44,19 +44,52 @@ static struct _jabber_conn_t {
     int tls_disabled;
 } jabber_conn;
 
+static log_level_t get_log_level(xmpp_log_level_t xmpp_level)
+{
+    if (xmpp_level == XMPP_LEVEL_DEBUG) {
+        return PROF_LEVEL_DEBUG;
+    } else if (xmpp_level == XMPP_LEVEL_INFO) {
+        return PROF_LEVEL_INFO;
+    } else if (xmpp_level == XMPP_LEVEL_WARN) {
+        return PROF_LEVEL_WARN;
+    } else {
+        return PROF_LEVEL_ERROR;
+    }
+}
+
+static xmpp_log_level_t get_xmpp_log_level()
+{
+    log_level_t prof_level = log_get_level();
+
+    if (prof_level == PROF_LEVEL_DEBUG) {
+        return XMPP_LEVEL_DEBUG;
+    } else if (prof_level == PROF_LEVEL_INFO) {
+        return XMPP_LEVEL_INFO;
+    } else if (prof_level == PROF_LEVEL_WARN) {
+        return XMPP_LEVEL_WARN;
+    } else {
+        return XMPP_LEVEL_ERROR;
+    }
+}
+
 void
 xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     const char * const area, const char * const msg)
 {
-    log_msg(area, msg);
+    log_level_t prof_level = get_log_level(level);
+    log_msg(prof_level, area, msg);
 }
-
-static const xmpp_log_t file_log = { &xmpp_file_logger, XMPP_LEVEL_DEBUG };
 
 xmpp_log_t *
 xmpp_get_file_logger()
 {
-    return (xmpp_log_t*) &file_log;
+    xmpp_log_level_t level = get_xmpp_log_level();
+    xmpp_log_t *file_log = malloc(sizeof(xmpp_log_t));
+
+    file_log->handler = xmpp_file_logger;
+    file_log->userdata = &level;
+
+    return file_log;
 }
 
 // private XMPP handlers
@@ -338,7 +371,7 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
             cons_bad_show("Login failed.");
         }
         win_page_off();
-        log_msg(CONN, "disconnected");
+        log_msg(PROF_LEVEL_INFO, CONN, "disconnected");
         xmpp_stop(ctx);
         jabber_conn.conn_status = JABBER_DISCONNECTED;
         jabber_conn.presence = PRESENCE_OFFLINE;
@@ -355,7 +388,7 @@ _roster_handler(xmpp_conn_t * const conn,
     type = xmpp_stanza_get_type(stanza);
     
     if (strcmp(type, "error") == 0)
-        log_msg(CONN, "ERROR: query failed");
+        log_msg(PROF_LEVEL_ERROR, CONN, "ERROR: query failed");
     else {
         query = xmpp_stanza_get_child_by_name(stanza, "query");
         cons_show("Roster:");

@@ -29,8 +29,17 @@
 #define PROF "prof"
 #define CONN "conn"
 
-void log_init(void);
-void log_msg(const char * const area, const char * const msg);
+// log levels
+typedef enum {
+    PROF_LEVEL_DEBUG,
+    PROF_LEVEL_INFO,
+    PROF_LEVEL_WARN,
+    PROF_LEVEL_ERROR
+} log_level_t;
+
+void log_init(log_level_t log_level);
+void log_msg(log_level_t level, const char * const area, const char * const msg);
+log_level_t log_get_level(void);
 void log_close(void);
 
 #endif

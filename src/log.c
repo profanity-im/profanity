@@ -32,19 +32,23 @@ static FILE *logp;
 
 static GTimeZone *tz;
 static GDateTime *dt;
+static log_level_t prof_log_level;
 
 void
-log_msg(const char * const area, const char * const msg)
+log_msg(log_level_t level, const char * const area, const char * const msg)
 {
-    dt = g_date_time_new_now(tz);                                      
-    gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");               
-    fprintf(logp, "%s: %s DEBUG: %s\n", date_fmt, area, msg);
-    g_date_time_unref(dt);
+    if (level >= prof_log_level) {
+        dt = g_date_time_new_now(tz);                                      
+        gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");               
+        fprintf(logp, "%s: %s: %s\n", date_fmt, area, msg);
+        g_date_time_unref(dt);
+    }
 }
 
 void
-log_init(void)
+log_init(log_level_t log_level)
 {
+    prof_log_level = log_level;
     tz = g_time_zone_new_local();
     GString *log_file = g_string_new(getenv("HOME"));
     g_string_append(log_file, "/.profanity/log");
@@ -52,7 +56,13 @@ log_init(void)
     g_string_append(log_file, "/profanity.log");
     logp = fopen(log_file->str, "a");
     g_string_free(log_file, TRUE);
-    log_msg(PROF, "Starting Profanity...");
+    log_msg(PROF_LEVEL_INFO, PROF, "Starting Profanity...");
+}
+
+log_level_t
+log_get_level(void)
+{
+    return prof_log_level;
 }
 
 void

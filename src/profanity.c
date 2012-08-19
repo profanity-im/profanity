@@ -72,7 +72,7 @@ void
 profanity_init(const int disable_tls)
 {
     create_config_directory();
-    log_init();
+    log_init(PROF_LEVEL_DEBUG);
     chat_log_init();
     prefs_load();
     gui_init();
