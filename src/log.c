@@ -30,15 +30,22 @@
 
 extern FILE *logp;
 
+static GTimeZone *tz;
+static GDateTime *dt;
+
 void
 log_msg(const char * const area, const char * const msg)
 {
-    fprintf(logp, "%s DEBUG: %s\n", area, msg);
+    dt = g_date_time_new_now(tz);                                      
+    gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");               
+    fprintf(logp, "%s: %s DEBUG: %s\n", date_fmt, area, msg);
+    g_date_time_unref(dt);
 }
 
 void
 log_init(void)
 {
+    tz = g_time_zone_new_local();
     GString *log_file = g_string_new(getenv("HOME"));
     g_string_append(log_file, "/.profanity/log");
     create_dir(log_file->str);
@@ -51,5 +58,7 @@ log_init(void)
 void
 log_close(void)
 {
+    g_time_zone_unref(tz);
     fclose(logp);
 }
+
