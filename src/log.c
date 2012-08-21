@@ -81,4 +81,3 @@ log_close(void)
     g_time_zone_unref(tz);
     fclose(logp);
 }
-

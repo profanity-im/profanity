@@ -28,6 +28,7 @@
 #include "chat_log.h"
 #include "common.h"
 #include "util.h"
+#include "log.h"
 
 static GHashTable *logs;
 static GTimeZone *tz;
@@ -37,6 +38,7 @@ static void _close_file(gpointer key, gpointer value, gpointer user_data);
 void
 chat_log_init(void)
 {
+    log_msg(PROF_LEVEL_INFO, "prof", "Initialising chat logs");
     tz = g_time_zone_new_local();
     logs = g_hash_table_new(NULL, (GEqualFunc) g_strcmp0);
 }
@@ -86,6 +88,7 @@ chat_log_chat(const char * const login, char *other,
 void
 chat_log_close(void)
 {
+    log_msg(PROF_LEVEL_INFO, "prof", "Closing down chat logs");
     g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
     g_time_zone_unref(tz);
 }

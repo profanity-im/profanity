@@ -26,6 +26,7 @@
 
 #include <glib.h>
 
+#include "config.h"
 #include "profanity.h"
 #include "log.h"
 #include "chat_log.h"
@@ -36,13 +37,15 @@
 #include "contact_list.h"
 #include "tinyurl.h"
 
-static log_level_t get_log_level(char *log_level);
+static log_level_t _get_log_level(char *log_level);
 static void _profanity_shutdown(void);
 
 void
 profanity_run(void)
 {
     gboolean cmd_result = TRUE;
+
+    log_msg(PROF_LEVEL_INFO, "prof", "Starting main event loop");
 
     inp_non_block();
     while(cmd_result == TRUE) {
@@ -73,9 +76,9 @@ void
 profanity_init(const int disable_tls, char *log_level)
 {
     create_config_directory();
-    log_level_t prof_log_level = get_log_level(log_level);
+    log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
-    log_msg(PROF_LEVEL_INFO, PROF, "Starting Profanity...");                      
+    log_msg(PROF_LEVEL_INFO, PROF, "Starting Profanity (%s)...", PACKAGE_VERSION);
     chat_log_init();
     prefs_load();
     gui_init();
@@ -91,12 +94,14 @@ _profanity_shutdown(void)
     log_msg(PROF_LEVEL_INFO, PROF, "Profanity is shutting down.");
     jabber_disconnect();
     gui_close();
-    log_close();
     chat_log_close();
     prefs_close();
+    log_msg(PROF_LEVEL_INFO, "prof", "Shutdown complete");
+    log_close();
 }
 
-static log_level_t get_log_level(char *log_level)
+static log_level_t 
+_get_log_level(char *log_level)
 {
     if (strcmp(log_level, "DEBUG") == 0) {
         return PROF_LEVEL_DEBUG;

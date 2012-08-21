@@ -360,6 +360,7 @@ process_input(char *inp)
 void
 command_init(void)
 {
+    log_msg(PROF_LEVEL_INFO, "prof", "Initialising commands");
     commands_ac = p_autocomplete_new();
 
     unsigned int i;

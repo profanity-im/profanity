@@ -111,6 +111,7 @@ static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 void
 jabber_init(const int disable_tls)
 {
+    log_msg(PROF_LEVEL_INFO, "prof", "Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence = PRESENCE_OFFLINE;
     jabber_conn.tls_disabled = disable_tls;
@@ -126,6 +127,7 @@ jabber_conn_status_t
 jabber_connect(const char * const user, 
     const char * const passwd)
 {
+    log_msg(PROF_LEVEL_INFO, "prof", "Connecting as %s", user);
     xmpp_initialize();
 
     jabber_conn.log = xmpp_get_file_logger();
@@ -159,6 +161,7 @@ void
 jabber_disconnect(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        log_msg(PROF_LEVEL_INFO, "prof", "Closing connection");
         xmpp_conn_release(jabber_conn.conn);
         xmpp_ctx_free(jabber_conn.ctx);
         xmpp_shutdown();
@@ -343,6 +346,7 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
         title_bar_set_status(PRESENCE_ONLINE);
 
         cons_show(line);
+        log_msg(PROF_LEVEL_INFO, "prof", line);
         win_page_off();
         status_bar_print_message(jid);
         status_bar_refresh();
@@ -366,9 +370,11 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
     else {
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
             cons_bad_show("Lost connection.");
+            log_msg(PROF_LEVEL_INFO, "prof", "Lost connection");
             win_disconnected();
         } else {
             cons_bad_show("Login failed.");
+            log_msg(PROF_LEVEL_INFO, "prof", "Login failed");
         }
         win_page_off();
         log_msg(PROF_LEVEL_INFO, CONN, "disconnected");
