@@ -23,19 +23,21 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-// command help strings
+// Command help strings
 struct cmd_help_t {
     const gchar *usage;
     const gchar *short_help;
     const gchar *long_help[50];
 };
 
-void command_init(void);
+void cmd_init(void);
 gboolean process_input(char *inp);
 char * cmd_complete(char *inp);
-void reset_command_completer(void);
-GSList * cmd_get_help_list_basic(void);
-GSList * cmd_get_help_list_settings(void);
-GSList * cmd_get_help_list_status(void);
+void cmd_reset_completer(void);
+
+// command help
+GSList * cmd_get_basic_help(void);
+GSList * cmd_get_settings_help(void);
+GSList * cmd_get_status_help(void);
 
 #endif

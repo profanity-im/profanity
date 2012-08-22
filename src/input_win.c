@@ -154,7 +154,7 @@ inp_get_char(int *ch, char *input, int *size)
 
             reset_search_attempts();
             reset_login_search();
-            reset_command_completer();
+            cmd_reset_completer();
         }
     }
 

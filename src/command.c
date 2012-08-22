@@ -55,6 +55,10 @@ static gboolean _handle_command(const char * const command,
     const char * const inp);
 static void _update_presence(const jabber_presence_t presence, 
     const char * const show, const char * const inp);
+static gboolean
+_cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
+    const char * const cmd_str, const char * const display, 
+    void (*set_func)(gboolean));
 
 // command prototypes
 static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
@@ -376,7 +380,7 @@ process_input(char *inp)
  * Initialise command autocompleter and history
  */
 void
-command_init(void)
+cmd_init(void)
 {
     log_msg(PROF_LEVEL_INFO, "prof", "Initialising commands");
     commands_ac = p_autocomplete_new();
@@ -407,13 +411,13 @@ cmd_complete(char *inp)
 }
 
 void
-reset_command_completer(void)
+cmd_reset_completer(void)
 {
     p_autocomplete_reset(commands_ac);
 }
 
 GSList *
-cmd_get_help_list_basic(void)
+cmd_get_basic_help(void)
 {
     GSList *result = NULL;
 
@@ -426,7 +430,7 @@ cmd_get_help_list_basic(void)
 }
 
 GSList *
-cmd_get_help_list_settings(void)
+cmd_get_settings_help(void)
 {
     GSList *result = NULL;
 
@@ -439,7 +443,7 @@ cmd_get_help_list_settings(void)
 }
 
 GSList *
-cmd_get_help_list_status(void)
+cmd_get_status_help(void)
 {
     GSList *result = NULL;
 
@@ -705,109 +709,43 @@ _cmd_close(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_set_beep(const char * const inp, struct cmd_help_t help)
 {
-    if (strcmp(inp, "/beep on") == 0) {
-        cons_show("Sound enabled.");
-        prefs_set_beep(TRUE);
-    } else if (strcmp(inp, "/beep off") == 0) {
-        cons_show("Sound disabled.");
-        prefs_set_beep(FALSE);
-    } else {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
-    }        
-
-    return TRUE;
+    return _cmd_set_boolean_preference(inp, help, "/beep",
+        "Sound", prefs_set_beep);
 }
 
 static gboolean
 _cmd_set_notify(const char * const inp, struct cmd_help_t help)
 {
-    if (strcmp(inp, "/notify on") == 0) {
-        cons_show("Desktop notifications enabled.");
-        prefs_set_notify(TRUE);
-    } else if (strcmp(inp, "/notify off") == 0) {
-        cons_show("Desktop notifications disabled.");
-        prefs_set_notify(FALSE);
-    } else {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
-    }        
-
-    return TRUE;
+    return _cmd_set_boolean_preference(inp, help, "/notify", 
+        "Desktop notifications", prefs_set_notify);
 }
 
 static gboolean
 _cmd_set_typing(const char * const inp, struct cmd_help_t help)
 {
-    if (strcmp(inp, "/typing on") == 0) {
-        cons_show("Incoming typing notifications enabled.");
-        prefs_set_typing(TRUE);
-    } else if (strcmp(inp, "/typing off") == 0) {
-        cons_show("Incoming typing notifications disabled.");
-        prefs_set_typing(FALSE);
-    } else {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
-    }        
-
-    return TRUE;
+    return _cmd_set_boolean_preference(inp, help, "/typing", 
+        "Incoming typing notifications", prefs_set_typing);
 }
 
 static gboolean
 _cmd_set_flash(const char * const inp, struct cmd_help_t help)
 {
-    if (strcmp(inp, "/flash on") == 0) {
-        cons_show("Screen flash enabled.");
-        prefs_set_flash(TRUE);
-    } else if (strcmp(inp, "/flash off") == 0) {
-        cons_show("Screen flash disabled.");
-        prefs_set_flash(FALSE);
-    } else {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
-    }        
-
-    return TRUE;
+    return _cmd_set_boolean_preference(inp, help, "/flash", 
+        "Screen flash", prefs_set_flash);
 }
 
 static gboolean
 _cmd_set_showsplash(const char * const inp, struct cmd_help_t help)
 {
-    if (strcmp(inp, "/showsplash on") == 0) {
-        cons_show("Splash screen enabled.");
-        prefs_set_showsplash(TRUE);
-    } else if (strcmp(inp, "/showsplash off") == 0) {
-        cons_show("Splash screen disabled.");
-        prefs_set_showsplash(FALSE);
-    } else {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
-    }
-
-    return TRUE;
+    return _cmd_set_boolean_preference(inp, help, "/showsplash", 
+        "Splash screen", prefs_set_showsplash);
 }
 
 static gboolean
 _cmd_set_chlog(const char * const inp, struct cmd_help_t help)
 {
-    if (strcmp(inp, "/chlog on") == 0) {
-        cons_show("Chat logging enabled.");
-        prefs_set_chlog(TRUE);
-    } else if (strcmp(inp, "/chlog off") == 0) {
-        cons_show("Chat logging disabled.");
-        prefs_set_chlog(FALSE);
-    } else {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
-    }
-
-    return TRUE;
+    return _cmd_set_boolean_preference(inp, help, "/chlog", 
+        "Chat logging", prefs_set_chlog);
 }
 
 static gboolean
@@ -891,3 +829,41 @@ _update_presence(const jabber_presence_t presence,
     }
 
 } 
+
+static gboolean
+_cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
+    const char * const cmd_str, const char * const display, 
+    void (*set_func)(gboolean))
+{
+    GString *on = g_string_new(cmd_str);
+    g_string_append(on, " on");
+    
+    GString *off = g_string_new(cmd_str);
+    g_string_append(off, " off");
+
+    GString *enabled = g_string_new(display);
+    g_string_append(enabled, " enabled.");
+
+    GString *disabled = g_string_new(display);
+    g_string_append(disabled, " disabled.");
+
+    if (strcmp(inp, on->str) == 0) {
+        cons_show(enabled->str);
+        set_func(TRUE);
+    } else if (strcmp(inp, off->str) == 0) {
+        cons_show(disabled->str);
+        set_func(FALSE);
+    } else {
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
+    }        
+
+    g_string_free(on, TRUE);
+    g_string_free(off, TRUE);
+    g_string_free(enabled, TRUE);
+    g_string_free(disabled, TRUE);
+
+    return TRUE;
+}
+

@@ -83,7 +83,7 @@ profanity_init(const int disable_tls, char *log_level)
     prefs_load();
     gui_init();
     jabber_init(disable_tls);
-    command_init();
+    cmd_init();
     contact_list_init();
     atexit(_profanity_shutdown);
 }

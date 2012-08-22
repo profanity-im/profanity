@@ -462,7 +462,7 @@ _cons_show_basic_help(void)
 {
     cons_show("");
 
-    GSList *basic_helpers = cmd_get_help_list_basic();
+    GSList *basic_helpers = cmd_get_basic_help();
     while (basic_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)basic_helpers->data;
         char line[25 + 2 + strlen(help->short_help)];
@@ -484,7 +484,7 @@ cons_help(void)
     cons_show("Settings:");
     cons_show("");
 
-    GSList *settings_helpers = cmd_get_help_list_settings();
+    GSList *settings_helpers = cmd_get_settings_help();
     while (settings_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)settings_helpers->data;
         char line[25 + 2 + strlen(help->short_help)];
@@ -497,7 +497,7 @@ cons_help(void)
     cons_show("Status changes:");
     cons_show("");
 
-    GSList *status_helpers = cmd_get_help_list_status();
+    GSList *status_helpers = cmd_get_status_help();
     while (status_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)status_helpers->data;
         char line[25 + 2 + strlen(help->short_help)];
