@@ -25,13 +25,10 @@
 
 #include <glib.h>
 
-#include "common.h"
 #include "command.h"
-#include "contact_list.h"
 #include "history.h"
 #include "jabber.h"
 #include "ui.h"
-#include "util.h"
 #include "preferences.h"
 #include "prof_autocomplete.h"
 #include "tinyurl.h"
