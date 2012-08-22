@@ -362,6 +362,8 @@ cmd_init(void)
     history_init();
 }
 
+// Command autocompletion functions
+
 char *
 cmd_complete(char *inp)
 {
@@ -373,6 +375,8 @@ cmd_reset_completer(void)
 {
     p_autocomplete_reset(commands_ac);
 }
+
+// Command help
 
 GSList *
 cmd_get_basic_help(void)
@@ -413,6 +417,8 @@ cmd_get_status_help(void)
     return result;
 }
 
+// Command execution
+
 gboolean
 cmd_execute(const char * const command, const char * const inp)
 {
@@ -440,6 +446,7 @@ cmd_execute_default(const char * const inp)
     return TRUE;
 }
 
+// The command functions
 
 static gboolean
 _cmd_connect(const char * const inp, struct cmd_help_t help)
@@ -728,6 +735,8 @@ _cmd_xa(const char * const inp, struct cmd_help_t help)
     return TRUE;
 }
 
+// helper function for status change commands
+
 static void
 _update_presence(const jabber_presence_t presence, 
     const char * const show, const char * const inp)
@@ -759,6 +768,8 @@ _update_presence(const jabber_presence_t presence,
     }
 
 } 
+
+// helper function for boolean preference commands
 
 static gboolean
 _cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
@@ -796,6 +807,8 @@ _cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
 
     return TRUE;
 }
+
+// helper to get command by string
 
 static struct cmd_t *
 _cmd_get_command(const char * const command)
