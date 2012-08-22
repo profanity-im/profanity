@@ -51,8 +51,6 @@ struct cmd_t {
 };
 
 static struct cmd_t * _cmd_get_command(const char * const command);
-static gboolean _handle_command(const char * const command, 
-    const char * const inp);
 static void _update_presence(const jabber_presence_t presence, 
     const char * const show, const char * const inp);
 static gboolean
@@ -81,7 +79,6 @@ static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_chat(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_xa(const char * const inp, struct cmd_help_t help);
-static gboolean _cmd_default(const char * const inp);
 
 /*
  * The commands are broken down into three groups:
@@ -337,45 +334,6 @@ static struct cmd_t status_commands[] =
     
 static PAutocomplete commands_ac;
 
-/* 
- * Take a line of input and process it, return TRUE if profanity is to 
- * continue, FALSE otherwise
- */
-gboolean
-process_input(char *inp)
-{
-    log_msg(PROF_LEVEL_DEBUG, PROF, "Input recieved: %s", inp);
-    gboolean result = FALSE;
-    g_strstrip(inp);
-    
-    // add line to history if something typed
-    if (strlen(inp) > 0) {
-        history_append(inp);
-    }
-
-    // just carry on if no input
-    if (strlen(inp) == 0) {
-        result = TRUE;
-
-    // habdle command if input starts with a '/'
-    } else if (inp[0] == '/') {
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
-        char *command = strtok(inp_cpy, " ");
-        result = _handle_command(command, inp);
-
-    // call a default handler if input didn't start with '/'
-    } else {
-        result = _cmd_default(inp);
-    }
-
-    inp_clear();
-    reset_search_attempts();
-    win_page_off();
-
-    return result;
-}
-
 /*
  * Initialise command autocompleter and history
  */
@@ -455,46 +413,33 @@ cmd_get_status_help(void)
     return result;
 }
 
-static struct cmd_t *
-_cmd_get_command(const char * const command)
-{
-    unsigned int i;
-    for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
-        struct cmd_t *pcmd = main_commands+i;
-        if (strcmp(pcmd->cmd, command) == 0) {
-            return pcmd;
-        }
-    }
-
-    for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
-        struct cmd_t *pcmd = setting_commands+i;
-        if (strcmp(pcmd->cmd, command) == 0) {
-            return pcmd;
-        }
-    }
-
-    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
-        struct cmd_t *pcmd = status_commands+i;
-        if (strcmp(pcmd->cmd, command) == 0) {
-            return pcmd;
-        }
-    }
-
-    return NULL;
-}
-
-
-static gboolean
-_handle_command(const char * const command, const char * const inp)
+gboolean
+cmd_execute(const char * const command, const char * const inp)
 {
     struct cmd_t *cmd = _cmd_get_command(command);
     
     if (cmd != NULL) {
         return (cmd->func(inp, cmd->help));
     } else {
-        return _cmd_default(inp);
+        return cmd_execute_default(inp);
     }
 }
+
+gboolean
+cmd_execute_default(const char * const inp)
+{
+    if (win_in_chat()) {
+        char *recipient = win_get_recipient();
+        jabber_send(inp, recipient);
+        win_show_outgoing_msg("me", recipient, inp);
+        free(recipient);
+    } else {
+        cons_bad_command(inp);
+    }
+
+    return TRUE;
+}
+
 
 static gboolean
 _cmd_connect(const char * const inp, struct cmd_help_t help)
@@ -783,21 +728,6 @@ _cmd_xa(const char * const inp, struct cmd_help_t help)
     return TRUE;
 }
 
-static gboolean
-_cmd_default(const char * const inp)
-{
-    if (win_in_chat()) {
-        char *recipient = win_get_recipient();
-        jabber_send(inp, recipient);
-        win_show_outgoing_msg("me", recipient, inp);
-        free(recipient);
-    } else {
-        cons_bad_command(inp);
-    }
-
-    return TRUE;
-}
-
 static void
 _update_presence(const jabber_presence_t presence, 
     const char * const show, const char * const inp)
@@ -867,3 +797,30 @@ _cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
     return TRUE;
 }
 
+static struct cmd_t *
+_cmd_get_command(const char * const command)
+{
+    unsigned int i;
+    for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
+        struct cmd_t *pcmd = main_commands+i;
+        if (strcmp(pcmd->cmd, command) == 0) {
+            return pcmd;
+        }
+    }
+
+    for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
+        struct cmd_t *pcmd = setting_commands+i;
+        if (strcmp(pcmd->cmd, command) == 0) {
+            return pcmd;
+        }
+    }
+
+    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
+        struct cmd_t *pcmd = status_commands+i;
+        if (strcmp(pcmd->cmd, command) == 0) {
+            return pcmd;
+        }
+    }
+
+    return NULL;
+}

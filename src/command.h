@@ -31,9 +31,10 @@ struct cmd_help_t {
 };
 
 void cmd_init(void);
-gboolean process_input(char *inp);
 char * cmd_complete(char *inp);
 void cmd_reset_completer(void);
+gboolean cmd_execute(const char * const command, const char * const inp);
+gboolean cmd_execute_default(const char * const inp);
 
 // command help
 GSList * cmd_get_basic_help(void);

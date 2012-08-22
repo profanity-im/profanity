@@ -30,6 +30,7 @@
 #include "profanity.h"
 #include "log.h"
 #include "chat_log.h"
+#include "history.h"
 #include "ui.h"
 #include "jabber.h"
 #include "command.h"
@@ -38,6 +39,7 @@
 #include "tinyurl.h"
 
 static log_level_t _get_log_level(char *log_level);
+gboolean _process_input(char *inp);
 static void _profanity_shutdown(void);
 
 void
@@ -67,7 +69,7 @@ profanity_run(void)
         }
 
         inp[size++] = '\0';
-        cmd_result = process_input(inp);
+        cmd_result = _process_input(inp);
     }
 
 }
@@ -112,4 +114,43 @@ _get_log_level(char *log_level)
     } else {
         return PROF_LEVEL_ERROR;
     }
+}
+
+/* 
+ * Take a line of input and process it, return TRUE if profanity is to 
+ * continue, FALSE otherwise
+ */
+gboolean
+_process_input(char *inp)
+{
+    log_msg(PROF_LEVEL_DEBUG, PROF, "Input recieved: %s", inp);
+    gboolean result = FALSE;
+    g_strstrip(inp);
+    
+    // add line to history if something typed
+    if (strlen(inp) > 0) {
+        history_append(inp);
+    }
+
+    // just carry on if no input
+    if (strlen(inp) == 0) {
+        result = TRUE;
+
+    // habdle command if input starts with a '/'
+    } else if (inp[0] == '/') {
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
+        char *command = strtok(inp_cpy, " ");
+        result = cmd_execute(command, inp);
+
+    // call a default handler if input didn't start with '/'
+    } else {
+        result = cmd_execute_default(inp);
+    }
+
+    inp_clear();
+    reset_search_attempts();
+    win_page_off();
+
+    return result;
 }
