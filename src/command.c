@@ -37,9 +37,12 @@
 #include "tinyurl.h"
 #include "log.h"
 
-/* command structure
- * cmd - The actual string of the command
+/* 
+ * Command structure
+ *
+ * cmd - The command string including leading '/'
  * func - The function to execute for the command
+ * help - A help struct containing usage info etc
  */
 struct cmd_t {
     const gchar *cmd;
@@ -47,8 +50,6 @@ struct cmd_t {
     struct cmd_help_t help;
 };
 
-
-// helpers
 static struct cmd_t * _cmd_get_command(const char * const command);
 static gboolean _handle_command(const char * const command, 
     const char * const inp);
@@ -78,7 +79,12 @@ static gboolean _cmd_chat(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_xa(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_default(const char * const inp);
 
-// The commands
+/*
+ * The commands are broken down into three groups:
+ * Main commands
+ * Commands to change preferences
+ * Commands to change users status
+ */
 static struct cmd_t main_commands[] = 
 {
     { "/help", 
@@ -327,25 +333,34 @@ static struct cmd_t status_commands[] =
     
 static PAutocomplete commands_ac;
 
+/* 
+ * Take a line of input and process it, return TRUE if profanity is to 
+ * continue, FALSE otherwise
+ */
 gboolean
 process_input(char *inp)
 {
     log_msg(PROF_LEVEL_DEBUG, PROF, "Input recieved: %s", inp);
-
     gboolean result = FALSE;
-
     g_strstrip(inp);
-
-    if (strlen(inp) > 0)
+    
+    // add line to history if something typed
+    if (strlen(inp) > 0) {
         history_append(inp);
+    }
 
+    // just carry on if no input
     if (strlen(inp) == 0) {
         result = TRUE;
+
+    // habdle command if input starts with a '/'
     } else if (inp[0] == '/') {
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
         char *command = strtok(inp_cpy, " ");
         result = _handle_command(command, inp);
+
+    // call a default handler if input didn't start with '/'
     } else {
         result = _cmd_default(inp);
     }
@@ -357,6 +372,9 @@ process_input(char *inp)
     return result;
 }
 
+/*
+ * Initialise command autocompleter and history
+ */
 void
 command_init(void)
 {
