@@ -31,7 +31,7 @@
 #endif
 
 #include "ui.h"
-#include "util.h"
+#include "common.h"
 #include "contact.h"
 #include "command.h"
 #include "preferences.h"

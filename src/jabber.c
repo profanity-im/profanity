@@ -30,7 +30,7 @@
 #include "chat_log.h"
 #include "contact_list.h"
 #include "ui.h"
-#include "util.h"
+#include "common.h"
 #include "preferences.h"
 
 #define PING_INTERVAL 120000 // 2 minutes

@@ -47,7 +47,7 @@
 #include "ui.h"
 #include "history.h"
 #include "preferences.h"
-#include "util.h"
+#include "common.h"
 #include "command.h"
 
 static WINDOW *inp_win;

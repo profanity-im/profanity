@@ -86,6 +86,7 @@ profanity_init(const int disable_tls, char *log_level)
     gui_init();
     jabber_init(disable_tls);
     cmd_init();
+    log_msg(PROF_LEVEL_INFO, "prof", "Initialising contact list");
     contact_list_init();
     atexit(_profanity_shutdown);
 }

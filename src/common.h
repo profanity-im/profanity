@@ -54,5 +54,9 @@ typedef enum {
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void create_config_directory(void);
 void create_dir(char *name);
+void get_time(char *thetime);
+char * str_replace(const char *string, const char *substr, 
+    const char *replacement);
+int str_contains(char str[], int size, char ch);
 
 #endif

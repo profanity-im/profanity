@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <head-unit.h>
-#include "util.h"
+#include "common.h"
 
 void replace_one_substr(void)
 {
@@ -146,9 +146,9 @@ void replace_when_new_null(void)
     assert_string_equals("hello", result);
 }
 
-void register_util_tests(void)
+void register_common_tests(void)
 {
-    TEST_MODULE("util tests");
+    TEST_MODULE("common tests");
     TEST(replace_one_substr);
     TEST(replace_one_substr_beginning);
     TEST(replace_one_substr_end);

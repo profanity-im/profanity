@@ -29,14 +29,12 @@
 #include "contact.h"
 #include "contact_list.h"
 #include "prof_autocomplete.h"
-#include "log.h"
 
 static PAutocomplete ac;
 
 void
 contact_list_init(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Initialising contact list");
     ac = p_obj_autocomplete_new((PStrFunc)p_contact_name, 
                             (PCopyFunc)p_contact_copy,
                             (PEqualDeepFunc)p_contacts_equal_deep,

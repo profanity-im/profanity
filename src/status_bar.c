@@ -26,7 +26,7 @@
 #include <ncurses.h>
 
 #include "ui.h"
-#include "util.h"
+#include "common.h"
 
 static WINDOW *status_bar;
 static char *message = NULL;

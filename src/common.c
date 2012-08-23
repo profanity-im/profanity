@@ -25,6 +25,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <ctype.h>
 
 #include <glib.h>
 
@@ -56,4 +59,73 @@ create_dir(char *name)
     if (e != 0)
         if (errno == ENOENT)
             e = mkdir(name, S_IRWXU);
+}
+
+void
+get_time(char *thetime)
+{
+    time_t rawtime;
+    struct tm *timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(thetime, 80, "%H:%M", timeinfo);
+}
+
+char *
+str_replace(const char *string, const char *substr, 
+    const char *replacement) 
+{
+    char *tok = NULL;
+    char *newstr = NULL;
+    char *oldstr = NULL;
+    char *head = NULL;
+ 
+    if (string == NULL)
+        return NULL;
+
+    if ( substr == NULL || 
+         replacement == NULL || 
+         (strcmp(substr, "") == 0)) 
+        return strdup (string);
+
+    newstr = strdup (string);
+    head = newstr;
+
+    while ( (tok = strstr ( head, substr ))) {
+        oldstr = newstr;
+        newstr = malloc ( strlen ( oldstr ) - strlen ( substr ) + 
+            strlen ( replacement ) + 1 );
+        
+        if ( newstr == NULL ) { 
+            free (oldstr);
+            return NULL;
+        }
+        
+        memcpy ( newstr, oldstr, tok - oldstr );
+        memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
+        memcpy ( newstr + (tok - oldstr) + strlen( replacement ), 
+            tok + strlen ( substr ), 
+            strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
+        memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + 
+            strlen ( replacement ) , 0, 1 );
+        
+        head = newstr + (tok - oldstr) + strlen( replacement );
+        free (oldstr);
+    }
+  
+    return newstr;
+}
+
+int
+str_contains(char str[], int size, char ch)
+{
+    int i;
+    for (i = 0; i < size; i++) {
+        if (str[i] == ch)
+            return 1;
+    }
+
+    return 0;
 }
