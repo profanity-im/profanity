@@ -85,7 +85,7 @@ static void _win_notify_typing(char * short_from);
 void
 gui_init(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Initialising UI");
+    log_info("Initialising UI");
     initscr();
     cbreak();
     keypad(stdscr, TRUE);
@@ -137,14 +137,14 @@ gui_refresh(void)
 void
 gui_close(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Closing UI");
+    log_info("Closing UI");
     endwin();
 }
 
 void
 gui_resize(const int ch, const char * const input, const int size)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Resizing UI");
+    log_info("Resizing UI");
     title_bar_resize();
     status_bar_resize();
     _win_resize_all();

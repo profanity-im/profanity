@@ -47,7 +47,7 @@ profanity_run(void)
 {
     gboolean cmd_result = TRUE;
 
-    log_msg(PROF_LEVEL_INFO, "prof", "Starting main event loop");
+    log_info("Starting main event loop");
 
     inp_non_block();
     while(cmd_result == TRUE) {
@@ -80,13 +80,13 @@ profanity_init(const int disable_tls, char *log_level)
     create_config_directory();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
-    log_msg(PROF_LEVEL_INFO, PROF, "Starting Profanity (%s)...", PACKAGE_VERSION);
+    log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     chat_log_init();
     prefs_load();
     gui_init();
     jabber_init(disable_tls);
     cmd_init();
-    log_msg(PROF_LEVEL_INFO, "prof", "Initialising contact list");
+    log_info("Initialising contact list");
     contact_list_init();
     atexit(_profanity_shutdown);
 }
@@ -94,12 +94,12 @@ profanity_init(const int disable_tls, char *log_level)
 void
 _profanity_shutdown(void)
 {
-    log_msg(PROF_LEVEL_INFO, PROF, "Profanity is shutting down.");
+    log_info("Profanity is shutting down.");
     jabber_disconnect();
     gui_close();
     chat_log_close();
     prefs_close();
-    log_msg(PROF_LEVEL_INFO, "prof", "Shutdown complete");
+    log_info("Shutdown complete");
     log_close();
 }
 
@@ -124,7 +124,7 @@ _get_log_level(char *log_level)
 gboolean
 _process_input(char *inp)
 {
-    log_msg(PROF_LEVEL_DEBUG, PROF, "Input recieved: %s", inp);
+    log_debug("Input recieved: %s", inp);
     gboolean result = FALSE;
     g_strstrip(inp);
     

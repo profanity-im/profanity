@@ -337,7 +337,7 @@ static PAutocomplete commands_ac;
 void
 cmd_init(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Initialising commands");
+    log_info("Initialising commands");
     commands_ac = p_autocomplete_new();
 
     unsigned int i;
@@ -471,16 +471,16 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
         inp_get_password(passwd);
         inp_non_block();
 
-        log_msg(PROF_LEVEL_DEBUG, PROF, "Connecting as %s", lower);
+        log_debug("Connecting as %s", lower);
         
         conn_status = jabber_connect(lower, passwd);
         if (conn_status == JABBER_CONNECTING) {
             cons_show("Connecting...");
-            log_msg(PROF_LEVEL_DEBUG, PROF, "Connecting...");
+            log_debug("Connecting...");
         }
         if (conn_status == JABBER_DISCONNECTED) {
             cons_bad_show("Connection to server failed.");
-            log_msg(PROF_LEVEL_DEBUG, PROF, "Connection using %s failed", lower);
+            log_debug("Connection using %s failed", lower);
         }
 
         result = TRUE;

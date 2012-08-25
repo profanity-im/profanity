@@ -59,7 +59,7 @@ static log_level_t get_log_level(xmpp_log_level_t xmpp_level)
 
 static xmpp_log_level_t get_xmpp_log_level()
 {
-    log_level_t prof_level = log_get_level();
+    log_level_t prof_level = log_get_filter();
 
     if (prof_level == PROF_LEVEL_DEBUG) {
         return XMPP_LEVEL_DEBUG;
@@ -111,7 +111,7 @@ static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 void
 jabber_init(const int disable_tls)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Initialising XMPP");
+    log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence = PRESENCE_OFFLINE;
     jabber_conn.tls_disabled = disable_tls;
@@ -127,7 +127,7 @@ jabber_conn_status_t
 jabber_connect(const char * const user, 
     const char * const passwd)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Connecting as %s", user);
+    log_info("Connecting as %s", user);
     xmpp_initialize();
 
     jabber_conn.log = xmpp_get_file_logger();
@@ -161,7 +161,7 @@ void
 jabber_disconnect(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
-        log_msg(PROF_LEVEL_INFO, "prof", "Closing connection");
+        log_info("Closing connection");
         xmpp_conn_release(jabber_conn.conn);
         xmpp_ctx_free(jabber_conn.ctx);
         xmpp_shutdown();
@@ -346,7 +346,7 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
         title_bar_set_status(PRESENCE_ONLINE);
 
         cons_show(line);
-        log_msg(PROF_LEVEL_INFO, "prof", line);
+        log_info(line);
         win_page_off();
         status_bar_print_message(jid);
         status_bar_refresh();
@@ -370,14 +370,14 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
     else {
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
             cons_bad_show("Lost connection.");
-            log_msg(PROF_LEVEL_INFO, "prof", "Lost connection");
+            log_info("Lost connection");
             win_disconnected();
         } else {
             cons_bad_show("Login failed.");
-            log_msg(PROF_LEVEL_INFO, "prof", "Login failed");
+            log_info("Login failed");
         }
         win_page_off();
-        log_msg(PROF_LEVEL_INFO, CONN, "disconnected");
+        log_info("disconnected");
         xmpp_stop(ctx);
         jabber_conn.conn_status = JABBER_DISCONNECTED;
         jabber_conn.presence = PRESENCE_OFFLINE;
@@ -394,7 +394,7 @@ _roster_handler(xmpp_conn_t * const conn,
     type = xmpp_stanza_get_type(stanza);
     
     if (strcmp(type, "error") == 0)
-        log_msg(PROF_LEVEL_ERROR, CONN, "ERROR: query failed");
+        log_error("Roster query failed");
     else {
         query = xmpp_stanza_get_child_by_name(stanza, "query");
         cons_show("Roster:");

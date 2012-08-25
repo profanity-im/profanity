@@ -25,10 +25,6 @@
 
 #include <stdio.h>
 
-// log areas
-#define PROF "prof"
-#define CONN "conn"
-
 // log levels
 typedef enum {
     PROF_LEVEL_DEBUG,
@@ -37,10 +33,14 @@ typedef enum {
     PROF_LEVEL_ERROR
 } log_level_t;
 
-void log_init(log_level_t log_level);
+void log_init(log_level_t filter);
+log_level_t log_get_filter(void);
+void log_close(void);
+void log_debug(const char * const msg, ...);
+void log_info(const char * const msg, ...);
+void log_warning(const char * const msg, ...);
+void log_error(const char * const msg, ...);
 void log_msg(log_level_t level, const char * const area, 
     const char * const msg, ...);
-log_level_t log_get_level(void);
-void log_close(void);
 
 #endif

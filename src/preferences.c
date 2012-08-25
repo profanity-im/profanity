@@ -80,7 +80,7 @@ static void _save_prefs(void);
 void
 prefs_load(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Loading preferences");
+    log_info("Loading preferences");
     ac = p_autocomplete_new();
     prefs_loc = g_string_new(getenv("HOME"));
     g_string_append(prefs_loc, "/.profanity/config");
@@ -110,7 +110,7 @@ prefs_load(void)
 void
 prefs_close(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Closing down preferences");
+    log_info("Closing down preferences");
     g_key_file_free(prefs);
 }
 
