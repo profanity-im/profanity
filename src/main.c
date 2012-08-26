@@ -19,10 +19,8 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <config.h>
 
-#include <stdio.h>
-#include <string.h>
+#include <config.h>
 
 #include <glib.h>
 

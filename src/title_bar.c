@@ -22,9 +22,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ncurses.h>
-
-#include <glib.h>
 
 #include "common.h"
 #include "ui.h"

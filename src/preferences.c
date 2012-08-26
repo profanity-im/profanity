@@ -23,11 +23,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <ncurses.h>
 #include <glib.h>
+#include <ncurses.h>
 
 #include "log.h"
-#include "preferences.h"
 #include "prof_autocomplete.h"
 
 static GString *prefs_loc;

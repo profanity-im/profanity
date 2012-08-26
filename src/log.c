@@ -25,8 +25,8 @@
 
 #include "glib.h"
 
-#include "log.h"
 #include "common.h"
+#include "log.h"
 
 #define PROF "prof"
 

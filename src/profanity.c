@@ -20,23 +20,19 @@
  *
  */
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <glib.h>
-
 #include "config.h"
-#include "profanity.h"
-#include "log.h"
+
+#include <stdlib.h>
+#include <string.h>
+
 #include "chat_log.h"
-#include "history.h"
-#include "ui.h"
-#include "jabber.h"
 #include "command.h"
-#include "preferences.h"
+#include "common.h"
 #include "contact_list.h"
-#include "tinyurl.h"
+#include "history.h"
+#include "log.h"
+#include "preferences.h"
+#include "ui.h"
 
 static log_level_t _get_log_level(char *log_level);
 gboolean _process_input(char *inp);

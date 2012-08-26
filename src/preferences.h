@@ -24,6 +24,7 @@
 #define PREFERENCES_H
 
 #include <glib.h>
+#include <ncurses.h>
 
 void prefs_load(void);
 void prefs_close(void);

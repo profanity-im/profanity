@@ -23,10 +23,10 @@
 #ifndef WINDOWS_H
 #define WINDOWS_h
 
+#include <glib.h>
 #include <ncurses.h>
 
-#include "common.h"
-#include "contact_list.h"
+#include "jabber.h"
 
 #define INP_WIN_MAX 1000
 

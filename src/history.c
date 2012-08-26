@@ -20,9 +20,6 @@
  *
  */
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "prof_history.h"
 
 #define MAX_HISTORY 100

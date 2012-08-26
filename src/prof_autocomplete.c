@@ -23,9 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
-
-#include "common.h"
 #include "prof_autocomplete.h"
 
 struct p_autocomplete_t {

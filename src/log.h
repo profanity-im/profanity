@@ -23,8 +23,6 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <stdio.h>
-
 // log levels
 typedef enum {
     PROF_LEVEL_DEBUG,

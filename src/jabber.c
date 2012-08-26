@@ -22,16 +22,16 @@
 
 #include <string.h>
 #include <stdlib.h>
+
 #include <strophe.h>
 
-#include "jabber.h"
-#include "common.h"
-#include "log.h"
 #include "chat_log.h"
-#include "contact_list.h"
-#include "ui.h"
 #include "common.h"
+#include "contact_list.h"
+#include "jabber.h"
+#include "log.h"
 #include "preferences.h"
+#include "ui.h"
 
 #define PING_INTERVAL 120000 // 2 minutes
 

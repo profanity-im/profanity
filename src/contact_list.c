@@ -20,14 +20,7 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <glib.h>
-
 #include "contact.h"
-#include "contact_list.h"
 #include "prof_autocomplete.h"
 
 static PAutocomplete ac;

@@ -25,8 +25,6 @@
 
 #include <glib.h>
 
-#include "contact.h"
-
 void contact_list_init(void);
 void contact_list_clear(void);
 void reset_search_attempts(void);

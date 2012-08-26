@@ -19,24 +19,23 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 #include "config.h"
 
 #include <string.h>
-#include <stdlib.h>
 
-#include <ncurses.h>
 #include <glib.h>
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
+#include <ncurses.h>
 
-#include "ui.h"
+#include "command.h"
 #include "common.h"
 #include "contact.h"
-#include "command.h"
-#include "preferences.h"
-#include "tinyurl.h"
 #include "log.h"
+#include "preferences.h"
+#include "ui.h"
 
 #define CONS_WIN_TITLE "_cons"
 #define PAD_SIZE 200

@@ -23,6 +23,8 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include <glib.h>
+
 // Command help strings
 struct cmd_help_t {
     const gchar *usage;

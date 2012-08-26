@@ -39,16 +39,17 @@
  * cols         : 4
  */
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <ncurses.h>
 
-#include "ui.h"
-#include "history.h"
-#include "preferences.h"
 #include "common.h"
 #include "command.h"
+#include "contact_list.h"
+#include "history.h"
+#include "preferences.h"
+#include "ui.h"
 
 static WINDOW *inp_win;
 static int pad_start = 0;

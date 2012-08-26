@@ -23,8 +23,6 @@
 #ifndef CHAT_LOG_H
 #define CHAT_LOG_H
 
-#include <stdio.h>
-
 typedef enum {
     IN,
     OUT

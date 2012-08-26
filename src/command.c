@@ -20,19 +20,21 @@
  *
  */
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <glib.h>
 
 #include "command.h"
+#include "common.h"
+#include "contact_list.h"
 #include "history.h"
 #include "jabber.h"
-#include "ui.h"
+#include "log.h"
 #include "preferences.h"
 #include "prof_autocomplete.h"
 #include "tinyurl.h"
-#include "log.h"
+#include "ui.h"
 
 /* 
  * Command structure

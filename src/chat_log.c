@@ -27,7 +27,6 @@
 
 #include "chat_log.h"
 #include "common.h"
-#include "common.h"
 #include "log.h"
 
 static GHashTable *logs;
