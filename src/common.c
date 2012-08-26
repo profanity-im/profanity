@@ -37,15 +37,6 @@ p_slist_free_full(GSList *items, GDestroyNotify free_func)
 }
 
 void
-create_config_directory()
-{
-    GString *dir = g_string_new(getenv("HOME"));
-    g_string_append(dir, "/.profanity");
-    create_dir(dir->str);
-    g_string_free(dir, TRUE);
-}
-
-void
 create_dir(char *name)
 {
     int e;

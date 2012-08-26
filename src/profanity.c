@@ -37,6 +37,7 @@
 static log_level_t _get_log_level(char *log_level);
 gboolean _process_input(char *inp);
 static void _profanity_shutdown(void);
+static void _create_config_directory();
 
 void
 profanity_run(void)
@@ -73,7 +74,7 @@ profanity_run(void)
 void
 profanity_init(const int disable_tls, char *log_level)
 {
-    create_config_directory();
+    _create_config_directory();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
     log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
@@ -151,3 +152,13 @@ _process_input(char *inp)
 
     return result;
 }
+
+static void
+_create_config_directory()
+{
+    GString *dir = g_string_new(getenv("HOME"));
+    g_string_append(dir, "/.profanity");
+    create_dir(dir->str);
+    g_string_free(dir, TRUE);
+}
+
