@@ -29,6 +29,7 @@
 
 #include "common.h"
 
+// backwards compatibility for GLib version < 2.28
 void
 p_slist_free_full(GSList *items, GDestroyNotify free_func)
 {
