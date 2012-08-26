@@ -48,18 +48,6 @@ create_dir(char *name)
             e = mkdir(name, S_IRWXU);
 }
 
-void
-get_time(char *thetime)
-{
-    time_t rawtime;
-    struct tm *timeinfo;
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    strftime(thetime, 80, "%H:%M", timeinfo);
-}
-
 char *
 str_replace(const char *string, const char *substr, 
     const char *replacement) 

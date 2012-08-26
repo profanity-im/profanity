@@ -31,7 +31,6 @@
 #include <ncurses.h>
 
 #include "command.h"
-#include "common.h"
 #include "contact.h"
 #include "log.h"
 #include "preferences.h"
@@ -509,7 +508,6 @@ cons_help(void)
     cons_show("Navigation:");
     cons_show("");
     cons_show("F1                       : This console window.");
-    cons_show("                           You may need to change the help key in your terminal settings.");
     cons_show("F2-F10                   : Chat windows.");
     cons_show("UP, DOWN                 : Navigate input history.");
     cons_show("LEFT, RIGHT, HOME, END   : Edit current input.");
@@ -759,9 +757,10 @@ _win_switch_if_active(const int i)
 static void
 _win_show_time(WINDOW *win)
 {
-    char tstmp[80];
-    get_time(tstmp);
-    wprintw(win, "%s - ", tstmp);
+    GDateTime *time = g_date_time_new_now_local(); 
+    gchar *date_fmt = g_date_time_format(time, "%H:%M");
+    wprintw(win, "%s - ", date_fmt);
+    g_date_time_unref(time);
 }
 
 static void

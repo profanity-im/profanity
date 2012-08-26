@@ -26,7 +26,6 @@
 #include <ncurses.h>
 
 #include "ui.h"
-#include "common.h"
 
 static WINDOW *status_bar;
 static char *message = NULL;
@@ -34,7 +33,7 @@ static char _active[29] = "[ ][ ][ ][ ][ ][ ][ ][ ][  ]";
 static int is_active[9];
 static int is_new[9];
 static int dirty;
-static char curr_time[80];
+static GDateTime *last_time;
 
 static void _status_bar_update_time(void);
 
@@ -55,19 +54,21 @@ create_status_bar(void)
     mvwprintw(status_bar, 0, cols - 29, _active);
     wattroff(status_bar, COLOUR_BAR_DRAW);
 
-    get_time(curr_time);
+    last_time = g_date_time_new_now_local();
+
     dirty = TRUE;
 }
 
 void
 status_bar_refresh(void)
 {
-    char new_time[80];
-    get_time(new_time);
+    GDateTime *now_time = g_date_time_new_now_local();
+    GTimeSpan elapsed = g_date_time_difference(now_time, last_time);
 
-    if (strcmp(new_time, curr_time) != 0) {
+    if (elapsed >= 60000000) {
         dirty = TRUE;
-        strcpy(curr_time, new_time);
+        g_date_time_unref(now_time);
+        last_time = g_date_time_new_now_local();
     }
 
     if (dirty) {
@@ -102,7 +103,7 @@ status_bar_resize(void)
     if (message != NULL)
         mvwprintw(status_bar, 0, 9, message);
 
-    get_time(curr_time);
+    last_time = g_date_time_new_now_local();
     dirty = TRUE;
 }
 
@@ -216,18 +217,17 @@ status_bar_clear(void)
 static void
 _status_bar_update_time(void)
 {
-    char bar_time[6];
-    char tstmp[80];
-    get_time(tstmp);
-    sprintf(bar_time, "%s", tstmp);
+    gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
 
     wattron(status_bar, COLOUR_BAR_DRAW);
     mvwaddch(status_bar, 0, 1, '[');
     wattroff(status_bar, COLOUR_BAR_DRAW);
-    mvwprintw(status_bar, 0, 2, bar_time);
+    mvwprintw(status_bar, 0, 2, date_fmt);
     wattron(status_bar, COLOUR_BAR_DRAW);
     mvwaddch(status_bar, 0, 7, ']');
     wattroff(status_bar, COLOUR_BAR_DRAW);
+
+    free(date_fmt);
 
     dirty = TRUE;
 }
