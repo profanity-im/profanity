@@ -37,14 +37,14 @@ static void _close_file(gpointer key, gpointer value, gpointer user_data);
 void
 chat_log_init(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Initialising chat logs");
+    log_info("Initialising chat logs");
     tz = g_time_zone_new_local();
     logs = g_hash_table_new(NULL, (GEqualFunc) g_strcmp0);
 }
 
 void
-chat_log_chat(const char * const login, char *other, 
-    const char * const msg, chat_log_direction_t direction)
+chat_log_chat(const gchar * const login, gchar *other, 
+    const gchar * const msg, chat_log_direction_t direction)
 {
     gpointer logpp = g_hash_table_lookup(logs, other);
     FILE *logp;
@@ -55,12 +55,12 @@ chat_log_chat(const char * const login, char *other,
         g_string_append(log_file, "/.profanity/log");
         create_dir(log_file->str);
     
-        char *login_dir = str_replace(login, "@", "_at_");
+        gchar *login_dir = str_replace(login, "@", "_at_");
         g_string_append_printf(log_file, "/%s", login_dir);
         create_dir(log_file->str);
         free(login_dir);
 
-        char *other_file = str_replace(other, "@", "_at_");
+        gchar *other_file = str_replace(other, "@", "_at_");
         g_string_append_printf(log_file, "/%s.log", other_file);
         logp = fopen(log_file->str, "a");
         free(other_file);
@@ -87,7 +87,7 @@ chat_log_chat(const char * const login, char *other,
 void
 chat_log_close(void)
 {
-    log_msg(PROF_LEVEL_INFO, "prof", "Closing down chat logs");
+    log_info("Closing down chat logs");
     g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
     g_time_zone_unref(tz);
 }

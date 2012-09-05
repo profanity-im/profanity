@@ -23,14 +23,16 @@
 #ifndef CHAT_LOG_H
 #define CHAT_LOG_H
 
+#include <glib.h>
+
 typedef enum {
     IN,
     OUT
 } chat_log_direction_t;
 
 void chat_log_init(void);
-void chat_log_chat(const char * const login, char *other, 
-    const char * const msg, chat_log_direction_t direction);
+void chat_log_chat(const gchar * const login, gchar *other, 
+    const gchar * const msg, chat_log_direction_t direction);
 void chat_log_close(void);
 
 #endif
