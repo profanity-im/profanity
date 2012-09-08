@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ubuntu_deps()
+debian_deps()
 {
     echo
     echo Profanity installer ... updating apt repositories
@@ -83,31 +83,25 @@ cleanup()
     echo
 }
 
+OS=`uname -s`
 DIST=unknown
 
-uname -a | grep --ignore-case fedora
-if [ $? -eq 0 ]; then
-    DIST=fedora
-fi
-
-# quick hack check for Fedora 16
-uname -a | grep --ignore-case fc16
-if [ $? -eq 0 ]; then
-   DIST=fedora
-fi
-
-uname -a | grep --ignore-case ubuntu
-if [ $? -eq 0 ]; then
-    DIST=ubuntu
+if [ "${OS}" = "Linux" ]; then
+    if [ -f /etc/fedora-release ]; then
+        DIST=fedora
+    elif [ -f /etc/debian-release ]; then
+        DIST=debian
+    fi
 fi
 
 case "$DIST" in
-unknown)    echo Unsupported distribution, exiting.
+unknown)    echo The install script will not work on this OS.
+            echo Try a manual install instead.
             exit
             ;;
 fedora)     fedora_deps
             ;;
-ubuntu)     ubuntu_deps
+debian)     debian_deps
             ;;
 esac
 
