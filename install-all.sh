@@ -89,7 +89,7 @@ DIST=unknown
 if [ "${OS}" = "Linux" ]; then
     if [ -f /etc/fedora-release ]; then
         DIST=fedora
-    elif [ -f /etc/debian-release ]; then
+    elif [ -f /etc/debian-version ]; then
         DIST=debian
     fi
 fi
