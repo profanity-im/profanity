@@ -1,0 +1,52 @@
+Install cygwin:
+
+http://www.cygwin.com/
+
+http://cygwin.com/setup.exe
+
+Choose git and wget
+
+mkdir projects-git
+git clone git://github.com/boothj5/profanity.git
+
+cd profanity
+
+wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
+
+chmod +x apt-cyg
+mv apt-cyg /usr/local/bin/
+
+git clone git://github.com/boothj5/head-unit.git
+
+cd head-unit
+apt-cyg install make gcc
+ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
+ln -s /usr/bin/g++-3.exe /usr/bin/g++.exe
+make
+make install
+
+cd ..
+git clone git://github.com/metajack/libstrophe.git
+
+cd libstrophe
+apt-cyg install automake autoconf pkg-config
+./bootstrap.sh
+./bootstrap.sh
+apt-cyg install openssl-devel expat zlib-devel
+make
+make install
+
+cd ..
+./bootstrap.sh
+apt-cyg install libncurses-devel 
+make
+make install
+
+cd ..
+./bootstrap.sh
+apt-cyg install libncurses-devel libxml2-devel libglib2.0-devel libcurl-devel
+
+
+
+
+
