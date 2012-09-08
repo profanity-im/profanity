@@ -61,7 +61,6 @@ install_lib_strophe()
     git clone git://github.com/metajack/libstrophe.git
     cd libstrophe
     ./bootstrap.sh
-    ./bootstrap.sh # second call seems to fix problem on cygwin
     ./configure
     make
     sudo make install
@@ -78,6 +77,46 @@ install_profanity()
     ./configure
     make
     sudo make install
+}
+
+cyg_install_head_unit()
+{
+    echo
+    echo Profanity installer... installing head-unit
+    echo
+    git clone git://github.com/boothj5/head-unit.git
+    cd head-unit
+    make
+    make install
+
+    cd ..
+}
+
+cyg_install_lib_strophe()
+{
+    echo
+    echo Profanity installer... installing libstrophe
+    echo
+    git clone git://github.com/metajack/libstrophe.git
+    cd libstrophe
+    ./bootstrap.sh
+    ./bootstrap.sh # second call seems to fix problem on cygwin
+    ./configure
+    make
+    make install
+
+    cd ..
+}
+
+cyg_install_profanity()
+{
+    echo
+    echo Profanity installer... installing Profanity
+    echo
+    ./bootstrap.sh
+    ./configure
+    make
+    make install
 }
 
 cleanup()
@@ -121,14 +160,20 @@ unknown)    echo The install script will not work on this OS.
             exit
             ;;
 fedora)     fedora_prepare
+            install_head_unit
+            install_lib_strophe
+            install_profanity
             ;;
 debian)     debian_prepare
+            install_head_unit
+            install_lib_strophe
+            install_profanity
             ;;
 cygwin)     cygwin_prepare
+            cyg_install_head_unit
+            cyg_install_lib_strophe
+            cyg_install_profanity
             ;;
 esac
 
-install_head_unit
-install_lib_strophe
-install_profanity
 cleanup
