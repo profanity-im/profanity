@@ -1,6 +1,6 @@
 #!/bin/sh
 
-debian_deps()
+debian_prepare()
 {
     echo
     echo Profanity installer ... updating apt repositories
@@ -14,7 +14,7 @@ debian_deps()
 
 }
 
-fedora_deps()
+fedora_prepare()
 {
     echo
     echo Profanity installer... installing dependencies
@@ -23,6 +23,21 @@ fedora_deps()
     ARCH=`arch`
     
     sudo yum -y install gcc gcc-c++ autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH libxml2-devel.$ARCH glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
+}
+
+cygwin_prepare()
+{
+    echo
+    echo Profanity installer... installing dependencies
+    echo
+
+    wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
+    chmod +x apt-cyg
+    mv apt-cyg /usr/local/bin/
+
+    apt-cyg install make gcc automake autoconf pkg-config openssl-devel expat zlib-devel libncurses-devel libncurses-devel libxml2-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+    ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
+    ln -s /usr/bin/g++-3.exe /usr/bin/g++.exe
 }
 
 install_head_unit()
@@ -46,6 +61,7 @@ install_lib_strophe()
     git clone git://github.com/metajack/libstrophe.git
     cd libstrophe
     ./bootstrap.sh
+    ./bootstrap.sh # second call seems to fix problem on cygwin
     ./configure
     make
     sudo make install
@@ -92,6 +108,11 @@ if [ "${OS}" = "Linux" ]; then
     elif [ -f /etc/debian_version ]; then
         DIST=debian
     fi
+else
+    echo $OS | grep -i cygwin
+    if [ "$?" -eq 0 ]; then
+        DIST=cygwin
+    fi
 fi
 
 case "$DIST" in
@@ -99,9 +120,11 @@ unknown)    echo The install script will not work on this OS.
             echo Try a manual install instead.
             exit
             ;;
-fedora)     fedora_deps
+fedora)     fedora_prepare
             ;;
-debian)     debian_deps
+debian)     debian_prepare
+            ;;
+cygwin)     cygwin_prepare
             ;;
 esac
 
