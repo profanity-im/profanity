@@ -38,6 +38,8 @@ cygwin_prepare()
     apt-cyg install make gcc automake autoconf pkg-config openssl-devel expat zlib-devel libncurses-devel libncurses-devel libxml2-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
     ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
     ln -s /usr/bin/g++-3.exe /usr/bin/g++.exe
+
+    export LIBRARY_PATH=/usr/local/lib/
 }
 
 install_head_unit()
