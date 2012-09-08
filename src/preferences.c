@@ -20,11 +20,18 @@
  *
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
+#ifdef HAVE_NCURSES_H
 #include <ncurses.h>
+#endif
+#ifdef HAVE_NCURSES_NCURSES_H
+#include <ncurses/ncurses.h>
+#endif
 
 #include "log.h"
 #include "prof_autocomplete.h"

@@ -23,8 +23,16 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
+#include "config.h"
+
 #include <glib.h>
+
+#ifdef HAVE_NCURSES_H
 #include <ncurses.h>
+#endif
+#ifdef HAVE_NCURSES_NCURSES_H
+#include <ncurses/ncurses.h>
+#endif
 
 void prefs_load(void);
 void prefs_close(void);

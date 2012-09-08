@@ -39,10 +39,17 @@
  * cols         : 4
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_NCURSES_H
 #include <ncurses.h>
+#endif
+#ifdef HAVE_NCURSES_NCURSES_H
+#include <ncurses/ncurses.h>
+#endif
 
 #include "common.h"
 #include "command.h"

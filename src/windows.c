@@ -28,7 +28,12 @@
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
+#ifdef HAVE_NCURSES_H
 #include <ncurses.h>
+#endif
+#ifdef HAVE_NCURSES_NCURSES_H
+#include <ncurses/ncurses.h>
+#endif
 
 #include "command.h"
 #include "contact.h"

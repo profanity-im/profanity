@@ -35,6 +35,8 @@ AC_CHECK_LIB([headunit], [main], [],
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
+AC_CHECK_HEADERS([ncurses.h], [], [])
+AC_CHECK_HEADERS([ncurses/ncurses.h], [], [])
 
 PKG_CHECK_MODULES([DEPS], [openssl glib-2.0 libcurl])
 PKG_CHECK_MODULES([NOTIFY], [libnotify], [], 
