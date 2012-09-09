@@ -52,15 +52,9 @@ unknown)    echo The upgrade script will not work on this OS.
             echo Try a manual upgrade instead.
             exit
             ;;
-linux)      fedora_prepare
-            install_head_unit
-            install_lib_strophe
-            install_profanity
+linux)      linux_upgrade
             ;;
-cygwin)     debian_prepare
-            install_head_unit
-            install_lib_strophe
-            install_profanity
+cygwin)     cygwin_upgrade
             ;;
 esac
 
