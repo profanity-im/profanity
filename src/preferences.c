@@ -92,7 +92,8 @@ prefs_load(void)
     g_string_append(prefs_loc, "/.profanity/config");
 
     prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_NONE, NULL);
+    g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_KEEP_COMMENTS, 
+        NULL);
 
     // create the logins searchable list for autocompletion
     gsize njids;
