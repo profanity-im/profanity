@@ -39,6 +39,6 @@ void log_info(const char * const msg, ...);
 void log_warning(const char * const msg, ...);
 void log_error(const char * const msg, ...);
 void log_msg(log_level_t level, const char * const area, 
-    const char * const msg, ...);
+    const char * const msg);
 
 #endif

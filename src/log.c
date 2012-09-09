@@ -41,7 +41,10 @@ log_debug(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
-    log_msg(PROF_LEVEL_DEBUG, PROF, msg, arg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    log_msg(PROF_LEVEL_DEBUG, PROF, fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
 
@@ -50,7 +53,10 @@ log_info(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
-    log_msg(PROF_LEVEL_INFO, PROF, msg, arg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    log_msg(PROF_LEVEL_INFO, PROF, fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
 
@@ -59,7 +65,10 @@ log_warning(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
-    log_msg(PROF_LEVEL_WARN, PROF, msg, arg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    log_msg(PROF_LEVEL_WARN, PROF, fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
 
@@ -68,7 +77,10 @@ log_error(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
-    log_msg(PROF_LEVEL_ERROR, PROF, msg, arg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    log_msg(PROF_LEVEL_ERROR, PROF, fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
 
@@ -99,21 +111,14 @@ log_close(void)
 }
 
 void
-log_msg(log_level_t level, const char * const area, const char * const msg, ...)
+log_msg(log_level_t level, const char * const area, const char * const msg)
 {
     if (level >= level_filter) {
         dt = g_date_time_new_now(tz);
 
-        va_list arg;
-        va_start(arg, msg);
-        GString *msg_formatted = g_string_new(NULL);
-        g_string_vprintf(msg_formatted, msg, arg);
-        va_end(arg);
-
         gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S"); 
-        fprintf(logp, "%s: %s: %s\n", date_fmt, area, msg_formatted->str);
+        fprintf(logp, "%s: %s: %s\n", date_fmt, area, msg);
         g_date_time_unref(dt);
-        g_string_free(msg_formatted, TRUE);
     
         fflush(logp);
     }
