@@ -27,7 +27,7 @@ cygwin_upgrade()
     ./configure
     make clean
     make
-    sudo make install
+    make install
     echo
     echo Profanity installer... upgrade complete!
     echo
