@@ -61,7 +61,7 @@ static int dirty;
 static int max_cols = 0;
 
 static void _create_windows(void);
-static void _print_splash_logo(WINDOW *win);
+static void _cons_splash_logo(void);
 static void _cons_show_basic_help(void);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact);
@@ -654,29 +654,30 @@ _create_windows(void)
     _wins[0] = cons;
     _cons_win = _wins[0].win;
     
-//    wattrset(_cons_win, A_BOLD);
-    _win_show_time(_cons_win);
     if (prefs_get_showsplash()) {
-        _print_splash_logo(_cons_win);
+        _cons_splash_logo();
     } else {
+        _win_show_time(_cons_win);
         wprintw(_cons_win, "Welcome to Profanity, version %s\n", PACKAGE_VERSION);
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "Copyright (C) 2012 James Booth <%s>.\n", PACKAGE_BUGREPORT);
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "\n");
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "This is free software; you are free to change and redistribute it.\n");
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "There is NO WARRANTY, to the extent permitted by law.\n");
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "\n");
-        _win_show_time(_cons_win);
-        wprintw(_cons_win, "Type '/help' to show complete help.\n");
-        
-        _cons_show_basic_help();
     }
+
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Copyright (C) 2012 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "This is free software; you are free to change and redistribute it.\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "There is NO WARRANTY, to the extent permitted by law.\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Type '/help' to show complete help.\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "\n");
+        
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
@@ -697,18 +698,51 @@ _create_windows(void)
 }
 
 static void
-_print_splash_logo(WINDOW *win)
+_cons_splash_logo(void)
 {
-    wprintw(win, "Welcome to\n");
-    wattron(win, COLOUR_OFFLINE);
-    wprintw(win, "                   ___            _           \n");
-    wprintw(win, "                  / __)          (_)_         \n");
-    wprintw(win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
-    wprintw(win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
-    wprintw(win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
-    wprintw(win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
-    wprintw(win, "|_|                                    (____/ \n");
-    wattroff(win, COLOUR_OFFLINE);
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Welcome to\n");
+
+
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOUR_OFFLINE);
+    wprintw(_cons_win, "                   ___            _           \n");
+    wattroff(_cons_win, COLOUR_OFFLINE);
+
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOUR_OFFLINE);
+    wprintw(_cons_win, "                  / __)          (_)_         \n");
+    wattroff(_cons_win, COLOUR_OFFLINE);
+
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOUR_OFFLINE);
+    wprintw(_cons_win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
+    wattroff(_cons_win, COLOUR_OFFLINE);
+
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOUR_OFFLINE);
+    wprintw(_cons_win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
+    wattroff(_cons_win, COLOUR_OFFLINE);
+
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOUR_OFFLINE);
+    wprintw(_cons_win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
+    wattroff(_cons_win, COLOUR_OFFLINE);
+
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOUR_OFFLINE);
+    wprintw(_cons_win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
+    wattroff(_cons_win, COLOUR_OFFLINE);
+
+    _win_show_time(_cons_win);
+    wattron(_cons_win, COLOUR_OFFLINE);
+    wprintw(_cons_win, "|_|                                    (____/ \n");
+    wattroff(_cons_win, COLOUR_OFFLINE);
+
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "Version %s\n", PACKAGE_VERSION);
 }
 
 static int
