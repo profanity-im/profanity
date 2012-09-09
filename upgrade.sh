@@ -47,7 +47,7 @@ else
     fi
 fi
 
-case "$DIST" in
+case "$SYSTEM" in
 unknown)    echo The upgrade script will not work on this OS.
             echo Try a manual upgrade instead.
             exit
