@@ -122,8 +122,7 @@ status_bar_inactive(const int win)
 
     int active_pos = 1 + ((win -1) * 3);
 
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
  
     mvwaddch(status_bar, 0, cols - 29 + active_pos, ' ');
     if (win == 9)
@@ -140,8 +139,7 @@ status_bar_active(const int win)
 
     int active_pos = 1 + ((win -1) * 3);
 
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
  
     wattron(status_bar, COLOUR_BAR_DRAW);
     if (win < 9)
@@ -161,8 +159,7 @@ status_bar_new(const int win)
 
     int active_pos = 1 + ((win -1) * 3);
 
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
  
     wattron(status_bar, COLOUR_BAR_TEXT);
     wattron(status_bar, A_BLINK);
@@ -212,8 +209,8 @@ status_bar_clear(void)
 
     wclear(status_bar);
 
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
+
     wattron(status_bar, COLOUR_BAR_DRAW);
     mvwprintw(status_bar, 0, cols - 29, _active);
     wattroff(status_bar, COLOUR_BAR_DRAW);

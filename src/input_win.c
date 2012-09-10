@@ -81,9 +81,9 @@ create_input_window(void)
 void
 inp_win_resize(const char * const input, const int size)
 {
-    int rows, cols, inp_x, inp_y;
+    int rows, cols, inp_x;
     getmaxyx(stdscr, rows, cols);
-    getyx(inp_win, inp_y, inp_x);
+    inp_x = getcurx(inp_win);
     
     // if lost cursor off screen, move contents to show it
     if (inp_x >= pad_start + cols) {

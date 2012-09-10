@@ -49,7 +49,6 @@ tinyurl_get(char *url)
     g_string_append(full_url, url);
 
     CURL *handle = curl_easy_init();
-    CURLcode result; 
     struct curl_data_t output; 
     output.buffer = NULL;
     output.size = 0;
@@ -58,7 +57,7 @@ tinyurl_get(char *url)
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, _data_callback);
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void *)&output);
     
-    result = curl_easy_perform(handle);
+    curl_easy_perform(handle);
     curl_easy_cleanup(handle);
 
     output.buffer[output.size++] = '\0';

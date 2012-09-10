@@ -619,12 +619,10 @@ win_handle_special_keys(const int * const ch)
 void
 win_page_off(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int rows = getmaxy(stdscr);
     _wins[_curr_prof_win].paged = 0;
     
-    int y, x;
-    getyx(_wins[_curr_prof_win].win, y, x);
+    int y = getcury(_wins[_curr_prof_win].win);
 
     int size = rows - 3;
 
@@ -947,9 +945,8 @@ _win_handle_switch(const int * const ch)
 static void
 _win_handle_page(const int * const ch)
 {
-    int rows, cols, y, x;
-    getmaxyx(stdscr, rows, cols);
-    getyx(_wins[_curr_prof_win].win, y, x);
+    int rows = getmaxy(stdscr);
+    int y = getcury(_wins[_curr_prof_win].win);
 
     int page_space = rows - 4;
     int *page_start = &_wins[_curr_prof_win].y_pos;

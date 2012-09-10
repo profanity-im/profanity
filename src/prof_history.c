@@ -124,7 +124,7 @@ p_history_previous(PHistory history, char *item)
         _create_session(history);
         
         // add the new item
-        g_list_append(history->session.items, copied);
+        history->session.items = g_list_append(history->session.items, copied);
         history->session.sess_new = g_list_last(history->session.items);
 
         char *result = strdup(history->session.sess_curr->data);

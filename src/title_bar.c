@@ -39,8 +39,7 @@ static void _title_bar_draw_status(void);
 void
 create_title_bar(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
 
     title_bar = newwin(1, cols, 0, 0);
     wbkgd(title_bar, COLOUR_BAR_DEF);
@@ -61,8 +60,7 @@ title_bar_title(void)
 void
 title_bar_resize(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
 
     wresize(title_bar, 1, cols);
     wbkgd(title_bar, COLOUR_BAR_DEF);
@@ -173,8 +171,7 @@ title_bar_draw(void)
 static void
 _title_bar_draw_status(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
+    int cols = getmaxx(stdscr);
 
     wattron(title_bar, COLOUR_BAR_DRAW);
     mvwaddch(title_bar, 0, cols - 14, '[');
