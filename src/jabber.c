@@ -162,11 +162,9 @@ jabber_disconnect(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");
-        xmpp_conn_release(jabber_conn.conn);
-        xmpp_ctx_free(jabber_conn.ctx);
-        xmpp_shutdown();
-        jabber_conn.conn_status = JABBER_DISCONNECTED;
-        jabber_conn.presence = PRESENCE_OFFLINE;
+
+        // attempt closing the XML stream
+        xmpp_disconnect(jabber_conn.conn);
     }
 }
 
@@ -382,6 +380,25 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
         jabber_conn.conn_status = JABBER_DISCONNECTED;
         jabber_conn.presence = PRESENCE_OFFLINE;
     }
+/* TO DO IF END STREAM
+
+
+    // free memory for connection object and context
+    xmpp_conn_release(jabber_conn.conn);
+    xmpp_ctx_free(jabber_conn.ctx);
+
+    // shutdown libstrophe
+    xmpp_shutdown();
+
+    jabber_conn.conn_status = JABBER_DISCONNECTED;
+    jabber_conn.presence = PRESENCE_OFFLINE;
+    
+    gui_close();
+    chat_log_close();
+    prefs_close();
+    log_info("Shutdown complete");
+    log_close();
+*/
 }
 
 static int

@@ -93,11 +93,6 @@ _profanity_shutdown(void)
 {
     log_info("Profanity is shutting down.");
     jabber_disconnect();
-    gui_close();
-    chat_log_close();
-    prefs_close();
-    log_info("Shutdown complete");
-    log_close();
 }
 
 static log_level_t 
