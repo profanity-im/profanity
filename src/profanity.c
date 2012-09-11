@@ -32,11 +32,11 @@
 #include "history.h"
 #include "log.h"
 #include "preferences.h"
+#include "profanity.h"
 #include "ui.h"
 
 static log_level_t _get_log_level(char *log_level);
 gboolean _process_input(char *inp);
-static void _profanity_shutdown(void);
 static void _create_config_directory();
 
 void
@@ -85,14 +85,32 @@ profanity_init(const int disable_tls, char *log_level)
     cmd_init();
     log_info("Initialising contact list");
     contact_list_init();
-    atexit(_profanity_shutdown);
+    atexit(profanity_shutdown_init);
 }
 
 void
-_profanity_shutdown(void)
+profanity_shutdown_init(void)
 {
     log_info("Profanity is shutting down.");
-    jabber_disconnect();
+    gboolean wait_response = jabber_disconnect();
+
+    if (wait_response) {
+        while (TRUE) {
+            jabber_process_events();
+        }
+    }
+
+    profanity_shutdown();
+}
+
+void
+profanity_shutdown(void)
+{
+    gui_close();                                                          
+    chat_log_close();                                                    
+    prefs_close();                                                       
+    log_info("Shutdown complete");                                       
+    log_close();   
 }
 
 static log_level_t 

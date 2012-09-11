@@ -495,8 +495,8 @@ static gboolean
 _cmd_quit(const char * const inp, struct cmd_help_t help)
 {
     log_info("Profanity is shutting down.");
-    jabber_disconnect();
-    return TRUE;
+    profanity_shutdown_init();
+    return FALSE;
 }
 
 static gboolean

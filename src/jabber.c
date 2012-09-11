@@ -31,6 +31,7 @@
 #include "jabber.h"
 #include "log.h"
 #include "preferences.h"
+#include "profanity.h"
 #include "ui.h"
 
 #define PING_INTERVAL 120000 // 2 minutes
@@ -157,14 +158,24 @@ jabber_get_jid(void)
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-void
+gboolean
 jabber_disconnect(void)
 {
+    // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");
-
-        // attempt closing the XML stream
         xmpp_disconnect(jabber_conn.conn);
+        jabber_conn.conn_status = JABBER_DISCONNECTING;
+        return TRUE;
+
+    // if disconnected dont wait just shutdown
+    } else if (jabber_conn.conn_status == JABBER_DISCONNECTED) {
+        log_info("No connection open");
+        return FALSE;
+
+    // any other states, just shutdown
+    } else {
+        return FALSE;
     }
 }
 
@@ -172,7 +183,8 @@ void
 jabber_process_events(void)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED 
-            || jabber_conn.conn_status == JABBER_CONNECTING)
+            || jabber_conn.conn_status == JABBER_CONNECTING
+            || jabber_conn.conn_status == JABBER_DISCONNECTING)
         xmpp_run_once(jabber_conn.ctx, 10);
 }
 
@@ -364,41 +376,44 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
 
         jabber_conn.conn_status = JABBER_CONNECTED;
         jabber_conn.presence = PRESENCE_ONLINE;
-    }
-    else {
-        if (jabber_conn.conn_status == JABBER_CONNECTED) {
+    } else {
+    
+        // received close stream response from server after disconnect
+        if (jabber_conn.conn_status == JABBER_DISCONNECTING) {
+            // free memory for connection object and context
+            xmpp_conn_release(jabber_conn.conn);
+            xmpp_ctx_free(jabber_conn.ctx);
+
+            // shutdown libstrophe
+            xmpp_shutdown();
+
+            jabber_conn.conn_status = JABBER_DISCONNECTED;
+            jabber_conn.presence = PRESENCE_OFFLINE;
+
+            profanity_shutdown();
+            
+        // lost connection for unkown reason
+        } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
             cons_bad_show("Lost connection.");
             log_info("Lost connection");
             win_disconnected();
+            win_page_off();
+            log_info("disconnected");
+            xmpp_stop(ctx);
+            jabber_conn.conn_status = JABBER_DISCONNECTED;
+            jabber_conn.presence = PRESENCE_OFFLINE;
+
+        // login attempt failed
         } else {
             cons_bad_show("Login failed.");
             log_info("Login failed");
+            win_page_off();
+            log_info("disconnected");
+            xmpp_stop(ctx);
+            jabber_conn.conn_status = JABBER_DISCONNECTED;
+            jabber_conn.presence = PRESENCE_OFFLINE;
         }
-        win_page_off();
-        log_info("disconnected");
-        xmpp_stop(ctx);
-        jabber_conn.conn_status = JABBER_DISCONNECTED;
-        jabber_conn.presence = PRESENCE_OFFLINE;
     }
-/* TO DO IF END STREAM
-
-
-    // free memory for connection object and context
-    xmpp_conn_release(jabber_conn.conn);
-    xmpp_ctx_free(jabber_conn.ctx);
-
-    // shutdown libstrophe
-    xmpp_shutdown();
-
-    jabber_conn.conn_status = JABBER_DISCONNECTED;
-    jabber_conn.presence = PRESENCE_OFFLINE;
-    
-    gui_close();
-    chat_log_close();
-    prefs_close();
-    log_info("Shutdown complete");
-    log_close();
-*/
 }
 
 static int

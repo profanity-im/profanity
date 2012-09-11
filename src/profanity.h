@@ -25,6 +25,7 @@
 
 void profanity_init(const int disable_tls, char *log_level);
 void profanity_run(void);
+void profanity_shutdown_init(void);
 void profanity_shutdown(void);
 
 #endif
