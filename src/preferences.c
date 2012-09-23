@@ -117,7 +117,6 @@ prefs_load(void)
 void
 prefs_close(void)
 {
-    log_info("Closing down preferences");
     g_key_file_free(prefs);
 }
 

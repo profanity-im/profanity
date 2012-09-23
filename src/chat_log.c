@@ -87,7 +87,6 @@ chat_log_chat(const gchar * const login, gchar *other,
 void
 chat_log_close(void)
 {
-    log_info("Closing down chat logs");
     g_hash_table_foreach(logs, (GHFunc) _close_file, NULL);
     g_time_zone_unref(tz);
 }

@@ -389,8 +389,6 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
 
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
-
-            profanity_shutdown();
             
         // lost connection for unkown reason
         } else if (jabber_conn.conn_status == JABBER_CONNECTED) {

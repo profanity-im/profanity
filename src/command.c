@@ -494,8 +494,8 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_quit(const char * const inp, struct cmd_help_t help)
 {
-    log_info("Profanity is shutting down.");
-    profanity_shutdown_init();
+    log_info("Profanity is shutting down...");
+    exit(0);
     return FALSE;
 }
 

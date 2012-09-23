@@ -68,7 +68,6 @@ profanity_run(void)
         inp[size++] = '\0';
         cmd_result = _process_input(inp);
     }
-
 }
 
 void
@@ -91,11 +90,10 @@ profanity_init(const int disable_tls, char *log_level)
 void
 profanity_shutdown_init(void)
 {
-    log_info("Profanity is shutting down.");
     gboolean wait_response = jabber_disconnect();
 
     if (wait_response) {
-        while (TRUE) {
+        while (jabber_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
         }
     }
@@ -109,7 +107,6 @@ profanity_shutdown(void)
     gui_close();                                                          
     chat_log_close();                                                    
     prefs_close();                                                       
-    log_info("Shutdown complete");                                       
     log_close();   
 }
 

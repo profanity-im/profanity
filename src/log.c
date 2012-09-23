@@ -121,6 +121,7 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
         g_date_time_unref(dt);
     
         fflush(logp);
+        g_free(date_fmt);
     }
 }
 

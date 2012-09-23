@@ -141,7 +141,6 @@ gui_refresh(void)
 void
 gui_close(void)
 {
-    log_info("Closing UI");
     endwin();
 }
 
@@ -799,6 +798,7 @@ _win_show_time(WINDOW *win)
     gchar *date_fmt = g_date_time_format(time, "%H:%M");
     wprintw(win, "%s - ", date_fmt);
     g_date_time_unref(time);
+    g_free(date_fmt);
 }
 
 static void
