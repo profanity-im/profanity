@@ -56,6 +56,7 @@ struct prof_win {
     WINDOW *win;
     int y_pos;
     int paged;
+    int unread;
 };
 
 // gui startup and shutdown, resize
@@ -97,6 +98,7 @@ void win_contact_offline(const char * const from, const char * const show,
 void win_disconnected(void);
 void win_show(const char * const msg);
 void win_bad_show(const char * const msg);
+gint win_get_unread(void);
 
 // console window actions
 void cons_help(void);

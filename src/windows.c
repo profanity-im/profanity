@@ -229,6 +229,17 @@ win_show_typing(const char * const from)
 #endif
 }
 
+gint
+win_get_unread(void)
+{
+    int i;
+    gint result = 0;
+    for (i = 0; i < NUM_WINS; i++) {
+        result += _wins[i].unread;
+    }
+    return result;
+}
+
 void
 win_show_incomming_msg(const char * const from, const char * const message) 
 {
@@ -245,17 +256,21 @@ win_show_incomming_msg(const char * const from, const char * const message)
     _win_show_user(win, short_from, 1);
     _win_show_message(win, message);
     
+    // currently viewing chat window with sender
     if (win_index == _curr_prof_win) {
         title_bar_set_typing(FALSE);
         title_bar_draw();
         status_bar_active(win_index);
         dirty = TRUE;
+
+    // not currently viewing chat window with sender
     } else {
         status_bar_new(win_index);
         _cons_show_incoming_message(short_from, win_index);
         if (prefs_get_flash())
             flash();
-        
+
+        _wins[win_index].unread++;
     }
 
     if (prefs_get_beep())
@@ -647,6 +662,7 @@ _create_windows(void)
     wbkgd(cons.win, COLOUR_TEXT);
     cons.y_pos = 0;
     cons.paged = 0;
+    cons.unread = 0;
     scrollok(cons.win, TRUE);
 
     _wins[0] = cons;
@@ -689,7 +705,7 @@ _create_windows(void)
         wbkgd(chat.win, COLOUR_TEXT);
         chat.y_pos = 0;
         chat.paged = 0;
-//        wattrset(chat.win, A_BOLD);
+        chat.unread = 0;
         scrollok(chat.win, TRUE);
         _wins[i] = chat;
     }    
@@ -778,6 +794,8 @@ _win_switch_if_active(const int i)
     if (strcmp(_wins[i].from, "") != 0) {
         _curr_prof_win = i;
         win_page_off();
+        
+        _wins[i].unread = 0;
 
         if (i == 0) {
             title_bar_title();
