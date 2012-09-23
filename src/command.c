@@ -73,6 +73,7 @@ static gboolean _cmd_set_typing(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_remind(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
@@ -204,10 +205,10 @@ static struct cmd_t setting_commands[] =
 
     { "/notify",
         _cmd_set_notify,
-        { "/notify on|off", "Enable/disable desktop notifications.",
+        { "/notify on|off", "Enable/disable message notifications.",
         { "/notify on|off",
           "--------------",
-          "Switch the desktop notifications on or off.",
+          "Switch the message notifications on or off.",
           "The notification will appear for all incoming messages.",
           "The desktop environment must support desktop notifications.",
           "",
@@ -226,6 +227,19 @@ static struct cmd_t setting_commands[] =
           "",
           "Config file section : [ui]",
           "Config file value :   typing=true|false",
+          NULL } } },
+
+    { "/remind",
+        _cmd_set_remind,
+        { "/remind seconds", "Set message reminder period in seconds.",
+        { "/remind seconds",
+          "--------------",
+          "Set the period for new message reminders as desktop notifications.",
+          "The value is in seconds, a setting of 0 will disable the feature.",
+          "The desktop environment must support desktop notifications.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   remind=seconds",
           NULL } } },
 
     { "/flash", 
@@ -699,6 +713,29 @@ _cmd_set_chlog(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/chlog", 
         "Chat logging", prefs_set_chlog);
+}
+
+static gboolean
+_cmd_set_remind(const char * const inp, struct cmd_help_t help)
+{
+    if ((strncmp(inp, "/remind ", 8) != 0) || (strlen(inp) < 9)) {
+        char usage[strlen(help.usage + 8)];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
+    } else {
+        // copy input    
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
+
+        // get period
+        strtok(inp_cpy, " ");
+        char *period_str = strtok(NULL, " ");
+        gint period = atoi(period_str);
+
+        prefs_set_remind(period);
+    }
+
+    return TRUE;    
 }
 
 static gboolean

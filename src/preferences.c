@@ -269,6 +269,19 @@ prefs_set_chlog(gboolean value)
     _save_prefs();
 }
 
+gint
+prefs_get_remind(void)
+{
+    return g_key_file_get_integer(prefs, "ui", "remind", NULL);
+}
+
+void
+prefs_set_remind(gint value)
+{
+    g_key_file_set_integer(prefs, "ui", "remind", value);
+    _save_prefs();
+}
+
 void
 prefs_add_login(const char *jid)
 {

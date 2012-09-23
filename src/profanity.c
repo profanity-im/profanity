@@ -41,8 +41,6 @@ static log_level_t _get_log_level(char *log_level);
 gboolean _process_input(char *inp);
 static void _create_config_directory();
 
-static gdouble remind_period = 10;
-
 void
 profanity_run(void)
 {
@@ -62,6 +60,8 @@ profanity_run(void)
         while(ch != '\n') {
 
             gdouble elapsed = g_timer_elapsed(timer, NULL);
+            
+            gint remind_period = prefs_get_remind();
 
             // 0 means to not remind
             if (remind_period > 0 && elapsed >= remind_period) {

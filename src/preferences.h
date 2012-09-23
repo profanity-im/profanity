@@ -52,6 +52,8 @@ gboolean prefs_get_chlog(void);
 void prefs_set_chlog(gboolean value);
 gboolean prefs_get_showsplash(void);
 void prefs_set_showsplash(gboolean value);
+gint prefs_get_remind(void);
+void prefs_set_remind(gint value);
 
 void prefs_add_login(const char *jid);
 

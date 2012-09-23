@@ -472,34 +472,40 @@ cons_prefs(void)
     cons_show("");
     
     if (prefs_get_beep())
-        cons_show("Terminal beep         : ON");
+        cons_show("Terminal beep           : ON");
     else
-        cons_show("Terminal beep         : OFF");    
+        cons_show("Terminal beep           : OFF");    
     
     if (prefs_get_flash())
-        cons_show("Terminal flash        : ON");
+        cons_show("Terminal flash          : ON");
     else
-        cons_show("Terminal flash        : OFF");    
+        cons_show("Terminal flash          : OFF");    
     
     if (prefs_get_notify())
-        cons_show("Desktop notifications : ON");
+        cons_show("Message notifications   : ON");
     else
-        cons_show("Desktop notifications : OFF");    
+        cons_show("Message notifications   : OFF");    
 
     if (prefs_get_typing())
-        cons_show("Typing notifications  : ON");
+        cons_show("Typing notifications    : ON");
     else
-        cons_show("Typing notifications  : OFF");    
+        cons_show("Typing notifications    : OFF");    
 
     if (prefs_get_showsplash())
-        cons_show("Splash screen         : ON");
+        cons_show("Splash screen           : ON");
     else
-        cons_show("Splash screen         : OFF");    
+        cons_show("Splash screen           : OFF");    
     
     if (prefs_get_chlog())
-        cons_show("Chat logging          : ON");
+        cons_show("Chat logging            : ON");
     else
-        cons_show("Chat logging          : OFF");    
+        cons_show("Chat logging            : OFF");    
+
+    char remind_period[50];
+    sprintf(remind_period, 
+                  "Message reminder period : %d seconds", prefs_get_remind());
+
+    cons_show(remind_period);
 
     cons_show("");
 
