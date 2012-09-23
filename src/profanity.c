@@ -41,7 +41,7 @@ static log_level_t _get_log_level(char *log_level);
 gboolean _process_input(char *inp);
 static void _create_config_directory();
 
-static gdouble unread_period = 5;
+static gdouble remind_period = 0;
 
 void
 profanity_run(void)
@@ -63,9 +63,12 @@ profanity_run(void)
 
             gdouble elapsed = g_timer_elapsed(timer, NULL);
 
-            if (elapsed >= unread_period) {
-                log_info("Unread : %d", win_get_unread());
-                g_timer_start(timer);
+            // 0 means to not remind
+            if (remind_period > 0 && elapsed >= remind_period) {
+                if (win_get_unread() > 0) {
+                    log_info("Unread : %d", win_get_unread());
+                    g_timer_start(timer);
+                }
             }
 
             win_handle_special_keys(&ch);
