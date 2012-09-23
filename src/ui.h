@@ -98,7 +98,7 @@ void win_contact_offline(const char * const from, const char * const show,
 void win_disconnected(void);
 void win_show(const char * const msg);
 void win_bad_show(const char * const msg);
-gint win_get_unread(void);
+void win_remind(void);
 
 // console window actions
 void cons_help(void);

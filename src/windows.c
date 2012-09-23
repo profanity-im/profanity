@@ -80,8 +80,10 @@ static void _cons_show_incoming_message(const char * const short_from,
 static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
 static void _win_resize_all(void);
+static gint _win_get_unread(void);
 
 #ifdef HAVE_LIBNOTIFY
+static void _win_notify_remind(gint unread);
 static void _win_notify_message(char * short_from);
 static void _win_notify_typing(char * short_from);
 #endif
@@ -229,15 +231,15 @@ win_show_typing(const char * const from)
 #endif
 }
 
-gint
-win_get_unread(void)
+void
+win_remind(void)
 {
-    int i;
-    gint result = 0;
-    for (i = 0; i < NUM_WINS; i++) {
-        result += _wins[i].unread;
+#ifdef HAVE_LIBNOTIFY
+    gint unread = _win_get_unread();
+    if (unread > 0) {
+        _win_notify_remind(unread);
     }
-    return result;
+#endif
 }
 
 void
@@ -282,6 +284,36 @@ win_show_incomming_msg(const char * const from, const char * const message)
 }
 
 #ifdef HAVE_LIBNOTIFY
+static void
+_win_notify_remind(gint unread)
+{
+    notify_init("Profanity");
+
+    char message[20];
+    if (unread == 1) {
+        sprintf(message, "1 unread message");
+    } else {
+        sprintf(message, "%d unread messages", unread);
+    }
+    
+    // create a new notification
+    NotifyNotification *incoming;
+    incoming = notify_notification_new("Profanity", message, NULL);
+
+    // set the timeout of the notification to 10 secs
+    notify_notification_set_timeout(incoming, 5000);
+
+    // set the category so as to tell what kind it is
+    char category[30] = "Incoming message";
+    notify_notification_set_category(incoming, category);
+
+    // set the urgency level of the notification
+    notify_notification_set_urgency(incoming, NOTIFY_URGENCY_NORMAL);
+
+    GError *error = NULL;
+    notify_notification_show(incoming, &error);
+}
+
 static void
 _win_notify_message(char * short_from)
 {
@@ -997,3 +1029,15 @@ _win_handle_page(const int * const ch)
         dirty = TRUE;
     }
 }
+
+static gint
+_win_get_unread(void)
+{
+    int i;
+    gint result = 0;
+    for (i = 0; i < NUM_WINS; i++) {
+        result += _wins[i].unread;
+    }
+    return result;
+}
+
