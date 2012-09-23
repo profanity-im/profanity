@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+
 #include "chat_log.h"
 #include "command.h"
 #include "common.h"
@@ -39,6 +41,8 @@ static log_level_t _get_log_level(char *log_level);
 gboolean _process_input(char *inp);
 static void _create_config_directory();
 
+static gdouble unread_period = 5;
+
 void
 profanity_run(void)
 {
@@ -47,12 +51,23 @@ profanity_run(void)
     log_info("Starting main event loop");
 
     inp_non_block();
+    
+    GTimer *timer = g_timer_new();
+
     while(cmd_result == TRUE) {
         int ch = ERR;
         char inp[INP_WIN_MAX];
         int size = 0;
 
         while(ch != '\n') {
+
+            gdouble elapsed = g_timer_elapsed(timer, NULL);
+
+            if (elapsed >= unread_period) {
+                log_info("Unread : %d", win_get_unread());
+                g_timer_start(timer);
+            }
+
             win_handle_special_keys(&ch);
 
             if (ch == KEY_RESIZE) {
