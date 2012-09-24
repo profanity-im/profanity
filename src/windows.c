@@ -83,6 +83,8 @@ static void _win_resize_all(void);
 static gint _win_get_unread(void);
 
 #ifdef HAVE_LIBNOTIFY
+static void _win_notify(const char * const message, int timeout, 
+    const char * const category);
 static void _win_notify_remind(gint unread);
 static void _win_notify_message(char * short_from);
 static void _win_notify_typing(char * short_from);
@@ -285,10 +287,25 @@ win_show_incomming_msg(const char * const from, const char * const message)
 
 #ifdef HAVE_LIBNOTIFY
 static void
+_win_notify(const char * const message, int timeout, 
+    const char * const category)
+{
+    notify_init("Profanity");    
+    
+    // create a new notification
+    NotifyNotification *notification;
+    notification = notify_notification_new("Profanity", message, NULL);
+    notify_notification_set_timeout(notification, timeout);
+    notify_notification_set_category(notification, category);
+    notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
+
+    GError *error = NULL;
+    notify_notification_show(notification, &error);
+}
+
+static void
 _win_notify_remind(gint unread)
 {
-    notify_init("Profanity");
-
     char message[20];
     if (unread == 1) {
         sprintf(message, "1 unread message");
@@ -296,74 +313,25 @@ _win_notify_remind(gint unread)
         sprintf(message, "%d unread messages", unread);
     }
     
-    // create a new notification
-    NotifyNotification *incoming;
-    incoming = notify_notification_new("Profanity", message, NULL);
-
-    // set the timeout of the notification to 10 secs
-    notify_notification_set_timeout(incoming, 5000);
-
-    // set the category so as to tell what kind it is
-    char category[30] = "Incoming message";
-    notify_notification_set_category(incoming, category);
-
-    // set the urgency level of the notification
-    notify_notification_set_urgency(incoming, NOTIFY_URGENCY_NORMAL);
-
-    GError *error = NULL;
-    notify_notification_show(incoming, &error);
+    _win_notify(message, 5000, "Incoming message");
 }
 
 static void
 _win_notify_message(char * short_from)
 {
-    notify_init("Profanity");
-
     char message[strlen(short_from) + 1 + 10];
     sprintf(message, "%s: message.", short_from);
-    
-    // create a new notification
-    NotifyNotification *incoming;
-    incoming = notify_notification_new("Profanity", message, NULL);
-
-    // set the timeout of the notification to 10 secs
-    notify_notification_set_timeout(incoming, 10000);
-
-    // set the category so as to tell what kind it is
-    char category[30] = "Incoming message";
-    notify_notification_set_category(incoming, category);
-
-    // set the urgency level of the notification
-    notify_notification_set_urgency(incoming, NOTIFY_URGENCY_NORMAL);
-
-    GError *error = NULL;
-    notify_notification_show(incoming, &error);
+   
+    _win_notify(message, 10000, "Incoming message"); 
 }
 
 static void
 _win_notify_typing(char * short_from)
 {
-    notify_init("Profanity");
-
     char message[strlen(short_from) + 1 + 11];
     sprintf(message, "%s: typing...", short_from);
     
-    // create a new notification
-    NotifyNotification *incoming;
-    incoming = notify_notification_new("Profanity", message, NULL);
-
-    // set the timeout of the notification to 10 secs
-    notify_notification_set_timeout(incoming, 10000);
-
-    // set the category so as to tell what kind it is
-    char category[30] = "Incoming message";
-    notify_notification_set_category(incoming, category);
-
-    // set the urgency level of the notification
-    notify_notification_set_urgency(incoming, NOTIFY_URGENCY_NORMAL);
-
-    GError *error = NULL;
-    notify_notification_show(incoming, &error);
+    _win_notify(message, 10000, "Incoming message");
 }
 #endif
 
