@@ -145,6 +145,11 @@ gui_refresh(void)
 void
 gui_close(void)
 {
+#ifdef HAVE_LIBNOTIFY
+    if (notify_is_initted()) {
+        notify_uninit();
+    }
+#endif
     endwin();
 }
 
@@ -290,17 +295,24 @@ static void
 _win_notify(const char * const message, int timeout, 
     const char * const category)
 {
-    notify_init("Profanity");    
-    
-    // create a new notification
-    NotifyNotification *notification;
-    notification = notify_notification_new("Profanity", message, NULL);
-    notify_notification_set_timeout(notification, timeout);
-    notify_notification_set_category(notification, category);
-    notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
+    gboolean notify_initted = notify_is_initted();
 
-    GError *error = NULL;
-    notify_notification_show(notification, &error);
+    if (!notify_initted) {
+        notify_initted = notify_init("Profanity");
+    }
+
+    if (notify_initted) {
+        NotifyNotification *notification;
+        notification = notify_notification_new("Profanity", message, NULL);
+        notify_notification_set_timeout(notification, timeout);
+        notify_notification_set_category(notification, category);
+        notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
+
+        GError *error = NULL;
+        notify_notification_show(notification, &error);
+    } else {
+        log_error("Libnotify initialisation error.");
+    }
 }
 
 static void
