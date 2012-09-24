@@ -309,7 +309,13 @@ _win_notify(const char * const message, int timeout,
         notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
 
         GError *error = NULL;
-        notify_notification_show(notification, &error);
+        gboolean notify_success = notify_notification_show(notification, &error);
+
+        if (!notify_success) {
+            log_error("Error sending desktop notification:");
+            log_error("  -> Message : %s", message);
+            log_error("  -> Error   : %s", error->message);
+        }
     } else {
         log_error("Libnotify initialisation error.");
     }
