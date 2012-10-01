@@ -348,16 +348,7 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
 
     if (status == XMPP_CONN_CONNECT) {
         const char *jid = xmpp_conn_get_jid(conn);
-        const char *msg = " logged in successfully.";
-        char line[strlen(jid) + 1 + strlen(msg) + 1];
-        sprintf(line, "%s %s", jid, msg);
-        title_bar_set_status(PRESENCE_ONLINE);
-
-        cons_show(line);
-        log_info(line);
-        win_page_off();
-        status_bar_print_message(jid);
-        status_bar_refresh();
+        prof_handle_login_success(jid);    
 
         xmpp_stanza_t* pres;
         xmpp_handler_add(conn, _jabber_message_handler, NULL, "message", NULL, ctx);
@@ -369,8 +360,6 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
         xmpp_stanza_set_name(pres, "presence");
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
-
-        prefs_add_login(jid);
 
         jabber_conn.conn_status = JABBER_CONNECTED;
         jabber_conn.presence = PRESENCE_ONLINE;
@@ -390,21 +379,14 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
             
         // lost connection for unkown reason
         } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
-            cons_bad_show("Lost connection.");
-            log_info("Lost connection");
-            win_disconnected();
-            win_page_off();
-            log_info("disconnected");
+            prof_handle_lost_connection();    
             xmpp_stop(ctx);
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
 
         // login attempt failed
         } else {
-            cons_bad_show("Login failed.");
-            log_info("Login failed");
-            win_page_off();
-            log_info("disconnected");
+            prof_handle_failed_login();
             xmpp_stop(ctx);
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;

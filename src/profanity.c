@@ -193,6 +193,40 @@ prof_handle_incoming_message(char *from, char *message)
     win_page_off();
 }
 
+void
+prof_handle_login_success(const char *jid)
+{
+    const char *msg = " logged in successfully.";
+    char line[strlen(jid) + 1 + strlen(msg) + 1];
+    sprintf(line, "%s %s", jid, msg);
+    title_bar_set_status(PRESENCE_ONLINE);
+    cons_show(line);
+    log_info(line);
+    win_page_off();
+    status_bar_print_message(jid);
+    status_bar_refresh();
+    prefs_add_login(jid);
+}
+
+void
+prof_handle_lost_connection(void)
+{
+    cons_bad_show("Lost connection.");
+    log_info("Lost connection");
+    win_disconnected();
+    win_page_off();
+    log_info("disconnected");
+}
+
+void
+prof_handle_failed_login(void)
+{
+    cons_bad_show("Login failed.");
+    log_info("Login failed");
+    win_page_off();
+    log_info("disconnected");
+}
+
 static void
 _create_config_directory()
 {
