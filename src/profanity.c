@@ -227,6 +227,26 @@ prof_handle_failed_login(void)
     log_info("disconnected");
 }
 
+void
+prof_handle_contact_online(char *contact, char *show, char *status)
+{
+    gboolean result = contact_list_add(contact, show, status);
+    if (result) {
+        win_contact_online(contact, show, status);
+    }
+    win_page_off();
+}
+
+void
+prof_handle_contact_offline(char *contact, char *show, char *status)
+{
+    gboolean result = contact_list_remove(contact);
+    if (result) {
+        win_contact_offline(contact, show, status);
+    }
+    win_page_off();
+}
+
 static void
 _create_config_directory()
 {

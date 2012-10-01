@@ -490,19 +490,11 @@ _jabber_presence_handler(xmpp_conn_t * const conn,
         status_str = NULL;
 
     if (strcmp(short_jid, short_from) !=0) {
-        if (type == NULL) {// online
-            gboolean result = contact_list_add(short_from, show_str, status_str);
-            if (result) {
-                win_contact_online(short_from, show_str, status_str);
-            }
-        } else {// offline
-            gboolean result = contact_list_remove(short_from);
-            if (result) {
-                win_contact_offline(short_from, show_str, status_str);
-            }
+        if (type == NULL) {
+            prof_handle_contact_online(short_from, show_str, status_str);
+        } else {
+            prof_handle_contact_offline(short_from, show_str, status_str);
         }
-
-        win_page_off();
     }
 
     return 1;
