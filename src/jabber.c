@@ -311,8 +311,7 @@ _jabber_message_handler(xmpp_conn_t * const conn,
             } else if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
                 // composing
                 char *from = xmpp_stanza_get_attribute(stanza, "from");
-                win_show_typing(from);
-                win_page_off();
+                prof_handle_typing(from);
             }
         }
         
@@ -326,8 +325,7 @@ _jabber_message_handler(xmpp_conn_t * const conn,
 
     char *message = xmpp_stanza_get_text(body);
     char *from = xmpp_stanza_get_attribute(stanza, "from");
-    win_show_incomming_msg(from, message);
-    win_page_off();
+    prof_handle_incoming_message(from, message);
 
     if (prefs_get_chlog()) {
         char from_cpy[strlen(from) + 1];

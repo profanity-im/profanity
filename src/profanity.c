@@ -179,6 +179,20 @@ _process_input(char *inp)
     return result;
 }
 
+void
+prof_handle_typing(char *from)
+{
+    win_show_typing(from);
+    win_page_off();
+}
+
+void
+prof_handle_incoming_message(char *from, char *message)
+{
+    win_show_incomming_msg(from, message);
+    win_page_off();
+}
+
 static void
 _create_config_directory()
 {
