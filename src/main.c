@@ -63,8 +63,7 @@ main(int argc, char **argv)
         return 0;
     }
 
-    profanity_init(disable_tls, log);
-    profanity_run();
+    prof_run(disable_tls, log);
 
     return 0;
 }

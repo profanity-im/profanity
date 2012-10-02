@@ -39,20 +39,21 @@
 #include "ui.h"
 
 static log_level_t _get_log_level(char *log_level);
-gboolean _process_input(char *inp);
+static gboolean _process_input(char *inp);
 static void _create_config_directory();
 static void _free_roster_entry(jabber_roster_entry *entry);
+static void _init(const int disable_tls, char *log_level);
+static void _shutdown_init(void);
+static void _shutdown(void);
 
 void
-profanity_run(void)
+prof_run(const int disable_tls, char *log_level)
 {
-    gboolean cmd_result = TRUE;
-
+    _init(disable_tls, log_level);
     log_info("Starting main event loop");
-
     inp_non_block();
-    
     GTimer *timer = g_timer_new();
+    gboolean cmd_result = TRUE;
 
     while(cmd_result == TRUE) {
         int ch = ERR;
@@ -86,99 +87,6 @@ profanity_run(void)
         inp[size++] = '\0';
         cmd_result = _process_input(inp);
     }
-}
-
-void
-profanity_init(const int disable_tls, char *log_level)
-{
-    _create_config_directory();
-    log_level_t prof_log_level = _get_log_level(log_level);
-    log_init(prof_log_level);
-    log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
-    chat_log_init();
-    prefs_load();
-    gui_init();
-    jabber_init(disable_tls);
-    cmd_init();
-    log_info("Initialising contact list");
-    contact_list_init();
-    atexit(profanity_shutdown_init);
-}
-
-void
-profanity_shutdown_init(void)
-{
-    gboolean wait_response = jabber_disconnect();
-
-    if (wait_response) {
-        while (jabber_connection_status() == JABBER_DISCONNECTING) {
-            jabber_process_events();
-        }
-    }
-
-    profanity_shutdown();
-}
-
-void
-profanity_shutdown(void)
-{
-    gui_close();                                                          
-    chat_log_close();                                                    
-    prefs_close();                                                       
-    log_close();   
-}
-
-static log_level_t 
-_get_log_level(char *log_level)
-{
-    if (strcmp(log_level, "DEBUG") == 0) {
-        return PROF_LEVEL_DEBUG;
-    } else if (strcmp(log_level, "INFO") == 0) {
-        return PROF_LEVEL_INFO;
-    } else if (strcmp(log_level, "WARN") == 0) {
-        return PROF_LEVEL_WARN;
-    } else {
-        return PROF_LEVEL_ERROR;
-    }
-}
-
-/* 
- * Take a line of input and process it, return TRUE if profanity is to 
- * continue, FALSE otherwise
- */
-gboolean
-_process_input(char *inp)
-{
-    log_debug("Input recieved: %s", inp);
-    gboolean result = FALSE;
-    g_strstrip(inp);
-    
-    // add line to history if something typed
-    if (strlen(inp) > 0) {
-        history_append(inp);
-    }
-
-    // just carry on if no input
-    if (strlen(inp) == 0) {
-        result = TRUE;
-
-    // habdle command if input starts with a '/'
-    } else if (inp[0] == '/') {
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
-        char *command = strtok(inp_cpy, " ");
-        result = cmd_execute(command, inp);
-
-    // call a default handler if input didn't start with '/'
-    } else {
-        result = cmd_execute_default(inp);
-    }
-
-    inp_clear();
-    reset_search_attempts();
-    win_page_off();
-
-    return result;
 }
 
 void
@@ -249,7 +157,8 @@ prof_handle_contact_offline(char *contact, char *show, char *status)
     win_page_off();
 }
 
-void prof_handle_roster(GSList *roster)
+void
+prof_handle_roster(GSList *roster)
 {
     cons_show("Roster:");
     while (roster != NULL) {
@@ -292,3 +201,95 @@ _free_roster_entry(jabber_roster_entry *entry)
     free(entry->jid);
 }
 
+static log_level_t 
+_get_log_level(char *log_level)
+{
+    if (strcmp(log_level, "DEBUG") == 0) {
+        return PROF_LEVEL_DEBUG;
+    } else if (strcmp(log_level, "INFO") == 0) {
+        return PROF_LEVEL_INFO;
+    } else if (strcmp(log_level, "WARN") == 0) {
+        return PROF_LEVEL_WARN;
+    } else {
+        return PROF_LEVEL_ERROR;
+    }
+}
+
+/* 
+ * Take a line of input and process it, return TRUE if profanity is to 
+ * continue, FALSE otherwise
+ */
+static gboolean
+_process_input(char *inp)
+{
+    log_debug("Input recieved: %s", inp);
+    gboolean result = FALSE;
+    g_strstrip(inp);
+    
+    // add line to history if something typed
+    if (strlen(inp) > 0) {
+        history_append(inp);
+    }
+
+    // just carry on if no input
+    if (strlen(inp) == 0) {
+        result = TRUE;
+
+    // habdle command if input starts with a '/'
+    } else if (inp[0] == '/') {
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
+        char *command = strtok(inp_cpy, " ");
+        result = cmd_execute(command, inp);
+
+    // call a default handler if input didn't start with '/'
+    } else {
+        result = cmd_execute_default(inp);
+    }
+
+    inp_clear();
+    reset_search_attempts();
+    win_page_off();
+
+    return result;
+}
+
+static void
+_init(const int disable_tls, char *log_level)
+{
+    _create_config_directory();
+    log_level_t prof_log_level = _get_log_level(log_level);
+    log_init(prof_log_level);
+    log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
+    chat_log_init();
+    prefs_load();
+    gui_init();
+    jabber_init(disable_tls);
+    cmd_init();
+    log_info("Initialising contact list");
+    contact_list_init();
+    atexit(_shutdown_init);
+}
+
+static void
+_shutdown_init(void)
+{
+    gboolean wait_response = jabber_disconnect();
+
+    if (wait_response) {
+        while (jabber_connection_status() == JABBER_DISCONNECTING) {
+            jabber_process_events();
+        }
+    }
+
+    _shutdown();
+}
+
+static void
+_shutdown(void)
+{
+    gui_close();                                                          
+    chat_log_close();                                                    
+    prefs_close();                                                       
+    log_close();   
+}
