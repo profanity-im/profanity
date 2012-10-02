@@ -25,7 +25,6 @@
 
 #include <strophe.h>
 
-#include "chat_log.h"
 #include "common.h"
 #include "jabber.h"
 #include "log.h"
@@ -161,11 +160,6 @@ jabber_send(const char * const msg, const char * const recipient)
     free(coded_msg);
     free(coded_msg2);
     free(coded_msg3);
-   
-    if (prefs_get_chlog()) { 
-        const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
-        chat_log_chat(jid, (char *)recipient, msg, OUT);
-    }
 }
 
 void
@@ -279,15 +273,6 @@ _message_handler(xmpp_conn_t * const conn,
     char *message = xmpp_stanza_get_text(body);
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     prof_handle_incoming_message(from, message);
-
-    if (prefs_get_chlog()) {
-        char from_cpy[strlen(from) + 1];
-        strcpy(from_cpy, from);
-        char *short_from = strtok(from_cpy, "/");
-        const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
-        
-        chat_log_chat(jid, short_from, message, IN);
-    }
 
     return 1;
 }

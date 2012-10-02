@@ -28,6 +28,7 @@
 #include "command.h"
 #include "common.h"
 #include "contact_list.h"
+#include "chat_log.h"
 #include "history.h"
 #include "jabber.h"
 #include "log.h"
@@ -450,6 +451,12 @@ cmd_execute_default(const char * const inp)
     if (win_in_chat()) {
         char *recipient = win_get_recipient();
         jabber_send(inp, recipient);
+        
+        if (prefs_get_chlog()) {
+            const char *jid = jabber_get_jid();
+            chat_log_chat(jid, recipient, inp, OUT);
+        }
+
         win_show_outgoing_msg("me", recipient, inp);
         free(recipient);
     } else {
@@ -604,8 +611,15 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
         if ((usr != NULL) && (strlen(inp) > (5 + strlen(usr) + 1))) {
             // get message
             msg = strndup(inp+5+strlen(usr)+1, strlen(inp)-(5+strlen(usr)+1));
+
             if (msg != NULL) {
                 jabber_send(msg, usr);
+
+                if (prefs_get_chlog()) {
+                    const char *jid = jabber_get_jid();
+                    chat_log_chat(jid, usr, msg, OUT);
+                }
+
                 win_show_outgoing_msg("me", usr, msg);
             } else {
                 char usage[strlen(help.usage + 8)];
@@ -641,6 +655,12 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
             char *tiny = tinyurl_get(url);
             char *recipient = win_get_recipient();
             jabber_send(tiny, recipient);
+
+            if (prefs_get_chlog()) {
+                const char *jid = jabber_get_jid();
+                chat_log_chat(jid, recipient, tiny, OUT);
+            }
+
             win_show_outgoing_msg("me", recipient, tiny);
             free(recipient);
             free(tiny);
