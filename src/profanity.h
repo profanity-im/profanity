@@ -32,7 +32,13 @@ void prof_handle_typing(char *from);
 void prof_handle_contact_online(char *contact, char *show, char *status);
 void prof_handle_contact_offline(char *contact, char *show, char *status);
 void prof_handle_incoming_message(char *from, char *message);
+void prof_handle_roster(GSList *roster);
 void profanity_shutdown_init(void);
 void profanity_shutdown(void);
+
+typedef struct roster_entry_t {
+    char *name;
+    char *jid;
+} jabber_roster_entry;
 
 #endif

@@ -35,11 +35,13 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
+#include "jabber.h"
 #include "ui.h"
 
 static log_level_t _get_log_level(char *log_level);
 gboolean _process_input(char *inp);
 static void _create_config_directory();
+static void _free_roster_entry(jabber_roster_entry *entry);
 
 void
 profanity_run(void)
@@ -247,6 +249,30 @@ prof_handle_contact_offline(char *contact, char *show, char *status)
     win_page_off();
 }
 
+void prof_handle_roster(GSList *roster)
+{
+    cons_show("Roster:");
+    while (roster != NULL) {
+        jabber_roster_entry *entry = roster->data;
+        if (entry->name != NULL) {
+            char line[strlen(entry->name) + 2 + strlen(entry->jid) + 1 + 1];
+            sprintf(line, "%s (%s)", entry->name, entry->jid);
+            cons_show(line);
+
+        } else {
+            char line[strlen(entry->jid) + 1];
+            sprintf(line, "%s", entry->jid);
+            cons_show(line);
+        }
+       
+        roster = g_slist_next(roster);
+
+        win_page_off();
+    }
+
+    g_slist_free_full(roster, (GDestroyNotify)_free_roster_entry); 
+}
+
 static void
 _create_config_directory()
 {
@@ -254,5 +280,15 @@ _create_config_directory()
     g_string_append(dir, "/.profanity");
     create_dir(dir->str);
     g_string_free(dir, TRUE);
+}
+
+static void
+_free_roster_entry(jabber_roster_entry *entry)
+{
+    if (entry->name != NULL) {
+        free(entry->name);
+        entry->name = NULL;
+    }
+    free(entry->jid);
 }
 

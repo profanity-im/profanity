@@ -399,36 +399,33 @@ _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *query, *item;
-    char *type, *name, *jid;
-
-    type = xmpp_stanza_get_type(stanza);
+    char *type = xmpp_stanza_get_type(stanza);
     
     if (strcmp(type, "error") == 0)
         log_error("Roster query failed");
     else {
         query = xmpp_stanza_get_child_by_name(stanza, "query");
-        cons_show("Roster:");
-
+        GSList *roster = NULL;
         item = xmpp_stanza_get_children(query);
+        
         while (item != NULL) {
-            name = xmpp_stanza_get_attribute(item, "name");
-            jid = xmpp_stanza_get_attribute(item, "jid");
+            const char *name = xmpp_stanza_get_attribute(item, "name");
+            const char *jid = xmpp_stanza_get_attribute(item, "jid");
+
+            jabber_roster_entry *entry = malloc(sizeof(jabber_roster_entry));
 
             if (name != NULL) {
-                char line[strlen(name) + 2 + strlen(jid) + 1 + 1];
-                sprintf(line, "%s (%s)", name, jid);
-                cons_show(line);
-
+                entry->name = strdup(name);
             } else {
-                char line[strlen(jid) + 1];
-                sprintf(line, "%s", jid);
-                cons_show(line);
+                entry->name = NULL;
             }
-        
-            item = xmpp_stanza_get_next(item);
+            entry->jid = strdup(jid);
 
-            win_page_off();
+            roster = g_slist_append(roster, entry);
+            item = xmpp_stanza_get_next(item);
         }
+
+        prof_handle_roster(roster);
     }
     
     return 1;
