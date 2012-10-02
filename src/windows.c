@@ -365,7 +365,8 @@ win_show_outgoing_msg(const char * const from, const char * const to,
     _win_show_time(win);
     _win_show_user(win, from, 0);
     _win_show_message(win, message);
-    
+    _win_switch_if_active(win_index);
+/*   
     status_bar_active(win_index);
     
     if (win_index == _curr_prof_win) {
@@ -373,6 +374,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
     } else {
         status_bar_new(win_index);
     }
+*/
 }
 
 void
