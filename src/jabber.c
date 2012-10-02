@@ -32,7 +32,6 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
-#include "ui.h"
 
 #define PING_INTERVAL 120000 // 2 minutes
 
