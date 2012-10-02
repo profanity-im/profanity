@@ -277,7 +277,7 @@ _shutdown_init(void)
     gboolean wait_response = jabber_disconnect();
 
     if (wait_response) {
-        while (jabber_connection_status() == JABBER_DISCONNECTING) {
+        while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
         }
     }

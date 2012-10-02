@@ -465,7 +465,7 @@ static gboolean
 _cmd_connect(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
-    jabber_conn_status_t conn_status = jabber_connection_status();
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
         cons_show("You are either connected already, or a login is in process.");
@@ -558,7 +558,7 @@ _cmd_prefs(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_ros(const char * const inp, struct cmd_help_t help)
 {
-    jabber_conn_status_t conn_status = jabber_connection_status();
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED)
         cons_show("You are not currently connected.");
@@ -571,7 +571,7 @@ _cmd_ros(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_who(const char * const inp, struct cmd_help_t help)
 {
-    jabber_conn_status_t conn_status = jabber_connection_status();
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -589,7 +589,7 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
     char *usr = NULL;
     char *msg = NULL;
 
-    jabber_conn_status_t conn_status = jabber_connection_status();
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -786,7 +786,7 @@ _update_presence(const jabber_presence_t presence,
         msg = NULL;
     }
 
-    jabber_conn_status_t conn_status = jabber_connection_status();
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
     
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");

@@ -27,7 +27,6 @@
 
 #include "chat_log.h"
 #include "common.h"
-#include "contact_list.h"
 #include "jabber.h"
 #include "log.h"
 #include "preferences.h"
@@ -44,68 +43,23 @@ static struct _jabber_conn_t {
     int tls_disabled;
 } jabber_conn;
 
-static log_level_t get_log_level(xmpp_log_level_t xmpp_level)
-{
-    if (xmpp_level == XMPP_LEVEL_DEBUG) {
-        return PROF_LEVEL_DEBUG;
-    } else if (xmpp_level == XMPP_LEVEL_INFO) {
-        return PROF_LEVEL_INFO;
-    } else if (xmpp_level == XMPP_LEVEL_WARN) {
-        return PROF_LEVEL_WARN;
-    } else {
-        return PROF_LEVEL_ERROR;
-    }
-}
+static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
+static xmpp_log_level_t _get_xmpp_log_level();
+static void _xmpp_file_logger(void * const userdata, 
+    const xmpp_log_level_t level, const char * const area, 
+    const char * const msg);
+static xmpp_log_t * _xmpp_get_file_logger();
 
-static xmpp_log_level_t get_xmpp_log_level()
-{
-    log_level_t prof_level = log_get_filter();
-
-    if (prof_level == PROF_LEVEL_DEBUG) {
-        return XMPP_LEVEL_DEBUG;
-    } else if (prof_level == PROF_LEVEL_INFO) {
-        return XMPP_LEVEL_INFO;
-    } else if (prof_level == PROF_LEVEL_WARN) {
-        return XMPP_LEVEL_WARN;
-    } else {
-        return XMPP_LEVEL_ERROR;
-    }
-}
-
-void
-xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
-    const char * const area, const char * const msg)
-{
-    log_level_t prof_level = get_log_level(level);
-    log_msg(prof_level, area, msg);
-}
-
-xmpp_log_t *
-xmpp_get_file_logger()
-{
-    xmpp_log_level_t level = get_xmpp_log_level();
-    xmpp_log_t *file_log = malloc(sizeof(xmpp_log_t));
-
-    file_log->handler = xmpp_file_logger;
-    file_log->userdata = &level;
-
-    return file_log;
-}
-
-// private XMPP handlers
-static void _jabber_conn_handler(xmpp_conn_t * const conn, 
+// XMPP event handlers
+static void _connection_handler(xmpp_conn_t * const conn, 
     const xmpp_conn_event_t status, const int error, 
     xmpp_stream_error_t * const stream_error, void * const userdata);
-
-static int _jabber_message_handler(xmpp_conn_t * const conn, 
+static int _message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata);
-
 static int _roster_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata);
-
-static int _jabber_presence_handler(xmpp_conn_t * const conn, 
+static int _presence_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata);
-
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
 void
@@ -118,19 +72,13 @@ jabber_init(const int disable_tls)
 }
 
 jabber_conn_status_t
-jabber_connection_status(void)
-{
-    return (jabber_conn.conn_status);
-}
-
-jabber_conn_status_t
 jabber_connect(const char * const user, 
     const char * const passwd)
 {
     log_info("Connecting as %s", user);
     xmpp_initialize();
 
-    jabber_conn.log = xmpp_get_file_logger();
+    jabber_conn.log = _xmpp_get_file_logger();
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
     jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
 
@@ -141,7 +89,7 @@ jabber_connect(const char * const user,
         xmpp_conn_disable_tls(jabber_conn.conn);
 
     int connect_status = xmpp_connect_client(jabber_conn.conn, NULL, 0, 
-        _jabber_conn_handler, jabber_conn.ctx);
+        _connection_handler, jabber_conn.ctx);
 
     if (connect_status == 0)
         jabber_conn.conn_status = JABBER_CONNECTING;
@@ -149,12 +97,6 @@ jabber_connect(const char * const user,
         jabber_conn.conn_status = JABBER_DISCONNECTED;
 
     return jabber_conn.conn_status;
-}
-
-const char *
-jabber_get_jid(void)
-{
-    return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
 gboolean
@@ -295,8 +237,20 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
     xmpp_stanza_release(pres);
 }
 
+jabber_conn_status_t
+jabber_get_connection_status(void)
+{
+    return (jabber_conn.conn_status);
+}
+
+const char *
+jabber_get_jid(void)
+{
+    return xmpp_conn_get_jid(jabber_conn.conn);
+}
+
 static int
-_jabber_message_handler(xmpp_conn_t * const conn, 
+_message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
@@ -339,7 +293,7 @@ _jabber_message_handler(xmpp_conn_t * const conn,
 }
 
 static void
-_jabber_conn_handler(xmpp_conn_t * const conn, 
+_connection_handler(xmpp_conn_t * const conn, 
     const xmpp_conn_event_t status, const int error, 
     xmpp_stream_error_t * const stream_error, void * const userdata)
 {
@@ -350,8 +304,8 @@ _jabber_conn_handler(xmpp_conn_t * const conn,
         prof_handle_login_success(jid);    
 
         xmpp_stanza_t* pres;
-        xmpp_handler_add(conn, _jabber_message_handler, NULL, "message", NULL, ctx);
-        xmpp_handler_add(conn, _jabber_presence_handler, NULL, "presence", NULL, ctx);
+        xmpp_handler_add(conn, _message_handler, NULL, "message", NULL, ctx);
+        xmpp_handler_add(conn, _presence_handler, NULL, "presence", NULL, ctx);
         xmpp_id_handler_add(conn, _roster_handler, "roster", ctx);
         xmpp_timed_handler_add(conn, _ping_timed_handler, PING_INTERVAL, ctx);
 
@@ -446,7 +400,6 @@ _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
         ping = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(ping, "ping");
 
-        // FIXME add ping namespace to libstrophe
         xmpp_stanza_set_ns(ping, "urn:xmpp:ping");
 
         xmpp_stanza_add_child(iq, ping);
@@ -459,7 +412,7 @@ _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 }
 
 static int
-_jabber_presence_handler(xmpp_conn_t * const conn, 
+_presence_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
@@ -495,3 +448,54 @@ _jabber_presence_handler(xmpp_conn_t * const conn,
 
     return 1;
 }
+
+static log_level_t
+_get_log_level(xmpp_log_level_t xmpp_level)
+{
+    if (xmpp_level == XMPP_LEVEL_DEBUG) {
+        return PROF_LEVEL_DEBUG;
+    } else if (xmpp_level == XMPP_LEVEL_INFO) {
+        return PROF_LEVEL_INFO;
+    } else if (xmpp_level == XMPP_LEVEL_WARN) {
+        return PROF_LEVEL_WARN;
+    } else {
+        return PROF_LEVEL_ERROR;
+    }
+}
+
+static xmpp_log_level_t
+_get_xmpp_log_level()
+{
+    log_level_t prof_level = log_get_filter();
+
+    if (prof_level == PROF_LEVEL_DEBUG) {
+        return XMPP_LEVEL_DEBUG;
+    } else if (prof_level == PROF_LEVEL_INFO) {
+        return XMPP_LEVEL_INFO;
+    } else if (prof_level == PROF_LEVEL_WARN) {
+        return XMPP_LEVEL_WARN;
+    } else {
+        return XMPP_LEVEL_ERROR;
+    }
+}
+
+static void
+_xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
+    const char * const area, const char * const msg)
+{
+    log_level_t prof_level = _get_log_level(level);
+    log_msg(prof_level, area, msg);
+}
+
+static xmpp_log_t *
+_xmpp_get_file_logger()
+{
+    xmpp_log_level_t level = _get_xmpp_log_level();
+    xmpp_log_t *file_log = malloc(sizeof(xmpp_log_t));
+
+    file_log->handler = _xmpp_file_logger;
+    file_log->userdata = &level;
+
+    return file_log;
+}
+
