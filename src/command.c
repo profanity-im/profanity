@@ -478,9 +478,7 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
         cons_show("You are either connected already, or a login is in process.");
         result = TRUE;
     } else if (strlen(inp) < 10) {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
+        cons_show("Usage: %s", help.usage);
         result = TRUE;
     } else {
         char *user, *lower;
@@ -622,14 +620,10 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
 
                 win_show_outgoing_msg("me", usr, msg);
             } else {
-                char usage[strlen(help.usage + 8)];
-                sprintf(usage, "Usage: %s", help.usage);
-                cons_show(usage);
+                cons_show("Usage: %s", help.usage);
             }
         } else {
-            char usage[strlen(help.usage + 8)];
-            sprintf(usage, "Usage: %s", help.usage);
-            cons_show(usage);
+            cons_show("Usage: %s", help.usage);
         }
     }
 
@@ -670,9 +664,7 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
             free(url);
         }
     } else {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
+        cons_show("Usage: %s", help.usage);
         
         if (win_in_chat()) {
             char usage[strlen(help.usage + 8)];
@@ -739,9 +731,7 @@ static gboolean
 _cmd_set_remind(const char * const inp, struct cmd_help_t help)
 {
     if ((strncmp(inp, "/remind ", 8) != 0) || (strlen(inp) < 9)) {
-        char usage[strlen(help.usage + 8)];
-        sprintf(usage, "Usage: %s", help.usage);
-        cons_show(usage);
+        cons_show("Usage: %s", help.usage);
     } else {
         // copy input    
         char inp_cpy[strlen(inp) + 1];
@@ -821,14 +811,10 @@ _update_presence(const jabber_presence_t presence,
         jabber_update_presence(presence, msg);
         title_bar_set_status(presence);
         if (msg != NULL) {
-            char str[14 + strlen(show) + 3 + strlen(msg) + 2];
-            sprintf(str, "Status set to %s, \"%s\"", show, msg);
-            cons_show(str);
+            cons_show("Status set to %s, \"%s\"", show, msg);
             free(msg);
         } else {
-            char str[14 + strlen(show) + 1];
-            sprintf(str, "Status set to %s", show);
-            cons_show(str);
+            cons_show("Status set to %s", show);
         }
     }
 

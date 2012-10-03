@@ -116,11 +116,9 @@ void
 prof_handle_login_success(const char *jid)
 {
     const char *msg = " logged in successfully.";
-    char line[strlen(jid) + 1 + strlen(msg) + 1];
-    sprintf(line, "%s %s", jid, msg);
+    cons_show("%s %s", jid, msg);
     title_bar_set_status(PRESENCE_ONLINE);
-    cons_show(line);
-    log_info(line);
+    log_info("%s %s", jid, msg);
     win_page_off();
     status_bar_print_message(jid);
     status_bar_refresh();
@@ -173,14 +171,10 @@ prof_handle_roster(GSList *roster)
     while (roster != NULL) {
         jabber_roster_entry *entry = roster->data;
         if (entry->name != NULL) {
-            char line[strlen(entry->name) + 2 + strlen(entry->jid) + 1 + 1];
-            sprintf(line, "%s (%s)", entry->name, entry->jid);
-            cons_show(line);
+            cons_show("%s (%s)", entry->name, entry->jid);
 
         } else {
-            char line[strlen(entry->jid) + 1];
-            sprintf(line, "%s", entry->jid);
-            cons_show(line);
+            cons_show("%s", entry->jid);
         }
        
         roster = g_slist_next(roster);

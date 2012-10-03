@@ -489,11 +489,7 @@ cons_prefs(void)
     else
         cons_show("Chat logging            : OFF");    
 
-    char remind_period[50];
-    sprintf(remind_period, 
-                  "Message reminder period : %d seconds", prefs_get_remind());
-
-    cons_show(remind_period);
+    cons_show("Message reminder period : %d seconds", prefs_get_remind());
 
     cons_show("");
 
@@ -509,9 +505,7 @@ _cons_show_basic_help(void)
     GSList *basic_helpers = cmd_get_basic_help();
     while (basic_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)basic_helpers->data;
-        char line[25 + 2 + strlen(help->short_help)];
-        sprintf(line, "%-25s: %s", help->usage, help->short_help);
-        cons_show(line);
+        cons_show("%-25s: %s", help->usage, help->short_help);
         basic_helpers = g_slist_next(basic_helpers);
     }
 
@@ -531,9 +525,7 @@ cons_help(void)
     GSList *settings_helpers = cmd_get_settings_help();
     while (settings_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)settings_helpers->data;
-        char line[25 + 2 + strlen(help->short_help)];
-        sprintf(line, "%-25s: %s", help->usage, help->short_help);
-        cons_show(line);
+        cons_show("%-25s: %s", help->usage, help->short_help);
         settings_helpers = g_slist_next(settings_helpers);
     }
 
@@ -544,9 +536,7 @@ cons_help(void)
     GSList *status_helpers = cmd_get_status_help();
     while (status_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)status_helpers->data;
-        char line[25 + 2 + strlen(help->short_help)];
-        sprintf(line, "%-25s: %s", help->usage, help->short_help);
-        cons_show(line);
+        cons_show("%-25s: %s", help->usage, help->short_help);
         status_helpers = g_slist_next(status_helpers);
     }
 
