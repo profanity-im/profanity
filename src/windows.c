@@ -366,15 +366,6 @@ win_show_outgoing_msg(const char * const from, const char * const to,
     _win_show_user(win, from, 0);
     _win_show_message(win, message);
     _win_switch_if_active(win_index);
-/*   
-    status_bar_active(win_index);
-    
-    if (win_index == _curr_prof_win) {
-        dirty = TRUE;
-    } else {
-        status_bar_new(win_index);
-    }
-*/
 }
 
 void
@@ -489,7 +480,14 @@ cons_prefs(void)
     else
         cons_show("Chat logging            : OFF");    
 
-    cons_show("Message reminder period : %d seconds", prefs_get_remind());
+    gint remind_period = prefs_get_remind();
+    if (remind_period == 0) {
+        cons_show("Message reminder period : OFF");
+    } else if (remind_period == 1) {
+        cons_show("Message reminder period : 1 second");
+    } else {
+        cons_show("Message reminder period : %d seconds", remind_period);
+    }
 
     cons_show("");
 
