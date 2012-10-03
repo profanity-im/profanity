@@ -631,10 +631,16 @@ cons_bad_show(const char * const msg)
 }
 
 void
-cons_show(const char * const msg)
+cons_show(const char * const msg, ...)
 {
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
     _win_show_time(_cons_win);
-    wprintw(_cons_win, "%s\n", msg); 
+    wprintw(_cons_win, "%s\n", fmt_msg->str); 
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
     
     if (_curr_prof_win == 0)
         dirty = TRUE;

@@ -753,6 +753,13 @@ _cmd_set_remind(const char * const inp, struct cmd_help_t help)
         gint period = atoi(period_str);
 
         prefs_set_remind(period);
+        if (period == 0) {
+            cons_show("Message reminders disabled.");
+        } else if (period == 1) {
+            cons_show("Message reminder period set to 1 second.");
+        } else {
+            cons_show("Message reminder period set to %d seconds.", period);
+        }
     }
 
     return TRUE;    

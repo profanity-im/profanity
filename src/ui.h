@@ -104,7 +104,7 @@ void win_remind(void);
 void cons_help(void);
 void cons_prefs(void);
 void cons_bad_command(const char * const cmd);
-void cons_show(const char * const cmd);
+void cons_show(const char * const cmd, ...);
 void cons_bad_show(const char * const cmd);
 void cons_highlight_show(const char * const cmd);
 void cons_show_online_contacts(GSList * list);
