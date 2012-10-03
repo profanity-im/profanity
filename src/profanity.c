@@ -87,6 +87,8 @@ prof_run(const int disable_tls, char *log_level)
         inp[size++] = '\0';
         cmd_result = _process_input(inp);
     }
+
+    g_timer_destroy(timer);
 }
 
 void
