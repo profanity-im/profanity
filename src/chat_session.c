@@ -31,7 +31,6 @@ static ChatSession _chat_session_new(char *recipient);
 static void _chat_session_free(ChatSession session);
 
 struct chat_session_t {
-    GTimer *last_composing_sent;
     char *recipient;
     chat_state_t state;
 };
@@ -45,43 +44,41 @@ chat_session_init(void)
         (GDestroyNotify)_chat_session_free);
 }
 
-ChatSession
-chat_session_new(char *recipient)
+void
+chat_session_start(char *recipient)
 {
     ChatSession session = _chat_session_new(recipient);
     g_hash_table_insert(sessions, recipient, session);
-    return session;
 }
 
-int
-chat_session_size(void)
+void
+chat_session_end(char *recipient)
 {
-    return g_hash_table_size(sessions);
-}
-
-ChatSession
-chat_session_get(char *recipient)
-{
-    return (ChatSession) g_hash_table_lookup(sessions, recipient);
+    g_hash_table_remove(sessions, recipient);
 }
 
 chat_state_t
-chat_session_get_state(ChatSession session)
+chat_session_get_state(char *recipient)
 {
-    return session->state;
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    if (session == NULL) {
+        return SESSION_ERR;
+    } else {
+        return session->state;
+    }
 }
 
-char *
-chat_session_get_recipient(ChatSession session)
+void
+chat_session_set_state(char *recipient, chat_state_t state)
 {
-    return session->recipient;
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    session->state = state;
 }
 
 static ChatSession
 _chat_session_new(char *recipient)
 {
     ChatSession new_session = malloc(sizeof(struct chat_session_t));
-    new_session->last_composing_sent = NULL;
     new_session->recipient = malloc(strlen(recipient) + 1);
     strcpy(new_session->recipient, recipient);
     new_session->state = ACTIVE;
@@ -92,10 +89,8 @@ _chat_session_new(char *recipient)
 static void
 _chat_session_free(ChatSession session)
 {
-    if (session->last_composing_sent != NULL) {
-        g_timer_destroy(session->last_composing_sent);
-        session->last_composing_sent = NULL;
+    if (session != NULL) {
+        g_free(session->recipient);
+        g_free(session);
     }
-    g_free(session->recipient);
-    g_free(session);
 }

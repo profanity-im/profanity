@@ -27,15 +27,17 @@ typedef struct chat_session_t *ChatSession;
 
 typedef enum {
     ACTIVE,
+    INACTIVE,
+    GONE,
     COMPOSING,
-    PAUSED
+    PAUSED,
+    SESSION_ERR
 } chat_state_t;
 
 void chat_session_init(void);
-int chat_session_size(void);
-ChatSession chat_session_new(char *recipient);
-ChatSession chat_session_get(char *recipient);
-chat_state_t chat_session_get_state(ChatSession session);
-char * chat_session_get_recipient(ChatSession session);
+void chat_session_start(char *recipient);
+void chat_session_end(char *recipient);
+chat_state_t chat_session_get_state(char *recipient);
+void chat_session_set_state(char *recipient, chat_state_t state);
 
 #endif
