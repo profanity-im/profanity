@@ -167,24 +167,15 @@ prof_handle_contact_offline(char *contact, char *show, char *status)
 void
 prof_handle_roster(GSList *roster)
 {
-    cons_show("Roster:");
     while (roster != NULL) {
         jabber_roster_entry *entry = roster->data;
-        if (entry->name != NULL) {
-            cons_show("%s (%s)", entry->name, entry->jid);
-
-        } else {
-            cons_show("%s", entry->jid);
-        }
-
+        
         // if contact not in contact list add them as offline
         if (find_contact(entry->jid) == NULL) {
             contact_list_add(entry->jid, "offline", NULL);
         }
        
         roster = g_slist_next(roster);
-
-        win_page_off();
     }
 
     g_slist_free_full(roster, (GDestroyNotify)_free_roster_entry); 

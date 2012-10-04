@@ -63,7 +63,6 @@ static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_help(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_prefs(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_who(const char * const inp, struct cmd_help_t help);
-static gboolean _cmd_ros(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_connect(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_msg(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
@@ -151,15 +150,6 @@ static struct cmd_t main_commands[] =
           "not from the console.",
           "",
           "Example : /tiny http://www.google.com",
-          NULL } } },
-
-    { "/ros", 
-        _cmd_ros,
-        { "/ros", "List all contacts.",
-        { "/ros",
-          "----",
-          "List all contact currently on the chat hosts roster.",
-          "See /who for a more useful list of contacts who are currently online.",
           NULL } } },
 
     { "/who", 
@@ -556,19 +546,6 @@ static gboolean
 _cmd_prefs(const char * const inp, struct cmd_help_t help)
 {
     cons_prefs();
-
-    return TRUE;
-}
-
-static gboolean
-_cmd_ros(const char * const inp, struct cmd_help_t help)
-{
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-
-    if (conn_status != JABBER_CONNECTED)
-        cons_show("You are not currently connected.");
-    else
-        jabber_roster_request();
 
     return TRUE;
 }
