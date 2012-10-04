@@ -370,6 +370,13 @@ win_show_outgoing_msg(const char * const from, const char * const to,
             win_index = _new_prof_win(to);
 
         WINDOW *win = _wins[win_index].win;
+
+        if (strcmp(p_contact_show(contact), "offline") == 0) {
+            const char const *show = p_contact_show(contact);
+            const char const *status = p_contact_status(contact);
+            _show_status_string(win, to, show, status, "--", "offline");
+        }
+
         _win_show_time(win);
         _win_show_user(win, from, 0);
         _win_show_message(win, message);
@@ -898,7 +905,7 @@ _show_status_string(WINDOW *win, const char * const from,
     const char * const default_show)
 {
     _win_show_time(win);    
-
+    
     if (show != NULL) {
         if (strcmp(show, "away") == 0) {
             wattron(win, COLOUR_AWAY);
@@ -926,8 +933,8 @@ _show_status_string(WINDOW *win, const char * const from,
         wprintw(win, ", \"%s\"", status);
     
     wprintw(win, "\n");
-    
-    if (show != NULL) {
+   
+    if (show != NULL) { 
         if (strcmp(show, "away") == 0) {
             wattroff(win, COLOUR_AWAY);
         } else if (strcmp(show, "chat") == 0) {
