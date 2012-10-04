@@ -915,6 +915,10 @@ _show_status_string(WINDOW *win, const char * const from,
             wattron(win, COLOUR_DND);
         } else if (strcmp(show, "xa") == 0) {
             wattron(win, COLOUR_XA);
+        } else if (strcmp(show, "online") == 0) {
+            wattron(win, COLOUR_ONLINE);
+        } else {
+            wattron(win, COLOUR_OFFLINE);
         }
     } else if (strcmp(default_show, "online") == 0) {
         wattron(win, COLOUR_ONLINE);
@@ -943,6 +947,10 @@ _show_status_string(WINDOW *win, const char * const from,
             wattroff(win, COLOUR_DND);
         } else if (strcmp(show, "xa") == 0) {
             wattroff(win, COLOUR_XA);
+        } else if (strcmp(show, "online") == 0) {
+            wattroff(win, COLOUR_ONLINE);
+        } else {
+            wattroff(win, COLOUR_OFFLINE);
         }
     } else if (strcmp(default_show, "online") == 0) {
         wattroff(win, COLOUR_ONLINE);
