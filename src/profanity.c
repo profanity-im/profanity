@@ -157,7 +157,7 @@ prof_handle_contact_online(char *contact, char *show, char *status)
 void
 prof_handle_contact_offline(char *contact, char *show, char *status)
 {
-    gboolean result = contact_list_remove(contact);
+    gboolean result = contact_list_add(contact, "offline", status);
     if (result) {
         win_contact_offline(contact, show, status);
     }
