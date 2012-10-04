@@ -155,10 +155,12 @@ static struct cmd_t main_commands[] =
 
     { "/who", 
         _cmd_who,
-        { "/who", "Find out who is online.",
-        { "/who",
-          "----",
-          "Show the list of all online contacts with their current status message.",
+        { "/who [status]", "Show contacts with chosen status.",
+        { "/who [status]",
+          "-------------",
+          "Show contacts with the specified status, no status shows all contacts.",
+          "Possible statuses are: online, offline, away, dnd, xa, chat.",
+          "online includes: chat, dnd, away, xa.",
           NULL } } },
 
     { "/close", 

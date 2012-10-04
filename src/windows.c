@@ -38,6 +38,7 @@
 
 #include "command.h"
 #include "contact.h"
+#include "contact_list.h"
 #include "log.h"
 #include "preferences.h"
 #include "ui.h"
@@ -357,15 +358,23 @@ void
 win_show_outgoing_msg(const char * const from, const char * const to, 
     const char * const message)
 {
-    int win_index = _find_prof_win_index(to);
-    if (win_index == NUM_WINS) 
-        win_index = _new_prof_win(to);
+    // if the contact is offline, show a message
+    PContact contact = contact_list_get_contact(to);
+    
+    if (contact == NULL) {
+        cons_show("%s is not one of your contacts.");
+    } else {
+        int win_index = _find_prof_win_index(to);
 
-    WINDOW *win = _wins[win_index].win;
-    _win_show_time(win);
-    _win_show_user(win, from, 0);
-    _win_show_message(win, message);
-    _win_switch_if_active(win_index);
+        if (win_index == NUM_WINS) 
+            win_index = _new_prof_win(to);
+
+        WINDOW *win = _wins[win_index].win;
+        _win_show_time(win);
+        _win_show_user(win, from, 0);
+        _win_show_message(win, message);
+        _win_switch_if_active(win_index);
+    }
 }
 
 void
