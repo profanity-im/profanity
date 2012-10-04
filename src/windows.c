@@ -365,16 +365,19 @@ win_show_outgoing_msg(const char * const from, const char * const to,
         cons_show("%s is not one of your contacts.");
     } else {
         int win_index = _find_prof_win_index(to);
+        WINDOW *win = NULL;
 
-        if (win_index == NUM_WINS) 
+        if (win_index == NUM_WINS) {
             win_index = _new_prof_win(to);
+            win = _wins[win_index].win;
 
-        WINDOW *win = _wins[win_index].win;
-
-        if (strcmp(p_contact_show(contact), "offline") == 0) {
-            const char const *show = p_contact_show(contact);
-            const char const *status = p_contact_status(contact);
-            _show_status_string(win, to, show, status, "--", "offline");
+            if (strcmp(p_contact_show(contact), "offline") == 0) {
+                const char const *show = p_contact_show(contact);
+                const char const *status = p_contact_status(contact);
+                _show_status_string(win, to, show, status, "--", "offline");
+            }
+        } else {
+            win = _wins[win_index].win;
         }
 
         _win_show_time(win);
