@@ -176,6 +176,11 @@ prof_handle_roster(GSList *roster)
         } else {
             cons_show("%s", entry->jid);
         }
+
+        // if contact not in contact list add them as offline
+        if (find_contact(entry->jid) == NULL) {
+            contact_list_add(entry->jid, "offline", NULL);
+        }
        
         roster = g_slist_next(roster);
 
