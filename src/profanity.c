@@ -55,10 +55,12 @@ prof_run(const int disable_tls, char *log_level)
     GTimer *timer = g_timer_new();
     gboolean cmd_result = TRUE;
 
+    char inp[INP_WIN_MAX];
+    int size = 0;
+
     while(cmd_result == TRUE) {
         int ch = ERR;
-        char inp[INP_WIN_MAX];
-        int size = 0;
+        size = 0;
 
         while(ch != '\n') {
 
