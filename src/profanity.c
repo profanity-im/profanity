@@ -55,10 +55,12 @@ prof_run(const int disable_tls, char *log_level)
     GTimer *timer = g_timer_new();
     gboolean cmd_result = TRUE;
 
+    char inp[INP_WIN_MAX];
+    int size = 0;
+
     while(cmd_result == TRUE) {
         int ch = ERR;
-        char inp[INP_WIN_MAX];
-        int size = 0;
+        size = 0;
 
         while(ch != '\n') {
 
@@ -159,7 +161,7 @@ prof_handle_contact_online(char *contact, char *show, char *status)
 void
 prof_handle_contact_offline(char *contact, char *show, char *status)
 {
-    gboolean result = contact_list_remove(contact);
+    gboolean result = contact_list_add(contact, "offline", status);
     if (result) {
         win_contact_offline(contact, show, status);
     }
@@ -169,19 +171,15 @@ prof_handle_contact_offline(char *contact, char *show, char *status)
 void
 prof_handle_roster(GSList *roster)
 {
-    cons_show("Roster:");
     while (roster != NULL) {
         jabber_roster_entry *entry = roster->data;
-        if (entry->name != NULL) {
-            cons_show("%s (%s)", entry->name, entry->jid);
-
-        } else {
-            cons_show("%s", entry->jid);
+        
+        // if contact not in contact list add them as offline
+        if (find_contact(entry->jid) == NULL) {
+            contact_list_add(entry->jid, "offline", NULL);
         }
        
         roster = g_slist_next(roster);
-
-        win_page_off();
     }
 
     g_slist_free_full(roster, (GDestroyNotify)_free_roster_entry); 

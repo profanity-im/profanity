@@ -20,6 +20,8 @@
  *
  */
 
+#include <string.h>
+
 #include "contact.h"
 #include "prof_autocomplete.h"
 
@@ -69,4 +71,20 @@ char *
 find_contact(char *search_str)
 {
     return p_autocomplete_complete(ac, search_str);
+}
+
+PContact
+contact_list_get_contact(const char const *jid)
+{
+    GSList *contacts = get_contact_list();
+    
+    while (contacts != NULL) {
+        PContact contact = contacts->data;
+        if (strcmp(p_contact_name(contact), jid) == 0) {
+            return contact;
+        }
+        contacts = g_slist_next(contacts);
+    }
+
+    return NULL;
 }

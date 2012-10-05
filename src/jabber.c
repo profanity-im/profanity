@@ -301,6 +301,7 @@ _connection_handler(xmpp_conn_t * const conn,
 
         jabber_conn.conn_status = JABBER_CONNECTED;
         jabber_conn.presence = PRESENCE_ONLINE;
+        jabber_roster_request();
     } else {
     
         // received close stream response from server after disconnect

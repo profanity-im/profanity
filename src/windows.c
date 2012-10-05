@@ -38,6 +38,7 @@
 
 #include "command.h"
 #include "contact.h"
+#include "contact_list.h"
 #include "log.h"
 #include "preferences.h"
 #include "ui.h"
@@ -357,15 +358,33 @@ void
 win_show_outgoing_msg(const char * const from, const char * const to, 
     const char * const message)
 {
-    int win_index = _find_prof_win_index(to);
-    if (win_index == NUM_WINS) 
-        win_index = _new_prof_win(to);
+    // if the contact is offline, show a message
+    PContact contact = contact_list_get_contact(to);
+    
+    if (contact == NULL) {
+        cons_show("%s is not one of your contacts.");
+    } else {
+        int win_index = _find_prof_win_index(to);
+        WINDOW *win = NULL;
 
-    WINDOW *win = _wins[win_index].win;
-    _win_show_time(win);
-    _win_show_user(win, from, 0);
-    _win_show_message(win, message);
-    _win_switch_if_active(win_index);
+        if (win_index == NUM_WINS) {
+            win_index = _new_prof_win(to);
+            win = _wins[win_index].win;
+
+            if (strcmp(p_contact_show(contact), "offline") == 0) {
+                const char const *show = p_contact_show(contact);
+                const char const *status = p_contact_status(contact);
+                _show_status_string(win, to, show, status, "--", "offline");
+            }
+        } else {
+            win = _wins[win_index].win;
+        }
+
+        _win_show_time(win);
+        _win_show_user(win, from, 0);
+        _win_show_message(win, message);
+        _win_switch_if_active(win_index);
+    }
 }
 
 void
@@ -554,17 +573,15 @@ cons_help(void)
 }
 
 void
-cons_show_online_contacts(GSList *list)
+cons_show_contacts(GSList *list)
 {
-    _win_show_time(_cons_win);
-    wprintw(_cons_win, "Online contacts:\n");
-
     GSList *curr = list;
 
     while(curr) {
         PContact contact = curr->data;
-        _win_show_time(_cons_win);
         const char *show = p_contact_show(contact);    
+        
+        _win_show_time(_cons_win);
 
         if (strcmp(show, "online") == 0) {
             wattron(_cons_win, COLOUR_ONLINE);
@@ -891,7 +908,7 @@ _show_status_string(WINDOW *win, const char * const from,
     const char * const default_show)
 {
     _win_show_time(win);    
-
+    
     if (show != NULL) {
         if (strcmp(show, "away") == 0) {
             wattron(win, COLOUR_AWAY);
@@ -901,6 +918,10 @@ _show_status_string(WINDOW *win, const char * const from,
             wattron(win, COLOUR_DND);
         } else if (strcmp(show, "xa") == 0) {
             wattron(win, COLOUR_XA);
+        } else if (strcmp(show, "online") == 0) {
+            wattron(win, COLOUR_ONLINE);
+        } else {
+            wattron(win, COLOUR_OFFLINE);
         }
     } else if (strcmp(default_show, "online") == 0) {
         wattron(win, COLOUR_ONLINE);
@@ -919,8 +940,8 @@ _show_status_string(WINDOW *win, const char * const from,
         wprintw(win, ", \"%s\"", status);
     
     wprintw(win, "\n");
-    
-    if (show != NULL) {
+   
+    if (show != NULL) { 
         if (strcmp(show, "away") == 0) {
             wattroff(win, COLOUR_AWAY);
         } else if (strcmp(show, "chat") == 0) {
@@ -929,6 +950,10 @@ _show_status_string(WINDOW *win, const char * const from,
             wattroff(win, COLOUR_DND);
         } else if (strcmp(show, "xa") == 0) {
             wattroff(win, COLOUR_XA);
+        } else if (strcmp(show, "online") == 0) {
+            wattroff(win, COLOUR_ONLINE);
+        } else {
+            wattroff(win, COLOUR_OFFLINE);
         }
     } else if (strcmp(default_show, "online") == 0) {
         wattroff(win, COLOUR_ONLINE);
