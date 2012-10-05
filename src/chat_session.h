@@ -23,6 +23,8 @@
 #ifndef CHAT_SESSION_H
 #define CHAT_SESSION_H
 
+#include <glib.h>
+
 typedef struct chat_session_t *ChatSession;
 
 typedef enum {
@@ -39,5 +41,7 @@ void chat_session_start(char *recipient);
 void chat_session_end(char *recipient);
 chat_state_t chat_session_get_state(char *recipient);
 void chat_session_set_state(char *recipient, chat_state_t state);
+gboolean chat_session_get_sent(char *recipient);
+void chat_session_sent(char *recipient);
 
 #endif

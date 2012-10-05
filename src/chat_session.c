@@ -33,6 +33,7 @@ static void _chat_session_free(ChatSession session);
 struct chat_session_t {
     char *recipient;
     chat_state_t state;
+    gboolean sent;
 };
 
 static GHashTable *sessions;
@@ -75,6 +76,20 @@ chat_session_set_state(char *recipient, chat_state_t state)
     session->state = state;
 }
 
+gboolean
+chat_session_get_sent(char *recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    return session->sent;
+}
+
+void
+chat_session_sent(char *recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    session->sent = TRUE;
+}
+
 static ChatSession
 _chat_session_new(char *recipient)
 {
@@ -82,6 +97,7 @@ _chat_session_new(char *recipient)
     new_session->recipient = malloc(strlen(recipient) + 1);
     strcpy(new_session->recipient, recipient);
     new_session->state = ACTIVE;
+    new_session->sent = FALSE;
     
     return new_session;
 }
