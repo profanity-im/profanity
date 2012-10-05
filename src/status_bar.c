@@ -74,7 +74,6 @@ status_bar_refresh(void)
 
     if (elapsed >= 60000000) {
         dirty = TRUE;
-        g_date_time_unref(now_time);
         last_time = g_date_time_new_now_local();
     }
 
@@ -84,6 +83,8 @@ status_bar_refresh(void)
         inp_put_back();
         dirty = FALSE;
     }
+
+    g_date_time_unref(now_time);
 }
     
 void
