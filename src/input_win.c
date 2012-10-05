@@ -110,7 +110,7 @@ inp_clear(void)
 void
 inp_non_block(void)
 {
-    wtimeout(inp_win, 100);
+    wtimeout(inp_win, 20);
 }
 
 void
