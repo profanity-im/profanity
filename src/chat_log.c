@@ -51,7 +51,6 @@ chat_log_chat(const gchar * const login, gchar *other,
     
     if (logpp == NULL) {
         GString *log_file = g_string_new(getenv("HOME"));
-    
         g_string_append(log_file, "/.profanity/log");
         create_dir(log_file->str);
     
@@ -59,13 +58,20 @@ chat_log_chat(const gchar * const login, gchar *other,
         g_string_append_printf(log_file, "/%s", login_dir);
         create_dir(log_file->str);
         free(login_dir);
-
-        gchar *other_file = str_replace(other, "@", "_at_");
-        g_string_append_printf(log_file, "/%s.log", other_file);
-        logp = fopen(log_file->str, "a");
-        free(other_file);
     
+        gchar *other_file = str_replace(other, "@", "_at_");
+        g_string_append_printf(log_file, "/%s", other_file);
+
+        GDateTime *dt = g_date_time_new_now_local();
+        gchar *date = g_date_time_format(dt, "_%d_%m_%Y.log");
+        g_string_append_printf(log_file, date);
+
+        logp = fopen(log_file->str, "a");
+        
+        free(other_file);
+        g_date_time_unref(dt);
         g_string_free(log_file, TRUE);
+        
         g_hash_table_insert(logs, other, logp);
     } else {
         logp = (FILE *) logpp;
