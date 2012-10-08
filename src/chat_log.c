@@ -78,12 +78,12 @@ chat_log_chat(const gchar * const login, gchar *other,
     }
 
     GDateTime *dt = g_date_time_new_now(tz);
-    gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
+    gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
     if (direction == IN) {
-        fprintf(logp, "%s: %s: %s\n", date_fmt, other, msg);
+        fprintf(logp, "%s - %s: %s\n", date_fmt, other, msg);
     } else {
-        fprintf(logp, "%s: %s: %s\n", date_fmt, login, msg);
+        fprintf(logp, "%s - me: %s\n", date_fmt, msg);
     }
     fflush(logp);
 

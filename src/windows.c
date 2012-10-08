@@ -853,7 +853,7 @@ static void
 _win_show_time(WINDOW *win)
 {
     GDateTime *time = g_date_time_new_now_local(); 
-    gchar *date_fmt = g_date_time_format(time, "%H:%M");
+    gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
     wprintw(win, "%s - ", date_fmt);
     g_date_time_unref(time);
     g_free(date_fmt);
