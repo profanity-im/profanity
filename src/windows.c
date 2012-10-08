@@ -367,6 +367,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
         int win_index = _find_prof_win_index(to);
         WINDOW *win = NULL;
 
+        // create new window
         if (win_index == NUM_WINS) {
             win_index = _new_prof_win(to);
             win = _wins[win_index].win;
@@ -376,6 +377,8 @@ win_show_outgoing_msg(const char * const from, const char * const to,
                 const char const *status = p_contact_status(contact);
                 _show_status_string(win, to, show, status, "--", "offline");
             }
+
+        // use existing window
         } else {
             win = _wins[win_index].win;
         }
@@ -850,7 +853,7 @@ static void
 _win_show_time(WINDOW *win)
 {
     GDateTime *time = g_date_time_new_now_local(); 
-    gchar *date_fmt = g_date_time_format(time, "%H:%M");
+    gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
     wprintw(win, "%s - ", date_fmt);
     g_date_time_unref(time);
     g_free(date_fmt);
