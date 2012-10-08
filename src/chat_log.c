@@ -32,7 +32,13 @@
 static GHashTable *logs;
 static GTimeZone *tz;
 
+struct dated_chat_log {
+    gpointer logpp;
+    GDateTime *date;
+};
+
 static void _close_file(gpointer key, gpointer value, gpointer user_data);
+static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
 
 void
 chat_log_init(void)
@@ -46,10 +52,11 @@ void
 chat_log_chat(const gchar * const login, gchar *other, 
     const gchar * const msg, chat_log_direction_t direction)
 {
-    gpointer logpp = g_hash_table_lookup(logs, other);
+    struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other);
     FILE *logp;
     
-    if (logpp == NULL) {
+    // no log for user
+    if (dated_log == NULL) {
         GString *log_file = g_string_new(getenv("HOME"));
         g_string_append(log_file, "/.profanity/log");
         create_dir(log_file->str);
@@ -69,12 +76,48 @@ chat_log_chat(const gchar * const login, gchar *other,
         logp = fopen(log_file->str, "a");
         
         free(other_file);
-        g_date_time_unref(dt);
         g_string_free(log_file, TRUE);
+
+        struct dated_chat_log *new_log = malloc(sizeof(struct dated_chat_log));
+        new_log->logpp = logp;
+        new_log->date = dt;
         
-        g_hash_table_insert(logs, other, logp);
+        g_hash_table_insert(logs, other, new_log);
+
+    // log exists but needs rolling
+    } else if (_log_roll_needed(dated_log)) {
+        fclose(dated_log->logpp);        
+
+        GString *log_file = g_string_new(getenv("HOME"));
+        g_string_append(log_file, "/.profanity/log");
+        create_dir(log_file->str);
+    
+        gchar *login_dir = str_replace(login, "@", "_at_");
+        g_string_append_printf(log_file, "/%s", login_dir);
+        create_dir(log_file->str);
+        free(login_dir);
+    
+        gchar *other_file = str_replace(other, "@", "_at_");
+        g_string_append_printf(log_file, "/%s", other_file);
+
+        GDateTime *dt = g_date_time_new_now_local();
+        gchar *date = g_date_time_format(dt, "_%d_%m_%Y.log");
+        g_string_append_printf(log_file, date);
+
+        logp = fopen(log_file->str, "a");
+        
+        free(other_file);
+        g_string_free(log_file, TRUE);
+
+        struct dated_chat_log *new_log = malloc(sizeof(struct dated_chat_log));
+        new_log->logpp = logp;
+        new_log->date = dt;
+
+        g_hash_table_replace(logs, other, new_log);
+
+    // log exists for user
     } else {
-        logp = (FILE *) logpp;
+        logp = (FILE *) dated_log->logpp;
     }
 
     GDateTime *dt = g_date_time_new_now(tz);
@@ -88,6 +131,20 @@ chat_log_chat(const gchar * const login, gchar *other,
     fflush(logp);
 
     g_date_time_unref(dt);
+}
+
+static gboolean
+_log_roll_needed(struct dated_chat_log *dated_log)
+{
+    gboolean result = FALSE;
+    GDateTime *now = g_date_time_new_now_local();
+    if (g_date_time_get_day_of_year(dated_log->date) !=
+            g_date_time_get_day_of_year(now)) {
+        result = TRUE;
+    }
+    g_date_time_unref(now);
+
+    return result;
 }
 
 void
