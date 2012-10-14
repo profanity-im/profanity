@@ -97,41 +97,49 @@ GSList *
 chat_log_get_previous(const gchar * const login, gchar *recipient, 
     GSList *history)
 {
+    GTimeZone *tz = g_time_zone_new_local();
+    
     GDateTime *now = g_date_time_new_now_local();
-    gint session_started_day = g_date_time_get_day_of_year(session_started);
-    gint day_now = g_date_time_get_day_of_year(now);
-
-    // session started today
-    if (day_now == session_started_day) {
-        char *filename = _get_log_filename(recipient, login, now);
-        
+    GDateTime *log_date = g_date_time_new(tz, 
+        g_date_time_get_year(session_started),
+        g_date_time_get_month(session_started), 
+        g_date_time_get_day_of_month(session_started),
+        g_date_time_get_hour(session_started),
+        g_date_time_get_minute(session_started),
+        g_date_time_get_second(session_started));
+    
+    // get data from all logs from the day the session was started to today
+    while (g_date_time_get_day_of_year(log_date) <=  g_date_time_get_day_of_year(now)) {
+        char *filename = _get_log_filename(recipient, login, log_date);
+    
         FILE *logp = fopen(filename, "r");
         char *line = NULL;
         size_t read = 0;
         if (logp != NULL) {
             size_t length = getline(&line, &read, logp);
             while (length != -1) {
-                 char *copy = malloc(length);
-                 copy = strncpy(copy, line, length);
-                 copy[length -1] = '\0';
-                 history = g_slist_append(history, copy);
-                 free(line);
-                 line = NULL;
-                 read = 0;
-                 length = getline(&line, &read, logp);
+                char *copy = malloc(length);
+                copy = strncpy(copy, line, length);
+                copy[length -1] = '\0';
+                history = g_slist_append(history, copy);
+                free(line);
+                line = NULL;
+                read = 0;
+                length = getline(&line, &read, logp);
             }
+            
+            fclose(logp);
         }
         
         free(filename);
-        g_date_time_unref(now);
-        
-        return history;
-    
-    // session started before today
-    } else {
-        
-        return NULL;
+        GDateTime *next = g_date_time_add_days(log_date, 1);
+        g_date_time_unref(log_date);
+        log_date = g_date_time_ref(next);
     }
+
+    g_time_zone_unref(tz);
+
+    return history;
 }
 
 void
