@@ -45,7 +45,7 @@
 #include "ui.h"
 
 #define CONS_WIN_TITLE "_cons"
-#define PAD_SIZE 200
+#define PAD_SIZE 1000
 #define NUM_WINS 10
 
 // holds console at index 0 and chat wins 1 through to 9
