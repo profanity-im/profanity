@@ -44,7 +44,8 @@ static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
 static struct dated_chat_log *_create_log(char *other, const  char * const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
-static char * _get_log_filename(char *other, const char * const login);
+static char * _get_log_filename(char *other, const char * const login, 
+    GDateTime *dt);
 
 void
 chat_log_init(void)
@@ -96,7 +97,8 @@ GSList *
 chat_log_get_previous(const gchar * const login, gchar *recipient, 
     GSList *history)
 {
-    char *filename = _get_log_filename(recipient, login);
+    GDateTime *now = g_date_time_new_now_local();
+    char *filename = _get_log_filename(recipient, login, now);
     
     FILE *logp = fopen(filename, "r");
     char *line = NULL;
@@ -116,6 +118,7 @@ chat_log_get_previous(const gchar * const login, gchar *recipient,
     }
     
     free(filename);
+    g_date_time_unref(now);
     
     return history;
 }
@@ -128,7 +131,7 @@ chat_log_close(void)
 }
 
 static char *
-_get_log_filename(char *other, const char * const login)
+_get_log_filename(char *other, const char * const login, GDateTime *dt)
 {
     GString *log_file = g_string_new(getenv("HOME"));
     g_string_append(log_file, "/.profanity/log");
@@ -144,11 +147,13 @@ _get_log_filename(char *other, const char * const login)
     create_dir(log_file->str);
     free(other_file);
 
-    GDateTime *dt = g_date_time_new_now_local();
     gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
     g_string_append(log_file, date);
 
-    return strdup(log_file->str);
+    char *result = strdup(log_file->str);
+    g_string_free(log_file, TRUE);
+
+    return result;
 }
 
 
