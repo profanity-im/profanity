@@ -37,11 +37,11 @@ typedef enum {
 } chat_state_t;
 
 void chat_session_init(void);
-void chat_session_start(char *recipient);
-void chat_session_end(char *recipient);
-chat_state_t chat_session_get_state(char *recipient);
-void chat_session_set_state(char *recipient, chat_state_t state);
-gboolean chat_session_get_sent(char *recipient);
-void chat_session_sent(char *recipient);
+void chat_session_start(const char * const recipient);
+void chat_session_end(const char * const recipient);
+chat_state_t chat_session_get_state(const char * const recipient);
+void chat_session_set_state(const char * const recipient, chat_state_t state);
+gboolean chat_session_get_sent(const char * const recipient);
+void chat_session_sent(const char * const recipient);
 
 #endif
