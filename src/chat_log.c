@@ -45,7 +45,7 @@ static struct dated_chat_log *_create_log(char *other, const  char * const login
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
 static char * _get_log_filename(const char * const other, const char * const login, 
-    GDateTime *dt);
+    GDateTime *dt, gboolean create);
 
 void
 chat_log_init(void)
@@ -110,7 +110,7 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
     
     // get data from all logs from the day the session was started to today
     while (g_date_time_get_day_of_year(log_date) <=  g_date_time_get_day_of_year(now)) {
-        char *filename = _get_log_filename(recipient, login, log_date);
+        char *filename = _get_log_filename(recipient, login, log_date, FALSE);
     
         FILE *logp = fopen(filename, "r");
         char *line = NULL;
@@ -162,7 +162,7 @@ static struct dated_chat_log *
 _create_log(char *other, const char * const login)
 {
     GDateTime *now = g_date_time_new_now_local();
-    char *filename = _get_log_filename(other, login, now);
+    char *filename = _get_log_filename(other, login, now, TRUE);
 
     struct dated_chat_log *new_log = malloc(sizeof(struct dated_chat_log));
     new_log->filename = strdup(filename);
@@ -214,20 +214,26 @@ gboolean _key_equals(void *key1, void *key2)
 
 static char *
 _get_log_filename(const char * const other, const char * const login, 
-    GDateTime *dt)
+    GDateTime *dt, gboolean create)
 {
     GString *log_file = g_string_new(getenv("HOME"));
     g_string_append(log_file, "/.profanity/log");
-    create_dir(log_file->str);
+    if (create) {
+        create_dir(log_file->str);
+    }
 
     gchar *login_dir = str_replace(login, "@", "_at_");
     g_string_append_printf(log_file, "/%s", login_dir);
-    create_dir(log_file->str);
+    if (create) {
+        create_dir(log_file->str);
+    }
     free(login_dir);
 
     gchar *other_file = str_replace(other, "@", "_at_");
     g_string_append_printf(log_file, "/%s", other_file);
-    create_dir(log_file->str);
+    if (create) {
+        create_dir(log_file->str);
+    }
     free(other_file);
 
     gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
