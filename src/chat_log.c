@@ -20,6 +20,7 @@
  *
  */
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,23 +30,29 @@
 #include "chat_log.h"
 #include "common.h"
 #include "log.h"
+#include "ui.h"
 
 static GHashTable *logs;
+static GDateTime *session_started;
 
 struct dated_chat_log {
-    FILE *logp;
+    gchar *filename;
     GDateTime *date;
 };
 
 static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
 static struct dated_chat_log *_create_log(char *other, const  char * const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
+static gboolean _key_equals(void *key1, void *key2);
+static char * _get_log_filename(char *other, const char * const login, 
+    GDateTime *dt);
 
 void
 chat_log_init(void)
-{
+{   
+    session_started = g_date_time_new_now_local();
     log_info("Initialising chat logs");
-    logs = g_hash_table_new_full(NULL, (GEqualFunc) g_strcmp0, g_free, 
+    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free, 
         (GDestroyNotify)_free_chat_log);
 }
 
@@ -70,53 +77,101 @@ chat_log_chat(const gchar * const login, gchar *other,
     GDateTime *dt = g_date_time_new_now_local();
     gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
+    FILE *logp = fopen(dated_log->filename, "a");
+
     if (direction == IN) {
-        fprintf(dated_log->logp, "%s - %s: %s\n", date_fmt, other_copy, msg);
+        fprintf(logp, "%s - %s: %s\n", date_fmt, other_copy, msg);
     } else {
-        fprintf(dated_log->logp, "%s - me: %s\n", date_fmt, msg);
+        fprintf(logp, "%s - me: %s\n", date_fmt, msg);
     }
-    fflush(dated_log->logp);
-    
+    fflush(logp);
+    int result = fclose(logp);
+    if (result == EOF) {
+        log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
+    }
     g_free(date_fmt);
     g_date_time_unref(dt);
+}
+
+GSList *
+chat_log_get_previous(const gchar * const login, gchar *recipient, 
+    GSList *history)
+{
+    GTimeZone *tz = g_time_zone_new_local();
+    
+    GDateTime *now = g_date_time_new_now_local();
+    GDateTime *log_date = g_date_time_new(tz, 
+        g_date_time_get_year(session_started),
+        g_date_time_get_month(session_started), 
+        g_date_time_get_day_of_month(session_started),
+        g_date_time_get_hour(session_started),
+        g_date_time_get_minute(session_started),
+        g_date_time_get_second(session_started));
+    
+    // get data from all logs from the day the session was started to today
+    while (g_date_time_get_day_of_year(log_date) <=  g_date_time_get_day_of_year(now)) {
+        char *filename = _get_log_filename(recipient, login, log_date);
+    
+        FILE *logp = fopen(filename, "r");
+        char *line = NULL;
+        size_t read = 0;
+        if (logp != NULL) {
+            GString *gs_header = g_string_new("Log ");
+            g_string_append_printf(gs_header, "%d/%d/%d:",
+                g_date_time_get_day_of_month(log_date),
+                g_date_time_get_month(log_date),
+                g_date_time_get_year(log_date));
+            char *header = strdup(gs_header->str);
+            history = g_slist_append(history, header);
+            g_string_free(gs_header, TRUE);
+
+            size_t length = getline(&line, &read, logp);
+            while (length != -1) {
+                char *copy = malloc(length);
+                copy = strncpy(copy, line, length);
+                copy[length -1] = '\0';
+                history = g_slist_append(history, copy);
+                free(line);
+                line = NULL;
+                read = 0;
+                length = getline(&line, &read, logp);
+            }
+            
+            fclose(logp);
+        }
+        
+        free(filename);
+        GDateTime *next = g_date_time_add_days(log_date, 1);
+        g_date_time_unref(log_date);
+        log_date = g_date_time_ref(next);
+    }
+
+    g_time_zone_unref(tz);
+
+    return history;
 }
 
 void
 chat_log_close(void)
 {
     g_hash_table_remove_all(logs);
+    g_date_time_unref(session_started);
 }
 
 static struct dated_chat_log *
 _create_log(char *other, const char * const login)
 {
-    GString *log_file = g_string_new(getenv("HOME"));
-    g_string_append(log_file, "/.profanity/log");
-    create_dir(log_file->str);
-
-    gchar *login_dir = str_replace(login, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", login_dir);
-    create_dir(log_file->str);
-    free(login_dir);
-
-    gchar *other_file = str_replace(other, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", other_file);
-    create_dir(log_file->str);
-    free(other_file);
-
-    GDateTime *dt = g_date_time_new_now_local();
-    gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
-    g_string_append_printf(log_file, date);
+    GDateTime *now = g_date_time_new_now_local();
+    char *filename = _get_log_filename(other, login, now);
 
     struct dated_chat_log *new_log = malloc(sizeof(struct dated_chat_log));
-    new_log->logp = fopen(log_file->str, "a");
-    new_log->date = dt;
+    new_log->filename = strdup(filename);
+    new_log->date = now;
 
-    g_string_free(log_file, TRUE);
+    free(filename);
 
     return new_log;
 }
-
 
 static gboolean
 _log_roll_needed(struct dated_chat_log *dated_log)
@@ -136,9 +191,9 @@ static void
 _free_chat_log(struct dated_chat_log *dated_log)
 {
     if (dated_log != NULL) {
-        if (dated_log->logp != NULL) {
-            fclose(dated_log->logp);
-            dated_log->logp = NULL;
+        if (dated_log->filename != NULL) {
+            g_free(dated_log->filename);
+            dated_log->filename = NULL;
         }
         if (dated_log->date != NULL) {
             g_date_time_unref(dated_log->date);
@@ -146,4 +201,39 @@ _free_chat_log(struct dated_chat_log *dated_log)
         }
     }
     dated_log = NULL;
+}
+
+static
+gboolean _key_equals(void *key1, void *key2)
+{
+    gchar *str1 = (gchar *) key1;
+    gchar *str2 = (gchar *) key2;
+    
+    return (g_strcmp0(str1, str2) == 0);
+}
+
+static char *
+_get_log_filename(char *other, const char * const login, GDateTime *dt)
+{
+    GString *log_file = g_string_new(getenv("HOME"));
+    g_string_append(log_file, "/.profanity/log");
+    create_dir(log_file->str);
+
+    gchar *login_dir = str_replace(login, "@", "_at_");
+    g_string_append_printf(log_file, "/%s", login_dir);
+    create_dir(log_file->str);
+    free(login_dir);
+
+    gchar *other_file = str_replace(other, "@", "_at_");
+    g_string_append_printf(log_file, "/%s", other_file);
+    create_dir(log_file->str);
+    free(other_file);
+
+    gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
+    g_string_append(log_file, date);
+
+    char *result = strdup(log_file->str);
+    g_string_free(log_file, TRUE);
+
+    return result;
 }

@@ -36,6 +36,7 @@
 #include <ncurses/ncurses.h>
 #endif
 
+#include "chat_log.h"
 #include "command.h"
 #include "contact.h"
 #include "contact_list.h"
@@ -44,7 +45,7 @@
 #include "ui.h"
 
 #define CONS_WIN_TITLE "_cons"
-#define PAD_SIZE 200
+#define PAD_SIZE 1000
 #define NUM_WINS 10
 
 // holds console at index 0 and chat wins 1 through to 9
@@ -172,6 +173,7 @@ win_close_win(void)
         // reset the chat win to unused
         strcpy(_wins[_curr_prof_win].from, "");
         wclear(_wins[_curr_prof_win].win);
+        _wins[_curr_prof_win].history_shown = 0;
 
         // set it as inactive in the status bar
         status_bar_inactive(_curr_prof_win);
@@ -262,12 +264,12 @@ win_show_incomming_msg(const char * const from, const char * const message)
         win_index = _new_prof_win(short_from);
 
     WINDOW *win = _wins[win_index].win;
-    _win_show_time(win);
-    _win_show_user(win, short_from, 1);
-    _win_show_message(win, message);
     
     // currently viewing chat window with sender
     if (win_index == _curr_prof_win) {
+        _win_show_time(win);
+        _win_show_user(win, short_from, 1);
+        _win_show_message(win, message);
         title_bar_set_typing(FALSE);
         title_bar_draw();
         status_bar_active(win_index);
@@ -281,6 +283,21 @@ win_show_incomming_msg(const char * const from, const char * const message)
             flash();
 
         _wins[win_index].unread++;
+        if (prefs_get_chlog()) {
+            if (!_wins[win_index].history_shown) {
+                GSList *history = NULL;
+                history = chat_log_get_previous(jabber_get_jid(), short_from, history);
+                while (history != NULL) {
+                    wprintw(win, "%s\n", history->data);
+                    history = g_slist_next(history);
+                }
+                _wins[win_index].history_shown = 1;
+            }
+        }
+        
+        _win_show_time(win);
+        _win_show_user(win, short_from, 1);
+        _win_show_message(win, message);
     }
 
     if (prefs_get_beep())
@@ -371,6 +388,18 @@ win_show_outgoing_msg(const char * const from, const char * const to,
         if (win_index == NUM_WINS) {
             win_index = _new_prof_win(to);
             win = _wins[win_index].win;
+            
+            if (prefs_get_chlog()) {
+                if (!_wins[win_index].history_shown) {
+                    GSList *history = NULL;
+                    history = chat_log_get_previous(jabber_get_jid(), to, history);
+                    while (history != NULL) {
+                        wprintw(win, "%s\n", history->data);
+                        history = g_slist_next(history);
+                    }
+                    _wins[win_index].history_shown = 1;
+                }
+            }
 
             if (strcmp(p_contact_show(contact), "offline") == 0) {
                 const char const *show = p_contact_show(contact);
@@ -703,6 +732,7 @@ _create_windows(void)
     cons.y_pos = 0;
     cons.paged = 0;
     cons.unread = 0;
+    cons.history_shown = 0;
     scrollok(cons.win, TRUE);
 
     _wins[0] = cons;
@@ -746,6 +776,7 @@ _create_windows(void)
         chat.y_pos = 0;
         chat.paged = 0;
         chat.unread = 0;
+        chat.history_shown = 0;
         scrollok(chat.win, TRUE);
         _wins[i] = chat;
     }    
@@ -864,9 +895,13 @@ _win_show_user(WINDOW *win, const char * const user, const int colour)
 {
     if (colour)
         wattron(win, COLOUR_ONLINE);
+    else
+        wattron(win, COLOUR_INC);
     wprintw(win, "%s: ", user);
     if (colour)
         wattroff(win, COLOUR_ONLINE);
+    else
+        wattroff(win, COLOUR_INC);
 }
 
 static void

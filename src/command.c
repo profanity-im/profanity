@@ -653,13 +653,13 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
 
             if (msg != NULL) {
                 jabber_send(msg, usr);
+                win_show_outgoing_msg("me", usr, msg);
 
                 if (prefs_get_chlog()) {
                     const char *jid = jabber_get_jid();
                     chat_log_chat(jid, usr, msg, OUT);
                 }
 
-                win_show_outgoing_msg("me", usr, msg);
             } else {
                 cons_show("Usage: %s", help.usage);
             }
