@@ -283,7 +283,7 @@ win_show_incomming_msg(const char * const from, const char * const message)
             flash();
 
         _wins[win_index].unread++;
-        if (prefs_get_chlog()) {
+        if (prefs_get_chlog() && prefs_get_history()) {
             if (!_wins[win_index].history_shown) {
                 GSList *history = NULL;
                 history = chat_log_get_previous(jabber_get_jid(), short_from, history);
@@ -389,7 +389,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
             win_index = _new_prof_win(to);
             win = _wins[win_index].win;
             
-            if (prefs_get_chlog()) {
+            if (prefs_get_chlog() && prefs_get_history()) {
                 if (!_wins[win_index].history_shown) {
                     GSList *history = NULL;
                     history = chat_log_get_previous(jabber_get_jid(), to, history);
@@ -530,6 +530,11 @@ cons_prefs(void)
         cons_show("Chat logging            : ON");
     else
         cons_show("Chat logging            : OFF");    
+
+    if (prefs_get_history())
+        cons_show("Chat history            : ON");
+    else
+        cons_show("Chat history            : OFF");    
 
     gint remind_period = prefs_get_remind();
     if (remind_period == 0) {

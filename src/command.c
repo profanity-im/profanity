@@ -74,6 +74,7 @@ static gboolean _cmd_set_typing(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_history(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_remind(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
@@ -275,6 +276,18 @@ static struct cmd_t setting_commands[] =
           "to myfriend@chatserv.com, the following chat log will be created:",
           "",
           "    ~/.profanity/log/someuser_at_chatserv.com/myfriend_at_chatserv.com",
+          NULL } } },
+
+    { "/history", 
+        _cmd_set_history,
+        { "/history on|off", "Enable/disable chat history.",
+        { "/history on|off",
+          "-------------",
+          "Switch chat history on or off, requires chlog to be enabled.",
+          "When history is enabled, previous messages are shown in chat windows.",
+          "The last day of messages are shown, or if you have had profanity open",
+          "for more than a day, messages will be shown from the day which",
+          "you started profanity.",
           NULL } } }
 };
 
@@ -766,6 +779,13 @@ _cmd_set_chlog(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/chlog", 
         "Chat logging", prefs_set_chlog);
+}
+
+static gboolean
+_cmd_set_history(const char * const inp, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(inp, help, "/history", 
+        "Chat history", prefs_set_history);
 }
 
 static gboolean

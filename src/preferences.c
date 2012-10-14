@@ -269,6 +269,19 @@ prefs_set_chlog(gboolean value)
     _save_prefs();
 }
 
+gboolean
+prefs_get_history(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "history", NULL);
+}
+
+void
+prefs_set_history(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "history", value);
+    _save_prefs();
+}
+
 gint
 prefs_get_remind(void)
 {
