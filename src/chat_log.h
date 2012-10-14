@@ -34,7 +34,7 @@ void chat_log_init(void);
 void chat_log_chat(const gchar * const login, gchar *other, 
     const gchar * const msg, chat_log_direction_t direction);
 void chat_log_close(void);
-GSList * chat_log_get_previous(const gchar * const login, gchar *recipient, 
-    GSList *history);
+GSList * chat_log_get_previous(const gchar * const login, 
+    const gchar * const recipient, GSList *history);
 
 #endif
