@@ -57,6 +57,7 @@ struct prof_win {
     int y_pos;
     int paged;
     int unread;
+    int history_shown;
 };
 
 // gui startup and shutdown, resize

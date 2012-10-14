@@ -103,7 +103,7 @@ prof_handle_incoming_message(char *from, char *message)
 {
     win_show_incomming_msg(from, message);
     win_page_off();
-
+    
     if (prefs_get_chlog()) {                                                               
         char from_cpy[strlen(from) + 1];                                         
         strcpy(from_cpy, from);                                                  
