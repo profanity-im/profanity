@@ -33,7 +33,7 @@
 #include "ui.h"
 
 static GHashTable *logs;
-static GDateTime *started;
+static GDateTime *session_started;
 
 struct dated_chat_log {
     gchar *filename;
@@ -50,7 +50,7 @@ static char * _get_log_filename(char *other, const char * const login,
 void
 chat_log_init(void)
 {   
-    started = g_date_time_new_now_local();
+    session_started = g_date_time_new_now_local();
     log_info("Initialising chat logs");
     logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free, 
         (GDestroyNotify)_free_chat_log);
@@ -98,36 +98,47 @@ chat_log_get_previous(const gchar * const login, gchar *recipient,
     GSList *history)
 {
     GDateTime *now = g_date_time_new_now_local();
-    char *filename = _get_log_filename(recipient, login, now);
-    
-    FILE *logp = fopen(filename, "r");
-    char *line = NULL;
-    size_t read = 0;
-    if (logp != NULL) {
-        size_t length = getline(&line, &read, logp);
-        while (length != -1) {
-             char *copy = malloc(length);
-             copy = strncpy(copy, line, length);
-             copy[length -1] = '\0';
-             history = g_slist_append(history, copy);
-             free(line);
-             line = NULL;
-             read = 0;
-             length = getline(&line, &read, logp);
+    gint session_started_day = g_date_time_get_day_of_year(session_started);
+    gint day_now = g_date_time_get_day_of_year(now);
+
+    // session started today
+    if (day_now == session_started_day) {
+        char *filename = _get_log_filename(recipient, login, now);
+        
+        FILE *logp = fopen(filename, "r");
+        char *line = NULL;
+        size_t read = 0;
+        if (logp != NULL) {
+            size_t length = getline(&line, &read, logp);
+            while (length != -1) {
+                 char *copy = malloc(length);
+                 copy = strncpy(copy, line, length);
+                 copy[length -1] = '\0';
+                 history = g_slist_append(history, copy);
+                 free(line);
+                 line = NULL;
+                 read = 0;
+                 length = getline(&line, &read, logp);
+            }
         }
+        
+        free(filename);
+        g_date_time_unref(now);
+        
+        return history;
+    
+    // session started before today
+    } else {
+        
+        return NULL;
     }
-    
-    free(filename);
-    g_date_time_unref(now);
-    
-    return history;
 }
 
 void
 chat_log_close(void)
 {
     g_hash_table_remove_all(logs);
-    g_date_time_unref(started);
+    g_date_time_unref(session_started);
 }
 
 static struct dated_chat_log *
