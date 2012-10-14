@@ -130,59 +130,17 @@ chat_log_close(void)
     g_date_time_unref(started);
 }
 
-static char *
-_get_log_filename(char *other, const char * const login, GDateTime *dt)
-{
-    GString *log_file = g_string_new(getenv("HOME"));
-    g_string_append(log_file, "/.profanity/log");
-    create_dir(log_file->str);
-
-    gchar *login_dir = str_replace(login, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", login_dir);
-    create_dir(log_file->str);
-    free(login_dir);
-
-    gchar *other_file = str_replace(other, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", other_file);
-    create_dir(log_file->str);
-    free(other_file);
-
-    gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
-    g_string_append(log_file, date);
-
-    char *result = strdup(log_file->str);
-    g_string_free(log_file, TRUE);
-
-    return result;
-}
-
-
 static struct dated_chat_log *
 _create_log(char *other, const char * const login)
 {
-    GString *log_file = g_string_new(getenv("HOME"));
-    g_string_append(log_file, "/.profanity/log");
-    create_dir(log_file->str);
-
-    gchar *login_dir = str_replace(login, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", login_dir);
-    create_dir(log_file->str);
-    free(login_dir);
-
-    gchar *other_file = str_replace(other, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", other_file);
-    create_dir(log_file->str);
-    free(other_file);
-
-    GDateTime *dt = g_date_time_new_now_local();
-    gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
-    g_string_append(log_file, date);
+    GDateTime *now = g_date_time_new_now_local();
+    char *filename = _get_log_filename(other, login, now);
 
     struct dated_chat_log *new_log = malloc(sizeof(struct dated_chat_log));
-    new_log->filename = strdup(log_file->str);
-    new_log->date = dt;
+    new_log->filename = strdup(filename);
+    new_log->date = now;
 
-    g_string_free(log_file, TRUE);
+    free(filename);
 
     return new_log;
 }
@@ -224,4 +182,30 @@ gboolean _key_equals(void *key1, void *key2)
     gchar *str2 = (gchar *) key2;
     
     return (g_strcmp0(str1, str2) == 0);
+}
+
+static char *
+_get_log_filename(char *other, const char * const login, GDateTime *dt)
+{
+    GString *log_file = g_string_new(getenv("HOME"));
+    g_string_append(log_file, "/.profanity/log");
+    create_dir(log_file->str);
+
+    gchar *login_dir = str_replace(login, "@", "_at_");
+    g_string_append_printf(log_file, "/%s", login_dir);
+    create_dir(log_file->str);
+    free(login_dir);
+
+    gchar *other_file = str_replace(other, "@", "_at_");
+    g_string_append_printf(log_file, "/%s", other_file);
+    create_dir(log_file->str);
+    free(other_file);
+
+    gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
+    g_string_append(log_file, date);
+
+    char *result = strdup(log_file->str);
+    g_string_free(log_file, TRUE);
+
+    return result;
 }
