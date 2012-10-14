@@ -116,6 +116,15 @@ chat_log_get_previous(const gchar * const login, gchar *recipient,
         char *line = NULL;
         size_t read = 0;
         if (logp != NULL) {
+            GString *gs_header = g_string_new("Log ");
+            g_string_append_printf(gs_header, "%d/%d/%d:",
+                g_date_time_get_day_of_month(log_date),
+                g_date_time_get_month(log_date),
+                g_date_time_get_year(log_date));
+            char *header = strdup(gs_header->str);
+            history = g_slist_append(history, header);
+            g_string_free(gs_header, TRUE);
+
             size_t length = getline(&line, &read, logp);
             while (length != -1) {
                 char *copy = malloc(length);
