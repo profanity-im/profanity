@@ -101,16 +101,18 @@ chat_log_get_previous(const gchar * const login, gchar *recipient,
     FILE *logp = fopen(filename, "r");
     char *line = NULL;
     size_t read = 0;
-    size_t length = getline(&line, &read, logp);
-    while (length != -1) {
-         char *copy = malloc(length);
-         copy = strncpy(copy, line, length);
-         copy[length -1] = '\0';
-         history = g_slist_append(history, copy);
-         free(line);
-         line = NULL;
-         read = 0;
-         length = getline(&line, &read, logp);
+    if (logp != NULL) {
+        size_t length = getline(&line, &read, logp);
+        while (length != -1) {
+             char *copy = malloc(length);
+             copy = strncpy(copy, line, length);
+             copy[length -1] = '\0';
+             history = g_slist_append(history, copy);
+             free(line);
+             line = NULL;
+             read = 0;
+             length = getline(&line, &read, logp);
+        }
     }
     
     free(filename);
