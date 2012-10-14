@@ -83,6 +83,8 @@ static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
 static void _win_resize_all(void);
 static gint _win_get_unread(void);
+static void _win_show_history(WINDOW *win, int win_index, 
+    const char * const contact);
 
 #ifdef HAVE_LIBNOTIFY
 static void _win_notify(const char * const message, int timeout, 
@@ -284,15 +286,7 @@ win_show_incomming_msg(const char * const from, const char * const message)
 
         _wins[win_index].unread++;
         if (prefs_get_chlog() && prefs_get_history()) {
-            if (!_wins[win_index].history_shown) {
-                GSList *history = NULL;
-                history = chat_log_get_previous(jabber_get_jid(), short_from, history);
-                while (history != NULL) {
-                    wprintw(win, "%s\n", history->data);
-                    history = g_slist_next(history);
-                }
-                _wins[win_index].history_shown = 1;
-            }
+            _win_show_history(win, win_index, short_from);
         }
         
         _win_show_time(win);
@@ -390,15 +384,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
             win = _wins[win_index].win;
             
             if (prefs_get_chlog() && prefs_get_history()) {
-                if (!_wins[win_index].history_shown) {
-                    GSList *history = NULL;
-                    history = chat_log_get_previous(jabber_get_jid(), to, history);
-                    while (history != NULL) {
-                        wprintw(win, "%s\n", history->data);
-                        history = g_slist_next(history);
-                    }
-                    _wins[win_index].history_shown = 1;
-                }
+                _win_show_history(win, win_index, to);
             }
 
             if (strcmp(p_contact_show(contact), "offline") == 0) {
@@ -1095,5 +1081,21 @@ _win_get_unread(void)
         result += _wins[i].unread;
     }
     return result;
+}
+
+static void
+_win_show_history(WINDOW *win, int win_index, const char * const contact)
+{
+    if (!_wins[win_index].history_shown) {
+        GSList *history = NULL;
+        history = chat_log_get_previous(jabber_get_jid(), contact, history);
+        while (history != NULL) {
+            wprintw(win, "%s\n", history->data);
+            history = g_slist_next(history);
+        }
+        _wins[win_index].history_shown = 1;
+
+        g_slist_free_full(history, free);
+    }
 }
 
