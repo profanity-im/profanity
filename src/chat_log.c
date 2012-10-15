@@ -116,7 +116,7 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
         char *line = NULL;
         size_t read = 0;
         if (logp != NULL) {
-            GString *gs_header = g_string_new("Log ");
+            GString *gs_header = g_string_new("");
             g_string_append_printf(gs_header, "%d/%d/%d:",
                 g_date_time_get_day_of_month(log_date),
                 g_date_time_get_month(log_date),
