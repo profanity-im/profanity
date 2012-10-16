@@ -70,6 +70,17 @@ jabber_init(const int disable_tls)
     jabber_conn.tls_disabled = disable_tls;
 }
 
+void
+jabber_shutdown(void)
+{
+    // free memory for connection and context
+    xmpp_conn_release(jabber_conn.conn);
+    xmpp_ctx_free(jabber_conn.ctx);
+
+    // shutdown libstrophe
+    xmpp_shutdown();
+}
+
 jabber_conn_status_t
 jabber_connect(const char * const user, 
     const char * const passwd)
@@ -306,13 +317,6 @@ _connection_handler(xmpp_conn_t * const conn,
     
         // received close stream response from server after disconnect
         if (jabber_conn.conn_status == JABBER_DISCONNECTING) {
-            // free memory for connection object and context
-            xmpp_conn_release(jabber_conn.conn);
-            xmpp_ctx_free(jabber_conn.ctx);
-
-            // shutdown libstrophe
-            xmpp_shutdown();
-
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
             
