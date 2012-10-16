@@ -246,9 +246,9 @@ jabber_get_jid(void)
 void
 jabber_free_resources(void)
 {
-	xmpp_conn_release(jabber_conn.conn);
-	xmpp_ctx_free(jabber_conn.ctx);
-	xmpp_shutdown();
+    xmpp_conn_release(jabber_conn.conn);
+    xmpp_ctx_free(jabber_conn.ctx);
+    xmpp_shutdown();
 }
 
 static int
