@@ -283,6 +283,7 @@ _shutdown_init(void)
         }
         jabber_shutdown();
     }
+    jabber_free_resources();
 
     _shutdown();
 }
