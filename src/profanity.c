@@ -281,9 +281,8 @@ _shutdown_init(void)
         while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
         }
-        jabber_shutdown();
+        jabber_free_resources();
     }
-    jabber_free_resources();
 
     _shutdown();
 }
