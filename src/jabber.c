@@ -243,6 +243,14 @@ jabber_get_jid(void)
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
+void
+jabber_free_resources(void)
+{
+	xmpp_conn_release(jabber_conn.conn);
+	xmpp_ctx_free(jabber_conn.ctx);
+	xmpp_shutdown();
+}
+
 static int
 _message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
@@ -306,13 +314,6 @@ _connection_handler(xmpp_conn_t * const conn,
     
         // received close stream response from server after disconnect
         if (jabber_conn.conn_status == JABBER_DISCONNECTING) {
-            // free memory for connection object and context
-            xmpp_conn_release(jabber_conn.conn);
-            xmpp_ctx_free(jabber_conn.ctx);
-
-            // shutdown libstrophe
-            xmpp_shutdown();
-
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
             
