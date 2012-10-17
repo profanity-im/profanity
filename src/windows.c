@@ -371,38 +371,38 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 {
     // if the contact is offline, show a message
     PContact contact = contact_list_get_contact(to);
-    
-    if (contact == NULL) {
-        cons_show("%s is not one of your contacts.");
-    } else {
-        int win_index = _find_prof_win_index(to);
-        WINDOW *win = NULL;
+    int win_index = _find_prof_win_index(to);
+    WINDOW *win = NULL;
 
-        // create new window
-        if (win_index == NUM_WINS) {
-            win_index = _new_prof_win(to);
-            win = _wins[win_index].win;
-            
-            if (prefs_get_chlog() && prefs_get_history()) {
-                _win_show_history(win, win_index, to);
-            }
+    // create new window
+    if (win_index == NUM_WINS) {
+        win_index = _new_prof_win(to);
+        win = _wins[win_index].win;
 
+        if (prefs_get_chlog() && prefs_get_history()) {
+            _win_show_history(win, win_index, to);
+        }
+
+        // say whether contact is in roster only once on creating window
+        if (contact == NULL) {
+            cons_show("%s is not one of your contacts.");
+        } else {
             if (strcmp(p_contact_show(contact), "offline") == 0) {
                 const char const *show = p_contact_show(contact);
                 const char const *status = p_contact_status(contact);
                 _show_status_string(win, to, show, status, "--", "offline");
             }
-
-        // use existing window
-        } else {
-            win = _wins[win_index].win;
         }
 
-        _win_show_time(win);
-        _win_show_user(win, from, 0);
-        _win_show_message(win, message);
-        _win_switch_if_active(win_index);
+    // use existing window
+    } else {
+        win = _wins[win_index].win;
     }
+
+    _win_show_time(win);
+    _win_show_user(win, from, 0);
+    _win_show_message(win, message);
+    _win_switch_if_active(win_index);
 }
 
 void
