@@ -73,6 +73,7 @@ static void _win_switch_if_active(const int i);
 static void _win_show_time(WINDOW *win);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
+static void _win_show_error_msg(WINDOW *win, const char * const message);
 static void _show_status_string(WINDOW *win, const char * const from, 
     const char * const show, const char * const status, const char * const pre, 
     const char * const default_show);
@@ -300,6 +301,24 @@ win_show_incomming_msg(const char * const from, const char * const message)
     if (prefs_get_notify())
         _win_notify_message(short_from);
 #endif
+}
+
+void
+win_show_error_msg(const char * const from, const char *err_msg)
+{
+    int win_index;
+    WINDOW *win;
+
+    if (from == NULL || err_msg == NULL)
+        return;
+
+    win_index = _find_prof_win_index(from);
+    // chat window exists
+    if (win_index < NUM_WINS) {
+        win = _wins[win_index].win;
+        _win_show_time(win);
+        _win_show_error_msg(win, err_msg);
+    }
 }
 
 #ifdef HAVE_LIBNOTIFY
@@ -896,6 +915,14 @@ static void
 _win_show_message(WINDOW *win, const char * const message)
 {
     wprintw(win, "%s\n", message);
+}
+
+static void
+_win_show_error_msg(WINDOW *win, const char * const message)
+{
+    wattron(win, COLOUR_ERR);
+    wprintw(win, "%s\n", message);
+    wattroff(win, COLOUR_ERR);
 }
 
 static void
