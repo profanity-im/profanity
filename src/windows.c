@@ -318,6 +318,9 @@ win_show_error_msg(const char * const from, const char *err_msg)
         win = _wins[win_index].win;
         _win_show_time(win);
         _win_show_error_msg(win, err_msg);
+        if (win_index == _curr_prof_win) {
+            dirty = TRUE;
+        }
     }
 }
 
