@@ -255,6 +255,32 @@ static int
 _message_handler(xmpp_conn_t * const conn, 
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    char *type;
+    char *from;
+
+    type = xmpp_stanza_get_attribute(stanza, "type");
+    from = xmpp_stanza_get_attribute(stanza, "from");
+
+    if (strcmp(type, "error") == 0) {
+        char *err_msg = NULL;
+        xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
+        if (error == NULL) {
+            log_debug("error message without <error/> received");
+            return 1;
+        } else {
+            xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error);
+            if (err_cond == NULL) {
+                log_debug("error message without <defined-condition/> received");
+                return 1;
+            } else {
+                err_msg = xmpp_stanza_get_name(err_cond);
+            }
+            // TODO: process 'type' attribute from <error/> [RFC6120, 8.3.2]
+        }
+        prof_handle_error_message(from, err_msg);
+        return 1;
+    }
+
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
 
     // if no message, check for chatstates
@@ -265,7 +291,6 @@ _message_handler(xmpp_conn_t * const conn,
                 // active
             } else if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
                 // composing
-                char *from = xmpp_stanza_get_attribute(stanza, "from");
                 prof_handle_typing(from);
             }
         }
@@ -274,12 +299,7 @@ _message_handler(xmpp_conn_t * const conn,
     }
 
     // message body recieved
-    char *type = xmpp_stanza_get_attribute(stanza, "type");
-    if(strcmp(type, "error") == 0)
-        return 1;
-
     char *message = xmpp_stanza_get_text(body);
-    char *from = xmpp_stanza_get_attribute(stanza, "from");
     prof_handle_incoming_message(from, message);
 
     return 1;
