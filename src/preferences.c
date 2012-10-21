@@ -117,6 +117,7 @@ prefs_load(void)
 void
 prefs_close(void)
 {
+    p_autocomplete_clear(ac);
     g_key_file_free(prefs);
 }
 

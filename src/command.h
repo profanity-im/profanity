@@ -33,6 +33,7 @@ struct cmd_help_t {
 };
 
 void cmd_init(void);
+void cmd_close(void);
 char * cmd_complete(char *inp);
 void cmd_reset_completer(void);
 gboolean cmd_execute(const char * const command, const char * const inp);

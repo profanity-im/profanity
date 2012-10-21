@@ -308,8 +308,10 @@ _shutdown_init(void)
 static void
 _shutdown(void)
 {
+    contact_list_clear();
     gui_close();
     chat_log_close();
     prefs_close();
+    cmd_close();
     log_close();
 }

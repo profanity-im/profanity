@@ -367,23 +367,30 @@ cmd_init(void)
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
         struct cmd_t *pcmd = main_commands+i;
-        p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
-        p_autocomplete_add(help_ac, (gchar *)pcmd->cmd+1);
+        p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
+        p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
     for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
         struct cmd_t *pcmd = setting_commands+i;
-        p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
-        p_autocomplete_add(help_ac, (gchar *)pcmd->cmd+1);
+        p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
+        p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
     for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
         struct cmd_t *pcmd = status_commands+i;
-        p_autocomplete_add(commands_ac, (gchar *)pcmd->cmd);
-        p_autocomplete_add(help_ac, (gchar *)pcmd->cmd+1);
+        p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
+        p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
     history_init();
+}
+
+void
+cmd_close(void)
+{
+    p_autocomplete_clear(commands_ac);
+    p_autocomplete_clear(help_ac);
 }
 
 // Command autocompletion functions
