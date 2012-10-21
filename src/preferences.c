@@ -193,13 +193,13 @@ _load_colours(void)
 }
 
 char *
-find_login(char *prefix)
+prefs_find_login(char *prefix)
 {
     return p_autocomplete_complete(ac, prefix);
 }
 
 void
-reset_login_search(void)
+prefs_reset_login_search(void)
 {
     p_autocomplete_reset(ac);
 }

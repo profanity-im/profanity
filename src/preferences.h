@@ -37,8 +37,8 @@
 void prefs_load(void);
 void prefs_close(void);
 
-char * find_login(char *prefix);
-void reset_login_search(void);
+char * prefs_find_login(char *prefix);
+void prefs_reset_login_search(void);
 
 gboolean prefs_get_beep(void);
 void prefs_set_beep(gboolean value);

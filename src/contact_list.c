@@ -43,7 +43,7 @@ contact_list_clear(void)
 }
 
 void
-reset_search_attempts(void)
+contact_list_reset_search_attempts(void)
 {
     p_autocomplete_reset(ac);
 }
@@ -68,7 +68,7 @@ get_contact_list(void)
 }
 
 char *
-find_contact(char *search_str)
+contact_list_find_contact(char *search_str)
 {
     return p_autocomplete_complete(ac, search_str);
 }

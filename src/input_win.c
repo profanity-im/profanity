@@ -160,8 +160,8 @@ inp_get_char(int *ch, char *input, int *size)
                 }
             }
 
-            reset_search_attempts();
-            reset_login_search();
+            contact_list_reset_search_attempts();
+            prefs_reset_login_search();
             cmd_help_reset_completer();
             cmd_reset_completer();
         }
@@ -217,7 +217,7 @@ _handle_edit(const int ch, char *input, int *size)
 
     case 127:
     case KEY_BACKSPACE:
-        reset_search_attempts();
+        contact_list_reset_search_attempts();
         if (*size > 0) {
 
             // if at end, delete last char
@@ -341,7 +341,7 @@ _handle_edit(const int ch, char *input, int *size)
                 inp_cpy[i-5] = input[i];
             }
             inp_cpy[(*size) - 5] = '\0';
-            found = find_contact(inp_cpy);
+            found = contact_list_find_contact(inp_cpy);
             if (found != NULL) {
                 auto_msg = (char *) malloc((5 + (strlen(found) + 1)) * sizeof(char));
                 strcpy(auto_msg, "/msg ");
@@ -357,7 +357,7 @@ _handle_edit(const int ch, char *input, int *size)
                 inp_cpy[i-9] = input[i];
             }
             inp_cpy[(*size) - 9] = '\0';
-            found = find_login(inp_cpy);
+            found = prefs_find_login(inp_cpy);
             if (found != NULL) {
                 auto_msg = (char *) malloc((9 + (strlen(found) + 1)) * sizeof(char));
                 strcpy(auto_msg, "/connect ");
