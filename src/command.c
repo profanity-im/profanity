@@ -402,13 +402,13 @@ cmd_reset_completer(void)
 
 // Command help
 char *
-help_complete(char *inp)
+cmd_help_complete(char *inp)
 {
     return p_autocomplete_complete(help_ac, inp);
 }
 
 void
-help_reset_completer(void)
+cmd_help_reset_completer(void)
 {
     p_autocomplete_reset(help_ac);
 }
