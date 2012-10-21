@@ -115,6 +115,24 @@ prof_handle_incoming_message(char *from, char *message)
 }
 
 void
+prof_handle_error_message(const char *from, const char *err_msg)
+{
+    char *msg, *fmt;
+
+    if (err_msg != NULL) {
+        fmt = "Error received from server: %s";
+        msg = (char *)malloc(strlen(err_msg) + strlen(fmt) - 1);
+        if (msg == NULL)
+            goto loop_out;
+        sprintf(msg, fmt, err_msg);
+        cons_bad_show(msg);
+        free(msg);
+    }
+loop_out:
+    win_show_error_msg(from, err_msg);
+}
+
+void
 prof_handle_login_success(const char *jid)
 {
     const char *msg = " logged in successfully.";

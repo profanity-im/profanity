@@ -73,6 +73,7 @@ static void _win_switch_if_active(const int i);
 static void _win_show_time(WINDOW *win);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
+static void _win_show_error_msg(WINDOW *win, const char * const message);
 static void _show_status_string(WINDOW *win, const char * const from, 
     const char * const show, const char * const status, const char * const pre, 
     const char * const default_show);
@@ -302,6 +303,27 @@ win_show_incomming_msg(const char * const from, const char * const message)
 #endif
 }
 
+void
+win_show_error_msg(const char * const from, const char *err_msg)
+{
+    int win_index;
+    WINDOW *win;
+
+    if (from == NULL || err_msg == NULL)
+        return;
+
+    win_index = _find_prof_win_index(from);
+    // chat window exists
+    if (win_index < NUM_WINS) {
+        win = _wins[win_index].win;
+        _win_show_time(win);
+        _win_show_error_msg(win, err_msg);
+        if (win_index == _curr_prof_win) {
+            dirty = TRUE;
+        }
+    }
+}
+
 #ifdef HAVE_LIBNOTIFY
 static void
 _win_notify(const char * const message, int timeout, 
@@ -371,38 +393,35 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 {
     // if the contact is offline, show a message
     PContact contact = contact_list_get_contact(to);
-    
-    if (contact == NULL) {
-        cons_show("%s is not one of your contacts.");
-    } else {
-        int win_index = _find_prof_win_index(to);
-        WINDOW *win = NULL;
+    int win_index = _find_prof_win_index(to);
+    WINDOW *win = NULL;
 
-        // create new window
-        if (win_index == NUM_WINS) {
-            win_index = _new_prof_win(to);
-            win = _wins[win_index].win;
-            
-            if (prefs_get_chlog() && prefs_get_history()) {
-                _win_show_history(win, win_index, to);
-            }
+    // create new window
+    if (win_index == NUM_WINS) {
+        win_index = _new_prof_win(to);
+        win = _wins[win_index].win;
 
+        if (prefs_get_chlog() && prefs_get_history()) {
+            _win_show_history(win, win_index, to);
+        }
+
+        if (contact != NULL) {
             if (strcmp(p_contact_show(contact), "offline") == 0) {
                 const char const *show = p_contact_show(contact);
                 const char const *status = p_contact_status(contact);
                 _show_status_string(win, to, show, status, "--", "offline");
             }
-
-        // use existing window
-        } else {
-            win = _wins[win_index].win;
         }
 
-        _win_show_time(win);
-        _win_show_user(win, from, 0);
-        _win_show_message(win, message);
-        _win_switch_if_active(win_index);
+    // use existing window
+    } else {
+        win = _wins[win_index].win;
     }
+
+    _win_show_time(win);
+    _win_show_user(win, from, 0);
+    _win_show_message(win, message);
+    _win_switch_if_active(win_index);
 }
 
 void
@@ -899,6 +918,14 @@ static void
 _win_show_message(WINDOW *win, const char * const message)
 {
     wprintw(win, "%s\n", message);
+}
+
+static void
+_win_show_error_msg(WINDOW *win, const char * const message)
+{
+    wattron(win, COLOUR_ERR);
+    wprintw(win, "%s\n", message);
+    wattroff(win, COLOUR_ERR);
 }
 
 static void
