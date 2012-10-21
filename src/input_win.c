@@ -58,12 +58,16 @@
 #include "preferences.h"
 #include "ui.h"
 
+typedef char*(*autocomplete_func)(char *);
+
 static WINDOW *inp_win;
 static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
 static void _replace_input(char *input, const char * const new_input, int *size);
+static void _parameter_autocomplete(char *input, int *size, char *command,
+    autocomplete_func func);
 
 void
 create_input_window(void)
@@ -320,7 +324,7 @@ _handle_edit(const int ch, char *input, int *size)
 
     case 9: // tab
 
-        // autocomplete commands
+        // autocomplete command
         if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
             for(i = 0; i < *size; i++) {
                 inp_cpy[i] = input[i];
@@ -334,55 +338,12 @@ _handle_edit(const int ch, char *input, int *size)
                 free(auto_msg);
                 free(found);
             }
-
-        // autcomplete /msg recipient
-        } else if ((strncmp(input, "/msg ", 5) == 0) && (*size > 5)) {
-            for(i = 5; i < *size; i++) {
-                inp_cpy[i-5] = input[i];
-            }
-            inp_cpy[(*size) - 5] = '\0';
-            found = contact_list_find_contact(inp_cpy);
-            if (found != NULL) {
-                auto_msg = (char *) malloc((5 + (strlen(found) + 1)) * sizeof(char));
-                strcpy(auto_msg, "/msg ");
-                strcat(auto_msg, found);
-                _replace_input(input, auto_msg, size);
-                free(auto_msg);
-                free(found);
-            }
-
-        // autocomplete /connect username
-        } else if ((strncmp(input, "/connect ", 9) == 0) && (*size > 9)) {
-            for(i = 9; i < *size; i++) {
-                inp_cpy[i-9] = input[i];
-            }
-            inp_cpy[(*size) - 9] = '\0';
-            found = prefs_find_login(inp_cpy);
-            if (found != NULL) {
-                auto_msg = (char *) malloc((9 + (strlen(found) + 1)) * sizeof(char));
-                strcpy(auto_msg, "/connect ");
-                strcat(auto_msg, found);
-                _replace_input(input, auto_msg, size);
-                free(auto_msg);
-                free(found);
-            }
-
-        // autocomplete /help command
-        } else if ((strncmp(input, "/help ", 6) == 0) && (*size > 6)) {
-            for(i = 6; i < *size; i++) {
-                inp_cpy[i-6] = input[i];
-            }
-            inp_cpy[(*size) - 6] = '\0';
-            found = cmd_help_complete(inp_cpy);
-            if (found != NULL) {
-                auto_msg = (char *) malloc((6 + (strlen(found) + 1)) * sizeof(char));
-                strcpy(auto_msg, "/help ");
-                strcat(auto_msg, found);
-                _replace_input(input, auto_msg, size);
-                free(auto_msg);
-                free(found);
-            }
         }
+
+        _parameter_autocomplete(input, size, "/msg", contact_list_find_contact);
+        _parameter_autocomplete(input, size, "/connect", prefs_find_login);
+        _parameter_autocomplete(input, size, "/help", cmd_help_complete);
+
         return 1;
 
     default:
@@ -412,4 +373,33 @@ _replace_input(char *input, const char * const new_input, int *size)
     inp_clear();
     for (i = 0; i < *size; i++)
         waddch(inp_win, input[i]);
+}
+
+static void
+_parameter_autocomplete(char *input, int *size, char *command,
+    autocomplete_func func)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+    char *command_cpy = malloc(strlen(command) + 2);
+    sprintf(command_cpy, "%s ", command);
+    int len = strlen(command_cpy);
+    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        for(i = len; i < *size; i++) {
+            inp_cpy[i-len] = input[i];
+        }
+        inp_cpy[(*size) - len] = '\0';
+        found = func(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, command_cpy);
+            strcat(auto_msg, found);
+            _replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
+    free(command_cpy);
 }

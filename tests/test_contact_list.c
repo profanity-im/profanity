@@ -339,7 +339,7 @@ static void find_first_exists(void)
     char *search = (char *) malloc(2 * sizeof(char));
     strcpy(search, "B");
 
-    char *result = find_contact(search);
+    char *result = contact_list_find_contact(search);
     assert_string_equals("Bob", result);
     free(result);
     free(search);
@@ -351,7 +351,7 @@ static void find_second_exists(void)
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
 
-    char *result = find_contact("Dav");
+    char *result = contact_list_find_contact("Dav");
     assert_string_equals("Dave", result);
     free(result);
 }
@@ -362,7 +362,7 @@ static void find_third_exists(void)
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
 
-    char *result = find_contact("Ja");
+    char *result = contact_list_find_contact("Ja");
     assert_string_equals("James", result);
     free(result);
 }
@@ -373,13 +373,13 @@ static void find_returns_null(void)
     contact_list_add("Dave", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
 
-    char *result = find_contact("Mike");
+    char *result = contact_list_find_contact("Mike");
     assert_is_null(result);
 }
 
 static void find_on_empty_returns_null(void)
 {
-    char *result = find_contact("James");
+    char *result = contact_list_find_contact("James");
     assert_is_null(result);
 }
 
@@ -389,8 +389,8 @@ static void find_twice_returns_second_when_two_match(void)
     contact_list_add("Jamie", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
 
-    char *result1 = find_contact("Jam");
-    char *result2 = find_contact(result1);
+    char *result1 = contact_list_find_contact("Jam");
+    char *result2 = contact_list_find_contact(result1);
     assert_string_equals("Jamie", result2);
     free(result1);
     free(result2);
@@ -409,11 +409,11 @@ static void find_five_times_finds_fifth(void)
     contact_list_add("Jamy", NULL, NULL);
     contact_list_add("Jamz", NULL, NULL);
 
-    char *result1 = find_contact("Jam");
-    char *result2 = find_contact(result1);
-    char *result3 = find_contact(result2);
-    char *result4 = find_contact(result3);
-    char *result5 = find_contact(result4);
+    char *result1 = contact_list_find_contact("Jam");
+    char *result2 = contact_list_find_contact(result1);
+    char *result3 = contact_list_find_contact(result2);
+    char *result4 = contact_list_find_contact(result3);
+    char *result5 = contact_list_find_contact(result4);
     assert_string_equals("Jamo", result5);
     free(result1);
     free(result2);
@@ -428,9 +428,9 @@ static void find_twice_returns_first_when_two_match_and_reset(void)
     contact_list_add("Jamie", NULL, NULL);
     contact_list_add("Bob", NULL, NULL);
 
-    char *result1 = find_contact("Jam");
-    reset_search_attempts();
-    char *result2 = find_contact(result1);
+    char *result1 = contact_list_find_contact("Jam");
+    contact_list_reset_search_attempts();
+    char *result2 = contact_list_find_contact(result1);
     assert_string_equals("James", result2);
     free(result1);
     free(result2);
@@ -444,10 +444,10 @@ static void removed_contact_not_in_search(void)
     contact_list_add("James", NULL, NULL);
     contact_list_add("Jamie", NULL, NULL);
 
-    char *result1 = find_contact("Jam"); // Jamatron
-    char *result2 = find_contact(result1); // Jambo
+    char *result1 = contact_list_find_contact("Jam"); // Jamatron
+    char *result2 = contact_list_find_contact(result1); // Jambo
     contact_list_remove("James");
-    char *result3 = find_contact(result2);
+    char *result3 = contact_list_find_contact(result2);
     assert_string_equals("Jamie", result3);
     free(result1);
     free(result2);
