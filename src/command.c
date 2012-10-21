@@ -1,8 +1,8 @@
-/* 
+/*
  * command.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@
 #include "tinyurl.h"
 #include "ui.h"
 
-/* 
+/*
  * Command structure
  *
  * cmd - The command string including leading '/'
@@ -52,11 +52,11 @@ struct cmd_t {
 };
 
 static struct cmd_t * _cmd_get_command(const char * const command);
-static void _update_presence(const jabber_presence_t presence, 
+static void _update_presence(const jabber_presence_t presence,
     const char * const show, const char * const inp);
 static gboolean
 _cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
-    const char * const cmd_str, const char * const display, 
+    const char * const cmd_str, const char * const display,
     void (*set_func)(gboolean));
 
 // command prototypes
@@ -88,10 +88,10 @@ static gboolean _cmd_xa(const char * const inp, struct cmd_help_t help);
  * Commands to change preferences
  * Commands to change users status
  */
-static struct cmd_t main_commands[] = 
+static struct cmd_t main_commands[] =
 {
-    { "/help", 
-        _cmd_help, 
+    { "/help",
+        _cmd_help,
         { "/help [command]", "Show help summary, or help on a specific command",
         { "/help [command]",
           "---------------",
@@ -101,8 +101,8 @@ static struct cmd_t main_commands[] =
           "Example : /help connect",
           NULL } } },
 
-    { "/connect", 
-        _cmd_connect, 
+    { "/connect",
+        _cmd_connect,
         { "/connect user@host", "Login to jabber.",
         { "/connect user@host",
           "------------------",
@@ -110,11 +110,11 @@ static struct cmd_t main_commands[] =
           "Profanity should work with any XMPP (Jabber) compliant chat host.",
           "You can use tab completion to autocomplete any logins you have used before.",
           "",
-          "Example: /connect myuser@gmail.com", 
+          "Example: /connect myuser@gmail.com",
           NULL  } } },
-    
-    { "/prefs", 
-        _cmd_prefs, 
+
+    { "/prefs",
+        _cmd_prefs,
         { "/prefs", "Show current preferences.",
         { "/prefs",
           "------",
@@ -127,8 +127,8 @@ static struct cmd_t main_commands[] =
           "you will need to restart Profanity for config file edits to take effect.",
           NULL } } },
 
-    { "/msg", 
-        _cmd_msg, 
+    { "/msg",
+        _cmd_msg,
         { "/msg user@host mesg", "Send mesg to user.",
         { "/msg user@host mesg",
           "-------------------",
@@ -142,8 +142,8 @@ static struct cmd_t main_commands[] =
           "Example : /msg boothj5@gmail.com Hey, here's a message!",
           NULL } } },
 
-    { "/tiny", 
-        _cmd_tiny, 
+    { "/tiny",
+        _cmd_tiny,
         { "/tiny url", "Send url as tinyurl in current chat.",
         { "/tiny url",
           "---------",
@@ -154,7 +154,7 @@ static struct cmd_t main_commands[] =
           "Example : /tiny http://www.google.com",
           NULL } } },
 
-    { "/who", 
+    { "/who",
         _cmd_who,
         { "/who [status]", "Show contacts with chosen status.",
         { "/who [status]",
@@ -164,8 +164,8 @@ static struct cmd_t main_commands[] =
           "online includes: chat, dnd, away, xa.",
           NULL } } },
 
-    { "/close", 
-        _cmd_close, 
+    { "/close",
+        _cmd_close,
         { "/close", "Close current chat window.",
         { "/close",
           "------",
@@ -173,8 +173,8 @@ static struct cmd_t main_commands[] =
           "The chat window will become available for new chats.",
           NULL } } },
 
-    { "/quit", 
-        _cmd_quit, 
+    { "/quit",
+        _cmd_quit,
         { "/quit", "Quit Profanity.",
         { "/quit",
           "-----",
@@ -182,7 +182,7 @@ static struct cmd_t main_commands[] =
           NULL } } }
 };
 
-static struct cmd_t setting_commands[] = 
+static struct cmd_t setting_commands[] =
 {
     { "/beep",
         _cmd_set_beep,
@@ -237,7 +237,7 @@ static struct cmd_t setting_commands[] =
           "Config file value :   remind=seconds",
           NULL } } },
 
-    { "/flash", 
+    { "/flash",
         _cmd_set_flash,
         { "/flash on|off", "Enable/disable screen flash notifications.",
         { "/flash on|off",
@@ -251,8 +251,8 @@ static struct cmd_t setting_commands[] =
           "Config file value :   flash=true|false",
           NULL } } },
 
-    { "/showsplash", 
-        _cmd_set_showsplash, 
+    { "/showsplash",
+        _cmd_set_showsplash,
         { "/showsplash on|off", "Enable/disable splash logo on startup.",
         { "/showsplash on|off",
           "------------------",
@@ -262,7 +262,7 @@ static struct cmd_t setting_commands[] =
           "Config file value :   showsplash=true|false",
           NULL } } },
 
-    { "/chlog", 
+    { "/chlog",
         _cmd_set_chlog,
         { "/chlog on|off", "Enable/disable chat logging.",
         { "/chlog on|off",
@@ -278,7 +278,7 @@ static struct cmd_t setting_commands[] =
           "    ~/.profanity/log/someuser_at_chatserv.com/myfriend_at_chatserv.com",
           NULL } } },
 
-    { "/history", 
+    { "/history",
         _cmd_set_history,
         { "/history on|off", "Enable/disable chat history.",
         { "/history on|off",
@@ -291,7 +291,7 @@ static struct cmd_t setting_commands[] =
           NULL } } }
 };
 
-static struct cmd_t status_commands[] = 
+static struct cmd_t status_commands[] =
 {
     { "/away",
         _cmd_away,
@@ -328,7 +328,7 @@ static struct cmd_t status_commands[] =
           "Example : /dnd I'm in the zone",
           NULL } } },
 
-    { "/online", 
+    { "/online",
         _cmd_online,
         { "/online [msg]", "Set status to online.",
         { "/online [msg]",
@@ -351,7 +351,7 @@ static struct cmd_t status_commands[] =
           "Example : /xa This meeting is going to be a long one",
           NULL } } },
 };
-    
+
 static PAutocomplete commands_ac;
 
 /*
@@ -443,7 +443,7 @@ gboolean
 cmd_execute(const char * const command, const char * const inp)
 {
     struct cmd_t *cmd = _cmd_get_command(command);
-    
+
     if (cmd != NULL) {
         return (cmd->func(inp, cmd->help));
     } else {
@@ -457,7 +457,7 @@ cmd_execute_default(const char * const inp)
     if (win_in_chat()) {
         char *recipient = win_get_recipient();
         jabber_send(inp, recipient);
-        
+
         if (prefs_get_chlog()) {
             const char *jid = jabber_get_jid();
             chat_log_chat(jid, recipient, inp, OUT);
@@ -499,7 +499,7 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
         inp_non_block();
 
         log_debug("Connecting as %s", lower);
-        
+
         conn_status = jabber_connect(lower, passwd);
         if (conn_status == JABBER_CONNECTING) {
             cons_show("Connecting...");
@@ -512,7 +512,7 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
 
         result = TRUE;
     }
-    
+
     return result;
 }
 
@@ -540,7 +540,7 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
         if (command != NULL) {
             help_text = command->help.long_help;
         }
-        
+
         cons_show("");
 
         if (help_text != NULL) {
@@ -574,7 +574,7 @@ _cmd_who(const char * const inp, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        // copy input    
+        // copy input
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
 
@@ -595,7 +595,7 @@ _cmd_who(const char * const inp, struct cmd_help_t help)
         // valid arg
         } else {
             GSList *list = get_contact_list();
-            
+
             // no arg, show all contacts
             if (show == NULL) {
                 cons_show("All contacts:");
@@ -653,7 +653,7 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        // copy input    
+        // copy input
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
 
@@ -719,7 +719,7 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
         }
     } else {
         cons_show("Usage: %s", help.usage);
-        
+
         if (win_in_chat()) {
             char usage[strlen(help.usage + 8)];
             sprintf(usage, "Usage: %s", help.usage);
@@ -735,7 +735,7 @@ _cmd_close(const char * const inp, struct cmd_help_t help)
 {
     if (!win_close_win())
         cons_bad_command(inp);
-    
+
     return TRUE;
 }
 
@@ -749,42 +749,42 @@ _cmd_set_beep(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_set_notify(const char * const inp, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(inp, help, "/notify", 
+    return _cmd_set_boolean_preference(inp, help, "/notify",
         "Desktop notifications", prefs_set_notify);
 }
 
 static gboolean
 _cmd_set_typing(const char * const inp, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(inp, help, "/typing", 
+    return _cmd_set_boolean_preference(inp, help, "/typing",
         "Incoming typing notifications", prefs_set_typing);
 }
 
 static gboolean
 _cmd_set_flash(const char * const inp, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(inp, help, "/flash", 
+    return _cmd_set_boolean_preference(inp, help, "/flash",
         "Screen flash", prefs_set_flash);
 }
 
 static gboolean
 _cmd_set_showsplash(const char * const inp, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(inp, help, "/showsplash", 
+    return _cmd_set_boolean_preference(inp, help, "/showsplash",
         "Splash screen", prefs_set_showsplash);
 }
 
 static gboolean
 _cmd_set_chlog(const char * const inp, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(inp, help, "/chlog", 
+    return _cmd_set_boolean_preference(inp, help, "/chlog",
         "Chat logging", prefs_set_chlog);
 }
 
 static gboolean
 _cmd_set_history(const char * const inp, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(inp, help, "/history", 
+    return _cmd_set_boolean_preference(inp, help, "/history",
         "Chat history", prefs_set_history);
 }
 
@@ -794,7 +794,7 @@ _cmd_set_remind(const char * const inp, struct cmd_help_t help)
     if ((strncmp(inp, "/remind ", 8) != 0) || (strlen(inp) < 9)) {
         cons_show("Usage: %s", help.usage);
     } else {
-        // copy input    
+        // copy input
         char inp_cpy[strlen(inp) + 1];
         strcpy(inp_cpy, inp);
 
@@ -813,7 +813,7 @@ _cmd_set_remind(const char * const inp, struct cmd_help_t help)
         }
     }
 
-    return TRUE;    
+    return TRUE;
 }
 
 static gboolean
@@ -854,7 +854,7 @@ _cmd_xa(const char * const inp, struct cmd_help_t help)
 // helper function for status change commands
 
 static void
-_update_presence(const jabber_presence_t presence, 
+_update_presence(const jabber_presence_t presence,
     const char * const show, const char * const inp)
 {
     char *msg;
@@ -865,7 +865,7 @@ _update_presence(const jabber_presence_t presence,
     }
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    
+
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
@@ -879,18 +879,18 @@ _update_presence(const jabber_presence_t presence,
         }
     }
 
-} 
+}
 
 // helper function for boolean preference commands
 
 static gboolean
 _cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
-    const char * const cmd_str, const char * const display, 
+    const char * const cmd_str, const char * const display,
     void (*set_func)(gboolean))
 {
     GString *on = g_string_new(cmd_str);
     g_string_append(on, " on");
-    
+
     GString *off = g_string_new(cmd_str);
     g_string_append(off, " off");
 
@@ -910,7 +910,7 @@ _cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
         char usage[strlen(help.usage + 8)];
         sprintf(usage, "Usage: %s", help.usage);
         cons_show(usage);
-    }        
+    }
 
     g_string_free(on, TRUE);
     g_string_free(off, TRUE);

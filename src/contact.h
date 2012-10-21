@@ -1,8 +1,8 @@
-/* 
+/*
  * contact.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 
 typedef struct p_contact_t *PContact;
 
-PContact p_contact_new(const char * const name, const char * const show, 
+PContact p_contact_new(const char * const name, const char * const show,
     const char * const status);
 PContact p_contact_copy(PContact contact);
 void p_contact_free(PContact contact);

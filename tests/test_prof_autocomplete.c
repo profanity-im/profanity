@@ -15,7 +15,7 @@ static void clear_empty(void)
 
 static void clear_empty_with_free_func(void)
 {
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -49,7 +49,7 @@ static void get_after_create_returns_null(void)
 
 static void get_after_create_with_copy_func_returns_null(void)
 {
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -57,7 +57,7 @@ static void get_after_create_with_copy_func_returns_null(void)
     GSList *result = p_autocomplete_get_list(ac);
 
     assert_is_null(result);
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -76,7 +76,7 @@ static void add_one_and_complete(void)
 static void add_one_and_complete_with_funcs(void)
 {
     PContact contact = p_contact_new("James", "Online", "I'm here");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -85,7 +85,7 @@ static void add_one_and_complete_with_funcs(void)
     char *result = p_autocomplete_complete(ac, "Jam");
 
     assert_string_equals("James", result);
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -99,7 +99,7 @@ static void add_two_and_complete_returns_first(void)
     char *result = p_autocomplete_complete(ac, "Hel");
 
     assert_string_equals("Hello", result);
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -107,7 +107,7 @@ static void add_two_and_complete_returns_first_with_funcs(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("Jamie", "Away", "Out to lunch");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -117,7 +117,7 @@ static void add_two_and_complete_returns_first_with_funcs(void)
     char *result = p_autocomplete_complete(ac, "Jam");
 
     assert_string_equals("James", result);
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -132,7 +132,7 @@ static void add_two_and_complete_returns_second(void)
     char *result2 = p_autocomplete_complete(ac, result1);
 
     assert_string_equals("Help", result2);
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -140,7 +140,7 @@ static void add_two_and_complete_returns_second_with_funcs(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("Jamie", "Away", "Out to lunch");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -151,7 +151,7 @@ static void add_two_and_complete_returns_second_with_funcs(void)
     char *result2 = p_autocomplete_complete(ac, result1);
 
     assert_string_equals("Jamie", result2);
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -173,7 +173,7 @@ static void add_two_adds_two_with_funcs(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("Jamie", "Away", "Out to lunch");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -183,7 +183,7 @@ static void add_two_adds_two_with_funcs(void)
     GSList *result = p_autocomplete_get_list(ac);
 
     assert_int_equals(2, g_slist_length(result));
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -205,7 +205,7 @@ static void add_two_same_adds_one_with_funcs(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("James", "Away", "Out to lunch");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -215,7 +215,7 @@ static void add_two_same_adds_one_with_funcs(void)
     GSList *result = p_autocomplete_get_list(ac);
 
     assert_int_equals(1, g_slist_length(result));
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -241,7 +241,7 @@ static void add_two_same_updates_with_funcs(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("James", "Away", "Out to lunch");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -274,7 +274,7 @@ static void add_one_returns_true(void)
 static void add_one_returns_true_with_funcs(void)
 {
     PContact contact = p_contact_new("James", "Online", "I'm here");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -282,7 +282,7 @@ static void add_one_returns_true_with_funcs(void)
     int result = p_autocomplete_add(ac, contact);
 
     assert_true(result);
-    
+
     p_autocomplete_clear(ac);
 }
 
@@ -304,7 +304,7 @@ static void add_two_different_returns_true_with_funcs(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("JamesB", "Away", "Out to lunch");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -336,7 +336,7 @@ static void add_two_same_returns_false_with_funcs(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("James", "Online", "I'm here");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,
@@ -354,7 +354,7 @@ static void add_two_same_different_data_returns_true(void)
 {
     PContact contact1 = p_contact_new("James", "Online", "I'm here");
     PContact contact2 = p_contact_new("James", "Away", "I'm not here right now");
-    PAutocomplete ac = 
+    PAutocomplete ac =
         p_obj_autocomplete_new((PStrFunc)p_contact_name,
                                (PCopyFunc)p_contact_copy,
                                (PEqualDeepFunc)p_contacts_equal_deep,

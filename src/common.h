@@ -1,8 +1,8 @@
-/* 
+/*
  * common.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@
 
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void create_dir(char *name);
-char * str_replace(const char *string, const char *substr, 
+char * str_replace(const char *string, const char *substr,
     const char *replacement);
 int str_contains(char str[], int size, char ch);
 

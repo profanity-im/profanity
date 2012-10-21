@@ -59,10 +59,10 @@ static void first_and_second_elements_correct(void)
     contact_list_add("James", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
     GSList *list = get_contact_list();
-    
+
     PContact dave = list->data;
     PContact james = (g_slist_next(list))->data;
-    
+
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
 }
@@ -73,7 +73,7 @@ static void contains_three_elements(void)
     contact_list_add("Bob", NULL, NULL);
     contact_list_add("Dave", NULL, NULL);
     GSList *list = get_contact_list();
-    
+
     assert_int_equals(3, g_slist_length(list));
 }
 
@@ -86,7 +86,7 @@ static void first_three_elements_correct(void)
     PContact bob = list->data;
     PContact dave = (g_slist_next(list))->data;
     PContact james = (g_slist_next(g_slist_next(list)))->data;
-    
+
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
     assert_string_equals("Bob", p_contact_name(bob));
@@ -102,8 +102,8 @@ static void add_twice_at_beginning_adds_once(void)
     PContact bob = list->data;
     PContact dave = (g_slist_next(list))->data;
     PContact james = (g_slist_next(g_slist_next(list)))->data;
-    
-    assert_int_equals(3, g_slist_length(list));    
+
+    assert_int_equals(3, g_slist_length(list));
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
     assert_string_equals("Bob", p_contact_name(bob));
@@ -119,8 +119,8 @@ static void add_twice_in_middle_adds_once(void)
     PContact bob = list->data;
     PContact dave = (g_slist_next(list))->data;
     PContact james = (g_slist_next(g_slist_next(list)))->data;
-    
-    assert_int_equals(3, g_slist_length(list));    
+
+    assert_int_equals(3, g_slist_length(list));
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
     assert_string_equals("Bob", p_contact_name(bob));
@@ -136,8 +136,8 @@ static void add_twice_at_end_adds_once(void)
     PContact bob = list->data;
     PContact dave = (g_slist_next(list))->data;
     PContact james = (g_slist_next(g_slist_next(list)))->data;
-    
-    assert_int_equals(3, g_slist_length(list));    
+
+    assert_int_equals(3, g_slist_length(list));
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
     assert_string_equals("Bob", p_contact_name(bob));
@@ -156,7 +156,7 @@ static void remove_when_one_removes(void)
     contact_list_add("James", NULL, NULL);
     contact_list_remove("James");
     GSList *list = get_contact_list();
-    
+
     assert_int_equals(0, g_slist_length(list));
 }
 
@@ -167,7 +167,7 @@ static void remove_first_when_two(void)
 
     contact_list_remove("James");
     GSList *list = get_contact_list();
-    
+
     assert_int_equals(1, g_slist_length(list));
     PContact dave = list->data;
     assert_string_equals("Dave", p_contact_name(dave));
@@ -180,7 +180,7 @@ static void remove_second_when_two(void)
 
     contact_list_remove("Dave");
     GSList *list = get_contact_list();
-    
+
     assert_int_equals(1, g_slist_length(list));
     PContact james = list->data;
     assert_string_equals("James", p_contact_name(james));
@@ -194,11 +194,11 @@ static void remove_first_when_three(void)
 
     contact_list_remove("James");
     GSList *list = get_contact_list();
-    
+
     assert_int_equals(2, g_slist_length(list));
     PContact bob = list->data;
     PContact dave = (g_slist_next(list))->data;
-    
+
     assert_string_equals("Dave", p_contact_name(dave));
     assert_string_equals("Bob", p_contact_name(bob));
 }
@@ -211,11 +211,11 @@ static void remove_second_when_three(void)
 
     contact_list_remove("Dave");
     GSList *list = get_contact_list();
-    
+
     assert_int_equals(2, g_slist_length(list));
     PContact bob = list->data;
     PContact james = (g_slist_next(list))->data;
-    
+
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Bob", p_contact_name(bob));
 }
@@ -228,11 +228,11 @@ static void remove_third_when_three(void)
 
     contact_list_remove("Bob");
     GSList *list = get_contact_list();
-    
+
     assert_int_equals(2, g_slist_length(list));
     PContact dave = list->data;
     PContact james = (g_slist_next(list))->data;
-    
+
     assert_string_equals("James", p_contact_name(james));
     assert_string_equals("Dave", p_contact_name(dave));
 }
@@ -242,7 +242,7 @@ static void test_show_when_value(void)
     contact_list_add("James", "away", NULL);
     GSList *list = get_contact_list();
     PContact james = list->data;
-    
+
     assert_string_equals("away", p_contact_show(james));
 }
 
@@ -251,7 +251,7 @@ static void test_show_online_when_no_value(void)
     contact_list_add("James", NULL, NULL);
     GSList *list = get_contact_list();
     PContact james = list->data;
-    
+
     assert_string_equals("online", p_contact_show(james));
 }
 
@@ -260,7 +260,7 @@ static void test_show_online_when_empty_string(void)
     contact_list_add("James", "", NULL);
     GSList *list = get_contact_list();
     PContact james = list->data;
-    
+
     assert_string_equals("online", p_contact_show(james));
 }
 
@@ -269,7 +269,7 @@ static void test_status_when_value(void)
     contact_list_add("James", NULL, "I'm not here right now");
     GSList *list = get_contact_list();
     PContact james = list->data;
-    
+
     assert_string_equals("I'm not here right now", p_contact_status(james));
 }
 
@@ -278,7 +278,7 @@ static void test_status_when_no_value(void)
     contact_list_add("James", NULL, NULL);
     GSList *list = get_contact_list();
     PContact james = list->data;
-    
+
     assert_is_null(p_contact_status(james));
 }
 

@@ -1,8 +1,8 @@
-/* 
- * input_win.c 
+/*
+ * input_win.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -26,11 +26,11 @@
  * *size  - holds the current size of input
  * *input - holds the current input string, NOT null terminated at this point
  * *ch    - getch will put a charater here if there was any input
- * 
+ *
  * The example below shows the values of size, input, a call to wgetyx to
  * find the current cursor location, and the index of the input string.
  *
- * view         :    |mple|  
+ * view         :    |mple|
  * input        : "example te"
  * index        : "0123456789"
  * inp_x        : "0123456789"
@@ -84,7 +84,7 @@ inp_win_resize(const char * const input, const int size)
     int rows, cols, inp_x;
     getmaxyx(stdscr, rows, cols);
     inp_x = getcurx(inp_win);
-    
+
     // if lost cursor off screen, move contents to show it
     if (inp_x >= pad_start + cols) {
         pad_start = inp_x - (cols / 2);
@@ -125,7 +125,7 @@ inp_get_char(int *ch, char *input, int *size)
     int inp_y = 0;
     int inp_x = 0;
     int i;
-    
+
     // echo off, and get some more input
     noecho();
     *ch = wgetch(inp_win);
@@ -134,7 +134,7 @@ inp_get_char(int *ch, char *input, int *size)
     if (!_handle_edit(*ch, input, size)) {
         if (_printable(*ch)) {
             getyx(inp_win, inp_y, inp_x);
-           
+
             // handle insert if not at end of input
             if (inp_x < *size) {
                 winsch(inp_win, *ch);
@@ -150,7 +150,7 @@ inp_get_char(int *ch, char *input, int *size)
             } else {
                 waddch(inp_win, *ch);
                 input[(*size)++] = *ch;
-            
+
                 // if gone over screen size follow input
                 int rows, cols;
                 getmaxyx(stdscr, rows, cols);
@@ -174,7 +174,7 @@ inp_get_password(char *passwd)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    
+
     wclear(inp_win);
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
     noecho();
@@ -208,12 +208,12 @@ _handle_edit(const int ch, char *input, int *size)
     int inp_y = 0;
     int inp_x = 0;
     char inp_cpy[*size];
-    
+
     getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
 
     switch(ch) {
-    
+
     case 127:
     case KEY_BACKSPACE:
         reset_search_attempts();
@@ -252,12 +252,12 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_DC: // DEL
         if (inp_x < *size) {
             wdelch(inp_win);
-    
+
             // if not last char, shift chars left
             if (inp_x < *size - 1)
                 for (i = inp_x; i < *size; i++)
                     input[i] = input[i+1];
-            
+
             (*size)--;
         }
         return 1;
@@ -265,7 +265,7 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_LEFT:
         if (inp_x > 0)
             wmove(inp_win, inp_y, inp_x-1);
-    
+
         // current position off screen to left
         if (inp_x - 1 < pad_start) {
             pad_start--;
@@ -276,7 +276,7 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_RIGHT:
         if (inp_x < *size) {
             wmove(inp_win, inp_y, inp_x+1);
-            
+
             // current position off screen to right
             if ((inp_x + 1 - pad_start) >= cols) {
                 pad_start++;
@@ -367,7 +367,7 @@ _handle_edit(const int ch, char *input, int *size)
             }
         }
         return 1;
-    
+
     default:
         return 0;
     }
@@ -376,9 +376,9 @@ _handle_edit(const int ch, char *input, int *size)
 static int
 _printable(const int ch)
 {
-   return (ch != ERR && ch != '\n' && 
+   return (ch != ERR && ch != '\n' &&
             ch != KEY_PPAGE && ch != KEY_NPAGE &&
-            ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) && 
+            ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) &&
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&
             ch != KEY_F(10) && ch!= KEY_F(11) && ch != KEY_F(12) &&

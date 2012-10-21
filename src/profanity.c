@@ -1,8 +1,8 @@
-/* 
+/*
  * profanity.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -65,7 +65,7 @@ prof_run(const int disable_tls, char *log_level)
         while(ch != '\n') {
 
             gdouble elapsed = g_timer_elapsed(timer, NULL);
-            
+
             gint remind_period = prefs_get_remind();
 
             // 0 means to not remind
@@ -79,10 +79,10 @@ prof_run(const int disable_tls, char *log_level)
             if (ch == KEY_RESIZE) {
                 gui_resize(ch, inp, size);
             }
-            
+
             gui_refresh();
             jabber_process_events();
-            
+
             inp_get_char(&ch, inp, &size);
         }
 
@@ -103,15 +103,15 @@ prof_handle_incoming_message(char *from, char *message)
 {
     win_show_incomming_msg(from, message);
     win_page_off();
-    
-    if (prefs_get_chlog()) {                                                               
-        char from_cpy[strlen(from) + 1];                                         
-        strcpy(from_cpy, from);                                                  
-        char *short_from = strtok(from_cpy, "/");                                
-        const char *jid = jabber_get_jid();                   
-                                                                                 
-        chat_log_chat(jid, short_from, message, IN);                             
-    }  
+
+    if (prefs_get_chlog()) {
+        char from_cpy[strlen(from) + 1];
+        strcpy(from_cpy, from);
+        char *short_from = strtok(from_cpy, "/");
+        const char *jid = jabber_get_jid();
+
+        chat_log_chat(jid, short_from, message, IN);
+    }
 }
 
 void
@@ -189,16 +189,16 @@ prof_handle_roster(GSList *roster)
 {
     while (roster != NULL) {
         jabber_roster_entry *entry = roster->data;
-        
+
         // if contact not in contact list add them as offline
         if (find_contact(entry->jid) == NULL) {
             contact_list_add(entry->jid, "offline", NULL);
         }
-       
+
         roster = g_slist_next(roster);
     }
 
-    g_slist_free_full(roster, (GDestroyNotify)_free_roster_entry); 
+    g_slist_free_full(roster, (GDestroyNotify)_free_roster_entry);
 }
 
 static void
@@ -220,7 +220,7 @@ _free_roster_entry(jabber_roster_entry *entry)
     free(entry->jid);
 }
 
-static log_level_t 
+static log_level_t
 _get_log_level(char *log_level)
 {
     if (strcmp(log_level, "DEBUG") == 0) {
@@ -234,8 +234,8 @@ _get_log_level(char *log_level)
     }
 }
 
-/* 
- * Take a line of input and process it, return TRUE if profanity is to 
+/*
+ * Take a line of input and process it, return TRUE if profanity is to
  * continue, FALSE otherwise
  */
 static gboolean
@@ -244,7 +244,7 @@ _process_input(char *inp)
     log_debug("Input recieved: %s", inp);
     gboolean result = FALSE;
     g_strstrip(inp);
-    
+
     // add line to history if something typed
     if (strlen(inp) > 0) {
         history_append(inp);
@@ -308,8 +308,8 @@ _shutdown_init(void)
 static void
 _shutdown(void)
 {
-    gui_close();                                                          
-    chat_log_close();                                                    
-    prefs_close();                                                       
-    log_close();   
+    gui_close();
+    chat_log_close();
+    prefs_close();
+    log_close();
 }

@@ -1,8 +1,8 @@
-/* 
+/*
  * jabber.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@ typedef enum {
 } jabber_presence_t;
 
 void jabber_init(const int disable_tls);
-jabber_conn_status_t jabber_connect(const char * const user, 
+jabber_conn_status_t jabber_connect(const char * const user,
     const char * const passwd);
 gboolean jabber_disconnect(void);
 void jabber_roster_request(void);

@@ -1,8 +1,8 @@
-/* 
+/*
  * chat_log.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -44,25 +44,25 @@ static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
 static struct dated_chat_log *_create_log(char *other, const  char * const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
-static char * _get_log_filename(const char * const other, const char * const login, 
+static char * _get_log_filename(const char * const other, const char * const login,
     GDateTime *dt, gboolean create);
 
 void
 chat_log_init(void)
-{   
+{
     session_started = g_date_time_new_now_local();
     log_info("Initialising chat logs");
-    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free, 
+    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
         (GDestroyNotify)_free_chat_log);
 }
 
 void
-chat_log_chat(const gchar * const login, gchar *other, 
+chat_log_chat(const gchar * const login, gchar *other,
     const gchar * const msg, chat_log_direction_t direction)
 {
     gchar *other_copy = strdup(other);
     struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other_copy);
-    
+
     // no log for user
     if (dated_log == NULL) {
         dated_log = _create_log(other_copy, login);
@@ -94,24 +94,24 @@ chat_log_chat(const gchar * const login, gchar *other,
 }
 
 GSList *
-chat_log_get_previous(const gchar * const login, const gchar * const recipient, 
+chat_log_get_previous(const gchar * const login, const gchar * const recipient,
     GSList *history)
 {
     GTimeZone *tz = g_time_zone_new_local();
-    
+
     GDateTime *now = g_date_time_new_now_local();
-    GDateTime *log_date = g_date_time_new(tz, 
+    GDateTime *log_date = g_date_time_new(tz,
         g_date_time_get_year(session_started),
-        g_date_time_get_month(session_started), 
+        g_date_time_get_month(session_started),
         g_date_time_get_day_of_month(session_started),
         g_date_time_get_hour(session_started),
         g_date_time_get_minute(session_started),
         g_date_time_get_second(session_started));
-    
+
     // get data from all logs from the day the session was started to today
     while (g_date_time_get_day_of_year(log_date) <=  g_date_time_get_day_of_year(now)) {
         char *filename = _get_log_filename(recipient, login, log_date, FALSE);
-    
+
         FILE *logp = fopen(filename, "r");
         char *line = NULL;
         size_t read = 0;
@@ -136,10 +136,10 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
                 read = 0;
                 length = getline(&line, &read, logp);
             }
-            
+
             fclose(logp);
         }
-        
+
         free(filename);
         GDateTime *next = g_date_time_add_days(log_date, 1);
         g_date_time_unref(log_date);
@@ -208,12 +208,12 @@ gboolean _key_equals(void *key1, void *key2)
 {
     gchar *str1 = (gchar *) key1;
     gchar *str2 = (gchar *) key2;
-    
+
     return (g_strcmp0(str1, str2) == 0);
 }
 
 static char *
-_get_log_filename(const char * const other, const char * const login, 
+_get_log_filename(const char * const other, const char * const login,
     GDateTime *dt, gboolean create)
 {
     GString *log_file = g_string_new(getenv("HOME"));

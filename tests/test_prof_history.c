@@ -67,8 +67,8 @@ void previous_goes_to_correct_element(void)
     char *item1 = p_history_previous(history, NULL);
     char *item2 = p_history_previous(history, item1);
     char *item3 = p_history_previous(history, item2);
-    
-    assert_string_equals("going", item3); 
+
+    assert_string_equals("going", item3);
 }
 
 void prev_then_next_returns_empty(void)
@@ -128,7 +128,7 @@ void navigate_then_append_new(void)
 
     char *item5 = p_history_next(history, item4);
     assert_string_equals("append", item5);
-    
+
     char *item6 = p_history_next(history, item5);
     assert_string_equals("new text", item6);
 }
@@ -144,22 +144,22 @@ void edit_item_mid_history(void)
 
     char *item1 = p_history_previous(history, "new item");
     assert_string_equals("append", item1);
-    
+
     char *item2 = p_history_previous(history, item1);
     assert_string_equals("history", item2);
 
     char *item3 = p_history_previous(history, item2);
     assert_string_equals("testing", item3);
-    
+
     char *item4 = p_history_previous(history, "EDITED");
-    assert_string_equals("again", item4);   
-    
+    assert_string_equals("again", item4);
+
     char *item5 = p_history_previous(history, item4);
     assert_string_equals("Hello", item5);
 
     char *item6 = p_history_next(history, item5);
     assert_string_equals("again", item6);
-    
+
     char *item7 = p_history_next(history, item6);
     assert_string_equals("EDITED", item7);
 
@@ -184,13 +184,13 @@ void edit_previous_and_append(void)
 
     char *item1 = p_history_previous(history, "new item");
     assert_string_equals("append", item1);
-    
+
     char *item2 = p_history_previous(history, item1);
     assert_string_equals("history", item2);
 
     char *item3 = p_history_previous(history, item2);
     assert_string_equals("testing", item3);
-    
+
     p_history_append(history, "EDITED");
 
     char *item4 = p_history_previous(history, NULL);
@@ -204,7 +204,7 @@ void start_session_add_new_submit_previous(void)
 
     char *item1 = p_history_previous(history, NULL);
     assert_string_equals("hello", item1);
-    
+
     char *item2 = p_history_next(history, item1);
     assert_string_equals("", item2);
 

@@ -1,8 +1,8 @@
-/* 
+/*
  * prof_history.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -59,7 +59,7 @@ p_history_new(unsigned int size)
     PHistory new_history = malloc(sizeof(struct p_history_t));
     new_history->items = NULL;
     new_history->max_size = size;
-    
+
     _reset_session(new_history);
 
     return new_history;
@@ -77,12 +77,12 @@ p_history_append(PHistory history, char *item)
         _add_to_history(history, copied);
         return;
     }
-        
+
     if (!_has_session(history)) {
         if (g_list_length(history->items) == history->max_size) {
             _remove_first(history);
         }
-    
+
         _add_to_history(history, copied);
 
     } else {
@@ -92,15 +92,15 @@ p_history_append(PHistory history, char *item)
             if (strcmp(history->session.sess_curr->data, "") == 0) {
                 _remove_last_session_item(history);
             }
-            
+
             _replace_history_with_session(history);
 
         } else {
             _remove_last_session_item(history);
-            
+
             char *new = strdup(history->session.sess_curr->data);
             history->session.items = g_list_append(history->session.items, new);
-            
+
             _replace_current_with_original(history);
             _replace_history_with_session(history);
         }
@@ -119,10 +119,10 @@ p_history_previous(PHistory history, char *item)
     if (item != NULL) {
         copied = strdup(item);
     }
-    
+
     if (!_has_session(history)) {
         _create_session(history);
-        
+
         // add the new item
         history->session.items = g_list_append(history->session.items, copied);
         history->session.sess_new = g_list_last(history->session.items);
@@ -153,7 +153,7 @@ p_history_next(PHistory history, char *item)
 
     _update_current_session_item(history, copied);
     _session_next(history);
-    
+
     char *result = strdup(history->session.sess_curr->data);
     return result;
 }
@@ -163,9 +163,9 @@ _replace_history_with_session(PHistory history)
 {
     g_list_free(history->items);
     history->items = g_list_copy(history->session.items);
-    
+
     if (g_list_length(history->items) > history->max_size) {
-        _remove_first(history);    
+        _remove_first(history);
     }
 
     _reset_session(history);
@@ -174,7 +174,7 @@ _replace_history_with_session(PHistory history)
 static gboolean
 _adding_new(PHistory history)
 {
-    return (history->session.sess_curr == 
+    return (history->session.sess_curr ==
         g_list_last(history->session.items));
 }
 
@@ -218,7 +218,7 @@ _remove_last_session_item(PHistory history)
 {
     history->session.items = g_list_reverse(history->session.items);
     GList *first = g_list_first(history->session.items);
-    history->session.items = 
+    history->session.items =
         g_list_remove(history->session.items, first->data);
     history->session.items = g_list_reverse(history->session.items);
 }
@@ -240,12 +240,12 @@ _create_session(PHistory history)
 static void
 _session_previous(PHistory history)
 {
-    history->session.sess_curr = 
+    history->session.sess_curr =
         g_list_previous(history->session.sess_curr);
     if (history->session.orig_curr == NULL)
         history->session.orig_curr = g_list_last(history->items);
-    else 
-        history->session.orig_curr = 
+    else
+        history->session.orig_curr =
             g_list_previous(history->session.orig_curr);
 
     if (history->session.sess_curr == NULL) {

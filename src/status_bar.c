@@ -1,8 +1,8 @@
-/* 
+/*
  * status_bar.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -86,7 +86,7 @@ status_bar_refresh(void)
 
     g_date_time_unref(now_time);
 }
-    
+
 void
 status_bar_resize(void)
 {
@@ -124,7 +124,7 @@ status_bar_inactive(const int win)
     int active_pos = 1 + ((win -1) * 3);
 
     int cols = getmaxx(stdscr);
- 
+
     mvwaddch(status_bar, 0, cols - 29 + active_pos, ' ');
     if (win == 9)
         mvwaddch(status_bar, 0, cols - 29 + active_pos + 1, ' ');
@@ -141,7 +141,7 @@ status_bar_active(const int win)
     int active_pos = 1 + ((win -1) * 3);
 
     int cols = getmaxx(stdscr);
- 
+
     wattron(status_bar, COLOUR_BAR_DRAW);
     if (win < 9)
         mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
@@ -161,7 +161,7 @@ status_bar_new(const int win)
     int active_pos = 1 + ((win -1) * 3);
 
     int cols = getmaxx(stdscr);
- 
+
     wattron(status_bar, COLOUR_BAR_TEXT);
     wattron(status_bar, A_BLINK);
     if (win < 9)
@@ -187,7 +187,7 @@ status_bar_print_message(const char * const msg)
     if (message != NULL)
         free(message);
 
-    message = (char *) malloc((strlen(msg) + 1) * sizeof(char));    
+    message = (char *) malloc((strlen(msg) + 1) * sizeof(char));
     strcpy(message, msg);
     mvwprintw(status_bar, 0, 9, message);
 
@@ -201,7 +201,7 @@ status_bar_clear(void)
         free(message);
         message = NULL;
     }
-    
+
     int i;
     for (i = 0; i < 9; i++) {
         is_active[i] = FALSE;

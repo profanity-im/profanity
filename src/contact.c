@@ -1,8 +1,8 @@
-/* 
+/*
  * contact.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ struct p_contact_t {
 };
 
 PContact
-p_contact_new(const char * const name, const char * const show, 
+p_contact_new(const char * const name, const char * const show,
     const char * const status)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
@@ -59,12 +59,12 @@ p_contact_copy(PContact contact)
     PContact copy = malloc(sizeof(struct p_contact_t));
     copy->name = strdup(contact->name);
     copy->show = strdup(contact->show);
-    
+
     if (contact->status != NULL)
         copy->status = strdup(contact->status);
     else
         copy->status = NULL;
-    
+
     return copy;
 }
 

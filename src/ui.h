@@ -1,8 +1,8 @@
-/* 
+/*
  * ui.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -89,13 +89,13 @@ char *win_get_recipient(void);
 void win_show_typing(const char * const from);
 void win_show_incomming_msg(const char * const from, const char * const message);
 void win_show_error_msg(const char * const from, const char *err_msg);
-void win_show_outgoing_msg(const char * const from, const char * const to, 
+void win_show_outgoing_msg(const char * const from, const char * const to,
     const char * const message);
 void win_handle_special_keys(const int * const ch);
 void win_page_off(void);
-void win_contact_online(const char * const from, const char * const show, 
+void win_contact_online(const char * const from, const char * const show,
     const char * const status);
-void win_contact_offline(const char * const from, const char * const show, 
+void win_contact_offline(const char * const from, const char * const show,
     const char * const status);
 void win_disconnected(void);
 void win_show(const char * const msg);
