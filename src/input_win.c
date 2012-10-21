@@ -162,6 +162,7 @@ inp_get_char(int *ch, char *input, int *size)
 
             reset_search_attempts();
             reset_login_search();
+            help_reset_completer();
             cmd_reset_completer();
         }
     }
@@ -360,6 +361,22 @@ _handle_edit(const int ch, char *input, int *size)
             if (found != NULL) {
                 auto_msg = (char *) malloc((9 + (strlen(found) + 1)) * sizeof(char));
                 strcpy(auto_msg, "/connect ");
+                strcat(auto_msg, found);
+                _replace_input(input, auto_msg, size);
+                free(auto_msg);
+                free(found);
+            }
+
+        // autocomplete /help command
+        } else if ((strncmp(input, "/help ", 6) == 0) && (*size > 6)) {
+            for(i = 6; i < *size; i++) {
+                inp_cpy[i-6] = input[i];
+            }
+            inp_cpy[(*size) - 6] = '\0';
+            found = help_complete(inp_cpy);
+            if (found != NULL) {
+                auto_msg = (char *) malloc((6 + (strlen(found) + 1)) * sizeof(char));
+                strcpy(auto_msg, "/help ");
                 strcat(auto_msg, found);
                 _replace_input(input, auto_msg, size);
                 free(auto_msg);
