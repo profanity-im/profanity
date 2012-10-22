@@ -72,6 +72,9 @@ static void _parameter_autocomplete(char *input, int *size, char *command,
 void
 create_input_window(void)
 {
+    if (getenv("ESCDELAY") == NULL)
+        ESCDELAY = 25;
+
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
@@ -219,6 +222,11 @@ _handle_edit(const int ch, char *input, int *size)
     getyx(inp_win, inp_y, inp_x);
 
     switch(ch) {
+
+    case 27: // ESC
+        *size = 0;
+        inp_clear();
+        return 1;
 
     case 127:
     case KEY_BACKSPACE:
