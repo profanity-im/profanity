@@ -20,8 +20,6 @@ AC_CHECK_LIB([ssl], [main], [],
     [AC_MSG_ERROR([openssl is required for profanity])])
 AC_CHECK_LIB([expat], [main], [], 
     [AC_MSG_ERROR([expat is required for profanity])])
-AC_CHECK_LIB([xml2], [main], [], 
-    [AC_MSG_ERROR([libxml2 is required for profanity])])
 AC_CHECK_LIB([strophe], [main], [], 
     [AC_MSG_ERROR([libstrophe is required for profanity])])
 AC_CHECK_LIB([glib-2.0], [main], [], 
@@ -43,7 +41,7 @@ PKG_CHECK_MODULES([NOTIFY], [libnotify], [],
     [AC_MSG_NOTICE([libnotify module not found])])
 
 AM_CFLAGS="-Wall "
-AM_CFLAGS="$AM_CFLAGS -lstrophe -lxml2 -lexpat -lncurses -lcurl -lresolv "
+AM_CFLAGS="$AM_CFLAGS -lstrophe -lexpat -lncurses -lcurl -lresolv "
 AM_CFLAGS="$AM_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
