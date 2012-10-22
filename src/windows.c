@@ -611,7 +611,7 @@ cons_settings_help(void)
         cons_show("%-25s: %s", help->usage, help->short_help);
         settings_helpers = g_slist_next(settings_helpers);
     }
-    
+
     cons_show("");
 
     if (_curr_prof_win == 0)

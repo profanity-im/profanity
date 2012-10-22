@@ -561,7 +561,7 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
         cons_basic_help();
     } else if (strcmp(inp, "/help status") == 0) {
         cons_status_help();
-    } else if (strcmp(inp, "/help settings") == 0) { 
+    } else if (strcmp(inp, "/help settings") == 0) {
         cons_settings_help();
     } else if (strcmp(inp, "/help navigation") == 0) {
         cons_navigation_help();
