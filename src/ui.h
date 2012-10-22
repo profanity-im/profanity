@@ -104,6 +104,10 @@ void win_remind(void);
 
 // console window actions
 void cons_help(void);
+void cons_basic_help(void);
+void cons_settings_help(void);
+void cons_status_help(void);
+void cons_navigation_help(void);
 void cons_prefs(void);
 void cons_bad_command(const char * const cmd);
 void cons_show(const char * const cmd, ...);

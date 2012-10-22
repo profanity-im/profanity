@@ -575,9 +575,33 @@ void
 cons_help(void)
 {
     cons_show("");
+    cons_show("Choose an area you need help with:");
+    cons_show("");
+    cons_show("/help basic      - Basic commands, for connecting, chatting etc.");
+    cons_show("/help status     - How to change your status.");
+    cons_show("/help settings   - Commands for configuring Profanity.");
+    cons_show("/help navigation - How to navigate around Profanity.");
+    cons_show("");
+
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
+}
+
+void
+cons_basic_help(void)
+{
+    cons_show("");
     cons_show("Basic Commands:");
     _cons_show_basic_help();
 
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
+}
+
+void
+cons_settings_help(void)
+{
+    cons_show("");
     cons_show("Settings:");
     cons_show("");
 
@@ -587,7 +611,16 @@ cons_help(void)
         cons_show("%-25s: %s", help->usage, help->short_help);
         settings_helpers = g_slist_next(settings_helpers);
     }
+    
+    cons_show("");
 
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
+}
+
+void
+cons_status_help(void)
+{
     cons_show("");
     cons_show("Status changes:");
     cons_show("");
@@ -599,6 +632,15 @@ cons_help(void)
         status_helpers = g_slist_next(status_helpers);
     }
 
+    cons_show("");
+
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
+}
+
+void
+cons_navigation_help(void)
+{
     cons_show("");
     cons_show("Navigation:");
     cons_show("");
