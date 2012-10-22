@@ -1,8 +1,8 @@
-/* 
+/*
  * history.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@ history_previous(char *inp, int *size)
 {
     char inp_str[*size + 1];
     _stringify_input(inp, *size, inp_str);
-    
+
     return p_history_previous(history, inp_str);
 }
 

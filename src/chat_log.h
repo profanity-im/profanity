@@ -1,8 +1,8 @@
-/* 
+/*
  * chat_log.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -31,10 +31,10 @@ typedef enum {
 } chat_log_direction_t;
 
 void chat_log_init(void);
-void chat_log_chat(const gchar * const login, gchar *other, 
+void chat_log_chat(const gchar * const login, gchar *other,
     const gchar * const msg, chat_log_direction_t direction);
 void chat_log_close(void);
-GSList * chat_log_get_previous(const gchar * const login, 
+GSList * chat_log_get_previous(const gchar * const login,
     const gchar * const recipient, GSList *history);
 
 #endif

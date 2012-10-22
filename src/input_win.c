@@ -1,8 +1,8 @@
-/* 
- * input_win.c 
+/*
+ * input_win.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -26,11 +26,11 @@
  * *size  - holds the current size of input
  * *input - holds the current input string, NOT null terminated at this point
  * *ch    - getch will put a charater here if there was any input
- * 
+ *
  * The example below shows the values of size, input, a call to wgetyx to
  * find the current cursor location, and the index of the input string.
  *
- * view         :    |mple|  
+ * view         :    |mple|
  * input        : "example te"
  * index        : "0123456789"
  * inp_x        : "0123456789"
@@ -58,12 +58,16 @@
 #include "preferences.h"
 #include "ui.h"
 
+typedef char*(*autocomplete_func)(char *);
+
 static WINDOW *inp_win;
 static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
 static void _replace_input(char *input, const char * const new_input, int *size);
+static void _parameter_autocomplete(char *input, int *size, char *command,
+    autocomplete_func func);
 
 void
 create_input_window(void)
@@ -84,7 +88,7 @@ inp_win_resize(const char * const input, const int size)
     int rows, cols, inp_x;
     getmaxyx(stdscr, rows, cols);
     inp_x = getcurx(inp_win);
-    
+
     // if lost cursor off screen, move contents to show it
     if (inp_x >= pad_start + cols) {
         pad_start = inp_x - (cols / 2);
@@ -125,7 +129,7 @@ inp_get_char(int *ch, char *input, int *size)
     int inp_y = 0;
     int inp_x = 0;
     int i;
-    
+
     // echo off, and get some more input
     noecho();
     *ch = wgetch(inp_win);
@@ -134,7 +138,7 @@ inp_get_char(int *ch, char *input, int *size)
     if (!_handle_edit(*ch, input, size)) {
         if (_printable(*ch)) {
             getyx(inp_win, inp_y, inp_x);
-           
+
             // handle insert if not at end of input
             if (inp_x < *size) {
                 winsch(inp_win, *ch);
@@ -150,7 +154,7 @@ inp_get_char(int *ch, char *input, int *size)
             } else {
                 waddch(inp_win, *ch);
                 input[(*size)++] = *ch;
-            
+
                 // if gone over screen size follow input
                 int rows, cols;
                 getmaxyx(stdscr, rows, cols);
@@ -160,8 +164,10 @@ inp_get_char(int *ch, char *input, int *size)
                 }
             }
 
-            reset_search_attempts();
-            reset_login_search();
+            contact_list_reset_search_attempts();
+            prefs_reset_login_search();
+            prefs_reset_boolean_choice();
+            cmd_help_reset_completer();
             cmd_reset_completer();
         }
     }
@@ -174,7 +180,7 @@ inp_get_password(char *passwd)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    
+
     wclear(inp_win);
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
     noecho();
@@ -208,15 +214,15 @@ _handle_edit(const int ch, char *input, int *size)
     int inp_y = 0;
     int inp_x = 0;
     char inp_cpy[*size];
-    
+
     getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
 
     switch(ch) {
-    
+
     case 127:
     case KEY_BACKSPACE:
-        reset_search_attempts();
+        contact_list_reset_search_attempts();
         if (*size > 0) {
 
             // if at end, delete last char
@@ -252,12 +258,12 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_DC: // DEL
         if (inp_x < *size) {
             wdelch(inp_win);
-    
+
             // if not last char, shift chars left
             if (inp_x < *size - 1)
                 for (i = inp_x; i < *size; i++)
                     input[i] = input[i+1];
-            
+
             (*size)--;
         }
         return 1;
@@ -265,7 +271,7 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_LEFT:
         if (inp_x > 0)
             wmove(inp_win, inp_y, inp_x-1);
-    
+
         // current position off screen to left
         if (inp_x - 1 < pad_start) {
             pad_start--;
@@ -276,7 +282,7 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_RIGHT:
         if (inp_x < *size) {
             wmove(inp_win, inp_y, inp_x+1);
-            
+
             // current position off screen to right
             if ((inp_x + 1 - pad_start) >= cols) {
                 pad_start++;
@@ -319,7 +325,7 @@ _handle_edit(const int ch, char *input, int *size)
 
     case 9: // tab
 
-        // autocomplete commands
+        // autocomplete command
         if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
             for(i = 0; i < *size; i++) {
                 inp_cpy[i] = input[i];
@@ -333,41 +339,31 @@ _handle_edit(const int ch, char *input, int *size)
                 free(auto_msg);
                 free(found);
             }
-
-        // autcomplete /msg recipient
-        } else if ((strncmp(input, "/msg ", 5) == 0) && (*size > 5)) {
-            for(i = 5; i < *size; i++) {
-                inp_cpy[i-5] = input[i];
-            }
-            inp_cpy[(*size) - 5] = '\0';
-            found = find_contact(inp_cpy);
-            if (found != NULL) {
-                auto_msg = (char *) malloc((5 + (strlen(found) + 1)) * sizeof(char));
-                strcpy(auto_msg, "/msg ");
-                strcat(auto_msg, found);
-                _replace_input(input, auto_msg, size);
-                free(auto_msg);
-                free(found);
-            }
-
-        // autocomplete /connect username
-        } else if ((strncmp(input, "/connect ", 9) == 0) && (*size > 9)) {
-            for(i = 9; i < *size; i++) {
-                inp_cpy[i-9] = input[i];
-            }
-            inp_cpy[(*size) - 9] = '\0';
-            found = find_login(inp_cpy);
-            if (found != NULL) {
-                auto_msg = (char *) malloc((9 + (strlen(found) + 1)) * sizeof(char));
-                strcpy(auto_msg, "/connect ");
-                strcat(auto_msg, found);
-                _replace_input(input, auto_msg, size);
-                free(auto_msg);
-                free(found);
-            }
         }
+
+        _parameter_autocomplete(input, size, "/msg",
+            contact_list_find_contact);
+        _parameter_autocomplete(input, size, "/connect",
+            prefs_find_login);
+        _parameter_autocomplete(input, size, "/help",
+            cmd_help_complete);
+        _parameter_autocomplete(input, size, "/beep",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/notify",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/typing",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/flash",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/showsplash",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/chlog",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/history",
+            prefs_autocomplete_boolean_choice);
+
         return 1;
-    
+
     default:
         return 0;
     }
@@ -376,9 +372,9 @@ _handle_edit(const int ch, char *input, int *size)
 static int
 _printable(const int ch)
 {
-   return (ch != ERR && ch != '\n' && 
+   return (ch != ERR && ch != '\n' &&
             ch != KEY_PPAGE && ch != KEY_NPAGE &&
-            ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) && 
+            ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) &&
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&
             ch != KEY_F(10) && ch!= KEY_F(11) && ch != KEY_F(12) &&
@@ -395,4 +391,33 @@ _replace_input(char *input, const char * const new_input, int *size)
     inp_clear();
     for (i = 0; i < *size; i++)
         waddch(inp_win, input[i]);
+}
+
+static void
+_parameter_autocomplete(char *input, int *size, char *command,
+    autocomplete_func func)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+    char *command_cpy = malloc(strlen(command) + 2);
+    sprintf(command_cpy, "%s ", command);
+    int len = strlen(command_cpy);
+    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        for(i = len; i < *size; i++) {
+            inp_cpy[i-len] = input[i];
+        }
+        inp_cpy[(*size) - len] = '\0';
+        found = func(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, command_cpy);
+            strcat(auto_msg, found);
+            _replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
+    free(command_cpy);
 }

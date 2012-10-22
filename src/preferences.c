@@ -1,8 +1,8 @@
-/* 
+/*
  * preferences.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -39,8 +39,8 @@
 static GString *prefs_loc;
 static GKeyFile *prefs;
 
-// search logins list
-static PAutocomplete ac;
+static PAutocomplete login_ac;
+static PAutocomplete boolean_choice_ac;
 
 struct colour_string_t {
     char *str;
@@ -78,7 +78,7 @@ static struct colours_t {
 } colour_prefs;
 
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
-static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, 
+static void _set_colour(gchar *val, NCURSES_COLOR_T *pref,
     NCURSES_COLOR_T def);
 static void _load_colours(void);
 static void _save_prefs(void);
@@ -87,12 +87,12 @@ void
 prefs_load(void)
 {
     log_info("Loading preferences");
-    ac = p_autocomplete_new();
+    login_ac = p_autocomplete_new();
     prefs_loc = g_string_new(getenv("HOME"));
     g_string_append(prefs_loc, "/.profanity/config");
 
     prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_KEEP_COMMENTS, 
+    g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_KEEP_COMMENTS,
         NULL);
 
     // create the logins searchable list for autocompletion
@@ -102,7 +102,7 @@ prefs_load(void)
 
     gsize i;
     for (i = 0; i < njids; i++) {
-        p_autocomplete_add(ac, strdup(jids[i]));
+        p_autocomplete_add(login_ac, strdup(jids[i]));
     }
 
     for (i = 0; i < njids; i++) {
@@ -110,13 +110,19 @@ prefs_load(void)
     }
     free(jids);
 
-
     _load_colours();
+
+    boolean_choice_ac = p_autocomplete_new();
+    p_autocomplete_add(boolean_choice_ac, strdup("on"));
+    p_autocomplete_add(boolean_choice_ac, strdup("off"));
+
 }
 
 void
 prefs_close(void)
 {
+    p_autocomplete_clear(login_ac);
+    p_autocomplete_clear(boolean_choice_ac);
     g_key_file_free(prefs);
 }
 
@@ -134,7 +140,7 @@ _lookup_colour(const char * const colour)
 }
 
 static void
-_set_colour(gchar *val, NCURSES_COLOR_T *pref, 
+_set_colour(gchar *val, NCURSES_COLOR_T *pref,
     NCURSES_COLOR_T def)
 {
     if(!val) {
@@ -144,7 +150,7 @@ _set_colour(gchar *val, NCURSES_COLOR_T *pref,
         if (col == -99) {
             *pref = def;
         } else {
-            *pref = col;   
+            *pref = col;
         }
     }
 }
@@ -160,48 +166,60 @@ _load_colours(void)
 
     gchar *online_val = g_key_file_get_string(prefs, "colours", "online", NULL);
     _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);
-    
+
     gchar *away_val = g_key_file_get_string(prefs, "colours", "away", NULL);
     _set_colour(away_val, &colour_prefs.away, COLOR_GREEN);
-    
+
     gchar *chat_val = g_key_file_get_string(prefs, "colours", "chat", NULL);
     _set_colour(chat_val, &colour_prefs.chat, COLOR_GREEN);
-    
+
     gchar *dnd_val = g_key_file_get_string(prefs, "colours", "dnd", NULL);
     _set_colour(dnd_val, &colour_prefs.dnd, COLOR_GREEN);
-    
+
     gchar *xa_val = g_key_file_get_string(prefs, "colours", "xa", NULL);
     _set_colour(xa_val, &colour_prefs.xa, COLOR_GREEN);
-    
+
     gchar *offline_val = g_key_file_get_string(prefs, "colours", "offline", NULL);
     _set_colour(offline_val, &colour_prefs.offline, COLOR_CYAN);
-    
+
     gchar *err_val = g_key_file_get_string(prefs, "colours", "err", NULL);
     _set_colour(err_val, &colour_prefs.err, COLOR_RED);
 
     gchar *inc_val = g_key_file_get_string(prefs, "colours", "inc", NULL);
     _set_colour(inc_val, &colour_prefs.inc, COLOR_YELLOW);
-    
+
     gchar *bar_val = g_key_file_get_string(prefs, "colours", "bar", NULL);
     _set_colour(bar_val, &colour_prefs.bar, COLOR_BLUE);
-    
+
     gchar *bar_draw_val = g_key_file_get_string(prefs, "colours", "bar_draw", NULL);
     _set_colour(bar_draw_val, &colour_prefs.bar_draw, COLOR_CYAN);
-    
+
     gchar *bar_text_val = g_key_file_get_string(prefs, "colours", "bar_text", NULL);
     _set_colour(bar_text_val, &colour_prefs.bar_text, COLOR_WHITE);
 }
 
 char *
-find_login(char *prefix)
+prefs_find_login(char *prefix)
 {
-    return p_autocomplete_complete(ac, prefix);
+    return p_autocomplete_complete(login_ac, prefix);
 }
 
 void
-reset_login_search(void)
+prefs_reset_login_search(void)
 {
-    p_autocomplete_reset(ac);
+    p_autocomplete_reset(login_ac);
+}
+
+char *
+prefs_autocomplete_boolean_choice(char *prefix)
+{
+    return p_autocomplete_complete(boolean_choice_ac, prefix);
+}
+
+void
+prefs_reset_boolean_choice(void)
+{
+    p_autocomplete_reset(boolean_choice_ac);
 }
 
 gboolean
@@ -299,7 +317,7 @@ void
 prefs_add_login(const char *jid)
 {
     gsize njids;
-    gchar **jids = 
+    gchar **jids =
         g_key_file_get_string_list(prefs, "connections", "logins", &njids, NULL);
 
     // no logins remembered yet
@@ -308,11 +326,11 @@ prefs_add_login(const char *jid)
         jids = (gchar**) g_malloc(sizeof(gchar *) * 2);
         jids[0] = g_strdup(jid);
         jids[1] = NULL;
-        g_key_file_set_string_list(prefs, "connections", "logins", 
+        g_key_file_set_string_list(prefs, "connections", "logins",
             (const gchar * const *)jids, njids);
         _save_prefs();
         g_strfreev(jids);
-        
+
         return;
     } else {
         gsize i;
@@ -322,7 +340,7 @@ prefs_add_login(const char *jid)
                 return;
             }
         }
-    
+
         // jid not found, add to the list
         jids = (gchar **) g_realloc(jids, (sizeof(gchar *) * (njids+2)));
         jids[njids] = g_strdup(jid);
@@ -359,79 +377,79 @@ _save_prefs(void)
 }
 
 NCURSES_COLOR_T
-prefs_get_bkgnd() 
+prefs_get_bkgnd()
 {
     return colour_prefs.bkgnd;
 }
 
 NCURSES_COLOR_T
-prefs_get_text() 
+prefs_get_text()
 {
     return colour_prefs.text;
 }
 
 NCURSES_COLOR_T
-prefs_get_online() 
+prefs_get_online()
 {
     return colour_prefs.online;
 }
 
 NCURSES_COLOR_T
-prefs_get_away() 
+prefs_get_away()
 {
     return colour_prefs.away;
 }
 
 NCURSES_COLOR_T
-prefs_get_chat() 
+prefs_get_chat()
 {
     return colour_prefs.chat;
 }
 
 NCURSES_COLOR_T
-prefs_get_dnd() 
+prefs_get_dnd()
 {
     return colour_prefs.dnd;
 }
 
 NCURSES_COLOR_T
-prefs_get_xa() 
+prefs_get_xa()
 {
     return colour_prefs.xa;
 }
 
 NCURSES_COLOR_T
-prefs_get_offline() 
+prefs_get_offline()
 {
     return colour_prefs.offline;
 }
 
 NCURSES_COLOR_T
-prefs_get_err() 
+prefs_get_err()
 {
     return colour_prefs.err;
 }
 
 NCURSES_COLOR_T
-prefs_get_inc() 
+prefs_get_inc()
 {
     return colour_prefs.inc;
 }
 
 NCURSES_COLOR_T
-prefs_get_bar() 
+prefs_get_bar()
 {
     return colour_prefs.bar;
 }
 
 NCURSES_COLOR_T
-prefs_get_bar_draw() 
+prefs_get_bar_draw()
 {
     return colour_prefs.bar_draw;
 }
 
 NCURSES_COLOR_T
-prefs_get_bar_text() 
+prefs_get_bar_text()
 {
     return colour_prefs.bar_text;
 }

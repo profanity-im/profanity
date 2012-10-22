@@ -1,8 +1,8 @@
-/* 
+/*
  * main.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -32,15 +32,15 @@ static char *log = "INFO";
 
 int
 main(int argc, char **argv)
-{   
-    static GOptionEntry entries[] = 
+{
+    static GOptionEntry entries[] =
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "disable-tls", 'd', 0, G_OPTION_ARG_NONE, &disable_tls, "Disable TLS", NULL },
         { "log",'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
         { NULL }
     };
-  
+
     GError *error = NULL;
     GOptionContext *context;
 

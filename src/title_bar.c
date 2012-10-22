@@ -1,8 +1,8 @@
-/* 
+/*
  * title_bar.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -79,7 +79,7 @@ title_bar_refresh(void)
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
 
             if (seconds >= 10) {
-                
+
                 if (current_title != NULL) {
                     free(current_title);
                 }
@@ -88,7 +88,7 @@ title_bar_refresh(void)
                 strcpy(current_title, recipient);
 
                 title_bar_draw();
-    
+
                 dirty = TRUE;
             }
         }
@@ -124,7 +124,7 @@ title_bar_set_recipient(char *from)
 {
     typing_elapsed = NULL;
     recipient = from;
-    
+
     if (current_title != NULL) {
         free(current_title);
     }
@@ -157,7 +157,7 @@ title_bar_set_typing(gboolean is_typing)
         current_title = (char *) malloc((strlen(recipient) + 1) * sizeof(char));
         strcpy(current_title, recipient);
     }
-    
+
     dirty = TRUE;
 }
 
@@ -190,11 +190,11 @@ _title_bar_draw_status(void)
     } else {
         mvwprintw(title_bar, 0, cols - 13, " ..offline ");
     }
-    
+
     wattron(title_bar, COLOUR_BAR_DRAW);
     mvwaddch(title_bar, 0, cols - 2, ']');
     wattroff(title_bar, COLOUR_BAR_DRAW);
-    
+
     dirty = TRUE;
 }
 
@@ -206,6 +206,6 @@ _title_bar_draw_title(void)
     for (i = 0; i < 45; i++)
         waddch(title_bar, ' ');
     mvwprintw(title_bar, 0, 0, " %s", current_title);
-    
+
     dirty = TRUE;
 }

@@ -1,8 +1,8 @@
-/* 
+/*
  * profanity.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -37,6 +37,7 @@ void prof_handle_typing(char *from);
 void prof_handle_contact_online(char *contact, char *show, char *status);
 void prof_handle_contact_offline(char *contact, char *show, char *status);
 void prof_handle_incoming_message(char *from, char *message);
+void prof_handle_error_message(const char *from, const char *err_msg);
 void prof_handle_roster(GSList *roster);
 
 #endif

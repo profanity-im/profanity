@@ -1,8 +1,8 @@
-/* 
+/*
  * contact_list.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -29,12 +29,12 @@
 
 void contact_list_init(void);
 void contact_list_clear(void);
-void reset_search_attempts(void);
+void contact_list_reset_search_attempts(void);
 gboolean contact_list_add(const char * const name, const char * const show,
     const char * const status);
 gboolean contact_list_remove(const char * const name);
 GSList * get_contact_list(void);
-char * find_contact(char *search_str);
+char * contact_list_find_contact(char *search_str);
 PContact contact_list_get_contact(const char const *jid);
 
 #endif

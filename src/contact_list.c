@@ -1,8 +1,8 @@
-/* 
+/*
  * contact_list.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ static PAutocomplete ac;
 void
 contact_list_init(void)
 {
-    ac = p_obj_autocomplete_new((PStrFunc)p_contact_name, 
+    ac = p_obj_autocomplete_new((PStrFunc)p_contact_name,
                             (PCopyFunc)p_contact_copy,
                             (PEqualDeepFunc)p_contacts_equal_deep,
                             (GDestroyNotify)p_contact_free);
@@ -43,7 +43,7 @@ contact_list_clear(void)
 }
 
 void
-reset_search_attempts(void)
+contact_list_reset_search_attempts(void)
 {
     p_autocomplete_reset(ac);
 }
@@ -55,7 +55,7 @@ contact_list_remove(const char * const name)
 }
 
 gboolean
-contact_list_add(const char * const name, const char * const show, 
+contact_list_add(const char * const name, const char * const show,
     const char * const status)
 {
     return p_autocomplete_add(ac, p_contact_new(name, show, status));
@@ -68,7 +68,7 @@ get_contact_list(void)
 }
 
 char *
-find_contact(char *search_str)
+contact_list_find_contact(char *search_str)
 {
     return p_autocomplete_complete(ac, search_str);
 }
@@ -77,7 +77,7 @@ PContact
 contact_list_get_contact(const char const *jid)
 {
     GSList *contacts = get_contact_list();
-    
+
     while (contacts != NULL) {
         PContact contact = contacts->data;
         if (strcmp(p_contact_name(contact), jid) == 0) {

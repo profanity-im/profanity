@@ -1,8 +1,8 @@
-/* 
+/*
  * tinyurl.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 gboolean
 tinyurl_valid(char *url)
 {
-    return (g_str_has_prefix(url, "http://") || 
+    return (g_str_has_prefix(url, "http://") ||
         g_str_has_prefix(url, "https://"));
 }
 
@@ -49,14 +49,14 @@ tinyurl_get(char *url)
     g_string_append(full_url, url);
 
     CURL *handle = curl_easy_init();
-    struct curl_data_t output; 
+    struct curl_data_t output;
     output.buffer = NULL;
     output.size = 0;
 
     curl_easy_setopt(handle, CURLOPT_URL, full_url->str);
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, _data_callback);
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void *)&output);
-    
+
     curl_easy_perform(handle);
     curl_easy_cleanup(handle);
 
@@ -66,7 +66,7 @@ tinyurl_get(char *url)
     return output.buffer;
 }
 
-static size_t 
+static size_t
 _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
 {
     size_t realsize = size * nmemb;
@@ -79,6 +79,6 @@ _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
         mem->size += realsize;
         mem->buffer[ mem->size ] = 0;
     }
-    
+
     return realsize;
 }

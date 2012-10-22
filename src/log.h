@@ -1,8 +1,8 @@
-/* 
+/*
  * log.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ void log_debug(const char * const msg, ...);
 void log_info(const char * const msg, ...);
 void log_warning(const char * const msg, ...);
 void log_error(const char * const msg, ...);
-void log_msg(log_level_t level, const char * const area, 
+void log_msg(log_level_t level, const char * const area,
     const char * const msg);
 
 #endif

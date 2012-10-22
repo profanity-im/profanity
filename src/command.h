@@ -1,8 +1,8 @@
-/* 
+/*
  * command.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -33,12 +33,15 @@ struct cmd_help_t {
 };
 
 void cmd_init(void);
+void cmd_close(void);
 char * cmd_complete(char *inp);
 void cmd_reset_completer(void);
 gboolean cmd_execute(const char * const command, const char * const inp);
 gboolean cmd_execute_default(const char * const inp);
 
 // command help
+char * cmd_help_complete(char *inp);
+void cmd_help_reset_completer(void);
 GSList * cmd_get_basic_help(void);
 GSList * cmd_get_settings_help(void);
 GSList * cmd_get_status_help(void);

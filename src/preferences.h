@@ -1,8 +1,8 @@
-/* 
+/*
  * preferences.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -37,8 +37,10 @@
 void prefs_load(void);
 void prefs_close(void);
 
-char * find_login(char *prefix);
-void reset_login_search(void);
+char * prefs_find_login(char *prefix);
+void prefs_reset_login_search(void);
+char * prefs_autocomplete_boolean_choice(char *prefix);
+void prefs_reset_boolean_choice(void);
 
 gboolean prefs_get_beep(void);
 void prefs_set_beep(gboolean value);

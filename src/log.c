@@ -1,8 +1,8 @@
-/* 
+/*
  * log.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ static GDateTime *dt;
 static log_level_t level_filter;
 
 void
-log_debug(const char * const msg, ...) 
+log_debug(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -49,7 +49,7 @@ log_debug(const char * const msg, ...)
 }
 
 void
-log_info(const char * const msg, ...) 
+log_info(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -61,7 +61,7 @@ log_info(const char * const msg, ...)
 }
 
 void
-log_warning(const char * const msg, ...) 
+log_warning(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -73,7 +73,7 @@ log_warning(const char * const msg, ...)
 }
 
 void
-log_error(const char * const msg, ...) 
+log_error(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -116,10 +116,10 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
     if (level >= level_filter) {
         dt = g_date_time_new_now(tz);
 
-        gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S"); 
+        gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
         fprintf(logp, "%s: %s: %s\n", date_fmt, area, msg);
         g_date_time_unref(dt);
-    
+
         fflush(logp);
         g_free(date_fmt);
     }

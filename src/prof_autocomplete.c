@@ -1,8 +1,8 @@
-/* 
+/*
  * prof_autocomplete.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ p_autocomplete_new(void)
 }
 
 PAutocomplete
-p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func, 
+p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
     PEqualDeepFunc equal_deep_func, GDestroyNotify free_func)
 {
     PAutocomplete new = malloc(sizeof(struct p_autocomplete_t));
@@ -105,15 +105,15 @@ p_autocomplete_add(PAutocomplete ac, void *item)
         return TRUE;
     } else {
         GSList *curr = ac->items;
-        
+
         while(curr) {
-            
+
             // insert
             if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) > 0) {
                 ac->items = g_slist_insert_before(ac->items,
                     curr, item);
                 return TRUE;
-            
+
             // update
             } else if (g_strcmp0(ac->str_func(curr->data), ac->str_func(item)) == 0) {
                 // only update if data different
@@ -125,7 +125,7 @@ p_autocomplete_add(PAutocomplete ac, void *item)
                     return FALSE;
                 }
             }
-            
+
             curr = g_slist_next(curr);
         }
 
@@ -148,13 +148,13 @@ p_autocomplete_remove(PAutocomplete ac, const char * const item)
         return FALSE;
     } else {
         GSList *curr = ac->items;
-        
+
         while(curr) {
             if (g_strcmp0(ac->str_func(curr->data), item) == 0) {
                 void *current_item = curr->data;
                 ac->items = g_slist_remove(ac->items, curr->data);
                 ac->free_func(current_item);
-                
+
                 return TRUE;
             }
 
@@ -190,14 +190,14 @@ p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
 
     // first search attempt
     if (ac->last_found == NULL) {
-        ac->search_str = 
+        ac->search_str =
             (gchar *) malloc((strlen(search_str) + 1) * sizeof(gchar));
         strcpy(ac->search_str, search_str);
 
         found = _search_from(ac, ac->items);
         return found;
 
-    // subsequent search attempt    
+    // subsequent search attempt
     } else {
         // search from here+1 tp end
         found = _search_from(ac, g_slist_next(ac->last_found));
@@ -208,7 +208,7 @@ p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
         found = _search_from(ac, ac->items);
         if (found != NULL)
             return found;
-    
+
         // we found nothing, reset search
         p_autocomplete_reset(ac);
         return NULL;
@@ -219,14 +219,14 @@ static gchar *
 _search_from(PAutocomplete ac, GSList *curr)
 {
     while(curr) {
-        
+
         // match found
         if (strncmp(ac->str_func(curr->data),
                 ac->search_str,
                 strlen(ac->search_str)) == 0) {
-            gchar *result = 
+            gchar *result =
                 (gchar *) malloc((strlen(ac->str_func(curr->data)) + 1) * sizeof(gchar));
-            
+
             // set pointer to last found
             ac->last_found = curr;
 
@@ -242,7 +242,7 @@ _search_from(PAutocomplete ac, GSList *curr)
 }
 
 static const char *
-_str_func_default(const char *orig) 
+_str_func_default(const char *orig)
 {
     return orig;
 }

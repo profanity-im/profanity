@@ -1,8 +1,8 @@
-/* 
+/*
  * windows.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -73,19 +73,22 @@ static void _win_switch_if_active(const int i);
 static void _win_show_time(WINDOW *win);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
-static void _show_status_string(WINDOW *win, const char * const from, 
-    const char * const show, const char * const status, const char * const pre, 
+static void _win_show_error_msg(WINDOW *win, const char * const message);
+static void _show_status_string(WINDOW *win, const char * const from,
+    const char * const show, const char * const status, const char * const pre,
     const char * const default_show);
 static void _cons_show_typing(const char * const short_from);
-static void _cons_show_incoming_message(const char * const short_from, 
+static void _cons_show_incoming_message(const char * const short_from,
     const int win_index);
 static void _win_handle_switch(const int * const ch);
 static void _win_handle_page(const int * const ch);
 static void _win_resize_all(void);
 static gint _win_get_unread(void);
+static void _win_show_history(WINDOW *win, int win_index,
+    const char * const contact);
 
 #ifdef HAVE_LIBNOTIFY
-static void _win_notify(const char * const message, int timeout, 
+static void _win_notify(const char * const message, int timeout,
     const char * const category);
 static void _win_notify_remind(gint unread);
 static void _win_notify_message(char * short_from);
@@ -100,7 +103,7 @@ gui_init(void)
     cbreak();
     keypad(stdscr, TRUE);
 
-    if (has_colors()) {    
+    if (has_colors()) {
         use_default_colors();
         start_color();
 
@@ -177,13 +180,13 @@ win_close_win(void)
 
         // set it as inactive in the status bar
         status_bar_inactive(_curr_prof_win);
-        
+
         // go back to console window
         _curr_prof_win = 0;
         title_bar_title();
 
         dirty = TRUE;
-    
+
         // success
         return 1;
     } else {
@@ -195,7 +198,7 @@ win_close_win(void)
 int
 win_in_chat(void)
 {
-    return ((_curr_prof_win != 0) && 
+    return ((_curr_prof_win != 0) &&
         (strcmp(_wins[_curr_prof_win].from, "") != 0));
 }
 
@@ -208,7 +211,7 @@ win_get_recipient(void)
     return recipient;
 }
 
-void 
+void
 win_show_typing(const char * const from)
 {
     char from_cpy[strlen(from) + 1];
@@ -253,7 +256,7 @@ win_remind(void)
 }
 
 void
-win_show_incomming_msg(const char * const from, const char * const message) 
+win_show_incomming_msg(const char * const from, const char * const message)
 {
     char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
@@ -264,7 +267,7 @@ win_show_incomming_msg(const char * const from, const char * const message)
         win_index = _new_prof_win(short_from);
 
     WINDOW *win = _wins[win_index].win;
-    
+
     // currently viewing chat window with sender
     if (win_index == _curr_prof_win) {
         _win_show_time(win);
@@ -284,17 +287,9 @@ win_show_incomming_msg(const char * const from, const char * const message)
 
         _wins[win_index].unread++;
         if (prefs_get_chlog() && prefs_get_history()) {
-            if (!_wins[win_index].history_shown) {
-                GSList *history = NULL;
-                history = chat_log_get_previous(jabber_get_jid(), short_from, history);
-                while (history != NULL) {
-                    wprintw(win, "%s\n", history->data);
-                    history = g_slist_next(history);
-                }
-                _wins[win_index].history_shown = 1;
-            }
+            _win_show_history(win, win_index, short_from);
         }
-        
+
         _win_show_time(win);
         _win_show_user(win, short_from, 1);
         _win_show_message(win, message);
@@ -308,9 +303,30 @@ win_show_incomming_msg(const char * const from, const char * const message)
 #endif
 }
 
+void
+win_show_error_msg(const char * const from, const char *err_msg)
+{
+    int win_index;
+    WINDOW *win;
+
+    if (from == NULL || err_msg == NULL)
+        return;
+
+    win_index = _find_prof_win_index(from);
+    // chat window exists
+    if (win_index < NUM_WINS) {
+        win = _wins[win_index].win;
+        _win_show_time(win);
+        _win_show_error_msg(win, err_msg);
+        if (win_index == _curr_prof_win) {
+            dirty = TRUE;
+        }
+    }
+}
+
 #ifdef HAVE_LIBNOTIFY
 static void
-_win_notify(const char * const message, int timeout, 
+_win_notify(const char * const message, int timeout,
     const char * const category)
 {
     gboolean notify_initted = notify_is_initted();
@@ -348,7 +364,7 @@ _win_notify_remind(gint unread)
     } else {
         sprintf(message, "%d unread messages", unread);
     }
-    
+
     _win_notify(message, 5000, "Incoming message");
 }
 
@@ -357,8 +373,8 @@ _win_notify_message(char * short_from)
 {
     char message[strlen(short_from) + 1 + 10];
     sprintf(message, "%s: message.", short_from);
-   
-    _win_notify(message, 10000, "Incoming message"); 
+
+    _win_notify(message, 10000, "Incoming message");
 }
 
 static void
@@ -366,57 +382,46 @@ _win_notify_typing(char * short_from)
 {
     char message[strlen(short_from) + 1 + 11];
     sprintf(message, "%s: typing...", short_from);
-    
+
     _win_notify(message, 10000, "Incoming message");
 }
 #endif
 
 void
-win_show_outgoing_msg(const char * const from, const char * const to, 
+win_show_outgoing_msg(const char * const from, const char * const to,
     const char * const message)
 {
     // if the contact is offline, show a message
     PContact contact = contact_list_get_contact(to);
-    
-    if (contact == NULL) {
-        cons_show("%s is not one of your contacts.");
-    } else {
-        int win_index = _find_prof_win_index(to);
-        WINDOW *win = NULL;
+    int win_index = _find_prof_win_index(to);
+    WINDOW *win = NULL;
 
-        // create new window
-        if (win_index == NUM_WINS) {
-            win_index = _new_prof_win(to);
-            win = _wins[win_index].win;
-            
-            if (prefs_get_chlog() && prefs_get_history()) {
-                if (!_wins[win_index].history_shown) {
-                    GSList *history = NULL;
-                    history = chat_log_get_previous(jabber_get_jid(), to, history);
-                    while (history != NULL) {
-                        wprintw(win, "%s\n", history->data);
-                        history = g_slist_next(history);
-                    }
-                    _wins[win_index].history_shown = 1;
-                }
-            }
+    // create new window
+    if (win_index == NUM_WINS) {
+        win_index = _new_prof_win(to);
+        win = _wins[win_index].win;
 
+        if (prefs_get_chlog() && prefs_get_history()) {
+            _win_show_history(win, win_index, to);
+        }
+
+        if (contact != NULL) {
             if (strcmp(p_contact_show(contact), "offline") == 0) {
                 const char const *show = p_contact_show(contact);
                 const char const *status = p_contact_status(contact);
                 _show_status_string(win, to, show, status, "--", "offline");
             }
-
-        // use existing window
-        } else {
-            win = _wins[win_index].win;
         }
 
-        _win_show_time(win);
-        _win_show_user(win, from, 0);
-        _win_show_message(win, message);
-        _win_switch_if_active(win_index);
+    // use existing window
+    } else {
+        win = _wins[win_index].win;
     }
+
+    _win_show_time(win);
+    _win_show_user(win, from, 0);
+    _win_show_message(win, message);
+    _win_switch_if_active(win_index);
 }
 
 void
@@ -424,7 +429,7 @@ win_show(const char * const msg)
 {
     WINDOW *win = _wins[_curr_prof_win].win;
     _win_show_time(win);
-    wprintw(win, "%s\n", msg); 
+    wprintw(win, "%s\n", msg);
 
     dirty = TRUE;
 }
@@ -437,12 +442,12 @@ win_bad_show(const char * const msg)
     wattron(win, COLOUR_ERR);
     wprintw(win, "%s\n", msg);
     wattroff(win, COLOUR_ERR);
-    
+
     dirty = TRUE;
 }
 
 void
-win_contact_online(const char * const from, const char * const show, 
+win_contact_online(const char * const from, const char * const show,
     const char * const status)
 {
     _show_status_string(_cons_win, from, show, status, "++", "online");
@@ -452,13 +457,13 @@ win_contact_online(const char * const from, const char * const show,
         WINDOW *win = _wins[win_index].win;
         _show_status_string(win, from, show, status, "++", "online");
     }
-    
+
     if (win_index == _curr_prof_win)
         dirty = TRUE;
 }
 
 void
-win_contact_offline(const char * const from, const char * const show, 
+win_contact_offline(const char * const from, const char * const show,
     const char * const status)
 {
     _show_status_string(_cons_win, from, show, status, "--", "offline");
@@ -468,7 +473,7 @@ win_contact_offline(const char * const from, const char * const show,
         WINDOW *win = _wins[win_index].win;
         _show_status_string(win, from, show, status, "--", "offline");
     }
-    
+
     if (win_index == _curr_prof_win)
         dirty = TRUE;
 }
@@ -485,7 +490,7 @@ win_disconnected(void)
             wattron(win, COLOUR_ERR);
             wprintw(win, "%s\n", "Lost connection.");
             wattroff(win, COLOUR_ERR);
-    
+
             // if current win, set dirty
             if (i == _curr_prof_win) {
                 dirty = TRUE;
@@ -500,41 +505,41 @@ cons_prefs(void)
     cons_show("");
     cons_show("Current preferences:");
     cons_show("");
-    
+
     if (prefs_get_beep())
         cons_show("Terminal beep           : ON");
     else
-        cons_show("Terminal beep           : OFF");    
-    
+        cons_show("Terminal beep           : OFF");
+
     if (prefs_get_flash())
         cons_show("Terminal flash          : ON");
     else
-        cons_show("Terminal flash          : OFF");    
-    
+        cons_show("Terminal flash          : OFF");
+
     if (prefs_get_notify())
         cons_show("Message notifications   : ON");
     else
-        cons_show("Message notifications   : OFF");    
+        cons_show("Message notifications   : OFF");
 
     if (prefs_get_typing())
         cons_show("Typing notifications    : ON");
     else
-        cons_show("Typing notifications    : OFF");    
+        cons_show("Typing notifications    : OFF");
 
     if (prefs_get_showsplash())
         cons_show("Splash screen           : ON");
     else
-        cons_show("Splash screen           : OFF");    
-    
+        cons_show("Splash screen           : OFF");
+
     if (prefs_get_chlog())
         cons_show("Chat logging            : ON");
     else
-        cons_show("Chat logging            : OFF");    
+        cons_show("Chat logging            : OFF");
 
     if (prefs_get_history())
         cons_show("Chat history            : ON");
     else
-        cons_show("Chat history            : OFF");    
+        cons_show("Chat history            : OFF");
 
     gint remind_period = prefs_get_remind();
     if (remind_period == 0) {
@@ -616,8 +621,8 @@ cons_show_contacts(GSList *list)
 
     while(curr) {
         PContact contact = curr->data;
-        const char *show = p_contact_show(contact);    
-        
+        const char *show = p_contact_show(contact);
+
         _win_show_time(_cons_win);
 
         if (strcmp(show, "online") == 0) {
@@ -636,10 +641,10 @@ cons_show_contacts(GSList *list)
 
         wprintw(_cons_win, "%s", p_contact_name(contact));
         wprintw(_cons_win, " is %s", show);
-    
+
         if (p_contact_status(contact))
             wprintw(_cons_win, ", \"%s\"", p_contact_status(contact));
-    
+
         wprintw(_cons_win, "\n");
 
         if (strcmp(show, "online") == 0) {
@@ -667,7 +672,7 @@ cons_bad_show(const char * const msg)
     wattron(_cons_win, COLOUR_ERR);
     wprintw(_cons_win, "%s\n", msg);
     wattroff(_cons_win, COLOUR_ERR);
-    
+
     if (_curr_prof_win == 0)
         dirty = TRUE;
 }
@@ -680,10 +685,10 @@ cons_show(const char * const msg, ...)
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
     _win_show_time(_cons_win);
-    wprintw(_cons_win, "%s\n", fmt_msg->str); 
+    wprintw(_cons_win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-    
+
     if (_curr_prof_win == 0)
         dirty = TRUE;
 }
@@ -693,7 +698,7 @@ cons_bad_command(const char * const cmd)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Unknown command: %s\n", cmd);
-    
+
     if (_curr_prof_win == 0)
         dirty = TRUE;
 }
@@ -710,7 +715,7 @@ win_page_off(void)
 {
     int rows = getmaxy(stdscr);
     _wins[_curr_prof_win].paged = 0;
-    
+
     int y = getcury(_wins[_curr_prof_win].win);
 
     int size = rows - 3;
@@ -742,7 +747,7 @@ _create_windows(void)
 
     _wins[0] = cons;
     _cons_win = _wins[0].win;
-    
+
     if (prefs_get_showsplash()) {
         _cons_splash_logo();
     } else {
@@ -766,11 +771,11 @@ _create_windows(void)
     wprintw(_cons_win, "Type '/help' to show complete help.\n");
     _win_show_time(_cons_win);
     wprintw(_cons_win, "\n");
-        
+
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
-    
+
     // create the chat windows
     int i;
     for (i = 1; i < NUM_WINS; i++) {
@@ -784,7 +789,7 @@ _create_windows(void)
         chat.history_shown = 0;
         scrollok(chat.win, TRUE);
         _wins[i] = chat;
-    }    
+    }
 }
 
 static void
@@ -870,7 +875,7 @@ _win_switch_if_active(const int i)
     if (strcmp(_wins[i].from, "") != 0) {
         _curr_prof_win = i;
         win_page_off();
-        
+
         _wins[i].unread = 0;
 
         if (i == 0) {
@@ -888,7 +893,7 @@ _win_switch_if_active(const int i)
 static void
 _win_show_time(WINDOW *win)
 {
-    GDateTime *time = g_date_time_new_now_local(); 
+    GDateTime *time = g_date_time_new_now_local();
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
     wprintw(win, "%s - ", date_fmt);
     g_date_time_unref(time);
@@ -916,6 +921,14 @@ _win_show_message(WINDOW *win, const char * const message)
 }
 
 static void
+_win_show_error_msg(WINDOW *win, const char * const message)
+{
+    wattron(win, COLOUR_ERR);
+    wprintw(win, "%s\n", message);
+    wattroff(win, COLOUR_ERR);
+}
+
+static void
 _current_window_refresh(void)
 {
     int rows, cols;
@@ -940,18 +953,18 @@ _win_resize_all(void)
             wresize(_wins[i].win, PAD_SIZE, cols);
         }
     }
-    
+
     WINDOW *current = _wins[_curr_prof_win].win;
     prefresh(current, _wins[_curr_prof_win].y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
 static void
-_show_status_string(WINDOW *win, const char * const from, 
-    const char * const show, const char * const status, const char * const pre, 
+_show_status_string(WINDOW *win, const char * const from,
+    const char * const show, const char * const status, const char * const pre,
     const char * const default_show)
 {
-    _win_show_time(win);    
-    
+    _win_show_time(win);
+
     if (show != NULL) {
         if (strcmp(show, "away") == 0) {
             wattron(win, COLOUR_AWAY);
@@ -974,17 +987,17 @@ _show_status_string(WINDOW *win, const char * const from,
 
     wprintw(win, "%s %s", pre, from);
 
-    if (show != NULL) 
+    if (show != NULL)
         wprintw(win, " is %s", show);
     else
         wprintw(win, " is %s", default_show);
-        
+
     if (status != NULL)
         wprintw(win, ", \"%s\"", status);
-    
+
     wprintw(win, "\n");
-   
-    if (show != NULL) { 
+
+    if (show != NULL) {
         if (strcmp(show, "away") == 0) {
             wattroff(win, COLOUR_AWAY);
         } else if (strcmp(show, "chat") == 0) {
@@ -1057,15 +1070,15 @@ _win_handle_page(const int * const ch)
 
     int page_space = rows - 4;
     int *page_start = &_wins[_curr_prof_win].y_pos;
-    
+
     // page up
     if (*ch == KEY_PPAGE) {
         *page_start -= page_space;
-    
+
         // went past beginning, show first page
         if (*page_start < 0)
             *page_start = 0;
-       
+
         _wins[_curr_prof_win].paged = 1;
         dirty = TRUE;
 
@@ -1080,7 +1093,7 @@ _win_handle_page(const int * const ch)
         // went past end, show full screen
         else if (*page_start >= y)
             *page_start = y - page_space;
-           
+
         _wins[_curr_prof_win].paged = 1;
         dirty = TRUE;
     }
@@ -1095,5 +1108,21 @@ _win_get_unread(void)
         result += _wins[i].unread;
     }
     return result;
+}
+
+static void
+_win_show_history(WINDOW *win, int win_index, const char * const contact)
+{
+    if (!_wins[win_index].history_shown) {
+        GSList *history = NULL;
+        history = chat_log_get_previous(jabber_get_jid(), contact, history);
+        while (history != NULL) {
+            wprintw(win, "%s\n", history->data);
+            history = g_slist_next(history);
+        }
+        _wins[win_index].history_shown = 1;
+
+        g_slist_free_full(history, free);
+    }
 }
 
