@@ -255,30 +255,32 @@ static int
 _message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
-    char *type;
-    char *from;
+    char *type = NULL;
+    char *from = NULL;
 
     type = xmpp_stanza_get_attribute(stanza, "type");
     from = xmpp_stanza_get_attribute(stanza, "from");
 
-    if (strcmp(type, "error") == 0) {
-        char *err_msg = NULL;
-        xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
-        if (error == NULL) {
-            log_debug("error message without <error/> received");
-            return 1;
-        } else {
-            xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error);
-            if (err_cond == NULL) {
-                log_debug("error message without <defined-condition/> received");
+    if (type != NULL) {
+        if (strcmp(type, "error") == 0) {
+            char *err_msg = NULL;
+            xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
+            if (error == NULL) {
+                log_debug("error message without <error/> received");
                 return 1;
             } else {
-                err_msg = xmpp_stanza_get_name(err_cond);
+                xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error);
+                if (err_cond == NULL) {
+                    log_debug("error message without <defined-condition/> received");
+                    return 1;
+                } else {
+                    err_msg = xmpp_stanza_get_name(err_cond);
+                }
+                // TODO: process 'type' attribute from <error/> [RFC6120, 8.3.2]
             }
-            // TODO: process 'type' attribute from <error/> [RFC6120, 8.3.2]
+            prof_handle_error_message(from, err_msg);
+            return 1;
         }
-        prof_handle_error_message(from, err_msg);
-        return 1;
     }
 
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
