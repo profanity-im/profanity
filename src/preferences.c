@@ -39,8 +39,8 @@
 static GString *prefs_loc;
 static GKeyFile *prefs;
 
-// search logins list
-static PAutocomplete ac;
+static PAutocomplete login_ac;
+static PAutocomplete boolean_choice_ac;
 
 struct colour_string_t {
     char *str;
@@ -87,7 +87,7 @@ void
 prefs_load(void)
 {
     log_info("Loading preferences");
-    ac = p_autocomplete_new();
+    login_ac = p_autocomplete_new();
     prefs_loc = g_string_new(getenv("HOME"));
     g_string_append(prefs_loc, "/.profanity/config");
 
@@ -102,7 +102,7 @@ prefs_load(void)
 
     gsize i;
     for (i = 0; i < njids; i++) {
-        p_autocomplete_add(ac, strdup(jids[i]));
+        p_autocomplete_add(login_ac, strdup(jids[i]));
     }
 
     for (i = 0; i < njids; i++) {
@@ -110,14 +110,19 @@ prefs_load(void)
     }
     free(jids);
 
-
     _load_colours();
+
+    boolean_choice_ac = p_autocomplete_new();
+    p_autocomplete_add(boolean_choice_ac, strdup("on"));
+    p_autocomplete_add(boolean_choice_ac, strdup("off"));
+
 }
 
 void
 prefs_close(void)
 {
-    p_autocomplete_clear(ac);
+    p_autocomplete_clear(login_ac);
+    p_autocomplete_clear(boolean_choice_ac);
     g_key_file_free(prefs);
 }
 
@@ -196,13 +201,25 @@ _load_colours(void)
 char *
 prefs_find_login(char *prefix)
 {
-    return p_autocomplete_complete(ac, prefix);
+    return p_autocomplete_complete(login_ac, prefix);
 }
 
 void
 prefs_reset_login_search(void)
 {
-    p_autocomplete_reset(ac);
+    p_autocomplete_reset(login_ac);
+}
+
+char *
+prefs_autocomplete_boolean_choice(char *prefix)
+{
+    return p_autocomplete_complete(boolean_choice_ac, prefix);
+}
+
+void
+prefs_reset_boolean_choice(void)
+{
+    p_autocomplete_reset(boolean_choice_ac);
 }
 
 gboolean

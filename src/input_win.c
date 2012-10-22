@@ -166,6 +166,7 @@ inp_get_char(int *ch, char *input, int *size)
 
             contact_list_reset_search_attempts();
             prefs_reset_login_search();
+            prefs_reset_boolean_choice();
             cmd_help_reset_completer();
             cmd_reset_completer();
         }
@@ -340,9 +341,26 @@ _handle_edit(const int ch, char *input, int *size)
             }
         }
 
-        _parameter_autocomplete(input, size, "/msg", contact_list_find_contact);
-        _parameter_autocomplete(input, size, "/connect", prefs_find_login);
-        _parameter_autocomplete(input, size, "/help", cmd_help_complete);
+        _parameter_autocomplete(input, size, "/msg",
+            contact_list_find_contact);
+        _parameter_autocomplete(input, size, "/connect",
+            prefs_find_login);
+        _parameter_autocomplete(input, size, "/help",
+            cmd_help_complete);
+        _parameter_autocomplete(input, size, "/beep",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/notify",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/typing",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/flash",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/showsplash",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/chlog",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/history",
+            prefs_autocomplete_boolean_choice);
 
         return 1;
 
