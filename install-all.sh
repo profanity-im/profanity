@@ -10,7 +10,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install g++ autoconf libssl-dev libexpat1-dev libncurses5-dev libxml2-dev libglib2.0-dev libnotify-dev libcurl3-dev
+    sudo apt-get -y install g++ autoconf libssl-dev libexpat1-dev libncurses5-dev libglib2.0-dev libnotify-dev libcurl3-dev
 
 }
 
@@ -22,7 +22,7 @@ fedora_prepare()
 
     ARCH=`arch`
     
-    sudo yum -y install gcc gcc-c++ autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH libxml2-devel.$ARCH glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
+    sudo yum -y install gcc gcc-c++ autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
 }
 
 cygwin_prepare()
@@ -35,7 +35,7 @@ cygwin_prepare()
     chmod +x apt-cyg
     mv apt-cyg /usr/local/bin/
 
-    apt-cyg install make gcc automake autoconf pkg-config openssl-devel expat zlib-devel libncurses-devel libncurses-devel libxml2-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+    apt-cyg install make gcc automake autoconf pkg-config openssl-devel expat zlib-devel libncurses-devel libncurses-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
     ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
     ln -s /usr/bin/g++-3.exe /usr/bin/g++.exe
 
