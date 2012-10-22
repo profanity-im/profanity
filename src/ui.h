@@ -103,6 +103,7 @@ void win_bad_show(const char * const msg);
 void win_remind(void);
 
 // console window actions
+void cons_about(void);
 void cons_help(void);
 void cons_basic_help(void);
 void cons_settings_help(void);

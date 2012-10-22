@@ -61,6 +61,7 @@ static gboolean _cmd_set_boolean_preference(const char * const inp,
 // command prototypes
 static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_help(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_about(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_prefs(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_who(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_connect(const char * const inp, struct cmd_help_t help);
@@ -93,7 +94,7 @@ static struct cmd_t main_commands[] =
         _cmd_help,
         { "/help [area|command]", "Show help summary, or help on a specific area or command",
         { "/help [area|command]",
-          "---------------",
+          "--------------------",
           "Show help options.",
           "Specify an area (basic, status, settings, navigation) for more help on that area.",
           "Specify the command if you want more detailed help on a specific command.",
@@ -101,6 +102,14 @@ static struct cmd_t main_commands[] =
           "Example : /help connect",
           "Example : /help settings",
           NULL } } },
+
+    { "/about",
+        _cmd_about,
+        { "/about", "About Profanity",
+        { "/about",
+          "------",
+          "Show versioning and license information.",
+          NULL  } } },
 
     { "/connect",
         _cmd_connect,
@@ -591,6 +600,13 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
         cons_show("");
     }
 
+    return TRUE;
+}
+
+static gboolean
+_cmd_about(const char * const inp, struct cmd_help_t help)
+{
+    cons_about();
     return TRUE;
 }
 
