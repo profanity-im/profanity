@@ -820,7 +820,12 @@ cons_about(void)
         _cons_splash_logo();
     } else {
         _win_show_time(_cons_win);
-        wprintw(_cons_win, "Welcome to Profanity, version %s\n", PACKAGE_VERSION);
+
+        if (strcmp(PACKAGE_STATUS, "dev") == 0) {
+            wprintw(_cons_win, "Welcome to Profanity, version %sdev\n", PACKAGE_VERSION);
+        } else {
+            wprintw(_cons_win, "Welcome to Profanity, version %s\n", PACKAGE_VERSION);
+        }
     }
 
     _win_show_time(_cons_win);
@@ -857,7 +862,6 @@ _cons_splash_logo(void)
 {
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Welcome to\n");
-
 
     _win_show_time(_cons_win);
     wattron(_cons_win, COLOUR_OFFLINE);
@@ -897,7 +901,11 @@ _cons_splash_logo(void)
     _win_show_time(_cons_win);
     wprintw(_cons_win, "\n");
     _win_show_time(_cons_win);
-    wprintw(_cons_win, "Version %s\n", PACKAGE_VERSION);
+    if (strcmp(PACKAGE_STATUS, "dev") == 0) {
+        wprintw(_cons_win, "Version %sdev\n", PACKAGE_VERSION);
+    } else {
+        wprintw(_cons_win, "Version %s\n", PACKAGE_VERSION);
+    }
 }
 
 static int
