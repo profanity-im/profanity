@@ -844,13 +844,23 @@ cons_about(void)
     wprintw(_cons_win, "Type '/help' to show complete help.\n");
     _win_show_time(_cons_win);
     wprintw(_cons_win, "\n");
-    
-    char *latest_release = release_get_latest();
-    _win_show_time(_cons_win);
-    wprintw(_cons_win, "RELEASE: %s", latest_release);
-    free(latest_release);
-    _win_show_time(_cons_win);
-    wprintw(_cons_win, "\n");
+
+    // check for new version if this is a release build
+    if (strcmp(PACKAGE_STATUS, "release") == 0) {
+        char *latest_release = release_get_latest();
+
+        if (latest_release != NULL) {
+            gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
+
+            if (relase_valid) {
+                _win_show_time(_cons_win);
+                wprintw(_cons_win, "RELEASE: %s", latest_release);
+                free(latest_release);
+                _win_show_time(_cons_win);
+                wprintw(_cons_win, "\n");
+            }
+        }
+    }
 
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
