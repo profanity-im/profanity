@@ -42,6 +42,7 @@
 #include "contact_list.h"
 #include "log.h"
 #include "preferences.h"
+#include "release.h"
 #include "ui.h"
 
 #define CONS_WIN_TITLE "_cons"
@@ -836,6 +837,13 @@ cons_about(void)
     wprintw(_cons_win, "\n");
     _win_show_time(_cons_win);
     wprintw(_cons_win, "Type '/help' to show complete help.\n");
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "\n");
+    
+    char *latest_release = release_get_latest();
+    _win_show_time(_cons_win);
+    wprintw(_cons_win, "RELEASE: %s", latest_release);
+    free(latest_release);
     _win_show_time(_cons_win);
     wprintw(_cons_win, "\n");
 

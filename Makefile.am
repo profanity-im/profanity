@@ -6,7 +6,7 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/contact_list.c src/input_win.c src/log.h src/profanity.c \
 	src/prof_history.c src/ui.h src/common.h src/ contact_list.h src/jabber.c \
 	src/main.c src/profanity.h src/prof_history.h src/chat_log.c \
-	src/chat_log.h src/tinyurl.c src/tinyurl.h
+	src/chat_log.h src/tinyurl.c src/tinyurl.h src/release.c src/release.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
