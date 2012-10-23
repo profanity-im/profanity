@@ -87,6 +87,7 @@ static void _win_resize_all(void);
 static gint _win_get_unread(void);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
+static gboolean _new_release(char *found_version);
 
 #ifdef HAVE_LIBNOTIFY
 static void _win_notify(const char * const message, int timeout,
@@ -821,7 +822,7 @@ cons_about(void)
     } else {
         _win_show_time(_cons_win);
 
-        if (strcmp(PACKAGE_STATUS, "dev") == 0) {
+        if (strcmp(PACKAGE_STATUS, "development") == 0) {
             wprintw(_cons_win, "Welcome to Profanity, version %sdev\n", PACKAGE_VERSION);
         } else {
             wprintw(_cons_win, "Welcome to Profanity, version %s\n", PACKAGE_VERSION);
@@ -853,11 +854,13 @@ cons_about(void)
             gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
 
             if (relase_valid) {
-                _win_show_time(_cons_win);
-                wprintw(_cons_win, "RELEASE: %s", latest_release);
-                free(latest_release);
-                _win_show_time(_cons_win);
-                wprintw(_cons_win, "\n");
+                if (_new_release(latest_release)) {
+                    _win_show_time(_cons_win);
+                    wprintw(_cons_win, "RELEASE: %s", latest_release);
+                    free(latest_release);
+                    _win_show_time(_cons_win);
+                    wprintw(_cons_win, "\n");
+                }
             }
         }
     }
@@ -865,6 +868,32 @@ cons_about(void)
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
+}
+
+static gboolean
+_new_release(char *found_version)
+{
+    int curr_maj, curr_min, curr_patch, found_maj, found_min, found_patch;
+
+    int parse_curr = sscanf(PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
+        &curr_patch);
+    int parse_found = sscanf(found_version, "%d.%d.%d", &found_maj, &found_min,
+        &found_patch);
+
+    if (parse_found == 3 && parse_curr == 3) {
+        if (found_maj > curr_maj) {
+            return TRUE;
+        } else if (found_maj == curr_maj && found_min > curr_min) {
+            return TRUE;
+        } else if (found_maj == curr_maj && found_min == curr_min
+                                        && found_patch > curr_patch) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    } else {
+        return FALSE;
+    }
 }
 
 static void
