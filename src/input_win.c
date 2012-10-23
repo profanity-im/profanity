@@ -72,8 +72,11 @@ static void _parameter_autocomplete(char *input, int *size, char *command,
 void
 create_input_window(void)
 {
-    if (getenv("ESCDELAY") == NULL)
-        ESCDELAY = 25;
+#ifdef NCURSES_REENTRANT
+    set_escdelay(25);
+#else
+    ESCDELAY = 25;
+#endif
 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
