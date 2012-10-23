@@ -51,8 +51,7 @@ PKG_CHECK_MODULES([NOTIFY], [libnotify], [],
     [AC_MSG_NOTICE([libnotify module not found])])
 
 AM_CFLAGS="-Wall "
-AM_CFLAGS="$AM_CFLAGS -lstrophe -lncurses -lcurl -lresolv "
-AM_CFLAGS="$AM_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
+LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 
