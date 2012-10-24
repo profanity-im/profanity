@@ -753,6 +753,10 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
 {
     if (strlen(inp) > 6) {
         char *url = strndup(inp+6, strlen(inp)-6);
+        if (url == NULL) {
+            log_error("Not enough memory.");
+            return FALSE;
+        }
 
         if (!tinyurl_valid(url)) {
             GString *error = g_string_new("/tiny, badly formed URL: ");
@@ -762,10 +766,9 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
                 win_bad_show(error->str);
             }
             g_string_free(error, TRUE);
-            free(url);
         } else if (win_in_chat()) {
             char *tiny = tinyurl_get(url);
-            
+
             if (tiny != NULL) {
                 char *recipient = win_get_recipient();
                 jabber_send(tiny, recipient);
@@ -781,12 +784,10 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
             } else {
                 cons_bad_show("Couldn't get tinyurl.");
             }
-    
-            free(url);
         } else {
             cons_bad_command(inp);
-            free(url);
         }
+        free(url);
     } else {
         cons_show("Usage: %s", help.usage);
 
