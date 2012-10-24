@@ -617,6 +617,7 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_about(const char * const inp, struct cmd_help_t help)
 {
+    cons_show("");
     cons_about();
     return TRUE;
 }

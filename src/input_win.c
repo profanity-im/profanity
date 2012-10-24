@@ -372,6 +372,8 @@ _handle_edit(const int ch, char *input, int *size)
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/history",
             prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/vercheck",
+            prefs_autocomplete_boolean_choice);
 
         return 1;
 
