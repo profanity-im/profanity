@@ -76,6 +76,7 @@ static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t he
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_history(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_remind(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_vercheck(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
@@ -271,6 +272,16 @@ static struct cmd_t setting_commands[] =
           "Config file section : [ui]",
           "Config file value :   showsplash=true|false",
           NULL } } },
+    
+    { "/vercheck",
+        _cmd_vercheck,
+        { "/vercheck [on|off]", "Check for a new release.",
+        { "/vercheck [on|off]",
+          "------------------",
+          "Without a parameter will check for a new release.",
+          "Switching on or off will enable/disable a version check when Profanity starts,",
+          "and each time the /about command is run.",
+          NULL  } } },
 
     { "/chlog",
         _cmd_set_chlog,
@@ -810,6 +821,18 @@ _cmd_set_typing(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/typing",
         "Incoming typing notifications", prefs_set_typing);
+}
+
+static gboolean
+_cmd_vercheck(const char * const inp, struct cmd_help_t help)
+{
+    if (strcmp(inp, "/vercheck") == 0) {
+        cons_check_version(TRUE);
+        return TRUE;
+    } else {
+        return _cmd_set_boolean_preference(inp, help, "/vercheck",
+            "Version checking", prefs_set_vercheck);
+    }
 }
 
 static gboolean

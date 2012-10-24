@@ -262,6 +262,19 @@ prefs_set_typing(gboolean value)
 }
 
 gboolean
+prefs_get_vercheck(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "vercheck", NULL);
+}
+
+void
+prefs_set_vercheck(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "vercheck", value);
+    _save_prefs();
+}
+
+gboolean
 prefs_get_flash(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "flash", NULL);

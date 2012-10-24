@@ -543,6 +543,11 @@ cons_prefs(void)
     else
         cons_show("Chat history            : OFF");
 
+    if (prefs_get_vercheck())
+        cons_show("Version checking        : ON");
+    else
+        cons_show("Version checking        : OFF");
+
     gint remind_period = prefs_get_remind();
     if (remind_period == 0) {
         cons_show("Message reminder period : OFF");
@@ -846,28 +851,44 @@ cons_about(void)
     _win_show_time(_cons_win);
     wprintw(_cons_win, "\n");
 
-    // check for new version if this is a release build
-    if (strcmp(PACKAGE_STATUS, "release") == 0) {
-        char *latest_release = release_get_latest();
-
-        if (latest_release != NULL) {
-            gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
-
-            if (relase_valid) {
-                if (_new_release(latest_release)) {
-                    _win_show_time(_cons_win);
-                    wprintw(_cons_win, "RELEASE: %s", latest_release);
-                    free(latest_release);
-                    _win_show_time(_cons_win);
-                    wprintw(_cons_win, "\n");
-                }
-            }
-        }
+    if (prefs_get_vercheck()) {
+        cons_check_version(FALSE);
     }
 
     prefresh(_cons_win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
+}
+
+void
+cons_check_version(gboolean not_available_msg)
+{
+    char *latest_release = release_get_latest();
+
+    if (latest_release != NULL) {
+        gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
+
+        if (relase_valid) {
+            if (_new_release(latest_release)) {
+                _win_show_time(_cons_win);
+                wattron(_cons_win, COLOUR_ONLINE);
+                wprintw(_cons_win, "A new version of Profanity is available: %s", latest_release);
+                wattroff(_cons_win, COLOUR_ONLINE);
+                _win_show_time(_cons_win);
+                wattron(_cons_win, COLOUR_ONLINE);
+                wprintw(_cons_win, "Check http://www.boothj5.com/profanity.shtml for details.\n");
+                wattroff(_cons_win, COLOUR_ONLINE);
+                free(latest_release);
+                _win_show_time(_cons_win);
+                wprintw(_cons_win, "\n");
+            } else {
+                if (not_available_msg) {
+                    cons_show("No new version available.");
+                    cons_show("");
+                }
+            }
+        }
+    }
 }
 
 static gboolean
