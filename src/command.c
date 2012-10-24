@@ -765,17 +765,23 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
             free(url);
         } else if (win_in_chat()) {
             char *tiny = tinyurl_get(url);
-            char *recipient = win_get_recipient();
-            jabber_send(tiny, recipient);
+            
+            if (tiny != NULL) {
+                char *recipient = win_get_recipient();
+                jabber_send(tiny, recipient);
 
-            if (prefs_get_chlog()) {
-                const char *jid = jabber_get_jid();
-                chat_log_chat(jid, recipient, tiny, OUT);
+                if (prefs_get_chlog()) {
+                    const char *jid = jabber_get_jid();
+                    chat_log_chat(jid, recipient, tiny, OUT);
+                }
+
+                win_show_outgoing_msg("me", recipient, tiny);
+                free(recipient);
+                free(tiny);
+            } else {
+                cons_bad_show("Couldn't get tinyurl.");
             }
-
-            win_show_outgoing_msg("me", recipient, tiny);
-            free(recipient);
-            free(tiny);
+    
             free(url);
         } else {
             cons_bad_command(inp);

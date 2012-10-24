@@ -53,9 +53,12 @@ release_get_latest()
     curl_easy_perform(handle);
     curl_easy_cleanup(handle);
 
-    output.buffer[output.size++] = '\0';
-
-    return output.buffer;
+    if (output.buffer != NULL) {
+        output.buffer[output.size++] = '\0';
+        return output.buffer;
+    } else {
+        return NULL;
+    }
 }
 
 static size_t
