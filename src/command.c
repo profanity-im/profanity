@@ -61,6 +61,7 @@ static gboolean _cmd_set_boolean_preference(const char * const inp,
 // command prototypes
 static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_help(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_about(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_prefs(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_who(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_connect(const char * const inp, struct cmd_help_t help);
@@ -75,6 +76,7 @@ static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t he
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_history(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_remind(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_vercheck(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
@@ -91,14 +93,24 @@ static struct cmd_t main_commands[] =
 {
     { "/help",
         _cmd_help,
-        { "/help [command]", "Show help summary, or help on a specific command",
-        { "/help [command]",
-          "---------------",
-          "List all commands with short help on what they do.",
+        { "/help [area|command]", "Show help summary, or help on a specific area or command",
+        { "/help [area|command]",
+          "--------------------",
+          "Show help options.",
+          "Specify an area (basic, status, settings, navigation) for more help on that area.",
           "Specify the command if you want more detailed help on a specific command.",
           "",
           "Example : /help connect",
+          "Example : /help settings",
           NULL } } },
+
+    { "/about",
+        _cmd_about,
+        { "/about", "About Profanity",
+        { "/about",
+          "------",
+          "Show versioning and license information.",
+          NULL  } } },
 
     { "/connect",
         _cmd_connect,
@@ -260,6 +272,16 @@ static struct cmd_t setting_commands[] =
           "Config file section : [ui]",
           "Config file value :   showsplash=true|false",
           NULL } } },
+    
+    { "/vercheck",
+        _cmd_vercheck,
+        { "/vercheck [on|off]", "Check for a new release.",
+        { "/vercheck [on|off]",
+          "------------------",
+          "Without a parameter will check for a new release.",
+          "Switching on or off will enable/disable a version check when Profanity starts,",
+          "and each time the /about command is run.",
+          NULL  } } },
 
     { "/chlog",
         _cmd_set_chlog,
@@ -363,6 +385,10 @@ cmd_init(void)
     log_info("Initialising commands");
     commands_ac = p_autocomplete_new();
     help_ac = p_autocomplete_new();
+    p_autocomplete_add(help_ac, strdup("basic"));
+    p_autocomplete_add(help_ac, strdup("status"));
+    p_autocomplete_add(help_ac, strdup("settings"));
+    p_autocomplete_add(help_ac, strdup("navigation"));
 
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
@@ -551,6 +577,14 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
 {
     if (strcmp(inp, "/help") == 0) {
         cons_help();
+    } else if (strcmp(inp, "/help basic") == 0) {
+        cons_basic_help();
+    } else if (strcmp(inp, "/help status") == 0) {
+        cons_status_help();
+    } else if (strcmp(inp, "/help settings") == 0) {
+        cons_settings_help();
+    } else if (strcmp(inp, "/help navigation") == 0) {
+        cons_navigation_help();
     } else {
         char *cmd = strndup(inp+6, strlen(inp)-6);
         char cmd_with_slash[1 + strlen(cmd) + 1];
@@ -577,6 +611,14 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
         cons_show("");
     }
 
+    return TRUE;
+}
+
+static gboolean
+_cmd_about(const char * const inp, struct cmd_help_t help)
+{
+    cons_show("");
+    cons_about();
     return TRUE;
 }
 
@@ -711,6 +753,10 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
 {
     if (strlen(inp) > 6) {
         char *url = strndup(inp+6, strlen(inp)-6);
+        if (url == NULL) {
+            log_error("Not enough memory.");
+            return FALSE;
+        }
 
         if (!tinyurl_valid(url)) {
             GString *error = g_string_new("/tiny, badly formed URL: ");
@@ -720,25 +766,28 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
                 win_bad_show(error->str);
             }
             g_string_free(error, TRUE);
-            free(url);
         } else if (win_in_chat()) {
             char *tiny = tinyurl_get(url);
-            char *recipient = win_get_recipient();
-            jabber_send(tiny, recipient);
 
-            if (prefs_get_chlog()) {
-                const char *jid = jabber_get_jid();
-                chat_log_chat(jid, recipient, tiny, OUT);
+            if (tiny != NULL) {
+                char *recipient = win_get_recipient();
+                jabber_send(tiny, recipient);
+
+                if (prefs_get_chlog()) {
+                    const char *jid = jabber_get_jid();
+                    chat_log_chat(jid, recipient, tiny, OUT);
+                }
+
+                win_show_outgoing_msg("me", recipient, tiny);
+                free(recipient);
+                free(tiny);
+            } else {
+                cons_bad_show("Couldn't get tinyurl.");
             }
-
-            win_show_outgoing_msg("me", recipient, tiny);
-            free(recipient);
-            free(tiny);
-            free(url);
         } else {
             cons_bad_command(inp);
-            free(url);
         }
+        free(url);
     } else {
         cons_show("Usage: %s", help.usage);
 
@@ -780,6 +829,18 @@ _cmd_set_typing(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/typing",
         "Incoming typing notifications", prefs_set_typing);
+}
+
+static gboolean
+_cmd_vercheck(const char * const inp, struct cmd_help_t help)
+{
+    if (strcmp(inp, "/vercheck") == 0) {
+        cons_check_version(TRUE);
+        return TRUE;
+    } else {
+        return _cmd_set_boolean_preference(inp, help, "/vercheck",
+            "Version checking", prefs_set_vercheck);
+    }
 }
 
 static gboolean

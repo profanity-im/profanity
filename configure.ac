@@ -2,7 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([profanity], [0.1.9dev], [boothj5web@gmail.com])
+AC_INIT([profanity], [0.1.9], [boothj5web@gmail.com])
+AC_DEFINE([PACKAGE_STATUS], ["development"], [Status of this build])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -11,19 +12,27 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 # Checks for programs.
 AC_PROG_CC
 
+# Options
+AC_ARG_WITH([libxml2],
+    [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
+
 # Checks for libraries.
-AC_CHECK_LIB([ncurses], [main], [], 
-    [AC_MSG_ERROR([ncurses is required for profanity])])
+if test "x$with_libxml2" = xyes; then
+    AC_CHECK_LIB([xml2], [main], [], 
+        [AC_MSG_ERROR([libxml2 is required for profanity])])
+else
+    AC_CHECK_LIB([expat], [main], [], 
+        [AC_MSG_ERROR([expat is required for profanity])])
+fi
+
 AC_CHECK_LIB([resolv], [main], [], 
     [AC_MSG_ERROR([libresolv is required for profanity])])
 AC_CHECK_LIB([ssl], [main], [], 
     [AC_MSG_ERROR([openssl is required for profanity])])
-AC_CHECK_LIB([expat], [main], [], 
-    [AC_MSG_ERROR([expat is required for profanity])])
-AC_CHECK_LIB([xml2], [main], [], 
-    [AC_MSG_ERROR([libxml2 is required for profanity])])
 AC_CHECK_LIB([strophe], [main], [], 
     [AC_MSG_ERROR([libstrophe is required for profanity])])
+AC_CHECK_LIB([ncurses], [main], [], 
+    [AC_MSG_ERROR([ncurses is required for profanity])])
 AC_CHECK_LIB([glib-2.0], [main], [], 
     [AC_MSG_ERROR([glib-2.0 is required for profanity])])
 AC_CHECK_LIB([curl], [main], [], 
@@ -43,8 +52,7 @@ PKG_CHECK_MODULES([NOTIFY], [libnotify], [],
     [AC_MSG_NOTICE([libnotify module not found])])
 
 AM_CFLAGS="-Wall "
-AM_CFLAGS="$AM_CFLAGS -lstrophe -lxml2 -lexpat -lncurses -lcurl -lresolv "
-AM_CFLAGS="$AM_CFLAGS $DEPS_LIBS $NOTIFY_LIBS"
+LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 

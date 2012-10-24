@@ -1,5 +1,5 @@
 /*
- * tinyurl.c
+ * release.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
  *
@@ -35,32 +35,23 @@ struct curl_data_t
 
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
-gboolean
-tinyurl_valid(char *url)
-{
-    return (g_str_has_prefix(url, "http://") ||
-        g_str_has_prefix(url, "https://"));
-}
-
 char *
-tinyurl_get(char *url)
+release_get_latest()
 {
-    GString *full_url = g_string_new("http://tinyurl.com/api-create.php?url=");
-    g_string_append(full_url, url);
+    char *url = "http://www.boothj5.com/profanity_version.txt";
 
     CURL *handle = curl_easy_init();
     struct curl_data_t output;
     output.buffer = NULL;
     output.size = 0;
 
-    curl_easy_setopt(handle, CURLOPT_URL, full_url->str);
+    curl_easy_setopt(handle, CURLOPT_URL, url);
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, _data_callback);
+    curl_easy_setopt(handle, CURLOPT_TIMEOUT, 2);
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void *)&output);
 
     curl_easy_perform(handle);
     curl_easy_cleanup(handle);
-
-    g_string_free(full_url, TRUE);
 
     if (output.buffer != NULL) {
         output.buffer[output.size++] = '\0';

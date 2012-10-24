@@ -72,6 +72,12 @@ static void _parameter_autocomplete(char *input, int *size, char *command,
 void
 create_input_window(void)
 {
+#ifdef NCURSES_REENTRANT
+    set_escdelay(25);
+#else
+    ESCDELAY = 25;
+#endif
+
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
@@ -220,6 +226,11 @@ _handle_edit(const int ch, char *input, int *size)
 
     switch(ch) {
 
+    case 27: // ESC
+        *size = 0;
+        inp_clear();
+        return 1;
+
     case 127:
     case KEY_BACKSPACE:
         contact_list_reset_search_attempts();
@@ -360,6 +371,8 @@ _handle_edit(const int ch, char *input, int *size)
         _parameter_autocomplete(input, size, "/chlog",
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/history",
+            prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/vercheck",
             prefs_autocomplete_boolean_choice);
 
         return 1;
