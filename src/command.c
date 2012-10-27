@@ -369,6 +369,7 @@ static struct cmd_t status_commands[] =
 
 static PAutocomplete commands_ac;
 static PAutocomplete help_ac;
+static PAutocomplete notify_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -383,6 +384,10 @@ cmd_init(void)
     p_autocomplete_add(help_ac, strdup("status"));
     p_autocomplete_add(help_ac, strdup("settings"));
     p_autocomplete_add(help_ac, strdup("navigation"));
+    notify_ac = p_autocomplete_new();
+    p_autocomplete_add(notify_ac, strdup("message"));
+    p_autocomplete_add(notify_ac, strdup("typing"));
+    p_autocomplete_add(notify_ac, strdup("remind"));
 
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
@@ -411,6 +416,7 @@ cmd_close(void)
 {
     p_autocomplete_clear(commands_ac);
     p_autocomplete_clear(help_ac);
+    p_autocomplete_clear(notify_ac);
 }
 
 // Command autocompletion functions
@@ -427,7 +433,7 @@ cmd_reset_completer(void)
     p_autocomplete_reset(commands_ac);
 }
 
-// Command help
+// Command help autocomplete
 char *
 cmd_help_complete(char *inp)
 {
@@ -438,6 +444,19 @@ void
 cmd_help_reset_completer(void)
 {
     p_autocomplete_reset(help_ac);
+}
+
+// Command notify autcomplete
+char *
+cmd_notify_complete(char *inp)
+{
+    return p_autocomplete_complete(notify_ac, inp);
+}
+
+void
+cmd_notify_reset_completer(void)
+{
+    p_autocomplete_reset(notify_ac);
 }
 
 GSList *

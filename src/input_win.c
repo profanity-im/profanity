@@ -174,6 +174,7 @@ inp_get_char(int *ch, char *input, int *size)
             prefs_reset_login_search();
             prefs_reset_boolean_choice();
             cmd_help_reset_completer();
+            cmd_notify_reset_completer();
             cmd_reset_completer();
         }
     }
@@ -361,9 +362,7 @@ _handle_edit(const int ch, char *input, int *size)
         _parameter_autocomplete(input, size, "/beep",
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/notify",
-            prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/typing",
-            prefs_autocomplete_boolean_choice);
+            cmd_notify_complete);
         _parameter_autocomplete(input, size, "/flash",
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/showsplash",

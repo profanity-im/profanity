@@ -41,7 +41,9 @@ gboolean cmd_execute_default(const char * const inp);
 
 // command help
 char * cmd_help_complete(char *inp);
+char * cmd_notify_complete(char *inp);
 void cmd_help_reset_completer(void);
+void cmd_notify_reset_completer(void);
 GSList * cmd_get_basic_help(void);
 GSList * cmd_get_settings_help(void);
 GSList * cmd_get_status_help(void);
