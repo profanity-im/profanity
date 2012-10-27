@@ -354,12 +354,6 @@ _handle_edit(const int ch, char *input, int *size)
             }
         }
 
-        _parameter_autocomplete(input, size, "/msg",
-            contact_list_find_contact);
-        _parameter_autocomplete(input, size, "/connect",
-            prefs_find_login);
-        _parameter_autocomplete(input, size, "/help",
-            cmd_help_complete);
         _parameter_autocomplete(input, size, "/beep",
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/intype",
@@ -374,6 +368,13 @@ _handle_edit(const int ch, char *input, int *size)
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/vercheck",
             prefs_autocomplete_boolean_choice);
+
+        _parameter_autocomplete(input, size, "/msg",
+            contact_list_find_contact);
+        _parameter_autocomplete(input, size, "/connect",
+            prefs_find_login);
+        _parameter_autocomplete(input, size, "/help",
+            cmd_help_complete);
 
         _notify_autocomplete(input, size);
 
