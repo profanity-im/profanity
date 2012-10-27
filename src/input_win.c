@@ -68,6 +68,7 @@ static int _printable(const int ch);
 static void _replace_input(char *input, const char * const new_input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
+static void _notify_autocomplete(char *input, int *size);
 
 void
 create_input_window(void)
@@ -361,8 +362,6 @@ _handle_edit(const int ch, char *input, int *size)
             cmd_help_complete);
         _parameter_autocomplete(input, size, "/beep",
             prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/notify",
-            cmd_notify_complete);
         _parameter_autocomplete(input, size, "/flash",
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/showsplash",
@@ -373,6 +372,8 @@ _handle_edit(const int ch, char *input, int *size)
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/vercheck",
             prefs_autocomplete_boolean_choice);
+
+        _notify_autocomplete(input, size);
 
         return 1;
 
@@ -432,4 +433,57 @@ _parameter_autocomplete(char *input, int *size, char *command,
         }
     }
     free(command_cpy);
+}
+
+static void
+_notify_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+
+    if ((strncmp(input, "/notify message ", 16) == 0) && (*size > 16)) {
+        for(i = 16; i < *size; i++) {
+            inp_cpy[i-16] = input[i];
+        }
+        inp_cpy[(*size) - 16] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify message ");
+            strcat(auto_msg, found);
+            _replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify typing ", 15) == 0) && (*size > 15)) {
+        for(i = 15; i < *size; i++) {
+            inp_cpy[i-15] = input[i];
+        }
+        inp_cpy[(*size) - 15] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify typing ");
+            strcat(auto_msg, found);
+            _replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify ", 8) == 0) && (*size > 8)) {
+        for(i = 8; i < *size; i++) {
+            inp_cpy[i-8] = input[i];
+        }
+        inp_cpy[(*size) - 8] = '\0';
+        found = cmd_notify_complete(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((8 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify ");
+            strcat(auto_msg, found);
+            _replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
 }
