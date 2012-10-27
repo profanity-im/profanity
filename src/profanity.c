@@ -43,7 +43,7 @@ static gboolean _process_input(char *inp);
 static void _create_config_directory();
 static void _free_roster_entry(jabber_roster_entry *entry);
 static void _init(const int disable_tls, char *log_level);
-static void _shutdown_init(void);
+static void _shutdown(void);
 
 void
 prof_run(const int disable_tls, char *log_level)
@@ -286,11 +286,11 @@ _init(const int disable_tls, char *log_level)
     cmd_init();
     log_info("Initialising contact list");
     contact_list_init();
-    atexit(_shutdown_init);
+    atexit(_shutdown);
 }
 
 static void
-_shutdown_init(void)
+_shutdown(void)
 {
     gboolean wait_response = jabber_disconnect();
 
