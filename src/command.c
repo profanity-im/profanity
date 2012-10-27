@@ -272,7 +272,7 @@ static struct cmd_t setting_commands[] =
           "Config file section : [ui]",
           "Config file value :   showsplash=true|false",
           NULL } } },
-    
+
     { "/vercheck",
         _cmd_vercheck,
         { "/vercheck [on|off]", "Check for a new release.",

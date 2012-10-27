@@ -44,7 +44,6 @@ static void _create_config_directory();
 static void _free_roster_entry(jabber_roster_entry *entry);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown_init(void);
-static void _shutdown(void);
 
 void
 prof_run(const int disable_tls, char *log_level)
@@ -302,12 +301,6 @@ _shutdown_init(void)
         jabber_free_resources();
     }
 
-    _shutdown();
-}
-
-static void
-_shutdown(void)
-{
     contact_list_clear();
     gui_close();
     chat_log_close();
