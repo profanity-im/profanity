@@ -70,6 +70,13 @@ jabber_init(const int disable_tls)
     jabber_conn.tls_disabled = disable_tls;
 }
 
+void
+jabber_restart(void)
+{
+    jabber_conn.conn_status = JABBER_STARTED;
+    jabber_conn.presence = PRESENCE_OFFLINE;
+}
+
 jabber_conn_status_t
 jabber_connect(const char * const user,
     const char * const passwd)

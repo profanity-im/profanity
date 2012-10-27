@@ -134,7 +134,7 @@ loop_out:
 void
 prof_handle_login_success(const char *jid)
 {
-    const char *msg = " logged in successfully.";
+    const char *msg = "logged in successfully.";
     cons_show("%s %s", jid, msg);
     title_bar_set_status(PRESENCE_ONLINE);
     log_info("%s %s", jid, msg);
@@ -201,7 +201,7 @@ prof_handle_roster(GSList *roster)
 }
 
 static void
-_create_config_directory()
+_create_config_directory(void)
 {
     GString *dir = g_string_new(getenv("HOME"));
     g_string_append(dir, "/.profanity");

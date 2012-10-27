@@ -51,5 +51,6 @@ void jabber_update_presence(jabber_presence_t status, const char * const msg);
 const char * jabber_get_jid(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 void jabber_free_resources(void);
+void jabber_restart(void);
 
 #endif

@@ -65,6 +65,7 @@ static gboolean _cmd_about(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_prefs(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_who(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_connect(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_disconnect(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_msg(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
@@ -122,6 +123,15 @@ static struct cmd_t main_commands[] =
           "You can use tab completion to autocomplete any logins you have used before.",
           "",
           "Example: /connect myuser@gmail.com",
+          NULL  } } },
+
+    { "/disconnect",
+        _cmd_disconnect,
+        { "/disconnect", "Logout of current jabber session.",
+        { "/disconnect",
+          "------------------",
+          "Disconnect from the current jabber session.",
+          "See the /connect command for connecting again.",
           NULL  } } },
 
     { "/prefs",
@@ -562,6 +572,27 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
     }
 
     return result;
+}
+
+static gboolean
+_cmd_disconnect(const char * const inp, struct cmd_help_t help)
+{
+    char *jid = strdup(jabber_get_jid());
+    gboolean wait_response = jabber_disconnect();
+
+    if (wait_response) {
+        while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
+            jabber_process_events();
+        }
+        jabber_free_resources();
+    }
+
+    contact_list_clear();
+    jabber_restart();
+    cons_show("%s logged out successfully.", jid);
+    free(jid);
+
+    return TRUE;
 }
 
 static gboolean
