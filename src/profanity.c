@@ -43,7 +43,6 @@ static gboolean _process_input(char *inp);
 static void _create_config_directory();
 static void _free_roster_entry(jabber_roster_entry *entry);
 static void _init(const int disable_tls, char *log_level);
-static void _shutdown_init(void);
 static void _shutdown(void);
 
 void
@@ -137,7 +136,7 @@ loop_out:
 void
 prof_handle_login_success(const char *jid)
 {
-    const char *msg = " logged in successfully.";
+    const char *msg = "logged in successfully.";
     cons_show("%s %s", jid, msg);
     title_bar_set_status(PRESENCE_ONLINE);
     log_info("%s %s", jid, msg);
@@ -204,7 +203,7 @@ prof_handle_roster(GSList *roster)
 }
 
 static void
-_create_config_directory()
+_create_config_directory(void)
 {
     GString *dir = g_string_new(getenv("HOME"));
     g_string_append(dir, "/.profanity");
@@ -289,27 +288,13 @@ _init(const int disable_tls, char *log_level)
     cmd_init();
     log_info("Initialising contact list");
     contact_list_init();
-    atexit(_shutdown_init);
-}
-
-static void
-_shutdown_init(void)
-{
-    gboolean wait_response = jabber_disconnect();
-
-    if (wait_response) {
-        while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
-            jabber_process_events();
-        }
-        jabber_free_resources();
-    }
-
-    _shutdown();
+    atexit(_shutdown);
 }
 
 static void
 _shutdown(void)
 {
+    jabber_disconnect();
     contact_list_clear();
     gui_close();
     chat_log_close();

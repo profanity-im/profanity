@@ -961,7 +961,7 @@ _cons_splash_logo(void)
     _win_show_time(_cons_win);
     wprintw(_cons_win, "\n");
     _win_show_time(_cons_win);
-    if (strcmp(PACKAGE_STATUS, "dev") == 0) {
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
         wprintw(_cons_win, "Version %sdev\n", PACKAGE_VERSION);
     } else {
         wprintw(_cons_win, "Version %s\n", PACKAGE_VERSION);

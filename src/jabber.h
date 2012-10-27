@@ -43,7 +43,7 @@ typedef enum {
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect(const char * const user,
     const char * const passwd);
-gboolean jabber_disconnect(void);
+void jabber_disconnect(void);
 void jabber_roster_request(void);
 void jabber_process_events(void);
 void jabber_send(const char * const msg, const char * const recipient);
@@ -51,5 +51,6 @@ void jabber_update_presence(jabber_presence_t status, const char * const msg);
 const char * jabber_get_jid(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 void jabber_free_resources(void);
+void jabber_restart(void);
 
 #endif
