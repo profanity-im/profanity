@@ -292,15 +292,7 @@ _init(const int disable_tls, char *log_level)
 static void
 _shutdown(void)
 {
-    gboolean wait_response = jabber_disconnect();
-
-    if (wait_response) {
-        while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
-            jabber_process_events();
-        }
-        jabber_free_resources();
-    }
-
+    jabber_disconnect();
     contact_list_clear();
     gui_close();
     chat_log_close();

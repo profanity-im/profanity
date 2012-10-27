@@ -577,20 +577,16 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_disconnect(const char * const inp, struct cmd_help_t help)
 {
-    char *jid = strdup(jabber_get_jid());
-    gboolean wait_response = jabber_disconnect();
-
-    if (wait_response) {
-        while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
-            jabber_process_events();
-        }
-        jabber_free_resources();
+    if (jabber_get_connection_status() == JABBER_CONNECTED) {
+        char *jid = strdup(jabber_get_jid());
+        jabber_disconnect();
+        contact_list_clear();
+        jabber_restart();
+        cons_show("%s logged out successfully.", jid);
+        free(jid);
+    } else {
+        cons_show("You are not currently connected.");
     }
-
-    contact_list_clear();
-    jabber_restart();
-    cons_show("%s logged out successfully.", jid);
-    free(jid);
 
     return TRUE;
 }

@@ -105,7 +105,7 @@ jabber_connect(const char * const user,
     return jabber_conn.conn_status;
 }
 
-gboolean
+void
 jabber_disconnect(void)
 {
     // if connected, send end stream and wait for response
@@ -113,16 +113,11 @@ jabber_disconnect(void)
         log_info("Closing connection");
         xmpp_disconnect(jabber_conn.conn);
         jabber_conn.conn_status = JABBER_DISCONNECTING;
-        return TRUE;
 
-    // if disconnected dont wait just shutdown
-    } else if (jabber_conn.conn_status == JABBER_DISCONNECTED) {
-        log_info("No connection open");
-        return FALSE;
-
-    // any other states, just shutdown
-    } else {
-        return FALSE;
+        while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
+            jabber_process_events();
+        }
+        jabber_free_resources();
     }
 }
 
