@@ -241,7 +241,7 @@ win_show_typing(const char * const from)
    }
 
 #ifdef HAVE_LIBNOTIFY
-    if (prefs_get_notify())
+    if (prefs_get_notify_typing())
         _win_notify_typing(short_from);
 #endif
 }
@@ -300,7 +300,7 @@ win_show_incomming_msg(const char * const from, const char * const message)
     if (prefs_get_beep())
         beep();
 #ifdef HAVE_LIBNOTIFY
-    if (prefs_get_notify())
+    if (prefs_get_notify_message())
         _win_notify_message(short_from);
 #endif
 }
@@ -518,12 +518,12 @@ cons_prefs(void)
     else
         cons_show("Terminal flash          : OFF");
 
-    if (prefs_get_notify())
+    if (prefs_get_notify_message())
         cons_show("Message notifications   : ON");
     else
         cons_show("Message notifications   : OFF");
 
-    if (prefs_get_typing())
+    if (prefs_get_notify_typing())
         cons_show("Typing notifications    : ON");
     else
         cons_show("Typing notifications    : OFF");
@@ -548,7 +548,7 @@ cons_prefs(void)
     else
         cons_show("Version checking        : OFF");
 
-    gint remind_period = prefs_get_remind();
+    gint remind_period = prefs_get_notify_remind();
     if (remind_period == 0) {
         cons_show("Message reminder period : OFF");
     } else if (remind_period == 1) {

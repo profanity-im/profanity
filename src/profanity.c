@@ -65,7 +65,7 @@ prof_run(const int disable_tls, char *log_level)
 
             gdouble elapsed = g_timer_elapsed(timer, NULL);
 
-            gint remind_period = prefs_get_remind();
+            gint remind_period = prefs_get_notify_remind();
 
             // 0 means to not remind
             if (remind_period > 0 && elapsed >= remind_period) {

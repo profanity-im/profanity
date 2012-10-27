@@ -290,7 +290,7 @@ _message_handler(xmpp_conn_t * const conn,
     // if no message, check for chatstates
     if (body == NULL) {
 
-        if (prefs_get_typing()) {
+        if (prefs_get_notify_typing()) {
             if (xmpp_stanza_get_child_by_name(stanza, "active") != NULL) {
                 // active
             } else if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
