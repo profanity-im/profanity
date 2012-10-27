@@ -44,10 +44,6 @@ void prefs_reset_boolean_choice(void);
 
 gboolean prefs_get_beep(void);
 void prefs_set_beep(gboolean value);
-gboolean prefs_get_notify(void);
-void prefs_set_notify(gboolean value);
-gboolean prefs_get_typing(void);
-void prefs_set_typing(gboolean value);
 gboolean prefs_get_flash(void);
 void prefs_set_flash(gboolean value);
 gboolean prefs_get_chlog(void);
@@ -56,10 +52,17 @@ gboolean prefs_get_history(void);
 void prefs_set_history(gboolean value);
 gboolean prefs_get_showsplash(void);
 void prefs_set_showsplash(gboolean value);
-gint prefs_get_remind(void);
-void prefs_set_remind(gint value);
 gboolean prefs_get_vercheck(void);
 void prefs_set_vercheck(gboolean value);
+gboolean prefs_get_intype(void);
+void prefs_set_intype(gboolean value);
+
+void prefs_set_notify_message(gboolean value);
+gboolean prefs_get_notify_message(void);
+void prefs_set_notify_typing(gboolean value);
+gboolean prefs_get_notify_typing(void);
+void prefs_set_notify_remind(gint period);
+gint prefs_get_notify_remind(void);
 
 void prefs_add_login(const char *jid);
 

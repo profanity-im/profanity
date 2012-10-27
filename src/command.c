@@ -71,12 +71,11 @@ static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_beep(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_notify(const char * const inp, struct cmd_help_t help);
-static gboolean _cmd_set_typing(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_intype(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_history(const char * const inp, struct cmd_help_t help);
-static gboolean _cmd_set_remind(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_vercheck(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
@@ -207,7 +206,7 @@ static struct cmd_t setting_commands[] =
 {
     { "/beep",
         _cmd_set_beep,
-        { "/beep on|off", "Enable/disable sound notifications.",
+        { "/beep on|off", "Terminal beep on new messages.",
         { "/beep on|off",
           "------------",
           "Switch the terminal bell on or off.",
@@ -221,46 +220,32 @@ static struct cmd_t setting_commands[] =
 
     { "/notify",
         _cmd_set_notify,
-        { "/notify on|off", "Enable/disable message notifications.",
-        { "/notify on|off",
-          "--------------",
-          "Switch the message notifications on or off.",
-          "The notification will appear for all incoming messages.",
-          "The desktop environment must support desktop notifications.",
+        { "/notify type value", "Control various desktop noficiations.",
+        { "/notify type value",
+          "------------------",
+          "Settings for various desktop notifications where type is one of:",
+          "message : Notificaitons for messages.",
+          "        : on|off",
+          "remind  : Notification reminders of unread messages.",
+          "        : where value is the reminder period in seconds,",
+          "        : use 0 to disable.",
+          "typing  : Notifications when contacts are typing.",
+          "        : on|off",
           "",
-          "Config file section : [ui]",
-          "Config file value :   notify=true|false",
-          NULL } } },
-
-    { "/typing",
-        _cmd_set_typing,
-        { "/typing on|off", "Enable/disable typing notifications.",
-        { "/typing on|off",
-          "--------------",
-          "Switch typing notifications on or off for incoming messages",
-          "If desktop notifications are also enabled you will receive them",
-          "for when users are typing a message to you.",
+          "Example : /notify message on (enable message notifications)",
+          "Example : /notify remind 10  (remind every 10 seconds)",
+          "Example : /notify remind 0   (switch off reminders)",
+          "Example : /notify typing on  (enable typing notifications)",
           "",
-          "Config file section : [ui]",
-          "Config file value :   typing=true|false",
-          NULL } } },
-
-    { "/remind",
-        _cmd_set_remind,
-        { "/remind seconds", "Set message reminder period in seconds.",
-        { "/remind seconds",
-          "--------------",
-          "Set the period for new message reminders as desktop notifications.",
-          "The value is in seconds, a setting of 0 will disable the feature.",
-          "The desktop environment must support desktop notifications.",
-          "",
-          "Config file section : [ui]",
+          "Config file section : [notifications]",
+          "Config file value :   message=on|off",
+          "Config file value :   typing=on|off",
           "Config file value :   remind=seconds",
           NULL } } },
 
     { "/flash",
         _cmd_set_flash,
-        { "/flash on|off", "Enable/disable screen flash notifications.",
+        { "/flash on|off", "Terminal flash on new messages.",
         { "/flash on|off",
           "-------------",
           "Make the terminal flash when incoming messages are recieved.",
@@ -272,9 +257,20 @@ static struct cmd_t setting_commands[] =
           "Config file value :   flash=true|false",
           NULL } } },
 
+    { "/intype",
+        _cmd_set_intype,
+        { "/intype on|off", "Show when contact is typing.",
+        { "/intype on|off",
+          "--------------",
+          "Show when a contact is typing in the console, and in active message window.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   intype=true|false",
+          NULL } } },
+
     { "/showsplash",
         _cmd_set_showsplash,
-        { "/showsplash on|off", "Enable/disable splash logo on startup.",
+        { "/showsplash on|off", "Splash logo on startup.",
         { "/showsplash on|off",
           "------------------",
           "Switch on or off the ascii logo on start up.",
@@ -295,7 +291,7 @@ static struct cmd_t setting_commands[] =
 
     { "/chlog",
         _cmd_set_chlog,
-        { "/chlog on|off", "Enable/disable chat logging.",
+        { "/chlog on|off", "Chat logging to file",
         { "/chlog on|off",
           "-------------",
           "Switch chat logging on or off.",
@@ -311,7 +307,7 @@ static struct cmd_t setting_commands[] =
 
     { "/history",
         _cmd_set_history,
-        { "/history on|off", "Enable/disable chat history.",
+        { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
           "-------------",
           "Switch chat history on or off, requires chlog to be enabled.",
@@ -385,6 +381,7 @@ static struct cmd_t status_commands[] =
 
 static PAutocomplete commands_ac;
 static PAutocomplete help_ac;
+static PAutocomplete notify_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -399,6 +396,10 @@ cmd_init(void)
     p_autocomplete_add(help_ac, strdup("status"));
     p_autocomplete_add(help_ac, strdup("settings"));
     p_autocomplete_add(help_ac, strdup("navigation"));
+    notify_ac = p_autocomplete_new();
+    p_autocomplete_add(notify_ac, strdup("message"));
+    p_autocomplete_add(notify_ac, strdup("typing"));
+    p_autocomplete_add(notify_ac, strdup("remind"));
 
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
@@ -427,6 +428,7 @@ cmd_close(void)
 {
     p_autocomplete_clear(commands_ac);
     p_autocomplete_clear(help_ac);
+    p_autocomplete_clear(notify_ac);
 }
 
 // Command autocompletion functions
@@ -443,7 +445,7 @@ cmd_reset_completer(void)
     p_autocomplete_reset(commands_ac);
 }
 
-// Command help
+// Command help autocomplete
 char *
 cmd_help_complete(char *inp)
 {
@@ -454,6 +456,19 @@ void
 cmd_help_reset_completer(void)
 {
     p_autocomplete_reset(help_ac);
+}
+
+// Command notify autcomplete
+char *
+cmd_notify_complete(char *inp)
+{
+    return p_autocomplete_complete(notify_ac, inp);
+}
+
+void
+cmd_notify_reset_completer(void)
+{
+    p_autocomplete_reset(notify_ac);
 }
 
 GSList *
@@ -847,15 +862,76 @@ _cmd_set_beep(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_set_notify(const char * const inp, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(inp, help, "/notify",
-        "Desktop notifications", prefs_set_notify);
-}
+    char *kind = NULL;
+    char *value = NULL;
 
-static gboolean
-_cmd_set_typing(const char * const inp, struct cmd_help_t help)
-{
-    return _cmd_set_boolean_preference(inp, help, "/typing",
-        "Incoming typing notifications", prefs_set_typing);
+    // copy input
+    char inp_cpy[strlen(inp) + 1];
+    strcpy(inp_cpy, inp);
+
+    // get kind
+    strtok(inp_cpy, " ");
+    kind = strtok(NULL, " ");
+    if ((kind != NULL) && (strlen(inp) > (8 + strlen(kind) + 1))) {
+        if ((strcmp(kind, "message") != 0) &&
+                (strcmp(kind, "typing") != 0) &&
+                (strcmp(kind, "remind") != 0)) {
+            cons_show("Usage: %s", help.usage);
+
+            return TRUE;
+        } else {
+            // get value
+            value = strndup(inp+8+strlen(kind)+1, strlen(inp)-(8+strlen(kind)+1));
+
+            if (value != NULL) {
+
+                // set message setting
+                if (strcmp(kind, "message") == 0) {
+                    if (strcmp(inp, "/notify message on") == 0) {
+                        cons_show("Message notifications enabled.");
+                        prefs_set_notify_message(TRUE);
+                    } else if (strcmp(inp, "/notify message off") == 0) {
+                        cons_show("Message notifications disabled.");
+                        prefs_set_notify_message(FALSE);
+                    } else {
+                        cons_show("Usage: /notify message on|off");
+                    }
+
+                // set typing setting
+                } else if (strcmp(kind, "typing") == 0) {
+                    if (strcmp(inp, "/notify typing on") == 0) {
+                        cons_show("Typing notifications enabled.");
+                        prefs_set_notify_typing(TRUE);
+                    } else if (strcmp(inp, "/notify typing off") == 0) {
+                        cons_show("Typing notifications disabled.");
+                        prefs_set_notify_typing(FALSE);
+                    } else {
+                        cons_show("Usage: /notify typing on|off");
+                    }
+
+                } else { // remind
+                    gint period = atoi(value);
+
+                    prefs_set_notify_remind(period);
+                    if (period == 0) {
+                        cons_show("Message reminders disabled.");
+                    } else if (period == 1) {
+                        cons_show("Message reminder period set to 1 second.");
+                    } else {
+                        cons_show("Message reminder period set to %d seconds.", period);
+                    }
+
+                }
+                return TRUE;
+            } else {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            }
+        }
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
 }
 
 static gboolean
@@ -878,6 +954,13 @@ _cmd_set_flash(const char * const inp, struct cmd_help_t help)
 }
 
 static gboolean
+_cmd_set_intype(const char * const inp, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(inp, help, "/intype",
+        "Show contact typing", prefs_set_intype);
+}
+
+static gboolean
 _cmd_set_showsplash(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/showsplash",
@@ -896,34 +979,6 @@ _cmd_set_history(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/history",
         "Chat history", prefs_set_history);
-}
-
-static gboolean
-_cmd_set_remind(const char * const inp, struct cmd_help_t help)
-{
-    if ((strncmp(inp, "/remind ", 8) != 0) || (strlen(inp) < 9)) {
-        cons_show("Usage: %s", help.usage);
-    } else {
-        // copy input
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
-
-        // get period
-        strtok(inp_cpy, " ");
-        char *period_str = strtok(NULL, " ");
-        gint period = atoi(period_str);
-
-        prefs_set_remind(period);
-        if (period == 0) {
-            cons_show("Message reminders disabled.");
-        } else if (period == 1) {
-            cons_show("Message reminder period set to 1 second.");
-        } else {
-            cons_show("Message reminder period set to %d seconds.", period);
-        }
-    }
-
-    return TRUE;
 }
 
 static gboolean

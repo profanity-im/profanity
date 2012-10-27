@@ -222,26 +222,28 @@ win_show_typing(const char * const from)
 
     int win_index = _find_prof_win_index(short_from);
 
-    // no chat window for user
-    if (win_index == NUM_WINS) {
-        _cons_show_typing(short_from);
+    if (prefs_get_intype()) {
+        // no chat window for user
+        if (win_index == NUM_WINS) {
+            _cons_show_typing(short_from);
 
-    // have chat window but not currently in it
-    } else if (win_index != _curr_prof_win) {
-        _cons_show_typing(short_from);
-        dirty = TRUE;
+        // have chat window but not currently in it
+        } else if (win_index != _curr_prof_win) {
+            _cons_show_typing(short_from);
+            dirty = TRUE;
 
-    // in chat window with user
-    } else {
-        title_bar_set_typing(TRUE);
-        title_bar_draw();
+        // in chat window with user
+        } else {
+            title_bar_set_typing(TRUE);
+            title_bar_draw();
 
-        status_bar_active(win_index);
-        dirty = TRUE;
-   }
+            status_bar_active(win_index);
+            dirty = TRUE;
+       }
+    }
 
 #ifdef HAVE_LIBNOTIFY
-    if (prefs_get_notify())
+    if (prefs_get_notify_typing())
         _win_notify_typing(short_from);
 #endif
 }
@@ -300,7 +302,7 @@ win_show_incomming_msg(const char * const from, const char * const message)
     if (prefs_get_beep())
         beep();
 #ifdef HAVE_LIBNOTIFY
-    if (prefs_get_notify())
+    if (prefs_get_notify_message())
         _win_notify_message(short_from);
 #endif
 }
@@ -509,52 +511,57 @@ cons_prefs(void)
     cons_show("");
 
     if (prefs_get_beep())
-        cons_show("Terminal beep           : ON");
+        cons_show("Terminal beep                : ON");
     else
-        cons_show("Terminal beep           : OFF");
+        cons_show("Terminal beep                : OFF");
 
     if (prefs_get_flash())
-        cons_show("Terminal flash          : ON");
+        cons_show("Terminal flash               : ON");
     else
-        cons_show("Terminal flash          : OFF");
+        cons_show("Terminal flash               : OFF");
 
-    if (prefs_get_notify())
-        cons_show("Message notifications   : ON");
+    if (prefs_get_intype())
+        cons_show("Show typing                  : ON");
     else
-        cons_show("Message notifications   : OFF");
-
-    if (prefs_get_typing())
-        cons_show("Typing notifications    : ON");
-    else
-        cons_show("Typing notifications    : OFF");
+        cons_show("Show typing                  : OFF");
 
     if (prefs_get_showsplash())
-        cons_show("Splash screen           : ON");
+        cons_show("Splash screen                : ON");
     else
-        cons_show("Splash screen           : OFF");
+        cons_show("Splash screen                : OFF");
 
     if (prefs_get_chlog())
-        cons_show("Chat logging            : ON");
+        cons_show("Chat logging                 : ON");
     else
-        cons_show("Chat logging            : OFF");
+        cons_show("Chat logging                 : OFF");
 
     if (prefs_get_history())
-        cons_show("Chat history            : ON");
+        cons_show("Chat history                 : ON");
     else
-        cons_show("Chat history            : OFF");
+        cons_show("Chat history                 : OFF");
 
     if (prefs_get_vercheck())
-        cons_show("Version checking        : ON");
+        cons_show("Version checking             : ON");
     else
-        cons_show("Version checking        : OFF");
+        cons_show("Version checking             : OFF");
 
-    gint remind_period = prefs_get_remind();
+    if (prefs_get_notify_message())
+        cons_show("Message notifications        : ON");
+    else
+        cons_show("Message notifications        : OFF");
+
+    if (prefs_get_notify_typing())
+        cons_show("Typing notifications         : ON");
+    else
+        cons_show("Typing notifications         : OFF");
+
+    gint remind_period = prefs_get_notify_remind();
     if (remind_period == 0) {
-        cons_show("Message reminder period : OFF");
+        cons_show("Reminder notification period : OFF");
     } else if (remind_period == 1) {
-        cons_show("Message reminder period : 1 second");
+        cons_show("Reminder notification period : 1 second");
     } else {
-        cons_show("Message reminder period : %d seconds", remind_period);
+        cons_show("Reminder notification period : %d seconds", remind_period);
     }
 
     cons_show("");
