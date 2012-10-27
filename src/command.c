@@ -207,7 +207,7 @@ static struct cmd_t setting_commands[] =
 {
     { "/beep",
         _cmd_set_beep,
-        { "/beep on|off", "Enable/disable sound notifications.",
+        { "/beep on|off", "Terminal beep on new messages.",
         { "/beep on|off",
           "------------",
           "Switch the terminal bell on or off.",
@@ -221,7 +221,7 @@ static struct cmd_t setting_commands[] =
 
     { "/notify",
         _cmd_set_notify,
-        { "/notify on|off", "Enable/disable message notifications.",
+        { "/notify on|off", "Desktop notifications for new messages.",
         { "/notify on|off",
           "--------------",
           "Switch the message notifications on or off.",
@@ -234,7 +234,7 @@ static struct cmd_t setting_commands[] =
 
     { "/typing",
         _cmd_set_typing,
-        { "/typing on|off", "Enable/disable typing notifications.",
+        { "/typing on|off", "Show when contacts typing.",
         { "/typing on|off",
           "--------------",
           "Switch typing notifications on or off for incoming messages",
@@ -247,7 +247,7 @@ static struct cmd_t setting_commands[] =
 
     { "/remind",
         _cmd_set_remind,
-        { "/remind seconds", "Set message reminder period in seconds.",
+        { "/remind seconds", "Desktop notification reminder of unread messages.",
         { "/remind seconds",
           "--------------",
           "Set the period for new message reminders as desktop notifications.",
@@ -260,7 +260,7 @@ static struct cmd_t setting_commands[] =
 
     { "/flash",
         _cmd_set_flash,
-        { "/flash on|off", "Enable/disable screen flash notifications.",
+        { "/flash on|off", "Terminal flash on new messages.",
         { "/flash on|off",
           "-------------",
           "Make the terminal flash when incoming messages are recieved.",
@@ -274,7 +274,7 @@ static struct cmd_t setting_commands[] =
 
     { "/showsplash",
         _cmd_set_showsplash,
-        { "/showsplash on|off", "Enable/disable splash logo on startup.",
+        { "/showsplash on|off", "Splash logo on startup.",
         { "/showsplash on|off",
           "------------------",
           "Switch on or off the ascii logo on start up.",
@@ -295,7 +295,7 @@ static struct cmd_t setting_commands[] =
 
     { "/chlog",
         _cmd_set_chlog,
-        { "/chlog on|off", "Enable/disable chat logging.",
+        { "/chlog on|off", "Chat logging to file",
         { "/chlog on|off",
           "-------------",
           "Switch chat logging on or off.",
@@ -311,7 +311,7 @@ static struct cmd_t setting_commands[] =
 
     { "/history",
         _cmd_set_history,
-        { "/history on|off", "Enable/disable chat history.",
+        { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
           "-------------",
           "Switch chat history on or off, requires chlog to be enabled.",
