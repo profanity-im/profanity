@@ -71,6 +71,7 @@ static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_beep(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_notify(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_intype(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
@@ -254,6 +255,17 @@ static struct cmd_t setting_commands[] =
           "",
           "Config file section : [ui]",
           "Config file value :   flash=true|false",
+          NULL } } },
+
+    { "/intype",
+        _cmd_set_intype,
+        { "/intype on|off", "Show when contact is typing.",
+        { "/intype on|off",
+          "--------------",
+          "Show when a contact is typing in the console, and in active message window.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   intype=true|false",
           NULL } } },
 
     { "/showsplash",
@@ -939,6 +951,13 @@ _cmd_set_flash(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/flash",
         "Screen flash", prefs_set_flash);
+}
+
+static gboolean
+_cmd_set_intype(const char * const inp, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(inp, help, "/intype",
+        "Show contact typing", prefs_set_intype);
 }
 
 static gboolean

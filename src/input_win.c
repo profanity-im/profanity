@@ -362,6 +362,8 @@ _handle_edit(const int ch, char *input, int *size)
             cmd_help_complete);
         _parameter_autocomplete(input, size, "/beep",
             prefs_autocomplete_boolean_choice);
+        _parameter_autocomplete(input, size, "/intype",
+            prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/flash",
             prefs_autocomplete_boolean_choice);
         _parameter_autocomplete(input, size, "/showsplash",

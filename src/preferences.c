@@ -301,6 +301,19 @@ prefs_set_flash(gboolean value)
 }
 
 gboolean
+prefs_get_intype(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "intype", NULL);
+}
+
+void
+prefs_set_intype(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "intype", value);
+    _save_prefs();
+}
+
+gboolean
 prefs_get_chlog(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "chlog", NULL);
