@@ -185,6 +185,19 @@ jabber_roster_request(void)
 }
 
 void
+jabber_subscribe(const char * const recipient)
+{
+    xmpp_stanza_t *presence;
+
+    presence = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(presence, "presence");
+    xmpp_stanza_set_type(presence, "subscribe");
+    xmpp_stanza_set_attribute(presence, "to", recipient); 
+    xmpp_send(jabber_conn.conn, presence);
+    xmpp_stanza_release(presence);
+}
+
+void
 jabber_update_presence(jabber_presence_t status, const char * const msg)
 {
     jabber_conn.presence = status;
@@ -434,6 +447,20 @@ _presence_handler(xmpp_conn_t * const conn,
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     char *short_from = strtok(from, "/");
     char *type = xmpp_stanza_get_attribute(stanza, "type");
+
+    if (type != NULL) {
+        if (strcmp(type, "subscribe") == 0) {
+            xmpp_stanza_t *presence;
+
+            presence = xmpp_stanza_new(jabber_conn.ctx);
+            xmpp_stanza_set_name(presence, "presence");
+            xmpp_stanza_set_type(presence, "subscribed");
+            xmpp_stanza_set_attribute(presence, "to", short_from); 
+            xmpp_send(jabber_conn.conn, presence);
+            xmpp_stanza_release(presence);
+            return 1;
+        }
+    }
 
     char *show_str, *status_str;
 

@@ -82,6 +82,7 @@ static gboolean _cmd_prefs(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_who(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_connect(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_disconnect(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_sub(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_msg(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
@@ -177,6 +178,16 @@ static struct cmd_t main_commands[] =
           "",
           "Example : /msg boothj5@gmail.com Hey, here's a message!",
           NULL } } },
+
+    { "/sub",
+        _cmd_sub,
+        { "/sub user@host", "Subscribe to presence notifications of user.",
+        { "/sub user@host",
+          "------------------",
+          "Send a subscription request to the user to be informed of their presence.",
+          "",
+          "Example: /sub myfriend@jabber.org",
+          NULL  } } },
 
     { "/tiny",
         _cmd_tiny,
@@ -684,6 +695,31 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
             cons_bad_show("Connection to server failed.");
             log_debug("Connection using %s failed", lower);
         }
+
+        result = TRUE;
+    }
+
+    return result;
+}
+
+static gboolean
+_cmd_sub(const char * const inp, struct cmd_help_t help)
+{
+    gboolean result = FALSE;
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currently not connected.");
+        result = TRUE;
+    } else if (strlen(inp) < 6) {
+        cons_show("Usage: %s", help.usage);
+        result = TRUE;
+    } else {
+        char *user, *lower;
+        user = strndup(inp+5, strlen(inp)-5);
+        lower = g_utf8_strdown(user, -1);
+    
+        jabber_subscribe(lower);
 
         result = TRUE;
     }
