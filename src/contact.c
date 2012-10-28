@@ -28,22 +28,31 @@
 #include "contact.h"
 
 struct p_contact_t {
+    char *jid;
     char *name;
-    char *show;
+    char *presence;
     char *status;
+    char *subscription;
 };
 
 PContact
-p_contact_new(const char * const name, const char * const show,
-    const char * const status)
+p_contact_new(const char * const jid, const char * const name,
+    const char * const presence, const char * const status,
+    const char * const subscription)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
-    contact->name = strdup(name);
+    contact->jid = strdup(jid);
 
-    if (show == NULL || (strcmp(show, "") == 0))
-        contact->show = strdup("online");
+    if (name != NULL) {
+        contact->name = strdup(name);
+    } else {
+        contact->name = NULL;
+    }
+
+    if (presence == NULL || (strcmp(presence, "") == 0))
+        contact->presence = strdup("online");
     else
-        contact->show = strdup(show);
+        contact->presence = strdup(presence);
 
     if (status != NULL)
         contact->status = strdup(status);
@@ -57,8 +66,15 @@ PContact
 p_contact_copy(PContact contact)
 {
     PContact copy = malloc(sizeof(struct p_contact_t));
-    copy->name = strdup(contact->name);
-    copy->show = strdup(contact->show);
+    copy->jid = strdup(contact->jid);
+
+    if (contact->name != NULL) {
+        copy->name = strdup(contact->name);
+    } else {
+        copy->name = NULL;
+    }
+
+    copy->presence = strdup(contact->presence);
 
     if (contact->status != NULL)
         copy->status = strdup(contact->status);
@@ -71,12 +87,21 @@ p_contact_copy(PContact contact)
 void
 p_contact_free(PContact contact)
 {
-    free(contact->name);
-
-    if (contact->show != NULL) {
-        free(contact->show);
-        contact->show = NULL;
+    if (contact->jid != NULL) {
+        free(contact->jid);
+        contact->jid = NULL;
     }
+
+    if (contact->name != NULL) {
+        free(contact->name);
+        contact->name = NULL;
+    }
+
+    if (contact->presence != NULL) {
+        free(contact->presence);
+        contact->presence = NULL;
+    }
+
     if (contact->status != NULL) {
         free(contact->status);
         contact->status = NULL;
@@ -87,15 +112,21 @@ p_contact_free(PContact contact)
 }
 
 const char *
+p_contact_jid(const PContact contact)
+{
+    return contact->jid;
+}
+
+const char *
 p_contact_name(const PContact contact)
 {
     return contact->name;
 }
 
 const char *
-p_contact_show(const PContact contact)
+p_contact_presence(const PContact contact)
 {
-    return contact->show;
+    return contact->presence;
 }
 
 const char *
@@ -107,9 +138,10 @@ p_contact_status(const PContact contact)
 int
 p_contacts_equal_deep(const PContact c1, const PContact c2)
 {
+    int jid_eq = (g_strcmp0(c1->jid, c2->jid) == 0);
     int name_eq = (g_strcmp0(c1->name, c2->name) == 0);
-    int show_eq = (g_strcmp0(c1->show, c2->show) == 0);
+    int presence_eq = (g_strcmp0(c1->presence, c2->presence) == 0);
     int status_eq = (g_strcmp0(c1->status, c2->status) == 0);
 
-    return (name_eq && show_eq && status_eq);
+    return (jid_eq && name_eq && presence_eq && status_eq);
 }

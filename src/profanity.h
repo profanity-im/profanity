@@ -23,11 +23,6 @@
 #ifndef PROFANITY_H
 #define PROFANITY_H
 
-typedef struct roster_entry_t {
-    char *name;
-    char *jid;
-} jabber_roster_entry;
-
 void prof_run(const int disable_tls, char *log_level);
 
 void prof_handle_login_success(const char *jid);

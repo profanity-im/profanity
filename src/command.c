@@ -718,8 +718,9 @@ _cmd_sub(const char * const inp, struct cmd_help_t help)
         char *user, *lower;
         user = strndup(inp+5, strlen(inp)-5);
         lower = g_utf8_strdown(user, -1);
-    
+
         jabber_subscribe(lower);
+        cons_show("Sent subscription request to %s.", user);
 
         result = TRUE;
     }
@@ -824,16 +825,16 @@ _cmd_who(const char * const inp, struct cmd_help_t help)
 
         // get show
         strtok(inp_cpy, " ");
-        char *show = strtok(NULL, " ");
+        char *presence = strtok(NULL, " ");
 
         // bad arg
-        if ((show != NULL)
-                && (strcmp(show, "online") != 0)
-                && (strcmp(show, "offline") != 0)
-                && (strcmp(show, "away") != 0)
-                && (strcmp(show, "chat") != 0)
-                && (strcmp(show, "xa") != 0)
-                && (strcmp(show, "dnd") != 0)) {
+        if ((presence != NULL)
+                && (strcmp(presence, "online") != 0)
+                && (strcmp(presence, "offline") != 0)
+                && (strcmp(presence, "away") != 0)
+                && (strcmp(presence, "chat") != 0)
+                && (strcmp(presence, "xa") != 0)
+                && (strcmp(presence, "dnd") != 0)) {
             cons_show("Usage: %s", help.usage);
 
         // valid arg
@@ -841,23 +842,23 @@ _cmd_who(const char * const inp, struct cmd_help_t help)
             GSList *list = get_contact_list();
 
             // no arg, show all contacts
-            if (show == NULL) {
+            if (presence == NULL) {
                 cons_show("All contacts:");
                 cons_show_contacts(list);
 
             // online, show all status that indicate online
-            } else if (strcmp("online", show) == 0) {
-                cons_show("Contacts (%s):", show);
+            } else if (strcmp("online", presence) == 0) {
+                cons_show("Contacts (%s):", presence);
                 GSList *filtered = NULL;
 
                 while (list != NULL) {
                     PContact contact = list->data;
-                    const char * const contact_show = (p_contact_show(contact));
-                    if ((strcmp(contact_show, "online") == 0)
-                            || (strcmp(contact_show, "away") == 0)
-                            || (strcmp(contact_show, "dnd") == 0)
-                            || (strcmp(contact_show, "xa") == 0)
-                            || (strcmp(contact_show, "chat") == 0)) {
+                    const char * const contact_presence = (p_contact_presence(contact));
+                    if ((strcmp(contact_presence, "online") == 0)
+                            || (strcmp(contact_presence, "away") == 0)
+                            || (strcmp(contact_presence, "dnd") == 0)
+                            || (strcmp(contact_presence, "xa") == 0)
+                            || (strcmp(contact_presence, "chat") == 0)) {
                         filtered = g_slist_append(filtered, contact);
                     }
                     list = g_slist_next(list);
@@ -867,12 +868,12 @@ _cmd_who(const char * const inp, struct cmd_help_t help)
 
             // show specific status
             } else {
-                cons_show("Contacts (%s):", show);
+                cons_show("Contacts (%s):", presence);
                 GSList *filtered = NULL;
 
                 while (list != NULL) {
                     PContact contact = list->data;
-                    if (strcmp(p_contact_show(contact), show) == 0) {
+                    if (strcmp(p_contact_presence(contact), presence) == 0) {
                         filtered = g_slist_append(filtered, contact);
                     }
                     list = g_slist_next(list);
