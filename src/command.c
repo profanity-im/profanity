@@ -63,6 +63,8 @@ static gboolean _cmd_set_boolean_preference(const char * const inp,
 
 static char *_cmd_complete(char *inp);
 static void _cmd_reset_command_completer(void);
+static char *_cmd_who_complete(char *inp);
+static void _cmd_reset_who_completer(void);
 static char *_cmd_help_complete(char *inp);
 static void _cmd_help_reset_completer(void);
 static char *_cmd_notify_complete(char *inp);
@@ -394,6 +396,7 @@ static struct cmd_t status_commands[] =
 };
 
 static PAutocomplete commands_ac;
+static PAutocomplete who_ac;
 static PAutocomplete help_ac;
 static PAutocomplete notify_ac;
 
@@ -404,12 +407,16 @@ void
 cmd_init(void)
 {
     log_info("Initialising commands");
+
     commands_ac = p_autocomplete_new();
+    who_ac = p_autocomplete_new();
+
     help_ac = p_autocomplete_new();
     p_autocomplete_add(help_ac, strdup("basic"));
     p_autocomplete_add(help_ac, strdup("status"));
     p_autocomplete_add(help_ac, strdup("settings"));
     p_autocomplete_add(help_ac, strdup("navigation"));
+
     notify_ac = p_autocomplete_new();
     p_autocomplete_add(notify_ac, strdup("message"));
     p_autocomplete_add(notify_ac, strdup("typing"));
@@ -432,6 +439,7 @@ cmd_init(void)
         struct cmd_t *pcmd = status_commands+i;
         p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
         p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
+        p_autocomplete_add(who_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
     history_init();
@@ -441,6 +449,7 @@ void
 cmd_close(void)
 {
     p_autocomplete_clear(commands_ac);
+    p_autocomplete_clear(who_ac);
     p_autocomplete_clear(help_ac);
     p_autocomplete_clear(notify_ac);
 }
@@ -481,6 +490,7 @@ cmd_reset_autocomplete()
     _cmd_help_reset_completer();
     _cmd_notify_reset_completer();
     _cmd_reset_command_completer();
+    _cmd_reset_who_completer();
 }
 
 GSList *
@@ -570,6 +580,18 @@ _cmd_reset_command_completer(void)
 }
 
 static char *
+_cmd_who_complete(char *inp)
+{
+    return p_autocomplete_complete(who_ac, inp);
+}
+
+static void
+_cmd_reset_who_completer(void)
+{
+    p_autocomplete_reset(who_ac);
+}
+
+static char *
 _cmd_help_complete(char *inp)
 {
     return p_autocomplete_complete(help_ac, inp);
@@ -617,6 +639,8 @@ _cmd_complete_parameters(char *input, int *size)
         prefs_find_login);
     _parameter_autocomplete(input, size, "/help",
         _cmd_help_complete);
+    _parameter_autocomplete(input, size, "/who",
+        _cmd_who_complete);
 
     _notify_autocomplete(input, size);
 }
