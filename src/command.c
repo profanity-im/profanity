@@ -442,7 +442,7 @@ cmd_init(void)
         p_autocomplete_add(who_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
-    p_autocomplete_add(who_ac, "offline");
+    p_autocomplete_add(who_ac, strdup("offline"));
 
     history_init();
 }
