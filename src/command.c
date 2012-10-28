@@ -51,7 +51,6 @@ typedef char*(*autocomplete_func)(char *);
 struct cmd_t {
     const gchar *cmd;
     gboolean (*func)(const char * const inp, struct cmd_help_t help);
-    autocomplete_func complete_func;
     struct cmd_help_t help;
 };
 
@@ -61,7 +60,15 @@ static void _update_presence(const jabber_presence_t presence,
 static gboolean _cmd_set_boolean_preference(const char * const inp,
     struct cmd_help_t help, const char * const cmd_str, const char * const display,
     void (*set_func)(gboolean));
+
+static char *_cmd_complete(char *inp);
+static void _cmd_reset_command_completer(void);
 static char *_cmd_help_complete(char *inp);
+static void _cmd_help_reset_completer(void);
+static char *_cmd_notify_complete(char *inp);
+static void _cmd_notify_reset_completer(void);
+static void _cmd_complete_parameters(char *input, int *size);
+static void _notify_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
 
@@ -100,7 +107,6 @@ static struct cmd_t main_commands[] =
 {
     { "/help",
         _cmd_help,
-        _cmd_help_complete,
         { "/help [area|command]", "Show help summary, or help on a specific area or command",
         { "/help [area|command]",
           "--------------------",
@@ -114,7 +120,6 @@ static struct cmd_t main_commands[] =
 
     { "/about",
         _cmd_about,
-        NULL,
         { "/about", "About Profanity",
         { "/about",
           "------",
@@ -123,7 +128,6 @@ static struct cmd_t main_commands[] =
 
     { "/connect",
         _cmd_connect,
-        prefs_find_login,
         { "/connect user@host", "Login to jabber.",
         { "/connect user@host",
           "------------------",
@@ -136,7 +140,6 @@ static struct cmd_t main_commands[] =
 
     { "/disconnect",
         _cmd_disconnect,
-        NULL,
         { "/disconnect", "Logout of current jabber session.",
         { "/disconnect",
           "------------------",
@@ -146,7 +149,6 @@ static struct cmd_t main_commands[] =
 
     { "/prefs",
         _cmd_prefs,
-        NULL,
         { "/prefs", "Show current preferences.",
         { "/prefs",
           "------",
@@ -161,7 +163,6 @@ static struct cmd_t main_commands[] =
 
     { "/msg",
         _cmd_msg,
-        contact_list_find_contact,
         { "/msg user@host mesg", "Send mesg to user.",
         { "/msg user@host mesg",
           "-------------------",
@@ -177,7 +178,6 @@ static struct cmd_t main_commands[] =
 
     { "/tiny",
         _cmd_tiny,
-        NULL,
         { "/tiny url", "Send url as tinyurl in current chat.",
         { "/tiny url",
           "---------",
@@ -190,7 +190,6 @@ static struct cmd_t main_commands[] =
 
     { "/who",
         _cmd_who,
-        NULL,
         { "/who [status]", "Show contacts with chosen status.",
         { "/who [status]",
           "-------------",
@@ -201,7 +200,6 @@ static struct cmd_t main_commands[] =
 
     { "/close",
         _cmd_close,
-        NULL,
         { "/close", "Close current chat window.",
         { "/close",
           "------",
@@ -211,7 +209,6 @@ static struct cmd_t main_commands[] =
 
     { "/quit",
         _cmd_quit,
-        NULL,
         { "/quit", "Quit Profanity.",
         { "/quit",
           "-----",
@@ -223,7 +220,6 @@ static struct cmd_t setting_commands[] =
 {
     { "/beep",
         _cmd_set_beep,
-        prefs_autocomplete_boolean_choice,
         { "/beep on|off", "Terminal beep on new messages.",
         { "/beep on|off",
           "------------",
@@ -238,7 +234,6 @@ static struct cmd_t setting_commands[] =
 
     { "/notify",
         _cmd_set_notify,
-        NULL,
         { "/notify type value", "Control various desktop noficiations.",
         { "/notify type value",
           "------------------",
@@ -264,7 +259,6 @@ static struct cmd_t setting_commands[] =
 
     { "/flash",
         _cmd_set_flash,
-        prefs_autocomplete_boolean_choice,
         { "/flash on|off", "Terminal flash on new messages.",
         { "/flash on|off",
           "-------------",
@@ -279,7 +273,6 @@ static struct cmd_t setting_commands[] =
 
     { "/intype",
         _cmd_set_intype,
-        prefs_autocomplete_boolean_choice,
         { "/intype on|off", "Show when contact is typing.",
         { "/intype on|off",
           "--------------",
@@ -291,7 +284,6 @@ static struct cmd_t setting_commands[] =
 
     { "/showsplash",
         _cmd_set_showsplash,
-        prefs_autocomplete_boolean_choice,
         { "/showsplash on|off", "Splash logo on startup.",
         { "/showsplash on|off",
           "------------------",
@@ -303,7 +295,6 @@ static struct cmd_t setting_commands[] =
 
     { "/vercheck",
         _cmd_vercheck,
-        prefs_autocomplete_boolean_choice,
         { "/vercheck [on|off]", "Check for a new release.",
         { "/vercheck [on|off]",
           "------------------",
@@ -314,7 +305,6 @@ static struct cmd_t setting_commands[] =
 
     { "/chlog",
         _cmd_set_chlog,
-        prefs_autocomplete_boolean_choice,
         { "/chlog on|off", "Chat logging to file",
         { "/chlog on|off",
           "-------------",
@@ -331,7 +321,6 @@ static struct cmd_t setting_commands[] =
 
     { "/history",
         _cmd_set_history,
-        prefs_autocomplete_boolean_choice,
         { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
           "-------------",
@@ -347,7 +336,6 @@ static struct cmd_t status_commands[] =
 {
     { "/away",
         _cmd_away,
-        NULL,
         { "/away [msg]", "Set status to away.",
         { "/away [msg]",
           "-----------",
@@ -359,7 +347,6 @@ static struct cmd_t status_commands[] =
 
     { "/chat",
         _cmd_chat,
-        NULL,
         { "/chat [msg]", "Set status to chat (available for chat).",
         { "/chat [msg]",
           "-----------",
@@ -372,7 +359,6 @@ static struct cmd_t status_commands[] =
 
     { "/dnd",
         _cmd_dnd,
-        NULL,
         { "/dnd [msg]", "Set status to dnd (do not disturb.",
         { "/dnd [msg]",
           "----------",
@@ -385,7 +371,6 @@ static struct cmd_t status_commands[] =
 
     { "/online",
         _cmd_online,
-        NULL,
         { "/online [msg]", "Set status to online.",
         { "/online [msg]",
           "-------------",
@@ -397,7 +382,6 @@ static struct cmd_t status_commands[] =
 
     { "/xa",
         _cmd_xa,
-        NULL,
         { "/xa [msg]", "Set status to xa (extended away).",
         { "/xa [msg]",
           "---------",
@@ -462,43 +446,41 @@ cmd_close(void)
 }
 
 // Command autocompletion functions
-
-char *
-cmd_complete(char *inp)
+void
+cmd_autocomplete(char *input, int *size)
 {
-    return p_autocomplete_complete(commands_ac, inp);
+    int i = 0;
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+
+    if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
+        for(i = 0; i < *size; i++) {
+            inp_cpy[i] = input[i];
+        }
+        inp_cpy[i] = '\0';
+        found = _cmd_complete(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
+            strcpy(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
+
+    _cmd_complete_parameters(input, size);
 }
 
 void
-cmd_reset_completer(void)
+cmd_reset_autocomplete()
 {
-    p_autocomplete_reset(commands_ac);
-}
-
-// Command help autocomplete
-static char *
-_cmd_help_complete(char *inp)
-{
-    return p_autocomplete_complete(help_ac, inp);
-}
-
-void
-cmd_help_reset_completer(void)
-{
-    p_autocomplete_reset(help_ac);
-}
-
-// Command notify autcomplete
-char *
-cmd_notify_complete(char *inp)
-{
-    return p_autocomplete_complete(notify_ac, inp);
-}
-
-void
-cmd_notify_reset_completer(void)
-{
-    p_autocomplete_reset(notify_ac);
+    contact_list_reset_search_attempts();
+    prefs_reset_login_search();
+    prefs_reset_boolean_choice();
+    _cmd_help_reset_completer();
+    _cmd_notify_reset_completer();
+    _cmd_reset_command_completer();
 }
 
 GSList *
@@ -575,8 +557,44 @@ cmd_execute_default(const char * const inp)
     return TRUE;
 }
 
-void
-cmd_complete_parameters(char *input, int *size)
+static char *
+_cmd_complete(char *inp)
+{
+    return p_autocomplete_complete(commands_ac, inp);
+}
+
+static void
+_cmd_reset_command_completer(void)
+{
+    p_autocomplete_reset(commands_ac);
+}
+
+static char *
+_cmd_help_complete(char *inp)
+{
+    return p_autocomplete_complete(help_ac, inp);
+}
+
+static void
+_cmd_help_reset_completer(void)
+{
+    p_autocomplete_reset(help_ac);
+}
+
+static char *
+_cmd_notify_complete(char *inp)
+{
+    return p_autocomplete_complete(notify_ac, inp);
+}
+
+static void
+_cmd_notify_reset_completer(void)
+{
+    p_autocomplete_reset(notify_ac);
+}
+
+static void
+_cmd_complete_parameters(char *input, int *size)
 {
     _parameter_autocomplete(input, size, "/beep",
         prefs_autocomplete_boolean_choice);
@@ -599,6 +617,8 @@ cmd_complete_parameters(char *input, int *size)
         prefs_find_login);
     _parameter_autocomplete(input, size, "/help",
         _cmd_help_complete);
+
+    _notify_autocomplete(input, size);
 }
 
 // The command functions
@@ -1200,3 +1220,55 @@ _parameter_autocomplete(char *input, int *size, char *command,
     free(command_cpy);
 }
 
+static void
+_notify_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+
+    if ((strncmp(input, "/notify message ", 16) == 0) && (*size > 16)) {
+        for(i = 16; i < *size; i++) {
+            inp_cpy[i-16] = input[i];
+        }
+        inp_cpy[(*size) - 16] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify message ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify typing ", 15) == 0) && (*size > 15)) {
+        for(i = 15; i < *size; i++) {
+            inp_cpy[i-15] = input[i];
+        }
+        inp_cpy[(*size) - 15] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify typing ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify ", 8) == 0) && (*size > 8)) {
+        for(i = 8; i < *size; i++) {
+            inp_cpy[i-8] = input[i];
+        }
+        inp_cpy[(*size) - 8] = '\0';
+        found = _cmd_notify_complete(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((8 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
+}

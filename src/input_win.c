@@ -63,7 +63,6 @@ static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
-static void _notify_autocomplete(char *input, int *size);
 
 void
 create_input_window(void)
@@ -166,12 +165,7 @@ inp_get_char(int *ch, char *input, int *size)
                 }
             }
 
-            contact_list_reset_search_attempts();
-            prefs_reset_login_search();
-            prefs_reset_boolean_choice();
-            cmd_help_reset_completer();
-            cmd_notify_reset_completer();
-            cmd_reset_completer();
+            cmd_reset_autocomplete();
         }
     }
 
@@ -225,11 +219,8 @@ _handle_edit(const int ch, char *input, int *size)
     int i, rows, cols;
     char *prev = NULL;
     char *next = NULL;
-    char *found = NULL;
-    char *auto_msg = NULL;
     int inp_y = 0;
     int inp_x = 0;
-    char inp_cpy[*size];
 
     getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
@@ -345,27 +336,7 @@ _handle_edit(const int ch, char *input, int *size)
         return 1;
 
     case 9: // tab
-
-        // autocomplete command
-        if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
-            for(i = 0; i < *size; i++) {
-                inp_cpy[i] = input[i];
-            }
-            inp_cpy[i] = '\0';
-            found = cmd_complete(inp_cpy);
-            if (found != NULL) {
-                auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
-                strcpy(auto_msg, found);
-                inp_replace_input(input, auto_msg, size);
-                free(auto_msg);
-                free(found);
-            }
-        }
-
-        cmd_complete_parameters(input, size);
-
-        _notify_autocomplete(input, size);
-
+        cmd_autocomplete(input, size);
         return 1;
 
     default:
@@ -385,55 +356,3 @@ _printable(const int ch)
             ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE);
 }
 
-static void
-_notify_autocomplete(char *input, int *size)
-{
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
-
-    if ((strncmp(input, "/notify message ", 16) == 0) && (*size > 16)) {
-        for(i = 16; i < *size; i++) {
-            inp_cpy[i-16] = input[i];
-        }
-        inp_cpy[(*size) - 16] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify message ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/notify typing ", 15) == 0) && (*size > 15)) {
-        for(i = 15; i < *size; i++) {
-            inp_cpy[i-15] = input[i];
-        }
-        inp_cpy[(*size) - 15] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify typing ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/notify ", 8) == 0) && (*size > 8)) {
-        for(i = 8; i < *size; i++) {
-            inp_cpy[i-8] = input[i];
-        }
-        inp_cpy[(*size) - 8] = '\0';
-        found = cmd_notify_complete(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((8 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    }
-}
