@@ -58,16 +58,11 @@
 #include "preferences.h"
 #include "ui.h"
 
-typedef char*(*autocomplete_func)(char *);
-
 static WINDOW *inp_win;
 static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
-static void _replace_input(char *input, const char * const new_input, int *size);
-static void _parameter_autocomplete(char *input, int *size, char *command,
-    autocomplete_func func);
 static void _notify_autocomplete(char *input, int *size);
 
 void
@@ -206,6 +201,19 @@ inp_put_back(void)
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
+void
+inp_replace_input(char *input, const char * const new_input, int *size)
+{
+    int i;
+
+    strcpy(input, new_input);
+    *size = strlen(input);
+    inp_clear();
+    for (i = 0; i < *size; i++)
+        waddch(inp_win, input[i]);
+}
+
+
 /*
  * Deal with command editing, return 1 if ch was an edit
  * key press: up, down, left, right or backspace
@@ -307,7 +315,7 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_UP:
         prev = history_previous(input, size);
         if (prev) {
-            _replace_input(input, prev, size);
+            inp_replace_input(input, prev, size);
             pad_start = 0;
             prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         }
@@ -316,7 +324,7 @@ _handle_edit(const int ch, char *input, int *size)
     case KEY_DOWN:
         next = history_next(input, size);
         if (next) {
-            _replace_input(input, next, size);
+            inp_replace_input(input, next, size);
             pad_start = 0;
             prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         }
@@ -348,33 +356,13 @@ _handle_edit(const int ch, char *input, int *size)
             if (found != NULL) {
                 auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
                 strcpy(auto_msg, found);
-                _replace_input(input, auto_msg, size);
+                inp_replace_input(input, auto_msg, size);
                 free(auto_msg);
                 free(found);
             }
         }
 
-        _parameter_autocomplete(input, size, "/beep",
-            prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/intype",
-            prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/flash",
-            prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/showsplash",
-            prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/chlog",
-            prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/history",
-            prefs_autocomplete_boolean_choice);
-        _parameter_autocomplete(input, size, "/vercheck",
-            prefs_autocomplete_boolean_choice);
-
-        _parameter_autocomplete(input, size, "/msg",
-            contact_list_find_contact);
-        _parameter_autocomplete(input, size, "/connect",
-            prefs_find_login);
-        _parameter_autocomplete(input, size, "/help",
-            cmd_help_complete);
+        cmd_complete_parameters(input, size);
 
         _notify_autocomplete(input, size);
 
@@ -398,47 +386,6 @@ _printable(const int ch)
 }
 
 static void
-_replace_input(char *input, const char * const new_input, int *size)
-{
-    int i;
-
-    strcpy(input, new_input);
-    *size = strlen(input);
-    inp_clear();
-    for (i = 0; i < *size; i++)
-        waddch(inp_win, input[i]);
-}
-
-static void
-_parameter_autocomplete(char *input, int *size, char *command,
-    autocomplete_func func)
-{
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
-    char *command_cpy = malloc(strlen(command) + 2);
-    sprintf(command_cpy, "%s ", command);
-    int len = strlen(command_cpy);
-    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
-        for(i = len; i < *size; i++) {
-            inp_cpy[i-len] = input[i];
-        }
-        inp_cpy[(*size) - len] = '\0';
-        found = func(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, command_cpy);
-            strcat(auto_msg, found);
-            _replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    }
-    free(command_cpy);
-}
-
-static void
 _notify_autocomplete(char *input, int *size)
 {
     char *found = NULL;
@@ -456,7 +403,7 @@ _notify_autocomplete(char *input, int *size)
             auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
             strcpy(auto_msg, "/notify message ");
             strcat(auto_msg, found);
-            _replace_input(input, auto_msg, size);
+            inp_replace_input(input, auto_msg, size);
             free(auto_msg);
             free(found);
         }
@@ -470,7 +417,7 @@ _notify_autocomplete(char *input, int *size)
             auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
             strcpy(auto_msg, "/notify typing ");
             strcat(auto_msg, found);
-            _replace_input(input, auto_msg, size);
+            inp_replace_input(input, auto_msg, size);
             free(auto_msg);
             free(found);
         }
@@ -484,7 +431,7 @@ _notify_autocomplete(char *input, int *size)
             auto_msg = (char *) malloc((8 + (strlen(found) + 1)) * sizeof(char));
             strcpy(auto_msg, "/notify ");
             strcat(auto_msg, found);
-            _replace_input(input, auto_msg, size);
+            inp_replace_input(input, auto_msg, size);
             free(auto_msg);
             free(found);
         }

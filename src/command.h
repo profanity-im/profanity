@@ -36,6 +36,7 @@ void cmd_init(void);
 void cmd_close(void);
 char * cmd_complete(char *inp);
 void cmd_reset_completer(void);
+void cmd_complete_parameters(char *input, int *size);
 gboolean cmd_execute(const char * const command, const char * const inp);
 gboolean cmd_execute_default(const char * const inp);
 
