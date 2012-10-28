@@ -80,9 +80,17 @@ chat_log_chat(const gchar * const login, gchar *other,
     FILE *logp = fopen(dated_log->filename, "a");
 
     if (direction == IN) {
-        fprintf(logp, "%s - %s: %s\n", date_fmt, other_copy, msg);
+        if (strncmp(msg, "/me ", 4) == 0) {
+            fprintf(logp, "%s - *%s %s\n", date_fmt, other_copy, msg + 4);
+        } else {
+            fprintf(logp, "%s - %s: %s\n", date_fmt, other_copy, msg);
+        }
     } else {
-        fprintf(logp, "%s - me: %s\n", date_fmt, msg);
+        if (strncmp(msg, "/me ", 4) == 0) {
+            fprintf(logp, "%s - *me %s\n", date_fmt, msg + 4);
+        } else {
+            fprintf(logp, "%s - me: %s\n", date_fmt, msg);
+        }
     }
     fflush(logp);
     int result = fclose(logp);
