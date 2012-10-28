@@ -34,16 +34,13 @@ struct cmd_help_t {
 
 void cmd_init(void);
 void cmd_close(void);
-char * cmd_complete(char *inp);
-void cmd_reset_completer(void);
+
+void cmd_autocomplete(char *input, int *size);
+void cmd_reset_autocomplete(void);
+
 gboolean cmd_execute(const char * const command, const char * const inp);
 gboolean cmd_execute_default(const char * const inp);
 
-// command help
-char * cmd_help_complete(char *inp);
-char * cmd_notify_complete(char *inp);
-void cmd_help_reset_completer(void);
-void cmd_notify_reset_completer(void);
 GSList * cmd_get_basic_help(void);
 GSList * cmd_get_settings_help(void);
 GSList * cmd_get_status_help(void);

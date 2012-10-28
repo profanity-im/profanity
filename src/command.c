@@ -38,11 +38,14 @@
 #include "tinyurl.h"
 #include "ui.h"
 
+typedef char*(*autocomplete_func)(char *);
+
 /*
  * Command structure
  *
  * cmd - The command string including leading '/'
  * func - The function to execute for the command
+ * complete_func - Function to autcomplete parameters
  * help - A help struct containing usage info etc
  */
 struct cmd_t {
@@ -57,6 +60,19 @@ static void _update_presence(const jabber_presence_t presence,
 static gboolean _cmd_set_boolean_preference(const char * const inp,
     struct cmd_help_t help, const char * const cmd_str, const char * const display,
     void (*set_func)(gboolean));
+
+static char *_cmd_complete(char *inp);
+static void _cmd_reset_command_completer(void);
+static char *_cmd_who_complete(char *inp);
+static void _cmd_reset_who_completer(void);
+static char *_cmd_help_complete(char *inp);
+static void _cmd_help_reset_completer(void);
+static char *_cmd_notify_complete(char *inp);
+static void _cmd_notify_reset_completer(void);
+static void _cmd_complete_parameters(char *input, int *size);
+static void _notify_autocomplete(char *input, int *size);
+static void _parameter_autocomplete(char *input, int *size, char *command,
+    autocomplete_func func);
 
 // command prototypes
 static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
@@ -380,6 +396,7 @@ static struct cmd_t status_commands[] =
 };
 
 static PAutocomplete commands_ac;
+static PAutocomplete who_ac;
 static PAutocomplete help_ac;
 static PAutocomplete notify_ac;
 
@@ -390,12 +407,16 @@ void
 cmd_init(void)
 {
     log_info("Initialising commands");
+
     commands_ac = p_autocomplete_new();
+    who_ac = p_autocomplete_new();
+
     help_ac = p_autocomplete_new();
     p_autocomplete_add(help_ac, strdup("basic"));
     p_autocomplete_add(help_ac, strdup("status"));
     p_autocomplete_add(help_ac, strdup("settings"));
     p_autocomplete_add(help_ac, strdup("navigation"));
+
     notify_ac = p_autocomplete_new();
     p_autocomplete_add(notify_ac, strdup("message"));
     p_autocomplete_add(notify_ac, strdup("typing"));
@@ -418,6 +439,7 @@ cmd_init(void)
         struct cmd_t *pcmd = status_commands+i;
         p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
         p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
+        p_autocomplete_add(who_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
     history_init();
@@ -427,48 +449,48 @@ void
 cmd_close(void)
 {
     p_autocomplete_clear(commands_ac);
+    p_autocomplete_clear(who_ac);
     p_autocomplete_clear(help_ac);
     p_autocomplete_clear(notify_ac);
 }
 
 // Command autocompletion functions
-
-char *
-cmd_complete(char *inp)
+void
+cmd_autocomplete(char *input, int *size)
 {
-    return p_autocomplete_complete(commands_ac, inp);
+    int i = 0;
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+
+    if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
+        for(i = 0; i < *size; i++) {
+            inp_cpy[i] = input[i];
+        }
+        inp_cpy[i] = '\0';
+        found = _cmd_complete(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
+            strcpy(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
+
+    _cmd_complete_parameters(input, size);
 }
 
 void
-cmd_reset_completer(void)
+cmd_reset_autocomplete()
 {
-    p_autocomplete_reset(commands_ac);
-}
-
-// Command help autocomplete
-char *
-cmd_help_complete(char *inp)
-{
-    return p_autocomplete_complete(help_ac, inp);
-}
-
-void
-cmd_help_reset_completer(void)
-{
-    p_autocomplete_reset(help_ac);
-}
-
-// Command notify autcomplete
-char *
-cmd_notify_complete(char *inp)
-{
-    return p_autocomplete_complete(notify_ac, inp);
-}
-
-void
-cmd_notify_reset_completer(void)
-{
-    p_autocomplete_reset(notify_ac);
+    contact_list_reset_search_attempts();
+    prefs_reset_login_search();
+    prefs_reset_boolean_choice();
+    _cmd_help_reset_completer();
+    _cmd_notify_reset_completer();
+    _cmd_reset_command_completer();
+    _cmd_reset_who_completer();
 }
 
 GSList *
@@ -543,6 +565,84 @@ cmd_execute_default(const char * const inp)
     }
 
     return TRUE;
+}
+
+static char *
+_cmd_complete(char *inp)
+{
+    return p_autocomplete_complete(commands_ac, inp);
+}
+
+static void
+_cmd_reset_command_completer(void)
+{
+    p_autocomplete_reset(commands_ac);
+}
+
+static char *
+_cmd_who_complete(char *inp)
+{
+    return p_autocomplete_complete(who_ac, inp);
+}
+
+static void
+_cmd_reset_who_completer(void)
+{
+    p_autocomplete_reset(who_ac);
+}
+
+static char *
+_cmd_help_complete(char *inp)
+{
+    return p_autocomplete_complete(help_ac, inp);
+}
+
+static void
+_cmd_help_reset_completer(void)
+{
+    p_autocomplete_reset(help_ac);
+}
+
+static char *
+_cmd_notify_complete(char *inp)
+{
+    return p_autocomplete_complete(notify_ac, inp);
+}
+
+static void
+_cmd_notify_reset_completer(void)
+{
+    p_autocomplete_reset(notify_ac);
+}
+
+static void
+_cmd_complete_parameters(char *input, int *size)
+{
+    _parameter_autocomplete(input, size, "/beep",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/intype",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/flash",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/showsplash",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/chlog",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/history",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/vercheck",
+        prefs_autocomplete_boolean_choice);
+
+    _parameter_autocomplete(input, size, "/msg",
+        contact_list_find_contact);
+    _parameter_autocomplete(input, size, "/connect",
+        prefs_find_login);
+    _parameter_autocomplete(input, size, "/help",
+        _cmd_help_complete);
+    _parameter_autocomplete(input, size, "/who",
+        _cmd_who_complete);
+
+    _notify_autocomplete(input, size);
 }
 
 // The command functions
@@ -1113,4 +1213,86 @@ _cmd_get_command(const char * const command)
     }
 
     return NULL;
+}
+
+static void
+_parameter_autocomplete(char *input, int *size, char *command,
+    autocomplete_func func)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+    char *command_cpy = malloc(strlen(command) + 2);
+    sprintf(command_cpy, "%s ", command);
+    int len = strlen(command_cpy);
+    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        for(i = len; i < *size; i++) {
+            inp_cpy[i-len] = input[i];
+        }
+        inp_cpy[(*size) - len] = '\0';
+        found = func(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, command_cpy);
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
+    free(command_cpy);
+}
+
+static void
+_notify_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+
+    if ((strncmp(input, "/notify message ", 16) == 0) && (*size > 16)) {
+        for(i = 16; i < *size; i++) {
+            inp_cpy[i-16] = input[i];
+        }
+        inp_cpy[(*size) - 16] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify message ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify typing ", 15) == 0) && (*size > 15)) {
+        for(i = 15; i < *size; i++) {
+            inp_cpy[i-15] = input[i];
+        }
+        inp_cpy[(*size) - 15] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify typing ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify ", 8) == 0) && (*size > 8)) {
+        for(i = 8; i < *size; i++) {
+            inp_cpy[i-8] = input[i];
+        }
+        inp_cpy[(*size) - 8] = '\0';
+        found = _cmd_notify_complete(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((8 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
 }

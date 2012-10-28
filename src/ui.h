@@ -136,5 +136,6 @@ void inp_put_back(void);
 void inp_non_block(void);
 void inp_block(void);
 void inp_get_password(char *passwd);
+void inp_replace_input(char *input, const char * const new_input, int *size);
 
 #endif
