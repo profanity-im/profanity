@@ -390,13 +390,11 @@ _roster_handler(xmpp_conn_t * const conn,
 
             item = xmpp_stanza_get_next(item);
         }
-/*
         xmpp_stanza_t* pres;
         pres = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(pres, "presence");
         xmpp_send(conn, pres);
         xmpp_stanza_release(pres);
-*/
     }
 
     return 1;
