@@ -275,8 +275,17 @@ win_show_incomming_msg(const char * const from, const char * const message)
     // currently viewing chat window with sender
     if (win_index == _curr_prof_win) {
         _win_show_time(win);
-        _win_show_user(win, short_from, 1);
-        _win_show_message(win, message);
+
+        if (strncmp(message, "/me ", 4) == 0) {
+            wattron(win, COLOUR_ONLINE);
+            wprintw(win, "*%s ", short_from);
+            wprintw(win, message + 4);
+            wprintw(win, "\n");
+            wattroff(win, COLOUR_ONLINE);
+        } else {
+            _win_show_user(win, short_from, 1);
+            _win_show_message(win, message);
+        }
         title_bar_set_typing(FALSE);
         title_bar_draw();
         status_bar_active(win_index);
@@ -295,8 +304,16 @@ win_show_incomming_msg(const char * const from, const char * const message)
         }
 
         _win_show_time(win);
-        _win_show_user(win, short_from, 1);
-        _win_show_message(win, message);
+        if (strncmp(message, "/me ", 4) == 0) {
+            wattron(win, COLOUR_ONLINE);
+            wprintw(win, "*%s ", short_from);
+            wprintw(win, message + 4);
+            wprintw(win, "\n");
+            wattroff(win, COLOUR_ONLINE);
+        } else {
+            _win_show_user(win, short_from, 1);
+            _win_show_message(win, message);
+        }
     }
 
     if (prefs_get_beep())
@@ -423,8 +440,16 @@ win_show_outgoing_msg(const char * const from, const char * const to,
     }
 
     _win_show_time(win);
-    _win_show_user(win, from, 0);
-    _win_show_message(win, message);
+    if (strncmp(message, "/me ", 4) == 0) {
+        wattron(win, COLOUR_ONLINE);
+        wprintw(win, "*%s ", from);
+        wprintw(win, message + 4);
+        wprintw(win, "\n");
+        wattroff(win, COLOUR_ONLINE);
+    } else {
+        _win_show_user(win, from, 1);
+        _win_show_message(win, message);
+    }
     _win_switch_if_active(win_index);
 }
 
