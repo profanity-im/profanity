@@ -34,6 +34,7 @@ const char * p_contact_jid(PContact contact);
 const char * p_contact_name(PContact contact);
 const char * p_contact_presence(PContact contact);
 const char * p_contact_status(PContact contact);
+const char * p_contact_subscription(const PContact contact);
 int p_contacts_equal_deep(const PContact c1, const PContact c2);
 
 #endif

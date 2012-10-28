@@ -386,14 +386,8 @@ _roster_handler(xmpp_conn_t * const conn,
             const char *jid = xmpp_stanza_get_attribute(item, "jid");
             const char *name = xmpp_stanza_get_attribute(item, "name");
             const char *sub = xmpp_stanza_get_attribute(item, "subscription");
+            contact_list_add(jid, name, "offline", NULL, sub);
 
-            if (sub != NULL) {
-                if (strcmp(sub, "none") != 0) {
-
-                contact_list_add(jid, name, "offline", NULL, sub);
-
-                }
-            }
             item = xmpp_stanza_get_next(item);
         }
 /*

@@ -703,44 +703,56 @@ cons_show_contacts(GSList *list)
 
     while(curr) {
         PContact contact = curr->data;
+        const char *jid = p_contact_jid(contact);
+        const char *name = p_contact_name(contact);
         const char *presence = p_contact_presence(contact);
+        const char *status = p_contact_status(contact);
+        const char *sub = p_contact_subscription(contact);
 
-        _win_show_time(_cons_win);
+        if (strcmp(sub, "none") != 0) {
+            _win_show_time(_cons_win);
 
-        if (strcmp(presence, "online") == 0) {
-            wattron(_cons_win, COLOUR_ONLINE);
-        } else if (strcmp(presence, "away") == 0) {
-            wattron(_cons_win, COLOUR_AWAY);
-        } else if (strcmp(presence, "chat") == 0) {
-            wattron(_cons_win, COLOUR_CHAT);
-        } else if (strcmp(presence, "dnd") == 0) {
-            wattron(_cons_win, COLOUR_DND);
-        } else if (strcmp(presence, "xa") == 0) {
-            wattron(_cons_win, COLOUR_XA);
-        } else {
-            wattron(_cons_win, COLOUR_OFFLINE);
-        }
+            if (strcmp(presence, "online") == 0) {
+                wattron(_cons_win, COLOUR_ONLINE);
+            } else if (strcmp(presence, "away") == 0) {
+                wattron(_cons_win, COLOUR_AWAY);
+            } else if (strcmp(presence, "chat") == 0) {
+                wattron(_cons_win, COLOUR_CHAT);
+            } else if (strcmp(presence, "dnd") == 0) {
+                wattron(_cons_win, COLOUR_DND);
+            } else if (strcmp(presence, "xa") == 0) {
+                wattron(_cons_win, COLOUR_XA);
+            } else {
+                wattron(_cons_win, COLOUR_OFFLINE);
+            }
 
-        wprintw(_cons_win, "%s", p_contact_jid(contact));
-        wprintw(_cons_win, " is %s", presence);
+            wprintw(_cons_win, "%s", jid);
 
-        if (p_contact_status(contact))
-            wprintw(_cons_win, ", \"%s\"", p_contact_status(contact));
+            if (name != NULL) {
+                wprintw(_cons_win, " (%s)", name);
+            }
 
-        wprintw(_cons_win, "\n");
+            wprintw(_cons_win, " is %s", presence);
 
-        if (strcmp(presence, "online") == 0) {
-            wattroff(_cons_win, COLOUR_ONLINE);
-        } else if (strcmp(presence, "away") == 0) {
-            wattroff(_cons_win, COLOUR_AWAY);
-        } else if (strcmp(presence, "chat") == 0) {
-            wattroff(_cons_win, COLOUR_CHAT);
-        } else if (strcmp(presence, "dnd") == 0) {
-            wattroff(_cons_win, COLOUR_DND);
-        } else if (strcmp(presence, "xa") == 0) {
-            wattroff(_cons_win, COLOUR_XA);
-        } else {
-            wattroff(_cons_win, COLOUR_OFFLINE);
+            if (status != NULL) {
+                wprintw(_cons_win, ", \"%s\"", p_contact_status(contact));
+            }
+
+            wprintw(_cons_win, "\n");
+
+            if (strcmp(presence, "online") == 0) {
+                wattroff(_cons_win, COLOUR_ONLINE);
+            } else if (strcmp(presence, "away") == 0) {
+                wattroff(_cons_win, COLOUR_AWAY);
+            } else if (strcmp(presence, "chat") == 0) {
+                wattroff(_cons_win, COLOUR_CHAT);
+            } else if (strcmp(presence, "dnd") == 0) {
+                wattroff(_cons_win, COLOUR_DND);
+            } else if (strcmp(presence, "xa") == 0) {
+                wattroff(_cons_win, COLOUR_XA);
+            } else {
+                wattroff(_cons_win, COLOUR_OFFLINE);
+            }
         }
 
         curr = g_slist_next(curr);

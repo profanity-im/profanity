@@ -59,6 +59,11 @@ p_contact_new(const char * const jid, const char * const name,
     else
         contact->status = NULL;
 
+    if (subscription != NULL)
+        contact->subscription = strdup(subscription);
+    else
+        contact->subscription = NULL;
+
     return contact;
 }
 
@@ -80,6 +85,11 @@ p_contact_copy(PContact contact)
         copy->status = strdup(contact->status);
     else
         copy->status = NULL;
+
+    if (contact->subscription != NULL)
+        copy->subscription = strdup(contact->subscription);
+    else
+        copy->subscription = NULL;
 
     return copy;
 }
@@ -105,6 +115,11 @@ p_contact_free(PContact contact)
     if (contact->status != NULL) {
         free(contact->status);
         contact->status = NULL;
+    }
+
+    if (contact->subscription != NULL) {
+        free(contact->subscription);
+        contact->subscription = NULL;
     }
 
     free(contact);
@@ -135,6 +150,12 @@ p_contact_status(const PContact contact)
     return contact->status;
 }
 
+const char *
+p_contact_subscription(const PContact contact)
+{
+    return contact->subscription;
+}
+
 int
 p_contacts_equal_deep(const PContact c1, const PContact c2)
 {
@@ -142,6 +163,7 @@ p_contacts_equal_deep(const PContact c1, const PContact c2)
     int name_eq = (g_strcmp0(c1->name, c2->name) == 0);
     int presence_eq = (g_strcmp0(c1->presence, c2->presence) == 0);
     int status_eq = (g_strcmp0(c1->status, c2->status) == 0);
+    int subscription_eq = (g_strcmp0(c1->subscription, c2->subscription) == 0);
 
-    return (jid_eq && name_eq && presence_eq && status_eq);
+    return (jid_eq && name_eq && presence_eq && status_eq && subscription_eq);
 }
