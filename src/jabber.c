@@ -439,29 +439,7 @@ _presence_handler(xmpp_conn_t * const conn,
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     char *short_from = strtok(from, "/");
     char *type = xmpp_stanza_get_attribute(stanza, "type");
-
-    if (type != NULL) {
-        // allow all subscription requests for now
-        if (strcmp(type, "subscribe") == 0) {
-            xmpp_stanza_t *presence;
-
-            presence = xmpp_stanza_new(jabber_conn.ctx);
-            xmpp_stanza_set_name(presence, "presence");
-            xmpp_stanza_set_type(presence, "subscribed");
-            xmpp_stanza_set_attribute(presence, "to", short_from);
-            xmpp_send(jabber_conn.conn, presence);
-            xmpp_stanza_release(presence);
-            return 1;
-        }
-    }
-
     char *show_str, *status_str;
-
-    xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
-    if (show != NULL)
-        show_str = xmpp_stanza_get_text(show);
-    else
-        show_str = NULL;
 
     xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
     if (status != NULL)
@@ -469,11 +447,20 @@ _presence_handler(xmpp_conn_t * const conn,
     else
         status_str = NULL;
 
-    if (strcmp(short_jid, short_from) !=0) {
-        if (type == NULL) {
+    if ((type != NULL) && (strcmp(type, "unavailable") == 0)) {
+        if (strcmp(short_jid, short_from) !=0) {
+            prof_handle_contact_offline(short_from, "offline", status_str);
+        }
+    } else {
+
+        xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
+        if (show != NULL)
+            show_str = xmpp_stanza_get_text(show);
+        else
+            show_str = "online";
+
+        if (strcmp(short_jid, short_from) !=0) {
             prof_handle_contact_online(short_from, show_str, status_str);
-        } else {
-            prof_handle_contact_offline(short_from, show_str, status_str);
         }
     }
 
