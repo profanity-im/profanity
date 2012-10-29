@@ -33,6 +33,8 @@ void contact_list_reset_search_attempts(void);
 void contact_list_add(const char * const jid, const char * const name,
     const char * const presence, const char * const status,
     const char * const subscription);
+gboolean contact_list_update_contact(const char * const jid, const char * const presence,
+    const char * const status);
 GSList * get_contact_list(void);
 char * contact_list_find_contact(char *search_str);
 PContact contact_list_get_contact(const char const *jid);

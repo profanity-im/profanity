@@ -165,12 +165,15 @@ prof_handle_failed_login(void)
 void
 prof_handle_contact_online(char *contact, char *show, char *status)
 {
-    contact_list_add(contact, NULL, show, status, NULL);
-    PContact result = contact_list_get_contact(contact);
-    if (p_contact_subscription(result) != NULL) {
-        if (strcmp(p_contact_subscription(result), "none") != 0) {
-            win_contact_online(contact, show, status);
-            win_page_off();
+    gboolean updated = contact_list_update_contact(contact, show, status);
+
+    if (updated) {
+        PContact result = contact_list_get_contact(contact);
+        if (p_contact_subscription(result) != NULL) {
+            if (strcmp(p_contact_subscription(result), "none") != 0) {
+                win_contact_online(contact, show, status);
+                win_page_off();
+            }
         }
     }
 }
@@ -178,12 +181,15 @@ prof_handle_contact_online(char *contact, char *show, char *status)
 void
 prof_handle_contact_offline(char *contact, char *show, char *status)
 {
-    contact_list_add(contact, NULL, "offline", status, NULL);
-    PContact result = contact_list_get_contact(contact);
-    if (p_contact_subscription(result) != NULL) {
-        if (strcmp(p_contact_subscription(result), "none") != 0) {
-            win_contact_offline(contact, show, status);
-            win_page_off();
+    gboolean updated = contact_list_update_contact(contact, "offline", status);
+
+    if (updated) {
+        PContact result = contact_list_get_contact(contact);
+        if (p_contact_subscription(result) != NULL) {
+            if (strcmp(p_contact_subscription(result), "none") != 0) {
+                win_contact_offline(contact, show, status);
+                win_page_off();
+            }
         }
     }
 }

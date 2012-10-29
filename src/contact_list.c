@@ -25,6 +25,7 @@
 #include <glib.h>
 
 #include "contact.h"
+#include "log.h"
 #include "prof_autocomplete.h"
 
 static PAutocomplete ac;
@@ -60,56 +61,39 @@ contact_list_add(const char * const jid, const char * const name,
 {
     PContact contact = g_hash_table_lookup(contacts, jid);
 
-    // contact not yet in list
     if (contact == NULL) {
         contact = p_contact_new(jid, name, presence, status, subscription);
         g_hash_table_insert(contacts, strdup(jid), contact);
-
-    // contact already exists, update non NULL arguments
     } else {
-        char *new_name = NULL;
-        if (name != NULL) {
-            new_name = strdup(name);
-        } else {
-            if (p_contact_name(contact) != NULL) {
-                new_name = strdup(p_contact_name(contact));
-            }
-        }
-
-        char *new_presence = NULL;
-        if (presence != NULL) {
-            new_presence = strdup(presence);
-        } else {
-            if (p_contact_presence(contact) != NULL) {
-                new_presence = strdup(p_contact_presence(contact));
-            }
-        }
-
-        char *new_status = NULL;
-        if (status != NULL) {
-            new_status = strdup(status);
-        } else {
-            if (p_contact_status(contact) != NULL) {
-                new_status = strdup(p_contact_status(contact));
-            }
-        }
-
-        char *new_subscription = NULL;
-        if (subscription != NULL) {
-            new_subscription = strdup(subscription);
-        } else {
-            if (p_contact_subscription(contact) != NULL) {
-                new_subscription = strdup(p_contact_subscription(contact));
-            }
-        }
-
-        PContact new_contact = p_contact_new(jid, new_name, new_presence,
-                new_status, new_subscription);
-
-        g_hash_table_replace(contacts, strdup(jid), new_contact);
+        log_warning("Duplicate roster entry: %s", jid);
     }
 
     p_autocomplete_add(ac, strdup(jid));
+}
+
+gboolean
+contact_list_update_contact(const char * const jid, const char * const presence,
+    const char * const status)
+{
+    gboolean changed = FALSE;
+    PContact contact = g_hash_table_lookup(contacts, jid);
+
+    if (contact == NULL) {
+        log_warning("Contact not in list: %s", jid);
+        return FALSE;
+    }
+
+    if (g_strcmp0(p_contact_presence(contact), presence) != 0) {
+        p_contact_set_presence(contact, presence);
+        changed = TRUE;
+    }
+
+    if (g_strcmp0(p_contact_status(contact), status) != 0) {
+        p_contact_set_status(contact, status);
+        changed = TRUE;
+    }
+
+    return changed;
 }
 
 GSList *

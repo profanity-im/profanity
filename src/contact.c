@@ -156,6 +156,36 @@ p_contact_subscription(const PContact contact)
     return contact->subscription;
 }
 
+void
+p_contact_set_presence(const PContact contact, const char * const presence)
+{
+    if (contact->presence != NULL) {
+        free(contact->presence);
+        contact->presence = NULL;
+    }
+
+    if (presence == NULL) {
+        contact->presence = NULL;
+    } else {
+        contact->presence = strdup(presence);
+    }
+}
+
+void
+p_contact_set_status(const PContact contact, const char * const status)
+{
+    if (contact->status != NULL) {
+        free(contact->status);
+        contact->status = NULL;
+    }
+
+    if (status == NULL) {
+        contact->status = NULL;
+    } else {
+        contact->status = strdup(status);
+    }
+}
+
 int
 p_contacts_equal_deep(const PContact c1, const PContact c2)
 {
