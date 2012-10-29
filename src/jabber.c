@@ -386,7 +386,11 @@ _roster_handler(xmpp_conn_t * const conn,
             const char *jid = xmpp_stanza_get_attribute(item, "jid");
             const char *name = xmpp_stanza_get_attribute(item, "name");
             const char *sub = xmpp_stanza_get_attribute(item, "subscription");
-            contact_list_add(jid, name, "offline", NULL, sub);
+            gboolean added = contact_list_add(jid, name, "offline", NULL, sub);
+
+            if (!added) {
+                log_warning("Attempt to add contact twice: %s", jid);
+            }
 
             item = xmpp_stanza_get_next(item);
         }

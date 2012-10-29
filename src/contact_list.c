@@ -54,21 +54,22 @@ contact_list_reset_search_attempts(void)
     p_autocomplete_reset(ac);
 }
 
-void
+gboolean
 contact_list_add(const char * const jid, const char * const name,
     const char * const presence, const char * const status,
     const char * const subscription)
 {
+    gboolean added = FALSE;
     PContact contact = g_hash_table_lookup(contacts, jid);
 
     if (contact == NULL) {
         contact = p_contact_new(jid, name, presence, status, subscription);
         g_hash_table_insert(contacts, strdup(jid), contact);
-    } else {
-        log_warning("Duplicate roster entry: %s", jid);
+        p_autocomplete_add(ac, strdup(jid));
+        added = TRUE;
     }
 
-    p_autocomplete_add(ac, strdup(jid));
+    return added;
 }
 
 gboolean
