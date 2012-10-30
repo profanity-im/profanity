@@ -441,13 +441,13 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 
     _win_show_time(win);
     if (strncmp(message, "/me ", 4) == 0) {
-        wattron(win, COLOUR_ONLINE);
+        wattron(win, COLOUR_INC);
         wprintw(win, "*%s ", from);
         wprintw(win, message + 4);
         wprintw(win, "\n");
-        wattroff(win, COLOUR_ONLINE);
+        wattroff(win, COLOUR_INC);
     } else {
-        _win_show_user(win, from, 1);
+        _win_show_user(win, from, 0);
         _win_show_message(win, message);
     }
     _win_switch_if_active(win_index);
