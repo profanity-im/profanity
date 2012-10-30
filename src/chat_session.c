@@ -52,6 +52,18 @@ chat_sessions_clear(void)
     g_hash_table_remove_all(sessions);
 }
 
+gboolean
+chat_session_exists(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session != NULL) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
 void
 chat_session_start(const char * const recipient, gboolean recipient_supports)
 {
