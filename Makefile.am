@@ -14,7 +14,7 @@ check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = tests/test_contact_list.c src/contact_list.c src/contact.c \
 	tests/test_common.c tests/test_prof_history.c src/prof_history.c src/common.c \
 	tests/test_prof_autocomplete.c src/prof_autocomplete.c tests/testsuite.c \
-	tests/test_chat_session.c src/chat_session.c
+	tests/test_chat_session.c src/chat_session.c src/log.c
 tests_testsuite_LDADD = -lheadunit -lstdc++
 
 man_MANS = docs/profanity.1

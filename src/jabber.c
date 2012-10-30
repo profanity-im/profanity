@@ -25,7 +25,9 @@
 
 #include <strophe.h>
 
+#include "chat_session.h"
 #include "common.h"
+#include "contact_list.h"
 #include "jabber.h"
 #include "log.h"
 #include "preferences.h"
@@ -48,6 +50,8 @@ static void _xmpp_file_logger(void * const userdata,
     const xmpp_log_level_t level, const char * const area,
     const char * const msg);
 static xmpp_log_t * _xmpp_get_file_logger();
+
+static void _jabber_roster_request(void);
 
 // XMPP event handlers
 static void _connection_handler(xmpp_conn_t * const conn,
@@ -165,23 +169,16 @@ jabber_send(const char * const msg, const char * const recipient)
 }
 
 void
-jabber_roster_request(void)
+jabber_subscribe(const char * const recipient)
 {
-    xmpp_stanza_t *iq, *query;
+    xmpp_stanza_t *presence;
 
-    iq = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(iq, "iq");
-    xmpp_stanza_set_type(iq, "get");
-    xmpp_stanza_set_id(iq, "roster");
-
-    query = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(query, "query");
-    xmpp_stanza_set_ns(query, XMPP_NS_ROSTER);
-
-    xmpp_stanza_add_child(iq, query);
-    xmpp_stanza_release(query);
-    xmpp_send(jabber_conn.conn, iq);
-    xmpp_stanza_release(iq);
+    presence = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(presence, "presence");
+    xmpp_stanza_set_type(presence, "subscribe");
+    xmpp_stanza_set_attribute(presence, "to", recipient);
+    xmpp_send(jabber_conn.conn, presence);
+    xmpp_stanza_release(presence);
 }
 
 void
@@ -248,9 +245,30 @@ jabber_get_jid(void)
 void
 jabber_free_resources(void)
 {
+    chat_sessions_clear();
     xmpp_conn_release(jabber_conn.conn);
     xmpp_ctx_free(jabber_conn.ctx);
     xmpp_shutdown();
+}
+
+static void
+_jabber_roster_request(void)
+{
+    xmpp_stanza_t *iq, *query;
+
+    iq = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(iq, "iq");
+    xmpp_stanza_set_type(iq, "get");
+    xmpp_stanza_set_id(iq, "roster");
+
+    query = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(query, "query");
+    xmpp_stanza_set_ns(query, XMPP_NS_ROSTER);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+    xmpp_send(jabber_conn.conn, iq);
+    xmpp_stanza_release(iq);
 }
 
 static int
@@ -319,21 +337,16 @@ _connection_handler(xmpp_conn_t * const conn,
     if (status == XMPP_CONN_CONNECT) {
         const char *jid = xmpp_conn_get_jid(conn);
         prof_handle_login_success(jid);
+        chat_sessions_init();
 
-        xmpp_stanza_t* pres;
         xmpp_handler_add(conn, _message_handler, NULL, "message", NULL, ctx);
         xmpp_handler_add(conn, _presence_handler, NULL, "presence", NULL, ctx);
         xmpp_id_handler_add(conn, _roster_handler, "roster", ctx);
         xmpp_timed_handler_add(conn, _ping_timed_handler, PING_INTERVAL, ctx);
 
-        pres = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(pres, "presence");
-        xmpp_send(conn, pres);
-        xmpp_stanza_release(pres);
-
+        _jabber_roster_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
         jabber_conn.presence = PRESENCE_ONLINE;
-        jabber_roster_request();
     } else {
 
         // received close stream response from server after disconnect
@@ -362,6 +375,7 @@ static int
 _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
     xmpp_stanza_t *query, *item;
     char *type = xmpp_stanza_get_type(stanza);
 
@@ -369,27 +383,25 @@ _roster_handler(xmpp_conn_t * const conn,
         log_error("Roster query failed");
     else {
         query = xmpp_stanza_get_child_by_name(stanza, "query");
-        GSList *roster = NULL;
         item = xmpp_stanza_get_children(query);
 
         while (item != NULL) {
-            const char *name = xmpp_stanza_get_attribute(item, "name");
             const char *jid = xmpp_stanza_get_attribute(item, "jid");
+            const char *name = xmpp_stanza_get_attribute(item, "name");
+            const char *sub = xmpp_stanza_get_attribute(item, "subscription");
+            gboolean added = contact_list_add(jid, name, "offline", NULL, sub);
 
-            jabber_roster_entry *entry = malloc(sizeof(jabber_roster_entry));
-
-            if (name != NULL) {
-                entry->name = strdup(name);
-            } else {
-                entry->name = NULL;
+            if (!added) {
+                log_warning("Attempt to add contact twice: %s", jid);
             }
-            entry->jid = strdup(jid);
 
-            roster = g_slist_append(roster, entry);
             item = xmpp_stanza_get_next(item);
         }
-
-        prof_handle_roster(roster);
+        xmpp_stanza_t* pres;
+        pres = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(pres, "presence");
+        xmpp_send(conn, pres);
+        xmpp_stanza_release(pres);
     }
 
     return 1;
@@ -434,14 +446,7 @@ _presence_handler(xmpp_conn_t * const conn,
     char *from = xmpp_stanza_get_attribute(stanza, "from");
     char *short_from = strtok(from, "/");
     char *type = xmpp_stanza_get_attribute(stanza, "type");
-
     char *show_str, *status_str;
-
-    xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
-    if (show != NULL)
-        show_str = xmpp_stanza_get_text(show);
-    else
-        show_str = NULL;
 
     xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
     if (status != NULL)
@@ -449,11 +454,20 @@ _presence_handler(xmpp_conn_t * const conn,
     else
         status_str = NULL;
 
-    if (strcmp(short_jid, short_from) !=0) {
-        if (type == NULL) {
+    if ((type != NULL) && (strcmp(type, "unavailable") == 0)) {
+        if (strcmp(short_jid, short_from) !=0) {
+            prof_handle_contact_offline(short_from, "offline", status_str);
+        }
+    } else {
+
+        xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
+        if (show != NULL)
+            show_str = xmpp_stanza_get_text(show);
+        else
+            show_str = "online";
+
+        if (strcmp(short_jid, short_from) !=0) {
             prof_handle_contact_online(short_from, show_str, status_str);
-        } else {
-            prof_handle_contact_offline(short_from, show_str, status_str);
         }
     }
 

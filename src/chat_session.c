@@ -1,8 +1,8 @@
-/* 
+/*
  * chat_session.c
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
- * 
+ *
  * This file is part of Profanity.
  *
  * Profanity is free software: you can redistribute it and/or modify
@@ -26,30 +26,37 @@
 #include <glib.h>
 
 #include "chat_session.h"
+#include "log.h"
 
-static ChatSession _chat_session_new(const char * const recipient);
+static ChatSession _chat_session_new(const char * const recipient,
+    gboolean recipient_supports);
 static void _chat_session_free(ChatSession session);
 
 struct chat_session_t {
     char *recipient;
-    chat_state_t state;
-    gboolean sent;
+    gboolean recipient_supports;
 };
 
 static GHashTable *sessions;
 
 void
-chat_session_init(void)
+chat_sessions_init(void)
 {
-    sessions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, 
+    sessions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)_chat_session_free);
 }
 
 void
-chat_session_start(const char * const recipient)
+chat_sessions_clear(void)
+{
+    g_hash_table_remove_all(sessions);
+}
+
+void
+chat_session_start(const char * const recipient, gboolean recipient_supports)
 {
     char *key = strdup(recipient);
-    ChatSession session = _chat_session_new(key);
+    ChatSession session = _chat_session_new(key, recipient_supports);
     g_hash_table_insert(sessions, key, session);
 }
 
@@ -59,46 +66,26 @@ chat_session_end(const char * const recipient)
     g_hash_table_remove(sessions, recipient);
 }
 
-chat_state_t
-chat_session_get_state(const char * const recipient)
+gboolean
+chat_session_recipient_supports(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
+
     if (session == NULL) {
-        return SESSION_ERR;
+        log_error("No chat session found for %s.", recipient);
+        return FALSE;
     } else {
-        return session->state;
+        return session->recipient_supports;
     }
 }
 
-void
-chat_session_set_state(const char * const recipient, chat_state_t state)
-{
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
-    session->state = state;
-}
-
-gboolean
-chat_session_get_sent(const char * const recipient)
-{
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
-    return session->sent;
-}
-
-void
-chat_session_sent(const char * const recipient)
-{
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
-    session->sent = TRUE;
-}
-
 static ChatSession
-_chat_session_new(const char * const recipient)
+_chat_session_new(const char * const recipient, gboolean recipient_supports)
 {
     ChatSession new_session = malloc(sizeof(struct chat_session_t));
     new_session->recipient = strdup(recipient);
-    new_session->state = ACTIVE;
-    new_session->sent = FALSE;
-    
+    new_session->recipient_supports = recipient_supports;
+
     return new_session;
 }
 

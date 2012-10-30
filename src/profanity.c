@@ -41,7 +41,6 @@
 static log_level_t _get_log_level(char *log_level);
 static gboolean _process_input(char *inp);
 static void _create_config_directory();
-static void _free_roster_entry(jabber_roster_entry *entry);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
 
@@ -168,38 +167,33 @@ prof_handle_failed_login(void)
 void
 prof_handle_contact_online(char *contact, char *show, char *status)
 {
-    gboolean result = contact_list_add(contact, show, status);
-    if (result) {
-        win_contact_online(contact, show, status);
+    gboolean updated = contact_list_update_contact(contact, show, status);
+
+    if (updated) {
+        PContact result = contact_list_get_contact(contact);
+        if (p_contact_subscription(result) != NULL) {
+            if (strcmp(p_contact_subscription(result), "none") != 0) {
+                win_contact_online(contact, show, status);
+                win_page_off();
+            }
+        }
     }
-    win_page_off();
 }
 
 void
 prof_handle_contact_offline(char *contact, char *show, char *status)
 {
-    gboolean result = contact_list_add(contact, "offline", status);
-    if (result) {
-        win_contact_offline(contact, show, status);
-    }
-    win_page_off();
-}
+    gboolean updated = contact_list_update_contact(contact, "offline", status);
 
-void
-prof_handle_roster(GSList *roster)
-{
-    while (roster != NULL) {
-        jabber_roster_entry *entry = roster->data;
-
-        // if contact not in contact list add them as offline
-        if (contact_list_find_contact(entry->jid) == NULL) {
-            contact_list_add(entry->jid, "offline", NULL);
+    if (updated) {
+        PContact result = contact_list_get_contact(contact);
+        if (p_contact_subscription(result) != NULL) {
+            if (strcmp(p_contact_subscription(result), "none") != 0) {
+                win_contact_offline(contact, show, status);
+                win_page_off();
+            }
         }
-
-        roster = g_slist_next(roster);
     }
-
-    g_slist_free_full(roster, (GDestroyNotify)_free_roster_entry);
 }
 
 static void
@@ -209,16 +203,6 @@ _create_config_directory(void)
     g_string_append(dir, "/.profanity");
     create_dir(dir->str);
     g_string_free(dir, TRUE);
-}
-
-static void
-_free_roster_entry(jabber_roster_entry *entry)
-{
-    if (entry->name != NULL) {
-        free(entry->name);
-        entry->name = NULL;
-    }
-    free(entry->jid);
 }
 
 static log_level_t
