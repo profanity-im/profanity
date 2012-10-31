@@ -56,6 +56,8 @@ gboolean prefs_get_vercheck(void);
 void prefs_set_vercheck(gboolean value);
 gboolean prefs_get_intype(void);
 void prefs_set_intype(gboolean value);
+gboolean prefs_get_states(void);
+void prefs_set_states(gboolean value);
 
 void prefs_set_notify_message(gboolean value);
 gboolean prefs_get_notify_message(void);

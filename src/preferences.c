@@ -236,6 +236,19 @@ prefs_set_beep(gboolean value)
 }
 
 gboolean
+prefs_get_states(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "states", NULL);
+}
+
+void
+prefs_set_states(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "states", value);
+    _save_prefs();
+}
+
+gboolean
 prefs_get_notify_typing(void)
 {
     return g_key_file_get_boolean(prefs, "notifications", "typing", NULL);

@@ -94,6 +94,7 @@ static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_history(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_states(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_vercheck(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
@@ -331,7 +332,25 @@ static struct cmd_t setting_commands[] =
           "to myfriend@chatserv.com, the following chat log will be created:",
           "",
           "    ~/.profanity/log/someuser_at_chatserv.com/myfriend_at_chatserv.com",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   chlog=true|false",
           NULL } } },
+
+    { "/states",
+        _cmd_set_states,
+        { "/states on|off", "Send chat states during a chat session.",
+        { "/states on|off",
+          "--------------",
+          "Sending of chat state notifications during chat sessions.",
+          "Enabling this will send information about your activity during a chat",
+          "session with somebody, such as whether you have become inactive, or",
+          "have close the chat window.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   states=true|false",
+          NULL } } },
+
 
     { "/history",
         _cmd_set_history,
@@ -343,6 +362,9 @@ static struct cmd_t setting_commands[] =
           "The last day of messages are shown, or if you have had profanity open",
           "for more than a day, messages will be shown from the day which",
           "you started profanity.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   history=true|false",
           NULL } } }
 };
 
@@ -1010,6 +1032,13 @@ _cmd_set_beep(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/beep",
         "Sound", prefs_set_beep);
+}
+
+static gboolean
+_cmd_set_states(const char * const inp, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(inp, help, "/states",
+        "Sending chat states", prefs_set_states);
 }
 
 static gboolean
