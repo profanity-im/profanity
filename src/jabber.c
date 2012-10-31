@@ -164,6 +164,7 @@ jabber_send(const char * const msg, const char * const recipient)
 
         // always send <active/> with messages when recipient supports chat states
         if (chat_session_get_recipient_supports(recipient)) {
+            chat_session_set_active(recipient);
             active = xmpp_stanza_new(jabber_conn.ctx);
             xmpp_stanza_set_name(active, "active");
             xmpp_stanza_set_ns(active, "http://jabber.org/protocol/chatstates");
@@ -195,6 +196,48 @@ jabber_send_inactive(const char * const recipient)
     xmpp_stanza_set_name(inactive, "inactive");
     xmpp_stanza_set_ns(inactive, "http://jabber.org/protocol/chatstates");
     xmpp_stanza_add_child(message, inactive);
+
+    xmpp_send(jabber_conn.conn, message);
+    xmpp_stanza_release(message);
+
+    chat_session_set_sent(recipient);
+}
+
+void
+jabber_send_composing(const char * const recipient)
+{
+    xmpp_stanza_t *message, *composing;
+
+    message = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(message, "message");
+    xmpp_stanza_set_type(message, "chat");
+    xmpp_stanza_set_attribute(message, "to", recipient);
+
+    composing = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(composing, "composing");
+    xmpp_stanza_set_ns(composing, "http://jabber.org/protocol/chatstates");
+    xmpp_stanza_add_child(message, composing);
+
+    xmpp_send(jabber_conn.conn, message);
+    xmpp_stanza_release(message);
+
+    chat_session_set_sent(recipient);
+}
+
+void
+jabber_send_paused(const char * const recipient)
+{
+    xmpp_stanza_t *message, *paused;
+
+    message = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(message, "message");
+    xmpp_stanza_set_type(message, "chat");
+    xmpp_stanza_set_attribute(message, "to", recipient);
+
+    paused = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(paused, "paused");
+    xmpp_stanza_set_ns(paused, "http://jabber.org/protocol/chatstates");
+    xmpp_stanza_add_child(message, paused);
 
     xmpp_send(jabber_conn.conn, message);
     xmpp_stanza_release(message);

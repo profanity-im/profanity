@@ -28,6 +28,7 @@
 #include "chat_session.h"
 #include "log.h"
 
+#define PAUSED_TIMOUT 10.0
 #define INACTIVE_TIMOUT 120.0
 #define GONE_TIMOUT 600.0
 
@@ -38,6 +39,8 @@ static void _chat_session_free(ChatSession session);
 typedef enum {
     CHAT_STATE_STARTED,
     CHAT_STATE_ACTIVE,
+    CHAT_STATE_PAUSED,
+    CHAT_STATE_COMPOSING,
     CHAT_STATE_INACTIVE,
     CHAT_STATE_GONE
 } chat_state_t;
@@ -85,14 +88,17 @@ chat_session_start(const char * const recipient, gboolean recipient_supports)
 }
 
 void
-chat_session_set_active(const char * const recipient)
+chat_session_set_composing(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
         log_error("No chat session found for %s.", recipient);
     } else {
-        session->state = CHAT_STATE_ACTIVE;
+        if (session->state != CHAT_STATE_COMPOSING) {
+            session->sent = FALSE;
+        }
+        session->state = CHAT_STATE_COMPOSING;
         g_timer_start(session->active_timer);
     }
 }
@@ -118,6 +124,11 @@ chat_session_no_activity(const char * const recipient)
                     session->sent = FALSE;
                 }
                 session->state = CHAT_STATE_INACTIVE;
+            } else if (elapsed > PAUSED_TIMOUT) {
+                if (session->state != CHAT_STATE_PAUSED) {
+                    session->sent = FALSE;
+                }
+                session->state = CHAT_STATE_PAUSED;
             }
         }
     }
@@ -164,6 +175,32 @@ chat_session_inactive(const char * const recipient)
         return FALSE;
     } else {
         return (session->state == CHAT_STATE_INACTIVE);
+    }
+}
+
+void
+chat_session_set_active(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+    } else {
+        session->state = CHAT_STATE_ACTIVE;
+        session->sent = FALSE;
+    }
+}
+
+gboolean
+chat_session_paused(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+        return FALSE;
+    } else {
+        return (session->state == CHAT_STATE_PAUSED);
     }
 }
 

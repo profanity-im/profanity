@@ -152,6 +152,9 @@ inp_get_char(int *ch, char *input, int *size)
                 } else if (chat_session_inactive(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     jabber_send_inactive(recipient);
+                } else if (chat_session_paused(recipient) &&
+                        !chat_session_get_sent(recipient)) {
+                    jabber_send_paused(recipient);
                 }
             }
         }
@@ -160,7 +163,11 @@ inp_get_char(int *ch, char *input, int *size)
         if (*ch != ERR) {
             if (win_in_chat()) {
                 char *recipient = win_get_recipient();
-                chat_session_set_active(recipient);
+                chat_session_set_composing(recipient);
+                if (!chat_session_get_sent(recipient) ||
+                        chat_session_paused(recipient)) {
+                    jabber_send_composing(recipient);
+                }
             }
         }
     }
