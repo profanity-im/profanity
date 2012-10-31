@@ -83,7 +83,7 @@ void title_bar_set_typing(gboolean is_typing);
 void title_bar_draw(void);
 
 // main window actions
-int win_close_win(void);
+void win_close_win(void);
 int win_in_chat(void);
 char *win_get_recipient(void);
 void win_show_typing(const char * const from);

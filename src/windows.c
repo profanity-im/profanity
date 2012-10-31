@@ -171,30 +171,22 @@ gui_resize(const int ch, const char * const input, const int size)
     dirty = TRUE;
 }
 
-int
+void
 win_close_win(void)
 {
-    if (win_in_chat()) {
-        // reset the chat win to unused
-        strcpy(_wins[_curr_prof_win].from, "");
-        wclear(_wins[_curr_prof_win].win);
-        _wins[_curr_prof_win].history_shown = 0;
+    // reset the chat win to unused
+    strcpy(_wins[_curr_prof_win].from, "");
+    wclear(_wins[_curr_prof_win].win);
+    _wins[_curr_prof_win].history_shown = 0;
 
-        // set it as inactive in the status bar
-        status_bar_inactive(_curr_prof_win);
+    // set it as inactive in the status bar
+    status_bar_inactive(_curr_prof_win);
 
-        // go back to console window
-        _curr_prof_win = 0;
-        title_bar_title();
+    // go back to console window
+    _curr_prof_win = 0;
+    title_bar_title();
 
-        dirty = TRUE;
-
-        // success
-        return 1;
-    } else {
-        // didn't close anything
-        return 0;
-    }
+    dirty = TRUE;
 }
 
 int
