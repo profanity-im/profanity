@@ -137,8 +137,10 @@ jabber_process_events(void)
 void
 jabber_send(const char * const msg, const char * const recipient)
 {
-    if (!chat_session_exists(recipient)) {
-        chat_session_start(recipient, TRUE);
+    if (prefs_get_states()) {
+        if (!chat_session_exists(recipient)) {
+            chat_session_start(recipient, TRUE);
+        }
     }
 
     char *coded_msg = str_replace(msg, "&", "&amp;");
@@ -158,12 +160,15 @@ jabber_send(const char * const msg, const char * const recipient)
     text = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_text(text, coded_msg3);
 
-    // always send <active/> with messages when recipient supports chat states
-    if (chat_session_get_recipient_supports(recipient)) {
-        active = xmpp_stanza_new(jabber_conn.ctx);
-        xmpp_stanza_set_name(active, "active");
-        xmpp_stanza_set_ns(active, "http://jabber.org/protocol/chatstates");
-        xmpp_stanza_add_child(reply, active);
+    if (prefs_get_states()) {
+
+        // always send <active/> with messages when recipient supports chat states
+        if (chat_session_get_recipient_supports(recipient)) {
+            active = xmpp_stanza_new(jabber_conn.ctx);
+            xmpp_stanza_set_name(active, "active");
+            xmpp_stanza_set_ns(active, "http://jabber.org/protocol/chatstates");
+            xmpp_stanza_add_child(reply, active);
+        }
     }
 
     xmpp_stanza_add_child(body, text);

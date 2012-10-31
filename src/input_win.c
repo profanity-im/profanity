@@ -137,28 +137,31 @@ inp_get_char(int *ch, char *input, int *size)
     noecho();
     *ch = wgetch(inp_win);
 
-    // if not got char, and in chat window, flag as no activity
-    // send inactive or gone, depending how long inactive
-    if (*ch == ERR) {
-        if (win_in_chat()) {
-            char *recipient = win_get_recipient();
-            chat_session_no_activity(recipient);
+    if (prefs_get_states()) {
 
-            if (chat_session_gone(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                jabber_send_gone(recipient);
-            } else if (chat_session_inactive(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                jabber_send_inactive(recipient);
+        // if not got char, and in chat window, flag as no activity
+        // send inactive or gone, depending how long inactive
+        if (*ch == ERR) {
+            if (win_in_chat()) {
+                char *recipient = win_get_recipient();
+                chat_session_no_activity(recipient);
+
+                if (chat_session_gone(recipient) &&
+                        !chat_session_get_sent(recipient)) {
+                    jabber_send_gone(recipient);
+                } else if (chat_session_inactive(recipient) &&
+                        !chat_session_get_sent(recipient)) {
+                    jabber_send_inactive(recipient);
+                }
             }
         }
-    }
 
-    // if got char and in chat window, chat session active
-    if (*ch != ERR) {
-        if (win_in_chat()) {
-            char *recipient = win_get_recipient();
-            chat_session_set_active(recipient);
+        // if got char and in chat window, chat session active
+        if (*ch != ERR) {
+            if (win_in_chat()) {
+                char *recipient = win_get_recipient();
+                chat_session_set_active(recipient);
+            }
         }
     }
 

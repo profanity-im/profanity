@@ -1009,13 +1009,16 @@ static gboolean
 _cmd_close(const char * const inp, struct cmd_help_t help)
 {
     if (win_in_chat()) {
-        char *recipient = win_get_recipient();
 
-        // send <gone/> chat state before closing
-        if (chat_session_get_recipient_supports(recipient)) {
-            chat_session_gone(recipient);
-            jabber_send_gone(recipient);
-            chat_session_end(recipient);
+        if (prefs_get_states()) {
+            char *recipient = win_get_recipient();
+
+            // send <gone/> chat state before closing
+            if (chat_session_get_recipient_supports(recipient)) {
+                chat_session_gone(recipient);
+                jabber_send_gone(recipient);
+                chat_session_end(recipient);
+            }
         }
 
         win_close_win();
