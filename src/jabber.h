@@ -47,6 +47,8 @@ void jabber_disconnect(void);
 void jabber_process_events(void);
 void jabber_subscribe(const char * const recipient);
 void jabber_send(const char * const msg, const char * const recipient);
+void jabber_send_inactive(const char * const recipient);
+void jabber_send_gone(const char * const recipient);
 void jabber_update_presence(jabber_presence_t status, const char * const msg);
 const char * jabber_get_jid(void);
 jabber_conn_status_t jabber_get_connection_status(void);

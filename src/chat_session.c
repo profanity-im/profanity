@@ -28,13 +28,26 @@
 #include "chat_session.h"
 #include "log.h"
 
+#define INACTIVE_TIMOUT 10.0
+#define GONE_TIMOUT 20.0
+
 static ChatSession _chat_session_new(const char * const recipient,
     gboolean recipient_supports);
 static void _chat_session_free(ChatSession session);
 
+typedef enum {
+    CHAT_STATE_STARTED,
+    CHAT_STATE_ACTIVE,
+    CHAT_STATE_INACTIVE,
+    CHAT_STATE_GONE
+} chat_state_t;
+
 struct chat_session_t {
     char *recipient;
     gboolean recipient_supports;
+    chat_state_t state;
+    GTimer *active_timer;
+    gboolean sent;
 };
 
 static GHashTable *sessions;
@@ -67,15 +80,104 @@ chat_session_exists(const char * const recipient)
 void
 chat_session_start(const char * const recipient, gboolean recipient_supports)
 {
-    char *key = strdup(recipient);
-    ChatSession session = _chat_session_new(key, recipient_supports);
-    g_hash_table_insert(sessions, key, session);
+    ChatSession session = _chat_session_new(recipient, recipient_supports);
+    g_hash_table_insert(sessions, strdup(recipient), session);
+}
+
+void
+chat_session_set_active(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+    } else {
+        session->state = CHAT_STATE_ACTIVE;
+        g_timer_start(session->active_timer);
+    }
+}
+
+void
+chat_session_no_activity(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+    } else {
+        if (session->active_timer != NULL) {
+            gdouble elapsed = g_timer_elapsed(session->active_timer, NULL);
+
+            if (elapsed > GONE_TIMOUT) {
+                if (session->state != CHAT_STATE_GONE) {
+                    session->sent = FALSE;
+                }
+                session->state = CHAT_STATE_GONE;
+            } else if (elapsed > INACTIVE_TIMOUT) {
+                if (session->state != CHAT_STATE_INACTIVE) {
+                    session->sent = FALSE;
+                }
+                session->state = CHAT_STATE_INACTIVE;
+            }
+        }
+    }
+}
+
+void
+chat_session_set_sent(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+    } else {
+        session->sent = TRUE;
+    }
+}
+
+gboolean
+chat_session_get_sent(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+        return FALSE;
+    } else {
+        return session->sent;
+    }
 }
 
 void
 chat_session_end(const char * const recipient)
 {
     g_hash_table_remove(sessions, recipient);
+}
+
+gboolean
+chat_session_inactive(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+        return FALSE;
+    } else {
+        return (session->state == CHAT_STATE_INACTIVE);
+    }
+}
+
+gboolean
+chat_session_gone(const char * const recipient)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+        return FALSE;
+    } else {
+        return (session->state == CHAT_STATE_GONE);
+    }
 }
 
 gboolean
@@ -97,6 +199,9 @@ _chat_session_new(const char * const recipient, gboolean recipient_supports)
     ChatSession new_session = malloc(sizeof(struct chat_session_t));
     new_session->recipient = strdup(recipient);
     new_session->recipient_supports = recipient_supports;
+    new_session->state = CHAT_STATE_STARTED;
+    new_session->active_timer = g_timer_new();
+    new_session->sent = FALSE;
 
     return new_session;
 }
@@ -105,7 +210,14 @@ static void
 _chat_session_free(ChatSession session)
 {
     if (session != NULL) {
-        g_free(session->recipient);
+        if (session->recipient != NULL) {
+            g_free(session->recipient);
+            session->recipient = NULL;
+        }
+        if (session->active_timer != NULL) {
+            g_timer_destroy(session->active_timer);
+            session->active_timer = NULL;
+        }
         g_free(session);
     }
     session = NULL;

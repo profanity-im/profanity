@@ -51,10 +51,12 @@
 #include <ncurses/ncurses.h>
 #endif
 
+#include "chat_session.h"
 #include "common.h"
 #include "command.h"
 #include "contact_list.h"
 #include "history.h"
+#include "log.h"
 #include "preferences.h"
 #include "ui.h"
 
@@ -134,6 +136,31 @@ inp_get_char(int *ch, char *input, int *size)
     // echo off, and get some more input
     noecho();
     *ch = wgetch(inp_win);
+
+    // if not got char, and in chat window, flag as no activity
+    // send inactive or gone, depending how long inactive
+    if (*ch == ERR) {
+        if (win_in_chat()) {
+            char *recipient = win_get_recipient();
+            chat_session_no_activity(recipient);
+
+            if (chat_session_gone(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                jabber_send_gone(recipient);
+            } else if (chat_session_inactive(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                jabber_send_inactive(recipient);
+            }
+        }
+    }
+
+    // if got char and in chat window, chat session active
+    if (*ch != ERR) {
+        if (win_in_chat()) {
+            char *recipient = win_get_recipient();
+            chat_session_set_active(recipient);
+        }
+    }
 
     // if it wasn't an arrow key etc
     if (!_handle_edit(*ch, input, size)) {

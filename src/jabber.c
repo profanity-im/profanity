@@ -176,6 +176,48 @@ jabber_send(const char * const msg, const char * const recipient)
 }
 
 void
+jabber_send_inactive(const char * const recipient)
+{
+    xmpp_stanza_t *message, *inactive;
+
+    message = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(message, "message");
+    xmpp_stanza_set_type(message, "chat");
+    xmpp_stanza_set_attribute(message, "to", recipient);
+
+    inactive = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(inactive, "inactive");
+    xmpp_stanza_set_ns(inactive, "http://jabber.org/protocol/chatstates");
+    xmpp_stanza_add_child(message, inactive);
+
+    xmpp_send(jabber_conn.conn, message);
+    xmpp_stanza_release(message);
+
+    chat_session_set_sent(recipient);
+}
+
+void
+jabber_send_gone(const char * const recipient)
+{
+    xmpp_stanza_t *message, *gone;
+
+    message = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(message, "message");
+    xmpp_stanza_set_type(message, "chat");
+    xmpp_stanza_set_attribute(message, "to", recipient);
+
+    gone = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(gone, "gone");
+    xmpp_stanza_set_ns(gone, "http://jabber.org/protocol/chatstates");
+    xmpp_stanza_add_child(message, gone);
+
+    xmpp_send(jabber_conn.conn, message);
+    xmpp_stanza_release(message);
+
+    chat_session_set_sent(recipient);
+}
+
+void
 jabber_subscribe(const char * const recipient)
 {
     xmpp_stanza_t *presence;
