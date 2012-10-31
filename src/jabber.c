@@ -158,7 +158,8 @@ jabber_send(const char * const msg, const char * const recipient)
     text = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_text(text, coded_msg3);
 
-    if (chat_session_recipient_supports(recipient)) {
+    // always send <active/> with messages when recipient supports chat states
+    if (chat_session_get_recipient_supports(recipient)) {
         active = xmpp_stanza_new(jabber_conn.ctx);
         xmpp_stanza_set_name(active, "active");
         xmpp_stanza_set_ns(active, "http://jabber.org/protocol/chatstates");
@@ -352,26 +353,62 @@ _message_handler(xmpp_conn_t * const conn,
         }
     }
 
-    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
 
-    // if no message, check for chatstates
-    if (body == NULL) {
+    char from_cpy[strlen(from) + 1];
+    strcpy(from_cpy, from);
+    char *short_from = strtok(from_cpy, "/");
 
-        if (prefs_get_notify_typing() || prefs_get_intype()) {
-            if (xmpp_stanza_get_child_by_name(stanza, "active") != NULL) {
-                // active
-            } else if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
-                // composing
-                prof_handle_typing(from);
-            }
-        }
+    //determine chatstate support of recipient
+    gboolean recipient_supports = FALSE;
 
-        return 1;
+    if ((xmpp_stanza_get_child_by_name(stanza, "active") != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL)) {
+        recipient_supports = TRUE;
     }
 
-    // message body recieved
-    char *message = xmpp_stanza_get_text(body);
-    prof_handle_incoming_message(from, message);
+    // create of update session
+    if (!chat_session_exists(short_from)) {
+        chat_session_start(short_from, recipient_supports);
+    } else {
+        chat_session_set_recipient_supports(short_from, recipient_supports);
+    }
+
+    // deal with chat states
+    if (recipient_supports) {
+
+        // handle <composing/>
+        if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
+            if (prefs_get_notify_typing() || prefs_get_intype()) {
+                prof_handle_typing(short_from);
+            }
+
+        // handle <paused/>
+        } else if (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) {
+            // do something
+
+        // handle <inactive/>
+        } else if (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL) {
+            // do something
+
+        // handle <gone/>
+        } else if (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) {
+            // do something
+
+        // handle <active/>
+        } else {
+            // do something
+        }
+    }
+
+    // check for and deal with message
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
+    if (body != NULL) {
+        char *message = xmpp_stanza_get_text(body);
+        prof_handle_incoming_message(short_from, message);
+    }
 
     return 1;
 }

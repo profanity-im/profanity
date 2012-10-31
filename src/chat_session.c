@@ -28,8 +28,8 @@
 #include "chat_session.h"
 #include "log.h"
 
-#define INACTIVE_TIMOUT 10.0
-#define GONE_TIMOUT 20.0
+#define INACTIVE_TIMOUT 120.0
+#define GONE_TIMOUT 600.0
 
 static ChatSession _chat_session_new(const char * const recipient,
     gboolean recipient_supports);
@@ -181,7 +181,7 @@ chat_session_gone(const char * const recipient)
 }
 
 gboolean
-chat_session_recipient_supports(const char * const recipient)
+chat_session_get_recipient_supports(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
@@ -190,6 +190,19 @@ chat_session_recipient_supports(const char * const recipient)
         return FALSE;
     } else {
         return session->recipient_supports;
+    }
+}
+
+void
+chat_session_set_recipient_supports(const char * const recipient,
+    gboolean recipient_supports)
+{
+    ChatSession session = g_hash_table_lookup(sessions, recipient);
+
+    if (session == NULL) {
+        log_error("No chat session found for %s.", recipient);
+    } else {
+        session->recipient_supports = recipient_supports;
     }
 }
 
