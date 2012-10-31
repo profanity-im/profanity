@@ -146,13 +146,13 @@ inp_get_char(int *ch, char *input, int *size)
                 char *recipient = win_get_recipient();
                 chat_session_no_activity(recipient);
 
-                if (chat_session_gone(recipient) &&
+                if (chat_session_is_gone(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     jabber_send_gone(recipient);
-                } else if (chat_session_inactive(recipient) &&
+                } else if (chat_session_is_inactive(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     jabber_send_inactive(recipient);
-                } else if (chat_session_paused(recipient) &&
+                } else if (chat_session_is_paused(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     jabber_send_paused(recipient);
                 }
@@ -165,7 +165,7 @@ inp_get_char(int *ch, char *input, int *size)
                 char *recipient = win_get_recipient();
                 chat_session_set_composing(recipient);
                 if (!chat_session_get_sent(recipient) ||
-                        chat_session_paused(recipient)) {
+                        chat_session_is_paused(recipient)) {
                     jabber_send_composing(recipient);
                 }
             }

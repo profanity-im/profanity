@@ -39,10 +39,12 @@ void chat_session_set_recipient_supports(const char * const recipient,
 
 void chat_session_set_composing(const char * const recipient);
 void chat_session_no_activity(const char * const recipient);
-gboolean chat_session_inactive(const char * const recipient);
+gboolean chat_session_is_inactive(const char * const recipient);
+gboolean chat_session_is_active(const char * const recipient);
 void chat_session_set_active(const char * const recipient);
-gboolean chat_session_paused(const char * const recipient);
-gboolean chat_session_gone(const char * const recipient);
+gboolean chat_session_is_paused(const char * const recipient);
+gboolean chat_session_is_gone(const char * const recipient);
+void chat_session_set_gone(const char * const recipient);
 void chat_session_set_sent(const char * const recipient);
 gboolean chat_session_get_sent(const char * const recipient);
 

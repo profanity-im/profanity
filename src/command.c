@@ -1015,7 +1015,7 @@ _cmd_close(const char * const inp, struct cmd_help_t help)
 
             // send <gone/> chat state before closing
             if (chat_session_get_recipient_supports(recipient)) {
-                chat_session_gone(recipient);
+                chat_session_set_gone(recipient);
                 jabber_send_gone(recipient);
                 chat_session_end(recipient);
             }
