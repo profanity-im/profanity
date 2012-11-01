@@ -29,7 +29,7 @@
 #include "log.h"
 
 #define PAUSED_TIMOUT 10.0
-#define INACTIVE_TIMOUT 120.0
+#define INACTIVE_TIMOUT 30.0
 #define GONE_TIMOUT 600.0
 
 static void _chat_session_free(ChatSession session);
