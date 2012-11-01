@@ -7,7 +7,6 @@ int main(void)
     register_contact_list_tests();
     register_common_tests();
     register_prof_autocomplete_tests();
-    register_chat_session_tests();
     run_suite();
     return 0;
 }
