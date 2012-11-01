@@ -443,7 +443,7 @@ _message_handler(xmpp_conn_t * const conn,
 
         // handle <gone/>
         } else if (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) {
-            // do something
+            prof_handle_gone(short_from);
 
         // handle <active/>
         } else {

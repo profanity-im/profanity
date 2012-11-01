@@ -146,6 +146,13 @@ prof_handle_login_success(const char *jid)
 }
 
 void
+prof_handle_gone(const char * const from)
+{
+    win_show_gone(from);
+    win_page_off();
+}
+
+void
 prof_handle_lost_connection(void)
 {
     cons_bad_show("Lost connection.");

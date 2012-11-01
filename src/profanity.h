@@ -34,5 +34,6 @@ void prof_handle_contact_offline(char *contact, char *show, char *status);
 void prof_handle_incoming_message(char *from, char *message);
 void prof_handle_error_message(const char *from, const char *err_msg);
 void prof_handle_roster(GSList *roster);
+void prof_handle_gone(const char * const from);
 
 #endif

@@ -337,6 +337,31 @@ win_show_error_msg(const char * const from, const char *err_msg)
     }
 }
 
+void
+win_show_gone(const char * const from)
+{
+    int win_index;
+    WINDOW *win;
+
+    if (from == NULL)
+        return;
+
+    win_index = _find_prof_win_index(from);
+    // chat window exists
+    if (win_index < NUM_WINS) {
+        win = _wins[win_index].win;
+        _win_show_time(win);
+        wattron(win, COLOUR_AWAY);
+        wprintw(win, "*%s ", from);
+        wprintw(win, "has left the conversation.");
+        wprintw(win, "\n");
+        wattroff(win, COLOUR_AWAY);
+        if (win_index == _curr_prof_win) {
+            dirty = TRUE;
+        }
+    }
+}
+
 #ifdef HAVE_LIBNOTIFY
 static void
 _win_notify(const char * const message, int timeout,

@@ -87,6 +87,7 @@ void win_close_win(void);
 int win_in_chat(void);
 char *win_get_recipient(void);
 void win_show_typing(const char * const from);
+void win_show_gone(const char * const from);
 void win_show_incomming_msg(const char * const from, const char * const message);
 void win_show_error_msg(const char * const from, const char *err_msg);
 void win_show_outgoing_msg(const char * const from, const char * const to,
