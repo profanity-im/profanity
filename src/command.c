@@ -95,6 +95,7 @@ static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t he
 static gboolean _cmd_set_chlog(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_history(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_states(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_outtype(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_vercheck(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_away(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
@@ -351,6 +352,17 @@ static struct cmd_t setting_commands[] =
           "Config file value :   states=true|false",
           NULL } } },
 
+    { "/outtype",
+        _cmd_set_outtype,
+        { "/outtype on|off", "Send typing notification to recipient.",
+        { "/outtype on|off",
+          "--------------",
+          "Send an indication that you are typing to the other person in chat.",
+          "Chat states must be enabled for this to work, see the /states command.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   outtype=true|false",
+          NULL } } },
 
     { "/history",
         _cmd_set_history,
@@ -657,6 +669,10 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/beep",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/intype",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/states",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/outtype",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/flash",
         prefs_autocomplete_boolean_choice);
@@ -1042,6 +1058,13 @@ _cmd_set_states(const char * const inp, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(inp, help, "/states",
         "Sending chat states", prefs_set_states);
+}
+
+static gboolean
+_cmd_set_outtype(const char * const inp, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(inp, help, "/outtype",
+        "Sending typing notifications", prefs_set_outtype);
 }
 
 static gboolean

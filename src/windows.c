@@ -557,6 +557,11 @@ cons_prefs(void)
     else
         cons_show("Send chat states             : OFF");
 
+    if (prefs_get_outtype())
+        cons_show("Send typing notifications    : ON");
+    else
+        cons_show("Send typing notifications    : OFF");
+
     if (prefs_get_history())
         cons_show("Chat history                 : ON");
     else

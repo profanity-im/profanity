@@ -209,6 +209,7 @@ chat_session_set_active(const char * const recipient)
         log_error("No chat session found for %s.", recipient);
     } else {
         session->state = CHAT_STATE_ACTIVE;
+        g_timer_start(session->active_timer);
         session->sent = TRUE;
     }
 }

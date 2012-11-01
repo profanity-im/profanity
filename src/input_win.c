@@ -152,7 +152,8 @@ inp_get_char(int *ch, char *input, int *size)
                 } else if (chat_session_is_inactive(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     jabber_send_inactive(recipient);
-                } else if (chat_session_is_paused(recipient) &&
+                } else if (prefs_get_outtype() &&
+                        chat_session_is_paused(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     jabber_send_paused(recipient);
                 }
@@ -160,14 +161,12 @@ inp_get_char(int *ch, char *input, int *size)
         }
 
         // if got char and in chat window, chat session active
-        if (*ch != ERR) {
-            if (win_in_chat()) {
-                char *recipient = win_get_recipient();
-                chat_session_set_composing(recipient);
-                if (!chat_session_get_sent(recipient) ||
-                        chat_session_is_paused(recipient)) {
-                    jabber_send_composing(recipient);
-                }
+        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat()) {
+            char *recipient = win_get_recipient();
+            chat_session_set_composing(recipient);
+            if (!chat_session_get_sent(recipient) ||
+                    chat_session_is_paused(recipient)) {
+                jabber_send_composing(recipient);
             }
         }
     }

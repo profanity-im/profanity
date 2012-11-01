@@ -249,6 +249,19 @@ prefs_set_states(gboolean value)
 }
 
 gboolean
+prefs_get_outtype(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "outtype", NULL);
+}
+
+void
+prefs_set_outtype(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "outtype", value);
+    _save_prefs();
+}
+
+gboolean
 prefs_get_notify_typing(void)
 {
     return g_key_file_get_boolean(prefs, "notifications", "typing", NULL);
