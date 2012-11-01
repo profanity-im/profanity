@@ -137,6 +137,13 @@ inp_get_char(int *ch, char *input, int *size)
     noecho();
     *ch = wgetch(inp_win);
 
+    gboolean in_command = FALSE;
+
+    if ((*size >= 1 && input[0] == '/') ||
+            (*size == 0 && *ch == '/')) {
+        in_command = TRUE;
+    }
+
     if (prefs_get_states()) {
 
         // if not got char, and in chat window, flag as no activity
@@ -161,7 +168,7 @@ inp_get_char(int *ch, char *input, int *size)
         }
 
         // if got char and in chat window, chat session active
-        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat()) {
+        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat() && !in_command) {
             char *recipient = win_get_recipient();
             chat_session_set_composing(recipient);
             if (!chat_session_get_sent(recipient) ||
