@@ -168,7 +168,8 @@ inp_get_char(int *ch, char *input, int *size)
         }
 
         // if got char and in chat window, chat session active
-        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat() && !in_command) {
+        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat() && !in_command &&
+                _printable(*ch)) {
             char *recipient = win_get_recipient();
             chat_session_set_composing(recipient);
             if (!chat_session_get_sent(recipient) ||
