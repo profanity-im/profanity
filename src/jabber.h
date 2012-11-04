@@ -46,6 +46,7 @@ jabber_conn_status_t jabber_connect(const char * const user,
 void jabber_disconnect(void);
 void jabber_process_events(void);
 void jabber_subscribe(const char * const recipient);
+void jabber_join(const char * const room_jid, const char * const nick);
 void jabber_send(const char * const msg, const char * const recipient);
 void jabber_send_inactive(const char * const recipient);
 void jabber_send_composing(const char * const recipient);
