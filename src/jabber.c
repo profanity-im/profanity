@@ -32,6 +32,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
+#include "room_chat.h"
 
 #define PING_INTERVAL 120000 // 2 minutes
 
@@ -292,6 +293,8 @@ jabber_join(const char * const room_jid, const char * const nick)
     xmpp_stanza_set_attribute(presence, "to", to->str);
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
+
+    room_join(room_join, nick);
 }
 
 void
