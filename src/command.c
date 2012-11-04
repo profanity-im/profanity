@@ -1015,7 +1015,6 @@ _cmd_join(const char * const inp, struct cmd_help_t help)
                 nick = strdup(strtok(jid_cpy, "@"));
             }
 
-            cons_show("Joining %s as %s", room_jid, nick);
             jabber_join(room_jid, nick);
         }
     }
