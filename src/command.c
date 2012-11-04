@@ -87,6 +87,7 @@ static gboolean _cmd_sub(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_msg(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_tiny(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_join(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_beep(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_notify(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_intype(const char * const inp, struct cmd_help_t help);
@@ -180,6 +181,19 @@ static struct cmd_t main_commands[] =
           "This command can be called from any window, including chat with other users.",
           "",
           "Example : /msg boothj5@gmail.com Hey, here's a message!",
+          NULL } } },
+
+    { "/join",
+        _cmd_join,
+        { "/join room@server [nick]", "Join a chat room.",
+        { "/join room@server [nick]",
+          "------------------------",
+          "Join a chat room at the conference server.",
+          "If nick is specified you will join with this nickname,",
+          "otherwise the first part of your JID (before the @) will be used.",
+          "",
+          "Example : /join jdev@conference.jabber.org",
+          "Example : /join jdev@conference.jabber.org mynick",
           NULL } } },
 
     { "/sub",
@@ -962,6 +976,46 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
             }
         } else {
             cons_show("Usage: %s", help.usage);
+        }
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_join(const char * const inp, struct cmd_help_t help)
+{
+    char *room_jid = NULL;
+    char *nick = NULL;
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        // copy input
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
+
+        // get room jid
+        strtok(inp_cpy, " ");
+        room_jid = strtok(NULL, " ");
+        if (room_jid == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            if ((strlen(inp) > (6 + strlen(room_jid) + 1))) {
+                nick = strndup(inp+6+strlen(room_jid)+1, strlen(inp)-(6+strlen(room_jid)+1));
+            }
+
+            // if no nick, set to first part of jid
+            if (nick == NULL) {
+                const char *jid = jabber_get_jid();
+                char jid_cpy[strlen(jid) + 1];
+                strcpy(jid_cpy, jid);
+                nick = strdup(strtok(jid_cpy, "@"));
+            }
+
+            cons_show("Joining %s as %s", room_jid, nick);
         }
     }
 
