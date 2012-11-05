@@ -509,6 +509,26 @@ win_show_chat_room_member(const char * const room_jid, const char * const nick)
 }
 
 void
+win_show_room_history(const char * const room_jid, const char * const nick,
+    GTimeVal tv_stamp, const char * const message)
+{
+    int win_index = _find_prof_win_index(room_jid);
+    WINDOW *win = _wins[win_index].win;
+
+    GDateTime *time = g_date_time_new_from_timeval_utc(&tv_stamp);
+    gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+    wprintw(win, "%s - ", date_fmt);
+    g_date_time_unref(time);
+    g_free(date_fmt);
+
+    wprintw(win, "%s: ", nick);
+    _win_show_message(win, message);
+
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
+}
+
+void
 win_show(const char * const msg)
 {
     WINDOW *win = _wins[_curr_prof_win].win;

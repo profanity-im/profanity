@@ -401,8 +401,25 @@ _message_handler(xmpp_conn_t * const conn,
     from = xmpp_stanza_get_attribute(stanza, "from");
 
     if (room_jid_is_room_chat(from)) {
-
-
+        xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, "delay");
+        if (delay != NULL) {
+            char *utc_stamp = xmpp_stanza_get_attribute(delay, "stamp");
+            GTimeVal tv_stamp;
+            if(g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
+                xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
+                if (body != NULL) {
+                    char *message = xmpp_stanza_get_text(body);
+                    char **tokens = g_strsplit(from, "/", 0);
+                    char *room_jid = tokens[0];
+                    char *nick = tokens[1];
+                    win_show_room_history(room_jid, nick, tv_stamp, message);
+                }
+            } else {
+                log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
+            }
+        } else {
+            // handle normal groupchat messages
+        }
 
         cons_show("CHAT ROOM MESSAGE RECIEVED");
     } else {
