@@ -20,4 +20,7 @@
  *
  */
 
+#include <glib.h>
+
 void room_join(const char * const jid, const char * const nick);
+gboolean room_jid_is_room_chat(const char * const jid);

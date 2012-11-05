@@ -34,6 +34,9 @@
 #include "profanity.h"
 #include "room_chat.h"
 
+// TODO REMOVE
+#include "ui.h"
+
 #define PING_INTERVAL 120000 // 2 minutes
 
 static struct _jabber_conn_t {
@@ -294,7 +297,7 @@ jabber_join(const char * const room_jid, const char * const nick)
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 
-    room_join(room_join, nick);
+    room_join(room_jid, nick);
 }
 
 void
@@ -397,83 +400,87 @@ _message_handler(xmpp_conn_t * const conn,
     type = xmpp_stanza_get_attribute(stanza, "type");
     from = xmpp_stanza_get_attribute(stanza, "from");
 
-    if (type != NULL) {
-        if (strcmp(type, "error") == 0) {
-            char *err_msg = NULL;
-            xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
-            if (error == NULL) {
-                log_debug("error message without <error/> received");
-                return 1;
-            } else {
-                xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error);
-                if (err_cond == NULL) {
-                    log_debug("error message without <defined-condition/> received");
+    if (room_jid_is_room_chat(from)) {
+        cons_show("CHAT ROOM MESSAGE RECIEVED");
+    } else {
+
+        if (type != NULL) {
+            if (strcmp(type, "error") == 0) {
+                char *err_msg = NULL;
+                xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
+                if (error == NULL) {
+                    log_debug("error message without <error/> received");
                     return 1;
                 } else {
-                    err_msg = xmpp_stanza_get_name(err_cond);
+                    xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error);
+                    if (err_cond == NULL) {
+                        log_debug("error message without <defined-condition/> received");
+                        return 1;
+                    } else {
+                        err_msg = xmpp_stanza_get_name(err_cond);
+                    }
+                    // TODO: process 'type' attribute from <error/> [RFC6120, 8.3.2]
                 }
-                // TODO: process 'type' attribute from <error/> [RFC6120, 8.3.2]
+                prof_handle_error_message(from, err_msg);
+                return 1;
             }
-            prof_handle_error_message(from, err_msg);
-            return 1;
         }
-    }
 
+        char from_cpy[strlen(from) + 1];
+        strcpy(from_cpy, from);
+        char *short_from = strtok(from_cpy, "/");
 
-    char from_cpy[strlen(from) + 1];
-    strcpy(from_cpy, from);
-    char *short_from = strtok(from_cpy, "/");
+        //determine chatstate support of recipient
+        gboolean recipient_supports = FALSE;
 
-    //determine chatstate support of recipient
-    gboolean recipient_supports = FALSE;
+        if ((xmpp_stanza_get_child_by_name(stanza, "active") != NULL) ||
+                (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) ||
+                (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) ||
+                (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) ||
+                (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL)) {
+            recipient_supports = TRUE;
+        }
 
-    if ((xmpp_stanza_get_child_by_name(stanza, "active") != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL)) {
-        recipient_supports = TRUE;
-    }
-
-    // create of update session
-    if (!chat_session_exists(short_from)) {
-        chat_session_start(short_from, recipient_supports);
-    } else {
-        chat_session_set_recipient_supports(short_from, recipient_supports);
-    }
-
-    // deal with chat states
-    if (recipient_supports) {
-
-        // handle <composing/>
-        if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
-            if (prefs_get_notify_typing() || prefs_get_intype()) {
-                prof_handle_typing(short_from);
-            }
-
-        // handle <paused/>
-        } else if (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) {
-            // do something
-
-        // handle <inactive/>
-        } else if (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL) {
-            // do something
-
-        // handle <gone/>
-        } else if (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) {
-            prof_handle_gone(short_from);
-
-        // handle <active/>
+        // create of update session
+        if (!chat_session_exists(short_from)) {
+            chat_session_start(short_from, recipient_supports);
         } else {
-            // do something
+            chat_session_set_recipient_supports(short_from, recipient_supports);
         }
-    }
 
-    // check for and deal with message
-    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
-    if (body != NULL) {
-        char *message = xmpp_stanza_get_text(body);
-        prof_handle_incoming_message(short_from, message);
+        // deal with chat states
+        if (recipient_supports) {
+
+            // handle <composing/>
+            if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
+                if (prefs_get_notify_typing() || prefs_get_intype()) {
+                    prof_handle_typing(short_from);
+                }
+
+            // handle <paused/>
+            } else if (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) {
+                // do something
+
+            // handle <inactive/>
+            } else if (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL) {
+                // do something
+
+            // handle <gone/>
+            } else if (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) {
+                prof_handle_gone(short_from);
+
+            // handle <active/>
+            } else {
+                // do something
+            }
+        }
+
+        // check for and deal with message
+        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
+        if (body != NULL) {
+            char *message = xmpp_stanza_get_text(body);
+            prof_handle_incoming_message(short_from, message);
+        }
     }
 
     return 1;
@@ -596,30 +603,35 @@ _presence_handler(xmpp_conn_t * const conn,
     char *short_jid = strtok(jid_cpy, "/");
 
     char *from = xmpp_stanza_get_attribute(stanza, "from");
-    char *short_from = strtok(from, "/");
-    char *type = xmpp_stanza_get_attribute(stanza, "type");
-    char *show_str, *status_str;
 
-    xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
-    if (status != NULL)
-        status_str = xmpp_stanza_get_text(status);
-    else
-        status_str = NULL;
-
-    if ((type != NULL) && (strcmp(type, "unavailable") == 0)) {
-        if (strcmp(short_jid, short_from) !=0) {
-            prof_handle_contact_offline(short_from, "offline", status_str);
-        }
+    if (room_jid_is_room_chat(from)) {
+        cons_show("CHAT ROOM PRESENCE RECIEVED");
     } else {
+        char *short_from = strtok(from, "/");
+        char *type = xmpp_stanza_get_attribute(stanza, "type");
+        char *show_str, *status_str;
 
-        xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
-        if (show != NULL)
-            show_str = xmpp_stanza_get_text(show);
+        xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
+        if (status != NULL)
+            status_str = xmpp_stanza_get_text(status);
         else
-            show_str = "online";
+            status_str = NULL;
 
-        if (strcmp(short_jid, short_from) !=0) {
-            prof_handle_contact_online(short_from, show_str, status_str);
+        if ((type != NULL) && (strcmp(type, "unavailable") == 0)) {
+            if (strcmp(short_jid, short_from) !=0) {
+                prof_handle_contact_offline(short_from, "offline", status_str);
+            }
+        } else {
+
+            xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
+            if (show != NULL)
+                show_str = xmpp_stanza_get_text(show);
+            else
+                show_str = "online";
+
+            if (strcmp(short_jid, short_from) !=0) {
+                prof_handle_contact_online(short_from, show_str, status_str);
+            }
         }
     }
 

@@ -42,3 +42,19 @@ room_join(const char * const jid, const char * const nick)
     rooms = g_slist_append(rooms, new_room);
 }
 
+gboolean
+room_jid_is_room_chat(const char * const jid)
+{
+    GSList *current = rooms;
+    while (current != NULL) {
+        muc_room *room = current->data;
+        if (g_str_has_prefix(jid, room->jid)) {
+            return TRUE;
+        }
+        current = g_slist_next(current);
+    }
+
+    return FALSE;
+
+}
+
