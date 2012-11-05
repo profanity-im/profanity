@@ -1014,8 +1014,8 @@ _cmd_join(const char * const inp, struct cmd_help_t help)
                 strcpy(jid_cpy, jid);
                 nick = strdup(strtok(jid_cpy, "@"));
             }
-
             jabber_join(room_jid, nick);
+            win_join_chat(room_jid, nick);
         }
     }
 

@@ -103,6 +103,10 @@ void win_show(const char * const msg);
 void win_bad_show(const char * const msg);
 void win_remind(void);
 
+void win_join_chat(const char * const room_jid, const char * const nick);
+void win_show_chat_room_member(const char * const room_jid,
+    const char * const nick);
+
 // console window actions
 void cons_about(void);
 void cons_help(void);

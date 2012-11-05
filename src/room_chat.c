@@ -58,3 +58,17 @@ room_jid_is_room_chat(const char * const jid)
 
 }
 
+char *
+room_get_nick_for_room(const char * const jid)
+{
+    GSList *current = rooms;
+    while (current != NULL) {
+        muc_room *room = current->data;
+        if (strcmp(jid, room->jid) == 0) {
+            return room->nick;
+        }
+        current = g_slist_next(current);
+    }
+
+    return NULL;
+}

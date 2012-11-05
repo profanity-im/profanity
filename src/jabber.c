@@ -605,7 +605,12 @@ _presence_handler(xmpp_conn_t * const conn,
     char *from = xmpp_stanza_get_attribute(stanza, "from");
 
     if (room_jid_is_room_chat(from)) {
-        cons_show("CHAT ROOM PRESENCE RECIEVED");
+        char **tokens = g_strsplit(from, "/", 0);
+        char *room_jid = tokens[0];
+        char *nick = tokens[1];
+        if (strcmp(room_get_nick_for_room(room_jid), nick) != 0) {
+            win_show_chat_room_member(room_jid, nick);
+        }
     } else {
         char *short_from = strtok(from, "/");
         char *type = xmpp_stanza_get_attribute(stanza, "type");

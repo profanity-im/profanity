@@ -24,3 +24,4 @@
 
 void room_join(const char * const jid, const char * const nick);
 gboolean room_jid_is_room_chat(const char * const jid);
+char * room_get_nick_for_room(const char * const jid);
