@@ -94,7 +94,7 @@ static gboolean _new_release(char *found_version);
 static void _win_notify(const char * const message, int timeout,
     const char * const category);
 static void _win_notify_remind(gint unread);
-static void _win_notify_message(char * short_from);
+static void _win_notify_message(const char * const short_from);
 static void _win_notify_typing(char * short_from);
 #endif
 
@@ -418,7 +418,7 @@ _win_notify_remind(gint unread)
 }
 
 static void
-_win_notify_message(char * short_from)
+_win_notify_message(const char * const short_from)
 {
     char message[strlen(short_from) + 1 + 10];
     sprintf(message, "%s: message.", short_from);
@@ -539,8 +539,31 @@ win_show_room_message(const char * const room_jid, const char * const nick,
     _win_show_user(win, nick, 1);
     _win_show_message(win, message);
 
-    if (win_index == _curr_prof_win)
+    // currently in groupchat window
+    if (win_index == _curr_prof_win) {
+        status_bar_active(win_index);
         dirty = TRUE;
+
+    // not currenlty on groupchat window
+    } else {
+        status_bar_new(win_index);
+        _cons_show_incoming_message(nick, win_index);
+        if (_curr_prof_win == 0) {
+            dirty = TRUE;
+        }
+
+        if (prefs_get_flash())
+            flash();
+
+        _wins[win_index].unread++;
+    }
+
+    if (prefs_get_beep())
+        beep();
+#ifdef HAVE_LIBNOTIFY
+    if (prefs_get_notify_message())
+        _win_notify_message(nick);
+#endif
 }
 
 void
