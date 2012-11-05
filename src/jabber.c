@@ -187,6 +187,36 @@ jabber_send(const char * const msg, const char * const recipient)
 }
 
 void
+jabber_send_groupchat(const char * const msg, const char * const recipient)
+{
+    char *coded_msg = str_replace(msg, "&", "&amp;");
+    char *coded_msg2 = str_replace(coded_msg, "<", "&lt;");
+    char *coded_msg3 = str_replace(coded_msg2, ">", "&gt;");
+
+    xmpp_stanza_t *reply, *body, *text;
+
+    reply = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(reply, "message");
+    xmpp_stanza_set_type(reply, "groupchat");
+    xmpp_stanza_set_attribute(reply, "to", recipient);
+
+    body = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(body, "body");
+
+    text = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_text(text, coded_msg3);
+
+    xmpp_stanza_add_child(body, text);
+    xmpp_stanza_add_child(reply, body);
+
+    xmpp_send(jabber_conn.conn, reply);
+    xmpp_stanza_release(reply);
+    free(coded_msg);
+    free(coded_msg2);
+    free(coded_msg3);
+}
+
+void
 jabber_send_inactive(const char * const recipient)
 {
     xmpp_stanza_t *message, *inactive;

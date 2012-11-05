@@ -611,7 +611,11 @@ cmd_execute(const char * const command, const char * const inp)
 gboolean
 cmd_execute_default(const char * const inp)
 {
-    if (win_in_chat()) {
+    if (win_in_groupchat()) {
+        char *recipient = win_get_recipient();
+        jabber_send_groupchat(inp, recipient);
+        free(recipient);
+    } else if (win_in_chat()) {
         char *recipient = win_get_recipient();
         jabber_send(inp, recipient);
 

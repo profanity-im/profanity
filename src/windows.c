@@ -536,7 +536,11 @@ win_show_room_message(const char * const room_jid, const char * const nick,
     WINDOW *win = _wins[win_index].win;
 
     _win_show_time(win);
-    _win_show_user(win, nick, 1);
+    if (strcmp(nick, room_get_nick_for_room(room_jid)) != 0) {
+        _win_show_user(win, nick, 1);
+    } else {
+        _win_show_user(win, nick, 0);
+    }
     _win_show_message(win, message);
 
     // currently in groupchat window
@@ -552,18 +556,25 @@ win_show_room_message(const char * const room_jid, const char * const nick,
             dirty = TRUE;
         }
 
-        if (prefs_get_flash())
-            flash();
+        if (strcmp(nick, room_get_nick_for_room(room_jid)) != 0) {
+            if (prefs_get_flash()) {
+                flash();
+            }
+        }
 
         _wins[win_index].unread++;
     }
 
-    if (prefs_get_beep())
-        beep();
+    if (strcmp(nick, room_get_nick_for_room(room_jid)) != 0) {
+        if (prefs_get_beep()) {
+            beep();
+        }
 #ifdef HAVE_LIBNOTIFY
-    if (prefs_get_notify_message())
-        _win_notify_message(nick);
+        if (prefs_get_notify_message()) {
+            _win_notify_message(nick);
+        }
 #endif
+    }
 }
 
 void
