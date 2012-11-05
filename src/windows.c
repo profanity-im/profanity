@@ -43,6 +43,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "release.h"
+#include "room_chat.h"
 #include "ui.h"
 
 #define CONS_WIN_TITLE "_cons"
@@ -194,6 +195,16 @@ win_in_chat(void)
 {
     return ((_curr_prof_win != 0) &&
         (strcmp(_wins[_curr_prof_win].from, "") != 0));
+}
+
+int
+win_in_groupchat(void)
+{
+    if (room_jid_is_room_chat(_wins[_curr_prof_win].from)) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 char *

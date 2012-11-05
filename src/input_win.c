@@ -149,7 +149,7 @@ inp_get_char(int *ch, char *input, int *size)
         // if not got char, and in chat window, flag as no activity
         // send inactive or gone, depending how long inactive
         if (*ch == ERR) {
-            if (win_in_chat()) {
+            if (win_in_chat() && !win_in_groupchat()) {
                 char *recipient = win_get_recipient();
                 chat_session_no_activity(recipient);
 
@@ -168,8 +168,8 @@ inp_get_char(int *ch, char *input, int *size)
         }
 
         // if got char and in chat window, chat session active
-        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat() && !in_command &&
-                _printable(*ch)) {
+        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat() &&
+                !win_in_groupchat() && !in_command && _printable(*ch)) {
             char *recipient = win_get_recipient();
             chat_session_set_composing(recipient);
             if (!chat_session_get_sent(recipient) ||

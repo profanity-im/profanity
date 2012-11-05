@@ -401,6 +401,9 @@ _message_handler(xmpp_conn_t * const conn,
     from = xmpp_stanza_get_attribute(stanza, "from");
 
     if (room_jid_is_room_chat(from)) {
+
+
+
         cons_show("CHAT ROOM MESSAGE RECIEVED");
     } else {
 

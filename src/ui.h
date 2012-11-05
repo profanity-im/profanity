@@ -106,6 +106,7 @@ void win_remind(void);
 void win_join_chat(const char * const room_jid, const char * const nick);
 void win_show_chat_room_member(const char * const room_jid,
     const char * const nick);
+int win_in_groupchat(void);
 
 // console window actions
 void cons_about(void);
