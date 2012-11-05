@@ -418,10 +418,16 @@ _message_handler(xmpp_conn_t * const conn,
                 log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
             }
         } else {
-            // handle normal groupchat messages
+            xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
+            if (body != NULL) {
+                char *message = xmpp_stanza_get_text(body);
+                char **tokens = g_strsplit(from, "/", 0);
+                char *room_jid = tokens[0];
+                char *nick = tokens[1];
+                win_show_room_message(room_jid, nick, message);
+            }
         }
 
-        cons_show("CHAT ROOM MESSAGE RECIEVED");
     } else {
 
         if (type != NULL) {

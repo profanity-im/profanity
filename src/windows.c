@@ -529,6 +529,21 @@ win_show_room_history(const char * const room_jid, const char * const nick,
 }
 
 void
+win_show_room_message(const char * const room_jid, const char * const nick,
+    const char * const message)
+{
+    int win_index = _find_prof_win_index(room_jid);
+    WINDOW *win = _wins[win_index].win;
+
+    _win_show_time(win);
+    _win_show_user(win, nick, 1);
+    _win_show_message(win, message);
+
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
+}
+
+void
 win_show(const char * const msg)
 {
     WINDOW *win = _wins[_curr_prof_win].win;
