@@ -53,6 +53,7 @@ static void _xmpp_file_logger(void * const userdata,
 static xmpp_log_t * _xmpp_get_file_logger();
 
 static void _jabber_roster_request(void);
+void _jabber_send_state(const char * const recipient, const char * const state);
 
 // XMPP event handlers
 static void _connection_handler(xmpp_conn_t * const conn,
@@ -208,87 +209,27 @@ jabber_send_groupchat(const char * const msg, const char * const recipient)
 }
 
 void
-jabber_send_inactive(const char * const recipient)
-{
-    xmpp_stanza_t *message, *inactive;
-
-    message = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(message, "message");
-    xmpp_stanza_set_type(message, "chat");
-    xmpp_stanza_set_attribute(message, "to", recipient);
-
-    inactive = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(inactive, "inactive");
-    xmpp_stanza_set_ns(inactive, "http://jabber.org/protocol/chatstates");
-    xmpp_stanza_add_child(message, inactive);
-
-    xmpp_send(jabber_conn.conn, message);
-    xmpp_stanza_release(message);
-
-    chat_session_set_sent(recipient);
-}
-
-void
 jabber_send_composing(const char * const recipient)
 {
-    xmpp_stanza_t *message, *composing;
-
-    message = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(message, "message");
-    xmpp_stanza_set_type(message, "chat");
-    xmpp_stanza_set_attribute(message, "to", recipient);
-
-    composing = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(composing, "composing");
-    xmpp_stanza_set_ns(composing, "http://jabber.org/protocol/chatstates");
-    xmpp_stanza_add_child(message, composing);
-
-    xmpp_send(jabber_conn.conn, message);
-    xmpp_stanza_release(message);
-
-    chat_session_set_sent(recipient);
+    _jabber_send_state(recipient, "composing");
 }
 
 void
 jabber_send_paused(const char * const recipient)
 {
-    xmpp_stanza_t *message, *paused;
+    _jabber_send_state(recipient, "paused");
+}
 
-    message = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(message, "message");
-    xmpp_stanza_set_type(message, "chat");
-    xmpp_stanza_set_attribute(message, "to", recipient);
-
-    paused = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(paused, "paused");
-    xmpp_stanza_set_ns(paused, "http://jabber.org/protocol/chatstates");
-    xmpp_stanza_add_child(message, paused);
-
-    xmpp_send(jabber_conn.conn, message);
-    xmpp_stanza_release(message);
-
-    chat_session_set_sent(recipient);
+void
+jabber_send_inactive(const char * const recipient)
+{
+    _jabber_send_state(recipient, "inactive");
 }
 
 void
 jabber_send_gone(const char * const recipient)
 {
-    xmpp_stanza_t *message, *gone;
-
-    message = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(message, "message");
-    xmpp_stanza_set_type(message, "chat");
-    xmpp_stanza_set_attribute(message, "to", recipient);
-
-    gone = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(gone, "gone");
-    xmpp_stanza_set_ns(gone, "http://jabber.org/protocol/chatstates");
-    xmpp_stanza_add_child(message, gone);
-
-    xmpp_send(jabber_conn.conn, message);
-    xmpp_stanza_release(message);
-
-    chat_session_set_sent(recipient);
+    _jabber_send_state(recipient, "gone");
 }
 
 void
@@ -768,3 +709,23 @@ _xmpp_get_file_logger()
     return file_log;
 }
 
+void
+_jabber_send_state(const char * const recipient, const char * const state)
+{
+    xmpp_stanza_t *message, *chat_state;
+
+    message = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(message, "message");
+    xmpp_stanza_set_type(message, "chat");
+    xmpp_stanza_set_attribute(message, "to", recipient);
+
+    chat_state = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(chat_state, state);
+    xmpp_stanza_set_ns(chat_state, "http://jabber.org/protocol/chatstates");
+    xmpp_stanza_add_child(message, chat_state);
+
+    xmpp_send(jabber_conn.conn, message);
+    xmpp_stanza_release(message);
+
+    chat_session_set_sent(recipient);
+}
