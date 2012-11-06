@@ -40,5 +40,6 @@ void create_dir(char *name);
 char * str_replace(const char *string, const char *substr,
     const char *replacement);
 int str_contains(char str[], int size, char ch);
+char* encode_xml(const char * const xml);
 
 #endif

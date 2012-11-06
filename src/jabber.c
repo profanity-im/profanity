@@ -144,9 +144,7 @@ jabber_send(const char * const msg, const char * const recipient)
         }
     }
 
-    char *coded_msg = str_replace(msg, "&", "&amp;");
-    char *coded_msg2 = str_replace(coded_msg, "<", "&lt;");
-    char *coded_msg3 = str_replace(coded_msg2, ">", "&gt;");
+    char *encoded_xml = encode_xml(msg);
 
     xmpp_stanza_t *reply, *body, *text, *active;
 
@@ -159,7 +157,7 @@ jabber_send(const char * const msg, const char * const recipient)
     xmpp_stanza_set_name(body, "body");
 
     text = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_text(text, coded_msg3);
+    xmpp_stanza_set_text(text, encoded_xml);
 
     if (prefs_get_states()) {
 
@@ -178,17 +176,14 @@ jabber_send(const char * const msg, const char * const recipient)
 
     xmpp_send(jabber_conn.conn, reply);
     xmpp_stanza_release(reply);
-    free(coded_msg);
-    free(coded_msg2);
-    free(coded_msg3);
+
+    free(encoded_xml);
 }
 
 void
 jabber_send_groupchat(const char * const msg, const char * const recipient)
 {
-    char *coded_msg = str_replace(msg, "&", "&amp;");
-    char *coded_msg2 = str_replace(coded_msg, "<", "&lt;");
-    char *coded_msg3 = str_replace(coded_msg2, ">", "&gt;");
+    char *encoded_xml = encode_xml(msg);
 
     xmpp_stanza_t *reply, *body, *text;
 
@@ -201,16 +196,15 @@ jabber_send_groupchat(const char * const msg, const char * const recipient)
     xmpp_stanza_set_name(body, "body");
 
     text = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_text(text, coded_msg3);
+    xmpp_stanza_set_text(text, encoded_xml);
 
     xmpp_stanza_add_child(body, text);
     xmpp_stanza_add_child(reply, body);
 
     xmpp_send(jabber_conn.conn, reply);
     xmpp_stanza_release(reply);
-    free(coded_msg);
-    free(coded_msg2);
-    free(coded_msg3);
+
+    free(encoded_xml);
 }
 
 void
