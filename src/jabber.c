@@ -446,11 +446,15 @@ _message_handler(xmpp_conn_t * const conn,
     type = xmpp_stanza_get_attribute(stanza, "type");
     from = xmpp_stanza_get_attribute(stanza, "from");
 
+    // handle groupchat messages
     if (room_jid_is_room_chat(from)) {
         xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, "delay");
+
+        // handle chat room history
         if (delay != NULL) {
             char *utc_stamp = xmpp_stanza_get_attribute(delay, "stamp");
             GTimeVal tv_stamp;
+
             if(g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
                 xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
                 if (body != NULL) {
@@ -464,6 +468,8 @@ _message_handler(xmpp_conn_t * const conn,
             } else {
                 log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
             }
+
+        // handle regular chat room message
         } else {
             xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
             if (body != NULL) {
@@ -476,6 +482,7 @@ _message_handler(xmpp_conn_t * const conn,
             }
         }
 
+    // handle regular messaging
     } else {
 
         if (type != NULL) {
