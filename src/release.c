@@ -38,7 +38,7 @@ static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 char *
 release_get_latest()
 {
-    char *url = "http://www.boothj5.com/profanity_version.txt";
+    char *url = "http://www.profanity.im/profanity_version.txt";
 
     CURL *handle = curl_easy_init();
     struct curl_data_t output;

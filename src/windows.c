@@ -1054,7 +1054,7 @@ cons_check_version(gboolean not_available_msg)
                 wattroff(_cons_win, COLOUR_ONLINE);
                 _win_show_time(_cons_win);
                 wattron(_cons_win, COLOUR_ONLINE);
-                wprintw(_cons_win, "Check http://www.boothj5.com/profanity.shtml for details.\n");
+                wprintw(_cons_win, "Check <http://www.profanity.im> for details.\n");
                 wattroff(_cons_win, COLOUR_ONLINE);
                 free(latest_release);
                 _win_show_time(_cons_win);
