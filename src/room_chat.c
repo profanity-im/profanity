@@ -90,6 +90,23 @@ room_get_nick_for_room(const char * const jid)
     }
 }
 
+gboolean
+room_parse_room_jid(const char * const room_jid, char **room, char **nick)
+{
+    char **tokens = g_strsplit(room_jid, "/", 0);
+
+    if (tokens == NULL || tokens[0] == NULL || tokens[1] == NULL) {
+        return FALSE;
+    } else {
+        *room = strdup(tokens[0]);
+        *nick = strdup(tokens[1]);
+
+        g_strfreev(tokens);
+
+        return TRUE;
+    }
+}
+
 static void
 _room_free(muc_room *room)
 {

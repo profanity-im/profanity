@@ -392,13 +392,20 @@ _message_handler(xmpp_conn_t * const conn,
 
             if(g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
                 xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
+
                 if (body != NULL) {
-                    char *message = xmpp_stanza_get_text(body);
-                    char **tokens = g_strsplit(from, "/", 0);
-                    char *room_jid = tokens[0];
-                    char *nick = tokens[1];
-                    prof_handle_room_history(room_jid, nick, tv_stamp, message);
-                    g_strfreev(tokens);
+                    char *room = NULL;
+                    char *nick = NULL;
+                    gboolean parse_success = room_parse_room_jid(from, &room, &nick);
+
+                    if (parse_success) {
+                        char *message = xmpp_stanza_get_text(body);
+                        prof_handle_room_history(room, nick, tv_stamp, message);
+                        g_free(room);
+                        g_free(nick);
+                    } else {
+                        log_error("Could not parse room jid: %s", from);
+                    }
                 }
             } else {
                 log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
@@ -408,12 +415,18 @@ _message_handler(xmpp_conn_t * const conn,
         } else {
             xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
             if (body != NULL) {
-                char *message = xmpp_stanza_get_text(body);
-                char **tokens = g_strsplit(from, "/", 0);
-                char *room_jid = tokens[0];
-                char *nick = tokens[1];
-                prof_handle_room_message(room_jid, nick, message);
-                g_strfreev(tokens);
+                char *room = NULL;
+                char *nick = NULL;
+                gboolean parse_success = room_parse_room_jid(from, &room, &nick);
+
+                if (parse_success) {
+                    char *message = xmpp_stanza_get_text(body);
+                    prof_handle_room_message(room, nick, message);
+                    g_free(room);
+                    g_free(nick);
+                } else {
+                    log_error("Could not parse room jid: %s", from);
+                }
             }
         }
 
@@ -729,3 +742,4 @@ _jabber_send_state(const char * const recipient, const char * const state)
 
     chat_session_set_sent(recipient);
 }
+
