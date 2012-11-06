@@ -172,6 +172,27 @@ prof_handle_failed_login(void)
 }
 
 void
+prof_handle_room_history(const char * const room_jid, const char * const nick,
+    GTimeVal tv_stamp, const char * const message)
+{
+    win_show_room_history(room_jid, nick, tv_stamp, message);
+}
+
+void
+prof_handle_room_message(const char * const room_jid, const char * const nick,
+    const char * const message)
+{
+    win_show_room_message(room_jid, nick, message);
+}
+
+void
+prof_handle_chat_room_member(const char * const room_jid,
+    const char * const nick)
+{
+    win_show_chat_room_member(room_jid, nick);
+}
+
+void
 prof_handle_contact_online(char *contact, char *show, char *status)
 {
     gboolean updated = contact_list_update_contact(contact, show, status);

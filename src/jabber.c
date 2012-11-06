@@ -34,9 +34,6 @@
 #include "profanity.h"
 #include "room_chat.h"
 
-// TODO REMOVE
-#include "ui.h"
-
 #define PING_INTERVAL 120000 // 2 minutes
 
 static struct _jabber_conn_t {
@@ -461,7 +458,8 @@ _message_handler(xmpp_conn_t * const conn,
                     char **tokens = g_strsplit(from, "/", 0);
                     char *room_jid = tokens[0];
                     char *nick = tokens[1];
-                    win_show_room_history(room_jid, nick, tv_stamp, message);
+                    prof_handle_room_history(room_jid, nick, tv_stamp, message);
+                    g_strfreev(tokens);
                 }
             } else {
                 log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
@@ -473,7 +471,8 @@ _message_handler(xmpp_conn_t * const conn,
                 char **tokens = g_strsplit(from, "/", 0);
                 char *room_jid = tokens[0];
                 char *nick = tokens[1];
-                win_show_room_message(room_jid, nick, message);
+                prof_handle_room_message(room_jid, nick, message);
+                g_strfreev(tokens);
             }
         }
 
@@ -684,7 +683,7 @@ _presence_handler(xmpp_conn_t * const conn,
         char *room_jid = tokens[0];
         char *nick = tokens[1];
         if (strcmp(room_get_nick_for_room(room_jid), nick) != 0) {
-            win_show_chat_room_member(room_jid, nick);
+            prof_handle_chat_room_member(room_jid, nick);
         }
     } else {
         char *short_from = strtok(from, "/");
