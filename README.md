@@ -8,6 +8,6 @@ See the [project wiki](https://github.com/boothj5/profanity/wiki) for informatio
 Links
 -----
 
-Homepage: http://www.boothj5.com/profanity.shtml
+Homepage: http://www.profanity.im
 
 Mailing List: https://groups.google.com/forum/#!forum/profanitydev
