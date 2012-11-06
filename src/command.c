@@ -1082,6 +1082,10 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_close(const char * const inp, struct cmd_help_t help)
 {
+    if (win_in_groupchat()) {
+        char *room_jid = win_get_recipient();
+        jabber_leave_chat_room(room_jid);
+    }
     if (win_in_chat()) {
 
         if (prefs_get_states()) {

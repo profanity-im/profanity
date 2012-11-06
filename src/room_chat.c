@@ -30,45 +30,79 @@ typedef struct _muc_room_t {
     char *nick;
 } muc_room;
 
-GSList *rooms;
+GHashTable *rooms = NULL;
+
+static void _room_free(muc_room *room);
 
 void
 room_join(const char * const jid, const char * const nick)
 {
+    if (rooms == NULL) {
+        rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
+            (GDestroyNotify)_room_free);
+    }
+
     muc_room *new_room = malloc(sizeof(muc_room));
     new_room->jid = strdup(jid);
     new_room->nick = strdup(nick);
 
-    rooms = g_slist_append(rooms, new_room);
+    g_hash_table_insert(rooms, strdup(jid), new_room);
+}
+
+void
+room_leave(const char * const jid)
+{
+    g_hash_table_remove(rooms, jid);
 }
 
 gboolean
 room_jid_is_room_chat(const char * const jid)
 {
-    GSList *current = rooms;
-    while (current != NULL) {
-        muc_room *room = current->data;
-        if (g_str_has_prefix(jid, room->jid)) {
+    char **tokens = g_strsplit(jid, "/", 0);
+    char *jid_part = tokens[0];
+
+    if (rooms != NULL) {
+        muc_room *room = g_hash_table_lookup(rooms, jid_part);
+
+        if (room != NULL) {
             return TRUE;
+        } else {
+            return FALSE;
         }
-        current = g_slist_next(current);
+    } else {
+        return FALSE;
     }
-
-    return FALSE;
-
 }
 
 char *
 room_get_nick_for_room(const char * const jid)
 {
-    GSList *current = rooms;
-    while (current != NULL) {
-        muc_room *room = current->data;
-        if (strcmp(jid, room->jid) == 0) {
-            return room->nick;
-        }
-        current = g_slist_next(current);
-    }
+    if (rooms != NULL) {
+        muc_room *room = g_hash_table_lookup(rooms, jid);
 
-    return NULL;
+        if (room != NULL) {
+            return room->nick;
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
+}
+
+static void
+_room_free(muc_room *room)
+{
+    if (room != NULL) {
+        if (room->jid != NULL) {
+            g_free(room->jid);
+            room->jid = NULL;
+        }
+        if (room->nick != NULL) {
+            g_free(room->nick);
+            room->nick = NULL;
+        }
+        g_free(room);
+    }
+    room = NULL;
 }
