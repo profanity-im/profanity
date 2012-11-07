@@ -372,14 +372,10 @@ _jabber_roster_request(void)
 }
 
 static int
-_message_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_groupchat_message_handler(const char * const room_jid,
+    xmpp_stanza_t * const stanza)
 {
-    gchar *type = xmpp_stanza_get_attribute(stanza, "type");
-    gchar *from = xmpp_stanza_get_attribute(stanza, "from");
-
-    // handle groupchat messages
-    if (room_is_active(from)) {
+    if (room_is_active(room_jid)) {
         xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, "delay");
 
         // handle chat room history
@@ -393,7 +389,7 @@ _message_handler(xmpp_conn_t * const conn,
                 if (body != NULL) {
                     char *room = NULL;
                     char *nick = NULL;
-                    gboolean parse_success = room_parse_room_jid(from, &room, &nick);
+                    gboolean parse_success = room_parse_room_jid(room_jid, &room, &nick);
 
                     if (parse_success) {
                         char *message = xmpp_stanza_get_text(body);
@@ -401,7 +397,7 @@ _message_handler(xmpp_conn_t * const conn,
                         g_free(room);
                         g_free(nick);
                     } else {
-                        log_error("Could not parse room jid: %s", from);
+                        log_error("Could not parse room jid: %s", room_jid);
                     }
                 }
             } else {
@@ -414,7 +410,7 @@ _message_handler(xmpp_conn_t * const conn,
             if (body != NULL) {
                 char *room = NULL;
                 char *nick = NULL;
-                gboolean parse_success = room_parse_room_jid(from, &room, &nick);
+                gboolean parse_success = room_parse_room_jid(room_jid, &room, &nick);
 
                 if (parse_success) {
                     char *message = xmpp_stanza_get_text(body);
@@ -422,10 +418,26 @@ _message_handler(xmpp_conn_t * const conn,
                     g_free(room);
                     g_free(nick);
                 } else {
-                    log_error("Could not parse room jid: %s", from);
+                    log_error("Could not parse room jid: %s", room_jid);
                 }
             }
         }
+    } else {
+        log_error("Message recieved for inactive groupchat: %s", room_jid);
+    }
+
+    return 1;
+}
+
+static int
+_message_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    gchar *type = xmpp_stanza_get_attribute(stanza, "type");
+    gchar *from = xmpp_stanza_get_attribute(stanza, "from");
+
+    if (strcmp(type, "groupchat") == 0) {
+        _groupchat_message_handler(from, stanza);
 
     // handle regular messaging
     } else {
