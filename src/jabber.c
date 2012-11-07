@@ -253,14 +253,20 @@ jabber_subscribe(const char * const recipient)
 void
 jabber_join(const char * const room_jid, const char * const nick)
 {
-    xmpp_stanza_t *presence = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(presence, "presence");
-
     GString *to = g_string_new(room_jid);
     g_string_append(to, "/");
     g_string_append(to, nick);
 
+    xmpp_stanza_t *presence = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(presence, "presence");
     xmpp_stanza_set_attribute(presence, "to", to->str);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(jabber_conn.ctx);
+    xmpp_stanza_set_name(x, "x");
+    xmpp_stanza_set_ns(x, "http://jabber.org/protocol/muc");
+
+    xmpp_stanza_add_child(presence, x);
+
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 
