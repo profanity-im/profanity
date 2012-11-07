@@ -645,6 +645,30 @@ _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 }
 
 static int
+_room_presence_handler(const char * const jid)
+{
+    char *room = NULL;
+    char *nick = NULL;
+
+    if (!room_parse_room_jid(jid, &room, &nick)) {
+        log_error("Could not parse room jid: %s", room);
+        g_free(room);
+        g_free(nick);
+
+        return 1;
+    }
+
+    // handle self presence (means room roster has been sent)
+    if (strcmp(room_get_nick_for_room(room), nick) == 0) {
+        prof_handle_room_roster_complete(room);
+    } else {
+        room_add_to_roster(room, nick);
+    }
+
+    return 1;
+}
+
+static int
 _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
@@ -657,23 +681,7 @@ _presence_handler(xmpp_conn_t * const conn,
 
     // handle chat room presence
     if (room_is_active(from)) {
-        char *room = NULL;
-        char *nick = NULL;
-
-        if (!room_parse_room_jid(from, &room, &nick)) {
-            log_error("Could not parse room jid: %s", room);
-            g_free(room);
-            g_free(nick);
-
-            return 1;
-        }
-
-        // handle self presence (means room roster has been sent)
-        if (strcmp(room_get_nick_for_room(room), nick) == 0) {
-            prof_handle_room_roster_complete(room);
-        } else {
-            room_add_to_roster(room, nick);
-        }
+        return _room_presence_handler(from);
 
     // handle regular presence
     } else {
