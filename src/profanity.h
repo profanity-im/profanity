@@ -39,8 +39,6 @@ void prof_handle_room_history(const char * const room_jid,
     const char * const nick, GTimeVal tv_stamp, const char * const message);
 void prof_handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message);
-void
-prof_handle_chat_room_member(const char * const room_jid,
-    const char * const nick);
+void prof_handle_room_roster_complete(const char * const room);
 
 #endif

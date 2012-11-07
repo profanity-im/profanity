@@ -655,13 +655,27 @@ _presence_handler(xmpp_conn_t * const conn,
 
     char *from = xmpp_stanza_get_attribute(stanza, "from");
 
+    // handle chat room presence
     if (room_is_active(from)) {
-        char **tokens = g_strsplit(from, "/", 0);
-        char *room_jid = tokens[0];
-        char *nick = tokens[1];
-        if (strcmp(room_get_nick_for_room(room_jid), nick) != 0) {
-            prof_handle_chat_room_member(room_jid, nick);
+        char *room = NULL;
+        char *nick = NULL;
+
+        if (!room_parse_room_jid(from, &room, &nick)) {
+            log_error("Could not parse room jid: %s", room);
+            g_free(room);
+            g_free(nick);
+
+            return 1;
         }
+
+        // handle self presence (means room roster has been sent)
+        if (strcmp(room_get_nick_for_room(room), nick) == 0) {
+            prof_handle_room_roster_complete(room);
+        } else {
+            room_add_to_roster(room, nick);
+        }
+
+    // handle regular presence
     } else {
         char *short_from = strtok(from, "/");
         char *type = xmpp_stanza_get_attribute(stanza, "type");

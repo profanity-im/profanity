@@ -28,6 +28,7 @@
 typedef struct _muc_room_t {
     char *jid;
     char *nick;
+    GSList *roster;
 } muc_room;
 
 GHashTable *rooms = NULL;
@@ -45,6 +46,7 @@ room_join(const char * const jid, const char * const nick)
     muc_room *new_room = malloc(sizeof(muc_room));
     new_room->jid = strdup(jid);
     new_room->nick = strdup(nick);
+    new_room->roster = NULL;
 
     g_hash_table_insert(rooms, strdup(jid), new_room);
 }
@@ -107,6 +109,28 @@ room_parse_room_jid(const char * const room_jid, char **room, char **nick)
     }
 }
 
+void
+room_add_to_roster(const char * const jid, const char * const nick)
+{
+    muc_room *room = g_hash_table_lookup(rooms, jid);
+
+    if (room != NULL) {
+        room->roster = g_slist_append(room->roster, strdup(nick));
+    }
+}
+
+GSList *
+room_get_roster(const char * const jid)
+{
+    muc_room *room = g_hash_table_lookup(rooms, jid);
+
+    if (room != NULL) {
+        return room->roster;
+    } else {
+        return NULL;
+    }
+}
+
 static void
 _room_free(muc_room *room)
 {
@@ -118,6 +142,10 @@ _room_free(muc_room *room)
         if (room->nick != NULL) {
             g_free(room->nick);
             room->nick = NULL;
+        }
+        if (room->roster != NULL) {
+            g_slist_free_full(room->roster, g_free);
+            room->roster = NULL;
         }
         g_free(room);
     }

@@ -35,6 +35,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
+#include "room_chat.h"
 #include "jabber.h"
 #include "ui.h"
 
@@ -186,10 +187,14 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-prof_handle_chat_room_member(const char * const room_jid,
-    const char * const nick)
+prof_handle_room_roster_complete(const char * const room)
 {
-    win_show_chat_room_member(room_jid, nick);
+    GSList *roster = room_get_roster(room);
+
+    while (roster != NULL) {
+        win_show_chat_room_member(room, roster->data);
+        roster = g_slist_next(roster);
+    }
 }
 
 void
