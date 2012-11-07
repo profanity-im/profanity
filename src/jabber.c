@@ -467,13 +467,13 @@ static int
 _chat_message_handler(xmpp_stanza_t * const stanza)
 {
     gchar *from = xmpp_stanza_get_attribute(stanza, "from");
+
     char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
     char *short_from = strtok(from_cpy, "/");
 
     //determine chatstate support of recipient
     gboolean recipient_supports = FALSE;
-
     if ((xmpp_stanza_get_child_by_name(stanza, "active") != NULL) ||
             (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) ||
             (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) ||
@@ -482,36 +482,26 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
         recipient_supports = TRUE;
     }
 
-    // create of update session
+    // create or update chat session
     if (!chat_session_exists(short_from)) {
         chat_session_start(short_from, recipient_supports);
     } else {
         chat_session_set_recipient_supports(short_from, recipient_supports);
     }
 
-    // deal with chat states
+    // deal with chat states is recipient supports them
     if (recipient_supports) {
-
-        // handle <composing/>
         if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
             if (prefs_get_notify_typing() || prefs_get_intype()) {
                 prof_handle_typing(short_from);
             }
-
-        // handle <paused/>
-        } else if (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) {
-            // do something
-
-        // handle <inactive/>
-        } else if (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL) {
-            // do something
-
-        // handle <gone/>
         } else if (xmpp_stanza_get_child_by_name(stanza, "gone") != NULL) {
             prof_handle_gone(short_from);
-
-        // handle <active/>
-        } else {
+        } else if (xmpp_stanza_get_child_by_name(stanza, "paused") != NULL) {
+            // do something
+        } else if (xmpp_stanza_get_child_by_name(stanza, "inactive") != NULL) {
+            // do something
+        } else { // handle <active/>
             // do something
         }
     }
