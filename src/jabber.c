@@ -62,12 +62,9 @@ static void _connection_handler(xmpp_conn_t * const conn,
 
 static int _message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _groupchat_message_handler(const char * const room_jid,
-    xmpp_stanza_t * const stanza);
-static int _error_message_handler(const char * const from,
-    xmpp_stanza_t * const stanza);
-static int _chat_message_handler(const char * const from,
-    xmpp_stanza_t * const stanza);
+static int _groupchat_message_handler(xmpp_stanza_t * const stanza);
+static int _error_message_handler(xmpp_stanza_t * const stanza);
+static int _chat_message_handler(xmpp_stanza_t * const stanza);
 
 static int _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
@@ -380,9 +377,10 @@ _jabber_roster_request(void)
 }
 
 static int
-_groupchat_message_handler(const char * const room_jid,
-    xmpp_stanza_t * const stanza)
+_groupchat_message_handler(xmpp_stanza_t * const stanza)
 {
+    gchar *room_jid = xmpp_stanza_get_attribute(stanza, "from");
+
     if (room_is_active(room_jid)) {
         xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, "delay");
 
@@ -438,7 +436,7 @@ _groupchat_message_handler(const char * const room_jid,
 }
 
 static int
-_error_message_handler(const char * const from, xmpp_stanza_t * const stanza)
+_error_message_handler(xmpp_stanza_t * const stanza)
 {
     char *err_msg = NULL;
     xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
@@ -459,14 +457,16 @@ _error_message_handler(const char * const from, xmpp_stanza_t * const stanza)
         // TODO: process 'type' attribute from <error/> [RFC6120, 8.3.2]
     }
 
+    gchar *from = xmpp_stanza_get_attribute(stanza, "from");
     prof_handle_error_message(from, err_msg);
 
     return 1;
 }
 
 static int
-_chat_message_handler(const char * const from, xmpp_stanza_t * const stanza)
+_chat_message_handler(xmpp_stanza_t * const stanza)
 {
+    gchar *from = xmpp_stanza_get_attribute(stanza, "from");
     char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
     char *short_from = strtok(from_cpy, "/");
@@ -531,17 +531,16 @@ _message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     gchar *type = xmpp_stanza_get_attribute(stanza, "type");
-    gchar *from = xmpp_stanza_get_attribute(stanza, "from");
 
     if (type == NULL) {
         log_error("Message stanza received with no type attribute");
         return 1;
     } else if (strcmp(type, "error") == 0) {
-        return _error_message_handler(from, stanza);
+        return _error_message_handler(stanza);
     } else if (strcmp(type, "groupchat") == 0) {
-        return _groupchat_message_handler(from, stanza);
+        return _groupchat_message_handler(stanza);
     } else if (strcmp(type, "chat") == 0) {
-        return _chat_message_handler(from, stanza);
+        return _chat_message_handler(stanza);
     } else {
         log_error("Message stanza received with unknown type: %s", type);
         return 1;
