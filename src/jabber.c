@@ -379,57 +379,51 @@ _jabber_roster_request(void)
 static int
 _groupchat_message_handler(xmpp_stanza_t * const stanza)
 {
+    char *room = NULL;
+    char *nick = NULL;
+
     gchar *room_jid = xmpp_stanza_get_attribute(stanza, "from");
+    if (!room_parse_room_jid(room_jid, &room, &nick)) {
+        log_error("Could not parse room jid: %s", room_jid);
+        g_free(room);
+        g_free(nick);
 
-    if (room_is_active(room_jid)) {
-        xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, "delay");
+        return 1;
+    }
 
-        // handle chat room history
-        if (delay != NULL) {
-            char *utc_stamp = xmpp_stanza_get_attribute(delay, "stamp");
-            GTimeVal tv_stamp;
-
-            if(g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
-                xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
-
-                if (body != NULL) {
-                    char *room = NULL;
-                    char *nick = NULL;
-                    gboolean parse_success = room_parse_room_jid(room_jid, &room, &nick);
-
-                    if (parse_success) {
-                        char *message = xmpp_stanza_get_text(body);
-                        prof_handle_room_history(room, nick, tv_stamp, message);
-                        g_free(room);
-                        g_free(nick);
-                    } else {
-                        log_error("Could not parse room jid: %s", room_jid);
-                    }
-                }
-            } else {
-                log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
-            }
-
-        // handle regular chat room message
-        } else {
-            xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
-            if (body != NULL) {
-                char *room = NULL;
-                char *nick = NULL;
-                gboolean parse_success = room_parse_room_jid(room_jid, &room, &nick);
-
-                if (parse_success) {
-                    char *message = xmpp_stanza_get_text(body);
-                    prof_handle_room_message(room, nick, message);
-                    g_free(room);
-                    g_free(nick);
-                } else {
-                    log_error("Could not parse room jid: %s", room_jid);
-                }
-            }
-        }
-    } else {
+    if (!room_is_active(room_jid)) {
         log_error("Message recieved for inactive groupchat: %s", room_jid);
+        g_free(room);
+        g_free(nick);
+
+        return 1;
+    }
+
+    char *message = NULL;
+    xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, "delay");
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, "body");
+    if (body != NULL) {
+        message = xmpp_stanza_get_text(body);
+    }
+
+    // handle chat room history
+    if (delay != NULL) {
+        char *utc_stamp = xmpp_stanza_get_attribute(delay, "stamp");
+        GTimeVal tv_stamp;
+
+        if (g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
+            if (message != NULL) {
+                prof_handle_room_history(room, nick, tv_stamp, message);
+            }
+        } else {
+            log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
+        }
+
+    // handle regular chat room message
+    } else {
+        if (message != NULL) {
+            prof_handle_room_message(room, nick, message);
+        }
     }
 
     return 1;
