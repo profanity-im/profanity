@@ -200,7 +200,7 @@ win_in_chat(void)
 int
 win_in_groupchat(void)
 {
-    if (room_jid_is_room_chat(_wins[_curr_prof_win].from)) {
+    if (room_is_active(_wins[_curr_prof_win].from)) {
         return 1;
     } else {
         return 0;

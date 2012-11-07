@@ -56,7 +56,7 @@ room_leave(const char * const jid)
 }
 
 gboolean
-room_jid_is_room_chat(const char * const jid)
+room_is_active(const char * const jid)
 {
     char **tokens = g_strsplit(jid, "/", 0);
     char *jid_part = tokens[0];

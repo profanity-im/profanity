@@ -375,14 +375,11 @@ static int
 _message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
-    char *type = NULL;
-    char *from = NULL;
-
-    type = xmpp_stanza_get_attribute(stanza, "type");
-    from = xmpp_stanza_get_attribute(stanza, "from");
+    gchar *type = xmpp_stanza_get_attribute(stanza, "type");
+    gchar *from = xmpp_stanza_get_attribute(stanza, "from");
 
     // handle groupchat messages
-    if (room_jid_is_room_chat(from)) {
+    if (room_is_active(from)) {
         xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, "delay");
 
         // handle chat room history
@@ -633,7 +630,7 @@ _presence_handler(xmpp_conn_t * const conn,
 
     char *from = xmpp_stanza_get_attribute(stanza, "from");
 
-    if (room_jid_is_room_chat(from)) {
+    if (room_is_active(from)) {
         char **tokens = g_strsplit(from, "/", 0);
         char *room_jid = tokens[0];
         char *nick = tokens[1];
