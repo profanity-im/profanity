@@ -59,8 +59,16 @@ void _jabber_send_state(const char * const recipient, const char * const state);
 static void _connection_handler(xmpp_conn_t * const conn,
     const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t * const stream_error, void * const userdata);
+
 static int _message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _groupchat_message_handler(const char * const room_jid,
+    xmpp_stanza_t * const stanza);
+static int _error_message_handler(const char * const from,
+    xmpp_stanza_t * const stanza);
+static int _chat_message_handler(const char * const from,
+    xmpp_stanza_t * const stanza);
+
 static int _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _presence_handler(xmpp_conn_t * const conn,
