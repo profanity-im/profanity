@@ -29,6 +29,7 @@ typedef struct _muc_room_t {
     char *jid;
     char *nick;
     GSList *roster;
+    gboolean roster_received;
 } muc_room;
 
 GHashTable *rooms = NULL;
@@ -47,6 +48,7 @@ room_join(const char * const jid, const char * const nick)
     new_room->jid = strdup(jid);
     new_room->nick = strdup(nick);
     new_room->roster = NULL;
+    new_room->roster_received = FALSE;
 
     g_hash_table_insert(rooms, strdup(jid), new_room);
 }
@@ -128,6 +130,28 @@ room_get_roster(const char * const jid)
         return room->roster;
     } else {
         return NULL;
+    }
+}
+
+void
+room_set_roster_received(const char * const jid)
+{
+    muc_room *room = g_hash_table_lookup(rooms, jid);
+
+    if (room != NULL) {
+        room->roster_received = TRUE;
+    }
+}
+
+gboolean
+room_get_roster_received(const char * const jid)
+{
+    muc_room *room = g_hash_table_lookup(rooms, jid);
+
+    if (room != NULL) {
+        return room->roster_received;
+    } else {
+        return FALSE;
     }
 }
 

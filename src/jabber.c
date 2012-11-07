@@ -660,9 +660,12 @@ _room_presence_handler(const char * const jid)
 
     // handle self presence (means room roster has been sent)
     if (strcmp(room_get_nick_for_room(room), nick) == 0) {
+        room_set_roster_received(room);
         prof_handle_room_roster_complete(room);
     } else {
-        room_add_to_roster(room, nick);
+        if (!room_get_roster_received(room)) {
+            room_add_to_roster(room, nick);
+        }
     }
 
     return 1;
