@@ -495,13 +495,29 @@ win_join_chat(const char * const room_jid, const char * const nick)
 }
 
 void
-win_show_chat_room_member(const char * const room_jid, const char * const nick)
+win_show_room_roster(const char * const room)
 {
-    int win_index = _find_prof_win_index(room_jid);
+    int win_index = _find_prof_win_index(room);
     WINDOW *win = _wins[win_index].win;
 
+    GSList *roster = room_get_roster(room);
+
+
+    if (roster != NULL) {
+        wprintw(win, "Room occupants:\n");
+    }
+
     wattron(win, COLOUR_ONLINE);
-    wprintw(win, "%s\n", nick);
+
+    while (roster != NULL) {
+        wprintw(win, "%s", roster->data);
+        if (roster->next != NULL) {
+            wprintw(win, ", ");
+        }
+        roster = g_slist_next(roster);
+    }
+    wprintw(win, "\n");
+
     wattroff(win, COLOUR_ONLINE);
 
     if (win_index == _curr_prof_win)

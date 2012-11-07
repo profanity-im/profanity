@@ -189,12 +189,7 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
 void
 prof_handle_room_roster_complete(const char * const room)
 {
-    GSList *roster = room_get_roster(room);
-
-    while (roster != NULL) {
-        win_show_chat_room_member(room, roster->data);
-        roster = g_slist_next(roster);
-    }
+    win_show_room_roster(room);
 }
 
 void
