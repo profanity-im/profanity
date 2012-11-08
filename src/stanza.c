@@ -54,7 +54,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
 
     msg = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(msg, "message");
-    xmpp_stanza_set_type(msg, "chat");
+    xmpp_stanza_set_type(msg, type);
     xmpp_stanza_set_attribute(msg, "to", recipient);
 
     body = xmpp_stanza_new(ctx);

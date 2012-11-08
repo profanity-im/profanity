@@ -167,28 +167,11 @@ jabber_send(const char * const msg, const char * const recipient)
 void
 jabber_send_groupchat(const char * const msg, const char * const recipient)
 {
-    char *encoded_xml = encode_xml(msg);
+    xmpp_stanza_t *message = stanza_create_message(jabber_conn.ctx, recipient,
+        "groupchat", msg, NULL);
 
-    xmpp_stanza_t *reply, *body, *text;
-
-    reply = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(reply, "message");
-    xmpp_stanza_set_type(reply, "groupchat");
-    xmpp_stanza_set_attribute(reply, "to", recipient);
-
-    body = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(body, "body");
-
-    text = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_text(text, encoded_xml);
-
-    xmpp_stanza_add_child(body, text);
-    xmpp_stanza_add_child(reply, body);
-
-    xmpp_send(jabber_conn.conn, reply);
-    xmpp_stanza_release(reply);
-
-    free(encoded_xml);
+    xmpp_send(jabber_conn.conn, message);
+    xmpp_stanza_release(message);
 }
 
 void
