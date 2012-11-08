@@ -28,4 +28,7 @@
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const recipient, const char * const state);
 
+xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx,
+    const char * const recipient, const char * const type,
+    const char * const message, const char * const state);
 #endif

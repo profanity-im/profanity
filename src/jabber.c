@@ -144,44 +144,26 @@ jabber_process_events(void)
 void
 jabber_send(const char * const msg, const char * const recipient)
 {
+    char *encoded_xml = encode_xml(msg);
+
     if (prefs_get_states()) {
         if (!chat_session_exists(recipient)) {
             chat_session_start(recipient, TRUE);
         }
     }
 
-    char *encoded_xml = encode_xml(msg);
-
-    xmpp_stanza_t *reply, *body, *text, *active;
-
-    reply = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(reply, "message");
-    xmpp_stanza_set_type(reply, "chat");
-    xmpp_stanza_set_attribute(reply, "to", recipient);
-
-    body = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(body, "body");
-
-    text = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_text(text, encoded_xml);
-
-    if (prefs_get_states()) {
-
-        // always send <active/> with messages when recipient supports chat states
-        if (chat_session_get_recipient_supports(recipient)) {
-            chat_session_set_active(recipient);
-            active = xmpp_stanza_new(jabber_conn.ctx);
-            xmpp_stanza_set_name(active, "active");
-            xmpp_stanza_set_ns(active, "http://jabber.org/protocol/chatstates");
-            xmpp_stanza_add_child(reply, active);
-        }
+    xmpp_stanza_t *message;
+    if (prefs_get_states() && chat_session_get_recipient_supports(recipient)) {
+        chat_session_set_active(recipient);
+        message = stanza_create_message(jabber_conn.ctx, recipient, "chat",
+            encoded_xml, "active");
+    } else {
+        message = stanza_create_message(jabber_conn.ctx, recipient, "chat",
+            encoded_xml, NULL);
     }
 
-    xmpp_stanza_add_child(body, text);
-    xmpp_stanza_add_child(reply, body);
-
-    xmpp_send(jabber_conn.conn, reply);
-    xmpp_stanza_release(reply);
+    xmpp_send(jabber_conn.conn, message);
+    xmpp_stanza_release(message);
 
     free(encoded_xml);
 }
