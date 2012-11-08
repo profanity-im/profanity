@@ -58,7 +58,7 @@ chat_log_init(void)
 
 void
 chat_log_chat(const gchar * const login, gchar *other,
-    const gchar * const msg, chat_log_direction_t direction)
+    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
 {
     gchar *other_copy = strdup(other);
     struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other_copy);
@@ -74,8 +74,15 @@ chat_log_chat(const gchar * const login, gchar *other,
         g_hash_table_replace(logs, other_copy, dated_log);
     }
 
-    GDateTime *dt = g_date_time_new_now_local();
-    gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
+    gchar *date_fmt = NULL;
+    GDateTime *dt = NULL;
+    if (tv_stamp == NULL) {
+        dt = g_date_time_new_now_local();
+    } else {
+        dt = g_date_time_new_from_timeval_utc(tv_stamp);
+    }
+
+    date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
     FILE *logp = fopen(dated_log->filename, "a");
 
@@ -97,6 +104,7 @@ chat_log_chat(const gchar * const login, gchar *other,
     if (result == EOF) {
         log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
     }
+
     g_free(date_fmt);
     g_date_time_unref(dt);
 }

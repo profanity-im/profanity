@@ -624,7 +624,7 @@ cmd_execute_default(const char * const inp)
 
         if (prefs_get_chlog()) {
             const char *jid = jabber_get_jid();
-            chat_log_chat(jid, recipient, inp, OUT);
+            chat_log_chat(jid, recipient, inp, OUT, NULL);
         }
 
         win_show_outgoing_msg("me", recipient, inp);
@@ -980,7 +980,7 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
 
                 if (prefs_get_chlog()) {
                     const char *jid = jabber_get_jid();
-                    chat_log_chat(jid, usr, msg, OUT);
+                    chat_log_chat(jid, usr, msg, OUT, NULL);
                 }
 
             } else {
@@ -1061,7 +1061,7 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
 
                 if (prefs_get_chlog()) {
                     const char *jid = jabber_get_jid();
-                    chat_log_chat(jid, recipient, tiny, OUT);
+                    chat_log_chat(jid, recipient, tiny, OUT, NULL);
                 }
 
                 win_show_outgoing_msg("me", recipient, tiny);

@@ -103,7 +103,7 @@ prof_handle_typing(char *from)
 void
 prof_handle_incoming_message(char *from, char *message)
 {
-    win_show_incomming_msg(from, message);
+    win_show_incomming_msg(from, message, NULL);
     win_page_off();
 
     if (prefs_get_chlog()) {
@@ -112,7 +112,23 @@ prof_handle_incoming_message(char *from, char *message)
         char *short_from = strtok(from_cpy, "/");
         const char *jid = jabber_get_jid();
 
-        chat_log_chat(jid, short_from, message, IN);
+        chat_log_chat(jid, short_from, message, IN, NULL);
+    }
+}
+
+void
+prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp)
+{
+    win_show_incomming_msg(from, message, &tv_stamp);
+    win_page_off();
+
+    if (prefs_get_chlog()) {
+        char from_cpy[strlen(from) + 1];
+        strcpy(from_cpy, from);
+        char *short_from = strtok(from_cpy, "/");
+        const char *jid = jabber_get_jid();
+
+        chat_log_chat(jid, short_from, message, IN, &tv_stamp);
     }
 }
 

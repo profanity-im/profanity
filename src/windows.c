@@ -263,7 +263,8 @@ win_remind(void)
 }
 
 void
-win_show_incomming_msg(const char * const from, const char * const message)
+win_show_incomming_msg(const char * const from, const char * const message,
+    GTimeVal *tv_stamp)
 {
     char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
@@ -277,7 +278,15 @@ win_show_incomming_msg(const char * const from, const char * const message)
 
     // currently viewing chat window with sender
     if (win_index == _curr_prof_win) {
-        _win_show_time(win);
+        if (tv_stamp == NULL) {
+            _win_show_time(win);
+        } else {
+            GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
+            gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+            wprintw(win, "%s - ", date_fmt);
+            g_date_time_unref(time);
+            g_free(date_fmt);
+        }
 
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(win, COLOUR_ONLINE);
@@ -306,7 +315,16 @@ win_show_incomming_msg(const char * const from, const char * const message)
             _win_show_history(win, win_index, short_from);
         }
 
-        _win_show_time(win);
+        if (tv_stamp == NULL) {
+            _win_show_time(win);
+        } else {
+            GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
+            gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+            wprintw(win, "%s - ", date_fmt);
+            g_date_time_unref(time);
+            g_free(date_fmt);
+        }
+
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(win, COLOUR_ONLINE);
             wprintw(win, "*%s ", short_from);
