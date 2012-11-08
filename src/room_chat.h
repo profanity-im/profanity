@@ -20,6 +20,9 @@
  *
  */
 
+#ifndef ROOM_CHAT_H
+#define ROOM_CHAT_H
+
 #include <glib.h>
 
 void room_join(const char * const jid, const char * const nick);
@@ -33,3 +36,5 @@ GList * room_get_roster(const char * const jid);
 void room_set_roster_received(const char * const jid);
 gboolean room_get_roster_received(const char * const jid);
 void room_remove_from_roster(const char * const jid, const char * const nick);
+
+#endif

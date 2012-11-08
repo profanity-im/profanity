@@ -20,6 +20,11 @@
  *
  */
 
+#ifndef RELEASE_H
+#define RELEASE_H
+
 #include <glib.h>
 
 char * release_get_latest(void);
+
+#endif
