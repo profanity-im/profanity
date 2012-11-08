@@ -489,8 +489,14 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
         chat_session_set_recipient_supports(short_from, recipient_supports);
     }
 
+    gboolean historic_notification = FALSE;
+    // determine if the notifications happened whilst offline
+    if (xmpp_stanza_get_child_by_name(stanza, "delay") != NULL) {
+        historic_notification = TRUE;
+    }
+
     // deal with chat states if recipient supports them
-    if (recipient_supports) {
+    if (recipient_supports && !historic_notification) {
         if (xmpp_stanza_get_child_by_name(stanza, "composing") != NULL) {
             if (prefs_get_notify_typing() || prefs_get_intype()) {
                 prof_handle_typing(short_from);
