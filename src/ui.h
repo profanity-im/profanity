@@ -103,6 +103,8 @@ void win_disconnected(void);
 void win_show(const char * const msg);
 void win_bad_show(const char * const msg);
 void win_remind(void);
+void win_activity(void);
+void win_no_activity(void);
 
 void win_join_chat(const char * const room_jid, const char * const nick);
 void win_show_room_roster(const char * const room);

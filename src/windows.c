@@ -37,6 +37,7 @@
 #endif
 
 #include "chat_log.h"
+#include "chat_session.h"
 #include "command.h"
 #include "contact.h"
 #include "contact_list.h"
@@ -260,6 +261,47 @@ win_remind(void)
         _win_notify_remind(unread);
     }
 #endif
+}
+
+void
+win_activity(void)
+{
+    if (win_in_chat() && !win_in_groupchat()) {
+        char *recipient = win_get_recipient();
+        chat_session_set_composing(recipient);
+        if (!chat_session_get_sent(recipient) ||
+                chat_session_is_paused(recipient)) {
+            jabber_send_composing(recipient);
+        }
+    }
+}
+
+void
+win_no_activity(void)
+{
+    int i;
+
+    // loop through regular chat windows and update states
+    for (i = 1; i < NUM_WINS; i++) {
+        if ((strcmp(_wins[i].from, "") != 0) &&
+                (!room_is_active(_wins[i].from))) {
+            char *recipient = _wins[i].from;
+            chat_session_no_activity(recipient);
+
+            if (chat_session_is_gone(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                jabber_send_gone(recipient);
+            } else if (chat_session_is_inactive(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                jabber_send_inactive(recipient);
+            } else if (prefs_get_outtype() &&
+                    chat_session_is_paused(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                jabber_send_paused(recipient);
+            }
+        }
+    }
+
 }
 
 void

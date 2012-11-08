@@ -51,7 +51,6 @@
 #include <ncurses/ncurses.h>
 #endif
 
-#include "chat_session.h"
 #include "common.h"
 #include "command.h"
 #include "contact_list.h"
@@ -145,37 +144,12 @@ inp_get_char(int *ch, char *input, int *size)
     }
 
     if (prefs_get_states()) {
-
-        // if not got char, and in chat window, flag as no activity
-        // send inactive or gone, depending how long inactive
         if (*ch == ERR) {
-            if (win_in_chat() && !win_in_groupchat()) {
-                char *recipient = win_get_recipient();
-                chat_session_no_activity(recipient);
-
-                if (chat_session_is_gone(recipient) &&
-                        !chat_session_get_sent(recipient)) {
-                    jabber_send_gone(recipient);
-                } else if (chat_session_is_inactive(recipient) &&
-                        !chat_session_get_sent(recipient)) {
-                    jabber_send_inactive(recipient);
-                } else if (prefs_get_outtype() &&
-                        chat_session_is_paused(recipient) &&
-                        !chat_session_get_sent(recipient)) {
-                    jabber_send_paused(recipient);
-                }
-            }
+            win_no_activity();
         }
-
-        // if got char and in chat window, chat session active
-        if (prefs_get_outtype() && (*ch != ERR) && win_in_chat() &&
-                !win_in_groupchat() && !in_command && _printable(*ch)) {
-            char *recipient = win_get_recipient();
-            chat_session_set_composing(recipient);
-            if (!chat_session_get_sent(recipient) ||
-                    chat_session_is_paused(recipient)) {
-                jabber_send_composing(recipient);
-            }
+        if (prefs_get_outtype() && (*ch != ERR) && !in_command
+                                                && _printable(*ch)) {
+            win_activity();
         }
     }
 
