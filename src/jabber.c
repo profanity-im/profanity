@@ -144,8 +144,6 @@ jabber_process_events(void)
 void
 jabber_send(const char * const msg, const char * const recipient)
 {
-    char *encoded_xml = encode_xml(msg);
-
     if (prefs_get_states()) {
         if (!chat_session_exists(recipient)) {
             chat_session_start(recipient, TRUE);
@@ -156,16 +154,14 @@ jabber_send(const char * const msg, const char * const recipient)
     if (prefs_get_states() && chat_session_get_recipient_supports(recipient)) {
         chat_session_set_active(recipient);
         message = stanza_create_message(jabber_conn.ctx, recipient, "chat",
-            encoded_xml, "active");
+            msg, "active");
     } else {
         message = stanza_create_message(jabber_conn.ctx, recipient, "chat",
-            encoded_xml, NULL);
+            msg, NULL);
     }
 
     xmpp_send(jabber_conn.conn, message);
     xmpp_stanza_release(message);
-
-    free(encoded_xml);
 }
 
 void
