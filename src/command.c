@@ -191,6 +191,7 @@ static struct cmd_t main_commands[] =
           "Join a chat room at the conference server.",
           "If nick is specified you will join with this nickname,",
           "otherwise the first part of your JID (before the @) will be used.",
+          "If the room doesn't exist, and the server allows it, a new one will be created."
           "",
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
@@ -225,7 +226,8 @@ static struct cmd_t main_commands[] =
           "-------------",
           "Show contacts with the specified status, no status shows all contacts.",
           "Possible statuses are: online, offline, away, dnd, xa, chat.",
-          "online includes: chat, dnd, away, xa.",
+          "The online status includes the following statuses: chat, dnd, away, xa.",
+          "If in a chat room, this command shows the room roster in the room.",
           NULL } } },
 
     { "/close",
@@ -235,6 +237,7 @@ static struct cmd_t main_commands[] =
           "------",
           "Close the current chat window, no message is sent to the recipient,",
           "The chat window will become available for new chats.",
+          "If in a chat room, you will leave the room.",
           NULL } } },
 
     { "/quit",
