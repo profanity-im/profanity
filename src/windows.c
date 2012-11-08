@@ -502,22 +502,23 @@ win_show_room_roster(const char * const room)
 
     GList *roster = room_get_roster(room);
 
-    if (roster != NULL) {
+    if ((roster == NULL) || (g_list_length(roster) == 0)) {
+        wprintw(win, "You are alone!\n");
+    } else {
         wprintw(win, "Room occupants:\n");
-    }
+        wattron(win, COLOUR_ONLINE);
 
-    wattron(win, COLOUR_ONLINE);
-
-    while (roster != NULL) {
-        wprintw(win, "%s", roster->data);
-        if (roster->next != NULL) {
-            wprintw(win, ", ");
+        while (roster != NULL) {
+            wprintw(win, "%s", roster->data);
+            if (roster->next != NULL) {
+                wprintw(win, ", ");
+            }
+            roster = g_list_next(roster);
         }
-        roster = g_list_next(roster);
-    }
-    wprintw(win, "\n");
 
-    wattroff(win, COLOUR_ONLINE);
+        wprintw(win, "\n");
+        wattroff(win, COLOUR_ONLINE);
+    }
 
     if (win_index == _curr_prof_win)
         dirty = TRUE;
