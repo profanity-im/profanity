@@ -30,6 +30,7 @@
 #include "chat_log.h"
 #include "command.h"
 #include "common.h"
+#include "contact.h"
 #include "contact_list.h"
 #include "history.h"
 #include "log.h"
@@ -177,6 +178,7 @@ prof_handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
     win_show_room_history(room_jid, nick, tv_stamp, message);
+    win_page_off();
 }
 
 void
@@ -184,12 +186,32 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
     win_show_room_message(room_jid, nick, message);
+    win_page_off();
 }
 
 void
 prof_handle_room_roster_complete(const char * const room)
 {
     win_show_room_roster(room);
+    win_page_off();
+}
+
+void
+prof_handle_room_member_online(const char * const room, const char * const nick,
+    const char * const show, const char * const status)
+{
+    room_add_to_roster(room, nick);
+    win_show_room_member_online(room, nick);
+    win_page_off();
+}
+
+void
+prof_handle_room_member_offline(const char * const room, const char * const nick,
+    const char * const show, const char * const status)
+{
+    room_remove_from_roster(room, nick);
+    win_show_room_member_offline(room, nick);
+    win_page_off();
 }
 
 void

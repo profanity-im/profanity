@@ -110,6 +110,8 @@ void win_show_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void win_show_room_message(const char * const room_jid, const char * const nick,
     const char * const message);
+void win_show_room_member_offline(const char * const room, const char * const nick);
+void win_show_room_member_online(const char * const room, const char * const nick);
 
 // console window actions
 void cons_about(void);

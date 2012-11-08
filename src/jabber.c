@@ -645,7 +645,7 @@ _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 }
 
 static int
-_room_presence_handler(const char * const jid)
+_room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
 {
     char *room = NULL;
     char *nick = NULL;
@@ -662,9 +662,36 @@ _room_presence_handler(const char * const jid)
     if (strcmp(room_get_nick_for_room(room), nick) == 0) {
         room_set_roster_received(room);
         prof_handle_room_roster_complete(room);
+
+    // handle presence from room members
     } else {
+        // roster not yet complete, just add to roster
         if (!room_get_roster_received(room)) {
             room_add_to_roster(room, nick);
+
+        // deal with presence information
+        } else {
+            char *type = xmpp_stanza_get_attribute(stanza, "type");
+            char *show_str, *status_str;
+
+            xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, "status");
+            if (status != NULL) {
+                status_str = xmpp_stanza_get_text(status);
+            } else {
+                status_str = NULL;
+            }
+
+            if ((type != NULL) && (strcmp(type, "unavailable") == 0)) {
+                prof_handle_room_member_offline(room, nick, "offline", status_str);
+            } else {
+                xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, "show");
+                if (show != NULL) {
+                    show_str = xmpp_stanza_get_text(show);
+                } else {
+                    show_str = "online";
+                    prof_handle_room_member_online(room, nick, show_str, status_str);
+                }
+            }
         }
     }
 
@@ -684,7 +711,7 @@ _presence_handler(xmpp_conn_t * const conn,
 
     // handle chat room presence
     if (room_is_active(from)) {
-        return _room_presence_handler(from);
+        return _room_presence_handler(from, stanza);
 
     // handle regular presence
     } else {

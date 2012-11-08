@@ -25,10 +25,12 @@
 
 #include <glib.h>
 
+#include <contact.h>
+
 typedef struct _muc_room_t {
     char *jid;
     char *nick;
-    GSList *roster;
+    GHashTable *roster;
     gboolean roster_received;
 } muc_room;
 
@@ -47,7 +49,8 @@ room_join(const char * const jid, const char * const nick)
     muc_room *new_room = malloc(sizeof(muc_room));
     new_room->jid = strdup(jid);
     new_room->nick = strdup(nick);
-    new_room->roster = NULL;
+    new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
+        (GDestroyNotify)p_contact_free);
     new_room->roster_received = FALSE;
 
     g_hash_table_insert(rooms, strdup(jid), new_room);
@@ -117,17 +120,28 @@ room_add_to_roster(const char * const jid, const char * const nick)
     muc_room *room = g_hash_table_lookup(rooms, jid);
 
     if (room != NULL) {
-        room->roster = g_slist_append(room->roster, strdup(nick));
+        PContact contact = p_contact_new(nick, NULL, "online", NULL, NULL);
+        g_hash_table_replace(room->roster, strdup(nick), contact);
     }
 }
 
-GSList *
+void
+room_remove_from_roster(const char * const jid, const char * const nick)
+{
+    muc_room *room = g_hash_table_lookup(rooms, jid);
+
+    if (room != NULL) {
+        g_hash_table_remove(room->roster, nick);
+    }
+}
+
+GList *
 room_get_roster(const char * const jid)
 {
     muc_room *room = g_hash_table_lookup(rooms, jid);
 
     if (room != NULL) {
-        return room->roster;
+        return g_hash_table_get_keys(room->roster);
     } else {
         return NULL;
     }
@@ -168,7 +182,7 @@ _room_free(muc_room *room)
             room->nick = NULL;
         }
         if (room->roster != NULL) {
-            g_slist_free_full(room->roster, g_free);
+            g_hash_table_remove_all(room->roster);
             room->roster = NULL;
         }
         g_free(room);

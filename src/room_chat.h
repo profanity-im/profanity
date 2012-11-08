@@ -29,6 +29,7 @@ char * room_get_nick_for_room(const char * const jid);
 gboolean room_parse_room_jid(const char * const room_jid, char **room,
     char **nick);
 void room_add_to_roster(const char * const jid, const char * const nick);
-GSList * room_get_roster(const char * const jid);
+GList * room_get_roster(const char * const jid);
 void room_set_roster_received(const char * const jid);
 gboolean room_get_roster_received(const char * const jid);
+void room_remove_from_roster(const char * const jid, const char * const nick);
