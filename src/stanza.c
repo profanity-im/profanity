@@ -78,3 +78,24 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     return msg;
 }
 
+xmpp_stanza_t *
+stanza_create_room_presence(xmpp_ctx_t *ctx, const char * const room,
+    const char * const nick)
+{
+    GString *to = g_string_new(room);
+    g_string_append(to, "/");
+    g_string_append(to, nick);
+
+    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
+    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, to->str);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x, STANZA_NS_MUC);
+
+    xmpp_stanza_add_child(presence, x);
+
+    return presence;
+}
+
