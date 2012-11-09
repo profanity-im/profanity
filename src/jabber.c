@@ -253,6 +253,7 @@ jabber_leave_chat_room(const char * const room_jid)
     xmpp_stanza_t *presence = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, STANZA_TYPE_UNAVAILABLE);
+    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_jid->str);
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 
