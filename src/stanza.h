@@ -25,6 +25,49 @@
 
 #include <strophe.h>
 
+#define STANZA_NAME_ACTIVE "active"
+#define STANZA_NAME_INACTIVE "inactive"
+#define STANZA_NAME_COMPOSING "composing"
+#define STANZA_NAME_PAUSED "paused"
+#define STANZA_NAME_GONE "gone"
+
+#define STANZA_NAME_MESSAGE "message"
+#define STANZA_NAME_BODY "body"
+#define STANZA_NAME_PRESENCE "presence"
+#define STANZA_NAME_X "x"
+#define STANZA_NAME_SHOW "show"
+#define STANZA_NAME_STATUS "status"
+#define STANZA_NAME_IQ "iq"
+#define STANZA_NAME_QUERY "query"
+#define STANZA_NAME_DELAY "delay"
+#define STANZA_NAME_ERROR "error"
+#define STANZA_NAME_PING "ping"
+
+#define STANZA_TYPE_CHAT "chat"
+#define STANZA_TYPE_GROUPCHAT "groupchat"
+#define STANZA_TYPE_UNAVAILABLE "unavailable"
+#define STANZA_TYPE_SUBSCRIBE "subscribe"
+#define STANZA_TYPE_GET "get"
+#define STANZA_TYPE_ERROR "error"
+
+#define STANZA_ATTR_TO "to"
+#define STANZA_ATTR_FROM "from"
+#define STANZA_ATTR_STAMP "stamp"
+#define STANZA_ATTR_TYPE "type"
+#define STANZA_ATTR_JID "jid"
+#define STANZA_ATTR_NAME "name"
+#define STANZA_ATTR_SUBSCRIPTION "subscription"
+
+#define STANZA_TEXT_AWAY "away"
+#define STANZA_TEXT_DND "dnd"
+#define STANZA_TEXT_CHAT "chat"
+#define STANZA_TEXT_XA "xa"
+#define STANZA_TEXT_ONLINE "online"
+
+#define STANZA_NS_CHATSTATES "http://jabber.org/protocol/chatstates"
+#define STANZA_NS_MUC "http://jabber.org/protocol/muc"
+#define STANZA_NS_PING "urn:xmpp:ping"
+
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const recipient, const char * const state);
 

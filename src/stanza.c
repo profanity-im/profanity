@@ -23,6 +23,7 @@
 #include <strophe.h>
 
 #include "common.h"
+#include "stanza.h"
 
 xmpp_stanza_t *
 stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
@@ -31,13 +32,13 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_t *msg, *chat_state;
 
     msg = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(msg, "message");
-    xmpp_stanza_set_type(msg, "chat");
-    xmpp_stanza_set_attribute(msg, "to", recipient);
+    xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
+    xmpp_stanza_set_type(msg, STANZA_TYPE_CHAT);
+    xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
 
     chat_state = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(chat_state, state);
-    xmpp_stanza_set_ns(chat_state, "http://jabber.org/protocol/chatstates");
+    xmpp_stanza_set_ns(chat_state, STANZA_NS_CHATSTATES);
     xmpp_stanza_add_child(msg, chat_state);
 
     return msg;
@@ -53,12 +54,12 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_t *msg, *body, *text;
 
     msg = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(msg, "message");
+    xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, type);
-    xmpp_stanza_set_attribute(msg, "to", recipient);
+    xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
 
     body = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(body, "body");
+    xmpp_stanza_set_name(body, STANZA_NAME_BODY);
 
     text = xmpp_stanza_new(ctx);
     xmpp_stanza_set_text(text, encoded_xml);
@@ -68,7 +69,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     if (state != NULL) {
         xmpp_stanza_t *chat_state = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(chat_state, state);
-        xmpp_stanza_set_ns(chat_state, "http://jabber.org/protocol/chatstates");
+        xmpp_stanza_set_ns(chat_state, STANZA_NS_CHATSTATES);
         xmpp_stanza_add_child(msg, chat_state);
     }
 
