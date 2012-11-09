@@ -98,7 +98,7 @@ stanza_create_room_presence(xmpp_ctx_t *ctx, const char * const room,
 
     return presence;
 }
-/*
+
 xmpp_stanza_t *
 stanza_create_room_leave(xmpp_ctx_t *ctx, const char * const room,
     const char * const nick)
@@ -110,7 +110,9 @@ stanza_create_room_leave(xmpp_ctx_t *ctx, const char * const room,
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, STANZA_TYPE_UNAVAILABLE);
+    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_jid->str);
 
     g_string_free(full_jid, TRUE);
+
+    return presence;
 }
-*/

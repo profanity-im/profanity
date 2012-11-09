@@ -246,18 +246,11 @@ void
 jabber_leave_chat_room(const char * const room_jid)
 {
     char *nick = room_get_nick_for_room(room_jid);
-    GString *full_jid = g_string_new(room_jid);
-    g_string_append(full_jid, "/");
-    g_string_append(full_jid, nick);
 
-    xmpp_stanza_t *presence = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
-    xmpp_stanza_set_type(presence, STANZA_TYPE_UNAVAILABLE);
-    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_jid->str);
+    xmpp_stanza_t *presence = stanza_create_room_leave(jabber_conn.ctx,
+        room_jid, nick);
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
-
-    g_string_free(full_jid, TRUE);
 
     room_leave(room_jid);
 }
