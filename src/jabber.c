@@ -232,14 +232,14 @@ jabber_subscribe(const char * const recipient)
 }
 
 void
-jabber_join(const char * const room_jid, const char * const nick)
+jabber_join(const char * const room, const char * const nick)
 {
     xmpp_stanza_t *presence = stanza_create_room_join_presence(jabber_conn.ctx,
-        room_jid, nick);
+        room, nick);
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 
-    room_join(room_jid, nick);
+    room_join(room, nick);
 }
 
 void

@@ -997,7 +997,7 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_join(const char * const inp, struct cmd_help_t help)
 {
-    char *room_jid = NULL;
+    char *room = NULL;
     char *nick = NULL;
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -1011,12 +1011,12 @@ _cmd_join(const char * const inp, struct cmd_help_t help)
 
         // get room jid
         strtok(inp_cpy, " ");
-        room_jid = strtok(NULL, " ");
-        if (room_jid == NULL) {
+        room = strtok(NULL, " ");
+        if (room == NULL) {
             cons_show("Usage: %s", help.usage);
         } else {
-            if ((strlen(inp) > (6 + strlen(room_jid) + 1))) {
-                nick = strndup(inp+6+strlen(room_jid)+1, strlen(inp)-(6+strlen(room_jid)+1));
+            if ((strlen(inp) > (6 + strlen(room) + 1))) {
+                nick = strndup(inp+6+strlen(room)+1, strlen(inp)-(6+strlen(room)+1));
             }
 
             // if no nick, set to first part of jid
@@ -1026,8 +1026,8 @@ _cmd_join(const char * const inp, struct cmd_help_t help)
                 strcpy(jid_cpy, jid);
                 nick = strdup(strtok(jid_cpy, "@"));
             }
-            jabber_join(room_jid, nick);
-            win_join_chat(room_jid, nick);
+            jabber_join(room, nick);
+            win_join_chat(room, nick);
         }
     }
 
