@@ -542,13 +542,13 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 }
 
 void
-win_join_chat(const char * const room_jid, const char * const nick)
+win_join_chat(const char * const room, const char * const nick)
 {
-    int win_index = _find_prof_win_index(room_jid);
+    int win_index = _find_prof_win_index(room);
 
     // create new window
     if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(room_jid);
+        win_index = _new_prof_win(room);
     }
 
     _win_switch_if_active(win_index);

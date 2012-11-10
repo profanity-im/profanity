@@ -106,7 +106,7 @@ void win_remind(void);
 void win_activity(void);
 void win_no_activity(void);
 
-void win_join_chat(const char * const room_jid, const char * const nick);
+void win_join_chat(const char * const room, const char * const nick);
 void win_show_room_roster(const char * const room);
 int win_in_groupchat(void);
 void win_show_room_history(const char * const room_jid, const char * const nick,
