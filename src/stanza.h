@@ -81,4 +81,8 @@ xmpp_stanza_t* stanza_create_room_presence(xmpp_ctx_t *ctx,
 xmpp_stanza_t* stanza_create_room_leave(xmpp_ctx_t *ctx,
     const char * const room, const char * const nick);
 
+xmpp_stanza_t *
+stanza_create_presence(xmpp_ctx_t *ctx, const char * const show,
+    const char * const status);
+
 #endif

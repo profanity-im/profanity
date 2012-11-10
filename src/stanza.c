@@ -20,6 +20,8 @@
  *
  */
 
+#include <string.h>
+
 #include <strophe.h>
 
 #include "common.h"
@@ -113,6 +115,38 @@ stanza_create_room_leave(xmpp_ctx_t *ctx, const char * const room,
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_jid->str);
 
     g_string_free(full_jid, TRUE);
+
+    return presence;
+}
+
+xmpp_stanza_t *
+stanza_create_presence(xmpp_ctx_t *ctx, const char * const show,
+    const char * const status)
+{
+    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
+
+    if (strcmp(show, STANZA_TEXT_ONLINE) != 0) {
+        xmpp_stanza_t *show_stanza = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(show_stanza, STANZA_NAME_SHOW);
+        xmpp_stanza_t *text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(text, show);
+        xmpp_stanza_add_child(show_stanza, text);
+        xmpp_stanza_add_child(presence, show_stanza);
+        xmpp_stanza_release(text);
+        xmpp_stanza_release(show_stanza);
+    }
+
+    if (status != NULL) {
+        xmpp_stanza_t *status_stanza = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(status_stanza, STANZA_NAME_STATUS);
+        xmpp_stanza_t *text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(text, status);
+        xmpp_stanza_add_child(status_stanza, text);
+        xmpp_stanza_add_child(presence, status_stanza);
+        xmpp_stanza_release(text);
+        xmpp_stanza_release(status_stanza);
+    }
 
     return presence;
 }

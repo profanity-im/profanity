@@ -260,48 +260,29 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
 {
     jabber_conn.presence = status;
 
-    xmpp_stanza_t *pres, *show;
-
-    pres = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(pres, STANZA_NAME_PRESENCE);
-
-    if (status != PRESENCE_ONLINE) {
-        show = xmpp_stanza_new(jabber_conn.ctx);
-        xmpp_stanza_set_name(show, STANZA_NAME_SHOW);
-        xmpp_stanza_t *text = xmpp_stanza_new(jabber_conn.ctx);
-
-        if (status == PRESENCE_AWAY)
-            xmpp_stanza_set_text(text, STANZA_TEXT_AWAY);
-        else if (status == PRESENCE_DND)
-            xmpp_stanza_set_text(text, STANZA_TEXT_DND);
-        else if (status == PRESENCE_CHAT)
-            xmpp_stanza_set_text(text, STANZA_TEXT_CHAT);
-        else if (status == PRESENCE_XA)
-            xmpp_stanza_set_text(text, STANZA_TEXT_XA);
-        else
-            xmpp_stanza_set_text(text, STANZA_TEXT_ONLINE);
-
-        xmpp_stanza_add_child(show, text);
-        xmpp_stanza_add_child(pres, show);
-        xmpp_stanza_release(text);
-        xmpp_stanza_release(show);
+    char *show = NULL;
+    switch(status)
+    {
+        case PRESENCE_AWAY:
+            show = STANZA_TEXT_AWAY;
+            break;
+        case PRESENCE_DND:
+            show = STANZA_TEXT_DND;
+            break;
+        case PRESENCE_CHAT:
+            show = STANZA_TEXT_CHAT;
+            break;
+        case PRESENCE_XA:
+            show = STANZA_TEXT_XA;
+            break;
+        default:
+            show = STANZA_TEXT_ONLINE;
+            break;
     }
 
-    if (msg != NULL) {
-        xmpp_stanza_t *status = xmpp_stanza_new(jabber_conn.ctx);
-        xmpp_stanza_set_name(status, STANZA_NAME_STATUS);
-        xmpp_stanza_t *text = xmpp_stanza_new(jabber_conn.ctx);
-
-        xmpp_stanza_set_text(text, msg);
-
-        xmpp_stanza_add_child(status, text);
-        xmpp_stanza_add_child(pres, status);
-        xmpp_stanza_release(text);
-        xmpp_stanza_release(status);
-    }
-
-    xmpp_send(jabber_conn.conn, pres);
-    xmpp_stanza_release(pres);
+    xmpp_stanza_t *presence = stanza_create_presence(jabber_conn.ctx, show, msg);
+    xmpp_send(jabber_conn.conn, presence);
+    xmpp_stanza_release(presence);
 }
 
 jabber_conn_status_t
