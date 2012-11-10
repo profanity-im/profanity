@@ -1000,12 +1000,18 @@ cons_show_contacts(GSList *list)
 }
 
 void
-cons_bad_show(const char * const msg)
+cons_bad_show(const char * const msg, ...)
 {
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
     _win_show_time(_cons_win);
     wattron(_cons_win, COLOUR_ERR);
-    wprintw(_cons_win, "%s\n", msg);
+    wprintw(_cons_win, "%s\n", fmt_msg->str);
     wattroff(_cons_win, COLOUR_ERR);
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
 
     if (_curr_prof_win == 0)
         dirty = TRUE;

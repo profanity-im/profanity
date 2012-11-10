@@ -126,7 +126,7 @@ void cons_navigation_help(void);
 void cons_prefs(void);
 void cons_bad_command(const char * const cmd);
 void cons_show(const char * const cmd, ...);
-void cons_bad_show(const char * const cmd);
+void cons_bad_show(const char * const cmd, ...);
 void cons_highlight_show(const char * const cmd);
 void cons_show_contacts(GSList * list);
 void cons_check_version(gboolean not_available_msg);

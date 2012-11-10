@@ -135,18 +135,12 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp)
 void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
-    char *msg, *fmt;
-
     if (err_msg != NULL) {
-        fmt = "Error received from server: %s";
-        msg = (char *)malloc(strlen(err_msg) + strlen(fmt) - 1);
-        if (msg == NULL)
-            goto loop_out;
-        sprintf(msg, fmt, err_msg);
-        cons_bad_show(msg);
-        free(msg);
+        cons_bad_show("Error received from server: %s", err_msg);
+    } else {
+        cons_bad_show("Unknown error received from server.");
     }
-loop_out:
+
     win_show_error_msg(from, err_msg);
 }
 

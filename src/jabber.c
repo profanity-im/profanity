@@ -63,7 +63,7 @@ static void _connection_handler(xmpp_conn_t * const conn,
 static int _message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _groupchat_message_handler(xmpp_stanza_t * const stanza);
-static int _error_message_handler(xmpp_stanza_t * const stanza);
+static int _error_handler(xmpp_stanza_t * const stanza);
 static int _chat_message_handler(xmpp_stanza_t * const stanza);
 
 static int _roster_handler(xmpp_conn_t * const conn,
@@ -322,7 +322,7 @@ _message_handler(xmpp_conn_t * const conn,
         log_error("Message stanza received with no type attribute");
         return 1;
     } else if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
-        return _error_message_handler(stanza);
+        return _error_handler(stanza);
     } else if (strcmp(type, STANZA_TYPE_GROUPCHAT) == 0) {
         return _groupchat_message_handler(stanza);
     } else if (strcmp(type, STANZA_TYPE_CHAT) == 0) {
@@ -387,7 +387,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
 }
 
 static int
-_error_message_handler(xmpp_stanza_t * const stanza)
+_error_handler(xmpp_stanza_t * const stanza)
 {
     char *err_msg = NULL;
     xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
@@ -647,6 +647,11 @@ _presence_handler(xmpp_conn_t * const conn,
     char *short_jid = strtok(jid_cpy, "/");
 
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+
+    if ((type != NULL) && (strcmp(type, STANZA_TYPE_ERROR) == 0)) {
+        return _error_handler(stanza);
+    }
 
     // handle chat room presence
     if (room_is_active(from)) {
