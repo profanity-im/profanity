@@ -114,6 +114,37 @@ room_get_room_from_full_jid(const char * const full_room_jid)
     }
 }
 
+char *
+room_get_nick_from_full_jid(const char * const full_room_jid)
+{
+    char **tokens = g_strsplit(full_room_jid, "/", 0);
+    char *nick_part;
+
+    if (tokens == NULL || tokens[1] == NULL) {
+        return NULL;
+    } else {
+        nick_part = strdup(tokens[1]);
+
+        g_strfreev(tokens);
+
+        return nick_part;
+    }
+}
+
+char *
+room_create_full_room_jid(const char * const room, const char * const nick)
+{
+    GString *full_jid = g_string_new(room);
+    g_string_append(full_jid, "/");
+    g_string_append(full_jid, nick);
+
+    char *result = strdup(full_jid->str);
+
+    g_string_free(full_jid, TRUE);
+
+    return result;
+}
+
 gboolean
 room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 {

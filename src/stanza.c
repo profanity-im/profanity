@@ -81,16 +81,12 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
 }
 
 xmpp_stanza_t *
-stanza_create_room_join_presence(xmpp_ctx_t *ctx, const char * const room,
-    const char * const nick)
+stanza_create_room_join_presence(xmpp_ctx_t *ctx,
+    const char * const full_room_jid)
 {
-    GString *to = g_string_new(room);
-    g_string_append(to, "/");
-    g_string_append(to, nick);
-
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
-    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, to->str);
+    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
 
     xmpp_stanza_t *x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);

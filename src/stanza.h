@@ -78,7 +78,7 @@ xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx,
     const char * const message, const char * const state);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t *ctx,
-    const char * const room, const char * const nick);
+    const char * const full_room_jid);
 
 xmpp_stanza_t* stanza_create_room_leave_presence(xmpp_ctx_t *ctx,
     const char * const room, const char * const nick);
