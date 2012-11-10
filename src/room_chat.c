@@ -97,6 +97,23 @@ room_get_nick_for_room(const char * const jid)
     }
 }
 
+char *
+room_get_room_for_full_jid(const char * const jid)
+{
+    char **tokens = g_strsplit(jid, "/", 0);
+    char *room;
+
+    if (tokens == NULL || tokens[0] == NULL) {
+        return NULL;
+    } else {
+        room = strdup(tokens[0]);
+
+        g_strfreev(tokens);
+
+        return room;
+    }
+}
+
 gboolean
 room_parse_room_jid(const char * const room_jid, char **room, char **nick)
 {

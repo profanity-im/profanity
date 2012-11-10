@@ -29,6 +29,7 @@ void room_join(const char * const jid, const char * const nick);
 void room_leave(const char * const jid);
 gboolean room_is_active(const char * const jid);
 char * room_get_nick_for_room(const char * const jid);
+char * room_get_room_for_full_jid(const char * const jid);
 gboolean room_parse_room_jid(const char * const room_jid, char **room,
     char **nick);
 void room_add_to_roster(const char * const jid, const char * const nick);

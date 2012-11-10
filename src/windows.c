@@ -563,9 +563,13 @@ win_show_room_roster(const char * const room)
     GList *roster = room_get_roster(room);
 
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
+        wattron(win, COLOUR_INC);
         wprintw(win, "You are alone!\n");
+        wattroff(win, COLOUR_INC);
     } else {
+        wattron(win, COLOUR_INC);
         wprintw(win, "Room occupants:\n");
+        wattroff(win, COLOUR_INC);
         wattron(win, COLOUR_ONLINE);
 
         while (roster != NULL) {
@@ -680,6 +684,28 @@ win_show_room_message(const char * const room_jid, const char * const nick,
             _win_notify_message(nick);
         }
 #endif
+    }
+}
+
+void
+win_show_room_subject(const char * const room_jid, const char * const subject)
+{
+    int win_index = _find_prof_win_index(room_jid);
+    WINDOW *win = _wins[win_index].win;
+
+    wattron(win, COLOUR_INC);
+    wprintw(win, "Room subject: ");
+    wattroff(win, COLOUR_INC);
+    wprintw(win, "%s\n", subject);
+
+    // currently in groupchat window
+    if (win_index == _curr_prof_win) {
+        status_bar_active(win_index);
+        dirty = TRUE;
+
+    // not currenlty on groupchat window
+    } else {
+        status_bar_new(win_index);
     }
 }
 

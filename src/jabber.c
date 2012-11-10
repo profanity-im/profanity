@@ -338,8 +338,22 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
 {
     char *room = NULL;
     char *nick = NULL;
-
+    char *message = NULL;
+    xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
     gchar *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    // handle subject
+    if (subject != NULL) {
+        message = xmpp_stanza_get_text(subject);
+        if (message != NULL) {
+            room = room_get_room_for_full_jid(room_jid);
+            prof_handle_room_subject(room, message);
+        }
+
+        return 1;
+    }
+
+    // room jid not of form room/nick
     if (!room_parse_room_jid(room_jid, &room, &nick)) {
         log_error("Could not parse room jid: %s", room_jid);
         g_free(room);
@@ -348,6 +362,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
         return 1;
     }
 
+    // room not active in profanity
     if (!room_is_active(room_jid)) {
         log_error("Message recieved for inactive groupchat: %s", room_jid);
         g_free(room);
@@ -356,9 +371,9 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
         return 1;
     }
 
-    char *message = NULL;
     xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+
     if (body != NULL) {
         message = xmpp_stanza_get_text(body);
     }
