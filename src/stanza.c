@@ -150,3 +150,21 @@ stanza_create_presence(xmpp_ctx_t *ctx, const char * const show,
 
     return presence;
 }
+
+xmpp_stanza_t *
+stanza_create_roster_iq(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    xmpp_stanza_set_id(iq, "roster");
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, XMPP_NS_ROSTER);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}

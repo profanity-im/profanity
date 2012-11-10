@@ -309,19 +309,7 @@ jabber_free_resources(void)
 static void
 _jabber_roster_request(void)
 {
-    xmpp_stanza_t *iq, *query;
-
-    iq = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
-    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
-    xmpp_stanza_set_id(iq, "roster");
-
-    query = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-    xmpp_stanza_set_ns(query, XMPP_NS_ROSTER);
-
-    xmpp_stanza_add_child(iq, query);
-    xmpp_stanza_release(query);
+    xmpp_stanza_t *iq = stanza_create_roster_iq(jabber_conn.ctx);
     xmpp_send(jabber_conn.conn, iq);
     xmpp_stanza_release(iq);
 }
