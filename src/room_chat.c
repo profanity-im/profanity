@@ -28,7 +28,7 @@
 #include <contact.h>
 
 typedef struct _muc_room_t {
-    char *jid;
+    char *room;
     char *nick;
     GHashTable *roster;
     gboolean roster_received;
@@ -47,7 +47,7 @@ room_join(const char * const jid, const char * const nick)
     }
 
     muc_room *new_room = malloc(sizeof(muc_room));
-    new_room->jid = strdup(jid);
+    new_room->room = strdup(jid);
     new_room->nick = strdup(nick);
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
@@ -190,9 +190,9 @@ static void
 _room_free(muc_room *room)
 {
     if (room != NULL) {
-        if (room->jid != NULL) {
-            g_free(room->jid);
-            room->jid = NULL;
+        if (room->room != NULL) {
+            g_free(room->room);
+            room->room = NULL;
         }
         if (room->nick != NULL) {
             g_free(room->nick);
