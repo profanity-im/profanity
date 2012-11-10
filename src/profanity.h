@@ -45,5 +45,6 @@ void prof_handle_room_member_online(const char * const room,
     const char * const nick, const char * const show, const char * const status);
 void prof_handle_room_member_offline(const char * const room,
     const char * const nick, const char * const show, const char * const status);
+void prof_handle_leave_room(const char * const room);
 
 #endif

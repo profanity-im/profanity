@@ -251,8 +251,6 @@ jabber_leave_chat_room(const char * const room_jid)
         room_jid, nick);
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
-
-    room_leave(room_jid);
 }
 
 void
@@ -589,10 +587,20 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
         return 1;
     }
 
-    // handle self presence (means room roster has been sent)
+    // handle self presence
     if (strcmp(room_get_nick_for_room(room), nick) == 0) {
-        room_set_roster_received(room);
-        prof_handle_room_roster_complete(room);
+        char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+
+        // left room
+        if (type != NULL) {
+            if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
+                prof_handle_leave_room(room);
+            }
+
+        // roster received
+        } else {
+            prof_handle_room_roster_complete(room);
+        }
 
     // handle presence from room members
     } else {

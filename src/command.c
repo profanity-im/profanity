@@ -1093,7 +1093,6 @@ _cmd_close(const char * const inp, struct cmd_help_t help)
     if (win_in_groupchat()) {
         char *room_jid = win_get_recipient();
         jabber_leave_chat_room(room_jid);
-        win_close_win();
     } else if (win_in_chat()) {
 
         if (prefs_get_states()) {

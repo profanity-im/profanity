@@ -208,6 +208,7 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
 void
 prof_handle_room_roster_complete(const char * const room)
 {
+    room_set_roster_received(room);
     win_show_room_roster(room);
     win_page_off();
 }
@@ -228,6 +229,13 @@ prof_handle_room_member_offline(const char * const room, const char * const nick
     room_remove_from_roster(room, nick);
     win_show_room_member_offline(room, nick);
     win_page_off();
+}
+
+void
+prof_handle_leave_room(const char * const room)
+{
+    room_leave(room);
+    win_close_win();
 }
 
 void
