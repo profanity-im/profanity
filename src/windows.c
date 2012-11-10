@@ -631,8 +631,14 @@ win_show_room_history(const char * const room_jid, const char * const nick,
     g_date_time_unref(time);
     g_free(date_fmt);
 
-    wprintw(win, "%s: ", nick);
-    _win_show_message(win, message);
+    if (strncmp(message, "/me ", 4) == 0) {
+        wprintw(win, "*%s ", nick);
+        wprintw(win, message + 4);
+        wprintw(win, "\n");
+    } else {
+        wprintw(win, "%s: ", nick);
+        _win_show_message(win, message);
+    }
 
     if (win_index == _curr_prof_win)
         dirty = TRUE;
@@ -647,11 +653,29 @@ win_show_room_message(const char * const room_jid, const char * const nick,
 
     _win_show_time(win);
     if (strcmp(nick, room_get_nick_for_room(room_jid)) != 0) {
-        _win_show_user(win, nick, 1);
+        if (strncmp(message, "/me ", 4) == 0) {
+            wattron(win, COLOUR_ONLINE);
+            wprintw(win, "*%s ", nick);
+            wprintw(win, message + 4);
+            wprintw(win, "\n");
+            wattroff(win, COLOUR_ONLINE);
+        } else {
+            _win_show_user(win, nick, 1);
+            _win_show_message(win, message);
+        }
+
     } else {
-        _win_show_user(win, nick, 0);
+        if (strncmp(message, "/me ", 4) == 0) {
+            wattron(win, COLOUR_INC);
+            wprintw(win, "*%s ", nick);
+            wprintw(win, message + 4);
+            wprintw(win, "\n");
+            wattroff(win, COLOUR_INC);
+        } else {
+            _win_show_user(win, nick, 0);
+            _win_show_message(win, message);
+        }
     }
-    _win_show_message(win, message);
 
     // currently in groupchat window
     if (win_index == _curr_prof_win) {
