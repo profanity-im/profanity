@@ -42,6 +42,7 @@
 #define STANZA_NAME_DELAY "delay"
 #define STANZA_NAME_ERROR "error"
 #define STANZA_NAME_PING "ping"
+#define STANZA_NAME_TEXT "text"
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"

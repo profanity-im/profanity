@@ -229,7 +229,6 @@ void
 prof_handle_leave_room(const char * const room)
 {
     room_leave(room);
-    win_close_win();
 }
 
 void

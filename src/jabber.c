@@ -389,27 +389,38 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
 static int
 _error_handler(xmpp_stanza_t * const stanza)
 {
-    char *err_msg = NULL;
-    xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
-
-    if (error == NULL) {
-        log_debug("error message without <error/> received");
-        return 1;
-    } else {
-        xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error);
-
-        if (err_cond == NULL) {
-            log_debug("error message without <defined-condition/> received");
-            return 1;
-        } else {
-            err_msg = xmpp_stanza_get_name(err_cond);
-        }
-
-        // TODO: process 'type' attribute from <error/> [RFC6120, 8.3.2]
-    }
-
+    gchar *err_msg = NULL;
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    prof_handle_error_message(from, err_msg);
+    xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+        xmpp_stanza_t *text_stanza =
+            xmpp_stanza_get_child_by_name(error_stanza, STANZA_NAME_TEXT);
+
+    if (error_stanza == NULL) {
+        log_debug("error message without <error/> received");
+    } else {
+
+        // check for text
+        if (text_stanza != NULL) {
+            err_msg = xmpp_stanza_get_text(text_stanza);
+            prof_handle_error_message(from, err_msg);
+
+            // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
+
+        // otherwise show defined-condition
+        } else {
+            xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error_stanza);
+
+            if (err_cond == NULL) {
+                log_debug("error message without <defined-condition/> or <text/> received");
+
+            } else {
+                err_msg = xmpp_stanza_get_name(err_cond);
+                prof_handle_error_message(from, err_msg);
+
+                // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
+            }
+        }
+    }
 
     return 1;
 }
