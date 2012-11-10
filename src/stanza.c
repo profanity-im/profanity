@@ -168,3 +168,32 @@ stanza_create_roster_iq(xmpp_ctx_t *ctx)
 
     return iq;
 }
+
+gboolean
+stanza_contains_chat_state(xmpp_stanza_t *stanza)
+{
+    return ((xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ACTIVE) != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) ||
+            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL));
+}
+
+xmpp_stanza_t *
+stanza_create_ping_iq(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    xmpp_stanza_set_id(iq, "c2s1");
+
+    xmpp_stanza_t *ping = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(ping, STANZA_NAME_PING);
+
+    xmpp_stanza_set_ns(ping, STANZA_NS_PING);
+
+    xmpp_stanza_add_child(iq, ping);
+    xmpp_stanza_release(ping);
+
+    return iq;
+}

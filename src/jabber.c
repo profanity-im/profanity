@@ -315,6 +315,27 @@ _jabber_roster_request(void)
 }
 
 static int
+_message_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    gchar *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+
+    if (type == NULL) {
+        log_error("Message stanza received with no type attribute");
+        return 1;
+    } else if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
+        return _error_message_handler(stanza);
+    } else if (strcmp(type, STANZA_TYPE_GROUPCHAT) == 0) {
+        return _groupchat_message_handler(stanza);
+    } else if (strcmp(type, STANZA_TYPE_CHAT) == 0) {
+        return _chat_message_handler(stanza);
+    } else {
+        log_error("Message stanza received with unknown type: %s", type);
+        return 1;
+    }
+}
+
+static int
 _groupchat_message_handler(xmpp_stanza_t * const stanza)
 {
     char *room = NULL;
@@ -404,13 +425,9 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     strcpy(from_cpy, from);
     char *short_from = strtok(from_cpy, "/");
 
-    //determine chatstate support of recipient
+    // determine chatstate support of recipient
     gboolean recipient_supports = FALSE;
-    if ((xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ACTIVE) != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) ||
-            (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL)) {
+    if (stanza_contains_chat_state(stanza)) {
         recipient_supports = TRUE;
     }
 
@@ -462,27 +479,6 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     }
 
     return 1;
-}
-
-static int
-_message_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
-{
-    gchar *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-
-    if (type == NULL) {
-        log_error("Message stanza received with no type attribute");
-        return 1;
-    } else if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
-        return _error_message_handler(stanza);
-    } else if (strcmp(type, STANZA_TYPE_GROUPCHAT) == 0) {
-        return _groupchat_message_handler(stanza);
-    } else if (strcmp(type, STANZA_TYPE_CHAT) == 0) {
-        return _chat_message_handler(stanza);
-    } else {
-        log_error("Message stanza received with unknown type: %s", type);
-        return 1;
-    }
 }
 
 static void
@@ -571,20 +567,7 @@ _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
 
-        xmpp_stanza_t *iq, *ping;
-
-        iq = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
-        xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
-        xmpp_stanza_set_id(iq, "c2s1");
-
-        ping = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(ping, STANZA_NAME_PING);
-
-        xmpp_stanza_set_ns(ping, STANZA_NS_PING);
-
-        xmpp_stanza_add_child(iq, ping);
-        xmpp_stanza_release(ping);
+        xmpp_stanza_t *iq = stanza_create_ping_iq(ctx);
         xmpp_send(conn, iq);
         xmpp_stanza_release(iq);
     }
