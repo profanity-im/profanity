@@ -346,7 +346,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     if (subject != NULL) {
         message = xmpp_stanza_get_text(subject);
         if (message != NULL) {
-            room = room_get_room_for_full_jid(room_jid);
+            room = room_get_room_from_full_jid(room_jid);
             prof_handle_room_subject(room, message);
         }
 

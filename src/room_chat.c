@@ -98,7 +98,7 @@ room_get_nick_for_room(const char * const room)
 }
 
 char *
-room_get_room_for_full_jid(const char * const full_room_jid)
+room_get_room_from_full_jid(const char * const full_room_jid)
 {
     char **tokens = g_strsplit(full_room_jid, "/", 0);
     char *room_part;
