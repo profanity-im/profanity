@@ -81,7 +81,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
 }
 
 xmpp_stanza_t *
-stanza_create_room_presence(xmpp_ctx_t *ctx, const char * const room,
+stanza_create_room_join_presence(xmpp_ctx_t *ctx, const char * const room,
     const char * const nick)
 {
     GString *to = g_string_new(room);
@@ -102,7 +102,7 @@ stanza_create_room_presence(xmpp_ctx_t *ctx, const char * const room,
 }
 
 xmpp_stanza_t *
-stanza_create_room_leave(xmpp_ctx_t *ctx, const char * const room,
+stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char * const room,
     const char * const nick)
 {
     GString *full_jid = g_string_new(room);
