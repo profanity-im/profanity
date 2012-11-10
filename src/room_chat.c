@@ -39,7 +39,7 @@ GHashTable *rooms = NULL;
 static void _room_free(muc_room *room);
 
 void
-room_join(const char * const jid, const char * const nick)
+room_join(const char * const room, const char * const nick)
 {
     if (rooms == NULL) {
         rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
@@ -47,31 +47,31 @@ room_join(const char * const jid, const char * const nick)
     }
 
     muc_room *new_room = malloc(sizeof(muc_room));
-    new_room->room = strdup(jid);
+    new_room->room = strdup(room);
     new_room->nick = strdup(nick);
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
     new_room->roster_received = FALSE;
 
-    g_hash_table_insert(rooms, strdup(jid), new_room);
+    g_hash_table_insert(rooms, strdup(room), new_room);
 }
 
 void
-room_leave(const char * const jid)
+room_leave(const char * const room)
 {
-    g_hash_table_remove(rooms, jid);
+    g_hash_table_remove(rooms, room);
 }
 
 gboolean
-room_is_active(const char * const jid)
+room_is_active(const char * const full_room_jid)
 {
-    char **tokens = g_strsplit(jid, "/", 0);
-    char *jid_part = tokens[0];
+    char **tokens = g_strsplit(full_room_jid, "/", 0);
+    char *room_part = tokens[0];
 
     if (rooms != NULL) {
-        muc_room *room = g_hash_table_lookup(rooms, jid_part);
+        muc_room *chat_room = g_hash_table_lookup(rooms, room_part);
 
-        if (room != NULL) {
+        if (chat_room != NULL) {
             return TRUE;
         } else {
             return FALSE;
@@ -82,13 +82,13 @@ room_is_active(const char * const jid)
 }
 
 char *
-room_get_nick_for_room(const char * const jid)
+room_get_nick_for_room(const char * const room)
 {
     if (rooms != NULL) {
-        muc_room *room = g_hash_table_lookup(rooms, jid);
+        muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
-        if (room != NULL) {
-            return room->nick;
+        if (chat_room != NULL) {
+            return chat_room->nick;
         } else {
             return NULL;
         }
@@ -98,26 +98,26 @@ room_get_nick_for_room(const char * const jid)
 }
 
 char *
-room_get_room_for_full_jid(const char * const jid)
+room_get_room_for_full_jid(const char * const full_room_jid)
 {
-    char **tokens = g_strsplit(jid, "/", 0);
-    char *room;
+    char **tokens = g_strsplit(full_room_jid, "/", 0);
+    char *room_part;
 
     if (tokens == NULL || tokens[0] == NULL) {
         return NULL;
     } else {
-        room = strdup(tokens[0]);
+        room_part = strdup(tokens[0]);
 
         g_strfreev(tokens);
 
-        return room;
+        return room_part;
     }
 }
 
 gboolean
-room_parse_room_jid(const char * const room_jid, char **room, char **nick)
+room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 {
-    char **tokens = g_strsplit(room_jid, "/", 0);
+    char **tokens = g_strsplit(full_room_jid, "/", 0);
 
     if (tokens == NULL || tokens[0] == NULL || tokens[1] == NULL) {
         return FALSE;
@@ -132,55 +132,55 @@ room_parse_room_jid(const char * const room_jid, char **room, char **nick)
 }
 
 void
-room_add_to_roster(const char * const jid, const char * const nick)
+room_add_to_roster(const char * const room, const char * const nick)
 {
-    muc_room *room = g_hash_table_lookup(rooms, jid);
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (room != NULL) {
+    if (chat_room != NULL) {
         PContact contact = p_contact_new(nick, NULL, "online", NULL, NULL);
-        g_hash_table_replace(room->roster, strdup(nick), contact);
+        g_hash_table_replace(chat_room->roster, strdup(nick), contact);
     }
 }
 
 void
-room_remove_from_roster(const char * const jid, const char * const nick)
+room_remove_from_roster(const char * const room, const char * const nick)
 {
-    muc_room *room = g_hash_table_lookup(rooms, jid);
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (room != NULL) {
-        g_hash_table_remove(room->roster, nick);
+    if (chat_room != NULL) {
+        g_hash_table_remove(chat_room->roster, nick);
     }
 }
 
 GList *
-room_get_roster(const char * const jid)
+room_get_roster(const char * const room)
 {
-    muc_room *room = g_hash_table_lookup(rooms, jid);
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (room != NULL) {
-        return g_hash_table_get_keys(room->roster);
+    if (chat_room != NULL) {
+        return g_hash_table_get_keys(chat_room->roster);
     } else {
         return NULL;
     }
 }
 
 void
-room_set_roster_received(const char * const jid)
+room_set_roster_received(const char * const room)
 {
-    muc_room *room = g_hash_table_lookup(rooms, jid);
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (room != NULL) {
-        room->roster_received = TRUE;
+    if (chat_room != NULL) {
+        chat_room->roster_received = TRUE;
     }
 }
 
 gboolean
-room_get_roster_received(const char * const jid)
+room_get_roster_received(const char * const room)
 {
-    muc_room *room = g_hash_table_lookup(rooms, jid);
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (room != NULL) {
-        return room->roster_received;
+    if (chat_room != NULL) {
+        return chat_room->roster_received;
     } else {
         return FALSE;
     }

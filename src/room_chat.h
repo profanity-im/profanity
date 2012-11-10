@@ -25,17 +25,17 @@
 
 #include <glib.h>
 
-void room_join(const char * const jid, const char * const nick);
-void room_leave(const char * const jid);
-gboolean room_is_active(const char * const jid);
-char * room_get_nick_for_room(const char * const jid);
-char * room_get_room_for_full_jid(const char * const jid);
-gboolean room_parse_room_jid(const char * const room_jid, char **room,
+void room_join(const char * const room, const char * const nick);
+void room_leave(const char * const room);
+gboolean room_is_active(const char * const full_room_jid);
+char * room_get_nick_for_room(const char * const room);
+char * room_get_room_for_full_jid(const char * const full_room_jid);
+gboolean room_parse_room_jid(const char * const full_room_jid, char **room,
     char **nick);
-void room_add_to_roster(const char * const jid, const char * const nick);
-GList * room_get_roster(const char * const jid);
-void room_set_roster_received(const char * const jid);
-gboolean room_get_roster_received(const char * const jid);
-void room_remove_from_roster(const char * const jid, const char * const nick);
+void room_add_to_roster(const char * const room, const char * const nick);
+GList * room_get_roster(const char * const room);
+void room_set_roster_received(const char * const room);
+gboolean room_get_roster_received(const char * const room);
+void room_remove_from_roster(const char * const room, const char * const nick);
 
 #endif
