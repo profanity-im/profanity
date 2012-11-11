@@ -49,6 +49,8 @@
 #define STANZA_TYPE_GROUPCHAT "groupchat"
 #define STANZA_TYPE_UNAVAILABLE "unavailable"
 #define STANZA_TYPE_SUBSCRIBE "subscribe"
+#define STANZA_TYPE_SUBSCRIBED "subscribed"
+#define STANZA_TYPE_UNSUBSCRIBED "unsubscribed"
 #define STANZA_TYPE_GET "get"
 #define STANZA_TYPE_ERROR "error"
 

@@ -199,12 +199,18 @@ static struct cmd_t main_commands[] =
 
     { "/sub",
         _cmd_sub,
-        { "/sub user@host", "Subscribe to presence notifications of user.",
-        { "/sub user@host",
+        { "/sub <add|del|request|show> [jid]", "Manage subscriptions.",
+        { "/sub <add|del|request|show> [jid]",
           "------------------",
-          "Send a subscription request to the user to be informed of their presence.",
+          "add     : Approve subscription to a contact.",
+          "del     : Remove subscription for a contact.",
+          "request : Send a subscription request to the user to be informed of their",
+          "        : presence.",
+          "show    : Show subscriprion status for a contact.",
           "",
-          "Example: /sub myfriend@jabber.org",
+          "If optional parameter 'jid' isn't set command belongs to the current window.",
+          "",
+          "Example: /sub add myfriend@jabber.org",
           NULL  } } },
 
     { "/tiny",
@@ -710,6 +716,8 @@ _cmd_complete_parameters(char *input, int *size)
         contact_list_find_contact);
     _parameter_autocomplete(input, size, "/connect",
         prefs_find_login);
+    _parameter_autocomplete(input, size, "/sub",
+        prefs_autocomplete_sub_cmd);
     _parameter_autocomplete(input, size, "/help",
         _cmd_help_complete);
     _parameter_autocomplete(input, size, "/who",
@@ -775,13 +783,40 @@ _cmd_sub(const char * const inp, struct cmd_help_t help)
         cons_show("Usage: %s", help.usage);
         result = TRUE;
     } else {
-        char *user, *lower;
-        user = strndup(inp+5, strlen(inp)-5);
-        lower = g_utf8_strdown(user, -1);
+        char *inp_cpy, *subcmd;
+        char *jid, *bare_jid;
 
-        jabber_subscribe(lower);
-        cons_show("Sent subscription request to %s.", user);
+        inp_cpy = strndup(inp+5, strlen(inp)-5);
+        /* using strtok is bad idea */
+        subcmd = strtok(inp_cpy, " ");
+        jid = strtok(NULL, " ");
 
+        if (jid != NULL) {
+            jid = strdup(jid);
+        } else {
+            jid = win_get_recipient();
+        }
+
+        bare_jid = strtok(jid, "/");
+
+        if (strcmp(subcmd, "add") == 0) {
+            jabber_subscription(bare_jid, PRESENCE_SUBSCRIBED);
+            cons_show("Accepted subscription for %s", bare_jid);
+            log_info("Accepted subscription for %s", bare_jid);
+        } else if (strcmp(subcmd, "del") == 0) {
+            jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
+            cons_show("Deleted subscription for %s", bare_jid);
+            log_info("Deleted subscription for %s", bare_jid);
+        } else if (strcmp(subcmd, "request") == 0) {
+            jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
+            cons_show("Sent subscription request to %s.", bare_jid);
+            log_info("Sent subscription request to %s.", bare_jid);
+        } else if (strcmp(subcmd, "show") == 0) {
+            /* TODO: not implemented yet */
+        }
+
+        free(jid);
+        free(inp_cpy);
         result = TRUE;
     }
 
