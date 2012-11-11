@@ -169,7 +169,7 @@ prof_handle_subscription(const char *from, jabber_subscr_t type)
         break;
     default:
         /* unknown type */
-	break;
+        break;
     }
 }
 
