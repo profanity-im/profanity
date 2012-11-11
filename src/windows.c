@@ -937,12 +937,14 @@ void
 cons_help(void)
 {
     cons_show("");
-    cons_show("Choose an area you need help with:");
+    cons_show("Choose a help option:");
     cons_show("");
-    cons_show("/help basic      - Basic commands, for connecting, chatting etc.");
-    cons_show("/help status     - How to change your status.");
-    cons_show("/help settings   - Commands for configuring Profanity.");
+    cons_show("/help list       - List all commands.");
+    cons_show("/help basic      - Summary of basic usgae commands.");
+    cons_show("/help status     - Summary of online status change commands.");
+    cons_show("/help settings   - Summary of commands for changing Profanity settings.");
     cons_show("/help navigation - How to navigate around Profanity.");
+    cons_show("/help [command]  - Detailed help on a specific command.");
     cons_show("");
 
     if (_curr_prof_win == 0)
@@ -1101,6 +1103,12 @@ cons_bad_show(const char * const msg, ...)
 }
 
 void
+cons_show_time(void)
+{
+    _win_show_time(_cons_win);
+}
+
+void
 cons_show(const char * const msg, ...)
 {
     va_list arg;
@@ -1111,6 +1119,15 @@ cons_show(const char * const msg, ...)
     wprintw(_cons_win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
+
+    if (_curr_prof_win == 0)
+        dirty = TRUE;
+}
+
+void
+cons_show_word(const char * const word)
+{
+    wprintw(_cons_win, "%s", word);
 
     if (_curr_prof_win == 0)
         dirty = TRUE;

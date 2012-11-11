@@ -129,6 +129,8 @@ void cons_navigation_help(void);
 void cons_prefs(void);
 void cons_bad_command(const char * const cmd);
 void cons_show(const char * const cmd, ...);
+void cons_show_time(void);
+void cons_show_word(const char * const word);
 void cons_bad_show(const char * const cmd, ...);
 void cons_highlight_show(const char * const cmd);
 void cons_show_contacts(GSList * list);

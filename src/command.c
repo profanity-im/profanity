@@ -116,13 +116,15 @@ static struct cmd_t main_commands[] =
 {
     { "/help",
         _cmd_help,
-        { "/help [area|command]", "Show help summary, or help on a specific area or command",
-        { "/help [area|command]",
-          "--------------------",
+        { "/help [list|area|command]", "Show help summary, or help on a specific area or command",
+        { "/help [list|area|command]",
+          "-------------------------",
           "Show help options.",
+          "Specify list if you want a list of all commands.",
           "Specify an area (basic, status, settings, navigation) for more help on that area.",
           "Specify the command if you want more detailed help on a specific command.",
           "",
+          "Example : /help list",
           "Example : /help connect",
           "Example : /help settings",
           NULL } } },
@@ -484,6 +486,7 @@ cmd_init(void)
     who_ac = p_autocomplete_new();
 
     help_ac = p_autocomplete_new();
+    p_autocomplete_add(help_ac, strdup("list"));
     p_autocomplete_add(help_ac, strdup("basic"));
     p_autocomplete_add(help_ac, strdup("status"));
     p_autocomplete_add(help_ac, strdup("settings"));
@@ -875,6 +878,36 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
 {
     if (strcmp(inp, "/help") == 0) {
         cons_help();
+    } else if (strcmp(inp, "/help list") == 0) {
+        cons_show("");
+        cons_show("Basic commands:");
+        cons_show_time();
+        unsigned int i;
+        for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
+            cons_show_word( (main_commands+i)->cmd );
+            if (i < ARRAY_SIZE(main_commands) - 1) {
+                cons_show_word(", ");
+            }
+        }
+        cons_show_word("\n");
+        cons_show("Settings commands:");
+        cons_show_time();
+        for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
+            cons_show_word( (setting_commands+i)->cmd );
+            if (i < ARRAY_SIZE(setting_commands) - 1) {
+                cons_show_word(", ");
+            }
+        }
+        cons_show_word("\n");
+        cons_show("Status commands:");
+        cons_show_time();
+        for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
+            cons_show_word( (status_commands+i)->cmd );
+            if (i < ARRAY_SIZE(status_commands) - 1) {
+                cons_show_word(", ");
+            }
+        }
+        cons_show_word("\n");
     } else if (strcmp(inp, "/help basic") == 0) {
         cons_basic_help();
     } else if (strcmp(inp, "/help status") == 0) {
