@@ -300,6 +300,13 @@ prefs_set_notify_remind(gint value)
     _save_prefs();
 }
 
+gint
+prefs_get_max_log_size(void)
+{
+    /* TODO: make command and field in config file */
+    return PREFS_MAX_LOG_SIZE;
+}
+
 gboolean
 prefs_get_vercheck(void)
 {
