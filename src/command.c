@@ -65,7 +65,7 @@ static gboolean _cmd_set_boolean_preference(const char * const inp,
 static char *_cmd_complete(char *inp);
 static void _cmd_reset_command_completer(void);
 static char *_cmd_who_complete(char *inp);
-static void _cmd_reset_who_completer(void);
+static void _cmd_who_reset_completer(void);
 static char *_cmd_help_complete(char *inp);
 static void _cmd_help_reset_completer(void);
 static char *_cmd_notify_complete(char *inp);
@@ -570,8 +570,8 @@ cmd_reset_autocomplete()
     _cmd_help_reset_completer();
     _cmd_notify_reset_completer();
     _cmd_sub_reset_completer();
+    _cmd_who_reset_completer();
     _cmd_reset_command_completer();
-    _cmd_reset_who_completer();
 }
 
 GSList *
@@ -671,7 +671,7 @@ _cmd_who_complete(char *inp)
 }
 
 static void
-_cmd_reset_who_completer(void)
+_cmd_who_reset_completer(void)
 {
     p_autocomplete_reset(who_ac);
 }
