@@ -70,6 +70,8 @@ static char *_cmd_help_complete(char *inp);
 static void _cmd_help_reset_completer(void);
 static char *_cmd_notify_complete(char *inp);
 static void _cmd_notify_reset_completer(void);
+static char *_cmd_sub_complete(char *inp);
+static void _cmd_sub_reset_completer(void);
 static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
@@ -468,6 +470,7 @@ static PAutocomplete commands_ac;
 static PAutocomplete who_ac;
 static PAutocomplete help_ac;
 static PAutocomplete notify_ac;
+static PAutocomplete sub_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -490,6 +493,12 @@ cmd_init(void)
     p_autocomplete_add(notify_ac, strdup("message"));
     p_autocomplete_add(notify_ac, strdup("typing"));
     p_autocomplete_add(notify_ac, strdup("remind"));
+
+    sub_ac = p_autocomplete_new();
+    p_autocomplete_add(sub_ac, strdup("add"));
+    p_autocomplete_add(sub_ac, strdup("del"));
+    p_autocomplete_add(sub_ac, strdup("request"));
+    p_autocomplete_add(sub_ac, strdup("show"));
 
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
@@ -560,6 +569,7 @@ cmd_reset_autocomplete()
     prefs_reset_boolean_choice();
     _cmd_help_reset_completer();
     _cmd_notify_reset_completer();
+    _cmd_sub_reset_completer();
     _cmd_reset_command_completer();
     _cmd_reset_who_completer();
 }
@@ -690,6 +700,18 @@ _cmd_notify_reset_completer(void)
     p_autocomplete_reset(notify_ac);
 }
 
+static char *
+_cmd_sub_complete(char *inp)
+{
+    return p_autocomplete_complete(sub_ac, inp);
+}
+
+static void
+_cmd_sub_reset_completer(void)
+{
+    p_autocomplete_reset(sub_ac);
+}
+
 static void
 _cmd_complete_parameters(char *input, int *size)
 {
@@ -717,7 +739,7 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/connect",
         prefs_find_login);
     _parameter_autocomplete(input, size, "/sub",
-        prefs_autocomplete_sub_cmd);
+        _cmd_sub_complete);
     _parameter_autocomplete(input, size, "/help",
         _cmd_help_complete);
     _parameter_autocomplete(input, size, "/who",

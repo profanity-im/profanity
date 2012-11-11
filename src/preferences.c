@@ -42,7 +42,6 @@ static GKeyFile *prefs;
 
 static PAutocomplete login_ac;
 static PAutocomplete boolean_choice_ac;
-static PAutocomplete sub_cmd_ac;
 
 struct colour_string_t {
     char *str;
@@ -117,12 +116,6 @@ prefs_load(void)
     boolean_choice_ac = p_autocomplete_new();
     p_autocomplete_add(boolean_choice_ac, strdup("on"));
     p_autocomplete_add(boolean_choice_ac, strdup("off"));
-
-    sub_cmd_ac = p_autocomplete_new();
-    p_autocomplete_add(sub_cmd_ac, strdup("add"));
-    p_autocomplete_add(sub_cmd_ac, strdup("del"));
-    p_autocomplete_add(sub_cmd_ac, strdup("request"));
-    p_autocomplete_add(sub_cmd_ac, strdup("show"));
 }
 
 void
@@ -130,7 +123,6 @@ prefs_close(void)
 {
     p_autocomplete_clear(login_ac);
     p_autocomplete_clear(boolean_choice_ac);
-    p_autocomplete_clear(sub_cmd_ac);
     g_key_file_free(prefs);
 }
 
@@ -228,22 +220,6 @@ void
 prefs_reset_boolean_choice(void)
 {
     p_autocomplete_reset(boolean_choice_ac);
-}
-
-char *
-prefs_autocomplete_sub_cmd(char *prefix)
-{
-    char *result;
-    result = p_autocomplete_complete(sub_cmd_ac, prefix);
-    /* TODO: fix the problem with ac->last_found instead of this hack */
-    prefs_reset_sub_cmd();
-    return result;
-}
-
-void
-prefs_reset_sub_cmd(void)
-{
-    p_autocomplete_reset(sub_cmd_ac);
 }
 
 gboolean
