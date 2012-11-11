@@ -926,7 +926,7 @@ _cons_show_basic_help(void)
     GSList *basic_helpers = cmd_get_basic_help();
     while (basic_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)basic_helpers->data;
-        cons_show("%-25s: %s", help->usage, help->short_help);
+        cons_show("%-30s: %s", help->usage, help->short_help);
         basic_helpers = g_slist_next(basic_helpers);
     }
 

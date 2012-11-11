@@ -201,14 +201,14 @@ static struct cmd_t main_commands[] =
 
     { "/sub",
         _cmd_sub,
-        { "/sub <add|del|request|show> [jid]", "Manage subscriptions.",
-        { "/sub <add|del|request|show> [jid]",
-          "------------------",
-          "add     : Approve subscription to a contact.",
-          "del     : Remove subscription for a contact.",
-          "request : Send a subscription request to the user to be informed of their",
-          "        : presence.",
-          "show    : Show subscriprion status for a contact.",
+        { "/sub <add|del|req|show> [jid]", "Manage subscriptions.",
+        { "/sub <add|del|req|show> [jid]",
+          "-----------------------------",
+          "add  : Approve subscription to a contact.",
+          "del  : Remove subscription for a contact.",
+          "req  : Send a subscription request to the user to be informed of their",
+          "     : presence.",
+          "show : Show subscriprion status for a contact.",
           "",
           "If optional parameter 'jid' isn't set command belongs to the current window.",
           "",
@@ -393,7 +393,7 @@ static struct cmd_t setting_commands[] =
         _cmd_set_history,
         { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
-          "-------------",
+          "---------------",
           "Switch chat history on or off, requires chlog to be enabled.",
           "When history is enabled, previous messages are shown in chat windows.",
           "The last day of messages are shown, or if you have had profanity open",
@@ -497,7 +497,7 @@ cmd_init(void)
     sub_ac = p_autocomplete_new();
     p_autocomplete_add(sub_ac, strdup("add"));
     p_autocomplete_add(sub_ac, strdup("del"));
-    p_autocomplete_add(sub_ac, strdup("request"));
+    p_autocomplete_add(sub_ac, strdup("req"));
     p_autocomplete_add(sub_ac, strdup("show"));
 
     unsigned int i;
@@ -829,7 +829,7 @@ _cmd_sub(const char * const inp, struct cmd_help_t help)
             jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
             cons_show("Deleted subscription for %s", bare_jid);
             log_info("Deleted subscription for %s", bare_jid);
-        } else if (strcmp(subcmd, "request") == 0) {
+        } else if (strcmp(subcmd, "req") == 0) {
             jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
             cons_show("Sent subscription request to %s.", bare_jid);
             log_info("Sent subscription request to %s.", bare_jid);
