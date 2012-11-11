@@ -153,16 +153,19 @@ prof_handle_subscription(const char *from, jabber_subscr_t type)
         cons_show("Received authorization request from %s", from);
         log_info("Received authorization request from %s", from);
         win_show_system_msg(from, "Authorization request, type '/sub add' to accept or '/sub del' to reject");
+        win_page_off();
         break;
     case PRESENCE_SUBSCRIBED:
         cons_show("Subscription received from %s", from);
         log_info("Subscription received from %s", from);
         win_show_system_msg(from, "Subscribed");
+        win_page_off();
         break;
     case PRESENCE_UNSUBSCRIBED:
         cons_show("%s deleted subscription", from);
         log_info("%s deleted subscription", from);
         win_show_system_msg(from, "Unsubscribed");
+        win_page_off();
         break;
     default:
         /* unknown type */
