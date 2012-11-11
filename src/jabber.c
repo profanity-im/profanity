@@ -219,16 +219,31 @@ jabber_send_gone(const char * const recipient)
 }
 
 void
-jabber_subscribe(const char * const recipient)
+jabber_subscription(const char * const jid, jabber_subscr_t action)
 {
     xmpp_stanza_t *presence;
+    char *type, *jid_cpy, *bare_jid;
+
+    // jid must be a bare JID
+    jid_cpy = strdup(jid);
+    bare_jid = strtok(jid_cpy, "/");
+
+    if (action == PRESENCE_SUBSCRIBE)
+        type = STANZA_TYPE_SUBSCRIBE;
+    else if (action == PRESENCE_SUBSCRIBED)
+        type = STANZA_TYPE_SUBSCRIBED;
+    else if (action == PRESENCE_UNSUBSCRIBED)
+        type = STANZA_TYPE_UNSUBSCRIBED;
+    else // unknown action
+        return;
 
     presence = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
-    xmpp_stanza_set_type(presence, STANZA_TYPE_SUBSCRIBE);
-    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, recipient);
+    xmpp_stanza_set_type(presence, type);
+    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, bare_jid);
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
+    free(jid_cpy);
 }
 
 void
@@ -698,12 +713,7 @@ _presence_handler(xmpp_conn_t * const conn,
         else
             status_str = NULL;
 
-        if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
-            if (strcmp(short_jid, short_from) !=0) {
-                prof_handle_contact_offline(short_from, "offline", status_str);
-            }
-        } else {
-
+        if (type == NULL) { // available
             xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
             if (show != NULL)
                 show_str = xmpp_stanza_get_text(show);
@@ -713,6 +723,18 @@ _presence_handler(xmpp_conn_t * const conn,
             if (strcmp(short_jid, short_from) !=0) {
                 prof_handle_contact_online(short_from, show_str, status_str);
             }
+        } else if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
+            if (strcmp(short_jid, short_from) !=0) {
+                prof_handle_contact_offline(short_from, "offline", status_str);
+            }
+        } else if (strcmp(type, STANZA_TYPE_SUBSCRIBE) == 0) {
+            prof_handle_subscription(short_from, PRESENCE_SUBSCRIBE);
+        } else if (strcmp(type, STANZA_TYPE_SUBSCRIBED) == 0) {
+            prof_handle_subscription(short_from, PRESENCE_SUBSCRIBED);
+        } else if (strcmp(type, STANZA_TYPE_UNSUBSCRIBED) == 0) {
+            prof_handle_subscription(short_from, PRESENCE_UNSUBSCRIBED);
+        } else { /* unknown type */
+            log_debug("Received presence with unknown type '%s'", type);
         }
     }
 

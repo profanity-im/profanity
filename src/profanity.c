@@ -145,6 +145,32 @@ prof_handle_error_message(const char *from, const char *err_msg)
 }
 
 void
+prof_handle_subscription(const char *from, jabber_subscr_t type)
+{
+    switch (type) {
+    case PRESENCE_SUBSCRIBE:
+        /* TODO: auto-subscribe if needed */
+        cons_show("Received authorization request from %s", from);
+        log_info("Received authorization request from %s", from);
+        win_show_system_msg(from, "Authorization request, type '/sub add' to accept or '/sub del' to reject");
+        break;
+    case PRESENCE_SUBSCRIBED:
+        cons_show("Subscription received from %s", from);
+        log_info("Subscription received from %s", from);
+        win_show_system_msg(from, "Subscribed");
+        break;
+    case PRESENCE_UNSUBSCRIBED:
+        cons_show("%s deleted subscription", from);
+        log_info("%s deleted subscription", from);
+        win_show_system_msg(from, "Unsubscribed");
+        break;
+    default:
+        /* unknown type */
+	break;
+    }
+}
+
+void
 prof_handle_login_success(const char *jid)
 {
     const char *msg = "logged in successfully.";

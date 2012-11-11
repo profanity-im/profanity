@@ -23,6 +23,8 @@
 #ifndef PROFANITY_H
 #define PROFANITY_H
 
+#include "jabber.h"
+
 void prof_run(const int disable_tls, char *log_level);
 
 void prof_handle_login_success(const char *jid);
@@ -34,6 +36,7 @@ void prof_handle_contact_offline(char *contact, char *show, char *status);
 void prof_handle_incoming_message(char *from, char *message);
 void prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp);
 void prof_handle_error_message(const char *from, const char *err_msg);
+void prof_handle_subscription(const char *from, jabber_subscr_t type);
 void prof_handle_roster(GSList *roster);
 void prof_handle_gone(const char * const from);
 void prof_handle_room_history(const char * const room_jid,
