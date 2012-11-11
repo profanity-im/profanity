@@ -40,14 +40,20 @@ typedef enum {
     PRESENCE_XA
 } jabber_presence_t;
 
+typedef enum {
+    PRESENCE_SUBSCRIBE,
+    PRESENCE_SUBSCRIBED,
+    PRESENCE_UNSUBSCRIBED
+} jabber_subscr_t;
+
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect(const char * const user,
     const char * const passwd);
 void jabber_disconnect(void);
 void jabber_process_events(void);
-void jabber_subscribe(const char * const recipient);
 void jabber_join(const char * const room, const char * const nick);
 void jabber_leave_chat_room(const char * const room_jid);
+void jabber_subscription(const char * const jid, jabber_subscr_t action);
 void jabber_send(const char * const msg, const char * const recipient);
 void jabber_send_groupchat(const char * const msg, const char * const recipient);
 void jabber_send_inactive(const char * const recipient);

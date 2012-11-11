@@ -433,6 +433,39 @@ win_show_gone(const char * const from)
     }
 }
 
+void
+win_show_system_msg(const char * const from, const char *message)
+{
+    int win_index;
+    WINDOW *win;
+    char from_cpy[strlen(from) + 1];
+    char *bare_jid;
+
+    if (from == NULL || message == NULL)
+        return;
+
+    strcpy(from_cpy, from);
+    bare_jid = strtok(from_cpy, "/");
+
+    win_index = _find_prof_win_index(bare_jid);
+    if (win_index == NUM_WINS) {
+        win_index = _new_prof_win(bare_jid);
+        status_bar_active(win_index);
+        dirty = TRUE;
+    }
+    win = _wins[win_index].win;
+
+    _win_show_time(win);
+    wattron(win, COLOUR_ONLINE);
+    wprintw(win, "*%s %s\n", bare_jid, message);
+    wattroff(win, COLOUR_ONLINE);
+
+    // this is the current window
+    if (win_index == _curr_prof_win) {
+        dirty = TRUE;
+    }
+}
+
 #ifdef HAVE_LIBNOTIFY
 static void
 _win_notify(const char * const message, int timeout,

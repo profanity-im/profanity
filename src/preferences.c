@@ -21,6 +21,7 @@
  */
 
 #include "config.h"
+#include "preferences.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -115,7 +116,6 @@ prefs_load(void)
     boolean_choice_ac = p_autocomplete_new();
     p_autocomplete_add(boolean_choice_ac, strdup("on"));
     p_autocomplete_add(boolean_choice_ac, strdup("off"));
-
 }
 
 void
