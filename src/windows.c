@@ -303,13 +303,9 @@ void
 win_show_incomming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp)
 {
-    char from_cpy[strlen(from) + 1];
-    strcpy(from_cpy, from);
-    char *short_from = strtok(from_cpy, "/");
-
-    int win_index = _find_prof_win_index(short_from);
+    int win_index = _find_prof_win_index(from);
     if (win_index == NUM_WINS)
-        win_index = _new_prof_win(short_from, WIN_CHAT);
+        win_index = _new_prof_win(from, WIN_CHAT);
 
     WINDOW *win = _wins[win_index].win;
 
@@ -327,12 +323,12 @@ win_show_incomming_msg(const char * const from, const char * const message,
 
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(win, COLOUR_ONLINE);
-            wprintw(win, "*%s ", short_from);
+            wprintw(win, "*%s ", from);
             wprintw(win, message + 4);
             wprintw(win, "\n");
             wattroff(win, COLOUR_ONLINE);
         } else {
-            _win_show_user(win, short_from, 1);
+            _win_show_user(win, from, 1);
             _win_show_message(win, message);
         }
         title_bar_set_typing(FALSE);
@@ -343,13 +339,13 @@ win_show_incomming_msg(const char * const from, const char * const message,
     // not currently viewing chat window with sender
     } else {
         status_bar_new(win_index);
-        _cons_show_incoming_message(short_from, win_index);
+        _cons_show_incoming_message(from, win_index);
         if (prefs_get_flash())
             flash();
 
         _wins[win_index].unread++;
         if (prefs_get_chlog() && prefs_get_history()) {
-            _win_show_history(win, win_index, short_from);
+            _win_show_history(win, win_index, from);
         }
 
         if (tv_stamp == NULL) {
@@ -364,12 +360,12 @@ win_show_incomming_msg(const char * const from, const char * const message,
 
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(win, COLOUR_ONLINE);
-            wprintw(win, "*%s ", short_from);
+            wprintw(win, "*%s ", from);
             wprintw(win, message + 4);
             wprintw(win, "\n");
             wattroff(win, COLOUR_ONLINE);
         } else {
-            _win_show_user(win, short_from, 1);
+            _win_show_user(win, from, 1);
             _win_show_message(win, message);
         }
     }
@@ -378,7 +374,7 @@ win_show_incomming_msg(const char * const from, const char * const message,
         beep();
 #ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify_message())
-        _win_notify_message(short_from);
+        _win_notify_message(from);
 #endif
 }
 

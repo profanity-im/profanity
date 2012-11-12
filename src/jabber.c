@@ -466,6 +466,15 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     char from_cpy[strlen(from) + 1];
     strcpy(from_cpy, from);
     char *short_from = strtok(from_cpy, "/");
+    char *jid = NULL;
+
+    // private message from chat room use full jid (room/nick)
+    if (room_is_active(short_from)) {
+        jid = strdup(from);
+    // standard chat message, use jid without resource
+    } else {
+        jid = strdup(short_from);
+    }
 
     // determine chatstate support of recipient
     gboolean recipient_supports = FALSE;
@@ -474,10 +483,10 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     }
 
     // create or update chat session
-    if (!chat_session_exists(short_from)) {
-        chat_session_start(short_from, recipient_supports);
+    if (!chat_session_exists(jid)) {
+        chat_session_start(jid, recipient_supports);
     } else {
-        chat_session_set_recipient_supports(short_from, recipient_supports);
+        chat_session_set_recipient_supports(jid, recipient_supports);
     }
 
     // determine if the notifications happened whilst offline
@@ -487,10 +496,10 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     if (recipient_supports && (delay == NULL)) {
         if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
             if (prefs_get_notify_typing() || prefs_get_intype()) {
-                prof_handle_typing(short_from);
+                prof_handle_typing(jid);
             }
         } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
-            prof_handle_gone(short_from);
+            prof_handle_gone(jid);
         } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) {
             // do something
         } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
@@ -510,15 +519,17 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
 
             if (g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
                 if (message != NULL) {
-                    prof_handle_delayed_message(short_from, message, tv_stamp);
+                    prof_handle_delayed_message(jid, message, tv_stamp);
                 }
             } else {
                 log_error("Couldn't parse datetime string of historic message: %s", utc_stamp);
             }
         } else {
-            prof_handle_incoming_message(short_from, message);
+            prof_handle_incoming_message(jid, message);
         }
     }
+
+    g_free(jid);
 
     return 1;
 }
