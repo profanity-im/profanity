@@ -235,8 +235,12 @@ static struct cmd_t main_commands[] =
         { "/who [status]",
           "-------------",
           "Show contacts with the specified status, no status shows all contacts.",
-          "Possible statuses are: online, offline, away, dnd, xa, chat.",
-          "The online status includes the following statuses: chat, dnd, away, xa.",
+          "Possible statuses are: online, offline, away, dnd, xa, chat, available, unavailable.",
+          "",
+          "\"/who online\" will list contacts that are connected, i.e. online, chat, away, xa, dnd",
+          "\"/who available\" will list contacts that are available for chat, i.e. online, chat.",
+          "\"/who unavailable\" will list contacts that are not available for chat, i.e. offline, away, xa, dnd.",
+          "",
           "If in a chat room, this command shows the room roster in the room.",
           NULL } } },
 
@@ -524,6 +528,8 @@ cmd_init(void)
     }
 
     p_autocomplete_add(who_ac, strdup("offline"));
+    p_autocomplete_add(who_ac, strdup("available"));
+    p_autocomplete_add(who_ac, strdup("unavailable"));
 
     history_init();
 }
@@ -980,6 +986,8 @@ _cmd_who(const char * const inp, struct cmd_help_t help)
         // bad arg
         if ((presence != NULL)
                 && (strcmp(presence, "online") != 0)
+                && (strcmp(presence, "available") != 0)
+                && (strcmp(presence, "unavailable") != 0)
                 && (strcmp(presence, "offline") != 0)
                 && (strcmp(presence, "away") != 0)
                 && (strcmp(presence, "chat") != 0)
@@ -999,6 +1007,42 @@ _cmd_who(const char * const inp, struct cmd_help_t help)
                 if (presence == NULL) {
                     cons_show("All contacts:");
                     cons_show_contacts(list);
+
+                // available
+                } else if (strcmp("available", presence) == 0) {
+                    cons_show("Contacts (%s):", presence);
+                    GSList *filtered = NULL;
+
+                    while (list != NULL) {
+                        PContact contact = list->data;
+                        const char * const contact_presence = (p_contact_presence(contact));
+                        if ((strcmp(contact_presence, "online") == 0)
+                                || (strcmp(contact_presence, "chat") == 0)) {
+                            filtered = g_slist_append(filtered, contact);
+                        }
+                        list = g_slist_next(list);
+                    }
+
+                    cons_show_contacts(filtered);
+
+                // unavailable
+                } else if (strcmp("unavailable", presence) == 0) {
+                    cons_show("Contacts (%s):", presence);
+                    GSList *filtered = NULL;
+
+                    while (list != NULL) {
+                        PContact contact = list->data;
+                        const char * const contact_presence = (p_contact_presence(contact));
+                        if ((strcmp(contact_presence, "offline") == 0)
+                                || (strcmp(contact_presence, "away") == 0)
+                                || (strcmp(contact_presence, "dnd") == 0)
+                                || (strcmp(contact_presence, "xa") == 0)) {
+                            filtered = g_slist_append(filtered, contact);
+                        }
+                        list = g_slist_next(list);
+                    }
+
+                    cons_show_contacts(filtered);
 
                 // online, show all status that indicate online
                 } else if (strcmp("online", presence) == 0) {
