@@ -72,6 +72,8 @@ static char *_cmd_notify_complete(char *inp);
 static void _cmd_notify_reset_completer(void);
 static char *_cmd_sub_complete(char *inp);
 static void _cmd_sub_reset_completer(void);
+static char *_cmd_log_complete(char *inp);
+static void _cmd_log_reset_completer(void);
 static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
@@ -92,6 +94,7 @@ static gboolean _cmd_close(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_join(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_beep(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_notify(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_log(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_intype(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
@@ -408,6 +411,18 @@ static struct cmd_t setting_commands[] =
           "",
           "Config file section : [ui]",
           "Config file value :   history=true|false",
+          NULL } } },
+
+    { "/log",
+        _cmd_set_log,
+        { "/log maxsize <value>", "Manage system logging settings.",
+        { "/history maxsize <value>",
+          "---------------",
+          "maxsize : When log file size exceeds this value it will be automatically",
+          "          rotated (file will be renamed). Default value is 1048580 (1MB)",
+          "",
+          "Config file section : [log]",
+          "Config file value :   maxsize=bytes",
           NULL } } }
 };
 
@@ -477,6 +492,7 @@ static PAutocomplete who_ac;
 static PAutocomplete help_ac;
 static PAutocomplete notify_ac;
 static PAutocomplete sub_ac;
+static PAutocomplete log_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -506,6 +522,9 @@ cmd_init(void)
     p_autocomplete_add(sub_ac, strdup("del"));
     p_autocomplete_add(sub_ac, strdup("req"));
     p_autocomplete_add(sub_ac, strdup("show"));
+
+    log_ac = p_autocomplete_new();
+    p_autocomplete_add(log_ac, strdup("maxsize"));
 
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
@@ -580,6 +599,7 @@ cmd_reset_autocomplete()
     _cmd_notify_reset_completer();
     _cmd_sub_reset_completer();
     _cmd_who_reset_completer();
+    _cmd_log_reset_completer();
     _cmd_reset_command_completer();
 }
 
@@ -721,6 +741,18 @@ _cmd_sub_reset_completer(void)
     p_autocomplete_reset(sub_ac);
 }
 
+static char *
+_cmd_log_complete(char *inp)
+{
+    return p_autocomplete_complete(log_ac, inp);
+}
+
+static void
+_cmd_log_reset_completer(void)
+{
+    p_autocomplete_reset(log_ac);
+}
+
 static void
 _cmd_complete_parameters(char *input, int *size)
 {
@@ -753,6 +785,8 @@ _cmd_complete_parameters(char *input, int *size)
         _cmd_help_complete);
     _parameter_autocomplete(input, size, "/who",
         _cmd_who_complete);
+    _parameter_autocomplete(input, size, "/log",
+        _cmd_log_complete);
 
     _notify_autocomplete(input, size);
 }
@@ -1344,6 +1378,30 @@ _cmd_set_notify(const char * const inp, struct cmd_help_t help)
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
+}
+
+static gboolean
+_cmd_set_log(const char * const inp, struct cmd_help_t help)
+{
+    char *subcmd, *value;
+    char inp_cpy[strlen(inp) + 1];
+    int intval;
+
+    strcpy(inp_cpy, inp);
+    strtok(inp_cpy, " ");
+    subcmd = strtok(NULL, " ");
+    value = strtok(NULL, " ");
+    if (subcmd == NULL || value == NULL) {
+        cons_show("Usage: %s", help.usage);
+    } else {
+        if (strcmp(subcmd, "maxsize") == 0) {
+            intval = atoi(value);
+            prefs_set_max_log_size(intval);
+            cons_show("Log maxinum size set to %d bytes", intval);
+        }
+        /* TODO: make 'level' subcommand for debug level */
+    }
+    return TRUE;
 }
 
 static gboolean

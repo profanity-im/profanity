@@ -39,6 +39,7 @@
 
 static GString *prefs_loc;
 static GKeyFile *prefs;
+gint log_maxsize = 0;
 
 static PAutocomplete login_ac;
 static PAutocomplete boolean_choice_ac;
@@ -87,6 +88,8 @@ static void _save_prefs(void);
 void
 prefs_load(void)
 {
+    GError *err;
+
     log_info("Loading preferences");
     login_ac = p_autocomplete_new();
     prefs_loc = g_string_new(getenv("HOME"));
@@ -112,6 +115,13 @@ prefs_load(void)
     free(jids);
 
     _load_colours();
+
+    err = NULL;
+    log_maxsize = g_key_file_get_integer(prefs, "log", "maxsize", &err);
+    if (err != NULL) {
+        log_maxsize = 0;
+        g_error_free(err);
+    }
 
     boolean_choice_ac = p_autocomplete_new();
     p_autocomplete_add(boolean_choice_ac, strdup("on"));
@@ -303,8 +313,18 @@ prefs_set_notify_remind(gint value)
 gint
 prefs_get_max_log_size(void)
 {
-    /* TODO: make command and field in config file */
-    return PREFS_MAX_LOG_SIZE;
+    if (log_maxsize < PREFS_MIN_LOG_SIZE)
+        return PREFS_MAX_LOG_SIZE;
+    else
+        return log_maxsize;
+}
+
+void
+prefs_set_max_log_size(gint value)
+{
+    log_maxsize = value;
+    g_key_file_set_integer(prefs, "log", "maxsize", value);
+    _save_prefs();
 }
 
 gboolean
