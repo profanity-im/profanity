@@ -198,6 +198,7 @@ prof_handle_lost_connection(void)
 {
     cons_bad_show("Lost connection.");
     log_info("Lost connection");
+    contact_list_clear();
     win_disconnected();
     win_page_off();
     log_info("disconnected");
