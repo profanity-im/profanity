@@ -70,7 +70,7 @@ static void _create_windows(void);
 static void _cons_splash_logo(void);
 static void _cons_show_basic_help(void);
 static int _find_prof_win_index(const char * const contact);
-static int _new_prof_win(const char * const contact);
+static int _new_prof_win(const char * const contact, win_type_t type);
 static void _current_window_refresh(void);
 static void _win_switch_if_active(const int i);
 static void _win_show_time(WINDOW *win);
@@ -180,6 +180,7 @@ win_close_win(void)
     strcpy(_wins[_curr_prof_win].from, "");
     wclear(_wins[_curr_prof_win].win);
     _wins[_curr_prof_win].history_shown = 0;
+    _wins[_curr_prof_win].type = WIN_UNUSED;
 
     // set it as inactive in the status bar
     status_bar_inactive(_curr_prof_win);
@@ -194,18 +195,13 @@ win_close_win(void)
 int
 win_in_chat(void)
 {
-    return ((_curr_prof_win != 0) &&
-        (strcmp(_wins[_curr_prof_win].from, "") != 0));
+    return (_wins[_curr_prof_win].type == WIN_CHAT);
 }
 
 int
 win_in_groupchat(void)
 {
-    if (room_is_active(_wins[_curr_prof_win].from)) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return (_wins[_curr_prof_win].type == WIN_MUC);
 }
 
 char *
@@ -266,7 +262,7 @@ win_remind(void)
 void
 win_activity(void)
 {
-    if (win_in_chat() && !win_in_groupchat()) {
+    if (win_in_chat()) {
         char *recipient = win_get_recipient();
         chat_session_set_composing(recipient);
         if (!chat_session_get_sent(recipient) ||
@@ -283,8 +279,7 @@ win_no_activity(void)
 
     // loop through regular chat windows and update states
     for (i = 1; i < NUM_WINS; i++) {
-        if ((strcmp(_wins[i].from, "") != 0) &&
-                (!room_is_active(_wins[i].from))) {
+        if (_wins[i].type == WIN_CHAT) {
             char *recipient = _wins[i].from;
             chat_session_no_activity(recipient);
 
@@ -314,7 +309,7 @@ win_show_incomming_msg(const char * const from, const char * const message,
 
     int win_index = _find_prof_win_index(short_from);
     if (win_index == NUM_WINS)
-        win_index = _new_prof_win(short_from);
+        win_index = _new_prof_win(short_from, WIN_CHAT);
 
     WINDOW *win = _wins[win_index].win;
 
@@ -449,7 +444,7 @@ win_show_system_msg(const char * const from, const char *message)
 
     win_index = _find_prof_win_index(bare_jid);
     if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(bare_jid);
+        win_index = _new_prof_win(bare_jid, WIN_CHAT);
         status_bar_active(win_index);
         dirty = TRUE;
     }
@@ -540,7 +535,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 
     // create new window
     if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(to);
+        win_index = _new_prof_win(to, WIN_CHAT);
         win = _wins[win_index].win;
 
         if (prefs_get_chlog() && prefs_get_history()) {
@@ -581,7 +576,7 @@ win_join_chat(const char * const room, const char * const nick)
 
     // create new window
     if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(room);
+        win_index = _new_prof_win(room, WIN_MUC);
     }
 
     _win_switch_if_active(win_index);
@@ -1184,6 +1179,7 @@ _create_windows(void)
     cons.paged = 0;
     cons.unread = 0;
     cons.history_shown = 0;
+    cons.type = WIN_CONSOLE;
     scrollok(cons.win, TRUE);
 
     _wins[0] = cons;
@@ -1201,6 +1197,7 @@ _create_windows(void)
         chat.paged = 0;
         chat.unread = 0;
         chat.history_shown = 0;
+        chat.type = WIN_UNUSED;
         scrollok(chat.win, TRUE);
         _wins[i] = chat;
     }
@@ -1373,7 +1370,7 @@ _find_prof_win_index(const char * const contact)
 }
 
 static int
-_new_prof_win(const char * const contact)
+_new_prof_win(const char * const contact, win_type_t type)
 {
     int i;
     // find the first unused one
@@ -1384,6 +1381,7 @@ _new_prof_win(const char * const contact)
     // set it up
     strcpy(_wins[i].from, contact);
     wclear(_wins[i].win);
+    _wins[i].type = type;
 
     return i;
 }

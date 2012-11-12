@@ -51,9 +51,18 @@
 #define COLOUR_DND      COLOR_PAIR(11)
 #define COLOUR_XA       COLOR_PAIR(12)
 
+typedef enum {
+    WIN_UNUSED,
+    WIN_CONSOLE,
+    WIN_CHAT,
+    WIN_MUC,
+    WIN_PRIVATE
+} win_type_t;
+
 struct prof_win {
     char from[100];
     WINDOW *win;
+    win_type_t type;
     int y_pos;
     int paged;
     int unread;
