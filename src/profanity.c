@@ -24,7 +24,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <signal.h>
+#endif /* _WIN32 */
 
 #include <glib.h>
 
@@ -366,8 +368,10 @@ _process_input(char *inp)
 static void
 _init(const int disable_tls, char *log_level)
 {
+#ifndef _WIN32
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
+#endif /* _WIN32 */
     _create_config_directory();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
