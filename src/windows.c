@@ -868,6 +868,8 @@ cons_prefs(void)
     else
         cons_show("Splash screen                : OFF");
 
+    cons_show("Max log size                 : %d bytes", prefs_get_max_log_size());
+
     if (prefs_get_chlog())
         cons_show("Chat logging                 : ON");
     else
