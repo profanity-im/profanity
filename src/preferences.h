@@ -34,6 +34,7 @@
 #include <ncurses/ncurses.h>
 #endif
 
+#define PREFS_MIN_LOG_SIZE 64
 #define PREFS_MAX_LOG_SIZE 1048580
 
 void prefs_load(void);
@@ -69,6 +70,7 @@ void prefs_set_notify_typing(gboolean value);
 gboolean prefs_get_notify_typing(void);
 void prefs_set_notify_remind(gint period);
 gint prefs_get_notify_remind(void);
+void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
 
 void prefs_add_login(const char *jid);
