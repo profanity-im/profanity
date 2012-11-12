@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include <glib.h>
 
@@ -364,6 +365,8 @@ _process_input(char *inp)
 static void
 _init(const int disable_tls, char *log_level)
 {
+    // ignore SIGPIPE
+    signal(SIGPIPE, SIG_IGN);
     _create_config_directory();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
