@@ -96,7 +96,7 @@ static void _win_notify(const char * const message, int timeout,
     const char * const category);
 static void _win_notify_remind(gint unread);
 static void _win_notify_message(const char * const short_from);
-static void _win_notify_typing(char * short_from);
+static void _win_notify_typing(const char * const from);
 #endif
 
 void
@@ -216,20 +216,16 @@ win_get_recipient(void)
 void
 win_show_typing(const char * const from)
 {
-    char from_cpy[strlen(from) + 1];
-    strcpy(from_cpy, from);
-    char *short_from = strtok(from_cpy, "/");
-
-    int win_index = _find_prof_win_index(short_from);
+    int win_index = _find_prof_win_index(from);
 
     if (prefs_get_intype()) {
         // no chat window for user
         if (win_index == NUM_WINS) {
-            _cons_show_typing(short_from);
+            _cons_show_typing(from);
 
         // have chat window but not currently in it
         } else if (win_index != _curr_prof_win) {
-            _cons_show_typing(short_from);
+            _cons_show_typing(from);
             dirty = TRUE;
 
         // in chat window with user
@@ -244,7 +240,7 @@ win_show_typing(const char * const from)
 
 #ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify_typing())
-        _win_notify_typing(short_from);
+        _win_notify_typing(from);
 #endif
 }
 
@@ -511,10 +507,10 @@ _win_notify_message(const char * const short_from)
 }
 
 static void
-_win_notify_typing(char * short_from)
+_win_notify_typing(const char * const from)
 {
-    char message[strlen(short_from) + 1 + 11];
-    sprintf(message, "%s: typing...", short_from);
+    char message[strlen(from) + 1 + 11];
+    sprintf(message, "%s: typing...", from);
 
     _win_notify(message, 10000, "Incoming message");
 }
