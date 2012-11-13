@@ -127,6 +127,7 @@ void win_show_room_subject(const char * const room_jid,
     const char * const subject);
 void win_show_room_member_offline(const char * const room, const char * const nick);
 void win_show_room_member_online(const char * const room, const char * const nick);
+void win_show_status(const char * const contact);
 
 // console window actions
 void cons_about(void);

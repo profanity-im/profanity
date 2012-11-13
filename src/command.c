@@ -108,6 +108,7 @@ static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_chat(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_xa(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_status(const char * const inp, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -188,6 +189,15 @@ static struct cmd_t main_commands[] =
           "This command can be called from any window, including chat with other users.",
           "",
           "Example : /msg boothj5@gmail.com Hey, here's a message!",
+          NULL } } },
+
+    { "/status",
+        _cmd_status,
+        { "/msg user@host", "Find out a contacts status.",
+        { "/msg user@host",
+          "--------------",
+          "Find out someones presence information.",
+          "Use tab completion to autocomplete the contact.",
           NULL } } },
 
     { "/join",
@@ -777,6 +787,8 @@ _cmd_complete_parameters(char *input, int *size)
 
     _parameter_autocomplete(input, size, "/msg",
         contact_list_find_contact);
+    _parameter_autocomplete(input, size, "/status",
+        contact_list_find_contact);
     _parameter_autocomplete(input, size, "/connect",
         prefs_find_login);
     _parameter_autocomplete(input, size, "/sub",
@@ -1154,6 +1166,33 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
             } else {
                 cons_show("Usage: %s", help.usage);
             }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_status(const char * const inp, struct cmd_help_t help)
+{
+    char *usr = NULL;
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        // copy input
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
+
+        // get user
+        strtok(inp_cpy, " ");
+        usr = strtok(NULL, " ");
+        if (usr != NULL) {
+            win_show_status(usr);
         } else {
             cons_show("Usage: %s", help.usage);
         }
