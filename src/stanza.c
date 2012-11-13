@@ -122,7 +122,7 @@ stanza_create_presence(xmpp_ctx_t *ctx, const char * const show,
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
 
-    if (strcmp(show, STANZA_TEXT_ONLINE) != 0) {
+    if (show != NULL) {
         xmpp_stanza_t *show_stanza = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(show_stanza, STANZA_NAME_SHOW);
         xmpp_stanza_t *text = xmpp_stanza_new(ctx);

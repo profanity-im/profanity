@@ -95,6 +95,7 @@ static gboolean _cmd_join(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_beep(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_notify(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_log(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_set_priority(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_intype(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_flash(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(const char * const inp, struct cmd_help_t help);
@@ -423,6 +424,16 @@ static struct cmd_t setting_commands[] =
           "",
           "Config file section : [log]",
           "Config file value :   maxsize=bytes",
+          NULL } } },
+
+    { "/priority",
+        _cmd_set_priority,
+        { "/priority <value>", "Set priority for connection.",
+        { "/priority <value>",
+          "--------------------",
+          "value : Number between -128 and 127. Default value is 0.",
+          "",
+          "Config file section : [jabber]",
           NULL } } }
 };
 
@@ -1400,6 +1411,31 @@ _cmd_set_log(const char * const inp, struct cmd_help_t help)
             cons_show("Log maxinum size set to %d bytes", intval);
         }
         /* TODO: make 'level' subcommand for debug level */
+    }
+    return TRUE;
+}
+
+static gboolean
+_cmd_set_priority(const char * const inp, struct cmd_help_t help)
+{
+    char *value;
+    char inp_cpy[strlen(inp) + 1];
+    int intval;
+
+    strcpy(inp_cpy, inp);
+    strtok(inp_cpy, " ");
+    value = strtok(NULL, " ");
+    if (value == NULL) {
+        cons_show("Usage: %s", help.usage);
+    } else {
+        char *status = jabber_get_status();
+        intval = atoi(value);
+        prefs_set_priority(intval);
+        // update presence with new priority
+        jabber_update_presence(jabber_get_presence(), status);
+        if (status != NULL)
+            free(status);
+        cons_show("Priority set to %d.", intval);
     }
     return TRUE;
 }

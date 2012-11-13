@@ -914,6 +914,8 @@ cons_prefs(void)
         cons_show("Reminder notification period : %d seconds", remind_period);
     }
 
+    cons_show("Priority                     : %d", prefs_get_priority());
+
     cons_show("");
 
     if (_curr_prof_win == 0)

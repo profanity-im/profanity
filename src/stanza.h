@@ -34,6 +34,7 @@
 #define STANZA_NAME_MESSAGE "message"
 #define STANZA_NAME_BODY "body"
 #define STANZA_NAME_PRESENCE "presence"
+#define STANZA_NAME_PRIORITY "priority"
 #define STANZA_NAME_X "x"
 #define STANZA_NAME_SHOW "show"
 #define STANZA_NAME_STATUS "status"
