@@ -943,7 +943,7 @@ cons_help(void)
     cons_show("");
     cons_show("/help list       - List all commands.");
     cons_show("/help basic      - Summary of basic usgae commands.");
-    cons_show("/help status     - Summary of online status change commands.");
+    cons_show("/help presence   - Summary of online status change commands.");
     cons_show("/help settings   - Summary of commands for changing Profanity settings.");
     cons_show("/help navigation - How to navigate around Profanity.");
     cons_show("/help [command]  - Detailed help on a specific command.");
@@ -985,17 +985,17 @@ cons_settings_help(void)
 }
 
 void
-cons_status_help(void)
+cons_presence_help(void)
 {
     cons_show("");
-    cons_show("Status changes:");
+    cons_show("Presence changes:");
     cons_show("");
 
-    GSList *status_helpers = cmd_get_status_help();
-    while (status_helpers != NULL) {
-        struct cmd_help_t *help = (struct cmd_help_t *)status_helpers->data;
+    GSList *presence_helpers = cmd_get_presence_help();
+    while (presence_helpers != NULL) {
+        struct cmd_help_t *help = (struct cmd_help_t *)presence_helpers->data;
         cons_show("%-25s: %s", help->usage, help->short_help);
-        status_helpers = g_slist_next(status_helpers);
+        presence_helpers = g_slist_next(presence_helpers);
     }
 
     cons_show("");

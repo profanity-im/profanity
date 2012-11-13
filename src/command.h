@@ -43,6 +43,6 @@ gboolean cmd_execute_default(const char * const inp);
 
 GSList * cmd_get_basic_help(void);
 GSList * cmd_get_settings_help(void);
-GSList * cmd_get_status_help(void);
+GSList * cmd_get_presence_help(void);
 
 #endif

@@ -125,7 +125,7 @@ static struct cmd_t main_commands[] =
           "-------------------------",
           "Show help options.",
           "Specify list if you want a list of all commands.",
-          "Specify an area (basic, status, settings, navigation) for more help on that area.",
+          "Specify an area (basic, presence, settings, navigation) for more help on that area.",
           "Specify the command if you want more detailed help on a specific command.",
           "",
           "Example : /help list",
@@ -193,9 +193,9 @@ static struct cmd_t main_commands[] =
 
     { "/status",
         _cmd_status,
-        { "/msg user@host", "Find out a contacts status.",
-        { "/msg user@host",
-          "--------------",
+        { "/status user@host", "Find out a contacts status.",
+        { "/status user@host",
+          "-----------------",
           "Find out someones presence information.",
           "Use tab completion to autocomplete the contact.",
           NULL } } },
@@ -436,7 +436,7 @@ static struct cmd_t setting_commands[] =
           NULL } } }
 };
 
-static struct cmd_t status_commands[] =
+static struct cmd_t presence_commands[] =
 {
     { "/away",
         _cmd_away,
@@ -518,7 +518,7 @@ cmd_init(void)
     help_ac = p_autocomplete_new();
     p_autocomplete_add(help_ac, strdup("list"));
     p_autocomplete_add(help_ac, strdup("basic"));
-    p_autocomplete_add(help_ac, strdup("status"));
+    p_autocomplete_add(help_ac, strdup("presence"));
     p_autocomplete_add(help_ac, strdup("settings"));
     p_autocomplete_add(help_ac, strdup("navigation"));
 
@@ -549,8 +549,8 @@ cmd_init(void)
         p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
-    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
-        struct cmd_t *pcmd = status_commands+i;
+    for (i = 0; i < ARRAY_SIZE(presence_commands); i++) {
+        struct cmd_t *pcmd = presence_commands+i;
         p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
         p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
         p_autocomplete_add(who_ac, (gchar *)strdup(pcmd->cmd+1));
@@ -640,13 +640,13 @@ cmd_get_settings_help(void)
 }
 
 GSList *
-cmd_get_status_help(void)
+cmd_get_presence_help(void)
 {
     GSList *result = NULL;
 
     unsigned int i;
-    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
-        result = g_slist_append(result, &((status_commands+i)->help));
+    for (i = 0; i < ARRAY_SIZE(presence_commands); i++) {
+        result = g_slist_append(result, &((presence_commands+i)->help));
     }
 
     return result;
@@ -951,19 +951,19 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
             }
         }
         cons_show_word("\n");
-        cons_show("Status commands:");
+        cons_show("Presence commands:");
         cons_show_time();
-        for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
-            cons_show_word( (status_commands+i)->cmd );
-            if (i < ARRAY_SIZE(status_commands) - 1) {
+        for (i = 0; i < ARRAY_SIZE(presence_commands); i++) {
+            cons_show_word( (presence_commands+i)->cmd );
+            if (i < ARRAY_SIZE(presence_commands) - 1) {
                 cons_show_word(", ");
             }
         }
         cons_show_word("\n");
     } else if (strcmp(inp, "/help basic") == 0) {
         cons_basic_help();
-    } else if (strcmp(inp, "/help status") == 0) {
-        cons_status_help();
+    } else if (strcmp(inp, "/help presence") == 0) {
+        cons_presence_help();
     } else if (strcmp(inp, "/help settings") == 0) {
         cons_settings_help();
     } else if (strcmp(inp, "/help navigation") == 0) {
@@ -1614,8 +1614,8 @@ _cmd_get_command(const char * const command)
         }
     }
 
-    for (i = 0; i < ARRAY_SIZE(status_commands); i++) {
-        struct cmd_t *pcmd = status_commands+i;
+    for (i = 0; i < ARRAY_SIZE(presence_commands); i++) {
+        struct cmd_t *pcmd = presence_commands+i;
         if (strcmp(pcmd->cmd, command) == 0) {
             return pcmd;
         }
