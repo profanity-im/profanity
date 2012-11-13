@@ -43,7 +43,9 @@ static struct _jabber_conn_t {
     xmpp_conn_t *conn;
     jabber_conn_status_t conn_status;
     jabber_presence_t presence;
+    char *status;
     int tls_disabled;
+    int priority;
 } jabber_conn;
 
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
@@ -78,6 +80,7 @@ jabber_init(const int disable_tls)
     log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence = PRESENCE_OFFLINE;
+    jabber_conn.status = NULL;
     jabber_conn.tls_disabled = disable_tls;
 }
 
@@ -86,6 +89,9 @@ jabber_restart(void)
 {
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence = PRESENCE_OFFLINE;
+    if (jabber_conn.status != NULL)
+        free(jabber_conn.status);
+    jabber_conn.status = NULL;
 }
 
 jabber_conn_status_t
@@ -274,9 +280,20 @@ jabber_leave_chat_room(const char * const room_jid)
 void
 jabber_update_presence(jabber_presence_t status, const char * const msg)
 {
-    jabber_conn.presence = status;
+    int pri;
+    char *show;
 
-    char *show = NULL;
+    // don't send presence when disconnected
+    if (jabber_conn.conn_status != JABBER_CONNECTED)
+        return;
+
+    pri = prefs_get_priority();
+    if (pri < -128 || pri > 127)
+        pri = 0;
+
+    jabber_conn.presence = status;
+    jabber_conn.priority = pri;
+
     switch(status)
     {
         case PRESENCE_AWAY:
@@ -291,12 +308,29 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
         case PRESENCE_XA:
             show = STANZA_TEXT_XA;
             break;
-        default:
-            show = STANZA_TEXT_ONLINE;
+        default: // PRESENCE_ONLINE
+            show = NULL;
             break;
     }
 
+    if (jabber_conn.status != NULL)
+        free(jabber_conn.status);
+    if (msg != NULL)
+        jabber_conn.status = strdup(msg);
+
     xmpp_stanza_t *presence = stanza_create_presence(jabber_conn.ctx, show, msg);
+    if (pri != 0) {
+        xmpp_stanza_t *priority, *value;
+        char pri_str[10];
+
+        snprintf(pri_str, sizeof(pri_str), "%d", pri);
+        priority = xmpp_stanza_new(jabber_conn.ctx);
+        value = xmpp_stanza_new(jabber_conn.ctx);
+        xmpp_stanza_set_name(priority, STANZA_NAME_PRIORITY);
+        xmpp_stanza_set_text(value, pri_str);
+        xmpp_stanza_add_child(priority, value);
+        xmpp_stanza_add_child(presence, priority);
+    }
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 }
@@ -311,6 +345,27 @@ const char *
 jabber_get_jid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
+}
+
+int
+jabber_get_priority(void)
+{
+    return jabber_conn.priority;
+}
+
+jabber_presence_t
+jabber_get_presence(void)
+{
+    return jabber_conn.presence;
+}
+
+char *
+jabber_get_status(void)
+{
+    if (jabber_conn.status == NULL)
+        return NULL;
+    else
+        return strdup(jabber_conn.status);
 }
 
 void
@@ -582,7 +637,6 @@ static int
 _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
     xmpp_stanza_t *query, *item;
     char *type = xmpp_stanza_get_type(stanza);
 
@@ -604,11 +658,12 @@ _roster_handler(xmpp_conn_t * const conn,
 
             item = xmpp_stanza_get_next(item);
         }
-        xmpp_stanza_t* pres;
-        pres = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(pres, STANZA_NAME_PRESENCE);
-        xmpp_send(conn, pres);
-        xmpp_stanza_release(pres);
+
+        /* TODO: Save somehow last presence show and use it for initial
+         *       presence rather than PRESENCE_ONLINE. It will be helpful 
+         *       when I set dnd status and reconnect for some reason */
+        // send initial presence
+        jabber_update_presence(PRESENCE_ONLINE, NULL);
     }
 
     return 1;

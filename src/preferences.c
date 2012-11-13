@@ -327,6 +327,19 @@ prefs_set_max_log_size(gint value)
     _save_prefs();
 }
 
+gint
+prefs_get_priority(void)
+{
+    return g_key_file_get_integer(prefs, "jabber", "priority", NULL);
+}
+
+void
+prefs_set_priority(gint value)
+{
+    g_key_file_set_integer(prefs, "jabber", "priority", value);
+    _save_prefs();
+}
+
 gboolean
 prefs_get_vercheck(void)
 {
