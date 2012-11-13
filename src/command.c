@@ -22,6 +22,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <errno.h>
 
 #include <glib.h>
 
@@ -78,6 +80,8 @@ static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
+
+static int _strtoi(char *str, int *saveptr, int min, int max);
 
 // command prototypes
 static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
@@ -1404,14 +1408,17 @@ _cmd_set_log(const char * const inp, struct cmd_help_t help)
     value = strtok(NULL, " ");
     if (subcmd == NULL || value == NULL) {
         cons_show("Usage: %s", help.usage);
-    } else {
-        if (strcmp(subcmd, "maxsize") == 0) {
-            intval = atoi(value);
+        return TRUE;
+    }
+
+    if (strcmp(subcmd, "maxsize") == 0) {
+        if (_strtoi(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX) == 0) {
             prefs_set_max_log_size(intval);
             cons_show("Log maxinum size set to %d bytes", intval);
         }
-        /* TODO: make 'level' subcommand for debug level */
     }
+    /* TODO: make 'level' subcommand for debug level */
+
     return TRUE;
 }
 
@@ -1427,10 +1434,12 @@ _cmd_set_priority(const char * const inp, struct cmd_help_t help)
     value = strtok(NULL, " ");
     if (value == NULL) {
         cons_show("Usage: %s", help.usage);
-    } else {
+        return TRUE;
+    }
+
+    if (_strtoi(value, &intval, -128, 127) == 0) {
         char *status = jabber_get_status();
-        intval = atoi(value);
-        prefs_set_priority(intval);
+        prefs_set_priority((int)intval);
         // update presence with new priority
         jabber_update_presence(jabber_get_presence(), status);
         if (status != NULL)
@@ -1701,4 +1710,25 @@ _notify_autocomplete(char *input, int *size)
             free(found);
         }
     }
+}
+
+static int
+_strtoi(char *str, int *saveptr, int min, int max)
+{
+    char *ptr;
+    int val;
+
+    errno = 0;
+    val = (int)strtol(str, &ptr, 0);
+    if (*str == '\0' || *ptr != '\0') {
+        cons_show("Illegal character. Must be a number.");
+        return -1;
+    } else if (errno == ERANGE || val < min || val > max) {
+        cons_show("Value out of range. Must be in %d..%d.", min, max);
+        return -1;
+    }
+
+    *saveptr = val;
+
+    return 0;
 }
