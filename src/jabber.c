@@ -316,9 +316,9 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
     xmpp_stanza_t *presence = stanza_create_presence(jabber_conn.ctx, show, msg);
     if (pri != 0) {
         xmpp_stanza_t *priority, *value;
-        char pri_str[5];
+        char pri_str[10];
 
-        sprintf(pri_str, "%d", pri);
+        snprintf(pri_str, sizeof(pri_str), "%d", pri);
         priority = xmpp_stanza_new(jabber_conn.ctx);
         value = xmpp_stanza_new(jabber_conn.ctx);
         xmpp_stanza_set_name(priority, STANZA_NAME_PRIORITY);
