@@ -280,9 +280,14 @@ jabber_leave_chat_room(const char * const room_jid)
 void
 jabber_update_presence(jabber_presence_t status, const char * const msg)
 {
-    int pri = prefs_get_priority();
+    int pri;
     char *show;
 
+    // don't send presence when disconnected
+    if (jabber_conn.conn_status != JABBER_CONNECTED)
+        return;
+
+    pri = prefs_get_priority();
     if (pri < -128 || pri > 127)
         pri = 0;
 
