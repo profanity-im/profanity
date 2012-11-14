@@ -741,8 +741,8 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
                     show_str = xmpp_stanza_get_text(show);
                 } else {
                     show_str = "online";
-                    prof_handle_room_member_online(room, nick, show_str, status_str);
                 }
+                prof_handle_room_member_online(room, nick, show_str, status_str);
             }
         }
     }
