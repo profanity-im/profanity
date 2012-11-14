@@ -113,7 +113,7 @@ static gboolean _cmd_online(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_chat(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_xa(const char * const inp, struct cmd_help_t help);
-static gboolean _cmd_status(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_info(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_wins(const char * const inp, struct cmd_help_t help);
 
 /*
@@ -197,11 +197,11 @@ static struct cmd_t main_commands[] =
           "Example : /msg boothj5@gmail.com Hey, here's a message!",
           NULL } } },
 
-    { "/status",
-        _cmd_status,
-        { "/status user@host", "Find out a contacts status.",
-        { "/status user@host",
-          "-----------------",
+    { "/info",
+        _cmd_info,
+        { "/info user@host", "Find out a contacts presence information.",
+        { "/info user@host",
+          "---------------",
           "Find out someones presence information.",
           "Use tab completion to autocomplete the contact.",
           NULL } } },
@@ -811,7 +811,7 @@ _cmd_complete_parameters(char *input, int *size)
 
     _parameter_autocomplete(input, size, "/msg",
         contact_list_find_contact);
-    _parameter_autocomplete(input, size, "/status",
+    _parameter_autocomplete(input, size, "/info",
         contact_list_find_contact);
     _parameter_autocomplete(input, size, "/connect",
         prefs_find_login);
@@ -1206,7 +1206,7 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_status(const char * const inp, struct cmd_help_t help)
+_cmd_info(const char * const inp, struct cmd_help_t help)
 {
     char *usr = NULL;
 
