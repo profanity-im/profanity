@@ -516,6 +516,7 @@ _error_handler(xmpp_stanza_t * const stanza)
 static int
 _chat_message_handler(xmpp_stanza_t * const stanza)
 {
+    gboolean priv = FALSE;
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     char from_cpy[strlen(from) + 1];
@@ -526,9 +527,11 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     // private message from chat room use full jid (room/nick)
     if (room_is_active(short_from)) {
         jid = strdup(from);
+        priv = TRUE;
     // standard chat message, use jid without resource
     } else {
         jid = strdup(short_from);
+        priv = FALSE;
     }
 
     // determine chatstate support of recipient
@@ -574,13 +577,13 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
 
             if (g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
                 if (message != NULL) {
-                    prof_handle_delayed_message(jid, message, tv_stamp);
+                    prof_handle_delayed_message(jid, message, tv_stamp, priv);
                 }
             } else {
                 log_error("Couldn't parse datetime string of historic message: %s", utc_stamp);
             }
         } else {
-            prof_handle_incoming_message(jid, message);
+            prof_handle_incoming_message(jid, message, priv);
         }
     }
 
@@ -660,7 +663,7 @@ _roster_handler(xmpp_conn_t * const conn,
         }
 
         /* TODO: Save somehow last presence show and use it for initial
-         *       presence rather than PRESENCE_ONLINE. It will be helpful 
+         *       presence rather than PRESENCE_ONLINE. It will be helpful
          *       when I set dnd status and reconnect for some reason */
         // send initial presence
         jabber_update_presence(PRESENCE_ONLINE, NULL);

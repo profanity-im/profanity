@@ -102,9 +102,9 @@ prof_handle_typing(char *from)
 }
 
 void
-prof_handle_incoming_message(char *from, char *message)
+prof_handle_incoming_message(char *from, char *message, gboolean priv)
 {
-    win_show_incomming_msg(from, message, NULL);
+    win_show_incomming_msg(from, message, NULL, priv);
     win_page_off();
 
     if (prefs_get_chlog()) {
@@ -118,9 +118,10 @@ prof_handle_incoming_message(char *from, char *message)
 }
 
 void
-prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp)
+prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
+    gboolean priv)
 {
-    win_show_incomming_msg(from, message, &tv_stamp);
+    win_show_incomming_msg(from, message, &tv_stamp, priv);
     win_page_off();
 
     if (prefs_get_chlog()) {

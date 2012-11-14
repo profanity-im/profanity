@@ -298,11 +298,18 @@ win_no_activity(void)
 
 void
 win_show_incomming_msg(const char * const from, const char * const message,
-    GTimeVal *tv_stamp)
+    GTimeVal *tv_stamp, gboolean priv)
 {
+    win_type_t win_type;
+    if (priv) {
+        win_type = WIN_PRIVATE;
+    } else {
+        win_type = WIN_CHAT;
+    }
+
     int win_index = _find_prof_win_index(from);
     if (win_index == NUM_WINS)
-        win_index = _new_prof_win(from, WIN_CHAT);
+        win_index = _new_prof_win(from, win_type);
 
     WINDOW *win = _wins[win_index].win;
 
