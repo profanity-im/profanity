@@ -114,6 +114,7 @@ static gboolean _cmd_dnd(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_chat(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_xa(const char * const inp, struct cmd_help_t help);
 static gboolean _cmd_status(const char * const inp, struct cmd_help_t help);
+static gboolean _cmd_wins(const char * const inp, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -217,6 +218,14 @@ static struct cmd_t main_commands[] =
           "",
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
+          NULL } } },
+
+    { "/wins",
+        _cmd_wins,
+        { "/wins", "List active windows.",
+        { "/wins",
+          "-----",
+          "List all currently active windows and information about them.",
           NULL } } },
 
     { "/sub",
@@ -688,7 +697,7 @@ cmd_execute_default(const char * const inp)
         char *recipient = win_get_recipient();
         jabber_send_groupchat(inp, recipient);
         free(recipient);
-    } else if (win_in_chat()) {
+    } else if (win_in_chat() || win_in_private_chat()) {
         char *recipient = win_get_recipient();
         jabber_send(inp, recipient);
 
@@ -938,6 +947,13 @@ _cmd_quit(const char * const inp, struct cmd_help_t help)
     log_info("Profanity is shutting down...");
     exit(0);
     return FALSE;
+}
+
+static gboolean
+_cmd_wins(const char * const inp, struct cmd_help_t help)
+{
+    win_show_wins();
+    return TRUE;
 }
 
 static gboolean
@@ -1316,7 +1332,7 @@ _cmd_close(const char * const inp, struct cmd_help_t help)
         char *room_jid = win_get_recipient();
         jabber_leave_chat_room(room_jid);
         win_close_win();
-    } else if (win_in_chat()) {
+    } else if (win_in_chat() || win_in_private_chat()) {
 
         if (prefs_get_states()) {
             char *recipient = win_get_recipient();

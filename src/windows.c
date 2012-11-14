@@ -205,6 +205,59 @@ win_in_groupchat(void)
     return (_wins[_curr_prof_win].type == WIN_MUC);
 }
 
+int
+win_in_private_chat(void)
+{
+    return (_wins[_curr_prof_win].type == WIN_PRIVATE);
+}
+
+void
+win_show_wins(void)
+{
+    int i = 0;
+    int count = 0;
+
+    for (i = 1; i < NUM_WINS; i++) {
+        if (_wins[i].type != WIN_UNUSED) {
+            count++;
+        }
+    }
+
+    cons_show("");
+
+    if (count == 0) {
+        cons_show("No active windows.");
+    } else if (count == 1) {
+        cons_show("1 active window:");
+    } else {
+        cons_show("%d active windows:", count);
+    }
+
+    if (count != 0) {
+        for (i = 1; i < NUM_WINS; i++) {
+            if (_wins[i].type != WIN_UNUSED) {
+                _win_show_time(_cons_win);
+                wprintw(_cons_win, "[%d] - ", i + 1);
+
+                switch (_wins[i].type)
+                {
+                    case WIN_CHAT:
+                        wprintw(_cons_win, "conversation : %s\n", _wins[i].from);
+                        break;
+                    case WIN_PRIVATE:
+                        wprintw(_cons_win, "private      : %s\n", _wins[i].from);
+                        break;
+                    case WIN_MUC:
+                        wprintw(_cons_win, "chat room    : %s\n", _wins[i].from);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+}
+
 char *
 win_get_recipient(void)
 {
@@ -535,7 +588,13 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 
     // create new window
     if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(to, WIN_CHAT);
+
+        if (room_is_active(to)) {
+            win_index = _new_prof_win(to, WIN_PRIVATE);
+        } else {
+            win_index = _new_prof_win(to, WIN_CHAT);
+        }
+
         win = _wins[win_index].win;
 
         if (prefs_get_chlog() && prefs_get_history()) {

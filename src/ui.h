@@ -128,6 +128,8 @@ void win_show_room_subject(const char * const room_jid,
 void win_show_room_member_offline(const char * const room, const char * const nick);
 void win_show_room_member_online(const char * const room, const char * const nick);
 void win_show_status(const char * const contact);
+void win_show_wins(void);
+int win_in_private_chat(void);
 
 // console window actions
 void cons_about(void);
