@@ -241,36 +241,27 @@ win_show_wins(void)
                 switch (_wins[i].type)
                 {
                     case WIN_CHAT:
-                        wprintw(_cons_win, "[%d]", i + 1);
-                        if (_wins[i].unread > 0) {
-                            wprintw(_cons_win, " !! - ");
-                        } else {
-                            wprintw(_cons_win, "    - ");
-                        }
-                        wprintw(_cons_win, "conversation : %s", _wins[i].from);
+                        wprintw(_cons_win, "%d: chat %s", i + 1, _wins[i].from);
                         PContact contact = contact_list_get_contact(_wins[i].from);
                         if (p_contact_name(contact) != NULL) {
                             wprintw(_cons_win, " (%s)", p_contact_name(contact));
                         }
-                        wprintw(_cons_win, ", %s", p_contact_presence(contact));
+                        wprintw(_cons_win, " - %s", p_contact_presence(contact));
+                        if (_wins[i].unread > 0) {
+                            wprintw(_cons_win, ", %d unread", _wins[i].unread);
+                        }
                         break;
                     case WIN_PRIVATE:
-                        wprintw(_cons_win, "[%d]", i + 1);
+                        wprintw(_cons_win, "%d: private %s", i + 1, _wins[i].from);
                         if (_wins[i].unread > 0) {
-                            wprintw(_cons_win, " !! - ");
-                        } else {
-                            wprintw(_cons_win, "    - ");
+                            wprintw(_cons_win, ", %d unread", _wins[i].unread);
                         }
-                        wprintw(_cons_win, "private      : %s", _wins[i].from);
                         break;
                     case WIN_MUC:
-                        wprintw(_cons_win, "[%d]", i + 1);
+                        wprintw(_cons_win, "%d: room %s", i + 1, _wins[i].from);
                         if (_wins[i].unread > 0) {
-                            wprintw(_cons_win, " !! - ");
-                        } else {
-                            wprintw(_cons_win, "    - ");
+                            wprintw(_cons_win, ", %d unread", _wins[i].unread);
                         }
-                        wprintw(_cons_win, "chat room    : %s", _wins[i].from);
                         break;
                     default:
                         break;
