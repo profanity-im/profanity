@@ -241,7 +241,12 @@ win_show_wins(void)
                 switch (_wins[i].type)
                 {
                     case WIN_CHAT:
-                        wprintw(_cons_win, "[%d] - ", i + 1);
+                        wprintw(_cons_win, "[%d]", i + 1);
+                        if (_wins[i].unread > 0) {
+                            wprintw(_cons_win, " !! - ");
+                        } else {
+                            wprintw(_cons_win, "    - ");
+                        }
                         wprintw(_cons_win, "conversation : %s", _wins[i].from);
                         PContact contact = contact_list_get_contact(_wins[i].from);
                         if (p_contact_name(contact) != NULL) {
@@ -250,11 +255,21 @@ win_show_wins(void)
                         wprintw(_cons_win, ", %s", p_contact_presence(contact));
                         break;
                     case WIN_PRIVATE:
-                        wprintw(_cons_win, "[%d] - ", i + 1);
+                        wprintw(_cons_win, "[%d]", i + 1);
+                        if (_wins[i].unread > 0) {
+                            wprintw(_cons_win, " !! - ");
+                        } else {
+                            wprintw(_cons_win, "    - ");
+                        }
                         wprintw(_cons_win, "private      : %s", _wins[i].from);
                         break;
                     case WIN_MUC:
-                        wprintw(_cons_win, "[%d] - ", i + 1);
+                        wprintw(_cons_win, "[%d]", i + 1);
+                        if (_wins[i].unread > 0) {
+                            wprintw(_cons_win, " !! - ");
+                        } else {
+                            wprintw(_cons_win, "    - ");
+                        }
                         wprintw(_cons_win, "chat room    : %s", _wins[i].from);
                         break;
                     default:
