@@ -1034,7 +1034,7 @@ cons_help(void)
     cons_show("Choose a help option:");
     cons_show("");
     cons_show("/help list       - List all commands.");
-    cons_show("/help basic      - Summary of basic usgae commands.");
+    cons_show("/help basic      - Summary of basic usage commands.");
     cons_show("/help presence   - Summary of online status change commands.");
     cons_show("/help settings   - Summary of commands for changing Profanity settings.");
     cons_show("/help navigation - How to navigate around Profanity.");
