@@ -82,6 +82,7 @@ static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
+gchar** _cmd_parse_args(const char * const inp, int min, int max, int *num);
 
 // command prototypes
 static gboolean _cmd_quit(const char * const inp, struct cmd_help_t help);
@@ -833,40 +834,45 @@ static gboolean
 _cmd_connect(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
 
-    if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
-        cons_show("You are either connected already, or a login is in process.");
-        result = TRUE;
-    } else if (strlen(inp) < 10) {
+    if (args == NULL) {
         cons_show("Usage: %s", help.usage);
         result = TRUE;
     } else {
-        char *user, *lower;
-        user = strndup(inp+9, strlen(inp)-9);
-        lower = g_utf8_strdown(user, -1);
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-        status_bar_get_password();
-        status_bar_refresh();
-        char passwd[21];
-        inp_block();
-        inp_get_password(passwd);
-        inp_non_block();
+        if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
+            cons_show("You are either connected already, or a login is in process.");
+            result = TRUE;
+        } else {
+            char *user = args[0];
+            char *lower = g_utf8_strdown(user, -1);
 
-        log_debug("Connecting as %s", lower);
+            status_bar_get_password();
+            status_bar_refresh();
+            char passwd[21];
+            inp_block();
+            inp_get_password(passwd);
+            inp_non_block();
 
-        conn_status = jabber_connect(lower, passwd);
-        if (conn_status == JABBER_CONNECTING) {
-            cons_show("Connecting...");
-            log_debug("Connecting...");
+            log_debug("Connecting as %s", lower);
+
+            conn_status = jabber_connect(lower, passwd);
+            if (conn_status == JABBER_CONNECTING) {
+                cons_show("Connecting...");
+                log_debug("Connecting...");
+            }
+            if (conn_status == JABBER_DISCONNECTED) {
+                cons_bad_show("Connection to server failed.");
+                log_debug("Connection using %s failed", lower);
+            }
+
+            result = TRUE;
         }
-        if (conn_status == JABBER_DISCONNECTED) {
-            cons_bad_show("Connection to server failed.");
-            log_debug("Connection using %s failed", lower);
-        }
-
-        result = TRUE;
     }
+    g_strfreev(args);
 
     return result;
 }
@@ -875,51 +881,55 @@ static gboolean
 _cmd_sub(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 1, 2, &num_args);
 
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are currently not connected.");
-        result = TRUE;
-    } else if (strlen(inp) < 6) {
+    if (args == NULL) {
         cons_show("Usage: %s", help.usage);
         result = TRUE;
     } else {
-        char *inp_cpy, *subcmd;
-        char *jid, *bare_jid;
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-        inp_cpy = strndup(inp+5, strlen(inp)-5);
-        /* using strtok is bad idea */
-        subcmd = strtok(inp_cpy, " ");
-        jid = strtok(NULL, " ");
-
-        if (jid != NULL) {
-            jid = strdup(jid);
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are currently not connected.");
+            result = TRUE;
+        } else if (strlen(inp) < 6) {
+            cons_show("Usage: %s", help.usage);
+            result = TRUE;
         } else {
-            jid = win_get_recipient();
+            char *subcmd, *jid, *bare_jid;
+            subcmd = args[0];
+            jid = args[1];
+
+            if (jid != NULL) {
+                jid = strdup(jid);
+            } else {
+                jid = win_get_recipient();
+            }
+
+            bare_jid = strtok(jid, "/");
+
+            if (strcmp(subcmd, "add") == 0) {
+                jabber_subscription(bare_jid, PRESENCE_SUBSCRIBED);
+                cons_show("Accepted subscription for %s", bare_jid);
+                log_info("Accepted subscription for %s", bare_jid);
+            } else if (strcmp(subcmd, "del") == 0) {
+                jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
+                cons_show("Deleted subscription for %s", bare_jid);
+                log_info("Deleted subscription for %s", bare_jid);
+            } else if (strcmp(subcmd, "req") == 0) {
+                jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
+                cons_show("Sent subscription request to %s.", bare_jid);
+                log_info("Sent subscription request to %s.", bare_jid);
+            } else if (strcmp(subcmd, "show") == 0) {
+                /* TODO: not implemented yet */
+            }
+
+            free(jid);
+            result = TRUE;
         }
-
-        bare_jid = strtok(jid, "/");
-
-        if (strcmp(subcmd, "add") == 0) {
-            jabber_subscription(bare_jid, PRESENCE_SUBSCRIBED);
-            cons_show("Accepted subscription for %s", bare_jid);
-            log_info("Accepted subscription for %s", bare_jid);
-        } else if (strcmp(subcmd, "del") == 0) {
-            jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
-            cons_show("Deleted subscription for %s", bare_jid);
-            log_info("Deleted subscription for %s", bare_jid);
-        } else if (strcmp(subcmd, "req") == 0) {
-            jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
-            cons_show("Sent subscription request to %s.", bare_jid);
-            log_info("Sent subscription request to %s.", bare_jid);
-        } else if (strcmp(subcmd, "show") == 0) {
-            /* TODO: not implemented yet */
-        }
-
-        free(jid);
-        free(inp_cpy);
-        result = TRUE;
     }
+    g_strfreev(args);
 
     return result;
 }
@@ -1208,79 +1218,96 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_info(const char * const inp, struct cmd_help_t help)
 {
-    char *usr = NULL;
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+    if (args == NULL) {
+        cons_show("Usage: %s", help.usage);
+        result = TRUE;
     } else {
-        // copy input
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
+        char *usr = args[0];
 
-        // get user
-        strtok(inp_cpy, " ");
-        usr = strtok(NULL, " ");
-        if (usr != NULL) {
-            win_show_status(usr);
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
         } else {
-            cons_show("Usage: %s", help.usage);
+            if (usr != NULL) {
+                win_show_status(usr);
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
         }
-    }
 
-    return TRUE;
+        result = TRUE;
+    }
+    g_strfreev(args);
+
+    return result;
 }
 
 static gboolean
 _cmd_join(const char * const inp, struct cmd_help_t help)
 {
-    char *room = NULL;
-    char *nick = NULL;
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 1, 2, &num_args);
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+    if (args == NULL) {
+        cons_show("Usage: %s", help.usage);
+        result = TRUE;
     } else {
-        // copy input
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
-
-        // get room jid
-        strtok(inp_cpy, " ");
-        room = strtok(NULL, " ");
-        if (room == NULL) {
-            cons_show("Usage: %s", help.usage);
-        } else {
-            if ((strlen(inp) > (6 + strlen(room) + 1))) {
-                nick = strndup(inp+6+strlen(room)+1, strlen(inp)-(6+strlen(room)+1));
-            }
-
-            // if no nick, set to first part of jid
-            if (nick == NULL) {
-                const char *jid = jabber_get_jid();
-                char jid_cpy[strlen(jid) + 1];
-                strcpy(jid_cpy, jid);
-                nick = strdup(strtok(jid_cpy, "@"));
-            }
-            jabber_join(room, nick);
-            win_join_chat(room, nick);
+        char *room = args[0];
+        char *nick = NULL;
+        if (num_args == 2) {
+            nick = args[1];
         }
-    }
 
-    return TRUE;
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+        } else {
+            if (room == NULL) {
+                cons_show("Usage: %s", help.usage);
+            } else {
+                // if no nick, set to first part of jid
+                if (nick == NULL) {
+                    const char *jid = jabber_get_jid();
+                    char jid_cpy[strlen(jid) + 1];
+                    strcpy(jid_cpy, jid);
+                    nick = strdup(strtok(jid_cpy, "@"));
+                }
+                jabber_join(room, nick);
+                win_join_chat(room, nick);
+            }
+        }
+
+        result = TRUE;
+    }
+    g_strfreev(args);
+
+    return result;
 }
 
 static gboolean
 _cmd_tiny(const char * const inp, struct cmd_help_t help)
 {
-    if (strlen(inp) > 6) {
-        char *url = strndup(inp+6, strlen(inp)-6);
-        if (url == NULL) {
-            log_error("Not enough memory.");
-            return FALSE;
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
+
+    if (args == NULL) {
+        cons_show("Usage: %s", help.usage);
+        if (win_in_chat()) {
+            char usage[strlen(help.usage + 8)];
+            sprintf(usage, "Usage: %s", help.usage);
+            win_show(usage);
         }
+        result = TRUE;
+    } else {
+        char *url = args[0];
 
         if (!tinyurl_valid(url)) {
             GString *error = g_string_new("/tiny, badly formed URL: ");
@@ -1311,18 +1338,12 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
         } else {
             cons_bad_command(inp);
         }
-        free(url);
-    } else {
-        cons_show("Usage: %s", help.usage);
 
-        if (win_in_chat()) {
-            char usage[strlen(help.usage + 8)];
-            sprintf(usage, "Usage: %s", help.usage);
-            win_show(usage);
-        }
+        result = TRUE;
     }
+    g_strfreev(args);
 
-    return TRUE;
+    return result;
 }
 
 static gboolean
@@ -1378,130 +1399,127 @@ _cmd_set_outtype(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_set_notify(const char * const inp, struct cmd_help_t help)
 {
-    char *kind = NULL;
-    char *value = NULL;
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 2, 2, &num_args);
 
-    // copy input
-    char inp_cpy[strlen(inp) + 1];
-    strcpy(inp_cpy, inp);
+    if (args == NULL) {
+        cons_show("Usage: %s", help.usage);
+        result = TRUE;
+    } else {
+        char *kind = args[0];
+        char *value = args[1];
 
-    // get kind
-    strtok(inp_cpy, " ");
-    kind = strtok(NULL, " ");
-    if ((kind != NULL) && (strlen(inp) > (8 + strlen(kind) + 1))) {
-        if ((strcmp(kind, "message") != 0) &&
-                (strcmp(kind, "typing") != 0) &&
+        // bad kind
+        if ((strcmp(kind, "message") != 0) && (strcmp(kind, "typing") != 0) &&
                 (strcmp(kind, "remind") != 0)) {
             cons_show("Usage: %s", help.usage);
 
-            return TRUE;
-        } else {
-            // get value
-            value = strndup(inp+8+strlen(kind)+1, strlen(inp)-(8+strlen(kind)+1));
-
-            if (value != NULL) {
-
-                // set message setting
-                if (strcmp(kind, "message") == 0) {
-                    if (strcmp(inp, "/notify message on") == 0) {
-                        cons_show("Message notifications enabled.");
-                        prefs_set_notify_message(TRUE);
-                    } else if (strcmp(inp, "/notify message off") == 0) {
-                        cons_show("Message notifications disabled.");
-                        prefs_set_notify_message(FALSE);
-                    } else {
-                        cons_show("Usage: /notify message on|off");
-                    }
-
-                // set typing setting
-                } else if (strcmp(kind, "typing") == 0) {
-                    if (strcmp(inp, "/notify typing on") == 0) {
-                        cons_show("Typing notifications enabled.");
-                        prefs_set_notify_typing(TRUE);
-                    } else if (strcmp(inp, "/notify typing off") == 0) {
-                        cons_show("Typing notifications disabled.");
-                        prefs_set_notify_typing(FALSE);
-                    } else {
-                        cons_show("Usage: /notify typing on|off");
-                    }
-
-                } else { // remind
-                    gint period = atoi(value);
-
-                    prefs_set_notify_remind(period);
-                    if (period == 0) {
-                        cons_show("Message reminders disabled.");
-                    } else if (period == 1) {
-                        cons_show("Message reminder period set to 1 second.");
-                    } else {
-                        cons_show("Message reminder period set to %d seconds.", period);
-                    }
-
-                }
-                return TRUE;
+        // set message setting
+        } else if (strcmp(kind, "message") == 0) {
+            if (strcmp(value, "on") == 0) {
+                cons_show("Message notifications enabled.");
+                prefs_set_notify_message(TRUE);
+            } else if (strcmp(value, "off") == 0) {
+                cons_show("Message notifications disabled.");
+                prefs_set_notify_message(FALSE);
             } else {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
+                cons_show("Usage: /notify message on|off");
+            }
+
+        // set typing setting
+        } else if (strcmp(kind, "typing") == 0) {
+            if (strcmp(value, "on") == 0) {
+                cons_show("Typing notifications enabled.");
+                prefs_set_notify_typing(TRUE);
+            } else if (strcmp(value, "off") == 0) {
+                cons_show("Typing notifications disabled.");
+                prefs_set_notify_typing(FALSE);
+            } else {
+                cons_show("Usage: /notify typing on|off");
+            }
+
+        } else { // remind
+            gint period = atoi(value);
+            prefs_set_notify_remind(period);
+            if (period == 0) {
+                cons_show("Message reminders disabled.");
+            } else if (period == 1) {
+                cons_show("Message reminder period set to 1 second.");
+            } else {
+                cons_show("Message reminder period set to %d seconds.", period);
             }
         }
-    } else {
-        cons_show("Usage: %s", help.usage);
-        return TRUE;
+
+        result = TRUE;
     }
+    g_strfreev(args);
+
+    return result;
 }
 
 static gboolean
 _cmd_set_log(const char * const inp, struct cmd_help_t help)
 {
-    char *subcmd, *value;
-    char inp_cpy[strlen(inp) + 1];
-    int intval;
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 2, 2, &num_args);
 
-    strcpy(inp_cpy, inp);
-    strtok(inp_cpy, " ");
-    subcmd = strtok(NULL, " ");
-    value = strtok(NULL, " ");
-    if (subcmd == NULL || value == NULL) {
+    if (args == NULL) {
         cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
+        result = TRUE;
+    } else {
+        char *subcmd = args[0];
+        char *value = args[1];
+        int intval;
 
-    if (strcmp(subcmd, "maxsize") == 0) {
-        if (_strtoi(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX) == 0) {
-            prefs_set_max_log_size(intval);
-            cons_show("Log maxinum size set to %d bytes", intval);
+        if (strcmp(subcmd, "maxsize") == 0) {
+            if (_strtoi(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX) == 0) {
+                prefs_set_max_log_size(intval);
+                cons_show("Log maxinum size set to %d bytes", intval);
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
         }
-    }
-    /* TODO: make 'level' subcommand for debug level */
 
-    return TRUE;
+        /* TODO: make 'level' subcommand for debug level */
+
+        result = TRUE;
+    }
+    g_strfreev(args);
+
+    return result;
 }
 
 static gboolean
 _cmd_set_priority(const char * const inp, struct cmd_help_t help)
 {
-    char *value;
-    char inp_cpy[strlen(inp) + 1];
-    int intval;
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
 
-    strcpy(inp_cpy, inp);
-    strtok(inp_cpy, " ");
-    value = strtok(NULL, " ");
-    if (value == NULL) {
+    if (args == NULL) {
         cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
+        result = TRUE;
+    } else {
+        char *value = args[0];
+        int intval;
 
-    if (_strtoi(value, &intval, -128, 127) == 0) {
-        char *status = jabber_get_status();
-        prefs_set_priority((int)intval);
-        // update presence with new priority
-        jabber_update_presence(jabber_get_presence(), status);
-        if (status != NULL)
-            free(status);
-        cons_show("Priority set to %d.", intval);
+        if (_strtoi(value, &intval, -128, 127) == 0) {
+            char *status = jabber_get_status();
+            prefs_set_priority((int)intval);
+            // update presence with new priority
+            jabber_update_presence(jabber_get_presence(), status);
+            if (status != NULL)
+                free(status);
+            cons_show("Priority set to %d.", intval);
+        }
+
+        result = TRUE;
     }
-    return TRUE;
+    g_strfreev(args);
+
+    return result;
 }
 
 static gboolean
@@ -1786,4 +1804,31 @@ _strtoi(char *str, int *saveptr, int min, int max)
     *saveptr = val;
 
     return 0;
+}
+
+gchar **
+_cmd_parse_args(const char * const inp, int min, int max, int *num)
+{
+    char *copy = strdup(inp);
+    gchar **args = NULL;
+    g_strstrip(copy);
+    gchar **split = g_strsplit(copy, " ", 0);
+    *num = g_strv_length(split) - 1;
+
+    if ((*num < min) || (*num > max)) {
+        g_strfreev(split);
+        free(copy);
+        return NULL;
+    } else {
+        args = malloc((*num + 1) * sizeof(*args));
+        int i;
+        for (i = 0; i < *num; i++) {
+            args[i] = strdup(split[i+1]);
+        }
+        args[i] = NULL;
+        g_strfreev(split);
+        free(copy);
+
+        return args;
+    }
 }
