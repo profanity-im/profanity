@@ -1301,7 +1301,7 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
         if (win_in_chat()) {
-            char usage[strlen(help.usage + 8)];
+            char usage[strlen(help.usage) + 8];
             sprintf(usage, "Usage: %s", help.usage);
             win_show(usage);
         }
@@ -1660,7 +1660,7 @@ _cmd_set_boolean_preference(const char * const inp, struct cmd_help_t help,
         cons_show(disabled->str);
         set_func(FALSE);
     } else {
-        char usage[strlen(help.usage + 8)];
+        char usage[strlen(help.usage) + 8];
         sprintf(usage, "Usage: %s", help.usage);
         cons_show(usage);
     }

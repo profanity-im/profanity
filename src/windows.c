@@ -567,7 +567,7 @@ _win_notify_remind(gint unread)
     if (unread == 1) {
         sprintf(message, "1 unread message");
     } else {
-        sprintf(message, "%d unread messages", unread);
+        snprintf(message, sizeof(message), "%d unread messages", unread);
     }
 
     _win_notify(message, 5000, "Incoming message");
