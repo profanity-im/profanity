@@ -313,8 +313,10 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
             break;
     }
 
-    if (jabber_conn.status != NULL)
+    if (jabber_conn.status != NULL) {
         free(jabber_conn.status);
+        jabber_conn.status = NULL;
+    }
     if (msg != NULL)
         jabber_conn.status = strdup(msg);
 
