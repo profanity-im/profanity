@@ -1010,7 +1010,7 @@ _cmd_help(const char * const inp, struct cmd_help_t help)
     } else if (strcmp(inp, "/help navigation") == 0) {
         cons_navigation_help();
     } else {
-        char *cmd = strndup(inp+6, strlen(inp)-6);
+        char *cmd = strdup(inp + 6);
         char cmd_with_slash[1 + strlen(cmd) + 1];
         sprintf(cmd_with_slash, "/%s", cmd);
 
@@ -1193,7 +1193,7 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
         usr = strtok(NULL, " ");
         if ((usr != NULL) && (strlen(inp) > (5 + strlen(usr) + 1))) {
             // get message
-            msg = strndup(inp+5+strlen(usr)+1, strlen(inp)-(5+strlen(usr)+1));
+            msg = strdup(inp + 5 + strlen(usr) + 1);
 
             if (msg != NULL) {
                 jabber_send(msg, usr);
@@ -1205,6 +1205,8 @@ _cmd_msg(const char * const inp, struct cmd_help_t help)
                 }
 
             } else {
+                /* TODO: this should be error while sending message cause
+                 * this is the case when strdup can't allocate memory */
                 cons_show("Usage: %s", help.usage);
             }
         } else {
@@ -1612,7 +1614,7 @@ _update_presence(const jabber_presence_t presence,
 {
     char *msg;
     if (strlen(inp) > strlen(show) + 2) {
-        msg = strndup(inp+(strlen(show) + 2), strlen(inp)-(strlen(show) + 2));
+        msg = strdup(inp + strlen(show) + 2);
     } else {
         msg = NULL;
     }
