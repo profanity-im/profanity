@@ -23,6 +23,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdio.h>
 #include <glib.h>
 
 #if !GLIB_CHECK_VERSION(2,28,0)
@@ -41,5 +42,6 @@ char * str_replace(const char *string, const char *substr,
     const char *replacement);
 int str_contains(char str[], int size, char ch);
 char* encode_xml(const char * const xml);
+char * prof_getline(FILE *stream);
 
 #endif

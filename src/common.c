@@ -29,6 +29,10 @@
 
 #include "common.h"
 
+// assume malloc stores at most 8 bytes for size of allocated memory
+// and page size is at least 4KB
+#define READ_BUF_SIZE 4088
+
 // backwards compatibility for GLib version < 2.28
 void
 p_slist_free_full(GSList *items, GDestroyNotify free_func)
@@ -117,4 +121,49 @@ encode_xml(const char * const xml)
     free(coded_msg2);
 
     return coded_msg3;
+}
+
+char *
+prof_getline(FILE *stream)
+{
+    char *buf;
+    size_t buf_size;
+    char *result;
+    char *s = NULL;
+    size_t s_size = 1;
+    int need_exit = 0;
+
+    buf = (char *)malloc(READ_BUF_SIZE);
+
+    while (TRUE) {
+        result = fgets(buf, READ_BUF_SIZE, stream);
+        if (result == NULL)
+            break;
+        buf_size = strlen(buf);
+        if (buf[buf_size - 1] == '\n') {
+            buf_size--;
+            buf[buf_size] = '\0';
+            need_exit = 1;
+        }
+
+        result = (char *)realloc(s, s_size + buf_size);
+        if (result == NULL) {
+            if (s != NULL) {
+                free(s);
+                s = NULL;
+            }
+            break;
+        }
+        s = result;
+
+        memcpy(s + s_size - 1, buf, buf_size);
+        s_size += buf_size;
+        s[s_size - 1] = '\0';
+
+        if (need_exit != 0 || feof(stream) != 0)
+            break;
+    }
+
+    free(buf);
+    return s;
 }
