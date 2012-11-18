@@ -129,8 +129,7 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
         char *filename = _get_log_filename(recipient, login, log_date, FALSE);
 
         FILE *logp = fopen(filename, "r");
-        char *line = NULL;
-        size_t read = 0;
+        char *line;
         if (logp != NULL) {
             GString *gs_header = g_string_new("");
             g_string_append_printf(gs_header, "%d/%d/%d:",
@@ -141,16 +140,8 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
             history = g_slist_append(history, header);
             g_string_free(gs_header, TRUE);
 
-            size_t length = getline(&line, &read, logp);
-            while (length != -1) {
-                char *copy = malloc(length);
-                copy = strncpy(copy, line, length);
-                copy[length -1] = '\0';
-                history = g_slist_append(history, copy);
-                free(line);
-                line = NULL;
-                read = 0;
-                length = getline(&line, &read, logp);
+            while ((line = prof_getline(logp)) != NULL) {
+                history = g_slist_append(history, line);
             }
 
             fclose(logp);
