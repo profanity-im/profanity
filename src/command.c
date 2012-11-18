@@ -970,73 +970,85 @@ _cmd_wins(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_help(const char * const inp, struct cmd_help_t help)
 {
-    if (strcmp(inp, "/help") == 0) {
-        cons_help();
-    } else if (strcmp(inp, "/help list") == 0) {
-        cons_show("");
-        cons_show("Basic commands:");
-        cons_show_time();
-        unsigned int i;
-        for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
-            cons_show_word( (main_commands+i)->cmd );
-            if (i < ARRAY_SIZE(main_commands) - 1) {
-                cons_show_word(", ");
-            }
-        }
-        cons_show_word("\n");
-        cons_show("Settings commands:");
-        cons_show_time();
-        for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
-            cons_show_word( (setting_commands+i)->cmd );
-            if (i < ARRAY_SIZE(setting_commands) - 1) {
-                cons_show_word(", ");
-            }
-        }
-        cons_show_word("\n");
-        cons_show("Presence commands:");
-        cons_show_time();
-        for (i = 0; i < ARRAY_SIZE(presence_commands); i++) {
-            cons_show_word( (presence_commands+i)->cmd );
-            if (i < ARRAY_SIZE(presence_commands) - 1) {
-                cons_show_word(", ");
-            }
-        }
-        cons_show_word("\n");
-    } else if (strcmp(inp, "/help basic") == 0) {
-        cons_basic_help();
-    } else if (strcmp(inp, "/help presence") == 0) {
-        cons_presence_help();
-    } else if (strcmp(inp, "/help settings") == 0) {
-        cons_settings_help();
-    } else if (strcmp(inp, "/help navigation") == 0) {
-        cons_navigation_help();
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = parse_args(inp, 0, 1, &num_args);
+
+    if (args == NULL) {
+        cons_show("Usage: %s", help.usage);
+        result = TRUE;
     } else {
-        char *cmd = strndup(inp+6, strlen(inp)-6);
-        char cmd_with_slash[1 + strlen(cmd) + 1];
-        sprintf(cmd_with_slash, "/%s", cmd);
-
-        const gchar **help_text = NULL;
-        struct cmd_t *command = _cmd_get_command(cmd_with_slash);
-
-        if (command != NULL) {
-            help_text = command->help.long_help;
-        }
-
-        cons_show("");
-
-        if (help_text != NULL) {
-            int i;
-            for (i = 0; help_text[i] != NULL; i++) {
-                cons_show(help_text[i]);
+        if (num_args == 0) {
+            cons_help();
+        } else if (strcmp(args[0], "list") == 0) {
+            cons_show("");
+            cons_show("Basic commands:");
+            cons_show_time();
+            unsigned int i;
+            for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
+                cons_show_word( (main_commands+i)->cmd );
+                if (i < ARRAY_SIZE(main_commands) - 1) {
+                    cons_show_word(", ");
+                }
             }
+            cons_show_word("\n");
+            cons_show("Settings commands:");
+            cons_show_time();
+            for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
+                cons_show_word( (setting_commands+i)->cmd );
+                if (i < ARRAY_SIZE(setting_commands) - 1) {
+                    cons_show_word(", ");
+                }
+            }
+            cons_show_word("\n");
+            cons_show("Presence commands:");
+            cons_show_time();
+            for (i = 0; i < ARRAY_SIZE(presence_commands); i++) {
+                cons_show_word( (presence_commands+i)->cmd );
+                if (i < ARRAY_SIZE(presence_commands) - 1) {
+                    cons_show_word(", ");
+                }
+            }
+            cons_show_word("\n");
+        } else if (strcmp(args[0], "basic") == 0) {
+            cons_basic_help();
+        } else if (strcmp(args[0], "presence") == 0) {
+            cons_presence_help();
+        } else if (strcmp(args[0], "settings") == 0) {
+            cons_settings_help();
+        } else if (strcmp(args[0], "navigation") == 0) {
+            cons_navigation_help();
         } else {
-            cons_show("No such command.");
+            char *cmd = args[0];
+            char cmd_with_slash[1 + strlen(cmd) + 1];
+            sprintf(cmd_with_slash, "/%s", cmd);
+
+            const gchar **help_text = NULL;
+            struct cmd_t *command = _cmd_get_command(cmd_with_slash);
+
+            if (command != NULL) {
+                help_text = command->help.long_help;
+            }
+
+            cons_show("");
+
+            if (help_text != NULL) {
+                int i;
+                for (i = 0; help_text[i] != NULL; i++) {
+                    cons_show(help_text[i]);
+                }
+            } else {
+                cons_show("No such command.");
+            }
+
+            cons_show("");
         }
 
-        cons_show("");
+        result = TRUE;
     }
+    g_strfreev(args);
 
-    return TRUE;
+    return result;
 }
 
 static gboolean
@@ -1058,162 +1070,161 @@ _cmd_prefs(const char * const inp, struct cmd_help_t help)
 static gboolean
 _cmd_who(const char * const inp, struct cmd_help_t help)
 {
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = parse_args(inp, 0, 1, &num_args);
 
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+    if (args == NULL) {
+        cons_show("Usage: %s", help.usage);
+        result = TRUE;
     } else {
-        // copy input
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-        // get show
-        strtok(inp_cpy, " ");
-        char *presence = strtok(NULL, " ");
-
-        // bad arg
-        if ((presence != NULL)
-                && (strcmp(presence, "online") != 0)
-                && (strcmp(presence, "available") != 0)
-                && (strcmp(presence, "unavailable") != 0)
-                && (strcmp(presence, "offline") != 0)
-                && (strcmp(presence, "away") != 0)
-                && (strcmp(presence, "chat") != 0)
-                && (strcmp(presence, "xa") != 0)
-                && (strcmp(presence, "dnd") != 0)) {
-            cons_show("Usage: %s", help.usage);
-
-        // valid arg
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
         } else {
-            if (win_in_groupchat()) {
-                char *room = win_get_recipient();
-                win_show_room_roster(room);
+            char *presence = args[0];
+
+            // bad arg
+            if ((presence != NULL)
+                    && (strcmp(presence, "online") != 0)
+                    && (strcmp(presence, "available") != 0)
+                    && (strcmp(presence, "unavailable") != 0)
+                    && (strcmp(presence, "offline") != 0)
+                    && (strcmp(presence, "away") != 0)
+                    && (strcmp(presence, "chat") != 0)
+                    && (strcmp(presence, "xa") != 0)
+                    && (strcmp(presence, "dnd") != 0)) {
+                cons_show("Usage: %s", help.usage);
+
+            // valid arg
             } else {
-                GSList *list = get_contact_list();
-
-                // no arg, show all contacts
-                if (presence == NULL) {
-                    cons_show("All contacts:");
-                    cons_show_contacts(list);
-
-                // available
-                } else if (strcmp("available", presence) == 0) {
-                    cons_show("Contacts (%s):", presence);
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        const char * const contact_presence = (p_contact_presence(contact));
-                        if ((strcmp(contact_presence, "online") == 0)
-                                || (strcmp(contact_presence, "chat") == 0)) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    cons_show_contacts(filtered);
-
-                // unavailable
-                } else if (strcmp("unavailable", presence) == 0) {
-                    cons_show("Contacts (%s):", presence);
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        const char * const contact_presence = (p_contact_presence(contact));
-                        if ((strcmp(contact_presence, "offline") == 0)
-                                || (strcmp(contact_presence, "away") == 0)
-                                || (strcmp(contact_presence, "dnd") == 0)
-                                || (strcmp(contact_presence, "xa") == 0)) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    cons_show_contacts(filtered);
-
-                // online, show all status that indicate online
-                } else if (strcmp("online", presence) == 0) {
-                    cons_show("Contacts (%s):", presence);
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        const char * const contact_presence = (p_contact_presence(contact));
-                        if ((strcmp(contact_presence, "online") == 0)
-                                || (strcmp(contact_presence, "away") == 0)
-                                || (strcmp(contact_presence, "dnd") == 0)
-                                || (strcmp(contact_presence, "xa") == 0)
-                                || (strcmp(contact_presence, "chat") == 0)) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    cons_show_contacts(filtered);
-
-                // show specific status
+                if (win_in_groupchat()) {
+                    char *room = win_get_recipient();
+                    win_show_room_roster(room);
                 } else {
-                    cons_show("Contacts (%s):", presence);
-                    GSList *filtered = NULL;
+                    GSList *list = get_contact_list();
 
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        if (strcmp(p_contact_presence(contact), presence) == 0) {
-                            filtered = g_slist_append(filtered, contact);
+                    // no arg, show all contacts
+                    if (presence == NULL) {
+                        cons_show("All contacts:");
+                        cons_show_contacts(list);
+
+                    // available
+                    } else if (strcmp("available", presence) == 0) {
+                        cons_show("Contacts (%s):", presence);
+                        GSList *filtered = NULL;
+
+                        while (list != NULL) {
+                            PContact contact = list->data;
+                            const char * const contact_presence = (p_contact_presence(contact));
+                            if ((strcmp(contact_presence, "online") == 0)
+                                    || (strcmp(contact_presence, "chat") == 0)) {
+                                filtered = g_slist_append(filtered, contact);
+                            }
+                            list = g_slist_next(list);
                         }
-                        list = g_slist_next(list);
-                    }
 
-                    cons_show_contacts(filtered);
+                        cons_show_contacts(filtered);
+
+                    // unavailable
+                    } else if (strcmp("unavailable", presence) == 0) {
+                        cons_show("Contacts (%s):", presence);
+                        GSList *filtered = NULL;
+
+                        while (list != NULL) {
+                            PContact contact = list->data;
+                            const char * const contact_presence = (p_contact_presence(contact));
+                            if ((strcmp(contact_presence, "offline") == 0)
+                                    || (strcmp(contact_presence, "away") == 0)
+                                    || (strcmp(contact_presence, "dnd") == 0)
+                                    || (strcmp(contact_presence, "xa") == 0)) {
+                                filtered = g_slist_append(filtered, contact);
+                            }
+                            list = g_slist_next(list);
+                        }
+
+                        cons_show_contacts(filtered);
+
+                    // online, show all status that indicate online
+                    } else if (strcmp("online", presence) == 0) {
+                        cons_show("Contacts (%s):", presence);
+                        GSList *filtered = NULL;
+
+                        while (list != NULL) {
+                            PContact contact = list->data;
+                            const char * const contact_presence = (p_contact_presence(contact));
+                            if ((strcmp(contact_presence, "online") == 0)
+                                    || (strcmp(contact_presence, "away") == 0)
+                                    || (strcmp(contact_presence, "dnd") == 0)
+                                    || (strcmp(contact_presence, "xa") == 0)
+                                    || (strcmp(contact_presence, "chat") == 0)) {
+                                filtered = g_slist_append(filtered, contact);
+                            }
+                            list = g_slist_next(list);
+                        }
+
+                        cons_show_contacts(filtered);
+
+                    // show specific status
+                    } else {
+                        cons_show("Contacts (%s):", presence);
+                        GSList *filtered = NULL;
+
+                        while (list != NULL) {
+                            PContact contact = list->data;
+                            if (strcmp(p_contact_presence(contact), presence) == 0) {
+                                filtered = g_slist_append(filtered, contact);
+                            }
+                            list = g_slist_next(list);
+                        }
+
+                        cons_show_contacts(filtered);
+                    }
                 }
             }
         }
-    }
 
-    return TRUE;
+        result = TRUE;
+    }
+    g_strfreev(args);
+
+    return result;
 }
 
 static gboolean
 _cmd_msg(const char * const inp, struct cmd_help_t help)
 {
-    char *usr = NULL;
-    char *msg = NULL;
+    gboolean result = FALSE;
+    int num_args = 0;
+    gchar **args = parse_args_with_freetext(inp, 2, 2, &num_args);
 
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+    if (args == NULL) {
+        cons_show("Usage: %s", help.usage);
+        result = TRUE;
     } else {
-        // copy input
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
+        char *usr = args[0];
+        char *msg = args[1];
 
-        // get user
-        strtok(inp_cpy, " ");
-        usr = strtok(NULL, " ");
-        if ((usr != NULL) && (strlen(inp) > (5 + strlen(usr) + 1))) {
-            // get message
-            msg = strndup(inp+5+strlen(usr)+1, strlen(inp)-(5+strlen(usr)+1));
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-            if (msg != NULL) {
-                jabber_send(msg, usr);
-                win_show_outgoing_msg("me", usr, msg);
-
-                if (prefs_get_chlog()) {
-                    const char *jid = jabber_get_jid();
-                    chat_log_chat(jid, usr, msg, OUT, NULL);
-                }
-
-            } else {
-                cons_show("Usage: %s", help.usage);
-            }
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
         } else {
-            cons_show("Usage: %s", help.usage);
-        }
-    }
+            jabber_send(msg, usr);
+            win_show_outgoing_msg("me", usr, msg);
 
-    return TRUE;
+            if (prefs_get_chlog()) {
+                const char *jid = jabber_get_jid();
+                chat_log_chat(jid, usr, msg, OUT, NULL);
+            }
+        }
+
+        result = TRUE;
+    }
+    g_strfreev(args);
+
+    return result;
 }
 
 static gboolean
