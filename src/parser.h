@@ -26,5 +26,6 @@
 #include <glib.h>
 
 gchar** parse_args(const char * const inp, int min, int max, int *num);
+gchar** parse_args_with_freetext(const char * const inp, int min, int max, int *num);
 
 #endif

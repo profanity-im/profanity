@@ -75,6 +75,12 @@ parse_args(const char * const inp, int min, int max, int *num)
         *num = 0;
         return NULL;
 
+    // if min allowed is 0 and 0 found, return empty char* array
+    } else if (min == 0 && *num == 0) {
+        gchar **args = malloc((*num + 1) * sizeof(*args));
+        args[0] = NULL;
+        return args;
+
     // otherwise return args array
     } else {
         gchar **args = malloc((*num + 1) * sizeof(*args));
@@ -150,6 +156,12 @@ parse_args_with_freetext(const char * const inp, int min, int max, int *num)
         free(copy);
         *num = 0;
         return NULL;
+
+    // if min allowed is 0 and 0 found, return empty char* array
+    } else if (min == 0 && *num == 0) {
+        gchar **args = malloc((*num + 1) * sizeof(*args));
+        args[0] = NULL;
+        return args;
 
     // otherwise return args array
     } else {

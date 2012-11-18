@@ -173,6 +173,30 @@ parse_cmd_two_args_with_freetext(void)
 }
 
 void
+parse_cmd_min_zero(void)
+{
+    char *inp = "/cmd";
+    int num = 0;
+    gchar **result = parse_args(inp, 0, 2, &num);
+
+    assert_int_equals(0, num);
+    assert_is_null(result[0]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_min_zero_with_freetext(void)
+{
+    char *inp = "/cmd";
+    int num = 0;
+    gchar **result = parse_args_with_freetext(inp, 0, 2, &num);
+
+    assert_int_equals(0, num);
+    assert_is_null(result[0]);
+    g_strfreev(result);
+}
+
+void
 register_parser_tests(void)
 {
     TEST_MODULE("parser tests");
@@ -190,4 +214,6 @@ register_parser_tests(void)
     TEST(parse_cmd_two_args_with_freetext);
     TEST(parse_cmd_with_too_few_returns_null);
     TEST(parse_cmd_with_too_many_returns_null);
+    TEST(parse_cmd_min_zero);
+    TEST(parse_cmd_min_zero_with_freetext);
 }
