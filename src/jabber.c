@@ -550,10 +550,11 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     }
 
     // determine if the notifications happened whilst offline
-    xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
+    GTimeVal tv_stamp;
+    gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
 
     // deal with chat states if recipient supports them
-    if (recipient_supports && (delay == NULL)) {
+    if (recipient_supports && (!delayed)) {
         if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
             if (prefs_get_notify_typing() || prefs_get_intype()) {
                 prof_handle_typing(jid);
@@ -573,17 +574,8 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
     if (body != NULL) {
         char *message = xmpp_stanza_get_text(body);
-        if (delay != NULL) {
-            char *utc_stamp = xmpp_stanza_get_attribute(delay, STANZA_ATTR_STAMP);
-            GTimeVal tv_stamp;
-
-            if (g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
-                if (message != NULL) {
-                    prof_handle_delayed_message(jid, message, tv_stamp, priv);
-                }
-            } else {
-                log_error("Couldn't parse datetime string of historic message: %s", utc_stamp);
-            }
+        if (delayed) {
+            prof_handle_delayed_message(jid, message, tv_stamp, priv);
         } else {
             prof_handle_incoming_message(jid, message, priv);
         }

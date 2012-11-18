@@ -23,6 +23,7 @@
 #ifndef STANZA_H
 #define STANZA_H
 
+#include <glib.h>
 #include <strophe.h>
 
 #define STANZA_NAME_ACTIVE "active"
@@ -62,6 +63,7 @@
 #define STANZA_ATTR_JID "jid"
 #define STANZA_ATTR_NAME "name"
 #define STANZA_ATTR_SUBSCRIPTION "subscription"
+#define STANZA_ATTR_XMLNS "xmlns"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -93,5 +95,7 @@ xmpp_stanza_t* stanza_create_roster_iq(xmpp_ctx_t *ctx);
 xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx);
 
 gboolean stanza_contains_chat_state(xmpp_stanza_t *stanza);
+
+gboolean stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp);
 
 #endif

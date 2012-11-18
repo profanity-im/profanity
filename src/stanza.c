@@ -22,6 +22,7 @@
 
 #include <string.h>
 
+#include <glib.h>
 #include <strophe.h>
 
 #include "common.h"
@@ -192,4 +193,35 @@ stanza_create_ping_iq(xmpp_ctx_t *ctx)
     xmpp_stanza_release(ping);
 
     return iq;
+}
+
+gboolean
+stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp)
+{
+    // first check for XEP-0203 delayed delivery
+    xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
+    if (delay != NULL) {
+        char *xmlns = xmpp_stanza_get_attribute(delay, STANZA_ATTR_XMLNS);
+        if ((xmlns != NULL) && (strcmp(xmlns, "urn:xmpp:delay") == 0)) {
+            char *stamp = xmpp_stanza_get_attribute(delay, STANZA_ATTR_STAMP);
+            if ((stamp != NULL) && (g_time_val_from_iso8601(stamp, tv_stamp))) {
+                return TRUE;
+            }
+        }
+    }
+
+    // otherwise check for XEP-0091 legacy delayed delivery
+    // stanp format : CCYYMMDDThh:mm:ss
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+    if (x != NULL) {
+        char *xmlns = xmpp_stanza_get_attribute(x, STANZA_ATTR_XMLNS);
+        if ((xmlns != NULL) && (strcmp(xmlns, "jabber:x:delay") == 0)) {
+            char *stamp = xmpp_stanza_get_attribute(x, STANZA_ATTR_STAMP);
+            if ((stamp != NULL) && (g_time_val_from_iso8601(stamp, tv_stamp))) {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
 }
