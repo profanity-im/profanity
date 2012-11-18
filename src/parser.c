@@ -25,11 +25,32 @@
 
 #include <glib.h>
 
+/*
+ * Take a full line of input and return an array of strings representing
+ * the arguments of a command.
+ * If the number of arguments found is less than min, or more than max
+ * NULL is returned.
+ *
+ * inp - The line of input
+ * min - The minimum allowed number of arguments
+ * max - The maxmimum allowed number of arguments
+ *
+ * Returns - An NULL terminated array of strings representing the aguments
+ * of the command, or NULL if the validation fails.
+ *
+ * E.g. the following input line:
+ *
+ * /cmd arg1 arg2
+ *
+ * Will return a pointer to the following array:
+ *
+ * { "arg1", "arg2", NULL }
+ *
+ */
 gchar **
-parse_args(const char * const inp, int min, int max, int *num)
+parse_args(const char * const inp, int min, int max)
 {
     if (inp == NULL) {
-        *num = 0;
         return NULL;
     }
 
@@ -66,24 +87,23 @@ parse_args(const char * const inp, int min, int max, int *num)
         }
     }
 
-    *num = g_slist_length(tokens) - 1;
+    int num = g_slist_length(tokens) - 1;
 
     // if num args not valid return NULL
-    if ((*num < min) || (*num > max)) {
+    if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
         free(copy);
-        *num = 0;
         return NULL;
 
     // if min allowed is 0 and 0 found, return empty char* array
-    } else if (min == 0 && *num == 0) {
-        gchar **args = malloc((*num + 1) * sizeof(*args));
+    } else if (min == 0 && num == 0) {
+        gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         return args;
 
     // otherwise return args array
     } else {
-        gchar **args = malloc((*num + 1) * sizeof(*args));
+        gchar **args = malloc((num + 1) * sizeof(*args));
         GSList *token = tokens;
         token = g_slist_next(token);
         int arg_count = 0;
@@ -101,11 +121,36 @@ parse_args(const char * const inp, int min, int max, int *num)
     }
 }
 
+/*
+ * Take a full line of input and return an array of strings representing
+ * the arguments of a command.  This function handles when the last parameter
+ * to the command is free text e.g.
+ *
+ * /msg user@host here is a message
+ *
+ * If the number of arguments found is less than min, or more than max
+ * NULL is returned.
+ *
+ * inp - The line of input
+ * min - The minimum allowed number of arguments
+ * max - The maxmimum allowed number of arguments
+ *
+ * Returns - An NULL terminated array of strings representing the aguments
+ * of the command, or NULL if the validation fails.
+ *
+ * E.g. the following input line:
+ *
+ * /cmd arg1 arg2 some free text
+ *
+ * Will return a pointer to the following array:
+ *
+ * { "arg1", "arg2", "some free text", NULL }
+ *
+ */
 gchar **
-parse_args_with_freetext(const char * const inp, int min, int max, int *num)
+parse_args_with_freetext(const char * const inp, int min, int max)
 {
     if (inp == NULL) {
-        *num = 0;
         return NULL;
     }
 
@@ -148,24 +193,23 @@ parse_args_with_freetext(const char * const inp, int min, int max, int *num)
         }
     }
 
-    *num = g_slist_length(tokens) - 1;
+    int num = g_slist_length(tokens) - 1;
 
     // if num args not valid return NULL
-    if ((*num < min) || (*num > max)) {
+    if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
         free(copy);
-        *num = 0;
         return NULL;
 
     // if min allowed is 0 and 0 found, return empty char* array
-    } else if (min == 0 && *num == 0) {
-        gchar **args = malloc((*num + 1) * sizeof(*args));
+    } else if (min == 0 && num == 0) {
+        gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         return args;
 
     // otherwise return args array
     } else {
-        gchar **args = malloc((*num + 1) * sizeof(*args));
+        gchar **args = malloc((num + 1) * sizeof(*args));
         GSList *token = tokens;
         token = g_slist_next(token);
         int arg_count = 0;
