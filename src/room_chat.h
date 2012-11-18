@@ -34,7 +34,7 @@ char * room_get_room_from_full_jid(const char * const full_room_jid);
 char * room_get_nick_from_full_jid(const char * const full_room_jid);
 gboolean room_parse_room_jid(const char * const full_room_jid, char **room,
     char **nick);
-void room_add_to_roster(const char * const room, const char * const nick,
+gboolean room_add_to_roster(const char * const room, const char * const nick,
     const char * const show, const char * const status);
 void room_add_pending_nick_change(const char * const room,
     const char * const new_nick, const char * const old_nick);

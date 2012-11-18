@@ -201,16 +201,28 @@ room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
     }
 }
 
-void
+gboolean
 room_add_to_roster(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    gboolean updated = FALSE;
 
     if (chat_room != NULL) {
+        PContact old = g_hash_table_lookup(chat_room->roster, nick);
+
+        if (old == NULL) {
+            updated = TRUE;
+        } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
+                    (g_strcmp0(p_contact_status(old), status) != 0)) {
+            updated = TRUE;
+        }
+
         PContact contact = p_contact_new(nick, NULL, show, status, NULL);
         g_hash_table_replace(chat_room->roster, strdup(nick), contact);
     }
+
+    return updated;
 }
 
 void
