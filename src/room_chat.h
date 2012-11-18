@@ -26,6 +26,7 @@
 #include <glib.h>
 
 void room_join(const char * const room, const char * const nick);
+void room_change_nick(const char * const room, const char * const nick);
 void room_leave(const char * const room);
 gboolean room_is_active(const char * const full_room_jid);
 char * room_get_nick_for_room(const char * const room);

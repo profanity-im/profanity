@@ -57,6 +57,17 @@ room_join(const char * const room, const char * const nick)
 }
 
 void
+room_change_nick(const char * const room, const char * const nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        free(chat_room->nick);
+        chat_room->nick = strdup(nick);
+    }
+}
+
+void
 room_leave(const char * const room)
 {
     g_hash_table_remove(rooms, room);

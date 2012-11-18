@@ -267,6 +267,20 @@ jabber_join(const char * const room, const char * const nick)
 }
 
 void
+jabber_change_room_nick(const char * const room, const char * const nick)
+{
+    char *full_room_jid = room_create_full_room_jid(room, nick);
+    xmpp_stanza_t *presence = stanza_create_room_newnick_presence(jabber_conn.ctx,
+        full_room_jid);
+    xmpp_send(jabber_conn.conn, presence);
+    xmpp_stanza_release(presence);
+
+    room_change_nick(room, nick);
+
+    free(full_room_jid);
+}
+
+void
 jabber_leave_chat_room(const char * const room_jid)
 {
     char *nick = room_get_nick_for_room(room_jid);

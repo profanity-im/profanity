@@ -99,6 +99,17 @@ stanza_create_room_join_presence(xmpp_ctx_t *ctx,
 }
 
 xmpp_stanza_t *
+stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
+    const char * const full_room_jid)
+{
+    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
+    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
+
+    return presence;
+}
+
+xmpp_stanza_t *
 stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char * const room,
     const char * const nick)
 {

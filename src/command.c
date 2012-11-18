@@ -122,6 +122,7 @@ static gboolean _cmd_chat(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_xa(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_info(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_wins(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -225,6 +226,19 @@ static struct cmd_t main_commands[] =
           "",
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
+          NULL } } },
+
+    { "/nick",
+        _cmd_nick, parse_args_with_freetext, 1, 1,
+        { "/nick [nickname]", "Change nickname in chat room.",
+        { "/nick [nickname]",
+          "------------------------",
+          "Change the name by which other member of a chat room see you.",
+          "This command is only valid when called within a chat room window.",
+          "The new nickname may contain spaces.",
+          "",
+          "Example : /nick kai hansen",
+          "Example : /nick bob",
           NULL } } },
 
     { "/wins",
@@ -1233,6 +1247,27 @@ _cmd_join(gchar **args, struct cmd_help_t help)
         jabber_join(room, nick);
         win_join_chat(room, nick);
     }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_nick(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+    if (!win_in_groupchat()) {
+        cons_show("You can only change your nickname in a chat room window.");
+        return TRUE;
+    }
+
+    char *room = win_get_recipient();
+    char *nick = args[0];
+    jabber_change_room_nick(room, nick);
 
     return TRUE;
 }
