@@ -250,11 +250,10 @@ room_complete_pending_nick_change(const char * const room,
     muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
-        char *old_nick =
-            strdup(g_hash_table_lookup(chat_room->nick_changes, nick));
+        char *old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
 
         if (old_nick != NULL) {
-            return old_nick;
+            return strdup(old_nick);
         }
     }
 
