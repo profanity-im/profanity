@@ -240,6 +240,7 @@ room_add_pending_nick_change(const char * const room,
 
     if (chat_room != NULL) {
         g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(old_nick));
+        room_remove_from_roster(room, old_nick);
     }
 }
 

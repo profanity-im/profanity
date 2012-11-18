@@ -736,10 +736,11 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
         }
 
         if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
+
+            // handle nickname change
             if (stanza_is_room_nick_change(stanza)) {
                 char *new_nick = stanza_get_new_nick(stanza);
                 room_add_pending_nick_change(room, new_nick, nick);
-                room_remove_from_roster(room, nick);
             } else {
                 prof_handle_room_member_offline(room, nick, "offline", status_str);
             }
