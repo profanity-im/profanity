@@ -59,6 +59,28 @@ parse_cmd_with_space_returns_null(void)
 }
 
 void
+parse_cmd_with_too_few_returns_null(void)
+{
+    char *inp = "/cmd arg1";
+    int num = 0;
+    gchar **result = parse_args(inp, 2, 3, &num);
+
+    assert_is_null(result);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_with_too_many_returns_null(void)
+{
+    char *inp = "/cmd arg1 arg2 arg3 arg4";
+    int num = 0;
+    gchar **result = parse_args(inp, 1, 3, &num);
+
+    assert_is_null(result);
+    g_strfreev(result);
+}
+
+void
 parse_cmd_one_arg(void)
 {
     char *inp = "/cmd arg1";
@@ -112,6 +134,45 @@ parse_cmd_three_args_with_spaces(void)
 }
 
 void
+parse_cmd_with_freetext(void)
+{
+    char *inp = "/cmd this is some free text";
+    int num = 0;
+    gchar **result = parse_args_with_freetext(inp, 1, 1, &num);
+
+    assert_int_equals(1, num);
+    assert_string_equals("this is some free text", result[0]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_one_arg_with_freetext(void)
+{
+    char *inp = "/cmd arg1 this is some free text";
+    int num = 0;
+    gchar **result = parse_args_with_freetext(inp, 1, 2, &num);
+
+    assert_int_equals(2, num);
+    assert_string_equals("arg1", result[0]);
+    assert_string_equals("this is some free text", result[1]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_two_args_with_freetext(void)
+{
+    char *inp = "/cmd arg1 arg2 this is some free text";
+    int num = 0;
+    gchar **result = parse_args_with_freetext(inp, 1, 3, &num);
+
+    assert_int_equals(3, num);
+    assert_string_equals("arg1", result[0]);
+    assert_string_equals("arg2", result[1]);
+    assert_string_equals("this is some free text", result[2]);
+    g_strfreev(result);
+}
+
+void
 register_parser_tests(void)
 {
     TEST_MODULE("parser tests");
@@ -124,4 +185,9 @@ register_parser_tests(void)
     TEST(parse_cmd_two_args);
     TEST(parse_cmd_three_args);
     TEST(parse_cmd_three_args_with_spaces);
+    TEST(parse_cmd_with_freetext);
+    TEST(parse_cmd_one_arg_with_freetext);
+    TEST(parse_cmd_two_args_with_freetext);
+    TEST(parse_cmd_with_too_few_returns_null);
+    TEST(parse_cmd_with_too_many_returns_null);
 }
