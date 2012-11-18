@@ -46,6 +46,7 @@
 #define STANZA_NAME_PING "ping"
 #define STANZA_NAME_TEXT "text"
 #define STANZA_NAME_SUBJECT "subject"
+#define STANZA_NAME_ITEM "item"
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
@@ -60,10 +61,12 @@
 #define STANZA_ATTR_FROM "from"
 #define STANZA_ATTR_STAMP "stamp"
 #define STANZA_ATTR_TYPE "type"
+#define STANZA_ATTR_CODE "code"
 #define STANZA_ATTR_JID "jid"
 #define STANZA_ATTR_NAME "name"
 #define STANZA_ATTR_SUBSCRIPTION "subscription"
 #define STANZA_ATTR_XMLNS "xmlns"
+#define STANZA_ATTR_NICK "nick"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -73,6 +76,7 @@
 
 #define STANZA_NS_CHATSTATES "http://jabber.org/protocol/chatstates"
 #define STANZA_NS_MUC "http://jabber.org/protocol/muc"
+#define STANZA_NS_MUC_USER "http://jabber.org/protocol/muc#user"
 #define STANZA_NS_PING "urn:xmpp:ping"
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
@@ -100,5 +104,10 @@ xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx);
 gboolean stanza_contains_chat_state(xmpp_stanza_t *stanza);
 
 gboolean stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp);
+
+gboolean stanza_is_muc_self_presence(xmpp_stanza_t * const stanza);
+gboolean stanza_is_room_nick_change(xmpp_stanza_t * const stanza);
+
+char* stanza_get_new_nick(xmpp_stanza_t * const stanza);
 
 #endif

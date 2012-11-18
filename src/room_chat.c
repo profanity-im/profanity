@@ -31,6 +31,7 @@ typedef struct _muc_room_t {
     char *room;
     char *nick;
     GHashTable *roster;
+    GHashTable *nick_changes;
     gboolean roster_received;
 } muc_room;
 
@@ -51,6 +52,8 @@ room_join(const char * const room, const char * const nick)
     new_room->nick = strdup(nick);
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
+    new_room->nick_changes = g_hash_table_new_full(g_str_hash, g_str_equal,
+        g_free, g_free);
     new_room->roster_received = FALSE;
 
     g_hash_table_insert(rooms, strdup(room), new_room);
@@ -174,12 +177,13 @@ room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 }
 
 void
-room_add_to_roster(const char * const room, const char * const nick)
+room_add_to_roster(const char * const room, const char * const nick,
+    const char * const show, const char * const status)
 {
     muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
-        PContact contact = p_contact_new(nick, NULL, "online", NULL, NULL);
+        PContact contact = p_contact_new(nick, NULL, show, status, NULL);
         g_hash_table_replace(chat_room->roster, strdup(nick), contact);
     }
 }
@@ -228,6 +232,35 @@ room_get_roster_received(const char * const room)
     }
 }
 
+void
+room_add_pending_nick_change(const char * const room,
+    const char * const new_nick, const char * const old_nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(old_nick));
+    }
+}
+
+char *
+room_complete_pending_nick_change(const char * const room,
+    const char * const nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        char *old_nick =
+            strdup(g_hash_table_lookup(chat_room->nick_changes, nick));
+
+        if (old_nick != NULL) {
+            return old_nick;
+        }
+    }
+
+    return NULL;
+}
+
 static void
 _room_free(muc_room *room)
 {
@@ -243,6 +276,10 @@ _room_free(muc_room *room)
         if (room->roster != NULL) {
             g_hash_table_remove_all(room->roster);
             room->roster = NULL;
+        }
+        if (room->nick_changes != NULL) {
+            g_hash_table_remove_all(room->nick_changes);
+            room->nick_changes = NULL;
         }
         g_free(room);
     }

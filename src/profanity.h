@@ -52,5 +52,7 @@ void prof_handle_room_member_online(const char * const room,
 void prof_handle_room_member_offline(const char * const room,
     const char * const nick, const char * const show, const char * const status);
 void prof_handle_leave_room(const char * const room);
+void prof_handle_room_member_nick_change(const char * const room,
+    const char * const old_nick, const char * const nick);
 
 #endif

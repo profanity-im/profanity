@@ -236,3 +236,111 @@ stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp)
 
     return FALSE;
 }
+
+gboolean
+stanza_is_muc_self_presence(xmpp_stanza_t * const stanza)
+{
+    if (stanza == NULL) {
+        return FALSE;
+    }
+    if (strcmp(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+
+    if (x == NULL) {
+        return FALSE;
+    }
+
+    char *ns = xmpp_stanza_get_ns(x);
+    if (ns == NULL) {
+        return FALSE;
+    }
+    if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
+    if (x_children == NULL) {
+        return FALSE;
+    }
+
+    while (x_children != NULL) {
+        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
+            char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+            if (strcmp(code, "110") == 0) {
+                return TRUE;
+            }
+        }
+        x_children = xmpp_stanza_get_next(x_children);
+    }
+
+    return FALSE;
+}
+
+gboolean
+stanza_is_room_nick_change(xmpp_stanza_t * const stanza)
+{
+    if (stanza == NULL) {
+        return FALSE;
+    }
+    if (strcmp(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+
+    if (x == NULL) {
+        return FALSE;
+    }
+
+    char *ns = xmpp_stanza_get_ns(x);
+    if (ns == NULL) {
+        return FALSE;
+    }
+    if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
+    if (x_children == NULL) {
+        return FALSE;
+    }
+
+    while (x_children != NULL) {
+        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
+            char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+            if (strcmp(code, "303") == 0) {
+                return TRUE;
+            }
+        }
+        x_children = xmpp_stanza_get_next(x_children);
+    }
+
+    return FALSE;
+
+}
+
+char *
+stanza_get_new_nick(xmpp_stanza_t * const stanza)
+{
+    if (!stanza_is_room_nick_change(stanza)) {
+        return NULL;
+    } else {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+        xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
+
+        while (x_children != NULL) {
+            if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
+                char *nick = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_NICK);
+                if (nick != NULL) {
+                    return strdup(nick);
+                }
+            }
+            x_children = xmpp_stanza_get_next(x_children);
+        }
+
+        return NULL;
+    }
+}

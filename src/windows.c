@@ -706,7 +706,8 @@ win_show_room_member_offline(const char * const room, const char * const nick)
 }
 
 void
-win_show_room_member_online(const char * const room, const char * const nick)
+win_show_room_member_online(const char * const room, const char * const nick,
+    const char * const show, const char * const status)
 {
     int win_index = _find_prof_win_index(room);
     WINDOW *win = _wins[win_index].win;
@@ -718,6 +719,23 @@ win_show_room_member_online(const char * const room, const char * const nick)
 
     if (win_index == _curr_prof_win)
         dirty = TRUE;
+}
+
+void
+win_show_room_member_nick_change(const char * const room,
+    const char * const old_nick, const char * const nick)
+{
+    int win_index = _find_prof_win_index(room);
+    WINDOW *win = _wins[win_index].win;
+
+    _win_show_time(win);
+    wattron(win, COLOUR_ONLINE);
+    wprintw(win, "** %s is now known as %s\n", old_nick, nick);
+    wattroff(win, COLOUR_ONLINE);
+
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
+
 }
 
 void

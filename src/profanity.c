@@ -250,8 +250,8 @@ void
 prof_handle_room_member_online(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
-    room_add_to_roster(room, nick);
-    win_show_room_member_online(room, nick);
+    room_add_to_roster(room, nick, show, status);
+    win_show_room_member_online(room, nick, show, status);
     win_page_off();
 }
 
@@ -300,6 +300,14 @@ prof_handle_contact_offline(char *contact, char *show, char *status)
             }
         }
     }
+}
+
+void
+prof_handle_room_member_nick_change(const char * const room,
+    const char * const old_nick, const char * const nick)
+{
+    win_show_room_member_nick_change(room, old_nick, nick);
+    win_page_off();
 }
 
 static void

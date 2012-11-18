@@ -709,7 +709,7 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     }
 
     // handle self presence
-    if (strcmp(room_get_nick_for_room(room), nick) == 0) {
+    if (stanza_is_muc_self_presence(stanza)) {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
 
         // left room
@@ -725,32 +725,42 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
 
     // handle presence from room members
     } else {
-        // roster not yet complete, just add to roster
-        if (!room_get_roster_received(room)) {
-            room_add_to_roster(room, nick);
+        char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+        char *show_str, *status_str;
 
-        // deal with presence information
+        xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+        if (status != NULL) {
+            status_str = xmpp_stanza_get_text(status);
         } else {
-            char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-            char *show_str, *status_str;
+            status_str = NULL;
+        }
 
-            xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
-            if (status != NULL) {
-                status_str = xmpp_stanza_get_text(status);
+        if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
+            if (stanza_is_room_nick_change(stanza)) {
+                char *new_nick = stanza_get_new_nick(stanza);
+                room_add_pending_nick_change(room, new_nick, nick);
+                room_remove_from_roster(room, nick);
             } else {
-                status_str = NULL;
-            }
-
-            if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
                 prof_handle_room_member_offline(room, nick, "offline", status_str);
+            }
+        } else {
+            xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
+            if (show != NULL) {
+                show_str = xmpp_stanza_get_text(show);
             } else {
-                xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
-                if (show != NULL) {
-                    show_str = xmpp_stanza_get_text(show);
+                show_str = "online";
+            }
+            if (!room_get_roster_received(room)) {
+                room_add_to_roster(room, nick, show_str, status_str);
+            } else {
+                char *old_nick = room_complete_pending_nick_change(room, nick);
+
+                if (old_nick != NULL) {
+                    room_add_to_roster(room, nick, show_str, status_str);
+                    prof_handle_room_member_nick_change(room, old_nick, nick);
                 } else {
-                    show_str = "online";
+                    prof_handle_room_member_online(room, nick, show_str, status_str);
                 }
-                prof_handle_room_member_online(room, nick, show_str, status_str);
             }
         }
     }
