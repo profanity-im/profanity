@@ -133,6 +133,7 @@ void win_show_wins(void);
 int win_in_private_chat(void);
 void win_show_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick);
+void win_show_room_nick_change(const char * const room, const char * const nick);
 
 // console window actions
 void cons_about(void);

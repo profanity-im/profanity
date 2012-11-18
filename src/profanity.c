@@ -310,6 +310,14 @@ prof_handle_room_member_nick_change(const char * const room,
     win_page_off();
 }
 
+void
+prof_handle_room_nick_change(const char * const room,
+    const char * const nick)
+{
+    win_show_room_nick_change(room, nick);
+    win_page_off();
+}
+
 static void
 _create_config_directory(void)
 {

@@ -275,8 +275,6 @@ jabber_change_room_nick(const char * const room, const char * const nick)
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 
-    room_change_nick(room, nick);
-
     free(full_room_jid);
 }
 
@@ -711,14 +709,23 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     // handle self presence
     if (stanza_is_muc_self_presence(stanza)) {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+        gboolean nick_change = stanza_is_room_nick_change(stanza);
 
-        // left room
-        if (type != NULL) {
-            if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
+        if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
+
+            // leave room if not self nick change
+            if (nick_change) {
+                room_set_pending_nick_change(room);
+            } else {
                 prof_handle_leave_room(room);
             }
 
-        // roster received
+        // handle self nick change
+        } else if (room_is_pending_nick_change(room)) {
+            room_change_nick(room, nick);
+            prof_handle_room_nick_change(room, nick);
+
+        // handle roster complete
         } else {
             prof_handle_room_roster_complete(room);
         }

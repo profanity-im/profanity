@@ -30,6 +30,7 @@
 typedef struct _muc_room_t {
     char *room;
     char *nick;
+    gboolean pending_nick_change;
     GHashTable *roster;
     GHashTable *nick_changes;
     gboolean roster_received;
@@ -55,8 +56,31 @@ room_join(const char * const room, const char * const nick)
     new_room->nick_changes = g_hash_table_new_full(g_str_hash, g_str_equal,
         g_free, g_free);
     new_room->roster_received = FALSE;
+    new_room->pending_nick_change = FALSE;
 
     g_hash_table_insert(rooms, strdup(room), new_room);
+}
+
+void
+room_set_pending_nick_change(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        chat_room->pending_nick_change = TRUE;
+    }
+}
+
+gboolean
+room_is_pending_nick_change(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        return chat_room->pending_nick_change;
+    } else {
+        return FALSE;
+    }
 }
 
 void
@@ -67,6 +91,7 @@ room_change_nick(const char * const room, const char * const nick)
     if (chat_room != NULL) {
         free(chat_room->nick);
         chat_room->nick = strdup(nick);
+        chat_room->pending_nick_change = FALSE;
     }
 }
 

@@ -47,5 +47,7 @@ gboolean room_get_roster_received(const char * const room);
 void room_remove_from_roster(const char * const room, const char * const nick);
 char * room_create_full_room_jid(const char * const room,
     const char * const nick);
+void room_set_pending_nick_change(const char * const room);
+gboolean room_is_pending_nick_change(const char * const room);
 
 #endif
