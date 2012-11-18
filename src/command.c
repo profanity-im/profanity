@@ -36,6 +36,7 @@
 #include "history.h"
 #include "jabber.h"
 #include "log.h"
+#include "parser.h"
 #include "preferences.h"
 #include "prof_autocomplete.h"
 #include "tinyurl.h"
@@ -835,7 +836,7 @@ _cmd_connect(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
+    gchar **args = parse_args(inp, 1, 1, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -882,7 +883,7 @@ _cmd_sub(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 1, 2, &num_args);
+    gchar **args = parse_args(inp, 1, 2, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -1220,7 +1221,7 @@ _cmd_info(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
+    gchar **args = parse_args(inp, 1, 1, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -1252,7 +1253,7 @@ _cmd_join(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 1, 2, &num_args);
+    gchar **args = parse_args(inp, 1, 2, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -1296,7 +1297,7 @@ _cmd_tiny(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
+    gchar **args = parse_args(inp, 1, 1, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -1401,7 +1402,7 @@ _cmd_set_notify(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 2, 2, &num_args);
+    gchar **args = parse_args(inp, 2, 2, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -1463,7 +1464,7 @@ _cmd_set_log(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 2, 2, &num_args);
+    gchar **args = parse_args(inp, 2, 2, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -1496,7 +1497,7 @@ _cmd_set_priority(const char * const inp, struct cmd_help_t help)
 {
     gboolean result = FALSE;
     int num_args = 0;
-    gchar **args = _cmd_parse_args(inp, 1, 1, &num_args);
+    gchar **args = parse_args(inp, 1, 1, &num_args);
 
     if (args == NULL) {
         cons_show("Usage: %s", help.usage);
@@ -1804,31 +1805,4 @@ _strtoi(char *str, int *saveptr, int min, int max)
     *saveptr = val;
 
     return 0;
-}
-
-gchar **
-_cmd_parse_args(const char * const inp, int min, int max, int *num)
-{
-    char *copy = strdup(inp);
-    gchar **args = NULL;
-    g_strstrip(copy);
-    gchar **split = g_strsplit(copy, " ", 0);
-    *num = g_strv_length(split) - 1;
-
-    if ((*num < min) || (*num > max)) {
-        g_strfreev(split);
-        free(copy);
-        return NULL;
-    } else {
-        args = malloc((*num + 1) * sizeof(*args));
-        int i;
-        for (i = 0; i < *num; i++) {
-            args[i] = strdup(split[i+1]);
-        }
-        args[i] = NULL;
-        g_strfreev(split);
-        free(copy);
-
-        return args;
-    }
 }

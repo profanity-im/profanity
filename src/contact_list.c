@@ -25,7 +25,6 @@
 #include <glib.h>
 
 #include "contact.h"
-#include "log.h"
 #include "prof_autocomplete.h"
 
 static PAutocomplete ac;
@@ -80,7 +79,6 @@ contact_list_update_contact(const char * const jid, const char * const presence,
     PContact contact = g_hash_table_lookup(contacts, jid);
 
     if (contact == NULL) {
-        log_warning("Contact not in list: %s", jid);
         return FALSE;
     }
 
