@@ -767,7 +767,11 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
                     room_add_to_roster(room, nick, show_str, status_str);
                     prof_handle_room_member_nick_change(room, old_nick, nick);
                 } else {
-                    prof_handle_room_member_online(room, nick, show_str, status_str);
+                    if (!room_nick_in_roster(room, nick)) {
+                        prof_handle_room_member_online(room, nick, show_str, status_str);
+                    } else {
+                        prof_handle_room_member_presence(room, nick, show_str, status_str);
+                    }
                 }
             }
         }

@@ -202,6 +202,23 @@ room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 }
 
 gboolean
+room_nick_in_roster(const char * const room, const char * const nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        PContact contact = g_hash_table_lookup(chat_room->roster, nick);
+        if (contact != NULL) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    return FALSE;
+}
+
+gboolean
 room_add_to_roster(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {

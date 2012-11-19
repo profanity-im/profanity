@@ -40,6 +40,7 @@ void room_add_pending_nick_change(const char * const room,
     const char * const new_nick, const char * const old_nick);
 char* room_complete_pending_nick_change(const char * const room,
     const char * const nick);
+gboolean room_nick_in_roster(const char * const room, const char * const nick);
 
 GList * room_get_roster(const char * const room);
 void room_set_roster_received(const char * const room);

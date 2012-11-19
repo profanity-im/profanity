@@ -247,6 +247,19 @@ prof_handle_room_roster_complete(const char * const room)
 }
 
 void
+prof_handle_room_member_presence(const char * const room,
+    const char * const nick, const char * const show,
+    const char * const status)
+{
+    gboolean updated = room_add_to_roster(room, nick, show, status);
+
+    if (updated) {
+        win_show_room_member_presence(room, nick, show, status);
+        win_page_off();
+    }
+}
+
+void
 prof_handle_room_member_online(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {

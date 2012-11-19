@@ -722,6 +722,20 @@ win_show_room_member_online(const char * const room, const char * const nick,
 }
 
 void
+win_show_room_member_presence(const char * const room, const char * const nick,
+    const char * const show, const char * const status)
+{
+    int win_index = _find_prof_win_index(room);
+    if (win_index != NUM_WINS) {
+        WINDOW *win = _wins[win_index].win;
+        _show_status_string(win, nick, show, status, "++", "online");
+    }
+
+    if (win_index == _curr_prof_win)
+        dirty = TRUE;
+}
+
+void
 win_show_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick)
 {
