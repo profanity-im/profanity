@@ -278,6 +278,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     }
 
     // for older server that don't send status 110
+    x_children = xmpp_stanza_get_children(x);
     while (x_children != NULL) {
         if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
             char *jid = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_JID);
