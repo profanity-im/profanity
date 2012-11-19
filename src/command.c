@@ -953,10 +953,7 @@ _cmd_disconnect(gchar **args, struct cmd_help_t help)
 {
     if (jabber_get_connection_status() == JABBER_CONNECTED) {
         char *jid = strdup(jabber_get_jid());
-        jabber_disconnect();
-        contact_list_clear();
-        jabber_restart();
-        cons_show("%s logged out successfully.", jid);
+        prof_handle_disconnect(jid);
         free(jid);
     } else {
         cons_show("You are not currently connected.");

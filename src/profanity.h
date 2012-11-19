@@ -29,6 +29,7 @@ void prof_run(const int disable_tls, char *log_level);
 
 void prof_handle_login_success(const char *jid);
 void prof_handle_lost_connection(void);
+void prof_handle_disconnect(const char * const jid);
 void prof_handle_failed_login(void);
 void prof_handle_typing(char *from);
 void prof_handle_contact_online(char *contact, char *show, char *status);

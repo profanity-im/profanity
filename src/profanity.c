@@ -216,6 +216,15 @@ prof_handle_failed_login(void)
 }
 
 void
+prof_handle_disconnect(const char * const jid)
+{
+    jabber_disconnect();
+    contact_list_clear();
+    jabber_restart();
+    cons_show("%s logged out successfully.", jid);
+}
+
+void
 prof_handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
