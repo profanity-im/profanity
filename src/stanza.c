@@ -238,7 +238,8 @@ stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp)
 }
 
 gboolean
-stanza_is_muc_self_presence(xmpp_stanza_t * const stanza)
+stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
+    const char * const self_jid)
 {
     if (stanza == NULL) {
         return FALSE;
@@ -271,6 +272,19 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza)
             char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
             if (strcmp(code, "110") == 0) {
                 return TRUE;
+            }
+        }
+        x_children = xmpp_stanza_get_next(x_children);
+    }
+
+    // for older server that don't send status 110
+    while (x_children != NULL) {
+        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
+            char *jid = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_JID);
+            if (jid != NULL) {
+                if (g_str_has_prefix(jid, self_jid)) {
+                    return TRUE;
+                }
             }
         }
         x_children = xmpp_stanza_get_next(x_children);

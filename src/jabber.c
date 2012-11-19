@@ -458,29 +458,17 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
         return 1;
     }
 
-    xmpp_stanza_t *delay = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_DELAY);
+    // determine if the notifications happened whilst offline
+    GTimeVal tv_stamp;
+    gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
 
+    // check for and deal with message
     if (body != NULL) {
-        message = xmpp_stanza_get_text(body);
-    }
-
-    // handle chat room history
-    if (delay != NULL) {
-        char *utc_stamp = xmpp_stanza_get_attribute(delay, STANZA_ATTR_STAMP);
-        GTimeVal tv_stamp;
-
-        if (g_time_val_from_iso8601(utc_stamp, &tv_stamp)) {
-            if (message != NULL) {
-                prof_handle_room_history(room, nick, tv_stamp, message);
-            }
+        char *message = xmpp_stanza_get_text(body);
+        if (delayed) {
+            prof_handle_room_history(room, nick, tv_stamp, message);
         } else {
-            log_error("Couldn't parse datetime string receiving room history: %s", utc_stamp);
-        }
-
-    // handle regular chat room message
-    } else {
-        if (message != NULL) {
             prof_handle_room_message(room, nick, message);
         }
     }
@@ -707,7 +695,7 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     }
 
     // handle self presence
-    if (stanza_is_muc_self_presence(stanza)) {
+    if (stanza_is_muc_self_presence(stanza, jabber_get_jid())) {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         gboolean nick_change = stanza_is_room_nick_change(stanza);
 
