@@ -62,5 +62,7 @@ void prof_handle_room_nick_change(const char * const room,
     const char * const nick);
 void prof_handle_room_broadcast(const char *const room_jid,
     const char * const message);
+void prof_handle_idle(void);
+void prof_handle_activity(void);
 
 #endif

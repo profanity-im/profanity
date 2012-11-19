@@ -57,6 +57,7 @@
 #include "history.h"
 #include "log.h"
 #include "preferences.h"
+#include "profanity.h"
 #include "ui.h"
 
 static WINDOW *inp_win;
@@ -145,11 +146,11 @@ inp_get_char(int *ch, char *input, int *size)
 
     if (prefs_get_states()) {
         if (*ch == ERR) {
-            win_no_activity();
+            prof_handle_idle();
         }
         if (prefs_get_outtype() && (*ch != ERR) && !in_command
                                                 && _printable(*ch)) {
-            win_activity();
+            prof_handle_activity();
         }
     }
 

@@ -39,6 +39,7 @@
 #include "parser.h"
 #include "preferences.h"
 #include "prof_autocomplete.h"
+#include "profanity.h"
 #include "tinyurl.h"
 #include "ui.h"
 
@@ -728,20 +729,30 @@ gboolean
 cmd_execute_default(const char * const inp)
 {
     if (win_in_groupchat()) {
-        char *recipient = win_get_recipient();
-        jabber_send_groupchat(inp, recipient);
-        free(recipient);
-    } else if (win_in_chat() || win_in_private_chat()) {
-        char *recipient = win_get_recipient();
-        jabber_send(inp, recipient);
-
-        if (prefs_get_chlog()) {
-            const char *jid = jabber_get_jid();
-            chat_log_chat(jid, recipient, inp, OUT, NULL);
+        jabber_conn_status_t status = jabber_get_connection_status();
+        if (status != JABBER_CONNECTED) {
+            win_show("You are not currently connected.");
+        } else {
+            char *recipient = win_get_recipient();
+            jabber_send_groupchat(inp, recipient);
+            free(recipient);
         }
+    } else if (win_in_chat() || win_in_private_chat()) {
+        jabber_conn_status_t status = jabber_get_connection_status();
+        if (status != JABBER_CONNECTED) {
+            win_show("You are not currently connected.");
+        } else {
+            char *recipient = win_get_recipient();
+            jabber_send(inp, recipient);
 
-        win_show_outgoing_msg("me", recipient, inp);
-        free(recipient);
+            if (prefs_get_chlog()) {
+                const char *jid = jabber_get_jid();
+                chat_log_chat(jid, recipient, inp, OUT, NULL);
+            }
+
+            win_show_outgoing_msg("me", recipient, inp);
+            free(recipient);
+        }
     } else {
         cons_bad_command(inp);
     }

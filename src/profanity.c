@@ -29,6 +29,7 @@
 #include <glib.h>
 
 #include "chat_log.h"
+#include "chat_session.h"
 #include "command.h"
 #include "common.h"
 #include "contact.h"
@@ -220,8 +221,14 @@ prof_handle_disconnect(const char * const jid)
 {
     jabber_disconnect();
     contact_list_clear();
+    chat_sessions_clear();
     jabber_restart();
+    win_disconnected();
+    title_bar_set_status(PRESENCE_OFFLINE);
+    status_bar_clear_message();
+    status_bar_refresh();
     cons_show("%s logged out successfully.", jid);
+    win_page_off();
 }
 
 void
@@ -346,6 +353,24 @@ prof_handle_room_nick_change(const char * const room,
 {
     win_show_room_nick_change(room, nick);
     win_page_off();
+}
+
+void
+prof_handle_idle(void)
+{
+    jabber_conn_status_t status = jabber_get_connection_status();
+    if (status == JABBER_CONNECTED) {
+        win_no_activity();
+    }
+}
+
+void
+prof_handle_activity(void)
+{
+    jabber_conn_status_t status = jabber_get_connection_status();
+    if (status == JABBER_CONNECTED) {
+        win_activity();
+    }
 }
 
 static void

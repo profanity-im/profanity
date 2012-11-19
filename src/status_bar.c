@@ -219,6 +219,33 @@ status_bar_clear(void)
     dirty = TRUE;
 }
 
+void
+status_bar_clear_message(void)
+{
+    if (message != NULL) {
+        free(message);
+        message = NULL;
+    }
+
+    wclear(status_bar);
+
+    int cols = getmaxx(stdscr);
+
+    wattron(status_bar, COLOUR_BAR_DRAW);
+    mvwprintw(status_bar, 0, cols - 29, _active);
+    wattroff(status_bar, COLOUR_BAR_DRAW);
+
+    int i;
+    for(i = 0; i < 9; i++) {
+        if (is_new[i])
+            status_bar_new(i+1);
+        else if (is_active[i])
+            status_bar_active(i+1);
+    }
+
+    dirty = TRUE;
+}
+
 static void
 _status_bar_update_time(void)
 {
