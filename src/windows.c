@@ -882,6 +882,28 @@ win_show_room_subject(const char * const room_jid, const char * const subject)
 }
 
 void
+win_show_room_broadcast(const char * const room_jid, const char * const message)
+{
+    int win_index = _find_prof_win_index(room_jid);
+    WINDOW *win = _wins[win_index].win;
+
+    wattron(win, COLOUR_INC);
+    wprintw(win, "Room message: ");
+    wattroff(win, COLOUR_INC);
+    wprintw(win, "%s\n", message);
+
+    // currently in groupchat window
+    if (win_index == _curr_prof_win) {
+        status_bar_active(win_index);
+        dirty = TRUE;
+
+    // not currenlty on groupchat window
+    } else {
+        status_bar_new(win_index);
+    }
+}
+
+void
 win_show(const char * const msg)
 {
     WINDOW *win = _wins[_curr_prof_win].win;

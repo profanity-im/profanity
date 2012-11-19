@@ -239,6 +239,14 @@ prof_handle_room_subject(const char * const room_jid, const char * const subject
 }
 
 void
+prof_handle_room_broadcast(const char *const room_jid,
+    const char * const message)
+{
+    win_show_room_broadcast(room_jid, message);
+    win_page_off();
+}
+
+void
 prof_handle_room_roster_complete(const char * const room)
 {
     room_set_roster_received(room);

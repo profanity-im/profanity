@@ -153,6 +153,13 @@ room_get_room_from_full_jid(const char * const full_room_jid)
     }
 }
 
+gboolean
+room_from_jid_is_room(const char * const room_jid)
+{
+    gchar *result = g_strrstr(room_jid, "/");
+    return (result == NULL);
+}
+
 char *
 room_get_nick_from_full_jid(const char * const full_room_jid)
 {
