@@ -184,12 +184,30 @@ status_bar_get_password(void)
 void
 status_bar_print_message(const char * const msg)
 {
-    if (message != NULL)
+    if (message != NULL) {
         free(message);
+        message = NULL;
+    }
+
+    wclear(status_bar);
 
     message = (char *) malloc((strlen(msg) + 1) * sizeof(char));
     strcpy(message, msg);
     mvwprintw(status_bar, 0, 9, message);
+
+    int cols = getmaxx(stdscr);
+
+    wattron(status_bar, COLOUR_BAR_DRAW);
+    mvwprintw(status_bar, 0, cols - 29, _active);
+    wattroff(status_bar, COLOUR_BAR_DRAW);
+
+    int i;
+    for(i = 0; i < 9; i++) {
+        if (is_new[i])
+            status_bar_new(i+1);
+        else if (is_active[i])
+            status_bar_active(i+1);
+    }
 
     dirty = TRUE;
 }
