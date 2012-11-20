@@ -120,6 +120,16 @@ room_is_active(const char * const full_room_jid)
     }
 }
 
+GList *
+room_get_rooms(void)
+{
+    if (rooms != NULL) {
+        return g_hash_table_get_keys(rooms);
+    } else {
+        return NULL;
+    }
+}
+
 char *
 room_get_nick_for_room(const char * const room)
 {
@@ -313,9 +323,13 @@ room_complete_pending_nick_change(const char * const room,
 
     if (chat_room != NULL) {
         char *old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
+        char *old_nick_cpy;
 
         if (old_nick != NULL) {
-            return strdup(old_nick);
+            old_nick_cpy = strdup(old_nick);
+            g_hash_table_remove(chat_room->nick_changes, nick);
+
+            return old_nick_cpy;
         }
     }
 

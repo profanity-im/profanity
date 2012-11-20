@@ -51,5 +51,6 @@ char * room_create_full_room_jid(const char * const room,
     const char * const nick);
 void room_set_pending_nick_change(const char * const room);
 gboolean room_is_pending_nick_change(const char * const room);
+GList* room_get_rooms(void);
 
 #endif

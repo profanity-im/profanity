@@ -346,6 +346,21 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
         xmpp_stanza_add_child(presence, priority);
     }
     xmpp_send(jabber_conn.conn, presence);
+
+    // send presence for each room
+    GList *rooms = room_get_rooms();
+    while (rooms != NULL) {
+        char *room = rooms->data;
+        char *nick = room_get_nick_for_room(room);
+        char *full_room_jid = room_create_full_room_jid(room, nick);
+
+        xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
+        xmpp_send(jabber_conn.conn, presence);
+
+        rooms = g_list_next(rooms);
+    }
+    g_list_free(rooms);
+
     xmpp_stanza_release(presence);
 }
 
@@ -730,8 +745,9 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
             prof_handle_room_nick_change(room, nick);
 
         // handle roster complete
-        } else {
+        } else if (!room_get_roster_received(room)) {
             prof_handle_room_roster_complete(room);
+
         }
 
     // handle presence from room members
