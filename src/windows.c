@@ -107,7 +107,7 @@ gui_init(void)
     initscr();
     cbreak();
     keypad(stdscr, TRUE);
-    mousemask(ALL_MOUSE_EVENTS, NULL);
+    mousemask(BUTTON2_PRESSED | BUTTON4_PRESSED, NULL);
     mouseinterval(5);
 
     if (has_colors()) {
