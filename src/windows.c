@@ -1768,7 +1768,7 @@ _win_handle_page(const int * const ch)
     if (*ch == KEY_MOUSE) {
         if (getmouse(&mouse_event) == OK) {
             if (mouse_event.bstate & BUTTON2_PRESSED) { // mouse wheel down
-                (*page_start)++;
+                *page_start += 4;
 
                 // only got half a screen, show full screen
                 if ((y - (*page_start)) < page_space)
@@ -1781,7 +1781,7 @@ _win_handle_page(const int * const ch)
                 _wins[_curr_prof_win].paged = 1;
                 dirty = TRUE;
             } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
-                (*page_start)--;
+                *page_start -= 4;
 
                 // went past beginning, show first page
                 if (*page_start < 0)
