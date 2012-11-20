@@ -107,6 +107,8 @@ gui_init(void)
     initscr();
     cbreak();
     keypad(stdscr, TRUE);
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+    mouseinterval(5);
 
     if (has_colors()) {
         use_default_colors();
@@ -1761,8 +1763,37 @@ _win_handle_page(const int * const ch)
     int page_space = rows - 4;
     int *page_start = &_wins[_curr_prof_win].y_pos;
 
+    MEVENT mouse_event;
+
+    if (*ch == KEY_MOUSE) {
+        if (getmouse(&mouse_event) == OK) {
+            if (mouse_event.bstate & BUTTON2_PRESSED) { // mouse wheel down
+                (*page_start)++;
+
+                // only got half a screen, show full screen
+                if ((y - (*page_start)) < page_space)
+                    *page_start = y - page_space;
+
+                // went past end, show full screen
+                else if (*page_start >= y)
+                    *page_start = y - page_space;
+
+                _wins[_curr_prof_win].paged = 1;
+                dirty = TRUE;
+            } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
+                (*page_start)--;
+
+                // went past beginning, show first page
+                if (*page_start < 0)
+                    *page_start = 0;
+
+                _wins[_curr_prof_win].paged = 1;
+                dirty = TRUE;
+            }
+        }
+
     // page up
-    if (*ch == KEY_PPAGE) {
+    } else if (*ch == KEY_PPAGE) {
         *page_start -= page_space;
 
         // went past beginning, show first page
