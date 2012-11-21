@@ -1,17 +1,17 @@
 .TH Profanity 1 "August 2012" "Profanity XMPP client"
 .SH NAME
-Profanity \- a simple console based XMPP chat client for Linux.
+Profanity \- a simple console based XMPP chat client.
 .SH SYNOPSIS
 .B profanity
 [-vhd] [-l level]
 .SH DESCRIPTION
 .B Profanity
 is a simple lightweight console based XMPP chat client.  It's emphasis is 
-on having a simple and configurable UI, see the homepage
+on having a simple and configurable command driven UI, see the homepage
 at:
 .br
 .PP
-<http://www.boothj5.com/profanity.shtml>
+<http://www.profanity.im>
 .SH OPTIONS
 .TP
 .BI "\-v, \-\-version"
@@ -66,6 +66,8 @@ beep=false
 .br
 flash=false 
 .br
+theme=mytheme
+.br
 showsplash=false 
 .br
 notify=true 
@@ -80,6 +82,26 @@ remind=15
 .br
 vercheck=true
 .br
+.PP
+[connections]
+.br
+logins=user1@server1.org;myuser@server2.com;
+.PP
+.RE
+The [ui] section contains basic preferences, you can find more help on these
+settings by typing "/help beep" for example in Profanity.
+.PP
+The [connections] section is the list of users that will appear in tab
+completion for the /connect command.  This list is automatically populated
+when you successfully log in as a user.
+.SH THEMES
+Themes files for
+.B Profanity
+are stored in
+.I ~/.profanity/themes
+, see the following example:
+.br
+.RS
 .PP
 [colours]
 .br
@@ -117,23 +139,27 @@ xa=cyan
 .br
 offline=red
 .br
-.PP
-[connections]
+typing=yellow
 .br
-logins=user1@server1.org;myuser@server2.com;
+gone=red
+.br
+error=red
+.br
+incoming=yellow
+.br
+roominfo=yellow
+.br
+me=yellow
+.br
+them=green
+.br
 .PP
 .RE
-The [ui] section contains basic preferences, you can find more help on these
-settings by typing "/help beep" for example in Profanity.
-.PP
 The [colours] section allows you to tailor the colours used in Profanity to
 suit your terminal preferences.  Available colours are black, white, red, 
 green, blue, yellow, cyan, magenta and default, where default is the default
 forground or background colour on your terminal.
 .PP
-The [connections] section is the list of users that will appear in tab
-completion for the /connect command.  This list is automatically populated
-when you successfully log in as a user.
 .SH BUGS
 Bugs can either be reported by sending a mail directly to:
 .br

@@ -35,6 +35,7 @@
 #endif
 
 void theme_load(const char * const theme_name);
+gboolean theme_change(const char * const theme_name);
 void theme_close(void);
 
 NCURSES_COLOR_T theme_get_bkgnd();

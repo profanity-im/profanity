@@ -40,6 +40,7 @@
 #include "preferences.h"
 #include "prof_autocomplete.h"
 #include "profanity.h"
+#include "theme.h"
 #include "tinyurl.h"
 #include "ui.h"
 
@@ -124,6 +125,7 @@ static gboolean _cmd_xa(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_info(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_wins(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_theme(gchar **args, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -189,6 +191,18 @@ static struct cmd_t main_commands[] =
           "",
           "Preference changes made using the various commands take effect immediately,",
           "you will need to restart Profanity for config file edits to take effect.",
+          NULL } } },
+
+    { "/theme",
+        _cmd_theme, parse_args, 1, 1,
+        { "/theme [theme-name]", "Change colour theme.",
+        { "/theme [theme-name]",
+          "--------------",
+          "Change the colour setting as defined in:",
+          "",
+          "    ~/.profanity/themes/theme-name",
+          "",
+          "Using \"default\" as the theme name will reset to the default colours.",
           NULL } } },
 
     { "/msg",
@@ -1073,6 +1087,20 @@ static gboolean
 _cmd_prefs(gchar **args, struct cmd_help_t help)
 {
     cons_prefs();
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_theme(gchar **args, struct cmd_help_t help)
+{
+    if (theme_change(args[0])) {
+        win_load_colours();
+        prefs_set_theme(args[0]);
+        cons_show("Loaded theme: %s", args[0]);
+    } else {
+        cons_show("Couldn't find theme: %s", args[0]);
+    }
 
     return TRUE;
 }

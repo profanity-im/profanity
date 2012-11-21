@@ -106,6 +106,41 @@ theme_load(const char * const theme_name)
     _load_colours();
 }
 
+gboolean
+theme_change(const char * const theme_name)
+{
+    // use default theme
+    if (strcmp(theme_name, "default") == 0) {
+        g_key_file_free(theme);
+        theme = g_key_file_new();
+        _load_colours();
+        return TRUE;
+    } else {
+        GString *new_theme_file = g_string_new(getenv("HOME"));
+        g_string_append(new_theme_file, "/.profanity/themes/");
+        g_string_append(new_theme_file, theme_name);
+
+        // no theme file found
+        if (!g_file_test(new_theme_file->str, G_FILE_TEST_EXISTS)) {
+            log_info("Theme does not exist \"%s\"", theme_name);
+            g_string_free(new_theme_file, TRUE);
+            return FALSE;
+
+        // load from theme file
+        } else {
+            g_string_free(theme_loc, TRUE);
+            theme_loc = new_theme_file;
+            log_info("Changing theme to \"%s\"", theme_name);
+            g_key_file_free(theme);
+            theme = g_key_file_new();
+            g_key_file_load_from_file(theme, theme_loc->str, G_KEY_FILE_KEEP_COMMENTS,
+                NULL);
+            _load_colours();
+            return TRUE;
+        }
+    }
+}
+
 void
 theme_close(void)
 {
@@ -216,15 +251,6 @@ _load_colours(void)
     gchar *them_val = g_key_file_get_string(theme, "colours", "them", NULL);
     _set_colour(them_val, &colour_prefs.them, COLOR_GREEN);
 }
-/*
-static void
-_save_prefs(void)
-{
-    gsize g_data_size;
-    char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    g_file_set_contents(prefs_loc->str, g_prefs_data, g_data_size, NULL);
-}
-*/
 
 NCURSES_COLOR_T
 theme_get_bkgnd()

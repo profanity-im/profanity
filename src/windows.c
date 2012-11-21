@@ -109,6 +109,21 @@ gui_init(void)
     cbreak();
     keypad(stdscr, TRUE);
 
+    win_load_colours();
+
+    refresh();
+
+    create_title_bar();
+    create_status_bar();
+    create_input_window();
+    _create_windows();
+
+    dirty = TRUE;
+}
+
+void
+win_load_colours(void)
+{
     if (has_colors()) {
         use_default_colors();
         start_color();
@@ -148,15 +163,6 @@ gui_init(void)
         init_pair(60, theme_get_typing(), theme_get_bkgnd());
         init_pair(61, theme_get_gone(), theme_get_bkgnd());
     }
-
-    refresh();
-
-    create_title_bar();
-    create_status_bar();
-    create_input_window();
-    _create_windows();
-
-    dirty = TRUE;
 }
 
 void
