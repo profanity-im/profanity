@@ -78,17 +78,28 @@ gint prefs_get_priority(void);
 void prefs_add_login(const char *jid);
 
 NCURSES_COLOR_T prefs_get_bkgnd();
-NCURSES_COLOR_T prefs_get_text();
+NCURSES_COLOR_T prefs_get_titlebar();
+NCURSES_COLOR_T prefs_get_statusbar();
+NCURSES_COLOR_T prefs_get_titlebartext();
+NCURSES_COLOR_T prefs_get_titlebarbrackets();
+NCURSES_COLOR_T prefs_get_statusbartext();
+NCURSES_COLOR_T prefs_get_statusbarbrackets();
+NCURSES_COLOR_T prefs_get_statusbaractive();
+NCURSES_COLOR_T prefs_get_statusbarnew();
+NCURSES_COLOR_T prefs_get_maintext();
+NCURSES_COLOR_T prefs_get_splashtext();
 NCURSES_COLOR_T prefs_get_online();
 NCURSES_COLOR_T prefs_get_away();
 NCURSES_COLOR_T prefs_get_chat();
 NCURSES_COLOR_T prefs_get_dnd();
 NCURSES_COLOR_T prefs_get_xa();
 NCURSES_COLOR_T prefs_get_offline();
-NCURSES_COLOR_T prefs_get_err();
-NCURSES_COLOR_T prefs_get_inc();
-NCURSES_COLOR_T prefs_get_bar();
-NCURSES_COLOR_T prefs_get_bar_draw();
-NCURSES_COLOR_T prefs_get_bar_text();
+NCURSES_COLOR_T prefs_get_typing();
+NCURSES_COLOR_T prefs_get_gone();
+NCURSES_COLOR_T prefs_get_error();
+NCURSES_COLOR_T prefs_get_incoming();
+NCURSES_COLOR_T prefs_get_roominfo();
+NCURSES_COLOR_T prefs_get_me();
+NCURSES_COLOR_T prefs_get_them();
 
 #endif
