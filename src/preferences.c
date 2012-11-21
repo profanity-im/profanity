@@ -65,18 +65,29 @@ static struct colour_string_t colours[] = {
 // colour preferences
 static struct colours_t {
         NCURSES_COLOR_T bkgnd;
-        NCURSES_COLOR_T text;
+        NCURSES_COLOR_T titlebar;
+        NCURSES_COLOR_T statusbar;
+        NCURSES_COLOR_T titlebartext;
+        NCURSES_COLOR_T titlebarbrackets;
+        NCURSES_COLOR_T statusbartext;
+        NCURSES_COLOR_T statusbarbrackets;
+        NCURSES_COLOR_T statusbaractive;
+        NCURSES_COLOR_T statusbarnew;
+        NCURSES_COLOR_T maintext;
+        NCURSES_COLOR_T splashtext;
         NCURSES_COLOR_T online;
         NCURSES_COLOR_T away;
-        NCURSES_COLOR_T chat;
-        NCURSES_COLOR_T dnd;
         NCURSES_COLOR_T xa;
+        NCURSES_COLOR_T dnd;
+        NCURSES_COLOR_T chat;
         NCURSES_COLOR_T offline;
-        NCURSES_COLOR_T err;
-        NCURSES_COLOR_T inc;
-        NCURSES_COLOR_T bar;
-        NCURSES_COLOR_T bar_draw;
-        NCURSES_COLOR_T bar_text;
+        NCURSES_COLOR_T typing;
+        NCURSES_COLOR_T gone;
+        NCURSES_COLOR_T error;
+        NCURSES_COLOR_T incoming;
+        NCURSES_COLOR_T roominfo;
+        NCURSES_COLOR_T me;
+        NCURSES_COLOR_T them;
 } colour_prefs;
 
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
@@ -171,41 +182,74 @@ _load_colours(void)
     gchar *bkgnd_val = g_key_file_get_string(prefs, "colours", "bkgnd", NULL);
     _set_colour(bkgnd_val, &colour_prefs.bkgnd, -1);
 
-    gchar *text_val = g_key_file_get_string(prefs, "colours", "text", NULL);
-    _set_colour(text_val, &colour_prefs.text, COLOR_WHITE);
+    gchar *titlebar_val = g_key_file_get_string(prefs, "colours", "titlebar", NULL);
+    _set_colour(titlebar_val, &colour_prefs.titlebar, COLOR_BLUE);
+
+    gchar *statusbar_val = g_key_file_get_string(prefs, "colours", "statusbar", NULL);
+    _set_colour(statusbar_val, &colour_prefs.statusbar, COLOR_BLUE);
+
+    gchar *titlebartext_val = g_key_file_get_string(prefs, "colours", "titlebartext", NULL);
+    _set_colour(titlebartext_val, &colour_prefs.titlebartext, COLOR_WHITE);
+
+    gchar *titlebarbrackets_val = g_key_file_get_string(prefs, "colours", "titlebarbrackets", NULL);
+    _set_colour(titlebarbrackets_val, &colour_prefs.titlebarbrackets, COLOR_CYAN);
+
+    gchar *statusbartext_val = g_key_file_get_string(prefs, "colours", "statusbartext", NULL);
+    _set_colour(statusbartext_val, &colour_prefs.statusbartext, COLOR_WHITE);
+
+    gchar *statusbarbrackets_val = g_key_file_get_string(prefs, "colours", "statusbarbrackets", NULL);
+    _set_colour(statusbarbrackets_val, &colour_prefs.statusbarbrackets, COLOR_CYAN);
+
+    gchar *statusbaractive_val = g_key_file_get_string(prefs, "colours", "statusbaractive", NULL);
+    _set_colour(statusbaractive_val, &colour_prefs.statusbaractive, COLOR_CYAN);
+
+    gchar *statusbarnew_val = g_key_file_get_string(prefs, "colours", "statusbarnew", NULL);
+    _set_colour(statusbarnew_val, &colour_prefs.statusbarnew, COLOR_WHITE);
+
+    gchar *maintext_val = g_key_file_get_string(prefs, "colours", "maintext", NULL);
+    _set_colour(maintext_val, &colour_prefs.maintext, COLOR_WHITE);
+
+    gchar *splashtext_val = g_key_file_get_string(prefs, "colours", "splashtext", NULL);
+    _set_colour(splashtext_val, &colour_prefs.splashtext, COLOR_CYAN);
 
     gchar *online_val = g_key_file_get_string(prefs, "colours", "online", NULL);
     _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);
 
     gchar *away_val = g_key_file_get_string(prefs, "colours", "away", NULL);
-    _set_colour(away_val, &colour_prefs.away, COLOR_GREEN);
+    _set_colour(away_val, &colour_prefs.away, COLOR_CYAN);
 
     gchar *chat_val = g_key_file_get_string(prefs, "colours", "chat", NULL);
     _set_colour(chat_val, &colour_prefs.chat, COLOR_GREEN);
 
     gchar *dnd_val = g_key_file_get_string(prefs, "colours", "dnd", NULL);
-    _set_colour(dnd_val, &colour_prefs.dnd, COLOR_GREEN);
+    _set_colour(dnd_val, &colour_prefs.dnd, COLOR_RED);
 
     gchar *xa_val = g_key_file_get_string(prefs, "colours", "xa", NULL);
-    _set_colour(xa_val, &colour_prefs.xa, COLOR_GREEN);
+    _set_colour(xa_val, &colour_prefs.xa, COLOR_CYAN);
 
     gchar *offline_val = g_key_file_get_string(prefs, "colours", "offline", NULL);
-    _set_colour(offline_val, &colour_prefs.offline, COLOR_CYAN);
+    _set_colour(offline_val, &colour_prefs.offline, COLOR_RED);
 
-    gchar *err_val = g_key_file_get_string(prefs, "colours", "err", NULL);
-    _set_colour(err_val, &colour_prefs.err, COLOR_RED);
+    gchar *typing_val = g_key_file_get_string(prefs, "colours", "typing", NULL);
+    _set_colour(typing_val, &colour_prefs.typing, COLOR_YELLOW);
 
-    gchar *inc_val = g_key_file_get_string(prefs, "colours", "inc", NULL);
-    _set_colour(inc_val, &colour_prefs.inc, COLOR_YELLOW);
+    gchar *gone_val = g_key_file_get_string(prefs, "colours", "gone", NULL);
+    _set_colour(gone_val, &colour_prefs.gone, COLOR_RED);
 
-    gchar *bar_val = g_key_file_get_string(prefs, "colours", "bar", NULL);
-    _set_colour(bar_val, &colour_prefs.bar, COLOR_BLUE);
+    gchar *error_val = g_key_file_get_string(prefs, "colours", "error", NULL);
+    _set_colour(error_val, &colour_prefs.error, COLOR_RED);
 
-    gchar *bar_draw_val = g_key_file_get_string(prefs, "colours", "bar_draw", NULL);
-    _set_colour(bar_draw_val, &colour_prefs.bar_draw, COLOR_CYAN);
+    gchar *incoming_val = g_key_file_get_string(prefs, "colours", "incoming", NULL);
+    _set_colour(incoming_val, &colour_prefs.incoming, COLOR_YELLOW);
 
-    gchar *bar_text_val = g_key_file_get_string(prefs, "colours", "bar_text", NULL);
-    _set_colour(bar_text_val, &colour_prefs.bar_text, COLOR_WHITE);
+    gchar *roominfo_val = g_key_file_get_string(prefs, "colours", "roominfo", NULL);
+    _set_colour(roominfo_val, &colour_prefs.roominfo, COLOR_YELLOW);
+
+    gchar *me_val = g_key_file_get_string(prefs, "colours", "me", NULL);
+    _set_colour(me_val, &colour_prefs.me, COLOR_YELLOW);
+
+    gchar *them_val = g_key_file_get_string(prefs, "colours", "them", NULL);
+    _set_colour(them_val, &colour_prefs.them, COLOR_GREEN);
 }
 
 char *
@@ -475,9 +519,63 @@ prefs_get_bkgnd()
 }
 
 NCURSES_COLOR_T
-prefs_get_text()
+prefs_get_titlebar()
 {
-    return colour_prefs.text;
+    return colour_prefs.titlebar;
+}
+
+NCURSES_COLOR_T
+prefs_get_statusbar()
+{
+    return colour_prefs.statusbar;
+}
+
+NCURSES_COLOR_T
+prefs_get_titlebartext()
+{
+    return colour_prefs.titlebartext;
+}
+
+NCURSES_COLOR_T
+prefs_get_titlebarbrackets()
+{
+    return colour_prefs.titlebarbrackets;
+}
+
+NCURSES_COLOR_T
+prefs_get_statusbartext()
+{
+    return colour_prefs.statusbartext;
+}
+
+NCURSES_COLOR_T
+prefs_get_statusbarbrackets()
+{
+    return colour_prefs.statusbarbrackets;
+}
+
+NCURSES_COLOR_T
+prefs_get_statusbaractive()
+{
+    return colour_prefs.statusbaractive;
+}
+
+NCURSES_COLOR_T
+prefs_get_statusbarnew()
+{
+    return colour_prefs.statusbarnew;
+}
+
+NCURSES_COLOR_T
+prefs_get_maintext()
+{
+    return colour_prefs.maintext;
+}
+
+NCURSES_COLOR_T
+prefs_get_splashtext()
+{
+    return colour_prefs.splashtext;
 }
 
 NCURSES_COLOR_T
@@ -517,31 +615,43 @@ prefs_get_offline()
 }
 
 NCURSES_COLOR_T
-prefs_get_err()
+prefs_get_typing()
 {
-    return colour_prefs.err;
+    return colour_prefs.typing;
 }
 
 NCURSES_COLOR_T
-prefs_get_inc()
+prefs_get_gone()
 {
-    return colour_prefs.inc;
+    return colour_prefs.gone;
 }
 
 NCURSES_COLOR_T
-prefs_get_bar()
+prefs_get_error()
 {
-    return colour_prefs.bar;
+    return colour_prefs.error;
 }
 
 NCURSES_COLOR_T
-prefs_get_bar_draw()
+prefs_get_incoming()
 {
-    return colour_prefs.bar_draw;
+    return colour_prefs.incoming;
 }
 
 NCURSES_COLOR_T
-prefs_get_bar_text()
+prefs_get_roominfo()
 {
-    return colour_prefs.bar_text;
+    return colour_prefs.roominfo;
+}
+
+NCURSES_COLOR_T
+prefs_get_me()
+{
+    return colour_prefs.me;
+}
+
+NCURSES_COLOR_T
+prefs_get_them()
+{
+    return colour_prefs.them;
 }
