@@ -34,6 +34,7 @@
 #endif
 
 #include "log.h"
+#include "theme.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;
@@ -147,6 +148,45 @@ theme_close(void)
     g_key_file_free(theme);
 }
 
+void
+theme_init_colours(void)
+{
+    // main text
+    init_pair(1, colour_prefs.maintext, colour_prefs.bkgnd);
+    init_pair(2, colour_prefs.splashtext, colour_prefs.bkgnd);
+    init_pair(3, colour_prefs.error, colour_prefs.bkgnd);
+    init_pair(4, colour_prefs.incoming, colour_prefs.bkgnd);
+
+    // title bar
+    init_pair(10, colour_prefs.titlebartext, colour_prefs.titlebar);
+    init_pair(11, colour_prefs.titlebarbrackets, colour_prefs.titlebar);
+
+    // status bar
+    init_pair(20, colour_prefs.statusbartext, colour_prefs.statusbar);
+    init_pair(21, colour_prefs.statusbarbrackets, colour_prefs.statusbar);
+    init_pair(22, colour_prefs.statusbaractive, colour_prefs.statusbar);
+    init_pair(23, colour_prefs.statusbarnew, colour_prefs.statusbar);
+
+    // chat
+    init_pair(30, colour_prefs.me, colour_prefs.bkgnd);
+    init_pair(31, colour_prefs.them, colour_prefs.bkgnd);
+
+    // room chat
+    init_pair(40, colour_prefs.roominfo, colour_prefs.bkgnd);
+
+    // statuses
+    init_pair(50, colour_prefs.online, colour_prefs.bkgnd);
+    init_pair(51, colour_prefs.offline, colour_prefs.bkgnd);
+    init_pair(52, colour_prefs.away, colour_prefs.bkgnd);
+    init_pair(53, colour_prefs.chat, colour_prefs.bkgnd);
+    init_pair(54, colour_prefs.dnd, colour_prefs.bkgnd);
+    init_pair(55, colour_prefs.xa, colour_prefs.bkgnd);
+
+    // states
+    init_pair(60, colour_prefs.typing, colour_prefs.bkgnd);
+    init_pair(61, colour_prefs.gone, colour_prefs.bkgnd);
+}
+
 static NCURSES_COLOR_T
 _lookup_colour(const char * const colour)
 {
@@ -250,148 +290,4 @@ _load_colours(void)
 
     gchar *them_val = g_key_file_get_string(theme, "colours", "them", NULL);
     _set_colour(them_val, &colour_prefs.them, COLOR_GREEN);
-}
-
-NCURSES_COLOR_T
-theme_get_bkgnd()
-{
-    return colour_prefs.bkgnd;
-}
-
-NCURSES_COLOR_T
-theme_get_titlebar()
-{
-    return colour_prefs.titlebar;
-}
-
-NCURSES_COLOR_T
-theme_get_statusbar()
-{
-    return colour_prefs.statusbar;
-}
-
-NCURSES_COLOR_T
-theme_get_titlebartext()
-{
-    return colour_prefs.titlebartext;
-}
-
-NCURSES_COLOR_T
-theme_get_titlebarbrackets()
-{
-    return colour_prefs.titlebarbrackets;
-}
-
-NCURSES_COLOR_T
-theme_get_statusbartext()
-{
-    return colour_prefs.statusbartext;
-}
-
-NCURSES_COLOR_T
-theme_get_statusbarbrackets()
-{
-    return colour_prefs.statusbarbrackets;
-}
-
-NCURSES_COLOR_T
-theme_get_statusbaractive()
-{
-    return colour_prefs.statusbaractive;
-}
-
-NCURSES_COLOR_T
-theme_get_statusbarnew()
-{
-    return colour_prefs.statusbarnew;
-}
-
-NCURSES_COLOR_T
-theme_get_maintext()
-{
-    return colour_prefs.maintext;
-}
-
-NCURSES_COLOR_T
-theme_get_splashtext()
-{
-    return colour_prefs.splashtext;
-}
-
-NCURSES_COLOR_T
-theme_get_online()
-{
-    return colour_prefs.online;
-}
-
-NCURSES_COLOR_T
-theme_get_away()
-{
-    return colour_prefs.away;
-}
-
-NCURSES_COLOR_T
-theme_get_chat()
-{
-    return colour_prefs.chat;
-}
-
-NCURSES_COLOR_T
-theme_get_dnd()
-{
-    return colour_prefs.dnd;
-}
-
-NCURSES_COLOR_T
-theme_get_xa()
-{
-    return colour_prefs.xa;
-}
-
-NCURSES_COLOR_T
-theme_get_offline()
-{
-    return colour_prefs.offline;
-}
-
-NCURSES_COLOR_T
-theme_get_typing()
-{
-    return colour_prefs.typing;
-}
-
-NCURSES_COLOR_T
-theme_get_gone()
-{
-    return colour_prefs.gone;
-}
-
-NCURSES_COLOR_T
-theme_get_error()
-{
-    return colour_prefs.error;
-}
-
-NCURSES_COLOR_T
-theme_get_incoming()
-{
-    return colour_prefs.incoming;
-}
-
-NCURSES_COLOR_T
-theme_get_roominfo()
-{
-    return colour_prefs.roominfo;
-}
-
-NCURSES_COLOR_T
-theme_get_me()
-{
-    return colour_prefs.me;
-}
-
-NCURSES_COLOR_T
-theme_get_them()
-{
-    return colour_prefs.them;
 }

@@ -127,41 +127,7 @@ win_load_colours(void)
     if (has_colors()) {
         use_default_colors();
         start_color();
-
-        // main text
-        init_pair(1, theme_get_maintext(), theme_get_bkgnd());
-        init_pair(2, theme_get_splashtext(), theme_get_bkgnd());
-        init_pair(3, theme_get_error(), theme_get_bkgnd());
-        init_pair(4, theme_get_incoming(), theme_get_bkgnd());
-
-        // title bar
-        init_pair(10, theme_get_titlebartext(), theme_get_titlebar());
-        init_pair(11, theme_get_titlebarbrackets(), theme_get_titlebar());
-
-        // status bar
-        init_pair(20, theme_get_statusbartext(), theme_get_statusbar());
-        init_pair(21, theme_get_statusbarbrackets(), theme_get_statusbar());
-        init_pair(22, theme_get_statusbaractive(), theme_get_statusbar());
-        init_pair(23, theme_get_statusbarnew(), theme_get_statusbar());
-
-        // chat
-        init_pair(30, theme_get_me(), theme_get_bkgnd());
-        init_pair(31, theme_get_them(), theme_get_bkgnd());
-
-        // room chat
-        init_pair(40, theme_get_roominfo(), theme_get_bkgnd());
-
-        // statuses
-        init_pair(50, theme_get_online(), theme_get_bkgnd());
-        init_pair(51, theme_get_offline(), theme_get_bkgnd());
-        init_pair(52, theme_get_away(), theme_get_bkgnd());
-        init_pair(53, theme_get_chat(), theme_get_bkgnd());
-        init_pair(54, theme_get_dnd(), theme_get_bkgnd());
-        init_pair(55, theme_get_xa(), theme_get_bkgnd());
-
-        // states
-        init_pair(60, theme_get_typing(), theme_get_bkgnd());
-        init_pair(61, theme_get_gone(), theme_get_bkgnd());
+        theme_init_colours();
     }
 }
 
