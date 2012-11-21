@@ -39,6 +39,7 @@
 #include "preferences.h"
 #include "profanity.h"
 #include "room_chat.h"
+#include "theme.h"
 #include "jabber.h"
 #include "ui.h"
 
@@ -446,6 +447,7 @@ _init(const int disable_tls, char *log_level)
     log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     chat_log_init();
     prefs_load();
+    theme_load(prefs_get_theme());
     gui_init();
     jabber_init(disable_tls);
     cmd_init();
@@ -462,6 +464,7 @@ _shutdown(void)
     gui_close();
     chat_log_close();
     prefs_close();
+    theme_close();
     cmd_close();
     log_close();
 }
