@@ -1010,6 +1010,8 @@ cons_prefs(void)
     else
         cons_show("Terminal flash               : OFF");
 
+    cons_show("Theme                        : %s", prefs_get_theme());
+
     if (prefs_get_intype())
         cons_show("Show typing                  : ON");
     else
