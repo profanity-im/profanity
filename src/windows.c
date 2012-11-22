@@ -393,7 +393,9 @@ win_show_incomming_msg(const char * const from, const char * const message,
         } else {
             GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
             gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+            wattron(win, COLOUR_TIME);
             wprintw(win, "%s - ", date_fmt);
+            wattroff(win, COLOUR_TIME);
             g_date_time_unref(time);
             g_free(date_fmt);
         }
@@ -430,7 +432,9 @@ win_show_incomming_msg(const char * const from, const char * const message,
         } else {
             GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
             gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+            wattron(win, COLOUR_TIME);
             wprintw(win, "%s - ", date_fmt);
+            wattroff(win, COLOUR_TIME);
             g_date_time_unref(time);
             g_free(date_fmt);
         }
@@ -1521,7 +1525,9 @@ _win_show_time(WINDOW *win)
 {
     GDateTime *time = g_date_time_new_now_local();
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+    wattron(win, COLOUR_TIME);
     wprintw(win, "%s - ", date_fmt);
+    wattroff(win, COLOUR_TIME);
     g_date_time_unref(time);
     g_free(date_fmt);
 }
