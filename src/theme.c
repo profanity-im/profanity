@@ -69,6 +69,7 @@ static struct colours_t {
         NCURSES_COLOR_T statusbaractive;
         NCURSES_COLOR_T statusbarnew;
         NCURSES_COLOR_T maintext;
+        NCURSES_COLOR_T inputtext;
         NCURSES_COLOR_T splashtext;
         NCURSES_COLOR_T online;
         NCURSES_COLOR_T away;
@@ -156,6 +157,7 @@ theme_init_colours(void)
     init_pair(2, colour_prefs.splashtext, colour_prefs.bkgnd);
     init_pair(3, colour_prefs.error, colour_prefs.bkgnd);
     init_pair(4, colour_prefs.incoming, colour_prefs.bkgnd);
+    init_pair(5, colour_prefs.inputtext, colour_prefs.bkgnd);
 
     // title bar
     init_pair(10, colour_prefs.titlebartext, colour_prefs.titlebar);
@@ -251,6 +253,9 @@ _load_colours(void)
 
     gchar *splashtext_val = g_key_file_get_string(theme, "colours", "splashtext", NULL);
     _set_colour(splashtext_val, &colour_prefs.splashtext, COLOR_CYAN);
+
+    gchar *inputtext_val = g_key_file_get_string(theme, "colours", "inputtext", NULL);
+    _set_colour(inputtext_val, &colour_prefs.inputtext, COLOR_WHITE);
 
     gchar *online_val = g_key_file_get_string(theme, "colours", "online", NULL);
     _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);

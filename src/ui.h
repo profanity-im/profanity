@@ -38,28 +38,6 @@
 
 #define INP_WIN_MAX 1000
 
-#define COLOUR_TEXT             COLOR_PAIR(1)
-#define COLOUR_SPLASH           COLOR_PAIR(2)
-#define COLOUR_ERROR            COLOR_PAIR(3)
-#define COLOUR_INCOMING         COLOR_PAIR(4)
-#define COLOUR_TITLE_TEXT       COLOR_PAIR(10)
-#define COLOUR_TITLE_BRACKET    COLOR_PAIR(11)
-#define COLOUR_STATUS_TEXT      COLOR_PAIR(20)
-#define COLOUR_STATUS_BRACKET      COLOR_PAIR(21)
-#define COLOUR_STATUS_ACTIVE    COLOR_PAIR(22)
-#define COLOUR_STATUS_NEW       COLOR_PAIR(23)
-#define COLOUR_ME               COLOR_PAIR(30)
-#define COLOUR_THEM             COLOR_PAIR(31)
-#define COLOUR_ROOMINFO         COLOR_PAIR(40)
-#define COLOUR_ONLINE           COLOR_PAIR(50)
-#define COLOUR_OFFLINE          COLOR_PAIR(51)
-#define COLOUR_AWAY             COLOR_PAIR(52)
-#define COLOUR_CHAT             COLOR_PAIR(53)
-#define COLOUR_DND              COLOR_PAIR(54)
-#define COLOUR_XA               COLOR_PAIR(55)
-#define COLOUR_TYPING           COLOR_PAIR(60)
-#define COLOUR_GONE             COLOR_PAIR(61)
-
 typedef enum {
     WIN_UNUSED,
     WIN_CONSOLE,

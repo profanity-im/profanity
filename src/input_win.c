@@ -58,6 +58,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
+#include "theme.h"
 #include "ui.h"
 
 static WINDOW *inp_win;
@@ -79,7 +80,7 @@ create_input_window(void)
     getmaxyx(stdscr, rows, cols);
 
     inp_win = newpad(1, INP_WIN_MAX);
-    wbkgd(inp_win, COLOR_PAIR(1));
+    wbkgd(inp_win, COLOUR_INPUT_TEXT);
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);

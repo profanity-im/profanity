@@ -32,6 +32,7 @@
 #include <ncurses/ncurses.h>
 #endif
 
+#include "theme.h"
 #include "ui.h"
 
 static WINDOW *status_bar;
