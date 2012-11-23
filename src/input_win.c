@@ -241,32 +241,16 @@ _handle_edit(const int ch, char *input, int *size)
     char *next = NULL;
     int inp_y = 0;
     int inp_x = 0;
-    int next_ch;
 
     getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
 
     switch(ch) {
 
-    case 3: // CTRL-C
-        if (prefs_get_ctrlc()) {
-            exit(0);
-        }
+    case 27: // ESC
+        *size = 0;
+        inp_clear();
         return 1;
-
-    case 27:
-        next_ch = wgetch(inp_win);
-
-        // ESC
-        if (next_ch == ERR) {
-            *size = 0;
-            inp_clear();
-            return 1;
-
-        // ALT-<next_ch>
-        } else {
-            return 1;
-        }
 
     case 127:
     case KEY_BACKSPACE:
