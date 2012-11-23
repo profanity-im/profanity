@@ -106,7 +106,7 @@ gui_init(void)
 {
     log_info("Initialising UI");
     initscr();
-    cbreak();
+    raw();
     keypad(stdscr, TRUE);
 
     win_load_colours();
