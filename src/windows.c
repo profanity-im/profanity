@@ -106,7 +106,7 @@ gui_init(void)
 {
     log_info("Initialising UI");
     initscr();
-    cbreak();
+    raw();
     keypad(stdscr, TRUE);
 
     win_load_colours();
@@ -1049,6 +1049,11 @@ cons_prefs(void)
         cons_show("Version checking             : ON");
     else
         cons_show("Version checking             : OFF");
+
+    if (prefs_get_ctrlc())
+        cons_show("Ctrl-c quits                 : ON");
+    else
+        cons_show("Ctrl-c quits                 : OFF");
 
     if (prefs_get_notify_message())
         cons_show("Message notifications        : ON");

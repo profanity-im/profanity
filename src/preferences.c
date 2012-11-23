@@ -132,6 +132,19 @@ prefs_set_beep(gboolean value)
     _save_prefs();
 }
 
+gboolean
+prefs_get_ctrlc(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "ctrlc", NULL);
+}
+
+void
+prefs_set_ctrlc(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "ctrlc", value);
+    _save_prefs();
+}
+
 gchar *
 prefs_get_theme(void)
 {

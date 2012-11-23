@@ -116,6 +116,7 @@ static gboolean _cmd_set_chlog(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_ctrlc(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
@@ -484,6 +485,15 @@ static struct cmd_t setting_commands[] =
           "Config file section : [log]",
           "Config file value :   maxsize=bytes",
           NULL } } },
+
+    { "/ctrlc",
+        _cmd_set_ctrlc, parse_args, 1, 1,
+        { "/ctrlc on|off", "Set ctrl-c to quit profanity.",
+        { "/ctrlc on|off",
+          "---------------",
+          "Setting this option will allow you to quit using ctrl-c.",
+          NULL } } },
+
 
     { "/priority",
         _cmd_set_priority, parse_args, 1, 1,
@@ -854,6 +864,8 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/intype",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/states",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/ctrlc",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/outtype",
         prefs_autocomplete_boolean_choice);
@@ -1387,6 +1399,13 @@ _cmd_set_states(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args, help, "/states",
         "Sending chat states", prefs_set_states);
+}
+
+static gboolean
+_cmd_set_ctrlc(gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args, help, "/ctrlc",
+        "Ctrl-C quit", prefs_set_ctrlc);
 }
 
 static gboolean
