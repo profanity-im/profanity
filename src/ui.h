@@ -37,6 +37,7 @@
 #include "jabber.h"
 
 #define INP_WIN_MAX 1000
+#define PAD_SIZE 1000
 
 typedef enum {
     WIN_UNUSED,
