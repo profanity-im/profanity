@@ -66,6 +66,7 @@ static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
+static gboolean _special_key(const int ch);
 
 void
 create_input_window(void)
@@ -373,6 +374,13 @@ _printable(const int ch)
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&
             ch != KEY_F(10) && ch!= KEY_F(11) && ch != KEY_F(12) &&
-            ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE);
+            ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE &&
+            !_special_key(ch));
 }
 
+static gboolean
+_special_key(const int ch)
+{
+    char *str = unctrl(ch);
+    return ((strlen(str) > 1) && g_str_has_prefix(str, "^"));
+}
