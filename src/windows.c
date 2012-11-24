@@ -74,7 +74,6 @@ static void _cons_show_contact(PContact contact);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact, win_type_t type);
 static void _current_window_refresh(void);
-static void _win_switch_if_active(const int i);
 static void _win_show_time(WINDOW *win);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
@@ -644,7 +643,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
         _win_show_user(win, from, 0);
         _win_show_message(win, message);
     }
-    _win_switch_if_active(win_index);
+    win_switch_if_active(win_index);
 }
 
 void
@@ -657,7 +656,7 @@ win_join_chat(const char * const room, const char * const nick)
         win_index = _new_prof_win(room, WIN_MUC);
     }
 
-    _win_switch_if_active(win_index);
+    win_switch_if_active(win_index);
 }
 
 void
@@ -1467,8 +1466,8 @@ _new_prof_win(const char * const contact, win_type_t type)
     return i;
 }
 
-static void
-_win_switch_if_active(const int i)
+void
+win_switch_if_active(const int i)
 {
     win_page_off();
     if (windows[i] != NULL) {
@@ -1695,25 +1694,25 @@ static void
 _win_handle_switch(const int * const ch)
 {
     if (*ch == KEY_F(1)) {
-        _win_switch_if_active(0);
+        win_switch_if_active(0);
     } else if (*ch == KEY_F(2)) {
-        _win_switch_if_active(1);
+        win_switch_if_active(1);
     } else if (*ch == KEY_F(3)) {
-        _win_switch_if_active(2);
+        win_switch_if_active(2);
     } else if (*ch == KEY_F(4)) {
-        _win_switch_if_active(3);
+        win_switch_if_active(3);
     } else if (*ch == KEY_F(5)) {
-        _win_switch_if_active(4);
+        win_switch_if_active(4);
     } else if (*ch == KEY_F(6)) {
-        _win_switch_if_active(5);
+        win_switch_if_active(5);
     } else if (*ch == KEY_F(7)) {
-        _win_switch_if_active(6);
+        win_switch_if_active(6);
     } else if (*ch == KEY_F(8)) {
-        _win_switch_if_active(7);
+        win_switch_if_active(7);
     } else if (*ch == KEY_F(9)) {
-        _win_switch_if_active(8);
+        win_switch_if_active(8);
     } else if (*ch == KEY_F(10)) {
-        _win_switch_if_active(9);
+        win_switch_if_active(9);
     }
 }
 

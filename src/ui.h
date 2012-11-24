@@ -103,6 +103,7 @@ void win_bad_show(const char * const msg);
 void win_remind(void);
 void win_activity(void);
 void win_no_activity(void);
+void win_switch_if_active(const int i);
 
 void win_join_chat(const char * const room, const char * const nick);
 void win_show_room_roster(const char * const room);
@@ -166,5 +167,6 @@ void inp_non_block(void);
 void inp_block(void);
 void inp_get_password(char *passwd);
 void inp_replace_input(char *input, const char * const new_input, int *size);
+int inp_get_next_char(void);
 
 #endif
