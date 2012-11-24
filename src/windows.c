@@ -377,70 +377,106 @@ win_show_incomming_msg(const char * const from, const char * const message,
     if (win_index == NUM_WINS)
         win_index = _new_prof_win(from, win_type);
 
-    WINDOW *win = windows[win_index]->win;
-
-    // currently viewing chat window with sender
-    if (win_index == current_index) {
+    // no spare windows left
+    if (win_index == 0) {
         if (tv_stamp == NULL) {
-            _win_show_time(win);
+            _win_show_time(console->win);
         } else {
             GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
             gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-            wattron(win, COLOUR_TIME);
-            wprintw(win, "%s - ", date_fmt);
-            wattroff(win, COLOUR_TIME);
+            wattron(console->win, COLOUR_TIME);
+            wprintw(console->win, "%s - ", date_fmt);
+            wattroff(console->win, COLOUR_TIME);
             g_date_time_unref(time);
             g_free(date_fmt);
         }
 
         if (strncmp(message, "/me ", 4) == 0) {
-            wattron(win, COLOUR_THEM);
-            wprintw(win, "*%s ", from);
-            wprintw(win, message + 4);
-            wprintw(win, "\n");
-            wattroff(win, COLOUR_THEM);
+            wattron(console->win, COLOUR_THEM);
+            wprintw(console->win, "*%s ", from);
+            wprintw(console->win, message + 4);
+            wprintw(console->win, "\n");
+            wattroff(console->win, COLOUR_THEM);
         } else {
-            _win_show_user(win, from, 1);
-            _win_show_message(win, message);
+            _win_show_user(console->win, from, 1);
+            _win_show_message(console->win, message);
         }
-        title_bar_set_typing(FALSE);
-        title_bar_draw();
-        status_bar_active(win_index);
-        dirty = TRUE;
 
-    // not currently viewing chat window with sender
+        cons_bad_show("Windows all used, close a window to respond.");
+
+        if (current_index == 0) {
+           dirty = TRUE;
+        } else {
+            status_bar_new(0);
+        }
+
+    // window found or created
     } else {
-        status_bar_new(win_index);
-        _cons_show_incoming_message(from, win_index);
-        if (prefs_get_flash())
-            flash();
+        WINDOW *win = windows[win_index]->win;
 
-        windows[win_index]->unread++;
-        if (prefs_get_chlog() && prefs_get_history()) {
-            _win_show_history(win, win_index, from);
-        }
+        // currently viewing chat window with sender
+        if (win_index == current_index) {
+            if (tv_stamp == NULL) {
+                _win_show_time(win);
+            } else {
+                GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
+                gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+                wattron(win, COLOUR_TIME);
+                wprintw(win, "%s - ", date_fmt);
+                wattroff(win, COLOUR_TIME);
+                g_date_time_unref(time);
+                g_free(date_fmt);
+            }
 
-        if (tv_stamp == NULL) {
-            _win_show_time(win);
+            if (strncmp(message, "/me ", 4) == 0) {
+                wattron(win, COLOUR_THEM);
+                wprintw(win, "*%s ", from);
+                wprintw(win, message + 4);
+                wprintw(win, "\n");
+                wattroff(win, COLOUR_THEM);
+            } else {
+                _win_show_user(win, from, 1);
+                _win_show_message(win, message);
+            }
+            title_bar_set_typing(FALSE);
+            title_bar_draw();
+            status_bar_active(win_index);
+            dirty = TRUE;
+
+        // not currently viewing chat window with sender
         } else {
-            GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
-            gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-            wattron(win, COLOUR_TIME);
-            wprintw(win, "%s - ", date_fmt);
-            wattroff(win, COLOUR_TIME);
-            g_date_time_unref(time);
-            g_free(date_fmt);
-        }
+            status_bar_new(win_index);
+            _cons_show_incoming_message(from, win_index);
+            if (prefs_get_flash())
+                flash();
 
-        if (strncmp(message, "/me ", 4) == 0) {
-            wattron(win, COLOUR_THEM);
-            wprintw(win, "*%s ", from);
-            wprintw(win, message + 4);
-            wprintw(win, "\n");
-            wattroff(win, COLOUR_THEM);
-        } else {
-            _win_show_user(win, from, 1);
-            _win_show_message(win, message);
+            windows[win_index]->unread++;
+            if (prefs_get_chlog() && prefs_get_history()) {
+                _win_show_history(win, win_index, from);
+            }
+
+            if (tv_stamp == NULL) {
+                _win_show_time(win);
+            } else {
+                GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
+                gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+                wattron(win, COLOUR_TIME);
+                wprintw(win, "%s - ", date_fmt);
+                wattroff(win, COLOUR_TIME);
+                g_date_time_unref(time);
+                g_free(date_fmt);
+            }
+
+            if (strncmp(message, "/me ", 4) == 0) {
+                wattron(win, COLOUR_THEM);
+                wprintw(win, "*%s ", from);
+                wprintw(win, message + 4);
+                wprintw(win, "\n");
+                wattroff(win, COLOUR_THEM);
+            } else {
+                _win_show_user(win, from, 1);
+                _win_show_message(win, message);
+            }
         }
     }
 
@@ -1497,10 +1533,13 @@ _new_prof_win(const char * const contact, win_type_t type)
         }
     }
 
-    int cols = getmaxx(stdscr);
-    windows[i] = window_create(contact, cols, type);
-
-    return i;
+    if (i != NUM_WINS) {
+        int cols = getmaxx(stdscr);
+        windows[i] = window_create(contact, cols, type);
+        return i;
+    } else {
+        return 0;
+    }
 }
 
 void

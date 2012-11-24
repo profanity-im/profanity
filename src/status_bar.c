@@ -144,7 +144,7 @@ status_bar_active(const int win)
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_ACTIVE);
-    if (win < 10)
+    if (win+1 < 10)
         mvwprintw(status_bar, 0, cols - 31 + active_pos, "%d", win+1);
     else
         mvwprintw(status_bar, 0, cols - 31 + active_pos, "0");
@@ -165,7 +165,7 @@ status_bar_new(const int win)
 
     wattron(status_bar, COLOUR_STATUS_NEW);
     wattron(status_bar, A_BLINK);
-    if (win < 10)
+    if (win+1 < 10)
         mvwprintw(status_bar, 0, cols - 31 + active_pos, "%d", win+1);
     else
         mvwprintw(status_bar, 0, cols - 31 + active_pos, "0");
