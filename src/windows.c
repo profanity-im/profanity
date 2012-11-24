@@ -114,6 +114,7 @@ gui_init(void)
 
     create_title_bar();
     create_status_bar();
+    status_bar_active(0);
     create_input_window();
     _create_windows();
 
