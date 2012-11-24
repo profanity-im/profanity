@@ -178,6 +178,7 @@ win_close_win(void)
 
     // go back to console window
     _set_current(0);
+    status_bar_active(0);
     title_bar_title();
 
     dirty = TRUE;
@@ -207,20 +208,15 @@ win_show_wins(void)
     int i = 0;
     int count = 0;
 
+    cons_show("");
+    cons_show("Active windows:");
+    _win_show_time(console->win);
+    wprintw(console->win, "1: Console\n");
+
     for (i = 1; i < NUM_WINS; i++) {
         if (windows[i] != NULL) {
             count++;
         }
-    }
-
-    cons_show("");
-
-    if (count == 0) {
-        cons_show("No active windows.");
-    } else if (count == 1) {
-        cons_show("1 active window:");
-    } else {
-        cons_show("%d active windows:", count);
     }
 
     if (count != 0) {
@@ -1073,8 +1069,11 @@ cons_prefs(void)
 
     cons_show("");
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 static void
@@ -1106,8 +1105,11 @@ cons_help(void)
     cons_show("/help [command]  - Detailed help on a specific command.");
     cons_show("");
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1117,8 +1119,11 @@ cons_basic_help(void)
     cons_show("Basic Commands:");
     _cons_show_basic_help();
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1137,8 +1142,11 @@ cons_settings_help(void)
 
     cons_show("");
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1157,8 +1165,11 @@ cons_presence_help(void)
 
     cons_show("");
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1176,8 +1187,11 @@ cons_navigation_help(void)
     cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
     cons_show("");
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1208,8 +1222,11 @@ cons_bad_show(const char * const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1230,8 +1247,11 @@ cons_show(const char * const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1239,8 +1259,11 @@ cons_show_word(const char * const word)
 {
     wprintw(console->win, "%s", word);
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1249,8 +1272,11 @@ cons_bad_command(const char * const cmd)
     _win_show_time(console->win);
     wprintw(console->win, "Unknown command: %s\n", cmd);
 
-    if (current_index == 0)
+    if (current_index == 0) {
         dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1331,7 +1357,11 @@ cons_about(void)
 
     prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
-    dirty = TRUE;
+    if (current_index == 0) {
+        dirty = TRUE;
+    } else {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -1356,6 +1386,12 @@ cons_check_version(gboolean not_available_msg)
                     cons_show("No new version available.");
                     cons_show("");
                 }
+            }
+
+            if (current_index == 0) {
+                dirty = TRUE;
+            } else {
+                status_bar_new(0);
             }
         }
     }
@@ -1480,6 +1516,7 @@ win_switch_if_active(const int i)
 
         if (i == 0) {
             title_bar_title();
+            status_bar_active(0);
         } else {
             title_bar_set_recipient(current->from);
             title_bar_draw();;
