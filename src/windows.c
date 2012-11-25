@@ -108,6 +108,13 @@ gui_init(void)
     raw();
     keypad(stdscr, TRUE);
 
+#ifdef PLATFORM_CYGWIN
+    mousemask(BUTTON5_PRESSED | BUTTON4_PRESSED, NULL);
+#else
+    mousemask(BUTTON2_PRESSED | BUTTON4_PRESSED, NULL);
+#endif
+    mouseinterval(5);
+
     win_load_colours();
 
     refresh();
@@ -1816,8 +1823,42 @@ _win_handle_page(const int * const ch)
     int page_space = rows - 4;
     int *page_start = &(current->y_pos);
 
+    MEVENT mouse_event;
+
+    if (*ch == KEY_MOUSE) {
+        if (getmouse(&mouse_event) == OK) {
+
+#ifdef PLATFORM_CYGWIN
+            if (mouse_event.bstate & BUTTON5_PRESSED) { // mouse wheel down
+#else
+            if (mouse_event.bstate & BUTTON2_PRESSED) { // mouse wheel down
+#endif
+                *page_start += 4;
+
+                // only got half a screen, show full screen
+                if ((y - (*page_start)) < page_space)
+                    *page_start = y - page_space;
+
+                // went past end, show full screen
+                else if (*page_start >= y)
+                    *page_start = y - page_space;
+
+                current->paged = 1;
+                dirty = TRUE;
+            } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
+                *page_start -= 4;
+
+                // went past beginning, show first page
+                if (*page_start < 0)
+                    *page_start = 0;
+
+                current->paged = 1;
+                dirty = TRUE;
+            }
+        }
+
     // page up
-    if (*ch == KEY_PPAGE) {
+    } else if (*ch == KEY_PPAGE) {
         *page_start -= page_space;
 
         // went past beginning, show first page
