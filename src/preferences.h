@@ -76,6 +76,8 @@ void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
 void prefs_set_priority(gint value);
 gint prefs_get_priority(void);
+void prefs_set_reconnect(gint value);
+gint prefs_get_reconnect(void);
 
 void prefs_add_login(const char *jid);
 

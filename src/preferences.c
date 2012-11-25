@@ -240,6 +240,19 @@ prefs_set_priority(gint value)
     _save_prefs();
 }
 
+gint
+prefs_get_reconnect(void)
+{
+    return g_key_file_get_integer(prefs, "jabber", "reconnect", NULL);
+}
+
+void
+prefs_set_reconnect(gint value)
+{
+    g_key_file_set_integer(prefs, "jabber", "reconnect", value);
+    _save_prefs();
+}
+
 gboolean
 prefs_get_vercheck(void)
 {

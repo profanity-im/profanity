@@ -95,9 +95,7 @@ chat_session_set_composing(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
-    if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
-    } else {
+    if (session != NULL) {
         if (session->state != CHAT_STATE_COMPOSING) {
             session->sent = FALSE;
         }
@@ -111,9 +109,7 @@ chat_session_no_activity(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
-    if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
-    } else {
+    if (session != NULL) {
         if (session->active_timer != NULL) {
             gdouble elapsed = g_timer_elapsed(session->active_timer, NULL);
 
@@ -146,9 +142,7 @@ chat_session_set_sent(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
-    if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
-    } else {
+    if (session != NULL) {
         session->sent = TRUE;
     }
 }
@@ -159,7 +153,6 @@ chat_session_get_sent(const char * const recipient)
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
         return FALSE;
     } else {
         return session->sent;
@@ -178,7 +171,6 @@ chat_session_is_inactive(const char * const recipient)
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
         return FALSE;
     } else {
         return (session->state == CHAT_STATE_INACTIVE);
@@ -191,7 +183,6 @@ chat_session_is_active(const char * const recipient)
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
         return FALSE;
     } else {
         return (session->state == CHAT_STATE_ACTIVE);
@@ -203,9 +194,7 @@ chat_session_set_active(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
-    if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
-    } else {
+    if (session != NULL) {
         session->state = CHAT_STATE_ACTIVE;
         g_timer_start(session->active_timer);
         session->sent = TRUE;
@@ -218,7 +207,6 @@ chat_session_is_paused(const char * const recipient)
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
         return FALSE;
     } else {
         return (session->state == CHAT_STATE_PAUSED);
@@ -231,7 +219,6 @@ chat_session_is_gone(const char * const recipient)
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
         return FALSE;
     } else {
         return (session->state == CHAT_STATE_GONE);
@@ -243,9 +230,7 @@ chat_session_set_gone(const char * const recipient)
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
-    if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
-    } else {
+    if (session != NULL) {
         session->state = CHAT_STATE_GONE;
     }
 }
@@ -256,7 +241,6 @@ chat_session_get_recipient_supports(const char * const recipient)
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
         return FALSE;
     } else {
         return session->recipient_supports;
@@ -269,9 +253,7 @@ chat_session_set_recipient_supports(const char * const recipient,
 {
     ChatSession session = g_hash_table_lookup(sessions, recipient);
 
-    if (session == NULL) {
-        log_error("No chat session found for %s.", recipient);
-    } else {
+    if (session != NULL) {
         session->recipient_supports = recipient_supports;
     }
 }

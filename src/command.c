@@ -109,6 +109,7 @@ static gboolean _cmd_set_beep(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_notify(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_log(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_priority(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_reconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_intype(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_flash(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_showsplash(gchar **args, struct cmd_help_t help);
@@ -483,6 +484,18 @@ static struct cmd_t setting_commands[] =
           "",
           "Config file section : [log]",
           "Config file value :   maxsize=bytes",
+          NULL } } },
+
+    { "/reconnect",
+        _cmd_set_reconnect, parse_args, 1, 1,
+        { "/reconnect seconds", "Set reconnect interval.",
+        { "/reconnect seconds",
+          "--------------------",
+          "Set the reconnect attempt interval in seconds for when the connection is lost.",
+          "A value of 0 will switch of reconnect attempts.",
+          "",
+          "Config file section : [jabber]",
+          "Config file value :   reconnect=seconds",
           NULL } } },
 
     { "/priority",
@@ -1457,6 +1470,28 @@ _cmd_set_log(gchar **args, struct cmd_help_t help)
         if (_strtoi(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX) == 0) {
             prefs_set_max_log_size(intval);
             cons_show("Log maxinum size set to %d bytes", intval);
+        }
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
+
+    /* TODO: make 'level' subcommand for debug level */
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_set_reconnect(gchar **args, struct cmd_help_t help)
+{
+    char *value = args[0];
+    int intval;
+
+    if (_strtoi(value, &intval, 0, INT_MAX) == 0) {
+        prefs_set_reconnect(intval);
+        if (intval == 0) {
+            cons_show("Reconnect disabled.", intval);
+        } else {
+            cons_show("Reconnect interval set to %d seconds.", intval);
         }
     } else {
         cons_show("Usage: %s", help.usage);

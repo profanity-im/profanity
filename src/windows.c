@@ -1103,6 +1103,15 @@ cons_prefs(void)
 
     cons_show("Priority                     : %d", prefs_get_priority());
 
+    gint reconnect_interval = prefs_get_reconnect();
+    if (reconnect_interval == 0) {
+        cons_show("Reconnect interval           : OFF");
+    } else if (remind_period == 1) {
+        cons_show("Reconnect interval           : 1 second");
+    } else {
+        cons_show("Reconnect interval           : %d seconds", reconnect_interval);
+    }
+
     cons_show("");
 
     if (current_index == 0) {
