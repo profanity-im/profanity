@@ -12,6 +12,12 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 # Checks for programs.
 AC_PROG_CC
 
+# get canonical host
+AC_CANONICAL_HOST
+if test "$host_os" == "cygwin"; then
+    AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])
+fi
+
 # Options
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
