@@ -44,7 +44,7 @@ AC_CHECK_LIB([glib-2.0], [main], [],
 AC_CHECK_LIB([curl], [main], [], 
     [AC_MSG_ERROR([libcurl is required for profanity])])
 AC_CHECK_LIB([notify], [main], [], 
-    [AC_MSG_NOTICE([libnotify not found, desktop notifications no supported])])
+    [AC_MSG_NOTICE([libnotify not found, desktop notifications not supported])])
 AC_CHECK_LIB([headunit], [main], [], 
     [AC_MSG_NOTICE([headunit not found, will not be able to run tests])])
 
