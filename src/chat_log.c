@@ -29,6 +29,7 @@
 
 #include "chat_log.h"
 #include "common.h"
+#include "files.h"
 #include "log.h"
 #include "ui.h"
 
@@ -223,11 +224,9 @@ static char *
 _get_log_filename(const char * const other, const char * const login,
     GDateTime *dt, gboolean create)
 {
-    GString *log_file = g_string_new(getenv("HOME"));
-    g_string_append(log_file, "/.profanity/log");
-    if (create) {
-        create_dir(log_file->str);
-    }
+    gchar *chatlogs_dir = files_get_chatlog_dir();
+    GString *log_file = g_string_new(chatlogs_dir);
+    g_free(chatlogs_dir);
 
     gchar *login_dir = str_replace(login, "@", "_at_");
     g_string_append_printf(log_file, "/%s", login_dir);

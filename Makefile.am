@@ -9,7 +9,8 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/chat_log.h src/tinyurl.c src/tinyurl.h src/chat_session.c \
 	src/chat_session.h src/release.c src/release.h src/room_chat.c \
 	src/room_chat.h src/stanza.c src/stanza.h src/parser.c src/parser.h \
-	src/theme.c src/theme.h src/window.c src/window.h
+	src/theme.c src/theme.h src/window.c src/window.h src/xdg_base.c \
+	src/xdg_base.h src/files.c src/files.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite

@@ -20,9 +20,6 @@
  *
  */
 
-#include "config.h"
-#include "preferences.h"
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,10 +31,13 @@
 #include <ncurses/ncurses.h>
 #endif
 
+#include "config.h"
+#include "files.h"
 #include "log.h"
+#include "preferences.h"
 #include "prof_autocomplete.h"
 
-static GString *prefs_loc;
+static gchar *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
 
@@ -53,11 +53,10 @@ prefs_load(void)
 
     log_info("Loading preferences");
     login_ac = p_autocomplete_new();
-    prefs_loc = g_string_new(getenv("HOME"));
-    g_string_append(prefs_loc, "/.profanity/config");
+    prefs_loc = files_get_preferences_file();
 
     prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc->str, G_KEY_FILE_KEEP_COMMENTS,
+    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS,
         NULL);
 
     // create the logins searchable list for autocompletion
@@ -378,5 +377,5 @@ _save_prefs(void)
 {
     gsize g_data_size;
     char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    g_file_set_contents(prefs_loc->str, g_prefs_data, g_data_size, NULL);
+    g_file_set_contents(prefs_loc, g_prefs_data, g_data_size, NULL);
 }

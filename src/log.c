@@ -29,6 +29,7 @@
 #include "glib.h"
 
 #include "common.h"
+#include "files.h"
 #include "log.h"
 #include "preferences.h"
 
@@ -45,7 +46,6 @@ static GTimeZone *tz;
 static GDateTime *dt;
 static log_level_t level_filter;
 
-static GString *_get_log_file(void);
 static void _rotate_log_file(void);
 
 void
@@ -101,9 +101,9 @@ log_init(log_level_t filter)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
-    GString *log_file = _get_log_file();
-    logp = fopen(log_file->str, "a");
-    g_string_free(log_file, TRUE);
+    gchar *log_file = files_get_log_file();
+    logp = fopen(log_file, "a");
+    g_free(log_file);
 }
 
 log_level_t
@@ -125,7 +125,7 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
     if (level >= level_filter) {
         struct stat st;
         int result;
-        GString *log_file = _get_log_file();
+        gchar *log_file = files_get_log_file();
         dt = g_date_time_new_now(tz);
 
         gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
@@ -135,42 +135,32 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
         fflush(logp);
         g_free(date_fmt);
 
-        result = stat(log_file->str, &st);
+        result = stat(log_file, &st);
         if (result == 0 && st.st_size >= prefs_get_max_log_size()) {
             _rotate_log_file();
         }
 
-        g_string_free(log_file, TRUE);
+        g_free(log_file);
     }
 }
 
-static GString *
-_get_log_file(void)
-{
-    GString *log_file = g_string_new(getenv("HOME"));
-    g_string_append(log_file, "/.profanity/log");
-    create_dir(log_file->str);
-    g_string_append(log_file, "/profanity.log");
-
-    return log_file;
-}
 static void
 _rotate_log_file(void)
 {
-    GString *log_file = _get_log_file();
-    size_t len = strlen(log_file->str);
+    gchar *log_file = files_get_log_file();
+    size_t len = strlen(log_file);
     char *log_file_new = malloc(len + 3);
 
-    strncpy(log_file_new, log_file->str, len);
+    strncpy(log_file_new, log_file, len);
     log_file_new[len] = '.';
     log_file_new[len+1] = '1';
     log_file_new[len+2] = 0;
 
     log_close();
-    rename(log_file->str, log_file_new);
+    rename(log_file, log_file_new);
     log_init(log_get_filter());
 
     free(log_file_new);
-    g_string_free(log_file, TRUE);
+    g_free(log_file);
     log_info("Log has been rotated");
 }

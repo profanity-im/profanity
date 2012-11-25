@@ -34,6 +34,7 @@
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"
+#include "files.h"
 #include "history.h"
 #include "log.h"
 #include "preferences.h"
@@ -45,7 +46,6 @@
 
 static log_level_t _get_log_level(char *log_level);
 static gboolean _process_input(char *inp);
-static void _create_config_directory();
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
 
@@ -374,15 +374,6 @@ prof_handle_activity(void)
     }
 }
 
-static void
-_create_config_directory(void)
-{
-    GString *dir = g_string_new(getenv("HOME"));
-    g_string_append(dir, "/.profanity");
-    create_dir(dir->str);
-    g_string_free(dir, TRUE);
-}
-
 static log_level_t
 _get_log_level(char *log_level)
 {
@@ -441,7 +432,10 @@ _init(const int disable_tls, char *log_level)
 {
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
-    _create_config_directory();
+    files_create_config_directory();
+    files_create_data_directory();
+    files_create_chatlog_directory();
+    files_create_themes_directory();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
     log_info("Starting Profanity (%s)...", PACKAGE_VERSION);

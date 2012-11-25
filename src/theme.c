@@ -33,6 +33,7 @@
 #include <ncurses/ncurses.h>
 #endif
 
+#include "files.h"
 #include "log.h"
 #include "theme.h"
 
@@ -99,8 +100,10 @@ theme_load(const char * const theme_name)
     theme = g_key_file_new();
 
     if (theme_name != NULL) {
-        theme_loc = g_string_new(getenv("HOME"));
-        g_string_append(theme_loc, "/.profanity/themes/");
+        gchar *themes_dir = files_get_themes_dir();
+        theme_loc = g_string_new(themes_dir);
+        g_free(themes_dir);
+        g_string_append(theme_loc, "/");
         g_string_append(theme_loc, theme_name);
         g_key_file_load_from_file(theme, theme_loc->str, G_KEY_FILE_KEEP_COMMENTS,
             NULL);
@@ -119,8 +122,10 @@ theme_change(const char * const theme_name)
         _load_colours();
         return TRUE;
     } else {
-        GString *new_theme_file = g_string_new(getenv("HOME"));
-        g_string_append(new_theme_file, "/.profanity/themes/");
+        gchar *themes_dir = files_get_themes_dir();
+        GString *new_theme_file = g_string_new(themes_dir);
+        g_free(themes_dir);
+        g_string_append(new_theme_file, "/");
         g_string_append(new_theme_file, theme_name);
 
         // no theme file found
