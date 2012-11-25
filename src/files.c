@@ -150,6 +150,6 @@ _mkdir_recursive(const char *dir)
             _create_dir(next_dir);
             g_free(next_dir);
         }
-    } 
+    }
 }
 

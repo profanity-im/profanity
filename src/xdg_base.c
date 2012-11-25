@@ -38,7 +38,7 @@ xdg_get_config_home(void)
         g_string_append(default_path, "/.config");
         gchar *result = strdup(default_path->str);
         g_string_free(default_path, TRUE);
-        
+
         return result;
     }
 }
@@ -56,7 +56,7 @@ xdg_get_data_home(void)
         g_string_append(default_path, "/.local/share");
         gchar *result = strdup(default_path->str);
         g_string_free(default_path, TRUE);
-        
+
         return result;
     }
 }
