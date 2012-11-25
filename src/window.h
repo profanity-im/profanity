@@ -20,6 +20,9 @@
  *
  */
 
+#ifndef WINDOW_H
+#define WINDOW_H
+
 #include "ui.h"
 
 typedef struct prof_win_t {
@@ -35,3 +38,5 @@ typedef struct prof_win_t {
 
 ProfWin* window_create(const char * const title, int cols, win_type_t type);
 void window_free(ProfWin *window);
+
+#endif
