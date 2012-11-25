@@ -37,28 +37,7 @@
 #include "jabber.h"
 
 #define INP_WIN_MAX 1000
-
-#define COLOUR_TEXT             COLOR_PAIR(1)
-#define COLOUR_SPLASH           COLOR_PAIR(2)
-#define COLOUR_ERROR            COLOR_PAIR(3)
-#define COLOUR_INCOMING         COLOR_PAIR(4)
-#define COLOUR_TITLE_TEXT       COLOR_PAIR(10)
-#define COLOUR_TITLE_BRACKET    COLOR_PAIR(11)
-#define COLOUR_STATUS_TEXT      COLOR_PAIR(20)
-#define COLOUR_STATUS_BRACKET      COLOR_PAIR(21)
-#define COLOUR_STATUS_ACTIVE    COLOR_PAIR(22)
-#define COLOUR_STATUS_NEW       COLOR_PAIR(23)
-#define COLOUR_ME               COLOR_PAIR(30)
-#define COLOUR_THEM             COLOR_PAIR(31)
-#define COLOUR_ROOMINFO         COLOR_PAIR(40)
-#define COLOUR_ONLINE           COLOR_PAIR(50)
-#define COLOUR_OFFLINE          COLOR_PAIR(51)
-#define COLOUR_AWAY             COLOR_PAIR(52)
-#define COLOUR_CHAT             COLOR_PAIR(53)
-#define COLOUR_DND              COLOR_PAIR(54)
-#define COLOUR_XA               COLOR_PAIR(55)
-#define COLOUR_TYPING           COLOR_PAIR(60)
-#define COLOUR_GONE             COLOR_PAIR(61)
+#define PAD_SIZE 1000
 
 typedef enum {
     WIN_UNUSED,
@@ -124,6 +103,7 @@ void win_bad_show(const char * const msg);
 void win_remind(void);
 void win_activity(void);
 void win_no_activity(void);
+void win_switch_if_active(const int i);
 
 void win_join_chat(const char * const room, const char * const nick);
 void win_show_room_roster(const char * const room);
@@ -147,6 +127,7 @@ void win_show_room_member_nick_change(const char * const room,
 void win_show_room_nick_change(const char * const room, const char * const nick);
 void win_show_room_member_presence(const char * const room,
     const char * const nick, const char * const show, const char * const status);
+void win_load_colours(void);
 
 // console window actions
 void cons_about(void);
@@ -186,5 +167,6 @@ void inp_non_block(void);
 void inp_block(void);
 void inp_get_password(char *passwd);
 void inp_replace_input(char *input, const char * const new_input, int *size);
+int inp_get_next_char(void);
 
 #endif

@@ -32,13 +32,14 @@
 #include <ncurses/ncurses.h>
 #endif
 
+#include "theme.h"
 #include "ui.h"
 
 static WINDOW *status_bar;
 static char *message = NULL;
-static char _active[29] = "[ ][ ][ ][ ][ ][ ][ ][ ][  ]";
-static int is_active[9];
-static int is_new[9];
+static char _active[31] = "[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]";
+static int is_active[10];
+static int is_new[10];
 static int dirty;
 static GDateTime *last_time;
 
@@ -50,7 +51,9 @@ create_status_bar(void)
     int rows, cols, i;
     getmaxyx(stdscr, rows, cols);
 
-    for (i = 0; i < 9; i++) {
+    is_active[0] = TRUE;
+    is_new[0] = FALSE;
+    for (i = 1; i < 10; i++) {
         is_active[i] = FALSE;
         is_new[i] = FALSE;
     }
@@ -58,7 +61,7 @@ create_status_bar(void)
     status_bar = newwin(1, cols, rows-2, 0);
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 29, _active);
+    mvwprintw(status_bar, 0, cols - 31, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     last_time = g_date_time_new_now_local();
@@ -98,18 +101,18 @@ status_bar_resize(void)
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
     wclear(status_bar);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 29, _active);
+    mvwprintw(status_bar, 0, cols - 31, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    for(i = 0; i < 9; i++) {
+    for(i = 0; i < 10; i++) {
         if (is_new[i])
-            status_bar_new(i+1);
+            status_bar_new(i);
         else if (is_active[i])
-            status_bar_active(i+1);
+            status_bar_active(i);
     }
 
     if (message != NULL)
-        mvwprintw(status_bar, 0, 9, message);
+        mvwprintw(status_bar, 0, 10, message);
 
     last_time = g_date_time_new_now_local();
     dirty = TRUE;
@@ -118,16 +121,14 @@ status_bar_resize(void)
 void
 status_bar_inactive(const int win)
 {
-    is_active[win-1] = FALSE;
-    is_new[win-1] = FALSE;
+    is_active[win] = FALSE;
+    is_new[win] = FALSE;
 
-    int active_pos = 1 + ((win -1) * 3);
+    int active_pos = 1 + (win * 3);
 
     int cols = getmaxx(stdscr);
 
-    mvwaddch(status_bar, 0, cols - 29 + active_pos, ' ');
-    if (win == 9)
-        mvwaddch(status_bar, 0, cols - 29 + active_pos + 1, ' ');
+    mvwaddch(status_bar, 0, cols - 31 + active_pos, ' ');
 
     dirty = TRUE;
 }
@@ -135,18 +136,18 @@ status_bar_inactive(const int win)
 void
 status_bar_active(const int win)
 {
-    is_active[win-1] = TRUE;
-    is_new[win-1] = FALSE;
+    is_active[win] = TRUE;
+    is_new[win] = FALSE;
 
-    int active_pos = 1 + ((win -1) * 3);
+    int active_pos = 1 + (win * 3);
 
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_ACTIVE);
-    if (win < 9)
-        mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
+    if (win+1 < 10)
+        mvwprintw(status_bar, 0, cols - 31 + active_pos, "%d", win+1);
     else
-        mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
+        mvwprintw(status_bar, 0, cols - 31 + active_pos, "0");
     wattroff(status_bar, COLOUR_STATUS_ACTIVE);
 
     dirty = TRUE;
@@ -155,19 +156,19 @@ status_bar_active(const int win)
 void
 status_bar_new(const int win)
 {
-    is_active[win-1] = TRUE;
-    is_new[win-1] = TRUE;
+    is_active[win] = TRUE;
+    is_new[win] = TRUE;
 
-    int active_pos = 1 + ((win -1) * 3);
+    int active_pos = 1 + (win * 3);
 
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_NEW);
     wattron(status_bar, A_BLINK);
-    if (win < 9)
-        mvwprintw(status_bar, 0, cols - 29 + active_pos, "%d", win+1);
+    if (win+1 < 10)
+        mvwprintw(status_bar, 0, cols - 31 + active_pos, "%d", win+1);
     else
-        mvwprintw(status_bar, 0, cols - 29 + active_pos, "10");
+        mvwprintw(status_bar, 0, cols - 31 + active_pos, "0");
     wattroff(status_bar, COLOUR_STATUS_NEW);
     wattroff(status_bar, A_BLINK);
 
@@ -193,20 +194,20 @@ status_bar_print_message(const char * const msg)
 
     message = (char *) malloc((strlen(msg) + 1) * sizeof(char));
     strcpy(message, msg);
-    mvwprintw(status_bar, 0, 9, message);
+    mvwprintw(status_bar, 0, 10, message);
 
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 29, _active);
+    mvwprintw(status_bar, 0, cols - 31, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     int i;
-    for(i = 0; i < 9; i++) {
+    for(i = 0; i < 10; i++) {
         if (is_new[i])
-            status_bar_new(i+1);
+            status_bar_new(i);
         else if (is_active[i])
-            status_bar_active(i+1);
+            status_bar_active(i);
     }
 
     dirty = TRUE;
@@ -221,7 +222,9 @@ status_bar_clear(void)
     }
 
     int i;
-    for (i = 0; i < 9; i++) {
+    is_active[0] = TRUE;
+    is_new[0] = FALSE;
+    for (i = 1; i < 10; i++) {
         is_active[i] = FALSE;
         is_new[i] = FALSE;
     }
@@ -231,7 +234,7 @@ status_bar_clear(void)
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 29, _active);
+    mvwprintw(status_bar, 0, cols - 31, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     dirty = TRUE;
@@ -250,15 +253,15 @@ status_bar_clear_message(void)
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 29, _active);
+    mvwprintw(status_bar, 0, cols - 31, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     int i;
-    for(i = 0; i < 9; i++) {
+    for(i = 0; i < 10; i++) {
         if (is_new[i])
-            status_bar_new(i+1);
+            status_bar_new(i);
         else if (is_active[i])
-            status_bar_active(i+1);
+            status_bar_active(i);
     }
 
     dirty = TRUE;

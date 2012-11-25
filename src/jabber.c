@@ -48,6 +48,11 @@ static struct _jabber_conn_t {
     int priority;
 } jabber_conn;
 
+// for auto reconnect
+static char *saved_user;
+static char *saved_password;
+static GTimer *reconnect_timer;
+
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
 static xmpp_log_level_t _get_xmpp_log_level();
 static void _xmpp_file_logger(void * const userdata,
@@ -98,15 +103,22 @@ jabber_conn_status_t
 jabber_connect(const char * const user,
     const char * const passwd)
 {
-    log_info("Connecting as %s", user);
+    if (saved_user == NULL) {
+        saved_user = strdup(user);
+    }
+    if (saved_password == NULL) {
+        saved_password = strdup(passwd);
+    }
+
+    log_info("Connecting as %s", saved_user);
     xmpp_initialize();
 
     jabber_conn.log = _xmpp_get_file_logger();
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
     jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
 
-    xmpp_conn_set_jid(jabber_conn.conn, user);
-    xmpp_conn_set_pass(jabber_conn.conn, passwd);
+    xmpp_conn_set_jid(jabber_conn.conn, saved_user);
+    xmpp_conn_set_pass(jabber_conn.conn, saved_password);
 
     if (jabber_conn.tls_disabled)
         xmpp_conn_disable_tls(jabber_conn.conn);
@@ -141,10 +153,21 @@ jabber_disconnect(void)
 void
 jabber_process_events(void)
 {
+    // run xmpp event loop if connected, connecting or disconnecting
     if (jabber_conn.conn_status == JABBER_CONNECTED
             || jabber_conn.conn_status == JABBER_CONNECTING
-            || jabber_conn.conn_status == JABBER_DISCONNECTING)
+            || jabber_conn.conn_status == JABBER_DISCONNECTING) {
         xmpp_run_once(jabber_conn.ctx, 10);
+
+    // check timer and reconnect if disconnected and timer set
+    } else if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
+            (reconnect_timer != NULL)) {
+        if (g_timer_elapsed(reconnect_timer, NULL) > (prefs_get_reconnect() * 1.0)) {
+            log_debug("Attempting reconncet as %s", saved_user);
+            jabber_connect(saved_user, saved_password);
+        }
+    }
+
 }
 
 void
@@ -400,6 +423,8 @@ jabber_get_status(void)
 void
 jabber_free_resources(void)
 {
+    saved_user = NULL;
+    saved_password = NULL;
     chat_sessions_clear();
     xmpp_conn_release(jabber_conn.conn);
     xmpp_ctx_free(jabber_conn.ctx);
@@ -624,6 +649,7 @@ _connection_handler(xmpp_conn_t * const conn,
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
 
+    // login success
     if (status == XMPP_CONN_CONNECT) {
         const char *jid = xmpp_conn_get_jid(conn);
         prof_handle_login_success(jid);
@@ -637,26 +663,56 @@ _connection_handler(xmpp_conn_t * const conn,
         _jabber_roster_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
         jabber_conn.presence = PRESENCE_ONLINE;
+
+        if (reconnect_timer != NULL) {
+            g_timer_destroy(reconnect_timer);
+            reconnect_timer = NULL;
+        }
+
     } else {
 
         // received close stream response from server after disconnect
         if (jabber_conn.conn_status == JABBER_DISCONNECTING) {
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
+            if (saved_user != NULL) {
+                free(saved_user);
+                saved_user = NULL;
+            }
+            if (saved_password != NULL) {
+                free(saved_password);
+                saved_password = NULL;
+            }
 
         // lost connection for unkown reason
         } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
             prof_handle_lost_connection();
+            reconnect_timer = g_timer_new();
             xmpp_stop(ctx);
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
 
         // login attempt failed
         } else {
-            prof_handle_failed_login();
-            xmpp_stop(ctx);
-            jabber_conn.conn_status = JABBER_DISCONNECTED;
-            jabber_conn.presence = PRESENCE_OFFLINE;
+            if (reconnect_timer == NULL) {
+                prof_handle_failed_login();
+                if (saved_user != NULL) {
+                    free(saved_user);
+                    saved_user = NULL;
+                }
+                if (saved_password != NULL) {
+                    free(saved_password);
+                    saved_password = NULL;
+                }
+                xmpp_stop(ctx);
+                jabber_conn.conn_status = JABBER_DISCONNECTED;
+                jabber_conn.presence = PRESENCE_OFFLINE;
+            } else {
+                xmpp_stop(ctx);
+                g_timer_start(reconnect_timer);
+                jabber_conn.conn_status = JABBER_DISCONNECTED;
+                jabber_conn.presence = PRESENCE_OFFLINE;
+            }
         }
     }
 }

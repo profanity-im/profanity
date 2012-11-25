@@ -58,6 +58,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
+#include "theme.h"
 #include "ui.h"
 
 static WINDOW *inp_win;
@@ -65,6 +66,7 @@ static int pad_start = 0;
 
 static int _handle_edit(const int ch, char *input, int *size);
 static int _printable(const int ch);
+static gboolean _special_key(const int ch);
 
 void
 create_input_window(void)
@@ -79,7 +81,7 @@ create_input_window(void)
     getmaxyx(stdscr, rows, cols);
 
     inp_win = newpad(1, INP_WIN_MAX);
-    wbkgd(inp_win, COLOR_PAIR(1));
+    wbkgd(inp_win, COLOUR_INPUT_TEXT);
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
@@ -214,6 +216,12 @@ inp_put_back(void)
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
+int
+inp_get_next_char(void)
+{
+    return wgetch(inp_win);
+}
+
 void
 inp_replace_input(char *input, const char * const new_input, int *size)
 {
@@ -240,6 +248,7 @@ _handle_edit(const int ch, char *input, int *size)
     char *next = NULL;
     int inp_y = 0;
     int inp_x = 0;
+    int next_ch;
 
     getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
@@ -247,9 +256,50 @@ _handle_edit(const int ch, char *input, int *size)
     switch(ch) {
 
     case 27: // ESC
-        *size = 0;
-        inp_clear();
-        return 1;
+        // check for ALT-num
+        next_ch = inp_get_next_char();
+        if (next_ch != ERR) {
+            switch (next_ch)
+            {
+                case '1':
+                    win_switch_if_active(0);
+                    break;
+                case '2':
+                    win_switch_if_active(1);
+                    break;
+                case '3':
+                    win_switch_if_active(2);
+                    break;
+                case '4':
+                    win_switch_if_active(3);
+                    break;
+                case '5':
+                    win_switch_if_active(4);
+                    break;
+                case '6':
+                    win_switch_if_active(5);
+                    break;
+                case '7':
+                    win_switch_if_active(6);
+                    break;
+                case '8':
+                    win_switch_if_active(7);
+                    break;
+                case '9':
+                    win_switch_if_active(8);
+                    break;
+                case '0':
+                    win_switch_if_active(9);
+                    break;
+                default:
+                    break;
+            }
+            return 1;
+        } else {
+            *size = 0;
+            inp_clear();
+            return 1;
+        }
 
     case 127:
     case KEY_BACKSPACE:
@@ -372,6 +422,13 @@ _printable(const int ch)
             ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
             ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&
             ch != KEY_F(10) && ch!= KEY_F(11) && ch != KEY_F(12) &&
-            ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE);
+            ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE &&
+            !_special_key(ch));
 }
 
+static gboolean
+_special_key(const int ch)
+{
+    char *str = unctrl(ch);
+    return ((strlen(str) > 1) && g_str_has_prefix(str, "^"));
+}
