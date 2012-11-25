@@ -1828,7 +1828,7 @@ _win_handle_page(const int * const ch)
                 else if (*page_start >= y)
                     *page_start = y - page_space;
 
-                _wins[_curr_prof_win].paged = 1;
+                current->paged = 1;
                 dirty = TRUE;
             } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
                 *page_start -= 4;
@@ -1837,7 +1837,7 @@ _win_handle_page(const int * const ch)
                 if (*page_start < 0)
                     *page_start = 0;
 
-                _wins[_curr_prof_win].paged = 1;
+                current->paged = 1;
                 dirty = TRUE;
             }
         }
