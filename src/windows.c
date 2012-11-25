@@ -107,7 +107,12 @@ gui_init(void)
     initscr();
     raw();
     keypad(stdscr, TRUE);
+
+#ifdef PLATFORM_CYGWIN
+    mousemask(BUTTON5_PRESSED | BUTTON4_PRESSED, NULL);
+#else
     mousemask(BUTTON2_PRESSED | BUTTON4_PRESSED, NULL);
+#endif
     mouseinterval(5);
 
     win_load_colours();
@@ -1817,7 +1822,12 @@ _win_handle_page(const int * const ch)
 
     if (*ch == KEY_MOUSE) {
         if (getmouse(&mouse_event) == OK) {
+
+#ifdef PLATFORM_CYGWIN
+            if (mouse_event.bstate & BUTTON5_PRESSED) { // mouse wheel down
+#else
             if (mouse_event.bstate & BUTTON2_PRESSED) { // mouse wheel down
+#endif
                 *page_start += 4;
 
                 // only got half a screen, show full screen
