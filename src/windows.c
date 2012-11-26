@@ -101,24 +101,20 @@ static void _win_notify_typing(const char * const from);
 #endif
 
 void
-gui_init(void)
+ui_init(void)
 {
     log_info("Initialising UI");
     initscr();
     raw();
     keypad(stdscr, TRUE);
-
 #ifdef PLATFORM_CYGWIN
     mousemask(BUTTON5_PRESSED | BUTTON4_PRESSED, NULL);
 #else
     mousemask(BUTTON2_PRESSED | BUTTON4_PRESSED, NULL);
 #endif
     mouseinterval(5);
-
-    win_load_colours();
-
+    ui_load_colours();
     refresh();
-
     create_title_bar();
     create_status_bar();
     status_bar_active(0);
@@ -129,17 +125,7 @@ gui_init(void)
 }
 
 void
-win_load_colours(void)
-{
-    if (has_colors()) {
-        use_default_colors();
-        start_color();
-        theme_init_colours();
-    }
-}
-
-void
-gui_refresh(void)
+ui_refresh(void)
 {
     title_bar_refresh();
     status_bar_refresh();
@@ -153,7 +139,7 @@ gui_refresh(void)
 }
 
 void
-gui_close(void)
+ui_close(void)
 {
 #ifdef HAVE_LIBNOTIFY
     if (notify_is_initted()) {
@@ -164,7 +150,7 @@ gui_close(void)
 }
 
 void
-gui_resize(const int ch, const char * const input, const int size)
+ui_resize(const int ch, const char * const input, const int size)
 {
     log_info("Resizing UI");
     title_bar_resize();
@@ -175,7 +161,48 @@ gui_resize(const int ch, const char * const input, const int size)
 }
 
 void
-win_close_win(void)
+ui_load_colours(void)
+{
+    if (has_colors()) {
+        use_default_colors();
+        start_color();
+        theme_init_colours();
+    }
+}
+
+void
+ui_show_typing(const char * const from)
+{
+    int win_index = _find_prof_win_index(from);
+
+    if (prefs_get_intype()) {
+        // no chat window for user
+        if (win_index == NUM_WINS) {
+            _cons_show_typing(from);
+
+        // have chat window but not currently in it
+        } else if (win_index != current_index) {
+            _cons_show_typing(from);
+            dirty = TRUE;
+
+        // in chat window with user
+        } else {
+            title_bar_set_typing(TRUE);
+            title_bar_draw();
+
+            status_bar_active(win_index);
+            dirty = TRUE;
+       }
+    }
+
+#ifdef HAVE_LIBNOTIFY
+    if (prefs_get_notify_typing())
+        _win_notify_typing(from);
+#endif
+}
+
+void
+win_current_close(void)
 {
     window_free(current);
     windows[current_index] = NULL;
@@ -192,25 +219,31 @@ win_close_win(void)
 }
 
 int
-win_in_chat(void)
+win_current_is_chat(void)
 {
     return (current->type == WIN_CHAT);
 }
 
 int
-win_in_groupchat(void)
+win_current_is_groupchat(void)
 {
     return (current->type == WIN_MUC);
 }
 
 int
-win_in_private_chat(void)
+win_current_is_private(void)
 {
     return (current->type == WIN_PRIVATE);
 }
 
+char *
+win_current_get_recipient(void)
+{
+    return strdup(current->from);
+}
+
 void
-win_show_wins(void)
+cons_show_wins(void)
 {
     int i = 0;
     int count = 0;
@@ -279,47 +312,8 @@ win_show_wins(void)
     }
 }
 
-char *
-win_get_recipient(void)
-{
-    char *recipient = (char *) malloc(sizeof(char) * (strlen(current->from) + 1));
-    strcpy(recipient, current->from);
-    return recipient;
-}
-
 void
-win_show_typing(const char * const from)
-{
-    int win_index = _find_prof_win_index(from);
-
-    if (prefs_get_intype()) {
-        // no chat window for user
-        if (win_index == NUM_WINS) {
-            _cons_show_typing(from);
-
-        // have chat window but not currently in it
-        } else if (win_index != current_index) {
-            _cons_show_typing(from);
-            dirty = TRUE;
-
-        // in chat window with user
-        } else {
-            title_bar_set_typing(TRUE);
-            title_bar_draw();
-
-            status_bar_active(win_index);
-            dirty = TRUE;
-       }
-    }
-
-#ifdef HAVE_LIBNOTIFY
-    if (prefs_get_notify_typing())
-        _win_notify_typing(from);
-#endif
-}
-
-void
-win_remind(void)
+notify_remind(void)
 {
 #ifdef HAVE_LIBNOTIFY
     gint unread = _win_get_unread();
@@ -332,8 +326,8 @@ win_remind(void)
 void
 win_activity(void)
 {
-    if (win_in_chat()) {
-        char *recipient = win_get_recipient();
+    if (win_current_is_chat()) {
+        char *recipient = win_current_get_recipient();
         chat_session_set_composing(recipient);
         if (!chat_session_get_sent(recipient) ||
                 chat_session_is_paused(recipient)) {

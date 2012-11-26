@@ -58,11 +58,13 @@ struct prof_win {
 };
 
 // gui startup and shutdown, resize
-void gui_init(void);
-void gui_refresh(void);
-void gui_close(void);
-void gui_resize(const int ch, const char * const input,
+void ui_init(void);
+void ui_load_colours(void);
+void ui_refresh(void);
+void ui_close(void);
+void ui_resize(const int ch, const char * const input,
     const int size);
+void ui_show_typing(const char * const from);
 
 // create windows
 void create_title_bar(void);
@@ -79,11 +81,13 @@ void title_bar_set_recipient(char *from);
 void title_bar_set_typing(gboolean is_typing);
 void title_bar_draw(void);
 
-// main window actions
-void win_close_win(void);
-int win_in_chat(void);
-char *win_get_recipient(void);
-void win_show_typing(const char * const from);
+// current window actions
+void win_current_close(void);
+int win_current_is_chat(void);
+int win_current_is_groupchat(void);
+int win_current_is_private(void);
+char* win_current_get_recipient(void);
+
 void win_show_gone(const char * const from);
 void win_show_incomming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv);
@@ -100,14 +104,12 @@ void win_contact_offline(const char * const from, const char * const show,
 void win_disconnected(void);
 void win_show(const char * const msg);
 void win_bad_show(const char * const msg);
-void win_remind(void);
 void win_activity(void);
 void win_no_activity(void);
 void win_switch_if_active(const int i);
 
 void win_join_chat(const char * const room, const char * const nick);
 void win_show_room_roster(const char * const room);
-int win_in_groupchat(void);
 void win_show_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void win_show_room_message(const char * const room_jid, const char * const nick,
@@ -120,14 +122,11 @@ void win_show_room_member_offline(const char * const room, const char * const ni
 void win_show_room_member_online(const char * const room,
     const char * const nick, const char * const show, const char * const status);
 void win_show_status(const char * const contact);
-void win_show_wins(void);
-int win_in_private_chat(void);
 void win_show_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick);
 void win_show_room_nick_change(const char * const room, const char * const nick);
 void win_show_room_member_presence(const char * const room,
     const char * const nick, const char * const show, const char * const status);
-void win_load_colours(void);
 
 // console window actions
 void cons_about(void);
@@ -145,6 +144,7 @@ void cons_bad_show(const char * const cmd, ...);
 void cons_highlight_show(const char * const cmd);
 void cons_show_contacts(GSList * list);
 void cons_check_version(gboolean not_available_msg);
+void cons_show_wins(void);
 
 // status bar actions
 void status_bar_refresh(void);
@@ -169,4 +169,5 @@ void inp_get_password(char *passwd);
 void inp_replace_input(char *input, const char * const new_input, int *size);
 int inp_get_next_char(void);
 
+void notify_remind(void);
 #endif

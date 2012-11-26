@@ -73,17 +73,17 @@ prof_run(const int disable_tls, char *log_level)
 
             // 0 means to not remind
             if (remind_period > 0 && elapsed >= remind_period) {
-                win_remind();
+                notify_remind();
                 g_timer_start(timer);
             }
 
             win_handle_special_keys(&ch);
 
             if (ch == KEY_RESIZE) {
-                gui_resize(ch, inp, size);
+                ui_resize(ch, inp, size);
             }
 
-            gui_refresh();
+            ui_refresh();
             jabber_process_events();
 
             inp_get_char(&ch, inp, &size);
@@ -99,7 +99,7 @@ prof_run(const int disable_tls, char *log_level)
 void
 prof_handle_typing(char *from)
 {
-    win_show_typing(from);
+    ui_show_typing(from);
     win_page_off();
 }
 
@@ -442,7 +442,7 @@ _init(const int disable_tls, char *log_level)
     chat_log_init();
     prefs_load();
     theme_load(prefs_get_theme());
-    gui_init();
+    ui_init();
     jabber_init(disable_tls);
     cmd_init();
     log_info("Initialising contact list");
@@ -455,7 +455,7 @@ _shutdown(void)
 {
     jabber_disconnect();
     contact_list_clear();
-    gui_close();
+    ui_close();
     chat_log_close();
     prefs_close();
     theme_close();

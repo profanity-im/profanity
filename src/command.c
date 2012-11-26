@@ -744,7 +744,7 @@ cmd_execute(const char * const command, const char * const inp)
         gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args);
         if (args == NULL) {
             cons_show("Usage: %s", cmd->help.usage);
-            if (win_in_chat()) {
+            if (win_current_is_chat()) {
                 char usage[strlen(cmd->help.usage) + 8];
                 sprintf(usage, "Usage: %s", cmd->help.usage);
                 win_show(usage);
@@ -763,21 +763,21 @@ cmd_execute(const char * const command, const char * const inp)
 gboolean
 cmd_execute_default(const char * const inp)
 {
-    if (win_in_groupchat()) {
+    if (win_current_is_groupchat()) {
         jabber_conn_status_t status = jabber_get_connection_status();
         if (status != JABBER_CONNECTED) {
             win_show("You are not currently connected.");
         } else {
-            char *recipient = win_get_recipient();
+            char *recipient = win_current_get_recipient();
             jabber_send_groupchat(inp, recipient);
             free(recipient);
         }
-    } else if (win_in_chat() || win_in_private_chat()) {
+    } else if (win_current_is_chat() || win_current_is_private()) {
         jabber_conn_status_t status = jabber_get_connection_status();
         if (status != JABBER_CONNECTED) {
             win_show("You are not currently connected.");
         } else {
-            char *recipient = win_get_recipient();
+            char *recipient = win_current_get_recipient();
             jabber_send(inp, recipient);
 
             if (prefs_get_chlog()) {
@@ -966,7 +966,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         if (jid != NULL) {
             jid = strdup(jid);
         } else {
-            jid = win_get_recipient();
+            jid = win_current_get_recipient();
         }
 
         bare_jid = strtok(jid, "/");
@@ -1019,7 +1019,7 @@ _cmd_quit(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_wins(gchar **args, struct cmd_help_t help)
 {
-    win_show_wins();
+    cons_show_wins();
     return TRUE;
 }
 
@@ -1116,7 +1116,7 @@ static gboolean
 _cmd_theme(gchar **args, struct cmd_help_t help)
 {
     if (theme_change(args[0])) {
-        win_load_colours();
+        ui_load_colours();
         prefs_set_theme(args[0]);
         cons_show("Loaded theme: %s", args[0]);
     } else {
@@ -1150,8 +1150,8 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
         // valid arg
         } else {
-            if (win_in_groupchat()) {
-                char *room = win_get_recipient();
+            if (win_current_is_groupchat()) {
+                char *room = win_current_get_recipient();
                 win_show_room_roster(room);
             } else {
                 GSList *list = get_contact_list();
@@ -1317,12 +1317,12 @@ _cmd_nick(gchar **args, struct cmd_help_t help)
         cons_show("You are not currently connected.");
         return TRUE;
     }
-    if (!win_in_groupchat()) {
+    if (!win_current_is_groupchat()) {
         cons_show("You can only change your nickname in a chat room window.");
         return TRUE;
     }
 
-    char *room = win_get_recipient();
+    char *room = win_current_get_recipient();
     char *nick = args[0];
     jabber_change_room_nick(room, nick);
 
@@ -1338,15 +1338,15 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
         GString *error = g_string_new("/tiny, badly formed URL: ");
         g_string_append(error, url);
         cons_bad_show(error->str);
-        if (win_in_chat()) {
+        if (win_current_is_chat()) {
             win_bad_show(error->str);
         }
         g_string_free(error, TRUE);
-    } else if (win_in_chat()) {
+    } else if (win_current_is_chat()) {
         char *tiny = tinyurl_get(url);
 
         if (tiny != NULL) {
-            char *recipient = win_get_recipient();
+            char *recipient = win_current_get_recipient();
             jabber_send(tiny, recipient);
 
             if (prefs_get_chlog()) {
@@ -1370,14 +1370,14 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_close(gchar **args, struct cmd_help_t help)
 {
-    if (win_in_groupchat()) {
-        char *room_jid = win_get_recipient();
+    if (win_current_is_groupchat()) {
+        char *room_jid = win_current_get_recipient();
         jabber_leave_chat_room(room_jid);
-        win_close_win();
-    } else if (win_in_chat() || win_in_private_chat()) {
+        win_current_close();
+    } else if (win_current_is_chat() || win_current_is_private()) {
 
         if (prefs_get_states()) {
-            char *recipient = win_get_recipient();
+            char *recipient = win_current_get_recipient();
 
             // send <gone/> chat state before closing
             if (chat_session_get_recipient_supports(recipient)) {
@@ -1387,7 +1387,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
             }
         }
 
-        win_close_win();
+        win_current_close();
 
     } else {
         cons_show("Cannot close console window.");
