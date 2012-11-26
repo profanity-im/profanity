@@ -29,7 +29,8 @@ gchar *
 xdg_get_config_home(void)
 {
     gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
-    g_strstrip(xdg_config_home);
+    if (xdg_config_home != NULL)
+        g_strstrip(xdg_config_home);
 
     if ((xdg_config_home != NULL) && (strcmp(xdg_config_home, "") != 0)) {
         return strdup(xdg_config_home);
@@ -47,7 +48,8 @@ gchar *
 xdg_get_data_home(void)
 {
     gchar *xdg_data_home = getenv("XDG_DATA_HOME");
-    g_strstrip(xdg_data_home);
+    if (xdg_data_home != NULL)
+        g_strstrip(xdg_data_home);
 
     if ((xdg_data_home != NULL) && (strcmp(xdg_data_home, "") != 0)) {
         return strdup(xdg_data_home);
