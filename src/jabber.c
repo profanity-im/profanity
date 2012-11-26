@@ -164,7 +164,7 @@ jabber_process_events(void)
         if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
             (reconnect_timer != NULL)) {
             if (g_timer_elapsed(reconnect_timer, NULL) > (prefs_get_reconnect() * 1.0)) {
-                log_debug("Attempting reconncet as %s", saved_user);
+                log_debug("Attempting reconnect as %s", saved_user);
                 jabber_connect(saved_user, saved_password);
             }
         }
