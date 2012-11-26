@@ -77,7 +77,7 @@ prof_run(const int disable_tls, char *log_level)
                 g_timer_start(timer);
             }
 
-            win_handle_special_keys(&ch);
+            ui_handle_special_keys(&ch);
 
             if (ch == KEY_RESIZE) {
                 ui_resize(ch, inp, size);
@@ -100,14 +100,14 @@ void
 prof_handle_typing(char *from)
 {
     ui_show_typing(from);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
 prof_handle_incoming_message(char *from, char *message, gboolean priv)
 {
-    win_show_incomming_msg(from, message, NULL, priv);
-    win_page_off();
+    ui_show_incoming_msg(from, message, NULL, priv);
+    win_current_page_off();
 
     if (prefs_get_chlog()) {
         char from_cpy[strlen(from) + 1];
@@ -123,8 +123,8 @@ void
 prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     gboolean priv)
 {
-    win_show_incomming_msg(from, message, &tv_stamp, priv);
-    win_page_off();
+    ui_show_incoming_msg(from, message, &tv_stamp, priv);
+    win_current_page_off();
 
     if (prefs_get_chlog()) {
         char from_cpy[strlen(from) + 1];
@@ -157,19 +157,19 @@ prof_handle_subscription(const char *from, jabber_subscr_t type)
         cons_show("Received authorization request from %s", from);
         log_info("Received authorization request from %s", from);
         win_show_system_msg(from, "Authorization request, type '/sub add' to accept or '/sub del' to reject");
-        win_page_off();
+        win_current_page_off();
         break;
     case PRESENCE_SUBSCRIBED:
         cons_show("Subscription received from %s", from);
         log_info("Subscription received from %s", from);
         win_show_system_msg(from, "Subscribed");
-        win_page_off();
+        win_current_page_off();
         break;
     case PRESENCE_UNSUBSCRIBED:
         cons_show("%s deleted subscription", from);
         log_info("%s deleted subscription", from);
         win_show_system_msg(from, "Unsubscribed");
-        win_page_off();
+        win_current_page_off();
         break;
     default:
         /* unknown type */
@@ -184,7 +184,7 @@ prof_handle_login_success(const char *jid)
     cons_show("%s %s", jid, msg);
     title_bar_set_status(PRESENCE_ONLINE);
     log_info("%s %s", jid, msg);
-    win_page_off();
+    win_current_page_off();
     status_bar_print_message(jid);
     status_bar_refresh();
     prefs_add_login(jid);
@@ -194,7 +194,7 @@ void
 prof_handle_gone(const char * const from)
 {
     win_show_gone(from);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -203,8 +203,8 @@ prof_handle_lost_connection(void)
     cons_bad_show("Lost connection.");
     log_info("Lost connection");
     contact_list_clear();
-    win_disconnected();
-    win_page_off();
+    ui_disconnected();
+    win_current_page_off();
     log_info("disconnected");
 }
 
@@ -213,7 +213,7 @@ prof_handle_failed_login(void)
 {
     cons_bad_show("Login failed.");
     log_info("Login failed");
-    win_page_off();
+    win_current_page_off();
     log_info("disconnected");
 }
 
@@ -224,12 +224,12 @@ prof_handle_disconnect(const char * const jid)
     contact_list_clear();
     chat_sessions_clear();
     jabber_restart();
-    win_disconnected();
+    ui_disconnected();
     title_bar_set_status(PRESENCE_OFFLINE);
     status_bar_clear_message();
     status_bar_refresh();
     cons_show("%s logged out successfully.", jid);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -237,7 +237,7 @@ prof_handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
     win_show_room_history(room_jid, nick, tv_stamp, message);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -245,14 +245,14 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
     win_show_room_message(room_jid, nick, message);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
 prof_handle_room_subject(const char * const room_jid, const char * const subject)
 {
     win_show_room_subject(room_jid, subject);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -260,7 +260,7 @@ prof_handle_room_broadcast(const char *const room_jid,
     const char * const message)
 {
     win_show_room_broadcast(room_jid, message);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -268,7 +268,7 @@ prof_handle_room_roster_complete(const char * const room)
 {
     room_set_roster_received(room);
     win_show_room_roster(room);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -280,7 +280,7 @@ prof_handle_room_member_presence(const char * const room,
 
     if (updated) {
         win_show_room_member_presence(room, nick, show, status);
-        win_page_off();
+        win_current_page_off();
     }
 }
 
@@ -290,7 +290,7 @@ prof_handle_room_member_online(const char * const room, const char * const nick,
 {
     room_add_to_roster(room, nick, show, status);
     win_show_room_member_online(room, nick, show, status);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -299,7 +299,7 @@ prof_handle_room_member_offline(const char * const room, const char * const nick
 {
     room_remove_from_roster(room, nick);
     win_show_room_member_offline(room, nick);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -317,8 +317,8 @@ prof_handle_contact_online(char *contact, char *show, char *status)
         PContact result = contact_list_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
-                win_contact_online(contact, show, status);
-                win_page_off();
+                ui_contact_online(contact, show, status);
+                win_current_page_off();
             }
         }
     }
@@ -333,8 +333,8 @@ prof_handle_contact_offline(char *contact, char *show, char *status)
         PContact result = contact_list_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
-                win_contact_offline(contact, show, status);
-                win_page_off();
+                ui_contact_offline(contact, show, status);
+                win_current_page_off();
             }
         }
     }
@@ -345,7 +345,7 @@ prof_handle_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick)
 {
     win_show_room_member_nick_change(room, old_nick, nick);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -353,7 +353,7 @@ prof_handle_room_nick_change(const char * const room,
     const char * const nick)
 {
     win_show_room_nick_change(room, nick);
-    win_page_off();
+    win_current_page_off();
 }
 
 void
@@ -361,7 +361,7 @@ prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
-        win_no_activity();
+        ui_idle();
     }
 }
 
@@ -370,7 +370,14 @@ prof_handle_activity(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
-        win_activity();
+        if (win_current_is_chat()) {
+            char *recipient = win_current_get_recipient();
+            chat_session_set_composing(recipient);
+            if (!chat_session_get_sent(recipient) ||
+                    chat_session_is_paused(recipient)) {
+                jabber_send_composing(recipient);
+            }
+        }
     }
 }
 
@@ -422,7 +429,7 @@ _process_input(char *inp)
 
     inp_clear();
     contact_list_reset_search_attempts();
-    win_page_off();
+    win_current_page_off();
 
     return result;
 }

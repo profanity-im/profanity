@@ -93,11 +93,11 @@ static void _win_show_history(WINDOW *win, int win_index,
 static gboolean _new_release(char *found_version);
 
 #ifdef HAVE_LIBNOTIFY
-static void _win_notify(const char * const message, int timeout,
+static void _notify(const char * const message, int timeout,
     const char * const category);
-static void _win_notify_remind(gint unread);
-static void _win_notify_message(const char * const short_from);
-static void _win_notify_typing(const char * const from);
+static void _notify_remind(gint unread);
+static void _notify_message(const char * const short_from);
+static void _notify_typing(const char * const from);
 #endif
 
 void
@@ -197,147 +197,12 @@ ui_show_typing(const char * const from)
 
 #ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify_typing())
-        _win_notify_typing(from);
+        _notify_typing(from);
 #endif
 }
 
 void
-win_current_close(void)
-{
-    window_free(current);
-    windows[current_index] = NULL;
-
-    // set it as inactive in the status bar
-    status_bar_inactive(current_index);
-
-    // go back to console window
-    _set_current(0);
-    status_bar_active(0);
-    title_bar_title();
-
-    dirty = TRUE;
-}
-
-int
-win_current_is_chat(void)
-{
-    return (current->type == WIN_CHAT);
-}
-
-int
-win_current_is_groupchat(void)
-{
-    return (current->type == WIN_MUC);
-}
-
-int
-win_current_is_private(void)
-{
-    return (current->type == WIN_PRIVATE);
-}
-
-char *
-win_current_get_recipient(void)
-{
-    return strdup(current->from);
-}
-
-void
-cons_show_wins(void)
-{
-    int i = 0;
-    int count = 0;
-
-    cons_show("");
-    cons_show("Active windows:");
-    _win_show_time(console->win);
-    wprintw(console->win, "1: Console\n");
-
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            count++;
-        }
-    }
-
-    if (count != 0) {
-        for (i = 1; i < NUM_WINS; i++) {
-            if (windows[i] != NULL) {
-                ProfWin *window = windows[i];
-                _win_show_time(console->win);
-
-                switch (window->type)
-                {
-                    case WIN_CHAT:
-                        wprintw(console->win, "%d: chat %s", i + 1, window->from);
-                        PContact contact = contact_list_get_contact(window->from);
-
-                        if (contact != NULL) {
-                            if (p_contact_name(contact) != NULL) {
-                                wprintw(console->win, " (%s)", p_contact_name(contact));
-                            }
-                            wprintw(console->win, " - %s", p_contact_presence(contact));
-                        }
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_PRIVATE:
-                        wprintw(console->win, "%d: private %s", i + 1, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_MUC:
-                        wprintw(console->win, "%d: room %s", i + 1, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    default:
-                        break;
-                }
-
-                wprintw(console->win, "\n");
-            }
-        }
-    }
-}
-
-void
-notify_remind(void)
-{
-#ifdef HAVE_LIBNOTIFY
-    gint unread = _win_get_unread();
-    if (unread > 0) {
-        _win_notify_remind(unread);
-    }
-#endif
-}
-
-void
-win_activity(void)
-{
-    if (win_current_is_chat()) {
-        char *recipient = win_current_get_recipient();
-        chat_session_set_composing(recipient);
-        if (!chat_session_get_sent(recipient) ||
-                chat_session_is_paused(recipient)) {
-            jabber_send_composing(recipient);
-        }
-    }
-}
-
-void
-win_no_activity(void)
+ui_idle(void)
 {
     int i;
 
@@ -360,11 +225,10 @@ win_no_activity(void)
             }
         }
     }
-
 }
 
 void
-win_show_incomming_msg(const char * const from, const char * const message,
+ui_show_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
     win_type_t win_type;
@@ -485,8 +349,174 @@ win_show_incomming_msg(const char * const from, const char * const message,
         beep();
 #ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify_message())
-        _win_notify_message(from);
+        _notify_message(from);
 #endif
+}
+
+void
+ui_contact_online(const char * const from, const char * const show,
+    const char * const status)
+{
+    _show_status_string(console->win, from, show, status, "++", "online");
+
+    int win_index = _find_prof_win_index(from);
+    if (win_index != NUM_WINS) {
+        WINDOW *win = windows[win_index]->win;
+        _show_status_string(win, from, show, status, "++", "online");
+    }
+
+    if (win_index == current_index)
+        dirty = TRUE;
+}
+
+void
+ui_contact_offline(const char * const from, const char * const show,
+    const char * const status)
+{
+    _show_status_string(console->win, from, show, status, "--", "offline");
+
+    int win_index = _find_prof_win_index(from);
+    if (win_index != NUM_WINS) {
+        WINDOW *win = windows[win_index]->win;
+        _show_status_string(win, from, show, status, "--", "offline");
+    }
+
+    if (win_index == current_index)
+        dirty = TRUE;
+}
+
+void
+ui_disconnected(void)
+{
+    int i;
+    // show message in all active chats
+    for (i = 1; i < NUM_WINS; i++) {
+        if (windows[i] != NULL) {
+            WINDOW *win = windows[i]->win;
+            _win_show_time(win);
+            wattron(win, COLOUR_ERROR);
+            wprintw(win, "%s\n", "Lost connection.");
+            wattroff(win, COLOUR_ERROR);
+
+            // if current win, set dirty
+            if (i == current_index) {
+                dirty = TRUE;
+            }
+        }
+    }
+}
+
+void
+ui_handle_special_keys(const int * const ch)
+{
+    _win_handle_switch(ch);
+    _win_handle_page(ch);
+}
+
+void
+ui_switch_win(const int i)
+{
+    win_current_page_off();
+    if (windows[i] != NULL) {
+        current_index = i;
+        current = windows[current_index];
+        win_current_page_off();
+
+        current->unread = 0;
+
+        if (i == 0) {
+            title_bar_title();
+            status_bar_active(0);
+        } else {
+            title_bar_set_recipient(current->from);
+            title_bar_draw();;
+            status_bar_active(i);
+        }
+    }
+
+    dirty = TRUE;
+}
+
+void
+win_current_close(void)
+{
+    window_free(current);
+    windows[current_index] = NULL;
+
+    // set it as inactive in the status bar
+    status_bar_inactive(current_index);
+
+    // go back to console window
+    _set_current(0);
+    status_bar_active(0);
+    title_bar_title();
+
+    dirty = TRUE;
+}
+
+int
+win_current_is_chat(void)
+{
+    return (current->type == WIN_CHAT);
+}
+
+int
+win_current_is_groupchat(void)
+{
+    return (current->type == WIN_MUC);
+}
+
+int
+win_current_is_private(void)
+{
+    return (current->type == WIN_PRIVATE);
+}
+
+char *
+win_current_get_recipient(void)
+{
+    return strdup(current->from);
+}
+
+void
+win_current_show(const char * const msg)
+{
+    WINDOW *win = current->win;
+    _win_show_time(win);
+    wprintw(win, "%s\n", msg);
+
+    dirty = TRUE;
+}
+
+void
+win_current_bad_show(const char * const msg)
+{
+    WINDOW *win = current->win;
+    _win_show_time(win);
+    wattron(win, COLOUR_ERROR);
+    wprintw(win, "%s\n", msg);
+    wattroff(win, COLOUR_ERROR);
+
+    dirty = TRUE;
+}
+
+void
+win_current_page_off(void)
+{
+    int rows = getmaxy(stdscr);
+    ProfWin *window = windows[current_index];
+
+    window->paged = 0;
+
+    int y = getcury(window->win);
+
+    int size = rows - 3;
+
+    window->y_pos = y - (size - 1);
+    if (window->y_pos < 0)
+        window->y_pos = 0;
+
+    dirty = TRUE;
 }
 
 void
@@ -504,31 +534,6 @@ win_show_error_msg(const char * const from, const char *err_msg)
         win = windows[win_index]->win;
         _win_show_time(win);
         _win_show_error_msg(win, err_msg);
-        if (win_index == current_index) {
-            dirty = TRUE;
-        }
-    }
-}
-
-void
-win_show_gone(const char * const from)
-{
-    int win_index;
-    WINDOW *win;
-
-    if (from == NULL)
-        return;
-
-    win_index = _find_prof_win_index(from);
-    // chat window exists
-    if (win_index < NUM_WINS) {
-        win = windows[win_index]->win;
-        _win_show_time(win);
-        wattron(win, COLOUR_GONE);
-        wprintw(win, "*%s ", from);
-        wprintw(win, "has left the conversation.");
-        wprintw(win, "\n");
-        wattroff(win, COLOUR_GONE);
         if (win_index == current_index) {
             dirty = TRUE;
         }
@@ -566,68 +571,30 @@ win_show_system_msg(const char * const from, const char *message)
     }
 }
 
-#ifdef HAVE_LIBNOTIFY
-static void
-_win_notify(const char * const message, int timeout,
-    const char * const category)
+void
+win_show_gone(const char * const from)
 {
-    gboolean notify_initted = notify_is_initted();
+    int win_index;
+    WINDOW *win;
 
-    if (!notify_initted) {
-        notify_initted = notify_init("Profanity");
-    }
+    if (from == NULL)
+        return;
 
-    if (notify_initted) {
-        NotifyNotification *notification;
-        notification = notify_notification_new("Profanity", message, NULL);
-        notify_notification_set_timeout(notification, timeout);
-        notify_notification_set_category(notification, category);
-        notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
-
-        GError *error = NULL;
-        gboolean notify_success = notify_notification_show(notification, &error);
-
-        if (!notify_success) {
-            log_error("Error sending desktop notification:");
-            log_error("  -> Message : %s", message);
-            log_error("  -> Error   : %s", error->message);
+    win_index = _find_prof_win_index(from);
+    // chat window exists
+    if (win_index < NUM_WINS) {
+        win = windows[win_index]->win;
+        _win_show_time(win);
+        wattron(win, COLOUR_GONE);
+        wprintw(win, "*%s ", from);
+        wprintw(win, "has left the conversation.");
+        wprintw(win, "\n");
+        wattroff(win, COLOUR_GONE);
+        if (win_index == current_index) {
+            dirty = TRUE;
         }
-    } else {
-        log_error("Libnotify initialisation error.");
     }
 }
-
-static void
-_win_notify_remind(gint unread)
-{
-    char message[20];
-    if (unread == 1) {
-        sprintf(message, "1 unread message");
-    } else {
-        snprintf(message, sizeof(message), "%d unread messages", unread);
-    }
-
-    _win_notify(message, 5000, "Incoming message");
-}
-
-static void
-_win_notify_message(const char * const short_from)
-{
-    char message[strlen(short_from) + 1 + 10];
-    sprintf(message, "%s: message.", short_from);
-
-    _win_notify(message, 10000, "Incoming message");
-}
-
-static void
-_win_notify_typing(const char * const from)
-{
-    char message[strlen(from) + 1 + 11];
-    sprintf(message, "%s: typing...", from);
-
-    _win_notify(message, 10000, "Incoming message");
-}
-#endif
 
 void
 win_show_outgoing_msg(const char * const from, const char * const to,
@@ -677,7 +644,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
         _win_show_user(win, from, 0);
         _win_show_message(win, message);
     }
-    win_switch_if_active(win_index);
+    ui_switch_win(win_index);
 }
 
 void
@@ -690,7 +657,7 @@ win_join_chat(const char * const room, const char * const nick)
         win_index = _new_prof_win(room, WIN_MUC);
     }
 
-    win_switch_if_active(win_index);
+    ui_switch_win(win_index);
 }
 
 void
@@ -890,7 +857,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
         }
 #ifdef HAVE_LIBNOTIFY
         if (prefs_get_notify_message()) {
-            _win_notify_message(nick);
+            _notify_message(nick);
         }
 #endif
     }
@@ -941,61 +908,77 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
 }
 
 void
-win_show(const char * const msg)
+cons_show_wins(void)
 {
-    WINDOW *win = current->win;
-    _win_show_time(win);
-    wprintw(win, "%s\n", msg);
+    int i = 0;
+    int count = 0;
 
-    dirty = TRUE;
-}
+    cons_show("");
+    cons_show("Active windows:");
+    _win_show_time(console->win);
+    wprintw(console->win, "1: Console\n");
 
-void
-win_bad_show(const char * const msg)
-{
-    WINDOW *win = current->win;
-    _win_show_time(win);
-    wattron(win, COLOUR_ERROR);
-    wprintw(win, "%s\n", msg);
-    wattroff(win, COLOUR_ERROR);
-
-    dirty = TRUE;
-}
-
-void
-win_contact_online(const char * const from, const char * const show,
-    const char * const status)
-{
-    _show_status_string(console->win, from, show, status, "++", "online");
-
-    int win_index = _find_prof_win_index(from);
-    if (win_index != NUM_WINS) {
-        WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, from, show, status, "++", "online");
+    for (i = 1; i < NUM_WINS; i++) {
+        if (windows[i] != NULL) {
+            count++;
+        }
     }
 
-    if (win_index == current_index)
-        dirty = TRUE;
-}
+    if (count != 0) {
+        for (i = 1; i < NUM_WINS; i++) {
+            if (windows[i] != NULL) {
+                ProfWin *window = windows[i];
+                _win_show_time(console->win);
 
-void
-win_contact_offline(const char * const from, const char * const show,
-    const char * const status)
-{
-    _show_status_string(console->win, from, show, status, "--", "offline");
+                switch (window->type)
+                {
+                    case WIN_CHAT:
+                        wprintw(console->win, "%d: chat %s", i + 1, window->from);
+                        PContact contact = contact_list_get_contact(window->from);
 
-    int win_index = _find_prof_win_index(from);
-    if (win_index != NUM_WINS) {
-        WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, from, show, status, "--", "offline");
+                        if (contact != NULL) {
+                            if (p_contact_name(contact) != NULL) {
+                                wprintw(console->win, " (%s)", p_contact_name(contact));
+                            }
+                            wprintw(console->win, " - %s", p_contact_presence(contact));
+                        }
+
+                        if (window->unread > 0) {
+                            wprintw(console->win, ", %d unread", window->unread);
+                        }
+
+                        break;
+
+                    case WIN_PRIVATE:
+                        wprintw(console->win, "%d: private %s", i + 1, window->from);
+
+                        if (window->unread > 0) {
+                            wprintw(console->win, ", %d unread", window->unread);
+                        }
+
+                        break;
+
+                    case WIN_MUC:
+                        wprintw(console->win, "%d: room %s", i + 1, window->from);
+
+                        if (window->unread > 0) {
+                            wprintw(console->win, ", %d unread", window->unread);
+                        }
+
+                        break;
+
+                    default:
+                        break;
+                }
+
+                wprintw(console->win, "\n");
+            }
+        }
     }
-
-    if (win_index == current_index)
-        dirty = TRUE;
 }
 
 void
-win_show_status(const char * const contact)
+cons_show_status(const char * const contact)
 {
     PContact pcontact = contact_list_get_contact(contact);
 
@@ -1003,27 +986,6 @@ win_show_status(const char * const contact)
         _cons_show_contact(pcontact);
     } else {
         cons_show("No such contact %s in roster.", contact);
-    }
-}
-
-void
-win_disconnected(void)
-{
-    int i;
-    // show message in all active chats
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            WINDOW *win = windows[i]->win;
-            _win_show_time(win);
-            wattron(win, COLOUR_ERROR);
-            wprintw(win, "%s\n", "Lost connection.");
-            wattroff(win, COLOUR_ERROR);
-
-            // if current win, set dirty
-            if (i == current_index) {
-                dirty = TRUE;
-            }
-        }
     }
 }
 
@@ -1331,43 +1293,6 @@ cons_bad_command(const char * const cmd)
 }
 
 void
-win_handle_special_keys(const int * const ch)
-{
-    _win_handle_switch(ch);
-    _win_handle_page(ch);
-}
-
-void
-win_page_off(void)
-{
-    int rows = getmaxy(stdscr);
-    ProfWin *window = windows[current_index];
-
-    window->paged = 0;
-
-    int y = getcury(window->win);
-
-    int size = rows - 3;
-
-    window->y_pos = y - (size - 1);
-    if (window->y_pos < 0)
-        window->y_pos = 0;
-
-    dirty = TRUE;
-}
-
-static void
-_create_windows(void)
-{
-    int cols = getmaxx(stdscr);
-    max_cols = cols;
-    windows[0] = window_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
-    console = windows[0];
-    current = console;
-    cons_about();
-}
-
-void
 cons_about(void)
 {
     int rows, cols;
@@ -1446,6 +1371,91 @@ cons_check_version(gboolean not_available_msg)
             }
         }
     }
+}
+
+void
+notify_remind(void)
+{
+#ifdef HAVE_LIBNOTIFY
+    gint unread = _win_get_unread();
+    if (unread > 0) {
+        _notify_remind(unread);
+    }
+#endif
+}
+
+#ifdef HAVE_LIBNOTIFY
+static void
+_notify(const char * const message, int timeout,
+    const char * const category)
+{
+    gboolean notify_initted = notify_is_initted();
+
+    if (!notify_initted) {
+        notify_initted = notify_init("Profanity");
+    }
+
+    if (notify_initted) {
+        NotifyNotification *notification;
+        notification = notify_notification_new("Profanity", message, NULL);
+        notify_notification_set_timeout(notification, timeout);
+        notify_notification_set_category(notification, category);
+        notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
+
+        GError *error = NULL;
+        gboolean notify_success = notify_notification_show(notification, &error);
+
+        if (!notify_success) {
+            log_error("Error sending desktop notification:");
+            log_error("  -> Message : %s", message);
+            log_error("  -> Error   : %s", error->message);
+        }
+    } else {
+        log_error("Libnotify initialisation error.");
+    }
+}
+
+static void
+_notify_remind(gint unread)
+{
+    char message[20];
+    if (unread == 1) {
+        sprintf(message, "1 unread message");
+    } else {
+        snprintf(message, sizeof(message), "%d unread messages", unread);
+    }
+
+    _notify(message, 5000, "Incoming message");
+}
+
+static void
+_notify_message(const char * const short_from)
+{
+    char message[strlen(short_from) + 1 + 10];
+    sprintf(message, "%s: message.", short_from);
+
+    _notify(message, 10000, "Incoming message");
+}
+
+static void
+_notify_typing(const char * const from)
+{
+    char message[strlen(from) + 1 + 11];
+    sprintf(message, "%s: typing...", from);
+
+    _notify(message, 10000, "Incoming message");
+}
+#endif
+
+static void
+_create_windows(void)
+{
+    int cols = getmaxx(stdscr);
+    max_cols = cols;
+    windows[0] = window_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
+    console = windows[0];
+    current = console;
+    cons_about();
 }
 
 static gboolean
@@ -1555,30 +1565,6 @@ _new_prof_win(const char * const contact, win_type_t type)
     } else {
         return 0;
     }
-}
-
-void
-win_switch_if_active(const int i)
-{
-    win_page_off();
-    if (windows[i] != NULL) {
-        current_index = i;
-        current = windows[current_index];
-        win_page_off();
-
-        current->unread = 0;
-
-        if (i == 0) {
-            title_bar_title();
-            status_bar_active(0);
-        } else {
-            title_bar_set_recipient(current->from);
-            title_bar_draw();;
-            status_bar_active(i);
-        }
-    }
-
-    dirty = TRUE;
 }
 
 static void
@@ -1786,25 +1772,25 @@ static void
 _win_handle_switch(const int * const ch)
 {
     if (*ch == KEY_F(1)) {
-        win_switch_if_active(0);
+        ui_switch_win(0);
     } else if (*ch == KEY_F(2)) {
-        win_switch_if_active(1);
+        ui_switch_win(1);
     } else if (*ch == KEY_F(3)) {
-        win_switch_if_active(2);
+        ui_switch_win(2);
     } else if (*ch == KEY_F(4)) {
-        win_switch_if_active(3);
+        ui_switch_win(3);
     } else if (*ch == KEY_F(5)) {
-        win_switch_if_active(4);
+        ui_switch_win(4);
     } else if (*ch == KEY_F(6)) {
-        win_switch_if_active(5);
+        ui_switch_win(5);
     } else if (*ch == KEY_F(7)) {
-        win_switch_if_active(6);
+        ui_switch_win(6);
     } else if (*ch == KEY_F(8)) {
-        win_switch_if_active(7);
+        ui_switch_win(7);
     } else if (*ch == KEY_F(9)) {
-        win_switch_if_active(8);
+        ui_switch_win(8);
     } else if (*ch == KEY_F(10)) {
-        win_switch_if_active(9);
+        ui_switch_win(9);
     }
 }
 

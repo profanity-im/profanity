@@ -262,34 +262,34 @@ _handle_edit(const int ch, char *input, int *size)
             switch (next_ch)
             {
                 case '1':
-                    win_switch_if_active(0);
+                    ui_switch_win(0);
                     break;
                 case '2':
-                    win_switch_if_active(1);
+                    ui_switch_win(1);
                     break;
                 case '3':
-                    win_switch_if_active(2);
+                    ui_switch_win(2);
                     break;
                 case '4':
-                    win_switch_if_active(3);
+                    ui_switch_win(3);
                     break;
                 case '5':
-                    win_switch_if_active(4);
+                    ui_switch_win(4);
                     break;
                 case '6':
-                    win_switch_if_active(5);
+                    ui_switch_win(5);
                     break;
                 case '7':
-                    win_switch_if_active(6);
+                    ui_switch_win(6);
                     break;
                 case '8':
-                    win_switch_if_active(7);
+                    ui_switch_win(7);
                     break;
                 case '9':
-                    win_switch_if_active(8);
+                    ui_switch_win(8);
                     break;
                 case '0':
-                    win_switch_if_active(9);
+                    ui_switch_win(9);
                     break;
                 default:
                     break;

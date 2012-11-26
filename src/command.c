@@ -747,7 +747,7 @@ cmd_execute(const char * const command, const char * const inp)
             if (win_current_is_chat()) {
                 char usage[strlen(cmd->help.usage) + 8];
                 sprintf(usage, "Usage: %s", cmd->help.usage);
-                win_show(usage);
+                win_current_show(usage);
             }
             return TRUE;
         } else {
@@ -766,7 +766,7 @@ cmd_execute_default(const char * const inp)
     if (win_current_is_groupchat()) {
         jabber_conn_status_t status = jabber_get_connection_status();
         if (status != JABBER_CONNECTED) {
-            win_show("You are not currently connected.");
+            win_current_show("You are not currently connected.");
         } else {
             char *recipient = win_current_get_recipient();
             jabber_send_groupchat(inp, recipient);
@@ -775,7 +775,7 @@ cmd_execute_default(const char * const inp)
     } else if (win_current_is_chat() || win_current_is_private()) {
         jabber_conn_status_t status = jabber_get_connection_status();
         if (status != JABBER_CONNECTED) {
-            win_show("You are not currently connected.");
+            win_current_show("You are not currently connected.");
         } else {
             char *recipient = win_current_get_recipient();
             jabber_send(inp, recipient);
@@ -1272,7 +1272,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        win_show_status(usr);
+        cons_show_status(usr);
     }
 
     return TRUE;
@@ -1339,7 +1339,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
         g_string_append(error, url);
         cons_bad_show(error->str);
         if (win_current_is_chat()) {
-            win_bad_show(error->str);
+            win_current_bad_show(error->str);
         }
         g_string_free(error, TRUE);
     } else if (win_current_is_chat()) {
