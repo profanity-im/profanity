@@ -1191,13 +1191,16 @@ cons_navigation_help(void)
     cons_show("");
     cons_show("Navigation:");
     cons_show("");
+    cons_show("Alt-1                    : This console window.");
+    cons_show("Alt-2..Alt-0             : Chat windows.");
     cons_show("F1                       : This console window.");
-    cons_show("F2-F10                   : Chat windows.");
+    cons_show("F2..F10                  : Chat windows.");
     cons_show("UP, DOWN                 : Navigate input history.");
     cons_show("LEFT, RIGHT, HOME, END   : Edit current input.");
     cons_show("ESC                      : Clear current input.");
-    cons_show("TAB                      : Autocomplete command/recipient/login");
+    cons_show("TAB                      : Autocomplete command/recipient/login.");
     cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
+    cons_show("Mouse wheel              : Scroll the main window.");
     cons_show("");
 
     if (current_index == 0) {
