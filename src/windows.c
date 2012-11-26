@@ -1076,6 +1076,15 @@ cons_prefs(void)
         cons_show("Reconnect interval           : %d seconds", reconnect_interval);
     }
 
+    gint autoping_interval = prefs_get_autoping();
+    if (autoping_interval == 0) {
+        cons_show("Autoping interval            : OFF");
+    } else if (remind_period == 1) {
+        cons_show("Autoping interval            : 1 second");
+    } else {
+        cons_show("Autoping interval            : %d seconds", autoping_interval);
+    }
+
     cons_show("");
 
     if (current_index == 0) {

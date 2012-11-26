@@ -78,6 +78,8 @@ void prefs_set_priority(gint value);
 gint prefs_get_priority(void);
 void prefs_set_reconnect(gint value);
 gint prefs_get_reconnect(void);
+void prefs_set_autoping(gint value);
+gint prefs_get_autoping(void);
 
 void prefs_add_login(const char *jid);
 

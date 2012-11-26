@@ -69,5 +69,6 @@ jabber_presence_t jabber_get_presence(void);
 char * jabber_get_status(void);
 void jabber_free_resources(void);
 void jabber_restart(void);
+void jabber_set_autoping(int seconds);
 
 #endif

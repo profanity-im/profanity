@@ -35,8 +35,6 @@
 #include "room_chat.h"
 #include "stanza.h"
 
-#define PING_INTERVAL 5000 // 2 minutes
-
 static struct _jabber_conn_t {
     xmpp_log_t *log;
     xmpp_ctx_t *ctx;
@@ -389,6 +387,22 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
     xmpp_stanza_release(presence);
 }
 
+void
+jabber_set_autoping(int seconds)
+{
+    if (jabber_conn.conn_status != JABBER_CONNECTED) {
+        return;
+    } else {
+        xmpp_timed_handler_delete(jabber_conn.conn, _ping_timed_handler);
+
+        if (seconds != 0) {
+            int millis = seconds * 1000;
+            xmpp_timed_handler_add(jabber_conn.conn, _ping_timed_handler, millis,
+                jabber_conn.ctx);
+        }
+    }
+}
+
 jabber_conn_status_t
 jabber_get_connection_status(void)
 {
@@ -660,7 +674,11 @@ _connection_handler(xmpp_conn_t * const conn,
         xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
         xmpp_handler_add(conn, _presence_handler, NULL, STANZA_NAME_PRESENCE, NULL, ctx);
         xmpp_id_handler_add(conn, _roster_handler, "roster", ctx);
-        xmpp_timed_handler_add(conn, _ping_timed_handler, PING_INTERVAL, ctx);
+
+        if (prefs_get_autoping() != 0) {
+            int millis = prefs_get_autoping() * 1000;
+            xmpp_timed_handler_add(conn, _ping_timed_handler, millis, ctx);
+        }
 
         _jabber_roster_request();
         jabber_conn.conn_status = JABBER_CONNECTED;

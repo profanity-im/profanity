@@ -252,6 +252,19 @@ prefs_set_reconnect(gint value)
     _save_prefs();
 }
 
+gint
+prefs_get_autoping(void)
+{
+    return g_key_file_get_integer(prefs, "jabber", "autoping", NULL);
+}
+
+void
+prefs_set_autoping(gint value)
+{
+    g_key_file_set_integer(prefs, "jabber", "autoping", value);
+    _save_prefs();
+}
+
 gboolean
 prefs_get_vercheck(void)
 {

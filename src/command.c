@@ -117,6 +117,7 @@ static gboolean _cmd_set_chlog(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
@@ -504,6 +505,18 @@ static struct cmd_t setting_commands[] =
           "",
           "Config file section : [jabber]",
           "Config file value :   reconnect=seconds",
+          NULL } } },
+
+    { "/autoping",
+        _cmd_set_autoping, parse_args, 1, 1,
+        { "/autoping seconds", "Server ping interval.",
+        { "/autoping seconds",
+          "--------------------",
+          "Set the number of seconds between server pings, so ensure connection kept alive.",
+          "A value of 0 will switch off autopinging the server.",
+          "",
+          "Config file section : [jabber]",
+          "Config file value :   autoping=seconds",
           NULL } } },
 
     { "/priority",
@@ -1507,7 +1520,26 @@ _cmd_set_reconnect(gchar **args, struct cmd_help_t help)
         cons_show("Usage: %s", help.usage);
     }
 
-    /* TODO: make 'level' subcommand for debug level */
+    return TRUE;
+}
+
+static gboolean
+_cmd_set_autoping(gchar **args, struct cmd_help_t help)
+{
+    char *value = args[0];
+    int intval;
+
+    if (_strtoi(value, &intval, 0, INT_MAX) == 0) {
+        prefs_set_autoping(intval);
+        jabber_set_autoping(intval);
+        if (intval == 0) {
+            cons_show("Autoping disabled.", intval);
+        } else {
+            cons_show("Autoping interval set to %d seconds.", intval);
+        }
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
 
     return TRUE;
 }
