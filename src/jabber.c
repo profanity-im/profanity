@@ -35,7 +35,7 @@
 #include "room_chat.h"
 #include "stanza.h"
 
-#define PING_INTERVAL 120000 // 2 minutes
+#define PING_INTERVAL 5000 // 2 minutes
 
 static struct _jabber_conn_t {
     xmpp_log_t *log;
@@ -160,11 +160,13 @@ jabber_process_events(void)
         xmpp_run_once(jabber_conn.ctx, 10);
 
     // check timer and reconnect if disconnected and timer set
-    } else if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
+    } else if (prefs_get_reconnect() != 0) {
+        if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
             (reconnect_timer != NULL)) {
-        if (g_timer_elapsed(reconnect_timer, NULL) > (prefs_get_reconnect() * 1.0)) {
-            log_debug("Attempting reconncet as %s", saved_user);
-            jabber_connect(saved_user, saved_password);
+            if (g_timer_elapsed(reconnect_timer, NULL) > (prefs_get_reconnect() * 1.0)) {
+                log_debug("Attempting reconncet as %s", saved_user);
+                jabber_connect(saved_user, saved_password);
+            }
         }
     }
 
@@ -664,9 +666,11 @@ _connection_handler(xmpp_conn_t * const conn,
         jabber_conn.conn_status = JABBER_CONNECTED;
         jabber_conn.presence = PRESENCE_ONLINE;
 
-        if (reconnect_timer != NULL) {
-            g_timer_destroy(reconnect_timer);
-            reconnect_timer = NULL;
+        if (prefs_get_reconnect() != 0) {
+            if (reconnect_timer != NULL) {
+                g_timer_destroy(reconnect_timer);
+                reconnect_timer = NULL;
+            }
         }
 
     } else {
@@ -687,7 +691,9 @@ _connection_handler(xmpp_conn_t * const conn,
         // lost connection for unkown reason
         } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
             prof_handle_lost_connection();
-            reconnect_timer = g_timer_new();
+            if (prefs_get_reconnect() != 0) {
+                reconnect_timer = g_timer_new();
+            }
             xmpp_stop(ctx);
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
@@ -709,7 +715,9 @@ _connection_handler(xmpp_conn_t * const conn,
                 jabber_conn.presence = PRESENCE_OFFLINE;
             } else {
                 xmpp_stop(ctx);
-                g_timer_start(reconnect_timer);
+                if (prefs_get_reconnect() != 0) {
+                    g_timer_start(reconnect_timer);
+                }
                 jabber_conn.conn_status = JABBER_DISCONNECTED;
                 jabber_conn.presence = PRESENCE_OFFLINE;
             }
