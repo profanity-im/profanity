@@ -107,11 +107,7 @@ ui_init(void)
     initscr();
     raw();
     keypad(stdscr, TRUE);
-#ifdef PLATFORM_CYGWIN
-    mousemask(BUTTON5_PRESSED | BUTTON4_PRESSED, NULL);
-#else
-    mousemask(BUTTON2_PRESSED | BUTTON4_PRESSED, NULL);
-#endif
+    mousemask(ALL_MOUSE_EVENTS, NULL);
     mouseinterval(5);
     ui_load_colours();
     refresh();
