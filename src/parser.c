@@ -92,13 +92,15 @@ parse_args(const char * const inp, int min, int max)
     // if num args not valid return NULL
     if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
-        free(copy);
+        g_free(copy);
         return NULL;
 
     // if min allowed is 0 and 0 found, return empty char* array
     } else if (min == 0 && num == 0) {
+        g_slist_free_full(tokens, free);
         gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
+        g_free(copy);
         return args;
 
     // otherwise return args array
@@ -115,7 +117,7 @@ parse_args(const char * const inp, int min, int max)
 
         args[arg_count] = NULL;
         g_slist_free_full(tokens, free);
-        free(copy);
+        g_free(copy);
 
         return args;
     }

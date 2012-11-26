@@ -48,6 +48,7 @@ main(int argc, char **argv)
     g_option_context_add_main_entries(context, entries, NULL);
     if (!g_option_context_parse(context, &argc, &argv, &error)) {
         g_print("%s\n", error->message);
+        g_option_context_free(context);
         return 1;
     }
 

@@ -651,6 +651,8 @@ cmd_close(void)
     p_autocomplete_clear(who_ac);
     p_autocomplete_clear(help_ac);
     p_autocomplete_clear(notify_ac);
+    p_autocomplete_clear(sub_ac);
+    p_autocomplete_clear(log_ac);
 }
 
 // Command autocompletion functions

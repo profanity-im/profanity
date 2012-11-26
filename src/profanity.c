@@ -448,7 +448,9 @@ _init(const int disable_tls, char *log_level)
     log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     chat_log_init();
     prefs_load();
-    theme_load(prefs_get_theme());
+    gchar *theme = prefs_get_theme();
+    theme_load(theme);
+    g_free(theme);
     ui_init();
     jabber_init(disable_tls);
     cmd_init();

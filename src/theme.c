@@ -153,6 +153,7 @@ void
 theme_close(void)
 {
     g_key_file_free(theme);
+    g_string_free(theme_loc, TRUE);
 }
 
 void
@@ -230,79 +231,105 @@ _load_colours(void)
 {
     gchar *bkgnd_val = g_key_file_get_string(theme, "colours", "bkgnd", NULL);
     _set_colour(bkgnd_val, &colour_prefs.bkgnd, -1);
+    g_free(bkgnd_val);
 
     gchar *titlebar_val = g_key_file_get_string(theme, "colours", "titlebar", NULL);
     _set_colour(titlebar_val, &colour_prefs.titlebar, COLOR_BLUE);
+    g_free(titlebar_val);
 
     gchar *statusbar_val = g_key_file_get_string(theme, "colours", "statusbar", NULL);
     _set_colour(statusbar_val, &colour_prefs.statusbar, COLOR_BLUE);
+    g_free(statusbar_val);
 
     gchar *titlebartext_val = g_key_file_get_string(theme, "colours", "titlebartext", NULL);
     _set_colour(titlebartext_val, &colour_prefs.titlebartext, COLOR_WHITE);
+    g_free(titlebartext_val);
 
     gchar *titlebarbrackets_val = g_key_file_get_string(theme, "colours", "titlebarbrackets", NULL);
     _set_colour(titlebarbrackets_val, &colour_prefs.titlebarbrackets, COLOR_CYAN);
+    g_free(titlebarbrackets_val);
 
     gchar *statusbartext_val = g_key_file_get_string(theme, "colours", "statusbartext", NULL);
     _set_colour(statusbartext_val, &colour_prefs.statusbartext, COLOR_WHITE);
+    g_free(statusbartext_val);
 
     gchar *statusbarbrackets_val = g_key_file_get_string(theme, "colours", "statusbarbrackets", NULL);
     _set_colour(statusbarbrackets_val, &colour_prefs.statusbarbrackets, COLOR_CYAN);
+    g_free(statusbarbrackets_val);
 
     gchar *statusbaractive_val = g_key_file_get_string(theme, "colours", "statusbaractive", NULL);
     _set_colour(statusbaractive_val, &colour_prefs.statusbaractive, COLOR_CYAN);
+    g_free(statusbaractive_val);
 
     gchar *statusbarnew_val = g_key_file_get_string(theme, "colours", "statusbarnew", NULL);
     _set_colour(statusbarnew_val, &colour_prefs.statusbarnew, COLOR_WHITE);
+    g_free(statusbarnew_val);
 
     gchar *maintext_val = g_key_file_get_string(theme, "colours", "maintext", NULL);
     _set_colour(maintext_val, &colour_prefs.maintext, COLOR_WHITE);
+    g_free(maintext_val);
 
     gchar *splashtext_val = g_key_file_get_string(theme, "colours", "splashtext", NULL);
     _set_colour(splashtext_val, &colour_prefs.splashtext, COLOR_CYAN);
+    g_free(splashtext_val);
 
     gchar *inputtext_val = g_key_file_get_string(theme, "colours", "inputtext", NULL);
     _set_colour(inputtext_val, &colour_prefs.inputtext, COLOR_WHITE);
+    g_free(inputtext_val);
 
     gchar *timetext_val = g_key_file_get_string(theme, "colours", "timetext", NULL);
     _set_colour(timetext_val, &colour_prefs.timetext, COLOR_WHITE);
+    g_free(timetext_val);
 
     gchar *online_val = g_key_file_get_string(theme, "colours", "online", NULL);
     _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);
+    g_free(online_val);
 
     gchar *away_val = g_key_file_get_string(theme, "colours", "away", NULL);
     _set_colour(away_val, &colour_prefs.away, COLOR_CYAN);
+    g_free(away_val);
 
     gchar *chat_val = g_key_file_get_string(theme, "colours", "chat", NULL);
     _set_colour(chat_val, &colour_prefs.chat, COLOR_GREEN);
+    g_free(chat_val);
 
     gchar *dnd_val = g_key_file_get_string(theme, "colours", "dnd", NULL);
     _set_colour(dnd_val, &colour_prefs.dnd, COLOR_RED);
+    g_free(dnd_val);
 
     gchar *xa_val = g_key_file_get_string(theme, "colours", "xa", NULL);
     _set_colour(xa_val, &colour_prefs.xa, COLOR_CYAN);
+    g_free(xa_val);
 
     gchar *offline_val = g_key_file_get_string(theme, "colours", "offline", NULL);
     _set_colour(offline_val, &colour_prefs.offline, COLOR_RED);
+    g_free(offline_val);
 
     gchar *typing_val = g_key_file_get_string(theme, "colours", "typing", NULL);
     _set_colour(typing_val, &colour_prefs.typing, COLOR_YELLOW);
+    g_free(typing_val);
 
     gchar *gone_val = g_key_file_get_string(theme, "colours", "gone", NULL);
     _set_colour(gone_val, &colour_prefs.gone, COLOR_RED);
+    g_free(gone_val);
 
     gchar *error_val = g_key_file_get_string(theme, "colours", "error", NULL);
     _set_colour(error_val, &colour_prefs.error, COLOR_RED);
+    g_free(error_val);
 
     gchar *incoming_val = g_key_file_get_string(theme, "colours", "incoming", NULL);
     _set_colour(incoming_val, &colour_prefs.incoming, COLOR_YELLOW);
+    g_free(incoming_val);
 
     gchar *roominfo_val = g_key_file_get_string(theme, "colours", "roominfo", NULL);
     _set_colour(roominfo_val, &colour_prefs.roominfo, COLOR_YELLOW);
+    g_free(roominfo_val);
 
     gchar *me_val = g_key_file_get_string(theme, "colours", "me", NULL);
     _set_colour(me_val, &colour_prefs.me, COLOR_YELLOW);
+    g_free(me_val);
 
     gchar *them_val = g_key_file_get_string(theme, "colours", "them", NULL);
     _set_colour(them_val, &colour_prefs.them, COLOR_GREEN);
+    g_free(them_val);
 }

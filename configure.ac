@@ -57,7 +57,7 @@ PKG_CHECK_MODULES([DEPS], [openssl glib-2.0 libcurl])
 PKG_CHECK_MODULES([NOTIFY], [libnotify], [], 
     [AC_MSG_NOTICE([libnotify module not found])])
 
-AM_CFLAGS="-Wall -Werror"
+AM_CFLAGS="-Wall"
 LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
