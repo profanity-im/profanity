@@ -1310,6 +1310,8 @@ _cmd_join(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
+    } else if (ui_windows_full()) {
+        cons_bad_show("Windows all used, close a window and try again.");
     } else {
         // if no nick, set to first part of jid
         if (nick == NULL) {
