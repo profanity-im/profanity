@@ -75,6 +75,7 @@ void ui_contact_offline(const char * const from, const char * const show,
 void ui_disconnected(void);
 void ui_handle_special_keys(const int * const ch);
 void ui_switch_win(const int i);
+gboolean ui_windows_full(void);
 
 // create windows
 void create_title_bar(void);

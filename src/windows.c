@@ -166,6 +166,19 @@ ui_load_colours(void)
     }
 }
 
+gboolean
+ui_windows_full(void)
+{
+    int i;
+    for (i = 1; i < NUM_WINS; i++) {
+        if (windows[i] == NULL) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 void
 ui_show_typing(const char * const from)
 {

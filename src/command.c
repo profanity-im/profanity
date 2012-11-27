@@ -1264,6 +1264,8 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
+    } else if (ui_windows_full()) {
+        cons_bad_show("Windows all used, close a window and try again.");
     } else {
         jabber_send(msg, usr);
         win_show_outgoing_msg("me", usr, msg);
