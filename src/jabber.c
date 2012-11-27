@@ -760,7 +760,15 @@ _roster_handler(xmpp_conn_t * const conn,
             const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
             const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
             const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
-            gboolean added = contact_list_add(jid, name, "offline", NULL, sub);
+
+            gboolean pending_out = FALSE;
+            const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
+            if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
+                pending_out = TRUE;
+            }
+
+            gboolean added = contact_list_add(jid, name, "offline", NULL, sub,
+                pending_out);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", jid);

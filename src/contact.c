@@ -33,12 +33,13 @@ struct p_contact_t {
     char *presence;
     char *status;
     char *subscription;
+    gboolean pending_out;
 };
 
 PContact
 p_contact_new(const char * const jid, const char * const name,
     const char * const presence, const char * const status,
-    const char * const subscription)
+    const char * const subscription, gboolean pending_out)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
     contact->jid = strdup(jid);
@@ -63,6 +64,8 @@ p_contact_new(const char * const jid, const char * const name,
         contact->subscription = strdup(subscription);
     else
         contact->subscription = strdup("none");;
+
+    contact->pending_out = pending_out;
 
     return contact;
 }
@@ -154,6 +157,12 @@ const char *
 p_contact_subscription(const PContact contact)
 {
     return contact->subscription;
+}
+
+gboolean
+p_contact_pending_out(const PContact contact)
+{
+    return contact->pending_out;
 }
 
 void

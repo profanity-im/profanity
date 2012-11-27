@@ -67,6 +67,7 @@
 #define STANZA_ATTR_SUBSCRIPTION "subscription"
 #define STANZA_ATTR_XMLNS "xmlns"
 #define STANZA_ATTR_NICK "nick"
+#define STANZA_ATTR_ASK "ask"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"

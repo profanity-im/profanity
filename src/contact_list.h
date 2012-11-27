@@ -32,7 +32,7 @@ void contact_list_clear(void);
 void contact_list_reset_search_attempts(void);
 gboolean contact_list_add(const char * const jid, const char * const name,
     const char * const presence, const char * const status,
-    const char * const subscription);
+    const char * const subscription, gboolean pending_out);
 gboolean contact_list_update_contact(const char * const jid, const char * const presence,
     const char * const status);
 GSList * get_contact_list(void);

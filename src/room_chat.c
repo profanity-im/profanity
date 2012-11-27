@@ -252,7 +252,7 @@ room_add_to_roster(const char * const room, const char * const nick,
             updated = TRUE;
         }
 
-        PContact contact = p_contact_new(nick, NULL, show, status, NULL);
+        PContact contact = p_contact_new(nick, NULL, show, status, NULL, FALSE);
         g_hash_table_replace(chat_room->roster, strdup(nick), contact);
     }
 

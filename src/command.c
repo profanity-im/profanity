@@ -1009,13 +1009,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         log_info("Sent subscription request to %s.", bare_jid);
     } else if (strcmp(subcmd, "show") == 0) {
         PContact contact = contact_list_get_contact(bare_jid);
-        if (contact == NULL) {
-            if (win_current_is_chat()) {
-                win_current_show("No subscription information for %s.", bare_jid);
-            } else {
-                cons_show("No subscription information for %s.", bare_jid);
-            }
-        } else if (p_contact_subscription(contact) == NULL) {
+        if ((contact == NULL) || (p_contact_subscription(contact) == NULL)) {
             if (win_current_is_chat()) {
                 win_current_show("No subscription information for %s.", bare_jid);
             } else {
@@ -1023,11 +1017,21 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
             }
         } else {
             if (win_current_is_chat()) {
-                win_current_show("%s subscription status: %s.", bare_jid,
-                    p_contact_subscription(contact));
+                if (p_contact_pending_out(contact)) {
+                    win_current_show("%s subscription status: %s, request pending.",
+                        bare_jid, p_contact_subscription(contact));
+                } else {
+                    win_current_show("%s subscription status: %s.", bare_jid,
+                        p_contact_subscription(contact));
+                }
             } else {
-                cons_show("%s subscription status: %s.", bare_jid,
-                    p_contact_subscription(contact));
+                if (p_contact_pending_out(contact)) {
+                    cons_show("%s subscription status: %s, request pending.",
+                        bare_jid, p_contact_subscription(contact));
+                } else {
+                    cons_show("%s subscription status: %s.", bare_jid,
+                        p_contact_subscription(contact));
+                }
             }
         }
     } else {
