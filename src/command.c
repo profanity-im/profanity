@@ -966,47 +966,50 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_sub(gchar **args, struct cmd_help_t help)
 {
-    gboolean result = FALSE;
-
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are currently not connected.");
-        result = TRUE;
-    } else {
-        char *subcmd, *jid, *bare_jid;
-        subcmd = args[0];
-        jid = args[1];
-
-        if (jid != NULL) {
-            jid = strdup(jid);
-        } else {
-            jid = win_current_get_recipient();
-        }
-
-        bare_jid = strtok(jid, "/");
-
-        if (strcmp(subcmd, "add") == 0) {
-            jabber_subscription(bare_jid, PRESENCE_SUBSCRIBED);
-            cons_show("Accepted subscription for %s", bare_jid);
-            log_info("Accepted subscription for %s", bare_jid);
-        } else if (strcmp(subcmd, "del") == 0) {
-            jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
-            cons_show("Deleted subscription for %s", bare_jid);
-            log_info("Deleted subscription for %s", bare_jid);
-        } else if (strcmp(subcmd, "req") == 0) {
-            jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
-            cons_show("Sent subscription request to %s.", bare_jid);
-            log_info("Sent subscription request to %s.", bare_jid);
-        } else if (strcmp(subcmd, "show") == 0) {
-            /* TODO: not implemented yet */
-        }
-
-        free(jid);
-        result = TRUE;
+        return TRUE;
     }
 
-    return result;
+    char *subcmd, *jid, *bare_jid;
+    subcmd = args[0];
+    jid = args[1];
+
+    if (subcmd == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    if (jid != NULL) {
+        jid = strdup(jid);
+    } else {
+        jid = win_current_get_recipient();
+    }
+
+    bare_jid = strtok(jid, "/");
+
+    if (strcmp(subcmd, "add") == 0) {
+        jabber_subscription(bare_jid, PRESENCE_SUBSCRIBED);
+        cons_show("Accepted subscription for %s", bare_jid);
+        log_info("Accepted subscription for %s", bare_jid);
+    } else if (strcmp(subcmd, "del") == 0) {
+        jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
+        cons_show("Deleted subscription for %s", bare_jid);
+        log_info("Deleted subscription for %s", bare_jid);
+    } else if (strcmp(subcmd, "req") == 0) {
+        jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
+        cons_show("Sent subscription request to %s.", bare_jid);
+        log_info("Sent subscription request to %s.", bare_jid);
+    } else if (strcmp(subcmd, "show") == 0) {
+        /* TODO: not implemented yet */
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
+
+    free(jid);
+    return TRUE;
 }
 
 static gboolean
