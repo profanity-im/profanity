@@ -136,7 +136,9 @@ theme_change(const char * const theme_name)
 
         // load from theme file
         } else {
-            g_string_free(theme_loc, TRUE);
+            if (theme_loc != NULL) {
+                g_string_free(theme_loc, TRUE);
+            }
             theme_loc = new_theme_file;
             log_info("Changing theme to \"%s\"", theme_name);
             g_key_file_free(theme);
@@ -153,7 +155,9 @@ void
 theme_close(void)
 {
     g_key_file_free(theme);
-    g_string_free(theme_loc, TRUE);
+    if (theme_loc != NULL) {
+        g_string_free(theme_loc, TRUE);
+    }
 }
 
 void
