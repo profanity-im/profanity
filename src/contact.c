@@ -62,7 +62,7 @@ p_contact_new(const char * const jid, const char * const name,
     if (subscription != NULL)
         contact->subscription = strdup(subscription);
     else
-        contact->subscription = NULL;
+        contact->subscription = strdup("none");;
 
     return contact;
 }
