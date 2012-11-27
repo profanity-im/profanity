@@ -96,6 +96,20 @@ contact_list_update_contact(const char * const jid, const char * const presence,
     return changed;
 }
 
+void
+contact_list_update_subscription(const char * const jid,
+    const char * const subscription, gboolean pending_out)
+{
+    PContact contact = g_hash_table_lookup(contacts, jid);
+
+    if (contact == NULL) {
+        return;
+    } else {
+        p_contact_set_subscription(contact, subscription);
+        p_contact_set_pending_out(contact, pending_out);
+    }
+}
+
 GSList *
 get_contact_list(void)
 {

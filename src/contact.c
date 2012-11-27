@@ -195,6 +195,27 @@ p_contact_set_status(const PContact contact, const char * const status)
     }
 }
 
+void
+p_contact_set_subscription(const PContact contact, const char * const subscription)
+{
+    if (contact->subscription != NULL) {
+        free(contact->subscription);
+        contact->subscription = NULL;
+    }
+
+    if (subscription == NULL) {
+        contact->subscription = strdup("none");
+    } else {
+        contact->subscription = strdup(subscription);
+    }
+}
+
+void
+p_contact_set_pending_out(const PContact contact, gboolean pending_out)
+{
+    contact->pending_out = pending_out;
+}
+
 int
 p_contacts_equal_deep(const PContact c1, const PContact c2)
 {

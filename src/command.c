@@ -276,18 +276,20 @@ static struct cmd_t main_commands[] =
 
     { "/sub",
         _cmd_sub, parse_args, 1, 2,
-        { "/sub <add|del|req|show> [jid]", "Manage subscriptions.",
-        { "/sub <add|del|req|show> [jid]",
-          "-----------------------------",
-          "add  : Approve subscription to a contact.",
-          "del  : Remove subscription for a contact.",
-          "req  : Send a subscription request to the user to be informed of their",
-          "     : presence.",
-          "show : Show subscriprion status for a contact.",
+        { "/sub <request|allow|deny|show> [jid]", "Manage subscriptions.",
+        { "/sub <request|allow|deny|show> [jid]",
+          "------------------------------------",
+          "request : Send a subscription request to the user to be informed of their",
+          "        : presence.",
+          "allow   : Approve contacts subscription reqeust to see your presence.",
+          "deny    : Remove subscription for a contact, or deny a request",
+          "show    : Show subscriprion status for a contact.",
           "",
           "If optional parameter 'jid' isn't set command belongs to the current window.",
           "",
-          "Example: /sub add myfriend@jabber.org",
+          "Example: /sub request myfriend@jabber.org",
+          "Example: /sub allow myfriend@jabber.org",
+          "Example: /sub request (whilst in chat with contact)",
           NULL  } } },
 
     { "/tiny",
@@ -622,9 +624,9 @@ cmd_init(void)
     p_autocomplete_add(notify_ac, strdup("remind"));
 
     sub_ac = p_autocomplete_new();
-    p_autocomplete_add(sub_ac, strdup("add"));
-    p_autocomplete_add(sub_ac, strdup("del"));
-    p_autocomplete_add(sub_ac, strdup("req"));
+    p_autocomplete_add(sub_ac, strdup("request"));
+    p_autocomplete_add(sub_ac, strdup("allow"));
+    p_autocomplete_add(sub_ac, strdup("deny"));
     p_autocomplete_add(sub_ac, strdup("show"));
 
     log_ac = p_autocomplete_new();
@@ -995,15 +997,15 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
 
     bare_jid = strtok(jid, "/");
 
-    if (strcmp(subcmd, "add") == 0) {
+    if (strcmp(subcmd, "allow") == 0) {
         jabber_subscription(bare_jid, PRESENCE_SUBSCRIBED);
         cons_show("Accepted subscription for %s", bare_jid);
         log_info("Accepted subscription for %s", bare_jid);
-    } else if (strcmp(subcmd, "del") == 0) {
+    } else if (strcmp(subcmd, "deny") == 0) {
         jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
-        cons_show("Deleted subscription for %s", bare_jid);
-        log_info("Deleted subscription for %s", bare_jid);
-    } else if (strcmp(subcmd, "req") == 0) {
+        cons_show("Deleted/denied subscription for %s", bare_jid);
+        log_info("Deleted/denied subscription for %s", bare_jid);
+    } else if (strcmp(subcmd, "request") == 0) {
         jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
         cons_show("Sent subscription request to %s.", bare_jid);
         log_info("Sent subscription request to %s.", bare_jid);

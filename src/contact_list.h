@@ -35,6 +35,8 @@ gboolean contact_list_add(const char * const jid, const char * const name,
     const char * const subscription, gboolean pending_out);
 gboolean contact_list_update_contact(const char * const jid, const char * const presence,
     const char * const status);
+void contact_list_update_subscription(const char * const jid,
+    const char * const subscription, gboolean pending_out);
 GSList * get_contact_list(void);
 char * contact_list_find_contact(char *search_str);
 PContact contact_list_get_contact(const char const *jid);

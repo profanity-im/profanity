@@ -71,6 +71,8 @@ static int _groupchat_message_handler(xmpp_stanza_t * const stanza);
 static int _error_handler(xmpp_stanza_t * const stanza);
 static int _chat_message_handler(xmpp_stanza_t * const stanza);
 
+static int _iq_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _presence_handler(xmpp_conn_t * const conn,
@@ -673,7 +675,7 @@ _connection_handler(xmpp_conn_t * const conn,
 
         xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
         xmpp_handler_add(conn, _presence_handler, NULL, STANZA_NAME_PRESENCE, NULL, ctx);
-        xmpp_id_handler_add(conn, _roster_handler, "roster", ctx);
+        xmpp_handler_add(conn, _iq_handler, NULL, STANZA_NAME_IQ, NULL, ctx);
 
         if (prefs_get_autoping() != 0) {
             int millis = prefs_get_autoping() * 1000;
@@ -740,6 +742,66 @@ _connection_handler(xmpp_conn_t * const conn,
                 jabber_conn.presence = PRESENCE_OFFLINE;
             }
         }
+    }
+}
+
+static int
+_iq_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+
+    // handle the initial roster request
+    if ((id != NULL) && (strcmp(id, "roster") == 0)) {
+        return _roster_handler(conn, stanza, userdata);
+
+    // handle roster updates
+    } else {
+        char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+        if (type == NULL) {
+            return TRUE;
+        }
+
+        if (strcmp(type, "set") != 0) {
+            return TRUE;
+        }
+
+        xmpp_stanza_t *query =
+            xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
+        if (query == NULL) {
+            return TRUE;
+        }
+
+        char *xmlns = xmpp_stanza_get_attribute(query, STANZA_ATTR_XMLNS);
+
+        if (xmlns == NULL) {
+            return TRUE;
+        }
+
+        if (strcmp(xmlns, XMPP_NS_ROSTER) != 0) {
+            return TRUE;
+        }
+
+        xmpp_stanza_t *item =
+            xmpp_stanza_get_child_by_name(query, STANZA_NAME_ITEM);
+
+        if (item == NULL) {
+            return TRUE;
+        }
+
+        const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+        const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+
+        gboolean pending_out = FALSE;
+        const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
+        if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
+            pending_out = TRUE;
+        }
+
+        contact_list_update_subscription(jid, sub, pending_out);
+
+        return TRUE;
     }
 }
 

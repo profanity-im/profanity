@@ -38,6 +38,8 @@ const char * p_contact_subscription(const PContact contact);
 gboolean p_contact_pending_out(const PContact contact);
 void p_contact_set_presence(const PContact contact, const char * const presence);
 void p_contact_set_status(const PContact contact, const char * const status);
+void p_contact_set_subscription(const PContact contact, const char * const subscription);
+void p_contact_set_pending_out(const PContact contact, gboolean pending_out);
 int p_contacts_equal_deep(const PContact c1, const PContact c2);
 
 #endif
