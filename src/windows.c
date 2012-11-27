@@ -488,11 +488,16 @@ win_current_get_recipient(void)
 }
 
 void
-win_current_show(const char * const msg)
+win_current_show(const char * const msg, ...)
 {
-    WINDOW *win = current->win;
-    _win_show_time(win);
-    wprintw(win, "%s\n", msg);
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    _win_show_time(current->win);
+    wprintw(current->win, "%s\n", fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
 
     dirty = TRUE;
 }

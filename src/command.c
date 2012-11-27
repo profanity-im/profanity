@@ -982,6 +982,11 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    if (!win_current_is_chat() && (jid == NULL)) {
+        cons_show("You must specify a contact.");
+        return TRUE;
+    }
+
     if (jid != NULL) {
         jid = strdup(jid);
     } else {
@@ -1003,7 +1008,28 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         cons_show("Sent subscription request to %s.", bare_jid);
         log_info("Sent subscription request to %s.", bare_jid);
     } else if (strcmp(subcmd, "show") == 0) {
-        /* TODO: not implemented yet */
+        PContact contact = contact_list_get_contact(bare_jid);
+        if (contact == NULL) {
+            if (win_current_is_chat()) {
+                win_current_show("No subscription information for %s.", bare_jid);
+            } else {
+                cons_show("No subscription information for %s.", bare_jid);
+            }
+        } else if (p_contact_subscription(contact) == NULL) {
+            if (win_current_is_chat()) {
+                win_current_show("No subscription information for %s.", bare_jid);
+            } else {
+                cons_show("No subscription information for %s.", bare_jid);
+            }
+        } else {
+            if (win_current_is_chat()) {
+                win_current_show("%s subscription status: %s.", bare_jid,
+                    p_contact_subscription(contact));
+            } else {
+                cons_show("%s subscription status: %s.", bare_jid,
+                    p_contact_subscription(contact));
+            }
+        }
     } else {
         cons_show("Usage: %s", help.usage);
     }

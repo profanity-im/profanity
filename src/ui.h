@@ -98,7 +98,7 @@ int win_current_is_chat(void);
 int win_current_is_groupchat(void);
 int win_current_is_private(void);
 char* win_current_get_recipient(void);
-void win_current_show(const char * const msg);
+void win_current_show(const char * const msg, ...);
 void win_current_bad_show(const char * const msg);
 void win_current_page_off(void);
 
