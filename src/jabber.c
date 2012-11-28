@@ -793,6 +793,11 @@ _iq_handler(xmpp_conn_t * const conn,
         const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
         const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
 
+        if (g_strcmp0(sub, "remove") == 0) {
+            contact_list_remove(jid);
+            return TRUE;
+        }
+
         gboolean pending_out = FALSE;
         const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
         if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
