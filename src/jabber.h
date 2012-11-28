@@ -55,6 +55,7 @@ void jabber_join(const char * const room, const char * const nick);
 void jabber_change_room_nick(const char * const room, const char * const nick);
 void jabber_leave_chat_room(const char * const room_jid);
 void jabber_subscription(const char * const jid, jabber_subscr_t action);
+GList* jabber_get_subscription_requests(void);
 void jabber_send(const char * const msg, const char * const recipient);
 void jabber_send_groupchat(const char * const msg, const char * const recipient);
 void jabber_send_inactive(const char * const recipient);

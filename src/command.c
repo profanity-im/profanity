@@ -276,20 +276,24 @@ static struct cmd_t main_commands[] =
 
     { "/sub",
         _cmd_sub, parse_args, 1, 2,
-        { "/sub <request|allow|deny|show> [jid]", "Manage subscriptions.",
-        { "/sub <request|allow|deny|show> [jid]",
-          "------------------------------------",
-          "request : Send a subscription request to the user to be informed of their",
-          "        : presence.",
-          "allow   : Approve contacts subscription reqeust to see your presence.",
-          "deny    : Remove subscription for a contact, or deny a request",
-          "show    : Show subscriprion status for a contact.",
+        { "/sub <request|allow|deny|show|sent|received> [jid]", "Manage subscriptions.",
+        { "/sub <request|allow|deny|show|sent|received> [jid]",
+          "--------------------------------------------------",
+          "request  : Send a subscription request to the user to be informed of their",
+          "         : presence.",
+          "allow    : Approve contacts subscription reqeust to see your presence.",
+          "deny     : Remove subscription for a contact, or deny a request",
+          "show     : Show subscriprion status for a contact.",
+          "sent     : Show all sent subscription requests pending a response.",
+          "received : Show all received subscription requests awaiting your response.",
           "",
-          "If optional parameter 'jid' isn't set command belongs to the current window.",
+          "The optional 'jid' parameter only applys to 'request', 'allow', 'deny' and show",
+          "If it is ommited the contact of the current window is used.",
           "",
           "Example: /sub request myfriend@jabber.org",
           "Example: /sub allow myfriend@jabber.org",
           "Example: /sub request (whilst in chat with contact)",
+          "Example: /sub sent",
           NULL  } } },
 
     { "/tiny",
@@ -628,6 +632,8 @@ cmd_init(void)
     p_autocomplete_add(sub_ac, strdup("allow"));
     p_autocomplete_add(sub_ac, strdup("deny"));
     p_autocomplete_add(sub_ac, strdup("show"));
+    p_autocomplete_add(sub_ac, strdup("sent"));
+    p_autocomplete_add(sub_ac, strdup("received"));
 
     log_ac = p_autocomplete_new();
     p_autocomplete_add(log_ac, strdup("maxsize"));
@@ -981,6 +987,28 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
 
     if (subcmd == NULL) {
         cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    if (strcmp(subcmd, "sent") == 0) {
+        cons_show("No pending requests sent.");
+        return TRUE;
+    }
+
+    if (strcmp(subcmd, "received") == 0) {
+        GList *received = jabber_get_subscription_requests();
+
+        if (received == NULL) {
+            cons_show("No outstanding subscription requests.");
+        } else {
+            cons_show("%d outstanding subscription requests from:",
+                g_list_length(received));
+            while (received != NULL) {
+                cons_show(received->data);
+                received = g_list_next(received);
+            }
+        }
+
         return TRUE;
     }
 

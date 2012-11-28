@@ -50,6 +50,7 @@ static struct _jabber_conn_t {
 static char *saved_user;
 static char *saved_password;
 static GTimer *reconnect_timer;
+static GHashTable *sub_requests;
 
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
 static xmpp_log_level_t _get_xmpp_log_level();
@@ -87,6 +88,7 @@ jabber_init(const int disable_tls)
     jabber_conn.presence = PRESENCE_OFFLINE;
     jabber_conn.status = NULL;
     jabber_conn.tls_disabled = disable_tls;
+    sub_requests = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
@@ -277,6 +279,12 @@ jabber_subscription(const char * const jid, jabber_subscr_t action)
     free(jid_cpy);
 }
 
+GList *
+jabber_get_subscription_requests(void)
+{
+    return g_hash_table_get_keys(sub_requests);
+}
+
 void
 jabber_join(const char * const room, const char * const nick)
 {
@@ -444,6 +452,7 @@ jabber_free_resources(void)
     saved_user = NULL;
     saved_password = NULL;
     chat_sessions_clear();
+    g_hash_table_remove_all(sub_requests);
     xmpp_conn_release(jabber_conn.conn);
     xmpp_ctx_free(jabber_conn.ctx);
     xmpp_shutdown();
@@ -998,12 +1007,17 @@ _presence_handler(xmpp_conn_t * const conn,
             if (strcmp(short_jid, short_from) !=0) {
                 prof_handle_contact_offline(short_from, "offline", status_str);
             }
+
+        // subscriptions
         } else if (strcmp(type, STANZA_TYPE_SUBSCRIBE) == 0) {
             prof_handle_subscription(short_from, PRESENCE_SUBSCRIBE);
+            g_hash_table_insert(sub_requests, strdup(short_from), strdup(short_from));
         } else if (strcmp(type, STANZA_TYPE_SUBSCRIBED) == 0) {
             prof_handle_subscription(short_from, PRESENCE_SUBSCRIBED);
+            g_hash_table_remove(sub_requests, short_from);
         } else if (strcmp(type, STANZA_TYPE_UNSUBSCRIBED) == 0) {
             prof_handle_subscription(short_from, PRESENCE_UNSUBSCRIBED);
+            g_hash_table_remove(sub_requests, short_from);
         } else { /* unknown type */
             log_debug("Received presence with unknown type '%s'", type);
         }
