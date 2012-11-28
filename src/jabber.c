@@ -260,6 +260,7 @@ jabber_subscription(const char * const jid, jabber_subscr_t action)
     // jid must be a bare JID
     jid_cpy = strdup(jid);
     bare_jid = strtok(jid_cpy, "/");
+    g_hash_table_remove(sub_requests, bare_jid);
 
     if (action == PRESENCE_SUBSCRIBE)
         type = STANZA_TYPE_SUBSCRIBE;
