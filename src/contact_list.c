@@ -72,6 +72,12 @@ contact_list_add(const char * const jid, const char * const name,
     return added;
 }
 
+void
+contact_list_remove(const char * const jid)
+{
+    g_hash_table_remove(contacts, jid);
+}
+
 gboolean
 contact_list_update_contact(const char * const jid, const char * const presence,
     const char * const status)
@@ -103,7 +109,9 @@ contact_list_update_subscription(const char * const jid,
     PContact contact = g_hash_table_lookup(contacts, jid);
 
     if (contact == NULL) {
-        return;
+        contact = p_contact_new(jid, NULL, "offline", NULL, subscription,
+            pending_out);
+        g_hash_table_insert(contacts, strdup(jid), contact);
     } else {
         p_contact_set_subscription(contact, subscription);
         p_contact_set_pending_out(contact, pending_out);
