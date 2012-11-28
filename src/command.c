@@ -991,7 +991,20 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
     }
 
     if (strcmp(subcmd, "sent") == 0) {
-        cons_show("No pending requests sent.");
+        if (contact_list_has_pending_subscriptions()) {
+            cons_show("Awaiting subscription responses from:");
+            GSList *contacts = get_contact_list();
+            while (contacts != NULL) {
+                PContact contact = (PContact) contacts->data;
+                if (p_contact_pending_out(contact)) {
+                    cons_show(p_contact_jid(contact));
+                }
+                contacts = g_slist_next(contacts);
+            }
+        } else {
+            cons_show("No pending requests sent.");
+        }
+
         return TRUE;
     }
 
@@ -1001,7 +1014,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         if (received == NULL) {
             cons_show("No outstanding subscription requests.");
         } else {
-            cons_show("%d outstanding subscription requests from:",
+            cons_show("Outstanding subscription requests from:",
                 g_list_length(received));
             while (received != NULL) {
                 cons_show(received->data);

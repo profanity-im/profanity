@@ -118,6 +118,24 @@ contact_list_update_subscription(const char * const jid,
     }
 }
 
+gboolean
+contact_list_has_pending_subscriptions(void)
+{
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        PContact contact = (PContact) value;
+        if (p_contact_pending_out(contact)) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 GSList *
 get_contact_list(void)
 {

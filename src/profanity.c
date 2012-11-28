@@ -156,7 +156,7 @@ prof_handle_subscription(const char *from, jabber_subscr_t type)
         /* TODO: auto-subscribe if needed */
         cons_show("Received authorization request from %s", from);
         log_info("Received authorization request from %s", from);
-        win_show_system_msg(from, "Authorization request, type '/sub add' to accept or '/sub del' to reject");
+        win_show_system_msg(from, "Authorization request, type '/sub allow' to accept or '/sub deny' to reject");
         win_current_page_off();
         break;
     case PRESENCE_SUBSCRIBED:
