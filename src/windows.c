@@ -123,6 +123,16 @@ ui_init(void)
 void
 ui_refresh(void)
 {
+    GString *version_str = g_string_new("");
+
+    if (prefs_get_titlebarversion()) {
+        g_string_append(version_str, " ");
+        g_string_append(version_str, PACKAGE_VERSION);
+        if (strcmp(PACKAGE_STATUS, "development") == 0) {
+            g_string_append(version_str, "dev");
+        }
+    }
+
     jabber_conn_status_t status = jabber_get_connection_status();
 
     if (status == JABBER_CONNECTED) {
@@ -130,13 +140,15 @@ ui_refresh(void)
         gint unread = _win_get_unread();
 
         if (unread != 0) {
-            printf("%c]0;*%s - %s (%d unread)%c", '\033', "Profanity", jid, unread, '\007');
+            printf("%c]0;*%s%s - %s (%d unread)%c", '\033', "Profanity", version_str->str, jid, unread, '\007');
         } else {
-            printf("%c]0;%s - %s%c", '\033', "Profanity", jid, '\007');
+            printf("%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
         }
     } else {
-        printf("%c]0;%s%c", '\033', "Profanity", '\007');
+        printf("%c]0;%s%s%c", '\033', "Profanity", version_str->str, '\007');
     }
+
+    g_string_free(version_str, TRUE);
 
     title_bar_refresh();
     status_bar_refresh();

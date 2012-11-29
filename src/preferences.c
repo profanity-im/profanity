@@ -279,6 +279,19 @@ prefs_set_vercheck(gboolean value)
 }
 
 gboolean
+prefs_get_titlebarversion(void)
+{
+    return g_key_file_get_boolean(prefs, "ui", "titlebarversion", NULL);
+}
+
+void
+prefs_set_titlebarversion(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "titlebarversion", value);
+    _save_prefs();
+}
+
+gboolean
 prefs_get_flash(void)
 {
     return g_key_file_get_boolean(prefs, "ui", "flash", NULL);

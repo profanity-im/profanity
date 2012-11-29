@@ -118,6 +118,7 @@ static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_titlebarversion(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
@@ -427,6 +428,14 @@ static struct cmd_t setting_commands[] =
           "Without a parameter will check for a new release.",
           "Switching on or off will enable/disable a version check when Profanity starts,",
           "and each time the /about command is run.",
+          NULL  } } },
+
+    { "/titlebarversion",
+        _cmd_set_titlebarversion, parse_args, 1, 1,
+        { "/titlebarversion on|off", "Check for a new release.",
+        { "/titlebarversion on|off",
+          "------------------",
+          "Show the version in the title bar of the window.",
           NULL  } } },
 
     { "/chlog",
@@ -910,6 +919,8 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/history",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/vercheck",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/titlebarversion",
         prefs_autocomplete_boolean_choice);
 
     _parameter_autocomplete(input, size, "/msg",
@@ -1503,6 +1514,13 @@ _cmd_set_states(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args, help, "/states",
         "Sending chat states", prefs_set_states);
+}
+
+static gboolean
+_cmd_set_titlebarversion(gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args, help, "/titlebarversion",
+        "Show version in window title", prefs_set_titlebarversion);
 }
 
 static gboolean

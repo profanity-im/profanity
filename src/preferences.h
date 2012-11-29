@@ -57,6 +57,8 @@ gboolean prefs_get_showsplash(void);
 void prefs_set_showsplash(gboolean value);
 gboolean prefs_get_vercheck(void);
 void prefs_set_vercheck(gboolean value);
+gboolean prefs_get_titlebarversion(void);
+void prefs_set_titlebarversion(gboolean value);
 gboolean prefs_get_intype(void);
 void prefs_set_intype(gboolean value);
 gboolean prefs_get_states(void);
