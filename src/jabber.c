@@ -765,58 +765,91 @@ _iq_handler(xmpp_conn_t * const conn,
     if ((id != NULL) && (strcmp(id, "roster") == 0)) {
         return _roster_handler(conn, stanza, userdata);
 
-    // handle roster updates
+    // handle iq
     } else {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         if (type == NULL) {
             return TRUE;
         }
 
-        if (strcmp(type, "set") != 0) {
+        // handle roster update
+        if (strcmp(type, STANZA_TYPE_SET) == 0) {
+
+            xmpp_stanza_t *query =
+                xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+            if (query == NULL) {
+                return TRUE;
+            }
+
+            char *xmlns = xmpp_stanza_get_attribute(query, STANZA_ATTR_XMLNS);
+            if (xmlns == NULL) {
+                return TRUE;
+            }
+            if (strcmp(xmlns, XMPP_NS_ROSTER) != 0) {
+                return TRUE;
+            }
+
+            xmpp_stanza_t *item =
+                xmpp_stanza_get_child_by_name(query, STANZA_NAME_ITEM);
+            if (item == NULL) {
+                return TRUE;
+            }
+
+            const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+            const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+            if (g_strcmp0(sub, "remove") == 0) {
+                contact_list_remove(jid);
+                return TRUE;
+            }
+
+            gboolean pending_out = FALSE;
+            const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
+            if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
+                pending_out = TRUE;
+            }
+
+            contact_list_update_subscription(jid, sub, pending_out);
+
+            return TRUE;
+
+        // handle server ping
+        } else if (strcmp(type, STANZA_TYPE_GET) == 0) {
+            xmpp_stanza_t *ping = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PING);
+            if (ping == NULL) {
+                return TRUE;
+            }
+
+            char *xmlns = xmpp_stanza_get_attribute(ping, STANZA_ATTR_XMLNS);
+            if (xmlns == NULL) {
+                return TRUE;
+            }
+
+            if (strcmp(xmlns, STANZA_NS_PING) != 0) {
+                return TRUE;
+            }
+
+            char *to = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TO);
+            char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+            if ((from == NULL) || (to == NULL)) {
+                return TRUE;
+            }
+
+            xmpp_stanza_t *pong = xmpp_stanza_new(jabber_conn.ctx);
+            xmpp_stanza_set_name(pong, STANZA_NAME_IQ);
+            xmpp_stanza_set_attribute(pong, STANZA_ATTR_TO, from);
+            xmpp_stanza_set_attribute(pong, STANZA_ATTR_FROM, to);
+            xmpp_stanza_set_attribute(pong, STANZA_ATTR_TYPE, STANZA_TYPE_RESULT);
+            if (id != NULL) {
+                xmpp_stanza_set_attribute(pong, STANZA_ATTR_ID, id);
+            }
+
+            xmpp_send(jabber_conn.conn, pong);
+            xmpp_stanza_release(pong);
+
+            return TRUE;
+        } else {
             return TRUE;
         }
-
-        xmpp_stanza_t *query =
-            xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-
-        if (query == NULL) {
-            return TRUE;
-        }
-
-        char *xmlns = xmpp_stanza_get_attribute(query, STANZA_ATTR_XMLNS);
-
-        if (xmlns == NULL) {
-            return TRUE;
-        }
-
-        if (strcmp(xmlns, XMPP_NS_ROSTER) != 0) {
-            return TRUE;
-        }
-
-        xmpp_stanza_t *item =
-            xmpp_stanza_get_child_by_name(query, STANZA_NAME_ITEM);
-
-        if (item == NULL) {
-            return TRUE;
-        }
-
-        const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-        const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
-
-        if (g_strcmp0(sub, "remove") == 0) {
-            contact_list_remove(jid);
-            return TRUE;
-        }
-
-        gboolean pending_out = FALSE;
-        const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-        if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
-            pending_out = TRUE;
-        }
-
-        contact_list_update_subscription(jid, sub, pending_out);
-
-        return TRUE;
     }
 }
 

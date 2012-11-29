@@ -55,7 +55,9 @@
 #define STANZA_TYPE_SUBSCRIBED "subscribed"
 #define STANZA_TYPE_UNSUBSCRIBED "unsubscribed"
 #define STANZA_TYPE_GET "get"
+#define STANZA_TYPE_SET "set"
 #define STANZA_TYPE_ERROR "error"
+#define STANZA_TYPE_RESULT "result"
 
 #define STANZA_ATTR_TO "to"
 #define STANZA_ATTR_FROM "from"
