@@ -140,7 +140,7 @@ ui_refresh(void)
         gint unread = _win_get_unread();
 
         if (unread != 0) {
-            printf("%c]0;*%s%s - %s (%d unread)%c", '\033', "Profanity", version_str->str, jid, unread, '\007');
+            printf("%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
         } else {
             printf("%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
         }
