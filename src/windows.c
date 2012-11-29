@@ -123,6 +123,21 @@ ui_init(void)
 void
 ui_refresh(void)
 {
+    jabber_conn_status_t status = jabber_get_connection_status();
+
+    if (status == JABBER_CONNECTED) {
+        const char * const jid = jabber_get_jid();
+        gint unread = _win_get_unread();
+
+        if (unread != 0) {
+            printf("%c]0;*%s - %s (%d unread)%c", '\033', "Profanity", jid, unread, '\007');
+        } else {
+            printf("%c]0;%s - %s%c", '\033', "Profanity", jid, '\007');
+        }
+    } else {
+        printf("%c]0;%s%c", '\033', "Profanity", '\007');
+    }
+
     title_bar_refresh();
     status_bar_refresh();
 
