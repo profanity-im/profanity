@@ -84,6 +84,8 @@ static char *_cmd_sub_complete(char *inp);
 static void _cmd_sub_reset_completer(void);
 static char *_cmd_log_complete(char *inp);
 static void _cmd_log_reset_completer(void);
+static char *_cmd_prefs_complete(char *inp);
+static void _cmd_prefs_reset_completer(void);
 static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
@@ -183,12 +185,13 @@ static struct cmd_t main_commands[] =
           NULL  } } },
 
     { "/prefs",
-        _cmd_prefs, parse_args, 0, 0,
-        { "/prefs", "Show current preferences.",
-        { "/prefs",
-          "------",
-          "List all current user preference settings.",
-          "User preferences are stored at:",
+        _cmd_prefs, parse_args, 0, 1,
+        { "/prefs [ui|desktop|chat|log|xmpp]", "Show current preferences.",
+        { "/prefs [ui|desktop|chat|log|xmpp]",
+          "---------------------------------",
+          "Show current preferences.",
+          "The argument narrows down the category of preferences, with no argument showing all.",
+          "The perferences are stored in:",
           "",
           "    $XDG_CONFIG_HOME/profanity/profrc",
           "",
@@ -610,6 +613,7 @@ static PAutocomplete commands_ac;
 static PAutocomplete who_ac;
 static PAutocomplete help_ac;
 static PAutocomplete notify_ac;
+static PAutocomplete prefs_ac;
 static PAutocomplete sub_ac;
 static PAutocomplete log_ac;
 
@@ -623,6 +627,13 @@ cmd_init(void)
 
     commands_ac = p_autocomplete_new();
     who_ac = p_autocomplete_new();
+
+    prefs_ac = p_autocomplete_new();
+    p_autocomplete_add(prefs_ac, strdup("ui"));
+    p_autocomplete_add(prefs_ac, strdup("desktop"));
+    p_autocomplete_add(prefs_ac, strdup("chat"));
+    p_autocomplete_add(prefs_ac, strdup("log"));
+    p_autocomplete_add(prefs_ac, strdup("xmpp"));
 
     help_ac = p_autocomplete_new();
     p_autocomplete_add(help_ac, strdup("list"));
@@ -683,6 +694,7 @@ cmd_close(void)
     p_autocomplete_clear(notify_ac);
     p_autocomplete_clear(sub_ac);
     p_autocomplete_clear(log_ac);
+    p_autocomplete_clear(prefs_ac);
 }
 
 // Command autocompletion functions
@@ -722,6 +734,7 @@ cmd_reset_autocomplete()
     _cmd_notify_reset_completer();
     _cmd_sub_reset_completer();
     _cmd_who_reset_completer();
+    _cmd_prefs_reset_completer();
     _cmd_log_reset_completer();
     _cmd_reset_command_completer();
 }
@@ -852,6 +865,18 @@ _cmd_who_reset_completer(void)
 }
 
 static char *
+_cmd_prefs_complete(char *inp)
+{
+    return p_autocomplete_complete(prefs_ac, inp);
+}
+
+static void
+_cmd_prefs_reset_completer(void)
+{
+    p_autocomplete_reset(prefs_ac);
+}
+
+static char *
 _cmd_help_complete(char *inp)
 {
     return p_autocomplete_complete(help_ac, inp);
@@ -935,6 +960,8 @@ _cmd_complete_parameters(char *input, int *size)
         _cmd_help_complete);
     _parameter_autocomplete(input, size, "/who",
         _cmd_who_complete);
+    _parameter_autocomplete(input, size, "/prefs",
+        _cmd_prefs_complete);
     _parameter_autocomplete(input, size, "/log",
         _cmd_log_complete);
 
@@ -1209,7 +1236,31 @@ _cmd_about(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_prefs(gchar **args, struct cmd_help_t help)
 {
-    cons_prefs();
+    if (args[0] == NULL) {
+        cons_prefs();
+    } else if (strcmp(args[0], "ui") == 0) {
+        cons_show("");
+        cons_show_ui_prefs();
+        cons_show("");
+    } else if (strcmp(args[0], "desktop") == 0) {
+        cons_show("");
+        cons_show_desktop_prefs();
+        cons_show("");
+    } else if (strcmp(args[0], "chat") == 0) {
+        cons_show("");
+        cons_show_chat_prefs();
+        cons_show("");
+    } else if (strcmp(args[0], "log") == 0) {
+        cons_show("");
+        cons_show_log_prefs();
+        cons_show("");
+    } else if (strcmp(args[0], "xmpp") == 0) {
+        cons_show("");
+        cons_show_xmpp_prefs();
+        cons_show("");
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
 
     return TRUE;
 }
