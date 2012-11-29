@@ -191,7 +191,7 @@ static struct cmd_t main_commands[] =
           "---------------------------------",
           "Show current preferences.",
           "The argument narrows down the category of preferences, with no argument showing all.",
-          "The perferences are stored in:",
+          "The preferences are stored in:",
           "",
           "    $XDG_CONFIG_HOME/profanity/profrc",
           "",
