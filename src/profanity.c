@@ -51,7 +51,6 @@ static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
 
 static gboolean idle = FALSE;
-static gboolean away = FALSE;
 
 void
 prof_run(const int disable_tls, char *log_level)
@@ -453,11 +452,7 @@ _handle_idle_time()
     } else {
         if (idle_ms < 5000) {
             idle = FALSE;
-            away = FALSE;
             cons_show("BACK");
-        } else if ((idle_ms >= 10000) && (!away)) {
-            away = TRUE;
-            cons_show("AWAY");
         }
     }
 }
