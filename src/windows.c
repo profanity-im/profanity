@@ -638,6 +638,39 @@ win_show_gone(const char * const from)
 }
 
 void
+win_new_chat_win(const char * const to)
+{
+    // if the contact is offline, show a message
+    PContact contact = contact_list_get_contact(to);
+    int win_index = _find_prof_win_index(to);
+    WINDOW *win = NULL;
+
+    // create new window
+    if (win_index == NUM_WINS) {
+        win_index = _new_prof_win(to, WIN_CHAT);
+        win = windows[win_index]->win;
+
+        if (prefs_get_chlog() && prefs_get_history()) {
+            _win_show_history(win, win_index, to);
+        }
+
+        if (contact != NULL) {
+            if (strcmp(p_contact_presence(contact), "offline") == 0) {
+                const char const *show = p_contact_presence(contact);
+                const char const *status = p_contact_status(contact);
+                _show_status_string(win, to, show, status, "--", "offline");
+            }
+        }
+
+    // use existing window
+    } else {
+        win = windows[win_index]->win;
+    }
+
+    ui_switch_win(win_index);
+}
+
+void
 win_show_outgoing_msg(const char * const from, const char * const to,
     const char * const message)
 {

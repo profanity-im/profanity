@@ -220,18 +220,15 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/msg",
-        _cmd_msg, parse_args_with_freetext, 2, 2,
-        { "/msg user@host mesg", "Send mesg to user.",
-        { "/msg user@host mesg",
-          "-------------------",
-          "Send a message to the user specified.",
-          "Use tab completion to autocomplete online contacts.",
-          "If there is no current chat with the recipient, a new chat window",
-          "will be opened, and highlighted in the status bar at the bottom.",
-          "pressing the corresponding F key will take you to that window.",
-          "This command can be called from any window, including chat with other users.",
+        _cmd_msg, parse_args_with_freetext, 1, 2,
+        { "/msg user@host [message]", "Start chat window with user.",
+        { "/msg user@host [message]",
+          "------------------------",
+          "Open a chat window with user@host and send the message if one is supplied.",
+          "Use tab completion to autocomplete conacts from the roster.",
           "",
-          "Example : /msg boothj5@gmail.com Hey, here's a message!",
+          "Example : /msg myfriend@server.com Hey, here's a message!",
+          "Example : /msg otherfriend@server.com",
           NULL } } },
 
     { "/info",
@@ -1402,9 +1399,15 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-    } else if (ui_windows_full()) {
+        return TRUE;
+    }
+
+    if (ui_windows_full()) {
         cons_bad_show("Windows all used, close a window and try again.");
-    } else {
+        return TRUE;
+    }
+
+    if (msg != NULL) {
         jabber_send(msg, usr);
         win_show_outgoing_msg("me", usr, msg);
 
@@ -1412,9 +1415,12 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             const char *jid = jabber_get_jid();
             chat_log_chat(jid, usr, msg, OUT, NULL);
         }
-    }
 
-    return TRUE;
+        return TRUE;
+    } else {
+        win_new_chat_win(usr);
+        return TRUE;
+    }
 }
 
 static gboolean

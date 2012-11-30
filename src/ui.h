@@ -107,6 +107,7 @@ void win_show_gone(const char * const from);
 void win_show_system_msg(const char * const from, const char *message);
 void win_show_outgoing_msg(const char * const from, const char * const to,
     const char * const message);
+void win_new_chat_win(const char * const to);
 
 void win_join_chat(const char * const room, const char * const nick);
 void win_show_room_roster(const char * const room);
