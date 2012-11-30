@@ -46,8 +46,12 @@
 
 static log_level_t _get_log_level(char *log_level);
 static gboolean _process_input(char *inp);
+static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
+
+static gboolean idle = FALSE;
+static gboolean away = FALSE;
 
 void
 prof_run(const int disable_tls, char *log_level)
@@ -66,6 +70,8 @@ prof_run(const int disable_tls, char *log_level)
         size = 0;
 
         while(ch != '\n') {
+
+            _handle_idle_time();
 
             gdouble elapsed = g_timer_elapsed(timer, NULL);
 
@@ -432,6 +438,28 @@ _process_input(char *inp)
     win_current_page_off();
 
     return result;
+}
+
+static void
+_handle_idle_time()
+{
+    unsigned long idle_ms = ui_get_desktop_idle();
+    if (!idle) {
+        if (idle_ms >= 5000) {
+            idle = TRUE;
+            cons_show("IDLE");
+        }
+
+    } else {
+        if (idle_ms < 5000) {
+            idle = FALSE;
+            away = FALSE;
+            cons_show("BACK");
+        } else if ((idle_ms >= 10000) && (!away)) {
+            away = TRUE;
+            cons_show("AWAY");
+        }
+    }
 }
 
 static void

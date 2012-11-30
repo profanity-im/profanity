@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_LIBXSS
+#include <X11/extensions/scrnsaver.h>
+#endif
+
 #include <glib.h>
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
@@ -65,6 +69,10 @@ static int dirty;
 
 // max columns for main windows, never resize below
 static int max_cols = 0;
+
+#ifdef HAVE_LIBXSS
+static Display *display;
+#endif
 
 static void _set_current(int index);
 static void _create_windows(void);
@@ -116,7 +124,9 @@ ui_init(void)
     status_bar_active(0);
     create_input_window();
     _create_windows();
-
+#ifdef HAVE_LIBXSS
+    display = XOpenDisplay(0);
+#endif
     dirty = TRUE;
 }
 
@@ -160,6 +170,19 @@ ui_refresh(void)
 
     inp_put_back();
 }
+
+#ifdef HAVE_LIBXSS
+unsigned long
+ui_get_desktop_idle(void)
+{
+    XScreenSaverInfo *info = XScreenSaverAllocInfo();
+    XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
+    unsigned long result = info->idle;
+    XFree(info);
+
+    return result;
+}
+#endif
 
 void
 ui_close(void)
