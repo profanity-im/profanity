@@ -446,13 +446,13 @@ _handle_idle_time()
     if (!idle) {
         if (idle_ms >= 5000) {
             idle = TRUE;
-            cons_show("IDLE");
+            jabber_update_presence(PRESENCE_AWAY, "Away from computer computer");
         }
 
     } else {
         if (idle_ms < 5000) {
             idle = FALSE;
-            cons_show("BACK");
+            jabber_update_presence(PRESENCE_ONLINE, NULL);
         }
     }
 }
