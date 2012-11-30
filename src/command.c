@@ -68,8 +68,8 @@ struct cmd_t {
 static struct cmd_t * _cmd_get_command(const char * const command);
 static void _update_presence(const jabber_presence_t presence,
     const char * const show, gchar **args);
-static gboolean _cmd_set_boolean_preference(gchar **args, struct cmd_help_t help,
-    const char * const cmd_str, const char * const display,
+static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
+    const char * const display,
     void (*set_func)(gboolean));
 
 static char *_cmd_complete(char *inp);
@@ -121,6 +121,7 @@ static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_titlebarversion(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_autoaway(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
@@ -186,9 +187,9 @@ static struct cmd_t main_commands[] =
 
     { "/prefs",
         _cmd_prefs, parse_args, 0, 1,
-        { "/prefs [ui|desktop|chat|log|xmpp]", "Show current preferences.",
-        { "/prefs [ui|desktop|chat|log|xmpp]",
-          "---------------------------------",
+        { "/prefs [ui|desktop|chat|log|conn|presence]", "Show current preferences.",
+        { "/prefs [ui|desktop|chat|log|conn|presence]",
+          "------------------------------------------",
           "Show current preferences.",
           "The argument narrows down the category of preferences, with no argument showing all.",
           "The preferences are stored in:",
@@ -534,6 +535,32 @@ static struct cmd_t setting_commands[] =
           "Config file value :   autoping=seconds",
           NULL } } },
 
+    { "/autoaway",
+        _cmd_set_autoaway, parse_args_with_freetext, 2, 2,
+        { "/autoaway setting value", "Set auto idle/away properties.",
+        { "/autoaway setting value",
+          "-----------------------",
+          "'setting' may be one of 'mode', 'minutes', 'message' or 'check', with the following values:",
+          "",
+          "mode    : idle - Sends idle time, whilst your status remains online.",
+          "          away - Sends an away presence.",
+          "          off - Disabled (default).",
+          "time    : Number of minutes before the presence change is sent, the default is 15.",
+          "message : Optional message to send with the presence change.",
+          "check   : on|off, when enabled, checks for activity and sends online presence, default is 'on'.",
+          "",
+          "Example: /autoaway mode idle",
+          "Example: /autoaway time 30",
+          "Example: /autoaway message I'm not really doing much",
+          "Example: /autoaway check false",
+          "",
+          "Config file section : [autoaway]",
+          "Config file value :   mode=idle|away|off",
+          "Config file value :   time=value",
+          "Config file value :   message=value",
+          "Config file value :   check=on|off",
+          NULL } } },
+
     { "/priority",
         _cmd_set_priority, parse_args, 1, 1,
         { "/priority <value>", "Set priority for connection.",
@@ -630,7 +657,8 @@ cmd_init(void)
     p_autocomplete_add(prefs_ac, strdup("desktop"));
     p_autocomplete_add(prefs_ac, strdup("chat"));
     p_autocomplete_add(prefs_ac, strdup("log"));
-    p_autocomplete_add(prefs_ac, strdup("xmpp"));
+    p_autocomplete_add(prefs_ac, strdup("conn"));
+    p_autocomplete_add(prefs_ac, strdup("presence"));
 
     help_ac = p_autocomplete_new();
     p_autocomplete_add(help_ac, strdup("list"));
@@ -1251,9 +1279,13 @@ _cmd_prefs(gchar **args, struct cmd_help_t help)
         cons_show("");
         cons_show_log_prefs();
         cons_show("");
-    } else if (strcmp(args[0], "xmpp") == 0) {
+    } else if (strcmp(args[0], "conn") == 0) {
         cons_show("");
-        cons_show_xmpp_prefs();
+        cons_show_connection_prefs();
+        cons_show("");
+    } else if (strcmp(args[0], "presence") == 0) {
+        cons_show("");
+        cons_show_presence_prefs();
         cons_show("");
     } else {
         cons_show("Usage: %s", help.usage);
@@ -1562,28 +1594,27 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_beep(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/beep",
-        "Sound", prefs_set_beep);
+    return _cmd_set_boolean_preference(args[0], help, "Sound", prefs_set_beep);
 }
 
 static gboolean
 _cmd_set_states(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/states",
-        "Sending chat states", prefs_set_states);
+    return _cmd_set_boolean_preference(args[0], help, "Sending chat states",
+        prefs_set_states);
 }
 
 static gboolean
 _cmd_set_titlebarversion(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/titlebarversion",
+    return _cmd_set_boolean_preference(args[0], help,
         "Show version in window title", prefs_set_titlebarversion);
 }
 
 static gboolean
 _cmd_set_outtype(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/outtype",
+    return _cmd_set_boolean_preference(args[0], help,
         "Sending typing notifications", prefs_set_outtype);
 }
 
@@ -1700,6 +1731,55 @@ _cmd_set_autoping(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
+_cmd_set_autoaway(gchar **args, struct cmd_help_t help)
+{
+    char *setting = args[0];
+    char *value = args[1];
+    int minutesval;
+
+    if ((strcmp(setting, "mode") != 0) && (strcmp(setting, "time") != 0) &&
+            (strcmp(setting, "message") != 0) && (strcmp(setting, "check") != 0)) {
+        cons_show("Setting must be one of 'mode', 'time', 'message' or 'check'");
+        return TRUE;
+    }
+
+    if (strcmp(setting, "mode") == 0) {
+        if ((strcmp(value, "idle") != 0) && (strcmp(value, "away") != 0) &&
+                (strcmp(value, "off") != 0)) {
+            cons_show("Mode must be one of 'idle', 'away' or 'off'");
+        } else {
+            prefs_set_autoaway_mode(value);
+            cons_show("Auto away mode set to: %s.", value);
+        }
+
+        return TRUE;
+    }
+
+    if (strcmp(setting, "time") == 0) {
+        if (_strtoi(value, &minutesval, 1, INT_MAX) == 0) {
+            prefs_set_autoaway_time(minutesval);
+            cons_show("Auto away time set to: %d minutes.", minutesval);
+        }
+
+        return TRUE;
+    }
+
+    if (strcmp(setting, "message") == 0) {
+        prefs_set_autoaway_message(value);
+        cons_show("Auto away message set to: \"%s\".", value);
+
+        return TRUE;
+    }
+
+    if (strcmp(setting, "check") == 0) {
+        return _cmd_set_boolean_preference(value, help, "Online check",
+            prefs_set_autoaway_check);
+    }
+
+    return TRUE;
+}
+
+static gboolean
 _cmd_set_priority(gchar **args, struct cmd_help_t help)
 {
     char *value = args[0];
@@ -1727,7 +1807,7 @@ _cmd_vercheck(gchar **args, struct cmd_help_t help)
         cons_check_version(TRUE);
         return TRUE;
     } else {
-        return _cmd_set_boolean_preference(args, help, "/vercheck",
+        return _cmd_set_boolean_preference(args[0], help,
             "Version checking", prefs_set_vercheck);
     }
 }
@@ -1735,35 +1815,35 @@ _cmd_vercheck(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_flash(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/flash",
+    return _cmd_set_boolean_preference(args[0], help,
         "Screen flash", prefs_set_flash);
 }
 
 static gboolean
 _cmd_set_intype(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/intype",
+    return _cmd_set_boolean_preference(args[0], help,
         "Show contact typing", prefs_set_intype);
 }
 
 static gboolean
 _cmd_set_showsplash(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/showsplash",
+    return _cmd_set_boolean_preference(args[0], help,
         "Splash screen", prefs_set_showsplash);
 }
 
 static gboolean
 _cmd_set_chlog(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/chlog",
+    return _cmd_set_boolean_preference(args[0], help,
         "Chat logging", prefs_set_chlog);
 }
 
 static gboolean
 _cmd_set_history(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args, help, "/history",
+    return _cmd_set_boolean_preference(args[0], help,
         "Chat history", prefs_set_history);
 }
 
@@ -1833,8 +1913,8 @@ _update_presence(const jabber_presence_t presence,
 // helper function for boolean preference commands
 
 static gboolean
-_cmd_set_boolean_preference(gchar **args, struct cmd_help_t help,
-    const char * const cmd_str, const char * const display,
+_cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
+    const char * const display,
     void (*set_func)(gboolean))
 {
     GString *enabled = g_string_new(display);
@@ -1843,10 +1923,10 @@ _cmd_set_boolean_preference(gchar **args, struct cmd_help_t help,
     GString *disabled = g_string_new(display);
     g_string_append(disabled, " disabled.");
 
-    if (strcmp(args[0], "on") == 0) {
+    if (strcmp(arg, "on") == 0) {
         cons_show(enabled->str);
         set_func(TRUE);
-    } else if (strcmp(args[0], "off") == 0) {
+    } else if (strcmp(arg, "off") == 0) {
         cons_show(disabled->str);
         set_func(FALSE);
     } else {

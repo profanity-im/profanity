@@ -343,6 +343,69 @@ prefs_set_history(gboolean value)
     _save_prefs();
 }
 
+gchar *
+prefs_get_autoaway_mode(void)
+{
+    gchar *result = g_key_file_get_string(prefs, "autoaway", "mode", NULL);
+    if (result == NULL) {
+        return strdup("off");
+    } else {
+        return result;
+    }
+}
+
+void
+prefs_set_autoaway_mode(gchar *value)
+{
+    g_key_file_set_string(prefs, "autoaway", "mode", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_autoaway_time(void)
+{
+    gint result = g_key_file_get_integer(prefs, "autoaway", "time", NULL);
+
+    if (result == 0) {
+        return 15;
+    } else {
+        return result;
+    }
+}
+
+void
+prefs_set_autoaway_time(gint value)
+{
+    g_key_file_set_integer(prefs, "autoaway", "time", value);
+    _save_prefs();
+}
+
+gchar *
+prefs_get_autoaway_message(void)
+{
+    return g_key_file_get_string(prefs, "autoaway", "message", NULL);
+}
+
+void
+prefs_set_autoaway_message(gchar *value)
+{
+    g_key_file_set_string(prefs, "autoaway", "message", value);
+    _save_prefs();
+}
+
+gboolean
+prefs_get_autoaway_check(void)
+{
+    return g_key_file_get_boolean(prefs, "autoaway", "check", NULL);
+}
+
+void
+prefs_set_autoaway_check(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "autoaway", "check", value);
+    _save_prefs();
+}
+
 void
 prefs_add_login(const char *jid)
 {

@@ -1188,12 +1188,40 @@ cons_show_log_prefs(void)
 }
 
 void
-cons_show_xmpp_prefs(void)
+cons_show_presence_prefs(void)
 {
-    cons_show("XMPP preferences:");
+    cons_show("Presence preferences:");
     cons_show("");
 
-    cons_show("Priority (/priority)            : %d", prefs_get_priority());
+    cons_show("Priority (/priority)                 : %d", prefs_get_priority());
+
+    if (strcmp(prefs_get_autoaway_mode(), "off") == 0) {
+        cons_show("Autoaway (/autoaway mode)            : OFF");
+    } else {
+        cons_show("Autoaway (/autoaway mode)            : %s", prefs_get_autoaway_mode());
+    }
+
+    cons_show("Autoaway time (/autoaway time)       : %d minutes", prefs_get_autoaway_time());
+
+    if ((prefs_get_autoaway_message() == NULL) ||
+            (strcmp(prefs_get_autoaway_message(), "") == 0)) {
+        cons_show("Autoaway message (/autoaway message) : OFF");
+    } else {
+        cons_show("Autoaway message (/autoaway message) : \"%s\"", prefs_get_autoaway_message());
+    }
+
+    if (prefs_get_autoaway_check()) {
+        cons_show("Autoaway check (/autoaway check)     : ON");
+    } else {
+        cons_show("Autoaway check (/autoaway check)     : OFF");
+    }
+}
+
+void
+cons_show_connection_prefs(void)
+{
+    cons_show("Connection preferences:");
+    cons_show("");
 
     gint reconnect_interval = prefs_get_reconnect();
     if (reconnect_interval == 0) {
@@ -1226,7 +1254,9 @@ cons_prefs(void)
     cons_show("");
     cons_show_log_prefs();
     cons_show("");
-    cons_show_xmpp_prefs();
+    cons_show_presence_prefs();
+    cons_show("");
+    cons_show_connection_prefs();
     cons_show("");
 
     if (current_index == 0) {

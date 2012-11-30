@@ -83,6 +83,15 @@ gint prefs_get_reconnect(void);
 void prefs_set_autoping(gint value);
 gint prefs_get_autoping(void);
 
+gchar* prefs_get_autoaway_mode(void);
+void prefs_set_autoaway_mode(gchar *value);
+gint prefs_get_autoaway_time(void);
+void prefs_set_autoaway_time(gint value);
+gchar* prefs_get_autoaway_message(void);
+void prefs_set_autoaway_message(gchar *value);
+gboolean prefs_get_autoaway_check(void);
+void prefs_set_autoaway_check(gboolean value);
+
 void prefs_add_login(const char *jid);
 
 #endif
