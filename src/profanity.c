@@ -455,11 +455,13 @@ _handle_idle_time()
             if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
                 jabber_update_presence(PRESENCE_AWAY, prefs_get_autoaway_message());
                 if (prefs_get_autoaway_message() != NULL) {
-                    cons_show("Auto away.\"%s\".", prefs_get_autoaway_message());
+                    cons_show("Idle for %d minutes, status set to away, \"%s\".",
+                        prefs_get_autoaway_time(), prefs_get_autoaway_message());
                     title_bar_set_status(PRESENCE_AWAY);
                     win_current_page_off();
                 } else {
-                    cons_show("Auto away.");
+                    cons_show("Idle for %d minutes, status set to away.",
+                        prefs_get_autoaway_time());
                     title_bar_set_status(PRESENCE_AWAY);
                     win_current_page_off();
                 }
