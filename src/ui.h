@@ -76,9 +76,8 @@ void ui_disconnected(void);
 void ui_handle_special_keys(const int * const ch);
 void ui_switch_win(const int i);
 gboolean ui_windows_full(void);
-#ifdef HAVE_LIBXSS
-unsigned long ui_get_desktop_idle(void);
-#endif
+unsigned long ui_get_idle_time(void);
+void ui_reset_idle_time(void);
 
 // create windows
 void create_title_bar(void);

@@ -94,6 +94,10 @@ prof_run(const int disable_tls, char *log_level)
             jabber_process_events();
 
             inp_get_char(&ch, inp, &size);
+
+            if (ch != ERR) {
+                ui_reset_idle_time();
+            }
         }
 
         inp[size++] = '\0';
@@ -444,11 +448,12 @@ _process_input(char *inp)
 static void
 _handle_idle_time()
 {
-    // for development
+// for development
     gint prefs_time = prefs_get_autoaway_time() * 1000;
+
 //    gint prefs_time = prefs_get_autoaway_time() * 60000;
 
-    unsigned long idle_ms = ui_get_desktop_idle();
+    unsigned long idle_ms = ui_get_idle_time();
     if (!idle) {
         if (idle_ms >= prefs_time) {
             idle = TRUE;

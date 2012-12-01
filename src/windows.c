@@ -74,6 +74,8 @@ static int max_cols = 0;
 static Display *display;
 #endif
 
+static GTimer *ui_idle_time;
+
 static void _set_current(int index);
 static void _create_windows(void);
 static void _cons_splash_logo(void);
@@ -127,6 +129,7 @@ ui_init(void)
 #ifdef HAVE_LIBXSS
     display = XOpenDisplay(0);
 #endif
+    ui_idle_time = g_timer_new();
     dirty = TRUE;
 }
 
@@ -171,18 +174,28 @@ ui_refresh(void)
     inp_put_back();
 }
 
-#ifdef HAVE_LIBXSS
 unsigned long
-ui_get_desktop_idle(void)
+ui_get_idle_time(void)
 {
+#ifdef HAVE_LIBXSS
     XScreenSaverInfo *info = XScreenSaverAllocInfo();
     XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
     unsigned long result = info->idle;
     XFree(info);
 
     return result;
-}
+#else
+    gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time);
+    unsigned long ms_elapsed = seconds_elapsed * 1000.0;
+    return ms_elapsed;
 #endif
+}
+
+void
+ui_reset_idle_time(void)
+{
+    g_timer_start(ui_idle_time);
+}
 
 void
 ui_close(void)
