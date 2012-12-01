@@ -324,7 +324,8 @@ jabber_leave_chat_room(const char * const room_jid)
 }
 
 void
-jabber_update_presence(jabber_presence_t status, const char * const msg)
+jabber_update_presence(jabber_presence_t status, const char * const msg,
+    int idle)
 {
     int pri;
     char *show;
@@ -379,6 +380,17 @@ jabber_update_presence(jabber_presence_t status, const char * const msg)
         xmpp_stanza_add_child(priority, value);
         xmpp_stanza_add_child(presence, priority);
     }
+
+    if (idle > 0) {
+        xmpp_stanza_t *query = xmpp_stanza_new(jabber_conn.ctx);
+        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+        xmpp_stanza_set_ns(query, STANZA_NS_LASTACTIVITY);
+        char idle_str[10];
+        snprintf(idle_str, sizeof(idle_str), "%d", idle);
+        xmpp_stanza_set_attribute(query, STANZA_ATTR_SECONDS, idle_str);
+        xmpp_stanza_add_child(presence, query);
+    }
+
     xmpp_send(jabber_conn.conn, presence);
 
     // send presence for each room
@@ -891,7 +903,7 @@ _roster_handler(xmpp_conn_t * const conn,
          *       presence rather than PRESENCE_ONLINE. It will be helpful
          *       when I set dnd status and reconnect for some reason */
         // send initial presence
-        jabber_update_presence(PRESENCE_ONLINE, NULL);
+        jabber_update_presence(PRESENCE_ONLINE, NULL, 0);
     }
 
     return 1;

@@ -71,6 +71,7 @@
 #define STANZA_ATTR_NICK "nick"
 #define STANZA_ATTR_ASK "ask"
 #define STANZA_ATTR_ID "id"
+#define STANZA_ATTR_SECONDS "seconds"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -82,6 +83,7 @@
 #define STANZA_NS_MUC "http://jabber.org/protocol/muc"
 #define STANZA_NS_MUC_USER "http://jabber.org/protocol/muc#user"
 #define STANZA_NS_PING "urn:xmpp:ping"
+#define STANZA_NS_LASTACTIVITY "jabber:iq:last"
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const recipient, const char * const state);

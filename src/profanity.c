@@ -452,8 +452,10 @@ _handle_idle_time()
     if (!idle) {
         if (idle_ms >= prefs_time) {
             idle = TRUE;
+
+            // handle away mode
             if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
-                jabber_update_presence(PRESENCE_AWAY, prefs_get_autoaway_message());
+                jabber_update_presence(PRESENCE_AWAY, prefs_get_autoaway_message(), 0);
                 if (prefs_get_autoaway_message() != NULL) {
                     cons_show("Idle for %d minutes, status set to away, \"%s\".",
                         prefs_get_autoaway_time(), prefs_get_autoaway_message());
@@ -465,24 +467,28 @@ _handle_idle_time()
                     title_bar_set_status(PRESENCE_AWAY);
                     win_current_page_off();
                 }
+
+            // handle idle mode
             } else if (strcmp(prefs_get_autoaway_mode(), "idle") == 0) {
-                cons_show("IDLE");
-                win_current_page_off();
+                jabber_update_presence(PRESENCE_ONLINE,
+                    prefs_get_autoaway_message(), idle_ms / 1000);
             }
         }
 
     } else {
         if (idle_ms < prefs_time) {
             idle = FALSE;
+
+            // handle check
             if (prefs_get_autoaway_check()) {
                 if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
-                    jabber_update_presence(PRESENCE_ONLINE, NULL);
-                    cons_show("Auto presence online.");
+                    jabber_update_presence(PRESENCE_ONLINE, NULL, 0);
+                    cons_show("No longer idle, status set to online.");
                     title_bar_set_status(PRESENCE_ONLINE);
                     win_current_page_off();
                 } else if (strcmp(prefs_get_autoaway_mode(), "idle") == 0) {
-                    cons_show("BACK");
-                    win_current_page_off();
+                    jabber_update_presence(PRESENCE_ONLINE, NULL, 0);
+                    title_bar_set_status(PRESENCE_ONLINE);
                 }
             }
         }

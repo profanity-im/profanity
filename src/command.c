@@ -546,7 +546,7 @@ static struct cmd_t setting_commands[] =
           "          away - Sends an away presence.",
           "          off - Disabled (default).",
           "time    : Number of minutes before the presence change is sent, the default is 15.",
-          "message : Optional message to send with the presence change.",
+          "message : Optional message to send with the presence change, use no value to clear.",
           "check   : on|off, when enabled, checks for activity and sends online presence, default is 'on'.",
           "",
           "Example: /autoaway mode idle",
@@ -1765,8 +1765,13 @@ _cmd_set_autoaway(gchar **args, struct cmd_help_t help)
     }
 
     if (strcmp(setting, "message") == 0) {
-        prefs_set_autoaway_message(value);
-        cons_show("Auto away message set to: \"%s\".", value);
+        if (strcmp(value, "off") == 0) {
+            prefs_set_autoaway_message(NULL);
+            cons_show("Auto away message cleared.");
+        } else {
+            prefs_set_autoaway_message(value);
+            cons_show("Auto away message set to: \"%s\".", value);
+        }
 
         return TRUE;
     }
@@ -1789,7 +1794,7 @@ _cmd_set_priority(gchar **args, struct cmd_help_t help)
         char *status = jabber_get_status();
         prefs_set_priority((int)intval);
         // update presence with new priority
-        jabber_update_presence(jabber_get_presence(), status);
+        jabber_update_presence(jabber_get_presence(), status, 0);
         if (status != NULL)
             free(status);
         cons_show("Priority set to %d.", intval);
@@ -1899,7 +1904,7 @@ _update_presence(const jabber_presence_t presence,
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        jabber_update_presence(presence, msg);
+        jabber_update_presence(presence, msg, 0);
         title_bar_set_status(presence);
         if (msg != NULL) {
             cons_show("Status set to %s, \"%s\"", show, msg);

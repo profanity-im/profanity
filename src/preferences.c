@@ -389,7 +389,11 @@ prefs_get_autoaway_message(void)
 void
 prefs_set_autoaway_message(gchar *value)
 {
-    g_key_file_set_string(prefs, "autoaway", "message", value);
+    if (value == NULL) {
+        g_key_file_remove_key(prefs, "autoaway", "message", NULL);
+    } else {
+        g_key_file_set_string(prefs, "autoaway", "message", value);
+    }
     _save_prefs();
 }
 

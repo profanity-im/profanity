@@ -62,7 +62,8 @@ void jabber_send_inactive(const char * const recipient);
 void jabber_send_composing(const char * const recipient);
 void jabber_send_paused(const char * const recipient);
 void jabber_send_gone(const char * const recipient);
-void jabber_update_presence(jabber_presence_t status, const char * const msg);
+void jabber_update_presence(jabber_presence_t status, const char * const msg,
+    int idle);
 const char * jabber_get_jid(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 int jabber_get_priority(void);
