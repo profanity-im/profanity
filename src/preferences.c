@@ -400,7 +400,11 @@ prefs_set_autoaway_message(gchar *value)
 gboolean
 prefs_get_autoaway_check(void)
 {
-    return g_key_file_get_boolean(prefs, "autoaway", "check", NULL);
+    if (g_key_file_has_key(prefs, "autoaway", "check", NULL)) {
+        return g_key_file_get_boolean(prefs, "autoaway", "check", NULL);
+    } else {
+        return TRUE;
+    }
 }
 
 void
