@@ -448,10 +448,7 @@ _process_input(char *inp)
 static void
 _handle_idle_time()
 {
-// for development
-    gint prefs_time = prefs_get_autoaway_time() * 1000;
-
-//    gint prefs_time = prefs_get_autoaway_time() * 60000;
+    gint prefs_time = prefs_get_autoaway_time() * 60000;
 
     unsigned long idle_ms = ui_get_idle_time();
     if (!idle) {
