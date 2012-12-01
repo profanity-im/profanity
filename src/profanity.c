@@ -70,7 +70,9 @@ prof_run(const int disable_tls, char *log_level)
 
         while(ch != '\n') {
 
-            _handle_idle_time();
+            if (jabber_get_connection_status() == JABBER_CONNECTED) {
+                _handle_idle_time();
+            }
 
             gdouble elapsed = g_timer_elapsed(timer, NULL);
 
@@ -442,17 +444,45 @@ _process_input(char *inp)
 static void
 _handle_idle_time()
 {
+    // for development
+    gint prefs_time = prefs_get_autoaway_time() * 1000;
+//    gint prefs_time = prefs_get_autoaway_time() * 60000;
+
     unsigned long idle_ms = ui_get_desktop_idle();
     if (!idle) {
-        if (idle_ms >= 5000) {
+        if (idle_ms >= prefs_time) {
             idle = TRUE;
-            jabber_update_presence(PRESENCE_AWAY, "Away from computer computer");
+            if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
+                jabber_update_presence(PRESENCE_AWAY, prefs_get_autoaway_message());
+                if (prefs_get_autoaway_message() != NULL) {
+                    cons_show("Auto away.\"%s\".", prefs_get_autoaway_message());
+                    title_bar_set_status(PRESENCE_AWAY);
+                    win_current_page_off();
+                } else {
+                    cons_show("Auto away.");
+                    title_bar_set_status(PRESENCE_AWAY);
+                    win_current_page_off();
+                }
+            } else if (strcmp(prefs_get_autoaway_mode(), "idle") == 0) {
+                cons_show("IDLE");
+                win_current_page_off();
+            }
         }
 
     } else {
-        if (idle_ms < 5000) {
+        if (idle_ms < prefs_time) {
             idle = FALSE;
-            jabber_update_presence(PRESENCE_ONLINE, NULL);
+            if (prefs_get_autoaway_check()) {
+                if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
+                    jabber_update_presence(PRESENCE_ONLINE, NULL);
+                    cons_show("Auto presence online.");
+                    title_bar_set_status(PRESENCE_ONLINE);
+                    win_current_page_off();
+                } else if (strcmp(prefs_get_autoaway_mode(), "idle") == 0) {
+                    cons_show("BACK");
+                    win_current_page_off();
+                }
+            }
         }
     }
 }
