@@ -104,7 +104,7 @@ static gboolean _cmd_set_priority(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_reconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_intype(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_flash(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_showsplash(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_splash(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
@@ -400,15 +400,15 @@ static struct cmd_t setting_commands[] =
           "Config file value :   intype=true|false",
           NULL } } },
 
-    { "/showsplash",
-        _cmd_set_showsplash, parse_args, 1, 1,
-        { "/showsplash on|off", "Splash logo on startup.",
-        { "/showsplash on|off",
-          "------------------",
+    { "/splash",
+        _cmd_set_splash, parse_args, 1, 1,
+        { "/splash on|off", "Splash logo on startup.",
+        { "/splash on|off",
+          "--------------",
           "Switch on or off the ascii logo on start up.",
           "",
           "Config file section : [ui]",
-          "Config file value :   showsplash=true|false",
+          "Config file value :   splash=true|false",
           NULL } } },
 
     { "/vercheck",
@@ -435,16 +435,8 @@ static struct cmd_t setting_commands[] =
         { "/chlog on|off",
           "-------------",
           "Switch chat logging on or off.",
-          "Chat logs are stored in the ~/.profanoty/log directory.",
-          "A folder is created for each login that you have used with Profanity.",
-          "Within in those folders, a log file is created for each user you chat to.",
           "",
-          "For example if you are logged in as someuser@chatserv.com, and you chat",
-          "to myfriend@chatserv.com, the following chat log will be created:",
-          "",
-          "    ~/.profanity/log/someuser_at_chatserv.com/myfriend_at_chatserv.com",
-          "",
-          "Config file section : [ui]",
+          "Config file section : [logging]",
           "Config file value :   chlog=true|false",
           NULL } } },
 
@@ -458,8 +450,8 @@ static struct cmd_t setting_commands[] =
           "session with somebody, such as whether you have become inactive, or",
           "have close the chat window.",
           "",
-          "Config file section : [ui]",
-          "Config file value :   states=true|false",
+          "Config file section : [chatstates]",
+          "Config file value :   enabled=true|false",
           NULL } } },
 
     { "/outtype",
@@ -470,7 +462,7 @@ static struct cmd_t setting_commands[] =
           "Send an indication that you are typing to the other person in chat.",
           "Chat states must be enabled for this to work, see the /states command.",
           "",
-          "Config file section : [ui]",
+          "Config file section : [chatstates]",
           "Config file value :   outtype=true|false",
           NULL } } },
 
@@ -497,7 +489,7 @@ static struct cmd_t setting_commands[] =
           "maxsize : When log file size exceeds this value it will be automatically",
           "          rotated (file will be renamed). Default value is 1048580 (1MB)",
           "",
-          "Config file section : [log]",
+          "Config file section : [logging]",
           "Config file value :   maxsize=bytes",
           NULL } } },
 
@@ -509,7 +501,7 @@ static struct cmd_t setting_commands[] =
           "Set the reconnect attempt interval in seconds for when the connection is lost.",
           "A value of 0 will switch of reconnect attempts.",
           "",
-          "Config file section : [jabber]",
+          "Config file section : [connection]",
           "Config file value :   reconnect=seconds",
           NULL } } },
 
@@ -521,7 +513,7 @@ static struct cmd_t setting_commands[] =
           "Set the number of seconds between server pings, so ensure connection kept alive.",
           "A value of 0 will switch off autopinging the server.",
           "",
-          "Config file section : [jabber]",
+          "Config file section : [connection]",
           "Config file value :   autoping=seconds",
           NULL } } },
 
@@ -545,11 +537,11 @@ static struct cmd_t setting_commands[] =
           "Example: /autoaway message I'm not really doing much",
           "Example: /autoaway check false",
           "",
-          "Config file section : [autoaway]",
-          "Config file value :   mode=idle|away|off",
-          "Config file value :   time=value",
-          "Config file value :   message=value",
-          "Config file value :   check=on|off",
+          "Config file section : [presence]",
+          "Config file value :   autoaway.mode=idle|away|off",
+          "Config file value :   autoaway.time=value",
+          "Config file value :   autoaway.message=value",
+          "Config file value :   autoaway.check=on|off",
           NULL } } },
 
     { "/priority",
@@ -559,7 +551,8 @@ static struct cmd_t setting_commands[] =
           "--------------------",
           "value : Number between -128 and 127. Default value is 0.",
           "",
-          "Config file section : [jabber]",
+          "Config file section : [presence]",
+          "Config file value :   priority=value",
           NULL } } }
 };
 
@@ -889,7 +882,7 @@ _cmd_complete_parameters(char *input, int *size)
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/flash",
         prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/showsplash",
+    _parameter_autocomplete(input, size, "/splash",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/chlog",
         prefs_autocomplete_boolean_choice);
@@ -1755,10 +1748,10 @@ _cmd_set_intype(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_showsplash(gchar **args, struct cmd_help_t help)
+_cmd_set_splash(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Splash screen", prefs_set_showsplash);
+        "Splash screen", prefs_set_splash);
 }
 
 static gboolean

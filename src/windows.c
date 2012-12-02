@@ -1127,10 +1127,10 @@ cons_show_ui_prefs(void)
     else
         cons_show("Show typing (/intype)        : OFF");
 
-    if (prefs_get_showsplash())
-        cons_show("Splash screen (/showsplash)  : ON");
+    if (prefs_get_splash())
+        cons_show("Splash screen (/splash)      : ON");
     else
-        cons_show("Splash screen (/showsplash)  : OFF");
+        cons_show("Splash screen (/splash)      : OFF");
 
     if (prefs_get_history())
         cons_show("Chat history (/history)      : ON");
@@ -1214,7 +1214,7 @@ cons_show_presence_prefs(void)
         cons_show("Autoaway (/autoaway mode)            : %s", prefs_get_autoaway_mode());
     }
 
-    cons_show("Autoaway time (/autoaway time)       : %d minutes", prefs_get_autoaway_time());
+    cons_show("Autoaway minutes (/autoaway time)    : %d minutes", prefs_get_autoaway_time());
 
     if ((prefs_get_autoaway_message() == NULL) ||
             (strcmp(prefs_get_autoaway_message(), "") == 0)) {
@@ -1491,7 +1491,7 @@ cons_about(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    if (prefs_get_showsplash()) {
+    if (prefs_get_splash()) {
         _cons_splash_logo();
     } else {
         _win_show_time(console->win);

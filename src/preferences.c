@@ -58,7 +58,7 @@ prefs_load(void)
         NULL);
 
     err = NULL;
-    log_maxsize = g_key_file_get_integer(prefs, "log", "maxsize", &err);
+    log_maxsize = g_key_file_get_integer(prefs, "logging", "maxsize", &err);
     if (err != NULL) {
         log_maxsize = 0;
         g_error_free(err);
@@ -117,26 +117,26 @@ prefs_set_theme(gchar *value)
 gboolean
 prefs_get_states(void)
 {
-    return g_key_file_get_boolean(prefs, "ui", "states", NULL);
+    return g_key_file_get_boolean(prefs, "chatstates", "enabled", NULL);
 }
 
 void
 prefs_set_states(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "states", value);
+    g_key_file_set_boolean(prefs, "chatstates", "enabled", value);
     _save_prefs();
 }
 
 gboolean
 prefs_get_outtype(void)
 {
-    return g_key_file_get_boolean(prefs, "ui", "outtype", NULL);
+    return g_key_file_get_boolean(prefs, "chatstates", "outtype", NULL);
 }
 
 void
 prefs_set_outtype(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "outtype", value);
+    g_key_file_set_boolean(prefs, "chatstates", "outtype", value);
     _save_prefs();
 }
 
@@ -192,46 +192,46 @@ void
 prefs_set_max_log_size(gint value)
 {
     log_maxsize = value;
-    g_key_file_set_integer(prefs, "log", "maxsize", value);
+    g_key_file_set_integer(prefs, "logging", "maxsize", value);
     _save_prefs();
 }
 
 gint
 prefs_get_priority(void)
 {
-    return g_key_file_get_integer(prefs, "jabber", "priority", NULL);
+    return g_key_file_get_integer(prefs, "presence", "priority", NULL);
 }
 
 void
 prefs_set_priority(gint value)
 {
-    g_key_file_set_integer(prefs, "jabber", "priority", value);
+    g_key_file_set_integer(prefs, "presence", "priority", value);
     _save_prefs();
 }
 
 gint
 prefs_get_reconnect(void)
 {
-    return g_key_file_get_integer(prefs, "jabber", "reconnect", NULL);
+    return g_key_file_get_integer(prefs, "connection", "reconnect", NULL);
 }
 
 void
 prefs_set_reconnect(gint value)
 {
-    g_key_file_set_integer(prefs, "jabber", "reconnect", value);
+    g_key_file_set_integer(prefs, "connection", "reconnect", value);
     _save_prefs();
 }
 
 gint
 prefs_get_autoping(void)
 {
-    return g_key_file_get_integer(prefs, "jabber", "autoping", NULL);
+    return g_key_file_get_integer(prefs, "connection", "autoping", NULL);
 }
 
 void
 prefs_set_autoping(gint value)
 {
-    g_key_file_set_integer(prefs, "jabber", "autoping", value);
+    g_key_file_set_integer(prefs, "connection", "autoping", value);
     _save_prefs();
 }
 
@@ -290,13 +290,13 @@ prefs_set_intype(gboolean value)
 gboolean
 prefs_get_chlog(void)
 {
-    return g_key_file_get_boolean(prefs, "ui", "chlog", NULL);
+    return g_key_file_get_boolean(prefs, "logging", "chlog", NULL);
 }
 
 void
 prefs_set_chlog(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "chlog", value);
+    g_key_file_set_boolean(prefs, "logging", "chlog", value);
     _save_prefs();
 }
 
@@ -316,7 +316,7 @@ prefs_set_history(gboolean value)
 gchar *
 prefs_get_autoaway_mode(void)
 {
-    gchar *result = g_key_file_get_string(prefs, "autoaway", "mode", NULL);
+    gchar *result = g_key_file_get_string(prefs, "presence", "autoaway.mode", NULL);
     if (result == NULL) {
         return strdup("off");
     } else {
@@ -327,14 +327,14 @@ prefs_get_autoaway_mode(void)
 void
 prefs_set_autoaway_mode(gchar *value)
 {
-    g_key_file_set_string(prefs, "autoaway", "mode", value);
+    g_key_file_set_string(prefs, "presence", "autoaway.mode", value);
     _save_prefs();
 }
 
 gint
 prefs_get_autoaway_time(void)
 {
-    gint result = g_key_file_get_integer(prefs, "autoaway", "time", NULL);
+    gint result = g_key_file_get_integer(prefs, "presence", "autoaway.time", NULL);
 
     if (result == 0) {
         return 15;
@@ -346,23 +346,23 @@ prefs_get_autoaway_time(void)
 void
 prefs_set_autoaway_time(gint value)
 {
-    g_key_file_set_integer(prefs, "autoaway", "time", value);
+    g_key_file_set_integer(prefs, "presence", "autoaway.time", value);
     _save_prefs();
 }
 
 gchar *
 prefs_get_autoaway_message(void)
 {
-    return g_key_file_get_string(prefs, "autoaway", "message", NULL);
+    return g_key_file_get_string(prefs, "presence", "autoaway.message", NULL);
 }
 
 void
 prefs_set_autoaway_message(gchar *value)
 {
     if (value == NULL) {
-        g_key_file_remove_key(prefs, "autoaway", "message", NULL);
+        g_key_file_remove_key(prefs, "presence", "autoaway.message", NULL);
     } else {
-        g_key_file_set_string(prefs, "autoaway", "message", value);
+        g_key_file_set_string(prefs, "presence", "autoaway.message", value);
     }
     _save_prefs();
 }
@@ -370,8 +370,8 @@ prefs_set_autoaway_message(gchar *value)
 gboolean
 prefs_get_autoaway_check(void)
 {
-    if (g_key_file_has_key(prefs, "autoaway", "check", NULL)) {
-        return g_key_file_get_boolean(prefs, "autoaway", "check", NULL);
+    if (g_key_file_has_key(prefs, "presence", "autoaway.check", NULL)) {
+        return g_key_file_get_boolean(prefs, "presence", "autoaway.check", NULL);
     } else {
         return TRUE;
     }
@@ -380,20 +380,20 @@ prefs_get_autoaway_check(void)
 void
 prefs_set_autoaway_check(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "autoaway", "check", value);
+    g_key_file_set_boolean(prefs, "presence", "autoaway.check", value);
     _save_prefs();
 }
 
 gboolean
-prefs_get_showsplash(void)
+prefs_get_splash(void)
 {
-    return g_key_file_get_boolean(prefs, "ui", "showsplash", NULL);
+    return g_key_file_get_boolean(prefs, "ui", "splash", NULL);
 }
 
 void
-prefs_set_showsplash(gboolean value)
+prefs_set_splash(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "showsplash", value);
+    g_key_file_set_boolean(prefs, "ui", "splash", value);
     _save_prefs();
 }
 
