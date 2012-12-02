@@ -87,6 +87,19 @@ files_get_log_file(void)
 }
 
 gchar *
+files_get_accounts_file(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *logfile = g_string_new(xdg_data);
+    g_string_append(logfile, "/profanity/accounts");
+    gchar *result = strdup(logfile->str);
+    g_free(xdg_data);
+    g_string_free(logfile, TRUE);
+
+    return result;
+}
+
+gchar *
 files_get_themes_dir(void)
 {
     gchar *xdg_config = xdg_get_config_home();

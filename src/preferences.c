@@ -41,7 +41,6 @@ static gchar *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
 
-static PAutocomplete login_ac;
 static PAutocomplete boolean_choice_ac;
 
 static void _save_prefs(void);
@@ -52,27 +51,11 @@ prefs_load(void)
     GError *err;
 
     log_info("Loading preferences");
-    login_ac = p_autocomplete_new();
     prefs_loc = files_get_preferences_file();
 
     prefs = g_key_file_new();
     g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS,
         NULL);
-
-    // create the logins searchable list for autocompletion
-    gsize njids;
-    gchar **jids =
-        g_key_file_get_string_list(prefs, "connections", "logins", &njids, NULL);
-
-    gsize i;
-    for (i = 0; i < njids; i++) {
-        p_autocomplete_add(login_ac, strdup(jids[i]));
-    }
-
-    for (i = 0; i < njids; i++) {
-        free(jids[i]);
-    }
-    free(jids);
 
     err = NULL;
     log_maxsize = g_key_file_get_integer(prefs, "log", "maxsize", &err);
@@ -89,21 +72,8 @@ prefs_load(void)
 void
 prefs_close(void)
 {
-    p_autocomplete_clear(login_ac);
     p_autocomplete_clear(boolean_choice_ac);
     g_key_file_free(prefs);
-}
-
-char *
-prefs_find_login(char *prefix)
-{
-    return p_autocomplete_complete(login_ac, prefix);
-}
-
-void
-prefs_reset_login_search(void)
-{
-    p_autocomplete_reset(login_ac);
 }
 
 char *
@@ -412,48 +382,6 @@ prefs_set_autoaway_check(gboolean value)
 {
     g_key_file_set_boolean(prefs, "autoaway", "check", value);
     _save_prefs();
-}
-
-void
-prefs_add_login(const char *jid)
-{
-    gsize njids;
-    gchar **jids =
-        g_key_file_get_string_list(prefs, "connections", "logins", &njids, NULL);
-
-    // no logins remembered yet
-    if (jids == NULL) {
-        njids = 1;
-        jids = (gchar**) g_malloc(sizeof(gchar *) * 2);
-        jids[0] = g_strdup(jid);
-        jids[1] = NULL;
-        g_key_file_set_string_list(prefs, "connections", "logins",
-            (const gchar * const *)jids, njids);
-        _save_prefs();
-        g_strfreev(jids);
-
-        return;
-    } else {
-        gsize i;
-        for (i = 0; i < njids; i++) {
-            if (strcmp(jid, jids[i]) == 0) {
-                g_strfreev(jids);
-                return;
-            }
-        }
-
-        // jid not found, add to the list
-        jids = (gchar **) g_realloc(jids, (sizeof(gchar *) * (njids+2)));
-        jids[njids] = g_strdup(jid);
-        njids++;
-        jids[njids] = NULL;
-        g_key_file_set_string_list(prefs, "connections", "logins",
-            (const gchar * const *)jids, njids);
-        _save_prefs();
-        g_strfreev(jids);
-
-        return;
-    }
 }
 
 gboolean

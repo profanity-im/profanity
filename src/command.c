@@ -27,6 +27,7 @@
 
 #include <glib.h>
 
+#include "accounts.h"
 #include "chat_session.h"
 #include "command.h"
 #include "common.h"
@@ -761,7 +762,7 @@ void
 cmd_reset_autocomplete()
 {
     contact_list_reset_search_attempts();
-    prefs_reset_login_search();
+    accounts_reset_login_search();
     prefs_reset_boolean_choice();
     p_autocomplete_reset(help_ac);
     p_autocomplete_reset(notify_ac);
@@ -904,7 +905,7 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/info",
         contact_list_find_contact);
     _parameter_autocomplete(input, size, "/connect",
-        prefs_find_login);
+        accounts_find_login);
     _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
     _parameter_autocomplete_with_ac(input, size, "/help", help_ac);
     _parameter_autocomplete_with_ac(input, size, "/who", who_ac);

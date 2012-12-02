@@ -28,6 +28,7 @@
 
 #include <glib.h>
 
+#include "accounts.h"
 #include "chat_log.h"
 #include "chat_session.h"
 #include "command.h"
@@ -198,7 +199,7 @@ prof_handle_login_success(const char *jid)
     win_current_page_off();
     status_bar_print_message(jid);
     status_bar_refresh();
-    prefs_add_login(jid);
+    accounts_add_login(jid);
 }
 
 void
@@ -508,6 +509,7 @@ _init(const int disable_tls, char *log_level)
     log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     chat_log_init();
     prefs_load();
+    accounts_load();
     gchar *theme = prefs_get_theme();
     theme_load(theme);
     g_free(theme);

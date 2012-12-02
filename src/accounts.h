@@ -1,5 +1,5 @@
 /*
- * files.h
+ * accounts.h
  *
  * Copyright (C) 2012 James Booth <boothj5@gmail.com>
  *
@@ -20,14 +20,14 @@
  *
  */
 
-#ifndef FILES_H
-#define FILES_H
+#ifndef ACCOUNTS_H
+#define ACCOUNTS_H
 
-void files_create_directories(void);
-gchar* files_get_chatlog_dir(void);
-gchar* files_get_preferences_file(void);
-gchar* files_get_log_file(void);
-gchar* files_get_themes_dir(void);
-gchar* files_get_accounts_file(void);
+void accounts_load(void);
+void accounts_close(void);
+
+char * accounts_find_login(char *prefix);
+void accounts_reset_login_search(void);
+void accounts_add_login(const char *jid);
 
 #endif
