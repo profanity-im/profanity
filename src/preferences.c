@@ -251,13 +251,13 @@ prefs_set_vercheck(gboolean value)
 gboolean
 prefs_get_titlebarversion(void)
 {
-    return g_key_file_get_boolean(prefs, "ui", "titlebarversion", NULL);
+    return g_key_file_get_boolean(prefs, "ui", "titlebar.version", NULL);
 }
 
 void
 prefs_set_titlebarversion(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "titlebarversion", value);
+    g_key_file_set_boolean(prefs, "ui", "titlebar.version", value);
     _save_prefs();
 }
 

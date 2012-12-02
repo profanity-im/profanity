@@ -75,6 +75,7 @@ static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
 
 static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
+static void _titlebar_autocomplete(char *input, int *size);
 static void _autoaway_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
@@ -110,7 +111,7 @@ static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_titlebarversion(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_titlebar(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoaway(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
@@ -421,12 +422,15 @@ static struct cmd_t setting_commands[] =
           "and each time the /about command is run.",
           NULL  } } },
 
-    { "/titlebarversion",
-        _cmd_set_titlebarversion, parse_args, 1, 1,
-        { "/titlebarversion on|off", "Check for a new release.",
-        { "/titlebarversion on|off",
-          "------------------",
-          "Show the version in the title bar of the window.",
+    { "/titlebar",
+        _cmd_set_titlebar, parse_args, 2, 2,
+        { "/titlebar property on|off", "Show various properties in the window title bar.",
+        { "/titlebar property on|off",
+          "-------------------------",
+          "Possible properties are 'version'.",
+          "",
+          "Config file section : [ui]",
+          "Config file value :   titlebar.version=true|false",
           NULL  } } },
 
     { "/chlog",
@@ -626,6 +630,7 @@ static PAutocomplete sub_ac;
 static PAutocomplete log_ac;
 static PAutocomplete autoaway_ac;
 static PAutocomplete autoaway_mode_ac;
+static PAutocomplete titlebar_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -665,6 +670,9 @@ cmd_init(void)
     p_autocomplete_add(sub_ac, strdup("show"));
     p_autocomplete_add(sub_ac, strdup("sent"));
     p_autocomplete_add(sub_ac, strdup("received"));
+
+    titlebar_ac = p_autocomplete_new();
+    p_autocomplete_add(titlebar_ac, strdup("version"));
 
     log_ac = p_autocomplete_new();
     p_autocomplete_add(log_ac, strdup("maxsize"));
@@ -890,8 +898,6 @@ _cmd_complete_parameters(char *input, int *size)
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/vercheck",
         prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/titlebarversion",
-        prefs_autocomplete_boolean_choice);
 
     _parameter_autocomplete(input, size, "/msg",
         contact_list_find_contact);
@@ -907,6 +913,7 @@ _cmd_complete_parameters(char *input, int *size)
 
     _notify_autocomplete(input, size);
     _autoaway_autocomplete(input, size);
+    _titlebar_autocomplete(input, size);
 }
 
 // The command functions
@@ -1521,10 +1528,15 @@ _cmd_set_states(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_titlebarversion(gchar **args, struct cmd_help_t help)
+_cmd_set_titlebar(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help,
+    if (strcmp(args[0], "version") != 0) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    } else {
+        return _cmd_set_boolean_preference(args[1], help,
         "Show version in window title", prefs_set_titlebarversion);
+    }
 }
 
 static gboolean
@@ -1988,6 +2000,33 @@ _notify_autocomplete(char *input, int *size)
         }
     } else if ((strncmp(input, "/notify ", 8) == 0) && (*size > 8)) {
         _parameter_autocomplete_with_ac(input, size, "/notify", notify_ac);
+    }
+}
+
+static void
+_titlebar_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+
+    if ((strncmp(input, "/titlebar version ", 18) == 0) && (*size > 18)) {
+        for(i = 18; i < *size; i++) {
+            inp_cpy[i-18] = input[i];
+        }
+        inp_cpy[(*size) - 18] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((18 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/titlebar version ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/titlebar ", 10) == 0) && (*size > 10)) {
+        _parameter_autocomplete_with_ac(input, size, "/titlebar", titlebar_ac);
     }
 }
 
