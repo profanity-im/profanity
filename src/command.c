@@ -72,24 +72,13 @@ static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     const char * const display,
     void (*set_func)(gboolean));
 
-static char *_cmd_complete(char *inp);
-static void _cmd_reset_command_completer(void);
-static char *_cmd_who_complete(char *inp);
-static void _cmd_who_reset_completer(void);
-static char *_cmd_help_complete(char *inp);
-static void _cmd_help_reset_completer(void);
-static char *_cmd_notify_complete(char *inp);
-static void _cmd_notify_reset_completer(void);
-static char *_cmd_sub_complete(char *inp);
-static void _cmd_sub_reset_completer(void);
-static char *_cmd_log_complete(char *inp);
-static void _cmd_log_reset_completer(void);
-static char *_cmd_prefs_complete(char *inp);
-static void _cmd_prefs_reset_completer(void);
 static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
+static void _autoaway_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
+static void _parameter_autocomplete_with_ac(char *input, int *size, char *command,
+    PAutocomplete ac);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
 gchar** _cmd_parse_args(const char * const inp, int min, int max, int *num);
@@ -546,7 +535,8 @@ static struct cmd_t setting_commands[] =
           "          away - Sends an away presence.",
           "          off - Disabled (default).",
           "time    : Number of minutes before the presence change is sent, the default is 15.",
-          "message : Optional message to send with the presence change, use no value to clear.",
+          "message : Optional message to send with the presence change.",
+          "        : off - Disable message (default).",
           "check   : on|off, when enabled, checks for activity and sends online presence, default is 'on'.",
           "",
           "Example: /autoaway mode idle",
@@ -640,6 +630,8 @@ static PAutocomplete notify_ac;
 static PAutocomplete prefs_ac;
 static PAutocomplete sub_ac;
 static PAutocomplete log_ac;
+static PAutocomplete autoaway_ac;
+static PAutocomplete autoaway_mode_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -683,6 +675,17 @@ cmd_init(void)
     log_ac = p_autocomplete_new();
     p_autocomplete_add(log_ac, strdup("maxsize"));
 
+    autoaway_ac = p_autocomplete_new();
+    p_autocomplete_add(autoaway_ac, strdup("mode"));
+    p_autocomplete_add(autoaway_ac, strdup("time"));
+    p_autocomplete_add(autoaway_ac, strdup("message"));
+    p_autocomplete_add(autoaway_ac, strdup("check"));
+
+    autoaway_mode_ac = p_autocomplete_new();
+    p_autocomplete_add(autoaway_mode_ac, strdup("away"));
+    p_autocomplete_add(autoaway_mode_ac, strdup("idle"));
+    p_autocomplete_add(autoaway_mode_ac, strdup("off"));
+
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
         struct cmd_t *pcmd = main_commands+i;
@@ -720,6 +723,8 @@ cmd_close(void)
     p_autocomplete_clear(sub_ac);
     p_autocomplete_clear(log_ac);
     p_autocomplete_clear(prefs_ac);
+    p_autocomplete_clear(autoaway_ac);
+    p_autocomplete_clear(autoaway_mode_ac);
 }
 
 // Command autocompletion functions
@@ -731,12 +736,13 @@ cmd_autocomplete(char *input, int *size)
     char *auto_msg = NULL;
     char inp_cpy[*size];
 
+    // autocomplete command
     if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
         for(i = 0; i < *size; i++) {
             inp_cpy[i] = input[i];
         }
         inp_cpy[i] = '\0';
-        found = _cmd_complete(inp_cpy);
+        found = p_autocomplete_complete(commands_ac, inp_cpy);
         if (found != NULL) {
             auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
             strcpy(auto_msg, found);
@@ -744,9 +750,11 @@ cmd_autocomplete(char *input, int *size)
             free(auto_msg);
             free(found);
         }
-    }
 
-    _cmd_complete_parameters(input, size);
+    // autocomplete parameters
+    } else {
+        _cmd_complete_parameters(input, size);
+    }
 }
 
 void
@@ -755,13 +763,15 @@ cmd_reset_autocomplete()
     contact_list_reset_search_attempts();
     prefs_reset_login_search();
     prefs_reset_boolean_choice();
-    _cmd_help_reset_completer();
-    _cmd_notify_reset_completer();
-    _cmd_sub_reset_completer();
-    _cmd_who_reset_completer();
-    _cmd_prefs_reset_completer();
-    _cmd_log_reset_completer();
-    _cmd_reset_command_completer();
+    p_autocomplete_reset(help_ac);
+    p_autocomplete_reset(notify_ac);
+    p_autocomplete_reset(sub_ac);
+    p_autocomplete_reset(who_ac);
+    p_autocomplete_reset(prefs_ac);
+    p_autocomplete_reset(log_ac);
+    p_autocomplete_reset(commands_ac);
+    p_autocomplete_reset(autoaway_ac);
+    p_autocomplete_reset(autoaway_mode_ac);
 }
 
 GSList *
@@ -865,90 +875,6 @@ cmd_execute_default(const char * const inp)
     return TRUE;
 }
 
-static char *
-_cmd_complete(char *inp)
-{
-    return p_autocomplete_complete(commands_ac, inp);
-}
-
-static void
-_cmd_reset_command_completer(void)
-{
-    p_autocomplete_reset(commands_ac);
-}
-
-static char *
-_cmd_who_complete(char *inp)
-{
-    return p_autocomplete_complete(who_ac, inp);
-}
-
-static void
-_cmd_who_reset_completer(void)
-{
-    p_autocomplete_reset(who_ac);
-}
-
-static char *
-_cmd_prefs_complete(char *inp)
-{
-    return p_autocomplete_complete(prefs_ac, inp);
-}
-
-static void
-_cmd_prefs_reset_completer(void)
-{
-    p_autocomplete_reset(prefs_ac);
-}
-
-static char *
-_cmd_help_complete(char *inp)
-{
-    return p_autocomplete_complete(help_ac, inp);
-}
-
-static void
-_cmd_help_reset_completer(void)
-{
-    p_autocomplete_reset(help_ac);
-}
-
-static char *
-_cmd_notify_complete(char *inp)
-{
-    return p_autocomplete_complete(notify_ac, inp);
-}
-
-static void
-_cmd_notify_reset_completer(void)
-{
-    p_autocomplete_reset(notify_ac);
-}
-
-static char *
-_cmd_sub_complete(char *inp)
-{
-    return p_autocomplete_complete(sub_ac, inp);
-}
-
-static void
-_cmd_sub_reset_completer(void)
-{
-    p_autocomplete_reset(sub_ac);
-}
-
-static char *
-_cmd_log_complete(char *inp)
-{
-    return p_autocomplete_complete(log_ac, inp);
-}
-
-static void
-_cmd_log_reset_completer(void)
-{
-    p_autocomplete_reset(log_ac);
-}
-
 static void
 _cmd_complete_parameters(char *input, int *size)
 {
@@ -979,18 +905,14 @@ _cmd_complete_parameters(char *input, int *size)
         contact_list_find_contact);
     _parameter_autocomplete(input, size, "/connect",
         prefs_find_login);
-    _parameter_autocomplete(input, size, "/sub",
-        _cmd_sub_complete);
-    _parameter_autocomplete(input, size, "/help",
-        _cmd_help_complete);
-    _parameter_autocomplete(input, size, "/who",
-        _cmd_who_complete);
-    _parameter_autocomplete(input, size, "/prefs",
-        _cmd_prefs_complete);
-    _parameter_autocomplete(input, size, "/log",
-        _cmd_log_complete);
+    _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
+    _parameter_autocomplete_with_ac(input, size, "/help", help_ac);
+    _parameter_autocomplete_with_ac(input, size, "/who", who_ac);
+    _parameter_autocomplete_with_ac(input, size, "/prefs", prefs_ac);
+    _parameter_autocomplete_with_ac(input, size, "/log", log_ac);
 
     _notify_autocomplete(input, size);
+    _autoaway_autocomplete(input, size);
 }
 
 // The command functions
@@ -2006,6 +1928,35 @@ _parameter_autocomplete(char *input, int *size, char *command,
 }
 
 static void
+_parameter_autocomplete_with_ac(char *input, int *size, char *command,
+    PAutocomplete ac)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+    char *command_cpy = malloc(strlen(command) + 2);
+    sprintf(command_cpy, "%s ", command);
+    int len = strlen(command_cpy);
+    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        for(i = len; i < *size; i++) {
+            inp_cpy[i-len] = input[i];
+        }
+        inp_cpy[(*size) - len] = '\0';
+        found = p_autocomplete_complete(ac, inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, command_cpy);
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    }
+    free(command_cpy);
+}
+
+static void
 _notify_autocomplete(char *input, int *size)
 {
     char *found = NULL;
@@ -2042,19 +1993,36 @@ _notify_autocomplete(char *input, int *size)
             free(found);
         }
     } else if ((strncmp(input, "/notify ", 8) == 0) && (*size > 8)) {
-        for(i = 8; i < *size; i++) {
-            inp_cpy[i-8] = input[i];
+        _parameter_autocomplete_with_ac(input, size, "/notify", notify_ac);
+    }
+}
+
+static void
+_autoaway_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+
+    if ((strncmp(input, "/autoaway mode ", 15) == 0) && (*size > 15)) {
+        _parameter_autocomplete_with_ac(input, size, "/autoaway mode", autoaway_mode_ac);
+    } else if ((strncmp(input, "/autoaway check ", 16) == 0) && (*size > 16)) {
+        for(i = 16; i < *size; i++) {
+            inp_cpy[i-16] = input[i];
         }
-        inp_cpy[(*size) - 8] = '\0';
-        found = _cmd_notify_complete(inp_cpy);
+        inp_cpy[(*size) - 16] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc((8 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify ");
+            auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/autoaway check ");
             strcat(auto_msg, found);
             inp_replace_input(input, auto_msg, size);
             free(auto_msg);
             free(found);
         }
+    } else if ((strncmp(input, "/autoaway ", 10) == 0) && (*size > 10)) {
+        _parameter_autocomplete_with_ac(input, size, "/autoaway", autoaway_ac);
     }
 }
 
