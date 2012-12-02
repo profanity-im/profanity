@@ -502,10 +502,7 @@ _init(const int disable_tls, char *log_level)
 {
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
-    files_create_config_directory();
-    files_create_data_directory();
-    files_create_chatlog_directory();
-    files_create_themes_directory();
+    files_create_directories();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
     log_info("Starting Profanity (%s)...", PACKAGE_VERSION);

@@ -23,10 +23,7 @@
 #ifndef FILES_H
 #define FILES_H
 
-void files_create_config_directory(void);
-void files_create_data_directory(void);
-void files_create_chatlog_directory(void);
-void files_create_themes_directory(void);
+void files_create_directories(void);
 gchar* files_get_chatlog_dir(void);
 gchar* files_get_preferences_file(void);
 gchar* files_get_log_file(void);

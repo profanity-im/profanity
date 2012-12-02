@@ -29,51 +29,22 @@
 
 #include <glib.h>
 
+static void _files_create_config_directory(void);
+static void _files_create_data_directory(void);
+static void _files_create_chatlog_directory(void);
+static void _files_create_log_directory(void);
+static void _files_create_themes_directory(void);
 static void _create_dir(char *name);
 static void _mkdir_recursive(const char *dir);
 
 void
-files_create_config_directory(void)
+files_create_directories(void)
 {
-    gchar *xdg_config = xdg_get_config_home();
-    GString *prof_conf_dir = g_string_new(xdg_config);
-    g_string_append(prof_conf_dir, "/profanity");
-    _mkdir_recursive(prof_conf_dir->str);
-    g_free(xdg_config);
-    g_string_free(prof_conf_dir, TRUE);
-}
-
-void
-files_create_data_directory(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *prof_data_dir = g_string_new(xdg_data);
-    g_string_append(prof_data_dir, "/profanity");
-    _mkdir_recursive(prof_data_dir->str);
-    g_free(xdg_data);
-    g_string_free(prof_data_dir, TRUE);
-}
-
-void
-files_create_chatlog_directory(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *chatlogs_dir = g_string_new(xdg_data);
-    g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    _mkdir_recursive(chatlogs_dir->str);
-    g_free(xdg_data);
-    g_string_free(chatlogs_dir, TRUE);
-}
-
-void
-files_create_themes_directory(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *themes_dir = g_string_new(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    _mkdir_recursive(themes_dir->str);
-    g_free(xdg_config);
-    g_string_free(themes_dir, TRUE);
+    _files_create_config_directory();
+    _files_create_data_directory();
+    _files_create_chatlog_directory();
+    _files_create_log_directory();
+    _files_create_themes_directory();
 }
 
 gchar *
@@ -107,7 +78,7 @@ files_get_log_file(void)
 {
     gchar *xdg_data = xdg_get_data_home();
     GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/profanity.log");
+    g_string_append(logfile, "/profanity/logs/profanity.log");
     gchar *result = strdup(logfile->str);
     g_free(xdg_data);
     g_string_free(logfile, TRUE);
@@ -126,6 +97,61 @@ files_get_themes_dir(void)
     g_string_free(themes_dir, TRUE);
 
     return result;
+}
+
+static void
+_files_create_config_directory(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *prof_conf_dir = g_string_new(xdg_config);
+    g_string_append(prof_conf_dir, "/profanity");
+    _mkdir_recursive(prof_conf_dir->str);
+    g_free(xdg_config);
+    g_string_free(prof_conf_dir, TRUE);
+}
+
+static void
+_files_create_data_directory(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *prof_data_dir = g_string_new(xdg_data);
+    g_string_append(prof_data_dir, "/profanity");
+    _mkdir_recursive(prof_data_dir->str);
+    g_free(xdg_data);
+    g_string_free(prof_data_dir, TRUE);
+}
+
+static void
+_files_create_chatlog_directory(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *chatlogs_dir = g_string_new(xdg_data);
+    g_string_append(chatlogs_dir, "/profanity/chatlogs");
+    _mkdir_recursive(chatlogs_dir->str);
+    g_free(xdg_data);
+    g_string_free(chatlogs_dir, TRUE);
+}
+
+static void
+_files_create_log_directory(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *chatlogs_dir = g_string_new(xdg_data);
+    g_string_append(chatlogs_dir, "/profanity/logs");
+    _mkdir_recursive(chatlogs_dir->str);
+    g_free(xdg_data);
+    g_string_free(chatlogs_dir, TRUE);
+}
+
+static void
+_files_create_themes_directory(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *themes_dir = g_string_new(xdg_config);
+    g_string_append(themes_dir, "/profanity/themes");
+    _mkdir_recursive(themes_dir->str);
+    g_free(xdg_config);
+    g_string_free(themes_dir, TRUE);
 }
 
 static void
