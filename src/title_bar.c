@@ -52,6 +52,7 @@ create_title_bar(void)
 void
 title_bar_title(void)
 {
+    wclear(title_bar);
     recipient = NULL;
     typing_elapsed = NULL;
     title_bar_show("Profanity. Type /help for help information.");
@@ -165,6 +166,7 @@ title_bar_set_typing(gboolean is_typing)
 void
 title_bar_draw(void)
 {
+    wclear(title_bar);
     _title_bar_draw_status();
     _title_bar_draw_title();
 }
