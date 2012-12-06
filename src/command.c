@@ -156,15 +156,17 @@ static struct cmd_t main_commands[] =
           NULL  } } },
 
     { "/connect",
-        _cmd_connect, parse_args, 1, 1,
-        { "/connect user@host", "Login to jabber.",
-        { "/connect user@host",
-          "------------------",
-          "Connect to the jabber server at host using the username user.",
-          "Profanity should work with any XMPP (Jabber) compliant chat host.",
+        _cmd_connect, parse_args, 1, 2,
+        { "/connect user@domain [server]", "Login to jabber.",
+        { "/connect user@domain [server]",
+          "-----------------------------",
+          "Connect to the jabber server at domain using the username user.",
+          "Profanity should work with any XMPP (Jabber) compliant chat service.",
           "You can use tab completion to autocomplete any logins you have used before.",
+          "Use the server option if the chat service is hosted at a different domain to the 'domain' part.",
           "",
           "Example: /connect myuser@gmail.com",
+          "Example: /connect myuser@mycompany.com talk.google.com",
           NULL  } } },
 
     { "/disconnect",
@@ -930,6 +932,7 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
         result = TRUE;
     } else {
         char *user = args[0];
+        char *altdomain = args[1];
         char *lower = g_utf8_strdown(user, -1);
 
         status_bar_get_password();
@@ -941,7 +944,7 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
 
         log_debug("Connecting as %s", lower);
 
-        conn_status = jabber_connect(lower, passwd);
+        conn_status = jabber_connect(lower, passwd, altdomain);
         if (conn_status == JABBER_CONNECTING) {
             cons_show("Connecting...");
             log_debug("Connecting...");

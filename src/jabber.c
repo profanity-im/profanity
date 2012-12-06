@@ -49,6 +49,7 @@ static struct _jabber_conn_t {
 // for auto reconnect
 static char *saved_user;
 static char *saved_password;
+static char *saved_altdomain;
 static GTimer *reconnect_timer;
 static GHashTable *sub_requests;
 
@@ -103,13 +104,18 @@ jabber_restart(void)
 
 jabber_conn_status_t
 jabber_connect(const char * const user,
-    const char * const passwd)
+    const char * const passwd, const char * const altdomain)
 {
     if (saved_user == NULL) {
         saved_user = strdup(user);
     }
     if (saved_password == NULL) {
         saved_password = strdup(passwd);
+    }
+    if (saved_altdomain == NULL) {
+        if (altdomain != NULL) {
+            saved_altdomain = strdup(altdomain);
+        }
     }
 
     log_info("Connecting as %s", saved_user);
@@ -125,7 +131,7 @@ jabber_connect(const char * const user,
     if (jabber_conn.tls_disabled)
         xmpp_conn_disable_tls(jabber_conn.conn);
 
-    int connect_status = xmpp_connect_client(jabber_conn.conn, NULL, 0,
+    int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, 0,
         _connection_handler, jabber_conn.ctx);
 
     if (connect_status == 0)
@@ -167,7 +173,7 @@ jabber_process_events(void)
             (reconnect_timer != NULL)) {
             if (g_timer_elapsed(reconnect_timer, NULL) > (prefs_get_reconnect() * 1.0)) {
                 log_debug("Attempting reconnect as %s", saved_user);
-                jabber_connect(saved_user, saved_password);
+                jabber_connect(saved_user, saved_password, saved_altdomain);
             }
         }
     }
