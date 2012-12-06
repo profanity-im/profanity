@@ -789,10 +789,44 @@ win_show_room_roster(const char * const room)
         wattron(win, COLOUR_ONLINE);
 
         while (roster != NULL) {
-            wprintw(win, "%s", roster->data);
+            PContact member = roster->data;
+            const char const *name = p_contact_jid(member);
+            const char const *show = p_contact_presence(member);
+
+            if (strcmp(show, "away") == 0) {
+                wattron(win, COLOUR_AWAY);
+            } else if (strcmp(show, "chat") == 0) {
+                wattron(win, COLOUR_CHAT);
+            } else if (strcmp(show, "dnd") == 0) {
+                wattron(win, COLOUR_DND);
+            } else if (strcmp(show, "xa") == 0) {
+                wattron(win, COLOUR_XA);
+            } else if (strcmp(show, "online") == 0) {
+                wattron(win, COLOUR_ONLINE);
+            } else {
+                wattron(win, COLOUR_OFFLINE);
+            }
+
+            wprintw(win, "%s", name);
+
+            if (strcmp(show, "away") == 0) {
+                wattroff(win, COLOUR_AWAY);
+            } else if (strcmp(show, "chat") == 0) {
+                wattroff(win, COLOUR_CHAT);
+            } else if (strcmp(show, "dnd") == 0) {
+                wattroff(win, COLOUR_DND);
+            } else if (strcmp(show, "xa") == 0) {
+                wattroff(win, COLOUR_XA);
+            } else if (strcmp(show, "online") == 0) {
+                wattroff(win, COLOUR_ONLINE);
+            } else {
+                wattroff(win, COLOUR_OFFLINE);
+            }
+
             if (roster->next != NULL) {
                 wprintw(win, ", ");
             }
+
             roster = g_list_next(roster);
         }
 

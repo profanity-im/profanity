@@ -275,7 +275,7 @@ room_get_roster(const char * const room)
     muc_room *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
-        return g_hash_table_get_keys(chat_room->roster);
+        return g_hash_table_get_values(chat_room->roster);
     } else {
         return NULL;
     }
