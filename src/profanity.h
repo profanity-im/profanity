@@ -27,7 +27,7 @@
 
 void prof_run(const int disable_tls, char *log_level);
 
-void prof_handle_login_success(const char *jid);
+void prof_handle_login_success(const char *jid, const char *altdomain);
 void prof_handle_lost_connection(void);
 void prof_handle_disconnect(const char * const jid);
 void prof_handle_failed_login(void);

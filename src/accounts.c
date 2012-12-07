@@ -82,10 +82,14 @@ accounts_reset_login_search(void)
 }
 
 void
-accounts_add_login(const char *jid)
+accounts_add_login(const char *jid, const char *altdomain)
 {
     if (!g_key_file_has_group(accounts, jid)) {
         g_key_file_set_boolean(accounts, jid, "enabled", TRUE);
+        if (altdomain != NULL) {
+            g_key_file_set_string(accounts, jid, "server", altdomain);
+        }
+
         _save_accounts();
     }
 }

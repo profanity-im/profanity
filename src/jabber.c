@@ -698,7 +698,7 @@ _connection_handler(xmpp_conn_t * const conn,
     // login success
     if (status == XMPP_CONN_CONNECT) {
         const char *jid = xmpp_conn_get_jid(conn);
-        prof_handle_login_success(jid);
+        prof_handle_login_success(jid, saved_altdomain);
         chat_sessions_init();
 
         xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
