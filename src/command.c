@@ -1223,7 +1223,7 @@ _cmd_prefs(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_theme(gchar **args, struct cmd_help_t help)
 {
-    if (theme_change(args[0])) {
+    if (theme_load(args[0])) {
         ui_load_colours();
         prefs_set_theme(args[0]);
         cons_show("Loaded theme: %s", args[0]);

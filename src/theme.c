@@ -94,7 +94,7 @@ static void _set_colour(gchar *val, NCURSES_COLOR_T *pref,
 static void _load_colours(void);
 
 void
-theme_load(const char * const theme_name)
+theme_init(const char * const theme_name)
 {
     log_info("Loading theme");
     theme = g_key_file_new();
@@ -113,7 +113,7 @@ theme_load(const char * const theme_name)
 }
 
 gboolean
-theme_change(const char * const theme_name)
+theme_load(const char * const theme_name)
 {
     // use default theme
     if (strcmp(theme_name, "default") == 0) {

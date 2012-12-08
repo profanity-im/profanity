@@ -58,9 +58,9 @@
 #define COLOUR_TYPING           COLOR_PAIR(60)
 #define COLOUR_GONE             COLOR_PAIR(61)
 
-void theme_load(const char * const theme_name);
+void theme_init(const char * const theme_name);
 void theme_init_colours(void);
-gboolean theme_change(const char * const theme_name);
+gboolean theme_load(const char * const theme_name);
 void theme_close(void);
 
 #endif

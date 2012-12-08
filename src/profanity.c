@@ -511,7 +511,7 @@ _init(const int disable_tls, char *log_level)
     prefs_load();
     accounts_load();
     gchar *theme = prefs_get_theme();
-    theme_load(theme);
+    theme_init(theme);
     g_free(theme);
     ui_init();
     jabber_init(disable_tls);
