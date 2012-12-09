@@ -1392,7 +1392,7 @@ cons_settings_help(void)
     GSList *settings_helpers = cmd_get_settings_help();
     while (settings_helpers != NULL) {
         struct cmd_help_t *help = (struct cmd_help_t *)settings_helpers->data;
-        cons_show("%-25s: %s", help->usage, help->short_help);
+        cons_show("%-27s: %s", help->usage, help->short_help);
         settings_helpers = g_slist_next(settings_helpers);
     }
 
