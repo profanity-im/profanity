@@ -28,18 +28,18 @@ typedef struct p_contact_t *PContact;
 PContact p_contact_new(const char * const jid, const char * const name,
     const char * const presence, const char * const status,
     const char * const subscription, gboolean pending_out);
-PContact p_contact_copy(PContact contact);
 void p_contact_free(PContact contact);
-const char * p_contact_jid(PContact contact);
-const char * p_contact_name(PContact contact);
-const char * p_contact_presence(PContact contact);
-const char * p_contact_status(PContact contact);
-const char * p_contact_subscription(const PContact contact);
+const char* p_contact_jid(PContact contact);
+const char* p_contact_name(PContact contact);
+const char* p_contact_presence(PContact contact);
+const char* p_contact_status(PContact contact);
+const char* p_contact_subscription(const PContact contact);
+GDateTime* p_contact_last_activity(const PContact contact);
 gboolean p_contact_pending_out(const PContact contact);
 void p_contact_set_presence(const PContact contact, const char * const presence);
 void p_contact_set_status(const PContact contact, const char * const status);
 void p_contact_set_subscription(const PContact contact, const char * const subscription);
 void p_contact_set_pending_out(const PContact contact, gboolean pending_out);
-int p_contacts_equal_deep(const PContact c1, const PContact c2);
+void p_contact_set_last_activity(const PContact contact, GDateTime *last_activity);
 
 #endif

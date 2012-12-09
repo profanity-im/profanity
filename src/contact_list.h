@@ -35,7 +35,7 @@ gboolean contact_list_add(const char * const jid, const char * const name,
     const char * const presence, const char * const status,
     const char * const subscription, gboolean pending_out);
 gboolean contact_list_update_contact(const char * const jid, const char * const presence,
-    const char * const status);
+    const char * const status, GDateTime *last_activity);
 void contact_list_update_subscription(const char * const jid,
     const char * const subscription, gboolean pending_out);
 gboolean contact_list_has_pending_subscriptions(void);

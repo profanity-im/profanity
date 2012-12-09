@@ -34,6 +34,7 @@ struct p_contact_t {
     char *status;
     char *subscription;
     gboolean pending_out;
+    GDateTime *last_activity;
 };
 
 PContact
@@ -67,34 +68,9 @@ p_contact_new(const char * const jid, const char * const name,
 
     contact->pending_out = pending_out;
 
+    contact->last_activity = NULL;
+
     return contact;
-}
-
-PContact
-p_contact_copy(PContact contact)
-{
-    PContact copy = malloc(sizeof(struct p_contact_t));
-    copy->jid = strdup(contact->jid);
-
-    if (contact->name != NULL) {
-        copy->name = strdup(contact->name);
-    } else {
-        copy->name = NULL;
-    }
-
-    copy->presence = strdup(contact->presence);
-
-    if (contact->status != NULL)
-        copy->status = strdup(contact->status);
-    else
-        copy->status = NULL;
-
-    if (contact->subscription != NULL)
-        copy->subscription = strdup(contact->subscription);
-    else
-        copy->subscription = NULL;
-
-    return copy;
 }
 
 void
@@ -123,6 +99,10 @@ p_contact_free(PContact contact)
     if (contact->subscription != NULL) {
         free(contact->subscription);
         contact->subscription = NULL;
+    }
+
+    if (contact->last_activity != NULL) {
+        g_date_time_unref(contact->last_activity);
     }
 
     free(contact);
@@ -163,6 +143,12 @@ gboolean
 p_contact_pending_out(const PContact contact)
 {
     return contact->pending_out;
+}
+
+GDateTime *
+p_contact_last_activity(const PContact contact)
+{
+    return contact->last_activity;
 }
 
 void
@@ -216,14 +202,15 @@ p_contact_set_pending_out(const PContact contact, gboolean pending_out)
     contact->pending_out = pending_out;
 }
 
-int
-p_contacts_equal_deep(const PContact c1, const PContact c2)
+void
+p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
 {
-    int jid_eq = (g_strcmp0(c1->jid, c2->jid) == 0);
-    int name_eq = (g_strcmp0(c1->name, c2->name) == 0);
-    int presence_eq = (g_strcmp0(c1->presence, c2->presence) == 0);
-    int status_eq = (g_strcmp0(c1->status, c2->status) == 0);
-    int subscription_eq = (g_strcmp0(c1->subscription, c2->subscription) == 0);
+    if (contact->last_activity != NULL) {
+        g_date_time_unref(contact->last_activity);
+        contact->last_activity = NULL;
+    }
 
-    return (jid_eq && name_eq && presence_eq && status_eq && subscription_eq);
+    if (last_activity != NULL) {
+        contact->last_activity = g_date_time_ref(last_activity);
+    }
 }

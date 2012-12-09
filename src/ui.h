@@ -69,7 +69,7 @@ void ui_idle(void);
 void ui_show_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv);
 void ui_contact_online(const char * const from, const char * const show,
-    const char * const status);
+    const char * const status, GDateTime *last_activity);
 void ui_contact_offline(const char * const from, const char * const show,
     const char * const status);
 void ui_disconnected(void);

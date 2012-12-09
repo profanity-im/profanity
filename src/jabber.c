@@ -1043,6 +1043,14 @@ _presence_handler(xmpp_conn_t * const conn,
         char *short_from = strtok(from, "/");
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
+        int idle_seconds = stanza_get_idle_time(stanza);
+        GDateTime *last_activity = NULL;
+
+        if (idle_seconds > 0) {
+            GDateTime *now = g_date_time_new_now_local();
+            last_activity = g_date_time_add_seconds(now, 0 - idle_seconds);
+            g_date_time_unref(now);
+        }
 
         xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
         if (status != NULL)
@@ -1058,12 +1066,16 @@ _presence_handler(xmpp_conn_t * const conn,
                 show_str = "online";
 
             if (strcmp(short_jid, short_from) !=0) {
-                prof_handle_contact_online(short_from, show_str, status_str);
+                prof_handle_contact_online(short_from, show_str, status_str, last_activity);
             }
         } else if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
             if (strcmp(short_jid, short_from) !=0) {
                 prof_handle_contact_offline(short_from, "offline", status_str);
             }
+
+        if (last_activity != NULL) {
+            g_date_time_unref(last_activity);
+        }
 
         // subscriptions
         } else if (strcmp(type, STANZA_TYPE_SUBSCRIBE) == 0) {

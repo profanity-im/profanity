@@ -117,4 +117,6 @@ gboolean stanza_is_room_nick_change(xmpp_stanza_t * const stanza);
 
 char* stanza_get_new_nick(xmpp_stanza_t * const stanza);
 
+int stanza_get_idle_time(xmpp_stanza_t * const stanza);
+
 #endif

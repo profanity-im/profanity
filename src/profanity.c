@@ -321,15 +321,16 @@ prof_handle_leave_room(const char * const room)
 }
 
 void
-prof_handle_contact_online(char *contact, char *show, char *status)
+prof_handle_contact_online(char *contact, char *show, char *status,
+    GDateTime *last_activity)
 {
-    gboolean updated = contact_list_update_contact(contact, show, status);
+    gboolean updated = contact_list_update_contact(contact, show, status, last_activity);
 
     if (updated) {
         PContact result = contact_list_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
-                ui_contact_online(contact, show, status);
+                ui_contact_online(contact, show, status, last_activity);
                 win_current_page_off();
             }
         }
@@ -339,7 +340,7 @@ prof_handle_contact_online(char *contact, char *show, char *status)
 void
 prof_handle_contact_offline(char *contact, char *show, char *status)
 {
-    gboolean updated = contact_list_update_contact(contact, "offline", status);
+    gboolean updated = contact_list_update_contact(contact, "offline", status, NULL);
 
     if (updated) {
         PContact result = contact_list_get_contact(contact);

@@ -31,6 +31,7 @@ static PAutocomplete ac;
 static GHashTable *contacts;
 
 static gboolean _key_equals(void *key1, void *key2);
+static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 
 void
 contact_list_init(void)
@@ -80,7 +81,7 @@ contact_list_remove(const char * const jid)
 
 gboolean
 contact_list_update_contact(const char * const jid, const char * const presence,
-    const char * const status)
+    const char * const status, GDateTime *last_activity)
 {
     gboolean changed = FALSE;
     PContact contact = g_hash_table_lookup(contacts, jid);
@@ -96,6 +97,11 @@ contact_list_update_contact(const char * const jid, const char * const presence,
 
     if (g_strcmp0(p_contact_status(contact), status) != 0) {
         p_contact_set_status(contact, status);
+        changed = TRUE;
+    }
+
+    if (!_datetimes_equal(p_contact_last_activity(contact), last_activity)) {
+        p_contact_set_last_activity(contact, last_activity);
         changed = TRUE;
     }
 
@@ -173,3 +179,18 @@ gboolean _key_equals(void *key1, void *key2)
 
     return (g_strcmp0(str1, str2) == 0);
 }
+
+static gboolean
+_datetimes_equal(GDateTime *dt1, GDateTime *dt2)
+{
+    if ((dt1 == NULL) && (dt2 == NULL)) {
+        return TRUE;
+    } else if ((dt1 == NULL) && (dt2 != NULL)) {
+        return FALSE;
+    } else if ((dt1 != NULL) && (dt2 == NULL)) {
+        return FALSE;
+    } else {
+        return g_date_time_equal(dt1, dt2);
+    }
+}
+

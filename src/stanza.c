@@ -20,6 +20,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
@@ -357,5 +358,36 @@ stanza_get_new_nick(xmpp_stanza_t * const stanza)
         }
 
         return NULL;
+    }
+}
+
+int
+stanza_get_idle_time(xmpp_stanza_t * const stanza)
+{
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
+    if (query == NULL) {
+        return 0;
+    }
+
+    char *ns = xmpp_stanza_get_ns(query);
+    if (ns == NULL) {
+        return 0;
+    }
+
+    if (strcmp(ns, STANZA_NS_LASTACTIVITY) != 0) {
+        return 0;
+    }
+
+    char *seconds_str = xmpp_stanza_get_attribute(query, STANZA_ATTR_SECONDS);
+    if (seconds_str == NULL) {
+        return 0;
+    }
+
+    int result = atoi(seconds_str);
+    if (result < 1) {
+        return 0;
+    } else {
+        return result;
     }
 }

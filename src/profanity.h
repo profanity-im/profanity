@@ -32,7 +32,8 @@ void prof_handle_lost_connection(void);
 void prof_handle_disconnect(const char * const jid);
 void prof_handle_failed_login(void);
 void prof_handle_typing(char *from);
-void prof_handle_contact_online(char *contact, char *show, char *status);
+void prof_handle_contact_online(char *contact, char *show, char *status,
+    GDateTime *last_activity);
 void prof_handle_contact_offline(char *contact, char *show, char *status);
 void prof_handle_incoming_message(char *from, char *message, gboolean priv);
 void prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,

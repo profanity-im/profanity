@@ -89,7 +89,8 @@ static void _win_show_user(WINDOW *win, const char * const user, const int colou
 static void _win_show_message(WINDOW *win, const char * const message);
 static void _win_show_error_msg(WINDOW *win, const char * const message);
 static void _show_status_string(WINDOW *win, const char * const from,
-    const char * const show, const char * const status, const char * const pre,
+    const char * const show, const char * const status,
+    GDateTime *last_activity, const char * const pre,
     const char * const default_show);
 static void _cons_show_typing(const char * const short_from);
 static void _cons_show_incoming_message(const char * const short_from,
@@ -427,14 +428,16 @@ ui_show_incoming_msg(const char * const from, const char * const message,
 
 void
 ui_contact_online(const char * const from, const char * const show,
-    const char * const status)
+    const char * const status, GDateTime *last_activity)
 {
-    _show_status_string(console->win, from, show, status, "++", "online");
+    _show_status_string(console->win, from, show, status, last_activity, "++",
+        "online");
 
     int win_index = _find_prof_win_index(from);
     if (win_index != NUM_WINS) {
         WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, from, show, status, "++", "online");
+        _show_status_string(win, from, show, status, last_activity, "++",
+            "online");
     }
 
     if (win_index == current_index)
@@ -445,12 +448,12 @@ void
 ui_contact_offline(const char * const from, const char * const show,
     const char * const status)
 {
-    _show_status_string(console->win, from, show, status, "--", "offline");
+    _show_status_string(console->win, from, show, status, NULL, "--", "offline");
 
     int win_index = _find_prof_win_index(from);
     if (win_index != NUM_WINS) {
         WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, from, show, status, "--", "offline");
+        _show_status_string(win, from, show, status, NULL, "--", "offline");
     }
 
     if (win_index == current_index)
@@ -694,7 +697,7 @@ win_new_chat_win(const char * const to)
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
                 const char const *show = p_contact_presence(contact);
                 const char const *status = p_contact_status(contact);
-                _show_status_string(win, to, show, status, "--", "offline");
+                _show_status_string(win, to, show, status, NULL, "--", "offline");
             }
         }
 
@@ -734,7 +737,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
                 const char const *show = p_contact_presence(contact);
                 const char const *status = p_contact_status(contact);
-                _show_status_string(win, to, show, status, "--", "offline");
+                _show_status_string(win, to, show, status, NULL, "--", "offline");
             }
         }
 
@@ -876,7 +879,7 @@ win_show_room_member_presence(const char * const room, const char * const nick,
     int win_index = _find_prof_win_index(room);
     if (win_index != NUM_WINS) {
         WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, nick, show, status, "++", "online");
+        _show_status_string(win, nick, show, status, NULL, "++", "online");
     }
 
     if (win_index == current_index)
@@ -1882,7 +1885,8 @@ _win_resize_all(void)
 
 static void
 _show_status_string(WINDOW *win, const char * const from,
-    const char * const show, const char * const status, const char * const pre,
+    const char * const show, const char * const status,
+    GDateTime *last_activity, const char * const pre,
     const char * const default_show)
 {
     _win_show_time(win);
@@ -1913,6 +1917,26 @@ _show_status_string(WINDOW *win, const char * const from,
         wprintw(win, " is %s", show);
     else
         wprintw(win, " is %s", default_show);
+
+    if (last_activity != NULL) {
+        GDateTime *now = g_date_time_new_now_local();
+        GTimeSpan span = g_date_time_difference(now, last_activity);
+
+        wprintw(win, ", idle ");
+
+        int hours = span / G_TIME_SPAN_HOUR;
+        span = span - hours * G_TIME_SPAN_HOUR;
+        if (hours > 0) {
+            wprintw(win, "%dh", hours);
+        }
+
+        int minutes = span / G_TIME_SPAN_MINUTE;
+        span = span - minutes * G_TIME_SPAN_MINUTE;
+        wprintw(win, "%dm", minutes);
+
+        int seconds = span / G_TIME_SPAN_SECOND;
+        wprintw(win, "%ds", seconds);
+    }
 
     if (status != NULL)
         wprintw(win, ", \"%s\"", status);
@@ -1965,6 +1989,7 @@ _cons_show_contact(PContact contact)
     const char *name = p_contact_name(contact);
     const char *presence = p_contact_presence(contact);
     const char *status = p_contact_status(contact);
+    GDateTime *last_activity = p_contact_last_activity(contact);
 
     _win_show_time(console->win);
 
@@ -1989,6 +2014,26 @@ _cons_show_contact(PContact contact)
     }
 
     wprintw(console->win, " is %s", presence);
+
+    if (last_activity != NULL) {
+        GDateTime *now = g_date_time_new_now_local();
+        GTimeSpan span = g_date_time_difference(now, last_activity);
+
+        wprintw(console->win, ", idle ");
+
+        int hours = span / G_TIME_SPAN_HOUR;
+        span = span - hours * G_TIME_SPAN_HOUR;
+        if (hours > 0) {
+            wprintw(console->win, "%dh", hours);
+        }
+
+        int minutes = span / G_TIME_SPAN_MINUTE;
+        span = span - minutes * G_TIME_SPAN_MINUTE;
+        wprintw(console->win, "%dm", minutes);
+
+        int seconds = span / G_TIME_SPAN_SECOND;
+        wprintw(console->win, "%ds", seconds);
+    }
 
     if (status != NULL) {
         wprintw(console->win, ", \"%s\"", p_contact_status(contact));
