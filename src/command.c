@@ -212,11 +212,11 @@ static struct cmd_t main_commands[] =
           "    $HOME/.config/profanity/themes/theme-name",
           "",
           "Command must be one of 'list' or 'load'.",
-          "list              : List all available themes.",
-          "load [theme-name] : Load the named theme.\"default\" will reset to the default colours.",
+          "list             : List all available themes.",
+          "set [theme-name] : Load the named theme.\"default\" will reset to the default colours.",
           "",
           "Example : /theme list",
-          "Example : /theme load mycooltheme",
+          "Example : /theme set mycooltheme",
           NULL } } },
 
     { "/msg",
@@ -700,7 +700,7 @@ cmd_init(void)
 
     theme_ac = p_autocomplete_new();
     p_autocomplete_add(theme_ac, strdup("list"));
-    p_autocomplete_add(theme_ac, strdup("load"));
+    p_autocomplete_add(theme_ac, strdup("set"));
 
     theme_load_ac = NULL;
 
@@ -796,7 +796,7 @@ cmd_reset_autocomplete()
     p_autocomplete_reset(autoaway_mode_ac);
     p_autocomplete_reset(theme_ac);
     if (theme_load_ac != NULL) {
-        p_autocomplete_clear(theme_load_ac);
+        p_autocomplete_reset(theme_load_ac);
         theme_load_ac = NULL;
     }
 }
@@ -1254,7 +1254,7 @@ _cmd_theme(gchar **args, struct cmd_help_t help)
         g_slist_free_full(themes, g_free);
 
     // load a theme
-    } else if (strcmp(args[0], "load") == 0) {
+    } else if (strcmp(args[0], "set") == 0) {
         if (args[1] == NULL) {
             cons_show("Usage: %s", help.usage);
         } else if (theme_load(args[1])) {
@@ -2102,7 +2102,7 @@ _autoaway_autocomplete(char *input, int *size)
 static void
 _theme_autocomplete(char *input, int *size)
 {
-    if ((strncmp(input, "/theme load ", 12) == 0) && (*size > 12)) {
+    if ((strncmp(input, "/theme set ", 11) == 0) && (*size > 11)) {
         if (theme_load_ac == NULL) {
             theme_load_ac = p_autocomplete_new();
             GSList *themes = theme_list();
@@ -2111,8 +2111,9 @@ _theme_autocomplete(char *input, int *size)
                 themes = g_slist_next(themes);
             }
             g_slist_free(themes);
+            p_autocomplete_add(theme_load_ac, "default");
          }
-        _parameter_autocomplete_with_ac(input, size, "/theme load", theme_load_ac);
+        _parameter_autocomplete_with_ac(input, size, "/theme set", theme_load_ac);
     } else if ((strncmp(input, "/theme ", 7) == 0) && (*size > 7)) {
         _parameter_autocomplete_with_ac(input, size, "/theme", theme_ac);
     }
