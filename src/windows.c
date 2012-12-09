@@ -1290,6 +1290,22 @@ cons_show_connection_prefs(void)
 }
 
 void
+cons_show_themes(GSList *themes)
+{
+    cons_show("");
+
+    if (themes == NULL) {
+        cons_show("No available themes.");
+    } else {
+        cons_show("Available themes:");
+        while (themes != NULL) {
+            cons_show(themes->data);
+            themes = g_slist_next(themes);
+        }
+    }
+}
+
+void
 cons_prefs(void)
 {
     cons_show("");

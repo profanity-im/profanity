@@ -1223,10 +1223,19 @@ _cmd_prefs(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_theme(gchar **args, struct cmd_help_t help)
 {
-    if (theme_load(args[0])) {
+    // list themes
+    if (strcmp(args[0], "list") == 0) {
+        GSList *themes = theme_list();
+        cons_show_themes(themes);
+        g_slist_free_full(themes, g_free);
+
+    // load a theme
+    } else if (theme_load(args[0])) {
         ui_load_colours();
         prefs_set_theme(args[0]);
         cons_show("Loaded theme: %s", args[0]);
+
+    // theme not found
     } else {
         cons_show("Couldn't find theme: %s", args[0]);
     }

@@ -112,6 +112,27 @@ theme_init(const char * const theme_name)
     _load_colours();
 }
 
+GSList *
+theme_list(void)
+{
+    GSList *result = NULL;
+    gchar *themes_dir = files_get_themes_dir();
+    GDir *themes = g_dir_open(themes_dir, 0, NULL);
+    if (themes != NULL) {
+        const gchar *theme = g_dir_read_name(themes);
+        while (theme != NULL) {
+            result = g_slist_append(result, strdup(theme));
+            theme = g_dir_read_name(themes);
+        }
+
+        g_dir_close(themes);
+        return result;
+
+    } else {
+        return NULL;
+    }
+}
+
 gboolean
 theme_load(const char * const theme_name)
 {

@@ -61,6 +61,7 @@
 void theme_init(const char * const theme_name);
 void theme_init_colours(void);
 gboolean theme_load(const char * const theme_name);
+GSList* theme_list(void);
 void theme_close(void);
 
 #endif
