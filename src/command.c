@@ -1235,14 +1235,16 @@ _cmd_theme(gchar **args, struct cmd_help_t help)
         g_slist_free_full(themes, g_free);
 
     // load a theme
-    } else if (theme_load(args[0])) {
-        ui_load_colours();
-        prefs_set_theme(args[0]);
-        cons_show("Loaded theme: %s", args[0]);
-
-    // theme not found
+    } else if (strcmp(args[0], "load") == 0) {
+        if (theme_load(args[1])) {
+            ui_load_colours();
+            prefs_set_theme(args[1]);
+            cons_show("Loaded theme: %s", args[1]);
+        } else {
+            cons_show("Couldn't find theme: %s", args[1]);
+        }
     } else {
-        cons_show("Couldn't find theme: %s", args[0]);
+        cons_show("Usage: %s", help.usage);
     }
 
     return TRUE;
