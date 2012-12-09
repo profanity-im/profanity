@@ -910,6 +910,7 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
         char *user = args[0];
         char *altdomain = args[1];
         char *lower = g_utf8_strdown(user, -1);
+        char *jid;
 
         status_bar_get_password();
         status_bar_refresh();
@@ -918,17 +919,28 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
         inp_get_password(passwd);
         inp_non_block();
 
-        log_debug("Connecting as %s", lower);
+        ProfAccount *account = accounts_get_account(lower);
+        if (account != NULL) {
+            jid = strdup(account->jid);
+            log_debug("Connecting as %s", jid);
+            conn_status = jabber_connect_with_account(account, passwd);
+        } else {
+            jid = strdup(lower);
+            log_debug("Connecting as %s", jid);
+            conn_status = jabber_connect(jid, passwd, altdomain);
+        }
 
-        conn_status = jabber_connect(lower, passwd, altdomain);
         if (conn_status == JABBER_CONNECTING) {
             cons_show("Connecting...");
             log_debug("Connecting...");
         }
         if (conn_status == JABBER_DISCONNECTED) {
             cons_bad_show("Connection to server failed.");
-            log_debug("Connection using %s failed", lower);
+            log_debug("Connection for %s failed", jid);
         }
+
+        accounts_free_account(account);
+        free(jid);
 
         result = TRUE;
     }

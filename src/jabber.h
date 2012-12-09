@@ -23,6 +23,8 @@
 #ifndef JABBER_H
 #define JABBER_H
 
+#include "accounts.h"
+
 typedef enum {
     JABBER_STARTED,
     JABBER_CONNECTING,
@@ -49,6 +51,8 @@ typedef enum {
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect(const char * const user,
     const char * const passwd, const char * const altdomain);
+jabber_conn_status_t jabber_connect_with_account(ProfAccount *account,
+    const char * const passwd);
 void jabber_disconnect(void);
 void jabber_process_events(void);
 void jabber_join(const char * const room, const char * const nick);

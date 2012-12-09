@@ -190,6 +190,22 @@ prof_handle_subscription(const char *from, jabber_subscr_t type)
 }
 
 void
+prof_handle_login_account_success(char *account_name)
+{
+    ProfAccount *account = accounts_get_account(account_name);
+
+    const char *msg = "logged in successfully.";
+    cons_show("%s %s", account->jid, msg);
+    title_bar_set_status(PRESENCE_ONLINE);
+    log_info("%s %s", account->jid, msg);
+    win_current_page_off();
+    status_bar_print_message(account->jid);
+    status_bar_refresh();
+
+    accounts_free_account(account);
+}
+
+void
 prof_handle_login_success(const char *jid, const char *altdomain)
 {
     const char *msg = "logged in successfully.";
@@ -199,6 +215,7 @@ prof_handle_login_success(const char *jid, const char *altdomain)
     win_current_page_off();
     status_bar_print_message(jid);
     status_bar_refresh();
+
     accounts_add_login(jid, altdomain);
 }
 

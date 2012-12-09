@@ -24,6 +24,8 @@
 #include <string.h>
 
 #include <glib.h>
+
+#include "accounts.h"
 #include "files.h"
 #include "log.h"
 #include "prof_autocomplete.h"
@@ -106,6 +108,54 @@ gchar**
 accounts_get_list(void)
 {
     return g_key_file_get_groups(accounts, NULL);
+}
+
+ProfAccount*
+accounts_get_account(const char * const name)
+{
+    if (!g_key_file_has_group(accounts, name)) {
+        return NULL;
+    } else {
+        ProfAccount *account = malloc(sizeof(ProfAccount));
+        account->name = strdup(name);
+        gchar *jid = g_key_file_get_string(accounts, name, "jid", NULL);
+        if (jid != NULL) {
+            account->jid = strdup(jid);
+        } else {
+            account->jid = strdup(name);
+            g_key_file_set_string(accounts, name, "jid", name);
+            _save_accounts();
+        }
+        account->enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
+        gchar *server = g_key_file_get_string(accounts, name, "server", NULL);
+        if (server != NULL) {
+            account->server = strdup(server);
+        } else {
+            account->server = NULL;
+        }
+
+        return account;
+    }
+}
+
+void
+accounts_free_account(ProfAccount *account)
+{
+    if (account != NULL) {
+        if (account->name != NULL) {
+            free(account->name);
+            account->name = NULL;
+        }
+        if (account->jid != NULL) {
+            free(account->jid);
+            account->jid = NULL;
+        }
+        if (account->server != NULL) {
+            free(account->server);
+            account->server = NULL;
+        }
+        account = NULL;
+    }
 }
 
 static void

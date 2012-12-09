@@ -47,6 +47,7 @@ static struct _jabber_conn_t {
 } jabber_conn;
 
 // for auto reconnect
+static char *saved_account;
 static char *saved_user;
 static char *saved_password;
 static char *saved_altdomain;
@@ -100,6 +101,46 @@ jabber_restart(void)
     if (jabber_conn.status != NULL)
         free(jabber_conn.status);
     jabber_conn.status = NULL;
+}
+
+jabber_conn_status_t
+jabber_connect_with_account(ProfAccount *account, const char * const passwd)
+{
+    saved_account = strdup(account->name);
+    if (saved_user == NULL) {
+        saved_user = strdup(account->jid);
+    }
+    if (saved_password == NULL) {
+        saved_password = strdup(passwd);
+    }
+    if (saved_altdomain == NULL) {
+        if (account->server != NULL) {
+            saved_altdomain = strdup(account->server);
+        }
+    }
+
+    log_info("Connecting with account:%s, jid: %s", account->name, account->jid);
+    xmpp_initialize();
+
+    jabber_conn.log = _xmpp_get_file_logger();
+    jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
+    jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
+
+    xmpp_conn_set_jid(jabber_conn.conn, account->jid);
+    xmpp_conn_set_pass(jabber_conn.conn, passwd);
+
+    if (jabber_conn.tls_disabled)
+        xmpp_conn_disable_tls(jabber_conn.conn);
+
+    int connect_status = xmpp_connect_client(jabber_conn.conn, account->server, 0,
+        _connection_handler, jabber_conn.ctx);
+
+    if (connect_status == 0)
+        jabber_conn.conn_status = JABBER_CONNECTING;
+    else
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
+
+    return jabber_conn.conn_status;
 }
 
 jabber_conn_status_t
@@ -697,8 +738,13 @@ _connection_handler(xmpp_conn_t * const conn,
 
     // login success
     if (status == XMPP_CONN_CONNECT) {
-        const char *jid = xmpp_conn_get_jid(conn);
-        prof_handle_login_success(jid, saved_altdomain);
+        if (saved_account != NULL) {
+            prof_handle_login_account_success(saved_account);
+        } else {
+            const char *jid = xmpp_conn_get_jid(conn);
+            prof_handle_login_success(jid, saved_altdomain);
+        }
+
         chat_sessions_init();
 
         xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);

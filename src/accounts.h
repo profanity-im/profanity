@@ -23,6 +23,13 @@
 #ifndef ACCOUNTS_H
 #define ACCOUNTS_H
 
+typedef struct prof_account_t {
+    gchar *name;
+    gchar *jid;
+    gchar *server;
+    gboolean enabled;
+} ProfAccount;
+
 void accounts_load(void);
 void accounts_close(void);
 
@@ -30,5 +37,7 @@ char * accounts_find_login(char *prefix);
 void accounts_reset_login_search(void);
 void accounts_add_login(const char *jid, const char *altdomain);
 gchar** accounts_get_list(void);
+ProfAccount* accounts_get_account(const char * const name);
+void accounts_free_account(ProfAccount *account);
 
 #endif
