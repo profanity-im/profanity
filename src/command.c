@@ -78,6 +78,7 @@ static void _notify_autocomplete(char *input, int *size);
 static void _titlebar_autocomplete(char *input, int *size);
 static void _theme_autocomplete(char *input, int *size);
 static void _autoaway_autocomplete(char *input, int *size);
+static void _account_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
 static void _parameter_autocomplete_with_ac(char *input, int *size, char *command,
@@ -593,6 +594,7 @@ static PAutocomplete autoaway_mode_ac;
 static PAutocomplete titlebar_ac;
 static PAutocomplete theme_ac;
 static PAutocomplete theme_load_ac;
+static PAutocomplete account_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -654,6 +656,14 @@ cmd_init(void)
     p_autocomplete_add(theme_ac, strdup("list"));
     p_autocomplete_add(theme_ac, strdup("set"));
 
+    account_ac = p_autocomplete_new();
+    p_autocomplete_add(account_ac, strdup("list"));
+    p_autocomplete_add(account_ac, strdup("show"));
+    p_autocomplete_add(account_ac, strdup("new"));
+    p_autocomplete_add(account_ac, strdup("enable"));
+    p_autocomplete_add(account_ac, strdup("disable"));
+    p_autocomplete_add(account_ac, strdup("set"));
+
     theme_load_ac = NULL;
 
     unsigned int i;
@@ -699,6 +709,7 @@ cmd_close(void)
     if (theme_load_ac != NULL) {
         p_autocomplete_clear(theme_load_ac);
     }
+    p_autocomplete_clear(account_ac);
 }
 
 // Command autocompletion functions
@@ -751,6 +762,7 @@ cmd_reset_autocomplete()
         p_autocomplete_reset(theme_load_ac);
         theme_load_ac = NULL;
     }
+    p_autocomplete_reset(account_ac);
 }
 
 GSList *
@@ -892,6 +904,7 @@ _cmd_complete_parameters(char *input, int *size)
     _autoaway_autocomplete(input, size);
     _titlebar_autocomplete(input, size);
     _theme_autocomplete(input, size);
+    _account_autocomplete(input, size);
 }
 
 // The command functions
@@ -963,11 +976,27 @@ _cmd_account(gchar **args, struct cmd_help_t help)
             for (i = 0; i < size; i++) {
                 cons_show(accounts[i]);
             }
+            cons_show("");
         } else {
             cons_show("No accounts created yet.");
+            cons_show("");
         }
+    } else if (strcmp(command, "show") == 0) {
+        char *account_name = args[1];
+        if (account_name == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            ProfAccount *account = accounts_get_account(account_name);
+            if (account == NULL) {
+                cons_show("No such account.");
+            } else {
+                cons_show_account(account);
+                accounts_free_account(account);
+            }
+        }
+    } else {
+        cons_show("");
     }
-    cons_show("");
 
     return TRUE;
 }
@@ -2104,6 +2133,16 @@ _theme_autocomplete(char *input, int *size)
         _parameter_autocomplete_with_ac(input, size, "/theme set", theme_load_ac);
     } else if ((strncmp(input, "/theme ", 7) == 0) && (*size > 7)) {
         _parameter_autocomplete_with_ac(input, size, "/theme", theme_ac);
+    }
+}
+
+static void
+_account_autocomplete(char *input, int *size)
+{
+    if ((strncmp(input, "/account show ", 14) == 0) && (*size > 14)) {
+        _parameter_autocomplete(input, size, "/account show", accounts_find_login);
+    } else if ((strncmp(input, "/account ", 9) == 0) && (*size > 9)) {
+        _parameter_autocomplete_with_ac(input, size, "/account", account_ac);
     }
 }
 

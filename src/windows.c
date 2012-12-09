@@ -1137,6 +1137,22 @@ cons_show_status(const char * const contact)
 }
 
 void
+cons_show_account(ProfAccount *account)
+{
+    cons_show("%s account details:", account->name);
+    cons_show("jid     : %s", account->jid);
+    if (account->enabled) {
+        cons_show("enabled : TRUE");
+    } else {
+        cons_show("enabled : FALSE");
+    }
+    if (account->server != NULL) {
+        cons_show("server  : %s", account->server);
+    }
+    cons_show("");
+}
+
+void
 cons_show_ui_prefs(void)
 {
     cons_show("UI preferences:");

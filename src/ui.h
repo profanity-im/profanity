@@ -144,6 +144,7 @@ void cons_show_chat_prefs(void);
 void cons_show_log_prefs(void);
 void cons_show_presence_prefs(void);
 void cons_show_connection_prefs(void);
+void cons_show_account(ProfAccount *account);
 void cons_bad_command(const char * const cmd);
 void cons_show(const char * const cmd, ...);
 void cons_show_time(void);
