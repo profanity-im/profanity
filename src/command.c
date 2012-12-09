@@ -93,6 +93,7 @@ static gboolean _cmd_about(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_prefs(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_who(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_connect(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_account(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_disconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_sub(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_msg(gchar **args, struct cmd_help_t help);
@@ -173,6 +174,30 @@ static struct cmd_t main_commands[] =
         { "/disconnect",
           "------------------",
           "Disconnect from the current session session.",
+          NULL  } } },
+
+    { "/account",
+        _cmd_account, parse_args, 1, 4,
+        { "/account command [account] [property] [value]", "Manage accounts.",
+        { "/account command [account] [property] [value]",
+          "---------------------------------------------",
+          "Commands for creating and managing accounts.",
+          "list                       : List all accounts.",
+          "show account               : Show information about an account.",
+          "enable account             : Enable the account, so it is used for autocomplete.",
+          "disable account            : Disable the account.",
+          "new account                : Create a new account.",
+          "set account property value : Set 'property' of 'account' to 'value'.",
+          "",
+          "The 'property' may be one of.",
+          "jid    : The Jabber ID of the account, the account name will be used if this property is not set.",
+          "server : The chat service server, if different to the domain part of the JID.",
+          "",
+          "Example : /account new work",
+          "        : /account set work jid myuser@mycompany.com",
+          "        : /account set work server talk.google.com",
+          "",
+          "To log in to this account: '/connect work'",
           NULL  } } },
 
     { "/prefs",
@@ -909,6 +934,30 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
     }
 
     return result;
+}
+
+static gboolean
+_cmd_account(gchar **args, struct cmd_help_t help)
+{
+    char *command = args[0];
+
+    if (strcmp(command, "list") == 0) {
+        gchar **accounts = accounts_get_list();
+        int size = g_strv_length(accounts);
+
+        if (size > 0) {
+            cons_show("Accounts:");
+            int i = 0;
+            for (i = 0; i < size; i++) {
+                cons_show(accounts[i]);
+            }
+        } else {
+            cons_show("No accounts created yet.");
+        }
+    }
+    cons_show("");
+
+    return TRUE;
 }
 
 static gboolean

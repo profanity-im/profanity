@@ -29,5 +29,6 @@ void accounts_close(void);
 char * accounts_find_login(char *prefix);
 void accounts_reset_login_search(void);
 void accounts_add_login(const char *jid, const char *altdomain);
+gchar** accounts_get_list(void);
 
 #endif
