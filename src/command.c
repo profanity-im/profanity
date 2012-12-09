@@ -76,6 +76,7 @@ static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
 static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
 static void _titlebar_autocomplete(char *input, int *size);
+static void _theme_autocomplete(char *input, int *size);
 static void _autoaway_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
@@ -638,6 +639,8 @@ static PAutocomplete log_ac;
 static PAutocomplete autoaway_ac;
 static PAutocomplete autoaway_mode_ac;
 static PAutocomplete titlebar_ac;
+static PAutocomplete theme_ac;
+static PAutocomplete theme_load_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -695,6 +698,12 @@ cmd_init(void)
     p_autocomplete_add(autoaway_mode_ac, strdup("idle"));
     p_autocomplete_add(autoaway_mode_ac, strdup("off"));
 
+    theme_ac = p_autocomplete_new();
+    p_autocomplete_add(theme_ac, strdup("list"));
+    p_autocomplete_add(theme_ac, strdup("load"));
+
+    theme_load_ac = NULL;
+
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
         struct cmd_t *pcmd = main_commands+i;
@@ -734,6 +743,10 @@ cmd_close(void)
     p_autocomplete_clear(prefs_ac);
     p_autocomplete_clear(autoaway_ac);
     p_autocomplete_clear(autoaway_mode_ac);
+    p_autocomplete_clear(theme_ac);
+    if (theme_load_ac != NULL) {
+        p_autocomplete_clear(theme_load_ac);
+    }
 }
 
 // Command autocompletion functions
@@ -781,6 +794,11 @@ cmd_reset_autocomplete()
     p_autocomplete_reset(commands_ac);
     p_autocomplete_reset(autoaway_ac);
     p_autocomplete_reset(autoaway_mode_ac);
+    p_autocomplete_reset(theme_ac);
+    if (theme_load_ac != NULL) {
+        p_autocomplete_clear(theme_load_ac);
+        theme_load_ac = NULL;
+    }
 }
 
 GSList *
@@ -921,6 +939,7 @@ _cmd_complete_parameters(char *input, int *size)
     _notify_autocomplete(input, size);
     _autoaway_autocomplete(input, size);
     _titlebar_autocomplete(input, size);
+    _theme_autocomplete(input, size);
 }
 
 // The command functions
@@ -1236,7 +1255,9 @@ _cmd_theme(gchar **args, struct cmd_help_t help)
 
     // load a theme
     } else if (strcmp(args[0], "load") == 0) {
-        if (theme_load(args[1])) {
+        if (args[1] == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else if (theme_load(args[1])) {
             ui_load_colours();
             prefs_set_theme(args[1]);
             cons_show("Loaded theme: %s", args[1]);
@@ -2075,6 +2096,25 @@ _autoaway_autocomplete(char *input, int *size)
         }
     } else if ((strncmp(input, "/autoaway ", 10) == 0) && (*size > 10)) {
         _parameter_autocomplete_with_ac(input, size, "/autoaway", autoaway_ac);
+    }
+}
+
+static void
+_theme_autocomplete(char *input, int *size)
+{
+    if ((strncmp(input, "/theme load ", 12) == 0) && (*size > 12)) {
+        if (theme_load_ac == NULL) {
+            theme_load_ac = p_autocomplete_new();
+            GSList *themes = theme_list();
+            while (themes != NULL) {
+                p_autocomplete_add(theme_load_ac, strdup(themes->data));
+                themes = g_slist_next(themes);
+            }
+            g_slist_free(themes);
+         }
+        _parameter_autocomplete_with_ac(input, size, "/theme load", theme_load_ac);
+    } else if ((strncmp(input, "/theme ", 7) == 0) && (*size > 7)) {
+        _parameter_autocomplete_with_ac(input, size, "/theme", theme_ac);
     }
 }
 
