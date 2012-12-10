@@ -187,7 +187,7 @@ static struct cmd_t main_commands[] =
           "show account               : Show information about an account.",
           "enable account             : Enable the account, so it is used for autocomplete.",
           "disable account            : Disable the account.",
-          "new account                : Create a new account.",
+          "add account                : Create a new account.",
           "rename account newname     : Rename account to newname.",
           "set account property value : Set 'property' of 'account' to 'value'.",
           "",
@@ -195,7 +195,7 @@ static struct cmd_t main_commands[] =
           "jid    : The Jabber ID of the account, the account name will be used if this property is not set.",
           "server : The chat service server, if different to the domain part of the JID.",
           "",
-          "Example : /account new work",
+          "Example : /account add work",
           "        : /account set work jid myuser@mycompany.com",
           "        : /account set work server talk.google.com",
           "        : /account rename work gtalk",
@@ -661,7 +661,7 @@ cmd_init(void)
     account_ac = p_autocomplete_new();
     p_autocomplete_add(account_ac, strdup("list"));
     p_autocomplete_add(account_ac, strdup("show"));
-    p_autocomplete_add(account_ac, strdup("new"));
+    p_autocomplete_add(account_ac, strdup("add"));
     p_autocomplete_add(account_ac, strdup("enable"));
     p_autocomplete_add(account_ac, strdup("disable"));
     p_autocomplete_add(account_ac, strdup("rename"));
@@ -999,7 +999,7 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                 accounts_free_account(account);
             }
         }
-    } else if (strcmp(command, "new") == 0) {
+    } else if (strcmp(command, "add") == 0) {
         char *account_name = args[1];
         if (account_name == NULL) {
             cons_show("Usage: %s", help.usage);
