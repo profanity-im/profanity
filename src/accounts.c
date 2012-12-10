@@ -33,7 +33,8 @@
 static gchar *accounts_loc;
 static GKeyFile *accounts;
 
-static PAutocomplete login_ac;
+static PAutocomplete all_ac;
+static PAutocomplete enabled_ac;
 
 static void _save_accounts(void);
 
@@ -41,7 +42,8 @@ void
 accounts_load(void)
 {
     log_info("Loading accounts");
-    login_ac = p_autocomplete_new();
+    all_ac = p_autocomplete_new();
+    enabled_ac = p_autocomplete_new();
     accounts_loc = files_get_accounts_file();
 
     accounts = g_key_file_new();
@@ -55,7 +57,10 @@ accounts_load(void)
 
     gsize i;
     for (i = 0; i < njids; i++) {
-        p_autocomplete_add(login_ac, strdup(jids[i]));
+        if (g_key_file_get_boolean(accounts, jids[i], "enabled", NULL)) {
+            p_autocomplete_add(enabled_ac, strdup(jids[i]));
+        }
+        p_autocomplete_add(all_ac, strdup(jids[i]));
     }
 
     for (i = 0; i < njids; i++) {
@@ -67,20 +72,33 @@ accounts_load(void)
 void
 accounts_close(void)
 {
-    p_autocomplete_clear(login_ac);
+    p_autocomplete_clear(all_ac);
+    p_autocomplete_clear(enabled_ac);
     g_key_file_free(accounts);
 }
 
 char *
-accounts_find_login(char *prefix)
+accounts_find_enabled(char *prefix)
 {
-    return p_autocomplete_complete(login_ac, prefix);
+    return p_autocomplete_complete(enabled_ac, prefix);
+}
+
+char *
+accounts_find_all(char *prefix)
+{
+    return p_autocomplete_complete(all_ac, prefix);
 }
 
 void
-accounts_reset_login_search(void)
+accounts_reset_all_search(void)
 {
-    p_autocomplete_reset(login_ac);
+    p_autocomplete_reset(all_ac);
+}
+
+void
+accounts_reset_enabled_search(void)
+{
+    p_autocomplete_reset(enabled_ac);
 }
 
 void
@@ -95,7 +113,8 @@ accounts_add_login(const char *jid, const char *altdomain)
         }
 
         _save_accounts();
-        p_autocomplete_add(login_ac, strdup(jid));
+        p_autocomplete_add(all_ac, strdup(jid));
+        p_autocomplete_add(enabled_ac, strdup(jid));
 
     // already exists, update old style accounts
     } else {
@@ -165,6 +184,7 @@ accounts_enable(const char * const name)
     if (g_key_file_has_group(accounts, name)) {
         g_key_file_set_boolean(accounts, name, "enabled", TRUE);
         _save_accounts();
+        p_autocomplete_add(enabled_ac, strdup(name));
         return TRUE;
     } else {
         return FALSE;
@@ -177,6 +197,7 @@ accounts_disable(const char * const name)
     if (g_key_file_has_group(accounts, name)) {
         g_key_file_set_boolean(accounts, name, "enabled", FALSE);
         _save_accounts();
+        p_autocomplete_remove(enabled_ac, strdup(name));
         return TRUE;
     } else {
         return FALSE;
@@ -212,8 +233,12 @@ accounts_rename(const char * const account_name, const char * const new_name)
     g_key_file_remove_group(accounts, account_name, NULL);
     _save_accounts();
 
-    p_autocomplete_remove(login_ac, strdup(account_name));
-    p_autocomplete_add(login_ac, strdup(new_name));
+    p_autocomplete_remove(all_ac, strdup(account_name));
+    p_autocomplete_add(all_ac, strdup(new_name));
+    if (g_key_file_get_boolean(accounts, new_name, "enabled", NULL)) {
+        p_autocomplete_remove(enabled_ac, strdup(account_name));
+        p_autocomplete_add(enabled_ac, strdup(new_name));
+    }
 
     return TRUE;
 }

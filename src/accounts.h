@@ -33,8 +33,10 @@ typedef struct prof_account_t {
 void accounts_load(void);
 void accounts_close(void);
 
-char * accounts_find_login(char *prefix);
-void accounts_reset_login_search(void);
+char * accounts_find_all(char *prefix);
+char * accounts_find_enabled(char *prefix);
+void accounts_reset_all_search(void);
+void accounts_reset_enabled_search(void);
 void accounts_add_login(const char *jid, const char *altdomain);
 gchar** accounts_get_list(void);
 ProfAccount* accounts_get_account(const char * const name);

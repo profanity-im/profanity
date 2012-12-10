@@ -749,7 +749,8 @@ void
 cmd_reset_autocomplete()
 {
     contact_list_reset_search_attempts();
-    accounts_reset_login_search();
+    accounts_reset_all_search();
+    accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
     p_autocomplete_reset(help_ac);
     p_autocomplete_reset(notify_ac);
@@ -896,7 +897,7 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/info",
         contact_list_find_contact);
     _parameter_autocomplete(input, size, "/connect",
-        accounts_find_login);
+        accounts_find_enabled);
     _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
     _parameter_autocomplete_with_ac(input, size, "/help", help_ac);
     _parameter_autocomplete_with_ac(input, size, "/who", who_ac);
@@ -2220,15 +2221,15 @@ static void
 _account_autocomplete(char *input, int *size)
 {
     if ((strncmp(input, "/account set ", 13) == 0) && (*size > 13)) {
-        _parameter_autocomplete(input, size, "/account set", accounts_find_login);
+        _parameter_autocomplete(input, size, "/account set", accounts_find_all);
     } else if ((strncmp(input, "/account show ", 14) == 0) && (*size > 14)) {
-        _parameter_autocomplete(input, size, "/account show", accounts_find_login);
+        _parameter_autocomplete(input, size, "/account show", accounts_find_all);
     } else if ((strncmp(input, "/account enable ", 16) == 0) && (*size > 16)) {
-        _parameter_autocomplete(input, size, "/account enable", accounts_find_login);
+        _parameter_autocomplete(input, size, "/account enable", accounts_find_all);
     } else if ((strncmp(input, "/account disable ", 17) == 0) && (*size > 17)) {
-        _parameter_autocomplete(input, size, "/account disable", accounts_find_login);
+        _parameter_autocomplete(input, size, "/account disable", accounts_find_all);
     } else if ((strncmp(input, "/account rename ", 16) == 0) && (*size > 16)) {
-        _parameter_autocomplete(input, size, "/account rename", accounts_find_login);
+        _parameter_autocomplete(input, size, "/account rename", accounts_find_all);
     } else if ((strncmp(input, "/account ", 9) == 0) && (*size > 9)) {
         _parameter_autocomplete_with_ac(input, size, "/account", account_ac);
     }
