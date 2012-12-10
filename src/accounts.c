@@ -218,6 +218,31 @@ accounts_rename(const char * const account_name, const char * const new_name)
     return TRUE;
 }
 
+gboolean
+accounts_account_exists(const char * const account_name)
+{
+    return g_key_file_has_group(accounts, account_name);
+
+}
+
+void
+accounts_set_jid(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "jid", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_server(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "server", value);
+        _save_accounts();
+    }
+}
+
 static void
 _save_accounts(void)
 {

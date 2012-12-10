@@ -1048,6 +1048,32 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                 cons_show("");
             }
         }
+    } else if (strcmp(command, "set") == 0) {
+        if (g_strv_length(args) != 4) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            char *account_name = args[1];
+            char *property = args[2];
+            char *value = args[3];
+
+            if (!accounts_account_exists(account_name)) {
+                cons_show("Account %s doesn't exist");
+                cons_show("");
+            } else {
+                if (strcmp(property, "jid") == 0) {
+                    accounts_set_jid(account_name, value);
+                    cons_show("Updated jid for account %s: %s", account_name, value);
+                    cons_show("");
+                } else if (strcmp(property, "server") == 0) {
+                    accounts_set_server(account_name, value);
+                    cons_show("Updated server for account %s: %s", account_name, value);
+                    cons_show("");
+                } else {
+                    cons_show("Invalid property: %s", property);
+                    cons_show("");
+                }
+            }
+        }
     } else {
         cons_show("");
     }
