@@ -2219,7 +2219,9 @@ _theme_autocomplete(char *input, int *size)
 static void
 _account_autocomplete(char *input, int *size)
 {
-    if ((strncmp(input, "/account show ", 14) == 0) && (*size > 14)) {
+    if ((strncmp(input, "/account set ", 13) == 0) && (*size > 13)) {
+        _parameter_autocomplete(input, size, "/account set", accounts_find_login);
+    } else if ((strncmp(input, "/account show ", 14) == 0) && (*size > 14)) {
         _parameter_autocomplete(input, size, "/account show", accounts_find_login);
     } else if ((strncmp(input, "/account enable ", 16) == 0) && (*size > 16)) {
         _parameter_autocomplete(input, size, "/account enable", accounts_find_login);
