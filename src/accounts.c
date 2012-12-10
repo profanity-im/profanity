@@ -95,6 +95,7 @@ accounts_add_login(const char *jid, const char *altdomain)
         }
 
         _save_accounts();
+        p_autocomplete_add(login_ac, strdup(jid));
 
     // already exists, update old style accounts
     } else {
@@ -156,6 +157,65 @@ accounts_free_account(ProfAccount *account)
         }
         account = NULL;
     }
+}
+
+gboolean
+accounts_enable(const char * const name)
+{
+    if (g_key_file_has_group(accounts, name)) {
+        g_key_file_set_boolean(accounts, name, "enabled", TRUE);
+        _save_accounts();
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+accounts_disable(const char * const name)
+{
+    if (g_key_file_has_group(accounts, name)) {
+        g_key_file_set_boolean(accounts, name, "enabled", FALSE);
+        _save_accounts();
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+accounts_rename(const char * const account_name, const char * const new_name)
+{
+    if (g_key_file_has_group(accounts, new_name)) {
+        return FALSE;
+    }
+
+    if (!g_key_file_has_group(accounts, account_name)) {
+        return FALSE;
+    }
+
+    g_key_file_set_boolean(accounts, new_name, "enabled",
+        g_key_file_get_boolean(accounts, account_name, "enabled", NULL));
+
+    char *jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
+    if (jid != NULL) {
+        g_key_file_set_string(accounts, new_name, "jid", jid);
+        free(jid);
+    }
+
+    char *server = g_key_file_get_string(accounts, account_name, "server", NULL);
+    if (server != NULL) {
+        g_key_file_set_string(accounts, new_name, "server", server);
+        free(server);
+    }
+
+    g_key_file_remove_group(accounts, account_name, NULL);
+    _save_accounts();
+
+    p_autocomplete_remove(login_ac, strdup(account_name));
+    p_autocomplete_add(login_ac, strdup(new_name));
+
+    return TRUE;
 }
 
 static void

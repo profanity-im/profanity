@@ -39,5 +39,9 @@ void accounts_add_login(const char *jid, const char *altdomain);
 gchar** accounts_get_list(void);
 ProfAccount* accounts_get_account(const char * const name);
 void accounts_free_account(ProfAccount *account);
+gboolean accounts_enable(const char * const name);
+gboolean accounts_disable(const char * const name);
+gboolean accounts_rename(const char * const account_name,
+    const char * const new_name);
 
 #endif

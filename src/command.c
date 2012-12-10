@@ -188,6 +188,7 @@ static struct cmd_t main_commands[] =
           "enable account             : Enable the account, so it is used for autocomplete.",
           "disable account            : Disable the account.",
           "new account                : Create a new account.",
+          "rename account newname     : Rename account to newname.",
           "set account property value : Set 'property' of 'account' to 'value'.",
           "",
           "The 'property' may be one of.",
@@ -197,8 +198,9 @@ static struct cmd_t main_commands[] =
           "Example : /account new work",
           "        : /account set work jid myuser@mycompany.com",
           "        : /account set work server talk.google.com",
+          "        : /account rename work gtalk",
           "",
-          "To log in to this account: '/connect work'",
+          "To log in to this account: '/connect gtalk'",
           NULL  } } },
 
     { "/prefs",
@@ -662,6 +664,7 @@ cmd_init(void)
     p_autocomplete_add(account_ac, strdup("new"));
     p_autocomplete_add(account_ac, strdup("enable"));
     p_autocomplete_add(account_ac, strdup("disable"));
+    p_autocomplete_add(account_ac, strdup("rename"));
     p_autocomplete_add(account_ac, strdup("set"));
 
     theme_load_ac = NULL;
@@ -989,9 +992,60 @@ _cmd_account(gchar **args, struct cmd_help_t help)
             ProfAccount *account = accounts_get_account(account_name);
             if (account == NULL) {
                 cons_show("No such account.");
+                cons_show("");
             } else {
                 cons_show_account(account);
                 accounts_free_account(account);
+            }
+        }
+    } else if (strcmp(command, "new") == 0) {
+        char *account_name = args[1];
+        if (account_name == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            accounts_add_login(account_name, NULL);
+            cons_show("Account created.");
+            cons_show("");
+        }
+    } else if (strcmp(command, "enable") == 0) {
+        char *account_name = args[1];
+        if (account_name == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            if (accounts_enable(account_name)) {
+                cons_show("Account enabled.");
+                cons_show("");
+            } else {
+                cons_show("No such account: %s", account_name);
+                cons_show("");
+            }
+        }
+    } else if (strcmp(command, "disable") == 0) {
+        char *account_name = args[1];
+        if (account_name == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            if (accounts_disable(account_name)) {
+                cons_show("Account disabled.");
+                cons_show("");
+            } else {
+                cons_show("No such account: %s", account_name);
+                cons_show("");
+            }
+        }
+    } else if (strcmp(command, "rename") == 0) {
+        if (g_strv_length(args) != 3) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            char *account_name = args[1];
+            char *new_name = args[2];
+
+            if (accounts_rename(account_name, new_name)) {
+                cons_show("Account renamed.");
+                cons_show("");
+            } else {
+                cons_show("Either account %s doesn't exist, or account %s already exists.", account_name, new_name);
+                cons_show("");
             }
         }
     } else {
@@ -2141,6 +2195,12 @@ _account_autocomplete(char *input, int *size)
 {
     if ((strncmp(input, "/account show ", 14) == 0) && (*size > 14)) {
         _parameter_autocomplete(input, size, "/account show", accounts_find_login);
+    } else if ((strncmp(input, "/account enable ", 16) == 0) && (*size > 16)) {
+        _parameter_autocomplete(input, size, "/account enable", accounts_find_login);
+    } else if ((strncmp(input, "/account disable ", 17) == 0) && (*size > 17)) {
+        _parameter_autocomplete(input, size, "/account disable", accounts_find_login);
+    } else if ((strncmp(input, "/account rename ", 16) == 0) && (*size > 16)) {
+        _parameter_autocomplete(input, size, "/account rename", accounts_find_login);
     } else if ((strncmp(input, "/account ", 9) == 0) && (*size > 9)) {
         _parameter_autocomplete_with_ac(input, size, "/account", account_ac);
     }
