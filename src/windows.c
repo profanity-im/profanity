@@ -106,13 +106,11 @@ static void _win_show_history(WINDOW *win, int win_index,
 static gboolean _new_release(char *found_version);
 static void _ui_draw_win_title(void);
 
-#ifdef HAVE_LIBNOTIFY
 static void _notify(const char * const message, int timeout,
     const char * const category);
 static void _notify_remind(gint unread);
 static void _notify_message(const char * const short_from);
 static void _notify_typing(const char * const from);
-#endif
 
 void
 ui_init(void)
@@ -288,10 +286,8 @@ ui_show_typing(const char * const from)
        }
     }
 
-#ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify_typing())
         _notify_typing(from);
-#endif
 }
 
 void
@@ -440,10 +436,8 @@ ui_show_incoming_msg(const char * const from, const char * const message,
 
     if (prefs_get_beep())
         beep();
-#ifdef HAVE_LIBNOTIFY
     if (prefs_get_notify_message())
         _notify_message(from);
-#endif
 }
 
 void
@@ -1022,11 +1016,9 @@ win_show_room_message(const char * const room_jid, const char * const nick,
         if (prefs_get_beep()) {
             beep();
         }
-#ifdef HAVE_LIBNOTIFY
         if (prefs_get_notify_message()) {
             _notify_message(nick);
         }
-#endif
     }
 }
 
@@ -1658,19 +1650,17 @@ cons_check_version(gboolean not_available_msg)
 void
 notify_remind(void)
 {
-#ifdef HAVE_LIBNOTIFY
     gint unread = _win_get_unread();
     if (unread > 0) {
         _notify_remind(unread);
     }
-#endif
 }
 
-#ifdef HAVE_LIBNOTIFY
 static void
 _notify(const char * const message, int timeout,
     const char * const category)
 {
+#ifdef HAVE_LIBNOTIFY
     gboolean notify_initted = notify_is_initted();
 
     if (!notify_initted) {
@@ -1695,6 +1685,7 @@ _notify(const char * const message, int timeout,
     } else {
         log_error("Libnotify initialisation error.");
     }
+#endif
 }
 
 static void
@@ -1727,7 +1718,6 @@ _notify_typing(const char * const from)
 
     _notify(message, 10000, "Incoming message");
 }
-#endif
 
 static void
 _create_windows(void)
