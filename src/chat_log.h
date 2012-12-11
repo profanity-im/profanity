@@ -26,8 +26,8 @@
 #include <glib.h>
 
 typedef enum {
-    IN,
-    OUT
+    PROF_IN_LOG,
+    PROF_OUT_LOG
 } chat_log_direction_t;
 
 void chat_log_init(void);

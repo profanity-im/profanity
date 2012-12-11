@@ -127,7 +127,7 @@ prof_handle_incoming_message(char *from, char *message, gboolean priv)
         char *short_from = strtok(from_cpy, "/");
         const char *jid = jabber_get_jid();
 
-        chat_log_chat(jid, short_from, message, IN, NULL);
+        chat_log_chat(jid, short_from, message, PROF_IN_LOG, NULL);
     }
 }
 
@@ -144,7 +144,7 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
         char *short_from = strtok(from_cpy, "/");
         const char *jid = jabber_get_jid();
 
-        chat_log_chat(jid, short_from, message, IN, &tv_stamp);
+        chat_log_chat(jid, short_from, message, PROF_IN_LOG, &tv_stamp);
     }
 }
 
