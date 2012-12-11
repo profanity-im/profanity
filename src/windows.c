@@ -70,6 +70,8 @@ static int dirty;
 // max columns for main windows, never resize below
 static int max_cols = 0;
 
+static char *win_title;
+
 #ifdef HAVE_LIBXSS
 static Display *display;
 #endif
@@ -102,6 +104,7 @@ static gint _win_get_unread(void);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static gboolean _new_release(char *found_version);
+static void _ui_draw_win_title(void);
 
 #ifdef HAVE_LIBNOTIFY
 static void _notify(const char * const message, int timeout,
@@ -137,6 +140,24 @@ ui_init(void)
 void
 ui_refresh(void)
 {
+    _ui_draw_win_title();
+
+    title_bar_refresh();
+    status_bar_refresh();
+
+    if (dirty) {
+        _current_window_refresh();
+        dirty = FALSE;
+    }
+
+    inp_put_back();
+}
+
+static void
+_ui_draw_win_title(void)
+{
+    char new_win_title[100];
+
     GString *version_str = g_string_new("");
 
     if (prefs_get_titlebarversion()) {
@@ -154,25 +175,24 @@ ui_refresh(void)
         gint unread = _win_get_unread();
 
         if (unread != 0) {
-            printf("%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
+            sprintf(new_win_title, "%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
         } else {
-            printf("%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
+            sprintf(new_win_title, "%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
         }
     } else {
-        printf("%c]0;%s%s%c", '\033', "Profanity", version_str->str, '\007');
+        sprintf(new_win_title, "%c]0;%s%s%c", '\033', "Profanity", version_str->str, '\007');
     }
 
     g_string_free(version_str, TRUE);
 
-    title_bar_refresh();
-    status_bar_refresh();
-
-    if (dirty) {
-        _current_window_refresh();
-        dirty = FALSE;
+    // draw if change
+    if (g_strcmp0(win_title, new_win_title) != 0) {
+        printf(new_win_title);
+        if (win_title != NULL) {
+            free(win_title);
+        }
+        win_title = strdup(new_win_title);
     }
-
-    inp_put_back();
 }
 
 unsigned long
