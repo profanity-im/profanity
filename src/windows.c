@@ -30,9 +30,14 @@
 #endif
 
 #include <glib.h>
+
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
+#ifdef PLATFORM_CYGWIN
+#include <windows.h>
+#endif
+
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
@@ -1685,6 +1690,27 @@ _notify(const char * const message, int timeout,
     } else {
         log_error("Libnotify initialisation error.");
     }
+#endif
+#ifdef PLATFORM_CYGWIN
+    NOTIFYICONDATA nid;
+    nid.cbSize = sizeof(NOTIFYICONDATA);
+    //nid.hWnd = hWnd;
+    nid.uID = 100;
+    nid.uVersion = NOTIFYICON_VERSION;
+    //nid.uCallbackMessage = WM_MYMESSAGE;
+    nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    strcpy(nid.szTip, "Tray Icon");
+    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+    Shell_NotifyIcon(NIM_ADD, &nid);
+
+    // For a Ballon Tip
+    nid.uFlags = NIF_INFO;
+    strcpy(nid.szInfoTitle, "Profanity"); // Title
+    strcpy(nid.szInfo, "New something!" ); // Copy Tip
+    nid.uTimeout = 3000;  // 3 Seconds
+    nid.dwInfoFlags = NIIF_INFO;
+
+    Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
 }
 
