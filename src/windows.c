@@ -1706,8 +1706,8 @@ _notify(const char * const message, int timeout,
     // For a Ballon Tip
     nid.uFlags = NIF_INFO;
     strcpy(nid.szInfoTitle, "Profanity"); // Title
-    strcpy(nid.szInfo, "New something!" ); // Copy Tip
-    nid.uTimeout = 3000;  // 3 Seconds
+    strcpy(nid.szInfo, message); // Copy Tip
+    nid.uTimeout = timeout;  // 3 Seconds
     nid.dwInfoFlags = NIIF_INFO;
 
     Shell_NotifyIcon(NIM_MODIFY, &nid);
