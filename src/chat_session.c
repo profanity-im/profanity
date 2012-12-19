@@ -27,10 +27,10 @@
 
 #include "chat_session.h"
 #include "log.h"
+#include "preferences.h"
 
 #define PAUSED_TIMOUT 10.0
 #define INACTIVE_TIMOUT 30.0
-#define GONE_TIMOUT 600.0
 
 static void _chat_session_free(ChatSession session);
 
@@ -113,7 +113,7 @@ chat_session_no_activity(const char * const recipient)
         if (session->active_timer != NULL) {
             gdouble elapsed = g_timer_elapsed(session->active_timer, NULL);
 
-            if (elapsed > GONE_TIMOUT) {
+            if ((prefs_get_gone() != 0) && (elapsed > (prefs_get_gone() * 60.0))) {
                 if (session->state != CHAT_STATE_GONE) {
                     session->sent = FALSE;
                 }
@@ -127,8 +127,7 @@ chat_session_no_activity(const char * const recipient)
 
             } else if (elapsed > PAUSED_TIMOUT) {
 
-                if ((session->state != CHAT_STATE_PAUSED) &&
-                        (session->state != CHAT_STATE_ACTIVE)) {
+                if (session->state == CHAT_STATE_COMPOSING) {
                     session->sent = FALSE;
                 }
                 session->state = CHAT_STATE_PAUSED;

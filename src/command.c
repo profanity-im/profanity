@@ -113,6 +113,7 @@ static gboolean _cmd_set_chlog(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_gone(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_titlebar(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoaway(gchar **args, struct cmd_help_t help);
@@ -456,6 +457,17 @@ static struct cmd_t setting_commands[] =
         { "/outtype on|off",
           "--------------",
           "Send an indication that you are typing to the other person in chat.",
+          "Chat states must be enabled for this to work, see the /states command.",
+          NULL } } },
+
+    { "/gone",
+        _cmd_set_gone, parse_args, 1, 1,
+        { "/gone minutes", "Send 'gone' state to recipient.",
+        { "/gone minutes",
+          "--------------",
+          "Send a 'gone' state to the recipient after the specified number of minutes."
+          "This indicates to the recipient's client that you have left the conversation.",
+          "A value of 0 will disable sending this chat state automatically after a period.",
           "Chat states must be enabled for this to work, see the /states command.",
           NULL } } },
 
@@ -1683,6 +1695,25 @@ _cmd_set_outtype(gchar **args, struct cmd_help_t help)
     return _cmd_set_boolean_preference(args[0], help,
         "Sending typing notifications", prefs_set_outtype);
 }
+
+static gboolean
+_cmd_set_gone(gchar **args, struct cmd_help_t help)
+{
+    char *value = args[0];
+
+    gint period = atoi(value);
+    prefs_set_gone(period);
+    if (period == 0) {
+        cons_show("Automatic leaving conversations after period disabled.");
+    } else if (period == 1) {
+        cons_show("Leaving conversations after 1 minute of inactivity.");
+    } else {
+        cons_show("Leaving conversations after %d minutes of inactivity.", period);
+    }
+
+    return TRUE;
+}
+
 
 static gboolean
 _cmd_set_notify(gchar **args, struct cmd_help_t help)

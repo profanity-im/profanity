@@ -140,6 +140,19 @@ prefs_set_outtype(gboolean value)
     _save_prefs();
 }
 
+gint
+prefs_get_gone(void)
+{
+    return g_key_file_get_integer(prefs, "chatstates", "gone", NULL);
+}
+
+void
+prefs_set_gone(gint value)
+{
+    g_key_file_set_integer(prefs, "chatstates", "gone", value);
+    _save_prefs();
+}
+
 gboolean
 prefs_get_notify_typing(void)
 {

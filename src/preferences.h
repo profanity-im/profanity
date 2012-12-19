@@ -65,6 +65,8 @@ gboolean prefs_get_states(void);
 void prefs_set_states(gboolean value);
 gboolean prefs_get_outtype(void);
 void prefs_set_outtype(gboolean value);
+gint prefs_get_gone(void);
+void prefs_set_gone(gint value);
 gchar * prefs_get_theme(void);
 void prefs_set_theme(gchar *value);
 

@@ -1259,6 +1259,15 @@ cons_show_chat_prefs(void)
         cons_show("Send composing (/outtype)  : ON");
     else
         cons_show("Send composing (/outtype)  : OFF");
+
+    gint gone_time = prefs_get_gone();
+    if (gone_time == 0) {
+        cons_show("Leave conversation (/gone) : OFF");
+    } else if (gone_time == 1) {
+        cons_show("Leave conversation (/gone) : 1 minute");
+    } else {
+        cons_show("Leave conversation (/gone) : %d minutes", gone_time);
+    }
 }
 
 void
