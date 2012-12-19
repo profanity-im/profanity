@@ -129,8 +129,8 @@ chat_session_no_activity(const char * const recipient)
 
                 if (session->state == CHAT_STATE_COMPOSING) {
                     session->sent = FALSE;
+                    session->state = CHAT_STATE_PAUSED;
                 }
-                session->state = CHAT_STATE_PAUSED;
             }
         }
     }
