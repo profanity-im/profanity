@@ -462,7 +462,7 @@ static struct cmd_t setting_commands[] =
 
     { "/gone",
         _cmd_set_gone, parse_args, 1, 1,
-        { "/gone minutes", "Send 'gone' state to recipient.",
+        { "/gone minutes", "Send 'gone' state to recipient after a period.",
         { "/gone minutes",
           "--------------",
           "Send a 'gone' state to the recipient after the specified number of minutes."
