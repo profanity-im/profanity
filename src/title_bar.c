@@ -91,6 +91,9 @@ title_bar_refresh(void)
 
                 title_bar_draw();
 
+                g_timer_destroy(typing_elapsed);
+                typing_elapsed = NULL;
+
                 dirty = TRUE;
             }
         }
@@ -124,7 +127,10 @@ title_bar_set_status(jabber_presence_t status)
 void
 title_bar_set_recipient(char *from)
 {
-    typing_elapsed = NULL;
+    if (typing_elapsed != NULL) {
+        g_timer_destroy(typing_elapsed);
+        typing_elapsed = NULL;
+    }
     recipient = from;
 
     if (current_title != NULL) {
