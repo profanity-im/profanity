@@ -10,7 +10,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install g++ autoconf libssl-dev libexpat1-dev libncurses5-dev libglib2.0-dev libnotify-dev libcurl3-dev
+    sudo apt-get -y install g++ git autoconf libssl-dev libexpat1-dev libncurses5-dev libglib2.0-dev libnotify-dev libcurl3-dev
 
 }
 
@@ -22,7 +22,7 @@ fedora_prepare()
 
     ARCH=`arch`
     
-    sudo yum -y install gcc gcc-c++ autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
+    sudo yum -y install gcc gcc-c++ git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
 }
 
 cygwin_prepare()
@@ -75,7 +75,6 @@ install_profanity()
     echo
     echo Profanity installer... installing Profanity
     echo
-    ./bootstrap.sh
     ./configure
     make
     sudo make install
@@ -115,7 +114,6 @@ cyg_install_profanity()
     echo
     echo Profanity installer... installing Profanity
     echo
-    ./bootstrap.sh
     ./configure
     make
     make install
