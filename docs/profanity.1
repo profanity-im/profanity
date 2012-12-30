@@ -29,24 +29,7 @@ Set the logging level,
 .I LEVEL
 may be set to DEBUG, INFO (the default), WARN or ERROR.
 .SH USING PROFANITY
-The
-.B Profanity 
-user interface contains 3 main elements.
-.PP
-The title bar at the top, shows various information about who you are chatting
-with, and your current status at the top right corner.
-.PP
-The status bar near the bottom, shows information about the user you are logged
-in as, and shows which windows are currently active, at the bottom right corner
-of the screen.
-.PP
-The input line, the last line, is where all user input goes, including commands
-starting with the "/" character and messages.
-.PP
-The main window holds a console window where information is given, press F1 to
-get back to the console window.  Up to 9 chat windows may be open at any one
-time, to access them use the F2-F10 keys.  When in a chat window, you do not
-need to use the "/msg" command.
+The user guide can be found at <http://www.profanity.im/userguide.html>.
 .SH SEE ALSO
 .B Profanity
 itself has a lot of built\-in help. Check the /help command for more information.
@@ -56,109 +39,7 @@ Configuration for
 .B Profanity
 is stored in
 .I $XDG_CONFIG_HOME/profanity/profrc
-, see the following example:
-.br
-.RS
-.PP
-[ui]
-.br
-beep=false
-.br
-flash=false 
-.br
-theme=mytheme
-.br
-showsplash=false 
-.br
-notify=true 
-.br
-chlog=true 
-.br
-history=true 
-.br
-typing=true 
-.br
-remind=15 
-.br
-vercheck=true
-.br
-.PP
-[connections]
-.br
-logins=user1@server1.org;myuser@server2.com;
-.PP
-.RE
-The [ui] section contains basic preferences, you can find more help on these
-settings by typing "/help beep" for example in Profanity.
-.PP
-The [connections] section is the list of users that will appear in tab
-completion for the /connect command.  This list is automatically populated
-when you successfully log in as a user.
-.SH THEMES
-Themes files for
-.B Profanity
-are stored in
-.I $XDG_CONFIG_HOME/profanity/themes
-, see the following example:
-.br
-.RS
-.PP
-[colours]
-.br
-bkgnd=default
-.br
-titlebar=blue
-.br
-statusbar=blue
-.br
-titlebartext=white
-.br
-titlebarbrackets=cyan
-.br
-statusbartext=white
-.br
-statusbarbrackets=cyan
-.br
-statusbaractive=cyan
-.br
-statusbarnew=white
-.br
-maintext=white
-.br
-splashtext=cyan
-.br
-online=green
-.br
-away=cyan
-.br
-chat=green
-.br
-dnd=red
-.br
-xa=cyan
-.br
-offline=red
-.br
-typing=yellow
-.br
-gone=red
-.br
-error=red
-.br
-incoming=yellow
-.br
-roominfo=yellow
-.br
-me=yellow
-.br
-them=green
-.br
-.PP
-.RE
-The [colours] section allows you to tailor the colours used in Profanity to
-suit your terminal preferences.  Available colours are black, white, red, 
-green, blue, yellow, cyan, magenta and default, where default is the default
-forground or background colour on your terminal.
+, details on configuring Profanity can be found at <http://www.profanity.im/configuration.html>.
 .PP
 .SH BUGS
 Bugs can either be reported by sending a mail directly to:
