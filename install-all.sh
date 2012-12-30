@@ -10,7 +10,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install g++ git autoconf libssl-dev libexpat1-dev libncurses5-dev libglib2.0-dev libnotify-dev libcurl3-dev
+    sudo apt-get -y install git autoconf libssl-dev libexpat1-dev libncurses5-dev libglib2.0-dev libnotify-dev libcurl3-dev
 
 }
 
@@ -22,7 +22,7 @@ fedora_prepare()
 
     ARCH=`arch`
     
-    sudo yum -y install gcc gcc-c++ git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
+    sudo yum -y install gcc git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH
 }
 
 cygwin_prepare()
@@ -37,22 +37,8 @@ cygwin_prepare()
 
     apt-cyg install make gcc automake autoconf pkg-config openssl-devel expat zlib-devel libncurses-devel libncurses-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
     ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
-    ln -s /usr/bin/g++-3.exe /usr/bin/g++.exe
 
     export LIBRARY_PATH=/usr/local/lib/
-}
-
-install_head_unit()
-{
-    echo
-    echo Profanity installer... installing head-unit
-    echo
-    git clone git://github.com/boothj5/head-unit.git
-    cd head-unit
-    make
-    sudo make install
-
-    cd ..
 }
 
 install_lib_strophe()
@@ -78,19 +64,6 @@ install_profanity()
     ./configure
     make
     sudo make install
-}
-
-cyg_install_head_unit()
-{
-    echo
-    echo Profanity installer... installing head-unit
-    echo
-    git clone git://github.com/boothj5/head-unit.git
-    cd head-unit
-    make
-    make install
-
-    cd ..
 }
 
 cyg_install_lib_strophe()
@@ -125,9 +98,6 @@ cleanup()
     echo Profanity installer... cleaning up
     echo
 
-    echo Removing head-unit repository...
-    rm -rf head-unit
-
     echo Removing libstrophe repository...
     rm -rf libstrophe
 
@@ -160,17 +130,14 @@ unknown)    echo The install script will not work on this OS.
             exit
             ;;
 fedora)     fedora_prepare
-            install_head_unit
             install_lib_strophe
             install_profanity
             ;;
 debian)     debian_prepare
-            install_head_unit
             install_lib_strophe
             install_profanity
             ;;
 cygwin)     cygwin_prepare
-            cyg_install_head_unit
             cyg_install_lib_strophe
             cyg_install_profanity
             ;;
