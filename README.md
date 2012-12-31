@@ -3,7 +3,7 @@ Profanity
 
 Profanity is a console based jabber client inspired by [Irssi](http://www.irssi.org/),
 
-See the [project wiki](https://github.com/boothj5/profanity/wiki) for information on installing, upgrading and using Profanity.
+See the [User Guide](http://www.profanity.im/userguide.html) for information on installing, upgrading and using Profanity.
 
 Links
 -----
