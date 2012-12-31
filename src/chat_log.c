@@ -126,7 +126,7 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
         g_date_time_get_second(session_started));
 
     // get data from all logs from the day the session was started to today
-    while (g_date_time_get_day_of_year(log_date) <=  g_date_time_get_day_of_year(now)) {
+    while (g_date_time_compare(log_date, now) != 1) {
         char *filename = _get_log_filename(recipient, login, log_date, FALSE);
 
         FILE *logp = fopen(filename, "r");
