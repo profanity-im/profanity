@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.65])
 AC_INIT([profanity], [0.1.10], [boothj5web@gmail.com])
-AC_DEFINE([PACKAGE_STATUS], ["development"], [Status of this build])
+AC_DEFINE([PACKAGE_STATUS], ["release"], [Status of this build])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
