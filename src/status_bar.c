@@ -28,8 +28,8 @@
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
-#ifdef HAVE_NCURSES_NCURSES_H
-#include <ncurses/ncurses.h>
+#ifdef HAVE_NCURSESW_NCURSES_H
+#include <ncursesw/ncurses.h>
 #endif
 
 #include "theme.h"

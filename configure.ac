@@ -37,8 +37,8 @@ AC_CHECK_LIB([ssl], [main], [],
     [AC_MSG_ERROR([openssl is required for profanity])])
 AC_CHECK_LIB([strophe], [main], [], 
     [AC_MSG_ERROR([libstrophe is required for profanity])])
-AC_CHECK_LIB([ncurses], [main], [], 
-    [AC_MSG_ERROR([ncurses is required for profanity])])
+AC_CHECK_LIB([ncursesw], [main], [], 
+    [AC_MSG_ERROR([ncursesw is required for profanity])])
 AC_CHECK_LIB([glib-2.0], [main], [], 
     [AC_MSG_ERROR([glib-2.0 is required for profanity])])
 AC_CHECK_LIB([curl], [main], [], 
@@ -54,8 +54,10 @@ AC_CHECK_LIB([X11], [main], [],
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
+
+# check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
+AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
-AC_CHECK_HEADERS([ncurses/ncurses.h], [], [])
 
 PKG_CHECK_MODULES([DEPS], [openssl glib-2.0 libcurl])
 PKG_CHECK_MODULES([NOTIFY], [libnotify], [], 

@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <locale.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
@@ -519,6 +520,7 @@ _handle_idle_time()
 static void
 _init(const int disable_tls, char *log_level)
 {
+    setlocale(LC_ALL, "");
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
     files_create_directories();
