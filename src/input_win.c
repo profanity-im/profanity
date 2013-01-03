@@ -348,13 +348,22 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
             // if in middle, delete and shift chars left
             } else if (inp_x > 0 && inp_x < display_size) {
-                for (i = inp_x; i < *size; i++)
-                    input[i-1] = input[i];
-                (*size)--;
+                gchar *start = g_utf8_substring(input, 0, inp_x - 1);
+                gchar *end = g_utf8_substring(input, inp_x, *size);
+                GString *new = g_string_new(start);
+                g_string_append(new, end);
+
+                for (*size = 0; *size < strlen(new->str); (*size)++) {
+                    input[*size] = new->str[*size];
+                }
+                input[*size] = '\0';
+
+                g_free(start);
+                g_free(end);
+                g_string_free(new, FALSE);
 
                 inp_clear();
-                for (i = 0; i < *size; i++)
-                    waddch(inp_win, input[i]);
+                wprintw(inp_win, input);
                 wmove(inp_win, 0, inp_x -1);
             }
 
