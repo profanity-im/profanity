@@ -25,6 +25,8 @@
 
 #include "config.h"
 
+#include <wchar.h>
+
 #include <glib.h>
 
 #ifdef HAVE_NCURSES_H
@@ -73,7 +75,7 @@ void ui_contact_online(const char * const from, const char * const show,
 void ui_contact_offline(const char * const from, const char * const show,
     const char * const status);
 void ui_disconnected(void);
-void ui_handle_special_keys(const int * const ch);
+void ui_handle_special_keys(const wint_t * const ch);
 void ui_switch_win(const int i);
 gboolean ui_windows_full(void);
 unsigned long ui_get_idle_time(void);
@@ -170,7 +172,7 @@ void status_bar_new(const int win);
 void status_bar_update_time(void);
 
 // input window actions
-void inp_get_char(int *ch, char *input, int *size);
+wint_t inp_get_char(char *input, int *size);
 void inp_clear(void);
 void inp_win_resize(const char * input, const int size);
 void inp_put_back(void);

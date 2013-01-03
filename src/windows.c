@@ -102,8 +102,8 @@ static void _show_status_string(WINDOW *win, const char * const from,
 static void _cons_show_typing(const char * const short_from);
 static void _cons_show_incoming_message(const char * const short_from,
     const int win_index);
-static void _win_handle_switch(const int * const ch);
-static void _win_handle_page(const int * const ch);
+static void _win_handle_switch(const wint_t * const ch);
+static void _win_handle_page(const wint_t * const ch);
 static void _win_resize_all(void);
 static gint _win_get_unread(void);
 static void _win_show_history(WINDOW *win, int win_index,
@@ -506,7 +506,7 @@ ui_disconnected(void)
 }
 
 void
-ui_handle_special_keys(const int * const ch)
+ui_handle_special_keys(const wint_t * const ch)
 {
     _win_handle_switch(ch);
     _win_handle_page(ch);
@@ -2123,7 +2123,7 @@ _cons_show_contact(PContact contact)
 }
 
 static void
-_win_handle_switch(const int * const ch)
+_win_handle_switch(const wint_t * const ch)
 {
     if (*ch == KEY_F(1)) {
         ui_switch_win(0);
@@ -2149,7 +2149,7 @@ _win_handle_switch(const int * const ch)
 }
 
 static void
-_win_handle_page(const int * const ch)
+_win_handle_page(const wint_t * const ch)
 {
     int rows = getmaxy(stdscr);
     int y = getcury(current->win);

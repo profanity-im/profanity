@@ -38,11 +38,12 @@
  * pad_start    : 3
  * cols         : 4
  */
-
+#define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
@@ -64,9 +65,9 @@
 static WINDOW *inp_win;
 static int pad_start = 0;
 
-static int _handle_edit(const int ch, char *input, int *size);
-static int _printable(const int ch);
-static gboolean _special_key(const int ch);
+static int _handle_edit(const wint_t ch, char *input, int *size);
+static int _printable(const wint_t ch);
+static gboolean _special_key(const wint_t ch);
 
 void
 create_input_window(void)
@@ -128,59 +129,73 @@ inp_block(void)
     wtimeout(inp_win, -1);
 }
 
-void
-inp_get_char(int *ch, char *input, int *size)
+wint_t
+inp_get_char(char *input, int *size)
 {
     int inp_y = 0;
     int inp_x = 0;
     int i;
+    wint_t ch;
+    int display_size = 0;
+
+    if (*size != 0) {
+        display_size = g_utf8_strlen(input, *size);
+    }
 
     // echo off, and get some more input
     noecho();
-    *ch = wgetch(inp_win);
+    wget_wch(inp_win, &ch);
 
     gboolean in_command = FALSE;
 
-    if ((*size >= 1 && input[0] == '/') ||
-            (*size == 0 && *ch == '/')) {
+    if ((display_size > 0 && input[0] == '/') ||
+            (display_size == 0 && ch == '/')) {
         in_command = TRUE;
     }
 
     if (prefs_get_states()) {
-        if (*ch == ERR) {
+        if (ch == ERR) {
             prof_handle_idle();
         }
-        if (prefs_get_outtype() && (*ch != ERR) && !in_command
-                                                && _printable(*ch)) {
+        if (prefs_get_outtype() && (ch != ERR) && !in_command
+                                                && _printable(ch)) {
             prof_handle_activity();
         }
     }
 
     // if it wasn't an arrow key etc
-    if (!_handle_edit(*ch, input, size)) {
-        if (_printable(*ch)) {
+    if (!_handle_edit(ch, input, size)) {
+        if (_printable(ch)) {
             getyx(inp_win, inp_y, inp_x);
 
             // handle insert if not at end of input
-            if (inp_x < *size) {
-                winsch(inp_win, *ch);
+            if (inp_x < display_size) {
+                winsch(inp_win, ch);
                 wmove(inp_win, inp_y, inp_x+1);
 
                 for (i = *size; i > inp_x; i--)
                     input[i] = input[i-1];
-                input[inp_x] = *ch;
+                input[inp_x] = ch;
 
                 (*size)++;
 
             // otherwise just append
             } else {
-                waddch(inp_win, *ch);
-                input[(*size)++] = *ch;
+                cchar_t t = { 0, { ch, 0 } };
+                wadd_wch(inp_win, &t);
+                char bytes[5];
+                size_t utf_len = wcrtomb(bytes, ch, NULL);
+                int i;
+                for (i = 0 ; i < utf_len; i++) {
+                    input[(*size)++] = bytes[i];
+                }
+
+                display_size++;
 
                 // if gone over screen size follow input
                 int rows, cols;
                 getmaxyx(stdscr, rows, cols);
-                if (*size - pad_start > cols-2) {
+                if (display_size - pad_start > cols-2) {
                     pad_start++;
                     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
                 }
@@ -191,6 +206,8 @@ inp_get_char(int *ch, char *input, int *size)
     }
 
     echo();
+
+    return ch;
 }
 
 void
@@ -241,7 +258,7 @@ inp_replace_input(char *input, const char * const new_input, int *size)
  * return 0 if it wasnt
  */
 static int
-_handle_edit(const int ch, char *input, int *size)
+_handle_edit(const wint_t ch, char *input, int *size)
 {
     int i, rows, cols;
     char *prev = NULL;
@@ -414,7 +431,7 @@ _handle_edit(const int ch, char *input, int *size)
 }
 
 static int
-_printable(const int ch)
+_printable(const wint_t ch)
 {
    return (ch != ERR && ch != '\n' &&
             ch != KEY_PPAGE && ch != KEY_NPAGE && ch != KEY_MOUSE &&
@@ -427,7 +444,7 @@ _printable(const int ch)
 }
 
 static gboolean
-_special_key(const int ch)
+_special_key(const wint_t ch)
 {
     char *str = unctrl(ch);
     return ((strlen(str) > 1) && g_str_has_prefix(str, "^"));

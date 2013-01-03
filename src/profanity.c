@@ -67,7 +67,7 @@ prof_run(const int disable_tls, char *log_level)
     int size = 0;
 
     while(cmd_result == TRUE) {
-        int ch = ERR;
+        wint_t ch = ERR;
         size = 0;
 
         while(ch != '\n') {
@@ -95,7 +95,7 @@ prof_run(const int disable_tls, char *log_level)
             ui_refresh();
             jabber_process_events();
 
-            inp_get_char(&ch, inp, &size);
+            ch = inp_get_char(inp, &size);
 
             if (ch != ERR) {
                 ui_reset_idle_time();
