@@ -181,14 +181,17 @@ inp_get_char(char *input, int *size)
 
             // otherwise just append
             } else {
-                cchar_t t = { 0, { ch, 0 } };
-                wadd_wch(inp_win, &t);
+                //cchar_t t = { 0, { ch, 0 } };
+                //wadd_wch(inp_win, &t);
                 char bytes[5];
                 size_t utf_len = wcrtomb(bytes, ch, NULL);
                 int i;
                 for (i = 0 ; i < utf_len; i++) {
                     input[(*size)++] = bytes[i];
                 }
+                input[*size] = '\0';
+                inp_clear();
+                wprintw(inp_win, input);
 
                 display_size++;
 
@@ -247,8 +250,8 @@ inp_replace_input(char *input, const char * const new_input, int *size)
     strcpy(input, new_input);
     *size = strlen(input);
     inp_clear();
-    for (i = 0; i < *size; i++)
-        waddch(inp_win, input[i]);
+    input[*size] = '\0';
+    wprintw(inp_win, input);
 }
 
 
