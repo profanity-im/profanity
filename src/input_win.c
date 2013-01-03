@@ -170,14 +170,22 @@ inp_get_char(char *input, int *size)
 
             // handle insert if not at end of input
             if (inp_x < display_size) {
-                winsch(inp_win, ch);
-                wmove(inp_win, inp_y, inp_x+1);
+                char bytes[5];
+                size_t utf_len = wcrtomb(bytes, ch, NULL);
 
-                for (i = *size; i > inp_x; i--)
-                    input[i] = input[i-1];
-                input[inp_x] = ch;
+                char *next_ch = g_utf8_offset_to_pointer(input, inp_x);
+                char *offset;
+                for (offset = &input[*size - 1]; offset >= next_ch; offset--) {
+                    *(offset + utf_len) = *offset;
+                }
+                for (i = 0; i < utf_len; i++) {
+                     *(next_ch + i) = bytes[i];
+                }
 
-                (*size)++;
+                *size += utf_len;
+                input[*size] = '\0';
+                wprintw(inp_win, next_ch);
+                wmove(inp_win, inp_y, inp_x + 1);
 
             // otherwise just append
             } else {
@@ -339,7 +347,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
                 }
 
             // if in middle, delete and shift chars left
-            } else if (inp_x > 0 && inp_x < *size) {
+            } else if (inp_x > 0 && inp_x < display_size) {
                 for (i = inp_x; i < *size; i++)
                     input[i-1] = input[i];
                 (*size)--;
@@ -387,7 +395,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
         return 1;
 
     case KEY_RIGHT:
-        if (inp_x < *size) {
+        if (inp_x < display_size) {
             wmove(inp_win, inp_y, inp_x+1);
 
             // current position off screen to right
