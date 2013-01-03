@@ -181,8 +181,6 @@ inp_get_char(char *input, int *size)
 
             // otherwise just append
             } else {
-                //cchar_t t = { 0, { ch, 0 } };
-                //wadd_wch(inp_win, &t);
                 char bytes[5];
                 size_t utf_len = wcrtomb(bytes, ch, NULL);
                 int i;
@@ -245,8 +243,6 @@ inp_get_next_char(void)
 void
 inp_replace_input(char *input, const char * const new_input, int *size)
 {
-    int i;
-
     strcpy(input, new_input);
     *size = strlen(input);
     inp_clear();
