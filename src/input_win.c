@@ -269,6 +269,11 @@ _handle_edit(const wint_t ch, char *input, int *size)
     int inp_y = 0;
     int inp_x = 0;
     int next_ch;
+    int display_size = 0;
+
+    if (*size != 0) {
+        display_size = g_utf8_strlen(input, *size);
+    }
 
     getmaxyx(stdscr, rows, cols);
     getyx(inp_win, inp_y, inp_x);
@@ -324,13 +329,18 @@ _handle_edit(const wint_t ch, char *input, int *size)
     case 127:
     case KEY_BACKSPACE:
         contact_list_reset_search_attempts();
-        if (*size > 0) {
+        if (display_size > 0) {
 
             // if at end, delete last char
-            if (inp_x >= *size) {
+            if (inp_x >= display_size) {
                 wmove(inp_win, inp_y, inp_x-1);
                 wdelch(inp_win);
                 (*size)--;
+                if (*size > 0) {
+                    if (!g_unichar_validate(input[*size])) {
+                        (*size)--;
+                    }
+                }
 
             // if in middle, delete and shift chars left
             } else if (inp_x > 0 && inp_x < *size) {
