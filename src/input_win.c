@@ -337,14 +337,17 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
             // if at end, delete last char
             if (inp_x >= display_size) {
-                wmove(inp_win, inp_y, inp_x-1);
-                wdelch(inp_win);
-                (*size)--;
-                if (*size > 0) {
-                    if (!g_unichar_validate(input[*size])) {
-                        (*size)--;
-                    }
+                gchar *start = g_utf8_substring(input, 0, inp_x-1);
+                for (*size = 0; *size < strlen(start); (*size)++) {
+                    input[*size] = start[*size];
                 }
+                input[*size] = '\0';
+
+                g_free(start);
+
+                inp_clear();
+                wprintw(inp_win, input);
+                wmove(inp_win, 0, inp_x -1);
 
             // if in middle, delete and shift chars left
             } else if (inp_x > 0 && inp_x < display_size) {
