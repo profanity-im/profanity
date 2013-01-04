@@ -267,7 +267,7 @@ inp_replace_input(char *input, const char * const new_input, int *size)
 static int
 _handle_edit(const wint_t ch, char *input, int *size)
 {
-    int i, rows, cols;
+    int rows, cols;
     char *prev = NULL;
     char *next = NULL;
     int inp_y = 0;
@@ -383,15 +383,35 @@ _handle_edit(const wint_t ch, char *input, int *size)
         return 1;
 
     case KEY_DC: // DEL
-        if (inp_x < *size) {
-            wdelch(inp_win);
+        if (inp_x == display_size-1) {
+            gchar *start = g_utf8_substring(input, 0, inp_x);
+            for (*size = 0; *size < strlen(start); (*size)++) {
+                input[*size] = start[*size];
+            }
+            input[*size] = '\0';
 
-            // if not last char, shift chars left
-            if (inp_x < *size - 1)
-                for (i = inp_x; i < *size; i++)
-                    input[i] = input[i+1];
+            g_free(start);
 
-            (*size)--;
+            inp_clear();
+            wprintw(inp_win, input);
+        } else if (inp_x < display_size-1) {
+            gchar *start = g_utf8_substring(input, 0, inp_x);
+            gchar *end = g_utf8_substring(input, inp_x+1, *size);
+            GString *new = g_string_new(start);
+            g_string_append(new, end);
+
+            for (*size = 0; *size < strlen(new->str); (*size)++) {
+                input[*size] = new->str[*size];
+            }
+            input[*size] = '\0';
+
+            g_free(start);
+            g_free(end);
+            g_string_free(new, FALSE);
+
+            inp_clear();
+            wprintw(inp_win, input);
+            wmove(inp_win, 0, inp_x);
         }
         return 1;
 
@@ -443,9 +463,9 @@ _handle_edit(const wint_t ch, char *input, int *size)
         return 1;
 
     case KEY_END:
-        wmove(inp_win, inp_y, *size);
-        if (*size > cols-2) {
-            pad_start = *size - cols + 1;
+        wmove(inp_win, inp_y, display_size);
+        if (display_size > cols-2) {
+            pad_start = display_size - cols + 1;
             prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         }
         return 1;
