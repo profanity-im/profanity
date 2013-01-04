@@ -189,7 +189,6 @@ _ui_draw_win_title(void)
 
     // draw if change
     if (g_strcmp0(win_title, new_win_title) != 0) {
-        printf(new_win_title);
         if (win_title != NULL) {
             free(win_title);
         }
@@ -207,16 +206,11 @@ ui_get_idle_time(void)
         unsigned long result = info->idle;
         XFree(info);
         return result;
-    } else {
-        gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
-        unsigned long ms_elapsed = seconds_elapsed * 1000.0;
-        return ms_elapsed;
     }
-#else
+#endif
     gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
     unsigned long ms_elapsed = seconds_elapsed * 1000.0;
     return ms_elapsed;
-#endif
 }
 
 void
