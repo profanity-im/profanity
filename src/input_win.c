@@ -169,7 +169,7 @@ inp_get_char(char *input, int *size)
 
             // handle insert if not at end of input
             if (inp_x < display_size) {
-                char bytes[5];
+                char bytes[MB_CUR_MAX];
                 size_t utf_len = wcrtomb(bytes, ch, NULL);
 
                 char *next_ch = g_utf8_offset_to_pointer(input, inp_x);
