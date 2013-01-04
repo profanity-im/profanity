@@ -206,16 +206,11 @@ ui_get_idle_time(void)
         unsigned long result = info->idle;
         XFree(info);
         return result;
-    } else {
-        gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
-        unsigned long ms_elapsed = seconds_elapsed * 1000.0;
-        return ms_elapsed;
     }
-#else
+#endif
     gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
     unsigned long ms_elapsed = seconds_elapsed * 1000.0;
     return ms_elapsed;
-#endif
 }
 
 void
