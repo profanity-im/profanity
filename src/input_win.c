@@ -190,7 +190,6 @@ inp_get_char(char *input, int *size)
             } else {
                 char bytes[MB_CUR_MAX];
                 size_t utf_len = wcrtomb(bytes, ch, NULL);
-                int i;
                 for (i = 0 ; i < utf_len; i++) {
                     input[(*size)++] = bytes[i];
                 }
