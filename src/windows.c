@@ -189,7 +189,6 @@ _ui_draw_win_title(void)
 
     // draw if change
     if (g_strcmp0(win_title, new_win_title) != 0) {
-        printf(new_win_title);
         if (win_title != NULL) {
             free(win_title);
         }
