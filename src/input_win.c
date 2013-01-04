@@ -188,8 +188,10 @@ inp_get_char(char *input, int *size)
 
             // otherwise just append
             } else {
+                mbstate_t state;
+                memset(&state, '\0', sizeof (state));
                 char bytes[5];
-                size_t utf_len = wcrtomb(bytes, ch, NULL);
+                size_t utf_len = wcrtomb(bytes, ch, &state);
                 int i;
                 for (i = 0 ; i < utf_len; i++) {
                     input[(*size)++] = bytes[i];
