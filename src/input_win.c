@@ -195,14 +195,13 @@ inp_get_char(char *input, int *size)
 
             // otherwise just append
             } else {
-                char bytes[MB_CUR_MAX];
+                char bytes[MB_CUR_MAX+1];
                 size_t utf_len = wcrtomb(bytes, ch, NULL);
                 for (i = 0 ; i < utf_len; i++) {
                     input[(*size)++] = bytes[i];
                 }
-                input[*size] = '\0';
-                _inp_clear_no_pad();
-                wprintw(inp_win, input);
+                bytes[utf_len] = '\0';
+                wprintw(inp_win, bytes);
 
                 display_size++;
 
