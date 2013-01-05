@@ -111,8 +111,7 @@ inp_clear(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    wclear(inp_win);
-    wmove(inp_win, 0, 0);
+    _inp_clear_no_pad();
     pad_start = 0;
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
