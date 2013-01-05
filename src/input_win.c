@@ -198,20 +198,25 @@ inp_get_char(char *input, int *size)
             } else {
                 char bytes[MB_CUR_MAX+1];
                 size_t utf_len = wcrtomb(bytes, ch, NULL);
-                for (i = 0 ; i < utf_len; i++) {
-                    input[(*size)++] = bytes[i];
-                }
-                bytes[utf_len] = '\0';
-                wprintw(inp_win, bytes);
 
-                display_size++;
+                // wcrtomb can return (size_t) -1
+                if (utf_len < MB_CUR_MAX) {
+                    for (i = 0 ; i < utf_len; i++) {
+                        input[(*size)++] = bytes[i];
+                    }
+                    input[*size] = '\0';
 
-                // if gone over screen size follow input
-                int rows, cols;
-                getmaxyx(stdscr, rows, cols);
-                if (display_size - pad_start > cols-2) {
-                    pad_start++;
-                    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+                    bytes[utf_len] = '\0';
+                    wprintw(inp_win, bytes);
+                    display_size++;
+
+                   // if gone over screen size follow input
+                    int rows, cols;
+                    getmaxyx(stdscr, rows, cols);
+                    if (display_size - pad_start > cols-2) {
+                        pad_start++;
+                        prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+                    }
                 }
             }
 
