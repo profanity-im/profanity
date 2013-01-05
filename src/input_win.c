@@ -165,6 +165,8 @@ inp_get_char(char *input, int *size)
     // if it wasn't an arrow key etc
     if (!_handle_edit(ch, input, size)) {
         if (_printable(ch)) {
+            int rows, cols;
+            getmaxyx(stdscr, rows, cols);
             getyx(inp_win, inp_y, inp_x);
 
             // handle insert if not at end of input
@@ -185,6 +187,11 @@ inp_get_char(char *input, int *size)
                 input[*size] = '\0';
                 wprintw(inp_win, next_ch);
                 wmove(inp_win, inp_y, inp_x + 1);
+
+                if (inp_x - pad_start > cols-3) {
+                    pad_start++;
+                    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+                }
 
             // otherwise just append
             } else {
