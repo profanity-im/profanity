@@ -19,50 +19,69 @@ if test "$host_os" == "cygwin"; then
 fi
 
 # Options
+AC_ARG_ENABLE([notifications],
+    [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
+AC_ARG_WITH([xscreensaver],
+    [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine indle time])])
 
 # Checks for libraries.
 if test "x$with_libxml2" = xyes; then
-    AC_CHECK_LIB([xml2], [main], [], 
+    AC_CHECK_LIB([xml2], [main], [],
         [AC_MSG_ERROR([libxml2 is required for profanity])])
 else
-    AC_CHECK_LIB([expat], [main], [], 
+    AC_CHECK_LIB([expat], [main], [],
         [AC_MSG_ERROR([expat is required for profanity])])
 fi
 
-AC_CHECK_LIB([resolv], [main], [], 
+if test "x$enable_notifications" = xyes; then
+    AC_CHECK_LIB([notify], [main], [],
+        [AC_MSG_ERROR([libnotify is required for desktop notifications])])
+elif test "x$enable_notifications" = x; then
+    AC_CHECK_LIB([notify], [main], [],
+        [AC_MSG_NOTICE([libnotify not found, desktop notifications not supported])])
+fi
+
+if test "x$with_xscreensaver" = xyes; then
+    AC_CHECK_LIB([Xss], [main], [],
+        [AC_MSG_ERROR([libXss is required for xscreensaver support])])
+elif test "x$with_xscreensaver" = x; then
+    AC_CHECK_LIB([Xss], [main], [],
+        [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
+fi
+
+AC_CHECK_LIB([resolv], [main], [],
     [AC_MSG_ERROR([libresolv is required for profanity])])
-AC_CHECK_LIB([ssl], [main], [], 
+AC_CHECK_LIB([ssl], [main], [],
     [AC_MSG_ERROR([openssl is required for profanity])])
-AC_CHECK_LIB([strophe], [main], [], 
+AC_CHECK_LIB([strophe], [main], [],
     [AC_MSG_ERROR([libstrophe is required for profanity])])
-AC_CHECK_LIB([ncursesw], [main], [], 
+AC_CHECK_LIB([ncursesw], [main], [],
     [AC_MSG_ERROR([ncursesw is required for profanity])])
-AC_CHECK_LIB([glib-2.0], [main], [], 
+AC_CHECK_LIB([glib-2.0], [main], [],
     [AC_MSG_ERROR([glib-2.0 is required for profanity])])
-AC_CHECK_LIB([curl], [main], [], 
+AC_CHECK_LIB([curl], [main], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
-AC_CHECK_LIB([notify], [main], [], 
-    [AC_MSG_NOTICE([libnotify not found, desktop notifications not supported])])
-AC_CHECK_LIB([headunit], [main], [], 
+AC_CHECK_LIB([headunit], [main], [],
     [AC_MSG_NOTICE([headunit not found, will not be able to run tests])])
-AC_CHECK_LIB([Xss], [main], [], 
-    [AC_MSG_NOTICE([libxss not found, falling back to profanity auto-away])])
-AC_CHECK_LIB([X11], [main], [], 
-    [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
-# check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
+# Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
 AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
 
+# Checks for pkgconfig modules
 PKG_CHECK_MODULES([DEPS], [openssl glib-2.0 libcurl])
-PKG_CHECK_MODULES([NOTIFY], [libnotify], [], 
-    [AC_MSG_NOTICE([libnotify module not found])])
 
+if test "x$enable_notifications" != xno; then
+    PKG_CHECK_MODULES([NOTIFY], [libnotify], [],
+        [AC_MSG_NOTICE([libnotify module not found])])
+fi
+
+# Default parameters
 AM_CFLAGS="-Wall"
 LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
 
