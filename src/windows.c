@@ -208,21 +208,12 @@ ui_get_idle_time(void)
         unsigned long result = info->idle;
         XFree(info);
         return result;
-
-    // if we couldn't get a screensaverinfo, use profanity interaction idle time
-    // this may occur if compiled with libxss, but then run in a bare terminal
-    } else {
-        gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
-        unsigned long ms_elapsed = seconds_elapsed * 1000.0;
-        return ms_elapsed;
     }
-
-// if not compiled with libxss, just use profanity interaction idle time
-#else
+// if no libxss or xss idle time failed, use profanity idle time
+#endif
     gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
     unsigned long ms_elapsed = seconds_elapsed * 1000.0;
     return ms_elapsed;
-#endif
 }
 
 void
