@@ -45,10 +45,15 @@ fi
 
 if test "x$with_xscreensaver" = xyes; then
     AC_CHECK_LIB([Xss], [main], [],
-        [AC_MSG_ERROR([libXss is required for xscreensaver support])])
+        [AC_MSG_ERROR([libXss is required for x autoaway support])])
+    AC_CHECK_LIB([X11], [main], [], 
+        [AC_MSG_NOTICE([libX11 is required for x autoaway support])])
 elif test "x$with_xscreensaver" = x; then
     AC_CHECK_LIB([Xss], [main], [],
         [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
+    AC_CHECK_LIB([X11], [main], [], 
+        [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
+
 fi
 
 AC_CHECK_LIB([resolv], [main], [],
