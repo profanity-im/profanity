@@ -67,6 +67,7 @@ static int pad_start = 0;
 static int _handle_edit(const wint_t ch, char *input, int *size);
 static int _printable(const wint_t ch);
 static gboolean _special_key(const wint_t ch);
+static void _inp_clear_no_pad(void);
 
 void
 create_input_window(void)
@@ -110,8 +111,7 @@ inp_clear(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    wclear(inp_win);
-    wmove(inp_win, 0, 0);
+    _inp_clear_no_pad();
     pad_start = 0;
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
@@ -165,6 +165,8 @@ inp_get_char(char *input, int *size)
     // if it wasn't an arrow key etc
     if (!_handle_edit(ch, input, size)) {
         if (_printable(ch)) {
+            int rows, cols;
+            getmaxyx(stdscr, rows, cols);
             getyx(inp_win, inp_y, inp_x);
 
             // handle insert if not at end of input
@@ -186,23 +188,24 @@ inp_get_char(char *input, int *size)
                 wprintw(inp_win, next_ch);
                 wmove(inp_win, inp_y, inp_x + 1);
 
+                if (inp_x - pad_start > cols-3) {
+                    pad_start++;
+                    prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+                }
+
             // otherwise just append
             } else {
                 char bytes[MB_CUR_MAX];
                 size_t utf_len = wcrtomb(bytes, ch, NULL);
-                int i;
                 for (i = 0 ; i < utf_len; i++) {
                     input[(*size)++] = bytes[i];
                 }
                 input[*size] = '\0';
-                inp_clear();
-                wprintw(inp_win, input);
+                wprintw(inp_win, bytes);
 
                 display_size++;
 
                 // if gone over screen size follow input
-                int rows, cols;
-                getmaxyx(stdscr, rows, cols);
                 if (display_size - pad_start > cols-2) {
                     pad_start++;
                     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
@@ -344,7 +347,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
                 g_free(start);
 
-                inp_clear();
+                _inp_clear_no_pad();
                 wprintw(inp_win, input);
                 wmove(inp_win, 0, inp_x -1);
 
@@ -364,7 +367,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
                 g_free(end);
                 g_string_free(new, FALSE);
 
-                inp_clear();
+                _inp_clear_no_pad();
                 wprintw(inp_win, input);
                 wmove(inp_win, 0, inp_x -1);
             }
@@ -375,9 +378,9 @@ _handle_edit(const wint_t ch, char *input, int *size)
                 if (pad_start < 0) {
                     pad_start = 0;
                 }
-
-                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
             }
+
+            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         }
         return 1;
 
@@ -391,8 +394,13 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
             g_free(start);
 
-            inp_clear();
+            _inp_clear_no_pad();
             wprintw(inp_win, input);
+
+            if (pad_start > 0) {
+                --pad_start;
+            }
+
         } else if (inp_x < display_size-1) {
             gchar *start = g_utf8_substring(input, 0, inp_x);
             gchar *end = g_utf8_substring(input, inp_x+1, *size);
@@ -408,10 +416,13 @@ _handle_edit(const wint_t ch, char *input, int *size)
             g_free(end);
             g_string_free(new, FALSE);
 
-            inp_clear();
+            _inp_clear_no_pad();
             wprintw(inp_win, input);
             wmove(inp_win, 0, inp_x);
         }
+
+        prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+
         return 1;
 
     case KEY_LEFT:
@@ -496,4 +507,11 @@ _special_key(const wint_t ch)
 {
     char *str = unctrl(ch);
     return ((strlen(str) > 1) && g_str_has_prefix(str, "^"));
+}
+
+static void
+_inp_clear_no_pad(void)
+{
+    wclear(inp_win);
+    wmove(inp_win, 0, 0);
 }
