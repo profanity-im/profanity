@@ -75,7 +75,7 @@ AC_SUBST(AM_CPPFLAGS)
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([atexit memset strdup strndup strstr])
+AC_CHECK_FUNCS([atexit memset strdup strstr])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
