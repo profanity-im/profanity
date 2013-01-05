@@ -251,7 +251,7 @@ inp_replace_input(char *input, const char * const new_input, int *size)
 {
     strcpy(input, new_input);
     *size = strlen(input);
-    _inp_clear_no_pad();
+    inp_clear();
     input[*size] = '\0';
     wprintw(inp_win, input);
 }
@@ -440,8 +440,12 @@ _handle_edit(const wint_t ch, char *input, int *size)
         prev = history_previous(input, size);
         if (prev) {
             inp_replace_input(input, prev, size);
-            pad_start = 0;
-            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            display_size = g_utf8_strlen(input, *size);
+            wmove(inp_win, inp_y, display_size);
+            if (display_size > cols-2) {
+                pad_start = display_size - cols + 1;
+                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            }
         }
         return 1;
 
@@ -449,8 +453,12 @@ _handle_edit(const wint_t ch, char *input, int *size)
         next = history_next(input, size);
         if (next) {
             inp_replace_input(input, next, size);
-            pad_start = 0;
-            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            display_size = g_utf8_strlen(input, *size);
+            wmove(inp_win, inp_y, display_size);
+            if (display_size > cols-2) {
+                pad_start = display_size - cols + 1;
+                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
+            }
         }
         return 1;
 
