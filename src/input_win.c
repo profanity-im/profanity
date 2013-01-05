@@ -68,6 +68,7 @@ static int _handle_edit(const wint_t ch, char *input, int *size);
 static int _printable(const wint_t ch);
 static gboolean _special_key(const wint_t ch);
 static void _inp_clear_no_pad(void);
+static void _go_to_end(int inp_y, int display_size, int rows, int cols);
 
 void
 create_input_window(void)
@@ -447,11 +448,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
         if (prev) {
             inp_replace_input(input, prev, size);
             display_size = g_utf8_strlen(input, *size);
-            wmove(inp_win, inp_y, display_size);
-            if (display_size > cols-2) {
-                pad_start = display_size - cols + 1;
-                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
-            }
+            _go_to_end(inp_y, display_size, rows, cols);
         }
         return 1;
 
@@ -460,11 +457,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
         if (next) {
             inp_replace_input(input, next, size);
             display_size = g_utf8_strlen(input, *size);
-            wmove(inp_win, inp_y, display_size);
-            if (display_size > cols-2) {
-                pad_start = display_size - cols + 1;
-                prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
-            }
+            _go_to_end(inp_y, display_size, rows, cols);
         }
         return 1;
 
@@ -475,11 +468,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
         return 1;
 
     case KEY_END:
-        wmove(inp_win, inp_y, display_size);
-        if (display_size > cols-2) {
-            pad_start = display_size - cols + 1;
-            prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
-        }
+        _go_to_end(inp_y, display_size, rows, cols);
         return 1;
 
     case 9: // tab
@@ -488,6 +477,16 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
     default:
         return 0;
+    }
+}
+
+static void
+_go_to_end(int inp_y, int display_size, int rows, int cols)
+{
+    wmove(inp_win, inp_y, display_size);
+    if (display_size > cols-2) {
+        pad_start = display_size - cols + 1;
+        prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
     }
 }
 
