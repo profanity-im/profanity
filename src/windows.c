@@ -177,12 +177,12 @@ _ui_draw_win_title(void)
         gint unread = _win_get_unread();
 
         if (unread != 0) {
-            sprintf(new_win_title, "%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
+            snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
         } else {
-            sprintf(new_win_title, "%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
+            snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
         }
     } else {
-        sprintf(new_win_title, "%c]0;%s%s%c", '\033', "Profanity", version_str->str, '\007');
+        snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s%c", '\033', "Profanity", version_str->str, '\007');
     }
 
     g_string_free(version_str, TRUE);
