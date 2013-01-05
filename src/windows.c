@@ -187,8 +187,8 @@ _ui_draw_win_title(void)
 
     g_string_free(version_str, TRUE);
 
-    // draw if change
     if (g_strcmp0(win_title, new_win_title) != 0) {
+        // print to x-window title bar
         printf(new_win_title);
         if (win_title != NULL) {
             free(win_title);
@@ -200,6 +200,7 @@ _ui_draw_win_title(void)
 unsigned long
 ui_get_idle_time(void)
 {
+// if compiled with libxss, get the x sessions idle time
 #ifdef HAVE_LIBXSS
     XScreenSaverInfo *info = XScreenSaverAllocInfo();
     if (info != NULL && display != NULL) {
@@ -207,11 +208,16 @@ ui_get_idle_time(void)
         unsigned long result = info->idle;
         XFree(info);
         return result;
+
+    // if we couldn't get a screensaverinfo, use profanity interaction idle time
+    // this may occur if compiled with libxss, but then run in a bare terminal
     } else {
         gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
         unsigned long ms_elapsed = seconds_elapsed * 1000.0;
         return ms_elapsed;
     }
+
+// if not compiled with libxss, just use profanity interaction idle time
 #else
     gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
     unsigned long ms_elapsed = seconds_elapsed * 1000.0;
