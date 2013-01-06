@@ -68,7 +68,7 @@ static int _handle_edit(const wint_t ch, char *input, int *size);
 static int _printable(const wint_t ch);
 static gboolean _special_key(const wint_t ch);
 static void _inp_clear_no_pad(void);
-static void _go_to_end(int inp_y, int display_size, int rows, int cols);
+static void _go_to_end(int display_size, int rows, int cols);
 
 void
 create_input_window(void)
@@ -132,7 +132,6 @@ inp_block(void)
 wint_t
 inp_get_char(char *input, int *size)
 {
-    int inp_y = 0;
     int inp_x = 0;
     int i;
     wint_t ch;
@@ -168,7 +167,7 @@ inp_get_char(char *input, int *size)
         if (_printable(ch)) {
             int rows, cols;
             getmaxyx(stdscr, rows, cols);
-            getyx(inp_win, inp_y, inp_x);
+            inp_x = getcurx(inp_win);
 
             // handle insert if not at end of input
             if (inp_x < display_size) {
@@ -187,7 +186,7 @@ inp_get_char(char *input, int *size)
                 *size += utf_len;
                 input[*size] = '\0';
                 wprintw(inp_win, next_ch);
-                wmove(inp_win, inp_y, inp_x + 1);
+                wmove(inp_win, 0, inp_x + 1);
 
                 if (inp_x - pad_start > cols-3) {
                     pad_start++;
@@ -280,7 +279,6 @@ _handle_edit(const wint_t ch, char *input, int *size)
     int rows, cols;
     char *prev = NULL;
     char *next = NULL;
-    int inp_y = 0;
     int inp_x = 0;
     int next_ch;
     int display_size = 0;
@@ -290,7 +288,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
     }
 
     getmaxyx(stdscr, rows, cols);
-    getyx(inp_win, inp_y, inp_x);
+    inp_x = getcurx(inp_win);
 
     switch(ch) {
 
@@ -427,7 +425,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
     case KEY_LEFT:
         if (inp_x > 0)
-            wmove(inp_win, inp_y, inp_x-1);
+            wmove(inp_win, 0, inp_x-1);
 
         // current position off screen to left
         if (inp_x - 1 < pad_start) {
@@ -438,7 +436,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
     case KEY_RIGHT:
         if (inp_x < display_size) {
-            wmove(inp_win, inp_y, inp_x+1);
+            wmove(inp_win, 0, inp_x+1);
 
             // current position off screen to right
             if ((inp_x + 1 - pad_start) >= cols) {
@@ -453,7 +451,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
         if (prev) {
             inp_replace_input(input, prev, size);
             display_size = g_utf8_strlen(input, *size);
-            _go_to_end(inp_y, display_size, rows, cols);
+            _go_to_end(display_size, rows, cols);
         }
         return 1;
 
@@ -462,18 +460,18 @@ _handle_edit(const wint_t ch, char *input, int *size)
         if (next) {
             inp_replace_input(input, next, size);
             display_size = g_utf8_strlen(input, *size);
-            _go_to_end(inp_y, display_size, rows, cols);
+            _go_to_end(display_size, rows, cols);
         }
         return 1;
 
     case KEY_HOME:
-        wmove(inp_win, inp_y, 0);
+        wmove(inp_win, 0, 0);
         pad_start = 0;
         prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
         return 1;
 
     case KEY_END:
-        _go_to_end(inp_y, display_size, rows, cols);
+        _go_to_end(display_size, rows, cols);
         return 1;
 
     case 9: // tab
@@ -486,9 +484,9 @@ _handle_edit(const wint_t ch, char *input, int *size)
 }
 
 static void
-_go_to_end(int inp_y, int display_size, int rows, int cols)
+_go_to_end(int display_size, int rows, int cols)
 {
-    wmove(inp_win, inp_y, display_size);
+    wmove(inp_win, 0, display_size);
     if (display_size > cols-2) {
         pad_start = display_size - cols + 1;
         prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
