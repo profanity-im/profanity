@@ -172,7 +172,7 @@ void status_bar_update_time(void);
 
 // input window actions
 wint_t inp_get_char(char *input, int *size);
-void inp_clear(void);
+void inp_win_reset(void);
 void inp_win_resize(const char * input, const int size);
 void inp_put_back(void);
 void inp_non_block(void);

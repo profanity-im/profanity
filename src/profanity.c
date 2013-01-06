@@ -458,7 +458,7 @@ _process_input(char *inp)
         result = cmd_execute_default(inp);
     }
 
-    inp_clear();
+    inp_win_reset();
     contact_list_reset_search_attempts();
     win_current_page_off();
 
