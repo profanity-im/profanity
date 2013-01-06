@@ -218,7 +218,7 @@ inp_get_char(char *input, int *size)
 void
 inp_get_password(char *passwd)
 {
-    wclear(inp_win);
+    _clear_input();
     _inp_win_refresh();
     noecho();
     mvwgetnstr(inp_win, 0, 1, passwd, 20);
