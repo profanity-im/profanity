@@ -146,7 +146,6 @@ inp_get_char(char *input, int *size)
     wget_wch(inp_win, &ch);
 
     gboolean in_command = FALSE;
-
     if ((display_size > 0 && input[0] == '/') ||
             (display_size == 0 && ch == '/')) {
         in_command = TRUE;
@@ -209,7 +208,7 @@ inp_get_char(char *input, int *size)
                     wprintw(inp_win, bytes);
                     display_size++;
 
-                   // if gone over screen size follow input
+                    // if gone over screen size follow input
                     int rows, cols;
                     getmaxyx(stdscr, rows, cols);
                     if (display_size - pad_start > cols-2) {
