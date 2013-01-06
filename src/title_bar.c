@@ -56,6 +56,7 @@ title_bar_title(void)
     recipient = NULL;
     typing_elapsed = NULL;
     title_bar_show("Profanity. Type /help for help information.");
+    _title_bar_draw_status();
     dirty = TRUE;
 }
 
