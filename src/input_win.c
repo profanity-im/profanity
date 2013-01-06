@@ -20,24 +20,6 @@
  *
  */
 
-/*
- * Non blocking input char handling
- *
- * *size  - holds the current size of input
- * *input - holds the current input string, NOT null terminated at this point
- * *ch    - getch will put a charater here if there was any input
- *
- * The example below shows the values of size, input, a call to wgetyx to
- * find the current cursor location, and the index of the input string.
- *
- * view         :    |mple|
- * input        : "example te"
- * index        : "0123456789"
- * inp_x        : "0123456789"
- * size         : 10
- * pad_start    : 3
- * cols         : 4
- */
 #define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
