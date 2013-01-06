@@ -250,12 +250,6 @@ inp_put_back(void)
     prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1);
 }
 
-int
-inp_get_next_char(void)
-{
-    return wgetch(inp_win);
-}
-
 void
 inp_replace_input(char *input, const char * const new_input, int *size)
 {
@@ -293,7 +287,7 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
     case 27: // ESC
         // check for ALT-num
-        next_ch = inp_get_next_char();
+        next_ch = wgetch(inp_win);
         if (next_ch != ERR) {
             switch (next_ch)
             {

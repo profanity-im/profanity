@@ -179,7 +179,6 @@ void inp_non_block(void);
 void inp_block(void);
 void inp_get_password(char *passwd);
 void inp_replace_input(char *input, const char * const new_input, int *size);
-int inp_get_next_char(void);
 
 void notify_remind(void);
 #endif
