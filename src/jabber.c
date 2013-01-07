@@ -82,6 +82,13 @@ static int _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
+#define FREE_SET_NULL(resource) \
+{\
+    if (resource != NULL) \
+        free(resource); \
+    resource = NULL; \
+}
+
 void
 jabber_init(const int disable_tls)
 {
@@ -514,8 +521,10 @@ jabber_get_status(void)
 void
 jabber_free_resources(void)
 {
-    saved_user = NULL;
-    saved_password = NULL;
+    FREE_SET_NULL(saved_user);
+    FREE_SET_NULL(saved_password);
+    FREE_SET_NULL(saved_account);
+    FREE_SET_NULL(saved_altdomain);
     chat_sessions_clear();
     g_hash_table_remove_all(sub_requests);
     xmpp_conn_release(jabber_conn.conn);
