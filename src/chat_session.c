@@ -63,7 +63,8 @@ chat_sessions_init(void)
 void
 chat_sessions_clear(void)
 {
-    g_hash_table_remove_all(sessions);
+    if (sessions != NULL)
+        g_hash_table_remove_all(sessions);
 }
 
 void

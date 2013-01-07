@@ -527,7 +527,8 @@ jabber_free_resources(void)
     FREE_SET_NULL(saved_account);
     FREE_SET_NULL(saved_altdomain);
     chat_sessions_clear();
-    g_hash_table_remove_all(sub_requests);
+    if (sub_requests != NULL)
+        g_hash_table_remove_all(sub_requests);
     xmpp_conn_release(jabber_conn.conn);
     xmpp_ctx_free(jabber_conn.ctx);
     xmpp_shutdown();
@@ -790,6 +791,9 @@ _connection_handler(xmpp_conn_t * const conn,
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
+                // TODO: free resources but leave saved_* untouched
+            } else {
+                jabber_free_resources();
             }
 
         // login attempt failed
@@ -801,6 +805,7 @@ _connection_handler(xmpp_conn_t * const conn,
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);
                 }
+                // TODO: free resources but leave saved_* untouched
             }
         }
 
