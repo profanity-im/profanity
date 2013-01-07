@@ -202,8 +202,8 @@ jabber_disconnect(void)
     // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");
-        xmpp_disconnect(jabber_conn.conn);
         jabber_conn.conn_status = JABBER_DISCONNECTING;
+        xmpp_disconnect(jabber_conn.conn);
 
         while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
@@ -782,40 +782,33 @@ _connection_handler(xmpp_conn_t * const conn,
             }
         }
 
-    } else {
-
-        // received close stream response from server after disconnect
-        if (jabber_conn.conn_status == JABBER_DISCONNECTING) {
-            jabber_conn.conn_status = JABBER_DISCONNECTED;
-            jabber_conn.presence = PRESENCE_OFFLINE;
+    } else if (status == XMPP_CONN_DISCONNECT) {
 
         // lost connection for unkown reason
-        } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        if (jabber_conn.conn_status == JABBER_CONNECTED) {
             prof_handle_lost_connection();
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
             }
             xmpp_stop(ctx);
-            jabber_conn.conn_status = JABBER_DISCONNECTED;
-            jabber_conn.presence = PRESENCE_OFFLINE;
 
         // login attempt failed
-        } else {
+        } else if (jabber_conn.conn_status != JABBER_DISCONNECTING) {
             if (reconnect_timer == NULL) {
                 prof_handle_failed_login();
-                jabber_conn.conn_status = JABBER_DISCONNECTED;
-                jabber_conn.presence = PRESENCE_OFFLINE;
                 jabber_free_resources();
             } else {
                 xmpp_stop(ctx);
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);
                 }
-                jabber_conn.conn_status = JABBER_DISCONNECTED;
-                jabber_conn.presence = PRESENCE_OFFLINE;
             }
         }
+
+        // close stream response from server after disconnect is handled too
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
+        jabber_conn.presence = PRESENCE_OFFLINE;
     }
 }
 
