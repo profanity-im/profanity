@@ -788,14 +788,6 @@ _connection_handler(xmpp_conn_t * const conn,
         if (jabber_conn.conn_status == JABBER_DISCONNECTING) {
             jabber_conn.conn_status = JABBER_DISCONNECTED;
             jabber_conn.presence = PRESENCE_OFFLINE;
-            if (saved_user != NULL) {
-                free(saved_user);
-                saved_user = NULL;
-            }
-            if (saved_password != NULL) {
-                free(saved_password);
-                saved_password = NULL;
-            }
 
         // lost connection for unkown reason
         } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
