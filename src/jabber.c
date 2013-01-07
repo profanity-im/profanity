@@ -791,7 +791,6 @@ _connection_handler(xmpp_conn_t * const conn,
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
             }
-            xmpp_stop(ctx);
 
         // login attempt failed
         } else if (jabber_conn.conn_status != JABBER_DISCONNECTING) {
@@ -799,7 +798,6 @@ _connection_handler(xmpp_conn_t * const conn,
                 prof_handle_failed_login();
                 jabber_free_resources();
             } else {
-                xmpp_stop(ctx);
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);
                 }
