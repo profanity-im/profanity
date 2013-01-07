@@ -51,7 +51,6 @@ static int rows, cols;
 
 static int _handle_edit(const wint_t ch, char *input, int *size);
 static int _printable(const wint_t ch);
-static gboolean _special_key(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
 
@@ -465,19 +464,10 @@ _go_to_end(int display_size)
 static int
 _printable(const wint_t ch)
 {
-   return (ch != ERR && ch != '\n' &&
-            ch != KEY_PPAGE && ch != KEY_NPAGE && ch != KEY_MOUSE &&
-            ch != KEY_F(1) && ch != KEY_F(2) && ch != KEY_F(3) &&
-            ch != KEY_F(4) && ch != KEY_F(5) && ch != KEY_F(6) &&
-            ch != KEY_F(7) && ch != KEY_F(8) && ch != KEY_F(9) &&
-            ch != KEY_F(10) && ch!= KEY_F(11) && ch != KEY_F(12) &&
-            ch != KEY_IC && ch != KEY_EIC && ch != KEY_RESIZE &&
-            !_special_key(ch));
-}
+    char bytes[MB_CUR_MAX+1];
+    size_t utf_len = wcrtomb(bytes, ch, NULL);
+    bytes[utf_len] = '\0';
 
-static gboolean
-_special_key(const wint_t ch)
-{
-    char *str = unctrl(ch);
-    return ((strlen(str) > 1) && g_str_has_prefix(str, "^"));
+    gunichar unichar = g_utf8_get_char(bytes);
+    return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
 }
