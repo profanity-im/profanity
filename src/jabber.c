@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <strophe.h>
 
@@ -800,6 +801,7 @@ _connection_handler(xmpp_conn_t * const conn,
         } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
             prof_handle_lost_connection();
             if (prefs_get_reconnect() != 0) {
+                assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
             }
             xmpp_stop(ctx);
