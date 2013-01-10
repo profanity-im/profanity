@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <strophe.h>
 
@@ -81,6 +82,13 @@ static int _roster_handler(xmpp_conn_t * const conn,
 static int _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
+
+#define FREE_SET_NULL(resource) \
+{\
+    if (resource != NULL) \
+        free(resource); \
+    resource = NULL; \
+}
 
 void
 jabber_init(const int disable_tls)
@@ -194,8 +202,8 @@ jabber_disconnect(void)
     // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         log_info("Closing connection");
-        xmpp_disconnect(jabber_conn.conn);
         jabber_conn.conn_status = JABBER_DISCONNECTING;
+        xmpp_disconnect(jabber_conn.conn);
 
         while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
@@ -217,7 +225,7 @@ jabber_process_events(void)
     } else if (prefs_get_reconnect() != 0) {
         if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
             (reconnect_timer != NULL)) {
-            if (g_timer_elapsed(reconnect_timer, NULL) > (prefs_get_reconnect() * 1.0)) {
+            if (g_timer_elapsed(reconnect_timer, NULL) > prefs_get_reconnect()) {
                 log_debug("Attempting reconnect as %s", saved_user);
                 jabber_connect(saved_user, saved_password, saved_altdomain);
             }
@@ -514,10 +522,13 @@ jabber_get_status(void)
 void
 jabber_free_resources(void)
 {
-    saved_user = NULL;
-    saved_password = NULL;
+    FREE_SET_NULL(saved_user);
+    FREE_SET_NULL(saved_password);
+    FREE_SET_NULL(saved_account);
+    FREE_SET_NULL(saved_altdomain);
     chat_sessions_clear();
-    g_hash_table_remove_all(sub_requests);
+    if (sub_requests != NULL)
+        g_hash_table_remove_all(sub_requests);
     xmpp_conn_release(jabber_conn.conn);
     xmpp_ctx_free(jabber_conn.ctx);
     xmpp_shutdown();
@@ -772,55 +783,35 @@ _connection_handler(xmpp_conn_t * const conn,
             }
         }
 
-    } else {
-
-        // received close stream response from server after disconnect
-        if (jabber_conn.conn_status == JABBER_DISCONNECTING) {
-            jabber_conn.conn_status = JABBER_DISCONNECTED;
-            jabber_conn.presence = PRESENCE_OFFLINE;
-            if (saved_user != NULL) {
-                free(saved_user);
-                saved_user = NULL;
-            }
-            if (saved_password != NULL) {
-                free(saved_password);
-                saved_password = NULL;
-            }
+    } else if (status == XMPP_CONN_DISCONNECT) {
 
         // lost connection for unkown reason
-        } else if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        if (jabber_conn.conn_status == JABBER_CONNECTED) {
             prof_handle_lost_connection();
             if (prefs_get_reconnect() != 0) {
+                assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
+                // TODO: free resources but leave saved_* untouched
+            } else {
+                jabber_free_resources();
             }
-            xmpp_stop(ctx);
-            jabber_conn.conn_status = JABBER_DISCONNECTED;
-            jabber_conn.presence = PRESENCE_OFFLINE;
 
         // login attempt failed
-        } else {
+        } else if (jabber_conn.conn_status != JABBER_DISCONNECTING) {
             if (reconnect_timer == NULL) {
                 prof_handle_failed_login();
-                if (saved_user != NULL) {
-                    free(saved_user);
-                    saved_user = NULL;
-                }
-                if (saved_password != NULL) {
-                    free(saved_password);
-                    saved_password = NULL;
-                }
-                xmpp_stop(ctx);
-                jabber_conn.conn_status = JABBER_DISCONNECTED;
-                jabber_conn.presence = PRESENCE_OFFLINE;
+                jabber_free_resources();
             } else {
-                xmpp_stop(ctx);
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);
                 }
-                jabber_conn.conn_status = JABBER_DISCONNECTED;
-                jabber_conn.presence = PRESENCE_OFFLINE;
+                // TODO: free resources but leave saved_* untouched
             }
         }
+
+        // close stream response from server after disconnect is handled too
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
+        jabber_conn.presence = PRESENCE_OFFLINE;
     }
 }
 
