@@ -1140,6 +1140,8 @@ cons_show_wins(void)
             }
         }
     }
+
+    cons_show("");
 }
 
 void
