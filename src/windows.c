@@ -326,11 +326,14 @@ void
 ui_show_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
+    char *display_from;
     win_type_t win_type;
     if (priv) {
         win_type = WIN_PRIVATE;
+        display_from = room_get_nick_from_full_jid(from);
     } else {
         win_type = WIN_CHAT;
+        display_from = strdup(from);
     }
 
     int win_index = _find_prof_win_index(from);
@@ -390,12 +393,12 @@ ui_show_incoming_msg(const char * const from, const char * const message,
 
             if (strncmp(message, "/me ", 4) == 0) {
                 wattron(win, COLOUR_THEM);
-                wprintw(win, "*%s ", from);
+                wprintw(win, "*%s ", display_from);
                 wprintw(win, message + 4);
                 wprintw(win, "\n");
                 wattroff(win, COLOUR_THEM);
             } else {
-                _win_show_user(win, from, 1);
+                _win_show_user(win, display_from, 1);
                 _win_show_message(win, message);
             }
             title_bar_set_typing(FALSE);
@@ -429,12 +432,12 @@ ui_show_incoming_msg(const char * const from, const char * const message,
 
             if (strncmp(message, "/me ", 4) == 0) {
                 wattron(win, COLOUR_THEM);
-                wprintw(win, "*%s ", from);
+                wprintw(win, "*%s ", display_from);
                 wprintw(win, message + 4);
                 wprintw(win, "\n");
                 wattroff(win, COLOUR_THEM);
             } else {
-                _win_show_user(win, from, 1);
+                _win_show_user(win, display_from, 1);
                 _win_show_message(win, message);
             }
         }
@@ -443,7 +446,9 @@ ui_show_incoming_msg(const char * const from, const char * const message,
     if (prefs_get_beep())
         beep();
     if (prefs_get_notify_message())
-        _notify_message(from);
+        _notify_message(display_from);
+
+    g_free(display_from);
 }
 
 void

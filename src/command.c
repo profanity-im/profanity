@@ -1532,19 +1532,44 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (msg != NULL) {
-        jabber_send(msg, usr);
-        win_show_outgoing_msg("me", usr, msg);
+    if (win_current_is_groupchat()) {
+        char *room_name = win_current_get_recipient();
+        if (room_nick_in_roster(room_name, usr)) {
+            GString *full_jid = g_string_new(room_name);
+            g_string_append(full_jid, "/");
+            g_string_append(full_jid, usr);
 
-        if (prefs_get_chlog()) {
-            const char *jid = jabber_get_jid();
-            chat_log_chat(jid, usr, msg, PROF_OUT_LOG, NULL);
+            jabber_send(msg, full_jid->str);
+            win_show_outgoing_msg("me", full_jid->str, msg);
+
+            if (prefs_get_chlog()) {
+                const char *jid = jabber_get_jid();
+                chat_log_chat(jid, full_jid->str, msg, PROF_OUT_LOG, NULL);
+            }
+
+            g_string_free(full_jid, TRUE);
+
+        } else {
+            cons_show("No such nick \"%s\" in room %s.", usr, room_name);
         }
 
         return TRUE;
+
     } else {
-        win_new_chat_win(usr);
-        return TRUE;
+        if (msg != NULL) {
+            jabber_send(msg, usr);
+            win_show_outgoing_msg("me", usr, msg);
+
+            if (prefs_get_chlog()) {
+                const char *jid = jabber_get_jid();
+                chat_log_chat(jid, usr, msg, PROF_OUT_LOG, NULL);
+            }
+
+            return TRUE;
+        } else {
+            win_new_chat_win(usr);
+            return TRUE;
+        }
     }
 }
 
