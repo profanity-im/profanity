@@ -97,6 +97,7 @@ void title_bar_draw(void);
 
 // current window actions
 void win_current_close(void);
+int win_current_is_console(void);
 int win_current_is_chat(void);
 int win_current_is_groupchat(void);
 int win_current_is_private(void);

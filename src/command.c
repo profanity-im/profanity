@@ -1661,8 +1661,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     // cannot close console window
-    if (!win_current_is_chat() && !win_current_is_groupchat()
-            && !win_current_is_private()) {
+    if (win_current_is_console()) {
         cons_show("Cannot close console window.");
         return TRUE;
     }

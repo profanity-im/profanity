@@ -550,6 +550,12 @@ win_current_close(void)
 }
 
 int
+win_current_is_console(void)
+{
+    return (current->type == WIN_CONSOLE);
+}
+
+int
 win_current_is_chat(void)
 {
     return (current->type == WIN_CHAT);
