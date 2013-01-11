@@ -29,6 +29,7 @@
 
 void contact_list_init(void);
 void contact_list_clear(void);
+void contact_list_free(void);
 void contact_list_reset_search_attempts(void);
 void contact_list_remove(const char * const jid);
 gboolean contact_list_add(const char * const jid, const char * const name,

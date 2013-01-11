@@ -72,8 +72,8 @@ accounts_load(void)
 void
 accounts_close(void)
 {
-    p_autocomplete_clear(all_ac);
-    p_autocomplete_clear(enabled_ac);
+    p_autocomplete_free(all_ac);
+    p_autocomplete_free(enabled_ac);
     g_key_file_free(accounts);
 }
 

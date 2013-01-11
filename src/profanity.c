@@ -545,11 +545,12 @@ static void
 _shutdown(void)
 {
     jabber_disconnect();
-    contact_list_clear();
+    contact_list_free();
     ui_close();
     chat_log_close();
     prefs_close();
     theme_close();
+    accounts_close();
     cmd_close();
     log_close();
 }

@@ -49,6 +49,12 @@ contact_list_clear(void)
 }
 
 void
+contact_list_free()
+{
+    p_autocomplete_free(ac);
+}
+
+void
 contact_list_reset_search_attempts(void)
 {
     p_autocomplete_reset(ac);

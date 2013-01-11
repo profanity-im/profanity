@@ -358,7 +358,7 @@ _room_free(muc_room *room)
             room->roster = NULL;
         }
         if (room->nick_ac != NULL) {
-            p_autocomplete_clear(room->nick_ac);
+            p_autocomplete_free(room->nick_ac);
         }
         if (room->nick_changes != NULL) {
             g_hash_table_remove_all(room->nick_changes);

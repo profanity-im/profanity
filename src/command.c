@@ -712,20 +712,20 @@ cmd_init(void)
 void
 cmd_close(void)
 {
-    p_autocomplete_clear(commands_ac);
-    p_autocomplete_clear(who_ac);
-    p_autocomplete_clear(help_ac);
-    p_autocomplete_clear(notify_ac);
-    p_autocomplete_clear(sub_ac);
-    p_autocomplete_clear(log_ac);
-    p_autocomplete_clear(prefs_ac);
-    p_autocomplete_clear(autoaway_ac);
-    p_autocomplete_clear(autoaway_mode_ac);
-    p_autocomplete_clear(theme_ac);
+    p_autocomplete_free(commands_ac);
+    p_autocomplete_free(who_ac);
+    p_autocomplete_free(help_ac);
+    p_autocomplete_free(notify_ac);
+    p_autocomplete_free(sub_ac);
+    p_autocomplete_free(log_ac);
+    p_autocomplete_free(prefs_ac);
+    p_autocomplete_free(autoaway_ac);
+    p_autocomplete_free(autoaway_mode_ac);
+    p_autocomplete_free(theme_ac);
     if (theme_load_ac != NULL) {
-        p_autocomplete_clear(theme_load_ac);
+        p_autocomplete_free(theme_load_ac);
     }
-    p_autocomplete_clear(account_ac);
+    p_autocomplete_free(account_ac);
 }
 
 // Command autocompletion functions

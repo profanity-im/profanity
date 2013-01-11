@@ -72,7 +72,7 @@ prefs_load(void)
 void
 prefs_close(void)
 {
-    p_autocomplete_clear(boolean_choice_ac);
+    p_autocomplete_free(boolean_choice_ac);
     g_key_file_free(prefs);
 }
 

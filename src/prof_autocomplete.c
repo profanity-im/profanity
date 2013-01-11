@@ -63,6 +63,14 @@ p_autocomplete_reset(PAutocomplete ac)
     }
 }
 
+void
+p_autocomplete_free(PAutocomplete ac)
+{
+    p_autocomplete_clear(ac);
+    g_free(ac);
+    ac = NULL;
+}
+
 gboolean
 p_autocomplete_add(PAutocomplete ac, void *item)
 {
