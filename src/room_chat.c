@@ -25,13 +25,15 @@
 
 #include <glib.h>
 
-#include <contact.h>
+#include "contact.h"
+#include "prof_autocomplete.h"
 
 typedef struct _muc_room_t {
     char *room;
     char *nick;
     gboolean pending_nick_change;
     GHashTable *roster;
+    PAutocomplete nick_ac;
     GHashTable *nick_changes;
     gboolean roster_received;
 } muc_room;
@@ -53,6 +55,7 @@ room_join(const char * const room, const char * const nick)
     new_room->nick = strdup(nick);
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
+    new_room->nick_ac = p_autocomplete_new();
     new_room->nick_changes = g_hash_table_new_full(g_str_hash, g_str_equal,
         g_free, g_free);
     new_room->roster_received = FALSE;
@@ -247,6 +250,7 @@ room_add_to_roster(const char * const room, const char * const nick,
 
         if (old == NULL) {
             updated = TRUE;
+            p_autocomplete_add(chat_room->nick_ac, strdup(nick));
         } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
                     (g_strcmp0(p_contact_status(old), status) != 0)) {
             updated = TRUE;
@@ -266,6 +270,7 @@ room_remove_from_roster(const char * const room, const char * const nick)
 
     if (chat_room != NULL) {
         g_hash_table_remove(chat_room->roster, nick);
+        p_autocomplete_remove(chat_room->nick_ac, nick);
     }
 }
 
@@ -351,6 +356,9 @@ _room_free(muc_room *room)
         if (room->roster != NULL) {
             g_hash_table_remove_all(room->roster);
             room->roster = NULL;
+        }
+        if (room->nick_ac != NULL) {
+            p_autocomplete_clear(room->nick_ac);
         }
         if (room->nick_changes != NULL) {
             g_hash_table_remove_all(room->nick_changes);
