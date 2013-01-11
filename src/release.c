@@ -1,7 +1,7 @@
 /*
  * release.c
  *
- * Copyright (C) 2012 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
