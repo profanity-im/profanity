@@ -41,6 +41,7 @@
 #include "preferences.h"
 #include "prof_autocomplete.h"
 #include "profanity.h"
+#include "room_chat.h"
 #include "theme.h"
 #include "tinyurl.h"
 #include "ui.h"
@@ -768,7 +769,16 @@ cmd_reset_autocomplete()
     p_autocomplete_reset(help_ac);
     p_autocomplete_reset(notify_ac);
     p_autocomplete_reset(sub_ac);
-    p_autocomplete_reset(who_ac);
+
+    if (win_current_is_groupchat()) {
+        PAutocomplete nick_ac = room_get_nick_ac(win_current_get_recipient());
+        if (nick_ac != NULL) {
+            p_autocomplete_reset(nick_ac);
+        }
+    } else {
+        p_autocomplete_reset(who_ac);
+    }
+
     p_autocomplete_reset(prefs_ac);
     p_autocomplete_reset(log_ac);
     p_autocomplete_reset(commands_ac);
@@ -905,10 +915,19 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/vercheck",
         prefs_autocomplete_boolean_choice);
 
-    _parameter_autocomplete(input, size, "/msg",
-        contact_list_find_contact);
-    _parameter_autocomplete(input, size, "/info",
-        contact_list_find_contact);
+    if (win_current_is_groupchat()) {
+        PAutocomplete nick_ac = room_get_nick_ac(win_current_get_recipient());
+        if (nick_ac != NULL) {
+            _parameter_autocomplete_with_ac(input, size, "/msg", nick_ac);
+            _parameter_autocomplete_with_ac(input, size, "/info", nick_ac);
+        }
+    } else {
+        _parameter_autocomplete(input, size, "/msg",
+            contact_list_find_contact);
+        _parameter_autocomplete(input, size, "/info",
+            contact_list_find_contact);
+    }
+
     _parameter_autocomplete(input, size, "/connect",
         accounts_find_enabled);
     _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
@@ -1639,28 +1658,37 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_close(gchar **args, struct cmd_help_t help)
 {
-    if (win_current_is_groupchat()) {
-        char *room_jid = win_current_get_recipient();
-        jabber_leave_chat_room(room_jid);
-        win_current_close();
-    } else if (win_current_is_chat() || win_current_is_private()) {
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-        if (prefs_get_states()) {
-            char *recipient = win_current_get_recipient();
+    // cannot close console window
+    if (!win_current_is_chat() && !win_current_is_groupchat()
+            && !win_current_is_private()) {
+        cons_show("Cannot close console window.");
+        return TRUE;
+    }
 
-            // send <gone/> chat state before closing
-            if (chat_session_get_recipient_supports(recipient)) {
-                chat_session_set_gone(recipient);
-                jabber_send_gone(recipient);
-                chat_session_end(recipient);
+    // handle leaving rooms, or chat
+    if (conn_status == JABBER_CONNECTED) {
+        if (win_current_is_groupchat()) {
+            char *room_jid = win_current_get_recipient();
+            jabber_leave_chat_room(room_jid);
+        } else if (win_current_is_chat() || win_current_is_private()) {
+
+            if (prefs_get_states()) {
+                char *recipient = win_current_get_recipient();
+
+                // send <gone/> chat state before closing
+                if (chat_session_get_recipient_supports(recipient)) {
+                    chat_session_set_gone(recipient);
+                    jabber_send_gone(recipient);
+                    chat_session_end(recipient);
+                }
             }
         }
-
-        win_current_close();
-
-    } else {
-        cons_show("Cannot close console window.");
     }
+
+    // close the window
+    win_current_close();
 
     return TRUE;
 }

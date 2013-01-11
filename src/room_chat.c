@@ -286,6 +286,18 @@ room_get_roster(const char * const room)
     }
 }
 
+PAutocomplete
+room_get_nick_ac(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        return chat_room->nick_ac;
+    } else {
+        return NULL;
+    }
+}
+
 void
 room_set_roster_received(const char * const room)
 {
