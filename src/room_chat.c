@@ -31,6 +31,7 @@
 typedef struct _muc_room_t {
     char *room;
     char *nick;
+    char *subject;
     gboolean pending_nick_change;
     GHashTable *roster;
     PAutocomplete nick_ac;
@@ -364,6 +365,10 @@ _room_free(muc_room *room)
         if (room->nick != NULL) {
             g_free(room->nick);
             room->nick = NULL;
+        }
+        if (room->subject != NULL) {
+            g_free(room->subject);
+            room->subject = NULL;
         }
         if (room->roster != NULL) {
             g_hash_table_remove_all(room->roster);
