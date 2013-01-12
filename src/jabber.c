@@ -88,10 +88,11 @@ static int _presence_handler(xmpp_conn_t * const conn,
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
 #define FREE_SET_NULL(resource) \
-{\
-    if (resource != NULL) \
+{ \
+    if (resource != NULL) { \
         free(resource); \
-    resource = NULL; \
+        resource = NULL; \
+    } \
 }
 
 void
