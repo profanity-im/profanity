@@ -536,7 +536,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     char *room = NULL;
     char *nick = NULL;
     char *message = NULL;
-    gchar *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     // handle room broadcasts
     if (jid_is_room(room_jid)) {
