@@ -47,13 +47,17 @@ static struct _jabber_conn_t {
     int priority;
 } jabber_conn;
 
-// for auto reconnect
-static char *saved_account;
-static char *saved_user;
-static char *saved_password;
-static char *saved_altdomain;
-static GTimer *reconnect_timer;
 static GHashTable *sub_requests;
+
+// for auto reconnect
+static struct {
+    char *account;
+    char *jid;
+    char *passwd;
+    char *altdomain;
+} saved_user;
+
+static GTimer *reconnect_timer;
 
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
 static xmpp_log_level_t _get_xmpp_log_level();
@@ -112,73 +116,37 @@ jabber_restart(void)
 jabber_conn_status_t
 jabber_connect_with_account(ProfAccount *account, const char * const passwd)
 {
-    saved_account = strdup(account->name);
-    if (saved_user == NULL) {
-        saved_user = strdup(account->jid);
-    }
-    if (saved_password == NULL) {
-        saved_password = strdup(passwd);
-    }
-    if (saved_altdomain == NULL) {
-        if (account->server != NULL) {
-            saved_altdomain = strdup(account->server);
-        }
-    }
-
-    log_info("Connecting with account:%s, jid: %s", account->name, account->jid);
-    xmpp_initialize();
-
-    jabber_conn.log = _xmpp_get_file_logger();
-    jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
-    jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
-
-    xmpp_conn_set_jid(jabber_conn.conn, account->jid);
-    xmpp_conn_set_pass(jabber_conn.conn, passwd);
-
-    if (jabber_conn.tls_disabled)
-        xmpp_conn_disable_tls(jabber_conn.conn);
-
-    int connect_status = xmpp_connect_client(jabber_conn.conn, account->server, 0,
-        _connection_handler, jabber_conn.ctx);
-
-    if (connect_status == 0)
-        jabber_conn.conn_status = JABBER_CONNECTING;
-    else
-        jabber_conn.conn_status = JABBER_DISCONNECTED;
-
-    return jabber_conn.conn_status;
+    FREE_SET_NULL(saved_user.account);
+    saved_user.account = strdup(account->name);
+    log_info("Connecting with account: %s", account->name);
+    return jabber_connect(account->jid, passwd, account->server);
 }
 
 jabber_conn_status_t
-jabber_connect(const char * const user,
+jabber_connect(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
-    if (saved_account != NULL) {
-        free(saved_account);
-        saved_account = NULL;
-    }
+    FREE_SET_NULL(saved_user.jid);
+    FREE_SET_NULL(saved_user.passwd);
+    FREE_SET_NULL(saved_user.altdomain);
 
-    if (saved_user == NULL) {
-        saved_user = strdup(user);
-    }
-    if (saved_password == NULL) {
-        saved_password = strdup(passwd);
-    }
-    if (saved_altdomain == NULL) {
-        if (altdomain != NULL) {
-            saved_altdomain = strdup(altdomain);
-        }
-    }
+    if (jid == NULL || passwd == NULL)
+        return JABBER_UNDEFINED;
 
-    log_info("Connecting as %s", saved_user);
+    saved_user.jid = strdup(jid);
+    saved_user.passwd = strdup(passwd);
+    if (altdomain != NULL)
+        saved_user.altdomain = strdup(altdomain);
+
+    log_info("Connecting as %s", jid);
     xmpp_initialize();
 
     jabber_conn.log = _xmpp_get_file_logger();
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
     jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
 
-    xmpp_conn_set_jid(jabber_conn.conn, saved_user);
-    xmpp_conn_set_pass(jabber_conn.conn, saved_password);
+    xmpp_conn_set_jid(jabber_conn.conn, jid);
+    xmpp_conn_set_pass(jabber_conn.conn, passwd);
 
     if (jabber_conn.tls_disabled)
         xmpp_conn_disable_tls(jabber_conn.conn);
@@ -224,8 +192,8 @@ jabber_process_events(void)
         if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
             (reconnect_timer != NULL)) {
             if (g_timer_elapsed(reconnect_timer, NULL) > prefs_get_reconnect()) {
-                log_debug("Attempting reconnect as %s", saved_user);
-                jabber_connect(saved_user, saved_password, saved_altdomain);
+                log_debug("Attempting reconnect as %s", saved_user.jid);
+                jabber_connect(saved_user.jid, saved_user.passwd, saved_user.altdomain);
             }
         }
     }
@@ -520,10 +488,10 @@ jabber_get_status(void)
 void
 jabber_free_resources(void)
 {
-    FREE_SET_NULL(saved_user);
-    FREE_SET_NULL(saved_password);
-    FREE_SET_NULL(saved_account);
-    FREE_SET_NULL(saved_altdomain);
+    FREE_SET_NULL(saved_user.jid);
+    FREE_SET_NULL(saved_user.passwd);
+    FREE_SET_NULL(saved_user.account);
+    FREE_SET_NULL(saved_user.altdomain);
     chat_sessions_clear();
     if (sub_requests != NULL)
         g_hash_table_remove_all(sub_requests);
@@ -752,11 +720,11 @@ _connection_handler(xmpp_conn_t * const conn,
 
     // login success
     if (status == XMPP_CONN_CONNECT) {
-        if (saved_account != NULL) {
-            prof_handle_login_account_success(saved_account);
+        if (saved_user.account != NULL) {
+            prof_handle_login_account_success(saved_user.account);
         } else {
             const char *jid = xmpp_conn_get_jid(conn);
-            prof_handle_login_success(jid, saved_altdomain);
+            prof_handle_login_success(jid, saved_user.altdomain);
         }
 
         chat_sessions_init();
@@ -789,7 +757,7 @@ _connection_handler(xmpp_conn_t * const conn,
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
-                // TODO: free resources but leave saved_* untouched
+                // TODO: free resources but leave saved_user untouched
             } else {
                 jabber_free_resources();
             }
@@ -803,7 +771,7 @@ _connection_handler(xmpp_conn_t * const conn,
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);
                 }
-                // TODO: free resources but leave saved_* untouched
+                // TODO: free resources but leave saved_user untouched
             }
         }
 
