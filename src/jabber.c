@@ -295,8 +295,10 @@ jabber_subscription(const char * const jid, jabber_subscr_t action)
         type = STANZA_TYPE_SUBSCRIBED;
     else if (action == PRESENCE_UNSUBSCRIBED)
         type = STANZA_TYPE_UNSUBSCRIBED;
-    else // unknown action
+    else { // unknown action
+        free(jid_cpy);
         return;
+    }
 
     presence = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
