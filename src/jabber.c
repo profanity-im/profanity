@@ -118,6 +118,10 @@ jabber_conn_status_t
 jabber_connect_with_account(ProfAccount *account, const char * const passwd)
 {
     FREE_SET_NULL(saved_user.account);
+
+    if (account->name == NULL)
+        return JABBER_UNDEFINED;
+
     saved_user.account = strdup(account->name);
     log_info("Connecting with account: %s", account->name);
     return jabber_connect(account->jid, passwd, account->server);
