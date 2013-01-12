@@ -349,7 +349,7 @@ jabber_get_subscription_requests(void)
 void
 jabber_join(const char * const room, const char * const nick)
 {
-    char *full_room_jid = room_create_full_room_jid(room, nick);
+    char *full_room_jid = create_full_room_jid(room, nick);
     xmpp_stanza_t *presence = stanza_create_room_join_presence(jabber_conn.ctx,
         full_room_jid);
     xmpp_send(jabber_conn.conn, presence);
@@ -363,7 +363,7 @@ jabber_join(const char * const room, const char * const nick)
 void
 jabber_change_room_nick(const char * const room, const char * const nick)
 {
-    char *full_room_jid = room_create_full_room_jid(room, nick);
+    char *full_room_jid = create_full_room_jid(room, nick);
     xmpp_stanza_t *presence = stanza_create_room_newnick_presence(jabber_conn.ctx,
         full_room_jid);
     xmpp_send(jabber_conn.conn, presence);
@@ -458,7 +458,7 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     while (rooms != NULL) {
         char *room = rooms->data;
         char *nick = muc_get_room_nick(room);
-        char *full_room_jid = room_create_full_room_jid(room, nick);
+        char *full_room_jid = create_full_room_jid(room, nick);
 
         xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
         xmpp_send(jabber_conn.conn, presence);
@@ -572,14 +572,14 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     gchar *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     // handle room broadcasts
-    if (room_from_jid_is_room(room_jid)) {
+    if (jid_is_room(room_jid)) {
         xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
 
         // handle subject
         if (subject != NULL) {
             message = xmpp_stanza_get_text(subject);
             if (message != NULL) {
-                room = room_get_room_from_full_jid(room_jid);
+                room = get_room_from_full_jid(room_jid);
                 prof_handle_room_subject(room, message);
             }
 
@@ -600,7 +600,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     }
 
     // room jid not of form room/nick
-    if (!room_parse_room_jid(room_jid, &room, &nick)) {
+    if (!parse_room_jid(room_jid, &room, &nick)) {
         log_error("Could not parse room jid: %s", room_jid);
         g_free(room);
         g_free(nick);
@@ -977,7 +977,7 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     char *room = NULL;
     char *nick = NULL;
 
-    if (!room_parse_room_jid(jid, &room, &nick)) {
+    if (!parse_room_jid(jid, &room, &nick)) {
         log_error("Could not parse room jid: %s", room);
         g_free(room);
         g_free(nick);

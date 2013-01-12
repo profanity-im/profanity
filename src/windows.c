@@ -47,6 +47,7 @@
 #include "chat_log.h"
 #include "chat_session.h"
 #include "command.h"
+#include "common.h"
 #include "contact.h"
 #include "contact_list.h"
 #include "log.h"
@@ -330,7 +331,7 @@ ui_show_incoming_msg(const char * const from, const char * const message,
     win_type_t win_type;
     if (priv) {
         win_type = WIN_PRIVATE;
-        display_from = room_get_nick_from_full_jid(from);
+        display_from = get_nick_from_full_jid(from);
     } else {
         win_type = WIN_CHAT;
         display_from = strdup(from);

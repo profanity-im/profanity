@@ -44,4 +44,12 @@ int str_contains(char str[], int size, char ch);
 char* encode_xml(const char * const xml);
 char * prof_getline(FILE *stream);
 
+gboolean jid_is_room(const char * const room_jid);
+char * create_full_room_jid(const char * const room,
+    const char * const nick);
+char * get_room_from_full_jid(const char * const full_room_jid);
+char * get_nick_from_full_jid(const char * const full_room_jid);
+gboolean parse_room_jid(const char * const full_room_jid, char **room,
+    char **nick);
+
 #endif

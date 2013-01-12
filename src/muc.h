@@ -52,12 +52,4 @@ void muc_set_roster_pending_nick_change(const char * const room,
 char* muc_complete_roster_nick_change(const char * const room,
     const char * const nick);
 
-gboolean room_from_jid_is_room(const char * const room_jid);
-char * room_create_full_room_jid(const char * const room,
-    const char * const nick);
-char * room_get_room_from_full_jid(const char * const full_room_jid);
-char * room_get_nick_from_full_jid(const char * const full_room_jid);
-gboolean room_parse_room_jid(const char * const full_room_jid, char **room,
-    char **nick);
-
 #endif
