@@ -106,9 +106,7 @@ jabber_restart(void)
 {
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence = PRESENCE_OFFLINE;
-    if (jabber_conn.status != NULL)
-        free(jabber_conn.status);
-    jabber_conn.status = NULL;
+    FREE_SET_NULL(jabber_conn.status);
 }
 
 jabber_conn_status_t
