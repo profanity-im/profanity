@@ -41,17 +41,17 @@ typedef struct _muc_room_t {
 
 GHashTable *rooms = NULL;
 
-static void _room_free(muc_room *room);
+static void _free_room(muc_room *room);
 
 /*
  * Join the chat room with the specified nickname
  */
 void
-room_join(const char * const room, const char * const nick)
+muc_join_room(const char * const room, const char * const nick)
 {
     if (rooms == NULL) {
         rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
-            (GDestroyNotify)_room_free);
+            (GDestroyNotify)_free_room);
     }
 
     muc_room *new_room = malloc(sizeof(muc_room));
@@ -72,62 +72,16 @@ room_join(const char * const room, const char * const nick)
  * Leave the room
  */
 void
-room_leave(const char * const room)
+muc_leave_room(const char * const room)
 {
     g_hash_table_remove(rooms, room);
-}
-
-/*
- * Flag that the user has sent a nick change to the service
- * and is awaiting the response
- */
-void
-room_set_pending_nick_change(const char * const room)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        chat_room->pending_nick_change = TRUE;
-    }
-}
-
-/*
- * Returns TRUE if the room is awaiting the result of a
- * nick change
- */
-gboolean
-room_is_pending_nick_change(const char * const room)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        return chat_room->pending_nick_change;
-    } else {
-        return FALSE;
-    }
-}
-
-/*
- * Change the current nuck name for the room, call once
- * the service has responded
- */
-void
-room_change_nick(const char * const room, const char * const nick)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        free(chat_room->nick);
-        chat_room->nick = strdup(nick);
-        chat_room->pending_nick_change = FALSE;
-    }
 }
 
 /*
  * Returns TRUE if the user is currently in the room
  */
 gboolean
-room_is_active(const char * const full_room_jid)
+muc_room_is_active(const char * const full_room_jid)
 {
     char **tokens = g_strsplit(full_room_jid, "/", 0);
     char *room_part = tokens[0];
@@ -146,12 +100,58 @@ room_is_active(const char * const full_room_jid)
 }
 
 /*
+ * Flag that the user has sent a nick change to the service
+ * and is awaiting the response
+ */
+void
+muc_set_room_pending_nick_change(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        chat_room->pending_nick_change = TRUE;
+    }
+}
+
+/*
+ * Returns TRUE if the room is awaiting the result of a
+ * nick change
+ */
+gboolean
+muc_is_room_pending_nick_change(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        return chat_room->pending_nick_change;
+    } else {
+        return FALSE;
+    }
+}
+
+/*
+ * Change the current nuck name for the room, call once
+ * the service has responded
+ */
+void
+muc_complete_room_nick_change(const char * const room, const char * const nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        free(chat_room->nick);
+        chat_room->nick = strdup(nick);
+        chat_room->pending_nick_change = FALSE;
+    }
+}
+
+/*
  * Return a list of room names
  * The contents of the list are owned by the chat room and should not be
  * modified or freed.
  */
 GList *
-room_get_rooms(void)
+muc_get_active_room_list(void)
 {
     if (rooms != NULL) {
         return g_hash_table_get_keys(rooms);
@@ -165,7 +165,7 @@ room_get_rooms(void)
  * The nickname is owned by the chat room and should not be modified or freed
  */
 char *
-room_get_nick_for_room(const char * const room)
+muc_get_room_nick(const char * const room)
 {
     if (rooms != NULL) {
         muc_room *chat_room = g_hash_table_lookup(rooms, room);
@@ -178,6 +178,170 @@ room_get_nick_for_room(const char * const room)
     } else {
         return NULL;
     }
+}
+
+/*
+ * Returns TRUE if the specified nick exists in the room's roster
+ */
+gboolean
+muc_nick_in_roster(const char * const room, const char * const nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        PContact contact = g_hash_table_lookup(chat_room->roster, nick);
+        if (contact != NULL) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    return FALSE;
+}
+
+/*
+ * Add a new chat room member to the room's roster
+ */
+gboolean
+muc_add_to_roster(const char * const room, const char * const nick,
+    const char * const show, const char * const status)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    gboolean updated = FALSE;
+
+    if (chat_room != NULL) {
+        PContact old = g_hash_table_lookup(chat_room->roster, nick);
+
+        if (old == NULL) {
+            updated = TRUE;
+            p_autocomplete_add(chat_room->nick_ac, strdup(nick));
+        } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
+                    (g_strcmp0(p_contact_status(old), status) != 0)) {
+            updated = TRUE;
+        }
+
+        PContact contact = p_contact_new(nick, NULL, show, status, NULL, FALSE);
+        g_hash_table_replace(chat_room->roster, strdup(nick), contact);
+    }
+
+    return updated;
+}
+
+/*
+ * Remove a room member from the room's roster
+ */
+void
+muc_remove_from_roster(const char * const room, const char * const nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        g_hash_table_remove(chat_room->roster, nick);
+        p_autocomplete_remove(chat_room->nick_ac, nick);
+    }
+}
+
+/*
+ * Return a list of PContacts representing the room members in the room's roster
+ * The list is owned by the room and must not be mofified or freed
+ */
+GList *
+muc_get_roster(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        return g_hash_table_get_values(chat_room->roster);
+    } else {
+        return NULL;
+    }
+}
+
+/*
+ * Return a PAutocomplete representing the room member's in the roster
+ */
+PAutocomplete
+muc_get_roster_ac(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        return chat_room->nick_ac;
+    } else {
+        return NULL;
+    }
+}
+
+/*
+ * Set to TRUE when the rooms roster has been fully recieved
+ */
+void
+muc_set_roster_received(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        chat_room->roster_received = TRUE;
+    }
+}
+
+/*
+ * Returns TRUE id the rooms roster has been fully recieved
+ */
+gboolean
+muc_get_roster_received(const char * const room)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        return chat_room->roster_received;
+    } else {
+        return FALSE;
+    }
+}
+
+/*
+ * Remove the old_nick from the roster, and flag that a pending nickname change
+ * is in progress
+ */
+void
+muc_set_roster_pending_nick_change(const char * const room,
+    const char * const new_nick, const char * const old_nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(old_nick));
+        muc_remove_from_roster(room, old_nick);
+    }
+}
+
+/*
+ * Complete the pending nick name change for a contact in the room's roster
+ * The new nick name will be added to the roster
+ * The old nick name will be returned in a new string which must be freed by
+ * the caller
+ */
+char *
+muc_complete_roster_nick_change(const char * const room,
+    const char * const nick)
+{
+    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        char *old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
+        char *old_nick_cpy;
+
+        if (old_nick != NULL) {
+            old_nick_cpy = strdup(old_nick);
+            g_hash_table_remove(chat_room->nick_changes, nick);
+
+            return old_nick_cpy;
+        }
+    }
+
+    return NULL;
 }
 
 /*
@@ -279,172 +443,8 @@ room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
     }
 }
 
-/*
- * Returns TRUE if the specified nick exists in the room's roster
- */
-gboolean
-room_nick_in_roster(const char * const room, const char * const nick)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        PContact contact = g_hash_table_lookup(chat_room->roster, nick);
-        if (contact != NULL) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
-    }
-
-    return FALSE;
-}
-
-/*
- * Add a new chat room member to the room's roster
- */
-gboolean
-room_add_to_roster(const char * const room, const char * const nick,
-    const char * const show, const char * const status)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-    gboolean updated = FALSE;
-
-    if (chat_room != NULL) {
-        PContact old = g_hash_table_lookup(chat_room->roster, nick);
-
-        if (old == NULL) {
-            updated = TRUE;
-            p_autocomplete_add(chat_room->nick_ac, strdup(nick));
-        } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
-                    (g_strcmp0(p_contact_status(old), status) != 0)) {
-            updated = TRUE;
-        }
-
-        PContact contact = p_contact_new(nick, NULL, show, status, NULL, FALSE);
-        g_hash_table_replace(chat_room->roster, strdup(nick), contact);
-    }
-
-    return updated;
-}
-
-/*
- * Remove a room member from the room's roster
- */
-void
-room_remove_from_roster(const char * const room, const char * const nick)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        g_hash_table_remove(chat_room->roster, nick);
-        p_autocomplete_remove(chat_room->nick_ac, nick);
-    }
-}
-
-/*
- * Return a list of PContacts representing the room members in the room's roster
- * The list is owned by the room and must not be mofified or freed
- */
-GList *
-room_get_roster(const char * const room)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        return g_hash_table_get_values(chat_room->roster);
-    } else {
-        return NULL;
-    }
-}
-
-/*
- * Return a PAutocomplete representing the room member's in the roster
- */
-PAutocomplete
-room_get_nick_ac(const char * const room)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        return chat_room->nick_ac;
-    } else {
-        return NULL;
-    }
-}
-
-/*
- * Set to TRUE when the rooms roster has been fully recieved
- */
-void
-room_set_roster_received(const char * const room)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        chat_room->roster_received = TRUE;
-    }
-}
-
-/*
- * Returns TRUE id the rooms roster has been fully recieved
- */
-gboolean
-room_get_roster_received(const char * const room)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        return chat_room->roster_received;
-    } else {
-        return FALSE;
-    }
-}
-
-/*
- * Remove the old_nick from the roster, and flag that a pending nickname change
- * is in progress
- */
-void
-room_add_pending_nick_change(const char * const room,
-    const char * const new_nick, const char * const old_nick)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(old_nick));
-        room_remove_from_roster(room, old_nick);
-    }
-}
-
-/*
- * Complete the pending nick name change for a contact in the room's roster
- * The new nick name will be added to the roster
- * The old nick name will be returned in a new string which must be freed by
- * the caller
- */
-char *
-room_complete_pending_nick_change(const char * const room,
-    const char * const nick)
-{
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room != NULL) {
-        char *old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
-        char *old_nick_cpy;
-
-        if (old_nick != NULL) {
-            old_nick_cpy = strdup(old_nick);
-            g_hash_table_remove(chat_room->nick_changes, nick);
-
-            return old_nick_cpy;
-        }
-    }
-
-    return NULL;
-}
-
 static void
-_room_free(muc_room *room)
+_free_room(muc_room *room)
 {
     if (room != NULL) {
         if (room->room != NULL) {

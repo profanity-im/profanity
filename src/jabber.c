@@ -355,7 +355,7 @@ jabber_join(const char * const room, const char * const nick)
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 
-    room_join(room, nick);
+    muc_join_room(room, nick);
 
     free(full_room_jid);
 }
@@ -375,7 +375,7 @@ jabber_change_room_nick(const char * const room, const char * const nick)
 void
 jabber_leave_chat_room(const char * const room_jid)
 {
-    char *nick = room_get_nick_for_room(room_jid);
+    char *nick = muc_get_room_nick(room_jid);
 
     xmpp_stanza_t *presence = stanza_create_room_leave_presence(jabber_conn.ctx,
         room_jid, nick);
@@ -454,10 +454,10 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     xmpp_send(jabber_conn.conn, presence);
 
     // send presence for each room
-    GList *rooms = room_get_rooms();
+    GList *rooms = muc_get_active_room_list();
     while (rooms != NULL) {
         char *room = rooms->data;
-        char *nick = room_get_nick_for_room(room);
+        char *nick = muc_get_room_nick(room);
         char *full_room_jid = room_create_full_room_jid(room, nick);
 
         xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
@@ -609,7 +609,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     }
 
     // room not active in profanity
-    if (!room_is_active(room_jid)) {
+    if (!muc_room_is_active(room_jid)) {
         log_error("Message recieved for inactive groupchat: %s", room_jid);
         g_free(room);
         g_free(nick);
@@ -686,7 +686,7 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
     char *jid = NULL;
 
     // private message from chat room use full jid (room/nick)
-    if (room_is_active(short_from)) {
+    if (muc_room_is_active(short_from)) {
         jid = strdup(from);
         priv = TRUE;
     // standard chat message, use jid without resource
@@ -994,18 +994,18 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
 
             // leave room if not self nick change
             if (nick_change) {
-                room_set_pending_nick_change(room);
+                muc_set_room_pending_nick_change(room);
             } else {
                 prof_handle_leave_room(room);
             }
 
         // handle self nick change
-        } else if (room_is_pending_nick_change(room)) {
-            room_change_nick(room, nick);
+        } else if (muc_is_room_pending_nick_change(room)) {
+            muc_complete_room_nick_change(room, nick);
             prof_handle_room_nick_change(room, nick);
 
         // handle roster complete
-        } else if (!room_get_roster_received(room)) {
+        } else if (!muc_get_roster_received(room)) {
             prof_handle_room_roster_complete(room);
 
         }
@@ -1027,7 +1027,7 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
             // handle nickname change
             if (stanza_is_room_nick_change(stanza)) {
                 char *new_nick = stanza_get_new_nick(stanza);
-                room_add_pending_nick_change(room, new_nick, nick);
+                muc_set_roster_pending_nick_change(room, new_nick, nick);
             } else {
                 prof_handle_room_member_offline(room, nick, "offline", status_str);
             }
@@ -1038,16 +1038,16 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
             } else {
                 show_str = "online";
             }
-            if (!room_get_roster_received(room)) {
-                room_add_to_roster(room, nick, show_str, status_str);
+            if (!muc_get_roster_received(room)) {
+                muc_add_to_roster(room, nick, show_str, status_str);
             } else {
-                char *old_nick = room_complete_pending_nick_change(room, nick);
+                char *old_nick = muc_complete_roster_nick_change(room, nick);
 
                 if (old_nick != NULL) {
-                    room_add_to_roster(room, nick, show_str, status_str);
+                    muc_add_to_roster(room, nick, show_str, status_str);
                     prof_handle_room_member_nick_change(room, old_nick, nick);
                 } else {
-                    if (!room_nick_in_roster(room, nick)) {
+                    if (!muc_nick_in_roster(room, nick)) {
                         prof_handle_room_member_online(room, nick, show_str, status_str);
                     } else {
                         prof_handle_room_member_presence(room, nick, show_str, status_str);
@@ -1077,7 +1077,7 @@ _presence_handler(xmpp_conn_t * const conn,
     }
 
     // handle chat room presence
-    if (room_is_active(from)) {
+    if (muc_room_is_active(from)) {
         return _room_presence_handler(from, stanza);
 
     // handle regular presence

@@ -296,7 +296,7 @@ prof_handle_room_broadcast(const char *const room_jid,
 void
 prof_handle_room_roster_complete(const char * const room)
 {
-    room_set_roster_received(room);
+    muc_set_roster_received(room);
     win_show_room_roster(room);
     win_current_page_off();
 }
@@ -306,7 +306,7 @@ prof_handle_room_member_presence(const char * const room,
     const char * const nick, const char * const show,
     const char * const status)
 {
-    gboolean updated = room_add_to_roster(room, nick, show, status);
+    gboolean updated = muc_add_to_roster(room, nick, show, status);
 
     if (updated) {
         win_show_room_member_presence(room, nick, show, status);
@@ -318,7 +318,7 @@ void
 prof_handle_room_member_online(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
-    room_add_to_roster(room, nick, show, status);
+    muc_add_to_roster(room, nick, show, status);
     win_show_room_member_online(room, nick, show, status);
     win_current_page_off();
 }
@@ -327,7 +327,7 @@ void
 prof_handle_room_member_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
-    room_remove_from_roster(room, nick);
+    muc_remove_from_roster(room, nick);
     win_show_room_member_offline(room, nick);
     win_current_page_off();
 }
@@ -335,7 +335,7 @@ prof_handle_room_member_offline(const char * const room, const char * const nick
 void
 prof_handle_leave_room(const char * const room)
 {
-    room_leave(room);
+    muc_leave_room(room);
 }
 
 void

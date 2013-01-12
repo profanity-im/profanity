@@ -771,7 +771,7 @@ cmd_reset_autocomplete()
     p_autocomplete_reset(sub_ac);
 
     if (win_current_is_groupchat()) {
-        PAutocomplete nick_ac = room_get_nick_ac(win_current_get_recipient());
+        PAutocomplete nick_ac = muc_get_roster_ac(win_current_get_recipient());
         if (nick_ac != NULL) {
             p_autocomplete_reset(nick_ac);
         }
@@ -916,7 +916,7 @@ _cmd_complete_parameters(char *input, int *size)
         prefs_autocomplete_boolean_choice);
 
     if (win_current_is_groupchat()) {
-        PAutocomplete nick_ac = room_get_nick_ac(win_current_get_recipient());
+        PAutocomplete nick_ac = muc_get_roster_ac(win_current_get_recipient());
         if (nick_ac != NULL) {
             _parameter_autocomplete_with_ac(input, size, "/msg", nick_ac);
             _parameter_autocomplete_with_ac(input, size, "/info", nick_ac);
@@ -1534,7 +1534,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
     if (win_current_is_groupchat()) {
         char *room_name = win_current_get_recipient();
-        if (room_nick_in_roster(room_name, usr)) {
+        if (muc_nick_in_roster(room_name, usr)) {
             GString *full_jid = g_string_new(room_name);
             g_string_append(full_jid, "/");
             g_string_append(full_jid, usr);
@@ -1614,7 +1614,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
             strcpy(jid_cpy, jid);
             nick = strdup(strtok(jid_cpy, "@"));
         }
-        if (!room_is_active(room)) {
+        if (!muc_room_is_active(room)) {
             jabber_join(room, nick);
         }
         win_join_chat(room, nick);

@@ -27,33 +27,37 @@
 
 #include "prof_autocomplete.h"
 
-void room_join(const char * const room, const char * const nick);
-void room_change_nick(const char * const room, const char * const nick);
-void room_leave(const char * const room);
-gboolean room_is_active(const char * const full_room_jid);
-char * room_get_nick_for_room(const char * const room);
+void muc_join_room(const char * const room, const char * const nick);
+void muc_leave_room(const char * const room);
+gboolean muc_room_is_active(const char * const full_room_jid);
+GList* muc_get_active_room_list(void);
+char * muc_get_room_nick(const char * const room);
+
+void muc_set_room_pending_nick_change(const char * const room);
+gboolean muc_is_room_pending_nick_change(const char * const room);
+void muc_complete_room_nick_change(const char * const room,
+    const char * const nick);
+
+gboolean muc_add_to_roster(const char * const room, const char * const nick,
+    const char * const show, const char * const status);
+void muc_remove_from_roster(const char * const room, const char * const nick);
+GList * muc_get_roster(const char * const room);
+PAutocomplete muc_get_roster_ac(const char * const room);
+gboolean muc_nick_in_roster(const char * const room, const char * const nick);
+void muc_set_roster_received(const char * const room);
+gboolean muc_get_roster_received(const char * const room);
+
+void muc_set_roster_pending_nick_change(const char * const room,
+    const char * const new_nick, const char * const old_nick);
+char* muc_complete_roster_nick_change(const char * const room,
+    const char * const nick);
+
+gboolean room_from_jid_is_room(const char * const room_jid);
+char * room_create_full_room_jid(const char * const room,
+    const char * const nick);
 char * room_get_room_from_full_jid(const char * const full_room_jid);
 char * room_get_nick_from_full_jid(const char * const full_room_jid);
 gboolean room_parse_room_jid(const char * const full_room_jid, char **room,
     char **nick);
-gboolean room_add_to_roster(const char * const room, const char * const nick,
-    const char * const show, const char * const status);
-void room_add_pending_nick_change(const char * const room,
-    const char * const new_nick, const char * const old_nick);
-char* room_complete_pending_nick_change(const char * const room,
-    const char * const nick);
-gboolean room_nick_in_roster(const char * const room, const char * const nick);
-gboolean room_from_jid_is_room(const char * const room_jid);
-PAutocomplete room_get_nick_ac(const char * const room);
-
-GList * room_get_roster(const char * const room);
-void room_set_roster_received(const char * const room);
-gboolean room_get_roster_received(const char * const room);
-void room_remove_from_roster(const char * const room, const char * const nick);
-char * room_create_full_room_jid(const char * const room,
-    const char * const nick);
-void room_set_pending_nick_change(const char * const room);
-gboolean room_is_pending_nick_change(const char * const room);
-GList* room_get_rooms(void);
 
 #endif

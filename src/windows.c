@@ -752,7 +752,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
     // create new window
     if (win_index == NUM_WINS) {
 
-        if (room_is_active(to)) {
+        if (muc_room_is_active(to)) {
             win_index = _new_prof_win(to, WIN_PRIVATE);
         } else {
             win_index = _new_prof_win(to, WIN_CHAT);
@@ -810,7 +810,7 @@ win_show_room_roster(const char * const room)
     int win_index = _find_prof_win_index(room);
     WINDOW *win = windows[win_index]->win;
 
-    GList *roster = room_get_roster(room);
+    GList *roster = muc_get_roster(room);
 
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
         wattron(win, COLOUR_ROOMINFO);
@@ -982,7 +982,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
     WINDOW *win = windows[win_index]->win;
 
     _win_show_time(win);
-    if (strcmp(nick, room_get_nick_for_room(room_jid)) != 0) {
+    if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(win, COLOUR_THEM);
             wprintw(win, "*%s ", nick);
@@ -1020,7 +1020,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
             dirty = TRUE;
         }
 
-        if (strcmp(nick, room_get_nick_for_room(room_jid)) != 0) {
+        if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
             if (prefs_get_flash()) {
                 flash();
             }
@@ -1029,7 +1029,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
         windows[win_index]->unread++;
     }
 
-    if (strcmp(nick, room_get_nick_for_room(room_jid)) != 0) {
+    if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
         if (prefs_get_beep()) {
             beep();
         }
