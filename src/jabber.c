@@ -442,9 +442,7 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
 void
 jabber_set_autoping(int seconds)
 {
-    if (jabber_conn.conn_status != JABBER_CONNECTED) {
-        return;
-    } else {
+    if (jabber_conn.conn_status == JABBER_CONNECTED) {
         xmpp_timed_handler_delete(jabber_conn.conn, _ping_timed_handler);
 
         if (seconds != 0) {
