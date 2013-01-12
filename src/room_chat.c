@@ -29,8 +29,8 @@
 #include "prof_autocomplete.h"
 
 typedef struct _muc_room_t {
-    char *room;
-    char *nick;
+    char *room; // e.g. test@conference.server
+    char *nick; // e.g. Some User
     char *subject;
     gboolean pending_nick_change;
     GHashTable *roster;
@@ -43,6 +43,9 @@ GHashTable *rooms = NULL;
 
 static void _room_free(muc_room *room);
 
+/*
+ * Join the chat room with the specified nickname
+ */
 void
 room_join(const char * const room, const char * const nick)
 {
@@ -65,6 +68,19 @@ room_join(const char * const room, const char * const nick)
     g_hash_table_insert(rooms, strdup(room), new_room);
 }
 
+/*
+ * Leave the room
+ */
+void
+room_leave(const char * const room)
+{
+    g_hash_table_remove(rooms, room);
+}
+
+/*
+ * Flag that the user has sent a nick change to the service
+ * and is awaiting the response
+ */
 void
 room_set_pending_nick_change(const char * const room)
 {
@@ -75,6 +91,10 @@ room_set_pending_nick_change(const char * const room)
     }
 }
 
+/*
+ * Returns TRUE if the room is awaiting the result of a
+ * nick change
+ */
 gboolean
 room_is_pending_nick_change(const char * const room)
 {
@@ -87,6 +107,10 @@ room_is_pending_nick_change(const char * const room)
     }
 }
 
+/*
+ * Change the current nuck name for the room, call once
+ * the service has responded
+ */
 void
 room_change_nick(const char * const room, const char * const nick)
 {
@@ -99,12 +123,9 @@ room_change_nick(const char * const room, const char * const nick)
     }
 }
 
-void
-room_leave(const char * const room)
-{
-    g_hash_table_remove(rooms, room);
-}
-
+/*
+ * Returns TRUE if the user is currently in the room
+ */
 gboolean
 room_is_active(const char * const full_room_jid)
 {
@@ -124,6 +145,11 @@ room_is_active(const char * const full_room_jid)
     }
 }
 
+/*
+ * Return a list of room names
+ * The contents of the list are owned by the chat room and should not be
+ * modified or freed.
+ */
 GList *
 room_get_rooms(void)
 {
@@ -134,6 +160,10 @@ room_get_rooms(void)
     }
 }
 
+/*
+ * Return current users nickname for the specified room
+ * The nickname is owned by the chat room and should not be modified or freed
+ */
 char *
 room_get_nick_for_room(const char * const room)
 {
@@ -150,6 +180,11 @@ room_get_nick_for_room(const char * const room)
     }
 }
 
+/*
+ * Get the room name part of the full JID, e.g.
+ * Full JID = "test@conference.server/person"
+ * returns "test@conference.server"
+ */
 char *
 room_get_room_from_full_jid(const char * const full_room_jid)
 {
@@ -167,6 +202,10 @@ room_get_room_from_full_jid(const char * const full_room_jid)
     }
 }
 
+/*
+ * Returns TRUE if the JID is a room JID
+ * The test is that the passed JID does not contain a "/"
+ */
 gboolean
 room_from_jid_is_room(const char * const room_jid)
 {
@@ -174,6 +213,11 @@ room_from_jid_is_room(const char * const room_jid)
     return (result == NULL);
 }
 
+/*
+ * Get the nickname part of the full JID, e.g.
+ * Full JID = "test@conference.server/person"
+ * returns "person"
+ */
 char *
 room_get_nick_from_full_jid(const char * const full_room_jid)
 {
@@ -191,6 +235,11 @@ room_get_nick_from_full_jid(const char * const full_room_jid)
     }
 }
 
+/*
+ * Given a room name, and a nick name create and return a full JID of the form
+ * room@server/nick
+ * Will return a newly created string that must be freed by the caller
+ */
 char *
 room_create_full_room_jid(const char * const room, const char * const nick)
 {
@@ -205,6 +254,14 @@ room_create_full_room_jid(const char * const room, const char * const nick)
     return result;
 }
 
+/*
+ * Given a full room JID of the form
+ * room@server/nick
+ * Will create two new strings and point room and nick to them e.g.
+ * *room = "room@server", *nick = "nick"
+ * The strings must be freed by the caller
+ * Returns TRUE if the JID was parsed successfully, FALSE otherwise
+ */
 gboolean
 room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 {
@@ -222,6 +279,9 @@ room_parse_room_jid(const char * const full_room_jid, char **room, char **nick)
     }
 }
 
+/*
+ * Returns TRUE if the specified nick exists in the room's roster
+ */
 gboolean
 room_nick_in_roster(const char * const room, const char * const nick)
 {
@@ -239,6 +299,9 @@ room_nick_in_roster(const char * const room, const char * const nick)
     return FALSE;
 }
 
+/*
+ * Add a new chat room member to the room's roster
+ */
 gboolean
 room_add_to_roster(const char * const room, const char * const nick,
     const char * const show, const char * const status)
@@ -264,6 +327,9 @@ room_add_to_roster(const char * const room, const char * const nick,
     return updated;
 }
 
+/*
+ * Remove a room member from the room's roster
+ */
 void
 room_remove_from_roster(const char * const room, const char * const nick)
 {
@@ -275,6 +341,10 @@ room_remove_from_roster(const char * const room, const char * const nick)
     }
 }
 
+/*
+ * Return a list of PContacts representing the room members in the room's roster
+ * The list is owned by the room and must not be mofified or freed
+ */
 GList *
 room_get_roster(const char * const room)
 {
@@ -287,6 +357,9 @@ room_get_roster(const char * const room)
     }
 }
 
+/*
+ * Return a PAutocomplete representing the room member's in the roster
+ */
 PAutocomplete
 room_get_nick_ac(const char * const room)
 {
@@ -299,6 +372,9 @@ room_get_nick_ac(const char * const room)
     }
 }
 
+/*
+ * Set to TRUE when the rooms roster has been fully recieved
+ */
 void
 room_set_roster_received(const char * const room)
 {
@@ -309,6 +385,9 @@ room_set_roster_received(const char * const room)
     }
 }
 
+/*
+ * Returns TRUE id the rooms roster has been fully recieved
+ */
 gboolean
 room_get_roster_received(const char * const room)
 {
@@ -321,6 +400,10 @@ room_get_roster_received(const char * const room)
     }
 }
 
+/*
+ * Remove the old_nick from the roster, and flag that a pending nickname change
+ * is in progress
+ */
 void
 room_add_pending_nick_change(const char * const room,
     const char * const new_nick, const char * const old_nick)
@@ -333,6 +416,12 @@ room_add_pending_nick_change(const char * const room,
     }
 }
 
+/*
+ * Complete the pending nick name change for a contact in the room's roster
+ * The new nick name will be added to the roster
+ * The old nick name will be returned in a new string which must be freed by
+ * the caller
+ */
 char *
 room_complete_pending_nick_change(const char * const room,
     const char * const nick)
