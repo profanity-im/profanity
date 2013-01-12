@@ -569,9 +569,6 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     // room jid not of form room/nick
     if (!parse_room_jid(room_jid, &room, &nick)) {
         log_error("Could not parse room jid: %s", room_jid);
-        g_free(room);
-        g_free(nick);
-
         return 1;
     }
 
