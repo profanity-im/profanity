@@ -41,7 +41,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
-#include "room_chat.h"
+#include "muc.h"
 #include "theme.h"
 #include "jabber.h"
 #include "ui.h"

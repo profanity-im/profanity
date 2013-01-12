@@ -33,7 +33,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
-#include "room_chat.h"
+#include "muc.h"
 #include "stanza.h"
 
 static struct _jabber_conn_t {

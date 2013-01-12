@@ -41,7 +41,7 @@
 #include "preferences.h"
 #include "prof_autocomplete.h"
 #include "profanity.h"
-#include "room_chat.h"
+#include "muc.h"
 #include "theme.h"
 #include "tinyurl.h"
 #include "ui.h"

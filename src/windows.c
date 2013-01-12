@@ -52,7 +52,7 @@
 #include "log.h"
 #include "preferences.h"
 #include "release.h"
-#include "room_chat.h"
+#include "muc.h"
 #include "theme.h"
 #include "ui.h"
 #include "window.h"
