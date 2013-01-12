@@ -32,7 +32,6 @@
 #define PAUSED_TIMOUT 10.0
 #define INACTIVE_TIMOUT 30.0
 
-static void _chat_session_free(ChatSession session);
 
 typedef enum {
     CHAT_STATE_STARTED,
@@ -51,7 +50,11 @@ struct chat_session_t {
     gboolean sent;
 };
 
+typedef struct chat_session_t *ChatSession;
+
 static GHashTable *sessions;
+
+static void _chat_session_free(ChatSession session);
 
 void
 chat_sessions_init(void)

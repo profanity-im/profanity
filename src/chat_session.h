@@ -25,8 +25,6 @@
 
 #include <glib.h>
 
-typedef struct chat_session_t *ChatSession;
-
 void chat_sessions_init(void);
 void chat_sessions_clear(void);
 void chat_session_start(const char * const recipient,
