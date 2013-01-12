@@ -190,7 +190,7 @@ _ui_draw_win_title(void)
 
     if (g_strcmp0(win_title, new_win_title) != 0) {
         // print to x-window title bar
-        printf(new_win_title);
+        printf("%s", new_win_title);
         if (win_title != NULL) {
             free(win_title);
         }
