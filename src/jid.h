@@ -1,5 +1,5 @@
 /*
- * common.h
+ * jid.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,28 +20,29 @@
  *
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef JID_H
+#define JID_H
 
-#include <stdio.h>
 #include <glib.h>
 
-#if !GLIB_CHECK_VERSION(2,28,0)
-#define g_slist_free_full(items, free_func)      p_slist_free_full(items, free_func)
-#endif
+struct jid_t {
+    char *localpart;
+    char *domainpart;
+    char *resourcepart;
+    char *barejid;
+    char *fulljid;
+};
 
-#ifndef NOTIFY_CHECK_VERSION
-#define notify_notification_new(summary, body, icon) notify_notification_new(summary, body, icon, NULL)
-#endif
+typedef struct jid_t *Jid;
 
-#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+Jid jid_create(const gchar * const str);
 
-void p_slist_free_full(GSList *items, GDestroyNotify free_func);
-void create_dir(char *name);
-char * str_replace(const char *string, const char *substr,
-    const char *replacement);
-int str_contains(char str[], int size, char ch);
-char* encode_xml(const char * const xml);
-char * prof_getline(FILE *stream);
+gboolean jid_is_room(const char * const room_jid);
+char * create_full_room_jid(const char * const room,
+    const char * const nick);
+char * get_room_from_full_jid(const char * const full_room_jid);
+char * get_nick_from_full_jid(const char * const full_room_jid);
+gboolean parse_room_jid(const char * const full_room_jid, char **room,
+    char **nick);
 
 #endif

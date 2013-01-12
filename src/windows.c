@@ -50,6 +50,7 @@
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"
+#include "jid.h"
 #include "log.h"
 #include "preferences.h"
 #include "release.h"

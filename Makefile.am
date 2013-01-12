@@ -10,14 +10,15 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
 	src/chat_session.h src/release.c src/release.h src/muc.c \
 	src/muc.h src/stanza.c src/stanza.h src/parser.c src/parser.h \
 	src/theme.c src/theme.h src/window.c src/window.h src/xdg_base.c \
-	src/xdg_base.h src/files.c src/files.h src/accounts.c src/accounts.h
+	src/xdg_base.h src/files.c src/files.h src/accounts.c src/accounts.h \
+	src/jid.h src/jid.c
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = tests/test_contact_list.c src/contact_list.c src/contact.c \
 	tests/test_common.c tests/test_prof_history.c src/prof_history.c src/common.c \
 	tests/test_prof_autocomplete.c src/prof_autocomplete.c tests/testsuite.c \
-	tests/test_parser.c src/parser.c
+	tests/test_parser.c src/parser.c tests/test_jid.c src/jid.c
 tests_testsuite_LDADD = -lheadunit -lstdc++
 
 man_MANS = docs/profanity.1

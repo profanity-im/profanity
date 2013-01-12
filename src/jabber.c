@@ -30,6 +30,7 @@
 #include "common.h"
 #include "contact_list.h"
 #include "jabber.h"
+#include "jid.h"
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"

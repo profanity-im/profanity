@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef ROOM_CHAT_H
-#define ROOM_CHAT_H
+#ifndef MUC_H
+#define MUC_H
 
 #include <glib.h>
 

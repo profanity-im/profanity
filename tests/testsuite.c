@@ -8,6 +8,7 @@ int main(void)
     register_common_tests();
     register_prof_autocomplete_tests();
     register_parser_tests();
+    register_jid_tests();
     run_suite();
     return 0;
 }
