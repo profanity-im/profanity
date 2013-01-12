@@ -364,7 +364,7 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
         return;
 
     pri = prefs_get_priority();
-    if (pri < -128 || pri > 127)
+    if (pri < JABBER_PRIORITY_MIN || pri > JABBER_PRIORITY_MAX)
         pri = 0;
 
     jabber_conn.presence = status;

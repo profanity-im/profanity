@@ -49,6 +49,9 @@ typedef enum {
     PRESENCE_UNSUBSCRIBED
 } jabber_subscr_t;
 
+#define JABBER_PRIORITY_MIN -128
+#define JABBER_PRIORITY_MAX 127
+
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect(const char * const jid,
     const char * const passwd, const char * const altdomain);
