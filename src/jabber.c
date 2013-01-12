@@ -575,8 +575,8 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     // room not active in profanity
     if (!muc_room_is_active(room_jid)) {
         log_error("Message recieved for inactive groupchat: %s", room_jid);
-        g_free(room);
-        g_free(nick);
+        free(room);
+        free(nick);
 
         return 1;
     }
@@ -595,6 +595,9 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
             prof_handle_room_message(room, nick, message);
         }
     }
+
+    free(room);
+    free(nick);
 
     return 1;
 }
@@ -704,7 +707,7 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
         }
     }
 
-    g_free(jid);
+    free(jid);
 
     return 1;
 }
@@ -943,9 +946,6 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
 
     if (!parse_room_jid(jid, &room, &nick)) {
         log_error("Could not parse room jid: %s", room);
-        g_free(room);
-        g_free(nick);
-
         return 1;
     }
 
@@ -1020,6 +1020,9 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
             }
         }
     }
+
+    free(room);
+    free(nick);
 
     return 1;
 }
