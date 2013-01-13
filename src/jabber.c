@@ -527,10 +527,9 @@ _message_handler(xmpp_conn_t * const conn,
 static int
 _groupchat_message_handler(xmpp_stanza_t * const stanza)
 {
-    char *room = NULL;
-    char *nick = NULL;
     char *message = NULL;
     char *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    Jid *jid = jid_create(room_jid);
 
     // handle room broadcasts
     if (jid_is_room(room_jid)) {
@@ -540,8 +539,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
         if (subject != NULL) {
             message = xmpp_stanza_get_text(subject);
             if (message != NULL) {
-                room = get_room_from_full_jid(room_jid);
-                prof_handle_room_subject(room, message);
+                prof_handle_room_subject(jid->barejid, message);
             }
 
             return 1;
@@ -560,13 +558,12 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
         }
     }
 
-    Jid *jid = jid_create(room_jid);
 
     if (!jid_is_valid_room_form(jid)) {
         log_error("Invalid room JID: %s", jid->str);
         return 1;
     }
-    
+
     // room not active in profanity
     if (!muc_room_is_active(jid)) {
         log_error("Message recieved for inactive chat room: %s", jid->str);
@@ -582,14 +579,13 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     if (body != NULL) {
         char *message = xmpp_stanza_get_text(body);
         if (delayed) {
-            prof_handle_room_history(room, nick, tv_stamp, message);
+            prof_handle_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
         } else {
-            prof_handle_room_message(room, nick, message);
+            prof_handle_room_message(jid->barejid, jid->resourcepart, message);
         }
     }
 
-    free(room);
-    free(nick);
+    jid_destroy(jid);
 
     return 1;
 }
@@ -1034,7 +1030,7 @@ _presence_handler(xmpp_conn_t * const conn,
     const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
- 
+
     Jid *my_jid = jid_create(jid);
     Jid *from_jid = jid_create(from);
 
