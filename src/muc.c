@@ -58,6 +58,7 @@ muc_join_room(const char * const room, const char * const nick)
     ChatRoom *new_room = malloc(sizeof(ChatRoom));
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
+    new_room->subject = NULL;
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
     new_room->nick_ac = p_autocomplete_new();
