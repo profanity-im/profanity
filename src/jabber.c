@@ -313,17 +313,14 @@ jabber_get_subscription_requests(void)
 }
 
 void
-jabber_join(const char * const room, const char * const nick)
+jabber_join(Jid *jid)
 {
-    char *full_room_jid = create_full_room_jid(room, nick);
     xmpp_stanza_t *presence = stanza_create_room_join_presence(jabber_conn.ctx,
-        full_room_jid);
+        jid->fulljid);
     xmpp_send(jabber_conn.conn, presence);
     xmpp_stanza_release(presence);
 
-    muc_join_room(room, nick);
-
-    free(full_room_jid);
+    muc_join_room(jid->barejid, jid->resourcepart);
 }
 
 void
@@ -563,18 +560,16 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
         }
     }
 
-    // room jid not of form room/nick
-    if (!parse_room_jid(room_jid, &room, &nick)) {
-        log_error("Could not parse room jid: %s", room_jid);
+    Jid *jid = jid_create(room_jid);
+
+    if (!jid_is_valid_room_form(jid)) {
+        log_error("Invalid room JID: %s", jid->str);
         return 1;
     }
-
+    
     // room not active in profanity
-    if (!muc_room_is_active(room_jid)) {
-        log_error("Message recieved for inactive groupchat: %s", room_jid);
-        free(room);
-        free(nick);
-
+    if (!muc_room_is_active(jid)) {
+        log_error("Message recieved for inactive chat room: %s", jid->str);
         return 1;
     }
 
@@ -641,72 +636,80 @@ _error_handler(xmpp_stanza_t * const stanza)
 static int
 _chat_message_handler(xmpp_stanza_t * const stanza)
 {
-    gboolean priv = FALSE;
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-
-    char from_cpy[strlen(from) + 1];
-    strcpy(from_cpy, from);
-    char *short_from = strtok(from_cpy, "/");
-    char *jid = NULL;
+    Jid *jid = jid_create(from);
 
     // private message from chat room use full jid (room/nick)
-    if (muc_room_is_active(short_from)) {
-        jid = strdup(from);
-        priv = TRUE;
+    if (muc_room_is_active(jid)) {
+        // determine if the notifications happened whilst offline
+        GTimeVal tv_stamp;
+        gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
+
+        // check for and deal with message
+        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+        if (body != NULL) {
+            char *message = xmpp_stanza_get_text(body);
+            if (delayed) {
+                prof_handle_delayed_message(jid->str, message, tv_stamp, TRUE);
+            } else {
+                prof_handle_incoming_message(jid->str, message, TRUE);
+            }
+        }
+
+        free(jid);
+        return 1;
+
     // standard chat message, use jid without resource
     } else {
-        jid = strdup(short_from);
-        priv = FALSE;
-    }
-
-    // determine chatstate support of recipient
-    gboolean recipient_supports = FALSE;
-    if (stanza_contains_chat_state(stanza)) {
-        recipient_supports = TRUE;
-    }
-
-    // create or update chat session
-    if (!chat_session_exists(jid)) {
-        chat_session_start(jid, recipient_supports);
-    } else {
-        chat_session_set_recipient_supports(jid, recipient_supports);
-    }
-
-    // determine if the notifications happened whilst offline
-    GTimeVal tv_stamp;
-    gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
-
-    // deal with chat states if recipient supports them
-    if (recipient_supports && (!delayed)) {
-        if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
-            if (prefs_get_notify_typing() || prefs_get_intype()) {
-                prof_handle_typing(jid);
-            }
-        } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
-            prof_handle_gone(jid);
-        } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) {
-            // do something
-        } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
-            // do something
-        } else { // handle <active/>
-            // do something
+        // determine chatstate support of recipient
+        gboolean recipient_supports = FALSE;
+        if (stanza_contains_chat_state(stanza)) {
+            recipient_supports = TRUE;
         }
-    }
 
-    // check for and deal with message
-    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-    if (body != NULL) {
-        char *message = xmpp_stanza_get_text(body);
-        if (delayed) {
-            prof_handle_delayed_message(jid, message, tv_stamp, priv);
+        // create or update chat session
+        if (!chat_session_exists(jid->barejid)) {
+            chat_session_start(jid->barejid, recipient_supports);
         } else {
-            prof_handle_incoming_message(jid, message, priv);
+            chat_session_set_recipient_supports(jid->barejid, recipient_supports);
         }
+
+        // determine if the notifications happened whilst offline
+        GTimeVal tv_stamp;
+        gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
+
+        // deal with chat states if recipient supports them
+        if (recipient_supports && (!delayed)) {
+            if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
+                if (prefs_get_notify_typing() || prefs_get_intype()) {
+                    prof_handle_typing(jid->barejid);
+                }
+            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
+                prof_handle_gone(jid->barejid);
+            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) {
+                // do something
+            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
+                // do something
+            } else { // handle <active/>
+                // do something
+            }
+        }
+
+        // check for and deal with message
+        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+        if (body != NULL) {
+            char *message = xmpp_stanza_get_text(body);
+            if (delayed) {
+                prof_handle_delayed_message(jid->barejid, message, tv_stamp, FALSE);
+            } else {
+                prof_handle_incoming_message(jid->barejid, message, FALSE);
+            }
+        }
+
+        free(jid);
+        return 1;
     }
 
-    free(jid);
-
-    return 1;
 }
 
 static void
@@ -1029,24 +1032,22 @@ _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     const char *jid = xmpp_conn_get_jid(jabber_conn.conn);
-    char jid_cpy[strlen(jid) + 1];
-    strcpy(jid_cpy, jid);
-    char *short_jid = strtok(jid_cpy, "/");
-
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+ 
+    Jid *my_jid = jid_create(jid);
+    Jid *from_jid = jid_create(from);
 
     if ((type != NULL) && (strcmp(type, STANZA_TYPE_ERROR) == 0)) {
         return _error_handler(stanza);
     }
 
     // handle chat room presence
-    if (muc_room_is_active(from)) {
-        return _room_presence_handler(from, stanza);
+    if (muc_room_is_active(from_jid)) {
+        return _room_presence_handler(from_jid->str, stanza);
 
     // handle regular presence
     } else {
-        char *short_from = strtok(from, "/");
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
         int idle_seconds = stanza_get_idle_time(stanza);
@@ -1071,12 +1072,12 @@ _presence_handler(xmpp_conn_t * const conn,
             else
                 show_str = "online";
 
-            if (strcmp(short_jid, short_from) !=0) {
-                prof_handle_contact_online(short_from, show_str, status_str, last_activity);
+            if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
+                prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity);
             }
         } else if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
-            if (strcmp(short_jid, short_from) !=0) {
-                prof_handle_contact_offline(short_from, "offline", status_str);
+            if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
+                prof_handle_contact_offline(from_jid->barejid, "offline", status_str);
             }
 
         if (last_activity != NULL) {
@@ -1085,14 +1086,14 @@ _presence_handler(xmpp_conn_t * const conn,
 
         // subscriptions
         } else if (strcmp(type, STANZA_TYPE_SUBSCRIBE) == 0) {
-            prof_handle_subscription(short_from, PRESENCE_SUBSCRIBE);
-            g_hash_table_insert(sub_requests, strdup(short_from), strdup(short_from));
+            prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
+            g_hash_table_insert(sub_requests, strdup(from_jid->barejid), strdup(from_jid->barejid));
         } else if (strcmp(type, STANZA_TYPE_SUBSCRIBED) == 0) {
-            prof_handle_subscription(short_from, PRESENCE_SUBSCRIBED);
-            g_hash_table_remove(sub_requests, short_from);
+            prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
+            g_hash_table_remove(sub_requests, from_jid->barejid);
         } else if (strcmp(type, STANZA_TYPE_UNSUBSCRIBED) == 0) {
-            prof_handle_subscription(short_from, PRESENCE_UNSUBSCRIBED);
-            g_hash_table_remove(sub_requests, short_from);
+            prof_handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
+            g_hash_table_remove(sub_requests, from_jid->barejid);
         } else { /* unknown type */
             log_debug("Received presence with unknown type '%s'", type);
         }

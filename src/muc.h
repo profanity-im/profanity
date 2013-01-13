@@ -29,7 +29,7 @@
 
 void muc_join_room(const char * const room, const char * const nick);
 void muc_leave_room(const char * const room);
-gboolean muc_room_is_active(const char * const full_room_jid);
+gboolean muc_room_is_active(Jid *jid);
 GList* muc_get_active_room_list(void);
 char * muc_get_room_nick(const char * const room);
 

@@ -36,6 +36,7 @@
 #include "chat_log.h"
 #include "history.h"
 #include "jabber.h"
+#include "jid.h"
 #include "log.h"
 #include "parser.h"
 #include "preferences.h"
@@ -1592,33 +1593,36 @@ _cmd_info(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_join(gchar **args, struct cmd_help_t help)
 {
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (ui_windows_full()) {
+        cons_bad_show("Windows all used, close a window and try again.");
+        return TRUE;
+    }
+
     char *room = args[0];
     char *nick = NULL;
 
     int num_args = g_strv_length(args);
     if (num_args == 2) {
         nick = args[1];
-    }
-
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-    } else if (ui_windows_full()) {
-        cons_bad_show("Windows all used, close a window and try again.");
     } else {
-        // if no nick, set to first part of jid
-        if (nick == NULL) {
-            const char *jid = jabber_get_jid();
-            char jid_cpy[strlen(jid) + 1];
-            strcpy(jid_cpy, jid);
-            nick = strdup(strtok(jid_cpy, "@"));
-        }
-        if (!muc_room_is_active(room)) {
-            jabber_join(room, nick);
-        }
-        win_join_chat(room, nick);
+        Jid *jid = jid_create(jabber_get_jid());
+        nick = strdup(jid->localpart);
+        jid_destroy(jid);
     }
+
+    Jid *room_jid = jid_create_room_jid(room, nick);
+
+    if (!muc_room_is_active(room_jid)) {
+        jabber_join(room_jid);
+    }
+    win_join_chat(room_jid);
 
     return TRUE;
 }

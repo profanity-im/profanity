@@ -36,6 +36,7 @@
 #endif
 
 #include "jabber.h"
+#include "jid.h"
 
 #define INP_WIN_MAX 1000
 #define PAD_SIZE 1000
@@ -113,7 +114,7 @@ void win_show_outgoing_msg(const char * const from, const char * const to,
     const char * const message);
 void win_new_chat_win(const char * const to);
 
-void win_join_chat(const char * const room, const char * const nick);
+void win_join_chat(Jid *jid);
 void win_show_room_roster(const char * const room);
 void win_show_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);

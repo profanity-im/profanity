@@ -26,10 +26,10 @@
 #include <glib.h>
 
 #include "contact.h"
+#include "jid.h"
 #include "prof_autocomplete.h"
 
 typedef struct _muc_room_t {
-
     char *room; // e.g. test@conference.server
     char *nick; // e.g. Some User
     char *subject;
@@ -82,13 +82,10 @@ muc_leave_room(const char * const room)
  * Returns TRUE if the user is currently in the room
  */
 gboolean
-muc_room_is_active(const char * const full_room_jid)
+muc_room_is_active(Jid *jid)
 {
-    char **tokens = g_strsplit(full_room_jid, "/", 0);
-    char *room_part = tokens[0];
-
     if (rooms != NULL) {
-        ChatRoom *chat_room = g_hash_table_lookup(rooms, room_part);
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, jid->barejid);
 
         if (chat_room != NULL) {
             return TRUE;

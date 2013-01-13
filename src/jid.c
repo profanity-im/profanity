@@ -55,6 +55,7 @@ jid_create(const gchar * const str)
     // has resourcepart
     if (slashp != NULL) {
         result = malloc(sizeof(struct jid_t));
+        result->str = strdup(trimmed);
         result->resourcepart = g_strdup(slashp + 1);
         result->barejid = g_strndup(trimmed, strlen(trimmed) - strlen(result->resourcepart) - 1);
         result->fulljid = g_strdup(trimmed);
@@ -78,6 +79,7 @@ jid_create(const gchar * const str)
     // no resourcepart
     } else {
         result = malloc(sizeof(struct jid_t));
+        result->str = strdup(trimmed);
         result->resourcepart = NULL;
         result->barejid = g_strdup(trimmed);
         result->fulljid = NULL;
@@ -114,12 +116,19 @@ jid_create_room_jid(const char * const room, const char * const nick)
 void
 jid_destroy(Jid *jid)
 {
+    FREE_SET_NULL(jid->str);
     FREE_SET_NULL(jid->localpart);
     FREE_SET_NULL(jid->domainpart);
     FREE_SET_NULL(jid->resourcepart);
     FREE_SET_NULL(jid->barejid);
     FREE_SET_NULL(jid->fulljid);
     FREE_SET_NULL(jid);
+}
+
+gboolean
+jid_is_valid_room_form(Jid *jid)
+{
+    return (jid->fulljid != NULL);
 }
 
 /*

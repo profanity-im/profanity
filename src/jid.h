@@ -26,6 +26,7 @@
 #include <glib.h>
 
 struct jid_t {
+    char *str;
     char *localpart;
     char *domainpart;
     char *resourcepart;
@@ -37,7 +38,9 @@ typedef struct jid_t Jid;
 
 Jid * jid_create(const gchar * const str);
 Jid * jid_create_room_jid(const char * const room, const char * const nick);
+void jid_destroy(Jid *jid);
 
+gboolean jid_is_valid_room_form(Jid *jid);
 gboolean jid_is_room(const char * const room_jid);
 char * create_full_room_jid(const char * const room,
     const char * const nick);
