@@ -25,6 +25,7 @@
 
 #include <glib.h>
 
+#include "common.h"
 #include "jid.h"
 
 Jid *
@@ -108,6 +109,17 @@ jid_create_room_jid(const char * const room, const char * const nick)
     free(jid);
 
     return result;
+}
+
+void
+jid_destroy(Jid *jid)
+{
+    FREE_SET_NULL(jid->localpart);
+    FREE_SET_NULL(jid->domainpart);
+    FREE_SET_NULL(jid->resourcepart);
+    FREE_SET_NULL(jid->barejid);
+    FREE_SET_NULL(jid->fulljid);
+    FREE_SET_NULL(jid);
 }
 
 /*
