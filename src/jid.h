@@ -41,7 +41,6 @@ Jid * jid_create_room_jid(const char * const room, const char * const nick);
 void jid_destroy(Jid *jid);
 
 gboolean jid_is_valid_room_form(Jid *jid);
-gboolean jid_is_room(const char * const room_jid);
 char * create_full_room_jid(const char * const room,
     const char * const nick);
 char * get_room_from_full_jid(const char * const full_room_jid);

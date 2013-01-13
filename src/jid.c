@@ -179,17 +179,6 @@ create_full_room_jid(const char * const room, const char * const nick)
 }
 
 /*
- * Returns TRUE if the JID is a room JID
- * The test is that the passed JID does not contain a "/"
- */
-gboolean
-jid_is_room(const char * const room_jid)
-{
-    gchar *result = g_strrstr(room_jid, "/");
-    return (result == NULL);
-}
-
-/*
  * Get the room name part of the full JID, e.g.
  * Full JID = "test@conference.server/person"
  * returns "test@conference.server"

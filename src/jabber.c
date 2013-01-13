@@ -532,7 +532,7 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
     Jid *jid = jid_create(room_jid);
 
     // handle room broadcasts
-    if (jid_is_room(room_jid)) {
+    if (jid->resourcepart == NULL) {
         xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
 
         // handle subject
