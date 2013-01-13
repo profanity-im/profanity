@@ -20,6 +20,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
@@ -96,6 +97,17 @@ jid_create(const gchar * const str)
         g_free(trimmed);
         return result;
     }
+}
+
+Jid *
+jid_create_room_jid(const char * const room, const char * const nick)
+{
+    Jid *result;
+    char *jid = create_full_room_jid(room, nick);
+    result = jid_create(jid);
+    free(jid);
+
+    return result;
 }
 
 /*

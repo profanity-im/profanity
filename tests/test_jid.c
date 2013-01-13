@@ -105,6 +105,20 @@ void create_jid_from_bare_returns_domainpart(void)
     assert_string_equals("mydomain", result->domainpart);
 }
 
+void create_room_jid_returns_room(void)
+{
+    Jid *result = jid_create_room_jid("room@conference.domain.org", "myname");
+
+    assert_string_equals("room@conference.domain.org", result->barejid);
+}
+
+void create_room_jid_returns_nick(void)
+{
+    Jid *result = jid_create_room_jid("room@conference.domain.org", "myname");
+
+    assert_string_equals("myname", result->resourcepart);
+}
+
 void register_jid_tests(void)
 {
     TEST_MODULE("jid tests");
@@ -125,4 +139,6 @@ void register_jid_tests(void)
     TEST(create_jid_from_bare_returns_bare);
     TEST(create_jid_from_bare_returns_localpart);
     TEST(create_jid_from_bare_returns_domainpart);
+    TEST(create_room_jid_returns_room);
+    TEST(create_room_jid_returns_nick);
 }

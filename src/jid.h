@@ -36,6 +36,7 @@ struct jid_t {
 typedef struct jid_t Jid;
 
 Jid * jid_create(const gchar * const str);
+Jid * jid_create_room_jid(const char * const room, const char * const nick);
 
 gboolean jid_is_room(const char * const room_jid);
 char * create_full_room_jid(const char * const room,
