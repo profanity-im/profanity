@@ -29,6 +29,7 @@
 #include "prof_autocomplete.h"
 
 typedef struct _muc_room_t {
+
     char *room; // e.g. test@conference.server
     char *nick; // e.g. Some User
     char *subject;

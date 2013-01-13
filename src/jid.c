@@ -26,10 +26,10 @@
 
 #include "jid.h"
 
-Jid
+Jid *
 jid_create(const gchar * const str)
 {
-    Jid result = NULL;
+    Jid *result = NULL;
 
     if (str == NULL) {
         return NULL;

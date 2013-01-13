@@ -33,9 +33,9 @@ struct jid_t {
     char *fulljid;
 };
 
-typedef struct jid_t *Jid;
+typedef struct jid_t Jid;
 
-Jid jid_create(const gchar * const str);
+Jid * jid_create(const gchar * const str);
 
 gboolean jid_is_room(const char * const room_jid);
 char * create_full_room_jid(const char * const room,
