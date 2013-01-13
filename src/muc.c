@@ -38,11 +38,11 @@ typedef struct _muc_room_t {
     PAutocomplete nick_ac;
     GHashTable *nick_changes;
     gboolean roster_received;
-} muc_room;
+} ChatRoom;
 
 GHashTable *rooms = NULL;
 
-static void _free_room(muc_room *room);
+static void _free_room(ChatRoom *room);
 
 /*
  * Join the chat room with the specified nickname
@@ -55,7 +55,7 @@ muc_join_room(const char * const room, const char * const nick)
             (GDestroyNotify)_free_room);
     }
 
-    muc_room *new_room = malloc(sizeof(muc_room));
+    ChatRoom *new_room = malloc(sizeof(ChatRoom));
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
@@ -88,7 +88,7 @@ muc_room_is_active(const char * const full_room_jid)
     char *room_part = tokens[0];
 
     if (rooms != NULL) {
-        muc_room *chat_room = g_hash_table_lookup(rooms, room_part);
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room_part);
 
         if (chat_room != NULL) {
             return TRUE;
@@ -107,7 +107,7 @@ muc_room_is_active(const char * const full_room_jid)
 void
 muc_set_room_pending_nick_change(const char * const room)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         chat_room->pending_nick_change = TRUE;
@@ -121,7 +121,7 @@ muc_set_room_pending_nick_change(const char * const room)
 gboolean
 muc_is_room_pending_nick_change(const char * const room)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         return chat_room->pending_nick_change;
@@ -137,7 +137,7 @@ muc_is_room_pending_nick_change(const char * const room)
 void
 muc_complete_room_nick_change(const char * const room, const char * const nick)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         free(chat_room->nick);
@@ -169,7 +169,7 @@ char *
 muc_get_room_nick(const char * const room)
 {
     if (rooms != NULL) {
-        muc_room *chat_room = g_hash_table_lookup(rooms, room);
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
         if (chat_room != NULL) {
             return chat_room->nick;
@@ -187,7 +187,7 @@ muc_get_room_nick(const char * const room)
 gboolean
 muc_nick_in_roster(const char * const room, const char * const nick)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         PContact contact = g_hash_table_lookup(chat_room->roster, nick);
@@ -208,7 +208,7 @@ gboolean
 muc_add_to_roster(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     gboolean updated = FALSE;
 
     if (chat_room != NULL) {
@@ -235,7 +235,7 @@ muc_add_to_roster(const char * const room, const char * const nick,
 void
 muc_remove_from_roster(const char * const room, const char * const nick)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         g_hash_table_remove(chat_room->roster, nick);
@@ -250,7 +250,7 @@ muc_remove_from_roster(const char * const room, const char * const nick)
 GList *
 muc_get_roster(const char * const room)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         return g_hash_table_get_values(chat_room->roster);
@@ -265,7 +265,7 @@ muc_get_roster(const char * const room)
 PAutocomplete
 muc_get_roster_ac(const char * const room)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         return chat_room->nick_ac;
@@ -280,7 +280,7 @@ muc_get_roster_ac(const char * const room)
 void
 muc_set_roster_received(const char * const room)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         chat_room->roster_received = TRUE;
@@ -293,7 +293,7 @@ muc_set_roster_received(const char * const room)
 gboolean
 muc_get_roster_received(const char * const room)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         return chat_room->roster_received;
@@ -310,7 +310,7 @@ void
 muc_set_roster_pending_nick_change(const char * const room,
     const char * const new_nick, const char * const old_nick)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(old_nick));
@@ -328,7 +328,7 @@ char *
 muc_complete_roster_nick_change(const char * const room,
     const char * const nick)
 {
-    muc_room *chat_room = g_hash_table_lookup(rooms, room);
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         char *old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
@@ -346,7 +346,7 @@ muc_complete_roster_nick_change(const char * const room,
 }
 
 static void
-_free_room(muc_room *room)
+_free_room(ChatRoom *room)
 {
     if (room != NULL) {
         if (room->room != NULL) {
