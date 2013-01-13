@@ -88,14 +88,6 @@ static int _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
-#define FREE_SET_NULL(resource) \
-{ \
-    if (resource != NULL) { \
-        free(resource); \
-        resource = NULL; \
-    } \
-}
-
 void
 jabber_init(const int disable_tls)
 {

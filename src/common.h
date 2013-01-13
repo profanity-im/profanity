@@ -36,6 +36,14 @@
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
+#define FREE_SET_NULL(resource) \
+{ \
+    if (resource != NULL) { \
+        free(resource); \
+        resource = NULL; \
+    } \
+}
+
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void create_dir(char *name);
 char * str_replace(const char *string, const char *substr,
