@@ -1168,7 +1168,7 @@ cons_show_status(const char * const contact)
     if (pcontact != NULL) {
         _cons_show_contact(pcontact);
     } else {
-        cons_show("No such contact %s in roster.", contact);
+        cons_show("No such contact \"%s\" in roster.", contact);
     }
 }
 
