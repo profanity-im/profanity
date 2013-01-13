@@ -121,18 +121,21 @@ jid_create_room_jid(const char * const room, const char * const nick)
 gboolean
 parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 {
+    gboolean result = FALSE;
     char **tokens = g_strsplit(full_room_jid, "/", 0);
 
-    if (tokens == NULL || tokens[0] == NULL || tokens[1] == NULL) {
+    if (tokens == NULL)
         return FALSE;
-    } else {
+
+    if (tokens[0] != NULL && tokens[1] != NULL) {
         *room = strdup(tokens[0]);
         *nick = strdup(tokens[1]);
-
-        g_strfreev(tokens);
-
-        return TRUE;
+        result = TRUE;
     }
+
+    g_strfreev(tokens);
+
+    return result;
 }
 
 /*
