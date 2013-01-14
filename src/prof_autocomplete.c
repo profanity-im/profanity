@@ -200,8 +200,21 @@ _search_from(PAutocomplete ac, GSList *curr)
             // set pointer to last found
             ac->last_found = curr;
 
-            // return the string, must be free'd by caller
-            return strdup(curr->data);
+            // if contains space, quote before returning
+            if (g_strrstr(curr->data, " ")) {
+                GString *quoted = g_string_new("\"");
+                g_string_append(quoted, curr->data);
+                g_string_append(quoted, "\"");
+
+                gchar *result = quoted->str;
+                g_string_free(quoted, FALSE);
+
+                return result;
+
+            // otherwise just return the string
+            } else {
+                return strdup(curr->data);
+            }
         }
 
         curr = g_slist_next(curr);
