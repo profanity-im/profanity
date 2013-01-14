@@ -410,6 +410,19 @@ prefs_set_splash(gboolean value)
     _save_prefs();
 }
 
+gboolean
+prefs_get_notify_status(void)
+{
+    return g_key_file_get_boolean(prefs, "notification", "status", NULL);
+}
+
+void
+prefs_set_notify_status(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "notification", "status", value);
+    _save_prefs();
+}
+
 static void
 _save_prefs(void)
 {

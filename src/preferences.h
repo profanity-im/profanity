@@ -75,6 +75,8 @@ void prefs_set_notify_typing(gboolean value);
 gboolean prefs_get_notify_typing(void);
 void prefs_set_notify_remind(gint period);
 gint prefs_get_notify_remind(void);
+void prefs_set_notify_status(gboolean value);
+gboolean prefs_get_notify_status(void);
 void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
 void prefs_set_priority(gint value);
