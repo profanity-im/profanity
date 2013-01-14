@@ -60,6 +60,7 @@ parse_args(const char * const inp, int min, int max)
 
     int inp_size = strlen(copy);
     gboolean in_token = FALSE;
+    gboolean in_quotes = FALSE;
     char *token_start = &copy[0];
     int token_size = 0;
     GSList *tokens = NULL;
@@ -72,17 +73,33 @@ parse_args(const char * const inp, int min, int max)
                 continue;
             } else {
                 in_token = TRUE;
+                if (copy[i] == '"') {
+                    in_quotes = TRUE;
+                    i++;
+                }
                 token_start = &copy[i];
                 token_size++;
             }
         } else {
-            if (copy[i] == ' ' || copy[i] == '\0') {
-                tokens = g_slist_append(tokens, g_strndup(token_start,
-                    token_size));
-                token_size = 0;
-                in_token = FALSE;
+            if (in_quotes) {
+                if ((copy[i] == '\0') || (copy[i] == '"')) {
+                    tokens = g_slist_append(tokens, g_strndup(token_start,
+                        token_size));
+                    token_size = 0;
+                    in_token = FALSE;
+                    in_quotes = FALSE;
+                } else {
+                    token_size++;
+                }
             } else {
-                token_size++;
+                if (copy[i] == ' ' || copy[i] == '\0') {
+                    tokens = g_slist_append(tokens, g_strndup(token_start,
+                        token_size));
+                    token_size = 0;
+                    in_token = FALSE;
+                } else {
+                    token_size++;
+                }
             }
         }
     }
@@ -163,6 +180,7 @@ parse_args_with_freetext(const char * const inp, int min, int max)
     int inp_size = strlen(copy);
     gboolean in_token = FALSE;
     gboolean in_freetext = FALSE;
+    gboolean in_quotes = FALSE;
     char *token_start = &copy[0];
     int token_size = 0;
     int num_tokens = 0;
@@ -179,18 +197,33 @@ parse_args_with_freetext(const char * const inp, int min, int max)
                 num_tokens++;
                 if (num_tokens == max + 1) {
                     in_freetext = TRUE;
+                } else if (copy[i] == '"') {
+                    in_quotes = TRUE;
+                    i++;
                 }
                 token_start = &copy[i];
                 token_size++;
             }
         } else {
-            if ((!in_freetext && copy[i] == ' ') || copy[i] == '\0') {
-                tokens = g_slist_append(tokens, g_strndup(token_start,
-                    token_size));
-                token_size = 0;
-                in_token = FALSE;
+            if (in_quotes) {
+                if ((copy[i] == '\0') || (copy[i] == '"')) {
+                    tokens = g_slist_append(tokens, g_strndup(token_start,
+                        token_size));
+                    token_size = 0;
+                    in_token = FALSE;
+                    in_quotes = FALSE;
+                } else {
+                    token_size++;
+                }
             } else {
-                token_size++;
+                if ((!in_freetext && copy[i] == ' ') || copy[i] == '\0') {
+                    tokens = g_slist_append(tokens, g_strndup(token_start,
+                        token_size));
+                    token_size = 0;
+                    in_token = FALSE;
+                } else {
+                    token_size++;
+                }
             }
         }
     }

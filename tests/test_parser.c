@@ -181,6 +181,105 @@ parse_cmd_min_zero_with_freetext(void)
 }
 
 void
+parse_cmd_with_quoted(void)
+{
+    char *inp = "/cmd \"arg1\" arg2";
+    gchar **result = parse_args(inp, 2, 2);
+
+    assert_int_equals(2, g_strv_length(result));
+    assert_string_equals("arg1", result[0]);
+    assert_string_equals("arg2", result[1]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_with_quoted_and_space(void)
+{
+    char *inp = "/cmd \"the arg1\" arg2";
+    gchar **result = parse_args(inp, 2, 2);
+
+    assert_int_equals(2, g_strv_length(result));
+    assert_string_equals("the arg1", result[0]);
+    assert_string_equals("arg2", result[1]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_with_quoted_and_many_spaces(void)
+{
+    char *inp = "/cmd \"the arg1 is here\" arg2";
+    gchar **result = parse_args(inp, 2, 2);
+
+    assert_int_equals(2, g_strv_length(result));
+    assert_string_equals("the arg1 is here", result[0]);
+    assert_string_equals("arg2", result[1]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_with_many_quoted_and_many_spaces(void)
+{
+    char *inp = "/cmd \"the arg1 is here\" \"and arg2 is right here\"";
+    gchar **result = parse_args(inp, 2, 2);
+
+    assert_int_equals(2, g_strv_length(result));
+    assert_string_equals("the arg1 is here", result[0]);
+    assert_string_equals("and arg2 is right here", result[1]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_freetext_with_quoted(void)
+{
+    char *inp = "/cmd \"arg1\" arg2 hello there whats up";
+    gchar **result = parse_args_with_freetext(inp, 3, 3);
+
+    assert_int_equals(3, g_strv_length(result));
+    assert_string_equals("arg1", result[0]);
+    assert_string_equals("arg2", result[1]);
+    assert_string_equals("hello there whats up", result[2]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_freetext_with_quoted_and_space(void)
+{
+    char *inp = "/cmd \"the arg1\" arg2 another bit of freetext";
+    gchar **result = parse_args_with_freetext(inp, 3, 3);
+
+    assert_int_equals(3, g_strv_length(result));
+    assert_string_equals("the arg1", result[0]);
+    assert_string_equals("arg2", result[1]);
+    assert_string_equals("another bit of freetext", result[2]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_freetext_with_quoted_and_many_spaces(void)
+{
+    char *inp = "/cmd \"the arg1 is here\" arg2 some more freetext";
+    gchar **result = parse_args_with_freetext(inp, 3, 3);
+
+    assert_int_equals(3, g_strv_length(result));
+    assert_string_equals("the arg1 is here", result[0]);
+    assert_string_equals("arg2", result[1]);
+    assert_string_equals("some more freetext", result[2]);
+    g_strfreev(result);
+}
+
+void
+parse_cmd_freetext_with_many_quoted_and_many_spaces(void)
+{
+    char *inp = "/cmd \"the arg1 is here\" \"and arg2 is right here\" and heres the free text";
+    gchar **result = parse_args_with_freetext(inp, 3, 3);
+
+    assert_int_equals(3, g_strv_length(result));
+    assert_string_equals("the arg1 is here", result[0]);
+    assert_string_equals("and arg2 is right here", result[1]);
+    assert_string_equals("and heres the free text", result[2]);
+    g_strfreev(result);
+}
+void
 register_parser_tests(void)
 {
     TEST_MODULE("parser tests");
@@ -200,4 +299,12 @@ register_parser_tests(void)
     TEST(parse_cmd_with_too_many_returns_null);
     TEST(parse_cmd_min_zero);
     TEST(parse_cmd_min_zero_with_freetext);
+    TEST(parse_cmd_with_quoted);
+    TEST(parse_cmd_with_quoted_and_space);
+    TEST(parse_cmd_with_quoted_and_many_spaces);
+    TEST(parse_cmd_with_many_quoted_and_many_spaces);
+    TEST(parse_cmd_freetext_with_quoted);
+    TEST(parse_cmd_freetext_with_quoted_and_space);
+    TEST(parse_cmd_freetext_with_quoted_and_many_spaces);
+    TEST(parse_cmd_freetext_with_many_quoted_and_many_spaces);
 }
