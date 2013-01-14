@@ -385,11 +385,14 @@ static struct cmd_t setting_commands[] =
           "        : use 0 to disable.",
           "typing  : Notifications when contacts are typing.",
           "        : on|off",
+          "status  : Notifcations for status messages.",
+          "        : on|off",
           "",
           "Example : /notify message on (enable message notifications)",
           "Example : /notify remind 10  (remind every 10 seconds)",
           "Example : /notify remind 0   (switch off reminders)",
           "Example : /notify typing on  (enable typing notifications)",
+          "Example : /notify status off (disable status notifications)",
           NULL } } },
 
     { "/flash",
@@ -642,6 +645,7 @@ cmd_init(void)
     p_autocomplete_add(notify_ac, strdup("message"));
     p_autocomplete_add(notify_ac, strdup("typing"));
     p_autocomplete_add(notify_ac, strdup("remind"));
+    p_autocomplete_add(notify_ac, strdup("status"));
 
     sub_ac = p_autocomplete_new();
     p_autocomplete_add(sub_ac, strdup("request"));
@@ -1778,7 +1782,7 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
 
     // bad kind
     if ((strcmp(kind, "message") != 0) && (strcmp(kind, "typing") != 0) &&
-            (strcmp(kind, "remind") != 0)) {
+            (strcmp(kind, "remind") != 0) && (strcmp(kind, "status") != 0)) {
         cons_show("Usage: %s", help.usage);
 
     // set message setting
@@ -1805,7 +1809,8 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
             cons_show("Usage: /notify typing on|off");
         }
 
-    } else { // remind
+    // set remind setting
+    } else if (strcmp(kind, "remind") == 0) {
         gint period = atoi(value);
         prefs_set_notify_remind(period);
         if (period == 0) {
@@ -1815,6 +1820,21 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
         } else {
             cons_show("Message reminder period set to %d seconds.", period);
         }
+
+    // set status setting
+    } else if (strcmp(kind, "status") == 0) {
+        if (strcmp(value, "on") == 0) {
+            cons_show("Status notifications enabled.");
+            prefs_set_notify_status(TRUE);
+        } else if (strcmp(value, "off") == 0) {
+            cons_show("Status notifications disabled.");
+            prefs_set_notify_status(FALSE);
+        } else {
+            cons_show("Usage: /notify status on|off");
+        }
+
+    } else {
+        cons_show("Unknown command: %s.", kind);
     }
 
     return TRUE;
