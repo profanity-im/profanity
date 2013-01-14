@@ -252,7 +252,7 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/info",
-        _cmd_info, parse_args_with_freetext, 1, 1,
+        _cmd_info, parse_args, 1, 1,
         { "/info jid", "Find out a contacts presence information.",
         { "/info jid",
           "---------",
