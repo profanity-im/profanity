@@ -195,18 +195,13 @@ _search_from(PAutocomplete ac, GSList *curr)
     while(curr) {
 
         // match found
-        if (strncmp(curr->data,
-                ac->search_str,
-                strlen(ac->search_str)) == 0) {
-            gchar *result =
-                (gchar *) malloc((strlen(curr->data) + 1) * sizeof(gchar));
+        if (strncmp(curr->data, ac->search_str, strlen(ac->search_str)) == 0) {
 
             // set pointer to last found
             ac->last_found = curr;
 
             // return the string, must be free'd by caller
-            strcpy(result, curr->data);
-            return result;
+            return strdup(curr->data);
         }
 
         curr = g_slist_next(curr);
