@@ -92,7 +92,7 @@ static void _win_show_contact(ProfWin *window, PContact contact);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact, win_type_t type);
 static void _current_window_refresh(void);
-static void _win_show_time(WINDOW *win);
+static void _win_show_time(WINDOW *win, char showchar);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
 static void _win_show_error_msg(WINDOW *win, const char * const message);
@@ -345,7 +345,7 @@ ui_show_incoming_msg(const char * const from, const char * const message,
     // no spare windows left
     if (win_index == 0) {
         if (tv_stamp == NULL) {
-            _win_show_time(console->win);
+            _win_show_time(console->win, '-');
         } else {
             GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
             gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
@@ -382,7 +382,7 @@ ui_show_incoming_msg(const char * const from, const char * const message,
         // currently viewing chat window with sender
         if (win_index == current_index) {
             if (tv_stamp == NULL) {
-                _win_show_time(win);
+                _win_show_time(win, '-');
             } else {
                 GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
                 gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
@@ -421,7 +421,7 @@ ui_show_incoming_msg(const char * const from, const char * const message,
             }
 
             if (tv_stamp == NULL) {
-                _win_show_time(win);
+                _win_show_time(win, '-');
             } else {
                 GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
                 gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
@@ -495,7 +495,7 @@ ui_disconnected(void)
     for (i = 1; i < NUM_WINS; i++) {
         if (windows[i] != NULL) {
             WINDOW *win = windows[i]->win;
-            _win_show_time(win);
+            _win_show_time(win, '-');
             wattron(win, COLOUR_ERROR);
             wprintw(win, "%s\n", "Lost connection.");
             wattroff(win, COLOUR_ERROR);
@@ -593,7 +593,7 @@ win_current_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    _win_show_time(current->win);
+    _win_show_time(current->win, '-');
     wprintw(current->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
@@ -605,7 +605,7 @@ void
 win_current_bad_show(const char * const msg)
 {
     WINDOW *win = current->win;
-    _win_show_time(win);
+    _win_show_time(win, '-');
     wattron(win, COLOUR_ERROR);
     wprintw(win, "%s\n", msg);
     wattroff(win, COLOUR_ERROR);
@@ -645,7 +645,7 @@ win_show_error_msg(const char * const from, const char *err_msg)
     // chat window exists
     if (win_index < NUM_WINS) {
         win = windows[win_index]->win;
-        _win_show_time(win);
+        _win_show_time(win, '-');
         _win_show_error_msg(win, err_msg);
         if (win_index == current_index) {
             dirty = TRUE;
@@ -675,7 +675,7 @@ win_show_system_msg(const char * const from, const char *message)
     }
     win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '-');
     wprintw(win, "*%s %s\n", bare_jid, message);
 
     // this is the current window
@@ -697,7 +697,7 @@ win_show_gone(const char * const from)
     // chat window exists
     if (win_index < NUM_WINS) {
         win = windows[win_index]->win;
-        _win_show_time(win);
+        _win_show_time(win, '-');
         wattron(win, COLOUR_GONE);
         wprintw(win, "*%s ", from);
         wprintw(win, "has left the conversation.");
@@ -782,7 +782,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
         win = windows[win_index]->win;
     }
 
-    _win_show_time(win);
+    _win_show_time(win, '-');
     if (strncmp(message, "/me ", 4) == 0) {
         wattron(win, COLOUR_ME);
         wprintw(win, "*%s ", from);
@@ -817,7 +817,7 @@ win_show_room_roster(const char * const room)
 
     GList *roster = muc_get_roster(room);
 
-    _win_show_time(win);
+    _win_show_time(win, '!');
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
         wattron(win, COLOUR_ROOMINFO);
         wprintw(win, "Room is empty.\n");
@@ -884,7 +884,7 @@ win_show_room_member_offline(const char * const room, const char * const nick)
     int win_index = _find_prof_win_index(room);
     WINDOW *win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '!');
     wattron(win, COLOUR_OFFLINE);
     wprintw(win, "-- %s has left the room.\n", nick);
     wattroff(win, COLOUR_OFFLINE);
@@ -900,7 +900,7 @@ win_show_room_member_online(const char * const room, const char * const nick,
     int win_index = _find_prof_win_index(room);
     WINDOW *win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '!');
     wattron(win, COLOUR_ONLINE);
     wprintw(win, "++ %s has joined the room.\n", nick);
     wattroff(win, COLOUR_ONLINE);
@@ -930,7 +930,7 @@ win_show_room_member_nick_change(const char * const room,
     int win_index = _find_prof_win_index(room);
     WINDOW *win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '!');
     wattron(win, COLOUR_THEM);
     wprintw(win, "** %s is now known as %s\n", old_nick, nick);
     wattroff(win, COLOUR_THEM);
@@ -945,7 +945,7 @@ win_show_room_nick_change(const char * const room, const char * const nick)
     int win_index = _find_prof_win_index(room);
     WINDOW *win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '!');
     wattron(win, COLOUR_ME);
     wprintw(win, "** You are now known as %s\n", nick);
     wattroff(win, COLOUR_ME);
@@ -987,7 +987,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
     int win_index = _find_prof_win_index(room_jid);
     WINDOW *win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '-');
     if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(win, COLOUR_THEM);
@@ -1051,7 +1051,7 @@ win_show_room_subject(const char * const room_jid, const char * const subject)
     int win_index = _find_prof_win_index(room_jid);
     WINDOW *win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '!');
     wattron(win, COLOUR_ROOMINFO);
     wprintw(win, "Room subject: ");
     wattroff(win, COLOUR_ROOMINFO);
@@ -1074,7 +1074,7 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
     int win_index = _find_prof_win_index(room_jid);
     WINDOW *win = windows[win_index]->win;
 
-    _win_show_time(win);
+    _win_show_time(win, '!');
     wattron(win, COLOUR_ROOMINFO);
     wprintw(win, "Room message: ");
     wattroff(win, COLOUR_ROOMINFO);
@@ -1099,7 +1099,7 @@ cons_show_wins(void)
 
     cons_show("");
     cons_show("Active windows:");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "1: Console\n");
 
     for (i = 1; i < NUM_WINS; i++) {
@@ -1112,7 +1112,7 @@ cons_show_wins(void)
         for (i = 1; i < NUM_WINS; i++) {
             if (windows[i] != NULL) {
                 ProfWin *window = windows[i];
-                _win_show_time(console->win);
+                _win_show_time(console->win, '-');
 
                 switch (window->type)
                 {
@@ -1550,7 +1550,7 @@ cons_bad_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_ERROR);
     wprintw(console->win, "%s\n", fmt_msg->str);
     wattroff(console->win, COLOUR_ERROR);
@@ -1567,7 +1567,7 @@ cons_bad_show(const char * const msg, ...)
 void
 cons_show_time(void)
 {
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
 }
 
 void
@@ -1577,7 +1577,7 @@ cons_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
@@ -1604,7 +1604,7 @@ cons_show_word(const char * const word)
 void
 cons_bad_command(const char * const cmd)
 {
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "Unknown command: %s\n", cmd);
 
     if (current_index == 0) {
@@ -1623,7 +1623,7 @@ cons_about(void)
     if (prefs_get_splash()) {
         _cons_splash_logo();
     } else {
-        _win_show_time(console->win);
+        _win_show_time(console->win, '-');
 
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
             wprintw(console->win, "Welcome to Profanity, version %sdev\n", PACKAGE_VERSION);
@@ -1632,21 +1632,21 @@ cons_about(void)
         }
     }
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "Copyright (C) 2012, 2013 James Booth <%s>.\n", PACKAGE_BUGREPORT);
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "\n");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "This is free software; you are free to change and redistribute it.\n");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "There is NO WARRANTY, to the extent permitted by law.\n");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "\n");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "Type '/help' to show complete help.\n");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "\n");
 
     if (prefs_get_vercheck()) {
@@ -1672,12 +1672,12 @@ cons_check_version(gboolean not_available_msg)
 
         if (relase_valid) {
             if (_new_release(latest_release)) {
-                _win_show_time(console->win);
+                _win_show_time(console->win, '-');
                 wprintw(console->win, "A new version of Profanity is available: %s", latest_release);
-                _win_show_time(console->win);
+                _win_show_time(console->win, '-');
                 wprintw(console->win, "Check <http://www.profanity.im> for details.\n");
                 free(latest_release);
-                _win_show_time(console->win);
+                _win_show_time(console->win, '-');
                 wprintw(console->win, "\n");
             } else {
                 if (not_available_msg) {
@@ -1828,47 +1828,47 @@ _new_release(char *found_version)
 static void
 _cons_splash_logo(void)
 {
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "Welcome to\n");
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "                   ___            _           \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "                  / __)          (_)_         \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "|_|                                    (____/ \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wprintw(console->win, "\n");
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
         wprintw(console->win, "Version %sdev\n", PACKAGE_VERSION);
     } else {
@@ -1909,12 +1909,12 @@ _new_prof_win(const char * const contact, win_type_t type)
 }
 
 static void
-_win_show_time(WINDOW *win)
+_win_show_time(WINDOW *win, char showchar)
 {
     GDateTime *time = g_date_time_new_now_local();
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
     wattron(win, COLOUR_TIME);
-    wprintw(win, "%s - ", date_fmt);
+    wprintw(win, "%s %c ", date_fmt, showchar);
     wattroff(win, COLOUR_TIME);
     g_date_time_unref(time);
     g_free(date_fmt);
@@ -1984,7 +1984,7 @@ _show_status_string(WINDOW *win, const char * const from,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show)
 {
-    _win_show_time(win);
+    _win_show_time(win, '-');
 
     if (show != NULL) {
         if (strcmp(show, "away") == 0) {
@@ -2062,7 +2062,7 @@ _show_status_string(WINDOW *win, const char * const from,
 static void
 _cons_show_typing(const char * const short_from)
 {
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_TYPING);
     wprintw(console->win, "!! %s is typing a message...\n", short_from);
     wattroff(console->win, COLOUR_TYPING);
@@ -2071,7 +2071,7 @@ _cons_show_typing(const char * const short_from)
 static void
 _cons_show_incoming_message(const char * const short_from, const int win_index)
 {
-    _win_show_time(console->win);
+    _win_show_time(console->win, '-');
     wattron(console->win, COLOUR_INCOMING);
     wprintw(console->win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
     wattroff(console->win, COLOUR_INCOMING);
@@ -2086,7 +2086,7 @@ _win_show_contact(ProfWin *window, PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    _win_show_time(window->win);
+    _win_show_time(window->win, '-');
 
     if (strcmp(presence, "online") == 0) {
         wattron(window->win, COLOUR_ONLINE);
