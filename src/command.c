@@ -324,7 +324,6 @@ static struct cmd_t main_commands[] =
         { "/tiny url",
           "---------",
           "Send the url as a tiny url.",
-          "This command can only be called when in a chat window, not from the console.",
           "",
           "Example : /tiny http://www.google.com",
           NULL } } },
@@ -1662,24 +1661,35 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
         GString *error = g_string_new("/tiny, badly formed URL: ");
         g_string_append(error, url);
         cons_bad_show(error->str);
-        if (win_current_is_chat()) {
+        if (!win_current_is_console()) {
             win_current_bad_show(error->str);
         }
         g_string_free(error, TRUE);
-    } else if (win_current_is_chat()) {
+    } else if (!win_current_is_console()) {
         char *tiny = tinyurl_get(url);
 
         if (tiny != NULL) {
-            char *recipient = win_current_get_recipient();
-            jabber_send(tiny, recipient);
+            if (win_current_is_chat()) {
+                char *recipient = win_current_get_recipient();
+                jabber_send(tiny, recipient);
 
-            if (prefs_get_chlog()) {
-                const char *jid = jabber_get_jid();
-                chat_log_chat(jid, recipient, tiny, PROF_OUT_LOG, NULL);
+                if (prefs_get_chlog()) {
+                    const char *jid = jabber_get_jid();
+                    chat_log_chat(jid, recipient, tiny, PROF_OUT_LOG, NULL);
+                }
+
+                win_show_outgoing_msg("me", recipient, tiny);
+                free(recipient);
+            } else if (win_current_is_private()) {
+                char *recipient = win_current_get_recipient();
+                jabber_send(tiny, recipient);
+                win_show_outgoing_msg("me", recipient, tiny);
+                free(recipient);
+            } else { // groupchat
+                char *recipient = win_current_get_recipient();
+                jabber_send_groupchat(tiny, recipient);
+                free(recipient);
             }
-
-            win_show_outgoing_msg("me", recipient, tiny);
-            free(recipient);
             free(tiny);
         } else {
             cons_bad_show("Couldn't get tinyurl.");
