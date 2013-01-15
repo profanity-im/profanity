@@ -1540,12 +1540,16 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, "/");
             g_string_append(full_jid, usr);
 
-            jabber_send(msg, full_jid->str);
-            win_show_outgoing_msg("me", full_jid->str, msg);
+            if (msg != NULL) {
+                jabber_send(msg, full_jid->str);
+                win_show_outgoing_msg("me", full_jid->str, msg);
 
-            if (prefs_get_chlog()) {
-                const char *jid = jabber_get_jid();
-                chat_log_chat(jid, full_jid->str, msg, PROF_OUT_LOG, NULL);
+                if (prefs_get_chlog()) {
+                    const char *jid = jabber_get_jid();
+                    chat_log_chat(jid, full_jid->str, msg, PROF_OUT_LOG, NULL);
+                }
+            } else {
+                win_new_chat_win(full_jid->str);
             }
 
             g_string_free(full_jid, TRUE);
