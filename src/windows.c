@@ -817,13 +817,14 @@ win_show_room_roster(const char * const room)
 
     GList *roster = muc_get_roster(room);
 
+    _win_show_time(win);
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
         wattron(win, COLOUR_ROOMINFO);
-        wprintw(win, "You are alone!\n");
+        wprintw(win, "Room is empty.\n");
         wattroff(win, COLOUR_ROOMINFO);
     } else {
         wattron(win, COLOUR_ROOMINFO);
-        wprintw(win, "Room occupants:\n");
+        wprintw(win, "Participants: ");
         wattroff(win, COLOUR_ROOMINFO);
         wattron(win, COLOUR_ONLINE);
 
@@ -1050,6 +1051,7 @@ win_show_room_subject(const char * const room_jid, const char * const subject)
     int win_index = _find_prof_win_index(room_jid);
     WINDOW *win = windows[win_index]->win;
 
+    _win_show_time(win);
     wattron(win, COLOUR_ROOMINFO);
     wprintw(win, "Room subject: ");
     wattroff(win, COLOUR_ROOMINFO);
@@ -1072,6 +1074,7 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
     int win_index = _find_prof_win_index(room_jid);
     WINDOW *win = windows[win_index]->win;
 
+    _win_show_time(win);
     wattron(win, COLOUR_ROOMINFO);
     wprintw(win, "Room message: ");
     wattroff(win, COLOUR_ROOMINFO);
