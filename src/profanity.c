@@ -122,7 +122,7 @@ prof_handle_incoming_message(char *from, char *message, gboolean priv)
     ui_show_incoming_msg(from, message, NULL, priv);
     win_current_page_off();
 
-    if (prefs_get_chlog()) {
+    if (win_current_is_chat() && prefs_get_chlog()) {
         char from_cpy[strlen(from) + 1];
         strcpy(from_cpy, from);
         char *short_from = strtok(from_cpy, "/");
@@ -139,7 +139,7 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     ui_show_incoming_msg(from, message, &tv_stamp, priv);
     win_current_page_off();
 
-    if (prefs_get_chlog()) {
+    if (win_current_is_chat() && prefs_get_chlog()) {
         char from_cpy[strlen(from) + 1];
         strcpy(from_cpy, from);
         char *short_from = strtok(from_cpy, "/");

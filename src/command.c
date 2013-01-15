@@ -879,7 +879,7 @@ cmd_execute_default(const char * const inp)
             char *recipient = win_current_get_recipient();
             jabber_send(inp, recipient);
 
-            if (prefs_get_chlog()) {
+            if (win_current_is_chat() && prefs_get_chlog()) {
                 const char *jid = jabber_get_jid();
                 chat_log_chat(jid, recipient, inp, PROF_OUT_LOG, NULL);
             }
@@ -1543,11 +1543,6 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             if (msg != NULL) {
                 jabber_send(msg, full_jid->str);
                 win_show_outgoing_msg("me", full_jid->str, msg);
-
-                if (prefs_get_chlog()) {
-                    const char *jid = jabber_get_jid();
-                    chat_log_chat(jid, full_jid->str, msg, PROF_OUT_LOG, NULL);
-                }
             } else {
                 win_new_chat_win(full_jid->str);
             }
@@ -1565,7 +1560,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             jabber_send(msg, usr);
             win_show_outgoing_msg("me", usr, msg);
 
-            if (prefs_get_chlog()) {
+            if (win_current_is_chat() && prefs_get_chlog()) {
                 const char *jid = jabber_get_jid();
                 chat_log_chat(jid, usr, msg, PROF_OUT_LOG, NULL);
             }
