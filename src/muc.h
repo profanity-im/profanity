@@ -44,6 +44,7 @@ void muc_remove_from_roster(const char * const room, const char * const nick);
 GList * muc_get_roster(const char * const room);
 PAutocomplete muc_get_roster_ac(const char * const room);
 gboolean muc_nick_in_roster(const char * const room, const char * const nick);
+PContact muc_get_participant(const char * const room, const char * const nick);
 void muc_set_roster_received(const char * const room);
 gboolean muc_get_roster_received(const char * const room);
 

@@ -241,6 +241,19 @@ muc_remove_from_roster(const char * const room, const char * const nick)
     }
 }
 
+PContact
+muc_get_participant(const char * const room, const char * const nick)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room != NULL) {
+        PContact participant = g_hash_table_lookup(chat_room->roster, nick);
+        return participant;
+    }
+
+    return NULL;
+}
+
 /*
  * Return a list of PContacts representing the room members in the room's roster
  * The list is owned by the room and must not be mofified or freed

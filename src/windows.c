@@ -88,7 +88,7 @@ static void _set_current(int index);
 static void _create_windows(void);
 static void _cons_splash_logo(void);
 static void _cons_show_basic_help(void);
-static void _cons_show_contact(PContact contact);
+static void _win_show_contact(ProfWin *window, PContact contact);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact, win_type_t type);
 static void _current_window_refresh(void);
@@ -1166,9 +1166,21 @@ cons_show_status(const char * const contact)
     PContact pcontact = contact_list_get_contact(contact);
 
     if (pcontact != NULL) {
-        _cons_show_contact(pcontact);
+        _win_show_contact(console, pcontact);
     } else {
         cons_show("No such contact \"%s\" in roster.", contact);
+    }
+}
+
+void
+win_show_status(const char * const contact)
+{
+    PContact pcontact = muc_get_participant(win_current_get_recipient(), contact);
+
+    if (pcontact != NULL) {
+        _win_show_contact(current, pcontact);
+    } else {
+        win_current_show("No such participant \"%s\" in room.", contact);
     }
 }
 
@@ -1522,7 +1534,7 @@ cons_show_contacts(GSList *list)
     while(curr) {
         PContact contact = curr->data;
         if (strcmp(p_contact_subscription(contact), "none") != 0) {
-            _cons_show_contact(contact);
+            _win_show_contact(console, contact);
         }
         curr = g_slist_next(curr);
     }
@@ -2063,7 +2075,7 @@ _cons_show_incoming_message(const char * const short_from, const int win_index)
 }
 
 static void
-_cons_show_contact(PContact contact)
+_win_show_contact(ProfWin *window, PContact contact)
 {
     const char *jid = p_contact_jid(contact);
     const char *name = p_contact_name(contact);
@@ -2071,68 +2083,68 @@ _cons_show_contact(PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    _win_show_time(console->win);
+    _win_show_time(window->win);
 
     if (strcmp(presence, "online") == 0) {
-        wattron(console->win, COLOUR_ONLINE);
+        wattron(window->win, COLOUR_ONLINE);
     } else if (strcmp(presence, "away") == 0) {
-        wattron(console->win, COLOUR_AWAY);
+        wattron(window->win, COLOUR_AWAY);
     } else if (strcmp(presence, "chat") == 0) {
-        wattron(console->win, COLOUR_CHAT);
+        wattron(window->win, COLOUR_CHAT);
     } else if (strcmp(presence, "dnd") == 0) {
-        wattron(console->win, COLOUR_DND);
+        wattron(window->win, COLOUR_DND);
     } else if (strcmp(presence, "xa") == 0) {
-        wattron(console->win, COLOUR_XA);
+        wattron(window->win, COLOUR_XA);
     } else {
-        wattron(console->win, COLOUR_OFFLINE);
+        wattron(window->win, COLOUR_OFFLINE);
     }
 
-    wprintw(console->win, "%s", jid);
+    wprintw(window->win, "%s", jid);
 
     if (name != NULL) {
-        wprintw(console->win, " (%s)", name);
+        wprintw(window->win, " (%s)", name);
     }
 
-    wprintw(console->win, " is %s", presence);
+    wprintw(window->win, " is %s", presence);
 
     if (last_activity != NULL) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
-        wprintw(console->win, ", idle ");
+        wprintw(window->win, ", idle ");
 
         int hours = span / G_TIME_SPAN_HOUR;
         span = span - hours * G_TIME_SPAN_HOUR;
         if (hours > 0) {
-            wprintw(console->win, "%dh", hours);
+            wprintw(window->win, "%dh", hours);
         }
 
         int minutes = span / G_TIME_SPAN_MINUTE;
         span = span - minutes * G_TIME_SPAN_MINUTE;
-        wprintw(console->win, "%dm", minutes);
+        wprintw(window->win, "%dm", minutes);
 
         int seconds = span / G_TIME_SPAN_SECOND;
-        wprintw(console->win, "%ds", seconds);
+        wprintw(window->win, "%ds", seconds);
     }
 
     if (status != NULL) {
-        wprintw(console->win, ", \"%s\"", p_contact_status(contact));
+        wprintw(window->win, ", \"%s\"", p_contact_status(contact));
     }
 
-    wprintw(console->win, "\n");
+    wprintw(window->win, "\n");
 
     if (strcmp(presence, "online") == 0) {
-        wattroff(console->win, COLOUR_ONLINE);
+        wattroff(window->win, COLOUR_ONLINE);
     } else if (strcmp(presence, "away") == 0) {
-        wattroff(console->win, COLOUR_AWAY);
+        wattroff(window->win, COLOUR_AWAY);
     } else if (strcmp(presence, "chat") == 0) {
-        wattroff(console->win, COLOUR_CHAT);
+        wattroff(window->win, COLOUR_CHAT);
     } else if (strcmp(presence, "dnd") == 0) {
-        wattroff(console->win, COLOUR_DND);
+        wattroff(window->win, COLOUR_DND);
     } else if (strcmp(presence, "xa") == 0) {
-        wattroff(console->win, COLOUR_XA);
+        wattroff(window->win, COLOUR_XA);
     } else {
-        wattroff(console->win, COLOUR_OFFLINE);
+        wattroff(window->win, COLOUR_OFFLINE);
     }
 }
 

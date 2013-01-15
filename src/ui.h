@@ -132,6 +132,7 @@ void win_show_room_member_nick_change(const char * const room,
 void win_show_room_nick_change(const char * const room, const char * const nick);
 void win_show_room_member_presence(const char * const room,
     const char * const nick, const char * const show, const char * const status);
+void win_show_status(const char * const contact);
 
 // console window actions
 void cons_about(void);

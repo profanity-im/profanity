@@ -1584,7 +1584,11 @@ _cmd_info(gchar **args, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        cons_show_status(usr);
+        if (win_current_is_groupchat()) {
+            win_show_status(usr);
+        } else {
+            cons_show_status(usr);
+        }
     }
 
     return TRUE;
