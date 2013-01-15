@@ -115,7 +115,7 @@ void win_show_outgoing_msg(const char * const from, const char * const to,
 void win_new_chat_win(const char * const to);
 
 void win_join_chat(Jid *jid);
-void win_show_room_roster(const char * const room);
+void win_show_room_roster(const char * const room, GList *roster, const char * const presence);
 void win_show_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void win_show_room_message(const char * const room_jid, const char * const nick,

@@ -810,21 +810,27 @@ win_join_chat(Jid *jid)
 }
 
 void
-win_show_room_roster(const char * const room)
+win_show_room_roster(const char * const room, GList *roster, const char * const presence)
 {
     int win_index = _find_prof_win_index(room);
     WINDOW *win = windows[win_index]->win;
 
-    GList *roster = muc_get_roster(room);
-
     _win_show_time(win, '!');
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
         wattron(win, COLOUR_ROOMINFO);
-        wprintw(win, "Room is empty.\n");
+        if (presence == NULL) {
+            wprintw(win, "Room is empty.\n");
+        } else {
+            wprintw(win, "No participants are %s.\n", presence);
+        }
         wattroff(win, COLOUR_ROOMINFO);
     } else {
         wattron(win, COLOUR_ROOMINFO);
-        wprintw(win, "Participants: ");
+        if (presence == NULL) {
+            wprintw(win, "Participants: ");
+        } else {
+            wprintw(win, "Participants (%s): ", presence);
+        }
         wattroff(win, COLOUR_ROOMINFO);
         wattron(win, COLOUR_ONLINE);
 

@@ -297,7 +297,8 @@ void
 prof_handle_room_roster_complete(const char * const room)
 {
     muc_set_roster_received(room);
-    win_show_room_roster(room);
+    GList *roster = muc_get_roster(room);
+    win_show_room_roster(room, roster, NULL);
     win_current_page_off();
 }
 

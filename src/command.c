@@ -777,10 +777,9 @@ cmd_reset_autocomplete()
         if (nick_ac != NULL) {
             p_autocomplete_reset(nick_ac);
         }
-    } else {
-        p_autocomplete_reset(who_ac);
     }
 
+    p_autocomplete_reset(who_ac);
     p_autocomplete_reset(prefs_ac);
     p_autocomplete_reset(log_ac);
     p_autocomplete_reset(commands_ac);
@@ -1429,7 +1428,81 @@ _cmd_who(gchar **args, struct cmd_help_t help)
         } else {
             if (win_current_is_groupchat()) {
                 char *room = win_current_get_recipient();
-                win_show_room_roster(room);
+                GList *list = muc_get_roster(room);
+
+                // no arg, show all contacts
+                if (presence == NULL) {
+                    win_show_room_roster(room, list, NULL);
+
+                // available
+                } else if (strcmp("available", presence) == 0) {
+                    GList *filtered = NULL;
+
+                    while (list != NULL) {
+                        PContact contact = list->data;
+                        const char * const contact_presence = (p_contact_presence(contact));
+                        if ((strcmp(contact_presence, "online") == 0)
+                                || (strcmp(contact_presence, "chat") == 0)) {
+                            filtered = g_list_append(filtered, contact);
+                        }
+                        list = g_list_next(list);
+                    }
+
+                    win_show_room_roster(room, filtered, "available");
+
+                // unavailable
+                } else if (strcmp("unavailable", presence) == 0) {
+                    GList *filtered = NULL;
+
+                    while (list != NULL) {
+                        PContact contact = list->data;
+                        const char * const contact_presence = (p_contact_presence(contact));
+                        if ((strcmp(contact_presence, "offline") == 0)
+                                || (strcmp(contact_presence, "away") == 0)
+                                || (strcmp(contact_presence, "dnd") == 0)
+                                || (strcmp(contact_presence, "xa") == 0)) {
+                            filtered = g_list_append(filtered, contact);
+                        }
+                        list = g_list_next(list);
+                    }
+
+                    win_show_room_roster(room, filtered, "unavailable");
+
+                // online, show all status that indicate online
+                } else if (strcmp("online", presence) == 0) {
+                    GList *filtered = NULL;
+
+                    while (list != NULL) {
+                        PContact contact = list->data;
+                        const char * const contact_presence = (p_contact_presence(contact));
+                        if ((strcmp(contact_presence, "online") == 0)
+                                || (strcmp(contact_presence, "away") == 0)
+                                || (strcmp(contact_presence, "dnd") == 0)
+                                || (strcmp(contact_presence, "xa") == 0)
+                                || (strcmp(contact_presence, "chat") == 0)) {
+                            filtered = g_list_append(filtered, contact);
+                        }
+                        list = g_list_next(list);
+                    }
+
+                    win_show_room_roster(room, filtered, "online");
+
+                // show specific status
+                } else {
+                    GList *filtered = NULL;
+
+                    while (list != NULL) {
+                        PContact contact = list->data;
+                        if (strcmp(p_contact_presence(contact), presence) == 0) {
+                            filtered = g_list_append(filtered, contact);
+                        }
+                        list = g_list_next(list);
+                    }
+
+                    win_show_room_roster(room, filtered, presence);
+                }
+
+            // not in groupchat window
             } else {
                 GSList *list = get_contact_list();
 
