@@ -1624,7 +1624,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_free(full_jid, TRUE);
 
         } else {
-            cons_show("No such nick \"%s\" in room %s.", usr, room_name);
+            win_current_show("No such participant \"%s\" in room.", usr);
         }
 
         return TRUE;

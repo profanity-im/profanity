@@ -152,10 +152,16 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
 void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
-    if (err_msg != NULL) {
-        cons_bad_show("Error received from server: %s", err_msg);
+    if (err_msg == NULL) {
+        cons_bad_show("Unknown error received from service.");
+    } else if (strcmp(err_msg, "conflict") == 0) {
+        if (win_current_is_groupchat()) {
+            win_current_show("Nickname already in use.");
+        } else {
+            cons_bad_show("Error received from server: %s", err_msg);
+        }
     } else {
-        cons_bad_show("Unknown error received from server.");
+        cons_bad_show("Error received from server: %s", err_msg);
     }
 
     win_show_error_msg(from, err_msg);
