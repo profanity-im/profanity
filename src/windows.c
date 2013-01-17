@@ -1184,7 +1184,36 @@ cons_show_status(const char * const contact)
 }
 
 void
-win_show_status(const char * const contact)
+win_show_status(void)
+{
+    char *recipient = win_current_get_recipient();
+    PContact pcontact = contact_list_get_contact(recipient);
+
+    if (pcontact != NULL) {
+        _win_show_contact(current, pcontact);
+    } else {
+        win_current_show("Error getting contact info.");
+    }
+}
+
+void
+win_private_show_status(void)
+{
+    Jid *jid = jid_create(win_current_get_recipient());
+
+    PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+
+    if (pcontact != NULL) {
+        _win_show_contact(current, pcontact);
+    } else {
+        win_current_show("Error getting contact info.");
+    }
+
+    jid_destroy(jid);
+}
+
+void
+win_room_show_status(const char * const contact)
 {
     PContact pcontact = muc_get_participant(win_current_get_recipient(), contact);
 

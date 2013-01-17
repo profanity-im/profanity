@@ -255,11 +255,12 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/info",
-        _cmd_info, parse_args, 1, 1,
-        { "/info jid|nick", "Find out a contacts presence information.",
-        { "/info jid|nick",
-          "--------------",
+        _cmd_info, parse_args, 0, 1,
+        { "/info [jid|nick]", "Find out a contacts presence information.",
+        { "/info [jid|nick]",
+          "----------------",
           "Find out a contact, or room members presence information.",
+          "If in a chat window the parameter is not required, the current recipient will be used.",
           NULL } } },
 
     { "/join",
@@ -1672,9 +1673,29 @@ _cmd_info(gchar **args, struct cmd_help_t help)
         cons_show("You are not currently connected.");
     } else {
         if (win_current_is_groupchat()) {
-            win_show_status(usr);
+            if (usr != NULL) {
+                win_room_show_status(usr);
+            } else {
+                win_current_show("You must specify a nickname.");
+            }
+        } else if (win_current_is_chat()) {
+            if (usr != NULL) {
+                win_current_show("No parameter required when in chat.");
+            } else {
+                win_show_status();
+            }
+        } else if (win_current_is_private()) {
+            if (usr != NULL) {
+                win_current_show("No parameter required when in chat.");
+            } else {
+                win_private_show_status();
+            }
         } else {
-            cons_show_status(usr);
+            if (usr != NULL) {
+                cons_show_status(usr);
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
         }
     }
 
