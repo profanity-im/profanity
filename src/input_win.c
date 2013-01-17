@@ -334,13 +334,16 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             }
         }
 
-        // handle some shit
         if (next_ch == NULL) {
             inp_x = display_size;
             wmove(inp_win, 0, inp_x);
         } else {
             glong offset = g_utf8_pointer_to_offset(input, curr_ch);
-            inp_x = offset + 1;
+            if (offset == display_size - 1) {
+                inp_x = offset + 1;
+            } else {
+                inp_x = offset;
+            }
             wmove(inp_win, 0, inp_x);
         }
 
