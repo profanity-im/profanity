@@ -131,23 +131,7 @@ inp_get_char(char *input, int *size)
             prof_handle_activity();
         }
     }
-/*
-    if (ch != 0) {
-        char *res = "?";
-        if (result == ERR) {
-            res = "ERR";
-        }
-        if (result == OK) {
-            res = "OK";
-        }
-        if (result == KEY_CODE_YES) {
-            res = "KEY_CODE_YES";
-        }
-        
-        cons_show("KEY CODE: %d, RESULT = %s", ch, res);
-        win_current_page_off();
-    }
-*/    
+
     // if it wasn't an arrow key etc
     if (!_handle_edit(result, ch, input, size)) {
         if (_printable(ch) && result != KEY_CODE_YES) {
@@ -282,35 +266,41 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
     if ((result == KEY_CODE_YES) && (ch == 540) && (inp_x > 0)) {
         input[*size] = '\0';
         gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
-        gchar *prev_ch = g_utf8_find_prev_char(input, curr_ch);
+        curr_ch = g_utf8_find_prev_char(input, curr_ch);
+        gchar *prev_ch;
+        gunichar curr_uni;
+        gunichar prev_uni;
 
-        // no more chars to left, set to beginning
-        if (prev_ch == NULL) {
-            inp_x = 0;
-            wmove(inp_win, 0, inp_x);
+        while (curr_ch != NULL) {
+            curr_uni = g_utf8_get_char(curr_ch);
 
-        // otherwise, go back to start of previous word
-        } else {
-            gunichar prev_uni = g_utf8_get_char(prev_ch);
-            while (!g_unichar_isspace(prev_uni)) {
-                prev_ch = g_utf8_find_prev_char(input, prev_ch);
-                if (prev_ch != NULL) {
-                    prev_uni = g_utf8_get_char(prev_ch);
-                } else {
+            if (g_unichar_isspace(curr_uni)) {
+                curr_ch = g_utf8_find_prev_char(input, curr_ch);
+            } else {
+                prev_ch = g_utf8_find_prev_char(input, curr_ch);
+                if (prev_ch == NULL) {
+                    curr_ch = NULL;
                     break;
+                } else {
+                    prev_uni = g_utf8_get_char(prev_ch);
+                    if (g_unichar_isspace(prev_uni)) {
+                        break;
+                    } else {
+                        curr_ch = prev_ch;
+                    }
                 }
             }
-
-            if (prev_ch == NULL) {
-                inp_x = 0;
-                wmove(inp_win, 0, inp_x);
-            } else {
-                glong offset = g_utf8_pointer_to_offset(input, prev_ch);
-                inp_x = offset;
-                wmove(inp_win, 0, inp_x);
-            }
         }
-        
+
+        if (curr_ch == NULL) {
+            inp_x = 0;
+            wmove(inp_win, 0, inp_x);
+        } else {
+            glong offset = g_utf8_pointer_to_offset(input, curr_ch);
+            inp_x = offset;
+            wmove(inp_win, 0, inp_x);
+        }
+
         // if gone off screen to left, jump left (half a screen worth)
         if (inp_x <= pad_start) {
             pad_start = pad_start - (cols / 2);
@@ -321,10 +311,19 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             _inp_win_refresh();
         }
         return 1;
-    } else if ((result == KEY_CODE_YES) && (ch == 555)) { // CTRL-RIGHT
-        cons_show("CTRL-RIGHT");
-        win_current_page_off();
+
+    // CTRL-RIGHT
+    } else if ((result == KEY_CODE_YES) && (ch == 555) && (inp_x < display_size)) {
+        wmove(inp_win, 0, inp_x+1);
+
+        // current position off screen to right
+        if ((inp_x + 1 - pad_start) >= cols) {
+            pad_start++;
+            _inp_win_refresh();
+        }
         return 1;
+
+    // other editing keys
     } else {
         switch(ch) {
 
