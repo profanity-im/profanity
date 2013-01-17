@@ -894,7 +894,7 @@ win_show_room_member_offline(const char * const room, const char * const nick)
 
     _win_show_time(win, '!');
     wattron(win, COLOUR_OFFLINE);
-    wprintw(win, "-- %s has left the room.\n", nick);
+    wprintw(win, "<- %s has left the room.\n", nick);
     wattroff(win, COLOUR_OFFLINE);
 
     if (win_index == current_index)
@@ -910,7 +910,7 @@ win_show_room_member_online(const char * const room, const char * const nick,
 
     _win_show_time(win, '!');
     wattron(win, COLOUR_ONLINE);
-    wprintw(win, "++ %s has joined the room.\n", nick);
+    wprintw(win, "-> %s has joined the room.\n", nick);
     wattroff(win, COLOUR_ONLINE);
 
     if (win_index == current_index)
