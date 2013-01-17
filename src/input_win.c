@@ -263,7 +263,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
     inp_x = getcurx(inp_win);
 
     // CTRL-LEFT
-    if ((result == KEY_CODE_YES) && (ch == 540 || ch == 539) && (inp_x > 0)) {
+    if ((result == KEY_CODE_YES) && (ch == 545 || ch == 540 || ch == 539) && (inp_x > 0)) {
         input[*size] = '\0';
         gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
         curr_ch = g_utf8_find_prev_char(input, curr_ch);
@@ -313,7 +313,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
         return 1;
 
     // CTRL-RIGHT
-    } else if ((result == KEY_CODE_YES) && (ch == 555 || ch == 554) && (inp_x < display_size)) {
+    } else if ((result == KEY_CODE_YES) && (ch == 560 || ch == 555 || ch == 554) && (inp_x < display_size)) {
         input[*size] = '\0';
         gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
         gchar *next_ch = g_utf8_find_next_char(curr_ch, NULL);
