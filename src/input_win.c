@@ -314,13 +314,42 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 
     // CTRL-RIGHT
     } else if ((result == KEY_CODE_YES) && (ch == 555) && (inp_x < display_size)) {
-        wmove(inp_win, 0, inp_x+1);
+        input[*size] = '\0';
+        gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
+        gchar *next_ch = g_utf8_find_next_char(curr_ch, NULL);
+        gunichar curr_uni;
+        gunichar next_uni;
+        gboolean moved = FALSE;
 
-        // current position off screen to right
-        if ((inp_x + 1 - pad_start) >= cols) {
-            pad_start++;
+        while (g_utf8_pointer_to_offset(input, next_ch) < display_size) {
+            curr_uni = g_utf8_get_char(curr_ch);
+            next_uni = g_utf8_get_char(next_ch);
+            curr_ch = next_ch;
+            next_ch = g_utf8_find_next_char(next_ch, NULL);
+
+            if (!g_unichar_isspace(curr_uni) && g_unichar_isspace(next_uni) && moved) {
+                break;
+            } else {
+                moved = TRUE;
+            }
+        }
+
+        // handle some shit
+        if (next_ch == NULL) {
+            inp_x = display_size;
+            wmove(inp_win, 0, inp_x);
+        } else {
+            glong offset = g_utf8_pointer_to_offset(input, curr_ch);
+            inp_x = offset + 1;
+            wmove(inp_win, 0, inp_x);
+        }
+
+        // if gone off screen to right, jump right (half a screen worth)
+        if (inp_x > pad_start + cols) {
+            pad_start = pad_start + (cols / 2);
             _inp_win_refresh();
         }
+
         return 1;
 
     // other editing keys
