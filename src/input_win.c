@@ -131,7 +131,7 @@ inp_get_char(char *input, int *size)
             prof_handle_activity();
         }
     }
-    
+
     // if it wasn't an arrow key etc
     if (!_handle_edit(result, ch, input, size)) {
         if (_printable(ch) && result != KEY_CODE_YES) {
@@ -313,7 +313,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
         return 1;
 
     // CTRL-RIGHT
-    } else if ((result == KEY_CODE_YES) && (ch == 555 | ch == 554) && (inp_x < display_size)) {
+    } else if ((result == KEY_CODE_YES) && (ch == 555 || ch == 554) && (inp_x < display_size)) {
         input[*size] = '\0';
         gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
         gchar *next_ch = g_utf8_find_next_char(curr_ch, NULL);
