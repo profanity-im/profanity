@@ -68,6 +68,8 @@ gint prefs_get_gone(void);
 void prefs_set_gone(gint value);
 gchar * prefs_get_theme(void);
 void prefs_set_theme(gchar *value);
+gboolean prefs_get_mouse(void);
+void prefs_set_mouse(gboolean value);
 
 void prefs_set_notify_message(gboolean value);
 gboolean prefs_get_notify_message(void);

@@ -119,6 +119,7 @@ static gboolean _cmd_set_gone(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_titlebar(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoaway(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_mouse(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
@@ -437,6 +438,17 @@ static struct cmd_t setting_commands[] =
           "Show various properties in the window title bar.",
           "Possible properties are 'version'.",
           NULL  } } },
+
+    { "/mouse",
+        _cmd_set_mouse, parse_args, 1, 1,
+        { "/mouse on|off", "Use profanity mouse handling.",
+        { "/mouse on|off",
+          "-------------",
+          "If set to 'on', profanity will handle mouse actions, which enabled scrolling the main window with the mouse wheel.",
+          "To select text, use the shift key while selcting an area.",
+          "If set to 'off', profanity leaves mouse handling to the terminal implementation.",
+          "The default is 'on', if you have strange behaviour with mouse actions, set to 'off'.",
+          NULL } } },
 
     { "/chlog",
         _cmd_set_chlog, parse_args, 1, 1,
@@ -910,6 +922,8 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/splash",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/chlog",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/mouse",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/history",
         prefs_autocomplete_boolean_choice);
@@ -2087,6 +2101,13 @@ _cmd_set_chlog(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
         "Chat logging", prefs_set_chlog);
+}
+
+static gboolean
+_cmd_set_mouse(gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args[0], help,
+        "Mouse handling", prefs_set_mouse);
 }
 
 static gboolean

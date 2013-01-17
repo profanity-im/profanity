@@ -410,6 +410,23 @@ prefs_set_splash(gboolean value)
     _save_prefs();
 }
 
+gboolean
+prefs_get_mouse(void)
+{
+    // default to true
+    if (!g_key_file_has_key(prefs, "ui", "mouse", NULL)) {
+        return TRUE;
+    } else {
+        return g_key_file_get_boolean(prefs, "ui", "mouse", NULL);
+    }
+}
+
+void
+prefs_set_mouse(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "mouse", value);
+    _save_prefs();
+}
 static void
 _save_prefs(void)
 {

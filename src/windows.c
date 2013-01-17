@@ -125,8 +125,10 @@ ui_init(void)
     initscr();
     raw();
     keypad(stdscr, TRUE);
-    mousemask(ALL_MOUSE_EVENTS, NULL);
-    mouseinterval(5);
+    if (prefs_get_mouse()) {
+        mousemask(ALL_MOUSE_EVENTS, NULL);
+        mouseinterval(5);
+    }
     ui_load_colours();
     refresh();
     create_title_bar();
@@ -1251,6 +1253,11 @@ cons_show_ui_prefs(void)
         cons_show("Version checking (/vercheck) : ON");
     else
         cons_show("Version checking (/vercheck) : OFF");
+
+    if (prefs_get_mouse())
+        cons_show("Mouse handling (/mouse)      : ON");
+    else
+        cons_show("Mouse handling (/mouse)      : OFF");
 }
 
 void
@@ -2192,42 +2199,45 @@ _win_handle_page(const wint_t * const ch)
     int page_space = rows - 4;
     int *page_start = &(current->y_pos);
 
-    MEVENT mouse_event;
+    if (prefs_get_mouse()) {
+        MEVENT mouse_event;
 
-    if (*ch == KEY_MOUSE) {
-        if (getmouse(&mouse_event) == OK) {
+        if (*ch == KEY_MOUSE) {
+            if (getmouse(&mouse_event) == OK) {
 
 #ifdef PLATFORM_CYGWIN
-            if (mouse_event.bstate & BUTTON5_PRESSED) { // mouse wheel down
+                if (mouse_event.bstate & BUTTON5_PRESSED) { // mouse wheel down
 #else
-            if (mouse_event.bstate & BUTTON2_PRESSED) { // mouse wheel down
+                if (mouse_event.bstate & BUTTON2_PRESSED) { // mouse wheel down
 #endif
-                *page_start += 4;
+                    *page_start += 4;
 
-                // only got half a screen, show full screen
-                if ((y - (*page_start)) < page_space)
-                    *page_start = y - page_space;
+                    // only got half a screen, show full screen
+                    if ((y - (*page_start)) < page_space)
+                        *page_start = y - page_space;
 
-                // went past end, show full screen
-                else if (*page_start >= y)
-                    *page_start = y - page_space;
+                    // went past end, show full screen
+                    else if (*page_start >= y)
+                        *page_start = y - page_space;
 
-                current->paged = 1;
-                dirty = TRUE;
-            } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
-                *page_start -= 4;
+                    current->paged = 1;
+                    dirty = TRUE;
+                } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
+                    *page_start -= 4;
 
-                // went past beginning, show first page
-                if (*page_start < 0)
-                    *page_start = 0;
+                    // went past beginning, show first page
+                    if (*page_start < 0)
+                        *page_start = 0;
 
-                current->paged = 1;
-                dirty = TRUE;
+                    current->paged = 1;
+                    dirty = TRUE;
+                }
             }
         }
+    }
 
     // page up
-    } else if (*ch == KEY_PPAGE) {
+    if (*ch == KEY_PPAGE) {
         *page_start -= page_space;
 
         // went past beginning, show first page
