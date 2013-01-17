@@ -49,7 +49,7 @@ static WINDOW *inp_win;
 static int pad_start = 0;
 static int rows, cols;
 
-static int _handle_edit(const wint_t ch, char *input, int *size);
+static int _handle_edit(int result, const wint_t ch, char *input, int *size);
 static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
@@ -131,9 +131,25 @@ inp_get_char(char *input, int *size)
             prof_handle_activity();
         }
     }
-
+/*
+    if (ch != 0) {
+        char *res = "?";
+        if (result == ERR) {
+            res = "ERR";
+        }
+        if (result == OK) {
+            res = "OK";
+        }
+        if (result == KEY_CODE_YES) {
+            res = "KEY_CODE_YES";
+        }
+        
+        cons_show("KEY CODE: %d, RESULT = %s", ch, res);
+        win_current_page_off();
+    }
+*/    
     // if it wasn't an arrow key etc
-    if (!_handle_edit(ch, input, size)) {
+    if (!_handle_edit(result, ch, input, size)) {
         if (_printable(ch) && result != KEY_CODE_YES) {
             inp_x = getcurx(inp_win);
 
@@ -248,7 +264,7 @@ _clear_input(void)
  * return 0 if it wasnt
  */
 static int
-_handle_edit(const wint_t ch, char *input, int *size)
+_handle_edit(int result, const wint_t ch, char *input, int *size)
 {
     char *prev = NULL;
     char *next = NULL;
@@ -262,62 +278,157 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
     inp_x = getcurx(inp_win);
 
-    switch(ch) {
+    // CTRL-LEFT
+    if ((result == KEY_CODE_YES) && (ch == 540) && (inp_x > 0)) {
+        input[*size] = '\0';
+        gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
+        gchar *prev_ch = g_utf8_find_prev_char(input, curr_ch);
 
-    case 27: // ESC
-        // check for ALT-num
-        next_ch = wgetch(inp_win);
-        if (next_ch != ERR) {
-            switch (next_ch)
-            {
-                case '1':
-                    ui_switch_win(0);
+        // no more chars to left, set to beginning
+        if (prev_ch == NULL) {
+            inp_x = 0;
+            wmove(inp_win, 0, inp_x);
+
+        // otherwise, go back to start of previous word
+        } else {
+            gunichar prev_uni = g_utf8_get_char(prev_ch);
+            while (!g_unichar_isspace(prev_uni)) {
+                prev_ch = g_utf8_find_prev_char(input, prev_ch);
+                if (prev_ch != NULL) {
+                    prev_uni = g_utf8_get_char(prev_ch);
+                } else {
                     break;
-                case '2':
-                    ui_switch_win(1);
-                    break;
-                case '3':
-                    ui_switch_win(2);
-                    break;
-                case '4':
-                    ui_switch_win(3);
-                    break;
-                case '5':
-                    ui_switch_win(4);
-                    break;
-                case '6':
-                    ui_switch_win(5);
-                    break;
-                case '7':
-                    ui_switch_win(6);
-                    break;
-                case '8':
-                    ui_switch_win(7);
-                    break;
-                case '9':
-                    ui_switch_win(8);
-                    break;
-                case '0':
-                    ui_switch_win(9);
-                    break;
-                default:
-                    break;
+                }
+            }
+
+            if (prev_ch == NULL) {
+                inp_x = 0;
+                wmove(inp_win, 0, inp_x);
+            } else {
+                glong offset = g_utf8_pointer_to_offset(input, prev_ch);
+                inp_x = offset;
+                wmove(inp_win, 0, inp_x);
+            }
+        }
+        
+        // if gone off screen to left, jump left (half a screen worth)
+        if (inp_x <= pad_start) {
+            pad_start = pad_start - (cols / 2);
+            if (pad_start < 0) {
+                pad_start = 0;
+            }
+
+            _inp_win_refresh();
+        }
+        return 1;
+    } else if ((result == KEY_CODE_YES) && (ch == 555)) { // CTRL-RIGHT
+        cons_show("CTRL-RIGHT");
+        win_current_page_off();
+        return 1;
+    } else {
+        switch(ch) {
+
+        case 27: // ESC
+            // check for ALT-num
+            next_ch = wgetch(inp_win);
+            if (next_ch != ERR) {
+                switch (next_ch)
+                {
+                    case '1':
+                        ui_switch_win(0);
+                        break;
+                    case '2':
+                        ui_switch_win(1);
+                        break;
+                    case '3':
+                        ui_switch_win(2);
+                        break;
+                    case '4':
+                        ui_switch_win(3);
+                        break;
+                    case '5':
+                        ui_switch_win(4);
+                        break;
+                    case '6':
+                        ui_switch_win(5);
+                        break;
+                    case '7':
+                        ui_switch_win(6);
+                        break;
+                    case '8':
+                        ui_switch_win(7);
+                        break;
+                    case '9':
+                        ui_switch_win(8);
+                        break;
+                    case '0':
+                        ui_switch_win(9);
+                        break;
+                    default:
+                        break;
+                }
+                return 1;
+            } else {
+                *size = 0;
+                inp_win_reset();
+                return 1;
+            }
+
+        case 127:
+        case KEY_BACKSPACE:
+            contact_list_reset_search_attempts();
+            if (display_size > 0) {
+
+                // if at end, delete last char
+                if (inp_x >= display_size) {
+                    gchar *start = g_utf8_substring(input, 0, inp_x-1);
+                    for (*size = 0; *size < strlen(start); (*size)++) {
+                        input[*size] = start[*size];
+                    }
+                    input[*size] = '\0';
+
+                    g_free(start);
+
+                    _clear_input();
+                    wprintw(inp_win, input);
+                    wmove(inp_win, 0, inp_x -1);
+
+                // if in middle, delete and shift chars left
+                } else if (inp_x > 0 && inp_x < display_size) {
+                    gchar *start = g_utf8_substring(input, 0, inp_x - 1);
+                    gchar *end = g_utf8_substring(input, inp_x, *size);
+                    GString *new = g_string_new(start);
+                    g_string_append(new, end);
+
+                    for (*size = 0; *size < strlen(new->str); (*size)++) {
+                        input[*size] = new->str[*size];
+                    }
+                    input[*size] = '\0';
+
+                    g_free(start);
+                    g_free(end);
+                    g_string_free(new, FALSE);
+
+                    _clear_input();
+                    wprintw(inp_win, input);
+                    wmove(inp_win, 0, inp_x -1);
+                }
+
+                // if gone off screen to left, jump left (half a screen worth)
+                if (inp_x <= pad_start) {
+                    pad_start = pad_start - (cols / 2);
+                    if (pad_start < 0) {
+                        pad_start = 0;
+                    }
+
+                    _inp_win_refresh();
+                }
             }
             return 1;
-        } else {
-            *size = 0;
-            inp_win_reset();
-            return 1;
-        }
 
-    case 127:
-    case KEY_BACKSPACE:
-        contact_list_reset_search_attempts();
-        if (display_size > 0) {
-
-            // if at end, delete last char
-            if (inp_x >= display_size) {
-                gchar *start = g_utf8_substring(input, 0, inp_x-1);
+        case KEY_DC: // DEL
+            if (inp_x == display_size-1) {
+                gchar *start = g_utf8_substring(input, 0, inp_x);
                 for (*size = 0; *size < strlen(start); (*size)++) {
                     input[*size] = start[*size];
                 }
@@ -327,12 +438,9 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
                 _clear_input();
                 wprintw(inp_win, input);
-                wmove(inp_win, 0, inp_x -1);
-
-            // if in middle, delete and shift chars left
-            } else if (inp_x > 0 && inp_x < display_size) {
-                gchar *start = g_utf8_substring(input, 0, inp_x - 1);
-                gchar *end = g_utf8_substring(input, inp_x, *size);
+            } else if (inp_x < display_size-1) {
+                gchar *start = g_utf8_substring(input, 0, inp_x);
+                gchar *end = g_utf8_substring(input, inp_x+1, *size);
                 GString *new = g_string_new(start);
                 g_string_append(new, end);
 
@@ -347,107 +455,65 @@ _handle_edit(const wint_t ch, char *input, int *size)
 
                 _clear_input();
                 wprintw(inp_win, input);
-                wmove(inp_win, 0, inp_x -1);
+                wmove(inp_win, 0, inp_x);
             }
+            return 1;
 
-            // if gone off screen to left, jump left (half a screen worth)
-            if (inp_x <= pad_start) {
-                pad_start = pad_start - (cols / 2);
-                if (pad_start < 0) {
-                    pad_start = 0;
+        case KEY_LEFT:
+            if (inp_x > 0) {
+                wmove(inp_win, 0, inp_x-1);
+
+                // current position off screen to left
+                if (inp_x - 1 < pad_start) {
+                    pad_start--;
+                    _inp_win_refresh();
                 }
-
-                _inp_win_refresh();
             }
-        }
-        return 1;
+            return 1;
 
-    case KEY_DC: // DEL
-        if (inp_x == display_size-1) {
-            gchar *start = g_utf8_substring(input, 0, inp_x);
-            for (*size = 0; *size < strlen(start); (*size)++) {
-                input[*size] = start[*size];
+        case KEY_RIGHT:
+            if (inp_x < display_size) {
+                wmove(inp_win, 0, inp_x+1);
+
+                // current position off screen to right
+                if ((inp_x + 1 - pad_start) >= cols) {
+                    pad_start++;
+                    _inp_win_refresh();
+                }
             }
-            input[*size] = '\0';
+            return 1;
 
-            g_free(start);
-
-            _clear_input();
-            wprintw(inp_win, input);
-        } else if (inp_x < display_size-1) {
-            gchar *start = g_utf8_substring(input, 0, inp_x);
-            gchar *end = g_utf8_substring(input, inp_x+1, *size);
-            GString *new = g_string_new(start);
-            g_string_append(new, end);
-
-            for (*size = 0; *size < strlen(new->str); (*size)++) {
-                input[*size] = new->str[*size];
+        case KEY_UP:
+            prev = history_previous(input, size);
+            if (prev) {
+                inp_replace_input(input, prev, size);
             }
-            input[*size] = '\0';
+            return 1;
 
-            g_free(start);
-            g_free(end);
-            g_string_free(new, FALSE);
+        case KEY_DOWN:
+            next = history_next(input, size);
+            if (next) {
+                inp_replace_input(input, next, size);
+            }
+            return 1;
 
-            _clear_input();
-            wprintw(inp_win, input);
-            wmove(inp_win, 0, inp_x);
-        }
-        return 1;
-
-    case KEY_LEFT:
-        if (inp_x > 0)
-            wmove(inp_win, 0, inp_x-1);
-
-        // current position off screen to left
-        if (inp_x - 1 < pad_start) {
-            pad_start--;
+        case KEY_HOME:
+            wmove(inp_win, 0, 0);
+            pad_start = 0;
             _inp_win_refresh();
+            return 1;
+
+        case KEY_END:
+            _go_to_end(display_size);
+            return 1;
+
+        case 9: // tab
+            cmd_autocomplete(input, size);
+            return 1;
+
+        default:
+            return 0;
         }
-        return 1;
-
-    case KEY_RIGHT:
-        if (inp_x < display_size) {
-            wmove(inp_win, 0, inp_x+1);
-
-            // current position off screen to right
-            if ((inp_x + 1 - pad_start) >= cols) {
-                pad_start++;
-                _inp_win_refresh();
-            }
-        }
-        return 1;
-
-    case KEY_UP:
-        prev = history_previous(input, size);
-        if (prev) {
-            inp_replace_input(input, prev, size);
-        }
-        return 1;
-
-    case KEY_DOWN:
-        next = history_next(input, size);
-        if (next) {
-            inp_replace_input(input, next, size);
-        }
-        return 1;
-
-    case KEY_HOME:
-        wmove(inp_win, 0, 0);
-        pad_start = 0;
-        _inp_win_refresh();
-        return 1;
-
-    case KEY_END:
-        _go_to_end(display_size);
-        return 1;
-
-    case 9: // tab
-        cmd_autocomplete(input, size);
-        return 1;
-
-    default:
-        return 0;
     }
 }
 
