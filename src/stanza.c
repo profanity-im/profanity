@@ -391,3 +391,19 @@ stanza_get_idle_time(xmpp_stanza_t * const stanza)
         return result;
     }
 }
+
+xmpp_stanza_t *
+stanza_get_caps(xmpp_stanza_t * const stanza)
+{
+    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
+
+    if (caps == NULL) {
+        return NULL;
+    }
+
+    if (strcmp(xmpp_stanza_get_ns(caps), STANZA_NS_CAPS) != 0) {
+        return NULL;
+    }
+
+    return caps;
+}

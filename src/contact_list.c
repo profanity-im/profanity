@@ -87,9 +87,9 @@ contact_list_remove(const char * const jid)
 
 gboolean
 contact_list_update_contact(const char * const jid, const char * const presence,
-    const char * const status, GDateTime *last_activity)
+    const char * const status, GDateTime *last_activity, const char * const caps_str)
 {
-    gboolean changed = FALSE;
+    gboolean presence_changed = FALSE;
     PContact contact = g_hash_table_lookup(contacts, jid);
 
     if (contact == NULL) {
@@ -98,20 +98,24 @@ contact_list_update_contact(const char * const jid, const char * const presence,
 
     if (g_strcmp0(p_contact_presence(contact), presence) != 0) {
         p_contact_set_presence(contact, presence);
-        changed = TRUE;
+        presence_changed = TRUE;
     }
 
     if (g_strcmp0(p_contact_status(contact), status) != 0) {
         p_contact_set_status(contact, status);
-        changed = TRUE;
+        presence_changed = TRUE;
     }
 
     if (!_datetimes_equal(p_contact_last_activity(contact), last_activity)) {
         p_contact_set_last_activity(contact, last_activity);
-        changed = TRUE;
+        presence_changed = TRUE;
     }
 
-    return changed;
+    if (g_strcmp0(p_contact_caps_str(contact), caps_str) != 0) {
+        p_contact_set_caps_str(contact, caps_str);
+    }
+
+    return presence_changed;
 }
 
 void

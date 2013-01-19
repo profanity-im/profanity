@@ -47,6 +47,7 @@
 #define STANZA_NAME_TEXT "text"
 #define STANZA_NAME_SUBJECT "subject"
 #define STANZA_NAME_ITEM "item"
+#define STANZA_NAME_C "c"
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
@@ -72,6 +73,8 @@
 #define STANZA_ATTR_ASK "ask"
 #define STANZA_ATTR_ID "id"
 #define STANZA_ATTR_SECONDS "seconds"
+#define STANZA_ATTR_NODE "node"
+#define STANZA_ATTR_VER "ver"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -82,6 +85,7 @@
 #define STANZA_NS_CHATSTATES "http://jabber.org/protocol/chatstates"
 #define STANZA_NS_MUC "http://jabber.org/protocol/muc"
 #define STANZA_NS_MUC_USER "http://jabber.org/protocol/muc#user"
+#define STANZA_NS_CAPS "http://jabber.org/protocol/caps"
 #define STANZA_NS_PING "urn:xmpp:ping"
 #define STANZA_NS_LASTACTIVITY "jabber:iq:last"
 
@@ -118,5 +122,6 @@ gboolean stanza_is_room_nick_change(xmpp_stanza_t * const stanza);
 char* stanza_get_new_nick(xmpp_stanza_t * const stanza);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
+xmpp_stanza_t * stanza_get_caps(xmpp_stanza_t * const stanza);
 
 #endif

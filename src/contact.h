@@ -34,11 +34,13 @@ const char* p_contact_name(PContact contact);
 const char* p_contact_presence(PContact contact);
 const char* p_contact_status(PContact contact);
 const char* p_contact_subscription(const PContact contact);
+const char* p_contact_caps_str(const PContact contact);
 GDateTime* p_contact_last_activity(const PContact contact);
 gboolean p_contact_pending_out(const PContact contact);
 void p_contact_set_presence(const PContact contact, const char * const presence);
 void p_contact_set_status(const PContact contact, const char * const status);
 void p_contact_set_subscription(const PContact contact, const char * const subscription);
+void p_contact_set_caps_str(const PContact contact, const char * const caps_str);
 void p_contact_set_pending_out(const PContact contact, gboolean pending_out);
 void p_contact_set_last_activity(const PContact contact, GDateTime *last_activity);
 

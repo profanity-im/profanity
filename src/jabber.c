@@ -1055,6 +1055,20 @@ _presence_handler(xmpp_conn_t * const conn,
             g_date_time_unref(now);
         }
 
+        char *caps_str = NULL;
+        xmpp_stanza_t *caps = stanza_get_caps(stanza);
+        if (caps != NULL) {
+            char *node = xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
+            char *ver = xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
+
+            if ((node != NULL) && (ver != NULL)) {
+                GString *caps_gstr = g_string_new(node);
+                g_string_append(caps_gstr, ver);
+                caps_str = caps_gstr->str;
+                g_string_free(caps_gstr, FALSE);
+            }
+        }
+
         xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
         if (status != NULL)
             status_str = xmpp_stanza_get_text(status);
@@ -1069,7 +1083,7 @@ _presence_handler(xmpp_conn_t * const conn,
                 show_str = "online";
 
             if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-                prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity);
+                prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity, caps_str);
             }
         } else if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
             if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {

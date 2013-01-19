@@ -25,6 +25,7 @@
 
 #include <glib.h>
 
+#include "common.h"
 #include "contact.h"
 
 struct p_contact_t {
@@ -33,6 +34,7 @@ struct p_contact_t {
     char *presence;
     char *status;
     char *subscription;
+    char *caps_str;
     gboolean pending_out;
     GDateTime *last_activity;
 };
@@ -67,8 +69,8 @@ p_contact_new(const char * const jid, const char * const name,
         contact->subscription = strdup("none");;
 
     contact->pending_out = pending_out;
-
     contact->last_activity = NULL;
+    contact->caps_str = NULL;
 
     return contact;
 }
@@ -76,37 +78,18 @@ p_contact_new(const char * const jid, const char * const name,
 void
 p_contact_free(PContact contact)
 {
-    if (contact->jid != NULL) {
-        free(contact->jid);
-        contact->jid = NULL;
-    }
-
-    if (contact->name != NULL) {
-        free(contact->name);
-        contact->name = NULL;
-    }
-
-    if (contact->presence != NULL) {
-        free(contact->presence);
-        contact->presence = NULL;
-    }
-
-    if (contact->status != NULL) {
-        free(contact->status);
-        contact->status = NULL;
-    }
-
-    if (contact->subscription != NULL) {
-        free(contact->subscription);
-        contact->subscription = NULL;
-    }
+    FREE_SET_NULL(contact->jid);
+    FREE_SET_NULL(contact->name);
+    FREE_SET_NULL(contact->presence);
+    FREE_SET_NULL(contact->status);
+    FREE_SET_NULL(contact->subscription);
+    FREE_SET_NULL(contact->caps_str);
 
     if (contact->last_activity != NULL) {
         g_date_time_unref(contact->last_activity);
     }
 
-    free(contact);
-    contact = NULL;
+    FREE_SET_NULL(contact);
 }
 
 const char *
@@ -151,17 +134,17 @@ p_contact_last_activity(const PContact contact)
     return contact->last_activity;
 }
 
+const char *
+p_contact_caps_str(const PContact contact)
+{
+    return contact->caps_str;
+}
+
 void
 p_contact_set_presence(const PContact contact, const char * const presence)
 {
-    if (contact->presence != NULL) {
-        free(contact->presence);
-        contact->presence = NULL;
-    }
-
-    if (presence == NULL) {
-        contact->presence = NULL;
-    } else {
+    FREE_SET_NULL(contact->presence);
+    if (presence != NULL) {
         contact->presence = strdup(presence);
     }
 }
@@ -169,14 +152,8 @@ p_contact_set_presence(const PContact contact, const char * const presence)
 void
 p_contact_set_status(const PContact contact, const char * const status)
 {
-    if (contact->status != NULL) {
-        free(contact->status);
-        contact->status = NULL;
-    }
-
-    if (status == NULL) {
-        contact->status = NULL;
-    } else {
+    FREE_SET_NULL(contact->status);
+    if (status != NULL) {
         contact->status = strdup(status);
     }
 }
@@ -184,14 +161,8 @@ p_contact_set_status(const PContact contact, const char * const status)
 void
 p_contact_set_subscription(const PContact contact, const char * const subscription)
 {
-    if (contact->subscription != NULL) {
-        free(contact->subscription);
-        contact->subscription = NULL;
-    }
-
-    if (subscription == NULL) {
-        contact->subscription = strdup("none");
-    } else {
+    FREE_SET_NULL(contact->subscription);
+    if (subscription != NULL) {
         contact->subscription = strdup(subscription);
     }
 }
@@ -212,5 +183,14 @@ p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
 
     if (last_activity != NULL) {
         contact->last_activity = g_date_time_ref(last_activity);
+    }
+}
+
+void
+p_contact_set_caps_str(const PContact contact, const char * const caps_str)
+{
+    FREE_SET_NULL(contact->caps_str);
+    if (caps_str != NULL) {
+        contact->caps_str = strdup(caps_str);
     }
 }
