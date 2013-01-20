@@ -39,7 +39,8 @@ void muc_complete_room_nick_change(const char * const room,
     const char * const nick);
 
 gboolean muc_add_to_roster(const char * const room, const char * const nick,
-    const char * const show, const char * const status);
+    const char * const show, const char * const status,
+    const char * const caps_str);
 void muc_remove_from_roster(const char * const room, const char * const nick);
 GList * muc_get_roster(const char * const room);
 PAutocomplete muc_get_roster_ac(const char * const room);

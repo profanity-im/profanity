@@ -2405,6 +2405,7 @@ _win_show_info(WINDOW *win, PContact pcontact)
             wprintw(win, "Client        : %s\n", caps->client);
         }
     }
+
 }
 
 void

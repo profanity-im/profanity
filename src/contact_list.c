@@ -70,7 +70,7 @@ contact_list_add(const char * const jid, const char * const name,
 
     if (contact == NULL) {
         contact = p_contact_new(jid, name, presence, status, subscription,
-            pending_out);
+            pending_out, NULL);
         g_hash_table_insert(contacts, strdup(jid), contact);
         p_autocomplete_add(ac, strdup(jid));
         added = TRUE;
@@ -126,7 +126,7 @@ contact_list_update_subscription(const char * const jid,
 
     if (contact == NULL) {
         contact = p_contact_new(jid, NULL, "offline", NULL, subscription,
-            pending_out);
+            pending_out, NULL);
         g_hash_table_insert(contacts, strdup(jid), contact);
     } else {
         p_contact_set_subscription(contact, subscription);

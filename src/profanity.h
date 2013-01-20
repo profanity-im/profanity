@@ -51,12 +51,13 @@ void prof_handle_room_subject(const char * const room_jid,
     const char * const subject);
 void prof_handle_room_roster_complete(const char * const room);
 void prof_handle_room_member_online(const char * const room,
-    const char * const nick, const char * const show, const char * const status);
+    const char * const nick, const char * const show, const char * const status,
+    const char * const caps_str);
 void prof_handle_room_member_offline(const char * const room,
     const char * const nick, const char * const show, const char * const status);
 void prof_handle_room_member_presence(const char * const room,
     const char * const nick, const char * const show,
-    const char * const status);
+    const char * const status, const char * const caps_str);
 void prof_handle_leave_room(const char * const room);
 void prof_handle_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick);

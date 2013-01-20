@@ -204,7 +204,8 @@ muc_nick_in_roster(const char * const room, const char * const nick)
  */
 gboolean
 muc_add_to_roster(const char * const room, const char * const nick,
-    const char * const show, const char * const status)
+    const char * const show, const char * const status,
+    const char * const caps_str)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     gboolean updated = FALSE;
@@ -219,8 +220,7 @@ muc_add_to_roster(const char * const room, const char * const nick,
                     (g_strcmp0(p_contact_status(old), status) != 0)) {
             updated = TRUE;
         }
-
-        PContact contact = p_contact_new(nick, NULL, show, status, NULL, FALSE);
+        PContact contact = p_contact_new(nick, NULL, show, status, NULL, FALSE, caps_str);
         g_hash_table_replace(chat_room->roster, strdup(nick), contact);
     }
 

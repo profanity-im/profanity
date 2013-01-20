@@ -312,9 +312,9 @@ prof_handle_room_roster_complete(const char * const room)
 void
 prof_handle_room_member_presence(const char * const room,
     const char * const nick, const char * const show,
-    const char * const status)
+    const char * const status, const char * const caps_str)
 {
-    gboolean updated = muc_add_to_roster(room, nick, show, status);
+    gboolean updated = muc_add_to_roster(room, nick, show, status, caps_str);
 
     if (updated) {
         win_show_room_member_presence(room, nick, show, status);
@@ -324,9 +324,10 @@ prof_handle_room_member_presence(const char * const room,
 
 void
 prof_handle_room_member_online(const char * const room, const char * const nick,
-    const char * const show, const char * const status)
+    const char * const show, const char * const status,
+    const char * const caps_str)
 {
-    muc_add_to_roster(room, nick, show, status);
+    muc_add_to_roster(room, nick, show, status, caps_str);
     win_show_room_member_online(room, nick, show, status);
     win_current_page_off();
 }

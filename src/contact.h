@@ -27,7 +27,8 @@ typedef struct p_contact_t *PContact;
 
 PContact p_contact_new(const char * const jid, const char * const name,
     const char * const presence, const char * const status,
-    const char * const subscription, gboolean pending_out);
+    const char * const subscription, gboolean pending_out,
+    const char * const caps_str);
 void p_contact_free(PContact contact);
 const char* p_contact_jid(PContact contact);
 const char* p_contact_name(PContact contact);
