@@ -1165,7 +1165,7 @@ cons_show_info(const char * const contact)
         cons_show("");
         _win_show_time(console->win, '-');
         _presence_colour_on(console->win, presence);
-        wprintw(console->win, "%s\n", jid);
+        wprintw(console->win, "%s:\n", jid);
         _presence_colour_off(console->win, presence);
 
         if (name != NULL) {

@@ -1424,6 +1424,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
+        cons_show("");
         char *presence = args[0];
 
         // bad arg
