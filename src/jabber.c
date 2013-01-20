@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include <openssl/sha.h>
 #include <strophe.h>
 
 #include "capabilities.h"
@@ -177,6 +178,28 @@ jabber_disconnect(void)
         }
         jabber_free_resources();
     }
+}
+
+char *
+jabber_get_sha1_caps_str(void)
+{
+    GString *str = g_string_new("");
+    unsigned char hash[SHA_DIGEST_LENGTH];
+
+    g_string_append(str, "client/pc//Profanity ");
+    g_string_append(str, PACKAGE_VERSION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+        g_string_append(str, "dev");
+    }
+    g_string_append(str, "<");
+
+    SHA1((unsigned char *)str->str, strlen(str->str), hash);
+
+    char *result = g_base64_encode(hash, strlen((char *)hash));
+
+    g_string_free(str, TRUE);
+
+    return result;
 }
 
 void
