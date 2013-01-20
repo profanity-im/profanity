@@ -1084,6 +1084,11 @@ _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         win_current_page_off();
         ui_refresh();
 
+        if (g_strcmp0(given_sha1, generated_sha1) != 0) {
+            log_info("Invalid SHA1 recieved for caps.");
+            return 1;
+        }
+
         // already cached
         if (caps_contains(node)) {
             log_info("Client info already cached.");
