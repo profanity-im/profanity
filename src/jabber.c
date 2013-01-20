@@ -1175,13 +1175,17 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     } else {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
-        char *caps_str = stanza_get_caps_str(stanza);
+        char *caps_str = NULL;
 
-        if (caps_str != NULL) {
-            if (!caps_contains(caps_str)) {
-                xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, jid, caps_str);
-                xmpp_send(jabber_conn.conn, iq);
-                xmpp_stanza_release(iq);
+        if (stanza_contains_caps(stanza)) {
+            caps_str = stanza_get_caps_str(stanza);
+
+            if (caps_str != NULL) {
+                if (!caps_contains(caps_str)) {
+                    xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, jid, caps_str);
+                    xmpp_send(jabber_conn.conn, iq);
+                    xmpp_stanza_release(iq);
+                }
             }
         }
 
@@ -1265,13 +1269,16 @@ _presence_handler(xmpp_conn_t * const conn,
             g_date_time_unref(now);
         }
 
-        char *caps_str = stanza_get_caps_str(stanza);
+        char *caps_str = NULL;
+        if (stanza_contains_caps(stanza)) {
+            caps_str = stanza_get_caps_str(stanza);
 
-        if (caps_str != NULL) {
-            if (!caps_contains(caps_str)) {
-                xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, from, caps_str);
-                xmpp_send(jabber_conn.conn, iq);
-                xmpp_stanza_release(iq);
+            if (caps_str != NULL) {
+                if (!caps_contains(caps_str)) {
+                    xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, from, caps_str);
+                    xmpp_send(jabber_conn.conn, iq);
+                    xmpp_stanza_release(iq);
+                }
             }
         }
 
