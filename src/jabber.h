@@ -23,6 +23,8 @@
 #ifndef JABBER_H
 #define JABBER_H
 
+#include <strophe.h>
+
 #include "accounts.h"
 #include "jid.h"
 
@@ -81,6 +83,7 @@ char * jabber_get_status(void);
 void jabber_free_resources(void);
 void jabber_restart(void);
 void jabber_set_autoping(int seconds);
-char * jabber_get_sha1_caps_str(void);
+char * jabber_get_local_sha1_caps_str(void);
+char * sha1_caps_str(xmpp_stanza_t *query);
 
 #endif

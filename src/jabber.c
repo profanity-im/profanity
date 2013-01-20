@@ -181,7 +181,7 @@ jabber_disconnect(void)
 }
 
 char *
-jabber_get_sha1_caps_str(void)
+jabber_get_local_sha1_caps_str(void)
 {
     GString *str = g_string_new("");
     unsigned char hash[SHA_DIGEST_LENGTH];
@@ -198,6 +198,74 @@ jabber_get_sha1_caps_str(void)
     char *result = g_base64_encode(hash, strlen((char *)hash));
 
     g_string_free(str, TRUE);
+
+    return result;
+}
+
+
+char *
+sha1_caps_str(xmpp_stanza_t *query)
+{
+    GSList *identities = NULL;
+    GSList *features = NULL;
+
+    GString *s = g_string_new("");
+    unsigned char hash[SHA_DIGEST_LENGTH];
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    while (child != NULL) {
+        if (strcmp(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
+            char *category = xmpp_stanza_get_attribute(child, "category");
+            char *type = xmpp_stanza_get_attribute(child, "type");
+            char *lang = xmpp_stanza_get_attribute(child, "xml:lang");
+            char *name = xmpp_stanza_get_attribute(child, "name");
+
+            GString *identity_str = g_string_new(category);
+            g_string_append(identity_str, "/");
+            if (type != NULL) {
+                g_string_append(identity_str, type);
+            }
+            g_string_append(identity_str, "/");
+            if (lang != NULL) {
+                g_string_append(identity_str, lang);
+            }
+            g_string_append(identity_str, "/");
+            if (name != NULL) {
+                g_string_append(identity_str, name);
+            }
+            g_string_append(identity_str, "<");
+            identities = g_slist_insert_sorted(identities, identity_str, (GCompareFunc)octet_compare);
+            g_string_free(identity_str, TRUE);
+        } else if (strcmp(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
+            char *feature_str = xmpp_stanza_get_attribute(child, "var");
+            features = g_slist_insert_sorted(features, feature_str, (GCompareFunc)octet_compare);
+        } else if (strcmp(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
+            // check for and add form to string
+        }
+        child = xmpp_stanza_get_next(child);
+    }
+
+    GSList *curr = identities;
+    while (curr != NULL) {
+        g_string_append(s, curr->data);
+        g_string_append(s, "<");
+        curr = g_slist_next(curr);
+    }
+
+    curr = features;
+    while (curr != NULL) {
+        g_string_append(s, curr->data);
+        g_string_append(s, "<");
+        curr = g_slist_next(curr);
+    }
+
+    SHA1((unsigned char *)s->str, strlen(s->str), hash);
+
+    char *result = g_base64_encode(hash, strlen((char *)hash));
+
+    g_string_free(s, TRUE);
+    g_slist_free_full(identities, free);
+    g_slist_free_full(features, free);
 
     return result;
 }

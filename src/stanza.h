@@ -48,6 +48,8 @@
 #define STANZA_NAME_SUBJECT "subject"
 #define STANZA_NAME_ITEM "item"
 #define STANZA_NAME_C "c"
+#define STANZA_NAME_IDENTITY "identity"
+#define STANZA_NAME_FEATURE "feature"
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
