@@ -1054,21 +1054,7 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     } else {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
-
-        char *caps_str = NULL;
-        xmpp_stanza_t *caps = stanza_get_caps(stanza);
-        if (caps != NULL) {
-            char *node = xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
-            char *ver = xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
-
-            if ((node != NULL) && (ver != NULL)) {
-                GString *caps_gstr = g_string_new(node);
-                g_string_append(caps_gstr, "#");
-                g_string_append(caps_gstr, ver);
-                caps_str = caps_gstr->str;
-                g_string_free(caps_gstr, FALSE);
-            }
-        }
+        char *caps_str = stanza_get_caps_str(stanza);
 
         if (caps_str != NULL) {
             if (!caps_contains(caps_str)) {
@@ -1158,20 +1144,7 @@ _presence_handler(xmpp_conn_t * const conn,
             g_date_time_unref(now);
         }
 
-        char *caps_str = NULL;
-        xmpp_stanza_t *caps = stanza_get_caps(stanza);
-        if (caps != NULL) {
-            char *node = xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
-            char *ver = xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
-
-            if ((node != NULL) && (ver != NULL)) {
-                GString *caps_gstr = g_string_new(node);
-                g_string_append(caps_gstr, "#");
-                g_string_append(caps_gstr, ver);
-                caps_str = caps_gstr->str;
-                g_string_free(caps_gstr, FALSE);
-            }
-        }
+        char *caps_str = stanza_get_caps_str(stanza);
 
         if (caps_str != NULL) {
             if (!caps_contains(caps_str)) {
