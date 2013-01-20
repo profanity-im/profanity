@@ -30,6 +30,7 @@
 #include <glib.h>
 
 #include "accounts.h"
+#include "capabilities.h"
 #include "chat_log.h"
 #include "chat_session.h"
 #include "command.h"
@@ -541,6 +542,7 @@ _init(const int disable_tls, char *log_level)
     theme_init(theme);
     g_free(theme);
     ui_init();
+    caps_init();
     jabber_init(disable_tls);
     cmd_init();
     log_info("Initialising contact list");
@@ -553,6 +555,7 @@ _shutdown(void)
 {
     jabber_disconnect();
     contact_list_free();
+    caps_close();
     ui_close();
     chat_log_close();
     prefs_close();

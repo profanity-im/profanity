@@ -28,7 +28,9 @@ typedef struct capabilities_t {
     char *version;
 } Capabilities;
 
+void caps_init(void);
 Capabilities* caps_create(const char * const client, const char * const version);
 void caps_destroy(Capabilities *caps);
+void caps_close(void);
 
 #endif

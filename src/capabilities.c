@@ -23,8 +23,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+
 #include "common.h"
 #include "capabilities.h"
+
+GHashTable *capabilities;
+
+void
+caps_init(void)
+{
+    capabilities = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
+        (GDestroyNotify)caps_destroy);
+}
 
 Capabilities *
 caps_create(const char * const client, const char * const version)
@@ -54,4 +65,10 @@ caps_destroy(Capabilities *caps)
         FREE_SET_NULL(caps->version);
         FREE_SET_NULL(caps);
     }
+}
+
+void
+caps_close(void)
+{
+    g_hash_table_destroy(capabilities);
 }
