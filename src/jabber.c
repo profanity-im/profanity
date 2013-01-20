@@ -208,6 +208,8 @@ sha1_caps_str(xmpp_stanza_t *query)
 {
     GSList *identities = NULL;
     GSList *features = NULL;
+    GSList *form_names = NULL;
+    GHashTable *forms = g_hash_table_new(g_str_hash, g_str_equal);
 
     GString *s = g_string_new("");
     unsigned char hash[SHA_DIGEST_LENGTH];
@@ -240,7 +242,11 @@ sha1_caps_str(xmpp_stanza_t *query)
             char *feature_str = xmpp_stanza_get_attribute(child, "var");
             features = g_slist_insert_sorted(features, feature_str, (GCompareFunc)octet_compare);
         } else if (strcmp(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
-            // check for and add form to string
+            if (strcmp(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
+                DataForm *form = stanza_get_form(child);
+                form_names = g_slist_insert_sorted(form_names, form->form_type, (GCompareFunc)octet_compare);
+                g_hash_table_insert(forms, form->form_type, form);
+            }
         }
         child = xmpp_stanza_get_next(child);
     }
@@ -257,6 +263,26 @@ sha1_caps_str(xmpp_stanza_t *query)
         g_string_append(s, curr->data);
         g_string_append(s, "<");
         curr = g_slist_next(curr);
+    }
+
+    curr = form_names;
+    while (curr != NULL) {
+        DataForm *form = g_hash_table_lookup(forms, curr->data);
+        g_string_append(s, form->form_type);
+        g_string_append(s, "<");
+
+        GSList *curr_field = form->fields;
+        while (curr_field != NULL) {
+            FormField *field = curr_field->data;
+            g_string_append(s, field->var);
+            GSList *curr_value = field->values;
+            while (curr_value != NULL) {
+                g_string_append(s, curr_value->data);
+                g_string_append(s, "<");
+                curr_value = g_slist_next(curr_value);
+            }
+            curr_field = g_slist_next(curr_value);
+        }
     }
 
     SHA1((unsigned char *)s->str, strlen(s->str), hash);

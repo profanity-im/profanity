@@ -90,6 +90,17 @@
 #define STANZA_NS_CAPS "http://jabber.org/protocol/caps"
 #define STANZA_NS_PING "urn:xmpp:ping"
 #define STANZA_NS_LASTACTIVITY "jabber:iq:last"
+#define STANZA_NS_DATA "jabber:x:data"
+
+typedef struct form_field_t {
+    char *var;
+    GSList *values;
+} FormField;
+
+typedef struct data_form_t {
+    char *form_type;
+    GSList *fields;
+} DataForm;
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const recipient, const char * const state);
@@ -127,5 +138,7 @@ char * stanza_get_new_nick(xmpp_stanza_t * const stanza);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);
+
+DataForm * stanza_get_form(xmpp_stanza_t * const stanza);
 
 #endif

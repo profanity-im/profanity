@@ -29,6 +29,8 @@
 #include "common.h"
 #include "stanza.h"
 
+static int _field_compare(FormField *f1, FormField *f2);
+
 xmpp_stanza_t *
 stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
     const char * const state)
@@ -440,4 +442,56 @@ stanza_get_caps_str(xmpp_stanza_t * const stanza)
     g_string_free(caps_gstr, FALSE);
 
     return  caps_str;
+}
+
+DataForm *
+stanza_get_form(xmpp_stanza_t * const stanza)
+{
+    DataForm *result = NULL;
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(stanza);
+
+    if (child != NULL) {
+        result = malloc(sizeof(struct data_form_t));
+        result->form_type = NULL;
+        result->fields = NULL;
+    }
+
+    //handle fields
+    while (child != NULL) {
+        char *var = xmpp_stanza_get_attribute(child, "var");
+
+        // handle FORM_TYPE
+        if (g_strcmp0(var, "FORM_TYPE")) {
+            xmpp_stanza_t *value = xmpp_stanza_get_child_by_name(child, "value");
+            char *value_text = xmpp_stanza_get_text(value);
+            result->form_type = strdup(value_text);
+
+        // handle regular fields
+        } else {
+            FormField *field = malloc(sizeof(struct form_field_t));
+            field->var = strdup(var);
+            field->values = NULL;
+            xmpp_stanza_t *value = xmpp_stanza_get_children(child);
+
+            // handle values
+            while (value != NULL) {
+                char *text = xmpp_stanza_get_text(value);
+                field->values = g_slist_insert_sorted(field->values, text, (GCompareFunc)octet_compare);
+                value = xmpp_stanza_get_next(value);
+            }
+
+            result->fields = g_slist_insert_sorted(result->fields, field, (GCompareFunc)_field_compare);
+        }
+
+        child = xmpp_stanza_get_next(child);
+    }
+
+    return result;
+}
+
+static int
+_field_compare(FormField *f1, FormField *f2)
+{
+    return octet_compare((unsigned char *)f1->var, (unsigned char *)f2->var);
 }
