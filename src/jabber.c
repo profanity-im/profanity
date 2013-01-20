@@ -39,6 +39,8 @@
 #include "muc.h"
 #include "stanza.h"
 
+#include "ui.h"
+
 static struct _jabber_conn_t {
     xmpp_log_t *log;
     xmpp_ctx_t *ctx;
@@ -216,7 +218,7 @@ sha1_caps_str(xmpp_stanza_t *query)
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     while (child != NULL) {
-        if (strcmp(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
+        if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
             char *category = xmpp_stanza_get_attribute(child, "category");
             char *type = xmpp_stanza_get_attribute(child, "type");
             char *lang = xmpp_stanza_get_attribute(child, "xml:lang");
@@ -236,12 +238,11 @@ sha1_caps_str(xmpp_stanza_t *query)
                 g_string_append(identity_str, name);
             }
             g_string_append(identity_str, "<");
-            identities = g_slist_insert_sorted(identities, identity_str, (GCompareFunc)octet_compare);
-            g_string_free(identity_str, TRUE);
-        } else if (strcmp(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
+            identities = g_slist_insert_sorted(identities, identity_str->str, (GCompareFunc)octet_compare);
+        } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
             char *feature_str = xmpp_stanza_get_attribute(child, "var");
             features = g_slist_insert_sorted(features, feature_str, (GCompareFunc)octet_compare);
-        } else if (strcmp(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
+        } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (strcmp(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
                 DataForm *form = stanza_get_form(child);
                 form_names = g_slist_insert_sorted(form_names, form->form_type, (GCompareFunc)octet_compare);
@@ -254,7 +255,6 @@ sha1_caps_str(xmpp_stanza_t *query)
     GSList *curr = identities;
     while (curr != NULL) {
         g_string_append(s, curr->data);
-        g_string_append(s, "<");
         curr = g_slist_next(curr);
     }
 
@@ -286,12 +286,11 @@ sha1_caps_str(xmpp_stanza_t *query)
     }
 
     SHA1((unsigned char *)s->str, strlen(s->str), hash);
+    char *result = g_base64_encode(hash, sizeof(hash));
 
-    char *result = g_base64_encode(hash, strlen((char *)hash));
-
-    g_string_free(s, TRUE);
-    g_slist_free_full(identities, free);
-    g_slist_free_full(features, free);
+    //g_string_free(s, TRUE);
+    //g_slist_free_full(identities, free);
+    //g_slist_free_full(features, free);
 
     return result;
 }
@@ -1061,6 +1060,15 @@ _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if (node == NULL) {
             return 1;
         }
+
+        // validate sha1
+        gchar **split = g_strsplit(node, "#", -1);
+        char *given_sha1 = split[1];
+        char *generated_sha1 = sha1_caps_str(query);
+        cons_show("GIVEN: %s", given_sha1);
+        cons_show("GEN  : %s", generated_sha1);
+        win_current_page_off();
+        ui_refresh();
 
         // already cached
         if (caps_contains(node)) {
