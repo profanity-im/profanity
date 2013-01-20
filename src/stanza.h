@@ -110,6 +110,8 @@ xmpp_stanza_t* stanza_create_presence(xmpp_ctx_t *ctx, const char * const show,
 
 xmpp_stanza_t* stanza_create_roster_iq(xmpp_ctx_t *ctx);
 xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx);
+xmpp_stanza_t* stanza_create_disco_iq(xmpp_ctx_t *ctx, const char * const to,
+    const char * const node);
 
 gboolean stanza_contains_chat_state(xmpp_stanza_t *stanza);
 

@@ -178,6 +178,27 @@ stanza_create_roster_iq(xmpp_ctx_t *ctx)
     return iq;
 }
 
+xmpp_stanza_t *
+stanza_create_disco_iq(xmpp_ctx_t *ctx, const char * const to,
+    const char * const node)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, to);
+    xmpp_stanza_set_id(iq, "disco");
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, XMPP_NS_DISCO_INFO);
+    xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
 gboolean
 stanza_contains_chat_state(xmpp_stanza_t *stanza)
 {

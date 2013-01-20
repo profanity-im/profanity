@@ -1064,6 +1064,7 @@ _presence_handler(xmpp_conn_t * const conn,
 
             if ((node != NULL) && (ver != NULL)) {
                 GString *caps_gstr = g_string_new(node);
+                g_string_append(caps_gstr, "#");
                 g_string_append(caps_gstr, ver);
                 caps_str = caps_gstr->str;
                 g_string_free(caps_gstr, FALSE);
@@ -1072,7 +1073,9 @@ _presence_handler(xmpp_conn_t * const conn,
 
         if (caps_str != NULL) {
             if (!caps_contains(caps_str)) {
-                // send iq request for caps info
+                xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, from, caps_str);
+                xmpp_send(jabber_conn.conn, iq);
+                xmpp_stanza_release(iq);
             }
         }
 
