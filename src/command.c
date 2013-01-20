@@ -1682,13 +1682,13 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             if (usr != NULL) {
                 win_current_show("No parameter required when in chat.");
             } else {
-                win_show_status();
+                win_show_info();
             }
         } else if (win_current_is_private()) {
             if (usr != NULL) {
                 win_current_show("No parameter required when in chat.");
             } else {
-                win_private_show_status();
+                win_private_show_info();
             }
         } else {
             if (usr != NULL) {

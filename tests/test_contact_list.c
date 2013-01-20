@@ -191,7 +191,7 @@ static void test_status_when_no_value(void)
 static void update_show(void)
 {
     contact_list_add("James", NULL, "away", NULL, NULL, FALSE);
-    contact_list_update_contact("James", "dnd", NULL, NULL);
+    contact_list_update_contact("James", "dnd", NULL, NULL, NULL);
     GSList *list = get_contact_list();
 
     assert_int_equals(1, g_slist_length(list));
@@ -203,7 +203,7 @@ static void update_show(void)
 static void set_show_to_null(void)
 {
     contact_list_add("James", NULL, "away", NULL, NULL, FALSE);
-    contact_list_update_contact("James", NULL, NULL, NULL);
+    contact_list_update_contact("James", NULL, NULL, NULL, NULL);
     GSList *list = get_contact_list();
 
     assert_int_equals(1, g_slist_length(list));
@@ -215,7 +215,7 @@ static void set_show_to_null(void)
 static void update_status(void)
 {
     contact_list_add("James", NULL, NULL, "I'm not here right now", NULL, FALSE);
-    contact_list_update_contact("James", NULL, "Gone to lunch", NULL);
+    contact_list_update_contact("James", NULL, "Gone to lunch", NULL, NULL);
     GSList *list = get_contact_list();
 
     assert_int_equals(1, g_slist_length(list));
@@ -227,7 +227,7 @@ static void update_status(void)
 static void set_status_to_null(void)
 {
     contact_list_add("James", NULL, NULL, "Gone to lunch", NULL, FALSE);
-    contact_list_update_contact("James", NULL, NULL, NULL);
+    contact_list_update_contact("James", NULL, NULL, NULL, NULL);
     GSList *list = get_contact_list();
 
     assert_int_equals(1, g_slist_length(list));

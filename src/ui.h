@@ -136,6 +136,8 @@ void win_room_show_status(const char * const contact);
 void win_room_show_info(const char * const contact);
 void win_show_status(void);
 void win_private_show_status(void);
+void win_show_info(void);
+void win_private_show_info(void);
 
 // console window actions
 void cons_about(void);
