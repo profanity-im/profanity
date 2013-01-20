@@ -1691,7 +1691,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             }
         } else {
             if (usr != NULL) {
-                cons_show_status(usr);
+                cons_show_info(usr);
             } else {
                 cons_show("Usage: %s", help.usage);
             }

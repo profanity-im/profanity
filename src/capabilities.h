@@ -27,13 +27,12 @@
 
 typedef struct capabilities_t {
     char *client;
-    char *version;
 } Capabilities;
 
 void caps_init(void);
-void caps_add(const char * const caps_str, const char * const client,
-    const char * const version);
+void caps_add(const char * const caps_str, const char * const client);
 gboolean caps_contains(const char * const caps_str);
+Capabilities* caps_get(const char * const caps_str);
 void caps_close(void);
 
 #endif

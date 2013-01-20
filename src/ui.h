@@ -161,6 +161,7 @@ void cons_show_contacts(GSList * list);
 void cons_check_version(gboolean not_available_msg);
 void cons_show_wins(void);
 void cons_show_status(const char * const contact);
+void cons_show_info(const char * const contact);
 void cons_show_themes(GSList *themes);
 
 // status bar actions

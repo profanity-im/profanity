@@ -40,8 +40,7 @@ caps_init(void)
 }
 
 void
-caps_add(const char * const caps_str, const char * const client,
-    const char * const version)
+caps_add(const char * const caps_str, const char * const client)
 {
     Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
 
@@ -51,12 +50,6 @@ caps_add(const char * const caps_str, const char * const client,
         new_caps->client = NULL;
     }
 
-    if (version != NULL) {
-        new_caps->version = strdup(version);
-    } else {
-        new_caps->version = NULL;
-    }
-
     g_hash_table_insert(capabilities, strdup(caps_str), new_caps);
 }
 
@@ -64,6 +57,12 @@ gboolean
 caps_contains(const char * const caps_str)
 {
     return (g_hash_table_lookup(capabilities, caps_str) != NULL);
+}
+
+Capabilities *
+caps_get(const char * const caps_str)
+{
+    return g_hash_table_lookup(capabilities, caps_str);
 }
 
 void
@@ -77,7 +76,6 @@ _caps_destroy(Capabilities *caps)
 {
     if (caps != NULL) {
         FREE_SET_NULL(caps->client);
-        FREE_SET_NULL(caps->version);
         FREE_SET_NULL(caps);
     }
 }

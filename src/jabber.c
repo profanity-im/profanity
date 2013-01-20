@@ -85,6 +85,8 @@ static int _iq_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata);
 static int _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
@@ -784,10 +786,15 @@ _iq_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
 
     // handle the initial roster request
-    if ((id != NULL) && (strcmp(id, "roster") == 0)) {
+    if (g_strcmp0(id, "roster") == 0) {
         return _roster_handler(conn, stanza, userdata);
+
+    // handle the initial roster request
+    } else if ((g_strcmp0(id, "disco") == 0) && (g_strcmp0(type, "result") == 0)) {
+        return _disco_handler(conn, stanza, userdata);
 
     // handle iq
     } else {
@@ -878,8 +885,8 @@ _iq_handler(xmpp_conn_t * const conn,
 }
 
 static int
-_roster_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
 {
     xmpp_stanza_t *query, *item;
     char *type = xmpp_stanza_get_type(stanza);
@@ -919,6 +926,55 @@ _roster_handler(xmpp_conn_t * const conn,
     }
 
     return 1;
+}
+
+static int
+_disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    char *type = xmpp_stanza_get_type(stanza);
+
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("Roster query failed");
+        return 1;
+    } else {
+        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+        const char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
+
+        if (node == NULL) {
+            return 1;
+        }
+
+        // already cached
+        if (caps_contains(node)) {
+            log_info("Client info already cached.");
+            return 1;
+        }
+
+        xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
+
+        if (identity == NULL) {
+            return 1;
+        }
+
+        const char *category = xmpp_stanza_get_attribute(identity, "category");
+        if (category == NULL) {
+            return 1;
+        }
+
+        if (strcmp(category, "client") != 0) {
+            return 1;
+        }
+
+        const char *name = xmpp_stanza_get_attribute(identity, "name");
+        if (name == 0) {
+            return 1;
+        }
+
+        caps_add(node, name);
+
+        return 1;
+    }
 }
 
 static int

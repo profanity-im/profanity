@@ -44,6 +44,7 @@
 #include <ncurses.h>
 #endif
 
+#include "capabilities.h"
 #include "chat_log.h"
 #include "chat_session.h"
 #include "command.h"
@@ -1169,6 +1170,70 @@ cons_show_wins(void)
     }
 
     cons_show("");
+}
+
+void
+cons_show_info(const char * const contact)
+{
+    PContact pcontact = contact_list_get_contact(contact);
+
+    if (pcontact != NULL) {
+        const char *jid = p_contact_jid(pcontact);
+        const char *name = p_contact_name(pcontact);
+        const char *presence = p_contact_presence(pcontact);
+        const char *status = p_contact_status(pcontact);
+        const char *caps_str = p_contact_caps_str(pcontact);
+        GDateTime *last_activity = p_contact_last_activity(pcontact);
+
+        cons_show("");
+        cons_show("JID: %s", jid);
+
+        if (name != NULL) {
+            cons_show("Name: %s", name);
+        }
+
+        cons_show("Presence: %s", presence);
+
+        if (status != NULL) {
+            cons_show("Message: %s", status);
+        }
+
+        if (last_activity != NULL) {
+            GDateTime *now = g_date_time_new_now_local();
+            GTimeSpan span = g_date_time_difference(now, last_activity);
+
+            _win_show_time(console->win, '-');
+            wprintw(console->win, "Last activity: ");
+
+            int hours = span / G_TIME_SPAN_HOUR;
+            span = span - hours * G_TIME_SPAN_HOUR;
+            if (hours > 0) {
+                wprintw(console->win, "%dh", hours);
+            }
+
+            int minutes = span / G_TIME_SPAN_MINUTE;
+            span = span - minutes * G_TIME_SPAN_MINUTE;
+            wprintw(console->win, "%dm", minutes);
+
+            int seconds = span / G_TIME_SPAN_SECOND;
+            wprintw(console->win, "%ds", seconds);
+
+            wprintw(console->win, "\n");
+
+            g_date_time_unref(now);
+        }
+
+        if (caps_str != NULL) {
+            Capabilities *caps = caps_get(caps_str);
+            if ((caps != NULL) && (caps->client != NULL)) {
+                cons_show("Client: %s", caps->client);
+            }
+        }
+
+        cons_show("");
+    } else {
+        cons_show("No such contact \"%s\" in roster.", contact);
+    }
 }
 
 void
