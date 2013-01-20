@@ -133,6 +133,7 @@ void win_show_room_nick_change(const char * const room, const char * const nick)
 void win_show_room_member_presence(const char * const room,
     const char * const nick, const char * const show, const char * const status);
 void win_room_show_status(const char * const contact);
+void win_room_show_info(const char * const contact);
 void win_show_status(void);
 void win_private_show_status(void);
 

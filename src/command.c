@@ -1424,7 +1424,6 @@ _cmd_who(gchar **args, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        cons_show("");
         char *presence = args[0];
 
         // bad arg
@@ -1519,6 +1518,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
             // not in groupchat window
             } else {
+                cons_show("");
                 GSList *list = get_contact_list();
 
                 // no arg, show all contacts
@@ -1674,7 +1674,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
     } else {
         if (win_current_is_groupchat()) {
             if (usr != NULL) {
-                win_room_show_status(usr);
+                win_room_show_info(usr);
             } else {
                 win_current_show("You must specify a nickname.");
             }

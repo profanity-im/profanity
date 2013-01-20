@@ -110,6 +110,7 @@ static void _win_resize_all(void);
 static gint _win_get_unread(void);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
+static void _win_show_info(WINDOW *win, PContact pcontact);
 static gboolean _new_release(char *found_version);
 static void _ui_draw_win_title(void);
 static void _presence_colour_on(WINDOW *win, const char * const presence);
@@ -1149,74 +1150,25 @@ cons_show_wins(void)
 }
 
 void
+win_room_show_info(const char * const contact)
+{
+    PContact pcontact = muc_get_participant(win_current_get_recipient(), contact);
+
+    if (pcontact != NULL) {
+        _win_show_info(current->win, pcontact);
+    } else {
+        win_current_show("No such participant \"%s\" in room.", contact);
+    }
+
+}
+
+void
 cons_show_info(const char * const contact)
 {
     PContact pcontact = contact_list_get_contact(contact);
 
     if (pcontact != NULL) {
-        const char *jid = p_contact_jid(pcontact);
-        const char *name = p_contact_name(pcontact);
-        const char *presence = p_contact_presence(pcontact);
-        const char *status = p_contact_status(pcontact);
-        const char *sub = p_contact_subscription(pcontact);
-        const char *caps_str = p_contact_caps_str(pcontact);
-        GDateTime *last_activity = p_contact_last_activity(pcontact);
-
-        cons_show("");
-        _win_show_time(console->win, '-');
-        _presence_colour_on(console->win, presence);
-        wprintw(console->win, "%s:\n", jid);
-        _presence_colour_off(console->win, presence);
-
-        if (name != NULL) {
-            cons_show("Name          : %s", name);
-        }
-
-        if (sub != NULL) {
-            cons_show("Subscription  : %s", sub);
-        }
-
-        _win_show_time(console->win, '-');
-        wprintw(console->win, "Presence      : ");
-        _presence_colour_on(console->win, presence);
-        wprintw(console->win, "%s\n", presence);
-        _presence_colour_off(console->win, presence);
-
-        if (status != NULL) {
-            cons_show("Message       : %s", status);
-        }
-
-        if (last_activity != NULL) {
-            GDateTime *now = g_date_time_new_now_local();
-            GTimeSpan span = g_date_time_difference(now, last_activity);
-
-            _win_show_time(console->win, '-');
-            wprintw(console->win, "Last activity : ");
-
-            int hours = span / G_TIME_SPAN_HOUR;
-            span = span - hours * G_TIME_SPAN_HOUR;
-            if (hours > 0) {
-                wprintw(console->win, "%dh", hours);
-            }
-
-            int minutes = span / G_TIME_SPAN_MINUTE;
-            span = span - minutes * G_TIME_SPAN_MINUTE;
-            wprintw(console->win, "%dm", minutes);
-
-            int seconds = span / G_TIME_SPAN_SECOND;
-            wprintw(console->win, "%ds", seconds);
-
-            wprintw(console->win, "\n");
-
-            g_date_time_unref(now);
-        }
-
-        if (caps_str != NULL) {
-            Capabilities *caps = caps_get(caps_str);
-            if ((caps != NULL) && (caps->client != NULL)) {
-                cons_show("Client        : %s", caps->client);
-            }
-        }
+        _win_show_info(console->win, pcontact);
     } else {
         cons_show("No such contact \"%s\" in roster.", contact);
     }
@@ -2379,6 +2331,79 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
         windows[win_index]->history_shown = 1;
 
         g_slist_free_full(history, free);
+    }
+}
+
+static void
+_win_show_info(WINDOW *win, PContact pcontact)
+{
+    const char *jid = p_contact_jid(pcontact);
+    const char *name = p_contact_name(pcontact);
+    const char *presence = p_contact_presence(pcontact);
+    const char *status = p_contact_status(pcontact);
+    const char *sub = p_contact_subscription(pcontact);
+    const char *caps_str = p_contact_caps_str(pcontact);
+    GDateTime *last_activity = p_contact_last_activity(pcontact);
+
+    _win_show_time(win, '-');
+    wprintw(win, "\n");
+    _win_show_time(win, '-');
+    _presence_colour_on(win, presence);
+    wprintw(win, "%s:\n", jid);
+    _presence_colour_off(win, presence);
+
+    if (name != NULL) {
+        _win_show_time(win, '-');
+        wprintw(win, "Name          : %s\n", name);
+    }
+
+    if (sub != NULL) {
+        _win_show_time(win, '-');
+        wprintw(win, "Subscription  : %s\n", sub);
+    }
+
+    _win_show_time(win, '-');
+    wprintw(win, "Presence      : ");
+    _presence_colour_on(win, presence);
+    wprintw(win, "%s\n", presence);
+    _presence_colour_off(win, presence);
+
+    if (status != NULL) {
+        _win_show_time(win, '-');
+        wprintw(win, "Message       : %s\n", status);
+    }
+
+    if (last_activity != NULL) {
+        GDateTime *now = g_date_time_new_now_local();
+        GTimeSpan span = g_date_time_difference(now, last_activity);
+
+        _win_show_time(win, '-');
+        wprintw(win, "Last activity : ");
+
+        int hours = span / G_TIME_SPAN_HOUR;
+        span = span - hours * G_TIME_SPAN_HOUR;
+        if (hours > 0) {
+            wprintw(win, "%dh", hours);
+        }
+
+        int minutes = span / G_TIME_SPAN_MINUTE;
+        span = span - minutes * G_TIME_SPAN_MINUTE;
+        wprintw(win, "%dm", minutes);
+
+        int seconds = span / G_TIME_SPAN_SECOND;
+        wprintw(win, "%ds", seconds);
+
+        wprintw(win, "\n");
+
+        g_date_time_unref(now);
+    }
+
+    if (caps_str != NULL) {
+        Capabilities *caps = caps_get(caps_str);
+        if ((caps != NULL) && (caps->client != NULL)) {
+            _win_show_time(win, '-');
+            wprintw(win, "Client        : %s\n", caps->client);
+        }
     }
 }
 
