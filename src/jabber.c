@@ -39,6 +39,8 @@
 #include "muc.h"
 #include "stanza.h"
 
+#include "ui.h"
+
 static struct _jabber_conn_t {
     xmpp_log_t *log;
     xmpp_ctx_t *ctx;
@@ -922,7 +924,7 @@ _iq_handler(xmpp_conn_t * const conn,
         return _roster_handler(conn, stanza, userdata);
 
     // handle diso requests
-    } else if ((g_strcmp0(id, "disco") == 0) && (g_strcmp0(type, "result") == 0)) {
+    } else if ((g_str_has_prefix(id, "disco")) && (g_strcmp0(type, "result") == 0)) {
         return _disco_handler(conn, stanza, userdata);
 
     // handle iq
@@ -1075,6 +1077,8 @@ _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         char *caps_key = NULL;
+
+        // xep-0115
         if (g_strcmp0(id, "disco") == 0) {
             caps_key = node;
 
@@ -1087,8 +1091,10 @@ _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 log_info("Invalid SHA1 recieved for caps.");
                 return 1;
             }
+        // non supported hash, or legacy caps
         } else {
-            caps_key = id;
+            caps_key = id + 6;
+            cons_show(caps_key);
         }
 
         // already cached
@@ -1259,9 +1265,12 @@ _handle_presence_caps(xmpp_stanza_t * const stanza)
 
                 if (node != NULL) {
                     if (!caps_contains(caps_key)) {
-                        xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, from, from, node);
+                        GString *id = g_string_new("disco_");
+                        g_string_append(id, from);
+                        xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, id->str, from, node);
                         xmpp_send(jabber_conn.conn, iq);
                         xmpp_stanza_release(iq);
+                        g_string_free(id, TRUE);
                     }
                 }
             }
@@ -1270,7 +1279,21 @@ _handle_presence_caps(xmpp_stanza_t * const stanza)
 
         //ignore or handle legacy caps
         } else {
-            return NULL;
+            node = stanza_get_caps_str(stanza);
+            caps_key = from;
+
+            if (node != NULL) {
+                if (!caps_contains(caps_key)) {
+                    GString *id = g_string_new("disco_");
+                    g_string_append(id, from);
+                    xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, id->str, from, node);
+                    xmpp_send(jabber_conn.conn, iq);
+                    xmpp_stanza_release(iq);
+                    g_string_free(id, TRUE);
+                }
+            }
+
+            return caps_key;
         }
     }
     return NULL;
