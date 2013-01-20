@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 #include <strophe.h>
 
 #include "capabilities.h"
@@ -185,6 +185,7 @@ jabber_disconnect(void)
 char *
 jabber_get_local_sha1_caps_str(void)
 {
+/*
     GString *str = g_string_new("");
     unsigned char hash[SHA_DIGEST_LENGTH];
 
@@ -202,6 +203,8 @@ jabber_get_local_sha1_caps_str(void)
     g_string_free(str, TRUE);
 
     return result;
+*/
+    return NULL;
 }
 
 
@@ -214,7 +217,6 @@ sha1_caps_str(xmpp_stanza_t *query)
     GHashTable *forms = g_hash_table_new(g_str_hash, g_str_equal);
 
     GString *s = g_string_new("");
-    unsigned char hash[SHA_DIGEST_LENGTH];
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
     while (child != NULL) {
@@ -285,12 +287,24 @@ sha1_caps_str(xmpp_stanza_t *query)
         }
     }
 
-    SHA1((unsigned char *)s->str, strlen(s->str), hash);
-    char *result = g_base64_encode(hash, sizeof(hash));
+    EVP_MD_CTX mdctx;
+    const EVP_MD *md;
 
-    //g_string_free(s, TRUE);
-    //g_slist_free_full(identities, free);
-    //g_slist_free_full(features, free);
+    unsigned char md_value[EVP_MAX_MD_SIZE];
+    unsigned int md_len;
+    OpenSSL_add_all_digests();
+    md = EVP_get_digestbyname("SHA1");
+    EVP_MD_CTX_init(&mdctx);
+    EVP_DigestInit_ex(&mdctx, md, NULL);
+    EVP_DigestUpdate(&mdctx, s->str, strlen(s->str));
+    EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
+    EVP_MD_CTX_cleanup(&mdctx);
+
+    char *result = g_base64_encode(md_value, md_len);
+
+    g_string_free(s, TRUE);
+    g_slist_free(identities);
+    g_slist_free(features);
 
     return result;
 }
