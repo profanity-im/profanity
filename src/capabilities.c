@@ -28,17 +28,20 @@
 #include "common.h"
 #include "capabilities.h"
 
-GHashTable *capabilities;
+static GHashTable *capabilities;
+
+static void _caps_destroy(Capabilities *caps);
 
 void
 caps_init(void)
 {
     capabilities = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
-        (GDestroyNotify)caps_destroy);
+        (GDestroyNotify)_caps_destroy);
 }
 
-Capabilities *
-caps_create(const char * const client, const char * const version)
+void
+caps_add(const char * const caps_str, const char * const client,
+    const char * const version)
 {
     Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
 
@@ -54,21 +57,27 @@ caps_create(const char * const client, const char * const version)
         new_caps->version = NULL;
     }
 
-    return new_caps;
+    g_hash_table_insert(capabilities, strdup(caps_str), new_caps);
 }
 
-void
-caps_destroy(Capabilities *caps)
+gboolean
+caps_contains(const char * const caps_str)
 {
-    if (caps != NULL) {
-        FREE_SET_NULL(caps->client);
-        FREE_SET_NULL(caps->version);
-        FREE_SET_NULL(caps);
-    }
+    return (g_hash_table_lookup(capabilities, caps_str) != NULL);
 }
 
 void
 caps_close(void)
 {
     g_hash_table_destroy(capabilities);
+}
+
+static void
+_caps_destroy(Capabilities *caps)
+{
+    if (caps != NULL) {
+        FREE_SET_NULL(caps->client);
+        FREE_SET_NULL(caps->version);
+        FREE_SET_NULL(caps);
+    }
 }

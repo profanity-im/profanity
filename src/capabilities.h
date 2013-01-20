@@ -23,14 +23,17 @@
 #ifndef CAPABILITIES_H
 #define CAPABILITIES_H
 
+#include <glib.h>
+
 typedef struct capabilities_t {
     char *client;
     char *version;
 } Capabilities;
 
 void caps_init(void);
-Capabilities* caps_create(const char * const client, const char * const version);
-void caps_destroy(Capabilities *caps);
+void caps_add(const char * const caps_str, const char * const client,
+    const char * const version);
+gboolean caps_contains(const char * const caps_str);
 void caps_close(void);
 
 #endif

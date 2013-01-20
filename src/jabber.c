@@ -26,6 +26,7 @@
 
 #include <strophe.h>
 
+#include "capabilities.h"
 #include "chat_session.h"
 #include "common.h"
 #include "contact_list.h"
@@ -1066,6 +1067,12 @@ _presence_handler(xmpp_conn_t * const conn,
                 g_string_append(caps_gstr, ver);
                 caps_str = caps_gstr->str;
                 g_string_free(caps_gstr, FALSE);
+            }
+        }
+
+        if (caps_str != NULL) {
+            if (!caps_contains(caps_str)) {
+                // send iq request for caps info
             }
         }
 
