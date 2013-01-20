@@ -181,14 +181,14 @@ stanza_create_roster_iq(xmpp_ctx_t *ctx)
 }
 
 xmpp_stanza_t *
-stanza_create_disco_iq(xmpp_ctx_t *ctx, const char * const to,
+stanza_create_disco_iq(xmpp_ctx_t *ctx, const char * const id, const char * const to,
     const char * const node)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
     xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, to);
-    xmpp_stanza_set_id(iq, "disco");
+    xmpp_stanza_set_id(iq, id);
 
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
@@ -429,6 +429,25 @@ stanza_contains_caps(xmpp_stanza_t * const stanza)
     }
 
     return TRUE;
+}
+
+char *
+stanza_caps_get_hash(xmpp_stanza_t * const stanza)
+{
+    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
+
+    if (caps == NULL) {
+        return NULL;
+    }
+
+    if (strcmp(xmpp_stanza_get_ns(caps), STANZA_NS_CAPS) != 0) {
+        return NULL;
+    }
+
+    char *result = xmpp_stanza_get_attribute(caps, STANZA_ATTR_HASH);
+
+    return result;
+
 }
 
 char *

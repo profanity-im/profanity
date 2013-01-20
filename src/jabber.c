@@ -39,8 +39,6 @@
 #include "muc.h"
 #include "stanza.h"
 
-#include "ui.h"
-
 static struct _jabber_conn_t {
     xmpp_log_t *log;
     xmpp_ctx_t *ctx;
@@ -93,6 +91,7 @@ static int _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
 static int _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
+static char * _handle_presence_caps(xmpp_stanza_t * const stanza);
 
 void
 jabber_init(const int disable_tls)
@@ -1063,34 +1062,37 @@ _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     char *type = xmpp_stanza_get_type(stanza);
+    char *id = xmpp_stanza_get_id(stanza);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         log_error("Roster query failed");
         return 1;
     } else {
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        const char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
-
+        char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
         if (node == NULL) {
             return 1;
         }
 
-        // validate sha1
-        gchar **split = g_strsplit(node, "#", -1);
-        char *given_sha1 = split[1];
-        char *generated_sha1 = sha1_caps_str(query);
-        cons_show("GIVEN: %s", given_sha1);
-        cons_show("GEN  : %s", generated_sha1);
-        win_current_page_off();
-        ui_refresh();
+        char *caps_key = NULL;
+        if (g_strcmp0(id, "disco") == 0) {
+            caps_key = node;
 
-        if (g_strcmp0(given_sha1, generated_sha1) != 0) {
-            log_info("Invalid SHA1 recieved for caps.");
-            return 1;
+            // validate sha1
+            gchar **split = g_strsplit(node, "#", -1);
+            char *given_sha1 = split[1];
+            char *generated_sha1 = sha1_caps_str(query);
+
+            if (g_strcmp0(given_sha1, generated_sha1) != 0) {
+                log_info("Invalid SHA1 recieved for caps.");
+                return 1;
+            }
+        } else {
+            caps_key = id;
         }
 
         // already cached
-        if (caps_contains(node)) {
+        if (caps_contains(caps_key)) {
             log_info("Client info already cached.");
             return 1;
         }
@@ -1115,7 +1117,7 @@ _disco_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             return 1;
         }
 
-        caps_add(node, name);
+        caps_add(caps_key, name);
 
         return 1;
     }
@@ -1175,19 +1177,7 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     } else {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
-        char *caps_str = NULL;
-
-        if (stanza_contains_caps(stanza)) {
-            caps_str = stanza_get_caps_str(stanza);
-
-            if (caps_str != NULL) {
-                if (!caps_contains(caps_str)) {
-                    xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, jid, caps_str);
-                    xmpp_send(jabber_conn.conn, iq);
-                    xmpp_stanza_release(iq);
-                }
-            }
-        }
+        char *caps_key = _handle_presence_caps(stanza);
 
         xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
         if (status != NULL) {
@@ -1213,18 +1203,18 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
                 show_str = "online";
             }
             if (!muc_get_roster_received(room)) {
-                muc_add_to_roster(room, nick, show_str, status_str, caps_str);
+                muc_add_to_roster(room, nick, show_str, status_str, caps_key);
             } else {
                 char *old_nick = muc_complete_roster_nick_change(room, nick);
 
                 if (old_nick != NULL) {
-                    muc_add_to_roster(room, nick, show_str, status_str, caps_str);
+                    muc_add_to_roster(room, nick, show_str, status_str, caps_key);
                     prof_handle_room_member_nick_change(room, old_nick, nick);
                 } else {
                     if (!muc_nick_in_roster(room, nick)) {
-                        prof_handle_room_member_online(room, nick, show_str, status_str, caps_str);
+                        prof_handle_room_member_online(room, nick, show_str, status_str, caps_key);
                     } else {
-                        prof_handle_room_member_presence(room, nick, show_str, status_str, caps_str);
+                        prof_handle_room_member_presence(room, nick, show_str, status_str, caps_key);
                     }
                 }
             }
@@ -1235,6 +1225,55 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     free(nick);
 
     return 1;
+}
+
+static char *
+_handle_presence_caps(xmpp_stanza_t * const stanza)
+{
+    char *caps_key = NULL;
+    char *node = NULL;
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (stanza_contains_caps(stanza)) {
+        char *hash_type = stanza_caps_get_hash(stanza);
+
+        // xep-0115
+        if (hash_type != NULL) {
+
+            // supported hash
+            if (strcmp(hash_type, "sha-1") == 0) {
+                node = stanza_get_caps_str(stanza);
+                caps_key = node;
+
+                if (node != NULL) {
+                    if (!caps_contains(caps_key)) {
+                        xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, "disco", from, node);
+                        xmpp_send(jabber_conn.conn, iq);
+                        xmpp_stanza_release(iq);
+                    }
+                }
+
+            // unsupported hash
+            } else {
+                node = stanza_get_caps_str(stanza);
+                caps_key = from;
+
+                if (node != NULL) {
+                    if (!caps_contains(caps_key)) {
+                        xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, from, from, node);
+                        xmpp_send(jabber_conn.conn, iq);
+                        xmpp_stanza_release(iq);
+                    }
+                }
+            }
+
+            return strdup(caps_key);
+
+        //ignore or handle legacy caps
+        } else {
+            return NULL;
+        }
+    }
+    return NULL;
 }
 
 static int
@@ -1269,18 +1308,7 @@ _presence_handler(xmpp_conn_t * const conn,
             g_date_time_unref(now);
         }
 
-        char *caps_str = NULL;
-        if (stanza_contains_caps(stanza)) {
-            caps_str = stanza_get_caps_str(stanza);
-
-            if (caps_str != NULL) {
-                if (!caps_contains(caps_str)) {
-                    xmpp_stanza_t *iq = stanza_create_disco_iq(jabber_conn.ctx, from, caps_str);
-                    xmpp_send(jabber_conn.conn, iq);
-                    xmpp_stanza_release(iq);
-                }
-            }
-        }
+        char *caps_key = _handle_presence_caps(stanza);
 
         xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
         if (status != NULL)
@@ -1296,7 +1324,7 @@ _presence_handler(xmpp_conn_t * const conn,
                 show_str = "online";
 
             if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-                prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity, caps_str);
+                prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity, caps_key);
             }
         } else if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
             if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
