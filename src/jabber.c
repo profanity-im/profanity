@@ -1118,7 +1118,7 @@ _disco_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *node_str = xmpp_stanza_get_attribute(incoming_query, STANZA_ATTR_NODE);
     char *from  = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (from != NULL) {
+    if (from != NULL && node_str != NULL) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(response, STANZA_NAME_IQ);
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
