@@ -35,6 +35,7 @@
 #include <ncurses.h>
 #endif
 
+#include "contact.h"
 #include "jabber.h"
 #include "jid.h"
 
@@ -136,8 +137,6 @@ void win_room_show_status(const char * const contact);
 void win_room_show_info(const char * const contact);
 void win_show_status(void);
 void win_private_show_status(void);
-void win_show_info(void);
-void win_private_show_info(void);
 
 // console window actions
 void cons_about(void);
@@ -164,7 +163,7 @@ void cons_show_contacts(GSList * list);
 void cons_check_version(gboolean not_available_msg);
 void cons_show_wins(void);
 void cons_show_status(const char * const contact);
-void cons_show_info(const char * const contact);
+void cons_show_info(PContact pcontact);
 void cons_show_themes(GSList *themes);
 
 // status bar actions

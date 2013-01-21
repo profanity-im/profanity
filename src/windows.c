@@ -1159,53 +1159,14 @@ cons_show_wins(void)
 }
 
 void
-win_room_show_info(const char * const contact)
+cons_show_info(PContact pcontact)
 {
-    PContact pcontact = muc_get_participant(win_current_get_recipient(), contact);
+    _win_show_info(console->win, pcontact);
 
-    if (pcontact != NULL) {
-        _win_show_info(current->win, pcontact);
+    if (current_index == 0) {
+        dirty = TRUE;
     } else {
-        win_current_show("No such participant \"%s\" in room.", contact);
-    }
-
-}
-
-void
-cons_show_info(const char * const contact)
-{
-    PContact pcontact = contact_list_get_contact(contact);
-
-    if (pcontact != NULL) {
-        _win_show_info(console->win, pcontact);
-    } else {
-        cons_show("No such contact \"%s\" in roster.", contact);
-    }
-}
-
-void
-win_show_info(void)
-{
-    PContact pcontact = contact_list_get_contact(win_current_get_recipient());
-
-    if (pcontact != NULL) {
-        _win_show_info(current->win, pcontact);
-    } else {
-        win_current_show("No such contact \"%s\" in roster.", win_current_get_recipient());
-    }
-}
-
-void
-win_private_show_info(void)
-{
-    Jid *jid = jid_create(win_current_get_recipient());
-
-    PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-
-    if (pcontact != NULL) {
-        _win_show_info(current->win, pcontact);
-    } else {
-        win_current_show("No such participant \"%s\" in room.", jid->resourcepart);
+        status_bar_new(0);
     }
 }
 

@@ -1727,25 +1727,49 @@ _cmd_info(gchar **args, struct cmd_help_t help)
     } else {
         if (win_current_is_groupchat()) {
             if (usr != NULL) {
-                win_room_show_info(usr);
+                PContact pcontact = muc_get_participant(win_current_get_recipient(), usr);
+                if (pcontact != NULL) {
+                    cons_show_info(pcontact);
+                } else {
+                    cons_show("No such participant \"%s\" in room.", usr);
+                }
             } else {
-                win_current_show("You must specify a nickname.");
+                cons_show("No nickname supplied to /info in chat room.");
             }
+
         } else if (win_current_is_chat()) {
             if (usr != NULL) {
-                win_current_show("No parameter required when in chat.");
+                cons_show("No parameter required for /info in chat.");
             } else {
-                win_show_info();
+                PContact pcontact = contact_list_get_contact(win_current_get_recipient());
+                if (pcontact != NULL) {
+                    cons_show_info(pcontact);
+                } else {
+                    cons_show("No such contact \"%s\" in roster.", win_current_get_recipient());
+                }
             }
+
         } else if (win_current_is_private()) {
             if (usr != NULL) {
                 win_current_show("No parameter required when in chat.");
             } else {
-                win_private_show_info();
+                Jid *jid = jid_create(win_current_get_recipient());
+                PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+                if (pcontact != NULL) {
+                    cons_show_info(pcontact);
+                } else {
+                    cons_show("No such participant \"%s\" in room.", jid->resourcepart);
+                }
+                jid_destroy(jid);
             }
         } else {
             if (usr != NULL) {
-                cons_show_info(usr);
+                PContact pcontact = contact_list_get_contact(usr);
+                if (pcontact != NULL) {
+                    cons_show_info(pcontact);
+                } else {
+                    cons_show("No such contact \"%s\" in roster.", usr);
+                }
             } else {
                 cons_show("Usage: %s", help.usage);
             }
