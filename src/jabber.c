@@ -969,7 +969,8 @@ _iq_handler(xmpp_conn_t * const conn,
         return _roster_handler(conn, stanza, userdata);
 
     // handle disco responses
-    } else if ((g_str_has_prefix(id, "disco")) && (g_strcmp0(type, "result") == 0)) {
+    } else if ((id != NULL) && (g_str_has_prefix(id, "disco")) &&
+            (g_strcmp0(type, "result") == 0)) {
         return _disco_response_handler(conn, stanza, userdata);
 
     // handle disco requests
