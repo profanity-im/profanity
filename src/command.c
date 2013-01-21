@@ -130,6 +130,7 @@ static gboolean _cmd_info(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_wins(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_theme(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_status(gchar **args, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -259,6 +260,15 @@ static struct cmd_t main_commands[] =
         { "/info [jid|nick]", "Find out a contacts presence information.",
         { "/info [jid|nick]",
           "----------------",
+          "Find out a contact, or room members presence information.",
+          "If in a chat window the parameter is not required, the current recipient will be used.",
+          NULL } } },
+
+    { "/status",
+        _cmd_status, parse_args, 0, 1,
+        { "/status [jid|nick]", "Find out a contacts presence information.",
+        { "/status [jid|nick]",
+          "------------------",
           "Find out a contact, or room members presence information.",
           "If in a chat window the parameter is not required, the current recipient will be used.",
           NULL } } },
@@ -935,11 +945,14 @@ _cmd_complete_parameters(char *input, int *size)
         if (nick_ac != NULL) {
             _parameter_autocomplete_with_ac(input, size, "/msg", nick_ac);
             _parameter_autocomplete_with_ac(input, size, "/info", nick_ac);
+            _parameter_autocomplete_with_ac(input, size, "/status", nick_ac);
         }
     } else {
         _parameter_autocomplete(input, size, "/msg",
             contact_list_find_contact);
         _parameter_autocomplete(input, size, "/info",
+            contact_list_find_contact);
+        _parameter_autocomplete(input, size, "/status",
             contact_list_find_contact);
     }
 
@@ -1660,6 +1673,46 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
     }
+}
+
+static gboolean
+_cmd_status(gchar **args, struct cmd_help_t help)
+{
+    char *usr = args[0];
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+    } else {
+        if (win_current_is_groupchat()) {
+            if (usr != NULL) {
+                win_room_show_status(usr);
+            } else {
+                win_current_show("You must specify a nickname.");
+            }
+        } else if (win_current_is_chat()) {
+            if (usr != NULL) {
+                win_current_show("No parameter required when in chat.");
+            } else {
+                win_show_status();
+            }
+        } else if (win_current_is_private()) {
+            if (usr != NULL) {
+                win_current_show("No parameter required when in chat.");
+            } else {
+                win_private_show_status();
+            }
+        } else {
+            if (usr != NULL) {
+                cons_show_status(usr);
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+        }
+    }
+
+    return TRUE;
 }
 
 static gboolean
