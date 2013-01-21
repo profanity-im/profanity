@@ -24,6 +24,7 @@
 #define CAPABILITIES_H
 
 #include <glib.h>
+#include <strophe.h>
 
 typedef struct capabilities_t {
     char *client;
@@ -33,6 +34,7 @@ void caps_init(void);
 void caps_add(const char * const caps_str, const char * const client);
 gboolean caps_contains(const char * const caps_str);
 Capabilities* caps_get(const char * const caps_str);
+char* caps_get_sha1_str(xmpp_stanza_t * const query);
 void caps_close(void);
 
 #endif
