@@ -1227,6 +1227,11 @@ cons_show_ui_prefs(void)
         cons_show("Version checking (/vercheck) : ON");
     else
         cons_show("Version checking (/vercheck) : OFF");
+
+    if (prefs_get_statuses())
+        cons_show("Status (/statuses)           : ON");
+    else
+        cons_show("Status (/statuses)           : OFF");
 }
 
 void
@@ -1253,11 +1258,6 @@ cons_show_desktop_prefs(void)
     } else {
         cons_show("Reminder period (/notify remind) : %d seconds", remind_period);
     }
-
-    if (prefs_get_notify_status())
-        cons_show("Status (/notify status)          : ON");
-    else
-        cons_show("Status (/notify status)          : OFF");
 }
 
 void
@@ -1971,7 +1971,7 @@ _show_status_string(WINDOW *win, const char * const from,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show)
 {
-    if (!prefs_get_notify_status())
+    if (!prefs_get_statuses())
         return;
 
     _win_show_time(win);

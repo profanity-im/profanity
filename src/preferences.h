@@ -68,6 +68,8 @@ gint prefs_get_gone(void);
 void prefs_set_gone(gint value);
 gchar * prefs_get_theme(void);
 void prefs_set_theme(gchar *value);
+void prefs_set_statuses(gboolean value);
+gboolean prefs_get_statuses(void);
 
 void prefs_set_notify_message(gboolean value);
 gboolean prefs_get_notify_message(void);
@@ -75,8 +77,6 @@ void prefs_set_notify_typing(gboolean value);
 gboolean prefs_get_notify_typing(void);
 void prefs_set_notify_remind(gint period);
 gint prefs_get_notify_remind(void);
-void prefs_set_notify_status(gboolean value);
-gboolean prefs_get_notify_status(void);
 void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
 void prefs_set_priority(gint value);

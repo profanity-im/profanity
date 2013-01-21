@@ -411,15 +411,15 @@ prefs_set_splash(gboolean value)
 }
 
 gboolean
-prefs_get_notify_status(void)
+prefs_get_statuses(void)
 {
-    return g_key_file_get_boolean(prefs, "notifications", "status", NULL);
+    return g_key_file_get_boolean(prefs, "ui", "statuses", NULL);
 }
 
 void
-prefs_set_notify_status(gboolean value)
+prefs_set_statuses(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "notifications", "status", value);
+    g_key_file_set_boolean(prefs, "ui", "statuses", value);
     _save_prefs();
 }
 
