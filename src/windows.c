@@ -725,7 +725,16 @@ win_new_chat_win(const char * const to)
 
     // create new window
     if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(to, WIN_CHAT);
+        Jid *jid = jid_create(to);
+
+        if (muc_room_is_active(jid)) {
+            win_index = _new_prof_win(to, WIN_PRIVATE);
+        } else {
+            win_index = _new_prof_win(to, WIN_CHAT);
+        }
+
+        jid_destroy(jid);
+
         win = windows[win_index]->win;
 
         if (prefs_get_chlog() && prefs_get_history()) {
