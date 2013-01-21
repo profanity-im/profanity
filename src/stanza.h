@@ -77,6 +77,7 @@
 #define STANZA_ATTR_SECONDS "seconds"
 #define STANZA_ATTR_NODE "node"
 #define STANZA_ATTR_VER "ver"
+#define STANZA_ATTR_VAR "var"
 #define STANZA_ATTR_HASH "hash"
 
 #define STANZA_TEXT_AWAY "away"
@@ -141,6 +142,7 @@ int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);
 gboolean stanza_contains_caps(xmpp_stanza_t * const stanza);
 char * stanza_caps_get_hash(xmpp_stanza_t * const stanza);
+gboolean stanza_is_caps_request(xmpp_stanza_t * const stanza);
 
 DataForm * stanza_get_form(xmpp_stanza_t * const stanza);
 
