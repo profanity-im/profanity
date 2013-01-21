@@ -186,32 +186,6 @@ jabber_disconnect(void)
 }
 
 char *
-jabber_get_local_sha1_caps_str(void)
-{
-/*
-    GString *str = g_string_new("");
-    unsigned char hash[SHA_DIGEST_LENGTH];
-
-    g_string_append(str, "client/pc//Profanity ");
-    g_string_append(str, PACKAGE_VERSION);
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-        g_string_append(str, "dev");
-    }
-    g_string_append(str, "<");
-
-    SHA1((unsigned char *)str->str, strlen(str->str), hash);
-
-    char *result = g_base64_encode(hash, strlen((char *)hash));
-
-    g_string_free(str, TRUE);
-
-    return result;
-*/
-    return NULL;
-}
-
-
-char *
 sha1_caps_str(xmpp_stanza_t *query)
 {
     GSList *identities = NULL;
