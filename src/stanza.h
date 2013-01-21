@@ -93,6 +93,7 @@
 #define STANZA_NS_PING "urn:xmpp:ping"
 #define STANZA_NS_LASTACTIVITY "jabber:iq:last"
 #define STANZA_NS_DATA "jabber:x:data"
+#define STANZA_NS_VERSION "jabber:iq:version"
 
 typedef struct form_field_t {
     char *var;
@@ -143,6 +144,8 @@ char * stanza_get_caps_str(xmpp_stanza_t * const stanza);
 gboolean stanza_contains_caps(xmpp_stanza_t * const stanza);
 char * stanza_caps_get_hash(xmpp_stanza_t * const stanza);
 gboolean stanza_is_caps_request(xmpp_stanza_t * const stanza);
+
+gboolean stanza_is_version_request(xmpp_stanza_t * const stanza);
 
 DataForm * stanza_get_form(xmpp_stanza_t * const stanza);
 

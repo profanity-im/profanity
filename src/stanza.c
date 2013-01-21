@@ -432,6 +432,34 @@ stanza_contains_caps(xmpp_stanza_t * const stanza)
 }
 
 gboolean
+stanza_is_version_request(xmpp_stanza_t * const stanza)
+{
+    char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+
+    if (g_strcmp0(type, STANZA_TYPE_GET) != 0) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
+    if (query == NULL) {
+        return FALSE;
+    }
+
+    char *ns = xmpp_stanza_get_ns(query);
+
+    if (ns == NULL) {
+        return FALSE;
+    }
+
+    if (strcmp(ns, STANZA_NS_VERSION) != 0) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+gboolean
 stanza_is_caps_request(xmpp_stanza_t * const stanza)
 {
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
