@@ -27,6 +27,7 @@
 #include <openssl/evp.h>
 #include <strophe.h>
 
+#include "config.h"
 #include "common.h"
 #include "capabilities.h"
 #include "stanza.h"
@@ -167,6 +168,50 @@ caps_get_sha1_str(xmpp_stanza_t *query)
     g_slist_free(features);
 
     return result;
+}
+
+xmpp_stanza_t *
+caps_get_query_response_stanza(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, XMPP_NS_DISCO_INFO);
+
+    xmpp_stanza_t *identity = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(identity, "identity");
+    xmpp_stanza_set_attribute(identity, "category", "client");
+    xmpp_stanza_set_attribute(identity, "type", "pc");
+
+    GString *name_str = g_string_new("Profanity ");
+    g_string_append(name_str, PACKAGE_VERSION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+        g_string_append(name_str, "dev");
+    }
+    xmpp_stanza_set_attribute(identity, "name", name_str->str);
+
+    xmpp_stanza_t *feature_caps = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(feature_caps, STANZA_NAME_FEATURE);
+    xmpp_stanza_set_attribute(feature_caps, STANZA_ATTR_VAR, STANZA_NS_CAPS);
+
+    xmpp_stanza_t *feature_discoinfo = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(feature_discoinfo, STANZA_NAME_FEATURE);
+    xmpp_stanza_set_attribute(feature_discoinfo, STANZA_ATTR_VAR, XMPP_NS_DISCO_INFO);
+
+    xmpp_stanza_t *feature_muc = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(feature_muc, STANZA_NAME_FEATURE);
+    xmpp_stanza_set_attribute(feature_muc, STANZA_ATTR_VAR, STANZA_NS_MUC);
+
+    xmpp_stanza_t *feature_version = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(feature_version, STANZA_NAME_FEATURE);
+    xmpp_stanza_set_attribute(feature_version, STANZA_ATTR_VAR, STANZA_NS_VERSION);
+
+    xmpp_stanza_add_child(query, identity);
+    xmpp_stanza_add_child(query, feature_muc);
+    xmpp_stanza_add_child(query, feature_discoinfo);
+    xmpp_stanza_add_child(query, feature_caps);
+    xmpp_stanza_add_child(query, feature_version);
+
+    return query;
 }
 
 void

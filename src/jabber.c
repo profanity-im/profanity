@@ -428,50 +428,10 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "http://www.profanity.im");
-
-    xmpp_stanza_t *query = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-    xmpp_stanza_set_ns(query, XMPP_NS_DISCO_INFO);
-
-    xmpp_stanza_t *identity = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(identity, "identity");
-    xmpp_stanza_set_attribute(identity, "category", "client");
-    xmpp_stanza_set_attribute(identity, "type", "pc");
-
-    GString *name_str = g_string_new("Profanity ");
-    g_string_append(name_str, PACKAGE_VERSION);
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-        g_string_append(name_str, "dev");
-    }
-    xmpp_stanza_set_attribute(identity, "name", name_str->str);
-
-    xmpp_stanza_t *feature_caps = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(feature_caps, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_caps, STANZA_ATTR_VAR, STANZA_NS_CAPS);
-
-    xmpp_stanza_t *feature_discoinfo = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(feature_discoinfo, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_discoinfo, STANZA_ATTR_VAR, XMPP_NS_DISCO_INFO);
-
-    xmpp_stanza_t *feature_muc = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(feature_muc, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_muc, STANZA_ATTR_VAR, STANZA_NS_MUC);
-
-    xmpp_stanza_t *feature_version = xmpp_stanza_new(jabber_conn.ctx);
-    xmpp_stanza_set_name(feature_version, STANZA_NAME_FEATURE);
-    xmpp_stanza_set_attribute(feature_version, STANZA_ATTR_VAR, STANZA_NS_VERSION);
-
-    xmpp_stanza_add_child(query, identity);
-    xmpp_stanza_add_child(query, feature_muc);
-    xmpp_stanza_add_child(query, feature_discoinfo);
-    xmpp_stanza_add_child(query, feature_caps);
-    xmpp_stanza_add_child(query, feature_version);
-
+    xmpp_stanza_t *query = caps_get_query_response_stanza(jabber_conn.ctx);
     char *sha1 = caps_get_sha1_str(query);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_VER, sha1);
-
     xmpp_stanza_add_child(presence, caps);
-
     xmpp_send(jabber_conn.conn, presence);
 
     // send presence for each room
@@ -1055,49 +1015,9 @@ _disco_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
         xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
-
-        xmpp_stanza_t *query = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-        xmpp_stanza_set_ns(query, XMPP_NS_DISCO_INFO);
+        xmpp_stanza_t *query = caps_get_query_response_stanza(ctx);
         xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
-
-        xmpp_stanza_t *identity = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(identity, "identity");
-        xmpp_stanza_set_attribute(identity, "category", "client");
-        xmpp_stanza_set_attribute(identity, "type", "pc");
-
-        GString *name_str = g_string_new("Profanity ");
-        g_string_append(name_str, PACKAGE_VERSION);
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-            g_string_append(name_str, "dev");
-        }
-        xmpp_stanza_set_attribute(identity, "name", name_str->str);
-
-        xmpp_stanza_t *feature_caps = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(feature_caps, STANZA_NAME_FEATURE);
-        xmpp_stanza_set_attribute(feature_caps, STANZA_ATTR_VAR, STANZA_NS_CAPS);
-
-        xmpp_stanza_t *feature_disoinfo = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(feature_disoinfo, STANZA_NAME_FEATURE);
-        xmpp_stanza_set_attribute(feature_disoinfo, STANZA_ATTR_VAR, XMPP_NS_DISCO_INFO);
-
-        xmpp_stanza_t *feature_muc = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(feature_muc, STANZA_NAME_FEATURE);
-        xmpp_stanza_set_attribute(feature_muc, STANZA_ATTR_VAR, STANZA_NS_MUC);
-
-        xmpp_stanza_t *feature_version = xmpp_stanza_new(jabber_conn.ctx);
-        xmpp_stanza_set_name(feature_version, STANZA_NAME_FEATURE);
-        xmpp_stanza_set_attribute(feature_version, STANZA_ATTR_VAR, STANZA_NS_VERSION);
-
-        xmpp_stanza_add_child(query, identity);
-
-        xmpp_stanza_add_child(query, feature_muc);
-        xmpp_stanza_add_child(query, feature_disoinfo);
-        xmpp_stanza_add_child(query, feature_caps);
-        xmpp_stanza_add_child(query, feature_version);
-
         xmpp_stanza_add_child(response, query);
-
         xmpp_send(conn, response);
     }
 
