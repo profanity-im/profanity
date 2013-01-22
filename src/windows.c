@@ -1296,6 +1296,11 @@ cons_show_ui_prefs(void)
         cons_show("Mouse handling (/mouse)      : ON");
     else
         cons_show("Mouse handling (/mouse)      : OFF");
+
+    if (prefs_get_statuses())
+        cons_show("Status (/statuses)           : ON");
+    else
+        cons_show("Status (/statuses)           : OFF");
 }
 
 void
@@ -2035,6 +2040,9 @@ _show_status_string(WINDOW *win, const char * const from,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show)
 {
+    if (!prefs_get_statuses())
+        return;
+
     _win_show_time(win, '-');
 
     if (show != NULL) {

@@ -120,6 +120,7 @@ static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_titlebar(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoaway(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_mouse(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_statuses(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
@@ -551,6 +552,15 @@ static struct cmd_t setting_commands[] =
           "---------------",
           "Set priority for the current session.",
           "value : Number between -128 and 127. Default value is 0.",
+          NULL } } },
+
+    { "/statuses",
+        _cmd_set_statuses, parse_args, 1, 1,
+        { "/statuses on|off", "Set notifications for status messages.",
+        { "/statuses on|off",
+          "---------------",
+          "Set notifications for status messages, such as online/offline or join/part channels.",
+          "When notifications are off status messages, such as online/offline or join/part, are not displayed.",
           NULL } } }
 };
 
@@ -656,6 +666,7 @@ cmd_init(void)
     p_autocomplete_add(notify_ac, strdup("message"));
     p_autocomplete_add(notify_ac, strdup("typing"));
     p_autocomplete_add(notify_ac, strdup("remind"));
+    p_autocomplete_add(notify_ac, strdup("status"));
 
     sub_ac = p_autocomplete_new();
     p_autocomplete_add(sub_ac, strdup("request"));
@@ -928,6 +939,8 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/history",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/vercheck",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/statuses",
         prefs_autocomplete_boolean_choice);
 
     if (win_current_is_groupchat()) {
@@ -1931,7 +1944,8 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
             cons_show("Usage: /notify typing on|off");
         }
 
-    } else { // remind
+    // set remind setting
+    } else if (strcmp(kind, "remind") == 0) {
         gint period = atoi(value);
         prefs_set_notify_remind(period);
         if (period == 0) {
@@ -1941,6 +1955,9 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
         } else {
             cons_show("Message reminder period set to %d seconds.", period);
         }
+
+    } else {
+        cons_show("Unknown command: %s.", kind);
     }
 
     return TRUE;
@@ -2079,6 +2096,13 @@ _cmd_set_priority(gchar **args, struct cmd_help_t help)
     }
 
     return TRUE;
+}
+
+static gboolean
+_cmd_set_statuses(gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args[0], help,
+        "Status notifications", prefs_set_statuses);
 }
 
 static gboolean
