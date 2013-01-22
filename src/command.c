@@ -118,6 +118,7 @@ static gboolean _cmd_set_gone(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_titlebar(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_autoaway(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_statuses(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);

@@ -413,7 +413,11 @@ prefs_set_splash(gboolean value)
 gboolean
 prefs_get_statuses(void)
 {
-    return g_key_file_get_boolean(prefs, "ui", "statuses", NULL);
+    if (g_key_file_has_key(prefs, "ui", "statuses", NULL)) {
+        return g_key_file_get_boolean(prefs, "ui", "statuses", NULL);
+    } else {
+        return TRUE;
+    }
 }
 
 void
