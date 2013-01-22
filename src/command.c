@@ -925,6 +925,8 @@ _cmd_complete_parameters(char *input, int *size)
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/vercheck",
         prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/statuses",
+        prefs_autocomplete_boolean_choice);
 
     if (win_current_is_groupchat()) {
         PAutocomplete nick_ac = muc_get_roster_ac(win_current_get_recipient());
