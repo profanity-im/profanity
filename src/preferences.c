@@ -421,12 +421,30 @@ prefs_get_mouse(void)
     }
 }
 
+gboolean
+prefs_get_statuses(void)
+{
+    if (g_key_file_has_key(prefs, "ui", "statuses", NULL)) {
+        return g_key_file_get_boolean(prefs, "ui", "statuses", NULL);
+    } else {
+        return TRUE;
+    }
+}
+
 void
 prefs_set_mouse(gboolean value)
 {
     g_key_file_set_boolean(prefs, "ui", "mouse", value);
     _save_prefs();
 }
+
+void
+prefs_set_statuses(gboolean value)
+{
+    g_key_file_set_boolean(prefs, "ui", "statuses", value);
+    _save_prefs();
+}
+
 static void
 _save_prefs(void)
 {
