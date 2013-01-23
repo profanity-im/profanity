@@ -83,14 +83,20 @@ static int _chat_message_handler(xmpp_stanza_t * const stanza);
 
 static int _iq_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+
 static int _roster_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata);
-static int _caps_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata);
-static int _version_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata);
+    xmpp_stanza_t * const stanza, xmpp_ctx_t * const ctx,
+    const char * const id, const char * const type, const char * const from);
+static int _caps_response_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, xmpp_ctx_t * const ctx,
+    const char * const id, const char * const type, const char * const from);
+static int _caps_request_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, xmpp_ctx_t * const ctx,
+    const char * const id, const char * const type, const char * const from);
+static int _version_request_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, xmpp_ctx_t * const ctx,
+    const char * const id, const char * const type, const char * const from);
+
 static int _presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
@@ -804,24 +810,26 @@ static int
 _iq_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
     char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     // handle the initial roster request
     if (g_strcmp0(id, "roster") == 0) {
-        return _roster_handler(conn, stanza, userdata);
+        return _roster_handler(conn, stanza, ctx, id, type, from);
 
     // handle caps responses
     } else if ((id != NULL) && (g_str_has_prefix(id, "disco")) &&
             (g_strcmp0(type, "result") == 0)) {
-        return _caps_response_handler(conn, stanza, userdata);
+        return _caps_response_handler(conn, stanza, ctx, id, type, from);
 
     // handle caps requests
     } else if (stanza_is_caps_request(stanza)) {
-        return _caps_request_handler(conn, stanza, userdata);
+        return _caps_request_handler(conn, stanza, ctx, id, type, from);
 
     } else if (stanza_is_version_request(stanza)) {
-        return _version_request_handler(conn, stanza, userdata);
+        return _version_request_handler(conn, stanza, ctx, id, type, from);
 
     // handle iq
     } else {
@@ -913,12 +921,12 @@ _iq_handler(xmpp_conn_t * const conn,
 
 static int
 _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+    xmpp_ctx_t * const ctx, const char * const id, const char * const type,
+    const char * const from)
 {
     xmpp_stanza_t *query, *item;
-    char *type = xmpp_stanza_get_type(stanza);
 
-    if (strcmp(type, STANZA_TYPE_ERROR) == 0)
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0)
         log_error("Roster query failed");
     else {
         query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
@@ -931,7 +939,7 @@ _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             gboolean pending_out = FALSE;
             const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-            if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
+            if (g_strcmp0(ask, "subscribe") == 0) {
                 pending_out = TRUE;
             }
 
@@ -957,13 +965,9 @@ _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
 static int
 _version_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+    xmpp_ctx_t * const ctx, const char * const id, const char * const type,
+    const char * const from)
 {
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
-
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    char *id = xmpp_stanza_get_id(stanza);
-
     if (from != NULL) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(response, STANZA_NAME_IQ);
@@ -1007,13 +1011,11 @@ _version_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
 static int
 _caps_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+    xmpp_ctx_t * ctx, const char * const id, const char * const type,
+    const char * const from)
 {
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
-
     xmpp_stanza_t *incoming_query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     char *node_str = xmpp_stanza_get_attribute(incoming_query, STANZA_ATTR_NODE);
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (from != NULL && node_str != NULL) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
@@ -1034,11 +1036,9 @@ _caps_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
 static int
 _caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+    xmpp_ctx_t * ctx, const char * const id, const char * const type,
+    const char * const from)
 {
-    char *type = xmpp_stanza_get_type(stanza);
-    char *id = xmpp_stanza_get_id(stanza);
-
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         log_error("Roster query failed");
         return 1;
@@ -1053,7 +1053,7 @@ _caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         // xep-0115
         if (g_strcmp0(id, "disco") == 0) {
-            caps_key = node;
+            caps_key = strdup(node);
 
             // validate sha1
             gchar **split = g_strsplit(node, "#", -1);
@@ -1072,7 +1072,7 @@ _caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         // non supported hash, or legacy caps
         } else {
-            caps_key = id + 6;
+            caps_key = strdup(id + 6);
         }
 
         // already cached
@@ -1102,6 +1102,8 @@ _caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         caps_add(caps_key, name);
+
+        free(caps_key);
 
         return 1;
     }
