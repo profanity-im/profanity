@@ -34,8 +34,8 @@ void caps_init(void);
 void caps_add(const char * const caps_str, const char * const client);
 gboolean caps_contains(const char * const caps_str);
 Capabilities* caps_get(const char * const caps_str);
-char* caps_get_sha1_str(xmpp_stanza_t * const query);
-xmpp_stanza_t* caps_get_query_response_stanza(xmpp_ctx_t *ctx);
+char* caps_create_sha1_str(xmpp_stanza_t * const query);
+xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t * const ctx);
 void caps_close(void);
 
 #endif

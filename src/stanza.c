@@ -581,6 +581,26 @@ stanza_create_form(xmpp_stanza_t * const stanza)
     return result;
 }
 
+void
+stanza_destroy_form(DataForm *form)
+{
+    if (form != NULL) {
+        FREE_SET_NULL(form->form_type);
+        if (form->fields != NULL) {
+            GSList *curr_field = form->fields;
+            while (curr_field != NULL) {
+                FormField *field = curr_field->data;
+                FREE_SET_NULL(field->var);
+                if ((field->values) != NULL) {
+                    g_slist_free_full(field->values, free);
+                }
+            }
+        }
+
+        form = NULL;
+    }
+}
+
 static int
 _field_compare(FormField *f1, FormField *f2)
 {

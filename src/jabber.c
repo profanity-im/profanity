@@ -428,8 +428,8 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "http://www.profanity.im");
-    xmpp_stanza_t *query = caps_get_query_response_stanza(jabber_conn.ctx);
-    char *sha1 = caps_get_sha1_str(query);
+    xmpp_stanza_t *query = caps_create_query_response_stanza(jabber_conn.ctx);
+    char *sha1 = caps_create_sha1_str(query);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_VER, sha1);
     xmpp_stanza_add_child(presence, caps);
     xmpp_send(jabber_conn.conn, presence);
@@ -1015,7 +1015,7 @@ _disco_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
         xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
-        xmpp_stanza_t *query = caps_get_query_response_stanza(ctx);
+        xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
         xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
         xmpp_stanza_add_child(response, query);
         xmpp_send(conn, response);
@@ -1050,7 +1050,7 @@ _disco_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             // validate sha1
             gchar **split = g_strsplit(node, "#", -1);
             char *given_sha1 = split[1];
-            char *generated_sha1 = caps_get_sha1_str(query);
+            char *generated_sha1 = caps_create_sha1_str(query);
 
             if (g_strcmp0(given_sha1, generated_sha1) != 0) {
                 log_info("Invalid SHA1 recieved for caps.");

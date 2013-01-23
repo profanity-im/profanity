@@ -148,5 +148,6 @@ gboolean stanza_is_caps_request(xmpp_stanza_t * const stanza);
 gboolean stanza_is_version_request(xmpp_stanza_t * const stanza);
 
 DataForm * stanza_create_form(xmpp_stanza_t * const stanza);
+void stanza_destroy_form(DataForm *form);
 
 #endif
