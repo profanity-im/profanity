@@ -85,9 +85,9 @@ static int _iq_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _roster_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _disco_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+static int _caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
-static int _disco_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+static int _caps_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
 static int _version_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata);
@@ -811,14 +811,14 @@ _iq_handler(xmpp_conn_t * const conn,
     if (g_strcmp0(id, "roster") == 0) {
         return _roster_handler(conn, stanza, userdata);
 
-    // handle disco responses
+    // handle caps responses
     } else if ((id != NULL) && (g_str_has_prefix(id, "disco")) &&
             (g_strcmp0(type, "result") == 0)) {
-        return _disco_response_handler(conn, stanza, userdata);
+        return _caps_response_handler(conn, stanza, userdata);
 
-    // handle disco requests
+    // handle caps requests
     } else if (stanza_is_caps_request(stanza)) {
-        return _disco_request_handler(conn, stanza, userdata);
+        return _caps_request_handler(conn, stanza, userdata);
 
     } else if (stanza_is_version_request(stanza)) {
         return _version_request_handler(conn, stanza, userdata);
@@ -1006,7 +1006,7 @@ _version_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_disco_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_caps_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
@@ -1033,7 +1033,7 @@ _disco_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_disco_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     char *type = xmpp_stanza_get_type(stanza);
