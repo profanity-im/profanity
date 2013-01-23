@@ -1025,6 +1025,8 @@ _disco_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
         xmpp_stanza_add_child(response, query);
         xmpp_send(conn, response);
+
+        xmpp_stanza_release(response);
     }
 
     return 1;
