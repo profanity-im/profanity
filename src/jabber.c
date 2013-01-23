@@ -1062,8 +1062,14 @@ _disco_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             if (g_strcmp0(given_sha1, generated_sha1) != 0) {
                 log_info("Invalid SHA1 recieved for caps.");
+                FREE_SET_NULL(generated_sha1);
+                g_strfreev(split);
+
                 return 1;
             }
+            FREE_SET_NULL(generated_sha1);
+            g_strfreev(split);
+
         // non supported hash, or legacy caps
         } else {
             caps_key = id + 6;
