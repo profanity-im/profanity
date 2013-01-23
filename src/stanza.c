@@ -536,7 +536,7 @@ stanza_get_caps_str(xmpp_stanza_t * const stanza)
 }
 
 DataForm *
-stanza_get_form(xmpp_stanza_t * const stanza)
+stanza_create_form(xmpp_stanza_t * const stanza)
 {
     DataForm *result = NULL;
 
@@ -568,7 +568,7 @@ stanza_get_form(xmpp_stanza_t * const stanza)
             // handle values
             while (value != NULL) {
                 char *text = xmpp_stanza_get_text(value);
-                field->values = g_slist_insert_sorted(field->values, text, (GCompareFunc)octet_compare);
+                field->values = g_slist_insert_sorted(field->values, strdup(text), (GCompareFunc)octet_compare);
                 value = xmpp_stanza_get_next(value);
             }
 

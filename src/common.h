@@ -44,6 +44,12 @@
     } \
 }
 
+#define GFREE_SET_NULL(resource) \
+{ \
+    g_free(resource); \
+    resource = NULL; \
+}
+
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void create_dir(char *name);
 char * str_replace(const char *string, const char *substr,
