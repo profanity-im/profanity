@@ -815,6 +815,14 @@ _iq_handler(xmpp_conn_t * const conn,
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
+    if (g_strcmp0(type, "error")) {
+        if (id != NULL) {
+            log_error("IQ error received, id: %s.", id);
+        } else {
+            log_error("IQ error recieved.");
+        }
+    }
+
     // handle the initial roster request
     if (g_strcmp0(id, "roster") == 0) {
         return _roster_handler(conn, stanza, ctx, id, type, from);
@@ -926,39 +934,35 @@ _roster_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     xmpp_stanza_t *query, *item;
 
-    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0)
-        log_error("Roster query failed");
-    else {
-        query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        item = xmpp_stanza_get_children(query);
+    query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    item = xmpp_stanza_get_children(query);
 
-        while (item != NULL) {
-            const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-            const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
-            const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+    while (item != NULL) {
+        const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+        const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
+        const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
 
-            gboolean pending_out = FALSE;
-            const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-            if (g_strcmp0(ask, "subscribe") == 0) {
-                pending_out = TRUE;
-            }
-
-            gboolean added = contact_list_add(jid, name, "offline", NULL, sub,
-                pending_out);
-
-            if (!added) {
-                log_warning("Attempt to add contact twice: %s", jid);
-            }
-
-            item = xmpp_stanza_get_next(item);
+        gboolean pending_out = FALSE;
+        const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
+        if (g_strcmp0(ask, "subscribe") == 0) {
+            pending_out = TRUE;
         }
 
-        /* TODO: Save somehow last presence show and use it for initial
-         *       presence rather than PRESENCE_ONLINE. It will be helpful
-         *       when I set dnd status and reconnect for some reason */
-        // send initial presence
-        jabber_update_presence(PRESENCE_ONLINE, NULL, 0);
+        gboolean added = contact_list_add(jid, name, "offline", NULL, sub,
+            pending_out);
+
+        if (!added) {
+            log_warning("Attempt to add contact twice: %s", jid);
+        }
+
+        item = xmpp_stanza_get_next(item);
     }
+
+    /* TODO: Save somehow last presence show and use it for initial
+     *       presence rather than PRESENCE_ONLINE. It will be helpful
+     *       when I set dnd status and reconnect for some reason */
+    // send initial presence
+    jabber_update_presence(PRESENCE_ONLINE, NULL, 0);
 
     return 1;
 }
@@ -1039,74 +1043,69 @@ _caps_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_ctx_t * ctx, const char * const id, const char * const type,
     const char * const from)
 {
-    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
-        log_error("Roster query failed");
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
+    if (node == NULL) {
         return 1;
-    } else {
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
-        if (node == NULL) {
-            return 1;
-        }
+    }
 
-        char *caps_key = NULL;
+    char *caps_key = NULL;
 
-        // xep-0115
-        if (g_strcmp0(id, "disco") == 0) {
-            caps_key = strdup(node);
+    // xep-0115
+    if (g_strcmp0(id, "disco") == 0) {
+        caps_key = strdup(node);
 
-            // validate sha1
-            gchar **split = g_strsplit(node, "#", -1);
-            char *given_sha1 = split[1];
-            char *generated_sha1 = caps_create_sha1_str(query);
+        // validate sha1
+        gchar **split = g_strsplit(node, "#", -1);
+        char *given_sha1 = split[1];
+        char *generated_sha1 = caps_create_sha1_str(query);
 
-            if (g_strcmp0(given_sha1, generated_sha1) != 0) {
-                log_info("Invalid SHA1 recieved for caps.");
-                FREE_SET_NULL(generated_sha1);
-                g_strfreev(split);
-
-                return 1;
-            }
+        if (g_strcmp0(given_sha1, generated_sha1) != 0) {
+            log_info("Invalid SHA1 recieved for caps.");
             FREE_SET_NULL(generated_sha1);
             g_strfreev(split);
 
-        // non supported hash, or legacy caps
-        } else {
-            caps_key = strdup(id + 6);
-        }
-
-        // already cached
-        if (caps_contains(caps_key)) {
-            log_info("Client info already cached.");
             return 1;
         }
+        FREE_SET_NULL(generated_sha1);
+        g_strfreev(split);
 
-        xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
+    // non supported hash, or legacy caps
+    } else {
+        caps_key = strdup(id + 6);
+    }
 
-        if (identity == NULL) {
-            return 1;
-        }
-
-        const char *category = xmpp_stanza_get_attribute(identity, "category");
-        if (category == NULL) {
-            return 1;
-        }
-
-        if (strcmp(category, "client") != 0) {
-            return 1;
-        }
-
-        const char *name = xmpp_stanza_get_attribute(identity, "name");
-        if (name == 0) {
-            return 1;
-        }
-
-        caps_add(caps_key, name);
-
-        free(caps_key);
-
+    // already cached
+    if (caps_contains(caps_key)) {
+        log_info("Client info already cached.");
         return 1;
     }
+
+    xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
+
+    if (identity == NULL) {
+        return 1;
+    }
+
+    const char *category = xmpp_stanza_get_attribute(identity, "category");
+    if (category == NULL) {
+        return 1;
+    }
+
+    if (strcmp(category, "client") != 0) {
+        return 1;
+    }
+
+    const char *name = xmpp_stanza_get_attribute(identity, "name");
+    if (name == 0) {
+        return 1;
+    }
+
+    caps_add(caps_key, name);
+
+    free(caps_key);
+
+    return 1;
 }
 
 static int
