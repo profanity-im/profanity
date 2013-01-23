@@ -426,12 +426,14 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     xmpp_stanza_t *caps = xmpp_stanza_new(jabber_conn.ctx);
     xmpp_stanza_set_name(caps, STANZA_NAME_C);
     xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
+    xmpp_stanza_t *query = caps_create_query_response_stanza(jabber_conn.ctx);
+
+    char *sha1 = caps_create_sha1_str(query);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "http://www.profanity.im");
-    xmpp_stanza_t *query = caps_create_query_response_stanza(jabber_conn.ctx);
-    char *sha1 = caps_create_sha1_str(query);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_VER, sha1);
     xmpp_stanza_add_child(presence, caps);
+
     xmpp_send(jabber_conn.conn, presence);
 
     // send presence for each room
@@ -449,6 +451,8 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     g_list_free(rooms);
 
     xmpp_stanza_release(presence);
+
+    FREE_SET_NULL(sha1);
 }
 
 void
@@ -994,6 +998,8 @@ _version_request_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_add_child(response, query);
 
         xmpp_send(conn, response);
+
+        xmpp_stanza_release(response);
     }
 
     return 1;
