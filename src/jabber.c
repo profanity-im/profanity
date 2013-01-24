@@ -807,6 +807,19 @@ _connection_handler(xmpp_conn_t * const conn,
 }
 
 static int
+_iq_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    xmpp_ctx_t * const ctx, const char * const id, const char * const from)
+{
+    if (id != NULL) {
+        log_error("IQ error received, id: %s.", id);
+    } else {
+        log_error("IQ error recieved.");
+    }
+
+    return 1;
+}
+
+static int
 _iq_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
@@ -815,14 +828,22 @@ _iq_handler(xmpp_conn_t * const conn,
     char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (g_strcmp0(type, "error")) {
-        if (id != NULL) {
-            log_error("IQ error received, id: %s.", id);
-        } else {
-            log_error("IQ error recieved.");
-        }
+    if (g_strcmp0(type, "error") == 0) {
+        return _iq_error_handler(conn, stanza, ctx, id, from);
+    }
+/*
+    if (g_strcmp0(type, "get") == 0) {
+        return _iq_get_handler(conn, stanza, ctx, id, from);
     }
 
+    if (g_strcmp0(type, "set") == 0) {
+        return _iq_set_handler(conn, stanza, ctx, id, from);
+    }
+
+    if (g_strcmp0(type, "result") == 0) {
+        return _iq_result_handler(conn, stanza, ctx, id, from);
+    }
+*/
     // handle the initial roster request
     if (g_strcmp0(id, "roster") == 0) {
         return _roster_handler(conn, stanza, ctx, id, type, from);
