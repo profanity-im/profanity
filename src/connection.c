@@ -30,7 +30,6 @@
 #include "chat_session.h"
 #include "common.h"
 #include "contact_list.h"
-#include "iq.h"
 #include "jabber.h"
 #include "jid.h"
 #include "log.h"
