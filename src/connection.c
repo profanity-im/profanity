@@ -740,7 +740,8 @@ _connection_handler(xmpp_conn_t * const conn,
 
         xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
         xmpp_handler_add(conn, _presence_handler, NULL, STANZA_NAME_PRESENCE, NULL, ctx);
-        xmpp_handler_add(conn, iq_handler, NULL, STANZA_NAME_IQ, NULL, ctx);
+
+        iq_add_handlers(conn, ctx);
 
         if (prefs_get_autoping() != 0) {
             int millis = prefs_get_autoping() * 1000;

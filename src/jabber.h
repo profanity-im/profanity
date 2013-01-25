@@ -84,7 +84,6 @@ void jabber_free_resources(void);
 void jabber_restart(void);
 void jabber_set_autoping(int seconds);
 
-int iq_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata);
+void iq_add_handlers(xmpp_conn_t * const conn, xmpp_ctx_t * const ctx);
 
 #endif
