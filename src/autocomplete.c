@@ -1,5 +1,5 @@
 /*
- * prof_autocomplete.c
+ * autocomplete.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -23,20 +23,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "prof_autocomplete.h"
+#include "autocomplete.h"
 
-struct p_autocomplete_t {
+struct autocomplete_t {
     GSList *items;
     GSList *last_found;
     gchar *search_str;
 };
 
-static gchar * _search_from(PAutocomplete ac, GSList *curr);
+static gchar * _search_from(Autocomplete ac, GSList *curr);
 
-PAutocomplete
-p_autocomplete_new(void)
+Autocomplete
+autocomplete_new(void)
 {
-    PAutocomplete new = malloc(sizeof(struct p_autocomplete_t));
+    Autocomplete new = malloc(sizeof(struct autocomplete_t));
     new->items = NULL;
     new->last_found = NULL;
     new->search_str = NULL;
@@ -45,16 +45,16 @@ p_autocomplete_new(void)
 }
 
 void
-p_autocomplete_clear(PAutocomplete ac)
+autocomplete_clear(Autocomplete ac)
 {
     g_slist_free_full(ac->items, free);
     ac->items = NULL;
 
-    p_autocomplete_reset(ac);
+    autocomplete_reset(ac);
 }
 
 void
-p_autocomplete_reset(PAutocomplete ac)
+autocomplete_reset(Autocomplete ac)
 {
     ac->last_found = NULL;
     if (ac->search_str != NULL) {
@@ -64,15 +64,15 @@ p_autocomplete_reset(PAutocomplete ac)
 }
 
 void
-p_autocomplete_free(PAutocomplete ac)
+autocomplete_free(Autocomplete ac)
 {
-    p_autocomplete_clear(ac);
+    autocomplete_clear(ac);
     g_free(ac);
     ac = NULL;
 }
 
 gboolean
-p_autocomplete_add(PAutocomplete ac, void *item)
+autocomplete_add(Autocomplete ac, void *item)
 {
     if (ac->items == NULL) {
         ac->items = g_slist_append(ac->items, item);
@@ -111,7 +111,7 @@ p_autocomplete_add(PAutocomplete ac, void *item)
 }
 
 gboolean
-p_autocomplete_remove(PAutocomplete ac, const char * const item)
+autocomplete_remove(Autocomplete ac, const char * const item)
 {
     // reset last found if it points to the item to be removed
     if (ac->last_found != NULL)
@@ -140,7 +140,7 @@ p_autocomplete_remove(PAutocomplete ac, const char * const item)
 }
 
 GSList *
-p_autocomplete_get_list(PAutocomplete ac)
+autocomplete_get_list(Autocomplete ac)
 {
     GSList *copy = NULL;
     GSList *curr = ac->items;
@@ -154,7 +154,7 @@ p_autocomplete_get_list(PAutocomplete ac)
 }
 
 gchar *
-p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
+autocomplete_complete(Autocomplete ac, gchar *search_str)
 {
     gchar *found = NULL;
 
@@ -184,13 +184,13 @@ p_autocomplete_complete(PAutocomplete ac, gchar *search_str)
             return found;
 
         // we found nothing, reset search
-        p_autocomplete_reset(ac);
+        autocomplete_reset(ac);
         return NULL;
     }
 }
 
 static gchar *
-_search_from(PAutocomplete ac, GSList *curr)
+_search_from(Autocomplete ac, GSList *curr)
 {
     while(curr) {
 

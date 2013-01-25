@@ -40,7 +40,7 @@
 #include "log.h"
 #include "parser.h"
 #include "preferences.h"
-#include "prof_autocomplete.h"
+#include "autocomplete.h"
 #include "profanity.h"
 #include "muc.h"
 #include "theme.h"
@@ -84,7 +84,7 @@ static void _account_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
 static void _parameter_autocomplete_with_ac(char *input, int *size, char *command,
-    PAutocomplete ac);
+    Autocomplete ac);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
 gchar** _cmd_parse_args(const char * const inp, int min, int max, int *num);
@@ -632,19 +632,19 @@ static struct cmd_t presence_commands[] =
           NULL } } },
 };
 
-static PAutocomplete commands_ac;
-static PAutocomplete who_ac;
-static PAutocomplete help_ac;
-static PAutocomplete notify_ac;
-static PAutocomplete prefs_ac;
-static PAutocomplete sub_ac;
-static PAutocomplete log_ac;
-static PAutocomplete autoaway_ac;
-static PAutocomplete autoaway_mode_ac;
-static PAutocomplete titlebar_ac;
-static PAutocomplete theme_ac;
-static PAutocomplete theme_load_ac;
-static PAutocomplete account_ac;
+static Autocomplete commands_ac;
+static Autocomplete who_ac;
+static Autocomplete help_ac;
+static Autocomplete notify_ac;
+static Autocomplete prefs_ac;
+static Autocomplete sub_ac;
+static Autocomplete log_ac;
+static Autocomplete autoaway_ac;
+static Autocomplete autoaway_mode_ac;
+static Autocomplete titlebar_ac;
+static Autocomplete theme_ac;
+static Autocomplete theme_load_ac;
+static Autocomplete account_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -654,93 +654,93 @@ cmd_init(void)
 {
     log_info("Initialising commands");
 
-    commands_ac = p_autocomplete_new();
-    who_ac = p_autocomplete_new();
+    commands_ac = autocomplete_new();
+    who_ac = autocomplete_new();
 
-    prefs_ac = p_autocomplete_new();
-    p_autocomplete_add(prefs_ac, strdup("ui"));
-    p_autocomplete_add(prefs_ac, strdup("desktop"));
-    p_autocomplete_add(prefs_ac, strdup("chat"));
-    p_autocomplete_add(prefs_ac, strdup("log"));
-    p_autocomplete_add(prefs_ac, strdup("conn"));
-    p_autocomplete_add(prefs_ac, strdup("presence"));
+    prefs_ac = autocomplete_new();
+    autocomplete_add(prefs_ac, strdup("ui"));
+    autocomplete_add(prefs_ac, strdup("desktop"));
+    autocomplete_add(prefs_ac, strdup("chat"));
+    autocomplete_add(prefs_ac, strdup("log"));
+    autocomplete_add(prefs_ac, strdup("conn"));
+    autocomplete_add(prefs_ac, strdup("presence"));
 
-    help_ac = p_autocomplete_new();
-    p_autocomplete_add(help_ac, strdup("list"));
-    p_autocomplete_add(help_ac, strdup("basic"));
-    p_autocomplete_add(help_ac, strdup("presence"));
-    p_autocomplete_add(help_ac, strdup("settings"));
-    p_autocomplete_add(help_ac, strdup("navigation"));
+    help_ac = autocomplete_new();
+    autocomplete_add(help_ac, strdup("list"));
+    autocomplete_add(help_ac, strdup("basic"));
+    autocomplete_add(help_ac, strdup("presence"));
+    autocomplete_add(help_ac, strdup("settings"));
+    autocomplete_add(help_ac, strdup("navigation"));
 
-    notify_ac = p_autocomplete_new();
-    p_autocomplete_add(notify_ac, strdup("message"));
-    p_autocomplete_add(notify_ac, strdup("typing"));
-    p_autocomplete_add(notify_ac, strdup("remind"));
-    p_autocomplete_add(notify_ac, strdup("status"));
+    notify_ac = autocomplete_new();
+    autocomplete_add(notify_ac, strdup("message"));
+    autocomplete_add(notify_ac, strdup("typing"));
+    autocomplete_add(notify_ac, strdup("remind"));
+    autocomplete_add(notify_ac, strdup("status"));
 
-    sub_ac = p_autocomplete_new();
-    p_autocomplete_add(sub_ac, strdup("request"));
-    p_autocomplete_add(sub_ac, strdup("allow"));
-    p_autocomplete_add(sub_ac, strdup("deny"));
-    p_autocomplete_add(sub_ac, strdup("show"));
-    p_autocomplete_add(sub_ac, strdup("sent"));
-    p_autocomplete_add(sub_ac, strdup("received"));
+    sub_ac = autocomplete_new();
+    autocomplete_add(sub_ac, strdup("request"));
+    autocomplete_add(sub_ac, strdup("allow"));
+    autocomplete_add(sub_ac, strdup("deny"));
+    autocomplete_add(sub_ac, strdup("show"));
+    autocomplete_add(sub_ac, strdup("sent"));
+    autocomplete_add(sub_ac, strdup("received"));
 
-    titlebar_ac = p_autocomplete_new();
-    p_autocomplete_add(titlebar_ac, strdup("version"));
+    titlebar_ac = autocomplete_new();
+    autocomplete_add(titlebar_ac, strdup("version"));
 
-    log_ac = p_autocomplete_new();
-    p_autocomplete_add(log_ac, strdup("maxsize"));
+    log_ac = autocomplete_new();
+    autocomplete_add(log_ac, strdup("maxsize"));
 
-    autoaway_ac = p_autocomplete_new();
-    p_autocomplete_add(autoaway_ac, strdup("mode"));
-    p_autocomplete_add(autoaway_ac, strdup("time"));
-    p_autocomplete_add(autoaway_ac, strdup("message"));
-    p_autocomplete_add(autoaway_ac, strdup("check"));
+    autoaway_ac = autocomplete_new();
+    autocomplete_add(autoaway_ac, strdup("mode"));
+    autocomplete_add(autoaway_ac, strdup("time"));
+    autocomplete_add(autoaway_ac, strdup("message"));
+    autocomplete_add(autoaway_ac, strdup("check"));
 
-    autoaway_mode_ac = p_autocomplete_new();
-    p_autocomplete_add(autoaway_mode_ac, strdup("away"));
-    p_autocomplete_add(autoaway_mode_ac, strdup("idle"));
-    p_autocomplete_add(autoaway_mode_ac, strdup("off"));
+    autoaway_mode_ac = autocomplete_new();
+    autocomplete_add(autoaway_mode_ac, strdup("away"));
+    autocomplete_add(autoaway_mode_ac, strdup("idle"));
+    autocomplete_add(autoaway_mode_ac, strdup("off"));
 
-    theme_ac = p_autocomplete_new();
-    p_autocomplete_add(theme_ac, strdup("list"));
-    p_autocomplete_add(theme_ac, strdup("set"));
+    theme_ac = autocomplete_new();
+    autocomplete_add(theme_ac, strdup("list"));
+    autocomplete_add(theme_ac, strdup("set"));
 
-    account_ac = p_autocomplete_new();
-    p_autocomplete_add(account_ac, strdup("list"));
-    p_autocomplete_add(account_ac, strdup("show"));
-    p_autocomplete_add(account_ac, strdup("add"));
-    p_autocomplete_add(account_ac, strdup("enable"));
-    p_autocomplete_add(account_ac, strdup("disable"));
-    p_autocomplete_add(account_ac, strdup("rename"));
-    p_autocomplete_add(account_ac, strdup("set"));
+    account_ac = autocomplete_new();
+    autocomplete_add(account_ac, strdup("list"));
+    autocomplete_add(account_ac, strdup("show"));
+    autocomplete_add(account_ac, strdup("add"));
+    autocomplete_add(account_ac, strdup("enable"));
+    autocomplete_add(account_ac, strdup("disable"));
+    autocomplete_add(account_ac, strdup("rename"));
+    autocomplete_add(account_ac, strdup("set"));
 
     theme_load_ac = NULL;
 
     unsigned int i;
     for (i = 0; i < ARRAY_SIZE(main_commands); i++) {
         struct cmd_t *pcmd = main_commands+i;
-        p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
-        p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
+        autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
+        autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
     for (i = 0; i < ARRAY_SIZE(setting_commands); i++) {
         struct cmd_t *pcmd = setting_commands+i;
-        p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
-        p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
+        autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
+        autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
     for (i = 0; i < ARRAY_SIZE(presence_commands); i++) {
         struct cmd_t *pcmd = presence_commands+i;
-        p_autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
-        p_autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
-        p_autocomplete_add(who_ac, (gchar *)strdup(pcmd->cmd+1));
+        autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
+        autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
+        autocomplete_add(who_ac, (gchar *)strdup(pcmd->cmd+1));
     }
 
-    p_autocomplete_add(who_ac, strdup("offline"));
-    p_autocomplete_add(who_ac, strdup("available"));
-    p_autocomplete_add(who_ac, strdup("unavailable"));
+    autocomplete_add(who_ac, strdup("offline"));
+    autocomplete_add(who_ac, strdup("available"));
+    autocomplete_add(who_ac, strdup("unavailable"));
 
     history_init();
 }
@@ -748,20 +748,20 @@ cmd_init(void)
 void
 cmd_close(void)
 {
-    p_autocomplete_free(commands_ac);
-    p_autocomplete_free(who_ac);
-    p_autocomplete_free(help_ac);
-    p_autocomplete_free(notify_ac);
-    p_autocomplete_free(sub_ac);
-    p_autocomplete_free(log_ac);
-    p_autocomplete_free(prefs_ac);
-    p_autocomplete_free(autoaway_ac);
-    p_autocomplete_free(autoaway_mode_ac);
-    p_autocomplete_free(theme_ac);
+    autocomplete_free(commands_ac);
+    autocomplete_free(who_ac);
+    autocomplete_free(help_ac);
+    autocomplete_free(notify_ac);
+    autocomplete_free(sub_ac);
+    autocomplete_free(log_ac);
+    autocomplete_free(prefs_ac);
+    autocomplete_free(autoaway_ac);
+    autocomplete_free(autoaway_mode_ac);
+    autocomplete_free(theme_ac);
     if (theme_load_ac != NULL) {
-        p_autocomplete_free(theme_load_ac);
+        autocomplete_free(theme_load_ac);
     }
-    p_autocomplete_free(account_ac);
+    autocomplete_free(account_ac);
 }
 
 // Command autocompletion functions
@@ -779,7 +779,7 @@ cmd_autocomplete(char *input, int *size)
             inp_cpy[i] = input[i];
         }
         inp_cpy[i] = '\0';
-        found = p_autocomplete_complete(commands_ac, inp_cpy);
+        found = autocomplete_complete(commands_ac, inp_cpy);
         if (found != NULL) {
             auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
             strcpy(auto_msg, found);
@@ -801,29 +801,29 @@ cmd_reset_autocomplete()
     accounts_reset_all_search();
     accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
-    p_autocomplete_reset(help_ac);
-    p_autocomplete_reset(notify_ac);
-    p_autocomplete_reset(sub_ac);
+    autocomplete_reset(help_ac);
+    autocomplete_reset(notify_ac);
+    autocomplete_reset(sub_ac);
 
     if (win_current_is_groupchat()) {
-        PAutocomplete nick_ac = muc_get_roster_ac(win_current_get_recipient());
+        Autocomplete nick_ac = muc_get_roster_ac(win_current_get_recipient());
         if (nick_ac != NULL) {
-            p_autocomplete_reset(nick_ac);
+            autocomplete_reset(nick_ac);
         }
     }
 
-    p_autocomplete_reset(who_ac);
-    p_autocomplete_reset(prefs_ac);
-    p_autocomplete_reset(log_ac);
-    p_autocomplete_reset(commands_ac);
-    p_autocomplete_reset(autoaway_ac);
-    p_autocomplete_reset(autoaway_mode_ac);
-    p_autocomplete_reset(theme_ac);
+    autocomplete_reset(who_ac);
+    autocomplete_reset(prefs_ac);
+    autocomplete_reset(log_ac);
+    autocomplete_reset(commands_ac);
+    autocomplete_reset(autoaway_ac);
+    autocomplete_reset(autoaway_mode_ac);
+    autocomplete_reset(theme_ac);
     if (theme_load_ac != NULL) {
-        p_autocomplete_reset(theme_load_ac);
+        autocomplete_reset(theme_load_ac);
         theme_load_ac = NULL;
     }
-    p_autocomplete_reset(account_ac);
+    autocomplete_reset(account_ac);
 }
 
 GSList *
@@ -954,7 +954,7 @@ _cmd_complete_parameters(char *input, int *size)
         prefs_autocomplete_boolean_choice);
 
     if (win_current_is_groupchat()) {
-        PAutocomplete nick_ac = muc_get_roster_ac(win_current_get_recipient());
+        Autocomplete nick_ac = muc_get_roster_ac(win_current_get_recipient());
         if (nick_ac != NULL) {
             _parameter_autocomplete_with_ac(input, size, "/msg", nick_ac);
             _parameter_autocomplete_with_ac(input, size, "/info", nick_ac);
@@ -2394,7 +2394,7 @@ _parameter_autocomplete(char *input, int *size, char *command,
 
 static void
 _parameter_autocomplete_with_ac(char *input, int *size, char *command,
-    PAutocomplete ac)
+    Autocomplete ac)
 {
     char *found = NULL;
     char *auto_msg = NULL;
@@ -2408,7 +2408,7 @@ _parameter_autocomplete_with_ac(char *input, int *size, char *command,
             inp_cpy[i-len] = input[i];
         }
         inp_cpy[(*size) - len] = '\0';
-        found = p_autocomplete_complete(ac, inp_cpy);
+        found = autocomplete_complete(ac, inp_cpy);
         if (found != NULL) {
             auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
             strcpy(auto_msg, command_cpy);
@@ -2523,14 +2523,14 @@ _theme_autocomplete(char *input, int *size)
 {
     if ((strncmp(input, "/theme set ", 11) == 0) && (*size > 11)) {
         if (theme_load_ac == NULL) {
-            theme_load_ac = p_autocomplete_new();
+            theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
             while (themes != NULL) {
-                p_autocomplete_add(theme_load_ac, strdup(themes->data));
+                autocomplete_add(theme_load_ac, strdup(themes->data));
                 themes = g_slist_next(themes);
             }
             g_slist_free(themes);
-            p_autocomplete_add(theme_load_ac, "default");
+            autocomplete_add(theme_load_ac, "default");
          }
         _parameter_autocomplete_with_ac(input, size, "/theme set", theme_load_ac);
     } else if ((strncmp(input, "/theme ", 7) == 0) && (*size > 7)) {

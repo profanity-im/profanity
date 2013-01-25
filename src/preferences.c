@@ -35,13 +35,13 @@
 #include "files.h"
 #include "log.h"
 #include "preferences.h"
-#include "prof_autocomplete.h"
+#include "autocomplete.h"
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
 
-static PAutocomplete boolean_choice_ac;
+static Autocomplete boolean_choice_ac;
 
 static void _save_prefs(void);
 
@@ -64,28 +64,28 @@ prefs_load(void)
         g_error_free(err);
     }
 
-    boolean_choice_ac = p_autocomplete_new();
-    p_autocomplete_add(boolean_choice_ac, strdup("on"));
-    p_autocomplete_add(boolean_choice_ac, strdup("off"));
+    boolean_choice_ac = autocomplete_new();
+    autocomplete_add(boolean_choice_ac, strdup("on"));
+    autocomplete_add(boolean_choice_ac, strdup("off"));
 }
 
 void
 prefs_close(void)
 {
-    p_autocomplete_free(boolean_choice_ac);
+    autocomplete_free(boolean_choice_ac);
     g_key_file_free(prefs);
 }
 
 char *
 prefs_autocomplete_boolean_choice(char *prefix)
 {
-    return p_autocomplete_complete(boolean_choice_ac, prefix);
+    return autocomplete_complete(boolean_choice_ac, prefix);
 }
 
 void
 prefs_reset_boolean_choice(void)
 {
-    p_autocomplete_reset(boolean_choice_ac);
+    autocomplete_reset(boolean_choice_ac);
 }
 
 gboolean

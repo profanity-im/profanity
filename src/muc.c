@@ -27,7 +27,7 @@
 
 #include "contact.h"
 #include "jid.h"
-#include "prof_autocomplete.h"
+#include "autocomplete.h"
 
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
@@ -35,7 +35,7 @@ typedef struct _muc_room_t {
     char *subject;
     gboolean pending_nick_change;
     GHashTable *roster;
-    PAutocomplete nick_ac;
+    Autocomplete nick_ac;
     GHashTable *nick_changes;
     gboolean roster_received;
 } ChatRoom;
@@ -61,7 +61,7 @@ muc_join_room(const char * const room, const char * const nick)
     new_room->subject = NULL;
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
-    new_room->nick_ac = p_autocomplete_new();
+    new_room->nick_ac = autocomplete_new();
     new_room->nick_changes = g_hash_table_new_full(g_str_hash, g_str_equal,
         g_free, g_free);
     new_room->roster_received = FALSE;
@@ -215,7 +215,7 @@ muc_add_to_roster(const char * const room, const char * const nick,
 
         if (old == NULL) {
             updated = TRUE;
-            p_autocomplete_add(chat_room->nick_ac, strdup(nick));
+            autocomplete_add(chat_room->nick_ac, strdup(nick));
         } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
                     (g_strcmp0(p_contact_status(old), status) != 0)) {
             updated = TRUE;
@@ -237,7 +237,7 @@ muc_remove_from_roster(const char * const room, const char * const nick)
 
     if (chat_room != NULL) {
         g_hash_table_remove(chat_room->roster, nick);
-        p_autocomplete_remove(chat_room->nick_ac, nick);
+        autocomplete_remove(chat_room->nick_ac, nick);
     }
 }
 
@@ -271,9 +271,9 @@ muc_get_roster(const char * const room)
 }
 
 /*
- * Return a PAutocomplete representing the room member's in the roster
+ * Return a Autocomplete representing the room member's in the roster
  */
-PAutocomplete
+Autocomplete
 muc_get_roster_ac(const char * const room)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
@@ -377,7 +377,7 @@ _free_room(ChatRoom *room)
             room->roster = NULL;
         }
         if (room->nick_ac != NULL) {
-            p_autocomplete_free(room->nick_ac);
+            autocomplete_free(room->nick_ac);
         }
         if (room->nick_changes != NULL) {
             g_hash_table_remove_all(room->nick_changes);

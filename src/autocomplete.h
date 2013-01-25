@@ -1,5 +1,5 @@
 /*
- * prof_autocomplete.h
+ * autocomplete.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,26 +20,26 @@
  *
  */
 
-#ifndef PROF_AUTOCOMPLETE_H
-#define PROF_AUTOCOMPLETE_H
+#ifndef AUTOCOMPLETE_H
+#define AUTOCOMPLETE_H
 
 #include <glib.h>
 
-typedef struct p_autocomplete_t *PAutocomplete;
+typedef struct autocomplete_t *Autocomplete;
 typedef const char * (*PStrFunc)(const void *obj);
 typedef void * (*PCopyFunc)(const void *obj);
 typedef int (*PEqualFunc)(const void *o1, const void *o2);
 typedef int (*PEqualDeepFunc)(const void *o1, const void *o2);
 
-PAutocomplete p_autocomplete_new(void);
-PAutocomplete p_obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
+Autocomplete autocomplete_new(void);
+Autocomplete obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
     PEqualDeepFunc equal_deep_func, GDestroyNotify free_func);
-void p_autocomplete_clear(PAutocomplete ac);
-void p_autocomplete_reset(PAutocomplete ac);
-void p_autocomplete_free(PAutocomplete ac);
-gboolean p_autocomplete_add(PAutocomplete ac, void *item);
-gboolean p_autocomplete_remove(PAutocomplete ac, const char * const item);
-GSList * p_autocomplete_get_list(PAutocomplete ac);
-gchar * p_autocomplete_complete(PAutocomplete ac, gchar *search_str);
+void autocomplete_clear(Autocomplete ac);
+void autocomplete_reset(Autocomplete ac);
+void autocomplete_free(Autocomplete ac);
+gboolean autocomplete_add(Autocomplete ac, void *item);
+gboolean autocomplete_remove(Autocomplete ac, const char * const item);
+GSList * autocomplete_get_list(Autocomplete ac);
+gchar * autocomplete_complete(Autocomplete ac, gchar *search_str);
 
 #endif

@@ -25,9 +25,9 @@
 #include <glib.h>
 
 #include "contact.h"
-#include "prof_autocomplete.h"
+#include "autocomplete.h"
 
-static PAutocomplete ac;
+static Autocomplete ac;
 static GHashTable *contacts;
 
 static gboolean _key_equals(void *key1, void *key2);
@@ -36,7 +36,7 @@ static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 void
 contact_list_init(void)
 {
-    ac = p_autocomplete_new();
+    ac = autocomplete_new();
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
 }
@@ -44,20 +44,20 @@ contact_list_init(void)
 void
 contact_list_clear(void)
 {
-    p_autocomplete_clear(ac);
+    autocomplete_clear(ac);
     g_hash_table_remove_all(contacts);
 }
 
 void
 contact_list_free()
 {
-    p_autocomplete_free(ac);
+    autocomplete_free(ac);
 }
 
 void
 contact_list_reset_search_attempts(void)
 {
-    p_autocomplete_reset(ac);
+    autocomplete_reset(ac);
 }
 
 gboolean
@@ -72,7 +72,7 @@ contact_list_add(const char * const jid, const char * const name,
         contact = p_contact_new(jid, name, presence, status, subscription,
             pending_out, NULL);
         g_hash_table_insert(contacts, strdup(jid), contact);
-        p_autocomplete_add(ac, strdup(jid));
+        autocomplete_add(ac, strdup(jid));
         added = TRUE;
     }
 
@@ -172,7 +172,7 @@ get_contact_list(void)
 char *
 contact_list_find_contact(char *search_str)
 {
-    return p_autocomplete_complete(ac, search_str);
+    return autocomplete_complete(ac, search_str);
 }
 
 PContact
