@@ -105,13 +105,15 @@ jid_create_room_jid(const char * const room, const char * const nick)
 void
 jid_destroy(Jid *jid)
 {
-    FREE_SET_NULL(jid->str);
-    FREE_SET_NULL(jid->localpart);
-    FREE_SET_NULL(jid->domainpart);
-    FREE_SET_NULL(jid->resourcepart);
-    FREE_SET_NULL(jid->barejid);
-    FREE_SET_NULL(jid->fulljid);
-    FREE_SET_NULL(jid);
+    if (jid != NULL) {
+        FREE_SET_NULL(jid->str);
+        FREE_SET_NULL(jid->localpart);
+        FREE_SET_NULL(jid->domainpart);
+        FREE_SET_NULL(jid->resourcepart);
+        FREE_SET_NULL(jid->barejid);
+        FREE_SET_NULL(jid->fulljid);
+        FREE_SET_NULL(jid);
+    }
 }
 
 gboolean
