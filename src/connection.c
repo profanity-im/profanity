@@ -190,6 +190,7 @@ jabber_process_events(void)
             if (g_timer_elapsed(reconnect_timer, NULL) > prefs_get_reconnect()) {
                 log_debug("Attempting reconnect as %s", saved_user.jid);
                 jabber_connect(saved_user.jid, saved_user.passwd, saved_user.altdomain);
+                g_timer_start(reconnect_timer);
             }
         }
     }
