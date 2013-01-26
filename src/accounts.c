@@ -26,9 +26,10 @@
 #include <glib.h>
 
 #include "accounts.h"
-#include "files.h"
-#include "log.h"
 #include "autocomplete.h"
+#include "files.h"
+#include "jid.h"
+#include "log.h"
 
 static gchar *accounts_loc;
 static GKeyFile *accounts;
@@ -102,26 +103,48 @@ accounts_reset_enabled_search(void)
 }
 
 void
-accounts_add_login(const char *jid, const char *altdomain)
+accounts_add_login(const char *account_name, const char *altdomain)
 {
+    const char *barejid = account_name;
+    const char *resource = NULL;
+
+    Jid *jid = jid_create(account_name);
+
+    if (jid != NULL) {
+        barejid = jid->barejid;
+        resource = jid->resourcepart;
+    }
+
     // doesn't yet exist
-    if (!g_key_file_has_group(accounts, jid)) {
-        g_key_file_set_boolean(accounts, jid, "enabled", TRUE);
-        g_key_file_set_string(accounts, jid, "jid", jid);
+    if (!g_key_file_has_group(accounts, account_name)) {
+        g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
+        g_key_file_set_string(accounts, account_name, "jid", barejid);
+        if (resource != NULL) {
+            g_key_file_set_string(accounts, account_name, "resource", resource);
+        } else {
+            g_key_file_set_string(accounts, account_name, "resource", "profanity");
+        }
+
         if (altdomain != NULL) {
-            g_key_file_set_string(accounts, jid, "server", altdomain);
+            g_key_file_set_string(accounts, account_name, "server", altdomain);
         }
 
         _save_accounts();
-        autocomplete_add(all_ac, strdup(jid));
-        autocomplete_add(enabled_ac, strdup(jid));
+        autocomplete_add(all_ac, strdup(account_name));
+        autocomplete_add(enabled_ac, strdup(account_name));
 
     // already exists, update old style accounts
     } else {
-        g_key_file_set_string(accounts, jid, "jid", jid);
+        g_key_file_set_string(accounts, account_name, "jid", barejid);
+        if (resource != NULL) {
+            g_key_file_set_string(accounts, account_name, "resource", resource);
+        } else {
+            g_key_file_set_string(accounts, account_name, "resource", "profanity");
+        }
         _save_accounts();
     }
 
+    jid_destroy(jid);
 }
 
 gchar**
