@@ -26,6 +26,7 @@
 typedef struct prof_account_t {
     gchar *name;
     gchar *jid;
+    gchar *resource;
     gchar *server;
     gboolean enabled;
 } ProfAccount;

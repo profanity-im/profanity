@@ -27,6 +27,7 @@
 
 #include "accounts.h"
 #include "autocomplete.h"
+#include "common.h"
 #include "files.h"
 #include "jid.h"
 #include "log.h"
@@ -176,6 +177,12 @@ accounts_get_account(const char * const name)
         } else {
             account->server = NULL;
         }
+        gchar *resource = g_key_file_get_string(accounts, name, "resource", NULL);
+        if (resource != NULL) {
+            account->resource = strdup(resource);
+        } else {
+            account->resource = NULL;
+        }
 
         return account;
     }
@@ -185,19 +192,11 @@ void
 accounts_free_account(ProfAccount *account)
 {
     if (account != NULL) {
-        if (account->name != NULL) {
-            free(account->name);
-            account->name = NULL;
-        }
-        if (account->jid != NULL) {
-            free(account->jid);
-            account->jid = NULL;
-        }
-        if (account->server != NULL) {
-            free(account->server);
-            account->server = NULL;
-        }
-        account = NULL;
+        FREE_SET_NULL(account->name);
+        FREE_SET_NULL(account->jid);
+        FREE_SET_NULL(account->resource);
+        FREE_SET_NULL(account->server);
+        FREE_SET_NULL(account);
     }
 }
 
@@ -251,6 +250,12 @@ accounts_rename(const char * const account_name, const char * const new_name)
     if (server != NULL) {
         g_key_file_set_string(accounts, new_name, "server", server);
         free(server);
+    }
+
+    char *resource = g_key_file_get_string(accounts, account_name, "resource", NULL);
+    if (resource != NULL) {
+        g_key_file_set_string(accounts, new_name, "resource", resource);
+        free(resource);
     }
 
     g_key_file_remove_group(accounts, account_name, NULL);
