@@ -108,12 +108,20 @@ jabber_restart(void)
 jabber_conn_status_t
 jabber_connect_with_account(ProfAccount *account, const char * const passwd)
 {
-    FREE_SET_NULL(saved_user.account);
-
-    if (account->name == NULL)
-        return JABBER_UNDEFINED;
-
     saved_user.account = strdup(account->name);
+
+    if (saved_user.jid == NULL) {
+        saved_user.jid = strdup(account->jid);
+    }
+    if (saved_user.passwd == NULL) {
+        saved_user.passwd = strdup(passwd);
+    }
+    if (saved_user.altdomain == NULL) {
+        if (account->server != NULL) {
+            saved_user.altdomain = strdup(account->server);
+        }
+    }
+
     log_info("Connecting with account: %s", account->name);
     return jabber_connect(account->jid, passwd, account->server);
 }
@@ -122,17 +130,22 @@ jabber_conn_status_t
 jabber_connect(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
-    FREE_SET_NULL(saved_user.jid);
-    FREE_SET_NULL(saved_user.passwd);
-    FREE_SET_NULL(saved_user.altdomain);
+    if (saved_user.account != NULL) {
+        free(saved_user.account);
+        saved_user.account = NULL;
+    }
 
-    if (jid == NULL || passwd == NULL)
-        return JABBER_UNDEFINED;
-
-    saved_user.jid = strdup(jid);
-    saved_user.passwd = strdup(passwd);
-    if (altdomain != NULL)
-        saved_user.altdomain = strdup(altdomain);
+    if (saved_user.jid == NULL) {
+        saved_user.jid = strdup(jid);
+    }
+    if (saved_user.passwd == NULL) {
+        saved_user.passwd = strdup(passwd);
+    }
+    if (saved_user.altdomain == NULL) {
+        if (altdomain != NULL) {
+            saved_user.altdomain = strdup(altdomain);
+        }
+    }
 
     log_info("Connecting as %s", jid);
     xmpp_initialize();
