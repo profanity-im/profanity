@@ -36,70 +36,59 @@ jid_create(const gchar * const str)
     if (str == NULL) {
         return NULL;
     }
-    if (strlen(str) == 0) {
-        return NULL;
-    }
 
     gchar *trimmed = g_strdup(str);
+
+    if (strlen(trimmed) == 0) {
+        return NULL;
+    }
 
     if (g_str_has_prefix(trimmed, "/") || g_str_has_prefix(trimmed, "@")) {
         g_free(trimmed);
         return NULL;
-    } else if (g_str_has_suffix(trimmed, "/") || g_str_has_suffix(trimmed, "@")) {
-        g_free(trimmed);
+    }
+
+    if (!g_utf8_validate(trimmed, -1, NULL)) {
         return NULL;
     }
 
-    gchar *slashp = g_strrstr(trimmed, "/");
+    result = malloc(sizeof(struct jid_t));
+    result->localpart = NULL;
+    result->domainpart = NULL;
+    result->resourcepart = NULL;
+    result->barejid = NULL;
+    result->fulljid = NULL;
 
-    // has resourcepart
-    if (slashp != NULL) {
-        result = malloc(sizeof(struct jid_t));
-        result->str = strdup(trimmed);
-        result->resourcepart = g_strdup(slashp + 1);
-        result->barejid = g_strndup(trimmed, strlen(trimmed) - strlen(result->resourcepart) - 1);
-        result->fulljid = g_strdup(trimmed);
+    gchar *atp = g_utf8_strchr(trimmed, -1, '@');
+    gchar *slashp = g_utf8_strchr(trimmed, -1, '/');
+    gchar *domain_start = trimmed;
 
-        gchar *atp = g_strrstr(result->barejid, "@");
 
-        // has domain and local parts
-        if (atp != NULL) {
-            result->domainpart = g_strndup(atp + 1, strlen(trimmed));
-            result->localpart = g_strndup(trimmed, strlen(trimmed) - (strlen(result->resourcepart) + strlen(result->domainpart) + 2));
-
-        // only domain part
-        } else {
-            result->domainpart = strdup(result->barejid);
-            result->localpart = NULL;
-        }
-
-        g_free(trimmed);
-        return result;
-
-    // no resourcepart
-    } else {
-        result = malloc(sizeof(struct jid_t));
-        result->str = strdup(trimmed);
-        result->resourcepart = NULL;
-        result->barejid = g_strdup(trimmed);
-        result->fulljid = NULL;
-
-        gchar *atp = g_strrstr(trimmed, "@");
-
-        // has local and domain parts
-        if (atp != NULL) {
-            result->domainpart = g_strdup(atp + 1);
-            result->localpart = g_strndup(trimmed, strlen(trimmed) - strlen(result->domainpart) - 1);
-
-        // only domain part
-        } else {
-            result->domainpart = g_strdup(trimmed);
-            result->localpart = NULL;
-        }
-
-        g_free(trimmed);
-        return result;
+    if (atp != NULL) {
+        result->localpart = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, atp));
+        domain_start = atp + 1;
     }
+
+    if (slashp != NULL) {
+        result->resourcepart = g_strdup(slashp + 1);
+        result->domainpart = g_utf8_substring(domain_start, 0, g_utf8_pointer_to_offset(domain_start, slashp));
+        result->barejid = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
+        result->fulljid = g_strdup(trimmed);
+    } else {
+        result->domainpart = g_strdup(domain_start);
+        result->barejid = g_strdup(trimmed);
+    }
+
+    if (result->domainpart == NULL) {
+        free(trimmed);
+        return NULL;
+    }
+
+    result->str = g_strdup(trimmed);
+
+    free(trimmed);
+
+    return result;
 }
 
 Jid *
@@ -142,21 +131,23 @@ jid_is_valid_room_form(Jid *jid)
 gboolean
 parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 {
-    gboolean result = FALSE;
-    char **tokens = g_strsplit(full_room_jid, "/", 0);
+    Jid *jid = jid_create(full_room_jid);
 
-    if (tokens == NULL)
+    if (jid == NULL) {
         return FALSE;
-
-    if (tokens[0] != NULL && tokens[1] != NULL) {
-        *room = strdup(tokens[0]);
-        *nick = strdup(tokens[1]);
-        result = TRUE;
     }
 
-    g_strfreev(tokens);
+    if (jid->resourcepart == NULL) {
+        jid_destroy(jid);
+        return FALSE;
+    }
 
-    return result;
+    *room = strdup(jid->barejid);
+    *nick = strdup(jid->resourcepart);
+
+    jid_destroy(jid);
+
+    return TRUE;
 }
 
 /*
