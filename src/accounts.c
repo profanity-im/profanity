@@ -53,48 +53,53 @@ accounts_load(void)
         NULL);
 
     // create the logins searchable list for autocompletion
-    gsize njids;
-    gchar **jids =
-        g_key_file_get_groups(accounts, &njids);
+    gsize naccounts;
+    gchar **account_names =
+        g_key_file_get_groups(accounts, &naccounts);
 
     gsize i;
-    for (i = 0; i < njids; i++) {
-        if (g_key_file_get_boolean(accounts, jids[i], "enabled", NULL)) {
-            autocomplete_add(enabled_ac, strdup(jids[i]));
+    for (i = 0; i < naccounts; i++) {
+        if (g_key_file_get_boolean(accounts, account_names[i], "enabled", NULL)) {
+            autocomplete_add(enabled_ac, strdup(account_names[i]));
         }
 
         // fix old style accounts (no jid, or resource setting)
-        char *barejid = jids[i];
+        char *barejid = account_names[i];
         char *resource = NULL;
-        Jid *jid = jid_create(jids[i]);
+        Jid *jid = jid_create(account_names[i]);
         if (jid != NULL) {
             barejid = jid->barejid;
             resource = jid->resourcepart;
         }
 
-        if (!g_key_file_has_key(accounts, jids[i], "jid", NULL)) {
-            g_key_file_set_string(accounts, jids[i], "jid", barejid);
+        // old accounts with no jid, use barejid (either account name,
+        // or account name with resource stripped)
+        if (!g_key_file_has_key(accounts, account_names[i], "jid", NULL)) {
+            g_key_file_set_string(accounts, account_names[i], "jid", barejid);
             _save_accounts();
         }
-        if (!g_key_file_has_key(accounts, jids[i], "resource", NULL)) {
+
+        // old accounts with no resource, use resourcepart of account name,
+        // or "profanity" if there was no resourcepart
+        if (!g_key_file_has_key(accounts, account_names[i], "resource", NULL)) {
             if (resource != NULL) {
-                g_key_file_set_string(accounts, jids[i], "resource", resource);
+                g_key_file_set_string(accounts, account_names[i], "resource", resource);
             } else {
-                g_key_file_set_string(accounts, jids[i], "resource", "profanity");
+                g_key_file_set_string(accounts, account_names[i], "resource", "profanity");
             }
 
             _save_accounts();
         }
 
-        autocomplete_add(all_ac, strdup(jids[i]));
+        autocomplete_add(all_ac, strdup(account_names[i]));
 
         jid_destroy(jid);
     }
 
-    for (i = 0; i < njids; i++) {
-        free(jids[i]);
+    for (i = 0; i < naccounts; i++) {
+        free(account_names[i]);
     }
-    free(jids);
+    free(account_names);
 }
 
 void
