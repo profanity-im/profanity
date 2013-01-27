@@ -300,6 +300,24 @@ accounts_set_resource(const char * const account_name, const char * const value)
     }
 }
 
+void
+accounts_set_last_presence(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "presence.last", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_login_presence(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "presence.login", value);
+        _save_accounts();
+    }
+}
+
 static void
 _fix_legacy_accounts(const char * const account_name)
 {

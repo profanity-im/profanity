@@ -402,7 +402,7 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     int idle)
 {
     int pri;
-    char *show;
+    char *show, *last;
 
     // don't send presence when disconnected
     if (jabber_conn.conn_status != JABBER_CONNECTED)
@@ -419,18 +419,23 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     {
         case PRESENCE_AWAY:
             show = STANZA_TEXT_AWAY;
+            last = STANZA_TEXT_AWAY;
             break;
         case PRESENCE_DND:
             show = STANZA_TEXT_DND;
+            last = STANZA_TEXT_DND;
             break;
         case PRESENCE_CHAT:
             show = STANZA_TEXT_CHAT;
+            last = STANZA_TEXT_CHAT;
             break;
         case PRESENCE_XA:
             show = STANZA_TEXT_XA;
+            last = STANZA_TEXT_XA;
             break;
         default: // PRESENCE_ONLINE
             show = NULL;
+            last = STANZA_TEXT_ONLINE;
             break;
     }
 
@@ -496,6 +501,9 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     xmpp_stanza_release(presence);
 
     FREE_SET_NULL(sha1);
+
+    // set last presence for account
+    accounts_set_last_presence(saved_account.name, last);
 }
 
 void
