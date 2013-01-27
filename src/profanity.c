@@ -224,7 +224,7 @@ prof_handle_login_success(const char *jid, const char *altdomain)
     status_bar_print_message(jid);
     status_bar_refresh();
 
-    accounts_add_login(jid, altdomain);
+    accounts_add(jid, altdomain);
 }
 
 void

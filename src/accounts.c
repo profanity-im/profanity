@@ -135,13 +135,15 @@ accounts_reset_enabled_search(void)
 }
 
 void
-accounts_add_login(const char *account_name, const char *altdomain)
+accounts_add(const char *account_name, const char *altdomain)
 {
+    // assume account name is barejid, use default resource
     const char *barejid = account_name;
-    const char *resource = NULL;
+    const char *resource = "profanity";
 
+    // check if account name contains resourcepart and split
+    // into barejid and resourcepart if so
     Jid *jid = jid_create(account_name);
-
     if (jid != NULL) {
         barejid = jid->barejid;
         resource = jid->resourcepart;
@@ -151,12 +153,7 @@ accounts_add_login(const char *account_name, const char *altdomain)
     if (!g_key_file_has_group(accounts, account_name)) {
         g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
         g_key_file_set_string(accounts, account_name, "jid", barejid);
-        if (resource != NULL) {
-            g_key_file_set_string(accounts, account_name, "resource", resource);
-        } else {
-            g_key_file_set_string(accounts, account_name, "resource", "profanity");
-        }
-
+        g_key_file_set_string(accounts, account_name, "resource", resource);
         if (altdomain != NULL) {
             g_key_file_set_string(accounts, account_name, "server", altdomain);
         }

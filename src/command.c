@@ -1079,7 +1079,7 @@ _cmd_account(gchar **args, struct cmd_help_t help)
         if (account_name == NULL) {
             cons_show("Usage: %s", help.usage);
         } else {
-            accounts_add_login(account_name, NULL);
+            accounts_add(account_name, NULL);
             cons_show("Account created.");
             cons_show("");
         }

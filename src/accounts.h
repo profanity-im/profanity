@@ -38,7 +38,7 @@ char * accounts_find_all(char *prefix);
 char * accounts_find_enabled(char *prefix);
 void accounts_reset_all_search(void);
 void accounts_reset_enabled_search(void);
-void accounts_add_login(const char *jid, const char *altdomain);
+void accounts_add(const char *jid, const char *altdomain);
 gchar** accounts_get_list(void);
 ProfAccount* accounts_get_account(const char * const name);
 void accounts_free_account(ProfAccount *account);
