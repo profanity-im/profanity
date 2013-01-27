@@ -338,7 +338,7 @@ jabber_join(Jid *jid)
 void
 jabber_change_room_nick(const char * const room, const char * const nick)
 {
-    char *full_room_jid = create_full_room_jid(room, nick);
+    char *full_room_jid = create_fulljid(room, nick);
     xmpp_stanza_t *presence = stanza_create_room_newnick_presence(jabber_conn.ctx,
         full_room_jid);
     xmpp_send(jabber_conn.conn, presence);
@@ -445,7 +445,7 @@ jabber_update_presence(jabber_presence_t status, const char * const msg,
     while (rooms != NULL) {
         char *room = rooms->data;
         char *nick = muc_get_room_nick(room);
-        char *full_room_jid = create_full_room_jid(room, nick);
+        char *full_room_jid = create_fulljid(room, nick);
 
         xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
         xmpp_send(jabber_conn.conn, presence);

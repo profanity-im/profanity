@@ -95,7 +95,7 @@ Jid *
 jid_create_from_bare_and_resource(const char * const room, const char * const nick)
 {
     Jid *result;
-    char *jid = create_full_room_jid(room, nick);
+    char *jid = create_fulljid(room, nick);
     result = jid_create(jid);
     free(jid);
 
@@ -158,11 +158,11 @@ parse_room_jid(const char * const full_room_jid, char **room, char **nick)
  * Will return a newly created string that must be freed by the caller
  */
 char *
-create_full_room_jid(const char * const room, const char * const nick)
+create_fulljid(const char * const barejid, const char * const resource)
 {
-    GString *full_jid = g_string_new(room);
+    GString *full_jid = g_string_new(barejid);
     g_string_append(full_jid, "/");
-    g_string_append(full_jid, nick);
+    g_string_append(full_jid, resource);
 
     char *result = strdup(full_jid->str);
 
