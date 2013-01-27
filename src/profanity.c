@@ -521,7 +521,11 @@ _init(const int disable_tls, char *log_level)
     files_create_directories();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
-    log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+        log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
+    } else {
+        log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
+    }
     chat_log_init();
     prefs_load();
     accounts_load();
