@@ -1227,14 +1227,17 @@ void
 cons_show_account(ProfAccount *account)
 {
     cons_show("%s account details:", account->name);
-    cons_show("jid     : %s", account->jid);
     if (account->enabled) {
-        cons_show("enabled : TRUE");
+        cons_show("enabled   : TRUE");
     } else {
-        cons_show("enabled : FALSE");
+        cons_show("enabled   : FALSE");
+    }
+    cons_show("jid       : %s", account->jid);
+    if (account->resource != NULL) {
+        cons_show("resource  : %s", account->resource);
     }
     if (account->server != NULL) {
-        cons_show("server  : %s", account->server);
+        cons_show("server    : %s", account->server);
     }
     cons_show("");
 }

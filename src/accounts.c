@@ -62,7 +62,33 @@ accounts_load(void)
         if (g_key_file_get_boolean(accounts, jids[i], "enabled", NULL)) {
             autocomplete_add(enabled_ac, strdup(jids[i]));
         }
+
+        // fix old style accounts (no jid, or resource setting)
+        char *barejid = jids[i];
+        char *resource = NULL;
+        Jid *jid = jid_create(jids[i]);
+        if (jid != NULL) {
+            barejid = jid->barejid;
+            resource = jid->resourcepart;
+        }
+
+        if (!g_key_file_has_key(accounts, jids[i], "jid", NULL)) {
+            g_key_file_set_string(accounts, jids[i], "jid", barejid);
+            _save_accounts();
+        }
+        if (!g_key_file_has_key(accounts, jids[i], "resource", NULL)) {
+            if (resource != NULL) {
+                g_key_file_set_string(accounts, jids[i], "resource", resource);
+            } else {
+                g_key_file_set_string(accounts, jids[i], "resource", "profanity");
+            }
+
+            _save_accounts();
+        }
+
         autocomplete_add(all_ac, strdup(jids[i]));
+
+        jid_destroy(jid);
     }
 
     for (i = 0; i < njids; i++) {
@@ -133,16 +159,6 @@ accounts_add_login(const char *account_name, const char *altdomain)
         _save_accounts();
         autocomplete_add(all_ac, strdup(account_name));
         autocomplete_add(enabled_ac, strdup(account_name));
-
-    // already exists, update old style accounts
-    } else {
-        g_key_file_set_string(accounts, account_name, "jid", barejid);
-        if (resource != NULL) {
-            g_key_file_set_string(accounts, account_name, "resource", resource);
-        } else {
-            g_key_file_set_string(accounts, account_name, "resource", "profanity");
-        }
-        _save_accounts();
     }
 
     jid_destroy(jid);

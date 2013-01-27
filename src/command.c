@@ -1135,9 +1135,18 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                 cons_show("");
             } else {
                 if (strcmp(property, "jid") == 0) {
-                    accounts_set_jid(account_name, value);
-                    cons_show("Updated jid for account %s: %s", account_name, value);
-                    cons_show("");
+                    Jid *jid = jid_create(args[3]);
+                    if (jid == NULL) {
+                        cons_show("Malformed jid: %s", value);
+                    } else {
+                        accounts_set_jid(account_name, jid->barejid);
+                        cons_show("Updated jid for account %s: %s", account_name, jid->barejid);
+                        if (jid->resourcepart != NULL) {
+                            cons_show("Updated resource for account %s: %s", account_name, jid->resourcepart);
+                        }
+                        cons_show("");
+                    }
+                    jid_destroy(jid);
                 } else if (strcmp(property, "server") == 0) {
                     accounts_set_server(account_name, value);
                     cons_show("Updated server for account %s: %s", account_name, value);
