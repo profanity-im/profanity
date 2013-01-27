@@ -92,7 +92,7 @@ jid_create(const gchar * const str)
 }
 
 Jid *
-jid_create_room_jid(const char * const room, const char * const nick)
+jid_create_from_bare_and_resource(const char * const room, const char * const nick)
 {
     Jid *result;
     char *jid = create_full_room_jid(room, nick);

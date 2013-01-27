@@ -1828,7 +1828,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
         jid_destroy(jid);
     }
 
-    Jid *room_jid = jid_create_room_jid(room, nick);
+    Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
 
     if (!muc_room_is_active(room_jid)) {
         jabber_join(room_jid);

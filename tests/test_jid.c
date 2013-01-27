@@ -107,14 +107,14 @@ void create_jid_from_bare_returns_domainpart(void)
 
 void create_room_jid_returns_room(void)
 {
-    Jid *result = jid_create_room_jid("room@conference.domain.org", "myname");
+    Jid *result = jid_create_from_bare_and_resource("room@conference.domain.org", "myname");
 
     assert_string_equals("room@conference.domain.org", result->barejid);
 }
 
 void create_room_jid_returns_nick(void)
 {
-    Jid *result = jid_create_room_jid("room@conference.domain.org", "myname");
+    Jid *result = jid_create_from_bare_and_resource("room@conference.domain.org", "myname");
 
     assert_string_equals("myname", result->resourcepart);
 }
