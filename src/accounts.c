@@ -291,6 +291,15 @@ accounts_set_server(const char * const account_name, const char * const value)
     }
 }
 
+void
+accounts_set_resource(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "resource", value);
+        _save_accounts();
+    }
+}
+
 static void
 _fix_legacy_accounts(const char * const account_name)
 {

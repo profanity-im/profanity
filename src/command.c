@@ -199,12 +199,14 @@ static struct cmd_t main_commands[] =
           "set account property value : Set 'property' of 'account' to 'value'.",
           "",
           "The 'property' may be one of.",
-          "jid    : The Jabber ID of the account, the account name will be used if this property is not set.",
-          "server : The chat service server, if different to the domain part of the JID.",
+          "jid      : The Jabber ID of the account, the account name will be used if this property is not set.",
+          "server   : The chat service server, if different to the domain part of the JID.",
+          "resource : The resource to be used.",
           "",
           "Example : /account add work",
           "        : /account set work jid myuser@mycompany.com",
           "        : /account set work server talk.google.com",
+          "        : /account set work resource desktop",
           "        : /account rename work gtalk",
           "",
           "To log in to this account: '/connect gtalk'",
@@ -1142,6 +1144,7 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                         accounts_set_jid(account_name, jid->barejid);
                         cons_show("Updated jid for account %s: %s", account_name, jid->barejid);
                         if (jid->resourcepart != NULL) {
+                            accounts_set_resource(account_name, jid->resourcepart);
                             cons_show("Updated resource for account %s: %s", account_name, jid->resourcepart);
                         }
                         cons_show("");
@@ -1150,6 +1153,10 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                 } else if (strcmp(property, "server") == 0) {
                     accounts_set_server(account_name, value);
                     cons_show("Updated server for account %s: %s", account_name, value);
+                    cons_show("");
+                } else if (strcmp(property, "resource") == 0) {
+                    accounts_set_resource(account_name, value);
+                    cons_show("Updated resource for account %s: %s", account_name, value);
                     cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);
