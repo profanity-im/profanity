@@ -111,7 +111,7 @@ jabber_connect_with_account(ProfAccount *account, const char * const passwd)
     saved_user.account = strdup(account->name);
 
     if (saved_user.jid == NULL) {
-        saved_user.jid = strdup(account->jid);
+        saved_user.jid = create_fulljid(account->jid, account->resource);
     }
     if (saved_user.passwd == NULL) {
         saved_user.passwd = strdup(passwd);
@@ -130,9 +130,19 @@ jabber_conn_status_t
 jabber_connect(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
+    Jid *jidp = jid_create(jid);
+
     if (saved_user.jid == NULL) {
-        saved_user.jid = strdup(jid);
+        if (jidp->resourcepart == NULL) {
+            jid_destroy(jidp);
+            jidp = jid_create_from_bare_and_resource(jid, "profanity");
+            saved_user.jid = strdup(jidp->fulljid);
+        } else {
+            saved_user.jid = strdup(jid);
+        }
     }
+    jid_destroy(jidp);
+
     if (saved_user.passwd == NULL) {
         saved_user.passwd = strdup(passwd);
     }
@@ -142,14 +152,14 @@ jabber_connect(const char * const jid,
         }
     }
 
-    log_info("Connecting as %s", jid);
+    log_info("Connecting as %s", saved_user.jid);
     xmpp_initialize();
 
     jabber_conn.log = _xmpp_get_file_logger();
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
     jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
 
-    xmpp_conn_set_jid(jabber_conn.conn, jid);
+    xmpp_conn_set_jid(jabber_conn.conn, saved_user.jid);
     xmpp_conn_set_pass(jabber_conn.conn, passwd);
 
     if (jabber_conn.tls_disabled)
