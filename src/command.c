@@ -1017,13 +1017,11 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
                 jid = strdup(account->jid);
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
-            log_debug("Connecting with account %s as %s", account->name, jid);
             conn_status = jabber_connect_with_account(account, passwd);
         } else {
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
-            log_debug("Connecting as %s", jid);
-            conn_status = jabber_connect(jid, passwd, altdomain);
+            conn_status = jabber_connect_with_details(jid, passwd, altdomain);
         }
 
         if (conn_status == JABBER_DISCONNECTED) {

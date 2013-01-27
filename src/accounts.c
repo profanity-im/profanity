@@ -270,9 +270,15 @@ accounts_account_exists(const char * const account_name)
 void
 accounts_set_jid(const char * const account_name, const char * const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "jid", value);
-        _save_accounts();
+    Jid *jid = jid_create(value);
+    if (jid != NULL) {
+        if (accounts_account_exists(account_name)) {
+            g_key_file_set_string(accounts, account_name, "jid", jid->barejid);
+            if (jid->resourcepart != NULL) {
+                g_key_file_set_string(accounts, account_name, "resource", jid->resourcepart);
+            }
+            _save_accounts();
+        }
     }
 }
 

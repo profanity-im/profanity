@@ -53,11 +53,16 @@ static GHashTable *sub_requests;
 
 // for auto reconnect
 static struct {
-    char *account;
+    char *name;
+    char *passwd;
+} saved_account;
+
+static struct {
+    char *name;
     char *jid;
     char *passwd;
     char *altdomain;
-} saved_user;
+} saved_details;
 
 static GTimer *reconnect_timer;
 
@@ -67,6 +72,10 @@ static void _xmpp_file_logger(void * const userdata,
     const xmpp_log_level_t level, const char * const area,
     const char * const msg);
 static xmpp_log_t * _xmpp_get_file_logger();
+
+static jabber_conn_status_t _jabber_connect(const char * const fulljid,
+    const char * const passwd, const char * const altdomain);
+static void _jabber_reconnect(void);
 
 static void _jabber_roster_request(void);
 
@@ -105,61 +114,30 @@ jabber_restart(void)
     FREE_SET_NULL(jabber_conn.status);
 }
 
-jabber_conn_status_t
-jabber_connect_with_account(ProfAccount *account, const char * const passwd)
+static jabber_conn_status_t
+_jabber_connect(const char * const fulljid, const char * const passwd,
+    const char * const altdomain)
 {
-    saved_user.account = strdup(account->name);
+    Jid *jid = jid_create(fulljid);
 
-    if (saved_user.jid == NULL) {
-        saved_user.jid = create_fulljid(account->jid, account->resource);
-    }
-    if (saved_user.passwd == NULL) {
-        saved_user.passwd = strdup(passwd);
-    }
-    if (saved_user.altdomain == NULL) {
-        if (account->server != NULL) {
-            saved_user.altdomain = strdup(account->server);
-        }
+    if (jid == NULL) {
+        log_error("Malformed JID not able to connect: %s", fulljid);
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
+        return jabber_conn.conn_status;
+    } else if (jid->fulljid == NULL) {
+        log_error("Full JID required to connect, received: %s", fulljid);
+        jabber_conn.conn_status = JABBER_DISCONNECTED;
+        return jabber_conn.conn_status;
     }
 
-    log_info("Connecting with account: %s", account->name);
-    return jabber_connect(account->jid, passwd, account->server);
-}
+    jid_destroy(jid);
 
-jabber_conn_status_t
-jabber_connect(const char * const jid,
-    const char * const passwd, const char * const altdomain)
-{
-    Jid *jidp = jid_create(jid);
-
-    if (saved_user.jid == NULL) {
-        if (jidp->resourcepart == NULL) {
-            jid_destroy(jidp);
-            jidp = jid_create_from_bare_and_resource(jid, "profanity");
-            saved_user.jid = strdup(jidp->fulljid);
-        } else {
-            saved_user.jid = strdup(jid);
-        }
-    }
-    jid_destroy(jidp);
-
-    if (saved_user.passwd == NULL) {
-        saved_user.passwd = strdup(passwd);
-    }
-    if (saved_user.altdomain == NULL) {
-        if (altdomain != NULL) {
-            saved_user.altdomain = strdup(altdomain);
-        }
-    }
-
-    log_info("Connecting as %s", saved_user.jid);
+    log_info("Connecting as %s", fulljid);
     xmpp_initialize();
-
     jabber_conn.log = _xmpp_get_file_logger();
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
     jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
-
-    xmpp_conn_set_jid(jabber_conn.conn, saved_user.jid);
+    xmpp_conn_set_jid(jabber_conn.conn, fulljid);
     xmpp_conn_set_pass(jabber_conn.conn, passwd);
 
     if (jabber_conn.tls_disabled)
@@ -174,6 +152,64 @@ jabber_connect(const char * const jid,
         jabber_conn.conn_status = JABBER_DISCONNECTED;
 
     return jabber_conn.conn_status;
+}
+
+jabber_conn_status_t
+jabber_connect_with_account(ProfAccount *account, const char * const passwd)
+{
+    saved_account.name = strdup(account->name);
+    saved_account.passwd = strdup(passwd);
+
+    log_info("Connecting using account: %s", account->name);
+    char *fulljid = create_fulljid(account->jid, account->resource);
+    jabber_conn_status_t result = _jabber_connect(fulljid, passwd, account->server);
+
+    free(fulljid);
+
+    return result;
+}
+
+jabber_conn_status_t
+jabber_connect_with_details(const char * const jid,
+    const char * const passwd, const char * const altdomain)
+{
+    saved_details.name = strdup(jid);
+    saved_details.passwd = strdup(passwd);
+    if (altdomain != NULL) {
+        saved_details.altdomain = strdup(altdomain);
+    } else {
+        saved_details.altdomain = NULL;
+    }
+
+    Jid *jidp = jid_create(jid);
+    if (jidp->resourcepart == NULL) {
+        jid_destroy(jidp);
+        jidp = jid_create_from_bare_and_resource(jid, "profanity");
+        saved_details.jid = strdup(jidp->fulljid);
+    } else {
+        saved_details.jid = strdup(jid);
+    }
+    jid_destroy(jidp);
+
+    log_info("Connecting without account, JID: %s", saved_details.jid);
+    return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain);
+}
+
+static void
+_jabber_reconnect(void)
+{
+    // reconnect with account.
+    ProfAccount *account = accounts_get_account(saved_account.name);
+
+    if (account == NULL) {
+        log_error("Unable to reconnect, account no longer exists: %s", saved_account.name);
+    } else {
+        char *fulljid = create_fulljid(account->jid, account->resource);
+        log_debug("Attempting reconnect with account %s", account->name);
+        _jabber_connect(fulljid, saved_account.passwd, account->server);
+        free(fulljid);
+        g_timer_start(reconnect_timer);
+    }
 }
 
 void
@@ -206,9 +242,7 @@ jabber_process_events(void)
         if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
             (reconnect_timer != NULL)) {
             if (g_timer_elapsed(reconnect_timer, NULL) > prefs_get_reconnect()) {
-                log_debug("Attempting reconnect as %s", saved_user.jid);
-                jabber_connect(saved_user.jid, saved_user.passwd, saved_user.altdomain);
-                g_timer_start(reconnect_timer);
+                _jabber_reconnect();
             }
         }
     }
@@ -514,10 +548,12 @@ jabber_get_status(void)
 void
 jabber_free_resources(void)
 {
-    FREE_SET_NULL(saved_user.jid);
-    FREE_SET_NULL(saved_user.passwd);
-    FREE_SET_NULL(saved_user.account);
-    FREE_SET_NULL(saved_user.altdomain);
+    FREE_SET_NULL(saved_details.name);
+    FREE_SET_NULL(saved_details.jid);
+    FREE_SET_NULL(saved_details.passwd);
+    FREE_SET_NULL(saved_details.altdomain);
+    FREE_SET_NULL(saved_account.name);
+    FREE_SET_NULL(saved_account.passwd);
     chat_sessions_clear();
     if (sub_requests != NULL)
         g_hash_table_remove_all(sub_requests);
@@ -748,11 +784,24 @@ _connection_handler(xmpp_conn_t * const conn,
 
     // login success
     if (status == XMPP_CONN_CONNECT) {
-        if (saved_user.account != NULL) {
-            prof_handle_login_account_success(saved_user.account);
+
+        // logged in with account
+        if (saved_account.name != NULL) {
+            prof_handle_login_account_success(saved_account.name);
+
+        // logged in without account, use details to create new account
         } else {
-            const char *jid = xmpp_conn_get_jid(conn);
-            prof_handle_login_success(jid, saved_user.altdomain);
+            accounts_add(saved_details.name, saved_details.altdomain);
+            accounts_set_jid(saved_details.name, saved_details.jid);
+
+            prof_handle_login_account_success(saved_details.name);
+            saved_account.name = strdup(saved_details.name);
+            saved_account.passwd = strdup(saved_details.passwd);
+
+            FREE_SET_NULL(saved_details.name);
+            FREE_SET_NULL(saved_details.jid);
+            FREE_SET_NULL(saved_details.passwd);
+            FREE_SET_NULL(saved_details.altdomain);
         }
 
         chat_sessions_init();

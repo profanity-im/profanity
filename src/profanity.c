@@ -214,20 +214,6 @@ prof_handle_login_account_success(char *account_name)
 }
 
 void
-prof_handle_login_success(const char *jid, const char *altdomain)
-{
-    const char *msg = "logged in successfully.";
-    cons_show("%s %s", jid, msg);
-    title_bar_set_status(PRESENCE_ONLINE);
-    log_info("%s %s", jid, msg);
-    win_current_page_off();
-    status_bar_print_message(jid);
-    status_bar_refresh();
-
-    accounts_add(jid, altdomain);
-}
-
-void
 prof_handle_gone(const char * const from)
 {
     win_show_gone(from);
