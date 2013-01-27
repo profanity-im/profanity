@@ -130,11 +130,6 @@ jabber_conn_status_t
 jabber_connect(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
-    if (saved_user.account != NULL) {
-        free(saved_user.account);
-        saved_user.account = NULL;
-    }
-
     if (saved_user.jid == NULL) {
         saved_user.jid = strdup(jid);
     }

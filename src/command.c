@@ -1011,22 +1011,24 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
-            jid = strdup(account->jid);
-            log_debug("Connecting as %s", jid);
+            if (account->resource != NULL) {
+                jid = create_fulljid(account->jid, account->resource);
+            } else {
+                jid = strdup(account->jid);
+            }
+            cons_show("Connecting with account %s as %s", account->name, jid);
+            log_debug("Connecting with account %s as %s", account->name, jid);
             conn_status = jabber_connect_with_account(account, passwd);
         } else {
             jid = strdup(lower);
+            cons_show("Connecting as %s", jid);
             log_debug("Connecting as %s", jid);
             conn_status = jabber_connect(jid, passwd, altdomain);
         }
 
-        if (conn_status == JABBER_CONNECTING) {
-            cons_show("Connecting...");
-            log_debug("Connecting...");
-        }
         if (conn_status == JABBER_DISCONNECTED) {
-            cons_bad_show("Connection to server failed.");
-            log_debug("Connection for %s failed", jid);
+            cons_bad_show("Connection attempt for %s failed.", jid);
+            log_debug("Connection attempt for %s failed", jid);
         }
 
         accounts_free_account(account);
