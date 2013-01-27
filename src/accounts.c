@@ -38,6 +38,7 @@ static GKeyFile *accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
+static void _fix_legacy_accounts(const char * const account_name);
 static void _save_accounts(void);
 
 void
@@ -59,41 +60,12 @@ accounts_load(void)
 
     gsize i;
     for (i = 0; i < naccounts; i++) {
+        autocomplete_add(all_ac, strdup(account_names[i]));
         if (g_key_file_get_boolean(accounts, account_names[i], "enabled", NULL)) {
             autocomplete_add(enabled_ac, strdup(account_names[i]));
         }
 
-        // fix old style accounts (no jid, or resource setting)
-        char *barejid = account_names[i];
-        char *resource = NULL;
-        Jid *jid = jid_create(account_names[i]);
-        if (jid != NULL) {
-            barejid = jid->barejid;
-            resource = jid->resourcepart;
-        }
-
-        // old accounts with no jid, use barejid (either account name,
-        // or account name with resource stripped)
-        if (!g_key_file_has_key(accounts, account_names[i], "jid", NULL)) {
-            g_key_file_set_string(accounts, account_names[i], "jid", barejid);
-            _save_accounts();
-        }
-
-        // old accounts with no resource, use resourcepart of account name,
-        // or "profanity" if there was no resourcepart
-        if (!g_key_file_has_key(accounts, account_names[i], "resource", NULL)) {
-            if (resource != NULL) {
-                g_key_file_set_string(accounts, account_names[i], "resource", resource);
-            } else {
-                g_key_file_set_string(accounts, account_names[i], "resource", "profanity");
-            }
-
-            _save_accounts();
-        }
-
-        autocomplete_add(all_ac, strdup(account_names[i]));
-
-        jid_destroy(jid);
+        _fix_legacy_accounts(account_names[i]);
     }
 
     for (i = 0; i < naccounts; i++) {
@@ -137,16 +109,15 @@ accounts_reset_enabled_search(void)
 void
 accounts_add(const char *account_name, const char *altdomain)
 {
-    // assume account name is barejid, use default resource
+    // set account name and resource
     const char *barejid = account_name;
     const char *resource = "profanity";
-
-    // check if account name contains resourcepart and split
-    // into barejid and resourcepart if so
     Jid *jid = jid_create(account_name);
     if (jid != NULL) {
         barejid = jid->barejid;
-        resource = jid->resourcepart;
+        if (jid->resourcepart != NULL) {
+            resource = jid->resourcepart;
+        }
     }
 
     // doesn't yet exist
@@ -312,6 +283,35 @@ accounts_set_server(const char * const account_name, const char * const value)
         g_key_file_set_string(accounts, account_name, "server", value);
         _save_accounts();
     }
+}
+
+static void
+_fix_legacy_accounts(const char * const account_name)
+{
+    // set barejid and resource
+    const char *barejid = account_name;
+    const char *resource = "profanity";
+    Jid *jid = jid_create(account_name);
+    if (jid != NULL) {
+        barejid = jid->barejid;
+        if (jid->resourcepart != NULL) {
+            resource = jid->resourcepart;
+        }
+    }
+
+    // accounts with no jid property
+    if (!g_key_file_has_key(accounts, account_name, "jid", NULL)) {
+        g_key_file_set_string(accounts, account_name, "jid", barejid);
+        _save_accounts();
+    }
+
+    // accounts with no resource, property
+    if (!g_key_file_has_key(accounts, account_name, "resource", NULL)) {
+        g_key_file_set_string(accounts, account_name, "resource", resource);
+        _save_accounts();
+    }
+
+    jid_destroy(jid);
 }
 
 static void
