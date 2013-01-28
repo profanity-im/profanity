@@ -5,8 +5,8 @@ profanity_SOURCES = src/command.c src/contact.c src/command_history.c src/xmpp.h
 	src/autocomplete.h src/ui_titlebar.c src/ui_windows.c src/common.c \
 	src/contact_list.c src/ui_inputwin.c src/log.h src/profanity.c \
 	src/history.c src/ui.h src/common.h src/ contact_list.h src/xmpp_conn.c \
-	src/main.c src/profanity.h src/history.h src/chat_log.c \
-	src/chat_log.h src/tinyurl.c src/tinyurl.h src/chat_session.c \
+	src/main.c src/profanity.h src/history.h \
+	src/tinyurl.c src/tinyurl.h src/chat_session.c \
 	src/chat_session.h src/muc.c \
 	src/muc.h src/xmpp_stanza.c src/command_parser.c \
 	src/theme.c src/theme.h src/window.c src/window.h \

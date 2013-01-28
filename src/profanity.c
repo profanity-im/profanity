@@ -30,7 +30,6 @@
 #include <glib.h>
 
 #include "accounts.h"
-#include "chat_log.h"
 #include "chat_session.h"
 #include "command.h"
 #include "common.h"

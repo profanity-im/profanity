@@ -33,7 +33,6 @@
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"
-#include "chat_log.h"
 #include "jid.h"
 #include "log.h"
 #include "preferences.h"

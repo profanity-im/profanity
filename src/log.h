@@ -31,6 +31,11 @@ typedef enum {
     PROF_LEVEL_ERROR
 } log_level_t;
 
+typedef enum {
+    PROF_IN_LOG,
+    PROF_OUT_LOG
+} chat_log_direction_t;
+
 void log_init(log_level_t filter);
 log_level_t log_get_filter(void);
 void log_close(void);
@@ -41,4 +46,10 @@ void log_error(const char * const msg, ...);
 void log_msg(log_level_t level, const char * const area,
     const char * const msg);
 
+void chat_log_init(void);
+void chat_log_chat(const gchar * const login, gchar *other,
+    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp);
+void chat_log_close(void);
+GSList * chat_log_get_previous(const gchar * const login,
+    const gchar * const recipient, GSList *history);
 #endif
