@@ -49,8 +49,10 @@ static int _iq_handle_discoinfo_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 
 void
-iq_add_handlers(xmpp_conn_t * const conn, xmpp_ctx_t * const ctx)
+iq_add_handlers(void)
 {
+    xmpp_conn_t * const conn = jabber_get_conn();
+    xmpp_ctx_t * const ctx = jabber_get_ctx();
     HANDLE(NULL,                STANZA_TYPE_ERROR,  _iq_handle_error);
     HANDLE(XMPP_NS_ROSTER,      STANZA_TYPE_SET,    _iq_handle_roster_set);
     HANDLE(XMPP_NS_ROSTER,      STANZA_TYPE_RESULT, _iq_handle_roster_result);

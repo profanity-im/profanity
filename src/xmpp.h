@@ -169,7 +169,7 @@ void jabber_conn_set_status(const char * const message);
 char* jabber_get_account_name(void);
 
 // iq functions
-void iq_add_handlers(xmpp_conn_t * const conn, xmpp_ctx_t * const ctx);
+void iq_add_handlers(void);
 
 // presence functions
 void presence_init(void);
