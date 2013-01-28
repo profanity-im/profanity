@@ -8,7 +8,7 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/xmpp.h \
 	src/main.c src/profanity.h src/prof_history.h src/chat_log.c \
 	src/chat_log.h src/tinyurl.c src/tinyurl.h src/chat_session.c \
 	src/chat_session.h src/release.c src/release.h src/muc.c \
-	src/muc.h src/stanza.c src/stanza.h src/parser.c src/parser.h \
+	src/muc.h src/xmpp_stanza.c src/parser.c src/parser.h \
 	src/theme.c src/theme.h src/window.c src/window.h src/xdg_base.c \
 	src/xdg_base.h src/files.c src/files.h src/accounts.c src/accounts.h \
 	src/jid.h src/jid.c src/xmpp_caps.c src/xmpp_iq.c

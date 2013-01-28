@@ -29,7 +29,6 @@
 
 #include "config.h"
 #include "common.h"
-#include "stanza.h"
 #include "xmpp.h"
 
 static GHashTable *capabilities;

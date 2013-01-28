@@ -1,5 +1,5 @@
 /*
- * stanza.c
+ * xmpp_stanza.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -27,7 +27,7 @@
 #include <strophe.h>
 
 #include "common.h"
-#include "stanza.h"
+#include "xmpp.h"
 
 static int _field_compare(FormField *f1, FormField *f2);
 

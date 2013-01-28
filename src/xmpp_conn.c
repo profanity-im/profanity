@@ -34,7 +34,6 @@
 #include "preferences.h"
 #include "profanity.h"
 #include "muc.h"
-#include "stanza.h"
 #include "xmpp.h"
 
 static struct _jabber_conn_t {
