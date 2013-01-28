@@ -1,5 +1,5 @@
 /*
- * capabilities.c
+ * xmpp_caps.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -29,8 +29,8 @@
 
 #include "config.h"
 #include "common.h"
-#include "capabilities.h"
 #include "stanza.h"
+#include "xmpp.h"
 
 static GHashTable *capabilities;
 

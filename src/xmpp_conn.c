@@ -26,7 +26,6 @@
 
 #include <strophe.h>
 
-#include "capabilities.h"
 #include "chat_session.h"
 #include "common.h"
 #include "contact_list.h"

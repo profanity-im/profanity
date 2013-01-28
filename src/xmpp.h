@@ -55,6 +55,11 @@ typedef enum {
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
 
+typedef struct capabilities_t {
+    char *client;
+} Capabilities;
+
+// connection functions
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain);
@@ -84,6 +89,16 @@ void jabber_free_resources(void);
 void jabber_restart(void);
 void jabber_set_autoping(int seconds);
 
+// iq functions
 void iq_add_handlers(xmpp_conn_t * const conn, xmpp_ctx_t * const ctx);
+
+// caps functions
+void caps_init(void);
+void caps_add(const char * const caps_str, const char * const client);
+gboolean caps_contains(const char * const caps_str);
+Capabilities* caps_get(const char * const caps_str);
+char* caps_create_sha1_str(xmpp_stanza_t * const query);
+xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t * const ctx);
+void caps_close(void);
 
 #endif
