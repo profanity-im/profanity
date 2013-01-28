@@ -23,7 +23,7 @@
 #ifndef PROFANITY_H
 #define PROFANITY_H
 
-#include "jabber.h"
+#include "xmpp.h"
 
 void prof_run(const int disable_tls, char *log_level);
 

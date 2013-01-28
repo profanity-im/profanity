@@ -36,7 +36,7 @@
 #endif
 
 #include "contact.h"
-#include "jabber.h"
+#include "xmpp.h"
 #include "jid.h"
 
 #define INP_WIN_MAX 1000

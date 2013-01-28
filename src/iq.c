@@ -29,9 +29,9 @@
 #include "common.h"
 #include "config.h"
 #include "contact_list.h"
-#include "jabber.h"
 #include "log.h"
 #include "stanza.h"
+#include "xmpp.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 

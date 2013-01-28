@@ -1,5 +1,5 @@
 bin_PROGRAMS = profanity
-profanity_SOURCES = src/command.c src/contact.c src/history.c src/jabber.h \
+profanity_SOURCES = src/command.c src/contact.c src/history.c src/xmpp.h \
 	src/preferences.c src/autocomplete.c src/status_bar.c \
 	src/command.h src/contact.h src/history.h src/log.c src/preferences.h \
 	src/autocomplete.h src/title_bar.c src/windows.c src/common.c \

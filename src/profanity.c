@@ -44,8 +44,8 @@
 #include "profanity.h"
 #include "muc.h"
 #include "theme.h"
-#include "jabber.h"
 #include "ui.h"
+#include "xmpp.h"
 
 static log_level_t _get_log_level(char *log_level);
 static gboolean _process_input(char *inp);

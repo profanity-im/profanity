@@ -30,13 +30,13 @@
 #include "chat_session.h"
 #include "common.h"
 #include "contact_list.h"
-#include "jabber.h"
 #include "jid.h"
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
 #include "muc.h"
 #include "stanza.h"
+#include "xmpp.h"
 
 static struct _jabber_conn_t {
     xmpp_log_t *log;

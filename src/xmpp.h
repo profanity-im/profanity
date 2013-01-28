@@ -1,5 +1,5 @@
 /*
- * jabber.h
+ * xmpp.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef JABBER_H
-#define JABBER_H
+#ifndef XMPP_H
+#define XMPP_H
 
 #include <strophe.h>
 

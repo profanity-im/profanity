@@ -35,7 +35,6 @@
 #include "contact_list.h"
 #include "chat_log.h"
 #include "history.h"
-#include "jabber.h"
 #include "jid.h"
 #include "log.h"
 #include "parser.h"
@@ -46,6 +45,7 @@
 #include "theme.h"
 #include "tinyurl.h"
 #include "ui.h"
+#include "xmpp.h"
 
 typedef char*(*autocomplete_func)(char *);
 
