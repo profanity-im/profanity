@@ -1206,7 +1206,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
     }
 
     if (strcmp(subcmd, "received") == 0) {
-        GList *received = jabber_get_subscription_requests();
+        GList *received = presence_get_subscription_requests();
 
         if (received == NULL) {
             cons_show("No outstanding subscription requests.");
@@ -1236,15 +1236,15 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
     bare_jid = strtok(jid, "/");
 
     if (strcmp(subcmd, "allow") == 0) {
-        jabber_subscription(bare_jid, PRESENCE_SUBSCRIBED);
+        presence_subscription(bare_jid, PRESENCE_SUBSCRIBED);
         cons_show("Accepted subscription for %s", bare_jid);
         log_info("Accepted subscription for %s", bare_jid);
     } else if (strcmp(subcmd, "deny") == 0) {
-        jabber_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
+        presence_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
         cons_show("Deleted/denied subscription for %s", bare_jid);
         log_info("Deleted/denied subscription for %s", bare_jid);
     } else if (strcmp(subcmd, "request") == 0) {
-        jabber_subscription(bare_jid, PRESENCE_SUBSCRIBE);
+        presence_subscription(bare_jid, PRESENCE_SUBSCRIBE);
         cons_show("Sent subscription request to %s.", bare_jid);
         log_info("Sent subscription request to %s.", bare_jid);
     } else if (strcmp(subcmd, "show") == 0) {

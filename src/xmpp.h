@@ -149,8 +149,6 @@ void jabber_process_events(void);
 void jabber_join(Jid *jid);
 void jabber_change_room_nick(const char * const room, const char * const nick);
 void jabber_leave_chat_room(const char * const room_jid);
-void jabber_subscription(const char * const jid, jabber_subscr_t action);
-GList* jabber_get_subscription_requests(void);
 void jabber_send(const char * const msg, const char * const recipient);
 void jabber_send_groupchat(const char * const msg, const char * const recipient);
 void jabber_send_inactive(const char * const recipient);
@@ -167,9 +165,20 @@ char * jabber_get_status(void);
 void jabber_free_resources(void);
 void jabber_restart(void);
 void jabber_set_autoping(int seconds);
+xmpp_conn_t *jabber_get_conn(void);
+xmpp_ctx_t *jabber_get_ctx(void);
+int error_handler(xmpp_stanza_t * const stanza);
 
 // iq functions
 void iq_add_handlers(xmpp_conn_t * const conn, xmpp_ctx_t * const ctx);
+
+// presence functions
+void presence_init(void);
+void presence_subscription(const char * const jid, const jabber_subscr_t action);
+GList* presence_get_subscription_requests(void);
+void presence_free_sub_requests(void);
+int presence_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 // caps functions
 void caps_init(void);

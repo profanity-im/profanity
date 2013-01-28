@@ -26,6 +26,8 @@
 #include <glib.h>
 
 #include "autocomplete.h"
+#include "contact.h"
+#include "jid.h"
 
 void muc_join_room(const char * const room, const char * const nick);
 void muc_leave_room(const char * const room);
