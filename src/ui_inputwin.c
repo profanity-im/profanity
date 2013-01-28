@@ -36,7 +36,6 @@
 #include "common.h"
 #include "command.h"
 #include "contact_list.h"
-#include "history.h"
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"

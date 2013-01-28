@@ -1,7 +1,7 @@
 bin_PROGRAMS = profanity
-profanity_SOURCES = src/command.c src/contact.c src/history.c src/xmpp.h \
+profanity_SOURCES = src/command.c src/contact.c src/command_history.c src/xmpp.h \
 	src/preferences.c src/autocomplete.c src/ui_statusbar.c \
-	src/command.h src/contact.h src/history.h src/log.c src/preferences.h \
+	src/command.h src/contact.h src/log.c src/preferences.h \
 	src/autocomplete.h src/ui_titlebar.c src/ui_windows.c src/common.c \
 	src/contact_list.c src/ui_inputwin.c src/log.h src/profanity.c \
 	src/prof_history.c src/ui.h src/common.h src/ contact_list.h src/xmpp_conn.c \
