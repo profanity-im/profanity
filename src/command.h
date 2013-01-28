@@ -45,9 +45,9 @@ GSList * cmd_get_basic_help(void);
 GSList * cmd_get_settings_help(void);
 GSList * cmd_get_presence_help(void);
 
-void history_init(void);
-void history_append(char *inp);
-char *history_previous(char *inp, int *size);
-char *history_next(char *inp, int *size);
+void cmd_history_init(void);
+void cmd_history_append(char *inp);
+char *cmd_history_previous(char *inp, int *size);
+char *cmd_history_next(char *inp, int *size);
 
 #endif

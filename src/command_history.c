@@ -20,42 +20,42 @@
  *
  */
 
-#include "prof_history.h"
+#include "history.h"
 
 #define MAX_HISTORY 100
 
-static PHistory history;
+static History history;
 
 void _stringify_input(char *inp, int size, char *string);
 
 void
-history_init(void)
+cmd_history_init(void)
 {
-    history = p_history_new(MAX_HISTORY);
+    history = history_new(MAX_HISTORY);
 }
 
 void
-history_append(char *inp)
+cmd_history_append(char *inp)
 {
-    p_history_append(history, inp);
+    history_append(history, inp);
 }
 
 char *
-history_previous(char *inp, int *size)
+cmd_history_previous(char *inp, int *size)
 {
     char inp_str[*size + 1];
     _stringify_input(inp, *size, inp_str);
 
-    return p_history_previous(history, inp_str);
+    return history_previous(history, inp_str);
 }
 
 char *
-history_next(char *inp, int *size)
+cmd_history_next(char *inp, int *size)
 {
     char inp_str[*size + 1];
     _stringify_input(inp, *size, inp_str);
 
-    return p_history_next(history, inp_str);
+    return history_next(history, inp_str);
 }
 
 void

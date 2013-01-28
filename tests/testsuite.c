@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    register_prof_history_tests();
+    register_history_tests();
     register_contact_list_tests();
     register_common_tests();
     register_autocomplete_tests();

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <head-unit.h>
-#include "prof_history.h"
+#include "history.h"
 
 void previous_on_empty_returns_null(void)
 {
@@ -214,9 +214,9 @@ void start_session_add_new_submit_previous(void)
     p_history_append(history, item3);
 }
 
-void register_prof_history_tests(void)
+void register_history_tests(void)
 {
-    TEST_MODULE("prof_history tests");
+    TEST_MODULE("history tests");
     TEST(previous_on_empty_returns_null);
     TEST(next_on_empty_returns_null);
     TEST(previous_once_returns_last);

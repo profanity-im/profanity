@@ -432,7 +432,7 @@ _process_input(char *inp)
 
     // add line to history if something typed
     if (strlen(inp) > 0) {
-        history_append(inp);
+        cmd_history_append(inp);
     }
 
     // just carry on if no input

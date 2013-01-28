@@ -743,7 +743,7 @@ cmd_init(void)
     autocomplete_add(who_ac, strdup("available"));
     autocomplete_add(who_ac, strdup("unavailable"));
 
-    history_init();
+    cmd_history_init();
 }
 
 void
