@@ -36,7 +36,6 @@
 #include "chat_log.h"
 #include "jid.h"
 #include "log.h"
-#include "parser.h"
 #include "preferences.h"
 #include "autocomplete.h"
 #include "profanity.h"

@@ -50,4 +50,7 @@ void cmd_history_append(char *inp);
 char *cmd_history_previous(char *inp, int *size);
 char *cmd_history_next(char *inp, int *size);
 
+gchar** parse_args(const char * const inp, int min, int max);
+gchar** parse_args_with_freetext(const char * const inp, int min, int max);
+
 #endif
