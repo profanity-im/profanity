@@ -542,13 +542,11 @@ jabber_get_presence(void)
     return jabber_conn.presence;
 }
 
+// returns pointer to status, owned by connection
 char *
 jabber_get_status(void)
 {
-    if (jabber_conn.status == NULL)
-        return NULL;
-    else
-        return strdup(jabber_conn.status);
+    return jabber_conn.status;
 }
 
 void
