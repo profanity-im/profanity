@@ -31,7 +31,6 @@
 #include "common.h"
 #include "files.h"
 #include "log.h"
-#include "ui.h"
 
 static GHashTable *logs;
 static GDateTime *session_started;
