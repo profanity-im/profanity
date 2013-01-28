@@ -1835,7 +1835,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
 
     if (!muc_room_is_active(room_jid)) {
-        jabber_join(room_jid);
+        presence_join_room(room_jid);
     }
     win_join_chat(room_jid);
 
@@ -1858,7 +1858,7 @@ _cmd_nick(gchar **args, struct cmd_help_t help)
 
     char *room = win_current_get_recipient();
     char *nick = args[0];
-    jabber_change_room_nick(room, nick);
+    presence_change_room_nick(room, nick);
 
     return TRUE;
 }
@@ -1927,7 +1927,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
     if (conn_status == JABBER_CONNECTED) {
         if (win_current_is_groupchat()) {
             char *room_jid = win_current_get_recipient();
-            jabber_leave_chat_room(room_jid);
+            presence_leave_chat_room(room_jid);
         } else if (win_current_is_chat() || win_current_is_private()) {
 
             if (prefs_get_states()) {
@@ -2180,7 +2180,7 @@ _cmd_set_priority(gchar **args, struct cmd_help_t help)
         char *status = jabber_get_status();
         prefs_set_priority((int)intval);
         // update presence with new priority
-        jabber_update_presence(jabber_get_presence(), status, 0);
+        presence_update(jabber_get_presence(), status, 0);
         cons_show("Priority set to %d.", intval);
     }
 
@@ -2302,7 +2302,7 @@ _update_presence(const jabber_presence_t presence,
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        jabber_update_presence(presence, msg, 0);
+        presence_update(presence, msg, 0);
         title_bar_set_status(presence);
         if (msg != NULL) {
             cons_show("Status set to %s, \"%s\"", show, msg);

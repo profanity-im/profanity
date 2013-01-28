@@ -141,7 +141,7 @@ _iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
          *       presence rather than PRESENCE_ONLINE. It will be helpful
          *       when I set dnd status and reconnect for some reason */
         // send initial presence
-        jabber_update_presence(PRESENCE_ONLINE, NULL, 0);
+        presence_update(PRESENCE_ONLINE, NULL, 0);
     }
 
     return 1;
