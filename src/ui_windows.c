@@ -1,5 +1,5 @@
 /*
- * windows.c
+ * ui_windows.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
