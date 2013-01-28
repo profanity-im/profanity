@@ -53,7 +53,6 @@
 #include "jid.h"
 #include "log.h"
 #include "preferences.h"
-#include "release.h"
 #include "muc.h"
 #include "theme.h"
 #include "ui.h"

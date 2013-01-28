@@ -58,5 +58,6 @@ int str_contains(char str[], int size, char ch);
 char* encode_xml(const char * const xml);
 char * prof_getline(FILE *stream);
 int octet_compare(unsigned char *str1, unsigned char *str2);
+char* release_get_latest(void);
 
 #endif
