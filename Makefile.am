@@ -11,7 +11,7 @@ profanity_SOURCES = src/command.c src/contact.c src/history.c src/xmpp.h \
 	src/muc.h src/stanza.c src/stanza.h src/parser.c src/parser.h \
 	src/theme.c src/theme.h src/window.c src/window.h src/xdg_base.c \
 	src/xdg_base.h src/files.c src/files.h src/accounts.c src/accounts.h \
-	src/jid.h src/jid.c src/capabilities.h src/capabilities.c src/iq.c
+	src/jid.h src/jid.c src/capabilities.h src/capabilities.c src/xmpp_iq.c
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
