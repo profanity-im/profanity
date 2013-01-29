@@ -403,8 +403,7 @@ _connection_handler(xmpp_conn_t * const conn,
 
         chat_sessions_init();
 
-        xmpp_handler_add(conn, message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
-
+        message_add_handlers();
         presence_add_handlers();
         iq_add_handlers();
 

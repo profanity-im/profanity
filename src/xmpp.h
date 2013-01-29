@@ -163,9 +163,7 @@ void jabber_conn_set_status(const char * const message);
 char* jabber_get_account_name(void);
 
 // message functions
-
-int message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata);
+void message_add_handlers(void);
 void message_send(const char * const msg, const char * const recipient);
 void message_send_groupchat(const char * const msg, const char * const recipient);
 void message_send_inactive(const char * const recipient);

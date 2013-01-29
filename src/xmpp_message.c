@@ -32,8 +32,20 @@
 #include "profanity.h"
 #include "xmpp.h"
 
+#define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
+
+static int _message_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _groupchat_message_handler(xmpp_stanza_t * const stanza);
 static int _chat_message_handler(xmpp_stanza_t * const stanza);
+
+void
+message_add_handlers(void)
+{
+    xmpp_conn_t * const conn = jabber_get_conn();
+    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    HANDLE(NULL, NULL, _message_handler);
+}
 
 void
 message_send(const char * const msg, const char * const recipient)
@@ -124,8 +136,8 @@ message_send_gone(const char * const recipient)
     chat_session_set_sent(recipient);
 }
 
-int
-message_handler(xmpp_conn_t * const conn,
+static int
+_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     gchar *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
