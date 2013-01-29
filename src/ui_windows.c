@@ -314,14 +314,14 @@ ui_idle(void)
 
             if (chat_session_is_gone(recipient) &&
                     !chat_session_get_sent(recipient)) {
-                jabber_send_gone(recipient);
+                message_send_gone(recipient);
             } else if (chat_session_is_inactive(recipient) &&
                     !chat_session_get_sent(recipient)) {
-                jabber_send_inactive(recipient);
+                message_send_inactive(recipient);
             } else if (prefs_get_outtype() &&
                     chat_session_is_paused(recipient) &&
                     !chat_session_get_sent(recipient)) {
-                jabber_send_paused(recipient);
+                message_send_paused(recipient);
             }
         }
     }

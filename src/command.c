@@ -900,7 +900,7 @@ cmd_execute_default(const char * const inp)
             win_current_show("You are not currently connected.");
         } else {
             char *recipient = win_current_get_recipient();
-            jabber_send_groupchat(inp, recipient);
+            message_send_groupchat(inp, recipient);
             free(recipient);
         }
     } else if (win_current_is_chat() || win_current_is_private()) {
@@ -1898,7 +1898,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
                 free(recipient);
             } else { // groupchat
                 char *recipient = win_current_get_recipient();
-                jabber_send_groupchat(tiny, recipient);
+                message_send_groupchat(tiny, recipient);
                 free(recipient);
             }
             free(tiny);
@@ -1936,7 +1936,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
                 // send <gone/> chat state before closing
                 if (chat_session_get_recipient_supports(recipient)) {
                     chat_session_set_gone(recipient);
-                    jabber_send_gone(recipient);
+                    message_send_gone(recipient);
                     chat_session_end(recipient);
                 }
             }

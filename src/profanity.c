@@ -398,7 +398,7 @@ prof_handle_activity(void)
             chat_session_set_composing(recipient);
             if (!chat_session_get_sent(recipient) ||
                     chat_session_is_paused(recipient)) {
-                jabber_send_composing(recipient);
+                message_send_composing(recipient);
             }
         }
     }
