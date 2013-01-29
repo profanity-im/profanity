@@ -146,7 +146,6 @@ jabber_conn_status_t jabber_connect_with_account(ProfAccount *account,
     const char * const passwd);
 void jabber_disconnect(void);
 void jabber_process_events(void);
-void jabber_send(const char * const msg, const char * const recipient);
 void jabber_send_groupchat(const char * const msg, const char * const recipient);
 void jabber_send_inactive(const char * const recipient);
 void jabber_send_composing(const char * const recipient);
@@ -167,6 +166,9 @@ void jabber_conn_set_presence(jabber_presence_t presence);
 void jabber_conn_set_priority(int priority);
 void jabber_conn_set_status(const char * const message);
 char* jabber_get_account_name(void);
+
+// message functions
+void message_send(const char * const msg, const char * const recipient);
 
 // iq functions
 void iq_add_handlers(void);

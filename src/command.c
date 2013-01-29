@@ -909,7 +909,7 @@ cmd_execute_default(const char * const inp)
             win_current_show("You are not currently connected.");
         } else {
             char *recipient = win_current_get_recipient();
-            jabber_send(inp, recipient);
+            message_send(inp, recipient);
 
             if (win_current_is_chat() && prefs_get_chlog()) {
                 const char *jid = jabber_get_jid();
@@ -1669,7 +1669,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, usr);
 
             if (msg != NULL) {
-                jabber_send(msg, full_jid->str);
+                message_send(msg, full_jid->str);
                 win_show_outgoing_msg("me", full_jid->str, msg);
             } else {
                 win_new_chat_win(full_jid->str);
@@ -1685,7 +1685,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
     } else {
         if (msg != NULL) {
-            jabber_send(msg, usr);
+            message_send(msg, usr);
             win_show_outgoing_msg("me", usr, msg);
 
             if (win_current_is_chat() && prefs_get_chlog()) {
@@ -1882,7 +1882,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
         if (tiny != NULL) {
             if (win_current_is_chat()) {
                 char *recipient = win_current_get_recipient();
-                jabber_send(tiny, recipient);
+                message_send(tiny, recipient);
 
                 if (prefs_get_chlog()) {
                     const char *jid = jabber_get_jid();
@@ -1893,7 +1893,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
                 free(recipient);
             } else if (win_current_is_private()) {
                 char *recipient = win_current_get_recipient();
-                jabber_send(tiny, recipient);
+                message_send(tiny, recipient);
                 win_show_outgoing_msg("me", recipient, tiny);
                 free(recipient);
             } else { // groupchat

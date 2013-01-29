@@ -242,29 +242,6 @@ jabber_process_events(void)
 }
 
 void
-jabber_send(const char * const msg, const char * const recipient)
-{
-    if (prefs_get_states()) {
-        if (!chat_session_exists(recipient)) {
-            chat_session_start(recipient, TRUE);
-        }
-    }
-
-    xmpp_stanza_t *message;
-    if (prefs_get_states() && chat_session_get_recipient_supports(recipient)) {
-        chat_session_set_active(recipient);
-        message = stanza_create_message(jabber_conn.ctx, recipient, STANZA_TYPE_CHAT,
-            msg, STANZA_NAME_ACTIVE);
-    } else {
-        message = stanza_create_message(jabber_conn.ctx, recipient, STANZA_TYPE_CHAT,
-            msg, NULL);
-    }
-
-    xmpp_send(jabber_conn.conn, message);
-    xmpp_stanza_release(message);
-}
-
-void
 jabber_send_groupchat(const char * const msg, const char * const recipient)
 {
     xmpp_stanza_t *message = stanza_create_message(jabber_conn.ctx, recipient,
