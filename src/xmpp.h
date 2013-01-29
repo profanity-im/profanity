@@ -172,12 +172,11 @@ char* jabber_get_account_name(void);
 void iq_add_handlers(void);
 
 // presence functions
+void presence_add_handlers(void);
 void presence_init(void);
 void presence_subscription(const char * const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
 void presence_free_sub_requests(void);
-int presence_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
 void presence_join_room(Jid *jid);
 void presence_change_room_nick(const char * const room, const char * const nick);
 void presence_leave_chat_room(const char * const room_jid);

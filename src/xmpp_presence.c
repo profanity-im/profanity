@@ -33,6 +33,11 @@
 #include "xmpp.h"
 
 static GHashTable *sub_requests;
+
+#define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_PRESENCE, type, ctx)
+
+static int _presence_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static char* _handle_presence_caps(xmpp_stanza_t * const stanza);
 static int _room_presence_handler(const char * const jid,
     xmpp_stanza_t * const stanza);
@@ -41,6 +46,14 @@ void
 presence_init(void)
 {
     sub_requests = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+}
+
+void
+presence_add_handlers(void)
+{
+    xmpp_conn_t * const conn = jabber_get_conn();
+    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    HANDLE(NULL, NULL, _presence_handler);
 }
 
 void
@@ -234,8 +247,8 @@ presence_update(jabber_presence_t status, const char * const msg,
 }
 
 
-int
-presence_handler(xmpp_conn_t * const conn,
+static int
+_presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     const char *jid = xmpp_conn_get_jid(conn);

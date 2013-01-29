@@ -663,8 +663,8 @@ _connection_handler(xmpp_conn_t * const conn,
         chat_sessions_init();
 
         xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
-        xmpp_handler_add(conn, presence_handler, NULL, STANZA_NAME_PRESENCE, NULL, ctx);
 
+        presence_add_handlers();
         iq_add_handlers();
 
         if (prefs_get_autoping() != 0) {
