@@ -73,8 +73,6 @@ static jabber_conn_status_t _jabber_connect(const char * const fulljid,
     const char * const passwd, const char * const altdomain);
 static void _jabber_reconnect(void);
 
-static void _jabber_roster_request(void);
-
 static void _connection_handler(xmpp_conn_t * const conn,
     const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t * const stream_error, void * const userdata);
@@ -138,23 +136,6 @@ jabber_connect_with_details(const char * const jid,
 
     log_info("Connecting without account, JID: %s", saved_details.jid);
     return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain);
-}
-
-static void
-_jabber_reconnect(void)
-{
-    // reconnect with account.
-    ProfAccount *account = accounts_get_account(saved_account.name);
-
-    if (account == NULL) {
-        log_error("Unable to reconnect, account no longer exists: %s", saved_account.name);
-    } else {
-        char *fulljid = create_fulljid(account->jid, account->resource);
-        log_debug("Attempting reconnect with account %s", account->name);
-        _jabber_connect(fulljid, saved_account.passwd, account->server);
-        free(fulljid);
-        g_timer_start(reconnect_timer);
-    }
 }
 
 void
@@ -373,6 +354,23 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
 }
 
 static void
+_jabber_reconnect(void)
+{
+    // reconnect with account.
+    ProfAccount *account = accounts_get_account(saved_account.name);
+
+    if (account == NULL) {
+        log_error("Unable to reconnect, account no longer exists: %s", saved_account.name);
+    } else {
+        char *fulljid = create_fulljid(account->jid, account->resource);
+        log_debug("Attempting reconnect with account %s", account->name);
+        _jabber_connect(fulljid, saved_account.passwd, account->server);
+        free(fulljid);
+        g_timer_start(reconnect_timer);
+    }
+}
+
+static void
 _connection_handler(xmpp_conn_t * const conn,
     const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t * const stream_error, void * const userdata)
@@ -412,7 +410,7 @@ _connection_handler(xmpp_conn_t * const conn,
             xmpp_timed_handler_add(conn, _ping_timed_handler, millis, ctx);
         }
 
-        _jabber_roster_request();
+        iq_roster_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
         jabber_conn.presence = PRESENCE_ONLINE;
 
@@ -453,14 +451,6 @@ _connection_handler(xmpp_conn_t * const conn,
         jabber_conn.conn_status = JABBER_DISCONNECTED;
         jabber_conn.presence = PRESENCE_OFFLINE;
     }
-}
-
-static void
-_jabber_roster_request(void)
-{
-    xmpp_stanza_t *iq = stanza_create_roster_iq(jabber_conn.ctx);
-    xmpp_send(jabber_conn.conn, iq);
-    xmpp_stanza_release(iq);
 }
 
 static int

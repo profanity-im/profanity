@@ -62,6 +62,16 @@ iq_add_handlers(void)
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
 }
 
+void
+iq_roster_request(void)
+{
+    xmpp_conn_t * const conn = jabber_get_conn();
+    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_roster_iq(ctx);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
 static int
 _iq_handle_error(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)

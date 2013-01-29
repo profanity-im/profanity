@@ -173,6 +173,7 @@ void message_send_gone(const char * const recipient);
 
 // iq functions
 void iq_add_handlers(void);
+void iq_roster_request(void);
 
 // presence functions
 void presence_add_handlers(void);
