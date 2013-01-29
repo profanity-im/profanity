@@ -120,13 +120,13 @@ prof_handle_incoming_message(char *from, char *message, gboolean priv)
     ui_show_incoming_msg(from, message, NULL, priv);
     win_current_page_off();
 
-    if (win_current_is_chat() && prefs_get_chlog()) {
-        char from_cpy[strlen(from) + 1];
-        strcpy(from_cpy, from);
-        char *short_from = strtok(from_cpy, "/");
+    if (prefs_get_chlog() && !priv) {
+        Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_jid();
-
-        chat_log_chat(jid, short_from, message, PROF_IN_LOG, NULL);
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
     }
 }
 
@@ -137,13 +137,13 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     ui_show_incoming_msg(from, message, &tv_stamp, priv);
     win_current_page_off();
 
-    if (win_current_is_chat() && prefs_get_chlog()) {
-        char from_cpy[strlen(from) + 1];
-        strcpy(from_cpy, from);
-        char *short_from = strtok(from_cpy, "/");
+    if (prefs_get_chlog() && !priv) {
+        Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_jid();
-
-        chat_log_chat(jid, short_from, message, PROF_IN_LOG, &tv_stamp);
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, &tv_stamp);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
     }
 }
 

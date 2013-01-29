@@ -2327,7 +2327,9 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
 {
     if (!windows[win_index]->history_shown) {
         GSList *history = NULL;
-        history = chat_log_get_previous(jabber_get_jid(), contact, history);
+        Jid *jid = jid_create(jabber_get_jid());
+        history = chat_log_get_previous(jid->barejid, contact, history);
+        jid_destroy(jid);
         while (history != NULL) {
             wprintw(win, "%s\n", history->data);
             history = g_slist_next(history);
