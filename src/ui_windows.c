@@ -1636,6 +1636,30 @@ cons_show(const char * const msg, ...)
 }
 
 void
+cons_debug(const char * const msg, ...)
+{
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+        va_list arg;
+        va_start(arg, msg);
+        GString *fmt_msg = g_string_new(NULL);
+        g_string_vprintf(fmt_msg, msg, arg);
+        _win_show_time(console->win, '-');
+        wprintw(console->win, "%s\n", fmt_msg->str);
+        g_string_free(fmt_msg, TRUE);
+        va_end(arg);
+
+        if (current_index == 0) {
+            dirty = TRUE;
+        } else {
+            status_bar_new(0);
+        }
+
+        win_current_page_off();
+        ui_refresh();
+    }
+}
+
+void
 cons_show_word(const char * const word)
 {
     wprintw(console->win, "%s", word);
