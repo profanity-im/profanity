@@ -178,6 +178,7 @@ void iq_roster_request(void);
 // presence functions
 void presence_add_handlers(void);
 void presence_init(void);
+gboolean presence_valid_string(const char * const str);
 void presence_subscription(const char * const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
 void presence_free_sub_requests(void);

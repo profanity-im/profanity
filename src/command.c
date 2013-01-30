@@ -1157,6 +1157,14 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_set_resource(account_name, value);
                     cons_show("Updated resource for account %s: %s", account_name, value);
                     cons_show("");
+                } else if (strcmp(property, "status") == 0) {
+                    if (!presence_valid_string(value)) {
+                        cons_show("Invalud status: %s", value);
+                    } else {
+                        accounts_set_login_presence(account_name, value);
+                        cons_show("Updated login status for account %s: %s", account_name, value);
+                    }
+                    cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);
                     cons_show("");

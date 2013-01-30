@@ -56,6 +56,23 @@ presence_add_handlers(void)
     HANDLE(NULL, NULL, _presence_handler);
 }
 
+gboolean
+presence_valid_string(const char * const str)
+{
+    if (str == NULL) {
+        return FALSE;
+    } else if ((strcmp(str, "online") == 0) ||
+                (strcmp(str, "chat") == 0) ||
+                (strcmp(str, "away") == 0) ||
+                (strcmp(str, "xa") == 0) ||
+                (strcmp(str, "dnd") == 0)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+
 void
 presence_subscription(const char * const jid, const jabber_subscr_t action)
 {
