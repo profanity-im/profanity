@@ -43,6 +43,21 @@ struct curl_data_t
 
 static size_t _data_callback(void *ptr, size_t size, size_t nmemb, void *data);
 
+// taken from glib 2.30.3
+gchar *
+p_utf8_substring(const gchar *str, glong start_pos, glong end_pos)
+{
+    gchar *start, *end, *out;
+
+    start = g_utf8_offset_to_pointer (str, start_pos);
+    end = g_utf8_offset_to_pointer (start, end_pos - start_pos);
+
+    out = g_malloc (end - start + 1);
+    memcpy (out, start, end - start);
+    out[end - start] = 0;
+
+    return out;
+}
 
 // backwards compatibility for GLib version < 2.28
 void
