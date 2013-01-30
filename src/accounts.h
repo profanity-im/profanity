@@ -52,5 +52,6 @@ void accounts_set_server(const char * const account_name, const char * const val
 void accounts_set_resource(const char * const account_name, const char * const value);
 void accounts_set_last_presence(const char * const account_name, const char * const value);
 void accounts_set_login_presence(const char * const account_name, const char * const value);
+void account_get_login_presence(const char * const account_name, char *str);
 
 #endif

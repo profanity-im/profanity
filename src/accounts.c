@@ -31,6 +31,7 @@
 #include "files.h"
 #include "jid.h"
 #include "log.h"
+#include "xmpp.h"
 
 static gchar *accounts_loc;
 static GKeyFile *accounts;
@@ -315,6 +316,22 @@ accounts_set_login_presence(const char * const account_name, const char * const 
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "presence.login", value);
         _save_accounts();
+    }
+}
+
+void
+account_get_login_presence(const char * const account_name, char *str)
+{
+    static char *online = "online";
+    gchar *setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
+    if (setting == NULL) {
+        str = online;
+    } else if (!presence_valid_string(setting)) {
+        log_warning("Error reading presence.login for account: '%s', value: '%s', defaulting to 'online'",
+            account_name, setting);
+        str = online;
+    } else {
+        str = setting;
     }
 }
 
