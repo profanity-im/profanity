@@ -39,6 +39,8 @@ static GKeyFile *accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
+static gchar *string_keys[] = {"jid", "server", "resource", "presence.last", "presence.login"};
+
 static void _fix_legacy_accounts(const char * const account_name);
 static void _save_accounts(void);
 
@@ -256,34 +258,13 @@ accounts_rename(const char * const account_name, const char * const new_name)
     g_key_file_set_boolean(accounts, new_name, "enabled",
         g_key_file_get_boolean(accounts, account_name, "enabled", NULL));
 
-    char *jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
-    if (jid != NULL) {
-        g_key_file_set_string(accounts, new_name, "jid", jid);
-        free(jid);
-    }
-
-    char *server = g_key_file_get_string(accounts, account_name, "server", NULL);
-    if (server != NULL) {
-        g_key_file_set_string(accounts, new_name, "server", server);
-        free(server);
-    }
-
-    char *resource = g_key_file_get_string(accounts, account_name, "resource", NULL);
-    if (resource != NULL) {
-        g_key_file_set_string(accounts, new_name, "resource", resource);
-        free(resource);
-    }
-
-    char *presence_last = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
-    if (presence_last != NULL) {
-        g_key_file_set_string(accounts, new_name, "presence.last", presence_last);
-        free(presence_last);
-    }
-
-    char *presence_login = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
-    if (presence_login != NULL) {
-        g_key_file_set_string(accounts, new_name, "presence.login", presence_login);
-        free(presence_login);
+    int i;
+    for (i = 0; i < ARRAY_SIZE(string_keys); i++) {
+        char *value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
+        if (value != NULL) {
+            g_key_file_set_string(accounts, new_name, string_keys[i], value);
+            free(value);
+        }
     }
 
     g_key_file_remove_group(accounts, account_name, NULL);
