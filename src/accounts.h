@@ -32,6 +32,11 @@ typedef struct prof_account_t {
     gchar *server;
     gchar *last_presence;
     gchar *login_presence;
+    gint priority_online;
+    gint priority_chat;
+    gint priority_away;
+    gint priority_xa;
+    gint priority_dnd;
     gboolean enabled;
 } ProfAccount;
 
