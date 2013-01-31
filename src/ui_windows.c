@@ -1225,16 +1225,22 @@ cons_show_account(ProfAccount *account)
 {
     cons_show("%s account details:", account->name);
     if (account->enabled) {
-        cons_show("enabled   : TRUE");
+        cons_show("enabled        : TRUE");
     } else {
-        cons_show("enabled   : FALSE");
+        cons_show("enabled        : FALSE");
     }
-    cons_show("jid       : %s", account->jid);
+    cons_show("jid            : %s", account->jid);
     if (account->resource != NULL) {
-        cons_show("resource  : %s", account->resource);
+        cons_show("resource       : %s", account->resource);
     }
     if (account->server != NULL) {
-        cons_show("server    : %s", account->server);
+        cons_show("server         : %s", account->server);
+    }
+    if (account->last_presence != NULL) {
+        cons_show("Last presence  : %s", account->last_presence);
+    }
+    if (account->login_presence != NULL) {
+        cons_show("Login presence : %s", account->login_presence);
     }
     cons_show("");
 }

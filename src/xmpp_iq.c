@@ -149,11 +149,8 @@ _iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             item = xmpp_stanza_get_next(item);
         }
 
-        /* TODO: Save somehow last presence show and use it for initial
-         *       presence rather than PRESENCE_ONLINE. It will be helpful
-         *       when I set dnd status and reconnect for some reason */
-        // send initial presence
-        presence_update(PRESENCE_ONLINE, NULL, 0);
+        jabber_presence_t connect_presence = account_get_login_presence(jabber_get_account_name());
+        presence_update(connect_presence, NULL, 0);
     }
 
     return 1;

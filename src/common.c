@@ -246,6 +246,22 @@ release_get_latest()
     }
 }
 
+gboolean
+presence_valid_string(const char * const str)
+{
+    if (str == NULL) {
+        return FALSE;
+    } else if ((strcmp(str, "online") == 0) ||
+                (strcmp(str, "chat") == 0) ||
+                (strcmp(str, "away") == 0) ||
+                (strcmp(str, "xa") == 0) ||
+                (strcmp(str, "dnd") == 0)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
 static size_t
 _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
 {

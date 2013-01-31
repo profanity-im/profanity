@@ -152,6 +152,7 @@ accounts_get_account(const char * const name)
     } else {
         ProfAccount *account = malloc(sizeof(ProfAccount));
         account->name = strdup(name);
+
         gchar *jid = g_key_file_get_string(accounts, name, "jid", NULL);
         if (jid != NULL) {
             account->jid = strdup(jid);
@@ -160,18 +161,39 @@ accounts_get_account(const char * const name)
             g_key_file_set_string(accounts, name, "jid", name);
             _save_accounts();
         }
+
         account->enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
+
         gchar *server = g_key_file_get_string(accounts, name, "server", NULL);
         if (server != NULL) {
             account->server = strdup(server);
         } else {
             account->server = NULL;
         }
+
         gchar *resource = g_key_file_get_string(accounts, name, "resource", NULL);
         if (resource != NULL) {
             account->resource = strdup(resource);
         } else {
             account->resource = NULL;
+        }
+
+        gchar *presence = g_key_file_get_string(accounts, name, "presence.last", NULL);
+        if (presence == NULL || (!presence_valid_string(presence))) {
+            account->last_presence = strdup("online");
+        } else {
+            account->last_presence = strdup(presence);
+        }
+
+        presence = g_key_file_get_string(accounts, name, "presence.login", NULL);
+        if (presence == NULL) {
+            account->login_presence = strdup("online");
+        } else if (strcmp(presence, "last") == 0) {
+            account->login_presence = strdup("last");
+        } else if (!presence_valid_string(presence)) {
+            account->login_presence = strdup("online");
+        } else {
+            account->login_presence = strdup(presence);
         }
 
         return account;
@@ -186,6 +208,8 @@ accounts_free_account(ProfAccount *account)
         FREE_SET_NULL(account->jid);
         FREE_SET_NULL(account->resource);
         FREE_SET_NULL(account->server);
+        FREE_SET_NULL(account->last_presence);
+        FREE_SET_NULL(account->login_presence);
         FREE_SET_NULL(account);
     }
 }
@@ -319,19 +343,47 @@ accounts_set_login_presence(const char * const account_name, const char * const 
     }
 }
 
-void
-account_get_login_presence(const char * const account_name, char *str)
+jabber_presence_t
+accounts_get_last_presence(const char * const account_name)
 {
-    static char *online = "online";
+    gchar *setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
+    if (setting == NULL || (strcmp(setting, "online") == 0)) {
+        return PRESENCE_ONLINE;
+    } else if (strcmp(setting, "chat") == 0) {
+        return PRESENCE_CHAT;
+    } else if (strcmp(setting, "away") == 0) {
+        return PRESENCE_AWAY;
+    } else if (strcmp(setting, "xa") == 0) {
+        return PRESENCE_XA;
+    } else if (strcmp(setting, "dnd") == 0) {
+        return PRESENCE_DND;
+    } else {
+        log_warning("Error reading presence.last for account: '%s', value: '%s', defaulting to 'online'",
+            account_name, setting);
+        return PRESENCE_ONLINE;
+    }
+}
+
+jabber_presence_t
+account_get_login_presence(const char * const account_name)
+{
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
-    if (setting == NULL) {
-        str = online;
-    } else if (!presence_valid_string(setting)) {
+    if (setting == NULL || (strcmp(setting, "online") == 0)) {
+        return PRESENCE_ONLINE;
+    } else if (strcmp(setting, "chat") == 0) {
+        return PRESENCE_CHAT;
+    } else if (strcmp(setting, "away") == 0) {
+        return PRESENCE_AWAY;
+    } else if (strcmp(setting, "xa") == 0) {
+        return PRESENCE_XA;
+    } else if (strcmp(setting, "dnd") == 0) {
+        return PRESENCE_DND;
+    } else if (strcmp(setting, "last") == 0) {
+        return accounts_get_last_presence(account_name);
+    } else {
         log_warning("Error reading presence.login for account: '%s', value: '%s', defaulting to 'online'",
             account_name, setting);
-        str = online;
-    } else {
-        str = setting;
+        return PRESENCE_ONLINE;
     }
 }
 

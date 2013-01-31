@@ -54,6 +54,15 @@
     resource = NULL; \
 }
 
+typedef enum {
+    PRESENCE_OFFLINE,
+    PRESENCE_ONLINE,
+    PRESENCE_AWAY,
+    PRESENCE_DND,
+    PRESENCE_CHAT,
+    PRESENCE_XA
+} jabber_presence_t;
+
 gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void create_dir(char *name);
@@ -64,5 +73,6 @@ char* encode_xml(const char * const xml);
 char * prof_getline(FILE *stream);
 int octet_compare(unsigned char *str1, unsigned char *str2);
 char* release_get_latest(void);
+gboolean presence_valid_string(const char * const str);
 
 #endif

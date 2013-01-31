@@ -110,15 +110,6 @@ typedef enum {
 } jabber_conn_status_t;
 
 typedef enum {
-    PRESENCE_OFFLINE,
-    PRESENCE_ONLINE,
-    PRESENCE_AWAY,
-    PRESENCE_DND,
-    PRESENCE_CHAT,
-    PRESENCE_XA
-} jabber_presence_t;
-
-typedef enum {
     PRESENCE_SUBSCRIBE,
     PRESENCE_SUBSCRIBED,
     PRESENCE_UNSUBSCRIBED
@@ -178,7 +169,6 @@ void iq_roster_request(void);
 // presence functions
 void presence_add_handlers(void);
 void presence_init(void);
-gboolean presence_valid_string(const char * const str);
 void presence_subscription(const char * const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
 void presence_free_sub_requests(void);

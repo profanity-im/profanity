@@ -23,11 +23,15 @@
 #ifndef ACCOUNTS_H
 #define ACCOUNTS_H
 
+#include "common.h"
+
 typedef struct prof_account_t {
     gchar *name;
     gchar *jid;
     gchar *resource;
     gchar *server;
+    gchar *last_presence;
+    gchar *login_presence;
     gboolean enabled;
 } ProfAccount;
 
@@ -52,6 +56,7 @@ void accounts_set_server(const char * const account_name, const char * const val
 void accounts_set_resource(const char * const account_name, const char * const value);
 void accounts_set_last_presence(const char * const account_name, const char * const value);
 void accounts_set_login_presence(const char * const account_name, const char * const value);
-void account_get_login_presence(const char * const account_name, char *str);
+jabber_presence_t account_get_login_presence(const char * const account_name);
+jabber_presence_t accounts_get_last_presence(const char * const account_name);
 
 #endif
