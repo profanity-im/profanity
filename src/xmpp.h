@@ -139,7 +139,6 @@ void jabber_disconnect(void);
 void jabber_process_events(void);
 const char * jabber_get_jid(void);
 jabber_conn_status_t jabber_get_connection_status(void);
-int jabber_get_priority(void);
 jabber_presence_t jabber_get_presence_type(void);
 char * jabber_get_presence_message(void);
 void jabber_free_resources(void);

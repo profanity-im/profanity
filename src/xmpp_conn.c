@@ -213,12 +213,6 @@ jabber_get_jid(void)
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-int
-jabber_get_priority(void)
-{
-    return jabber_conn.priority;
-}
-
 jabber_presence_t
 jabber_get_presence_type(void)
 {
