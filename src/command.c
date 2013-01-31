@@ -2193,10 +2193,9 @@ _cmd_set_priority(gchar **args, struct cmd_help_t help)
     int intval;
 
     if (_strtoi(value, &intval, -128, 127) == 0) {
-        char *status = jabber_get_status();
         prefs_set_priority((int)intval);
         // update presence with new priority
-        presence_update(jabber_get_presence(), status, 0);
+        presence_update(jabber_get_presence_type(), jabber_get_presence_message(), 0);
         cons_show("Priority set to %d.", intval);
     }
 

@@ -140,17 +140,17 @@ void jabber_process_events(void);
 const char * jabber_get_jid(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 int jabber_get_priority(void);
-jabber_presence_t jabber_get_presence(void);
-char * jabber_get_status(void);
+jabber_presence_t jabber_get_presence_type(void);
+char * jabber_get_presence_message(void);
 void jabber_free_resources(void);
 void jabber_restart(void);
 void jabber_set_autoping(int seconds);
 xmpp_conn_t *jabber_get_conn(void);
 xmpp_ctx_t *jabber_get_ctx(void);
 int error_handler(xmpp_stanza_t * const stanza);
-void jabber_conn_set_presence(jabber_presence_t presence);
+void jabber_conn_set_presence_type(jabber_presence_t presence_type);
 void jabber_conn_set_priority(int priority);
-void jabber_conn_set_status(const char * const message);
+void jabber_conn_set_presence_message(const char * const message);
 char* jabber_get_account_name(void);
 
 // message functions

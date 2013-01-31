@@ -141,7 +141,7 @@ presence_leave_chat_room(const char * const room_jid)
 }
 
 void
-presence_update(jabber_presence_t status, const char * const msg,
+presence_update(jabber_presence_t presence_type, const char * const msg,
     int idle)
 {
     xmpp_ctx_t *ctx = jabber_get_ctx();
@@ -157,10 +157,11 @@ presence_update(jabber_presence_t status, const char * const msg,
     if (pri < JABBER_PRIORITY_MIN || pri > JABBER_PRIORITY_MAX)
         pri = 0;
 
-    jabber_conn_set_presence(status);
+    jabber_conn_set_presence_type(presence_type);
+    jabber_conn_set_presence_message(msg);
     jabber_conn_set_priority(pri);
 
-    switch(status)
+    switch(presence_type)
     {
         case PRESENCE_AWAY:
             show = STANZA_TEXT_AWAY;
@@ -184,9 +185,10 @@ presence_update(jabber_presence_t status, const char * const msg,
             break;
     }
 
-    jabber_conn_set_status(msg);
 
     xmpp_stanza_t *presence = stanza_create_presence(ctx, show, msg);
+
+    // servers must treat no priority as 0
     if (pri != 0) {
         xmpp_stanza_t *priority, *value;
         char pri_str[10];
