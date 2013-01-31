@@ -272,6 +272,18 @@ accounts_rename(const char * const account_name, const char * const new_name)
         free(resource);
     }
 
+    char *presence_last = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
+    if (presence_last != NULL) {
+        g_key_file_set_string(accounts, new_name, "presence.last", presence_last);
+        free(presence_last);
+    }
+
+    char *presence_login = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
+    if (presence_login != NULL) {
+        g_key_file_set_string(accounts, new_name, "presence.login", presence_login);
+        free(presence_login);
+    }
+
     g_key_file_remove_group(accounts, account_name, NULL);
     _save_accounts();
 
