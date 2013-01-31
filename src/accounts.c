@@ -326,6 +326,81 @@ accounts_set_resource(const char * const account_name, const char * const value)
 }
 
 void
+accounts_set_priority_online(const char * const account_name, const gint value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_integer(accounts, account_name, "priority.online", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_priority_chat(const char * const account_name, const gint value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_integer(accounts, account_name, "priority.chat", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_priority_away(const char * const account_name, const gint value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_integer(accounts, account_name, "priority.away", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_priority_xa(const char * const account_name, const gint value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_integer(accounts, account_name, "priority.xa", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_priority_dnd(const char * const account_name, const gint value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_integer(accounts, account_name, "priority.dnd", value);
+        _save_accounts();
+    }
+}
+
+gint
+prefs_get_priority_online(const char * const account_name)
+{
+    return g_key_file_get_integer(accounts, account_name, "priority.online", NULL);
+}
+
+gint
+prefs_get_priority_chat(const char * const account_name)
+{
+    return g_key_file_get_integer(accounts, account_name, "priority.chat", NULL);
+}
+
+gint
+prefs_get_priority_away(const char * const account_name)
+{
+    return g_key_file_get_integer(accounts, account_name, "priority.away", NULL);
+}
+
+gint
+prefs_get_priority_xa(const char * const account_name)
+{
+    return g_key_file_get_integer(accounts, account_name, "priority.xa", NULL);
+}
+
+gint
+prefs_get_priority_dnd(const char * const account_name)
+{
+    return g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL);
+}
+
+void
 accounts_set_last_presence(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
