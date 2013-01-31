@@ -84,7 +84,7 @@ static void _parameter_autocomplete_with_ac(char *input, int *size, char *comman
     Autocomplete ac);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
-gchar** _cmd_parse_args(const char * const inp, int min, int max, int *num);
+static jabber_presence_t _presence_type_from_string(const char * const str);
 
 // command prototypes
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
@@ -196,19 +196,21 @@ static struct cmd_t main_commands[] =
           "set account property value : Set 'property' of 'account' to 'value'.",
           "",
           "The 'property' may be one of.",
-          "jid      : The Jabber ID of the account, the account name will be used if this property is not set.",
-          "server   : The chat service server, if different to the domain part of the JID.",
-          "status   : The presence status to use on login, use 'last' to use whatever your last status was.",
-          "resource : The resource to be used.",
+          "jid              : The Jabber ID of the account, the account name will be used if this property is not set.",
+          "server           : The chat service server, if different to the domain part of the JID.",
+          "status           : The presence status to use on login, use 'last' to use whatever your last status was.",
+          "online|chat|away",
+          "|xa|dnd          : Priority for the specified presence.",
+          "resource         : The resource to be used.",
           "",
           "Example : /account add work",
           "        : /account set work jid myuser@mycompany.com",
           "        : /account set work server talk.google.com",
           "        : /account set work resource desktop",
           "        : /account set work status dnd",
+          "        : /account set dnd -1",
+          "        : /account set online 10",
           "        : /account rename work gtalk",
-          "",
-          "To log in to this account: '/connect gtalk', which will always log in with the status 'dnd'.",
           NULL  } } },
 
     { "/prefs",
@@ -1168,6 +1170,39 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                         cons_show("Updated login status for account %s: %s", account_name, value);
                     }
                     cons_show("");
+                } else if (presence_valid_string(property)) {
+                        int intval;
+
+                        if (_strtoi(value, &intval, -128, 127) == 0) {
+                            jabber_presence_t presence_type = _presence_type_from_string(property);
+                            switch (presence_type)
+                            {
+                                case (PRESENCE_ONLINE):
+                                    accounts_set_priority_online(account_name, intval);
+                                    break;
+                                case (PRESENCE_CHAT):
+                                    accounts_set_priority_chat(account_name, intval);
+                                    break;
+                                case (PRESENCE_AWAY):
+                                    accounts_set_priority_away(account_name, intval);
+                                    break;
+                                case (PRESENCE_XA):
+                                    accounts_set_priority_xa(account_name, intval);
+                                    break;
+                                case (PRESENCE_DND):
+                                    accounts_set_priority_dnd(account_name, intval);
+                                    break;
+                                default:
+                                    accounts_set_priority_online(account_name, intval);
+                                    break;
+                            }
+                            jabber_conn_status_t conn_status = jabber_get_connection_status();
+                            if (conn_status == JABBER_CONNECTED && presence_type == jabber_get_presence_type()) {
+                                presence_update(jabber_get_presence_type(), jabber_get_presence_message(), 0);
+                            }
+                            cons_show("Updated %s priority for account %s: %s", property, account_name, value);
+                            cons_show("");
+                        }
                 } else {
                     cons_show("Invalid property: %s", property);
                     cons_show("");
@@ -2328,10 +2363,11 @@ _update_presence(const jabber_presence_t presence,
     } else {
         presence_update(presence, msg, 0);
         title_bar_set_status(presence);
+        gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence);
         if (msg != NULL) {
-            cons_show("Status set to %s, \"%s\"", show, msg);
+            cons_show("Status set to %s (priority %d), \"%s\".", show, priority, msg);
         } else {
-            cons_show("Status set to %s", show);
+            cons_show("Status set to %s (priority %d).", show, priority);
         }
     }
 
@@ -2610,4 +2646,24 @@ _strtoi(char *str, int *saveptr, int min, int max)
     *saveptr = val;
 
     return 0;
+}
+
+static jabber_presence_t
+_presence_type_from_string(const char * const str)
+{
+    if (str == NULL) {
+        return PRESENCE_ONLINE;
+    } else if (!presence_valid_string(str)) {
+        return PRESENCE_ONLINE;
+    } else if (strcmp(str, "online") == 0) {
+        return PRESENCE_ONLINE;
+    } else if (strcmp(str, "chat") == 0) {
+        return PRESENCE_CHAT;
+    } else if (strcmp(str, "away") == 0) {
+        return PRESENCE_AWAY;
+    } else if (strcmp(str, "xa") == 0) {
+        return PRESENCE_XA;
+    } else {
+        return PRESENCE_DND;
+    }
 }

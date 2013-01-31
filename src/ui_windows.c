@@ -1276,8 +1276,8 @@ cons_show_account(ProfAccount *account)
     if (account->login_presence != NULL) {
         cons_show   ("Login presence    : %s", account->login_presence);
     }
-    cons_show       ("Priority (online) : %d", account->priority_online);
     cons_show       ("Priority (chat)   : %d", account->priority_chat);
+    cons_show       ("Priority (online) : %d", account->priority_online);
     cons_show       ("Priority (away)   : %d", account->priority_away);
     cons_show       ("Priority (xa)     : %d", account->priority_xa);
     cons_show       ("Priority (dnd)    : %d", account->priority_dnd);
