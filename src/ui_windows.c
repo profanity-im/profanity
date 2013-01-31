@@ -1084,6 +1084,40 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
 }
 
 void
+cons_show_login_success(ProfAccount *account)
+{
+    _win_show_time(console->win, '-');
+    wprintw(console->win, "%s logged in successfully, ", account->jid);
+
+    jabber_presence_t presence = accounts_get_login_presence(account->name);
+    char *presence_str;
+    switch(presence)
+    {
+        case PRESENCE_CHAT:
+            presence_str = "chat";
+            break;
+        case PRESENCE_AWAY:
+            presence_str = "away";
+            break;
+        case PRESENCE_XA:
+            presence_str = "xa";
+            break;
+        case PRESENCE_DND:
+            presence_str = "dnd";
+            break;
+        default:
+            presence_str = "online";
+            break;
+    }
+
+    _presence_colour_on(console->win, presence_str);
+    wprintw(console->win, "%s", presence_str);
+    _presence_colour_off(console->win, presence_str);
+    wprintw(console->win, ".\n");
+}
+
+
+void
 cons_show_wins(void)
 {
     int i = 0;

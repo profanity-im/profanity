@@ -56,7 +56,7 @@ void accounts_set_server(const char * const account_name, const char * const val
 void accounts_set_resource(const char * const account_name, const char * const value);
 void accounts_set_last_presence(const char * const account_name, const char * const value);
 void accounts_set_login_presence(const char * const account_name, const char * const value);
-jabber_presence_t account_get_login_presence(const char * const account_name);
+jabber_presence_t accounts_get_login_presence(const char * const account_name);
 jabber_presence_t accounts_get_last_presence(const char * const account_name);
 
 #endif

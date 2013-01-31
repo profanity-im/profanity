@@ -198,11 +198,10 @@ void
 prof_handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
-
-    const char *msg = "logged in successfully.";
-    cons_show("%s %s", account->jid, msg);
-    title_bar_set_status(PRESENCE_ONLINE);
-    log_info("%s %s", account->jid, msg);
+    jabber_presence_t presence = accounts_get_login_presence(account->name);
+    cons_show_login_success(account);
+    title_bar_set_status(presence);
+    log_info("%s logged in successfully", account->jid);
     win_current_page_off();
     status_bar_print_message(account->jid);
     status_bar_refresh();

@@ -365,7 +365,7 @@ accounts_get_last_presence(const char * const account_name)
 }
 
 jabber_presence_t
-account_get_login_presence(const char * const account_name)
+accounts_get_login_presence(const char * const account_name)
 {
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
