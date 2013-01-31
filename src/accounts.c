@@ -129,6 +129,8 @@ accounts_add(const char *account_name, const char *altdomain)
         if (altdomain != NULL) {
             g_key_file_set_string(accounts, account_name, "server", altdomain);
         }
+        g_key_file_set_string(accounts, account_name, "presence.last", "online");
+        g_key_file_set_string(accounts, account_name, "presence.login", "online");
 
         _save_accounts();
         autocomplete_add(all_ac, strdup(account_name));
