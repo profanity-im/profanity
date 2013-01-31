@@ -205,6 +205,12 @@ accounts_get_account(const char * const name)
             account->login_presence = strdup(presence);
         }
 
+        account->priority_online = g_key_file_get_integer(accounts, name, "priority.online", NULL);
+        account->priority_chat = g_key_file_get_integer(accounts, name, "priority.chat", NULL);
+        account->priority_away = g_key_file_get_integer(accounts, name, "priority.away", NULL);
+        account->priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
+        account->priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
+
         return account;
     }
 }
@@ -381,34 +387,48 @@ accounts_set_priority_dnd(const char * const account_name, const gint value)
     }
 }
 
-gint
-prefs_get_priority_online(const char * const account_name)
+void
+accounts_set_priority_all(const char * const account_name, const gint value)
 {
-    return g_key_file_get_integer(accounts, account_name, "priority.online", NULL);
+    if (accounts_account_exists(account_name)) {
+        accounts_set_priority_online(account_name, value);
+        accounts_set_priority_chat(account_name, value);
+        accounts_set_priority_away(account_name, value);
+        accounts_set_priority_xa(account_name, value);
+        accounts_set_priority_dnd(account_name, value);
+        _save_accounts();
+    }
 }
 
 gint
-prefs_get_priority_chat(const char * const account_name)
+accounts_get_priority_for_presence_type(const char * const account_name,
+    jabber_presence_t presence_type)
 {
-    return g_key_file_get_integer(accounts, account_name, "priority.chat", NULL);
-}
+    gint result;
 
-gint
-prefs_get_priority_away(const char * const account_name)
-{
-    return g_key_file_get_integer(accounts, account_name, "priority.away", NULL);
-}
+    switch (presence_type)
+    {
+        case (PRESENCE_ONLINE):
+            result = g_key_file_get_integer(accounts, account_name, "priority.online", NULL);
+            break;
+        case (PRESENCE_CHAT):
+            result = g_key_file_get_integer(accounts, account_name, "priority.chat", NULL);
+            break;
+        case (PRESENCE_AWAY):
+            result = g_key_file_get_integer(accounts, account_name, "priority.away", NULL);
+            break;
+        case (PRESENCE_XA):
+            result = g_key_file_get_integer(accounts, account_name, "priority.xa", NULL);
+            break;
+        case (PRESENCE_DND):
+            result = g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL);
+            break;
+        default:
+            result = 0;
+            break;
+    }
 
-gint
-prefs_get_priority_xa(const char * const account_name)
-{
-    return g_key_file_get_integer(accounts, account_name, "priority.xa", NULL);
-}
-
-gint
-prefs_get_priority_dnd(const char * const account_name)
-{
-    return g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL);
+    return result;
 }
 
 void

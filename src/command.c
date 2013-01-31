@@ -558,10 +558,11 @@ static struct cmd_t setting_commands[] =
 
     { "/priority",
         _cmd_set_priority, parse_args, 1, 1,
-        { "/priority value", "Set priority for connection.",
+        { "/priority value", "Set priority for the current account.",
         { "/priority value",
           "---------------",
-          "Set priority for the current session.",
+          "Set priority for the current account, presence will be sent when calling this command.",
+          "See the /account command for more specific priority settings per presence status.",
           "value : Number between -128 and 127. Default value is 0.",
           NULL } } },
 
@@ -2189,11 +2190,19 @@ _cmd_set_autoaway(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_priority(gchar **args, struct cmd_help_t help)
 {
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
     char *value = args[0];
     int intval;
 
     if (_strtoi(value, &intval, -128, 127) == 0) {
-        prefs_set_priority((int)intval);
+        accounts_set_priority_all(jabber_get_account_name(), intval);
+        //prefs_set_priority((int)intval);
         // update presence with new priority
         presence_update(jabber_get_presence_type(), jabber_get_presence_message(), 0);
         cons_show("Priority set to %d.", intval);

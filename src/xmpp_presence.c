@@ -153,7 +153,8 @@ presence_update(jabber_presence_t presence_type, const char * const msg,
     if (jabber_get_connection_status() != JABBER_CONNECTED)
         return;
 
-    pri = prefs_get_priority();
+    pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
+        presence_type);
     if (pri < JABBER_PRIORITY_MIN || pri > JABBER_PRIORITY_MAX)
         pri = 0;
 

@@ -1259,23 +1259,28 @@ cons_show_account(ProfAccount *account)
 {
     cons_show("%s account details:", account->name);
     if (account->enabled) {
-        cons_show("enabled        : TRUE");
+        cons_show   ("enabled           : TRUE");
     } else {
-        cons_show("enabled        : FALSE");
+        cons_show   ("enabled           : FALSE");
     }
-    cons_show("jid            : %s", account->jid);
+    cons_show       ("jid               : %s", account->jid);
     if (account->resource != NULL) {
-        cons_show("resource       : %s", account->resource);
+        cons_show   ("resource          : %s", account->resource);
     }
     if (account->server != NULL) {
-        cons_show("server         : %s", account->server);
+        cons_show   ("server            : %s", account->server);
     }
     if (account->last_presence != NULL) {
-        cons_show("Last presence  : %s", account->last_presence);
+        cons_show   ("Last presence     : %s", account->last_presence);
     }
     if (account->login_presence != NULL) {
-        cons_show("Login presence : %s", account->login_presence);
+        cons_show   ("Login presence    : %s", account->login_presence);
     }
+    cons_show       ("Priority (online) : %d", account->priority_online);
+    cons_show       ("Priority (chat)   : %d", account->priority_chat);
+    cons_show       ("Priority (away)   : %d", account->priority_away);
+    cons_show       ("Priority (xa)     : %d", account->priority_xa);
+    cons_show       ("Priority (dnd)    : %d", account->priority_dnd);
     cons_show("");
 }
 
@@ -1404,8 +1409,6 @@ cons_show_presence_prefs(void)
 {
     cons_show("Presence preferences:");
     cons_show("");
-
-    cons_show("Priority (/priority)                 : %d", prefs_get_priority());
 
     if (strcmp(prefs_get_autoaway_mode(), "off") == 0) {
         cons_show("Autoaway (/autoaway mode)            : OFF");

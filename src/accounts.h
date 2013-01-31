@@ -68,10 +68,8 @@ void accounts_set_priority_chat(const char * const account_name, const gint valu
 void accounts_set_priority_away(const char * const account_name, const gint value);
 void accounts_set_priority_xa(const char * const account_name, const gint value);
 void accounts_set_priority_dnd(const char * const account_name, const gint value);
-gint prefs_get_priority_online(const char * const account_name);
-gint prefs_get_priority_chat(const char * const account_name);
-gint prefs_get_priority_away(const char * const account_name);
-gint prefs_get_priority_xa(const char * const account_name);
-gint prefs_get_priority_dnd(const char * const account_name);
+void accounts_set_priority_all(const char * const account_name, const gint value);
+gint accounts_get_priority_for_presence_type(const char * const account_name,
+    jabber_presence_t presence_type);
 
 #endif
