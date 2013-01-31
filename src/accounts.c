@@ -133,6 +133,11 @@ accounts_add(const char *account_name, const char *altdomain)
         }
         g_key_file_set_string(accounts, account_name, "presence.last", "online");
         g_key_file_set_string(accounts, account_name, "presence.login", "online");
+        g_key_file_set_integer(accounts, account_name, "priority.online", 0);
+        g_key_file_set_integer(accounts, account_name, "priority.chat", 0);
+        g_key_file_set_integer(accounts, account_name, "priority.away", 0);
+        g_key_file_set_integer(accounts, account_name, "priority.xa", 0);
+        g_key_file_set_integer(accounts, account_name, "priority.dnd", 0);
 
         _save_accounts();
         autocomplete_add(all_ac, strdup(account_name));
@@ -257,6 +262,17 @@ accounts_rename(const char * const account_name, const char * const new_name)
 
     g_key_file_set_boolean(accounts, new_name, "enabled",
         g_key_file_get_boolean(accounts, account_name, "enabled", NULL));
+
+    g_key_file_set_integer(accounts, new_name, "priority.online",
+        g_key_file_get_boolean(accounts, account_name, "priority.online", NULL));
+    g_key_file_set_integer(accounts, new_name, "priority.chat",
+        g_key_file_get_boolean(accounts, account_name, "priority.chat", NULL));
+    g_key_file_set_integer(accounts, new_name, "priority.away",
+        g_key_file_get_boolean(accounts, account_name, "priority.away", NULL));
+    g_key_file_set_integer(accounts, new_name, "priority.xa",
+        g_key_file_get_boolean(accounts, account_name, "priority.xa", NULL));
+    g_key_file_set_integer(accounts, new_name, "priority.dnd",
+        g_key_file_get_boolean(accounts, account_name, "priority.dnd", NULL));
 
     int i;
     for (i = 0; i < ARRAY_SIZE(string_keys); i++) {
