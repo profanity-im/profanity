@@ -79,6 +79,19 @@ create_dir(char *name)
             e = mkdir(name, S_IRWXU);
 }
 
+void
+mkdir_recursive(const char *dir)
+{
+    int i;
+    for (i = 1; i <= strlen(dir); i++) {
+        if (dir[i] == '/' || dir[i] == '\0') {
+            gchar *next_dir = g_strndup(dir, i);
+            create_dir(next_dir);
+            g_free(next_dir);
+        }
+    }
+}
+
 char *
 str_replace(const char *string, const char *substr,
     const char *replacement)

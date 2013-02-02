@@ -27,13 +27,13 @@
 
 #include <glib.h>
 
+#include "common.h"
+
 static void _files_create_config_directory(void);
 static void _files_create_data_directory(void);
 static void _files_create_chatlog_directory(void);
 static void _files_create_log_directory(void);
 static void _files_create_themes_directory(void);
-static void _create_dir(char *name);
-static void _mkdir_recursive(const char *dir);
 static gchar* _xdg_get_config_home(void);
 static gchar* _xdg_get_data_home(void);
 
@@ -118,7 +118,7 @@ _files_create_config_directory(void)
     gchar *xdg_config = _xdg_get_config_home();
     GString *prof_conf_dir = g_string_new(xdg_config);
     g_string_append(prof_conf_dir, "/profanity");
-    _mkdir_recursive(prof_conf_dir->str);
+    mkdir_recursive(prof_conf_dir->str);
     g_free(xdg_config);
     g_string_free(prof_conf_dir, TRUE);
 }
@@ -129,7 +129,7 @@ _files_create_data_directory(void)
     gchar *xdg_data = _xdg_get_data_home();
     GString *prof_data_dir = g_string_new(xdg_data);
     g_string_append(prof_data_dir, "/profanity");
-    _mkdir_recursive(prof_data_dir->str);
+    mkdir_recursive(prof_data_dir->str);
     g_free(xdg_data);
     g_string_free(prof_data_dir, TRUE);
 }
@@ -140,7 +140,7 @@ _files_create_chatlog_directory(void)
     gchar *xdg_data = _xdg_get_data_home();
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    _mkdir_recursive(chatlogs_dir->str);
+    mkdir_recursive(chatlogs_dir->str);
     g_free(xdg_data);
     g_string_free(chatlogs_dir, TRUE);
 }
@@ -151,7 +151,7 @@ _files_create_log_directory(void)
     gchar *xdg_data = _xdg_get_data_home();
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/logs");
-    _mkdir_recursive(chatlogs_dir->str);
+    mkdir_recursive(chatlogs_dir->str);
     g_free(xdg_data);
     g_string_free(chatlogs_dir, TRUE);
 }
@@ -162,34 +162,9 @@ _files_create_themes_directory(void)
     gchar *xdg_config = _xdg_get_config_home();
     GString *themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
-    _mkdir_recursive(themes_dir->str);
+    mkdir_recursive(themes_dir->str);
     g_free(xdg_config);
     g_string_free(themes_dir, TRUE);
-}
-
-static void
-_create_dir(char *name)
-{
-    int e;
-    struct stat sb;
-
-    e = stat(name, &sb);
-    if (e != 0)
-        if (errno == ENOENT)
-            e = mkdir(name, S_IRWXU);
-}
-
-static void
-_mkdir_recursive(const char *dir)
-{
-    int i;
-    for (i = 1; i <= strlen(dir); i++) {
-        if (dir[i] == '/' || dir[i] == '\0') {
-            gchar *next_dir = g_strndup(dir, i);
-            _create_dir(next_dir);
-            g_free(next_dir);
-        }
-    }
 }
 
 static gchar *
