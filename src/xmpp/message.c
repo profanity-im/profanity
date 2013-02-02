@@ -31,6 +31,7 @@
 #include "preferences.h"
 #include "profanity.h"
 #include "xmpp.h"
+#include "stanza.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 

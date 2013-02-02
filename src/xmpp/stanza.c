@@ -27,7 +27,7 @@
 #include <strophe.h>
 
 #include "common.h"
-#include "xmpp.h"
+#include "stanza.h"
 
 static int _field_compare(FormField *f1, FormField *f2);
 

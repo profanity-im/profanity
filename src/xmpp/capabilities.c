@@ -30,6 +30,7 @@
 #include "config.h"
 #include "common.h"
 #include "xmpp.h"
+#include "stanza.h"
 
 static GHashTable *capabilities;
 
