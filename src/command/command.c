@@ -27,11 +27,11 @@
 
 #include <glib.h>
 
-#include "command.h"
-
 #include "accounts.h"
-#include "autocomplete.h"
 #include "chat_session.h"
+#include "command/command.h"
+#include "command/history.h"
+#include "command/parser.h"
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"
@@ -41,7 +41,8 @@
 #include "preferences.h"
 #include "profanity.h"
 #include "theme.h"
-#include "tinyurl.h"
+#include "tools/autocomplete.h"
+#include "tools/tinyurl.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 

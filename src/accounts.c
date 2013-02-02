@@ -27,11 +27,11 @@
 
 #include "accounts.h"
 
-#include "autocomplete.h"
 #include "common.h"
 #include "files.h"
 #include "jid.h"
 #include "log.h"
+#include "tools/autocomplete.h"
 #include "xmpp/xmpp.h"
 
 static gchar *accounts_loc;

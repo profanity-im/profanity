@@ -20,7 +20,7 @@
  *
  */
 
-#include "history.h"
+#include "tools/history.h"
 
 #define MAX_HISTORY 100
 

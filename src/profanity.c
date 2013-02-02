@@ -33,7 +33,7 @@
 
 #include "accounts.h"
 #include "chat_session.h"
-#include "command.h"
+#include "command/command.h"
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"

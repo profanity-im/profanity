@@ -33,7 +33,7 @@
 #include <ncurses.h>
 #endif
 
-#include "command.h"
+#include "command/command.h"
 #include "common.h"
 #include "contact_list.h"
 #include "log.h"

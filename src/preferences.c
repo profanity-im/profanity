@@ -34,9 +34,9 @@
 
 #include "preferences.h"
 
-#include "autocomplete.h"
 #include "files.h"
 #include "log.h"
+#include "tools/autocomplete.h"
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;

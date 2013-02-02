@@ -25,9 +25,9 @@
 
 #include <glib.h>
 
-#include "autocomplete.h"
 #include "contact.h"
 #include "jid.h"
+#include "tools/autocomplete.h"
 
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
