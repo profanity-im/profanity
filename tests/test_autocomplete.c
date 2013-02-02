@@ -5,7 +5,7 @@
 #include <glib.h>
 
 #include "contact.h"
-#include "autocomplete.h"
+#include "tools/autocomplete.h"
 
 static void clear_empty(void)
 {

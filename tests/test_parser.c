@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <head-unit.h>
-#include "command.h"
+#include "command/parser.h"
 
 void
 parse_null_returns_null(void)

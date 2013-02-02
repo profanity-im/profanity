@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <head-unit.h>
-#include "history.h"
+#include "tools/history.h"
 
 void previous_on_empty_returns_null(void)
 {
