@@ -74,7 +74,6 @@ void jabber_conn_set_presence_message(const char * const message);
 char* jabber_get_account_name(void);
 
 // message functions
-void message_add_handlers(void);
 void message_send(const char * const msg, const char * const recipient);
 void message_send_groupchat(const char * const msg, const char * const recipient);
 void message_send_inactive(const char * const recipient);

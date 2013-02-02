@@ -36,6 +36,7 @@
 #include "muc.h"
 #include "xmpp.h"
 #include "stanza.h"
+#include "message.h"
 
 static struct _jabber_conn_t {
     xmpp_log_t *log;

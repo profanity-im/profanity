@@ -9,7 +9,7 @@ profanity_SOURCES = src/command.c src/contact.c src/command_history.c \
 	src/accounts.c src/accounts.h src/jid.h src/jid.c \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
-	src/xmpp/stanza.h \
+	src/xmpp/stanza.h src/xmpp/message.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/windows.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c
 
