@@ -32,10 +32,10 @@
 #include <ncurses.h>
 #endif
 
-#include "theme.h"
-
+#include "common.h"
 #include "files.h"
 #include "log.h"
+#include "theme.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;
@@ -92,6 +92,7 @@ static NCURSES_COLOR_T _lookup_colour(const char * const colour);
 static void _set_colour(gchar *val, NCURSES_COLOR_T *pref,
     NCURSES_COLOR_T def);
 static void _load_colours(void);
+static gchar * _get_themes_dir(void);
 
 void
 theme_init(const char * const theme_name)
@@ -100,7 +101,7 @@ theme_init(const char * const theme_name)
     theme = g_key_file_new();
 
     if (theme_name != NULL) {
-        gchar *themes_dir = files_get_themes_dir();
+        gchar *themes_dir = _get_themes_dir();
         theme_loc = g_string_new(themes_dir);
         g_free(themes_dir);
         g_string_append(theme_loc, "/");
@@ -116,7 +117,7 @@ GSList *
 theme_list(void)
 {
     GSList *result = NULL;
-    gchar *themes_dir = files_get_themes_dir();
+    gchar *themes_dir = _get_themes_dir();
     GDir *themes = g_dir_open(themes_dir, 0, NULL);
     if (themes != NULL) {
         const gchar *theme = g_dir_read_name(themes);
@@ -143,7 +144,7 @@ theme_load(const char * const theme_name)
         _load_colours();
         return TRUE;
     } else {
-        gchar *themes_dir = files_get_themes_dir();
+        gchar *themes_dir = _get_themes_dir();
         GString *new_theme_file = g_string_new(themes_dir);
         g_free(themes_dir);
         g_string_append(new_theme_file, "/");
@@ -357,4 +358,17 @@ _load_colours(void)
     gchar *them_val = g_key_file_get_string(theme, "colours", "them", NULL);
     _set_colour(them_val, &colour_prefs.them, COLOR_GREEN);
     g_free(them_val);
+}
+
+static gchar *
+_get_themes_dir(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *themes_dir = g_string_new(xdg_config);
+    g_string_append(themes_dir, "/profanity/themes");
+    gchar *result = strdup(themes_dir->str);
+    g_free(xdg_config);
+    g_string_free(themes_dir, TRUE);
+
+    return result;
 }

@@ -45,19 +45,6 @@ files_create_directories(void)
     _files_create_themes_directory();
 }
 
-gchar *
-files_get_themes_dir(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *themes_dir = g_string_new(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    gchar *result = strdup(themes_dir->str);
-    g_free(xdg_config);
-    g_string_free(themes_dir, TRUE);
-
-    return result;
-}
-
 static void
 _files_create_config_directory(void)
 {
