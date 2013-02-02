@@ -38,6 +38,7 @@
 #include "stanza.h"
 #include "message.h"
 #include "iq.h"
+#include "presence.h"
 
 static struct _jabber_conn_t {
     xmpp_log_t *log;

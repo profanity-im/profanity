@@ -82,11 +82,8 @@ void message_send_paused(const char * const recipient);
 void message_send_gone(const char * const recipient);
 
 // presence functions
-void presence_add_handlers(void);
-void presence_init(void);
 void presence_subscription(const char * const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
-void presence_free_sub_requests(void);
 void presence_join_room(Jid *jid);
 void presence_change_room_nick(const char * const room, const char * const nick);
 void presence_leave_chat_room(const char * const room_jid);
