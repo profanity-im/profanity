@@ -41,7 +41,7 @@
 #include "muc.h"
 #include "theme.h"
 #include "tinyurl.h"
-#include "ui.h"
+#include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
 typedef char*(*autocomplete_func)(char *);

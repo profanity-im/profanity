@@ -41,7 +41,7 @@
 #include "profanity.h"
 #include "muc.h"
 #include "theme.h"
-#include "ui.h"
+#include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
 static log_level_t _get_log_level(char *log_level);

@@ -1,16 +1,16 @@
 bin_PROGRAMS = profanity
 profanity_SOURCES = src/command.c src/contact.c src/command_history.c \
-	src/preferences.c src/autocomplete.c src/ui_statusbar.c \
-	src/command.h src/contact.h src/log.c src/preferences.h \
-	src/autocomplete.h src/ui_titlebar.c src/ui_windows.c src/common.c \
-	src/contact_list.c src/ui_inputwin.c src/log.h src/profanity.c \
-	src/history.c src/ui.h src/common.h src/ contact_list.h \
-	src/main.c src/profanity.h src/history.h src/tinyurl.c src/tinyurl.h \
-	src/chat_session.c src/chat_session.h src/muc.c src/muc.h \
-	src/command_parser.c src/theme.c src/theme.h src/window.c src/window.h \
-	src/files.c src/files.h src/accounts.c src/accounts.h src/jid.h src/jid.c \
+	src/preferences.c src/autocomplete.c src/command.h src/contact.h \
+	src/log.c src/preferences.h src/autocomplete.h src/common.c \
+	src/contact_list.c src/log.h src/profanity.c src/history.c src/common.h \
+	src/contact_list.h src/main.c src/profanity.h src/history.h src/tinyurl.c \
+	src/tinyurl.h src/chat_session.c src/chat_session.h src/muc.c src/muc.h \
+	src/command_parser.c src/theme.c src/theme.h src/files.c src/files.h \
+	src/accounts.c src/accounts.h src/jid.h src/jid.c \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
-	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c
+	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
+	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/windows.c \
+	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
