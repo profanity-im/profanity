@@ -34,8 +34,6 @@ static void _files_create_data_directory(void);
 static void _files_create_chatlog_directory(void);
 static void _files_create_log_directory(void);
 static void _files_create_themes_directory(void);
-static gchar* _xdg_get_config_home(void);
-static gchar* _xdg_get_data_home(void);
 
 void
 files_create_directories(void)
@@ -50,7 +48,7 @@ files_create_directories(void)
 gchar *
 files_get_chatlog_dir(void)
 {
-    gchar *xdg_data =_xdg_get_data_home();
+    gchar *xdg_data = xdg_get_data_home();
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     gchar *result = strdup(chatlogs_dir->str);
@@ -63,7 +61,7 @@ files_get_chatlog_dir(void)
 gchar *
 files_get_preferences_file(void)
 {
-    gchar *xdg_config = _xdg_get_config_home();
+    gchar *xdg_config = xdg_get_config_home();
     GString *prefs_file = g_string_new(xdg_config);
     g_string_append(prefs_file, "/profanity/profrc");
     gchar *result = strdup(prefs_file->str);
@@ -76,7 +74,7 @@ files_get_preferences_file(void)
 gchar *
 files_get_log_file(void)
 {
-    gchar *xdg_data = _xdg_get_data_home();
+    gchar *xdg_data = xdg_get_data_home();
     GString *logfile = g_string_new(xdg_data);
     g_string_append(logfile, "/profanity/logs/profanity.log");
     gchar *result = strdup(logfile->str);
@@ -89,7 +87,7 @@ files_get_log_file(void)
 gchar *
 files_get_accounts_file(void)
 {
-    gchar *xdg_data = _xdg_get_data_home();
+    gchar *xdg_data = xdg_get_data_home();
     GString *logfile = g_string_new(xdg_data);
     g_string_append(logfile, "/profanity/accounts");
     gchar *result = strdup(logfile->str);
@@ -102,7 +100,7 @@ files_get_accounts_file(void)
 gchar *
 files_get_themes_dir(void)
 {
-    gchar *xdg_config = _xdg_get_config_home();
+    gchar *xdg_config = xdg_get_config_home();
     GString *themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
     gchar *result = strdup(themes_dir->str);
@@ -115,7 +113,7 @@ files_get_themes_dir(void)
 static void
 _files_create_config_directory(void)
 {
-    gchar *xdg_config = _xdg_get_config_home();
+    gchar *xdg_config = xdg_get_config_home();
     GString *prof_conf_dir = g_string_new(xdg_config);
     g_string_append(prof_conf_dir, "/profanity");
     mkdir_recursive(prof_conf_dir->str);
@@ -126,7 +124,7 @@ _files_create_config_directory(void)
 static void
 _files_create_data_directory(void)
 {
-    gchar *xdg_data = _xdg_get_data_home();
+    gchar *xdg_data = xdg_get_data_home();
     GString *prof_data_dir = g_string_new(xdg_data);
     g_string_append(prof_data_dir, "/profanity");
     mkdir_recursive(prof_data_dir->str);
@@ -137,7 +135,7 @@ _files_create_data_directory(void)
 static void
 _files_create_chatlog_directory(void)
 {
-    gchar *xdg_data = _xdg_get_data_home();
+    gchar *xdg_data = xdg_get_data_home();
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     mkdir_recursive(chatlogs_dir->str);
@@ -148,7 +146,7 @@ _files_create_chatlog_directory(void)
 static void
 _files_create_log_directory(void)
 {
-    gchar *xdg_data = _xdg_get_data_home();
+    gchar *xdg_data = xdg_get_data_home();
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/logs");
     mkdir_recursive(chatlogs_dir->str);
@@ -159,49 +157,10 @@ _files_create_log_directory(void)
 static void
 _files_create_themes_directory(void)
 {
-    gchar *xdg_config = _xdg_get_config_home();
+    gchar *xdg_config = xdg_get_config_home();
     GString *themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
     mkdir_recursive(themes_dir->str);
     g_free(xdg_config);
     g_string_free(themes_dir, TRUE);
 }
-
-static gchar *
-_xdg_get_config_home(void)
-{
-    gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
-    if (xdg_config_home != NULL)
-        g_strstrip(xdg_config_home);
-
-    if ((xdg_config_home != NULL) && (strcmp(xdg_config_home, "") != 0)) {
-        return strdup(xdg_config_home);
-    } else {
-        GString *default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.config");
-        gchar *result = strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
-}
-
-static gchar *
-_xdg_get_data_home(void)
-{
-    gchar *xdg_data_home = getenv("XDG_DATA_HOME");
-    if (xdg_data_home != NULL)
-        g_strstrip(xdg_data_home);
-
-    if ((xdg_data_home != NULL) && (strcmp(xdg_data_home, "") != 0)) {
-        return strdup(xdg_data_home);
-    } else {
-        GString *default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.local/share");
-        gchar *result = strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
-}
-

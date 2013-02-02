@@ -275,6 +275,44 @@ presence_valid_string(const char * const str)
     }
 }
 
+gchar *
+xdg_get_config_home(void)
+{
+    gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
+    if (xdg_config_home != NULL)
+        g_strstrip(xdg_config_home);
+
+    if ((xdg_config_home != NULL) && (strcmp(xdg_config_home, "") != 0)) {
+        return strdup(xdg_config_home);
+    } else {
+        GString *default_path = g_string_new(getenv("HOME"));
+        g_string_append(default_path, "/.config");
+        gchar *result = strdup(default_path->str);
+        g_string_free(default_path, TRUE);
+
+        return result;
+    }
+}
+
+gchar *
+xdg_get_data_home(void)
+{
+    gchar *xdg_data_home = getenv("XDG_DATA_HOME");
+    if (xdg_data_home != NULL)
+        g_strstrip(xdg_data_home);
+
+    if ((xdg_data_home != NULL) && (strcmp(xdg_data_home, "") != 0)) {
+        return strdup(xdg_data_home);
+    } else {
+        GString *default_path = g_string_new(getenv("HOME"));
+        g_string_append(default_path, "/.local/share");
+        gchar *result = strdup(default_path->str);
+        g_string_free(default_path, TRUE);
+
+        return result;
+    }
+}
+
 static size_t
 _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
 {
