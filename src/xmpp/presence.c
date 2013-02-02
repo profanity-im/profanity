@@ -32,6 +32,7 @@
 #include "profanity.h"
 #include "xmpp.h"
 #include "stanza.h"
+#include "capabilities.h"
 
 static GHashTable *sub_requests;
 
