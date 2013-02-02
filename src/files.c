@@ -46,19 +46,6 @@ files_create_directories(void)
 }
 
 gchar *
-files_get_chatlog_dir(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *chatlogs_dir = g_string_new(xdg_data);
-    g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    gchar *result = strdup(chatlogs_dir->str);
-    g_free(xdg_data);
-    g_string_free(chatlogs_dir, TRUE);
-
-    return result;
-}
-
-gchar *
 files_get_preferences_file(void)
 {
     gchar *xdg_config = xdg_get_config_home();

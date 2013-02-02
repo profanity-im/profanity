@@ -24,7 +24,6 @@
 #define FILES_H
 
 void files_create_directories(void);
-gchar* files_get_chatlog_dir(void);
 gchar* files_get_preferences_file(void);
 gchar* files_get_log_file(void);
 gchar* files_get_themes_dir(void);

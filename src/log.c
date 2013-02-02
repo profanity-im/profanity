@@ -62,6 +62,7 @@ static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
 static char * _get_log_filename(const char * const other, const char * const login,
     GDateTime *dt, gboolean create);
+static gchar * _get_chatlog_dir(void);
 
 static void _rotate_log_file(void);
 
@@ -358,7 +359,7 @@ static char *
 _get_log_filename(const char * const other, const char * const login,
     GDateTime *dt, gboolean create)
 {
-    gchar *chatlogs_dir = files_get_chatlog_dir();
+    gchar *chatlogs_dir = _get_chatlog_dir();
     GString *log_file = g_string_new(chatlogs_dir);
     g_free(chatlogs_dir);
 
@@ -384,3 +385,17 @@ _get_log_filename(const char * const other, const char * const login,
 
     return result;
 }
+
+static gchar *
+_get_chatlog_dir(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *chatlogs_dir = g_string_new(xdg_data);
+    g_string_append(chatlogs_dir, "/profanity/chatlogs");
+    gchar *result = strdup(chatlogs_dir->str);
+    g_free(xdg_data);
+    g_string_free(chatlogs_dir, TRUE);
+
+    return result;
+}
+
