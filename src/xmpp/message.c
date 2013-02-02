@@ -26,9 +26,9 @@
 #include <strophe.h>
 
 #include "chat_session.h"
+#include "config/preferences.h"
 #include "log.h"
 #include "muc.h"
-#include "preferences.h"
 #include "profanity.h"
 #include "xmpp/message.h"
 #include "xmpp/stanza.h"

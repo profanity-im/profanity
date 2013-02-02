@@ -32,8 +32,8 @@
 #include "log.h"
 
 #include "common.h"
+#include "config/preferences.h"
 #include "files.h"
-#include "preferences.h"
 
 #define PROF "prof"
 

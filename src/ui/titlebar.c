@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "theme.h"
+#include "config/theme.h"
 #include "ui/ui.h"
 
 static WINDOW *title_bar;

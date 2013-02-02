@@ -28,11 +28,11 @@
 
 #include "chat_session.h"
 #include "common.h"
+#include "config/preferences.h"
 #include "contact_list.h"
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#include "preferences.h"
 #include "profanity.h"
 #include "xmpp/iq.h"
 #include "xmpp/message.h"

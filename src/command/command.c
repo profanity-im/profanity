@@ -27,20 +27,20 @@
 
 #include <glib.h>
 
-#include "accounts.h"
 #include "chat_session.h"
 #include "command/command.h"
 #include "command/history.h"
 #include "command/parser.h"
 #include "common.h"
+#include "config/accounts.h"
+#include "config/preferences.h"
+#include "config/theme.h"
 #include "contact.h"
 #include "contact_list.h"
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#include "preferences.h"
 #include "profanity.h"
-#include "theme.h"
 #include "tools/autocomplete.h"
 #include "tools/tinyurl.h"
 #include "ui/ui.h"

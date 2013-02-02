@@ -26,9 +26,9 @@
 #include <glib.h>
 
 #include "common.h"
+#include "config/preferences.h"
 #include "log.h"
 #include "muc.h"
-#include "preferences.h"
 #include "profanity.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/stanza.h"

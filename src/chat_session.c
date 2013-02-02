@@ -27,8 +27,8 @@
 
 #include "chat_session.h"
 
+#include "config/preferences.h"
 #include "log.h"
-#include "preferences.h"
 
 #define PAUSED_TIMOUT 10.0
 #define INACTIVE_TIMOUT 30.0

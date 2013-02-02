@@ -25,7 +25,7 @@
 
 #include <strophe.h>
 
-#include "accounts.h"
+#include "config/accounts.h"
 #include "jid.h"
 
 #define JABBER_PRIORITY_MIN -128

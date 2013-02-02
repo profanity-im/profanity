@@ -32,7 +32,7 @@
 #include <ncurses.h>
 #endif
 
-#include "theme.h"
+#include "config/theme.h"
 #include "ui/window.h"
 
 #define CONS_WIN_TITLE "_cons"

@@ -31,8 +31,10 @@
 
 #include "profanity.h"
 
-#include "accounts.h"
 #include "chat_session.h"
+#include "config/accounts.h"
+#include "config/preferences.h"
+#include "config/theme.h"
 #include "command/command.h"
 #include "common.h"
 #include "contact.h"
@@ -40,8 +42,6 @@
 #include "files.h"
 #include "log.h"
 #include "muc.h"
-#include "preferences.h"
-#include "theme.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 

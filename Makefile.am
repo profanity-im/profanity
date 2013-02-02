@@ -1,10 +1,9 @@
 bin_PROGRAMS = profanity
-profanity_SOURCES = src/contact.c src/preferences.c src/contact.h src/log.c \
-	src/preferences.h src/common.c src/contact_list.c src/log.h \
-	src/profanity.c src/common.h src/contact_list.h src/main.c \
-	src/profanity.h src/chat_session.c src/chat_session.h src/muc.c src/muc.h \
-	src/theme.c src/theme.h src/files.c src/files.h src/accounts.c \
-	src/accounts.h src/jid.h src/jid.c \
+profanity_SOURCES = src/contact.c src/contact.h src/log.c src/common.c \
+	src/contact_list.c src/log.h src/profanity.c src/common.h \
+	src/contact_list.h src/main.c src/profanity.h src/chat_session.c \
+	src/chat_session.h src/muc.c src/muc.h src/files.c src/files.h \
+	src/jid.h src/jid.c \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
 	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
@@ -16,7 +15,10 @@ profanity_SOURCES = src/contact.c src/preferences.c src/contact.h src/log.c \
 	src/command/parser.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/history.c src/tools/history.h \
-	src/tools/tinyurl.c src/tools/tinyurl.h
+	src/tools/tinyurl.c src/tools/tinyurl.h \
+	src/config/accounts.c src/config/accounts.h \
+	src/config/preferences.c src/config/preferences.h \
+	src/config/theme.c src/config/theme.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
