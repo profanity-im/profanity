@@ -25,7 +25,7 @@
 
 #include <strophe.h>
 
-#include "xmpp.h"
+#include "xmpp/xmpp.h"
 
 void caps_add(const char * const caps_str, const char * const client);
 gboolean caps_contains(const char * const caps_str);

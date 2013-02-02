@@ -30,9 +30,9 @@
 #include "muc.h"
 #include "preferences.h"
 #include "profanity.h"
-#include "xmpp.h"
-#include "stanza.h"
-#include "capabilities.h"
+#include "xmpp/capabilities.h"
+#include "xmpp/stanza.h"
+#include "xmpp/xmpp.h"
 
 static GHashTable *sub_requests;
 

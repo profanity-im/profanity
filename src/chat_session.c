@@ -26,6 +26,7 @@
 #include <glib.h>
 
 #include "chat_session.h"
+
 #include "log.h"
 #include "preferences.h"
 

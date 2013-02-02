@@ -25,8 +25,9 @@
 
 #include <glib.h>
 
-#include "common.h"
 #include "jid.h"
+
+#include "common.h"
 
 Jid *
 jid_create(const gchar * const str)

@@ -20,9 +20,9 @@
  *
  */
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include <strophe.h>
 
@@ -31,14 +31,14 @@
 #include "contact_list.h"
 #include "jid.h"
 #include "log.h"
+#include "muc.h"
 #include "preferences.h"
 #include "profanity.h"
-#include "muc.h"
-#include "xmpp.h"
-#include "stanza.h"
-#include "message.h"
-#include "iq.h"
-#include "presence.h"
+#include "xmpp/iq.h"
+#include "xmpp/message.h"
+#include "xmpp/presence.h"
+#include "xmpp/stanza.h"
+#include "xmpp/xmpp.h"
 
 static struct _jabber_conn_t {
     xmpp_log_t *log;

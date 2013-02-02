@@ -20,19 +20,20 @@
  *
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 
 #include <strophe.h>
 
 #include "common.h"
-#include "config.h"
 #include "contact_list.h"
 #include "log.h"
-#include "xmpp.h"
-#include "stanza.h"
-#include "iq.h"
-#include "capabilities.h"
+#include "xmpp/capabilities.h"
+#include "xmpp/iq.h"
+#include "xmpp/stanza.h"
+#include "xmpp/xmpp.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 

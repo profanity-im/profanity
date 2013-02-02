@@ -23,11 +23,13 @@
 #include "config.h"
 
 #include <locale.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 
 #include <glib.h>
+
+#include "profanity.h"
 
 #include "accounts.h"
 #include "chat_session.h"
@@ -37,9 +39,8 @@
 #include "contact_list.h"
 #include "files.h"
 #include "log.h"
-#include "preferences.h"
-#include "profanity.h"
 #include "muc.h"
+#include "preferences.h"
 #include "theme.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"

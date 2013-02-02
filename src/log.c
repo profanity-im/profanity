@@ -24,14 +24,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include "glib.h"
 
+#include "log.h"
+
 #include "common.h"
 #include "files.h"
-#include "log.h"
 #include "preferences.h"
 
 #define PROF "prof"

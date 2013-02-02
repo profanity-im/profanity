@@ -23,7 +23,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "ui.h"
+#include "ui/ui.h"
 
 typedef struct prof_win_t {
     char *from;

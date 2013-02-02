@@ -25,9 +25,9 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include <glib.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <glib.h>
 
 #include "common.h"
 

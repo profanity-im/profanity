@@ -20,25 +20,26 @@
  *
  */
 
+#include <errno.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
-#include <errno.h>
 
 #include <glib.h>
 
-#include "accounts.h"
-#include "chat_session.h"
 #include "command.h"
+
+#include "accounts.h"
+#include "autocomplete.h"
+#include "chat_session.h"
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"
 #include "jid.h"
 #include "log.h"
-#include "preferences.h"
-#include "autocomplete.h"
-#include "profanity.h"
 #include "muc.h"
+#include "preferences.h"
+#include "profanity.h"
 #include "theme.h"
 #include "tinyurl.h"
 #include "ui/ui.h"

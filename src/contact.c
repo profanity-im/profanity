@@ -25,8 +25,9 @@
 
 #include <glib.h>
 
-#include "common.h"
 #include "contact.h"
+
+#include "common.h"
 
 struct p_contact_t {
     char *jid;

@@ -33,14 +33,14 @@
 #include <ncurses.h>
 #endif
 
-#include "common.h"
 #include "command.h"
+#include "common.h"
 #include "contact_list.h"
 #include "log.h"
 #include "preferences.h"
 #include "profanity.h"
 #include "theme.h"
-#include "ui.h"
+#include "ui/ui.h"
 
 #define _inp_win_refresh() prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
 

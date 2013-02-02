@@ -20,6 +20,8 @@
  *
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,10 +29,9 @@
 #include <openssl/evp.h>
 #include <strophe.h>
 
-#include "config.h"
 #include "common.h"
-#include "xmpp.h"
-#include "stanza.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/stanza.h"
 
 static GHashTable *capabilities;
 

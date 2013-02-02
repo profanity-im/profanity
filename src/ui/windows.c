@@ -24,20 +24,16 @@
 
 #include <stdlib.h>
 #include <string.h>
-
 #ifdef HAVE_LIBXSS
 #include <X11/extensions/scrnsaver.h>
 #endif
-
 #include <glib.h>
-
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
 #ifdef PLATFORM_CYGWIN
 #include <windows.h>
 #endif
-
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -51,11 +47,11 @@
 #include "contact_list.h"
 #include "jid.h"
 #include "log.h"
-#include "preferences.h"
 #include "muc.h"
+#include "preferences.h"
 #include "theme.h"
-#include "ui.h"
-#include "window.h"
+#include "ui/ui.h"
+#include "ui/window.h"
 
 #define CONS_WIN_TITLE "_cons"
 #define NUM_WINS 10

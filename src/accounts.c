@@ -26,6 +26,7 @@
 #include <glib.h>
 
 #include "accounts.h"
+
 #include "autocomplete.h"
 #include "common.h"
 #include "files.h"

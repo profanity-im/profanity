@@ -24,6 +24,7 @@
 #define COMMON_H
 
 #include <stdio.h>
+
 #include <glib.h>
 
 #if !GLIB_CHECK_VERSION(2,28,0)

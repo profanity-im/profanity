@@ -25,7 +25,7 @@
 
 #include "common.h"
 #include "theme.h"
-#include "ui.h"
+#include "ui/ui.h"
 
 static WINDOW *title_bar;
 static char *current_title = NULL;

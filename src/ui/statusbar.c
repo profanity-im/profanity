@@ -32,7 +32,7 @@
 #endif
 
 #include "theme.h"
-#include "ui.h"
+#include "ui/ui.h"
 
 static WINDOW *status_bar;
 static char *message = NULL;

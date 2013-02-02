@@ -24,8 +24,8 @@
 
 #include <glib.h>
 
-#include "contact.h"
 #include "autocomplete.h"
+#include "contact.h"
 
 static Autocomplete ac;
 static GHashTable *contacts;

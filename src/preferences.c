@@ -20,22 +20,23 @@
  *
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
-
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
-#include "config.h"
+#include "preferences.h"
+
+#include "autocomplete.h"
 #include "files.h"
 #include "log.h"
-#include "preferences.h"
-#include "autocomplete.h"
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;
