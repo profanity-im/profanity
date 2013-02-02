@@ -46,32 +46,6 @@ files_create_directories(void)
 }
 
 gchar *
-files_get_preferences_file(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *prefs_file = g_string_new(xdg_config);
-    g_string_append(prefs_file, "/profanity/profrc");
-    gchar *result = strdup(prefs_file->str);
-    g_free(xdg_config);
-    g_string_free(prefs_file, TRUE);
-
-    return result;
-}
-
-gchar *
-files_get_log_file(void)
-{
-    gchar *xdg_data = xdg_get_data_home();
-    GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/logs/profanity.log");
-    gchar *result = strdup(logfile->str);
-    g_free(xdg_data);
-    g_string_free(logfile, TRUE);
-
-    return result;
-}
-
-gchar *
 files_get_accounts_file(void)
 {
     gchar *xdg_data = xdg_get_data_home();

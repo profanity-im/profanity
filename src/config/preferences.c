@@ -32,10 +32,10 @@
 #include <ncurses.h>
 #endif
 
-#include "preferences.h"
-
+#include "common.h"
 #include "files.h"
 #include "log.h"
+#include "preferences.h"
 #include "tools/autocomplete.h"
 
 static gchar *prefs_loc;
@@ -45,6 +45,7 @@ gint log_maxsize = 0;
 static Autocomplete boolean_choice_ac;
 
 static void _save_prefs(void);
+static gchar * _get_preferences_file(void);
 
 void
 prefs_load(void)
@@ -52,7 +53,7 @@ prefs_load(void)
     GError *err;
 
     log_info("Loading preferences");
-    prefs_loc = files_get_preferences_file();
+    prefs_loc = _get_preferences_file();
 
     prefs = g_key_file_new();
     g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS,
@@ -452,4 +453,17 @@ _save_prefs(void)
     gsize g_data_size;
     char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
     g_file_set_contents(prefs_loc, g_prefs_data, g_data_size, NULL);
+}
+
+static gchar *
+_get_preferences_file(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *prefs_file = g_string_new(xdg_config);
+    g_string_append(prefs_file, "/profanity/profrc");
+    gchar *result = strdup(prefs_file->str);
+    g_free(xdg_config);
+    g_string_free(prefs_file, TRUE);
+
+    return result;
 }

@@ -63,7 +63,7 @@ static gboolean _key_equals(void *key1, void *key2);
 static char * _get_log_filename(const char * const other, const char * const login,
     GDateTime *dt, gboolean create);
 static gchar * _get_chatlog_dir(void);
-
+static gchar * _get_log_file(void);
 static void _rotate_log_file(void);
 
 void
@@ -119,7 +119,7 @@ log_init(log_level_t filter)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
-    gchar *log_file = files_get_log_file();
+    gchar *log_file = _get_log_file();
     logp = fopen(log_file, "a");
     g_free(log_file);
 }
@@ -143,7 +143,7 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
     if (level >= level_filter) {
         struct stat st;
         int result;
-        gchar *log_file = files_get_log_file();
+        gchar *log_file = _get_log_file();
         dt = g_date_time_new_now(tz);
 
         gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
@@ -165,7 +165,7 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
 static void
 _rotate_log_file(void)
 {
-    gchar *log_file = files_get_log_file();
+    gchar *log_file = _get_log_file();
     size_t len = strlen(log_file);
     char *log_file_new = malloc(len + 3);
 
@@ -399,3 +399,15 @@ _get_chatlog_dir(void)
     return result;
 }
 
+static gchar *
+_get_log_file(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *logfile = g_string_new(xdg_data);
+    g_string_append(logfile, "/profanity/logs/profanity.log");
+    gchar *result = strdup(logfile->str);
+    g_free(xdg_data);
+    g_string_free(logfile, TRUE);
+
+    return result;
+}
