@@ -508,10 +508,15 @@ ui_disconnected(void)
 }
 
 void
-ui_handle_special_keys(const wint_t * const ch)
+ui_handle_special_keys(const wint_t * const ch, const char * const inp,
+    const int size)
 {
     _win_handle_switch(ch);
     _win_handle_page(ch);
+    if (*ch == KEY_RESIZE) {
+        ui_resize(*ch, inp, size);
+    }
+
 }
 
 void

@@ -75,7 +75,8 @@ void ui_contact_online(const char * const from, const char * const show,
 void ui_contact_offline(const char * const from, const char * const show,
     const char * const status);
 void ui_disconnected(void);
-void ui_handle_special_keys(const wint_t * const ch);
+void ui_handle_special_keys(const wint_t * const ch, const char * const inp,
+    const int size);
 void ui_switch_win(const int i);
 gboolean ui_windows_full(void);
 unsigned long ui_get_idle_time(void);

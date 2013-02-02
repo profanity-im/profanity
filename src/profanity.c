@@ -70,7 +70,6 @@ prof_run(const int disable_tls, char *log_level)
         size = 0;
 
         while(ch != '\n') {
-
             if (jabber_get_connection_status() == JABBER_CONNECTED) {
                 _handle_idle_time();
             }
@@ -78,24 +77,16 @@ prof_run(const int disable_tls, char *log_level)
             gdouble elapsed = g_timer_elapsed(timer, NULL);
 
             gint remind_period = prefs_get_notify_remind();
-
-            // 0 means to not remind
             if (remind_period > 0 && elapsed >= remind_period) {
                 notify_remind();
                 g_timer_start(timer);
             }
 
-            ui_handle_special_keys(&ch);
-
-            if (ch == KEY_RESIZE) {
-                ui_resize(ch, inp, size);
-            }
-
+            ui_handle_special_keys(&ch, inp, size);
             ui_refresh();
             jabber_process_events();
 
             ch = inp_get_char(inp, &size);
-
             if (ch != ERR) {
                 ui_reset_idle_time();
             }
