@@ -31,7 +31,7 @@
 #include "files.h"
 #include "jid.h"
 #include "log.h"
-#include "xmpp.h"
+#include "xmpp/xmpp.h"
 
 static gchar *accounts_loc;
 static GKeyFile *accounts;

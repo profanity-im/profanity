@@ -42,7 +42,7 @@
 #include "muc.h"
 #include "theme.h"
 #include "ui.h"
-#include "xmpp.h"
+#include "xmpp/xmpp.h"
 
 static log_level_t _get_log_level(char *log_level);
 static gboolean _process_input(char *inp);

@@ -42,7 +42,7 @@
 #include "theme.h"
 #include "tinyurl.h"
 #include "ui.h"
-#include "xmpp.h"
+#include "xmpp/xmpp.h"
 
 typedef char*(*autocomplete_func)(char *);
 

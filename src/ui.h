@@ -36,8 +36,8 @@
 #endif
 
 #include "contact.h"
-#include "xmpp.h"
 #include "jid.h"
+#include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
 #define PAD_SIZE 1000
