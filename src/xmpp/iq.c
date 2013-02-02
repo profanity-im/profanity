@@ -31,6 +31,7 @@
 #include "log.h"
 #include "xmpp.h"
 #include "stanza.h"
+#include "iq.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 
