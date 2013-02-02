@@ -1,5 +1,5 @@
 /*
- * command_history.h
+ * history.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
