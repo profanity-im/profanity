@@ -44,6 +44,7 @@ static gchar *string_keys[] = {"jid", "server", "resource", "presence.last", "pr
 
 static void _fix_legacy_accounts(const char * const account_name);
 static void _save_accounts(void);
+static gchar * _get_accounts_file(void);
 
 void
 accounts_load(void)
@@ -51,7 +52,7 @@ accounts_load(void)
     log_info("Loading accounts");
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
-    accounts_loc = files_get_accounts_file();
+    accounts_loc = _get_accounts_file();
 
     accounts = g_key_file_new();
     g_key_file_load_from_file(accounts, accounts_loc, G_KEY_FILE_KEEP_COMMENTS,
@@ -530,3 +531,17 @@ _save_accounts(void)
     char *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
     g_file_set_contents(accounts_loc, g_accounts_data, g_data_size, NULL);
 }
+
+static gchar *
+_get_accounts_file(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *logfile = g_string_new(xdg_data);
+    g_string_append(logfile, "/profanity/accounts");
+    gchar *result = strdup(logfile->str);
+    g_free(xdg_data);
+    g_string_free(logfile, TRUE);
+
+    return result;
+}
+

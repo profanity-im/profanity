@@ -25,6 +25,5 @@
 
 void files_create_directories(void);
 gchar* files_get_themes_dir(void);
-gchar* files_get_accounts_file(void);
 
 #endif
