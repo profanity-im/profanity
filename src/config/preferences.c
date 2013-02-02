@@ -33,7 +33,6 @@
 #endif
 
 #include "common.h"
-#include "files.h"
 #include "log.h"
 #include "preferences.h"
 #include "tools/autocomplete.h"

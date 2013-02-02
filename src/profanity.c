@@ -39,7 +39,6 @@
 #include "common.h"
 #include "contact.h"
 #include "contact_list.h"
-#include "files.h"
 #include "log.h"
 #include "muc.h"
 #include "ui/ui.h"
@@ -50,6 +49,12 @@ static gboolean _process_input(char *inp);
 static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
+static void _create_directories(void);
+static void _create_config_directory(void);
+static void _create_data_directory(void);
+static void _create_chatlog_directory(void);
+static void _create_log_directory(void);
+static void _create_themes_directory(void);
 
 static gboolean idle = FALSE;
 
@@ -515,7 +520,7 @@ _init(const int disable_tls, char *log_level)
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
-    files_create_directories();
+    _create_directories();
     log_level_t prof_log_level = _get_log_level(log_level);
     log_init(prof_log_level);
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
@@ -551,4 +556,69 @@ _shutdown(void)
     accounts_close();
     cmd_close();
     log_close();
+}
+
+static void
+_create_directories(void)
+{
+    _create_config_directory();
+    _create_data_directory();
+    _create_chatlog_directory();
+    _create_log_directory();
+    _create_themes_directory();
+}
+
+static void
+_create_config_directory(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *prof_conf_dir = g_string_new(xdg_config);
+    g_string_append(prof_conf_dir, "/profanity");
+    mkdir_recursive(prof_conf_dir->str);
+    g_free(xdg_config);
+    g_string_free(prof_conf_dir, TRUE);
+}
+
+static void
+_create_data_directory(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *prof_data_dir = g_string_new(xdg_data);
+    g_string_append(prof_data_dir, "/profanity");
+    mkdir_recursive(prof_data_dir->str);
+    g_free(xdg_data);
+    g_string_free(prof_data_dir, TRUE);
+}
+
+static void
+_create_chatlog_directory(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *chatlogs_dir = g_string_new(xdg_data);
+    g_string_append(chatlogs_dir, "/profanity/chatlogs");
+    mkdir_recursive(chatlogs_dir->str);
+    g_free(xdg_data);
+    g_string_free(chatlogs_dir, TRUE);
+}
+
+static void
+_create_log_directory(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *chatlogs_dir = g_string_new(xdg_data);
+    g_string_append(chatlogs_dir, "/profanity/logs");
+    mkdir_recursive(chatlogs_dir->str);
+    g_free(xdg_data);
+    g_string_free(chatlogs_dir, TRUE);
+}
+
+static void
+_create_themes_directory(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *themes_dir = g_string_new(xdg_config);
+    g_string_append(themes_dir, "/profanity/themes");
+    mkdir_recursive(themes_dir->str);
+    g_free(xdg_config);
+    g_string_free(themes_dir, TRUE);
 }

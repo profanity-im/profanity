@@ -33,7 +33,6 @@
 
 #include "common.h"
 #include "config/preferences.h"
-#include "files.h"
 
 #define PROF "prof"
 

@@ -28,7 +28,6 @@
 #include "accounts.h"
 
 #include "common.h"
-#include "files.h"
 #include "jid.h"
 #include "log.h"
 #include "tools/autocomplete.h"
