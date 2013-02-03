@@ -269,9 +269,11 @@ static int
 _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
+    log_debug("Recieved diso#info response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
     if ((id != NULL) && (g_str_has_prefix(id, "disco"))) {
+        log_debug("Response to query: %s", id);
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
         char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
         if (node == NULL) {
@@ -290,7 +292,9 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
             char *generated_sha1 = caps_create_sha1_str(query);
 
             if (g_strcmp0(given_sha1, generated_sha1) != 0) {
-                log_info("Invalid SHA1 recieved for caps.");
+                log_info("Generated sha-1 does not match given:");
+                log_info("Generated : %s", generated_sha1);
+                log_info("Given     : %s", given_sha1);
                 FREE_SET_NULL(generated_sha1);
                 g_strfreev(split);
 

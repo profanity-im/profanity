@@ -273,6 +273,7 @@ _presence_handler(xmpp_conn_t * const conn,
 
     // handle regular presence
     } else {
+        log_debug("Regular presence received from %s", from);
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
         int idle_seconds = stanza_get_idle_time(stanza);
@@ -338,38 +339,54 @@ _handle_presence_caps(xmpp_stanza_t * const stanza)
     char *node = NULL;
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (stanza_contains_caps(stanza)) {
+        log_debug("Presence contains capabilities.");
         char *hash_type = stanza_caps_get_hash(stanza);
 
         // xep-0115
         if (hash_type != NULL) {
+            log_debug("Hash type: %s", hash_type);
 
             // supported hash
             if (strcmp(hash_type, "sha-1") == 0) {
+                log_debug("Hash type supported.");
                 node = stanza_get_caps_str(stanza);
                 caps_key = node;
-
+                
                 if (node != NULL) {
+                    log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {
+                        log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
                         xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, "disco", from, node);
                         xmpp_send(conn, iq);
                         xmpp_stanza_release(iq);
+                    } else {
+                        log_debug("Capabilities already cached, for %s", caps_key);
                     }
+                } else {
+                    log_debug("No node string, not sending discovery IQ.");
                 }
 
             // unsupported hash
             } else {
+                log_debug("Hash type unsupported.");
                 node = stanza_get_caps_str(stanza);
                 caps_key = from;
 
                 if (node != NULL) {
+                    log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {
+                        log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
                         GString *id = g_string_new("disco_");
                         g_string_append(id, from);
                         xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
                         xmpp_send(conn, iq);
                         xmpp_stanza_release(iq);
                         g_string_free(id, TRUE);
+                    } else {
+                        log_debug("Capabilities already cached, for %s", caps_key);
                     }
+                } else {
+                    log_debug("No node string, not sending discovery IQ.");
                 }
             }
 
@@ -377,18 +394,25 @@ _handle_presence_caps(xmpp_stanza_t * const stanza)
 
         //ignore or handle legacy caps
         } else {
+            log_debug("No hash type, using legacy capabilities.");
             node = stanza_get_caps_str(stanza);
             caps_key = from;
 
             if (node != NULL) {
+                log_debug("Node string: %s.", node);
                 if (!caps_contains(caps_key)) {
+                    log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
                     GString *id = g_string_new("disco_");
                     g_string_append(id, from);
                     xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
                     xmpp_send(conn, iq);
                     xmpp_stanza_release(iq);
                     g_string_free(id, TRUE);
+                } else {
+                    log_debug("Capabilities already cached, for %s", caps_key);
                 }
+            } else {
+                log_debug("No node string, not sending discovery IQ.");
             }
 
             return caps_key;
@@ -438,6 +462,8 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
         char *caps_key = _handle_presence_caps(stanza);
+
+        log_debug("Room presence received from %s", jid);
 
         xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
         if (status != NULL) {
