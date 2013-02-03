@@ -27,6 +27,7 @@
 
 #include "xmpp/xmpp.h"
 
+void caps_init(void);
 void caps_add(const char * const caps_str, const char * const client);
 gboolean caps_contains(const char * const caps_str);
 char* caps_create_sha1_str(xmpp_stanza_t * const query);

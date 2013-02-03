@@ -34,6 +34,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
@@ -92,6 +93,7 @@ jabber_init(const int disable_tls)
     jabber_conn.presence_message = NULL;
     jabber_conn.tls_disabled = disable_tls;
     presence_init();
+    caps_init();
 }
 
 void

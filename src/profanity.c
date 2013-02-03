@@ -506,7 +506,6 @@ _init(const int disable_tls, char *log_level)
     theme_init(theme);
     g_free(theme);
     ui_init();
-    caps_init();
     jabber_init(disable_tls);
     cmd_init();
     log_info("Initialising contact list");

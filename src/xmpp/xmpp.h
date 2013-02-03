@@ -84,7 +84,6 @@ void presence_update(jabber_presence_t status, const char * const msg,
     int idle);
 
 // caps functions
-void caps_init(void);
 Capabilities* caps_get(const char * const caps_str);
 void caps_close(void);
 
