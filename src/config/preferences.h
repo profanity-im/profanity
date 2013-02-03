@@ -63,25 +63,11 @@ void prefs_reset_login_search(void);
 char * prefs_autocomplete_boolean_choice(char *prefix);
 void prefs_reset_boolean_choice(void);
 
-void prefs_set_beep(gboolean value);
-void prefs_set_flash(gboolean value);
-void prefs_set_chlog(gboolean value);
-void prefs_set_history(gboolean value);
-void prefs_set_splash(gboolean value);
-void prefs_set_vercheck(gboolean value);
-void prefs_set_titlebarversion(gboolean value);
-void prefs_set_intype(gboolean value);
-void prefs_set_states(gboolean value);
-void prefs_set_outtype(gboolean value);
 gint prefs_get_gone(void);
 void prefs_set_gone(gint value);
 gchar * prefs_get_theme(void);
 void prefs_set_theme(gchar *value);
-void prefs_set_mouse(gboolean value);
-void prefs_set_statuses(gboolean value);
 
-void prefs_set_notify_message(gboolean value);
-void prefs_set_notify_typing(gboolean value);
 void prefs_set_notify_remind(gint period);
 gint prefs_get_notify_remind(void);
 void prefs_set_max_log_size(gint value);
@@ -99,10 +85,10 @@ gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);
 gchar* prefs_get_autoaway_message(void);
 void prefs_set_autoaway_message(gchar *value);
-void prefs_set_autoaway_check(gboolean value);
 
 void prefs_add_login(const char *jid);
 
 gboolean prefs_get_boolean(preference_t pref);
+void prefs_set_boolean(preference_t pref, gboolean value);
 
 #endif

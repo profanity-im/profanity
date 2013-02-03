@@ -71,8 +71,7 @@ static struct cmd_t * _cmd_get_command(const char * const command);
 static void _update_presence(const jabber_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
-    const char * const display,
-    void (*set_func)(gboolean));
+    const char * const display, preference_t pref);
 
 static void _cmd_complete_parameters(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
@@ -2006,14 +2005,14 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_beep(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help, "Sound", prefs_set_beep);
+    return _cmd_set_boolean_preference(args[0], help, "Sound", PREF_BEEP);
 }
 
 static gboolean
 _cmd_set_states(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help, "Sending chat states",
-        prefs_set_states);
+        PREF_STATES);
 }
 
 static gboolean
@@ -2024,7 +2023,7 @@ _cmd_set_titlebar(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else {
         return _cmd_set_boolean_preference(args[1], help,
-        "Show version in window title", prefs_set_titlebarversion);
+        "Show version in window title", PREF_TITLEBARVERSION);
     }
 }
 
@@ -2032,7 +2031,7 @@ static gboolean
 _cmd_set_outtype(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Sending typing notifications", prefs_set_outtype);
+        "Sending typing notifications", PREF_OUTTYPE);
 }
 
 static gboolean
@@ -2069,10 +2068,10 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
     } else if (strcmp(kind, "message") == 0) {
         if (strcmp(value, "on") == 0) {
             cons_show("Message notifications enabled.");
-            prefs_set_notify_message(TRUE);
+            prefs_set_boolean(PREF_NOTIFY_MESSAGE, TRUE);
         } else if (strcmp(value, "off") == 0) {
             cons_show("Message notifications disabled.");
-            prefs_set_notify_message(FALSE);
+            prefs_set_boolean(PREF_NOTIFY_MESSAGE, FALSE);
         } else {
             cons_show("Usage: /notify message on|off");
         }
@@ -2081,10 +2080,10 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
     } else if (strcmp(kind, "typing") == 0) {
         if (strcmp(value, "on") == 0) {
             cons_show("Typing notifications enabled.");
-            prefs_set_notify_typing(TRUE);
+            prefs_set_boolean(PREF_NOTIFY_TYPING, TRUE);
         } else if (strcmp(value, "off") == 0) {
             cons_show("Typing notifications disabled.");
-            prefs_set_notify_typing(FALSE);
+            prefs_set_boolean(PREF_NOTIFY_TYPING, FALSE);
         } else {
             cons_show("Usage: /notify typing on|off");
         }
@@ -2218,7 +2217,7 @@ _cmd_set_autoaway(gchar **args, struct cmd_help_t help)
 
     if (strcmp(setting, "check") == 0) {
         return _cmd_set_boolean_preference(value, help, "Online check",
-            prefs_set_autoaway_check);
+            PREF_AUTOAWAY_CHECK);
     }
 
     return TRUE;
@@ -2252,7 +2251,7 @@ static gboolean
 _cmd_set_statuses(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Status notifications", prefs_set_statuses);
+        "Status notifications", PREF_STATUSES);
 }
 
 static gboolean
@@ -2265,7 +2264,7 @@ _cmd_vercheck(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else {
         return _cmd_set_boolean_preference(args[0], help,
-            "Version checking", prefs_set_vercheck);
+            "Version checking", PREF_VERCHECK);
     }
 }
 
@@ -2273,42 +2272,42 @@ static gboolean
 _cmd_set_flash(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Screen flash", prefs_set_flash);
+        "Screen flash", PREF_FLASH);
 }
 
 static gboolean
 _cmd_set_intype(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Show contact typing", prefs_set_intype);
+        "Show contact typing", PREF_INTYPE);
 }
 
 static gboolean
 _cmd_set_splash(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Splash screen", prefs_set_splash);
+        "Splash screen", PREF_SPLASH);
 }
 
 static gboolean
 _cmd_set_chlog(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Chat logging", prefs_set_chlog);
+        "Chat logging", PREF_CHLOG);
 }
 
 static gboolean
 _cmd_set_mouse(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Mouse handling", prefs_set_mouse);
+        "Mouse handling", PREF_MOUSE);
 }
 
 static gboolean
 _cmd_set_history(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
-        "Chat history", prefs_set_history);
+        "Chat history", PREF_HISTORY);
 }
 
 static gboolean
@@ -2379,8 +2378,7 @@ _update_presence(const jabber_presence_t presence,
 
 static gboolean
 _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
-    const char * const display,
-    void (*set_func)(gboolean))
+    const char * const display, preference_t pref)
 {
     GString *enabled = g_string_new(display);
     g_string_append(enabled, " enabled.");
@@ -2390,10 +2388,10 @@ _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
 
     if (strcmp(arg, "on") == 0) {
         cons_show(enabled->str);
-        set_func(TRUE);
+        prefs_set_boolean(pref, TRUE);
     } else if (strcmp(arg, "off") == 0) {
         cons_show(disabled->str);
-        set_func(FALSE);
+        prefs_set_boolean(pref, FALSE);
     } else {
         char usage[strlen(help.usage) + 8];
         sprintf(usage, "Usage: %s", help.usage);

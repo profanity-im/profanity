@@ -52,6 +52,9 @@ static Autocomplete boolean_choice_ac;
 
 static void _save_prefs(void);
 static gchar * _get_preferences_file(void);
+static const char * _get_group(preference_t pref);
+static const char * _get_key(preference_t pref);
+static gboolean _get_default_boolean(preference_t pref);
 
 void
 prefs_load(void)
@@ -94,6 +97,199 @@ void
 prefs_reset_boolean_choice(void)
 {
     autocomplete_reset(boolean_choice_ac);
+}
+
+gboolean
+prefs_get_boolean(preference_t pref)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    gboolean def = _get_default_boolean(pref);
+
+    if (!g_key_file_has_key(prefs, group, key, NULL)) {
+        return def;
+    }
+
+    return g_key_file_get_boolean(prefs, group, key, NULL);
+}
+
+void
+prefs_set_boolean(preference_t pref, gboolean value)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    g_key_file_set_boolean(prefs, group, key, value);
+    _save_prefs();
+}
+
+gchar *
+prefs_get_theme(void)
+{
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "theme", NULL);
+}
+
+void
+prefs_set_theme(gchar *value)
+{
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "theme", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_gone(void)
+{
+    return g_key_file_get_integer(prefs, PREF_GROUP_CHATSTATES, "gone", NULL);
+}
+
+void
+prefs_set_gone(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_CHATSTATES, "gone", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_notify_remind(void)
+{
+    return g_key_file_get_integer(prefs, PREF_GROUP_NOTIFICATIONS, "remind", NULL);
+}
+
+void
+prefs_set_notify_remind(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "remind", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_max_log_size(void)
+{
+    if (log_maxsize < PREFS_MIN_LOG_SIZE)
+        return PREFS_MAX_LOG_SIZE;
+    else
+        return log_maxsize;
+}
+
+void
+prefs_set_max_log_size(gint value)
+{
+    log_maxsize = value;
+    g_key_file_set_integer(prefs, PREF_GROUP_LOGGING, "maxsize", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_priority(void)
+{
+    return g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "priority", NULL);
+}
+
+void
+prefs_set_priority(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "priority", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_reconnect(void)
+{
+    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", NULL);
+}
+
+void
+prefs_set_reconnect(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_autoping(void)
+{
+    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping", NULL);
+}
+
+void
+prefs_set_autoping(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "autoping", value);
+    _save_prefs();
+}
+
+gchar *
+prefs_get_autoaway_mode(void)
+{
+    gchar *result = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", NULL);
+    if (result == NULL) {
+        return strdup("off");
+    } else {
+        return result;
+    }
+}
+
+void
+prefs_set_autoaway_mode(gchar *value)
+{
+    g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_autoaway_time(void)
+{
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
+
+    if (result == 0) {
+        return 15;
+    } else {
+        return result;
+    }
+}
+
+void
+prefs_set_autoaway_time(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", value);
+    _save_prefs();
+}
+
+gchar *
+prefs_get_autoaway_message(void)
+{
+    return g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
+}
+
+void
+prefs_set_autoaway_message(gchar *value)
+{
+    if (value == NULL) {
+        g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
+    } else {
+        g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", value);
+    }
+    _save_prefs();
+}
+
+static void
+_save_prefs(void)
+{
+    gsize g_data_size;
+    char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
+    g_file_set_contents(prefs_loc, g_prefs_data, g_data_size, NULL);
+}
+
+static gchar *
+_get_preferences_file(void)
+{
+    gchar *xdg_config = xdg_get_config_home();
+    GString *prefs_file = g_string_new(xdg_config);
+    g_string_append(prefs_file, "/profanity/profrc");
+    gchar *result = strdup(prefs_file->str);
+    g_free(xdg_config);
+    g_string_free(prefs_file, TRUE);
+
+    return result;
 }
 
 static const char *
@@ -183,291 +379,3 @@ _get_default_boolean(preference_t pref)
     }
 }
 
-gboolean
-prefs_get_boolean(preference_t pref)
-{
-    const char *group = _get_group(pref);
-    const char *key = _get_key(pref);
-    gboolean def = _get_default_boolean(pref);
-
-    if (!g_key_file_has_key(prefs, group, key, NULL)) {
-        return def;
-    }
-
-    return g_key_file_get_boolean(prefs, group, key, NULL);
-}
-
-void
-prefs_set_beep(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "beep", value);
-    _save_prefs();
-}
-
-gchar *
-prefs_get_theme(void)
-{
-    return g_key_file_get_string(prefs, PREF_GROUP_UI, "theme", NULL);
-}
-
-void
-prefs_set_theme(gchar *value)
-{
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "theme", value);
-    _save_prefs();
-}
-
-void
-prefs_set_states(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_CHATSTATES, "enabled", value);
-    _save_prefs();
-}
-
-void
-prefs_set_outtype(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_CHATSTATES, "outtype", value);
-    _save_prefs();
-}
-
-gint
-prefs_get_gone(void)
-{
-    return g_key_file_get_integer(prefs, PREF_GROUP_CHATSTATES, "gone", NULL);
-}
-
-void
-prefs_set_gone(gint value)
-{
-    g_key_file_set_integer(prefs, PREF_GROUP_CHATSTATES, "gone", value);
-    _save_prefs();
-}
-
-void
-prefs_set_notify_typing(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "typing", value);
-    _save_prefs();
-}
-
-void
-prefs_set_notify_message(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "message", value);
-    _save_prefs();
-}
-
-gint
-prefs_get_notify_remind(void)
-{
-    return g_key_file_get_integer(prefs, PREF_GROUP_NOTIFICATIONS, "remind", NULL);
-}
-
-void
-prefs_set_notify_remind(gint value)
-{
-    g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "remind", value);
-    _save_prefs();
-}
-
-gint
-prefs_get_max_log_size(void)
-{
-    if (log_maxsize < PREFS_MIN_LOG_SIZE)
-        return PREFS_MAX_LOG_SIZE;
-    else
-        return log_maxsize;
-}
-
-void
-prefs_set_max_log_size(gint value)
-{
-    log_maxsize = value;
-    g_key_file_set_integer(prefs, PREF_GROUP_LOGGING, "maxsize", value);
-    _save_prefs();
-}
-
-gint
-prefs_get_priority(void)
-{
-    return g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "priority", NULL);
-}
-
-void
-prefs_set_priority(gint value)
-{
-    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "priority", value);
-    _save_prefs();
-}
-
-gint
-prefs_get_reconnect(void)
-{
-    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", NULL);
-}
-
-void
-prefs_set_reconnect(gint value)
-{
-    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", value);
-    _save_prefs();
-}
-
-gint
-prefs_get_autoping(void)
-{
-    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping", NULL);
-}
-
-void
-prefs_set_autoping(gint value)
-{
-    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "autoping", value);
-    _save_prefs();
-}
-
-void
-prefs_set_vercheck(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "vercheck", value);
-    _save_prefs();
-}
-
-void
-prefs_set_titlebarversion(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.version", value);
-    _save_prefs();
-}
-
-void
-prefs_set_flash(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "flash", value);
-    _save_prefs();
-}
-
-void
-prefs_set_intype(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "intype", value);
-    _save_prefs();
-}
-
-void
-prefs_set_chlog(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_LOGGING, "chlog", value);
-    _save_prefs();
-}
-
-void
-prefs_set_history(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "history", value);
-    _save_prefs();
-}
-
-gchar *
-prefs_get_autoaway_mode(void)
-{
-    gchar *result = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", NULL);
-    if (result == NULL) {
-        return strdup("off");
-    } else {
-        return result;
-    }
-}
-
-void
-prefs_set_autoaway_mode(gchar *value)
-{
-    g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", value);
-    _save_prefs();
-}
-
-gint
-prefs_get_autoaway_time(void)
-{
-    gint result = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
-
-    if (result == 0) {
-        return 15;
-    } else {
-        return result;
-    }
-}
-
-void
-prefs_set_autoaway_time(gint value)
-{
-    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", value);
-    _save_prefs();
-}
-
-gchar *
-prefs_get_autoaway_message(void)
-{
-    return g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
-}
-
-void
-prefs_set_autoaway_message(gchar *value)
-{
-    if (value == NULL) {
-        g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
-    } else {
-        g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", value);
-    }
-    _save_prefs();
-}
-
-void
-prefs_set_autoaway_check(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_PRESENCE, "autoaway.check", value);
-    _save_prefs();
-}
-
-void
-prefs_set_splash(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "splash", value);
-    _save_prefs();
-}
-
-void
-prefs_set_mouse(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "mouse", value);
-    _save_prefs();
-}
-
-void
-prefs_set_statuses(gboolean value)
-{
-    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "statuses", value);
-    _save_prefs();
-}
-
-static void
-_save_prefs(void)
-{
-    gsize g_data_size;
-    char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    g_file_set_contents(prefs_loc, g_prefs_data, g_data_size, NULL);
-}
-
-static gchar *
-_get_preferences_file(void)
-{
-    gchar *xdg_config = xdg_get_config_home();
-    GString *prefs_file = g_string_new(xdg_config);
-    g_string_append(prefs_file, "/profanity/profrc");
-    gchar *result = strdup(prefs_file->str);
-    g_free(xdg_config);
-    g_string_free(prefs_file, TRUE);
-
-    return result;
-}
