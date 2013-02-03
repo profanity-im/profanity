@@ -918,7 +918,7 @@ cmd_execute_default(const char * const inp)
             char *recipient = win_current_get_recipient();
             message_send(inp, recipient);
 
-            if (win_current_is_chat() && prefs_get_chlog()) {
+            if (win_current_is_chat() && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_jid();
                 Jid *jidp = jid_create(jid);
                 chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
@@ -1738,7 +1738,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             message_send(msg, usr);
             win_show_outgoing_msg("me", usr, msg);
 
-            if (win_current_is_chat() && prefs_get_chlog()) {
+            if (win_current_is_chat() && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_jid();
                 Jid *jidp = jid_create(jid);
                 chat_log_chat(jidp->barejid, usr, msg, PROF_OUT_LOG, NULL);
@@ -1936,7 +1936,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
                 char *recipient = win_current_get_recipient();
                 message_send(tiny, recipient);
 
-                if (prefs_get_chlog()) {
+                if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_jid();
                     Jid *jidp = jid_create(jid);
                     chat_log_chat(jidp->barejid, recipient, tiny, PROF_OUT_LOG, NULL);
@@ -1984,7 +1984,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
             presence_leave_chat_room(room_jid);
         } else if (win_current_is_chat() || win_current_is_private()) {
 
-            if (prefs_get_states()) {
+            if (prefs_get_boolean(PREF_STATES)) {
                 char *recipient = win_current_get_recipient();
 
                 // send <gone/> chat state before closing

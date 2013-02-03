@@ -111,7 +111,7 @@ prof_handle_incoming_message(char *from, char *message, gboolean priv)
     ui_show_incoming_msg(from, message, NULL, priv);
     win_current_page_off();
 
-    if (prefs_get_chlog() && !priv) {
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_jid();
         Jid *jidp = jid_create(jid);
@@ -128,7 +128,7 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     ui_show_incoming_msg(from, message, &tv_stamp, priv);
     win_current_page_off();
 
-    if (prefs_get_chlog() && !priv) {
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_jid();
         Jid *jidp = jid_create(jid);
@@ -470,7 +470,7 @@ _handle_idle_time()
             idle = FALSE;
 
             // handle check
-            if (prefs_get_autoaway_check()) {
+            if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
                 if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
                     presence_update(PRESENCE_ONLINE, NULL, 0);
                     cons_show("No longer idle, status set to online.");

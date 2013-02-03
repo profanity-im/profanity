@@ -37,6 +37,13 @@
 #include "preferences.h"
 #include "tools/autocomplete.h"
 
+#define PREF_GROUP_LOGGING "logging"
+#define PREF_GROUP_CHATSTATES "chatstates"
+#define PREF_GROUP_UI "ui"
+#define PREF_GROUP_NOTIFICATIONS "notifications"
+#define PREF_GROUP_PRESENCE "presence"
+#define PREF_GROUP_CONNECTION "connection"
+
 static gchar *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
@@ -59,7 +66,7 @@ prefs_load(void)
         NULL);
 
     err = NULL;
-    log_maxsize = g_key_file_get_integer(prefs, "logging", "maxsize", &err);
+    log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
     if (err != NULL) {
         log_maxsize = 0;
         g_error_free(err);
@@ -89,107 +96,178 @@ prefs_reset_boolean_choice(void)
     autocomplete_reset(boolean_choice_ac);
 }
 
-gboolean
-prefs_get_beep(void)
+static const char *
+_get_group(preference_t pref)
 {
-    return g_key_file_get_boolean(prefs, "ui", "beep", NULL);
+    switch (pref)
+    {
+        case PREF_SPLASH:
+        case PREF_BEEP:
+        case PREF_THEME:
+        case PREF_VERCHECK:
+        case PREF_TITLEBARVERSION:
+        case PREF_FLASH:
+        case PREF_INTYPE:
+        case PREF_HISTORY:
+        case PREF_MOUSE:
+        case PREF_STATUSES:
+            return "ui";
+        case PREF_STATES:
+        case PREF_OUTTYPE:
+            return "chatstates";
+        case PREF_NOTIFY_TYPING:
+        case PREF_NOTIFY_MESSAGE:
+            return "notifications";
+        case PREF_CHLOG:
+            return "logging";
+        case PREF_AUTOAWAY_CHECK:
+            return "presence";
+        default:
+            return NULL;
+    }
+}
+
+static const char *
+_get_key(preference_t pref)
+{
+    switch (pref)
+    {
+        case PREF_SPLASH:
+            return "splash";
+        case PREF_BEEP:
+            return "beep";
+        case PREF_THEME:
+            return "theme";
+        case PREF_VERCHECK:
+            return "vercheck";
+        case PREF_TITLEBARVERSION:
+            return "titlebar.version";
+        case PREF_FLASH:
+            return "flash";
+        case PREF_INTYPE:
+            return "intype";
+        case PREF_HISTORY:
+            return "history";
+        case PREF_MOUSE:
+            return "mouse";
+        case PREF_STATUSES:
+            return "statuses";
+        case PREF_STATES:
+            return "enabled";
+        case PREF_OUTTYPE:
+            return "outtype";
+        case PREF_NOTIFY_TYPING:
+            return "typing";
+        case PREF_NOTIFY_MESSAGE:
+            return "message";
+        case PREF_CHLOG:
+            return "chlog";
+        case PREF_AUTOAWAY_CHECK:
+            return "autoaway.check";
+        default:
+            return NULL;
+    }
+}
+
+static gboolean
+_get_default_boolean(preference_t pref)
+{
+    switch (pref)
+    {
+        case PREF_MOUSE:
+        case PREF_STATUSES:
+        case PREF_AUTOAWAY_CHECK:
+            return TRUE;
+        default:
+            return FALSE;
+    }
+}
+
+gboolean
+prefs_get_boolean(preference_t pref)
+{
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    gboolean def = _get_default_boolean(pref);
+
+    if (!g_key_file_has_key(prefs, group, key, NULL)) {
+        return def;
+    }
+
+    return g_key_file_get_boolean(prefs, group, key, NULL);
 }
 
 void
 prefs_set_beep(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "beep", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "beep", value);
     _save_prefs();
 }
 
 gchar *
 prefs_get_theme(void)
 {
-    return g_key_file_get_string(prefs, "ui", "theme", NULL);
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "theme", NULL);
 }
 
 void
 prefs_set_theme(gchar *value)
 {
-    g_key_file_set_string(prefs, "ui", "theme", value);
+    g_key_file_set_string(prefs, PREF_GROUP_UI, "theme", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_states(void)
-{
-    return g_key_file_get_boolean(prefs, "chatstates", "enabled", NULL);
 }
 
 void
 prefs_set_states(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "chatstates", "enabled", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_CHATSTATES, "enabled", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_outtype(void)
-{
-    return g_key_file_get_boolean(prefs, "chatstates", "outtype", NULL);
 }
 
 void
 prefs_set_outtype(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "chatstates", "outtype", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_CHATSTATES, "outtype", value);
     _save_prefs();
 }
 
 gint
 prefs_get_gone(void)
 {
-    return g_key_file_get_integer(prefs, "chatstates", "gone", NULL);
+    return g_key_file_get_integer(prefs, PREF_GROUP_CHATSTATES, "gone", NULL);
 }
 
 void
 prefs_set_gone(gint value)
 {
-    g_key_file_set_integer(prefs, "chatstates", "gone", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_CHATSTATES, "gone", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_notify_typing(void)
-{
-    return g_key_file_get_boolean(prefs, "notifications", "typing", NULL);
 }
 
 void
 prefs_set_notify_typing(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "notifications", "typing", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "typing", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_notify_message(void)
-{
-    return g_key_file_get_boolean(prefs, "notifications", "message", NULL);
 }
 
 void
 prefs_set_notify_message(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "notifications", "message", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "message", value);
     _save_prefs();
 }
 
 gint
 prefs_get_notify_remind(void)
 {
-    return g_key_file_get_integer(prefs, "notifications", "remind", NULL);
+    return g_key_file_get_integer(prefs, PREF_GROUP_NOTIFICATIONS, "remind", NULL);
 }
 
 void
 prefs_set_notify_remind(gint value)
 {
-    g_key_file_set_integer(prefs, "notifications", "remind", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "remind", value);
     _save_prefs();
 }
 
@@ -206,131 +284,95 @@ void
 prefs_set_max_log_size(gint value)
 {
     log_maxsize = value;
-    g_key_file_set_integer(prefs, "logging", "maxsize", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_LOGGING, "maxsize", value);
     _save_prefs();
 }
 
 gint
 prefs_get_priority(void)
 {
-    return g_key_file_get_integer(prefs, "presence", "priority", NULL);
+    return g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "priority", NULL);
 }
 
 void
 prefs_set_priority(gint value)
 {
-    g_key_file_set_integer(prefs, "presence", "priority", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "priority", value);
     _save_prefs();
 }
 
 gint
 prefs_get_reconnect(void)
 {
-    return g_key_file_get_integer(prefs, "connection", "reconnect", NULL);
+    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", NULL);
 }
 
 void
 prefs_set_reconnect(gint value)
 {
-    g_key_file_set_integer(prefs, "connection", "reconnect", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", value);
     _save_prefs();
 }
 
 gint
 prefs_get_autoping(void)
 {
-    return g_key_file_get_integer(prefs, "connection", "autoping", NULL);
+    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "autoping", NULL);
 }
 
 void
 prefs_set_autoping(gint value)
 {
-    g_key_file_set_integer(prefs, "connection", "autoping", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "autoping", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_vercheck(void)
-{
-    return g_key_file_get_boolean(prefs, "ui", "vercheck", NULL);
 }
 
 void
 prefs_set_vercheck(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "vercheck", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "vercheck", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_titlebarversion(void)
-{
-    return g_key_file_get_boolean(prefs, "ui", "titlebar.version", NULL);
 }
 
 void
 prefs_set_titlebarversion(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "titlebar.version", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.version", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_flash(void)
-{
-    return g_key_file_get_boolean(prefs, "ui", "flash", NULL);
 }
 
 void
 prefs_set_flash(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "flash", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "flash", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_intype(void)
-{
-    return g_key_file_get_boolean(prefs, "ui", "intype", NULL);
 }
 
 void
 prefs_set_intype(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "intype", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "intype", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_chlog(void)
-{
-    return g_key_file_get_boolean(prefs, "logging", "chlog", NULL);
 }
 
 void
 prefs_set_chlog(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "logging", "chlog", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_LOGGING, "chlog", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_history(void)
-{
-    return g_key_file_get_boolean(prefs, "ui", "history", NULL);
 }
 
 void
 prefs_set_history(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "history", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "history", value);
     _save_prefs();
 }
 
 gchar *
 prefs_get_autoaway_mode(void)
 {
-    gchar *result = g_key_file_get_string(prefs, "presence", "autoaway.mode", NULL);
+    gchar *result = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", NULL);
     if (result == NULL) {
         return strdup("off");
     } else {
@@ -341,14 +383,14 @@ prefs_get_autoaway_mode(void)
 void
 prefs_set_autoaway_mode(gchar *value)
 {
-    g_key_file_set_string(prefs, "presence", "autoaway.mode", value);
+    g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", value);
     _save_prefs();
 }
 
 gint
 prefs_get_autoaway_time(void)
 {
-    gint result = g_key_file_get_integer(prefs, "presence", "autoaway.time", NULL);
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", NULL);
 
     if (result == 0) {
         return 15;
@@ -360,89 +402,52 @@ prefs_get_autoaway_time(void)
 void
 prefs_set_autoaway_time(gint value)
 {
-    g_key_file_set_integer(prefs, "presence", "autoaway.time", value);
+    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", value);
     _save_prefs();
 }
 
 gchar *
 prefs_get_autoaway_message(void)
 {
-    return g_key_file_get_string(prefs, "presence", "autoaway.message", NULL);
+    return g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
 }
 
 void
 prefs_set_autoaway_message(gchar *value)
 {
     if (value == NULL) {
-        g_key_file_remove_key(prefs, "presence", "autoaway.message", NULL);
+        g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
     } else {
-        g_key_file_set_string(prefs, "presence", "autoaway.message", value);
+        g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", value);
     }
     _save_prefs();
-}
-
-gboolean
-prefs_get_autoaway_check(void)
-{
-    if (g_key_file_has_key(prefs, "presence", "autoaway.check", NULL)) {
-        return g_key_file_get_boolean(prefs, "presence", "autoaway.check", NULL);
-    } else {
-        return TRUE;
-    }
 }
 
 void
 prefs_set_autoaway_check(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "presence", "autoaway.check", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_PRESENCE, "autoaway.check", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_splash(void)
-{
-    return g_key_file_get_boolean(prefs, "ui", "splash", NULL);
 }
 
 void
 prefs_set_splash(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "splash", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "splash", value);
     _save_prefs();
-}
-
-gboolean
-prefs_get_mouse(void)
-{
-    // default to true
-    if (!g_key_file_has_key(prefs, "ui", "mouse", NULL)) {
-        return TRUE;
-    } else {
-        return g_key_file_get_boolean(prefs, "ui", "mouse", NULL);
-    }
-}
-
-gboolean
-prefs_get_statuses(void)
-{
-    if (g_key_file_has_key(prefs, "ui", "statuses", NULL)) {
-        return g_key_file_get_boolean(prefs, "ui", "statuses", NULL);
-    } else {
-        return TRUE;
-    }
 }
 
 void
 prefs_set_mouse(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "mouse", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "mouse", value);
     _save_prefs();
 }
 
 void
 prefs_set_statuses(gboolean value)
 {
-    g_key_file_set_boolean(prefs, "ui", "statuses", value);
+    g_key_file_set_boolean(prefs, PREF_GROUP_UI, "statuses", value);
     _save_prefs();
 }
 

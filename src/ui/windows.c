@@ -122,7 +122,7 @@ ui_init(void)
     initscr();
     raw();
     keypad(stdscr, TRUE);
-    if (prefs_get_mouse()) {
+    if (prefs_get_boolean(PREF_MOUSE)) {
         mousemask(ALL_MOUSE_EVENTS, NULL);
         mouseinterval(5);
     }
@@ -163,7 +163,7 @@ _ui_draw_win_title(void)
 
     GString *version_str = g_string_new("");
 
-    if (prefs_get_titlebarversion()) {
+    if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
         g_string_append(version_str, " ");
         g_string_append(version_str, PACKAGE_VERSION);
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
@@ -273,7 +273,7 @@ ui_show_typing(const char * const from)
 {
     int win_index = _find_prof_win_index(from);
 
-    if (prefs_get_intype()) {
+    if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
         if (win_index == NUM_WINS) {
             _cons_show_typing(from);
@@ -293,7 +293,7 @@ ui_show_typing(const char * const from)
        }
     }
 
-    if (prefs_get_notify_typing())
+    if (prefs_get_boolean(PREF_NOTIFY_TYPING))
         _notify_typing(from);
 }
 
@@ -314,7 +314,7 @@ ui_idle(void)
             } else if (chat_session_is_inactive(recipient) &&
                     !chat_session_get_sent(recipient)) {
                 message_send_inactive(recipient);
-            } else if (prefs_get_outtype() &&
+            } else if (prefs_get_boolean(PREF_OUTTYPE) &&
                     chat_session_is_paused(recipient) &&
                     !chat_session_get_sent(recipient)) {
                 message_send_paused(recipient);
@@ -411,11 +411,11 @@ ui_show_incoming_msg(const char * const from, const char * const message,
         } else {
             status_bar_new(win_index);
             _cons_show_incoming_message(from, win_index);
-            if (prefs_get_flash())
+            if (prefs_get_boolean(PREF_FLASH))
                 flash();
 
             windows[win_index]->unread++;
-            if (prefs_get_chlog() && prefs_get_history()) {
+            if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
                 _win_show_history(win, win_index, from);
             }
 
@@ -444,9 +444,9 @@ ui_show_incoming_msg(const char * const from, const char * const message,
         }
     }
 
-    if (prefs_get_beep())
+    if (prefs_get_boolean(PREF_BEEP))
         beep();
-    if (prefs_get_notify_message())
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
         _notify_message(display_from);
 
     g_free(display_from);
@@ -735,7 +735,7 @@ win_new_chat_win(const char * const to)
 
         win = windows[win_index]->win;
 
-        if (prefs_get_chlog() && prefs_get_history()) {
+        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _win_show_history(win, win_index, to);
         }
 
@@ -778,7 +778,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 
         win = windows[win_index]->win;
 
-        if (prefs_get_chlog() && prefs_get_history()) {
+        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _win_show_history(win, win_index, to);
         }
 
@@ -1020,7 +1020,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
         }
 
         if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
-            if (prefs_get_flash()) {
+            if (prefs_get_boolean(PREF_FLASH)) {
                 flash();
             }
         }
@@ -1029,10 +1029,10 @@ win_show_room_message(const char * const room_jid, const char * const nick,
     }
 
     if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
-        if (prefs_get_beep()) {
+        if (prefs_get_boolean(PREF_BEEP)) {
             beep();
         }
-        if (prefs_get_notify_message()) {
+        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
             _notify_message(nick);
         }
     }
@@ -1298,42 +1298,42 @@ cons_show_ui_prefs(void)
         cons_show("Theme (/theme)               : %s", theme);
     }
 
-    if (prefs_get_beep())
+    if (prefs_get_boolean(PREF_BEEP))
         cons_show("Terminal beep (/beep)        : ON");
     else
         cons_show("Terminal beep (/beep)        : OFF");
 
-    if (prefs_get_flash())
+    if (prefs_get_boolean(PREF_FLASH))
         cons_show("Terminal flash (/flash)      : ON");
     else
         cons_show("Terminal flash (/flash)      : OFF");
 
-    if (prefs_get_intype())
+    if (prefs_get_boolean(PREF_INTYPE))
         cons_show("Show typing (/intype)        : ON");
     else
         cons_show("Show typing (/intype)        : OFF");
 
-    if (prefs_get_splash())
+    if (prefs_get_boolean(PREF_SPLASH))
         cons_show("Splash screen (/splash)      : ON");
     else
         cons_show("Splash screen (/splash)      : OFF");
 
-    if (prefs_get_history())
+    if (prefs_get_boolean(PREF_HISTORY))
         cons_show("Chat history (/history)      : ON");
     else
         cons_show("Chat history (/history)      : OFF");
 
-    if (prefs_get_vercheck())
+    if (prefs_get_boolean(PREF_VERCHECK))
         cons_show("Version checking (/vercheck) : ON");
     else
         cons_show("Version checking (/vercheck) : OFF");
 
-    if (prefs_get_mouse())
+    if (prefs_get_boolean(PREF_MOUSE))
         cons_show("Mouse handling (/mouse)      : ON");
     else
         cons_show("Mouse handling (/mouse)      : OFF");
 
-    if (prefs_get_statuses())
+    if (prefs_get_boolean(PREF_STATUSES))
         cons_show("Status (/statuses)           : ON");
     else
         cons_show("Status (/statuses)           : OFF");
@@ -1345,12 +1345,12 @@ cons_show_desktop_prefs(void)
     cons_show("Desktop notification preferences:");
     cons_show("");
 
-    if (prefs_get_notify_message())
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
         cons_show("Messages (/notify message)       : ON");
     else
         cons_show("Messages (/notify message)       : OFF");
 
-    if (prefs_get_notify_typing())
+    if (prefs_get_boolean(PREF_NOTIFY_TYPING))
         cons_show("Composing (/notify typing)       : ON");
     else
         cons_show("Composing (/notify typing)       : OFF");
@@ -1371,12 +1371,12 @@ cons_show_chat_prefs(void)
     cons_show("Chat preferences:");
     cons_show("");
 
-    if (prefs_get_states())
+    if (prefs_get_boolean(PREF_STATES))
         cons_show("Send chat states (/states) : ON");
     else
         cons_show("Send chat states (/states) : OFF");
 
-    if (prefs_get_outtype())
+    if (prefs_get_boolean(PREF_OUTTYPE))
         cons_show("Send composing (/outtype)  : ON");
     else
         cons_show("Send composing (/outtype)  : OFF");
@@ -1399,7 +1399,7 @@ cons_show_log_prefs(void)
 
     cons_show("Max log size (/log maxsize) : %d bytes", prefs_get_max_log_size());
 
-    if (prefs_get_chlog())
+    if (prefs_get_boolean(PREF_CHLOG))
         cons_show("Chat logging (/chlog)       : ON");
     else
         cons_show("Chat logging (/chlog)       : OFF");
@@ -1426,7 +1426,7 @@ cons_show_presence_prefs(void)
         cons_show("Autoaway message (/autoaway message) : \"%s\"", prefs_get_autoaway_message());
     }
 
-    if (prefs_get_autoaway_check()) {
+    if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
         cons_show("Autoaway check (/autoaway check)     : ON");
     } else {
         cons_show("Autoaway check (/autoaway check)     : OFF");
@@ -1734,7 +1734,7 @@ cons_about(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    if (prefs_get_splash()) {
+    if (prefs_get_boolean(PREF_SPLASH)) {
         _cons_splash_logo();
     } else {
         _win_show_time(console->win, '-');
@@ -1763,7 +1763,7 @@ cons_about(void)
     _win_show_time(console->win, '-');
     wprintw(console->win, "\n");
 
-    if (prefs_get_vercheck()) {
+    if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
     }
 
@@ -2134,7 +2134,7 @@ _show_status_string(WINDOW *win, const char * const from,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show)
 {
-    if (!prefs_get_statuses())
+    if (!prefs_get_boolean(PREF_STATUSES))
         return;
 
     _win_show_time(win, '-');
@@ -2312,7 +2312,7 @@ _win_handle_page(const wint_t * const ch)
     int page_space = rows - 4;
     int *page_start = &(current->y_pos);
 
-    if (prefs_get_mouse()) {
+    if (prefs_get_boolean(PREF_MOUSE)) {
         MEVENT mouse_event;
 
         if (*ch == KEY_MOUSE) {

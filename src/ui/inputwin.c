@@ -121,11 +121,11 @@ inp_get_char(char *input, int *size)
         in_command = TRUE;
     }
 
-    if (prefs_get_states()) {
+    if (prefs_get_boolean(PREF_STATES)) {
         if (result == ERR) {
             prof_handle_idle();
         }
-        if (prefs_get_outtype() && (result != ERR) && !in_command
+        if (prefs_get_boolean(PREF_OUTTYPE) && (result != ERR) && !in_command
                                                 && _printable(ch)) {
             prof_handle_activity();
         }

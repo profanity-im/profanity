@@ -54,14 +54,14 @@ message_send(const char * const msg, const char * const recipient)
 {
     xmpp_conn_t * const conn = jabber_get_conn();
     xmpp_ctx_t * const ctx = jabber_get_ctx();
-    if (prefs_get_states()) {
+    if (prefs_get_boolean(PREF_STATES)) {
         if (!chat_session_exists(recipient)) {
             chat_session_start(recipient, TRUE);
         }
     }
 
     xmpp_stanza_t *message;
-    if (prefs_get_states() && chat_session_get_recipient_supports(recipient)) {
+    if (prefs_get_boolean(PREF_STATES) && chat_session_get_recipient_supports(recipient)) {
         chat_session_set_active(recipient);
         message = stanza_create_message(ctx, recipient, STANZA_TYPE_CHAT,
             msg, STANZA_NAME_ACTIVE);
@@ -273,7 +273,7 @@ _chat_message_handler(xmpp_stanza_t * const stanza)
         // deal with chat states if recipient supports them
         if (recipient_supports && (!delayed)) {
             if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
-                if (prefs_get_notify_typing() || prefs_get_intype()) {
+                if (prefs_get_boolean(PREF_NOTIFY_TYPING) || prefs_get_boolean(PREF_INTYPE)) {
                     prof_handle_typing(jid->barejid);
                 }
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
