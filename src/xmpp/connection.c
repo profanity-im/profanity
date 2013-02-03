@@ -108,9 +108,10 @@ jabber_connect_with_account(ProfAccount *account, const char * const passwd)
     saved_account.name = strdup(account->name);
     saved_account.passwd = strdup(passwd);
 
-    char *fulljid = create_fulljid(account->jid, account->resource);
-    jabber_conn_status_t result = _jabber_connect(fulljid, passwd, account->server);
-    free(fulljid);
+    // connect with fulljid
+    Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
+    jabber_conn_status_t result = _jabber_connect(jidp->fulljid, passwd, account->server);
+    free(jidp);
 
     return result;
 }
@@ -119,6 +120,10 @@ jabber_conn_status_t
 jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
+    assert(jid != NULL);
+    assert(passwd != NULL);
+
+    // save details for reconnect, remember name for account creating on success
     saved_details.name = strdup(jid);
     saved_details.passwd = strdup(passwd);
     if (altdomain != NULL) {
@@ -127,6 +132,7 @@ jabber_connect_with_details(const char * const jid,
         saved_details.altdomain = NULL;
     }
 
+    // use 'profanity' when no resourcepart in provided jid
     Jid *jidp = jid_create(jid);
     if (jidp->resourcepart == NULL) {
         jid_destroy(jidp);
@@ -137,6 +143,7 @@ jabber_connect_with_details(const char * const jid,
     }
     jid_destroy(jidp);
 
+    // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
     return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain);
 }
