@@ -172,8 +172,10 @@ log_level_from_string(char *log_level)
         return PROF_LEVEL_INFO;
     } else if (strcmp(log_level, "WARN") == 0) {
         return PROF_LEVEL_WARN;
-    } else {
+    } else if (strcmp(log_level, "ERROR") == 0) {
         return PROF_LEVEL_ERROR;
+    } else { // default to info
+        return PROF_LEVEL_INFO;
     }
 }
 
