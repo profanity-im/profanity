@@ -553,7 +553,7 @@ stanza_create_form(xmpp_stanza_t * const stanza)
         char *var = xmpp_stanza_get_attribute(child, "var");
 
         // handle FORM_TYPE
-        if (g_strcmp0(var, "FORM_TYPE")) {
+        if (g_strcmp0(var, "FORM_TYPE") == 0) {
             xmpp_stanza_t *value = xmpp_stanza_get_child_by_name(child, "value");
             char *value_text = xmpp_stanza_get_text(value);
             result->form_type = strdup(value_text);

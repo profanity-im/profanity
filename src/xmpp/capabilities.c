@@ -153,8 +153,10 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
                 g_string_append(s, "<");
                 curr_value = g_slist_next(curr_value);
             }
-            curr_field = g_slist_next(curr_value);
+            curr_field = g_slist_next(curr_field);
         }
+
+        curr = g_slist_next(curr);
     }
 
     EVP_MD_CTX mdctx;
@@ -176,7 +178,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     g_slist_free_full(identities, free);
     g_slist_free_full(features, free);
     g_slist_free_full(form_names, free);
-    g_hash_table_destroy(forms);
+    //g_hash_table_destroy(forms);
 
     return result;
 }
