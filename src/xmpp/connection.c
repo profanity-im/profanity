@@ -99,13 +99,17 @@ jabber_init(const int disable_tls)
 jabber_conn_status_t
 jabber_connect_with_account(ProfAccount *account, const char * const passwd)
 {
+    assert(account != NULL);
+    assert(passwd != NULL);
+
+    log_info("Connecting using account: %s", account->name);
+
+    // save account name and password for reconnect
     saved_account.name = strdup(account->name);
     saved_account.passwd = strdup(passwd);
 
-    log_info("Connecting using account: %s", account->name);
     char *fulljid = create_fulljid(account->jid, account->resource);
     jabber_conn_status_t result = _jabber_connect(fulljid, passwd, account->server);
-
     free(fulljid);
 
     return result;
@@ -151,7 +155,7 @@ jabber_disconnect(void)
         }
         connection_free_resources();
     }
-    
+
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence_type = PRESENCE_OFFLINE;
     FREE_SET_NULL(jabber_conn.presence_message);
@@ -314,6 +318,9 @@ static jabber_conn_status_t
 _jabber_connect(const char * const fulljid, const char * const passwd,
     const char * const altdomain)
 {
+    assert(fulljid != NULL);
+    assert(passwd != NULL);
+
     Jid *jid = jid_create(fulljid);
 
     if (jid == NULL) {

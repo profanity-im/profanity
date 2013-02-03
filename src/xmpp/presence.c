@@ -161,7 +161,7 @@ presence_join_room(Jid *jid)
     xmpp_conn_t *conn = connection_get_conn();
     jabber_presence_t presence_type = jabber_get_presence_type();
     const char *show = stanza_get_presence_string_from_type(presence_type);
-    char *status = jabber_get_presence_message(); 
+    char *status = jabber_get_presence_message();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
 
@@ -302,7 +302,7 @@ _handle_presence_caps(xmpp_stanza_t * const stanza)
                 log_debug("Hash type supported.");
                 node = stanza_get_caps_str(stanza);
                 caps_key = node;
-                
+
                 if (node != NULL) {
                     log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {

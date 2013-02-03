@@ -154,8 +154,8 @@ parse_room_jid(const char * const full_room_jid, char **room, char **nick)
 }
 
 /*
- * Given a room name, and a nick name create and return a full JID of the form
- * room@server/nick
+ * Given a barejid, and resourcepart, create and return a full JID of the form
+ * barejid/resourcepart
  * Will return a newly created string that must be freed by the caller
  */
 char *

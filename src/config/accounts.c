@@ -428,7 +428,7 @@ accounts_get_priority_for_presence_type(const char * const account_name,
             result = 0;
             break;
     }
-    
+
     if (result < JABBER_PRIORITY_MIN || result > JABBER_PRIORITY_MAX)
         result = 0;
 

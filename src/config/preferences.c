@@ -133,7 +133,7 @@ prefs_get_string(preference_t pref)
     if (!g_key_file_has_key(prefs, group, key, NULL)) {
         return def;
     }
-    
+
     char *result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
