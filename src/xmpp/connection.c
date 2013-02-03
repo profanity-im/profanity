@@ -34,6 +34,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "xmpp/connection.h"
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
 #include "xmpp/presence.h"
@@ -154,7 +155,7 @@ jabber_disconnect(void)
         while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
         }
-        jabber_free_resources();
+        connection_free_resources();
     }
 }
 
@@ -200,13 +201,13 @@ jabber_get_connection_status(void)
 }
 
 xmpp_conn_t *
-jabber_get_conn(void)
+connection_get_conn(void)
 {
     return jabber_conn.conn;
 }
 
 xmpp_ctx_t *
-jabber_get_ctx(void)
+connection_get_ctx(void)
 {
     return jabber_conn.ctx;
 }
@@ -236,13 +237,13 @@ jabber_get_account_name(void)
 }
 
 void
-jabber_conn_set_presence_type(jabber_presence_t presence_type)
+connection_set_presence_type(jabber_presence_t presence_type)
 {
     jabber_conn.presence_type = presence_type;
 }
 
 void
-jabber_conn_set_presence_message(const char * const message)
+connection_set_presence_message(const char * const message)
 {
     FREE_SET_NULL(jabber_conn.presence_message);
     if (message != NULL) {
@@ -251,13 +252,13 @@ jabber_conn_set_presence_message(const char * const message)
 }
 
 void
-jabber_conn_set_priority(int priority)
+connection_set_priority(int priority)
 {
     jabber_conn.priority = priority;
 }
 
 void
-jabber_free_resources(void)
+connection_free_resources(void)
 {
     FREE_SET_NULL(saved_details.name);
     FREE_SET_NULL(saved_details.jid);
@@ -273,7 +274,7 @@ jabber_free_resources(void)
 }
 
 int
-error_handler(xmpp_stanza_t * const stanza)
+connection_error_handler(xmpp_stanza_t * const stanza)
 {
     gchar *err_msg = NULL;
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -429,14 +430,14 @@ _connection_handler(xmpp_conn_t * const conn,
                 reconnect_timer = g_timer_new();
                 // TODO: free resources but leave saved_user untouched
             } else {
-                jabber_free_resources();
+                connection_free_resources();
             }
 
         // login attempt failed
         } else if (jabber_conn.conn_status != JABBER_DISCONNECTING) {
             if (reconnect_timer == NULL) {
                 prof_handle_failed_login();
-                jabber_free_resources();
+                connection_free_resources();
             } else {
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);

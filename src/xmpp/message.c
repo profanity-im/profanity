@@ -30,6 +30,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "xmpp/connection.h"
 #include "xmpp/message.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
@@ -44,16 +45,16 @@ static int _chat_message_handler(xmpp_stanza_t * const stanza);
 void
 message_add_handlers(void)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     HANDLE(NULL, NULL, _message_handler);
 }
 
 void
 message_send(const char * const msg, const char * const recipient)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     if (prefs_get_boolean(PREF_STATES)) {
         if (!chat_session_exists(recipient)) {
             chat_session_start(recipient, TRUE);
@@ -77,8 +78,8 @@ message_send(const char * const msg, const char * const recipient)
 void
 message_send_groupchat(const char * const msg, const char * const recipient)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *message = stanza_create_message(ctx, recipient,
         STANZA_TYPE_GROUPCHAT, msg, NULL);
 
@@ -89,8 +90,8 @@ message_send_groupchat(const char * const msg, const char * const recipient)
 void
 message_send_composing(const char * const recipient)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, recipient,
         STANZA_NAME_COMPOSING);
 
@@ -102,8 +103,8 @@ message_send_composing(const char * const recipient)
 void
 message_send_paused(const char * const recipient)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, recipient,
         STANZA_NAME_PAUSED);
 
@@ -115,8 +116,8 @@ message_send_paused(const char * const recipient)
 void
 message_send_inactive(const char * const recipient)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, recipient,
         STANZA_NAME_INACTIVE);
 
@@ -128,8 +129,8 @@ message_send_inactive(const char * const recipient)
 void
 message_send_gone(const char * const recipient)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, recipient,
         STANZA_NAME_GONE);
 
@@ -148,7 +149,7 @@ _message_handler(xmpp_conn_t * const conn,
         log_error("Message stanza received with no type attribute");
         return 1;
     } else if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
-        return error_handler(stanza);
+        return connection_error_handler(stanza);
     } else if (strcmp(type, STANZA_TYPE_GROUPCHAT) == 0) {
         return _groupchat_message_handler(stanza);
     } else if (strcmp(type, STANZA_TYPE_CHAT) == 0) {

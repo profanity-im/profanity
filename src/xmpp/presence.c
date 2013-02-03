@@ -31,6 +31,7 @@
 #include "muc.h"
 #include "profanity.h"
 #include "xmpp/capabilities.h"
+#include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
@@ -53,16 +54,16 @@ presence_init(void)
 void
 presence_add_handlers(void)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     HANDLE(NULL, NULL, _presence_handler);
 }
 
 void
 presence_subscription(const char * const jid, const jabber_subscr_t action)
 {
-    xmpp_ctx_t *ctx = jabber_get_ctx();
-    xmpp_conn_t *conn = jabber_get_conn();
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_conn_t *conn = connection_get_conn();
     xmpp_stanza_t *presence;
     char *type, *jid_cpy, *bare_jid;
 
@@ -108,8 +109,8 @@ void
 presence_update(jabber_presence_t presence_type, const char * const msg,
     int idle)
 {
-    xmpp_ctx_t *ctx = jabber_get_ctx();
-    xmpp_conn_t *conn = jabber_get_conn();
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_conn_t *conn = connection_get_conn();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
     const char *show = stanza_get_presence_string_from_type(presence_type);
@@ -118,9 +119,9 @@ presence_update(jabber_presence_t presence_type, const char * const msg,
     if (jabber_get_connection_status() != JABBER_CONNECTED)
         return;
 
-    jabber_conn_set_presence_type(presence_type);
-    jabber_conn_set_presence_message(msg);
-    jabber_conn_set_priority(pri);
+    connection_set_presence_type(presence_type);
+    connection_set_presence_message(msg);
+    connection_set_priority(pri);
 
     xmpp_stanza_t *presence = stanza_create_presence(ctx, show, msg);
     stanza_attach_priority(ctx, presence, pri);
@@ -156,8 +157,8 @@ presence_update(jabber_presence_t presence_type, const char * const msg,
 void
 presence_join_room(Jid *jid)
 {
-    xmpp_ctx_t *ctx = jabber_get_ctx();
-    xmpp_conn_t *conn = jabber_get_conn();
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_conn_t *conn = connection_get_conn();
     jabber_presence_t presence_type = jabber_get_presence_type();
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message(); 
@@ -177,8 +178,8 @@ presence_join_room(Jid *jid)
 void
 presence_change_room_nick(const char * const room, const char * const nick)
 {
-    xmpp_ctx_t *ctx = jabber_get_ctx();
-    xmpp_conn_t *conn = jabber_get_conn();
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_conn_t *conn = connection_get_conn();
     char *full_room_jid = create_fulljid(room, nick);
     xmpp_stanza_t *presence = stanza_create_room_newnick_presence(ctx, full_room_jid);
     xmpp_send(conn, presence);
@@ -190,8 +191,8 @@ presence_change_room_nick(const char * const room, const char * const nick)
 void
 presence_leave_chat_room(const char * const room_jid)
 {
-    xmpp_ctx_t *ctx = jabber_get_ctx();
-    xmpp_conn_t *conn = jabber_get_conn();
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_conn_t *conn = connection_get_conn();
     char *nick = muc_get_room_nick(room_jid);
 
     xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
@@ -214,7 +215,7 @@ _presence_handler(xmpp_conn_t * const conn,
     Jid *from_jid = jid_create(from);
 
     if ((type != NULL) && (strcmp(type, STANZA_TYPE_ERROR) == 0)) {
-        return error_handler(stanza);
+        return connection_error_handler(stanza);
     }
 
     // handle chat room presence
@@ -283,8 +284,8 @@ _presence_handler(xmpp_conn_t * const conn,
 static char *
 _handle_presence_caps(xmpp_stanza_t * const stanza)
 {
-    xmpp_ctx_t *ctx = jabber_get_ctx();
-    xmpp_conn_t *conn = jabber_get_conn();
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_conn_t *conn = connection_get_conn();
     char *caps_key = NULL;
     char *node = NULL;
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);

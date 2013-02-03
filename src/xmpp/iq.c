@@ -31,6 +31,7 @@
 #include "contact_list.h"
 #include "log.h"
 #include "xmpp/capabilities.h"
+#include "xmpp/connection.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
@@ -55,8 +56,8 @@ static int _iq_handle_discoinfo_result(xmpp_conn_t * const conn,
 void
 iq_add_handlers(void)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     HANDLE(NULL,                STANZA_TYPE_ERROR,  _iq_handle_error);
     HANDLE(XMPP_NS_ROSTER,      STANZA_TYPE_SET,    _iq_handle_roster_set);
     HANDLE(XMPP_NS_ROSTER,      STANZA_TYPE_RESULT, _iq_handle_roster_result);
@@ -69,8 +70,8 @@ iq_add_handlers(void)
 void
 iq_roster_request(void)
 {
-    xmpp_conn_t * const conn = jabber_get_conn();
-    xmpp_ctx_t * const ctx = jabber_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_roster_iq(ctx);
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
