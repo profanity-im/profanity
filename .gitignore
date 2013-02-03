@@ -27,3 +27,4 @@ stamp-h1
 *dirstamp
 valgrind.out
 core
+error.txt
