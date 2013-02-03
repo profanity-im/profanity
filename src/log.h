@@ -45,6 +45,7 @@ void log_warning(const char * const msg, ...);
 void log_error(const char * const msg, ...);
 void log_msg(log_level_t level, const char * const area,
     const char * const msg);
+log_level_t log_level_from_string(char *log_level);
 
 void chat_log_init(void);
 void chat_log_chat(const gchar * const login, gchar *other,

@@ -44,7 +44,6 @@
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
-static log_level_t _get_log_level(char *log_level);
 static gboolean _process_input(char *inp);
 static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
@@ -395,20 +394,6 @@ prof_handle_activity(void)
     }
 }
 
-static log_level_t
-_get_log_level(char *log_level)
-{
-    if (strcmp(log_level, "DEBUG") == 0) {
-        return PROF_LEVEL_DEBUG;
-    } else if (strcmp(log_level, "INFO") == 0) {
-        return PROF_LEVEL_INFO;
-    } else if (strcmp(log_level, "WARN") == 0) {
-        return PROF_LEVEL_WARN;
-    } else {
-        return PROF_LEVEL_ERROR;
-    }
-}
-
 /*
  * Take a line of input and process it, return TRUE if profanity is to
  * continue, FALSE otherwise
@@ -507,7 +492,7 @@ _init(const int disable_tls, char *log_level)
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
     _create_directories();
-    log_level_t prof_log_level = _get_log_level(log_level);
+    log_level_t prof_log_level = log_level_from_string(log_level);
     log_init(prof_log_level);
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
         log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);

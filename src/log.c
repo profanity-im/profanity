@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -158,6 +159,21 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
         }
 
         g_free(log_file);
+    }
+}
+
+log_level_t
+log_level_from_string(char *log_level)
+{
+    assert(log_level != NULL);
+    if (strcmp(log_level, "DEBUG") == 0) {
+        return PROF_LEVEL_DEBUG;
+    } else if (strcmp(log_level, "INFO") == 0) {
+        return PROF_LEVEL_INFO;
+    } else if (strcmp(log_level, "WARN") == 0) {
+        return PROF_LEVEL_WARN;
+    } else {
+        return PROF_LEVEL_ERROR;
     }
 }
 
