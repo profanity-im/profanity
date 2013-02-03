@@ -43,7 +43,6 @@ static int _presence_handler(xmpp_conn_t * const conn,
 static char* _handle_presence_caps(xmpp_stanza_t * const stanza);
 static int _room_presence_handler(const char * const jid,
     xmpp_stanza_t * const stanza);
-static const char * _get_presence_stanza_string_from_type(jabber_presence_t presence_type);
 
 void
 presence_init(void)
@@ -113,7 +112,7 @@ presence_update(jabber_presence_t presence_type, const char * const msg,
     xmpp_conn_t *conn = jabber_get_conn();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
-    const char *show = _get_presence_stanza_string_from_type(presence_type);
+    const char *show = stanza_get_presence_string_from_type(presence_type);
 
     // don't send presence when disconnected
     if (jabber_get_connection_status() != JABBER_CONNECTED)
@@ -160,7 +159,7 @@ presence_join_room(Jid *jid)
     xmpp_ctx_t *ctx = jabber_get_ctx();
     xmpp_conn_t *conn = jabber_get_conn();
     jabber_presence_t presence_type = jabber_get_presence_type();
-    const char *show = _get_presence_stanza_string_from_type(presence_type);
+    const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message(); 
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
@@ -462,22 +461,4 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     free(nick);
 
     return 1;
-}
-
-static const char *
-_get_presence_stanza_string_from_type(jabber_presence_t presence_type)
-{
-    switch(presence_type)
-    {
-        case PRESENCE_AWAY:
-            return STANZA_TEXT_AWAY;
-        case PRESENCE_DND:
-            return STANZA_TEXT_DND;
-        case PRESENCE_CHAT:
-            return STANZA_TEXT_CHAT;
-        case PRESENCE_XA:
-            return STANZA_TEXT_XA;
-        default: // PRESENCE_ONLINE
-            return NULL;
-    }
 }

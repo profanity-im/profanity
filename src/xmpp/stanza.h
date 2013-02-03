@@ -154,4 +154,6 @@ void stanza_attach_priority(xmpp_ctx_t *ctx, xmpp_stanza_t *presence, int pri);
 void stanza_attach_last_activity(xmpp_ctx_t *ctx, xmpp_stanza_t *presence, int idle);
 void stanza_attach_caps(xmpp_ctx_t *ctx, xmpp_stanza_t *presence);
 
+const char * stanza_get_presence_string_from_type(jabber_presence_t presence_type);
+
 #endif

@@ -676,6 +676,24 @@ stanza_attach_caps(xmpp_ctx_t *ctx, xmpp_stanza_t *presence)
     FREE_SET_NULL(sha1);
 }
 
+const char *
+stanza_get_presence_string_from_type(jabber_presence_t presence_type)
+{
+    switch(presence_type)
+    {
+        case PRESENCE_AWAY:
+            return STANZA_TEXT_AWAY;
+        case PRESENCE_DND:
+            return STANZA_TEXT_DND;
+        case PRESENCE_CHAT:
+            return STANZA_TEXT_CHAT;
+        case PRESENCE_XA:
+            return STANZA_TEXT_XA;
+        default: // PRESENCE_ONLINE
+            return NULL;
+    }
+}
+
 static int
 _field_compare(FormField *f1, FormField *f2)
 {
