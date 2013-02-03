@@ -1291,7 +1291,7 @@ cons_show_ui_prefs(void)
     cons_show("UI preferences:");
     cons_show("");
 
-    gchar *theme = prefs_get_theme();
+    gchar *theme = prefs_get_string(PREF_THEME);
     if (theme == NULL) {
         cons_show("Theme (/theme)               : default");
     } else {
@@ -1411,19 +1411,19 @@ cons_show_presence_prefs(void)
     cons_show("Presence preferences:");
     cons_show("");
 
-    if (strcmp(prefs_get_autoaway_mode(), "off") == 0) {
+    if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "off") == 0) {
         cons_show("Autoaway (/autoaway mode)            : OFF");
     } else {
-        cons_show("Autoaway (/autoaway mode)            : %s", prefs_get_autoaway_mode());
+        cons_show("Autoaway (/autoaway mode)            : %s", prefs_get_string(PREF_AUTOAWAY_MODE));
     }
 
     cons_show("Autoaway minutes (/autoaway time)    : %d minutes", prefs_get_autoaway_time());
 
-    if ((prefs_get_autoaway_message() == NULL) ||
-            (strcmp(prefs_get_autoaway_message(), "") == 0)) {
+    if ((prefs_get_string(PREF_AUTOAWAY_MESSAGE) == NULL) ||
+            (strcmp(prefs_get_string(PREF_AUTOAWAY_MESSAGE), "") == 0)) {
         cons_show("Autoaway message (/autoaway message) : OFF");
     } else {
-        cons_show("Autoaway message (/autoaway message) : \"%s\"", prefs_get_autoaway_message());
+        cons_show("Autoaway message (/autoaway message) : \"%s\"", prefs_get_string(PREF_AUTOAWAY_MESSAGE));
     }
 
     if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {

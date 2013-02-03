@@ -55,6 +55,7 @@ static gchar * _get_preferences_file(void);
 static const char * _get_group(preference_t pref);
 static const char * _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
+static char * _get_default_string(preference_t pref);
 
 void
 prefs_load(void)
@@ -122,16 +123,36 @@ prefs_set_boolean(preference_t pref, gboolean value)
     _save_prefs();
 }
 
-gchar *
-prefs_get_theme(void)
+char *
+prefs_get_string(preference_t pref)
 {
-    return g_key_file_get_string(prefs, PREF_GROUP_UI, "theme", NULL);
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    char *def = _get_default_string(pref);
+
+    if (!g_key_file_has_key(prefs, group, key, NULL)) {
+        return def;
+    }
+    
+    char *result = g_key_file_get_string(prefs, group, key, NULL);
+
+    if (result == NULL) {
+        return def;
+    } else {
+        return result;
+    }
 }
 
 void
-prefs_set_theme(gchar *value)
+prefs_set_string(preference_t pref, char *value)
 {
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "theme", value);
+    const char *group = _get_group(pref);
+    const char *key = _get_key(pref);
+    if (value == NULL) {
+        g_key_file_remove_key(prefs, group, key, NULL);
+    } else {
+        g_key_file_set_string(prefs, group, key, value);
+    }
     _save_prefs();
 }
 
@@ -217,24 +238,6 @@ prefs_set_autoping(gint value)
     _save_prefs();
 }
 
-gchar *
-prefs_get_autoaway_mode(void)
-{
-    gchar *result = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", NULL);
-    if (result == NULL) {
-        return strdup("off");
-    } else {
-        return result;
-    }
-}
-
-void
-prefs_set_autoaway_mode(gchar *value)
-{
-    g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.mode", value);
-    _save_prefs();
-}
-
 gint
 prefs_get_autoaway_time(void)
 {
@@ -251,23 +254,6 @@ void
 prefs_set_autoaway_time(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.time", value);
-    _save_prefs();
-}
-
-gchar *
-prefs_get_autoaway_message(void)
-{
-    return g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
-}
-
-void
-prefs_set_autoaway_message(gchar *value)
-{
-    if (value == NULL) {
-        g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
-    } else {
-        g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", value);
-    }
     _save_prefs();
 }
 
@@ -317,6 +303,8 @@ _get_group(preference_t pref)
         case PREF_CHLOG:
             return "logging";
         case PREF_AUTOAWAY_CHECK:
+        case PREF_AUTOAWAY_MODE:
+        case PREF_AUTOAWAY_MESSAGE:
             return "presence";
         default:
             return NULL;
@@ -360,6 +348,10 @@ _get_key(preference_t pref)
             return "chlog";
         case PREF_AUTOAWAY_CHECK:
             return "autoaway.check";
+        case PREF_AUTOAWAY_MODE:
+            return "autoaway.mode";
+        case PREF_AUTOAWAY_MESSAGE:
+            return "autoaway.message";
         default:
             return NULL;
     }
@@ -379,3 +371,14 @@ _get_default_boolean(preference_t pref)
     }
 }
 
+static char *
+_get_default_string(preference_t pref)
+{
+    switch (pref)
+    {
+        case PREF_AUTOAWAY_MODE:
+            return "off";
+        default:
+            return NULL;
+    }
+}

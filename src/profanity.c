@@ -444,11 +444,11 @@ _handle_idle_time()
             idle = TRUE;
 
             // handle away mode
-            if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
-                presence_update(PRESENCE_AWAY, prefs_get_autoaway_message(), 0);
-                if (prefs_get_autoaway_message() != NULL) {
+            if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
+                presence_update(PRESENCE_AWAY, prefs_get_string(PREF_AUTOAWAY_MESSAGE), 0);
+                if (prefs_get_string(PREF_AUTOAWAY_MESSAGE) != NULL) {
                     cons_show("Idle for %d minutes, status set to away, \"%s\".",
-                        prefs_get_autoaway_time(), prefs_get_autoaway_message());
+                        prefs_get_autoaway_time(), prefs_get_string(PREF_AUTOAWAY_MESSAGE));
                     title_bar_set_status(PRESENCE_AWAY);
                     win_current_page_off();
                 } else {
@@ -459,9 +459,9 @@ _handle_idle_time()
                 }
 
             // handle idle mode
-            } else if (strcmp(prefs_get_autoaway_mode(), "idle") == 0) {
+            } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
                 presence_update(PRESENCE_ONLINE,
-                    prefs_get_autoaway_message(), idle_ms / 1000);
+                    prefs_get_string(PREF_AUTOAWAY_MESSAGE), idle_ms / 1000);
             }
         }
 
@@ -471,12 +471,12 @@ _handle_idle_time()
 
             // handle check
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
-                if (strcmp(prefs_get_autoaway_mode(), "away") == 0) {
+                if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
                     presence_update(PRESENCE_ONLINE, NULL, 0);
                     cons_show("No longer idle, status set to online.");
                     title_bar_set_status(PRESENCE_ONLINE);
                     win_current_page_off();
-                } else if (strcmp(prefs_get_autoaway_mode(), "idle") == 0) {
+                } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
                     presence_update(PRESENCE_ONLINE, NULL, 0);
                     title_bar_set_status(PRESENCE_ONLINE);
                 }
@@ -502,7 +502,7 @@ _init(const int disable_tls, char *log_level)
     chat_log_init();
     prefs_load();
     accounts_load();
-    gchar *theme = prefs_get_theme();
+    gchar *theme = prefs_get_string(PREF_THEME);
     theme_init(theme);
     g_free(theme);
     ui_init();

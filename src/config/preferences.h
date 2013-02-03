@@ -51,9 +51,10 @@ typedef enum {
     PREF_NOTIFY_TYPING,
     PREF_NOTIFY_MESSAGE,
     PREF_CHLOG,
-    PREF_AUTOAWAY_CHECK
+    PREF_AUTOAWAY_CHECK,
+    PREF_AUTOAWAY_MODE,
+    PREF_AUTOAWAY_MESSAGE
 } preference_t;
-
 
 void prefs_load(void);
 void prefs_close(void);
@@ -65,8 +66,6 @@ void prefs_reset_boolean_choice(void);
 
 gint prefs_get_gone(void);
 void prefs_set_gone(gint value);
-gchar * prefs_get_theme(void);
-void prefs_set_theme(gchar *value);
 
 void prefs_set_notify_remind(gint period);
 gint prefs_get_notify_remind(void);
@@ -79,16 +78,14 @@ gint prefs_get_reconnect(void);
 void prefs_set_autoping(gint value);
 gint prefs_get_autoping(void);
 
-gchar* prefs_get_autoaway_mode(void);
-void prefs_set_autoaway_mode(gchar *value);
 gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);
-gchar* prefs_get_autoaway_message(void);
-void prefs_set_autoaway_message(gchar *value);
 
 void prefs_add_login(const char *jid);
 
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
+char * prefs_get_string(preference_t pref);
+void prefs_set_string(preference_t pref, char *value);
 
 #endif

@@ -1492,7 +1492,7 @@ _cmd_theme(gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
         } else if (theme_load(args[1])) {
             ui_load_colours();
-            prefs_set_theme(args[1]);
+            prefs_set_string(PREF_THEME, args[1]);
             cons_show("Loaded theme: %s", args[1]);
         } else {
             cons_show("Couldn't find theme: %s", args[1]);
@@ -2187,7 +2187,7 @@ _cmd_set_autoaway(gchar **args, struct cmd_help_t help)
                 (strcmp(value, "off") != 0)) {
             cons_show("Mode must be one of 'idle', 'away' or 'off'");
         } else {
-            prefs_set_autoaway_mode(value);
+            prefs_set_string(PREF_AUTOAWAY_MODE, value);
             cons_show("Auto away mode set to: %s.", value);
         }
 
@@ -2205,10 +2205,10 @@ _cmd_set_autoaway(gchar **args, struct cmd_help_t help)
 
     if (strcmp(setting, "message") == 0) {
         if (strcmp(value, "off") == 0) {
-            prefs_set_autoaway_message(NULL);
+            prefs_set_string(PREF_AUTOAWAY_MESSAGE, NULL);
             cons_show("Auto away message cleared.");
         } else {
-            prefs_set_autoaway_message(value);
+            prefs_set_string(PREF_AUTOAWAY_MESSAGE, value);
             cons_show("Auto away message set to: \"%s\".", value);
         }
 
