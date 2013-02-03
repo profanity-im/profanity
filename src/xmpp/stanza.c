@@ -28,6 +28,7 @@
 
 #include "common.h"
 #include "xmpp/stanza.h"
+#include "xmpp/capabilities.h"
 
 static int _field_compare(FormField *f1, FormField *f2);
 
@@ -86,7 +87,8 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
 
 xmpp_stanza_t *
 stanza_create_room_join_presence(xmpp_ctx_t *ctx,
-    const char * const full_room_jid)
+    const char * const full_room_jid, const char * const show,
+    const char * const status)
 {
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
@@ -97,6 +99,28 @@ stanza_create_room_join_presence(xmpp_ctx_t *ctx,
     xmpp_stanza_set_ns(x, STANZA_NS_MUC);
 
     xmpp_stanza_add_child(presence, x);
+
+    if (show != NULL) {
+        xmpp_stanza_t *show_stanza = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(show_stanza, STANZA_NAME_SHOW);
+        xmpp_stanza_t *text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(text, show);
+        xmpp_stanza_add_child(show_stanza, text);
+        xmpp_stanza_add_child(presence, show_stanza);
+        xmpp_stanza_release(text);
+        xmpp_stanza_release(show_stanza);
+    }
+
+    if (status != NULL) {
+        xmpp_stanza_t *status_stanza = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(status_stanza, STANZA_NAME_STATUS);
+        xmpp_stanza_t *text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(text, status);
+        xmpp_stanza_add_child(status_stanza, text);
+        xmpp_stanza_add_child(presence, status_stanza);
+        xmpp_stanza_release(text);
+        xmpp_stanza_release(status_stanza);
+    }
 
     return presence;
 }
@@ -599,6 +623,57 @@ stanza_destroy_form(DataForm *form)
 
         form = NULL;
     }
+}
+
+void
+stanza_attach_priority(xmpp_ctx_t *ctx, xmpp_stanza_t *presence, int pri)
+{
+    if (pri != 0) {
+        xmpp_stanza_t *priority, *value;
+        char pri_str[10];
+
+        snprintf(pri_str, sizeof(pri_str), "%d", pri);
+        priority = xmpp_stanza_new(ctx);
+        value = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(priority, STANZA_NAME_PRIORITY);
+        xmpp_stanza_set_text(value, pri_str);
+        xmpp_stanza_add_child(priority, value);
+        xmpp_stanza_add_child(presence, priority);
+        xmpp_stanza_release(priority);
+    }
+}
+
+void
+stanza_attach_last_activity(xmpp_ctx_t *ctx, xmpp_stanza_t *presence, int idle)
+{
+    if (idle > 0) {
+        xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+        xmpp_stanza_set_ns(query, STANZA_NS_LASTACTIVITY);
+        char idle_str[10];
+        snprintf(idle_str, sizeof(idle_str), "%d", idle);
+        xmpp_stanza_set_attribute(query, STANZA_ATTR_SECONDS, idle_str);
+        xmpp_stanza_add_child(presence, query);
+        xmpp_stanza_release(query);
+    }
+}
+
+void
+stanza_attach_caps(xmpp_ctx_t *ctx, xmpp_stanza_t *presence)
+{
+    xmpp_stanza_t *caps = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(caps, STANZA_NAME_C);
+    xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
+    xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
+
+    char *sha1 = caps_create_sha1_str(query);
+    xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
+    xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "http://www.profanity.im");
+    xmpp_stanza_set_attribute(caps, STANZA_ATTR_VER, sha1);
+    xmpp_stanza_add_child(presence, caps);
+    xmpp_stanza_release(caps);
+    xmpp_stanza_release(query);
+    FREE_SET_NULL(sha1);
 }
 
 static int

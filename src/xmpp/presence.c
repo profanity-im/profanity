@@ -43,6 +43,7 @@ static int _presence_handler(xmpp_conn_t * const conn,
 static char* _handle_presence_caps(xmpp_stanza_t * const stanza);
 static int _room_presence_handler(const char * const jid,
     xmpp_stanza_t * const stanza);
+static const char * _get_presence_stanza_string_from_type(jabber_presence_t presence_type);
 
 void
 presence_init(void)
@@ -105,11 +106,69 @@ presence_free_sub_requests(void)
 }
 
 void
+presence_update(jabber_presence_t presence_type, const char * const msg,
+    int idle)
+{
+    xmpp_ctx_t *ctx = jabber_get_ctx();
+    xmpp_conn_t *conn = jabber_get_conn();
+    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
+        presence_type);
+    const char *show = _get_presence_stanza_string_from_type(presence_type);
+
+    // don't send presence when disconnected
+    if (jabber_get_connection_status() != JABBER_CONNECTED)
+        return;
+
+    jabber_conn_set_presence_type(presence_type);
+    jabber_conn_set_presence_message(msg);
+    jabber_conn_set_priority(pri);
+
+    xmpp_stanza_t *presence = stanza_create_presence(ctx, show, msg);
+    stanza_attach_priority(ctx, presence, pri);
+    stanza_attach_last_activity(ctx, presence, idle);
+    stanza_attach_caps(ctx, presence);
+
+    xmpp_send(conn, presence);
+
+    // send presence for each room
+    GList *rooms = muc_get_active_room_list();
+    while (rooms != NULL) {
+        char *room = rooms->data;
+        char *nick = muc_get_room_nick(room);
+        char *full_room_jid = create_fulljid(room, nick);
+
+        xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
+        xmpp_send(conn, presence);
+
+        rooms = g_list_next(rooms);
+    }
+    g_list_free(rooms);
+
+    xmpp_stanza_release(presence);
+
+    // set last presence for account
+    const char *last = show;
+    if (last == NULL) {
+        last = STANZA_TEXT_ONLINE;
+    }
+    accounts_set_last_presence(jabber_get_account_name(), last);
+}
+
+void
 presence_join_room(Jid *jid)
 {
     xmpp_ctx_t *ctx = jabber_get_ctx();
     xmpp_conn_t *conn = jabber_get_conn();
-    xmpp_stanza_t *presence = stanza_create_room_join_presence(ctx, jid->fulljid);
+    jabber_presence_t presence_type = jabber_get_presence_type();
+    const char *show = _get_presence_stanza_string_from_type(presence_type);
+    char *status = jabber_get_presence_message(); 
+    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
+        presence_type);
+
+    xmpp_stanza_t *presence = stanza_create_room_join_presence(ctx, jid->fulljid, show, status);
+    stanza_attach_priority(ctx, presence, pri);
+    stanza_attach_caps(ctx, presence);
+
     xmpp_send(conn, presence);
     xmpp_stanza_release(presence);
 
@@ -142,114 +201,6 @@ presence_leave_chat_room(const char * const room_jid)
     xmpp_stanza_release(presence);
 }
 
-void
-presence_update(jabber_presence_t presence_type, const char * const msg,
-    int idle)
-{
-    xmpp_ctx_t *ctx = jabber_get_ctx();
-    xmpp_conn_t *conn = jabber_get_conn();
-    int pri;
-    char *show, *last;
-
-    // don't send presence when disconnected
-    if (jabber_get_connection_status() != JABBER_CONNECTED)
-        return;
-
-    pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
-        presence_type);
-    if (pri < JABBER_PRIORITY_MIN || pri > JABBER_PRIORITY_MAX)
-        pri = 0;
-
-    jabber_conn_set_presence_type(presence_type);
-    jabber_conn_set_presence_message(msg);
-    jabber_conn_set_priority(pri);
-
-    switch(presence_type)
-    {
-        case PRESENCE_AWAY:
-            show = STANZA_TEXT_AWAY;
-            last = STANZA_TEXT_AWAY;
-            break;
-        case PRESENCE_DND:
-            show = STANZA_TEXT_DND;
-            last = STANZA_TEXT_DND;
-            break;
-        case PRESENCE_CHAT:
-            show = STANZA_TEXT_CHAT;
-            last = STANZA_TEXT_CHAT;
-            break;
-        case PRESENCE_XA:
-            show = STANZA_TEXT_XA;
-            last = STANZA_TEXT_XA;
-            break;
-        default: // PRESENCE_ONLINE
-            show = NULL;
-            last = STANZA_TEXT_ONLINE;
-            break;
-    }
-
-
-    xmpp_stanza_t *presence = stanza_create_presence(ctx, show, msg);
-
-    // servers must treat no priority as 0
-    if (pri != 0) {
-        xmpp_stanza_t *priority, *value;
-        char pri_str[10];
-
-        snprintf(pri_str, sizeof(pri_str), "%d", pri);
-        priority = xmpp_stanza_new(ctx);
-        value = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(priority, STANZA_NAME_PRIORITY);
-        xmpp_stanza_set_text(value, pri_str);
-        xmpp_stanza_add_child(priority, value);
-        xmpp_stanza_add_child(presence, priority);
-    }
-
-    if (idle > 0) {
-        xmpp_stanza_t *query = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-        xmpp_stanza_set_ns(query, STANZA_NS_LASTACTIVITY);
-        char idle_str[10];
-        snprintf(idle_str, sizeof(idle_str), "%d", idle);
-        xmpp_stanza_set_attribute(query, STANZA_ATTR_SECONDS, idle_str);
-        xmpp_stanza_add_child(presence, query);
-    }
-
-    // add caps
-    xmpp_stanza_t *caps = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(caps, STANZA_NAME_C);
-    xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
-    xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
-
-    char *sha1 = caps_create_sha1_str(query);
-    xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
-    xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "http://www.profanity.im");
-    xmpp_stanza_set_attribute(caps, STANZA_ATTR_VER, sha1);
-    xmpp_stanza_add_child(presence, caps);
-
-    xmpp_send(conn, presence);
-
-    // send presence for each room
-    GList *rooms = muc_get_active_room_list();
-    while (rooms != NULL) {
-        char *room = rooms->data;
-        char *nick = muc_get_room_nick(room);
-        char *full_room_jid = create_fulljid(room, nick);
-
-        xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
-        xmpp_send(conn, presence);
-
-        rooms = g_list_next(rooms);
-    }
-    g_list_free(rooms);
-
-    xmpp_stanza_release(presence);
-
-    FREE_SET_NULL(sha1);
-
-    // set last presence for account
-    accounts_set_last_presence(jabber_get_account_name(), last);
-}
 
 
 static int
@@ -513,3 +464,20 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
     return 1;
 }
 
+static const char *
+_get_presence_stanza_string_from_type(jabber_presence_t presence_type)
+{
+    switch(presence_type)
+    {
+        case PRESENCE_AWAY:
+            return STANZA_TEXT_AWAY;
+        case PRESENCE_DND:
+            return STANZA_TEXT_DND;
+        case PRESENCE_CHAT:
+            return STANZA_TEXT_CHAT;
+        case PRESENCE_XA:
+            return STANZA_TEXT_XA;
+        default: // PRESENCE_ONLINE
+            return NULL;
+    }
+}
