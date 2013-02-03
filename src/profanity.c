@@ -233,7 +233,6 @@ prof_handle_disconnect(const char * const jid)
     jabber_disconnect();
     contact_list_clear();
     chat_sessions_clear();
-    jabber_restart();
     ui_disconnected();
     title_bar_set_status(PRESENCE_OFFLINE);
     status_bar_clear_message();

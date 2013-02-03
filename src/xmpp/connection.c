@@ -96,14 +96,6 @@ jabber_init(const int disable_tls)
     caps_init();
 }
 
-void
-jabber_restart(void)
-{
-    jabber_conn.conn_status = JABBER_STARTED;
-    jabber_conn.presence_type = PRESENCE_OFFLINE;
-    FREE_SET_NULL(jabber_conn.presence_message);
-}
-
 jabber_conn_status_t
 jabber_connect_with_account(ProfAccount *account, const char * const passwd)
 {
@@ -159,6 +151,10 @@ jabber_disconnect(void)
         }
         connection_free_resources();
     }
+    
+    jabber_conn.conn_status = JABBER_STARTED;
+    jabber_conn.presence_type = PRESENCE_OFFLINE;
+    FREE_SET_NULL(jabber_conn.presence_message);
 }
 
 void

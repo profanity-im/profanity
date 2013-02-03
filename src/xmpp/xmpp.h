@@ -62,7 +62,6 @@ const char * jabber_get_jid(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 jabber_presence_t jabber_get_presence_type(void);
 char * jabber_get_presence_message(void);
-void jabber_restart(void);
 void jabber_set_autoping(int seconds);
 char* jabber_get_account_name(void);
 
