@@ -208,36 +208,31 @@ prof_handle_gone(const char * const from)
 }
 
 void
-prof_handle_lost_connection(void)
-{
-    cons_bad_show("Lost connection.");
-    log_info("Lost connection");
-    contact_list_clear();
-    ui_disconnected();
-    win_current_page_off();
-    log_info("disconnected");
-}
-
-void
 prof_handle_failed_login(void)
 {
     cons_bad_show("Login failed.");
     log_info("Login failed");
     win_current_page_off();
-    log_info("disconnected");
+}
+
+void
+prof_handle_lost_connection(void)
+{
+    cons_bad_show("Lost connection.");
+    contact_list_clear();
+    chat_sessions_clear();
+    ui_disconnected();
+    win_current_page_off();
 }
 
 void
 prof_handle_disconnect(const char * const jid)
 {
+    cons_show("%s logged out successfully.", jid);
     jabber_disconnect();
     contact_list_clear();
     chat_sessions_clear();
     ui_disconnected();
-    title_bar_set_status(PRESENCE_OFFLINE);
-    status_bar_clear_message();
-    status_bar_refresh();
-    cons_show("%s logged out successfully.", jid);
     win_current_page_off();
 }
 

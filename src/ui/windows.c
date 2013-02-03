@@ -505,6 +505,10 @@ ui_disconnected(void)
             }
         }
     }
+    
+    title_bar_set_status(PRESENCE_OFFLINE);
+    status_bar_clear_message();
+    status_bar_refresh();
 }
 
 void
