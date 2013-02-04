@@ -111,9 +111,8 @@ xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx,
     const char * const recipient, const char * const type,
     const char * const message, const char * const state);
 
-xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t *ctx,
-    const char * const full_room_jid, const char * const show,
-    const char * const status);
+xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
+    const char * const full_room_jid);
 
 xmpp_stanza_t* stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
     const char * const full_room_jid);
@@ -121,8 +120,7 @@ xmpp_stanza_t* stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
 xmpp_stanza_t* stanza_create_room_leave_presence(xmpp_ctx_t *ctx,
     const char * const room, const char * const nick);
 
-xmpp_stanza_t* stanza_create_presence(xmpp_ctx_t *ctx, const char * const show,
-    const char * const status);
+xmpp_stanza_t* stanza_create_presence(xmpp_ctx_t * const ctx);
 
 xmpp_stanza_t* stanza_create_roster_iq(xmpp_ctx_t *ctx);
 xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx);
@@ -150,9 +148,15 @@ gboolean stanza_is_version_request(xmpp_stanza_t * const stanza);
 DataForm * stanza_create_form(xmpp_stanza_t * const stanza);
 void stanza_destroy_form(DataForm *form);
 
-void stanza_attach_priority(xmpp_ctx_t *ctx, xmpp_stanza_t *presence, int pri);
-void stanza_attach_last_activity(xmpp_ctx_t *ctx, xmpp_stanza_t *presence, int idle);
-void stanza_attach_caps(xmpp_ctx_t *ctx, xmpp_stanza_t *presence);
+void stanza_attach_priority(xmpp_ctx_t * const ctx,
+    xmpp_stanza_t * const presence, const int pri);
+void stanza_attach_last_activity(xmpp_ctx_t * const ctx,
+    xmpp_stanza_t * const presence, const int idle);
+void stanza_attach_caps(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence);
+void stanza_attach_show(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence,
+    const char * const show);
+void stanza_attach_status(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence,
+    const char * const status);
 
 const char * stanza_get_presence_string_from_type(jabber_presence_t presence_type);
 

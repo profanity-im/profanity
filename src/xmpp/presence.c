@@ -123,7 +123,9 @@ presence_update(jabber_presence_t presence_type, const char * const msg,
     connection_set_presence_message(msg);
     connection_set_priority(pri);
 
-    xmpp_stanza_t *presence = stanza_create_presence(ctx, show, msg);
+    xmpp_stanza_t *presence = stanza_create_presence(ctx);
+    stanza_attach_show(ctx, presence, show);
+    stanza_attach_status(ctx, presence, msg);
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_last_activity(ctx, presence, idle);
     stanza_attach_caps(ctx, presence);
@@ -165,7 +167,9 @@ presence_join_room(Jid *jid)
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
 
-    xmpp_stanza_t *presence = stanza_create_room_join_presence(ctx, jid->fulljid, show, status);
+    xmpp_stanza_t *presence = stanza_create_room_join_presence(ctx, jid->fulljid);
+    stanza_attach_show(ctx, presence, show);
+    stanza_attach_status(ctx, presence, status);
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_caps(ctx, presence);
 
