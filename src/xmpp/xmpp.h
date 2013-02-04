@@ -54,7 +54,7 @@ typedef struct capabilities_t {
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain);
-jabber_conn_status_t jabber_connect_with_account(ProfAccount *account,
+jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const account,
     const char * const passwd);
 void jabber_disconnect(void);
 void jabber_process_events(void);

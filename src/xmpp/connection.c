@@ -97,7 +97,8 @@ jabber_init(const int disable_tls)
 }
 
 jabber_conn_status_t
-jabber_connect_with_account(ProfAccount *account, const char * const passwd)
+jabber_connect_with_account(const ProfAccount * const account,
+    const char * const passwd)
 {
     assert(account != NULL);
     assert(passwd != NULL);
@@ -190,7 +191,7 @@ jabber_process_events(void)
 }
 
 void
-jabber_set_autoping(int seconds)
+jabber_set_autoping(const int seconds)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         xmpp_timed_handler_delete(jabber_conn.conn, _ping_timed_handler);
@@ -246,7 +247,7 @@ jabber_get_account_name(void)
 }
 
 void
-connection_set_presence_type(jabber_presence_t presence_type)
+connection_set_presence_type(const jabber_presence_t presence_type)
 {
     jabber_conn.presence_type = presence_type;
 }
@@ -261,7 +262,7 @@ connection_set_presence_message(const char * const message)
 }
 
 void
-connection_set_priority(int priority)
+connection_set_priority(const int priority)
 {
     jabber_conn.priority = priority;
 }
@@ -479,7 +480,7 @@ _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 }
 
 static log_level_t
-_get_log_level(xmpp_log_level_t xmpp_level)
+_get_log_level(const xmpp_log_level_t xmpp_level)
 {
     if (xmpp_level == XMPP_LEVEL_DEBUG) {
         return PROF_LEVEL_DEBUG;
