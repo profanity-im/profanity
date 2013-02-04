@@ -184,8 +184,19 @@ presence_change_room_nick(const char * const room, const char * const nick)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
+    jabber_presence_t presence_type = jabber_get_presence_type();
+    const char *show = stanza_get_presence_string_from_type(presence_type);
+    char *status = jabber_get_presence_message();
+    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
+        presence_type);
+
     char *full_room_jid = create_fulljid(room, nick);
     xmpp_stanza_t *presence = stanza_create_room_newnick_presence(ctx, full_room_jid);
+    stanza_attach_show(ctx, presence, show);
+    stanza_attach_status(ctx, presence, status);
+    stanza_attach_priority(ctx, presence, pri);
+    stanza_attach_caps(ctx, presence);
+
     xmpp_send(conn, presence);
     xmpp_stanza_release(presence);
 
