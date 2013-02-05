@@ -1118,6 +1118,8 @@ cons_show_login_success(ProfAccount *account)
     _presence_colour_on(console->win, presence_str);
     wprintw(console->win, "%s", presence_str);
     _presence_colour_off(console->win, presence_str);
+    wprintw(console->win, " (priority %d)",
+        accounts_get_priority_for_presence_type(account->name, presence));
     wprintw(console->win, ".\n");
 }
 
