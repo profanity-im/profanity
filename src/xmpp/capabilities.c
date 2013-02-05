@@ -33,6 +33,8 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 
+#include "ui/ui.h"
+
 static GHashTable *capabilities;
 
 static void _caps_destroy(Capabilities *caps);
@@ -147,6 +149,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
         while (curr_field != NULL) {
             field = curr_field->data;
             g_string_append(s, strdup(field->var));
+            g_string_append(s, "<");
             GSList *curr_value = field->values;
             while (curr_value != NULL) {
                 g_string_append(s, strdup(curr_value->data));
@@ -158,6 +161,8 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
 
         curr = g_slist_next(curr);
     }
+
+    cons_debug("CAPS STR = %s", s->str);
 
     EVP_MD_CTX mdctx;
     const EVP_MD *md;
