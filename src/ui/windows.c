@@ -2427,28 +2427,26 @@ _win_show_info(WINDOW *win, PContact pcontact)
     wprintw(win, "\n");
     _win_show_time(win, '-');
     _presence_colour_on(win, presence);
-    wprintw(win, "%s:\n", jid);
-    _presence_colour_off(win, presence);
-
+    wprintw(win, "%s", jid);
     if (name != NULL) {
-        _win_show_time(win, '-');
-        wprintw(win, "Name          : %s\n", name);
+        wprintw(win, " (%s)", name);
     }
-
-    if (sub != NULL) {
-        _win_show_time(win, '-');
-        wprintw(win, "Subscription  : %s\n", sub);
-    }
+    wprintw(win, ":\n");
+    _presence_colour_off(win, presence);
 
     _win_show_time(win, '-');
     wprintw(win, "Presence      : ");
     _presence_colour_on(win, presence);
-    wprintw(win, "%s\n", presence);
+    wprintw(win, "%s", presence);
+    if (status != NULL) {
+        wprintw(win, ", \"%s\"", status);
+    }
+    wprintw(win, "\n");
     _presence_colour_off(win, presence);
 
-    if (status != NULL) {
+    if (sub != NULL) {
         _win_show_time(win, '-');
-        wprintw(win, "Message       : %s\n", status);
+        wprintw(win, "Subscription  : %s\n", sub);
     }
 
     if (last_activity != NULL) {
@@ -2478,9 +2476,48 @@ _win_show_info(WINDOW *win, PContact pcontact)
 
     if (caps_str != NULL) {
         Capabilities *caps = caps_get(caps_str);
-        if ((caps != NULL) && (caps->client != NULL)) {
-            _win_show_time(win, '-');
-            wprintw(win, "Client        : %s\n", caps->client);
+        if (caps != NULL) {
+            // show identity
+            if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                _win_show_time(win, '-');
+                wprintw(win, "Identity      : ");
+                if (caps->name != NULL) {
+                    wprintw(win, "%s", caps->name);
+                    if ((caps->category != NULL) || (caps->type != NULL)) {
+                        wprintw(win, " ");
+                    }
+                }
+                if (caps->type != NULL) {
+                    wprintw(win, "%s", caps->type);
+                    if (caps->category != NULL) {
+                        wprintw(win, " ");
+                    }
+                }
+                if (caps->category != NULL) {
+                    wprintw(win, "%s", caps->category);
+                }
+                wprintw(win, "\n");
+            }
+            if (caps->software != NULL) {
+                _win_show_time(win, '-');
+                wprintw(win, "Software      : %s", caps->software);
+            }
+            if (caps->software_version != NULL) {
+                wprintw(win, ", %s", caps->software_version);
+            }
+            if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                wprintw(win, "\n");
+            }
+            if (caps->os != NULL) {
+                _win_show_time(win, '-');
+                wprintw(win, "OS            : %s", caps->os);
+            }
+            if (caps->os_version != NULL) {
+                wprintw(win, ", %s\n", caps->os_version);
+            }
+            if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                wprintw(win, "\n");
+            }
         }
     }
 

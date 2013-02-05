@@ -47,7 +47,13 @@ typedef enum {
 } jabber_subscr_t;
 
 typedef struct capabilities_t {
-    char *client;
+    char *category;
+    char *type;
+    char *name;
+    char *software;
+    char *software_version;
+    char *os;
+    char *os_version;
 } Capabilities;
 
 // connection functions

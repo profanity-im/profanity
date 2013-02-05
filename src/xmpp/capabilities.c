@@ -45,14 +45,47 @@ caps_init(void)
 }
 
 void
-caps_add(const char * const caps_str, const char * const client)
+caps_add(const char * const caps_str, const char * const category,
+    const char * const type, const char * const name,
+    const char * const software, const char * const software_version,
+    const char * const os, const char * const os_version)
 {
     Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
 
-    if (client != NULL) {
-        new_caps->client = strdup(client);
+    if (category != NULL) {
+        new_caps->category = strdup(category);
     } else {
-        new_caps->client = NULL;
+        new_caps->category = NULL;
+    }
+    if (type != NULL) {
+        new_caps->type = strdup(type);
+    } else {
+        new_caps->type = NULL;
+    }
+    if (name != NULL) {
+        new_caps->name = strdup(name);
+    } else {
+        new_caps->name = NULL;
+    }
+    if (software != NULL) {
+        new_caps->software = strdup(software);
+    } else {
+        new_caps->software = NULL;
+    }
+    if (software_version != NULL) {
+        new_caps->software_version = strdup(software_version);
+    } else {
+        new_caps->software_version = NULL;
+    }
+    if (os != NULL) {
+        new_caps->os = strdup(os);
+    } else {
+        new_caps->os = NULL;
+    }
+    if (os_version != NULL) {
+        new_caps->os_version = strdup(os_version);
+    } else {
+        new_caps->os_version = NULL;
     }
 
     g_hash_table_insert(capabilities, strdup(caps_str), new_caps);
@@ -244,7 +277,13 @@ static void
 _caps_destroy(Capabilities *caps)
 {
     if (caps != NULL) {
-        FREE_SET_NULL(caps->client);
+        FREE_SET_NULL(caps->category);
+        FREE_SET_NULL(caps->type);
+        FREE_SET_NULL(caps->name);
+        FREE_SET_NULL(caps->software);
+        FREE_SET_NULL(caps->software_version);
+        FREE_SET_NULL(caps->os);
+        FREE_SET_NULL(caps->os_version);
         FREE_SET_NULL(caps);
     }
 }

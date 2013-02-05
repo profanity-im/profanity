@@ -315,28 +315,52 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
             return 1;
         }
 
+        DataForm *form = NULL;
+        FormField *formField = NULL;
+
+        const char *category = NULL;
+        const char *type = NULL;
+        const char *name = NULL;
+        const char *software = NULL;
+        const char *software_version = NULL;
+        const char *os = NULL;
+        const char *os_version = NULL;
+
         xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
-
-        if (identity == NULL) {
-            return 1;
+        if (identity != NULL) {
+            category = xmpp_stanza_get_attribute(identity, "category");
+            type = xmpp_stanza_get_attribute(identity, "type");
+            name = xmpp_stanza_get_attribute(identity, "name");
         }
 
-        const char *category = xmpp_stanza_get_attribute(identity, "category");
-        if (category == NULL) {
-            return 1;
+        xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
+        if (softwareinfo != NULL) {
+            form = stanza_create_form(softwareinfo);
+
+            if (g_strcmp0(form->form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
+                GSList *field = form->fields;
+                while (field != NULL) {
+                    formField = field->data;
+                    if (formField->values != NULL) {
+                        if (strcmp(formField->var, "software") == 0) {
+                            software = formField->values->data;
+                        } else if (strcmp(formField->var, "software_version") == 0) {
+                            software_version = formField->values->data;
+                        } else if (strcmp(formField->var, "os") == 0) {
+                            os = formField->values->data;
+                        } else if (strcmp(formField->var, "os_version") == 0) {
+                            os_version = formField->values->data;
+                        }
+                    }
+                    field = g_slist_next(field);
+                }
+            }
         }
 
-        if (strcmp(category, "client") != 0) {
-            return 1;
-        }
+        caps_add(caps_key, category, type, name, software, software_version,
+            os, os_version);
 
-        const char *name = xmpp_stanza_get_attribute(identity, "name");
-        if (name == 0) {
-            return 1;
-        }
-
-        caps_add(caps_key, name);
-
+        //stanza_destroy_form(form);
         free(caps_key);
 
         return 1;

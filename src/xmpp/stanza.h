@@ -94,6 +94,8 @@
 #define STANZA_NS_DATA "jabber:x:data"
 #define STANZA_NS_VERSION "jabber:iq:version"
 
+#define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
+
 typedef struct form_field_t {
     char *var;
     GSList *values;
