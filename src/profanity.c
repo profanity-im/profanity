@@ -441,13 +441,19 @@ _handle_idle_time()
             if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
                 presence_update(PRESENCE_AWAY, prefs_get_string(PREF_AUTOAWAY_MESSAGE), 0);
                 if (prefs_get_string(PREF_AUTOAWAY_MESSAGE) != NULL) {
-                    cons_show("Idle for %d minutes, status set to away, \"%s\".",
-                        prefs_get_autoaway_time(), prefs_get_string(PREF_AUTOAWAY_MESSAGE));
+                    int pri =
+                        accounts_get_priority_for_presence_type(jabber_get_account_name(),
+                            PRESENCE_AWAY);
+                    cons_show("Idle for %d minutes, status set to away (priority %d), \"%s\".",
+                        prefs_get_autoaway_time(), pri, prefs_get_string(PREF_AUTOAWAY_MESSAGE));
                     title_bar_set_status(PRESENCE_AWAY);
                     win_current_page_off();
                 } else {
-                    cons_show("Idle for %d minutes, status set to away.",
-                        prefs_get_autoaway_time());
+                    int pri =
+                        accounts_get_priority_for_presence_type(jabber_get_account_name(),
+                            PRESENCE_AWAY);
+                    cons_show("Idle for %d minutes, status set to away (priority %d).",
+                        prefs_get_autoaway_time(), pri);
                     title_bar_set_status(PRESENCE_AWAY);
                     win_current_page_off();
                 }
@@ -467,7 +473,10 @@ _handle_idle_time()
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
                 if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
                     presence_update(PRESENCE_ONLINE, NULL, 0);
-                    cons_show("No longer idle, status set to online.");
+                    int pri =
+                        accounts_get_priority_for_presence_type(jabber_get_account_name(),
+                            PRESENCE_ONLINE);
+                    cons_show("No longer idle, status set to online (priority %d).", pri);
                     title_bar_set_status(PRESENCE_ONLINE);
                     win_current_page_off();
                 } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
