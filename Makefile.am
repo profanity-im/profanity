@@ -3,6 +3,7 @@ profanity_SOURCES = src/contact.c src/contact.h src/log.c src/common.c \
 	src/contact_list.c src/log.h src/profanity.c src/common.h \
 	src/contact_list.h src/main.c src/profanity.h src/chat_session.c \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
+	src/resource.c src/resource.h \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
 	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
