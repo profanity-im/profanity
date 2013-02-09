@@ -1243,7 +1243,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
             while (contacts != NULL) {
                 PContact contact = (PContact) contacts->data;
                 if (p_contact_pending_out(contact)) {
-                    cons_show(p_contact_jid(contact));
+                    cons_show(p_contact_barejid(contact));
                 }
                 contacts = g_slist_next(contacts);
             }

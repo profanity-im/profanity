@@ -853,11 +853,11 @@ win_show_room_roster(const char * const room, GList *roster, const char * const 
 
         while (roster != NULL) {
             PContact member = roster->data;
-            const char const *name = p_contact_jid(member);
+            const char const *nick = p_contact_barejid(member);
             const char const *show = p_contact_presence(member);
 
             _presence_colour_on(win, show);
-            wprintw(win, "%s", name);
+            wprintw(win, "%s", nick);
             _presence_colour_off(win, show);
 
             if (roster->next != NULL) {
@@ -2239,7 +2239,7 @@ _cons_show_incoming_message(const char * const short_from, const int win_index)
 static void
 _win_show_contact(ProfWin *window, PContact contact)
 {
-    const char *jid = p_contact_jid(contact);
+    const char *barejid = p_contact_barejid(contact);
     const char *name = p_contact_name(contact);
     const char *presence = p_contact_presence(contact);
     const char *status = p_contact_status(contact);
@@ -2247,7 +2247,7 @@ _win_show_contact(ProfWin *window, PContact contact)
 
     _win_show_time(window->win, '-');
     _presence_colour_on(window->win, presence);
-    wprintw(window->win, "%s", jid);
+    wprintw(window->win, "%s", barejid);
 
     if (name != NULL) {
         wprintw(window->win, " (%s)", name);
@@ -2417,7 +2417,7 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
 static void
 _win_show_info(WINDOW *win, PContact pcontact)
 {
-    const char *jid = p_contact_jid(pcontact);
+    const char *barejid = p_contact_barejid(pcontact);
     const char *name = p_contact_name(pcontact);
     const char *presence = p_contact_presence(pcontact);
     const char *status = p_contact_status(pcontact);
@@ -2429,7 +2429,7 @@ _win_show_info(WINDOW *win, PContact pcontact)
     wprintw(win, "\n");
     _win_show_time(win, '-');
     _presence_colour_on(win, presence);
-    wprintw(win, "%s", jid);
+    wprintw(win, "%s", barejid);
     if (name != NULL) {
         wprintw(win, " (%s)", name);
     }

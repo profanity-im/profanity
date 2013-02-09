@@ -30,7 +30,7 @@
 #include "common.h"
 
 struct p_contact_t {
-    char *jid;
+    char *barejid;
     char *name;
     char *presence;
     char *status;
@@ -41,13 +41,13 @@ struct p_contact_t {
 };
 
 PContact
-p_contact_new(const char * const jid, const char * const name,
+p_contact_new(const char * const barejid, const char * const name,
     const char * const presence, const char * const status,
     const char * const subscription, gboolean pending_out,
     const char * const caps_str)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
-    contact->jid = strdup(jid);
+    contact->barejid = strdup(barejid);
 
     if (name != NULL) {
         contact->name = strdup(name);
@@ -84,7 +84,7 @@ p_contact_new(const char * const jid, const char * const name,
 void
 p_contact_free(PContact contact)
 {
-    FREE_SET_NULL(contact->jid);
+    FREE_SET_NULL(contact->barejid);
     FREE_SET_NULL(contact->name);
     FREE_SET_NULL(contact->presence);
     FREE_SET_NULL(contact->status);
@@ -99,9 +99,9 @@ p_contact_free(PContact contact)
 }
 
 const char *
-p_contact_jid(const PContact contact)
+p_contact_barejid(const PContact contact)
 {
-    return contact->jid;
+    return contact->barejid;
 }
 
 const char *
