@@ -152,7 +152,7 @@ inp_get_char(char *input, int *size)
 
                 *size += utf_len;
                 input[*size] = '\0';
-                wprintw(inp_win, next_ch);
+                waddstr(inp_win, next_ch);
                 wmove(inp_win, 0, inp_x + 1);
 
                 if (inp_x - pad_start > cols-3) {
@@ -173,7 +173,7 @@ inp_get_char(char *input, int *size)
                     input[*size] = '\0';
 
                     bytes[utf_len] = '\0';
-                    wprintw(inp_win, bytes);
+                    waddstr(inp_win, bytes);
                     display_size++;
 
                     // if gone over screen size follow input
@@ -222,7 +222,7 @@ inp_replace_input(char *input, const char * const new_input, int *size)
     display_size = g_utf8_strlen(input, *size);
     inp_win_reset();
     input[*size] = '\0';
-    wprintw(inp_win, input);
+    waddstr(inp_win, input);
     _go_to_end(display_size);
 }
 
@@ -420,7 +420,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                     g_free(start);
 
                     _clear_input();
-                    wprintw(inp_win, input);
+                    waddstr(inp_win, input);
                     wmove(inp_win, 0, inp_x -1);
 
                 // if in middle, delete and shift chars left
@@ -440,7 +440,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                     g_string_free(new, FALSE);
 
                     _clear_input();
-                    wprintw(inp_win, input);
+                    waddstr(inp_win, input);
                     wmove(inp_win, 0, inp_x -1);
                 }
 
@@ -467,7 +467,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 g_free(start);
 
                 _clear_input();
-                wprintw(inp_win, input);
+                waddstr(inp_win, input);
             } else if (inp_x < display_size-1) {
                 gchar *start = g_utf8_substring(input, 0, inp_x);
                 gchar *end = g_utf8_substring(input, inp_x+1, *size);
@@ -484,7 +484,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 g_string_free(new, FALSE);
 
                 _clear_input();
-                wprintw(inp_win, input);
+                waddstr(inp_win, input);
                 wmove(inp_win, 0, inp_x);
             }
             return 1;
