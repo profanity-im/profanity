@@ -30,6 +30,7 @@
 Resource * resource_new(const char * const name, const char * const show,
     const char * const status, const int priority, const char * const caps_str)
 {
+    assert(g_strcmp0(show, "offline") != 0);
     assert(name != NULL);
     Resource *new_resource = malloc(sizeof(struct resource_t));
     new_resource->name = strdup(name);

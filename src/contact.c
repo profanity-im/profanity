@@ -64,8 +64,10 @@ p_contact_new(const char * const barejid, const char * const name,
     contact->resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
         (GDestroyNotify)resource_destroy);
     // TODO, priority, last activity
-    Resource *resource = resource_new("default", presence, status, 0, caps_str);
-    g_hash_table_insert(contact->resources, strdup(resource->name), resource);
+    if (g_strcmp0(presence, "offline") != 0) {
+        Resource *resource = resource_new("default", presence, status, 0, caps_str);
+        g_hash_table_insert(contact->resources, strdup(resource->name), resource);
+    }
 
     return contact;
 }
@@ -127,15 +129,23 @@ p_contact_name(const PContact contact)
 const char *
 p_contact_presence(const PContact contact)
 {
-    Resource *resource = g_hash_table_lookup(contact->resources, "default");
-    return resource->show;
+    if (g_hash_table_size(contact->resources) == 0) {
+        return "offline";
+    } else {
+        Resource *resource = g_hash_table_lookup(contact->resources, "default");
+        return resource->show;
+    }
 }
 
 const char *
 p_contact_status(const PContact contact)
 {
-    Resource *resource = g_hash_table_lookup(contact->resources, "default");
-    return resource->status;
+    if (g_hash_table_size(contact->resources) == 0) {
+        return NULL;
+    } else {
+        Resource *resource = g_hash_table_lookup(contact->resources, "default");
+        return resource->status;
+    }
 }
 
 const char *
@@ -159,17 +169,32 @@ p_contact_last_activity(const PContact contact)
 const char *
 p_contact_caps_str(const PContact contact)
 {
-    Resource *resource = g_hash_table_lookup(contact->resources, "default");
-    return resource->caps_str;
+    if (g_hash_table_size(contact->resources) == 0) {
+        return NULL;
+    } else {
+        Resource *resource = g_hash_table_lookup(contact->resources, "default");
+        return resource->caps_str;
+    }
 }
 
 void
 p_contact_set_presence(const PContact contact, const char * const presence)
 {
-    Resource *resource = g_hash_table_lookup(contact->resources, "default");
-    FREE_SET_NULL(resource->show);
-    if (presence != NULL) {
-        resource->show = strdup(presence);
+    if (g_strcmp0(presence, "offline") == 0) {
+        g_hash_table_remove(contact->resources, "default");
+    } else {
+        if (g_hash_table_size(contact->resources) == 0) {
+            Resource *resource = resource_new("default", presence, NULL, 0, NULL);
+            g_hash_table_insert(contact->resources, strdup(resource->name), resource);
+        } else {
+            Resource *resource = g_hash_table_lookup(contact->resources, "default");
+            if (presence != NULL) {
+                FREE_SET_NULL(resource->show);
+                resource->show = strdup(presence);
+            } else {
+                resource->show = NULL;
+            }
+        }
     }
 }
 

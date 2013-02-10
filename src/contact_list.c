@@ -64,14 +64,13 @@ contact_list_reset_search_attempts(void)
 
 gboolean
 contact_list_add(const char * const barejid, const char * const name,
-    const char * const presence, const char * const status,
     const char * const subscription, gboolean pending_out)
 {
     gboolean added = FALSE;
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(barejid, name, presence, status, subscription,
+        contact = p_contact_new(barejid, name, "offline", NULL, subscription,
             pending_out, NULL);
         g_hash_table_insert(contacts, strdup(barejid), contact);
         autocomplete_add(ac, strdup(barejid));
