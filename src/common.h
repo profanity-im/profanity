@@ -76,6 +76,8 @@ char * prof_getline(FILE *stream);
 int octet_compare(unsigned char *str1, unsigned char *str2);
 char* release_get_latest(void);
 gboolean presence_valid_string(const char * const str);
+const char * presence_display_string_from_type(presence_t presence);
+const char * presence_stanza_show_from_type(presence_t presence);
 gchar * xdg_get_config_home(void);
 gchar * xdg_get_data_home(void);
 

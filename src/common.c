@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -262,16 +263,57 @@ release_get_latest()
 gboolean
 presence_valid_string(const char * const str)
 {
-    if (str == NULL) {
-        return FALSE;
-    } else if ((strcmp(str, "online") == 0) ||
-                (strcmp(str, "chat") == 0) ||
-                (strcmp(str, "away") == 0) ||
-                (strcmp(str, "xa") == 0) ||
-                (strcmp(str, "dnd") == 0)) {
+    assert(str != NULL);
+    if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) ||
+            (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) ||
+            (strcmp(str, "dnd") == 0)) {
         return TRUE;
     } else {
         return FALSE;
+    }
+}
+
+const char *
+presence_display_string_from_type(presence_t presence)
+{
+    switch (presence)
+    {
+        case PRESENCE_ONLINE:
+            return "online";
+        case PRESENCE_CHAT:
+            return "chat";
+        case PRESENCE_AWAY:
+            return "away";
+        case PRESENCE_XA:
+            return "xa";
+        case PRESENCE_DND:
+            return "dnd";
+        case PRESENCE_OFFLINE:
+            return "offline";
+        default:
+            return NULL;
+    }
+}
+
+const char *
+presence_stanza_show_from_type(presence_t presence)
+{
+    assert(presence != PRESENCE_OFFLINE);
+
+    switch (presence)
+    {
+        case PRESENCE_ONLINE:
+            return NULL;
+        case PRESENCE_CHAT:
+            return "chat";
+        case PRESENCE_AWAY:
+            return "away";
+        case PRESENCE_XA:
+            return "xa";
+        case PRESENCE_DND:
+            return "dnd";
+        default:
+            return NULL;
     }
 }
 
