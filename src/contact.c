@@ -65,6 +65,32 @@ p_contact_new(const char * const barejid, const char * const name,
         (GDestroyNotify)resource_destroy);
     // TODO, priority, last activity
     Resource *resource = resource_new("default", presence, status, 0, caps_str);
+    g_hash_table_insert(contact->resources, strdup(resource->name), resource);
+
+    return contact;
+}
+
+PContact
+p_contact_new_subscription(const char * const barejid,
+    const char * const subscription, gboolean pending_out)
+{
+    PContact contact = malloc(sizeof(struct p_contact_t));
+    contact->barejid = strdup(barejid);
+
+    contact->name = NULL;
+
+    if (subscription != NULL)
+        contact->subscription = strdup(subscription);
+    else
+        contact->subscription = strdup("none");
+
+    contact->pending_out = pending_out;
+    contact->last_activity = NULL;
+
+    contact->resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+        (GDestroyNotify)resource_destroy);
+    // TODO, priority, last activity
+    Resource *resource = resource_new("default", "offline", NULL, 0, NULL);
     g_hash_table_insert(contact->resources, resource->name, resource);
 
     return contact;

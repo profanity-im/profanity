@@ -25,7 +25,8 @@ check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = tests/test_contact_list.c src/contact_list.c src/contact.c \
 	tests/test_common.c tests/test_history.c src/tools/history.c src/common.c \
 	tests/test_autocomplete.c src/tools/autocomplete.c tests/testsuite.c \
-	tests/test_parser.c src/command/parser.c tests/test_jid.c src/jid.c
+	tests/test_parser.c src/command/parser.c tests/test_jid.c src/jid.c \
+	src/resource.c src/resource.h
 tests_testsuite_LDADD = -lheadunit -lstdc++
 
 man_MANS = docs/profanity.1

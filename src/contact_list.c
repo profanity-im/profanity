@@ -45,7 +45,9 @@ void
 contact_list_clear(void)
 {
     autocomplete_clear(ac);
-    g_hash_table_remove_all(contacts);
+    g_hash_table_destroy(contacts);
+    contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
+        (GDestroyNotify)p_contact_free);
 }
 
 void
@@ -125,8 +127,7 @@ contact_list_update_subscription(const char * const barejid,
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(barejid, NULL, "offline", NULL, subscription,
-            pending_out, NULL);
+        contact = p_contact_new_subscription(barejid, subscription, pending_out);
         g_hash_table_insert(contacts, strdup(barejid), contact);
     } else {
         p_contact_set_subscription(contact, subscription);

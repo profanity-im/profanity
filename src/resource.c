@@ -31,7 +31,6 @@ Resource * resource_new(const char * const name, const char * const show,
     const char * const status, const int priority, const char * const caps_str)
 {
     assert(name != NULL);
-    assert(show != NULL);
     Resource *new_resource = malloc(sizeof(struct resource_t));
     new_resource->name = strdup(name);
     if (show == NULL || (strcmp(show, "") == 0))
