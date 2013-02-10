@@ -27,17 +27,13 @@
 #include <common.h>
 #include <resource.h>
 
-Resource * resource_new(const char * const name, const char * const show,
+Resource * resource_new(const char * const name, resource_presence_t presence,
     const char * const status, const int priority, const char * const caps_str)
 {
-    assert(g_strcmp0(show, "offline") != 0);
     assert(name != NULL);
     Resource *new_resource = malloc(sizeof(struct resource_t));
     new_resource->name = strdup(name);
-    if (show == NULL || (strcmp(show, "") == 0))
-        new_resource->show = strdup("online");
-    else
-        new_resource->show = strdup(show);
+    new_resource->presence = presence;
     if (status != NULL) {
         new_resource->status = strdup(status);
     } else {
@@ -57,7 +53,6 @@ void resource_destroy(Resource *resource)
 {
     assert(resource != NULL);
     FREE_SET_NULL(resource->name);
-    FREE_SET_NULL(resource->show);
     FREE_SET_NULL(resource->status);
     FREE_SET_NULL(resource->caps_str);
     FREE_SET_NULL(resource);

@@ -25,13 +25,13 @@
 
 typedef struct resource_t {
     char *name;
-    char *show;
+    resource_presence_t presence;
     char *status;
     int priority;
     char *caps_str;
 } Resource;
 
-Resource * resource_new(const char * const name, const char * const show,
+Resource * resource_new(const char * const name, resource_presence_t presence,
     const char * const status, const int priority, const char * const caps_str);
 void resource_destroy(Resource *resource);
 
