@@ -23,6 +23,14 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
+typedef enum {
+    RESOURCE_ONLINE,
+    RESOURCE_CHAT,
+    RESOURCE_AWAY,
+    RESOURCE_XA,
+    RESOURCE_DND
+} resource_presence_t;
+
 typedef struct resource_t {
     char *name;
     char *show;
