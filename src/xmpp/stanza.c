@@ -239,6 +239,33 @@ stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp)
 }
 
 gboolean
+stanza_is_muc_presence(xmpp_stanza_t * const stanza)
+{
+    if (stanza == NULL) {
+        return FALSE;
+    }
+    if (strcmp(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
+        return FALSE;
+    }
+
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+
+    if (x == NULL) {
+        return FALSE;
+    }
+
+    char *ns = xmpp_stanza_get_ns(x);
+    if (ns == NULL) {
+        return FALSE;
+    }
+    if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+gboolean
 stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     const char * const self_jid)
 {

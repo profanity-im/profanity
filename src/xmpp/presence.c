@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -37,7 +38,8 @@
 
 static GHashTable *sub_requests;
 
-#define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_PRESENCE, type, ctx)
+#define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, \
+                                                STANZA_NAME_PRESENCE, type, ctx)
 
 static int _unavailable_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
@@ -49,14 +51,18 @@ static int _unsubscribed_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static char* _handle_presence_caps(xmpp_stanza_t * const stanza);
+
 static int _room_presence_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+
+static char* _get_caps_key(xmpp_stanza_t * const stanza);
+static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
 
 void
 presence_init(void)
 {
-    sub_requests = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    sub_requests =
+        g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
@@ -65,46 +71,54 @@ presence_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(NULL,                STANZA_TYPE_ERROR,          connection_error_handler);
-    HANDLE(STANZA_NS_MUC_USER,  NULL,                       _room_presence_handler);
-    HANDLE(NULL,                STANZA_TYPE_UNAVAILABLE,    _unavailable_handler);
-    HANDLE(NULL,                STANZA_TYPE_SUBSCRIBE,      _subscribe_handler);
-    HANDLE(NULL,                STANZA_TYPE_SUBSCRIBED,     _subscribed_handler);
-    HANDLE(NULL,                STANZA_TYPE_UNSUBSCRIBED,   _unsubscribed_handler);
-    HANDLE(NULL,                NULL,                       _available_handler);
+    HANDLE(NULL,               STANZA_TYPE_ERROR,        connection_error_handler);
+    HANDLE(STANZA_NS_MUC_USER, NULL,                     _room_presence_handler);
+    HANDLE(NULL,               STANZA_TYPE_UNAVAILABLE,  _unavailable_handler);
+    HANDLE(NULL,               STANZA_TYPE_SUBSCRIBE,    _subscribe_handler);
+    HANDLE(NULL,               STANZA_TYPE_SUBSCRIBED,   _subscribed_handler);
+    HANDLE(NULL,               STANZA_TYPE_UNSUBSCRIBED, _unsubscribed_handler);
+    HANDLE(NULL,               NULL,                     _available_handler);
 }
 
 void
 presence_subscription(const char * const jid, const jabber_subscr_t action)
 {
-    xmpp_ctx_t *ctx = connection_get_ctx();
-    xmpp_conn_t *conn = connection_get_conn();
-    xmpp_stanza_t *presence;
-    char *type, *jid_cpy, *bare_jid;
+    assert(jid != NULL);
 
-    // jid must be a bare JID
-    jid_cpy = strdup(jid);
-    bare_jid = strtok(jid_cpy, "/");
-    g_hash_table_remove(sub_requests, bare_jid);
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    const char *type = NULL;
 
-    if (action == PRESENCE_SUBSCRIBE)
-        type = STANZA_TYPE_SUBSCRIBE;
-    else if (action == PRESENCE_SUBSCRIBED)
-        type = STANZA_TYPE_SUBSCRIBED;
-    else if (action == PRESENCE_UNSUBSCRIBED)
-        type = STANZA_TYPE_UNSUBSCRIBED;
-    else { // unknown action
-        free(jid_cpy);
-        return;
+    Jid *jidp = jid_create(jid);
+    g_hash_table_remove(sub_requests, jidp->barejid);
+
+    switch (action)
+    {
+        case PRESENCE_SUBSCRIBE:
+            log_debug("Sending presence subscribe: %s", jid);
+            type = STANZA_TYPE_SUBSCRIBE;
+            break;
+        case PRESENCE_SUBSCRIBED:
+            log_debug("Sending presence subscribed: %s", jid);
+            type = STANZA_TYPE_SUBSCRIBED;
+            break;
+        case PRESENCE_UNSUBSCRIBED:
+            log_debug("Sending presence usubscribed: %s", jid);
+            type = STANZA_TYPE_UNSUBSCRIBED;
+            break;
+        default:
+            log_warning("Attempt to send unknown subscription action: %s", jid);
+            break;
     }
 
-    presence = xmpp_stanza_new(ctx);
+    xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, type);
-    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, bare_jid);
+    xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, jidp->barejid);
     xmpp_send(conn, presence);
     xmpp_stanza_release(presence);
-    free(jid_cpy);
+
+    jid_destroy(jidp);
 }
 
 GList *
@@ -116,23 +130,34 @@ presence_get_subscription_requests(void)
 void
 presence_free_sub_requests(void)
 {
-    if (sub_requests != NULL)
+    if (sub_requests != NULL) {
         g_hash_table_remove_all(sub_requests);
+    }
 }
 
 void
-presence_update(resource_presence_t presence_type, const char * const msg,
-    int idle)
+presence_update(const resource_presence_t presence_type, const char * const msg,
+    const int idle)
 {
-    xmpp_ctx_t *ctx = connection_get_ctx();
-    xmpp_conn_t *conn = connection_get_conn();
-    int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
-        presence_type);
-    const char *show = stanza_get_presence_string_from_type(presence_type);
-
-    // don't send presence when disconnected
-    if (jabber_get_connection_status() != JABBER_CONNECTED)
+    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+        log_warning("Error setting presence, not connected.");
         return;
+    }
+
+    if (msg != NULL) {
+        log_debug("Updating presence: %s, \"%s\"",
+            string_from_resource_presence(presence_type), msg);
+    } else {
+        log_debug("Updating presence: %s",
+            string_from_resource_presence(presence_type));
+    }
+
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_conn_t * const conn = connection_get_conn();
+    const int pri =
+        accounts_get_priority_for_presence_type(jabber_get_account_name(),
+                                                presence_type);
+    const char *show = stanza_get_presence_string_from_type(presence_type);
 
     connection_set_presence_message(msg);
     connection_set_priority(pri);
@@ -143,23 +168,8 @@ presence_update(resource_presence_t presence_type, const char * const msg,
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_last_activity(ctx, presence, idle);
     stanza_attach_caps(ctx, presence);
-
     xmpp_send(conn, presence);
-
-    // send presence for each room
-    GList *rooms = muc_get_active_room_list();
-    while (rooms != NULL) {
-        char *room = rooms->data;
-        char *nick = muc_get_room_nick(room);
-        char *full_room_jid = create_fulljid(room, nick);
-
-        xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
-        xmpp_send(conn, presence);
-
-        rooms = g_list_next(rooms);
-    }
-    g_list_free(rooms);
-
+    _send_room_presence(conn, presence);
     xmpp_stanza_release(presence);
 
     // set last presence for account
@@ -170,12 +180,35 @@ presence_update(resource_presence_t presence_type, const char * const msg,
     accounts_set_last_presence(jabber_get_account_name(), last);
 }
 
+static void
+_send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
+{
+    GList *rooms = muc_get_active_room_list();
+    while (rooms != NULL) {
+        const char *room = rooms->data;
+        const char *nick = muc_get_room_nick(room);
+        const char *full_room_jid = create_fulljid(room, nick);
+
+        xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
+        log_debug("Sending presence to room: %s", full_room_jid);
+        xmpp_send(conn, presence);
+
+        rooms = g_list_next(rooms);
+    }
+    g_list_free(rooms);
+}
+
 void
 presence_join_room(Jid *jid)
 {
+    assert(jid != NULL);
+    assert(jid->fulljid != NULL);
+
+    log_debug("Sending room join presence to: %s", jid->fulljid);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    contact_presence_t presence_type = accounts_get_last_presence(jabber_get_account_name());
+    contact_presence_t presence_type =
+        accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
@@ -196,16 +229,22 @@ presence_join_room(Jid *jid)
 void
 presence_change_room_nick(const char * const room, const char * const nick)
 {
+    assert(room != NULL);
+    assert(nick != NULL);
+
+    log_debug("Sending room nickname change to: %s, nick: %s", room, nick);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    contact_presence_t presence_type = accounts_get_last_presence(jabber_get_account_name());
+    contact_presence_t presence_type =
+        accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
 
     char *full_room_jid = create_fulljid(room, nick);
-    xmpp_stanza_t *presence = stanza_create_room_newnick_presence(ctx, full_room_jid);
+    xmpp_stanza_t *presence =
+        stanza_create_room_newnick_presence(ctx, full_room_jid);
     stanza_attach_show(ctx, presence, show);
     stanza_attach_status(ctx, presence, status);
     stanza_attach_priority(ctx, presence, pri);
@@ -220,6 +259,9 @@ presence_change_room_nick(const char * const room, const char * const nick)
 void
 presence_leave_chat_room(const char * const room_jid)
 {
+    assert(room_jid != NULL);
+
+    log_debug("Sending room leave presence to: %s", room_jid);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
     char *nick = muc_get_room_nick(room_jid);
@@ -236,7 +278,7 @@ _unsubscribed_handler(xmpp_conn_t * const conn,
 {
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *from_jid = jid_create(from);
-    log_debug("unsubscribed presence handler fired for %s", from);
+    log_debug("Unsubscribed presence handler fired for %s", from);
 
     prof_handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
     g_hash_table_remove(sub_requests, from_jid->barejid);
@@ -252,7 +294,7 @@ _subscribed_handler(xmpp_conn_t * const conn,
 {
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *from_jid = jid_create(from);
-    log_debug("subscribed presence handler fired for %s", from);
+    log_debug("Subscribed presence handler fired for %s", from);
 
     prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
     g_hash_table_remove(sub_requests, from_jid->barejid);
@@ -268,10 +310,11 @@ _subscribe_handler(xmpp_conn_t * const conn,
 {
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *from_jid = jid_create(from);
-    log_debug("subscribe presence handler fired for %s", from);
+    log_debug("Subscribe presence handler fired for %s", from);
 
     prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
-    g_hash_table_insert(sub_requests, strdup(from_jid->barejid), strdup(from_jid->barejid));
+    g_hash_table_insert(sub_requests, strdup(from_jid->barejid),
+        strdup(from_jid->barejid));
 
     jid_destroy(from_jid);
 
@@ -284,13 +327,15 @@ _unavailable_handler(xmpp_conn_t * const conn,
 {
     const char *jid = xmpp_conn_get_jid(conn);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    log_debug("unavailable presence handler fired for %s", from);
+    log_debug("Unavailable presence handler fired for %s", from);
 
     Jid *my_jid = jid_create(jid);
     Jid *from_jid = jid_create(from);
 
     char *status_str;
-    xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+    xmpp_stanza_t *status =
+        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+
     if (status != NULL)
         status_str = xmpp_stanza_get_text(status);
     else
@@ -323,15 +368,20 @@ _available_handler(xmpp_conn_t * const conn,
         return 1;
     }
 
+    // handler still fires for muc presence
+    if (stanza_is_muc_presence(stanza)) {
+        return 1;
+    }
+
     const char *jid = xmpp_conn_get_jid(conn);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    log_debug("available presence handler fired for %s", from);
+    log_debug("Available presence handler fired for %s", from);
 
     Jid *my_jid = jid_create(jid);
     Jid *from_jid = jid_create(from);
 
     char *show_str, *status_str;
-    char *caps_key = _handle_presence_caps(stanza);
+    char *caps_key = _get_caps_key(stanza);
     int idle_seconds = stanza_get_idle_time(stanza);
     GDateTime *last_activity = NULL;
 
@@ -342,19 +392,23 @@ _available_handler(xmpp_conn_t * const conn,
     }
 
     xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
+
     if (show != NULL)
         show_str = xmpp_stanza_get_text(show);
     else
         show_str = "online";
 
-    xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+    xmpp_stanza_t *status =
+        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+
     if (status != NULL)
         status_str = xmpp_stanza_get_text(status);
     else
         status_str = NULL;
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-        prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity, caps_key);
+        prof_handle_contact_online(from_jid->barejid, show_str, status_str,
+            last_activity, caps_key);
     }
 
     jid_destroy(my_jid);
@@ -369,7 +423,7 @@ _available_handler(xmpp_conn_t * const conn,
 
 
 static char *
-_handle_presence_caps(xmpp_stanza_t * const stanza)
+_get_caps_key(xmpp_stanza_t * const stanza)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
@@ -505,7 +559,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     } else {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
-        char *caps_key = _handle_presence_caps(stanza);
+        char *caps_key = _get_caps_key(stanza);
 
         log_debug("Room presence received from %s", from_jid->fulljid);
 
