@@ -35,7 +35,7 @@ struct p_contact_t {
     char *subscription;
     gboolean pending_out;
     GDateTime *last_activity;
-    GHashTable *resources;
+    GHashTable *available_resources;
 };
 
 PContact
@@ -61,12 +61,12 @@ p_contact_new(const char * const barejid, const char * const name,
     contact->pending_out = pending_out;
     contact->last_activity = NULL;
 
-    contact->resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+    contact->available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
         (GDestroyNotify)resource_destroy);
     // TODO, priority, last activity
     if (g_strcmp0(presence, "offline") != 0) {
         Resource *resource = resource_new("default", presence, status, 0, caps_str);
-        g_hash_table_insert(contact->resources, strdup(resource->name), resource);
+        g_hash_table_insert(contact->available_resources, strdup(resource->name), resource);
     }
 
     return contact;
@@ -89,11 +89,8 @@ p_contact_new_subscription(const char * const barejid,
     contact->pending_out = pending_out;
     contact->last_activity = NULL;
 
-    contact->resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+    contact->available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
         (GDestroyNotify)resource_destroy);
-    // TODO, priority, last activity
-    Resource *resource = resource_new("default", "offline", NULL, 0, NULL);
-    g_hash_table_insert(contact->resources, resource->name, resource);
 
     return contact;
 }
@@ -109,7 +106,7 @@ p_contact_free(PContact contact)
         g_date_time_unref(contact->last_activity);
     }
 
-    g_hash_table_destroy(contact->resources);
+    g_hash_table_destroy(contact->available_resources);
 
     FREE_SET_NULL(contact);
 }
@@ -129,10 +126,10 @@ p_contact_name(const PContact contact)
 const char *
 p_contact_presence(const PContact contact)
 {
-    if (g_hash_table_size(contact->resources) == 0) {
+    if (g_hash_table_size(contact->available_resources) == 0) {
         return "offline";
     } else {
-        Resource *resource = g_hash_table_lookup(contact->resources, "default");
+        Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
         return resource->show;
     }
 }
@@ -140,10 +137,10 @@ p_contact_presence(const PContact contact)
 const char *
 p_contact_status(const PContact contact)
 {
-    if (g_hash_table_size(contact->resources) == 0) {
+    if (g_hash_table_size(contact->available_resources) == 0) {
         return NULL;
     } else {
-        Resource *resource = g_hash_table_lookup(contact->resources, "default");
+        Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
         return resource->status;
     }
 }
@@ -169,10 +166,10 @@ p_contact_last_activity(const PContact contact)
 const char *
 p_contact_caps_str(const PContact contact)
 {
-    if (g_hash_table_size(contact->resources) == 0) {
+    if (g_hash_table_size(contact->available_resources) == 0) {
         return NULL;
     } else {
-        Resource *resource = g_hash_table_lookup(contact->resources, "default");
+        Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
         return resource->caps_str;
     }
 }
@@ -181,13 +178,13 @@ void
 p_contact_set_presence(const PContact contact, const char * const presence)
 {
     if (g_strcmp0(presence, "offline") == 0) {
-        g_hash_table_remove(contact->resources, "default");
+        g_hash_table_remove(contact->available_resources, "default");
     } else {
-        if (g_hash_table_size(contact->resources) == 0) {
+        if (g_hash_table_size(contact->available_resources) == 0) {
             Resource *resource = resource_new("default", presence, NULL, 0, NULL);
-            g_hash_table_insert(contact->resources, strdup(resource->name), resource);
+            g_hash_table_insert(contact->available_resources, strdup(resource->name), resource);
         } else {
-            Resource *resource = g_hash_table_lookup(contact->resources, "default");
+            Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
             if (presence != NULL) {
                 FREE_SET_NULL(resource->show);
                 resource->show = strdup(presence);
@@ -201,7 +198,7 @@ p_contact_set_presence(const PContact contact, const char * const presence)
 void
 p_contact_set_status(const PContact contact, const char * const status)
 {
-    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
     FREE_SET_NULL(resource->status);
     if (status != NULL) {
         resource->status = strdup(status);
@@ -239,7 +236,7 @@ p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
 void
 p_contact_set_caps_str(const PContact contact, const char * const caps_str)
 {
-    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
     FREE_SET_NULL(resource->caps_str);
     if (caps_str != NULL) {
         resource->caps_str = strdup(caps_str);
