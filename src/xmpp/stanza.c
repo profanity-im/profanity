@@ -664,7 +664,7 @@ stanza_attach_caps(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence)
 }
 
 const char *
-stanza_get_presence_string_from_type(jabber_presence_t presence_type)
+stanza_get_presence_string_from_type(presence_t presence_type)
 {
     switch(presence_type)
     {

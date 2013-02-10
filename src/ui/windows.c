@@ -1094,7 +1094,7 @@ cons_show_login_success(ProfAccount *account)
     _win_show_time(console->win, '-');
     wprintw(console->win, "%s logged in successfully, ", account->jid);
 
-    jabber_presence_t presence = accounts_get_login_presence(account->name);
+    presence_t presence = accounts_get_login_presence(account->name);
     char *presence_str;
     switch(presence)
     {

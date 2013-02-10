@@ -47,7 +47,7 @@ static struct _jabber_conn_t {
     xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;
     jabber_conn_status_t conn_status;
-    jabber_presence_t presence_type;
+    presence_t presence_type;
     char *presence_message;
     int priority;
     int tls_disabled;
@@ -228,7 +228,7 @@ jabber_get_jid(void)
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-jabber_presence_t
+presence_t
 jabber_get_presence_type(void)
 {
     return jabber_conn.presence_type;
@@ -247,7 +247,7 @@ jabber_get_account_name(void)
 }
 
 void
-connection_set_presence_type(const jabber_presence_t presence_type)
+connection_set_presence_type(const presence_t presence_type)
 {
     jabber_conn.presence_type = presence_type;
 }

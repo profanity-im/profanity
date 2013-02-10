@@ -62,7 +62,7 @@ typedef enum {
     PRESENCE_DND,
     PRESENCE_CHAT,
     PRESENCE_XA
-} jabber_presence_t;
+} presence_t;
 
 gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);

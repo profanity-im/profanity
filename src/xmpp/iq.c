@@ -153,7 +153,7 @@ _iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             item = xmpp_stanza_get_next(item);
         }
 
-        jabber_presence_t connect_presence = accounts_get_login_presence(jabber_get_account_name());
+        presence_t connect_presence = accounts_get_login_presence(jabber_get_account_name());
         presence_update(connect_presence, NULL, 0);
     }
 

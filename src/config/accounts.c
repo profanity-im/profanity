@@ -403,7 +403,7 @@ accounts_set_priority_all(const char * const account_name, const gint value)
 
 gint
 accounts_get_priority_for_presence_type(const char * const account_name,
-    jabber_presence_t presence_type)
+    presence_t presence_type)
 {
     gint result;
 
@@ -453,7 +453,7 @@ accounts_set_login_presence(const char * const account_name, const char * const 
     }
 }
 
-jabber_presence_t
+presence_t
 accounts_get_last_presence(const char * const account_name)
 {
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
@@ -474,7 +474,7 @@ accounts_get_last_presence(const char * const account_name)
     }
 }
 
-jabber_presence_t
+presence_t
 accounts_get_login_presence(const char * const account_name)
 {
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);

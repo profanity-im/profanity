@@ -189,7 +189,7 @@ void
 prof_handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
-    jabber_presence_t presence = accounts_get_login_presence(account->name);
+    presence_t presence = accounts_get_login_presence(account->name);
     cons_show_login_success(account);
     title_bar_set_status(presence);
     log_info("%s logged in successfully", account->jid);

@@ -68,7 +68,7 @@ struct cmd_t {
 };
 
 static struct cmd_t * _cmd_get_command(const char * const command);
-static void _update_presence(const jabber_presence_t presence,
+static void _update_presence(const presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     const char * const display, preference_t pref);
@@ -85,7 +85,7 @@ static void _parameter_autocomplete_with_ac(char *input, int *size, char *comman
     Autocomplete ac);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
-static jabber_presence_t _presence_type_from_string(const char * const str);
+static presence_t _presence_type_from_string(const char * const str);
 
 // command prototypes
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
@@ -1175,7 +1175,7 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                         int intval;
 
                         if (_strtoi(value, &intval, -128, 127) == 0) {
-                            jabber_presence_t presence_type = _presence_type_from_string(property);
+                            presence_t presence_type = _presence_type_from_string(property);
                             switch (presence_type)
                             {
                                 case (PRESENCE_ONLINE):
@@ -2348,7 +2348,7 @@ _cmd_xa(gchar **args, struct cmd_help_t help)
 // helper function for status change commands
 
 static void
-_update_presence(const jabber_presence_t presence,
+_update_presence(const presence_t presence,
     const char * const show, gchar **args)
 {
     char *msg = NULL;
@@ -2648,7 +2648,7 @@ _strtoi(char *str, int *saveptr, int min, int max)
     return 0;
 }
 
-static jabber_presence_t
+static presence_t
 _presence_type_from_string(const char * const str)
 {
     if (str == NULL) {

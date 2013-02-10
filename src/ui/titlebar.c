@@ -32,7 +32,7 @@ static char *current_title = NULL;
 static char *recipient = NULL;
 static GTimer *typing_elapsed;
 static int dirty;
-static jabber_presence_t current_status;
+static presence_t current_status;
 
 static void _title_bar_draw_title(void);
 static void _title_bar_draw_status(void);
@@ -119,7 +119,7 @@ title_bar_show(const char * const title)
 }
 
 void
-title_bar_set_status(jabber_presence_t status)
+title_bar_set_status(presence_t status)
 {
     current_status = status;
     _title_bar_draw_status();
