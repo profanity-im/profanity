@@ -61,8 +61,8 @@ void accounts_set_server(const char * const account_name, const char * const val
 void accounts_set_resource(const char * const account_name, const char * const value);
 void accounts_set_last_presence(const char * const account_name, const char * const value);
 void accounts_set_login_presence(const char * const account_name, const char * const value);
-presence_t accounts_get_login_presence(const char * const account_name);
-presence_t accounts_get_last_presence(const char * const account_name);
+resource_presence_t accounts_get_login_presence(const char * const account_name);
+resource_presence_t accounts_get_last_presence(const char * const account_name);
 void accounts_set_priority_online(const char * const account_name, const gint value);
 void accounts_set_priority_chat(const char * const account_name, const gint value);
 void accounts_set_priority_away(const char * const account_name, const gint value);
@@ -70,6 +70,6 @@ void accounts_set_priority_xa(const char * const account_name, const gint value)
 void accounts_set_priority_dnd(const char * const account_name, const gint value);
 void accounts_set_priority_all(const char * const account_name, const gint value);
 gint accounts_get_priority_for_presence_type(const char * const account_name,
-    presence_t presence_type);
+    resource_presence_t presence_type);
 
 #endif

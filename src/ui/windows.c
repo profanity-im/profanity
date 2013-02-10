@@ -506,7 +506,7 @@ ui_disconnected(void)
         }
     }
 
-    title_bar_set_status(PRESENCE_OFFLINE);
+    title_bar_set_status(CONTACT_OFFLINE);
     status_bar_clear_message();
     status_bar_refresh();
 }
@@ -1094,26 +1094,8 @@ cons_show_login_success(ProfAccount *account)
     _win_show_time(console->win, '-');
     wprintw(console->win, "%s logged in successfully, ", account->jid);
 
-    presence_t presence = accounts_get_login_presence(account->name);
-    char *presence_str;
-    switch(presence)
-    {
-        case PRESENCE_CHAT:
-            presence_str = "chat";
-            break;
-        case PRESENCE_AWAY:
-            presence_str = "away";
-            break;
-        case PRESENCE_XA:
-            presence_str = "xa";
-            break;
-        case PRESENCE_DND:
-            presence_str = "dnd";
-            break;
-        default:
-            presence_str = "online";
-            break;
-    }
+    resource_presence_t presence = accounts_get_login_presence(account->name);
+    const char *presence_str = string_from_resource_presence(presence);
 
     _presence_colour_on(console->win, presence_str);
     wprintw(console->win, "%s", presence_str);

@@ -56,13 +56,21 @@
 }
 
 typedef enum {
-    PRESENCE_OFFLINE,
-    PRESENCE_ONLINE,
-    PRESENCE_AWAY,
-    PRESENCE_DND,
-    PRESENCE_CHAT,
-    PRESENCE_XA
-} presence_t;
+    CONTACT_OFFLINE,
+    CONTACT_ONLINE,
+    CONTACT_AWAY,
+    CONTACT_DND,
+    CONTACT_CHAT,
+    CONTACT_XA
+} contact_presence_t;
+
+typedef enum {
+    RESOURCE_ONLINE,
+    RESOURCE_AWAY,
+    RESOURCE_DND,
+    RESOURCE_CHAT,
+    RESOURCE_XA
+} resource_presence_t;
 
 gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
@@ -75,10 +83,12 @@ char* encode_xml(const char * const xml);
 char * prof_getline(FILE *stream);
 int octet_compare(unsigned char *str1, unsigned char *str2);
 char* release_get_latest(void);
-gboolean presence_valid_string(const char * const str);
-const char * presence_display_string_from_type(presence_t presence);
-const char * presence_stanza_show_from_type(presence_t presence);
 gchar * xdg_get_config_home(void);
 gchar * xdg_get_data_home(void);
+
+gboolean valid_resource_presence_string(const char * const str);
+const char * string_from_resource_presence(resource_presence_t presence);
+resource_presence_t resource_presence_from_string(const char * const str);
+contact_presence_t contact_presence_from_resource_presence(resource_presence_t resource_presence);
 
 #endif

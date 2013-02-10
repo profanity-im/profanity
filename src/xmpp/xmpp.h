@@ -84,7 +84,7 @@ GList* presence_get_subscription_requests(void);
 void presence_join_room(Jid *jid);
 void presence_change_room_nick(const char * const room, const char * const nick);
 void presence_leave_chat_room(const char * const room_jid);
-void presence_update(presence_t status, const char * const msg,
+void presence_update(resource_presence_t status, const char * const msg,
     int idle);
 
 // caps functions

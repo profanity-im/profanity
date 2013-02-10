@@ -32,7 +32,7 @@ static char *current_title = NULL;
 static char *recipient = NULL;
 static GTimer *typing_elapsed;
 static int dirty;
-static presence_t current_status;
+static contact_presence_t current_status;
 
 static void _title_bar_draw_title(void);
 static void _title_bar_draw_status(void);
@@ -45,7 +45,7 @@ create_title_bar(void)
     title_bar = newwin(1, cols, 0, 0);
     wbkgd(title_bar, COLOUR_TITLE_TEXT);
     title_bar_title();
-    title_bar_set_status(PRESENCE_OFFLINE);
+    title_bar_set_status(CONTACT_OFFLINE);
     dirty = TRUE;
 }
 
@@ -119,7 +119,7 @@ title_bar_show(const char * const title)
 }
 
 void
-title_bar_set_status(presence_t status)
+title_bar_set_status(contact_presence_t status)
 {
     current_status = status;
     _title_bar_draw_status();
@@ -187,18 +187,26 @@ _title_bar_draw_status(void)
     mvwaddch(title_bar, 0, cols - 14, '[');
     wattroff(title_bar, COLOUR_TITLE_BRACKET);
 
-    if (current_status == PRESENCE_ONLINE) {
-        mvwprintw(title_bar, 0, cols - 13, " ...online ");
-    } else if (current_status == PRESENCE_AWAY) {
-        mvwprintw(title_bar, 0, cols - 13, " .....away ");
-    } else if (current_status == PRESENCE_DND) {
-        mvwprintw(title_bar, 0, cols - 13, " ......dnd ");
-    } else if (current_status == PRESENCE_CHAT) {
-        mvwprintw(title_bar, 0, cols - 13, " .....chat ");
-    } else if (current_status == PRESENCE_XA) {
-        mvwprintw(title_bar, 0, cols - 13, " .......xa ");
-    } else {
-        mvwprintw(title_bar, 0, cols - 13, " ..offline ");
+    switch (current_status)
+    {
+        case CONTACT_ONLINE:
+            mvwprintw(title_bar, 0, cols - 13, " ...online ");
+            break;
+        case CONTACT_AWAY:
+            mvwprintw(title_bar, 0, cols - 13, " .....away ");
+            break;
+        case CONTACT_DND:
+            mvwprintw(title_bar, 0, cols - 13, " ......dnd ");
+            break;
+        case CONTACT_CHAT:
+            mvwprintw(title_bar, 0, cols - 13, " .....chat ");
+            break;
+        case CONTACT_XA:
+            mvwprintw(title_bar, 0, cols - 13, " .......xa ");
+            break;
+        case CONTACT_OFFLINE:
+            mvwprintw(title_bar, 0, cols - 13, " ..offline ");
+            break;
     }
 
     wattron(title_bar, COLOUR_TITLE_BRACKET);

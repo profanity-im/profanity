@@ -664,19 +664,19 @@ stanza_attach_caps(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence)
 }
 
 const char *
-stanza_get_presence_string_from_type(presence_t presence_type)
+stanza_get_presence_string_from_type(resource_presence_t presence_type)
 {
     switch(presence_type)
     {
-        case PRESENCE_AWAY:
+        case RESOURCE_AWAY:
             return STANZA_TEXT_AWAY;
-        case PRESENCE_DND:
+        case RESOURCE_DND:
             return STANZA_TEXT_DND;
-        case PRESENCE_CHAT:
+        case RESOURCE_CHAT:
             return STANZA_TEXT_CHAT;
-        case PRESENCE_XA:
+        case RESOURCE_XA:
             return STANZA_TEXT_XA;
-        default: // PRESENCE_ONLINE
+        default:
             return NULL;
     }
 }

@@ -68,7 +68,7 @@ struct cmd_t {
 };
 
 static struct cmd_t * _cmd_get_command(const char * const command);
-static void _update_presence(const presence_t presence,
+static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     const char * const display, preference_t pref);
@@ -85,7 +85,6 @@ static void _parameter_autocomplete_with_ac(char *input, int *size, char *comman
     Autocomplete ac);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
-static presence_t _presence_type_from_string(const char * const str);
 
 // command prototypes
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
@@ -1164,41 +1163,38 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                     cons_show("Updated resource for account %s: %s", account_name, value);
                     cons_show("");
                 } else if (strcmp(property, "status") == 0) {
-                    if (!presence_valid_string(value) && (strcmp(value, "last") != 0)) {
+                    if (!valid_resource_presence_string(value) && (strcmp(value, "last") != 0)) {
                         cons_show("Invalud status: %s", value);
                     } else {
                         accounts_set_login_presence(account_name, value);
                         cons_show("Updated login status for account %s: %s", account_name, value);
                     }
                     cons_show("");
-                } else if (presence_valid_string(property)) {
+                } else if (valid_resource_presence_string(property)) {
                         int intval;
 
                         if (_strtoi(value, &intval, -128, 127) == 0) {
-                            presence_t presence_type = _presence_type_from_string(property);
+                            resource_presence_t presence_type = resource_presence_from_string(property);
                             switch (presence_type)
                             {
-                                case (PRESENCE_ONLINE):
+                                case (RESOURCE_ONLINE):
                                     accounts_set_priority_online(account_name, intval);
                                     break;
-                                case (PRESENCE_CHAT):
+                                case (RESOURCE_CHAT):
                                     accounts_set_priority_chat(account_name, intval);
                                     break;
-                                case (PRESENCE_AWAY):
+                                case (RESOURCE_AWAY):
                                     accounts_set_priority_away(account_name, intval);
                                     break;
-                                case (PRESENCE_XA):
+                                case (RESOURCE_XA):
                                     accounts_set_priority_xa(account_name, intval);
                                     break;
-                                case (PRESENCE_DND):
+                                case (RESOURCE_DND):
                                     accounts_set_priority_dnd(account_name, intval);
-                                    break;
-                                default:
-                                    accounts_set_priority_online(account_name, intval);
                                     break;
                             }
                             jabber_conn_status_t conn_status = jabber_get_connection_status();
-                            presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
+                            resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
                             if (conn_status == JABBER_CONNECTED && presence_type == last_presence) {
                                 presence_update(last_presence, jabber_get_presence_message(), 0);
                             }
@@ -2239,7 +2235,7 @@ _cmd_set_priority(gchar **args, struct cmd_help_t help)
 
     if (_strtoi(value, &intval, -128, 127) == 0) {
         accounts_set_priority_all(jabber_get_account_name(), intval);
-        presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
+        resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
         presence_update(last_presence, jabber_get_presence_message(), 0);
         cons_show("Priority set to %d.", intval);
     }
@@ -2313,42 +2309,42 @@ _cmd_set_history(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_away(gchar **args, struct cmd_help_t help)
 {
-    _update_presence(PRESENCE_AWAY, "away", args);
+    _update_presence(RESOURCE_AWAY, "away", args);
     return TRUE;
 }
 
 static gboolean
 _cmd_online(gchar **args, struct cmd_help_t help)
 {
-    _update_presence(PRESENCE_ONLINE, "online", args);
+    _update_presence(RESOURCE_ONLINE, "online", args);
     return TRUE;
 }
 
 static gboolean
 _cmd_dnd(gchar **args, struct cmd_help_t help)
 {
-    _update_presence(PRESENCE_DND, "dnd", args);
+    _update_presence(RESOURCE_DND, "dnd", args);
     return TRUE;
 }
 
 static gboolean
 _cmd_chat(gchar **args, struct cmd_help_t help)
 {
-    _update_presence(PRESENCE_CHAT, "chat", args);
+    _update_presence(RESOURCE_CHAT, "chat", args);
     return TRUE;
 }
 
 static gboolean
 _cmd_xa(gchar **args, struct cmd_help_t help)
 {
-    _update_presence(PRESENCE_XA, "xa", args);
+    _update_presence(RESOURCE_XA, "xa", args);
     return TRUE;
 }
 
 // helper function for status change commands
 
 static void
-_update_presence(const presence_t presence,
+_update_presence(const resource_presence_t resource_presence,
     const char * const show, gchar **args)
 {
     char *msg = NULL;
@@ -2362,9 +2358,12 @@ _update_presence(const presence_t presence,
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        presence_update(presence, msg, 0);
-        title_bar_set_status(presence);
-        gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), presence);
+        presence_update(resource_presence, msg, 0);
+
+        contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
+        title_bar_set_status(contact_presence);
+
+        gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
         if (msg != NULL) {
             cons_show("Status set to %s (priority %d), \"%s\".", show, priority, msg);
         } else {
@@ -2646,24 +2645,4 @@ _strtoi(char *str, int *saveptr, int min, int max)
     *saveptr = val;
 
     return 0;
-}
-
-static presence_t
-_presence_type_from_string(const char * const str)
-{
-    if (str == NULL) {
-        return PRESENCE_ONLINE;
-    } else if (!presence_valid_string(str)) {
-        return PRESENCE_ONLINE;
-    } else if (strcmp(str, "online") == 0) {
-        return PRESENCE_ONLINE;
-    } else if (strcmp(str, "chat") == 0) {
-        return PRESENCE_CHAT;
-    } else if (strcmp(str, "away") == 0) {
-        return PRESENCE_AWAY;
-    } else if (strcmp(str, "xa") == 0) {
-        return PRESENCE_XA;
-    } else {
-        return PRESENCE_DND;
-    }
 }

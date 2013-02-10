@@ -189,7 +189,7 @@ accounts_get_account(const char * const name)
         }
 
         gchar *presence = g_key_file_get_string(accounts, name, "presence.last", NULL);
-        if (presence == NULL || (!presence_valid_string(presence))) {
+        if (presence == NULL || (!valid_resource_presence_string(presence))) {
             account->last_presence = strdup("online");
         } else {
             account->last_presence = strdup(presence);
@@ -200,7 +200,7 @@ accounts_get_account(const char * const name)
             account->login_presence = strdup("online");
         } else if (strcmp(presence, "last") == 0) {
             account->login_presence = strdup("last");
-        } else if (!presence_valid_string(presence)) {
+        } else if (!valid_resource_presence_string(presence)) {
             account->login_presence = strdup("online");
         } else {
             account->login_presence = strdup(presence);
@@ -403,29 +403,26 @@ accounts_set_priority_all(const char * const account_name, const gint value)
 
 gint
 accounts_get_priority_for_presence_type(const char * const account_name,
-    presence_t presence_type)
+    resource_presence_t presence_type)
 {
     gint result;
 
     switch (presence_type)
     {
-        case (PRESENCE_ONLINE):
+        case (RESOURCE_ONLINE):
             result = g_key_file_get_integer(accounts, account_name, "priority.online", NULL);
             break;
-        case (PRESENCE_CHAT):
+        case (RESOURCE_CHAT):
             result = g_key_file_get_integer(accounts, account_name, "priority.chat", NULL);
             break;
-        case (PRESENCE_AWAY):
+        case (RESOURCE_AWAY):
             result = g_key_file_get_integer(accounts, account_name, "priority.away", NULL);
             break;
-        case (PRESENCE_XA):
+        case (RESOURCE_XA):
             result = g_key_file_get_integer(accounts, account_name, "priority.xa", NULL);
             break;
-        case (PRESENCE_DND):
-            result = g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL);
-            break;
         default:
-            result = 0;
+            result = g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL);
             break;
     }
 
@@ -453,47 +450,47 @@ accounts_set_login_presence(const char * const account_name, const char * const 
     }
 }
 
-presence_t
+resource_presence_t
 accounts_get_last_presence(const char * const account_name)
 {
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
-        return PRESENCE_ONLINE;
+        return RESOURCE_ONLINE;
     } else if (strcmp(setting, "chat") == 0) {
-        return PRESENCE_CHAT;
+        return RESOURCE_CHAT;
     } else if (strcmp(setting, "away") == 0) {
-        return PRESENCE_AWAY;
+        return RESOURCE_AWAY;
     } else if (strcmp(setting, "xa") == 0) {
-        return PRESENCE_XA;
+        return RESOURCE_XA;
     } else if (strcmp(setting, "dnd") == 0) {
-        return PRESENCE_DND;
+        return RESOURCE_DND;
     } else {
         log_warning("Error reading presence.last for account: '%s', value: '%s', defaulting to 'online'",
             account_name, setting);
-        return PRESENCE_ONLINE;
+        return RESOURCE_ONLINE;
     }
 }
 
-presence_t
+resource_presence_t
 accounts_get_login_presence(const char * const account_name)
 {
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
-        return PRESENCE_ONLINE;
+        return RESOURCE_ONLINE;
     } else if (strcmp(setting, "chat") == 0) {
-        return PRESENCE_CHAT;
+        return RESOURCE_CHAT;
     } else if (strcmp(setting, "away") == 0) {
-        return PRESENCE_AWAY;
+        return RESOURCE_AWAY;
     } else if (strcmp(setting, "xa") == 0) {
-        return PRESENCE_XA;
+        return RESOURCE_XA;
     } else if (strcmp(setting, "dnd") == 0) {
-        return PRESENCE_DND;
+        return RESOURCE_DND;
     } else if (strcmp(setting, "last") == 0) {
         return accounts_get_last_presence(account_name);
     } else {
         log_warning("Error reading presence.login for account: '%s', value: '%s', defaulting to 'online'",
             account_name, setting);
-        return PRESENCE_ONLINE;
+        return RESOURCE_ONLINE;
     }
 }
 

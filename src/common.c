@@ -261,7 +261,7 @@ release_get_latest()
 }
 
 gboolean
-presence_valid_string(const char * const str)
+valid_resource_presence_string(const char * const str)
 {
     assert(str != NULL);
     if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) ||
@@ -274,46 +274,58 @@ presence_valid_string(const char * const str)
 }
 
 const char *
-presence_display_string_from_type(presence_t presence)
+string_from_resource_presence(resource_presence_t presence)
 {
-    switch (presence)
+    switch(presence)
     {
-        case PRESENCE_ONLINE:
-            return "online";
-        case PRESENCE_CHAT:
+        case RESOURCE_CHAT:
             return "chat";
-        case PRESENCE_AWAY:
+        case RESOURCE_AWAY:
             return "away";
-        case PRESENCE_XA:
+        case RESOURCE_XA:
             return "xa";
-        case PRESENCE_DND:
+        case RESOURCE_DND:
             return "dnd";
-        case PRESENCE_OFFLINE:
-            return "offline";
         default:
-            return NULL;
+            return "online";
     }
 }
 
-const char *
-presence_stanza_show_from_type(presence_t presence)
+resource_presence_t
+resource_presence_from_string(const char * const str)
 {
-    assert(presence != PRESENCE_OFFLINE);
+    if (str == NULL) {
+        return RESOURCE_ONLINE;
+    } else if (strcmp(str, "online") == 0) {
+        return RESOURCE_ONLINE;
+    } else if (strcmp(str, "chat") == 0) {
+        return RESOURCE_CHAT;
+    } else if (strcmp(str, "away") == 0) {
+        return RESOURCE_AWAY;
+    } else if (strcmp(str, "xa") == 0) {
+        return RESOURCE_XA;
+    } else if (strcmp(str, "dnd") == 0) {
+        return RESOURCE_DND;
+    } else {
+        return RESOURCE_ONLINE;
+    }
+}
 
-    switch (presence)
+contact_presence_t
+contact_presence_from_resource_presence(resource_presence_t resource_presence)
+{
+    switch(resource_presence)
     {
-        case PRESENCE_ONLINE:
-            return NULL;
-        case PRESENCE_CHAT:
-            return "chat";
-        case PRESENCE_AWAY:
-            return "away";
-        case PRESENCE_XA:
-            return "xa";
-        case PRESENCE_DND:
-            return "dnd";
+        case RESOURCE_CHAT:
+            return CONTACT_CHAT;
+        case RESOURCE_AWAY:
+            return CONTACT_AWAY;
+        case RESOURCE_XA:
+            return CONTACT_XA;
+        case RESOURCE_DND:
+            return CONTACT_DND;
         default:
-            return NULL;
+            return CONTACT_ONLINE;
     }
 }
 

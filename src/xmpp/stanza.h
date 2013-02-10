@@ -160,6 +160,6 @@ void stanza_attach_show(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence,
 void stanza_attach_status(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence,
     const char * const status);
 
-const char * stanza_get_presence_string_from_type(presence_t presence_type);
+const char * stanza_get_presence_string_from_type(resource_presence_t presence_type);
 
 #endif
