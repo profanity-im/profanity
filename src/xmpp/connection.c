@@ -269,7 +269,8 @@ connection_free_resources(void)
 }
 
 int
-connection_error_handler(xmpp_stanza_t * const stanza)
+connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
 {
     gchar *err_msg = NULL;
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);

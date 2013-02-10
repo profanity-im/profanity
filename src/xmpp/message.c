@@ -37,17 +37,20 @@
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 
-static int _message_handler(xmpp_conn_t * const conn,
+static int _groupchat_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _groupchat_message_handler(xmpp_stanza_t * const stanza);
-static int _chat_message_handler(xmpp_stanza_t * const stanza);
+static int _chat_message_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 message_add_handlers(void)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    HANDLE(NULL, NULL, _message_handler);
+
+    HANDLE(NULL, STANZA_TYPE_ERROR, connection_error_handler);
+    HANDLE(NULL, STANZA_TYPE_GROUPCHAT, _groupchat_message_handler);
+    HANDLE(NULL, STANZA_TYPE_CHAT, _chat_message_handler);
 }
 
 void
@@ -140,28 +143,8 @@ message_send_gone(const char * const recipient)
 }
 
 static int
-_message_handler(xmpp_conn_t * const conn,
+_groupchat_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
-{
-    gchar *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-
-    if (type == NULL) {
-        log_error("Message stanza received with no type attribute");
-        return 1;
-    } else if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
-        return connection_error_handler(stanza);
-    } else if (strcmp(type, STANZA_TYPE_GROUPCHAT) == 0) {
-        return _groupchat_message_handler(stanza);
-    } else if (strcmp(type, STANZA_TYPE_CHAT) == 0) {
-        return _chat_message_handler(stanza);
-    } else {
-        log_error("Message stanza received with unknown type: %s", type);
-        return 1;
-    }
-}
-
-static int
-_groupchat_message_handler(xmpp_stanza_t * const stanza)
 {
     char *message = NULL;
     char *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -227,7 +210,8 @@ _groupchat_message_handler(xmpp_stanza_t * const stanza)
 }
 
 static int
-_chat_message_handler(xmpp_stanza_t * const stanza)
+_chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
 {
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *jid = jid_create(from);

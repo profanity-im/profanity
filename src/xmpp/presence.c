@@ -39,11 +39,19 @@ static GHashTable *sub_requests;
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_PRESENCE, type, ctx)
 
-static int _presence_handler(xmpp_conn_t * const conn,
+static int _unavailable_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _subscribe_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _subscribed_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _unsubscribed_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static char* _handle_presence_caps(xmpp_stanza_t * const stanza);
-static int _room_presence_handler(const char * const jid,
-    xmpp_stanza_t * const stanza);
+static int _room_presence_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 presence_init(void)
@@ -56,7 +64,14 @@ presence_add_handlers(void)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    HANDLE(NULL, NULL, _presence_handler);
+
+    HANDLE(NULL,                STANZA_TYPE_ERROR,          connection_error_handler);
+    HANDLE(STANZA_NS_MUC_USER,  NULL,                       _room_presence_handler);
+    HANDLE(NULL,                STANZA_TYPE_UNAVAILABLE,    _unavailable_handler);
+    HANDLE(NULL,                STANZA_TYPE_SUBSCRIBE,      _subscribe_handler);
+    HANDLE(NULL,                STANZA_TYPE_SUBSCRIBED,     _subscribed_handler);
+    HANDLE(NULL,                STANZA_TYPE_UNSUBSCRIBED,   _unsubscribed_handler);
+    HANDLE(NULL,                NULL,                       _available_handler);
 }
 
 void
@@ -215,85 +230,143 @@ presence_leave_chat_room(const char * const room_jid)
     xmpp_stanza_release(presence);
 }
 
+static int
+_unsubscribed_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    Jid *from_jid = jid_create(from);
+    log_debug("unsubscribed presence handler fired for %s", from);
 
+    prof_handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
+    g_hash_table_remove(sub_requests, from_jid->barejid);
+
+    jid_destroy(from_jid);
+
+    return 1;
+}
 
 static int
-_presence_handler(xmpp_conn_t * const conn,
+_subscribed_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    Jid *from_jid = jid_create(from);
+    log_debug("subscribed presence handler fired for %s", from);
+
+    prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
+    g_hash_table_remove(sub_requests, from_jid->barejid);
+
+    jid_destroy(from_jid);
+
+    return 1;
+}
+
+static int
+_subscribe_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    Jid *from_jid = jid_create(from);
+    log_debug("subscribe presence handler fired for %s", from);
+
+    prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
+    g_hash_table_insert(sub_requests, strdup(from_jid->barejid), strdup(from_jid->barejid));
+
+    jid_destroy(from_jid);
+
+    return 1;
+}
+
+static int
+_unavailable_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     const char *jid = xmpp_conn_get_jid(conn);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
+    log_debug("unavailable presence handler fired for %s", from);
 
     Jid *my_jid = jid_create(jid);
     Jid *from_jid = jid_create(from);
 
-    if ((type != NULL) && (strcmp(type, STANZA_TYPE_ERROR) == 0)) {
-        return connection_error_handler(stanza);
+    char *status_str;
+    xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+    if (status != NULL)
+        status_str = xmpp_stanza_get_text(status);
+    else
+        status_str = NULL;
+
+    if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
+        prof_handle_contact_offline(from_jid->barejid, "offline", status_str);
     }
 
-    // handle chat room presence
-    if (muc_room_is_active(from_jid)) {
-        return _room_presence_handler(from_jid->str, stanza);
+    jid_destroy(my_jid);
+    jid_destroy(from_jid);
 
-    // handle regular presence
-    } else {
-        log_debug("Regular presence received from %s", from);
-        char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-        char *show_str, *status_str;
-        int idle_seconds = stanza_get_idle_time(stanza);
-        GDateTime *last_activity = NULL;
+    return 1;
+}
 
-        if (idle_seconds > 0) {
-            GDateTime *now = g_date_time_new_now_local();
-            last_activity = g_date_time_add_seconds(now, 0 - idle_seconds);
-            g_date_time_unref(now);
-        }
+static int
+_available_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+    // handler still fires if error
+    if (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_ERROR) == 0) {
+        return 1;
+    }
 
-        char *caps_key = _handle_presence_caps(stanza);
+    // handler still fires if other types
+    if ((g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_UNAVAILABLE) == 0) ||
+            (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_SUBSCRIBE) == 0) ||
+            (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_SUBSCRIBED) == 0) ||
+            (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_UNSUBSCRIBED) == 0)) {
+        return 1;
+    }
 
-        xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
-        if (status != NULL)
-            status_str = xmpp_stanza_get_text(status);
-        else
-            status_str = NULL;
+    const char *jid = xmpp_conn_get_jid(conn);
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    log_debug("available presence handler fired for %s", from);
 
-        if (type == NULL) { // available
-            xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
-            if (show != NULL)
-                show_str = xmpp_stanza_get_text(show);
-            else
-                show_str = "online";
+    Jid *my_jid = jid_create(jid);
+    Jid *from_jid = jid_create(from);
 
-            if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-                prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity, caps_key);
-            }
-        } else if (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0) {
-            if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-                prof_handle_contact_offline(from_jid->barejid, "offline", status_str);
-            }
+    char *show_str, *status_str;
+    char *caps_key = _handle_presence_caps(stanza);
+    int idle_seconds = stanza_get_idle_time(stanza);
+    GDateTime *last_activity = NULL;
 
-        if (last_activity != NULL) {
-            g_date_time_unref(last_activity);
-        }
+    if (idle_seconds > 0) {
+        GDateTime *now = g_date_time_new_now_local();
+        last_activity = g_date_time_add_seconds(now, 0 - idle_seconds);
+        g_date_time_unref(now);
+    }
 
-        // subscriptions
-        } else if (strcmp(type, STANZA_TYPE_SUBSCRIBE) == 0) {
-            prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
-            g_hash_table_insert(sub_requests, strdup(from_jid->barejid), strdup(from_jid->barejid));
-        } else if (strcmp(type, STANZA_TYPE_SUBSCRIBED) == 0) {
-            prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
-            g_hash_table_remove(sub_requests, from_jid->barejid);
-        } else if (strcmp(type, STANZA_TYPE_UNSUBSCRIBED) == 0) {
-            prof_handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
-            g_hash_table_remove(sub_requests, from_jid->barejid);
-        } else { /* unknown type */
-            log_debug("Received presence with unknown type '%s'", type);
-        }
+    xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
+    if (show != NULL)
+        show_str = xmpp_stanza_get_text(show);
+    else
+        show_str = "online";
+
+    xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+    if (status != NULL)
+        status_str = xmpp_stanza_get_text(status);
+    else
+        status_str = NULL;
+
+    if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
+        prof_handle_contact_online(from_jid->barejid, show_str, status_str, last_activity, caps_key);
+    }
+
+    jid_destroy(my_jid);
+    jid_destroy(from_jid);
+
+    if (last_activity != NULL) {
+        g_date_time_unref(last_activity);
     }
 
     return 1;
 }
+
 
 static char *
 _handle_presence_caps(xmpp_stanza_t * const stanza)
@@ -387,15 +460,21 @@ _handle_presence_caps(xmpp_stanza_t * const stanza)
 }
 
 static int
-_room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
+_room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
 {
-    char *room = NULL;
-    char *nick = NULL;
-
-    if (!parse_room_jid(jid, &room, &nick)) {
-        log_error("Could not parse room jid: %s", room);
+    // handler still fires if error
+    if (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_ERROR) == 0) {
         return 1;
     }
+
+    const char *jid = xmpp_conn_get_jid(conn);
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    Jid *my_jid = jid_create(jid);
+    Jid *from_jid = jid_create(from);
+
+    char *room = from_jid->barejid;
+    char *nick = from_jid->resourcepart;
 
     // handle self presence
     if (stanza_is_muc_self_presence(stanza, jabber_get_jid())) {
@@ -428,7 +507,7 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
         char *show_str, *status_str;
         char *caps_key = _handle_presence_caps(stanza);
 
-        log_debug("Room presence received from %s", jid);
+        log_debug("Room presence received from %s", from_jid->fulljid);
 
         xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
         if (status != NULL) {
@@ -472,8 +551,8 @@ _room_presence_handler(const char * const jid, xmpp_stanza_t * const stanza)
         }
     }
 
-    free(room);
-    free(nick);
+    jid_destroy(my_jid);
+    jid_destroy(from_jid);
 
     return 1;
 }
