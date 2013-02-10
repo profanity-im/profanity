@@ -1198,8 +1198,9 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                                     break;
                             }
                             jabber_conn_status_t conn_status = jabber_get_connection_status();
-                            if (conn_status == JABBER_CONNECTED && presence_type == jabber_get_presence_type()) {
-                                presence_update(jabber_get_presence_type(), jabber_get_presence_message(), 0);
+                            presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
+                            if (conn_status == JABBER_CONNECTED && presence_type == last_presence) {
+                                presence_update(last_presence, jabber_get_presence_message(), 0);
                             }
                             cons_show("Updated %s priority for account %s: %s", property, account_name, value);
                             cons_show("");
@@ -2238,9 +2239,8 @@ _cmd_set_priority(gchar **args, struct cmd_help_t help)
 
     if (_strtoi(value, &intval, -128, 127) == 0) {
         accounts_set_priority_all(jabber_get_account_name(), intval);
-        //prefs_set_priority((int)intval);
-        // update presence with new priority
-        presence_update(jabber_get_presence_type(), jabber_get_presence_message(), 0);
+        presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
+        presence_update(last_presence, jabber_get_presence_message(), 0);
         cons_show("Priority set to %d.", intval);
     }
 

@@ -119,7 +119,6 @@ presence_update(presence_t presence_type, const char * const msg,
     if (jabber_get_connection_status() != JABBER_CONNECTED)
         return;
 
-    connection_set_presence_type(presence_type);
     connection_set_presence_message(msg);
     connection_set_priority(pri);
 
@@ -161,7 +160,7 @@ presence_join_room(Jid *jid)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    presence_t presence_type = jabber_get_presence_type();
+    presence_t presence_type = accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
@@ -184,7 +183,7 @@ presence_change_room_nick(const char * const room, const char * const nick)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    presence_t presence_type = jabber_get_presence_type();
+    presence_t presence_type = accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),

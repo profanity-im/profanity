@@ -47,7 +47,6 @@ static struct _jabber_conn_t {
     xmpp_ctx_t *ctx;
     xmpp_conn_t *conn;
     jabber_conn_status_t conn_status;
-    presence_t presence_type;
     char *presence_message;
     int priority;
     int tls_disabled;
@@ -89,7 +88,6 @@ jabber_init(const int disable_tls)
 {
     log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
-    jabber_conn.presence_type = PRESENCE_OFFLINE;
     jabber_conn.presence_message = NULL;
     jabber_conn.tls_disabled = disable_tls;
     presence_init();
@@ -165,7 +163,6 @@ jabber_disconnect(void)
     }
 
     jabber_conn.conn_status = JABBER_STARTED;
-    jabber_conn.presence_type = PRESENCE_OFFLINE;
     FREE_SET_NULL(jabber_conn.presence_message);
 }
 
@@ -228,12 +225,6 @@ jabber_get_jid(void)
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-presence_t
-jabber_get_presence_type(void)
-{
-    return jabber_conn.presence_type;
-}
-
 char *
 jabber_get_presence_message(void)
 {
@@ -244,12 +235,6 @@ char *
 jabber_get_account_name(void)
 {
     return saved_account.name;
-}
-
-void
-connection_set_presence_type(const presence_t presence_type)
-{
-    jabber_conn.presence_type = presence_type;
 }
 
 void
@@ -424,7 +409,6 @@ _connection_handler(xmpp_conn_t * const conn,
 
         iq_roster_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
-        jabber_conn.presence_type = PRESENCE_ONLINE;
 
         if (prefs_get_reconnect() != 0) {
             if (reconnect_timer != NULL) {
@@ -461,7 +445,6 @@ _connection_handler(xmpp_conn_t * const conn,
 
         // close stream response from server after disconnect is handled too
         jabber_conn.conn_status = JABBER_DISCONNECTED;
-        jabber_conn.presence_type = PRESENCE_OFFLINE;
     }
 }
 
