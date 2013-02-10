@@ -31,17 +31,17 @@ void contact_list_init(void);
 void contact_list_clear(void);
 void contact_list_free(void);
 void contact_list_reset_search_attempts(void);
-void contact_list_remove(const char * const jid);
-gboolean contact_list_add(const char * const jid, const char * const name,
+void contact_list_remove(const char * const barejid);
+gboolean contact_list_add(const char * const barejid, const char * const name,
     const char * const presence, const char * const status,
     const char * const subscription, gboolean pending_out);
-gboolean contact_list_update_contact(const char * const jid, const char * const presence,
+gboolean contact_list_update_contact(const char * const barejid, const char * const presence,
     const char * const status, GDateTime *last_activity, const char * const caps_str);
-void contact_list_update_subscription(const char * const jid,
+void contact_list_update_subscription(const char * const barejid,
     const char * const subscription, gboolean pending_out);
 gboolean contact_list_has_pending_subscriptions(void);
 GSList * get_contact_list(void);
 char * contact_list_find_contact(char *search_str);
-PContact contact_list_get_contact(const char const *jid);
+PContact contact_list_get_contact(const char const *barejid);
 
 #endif

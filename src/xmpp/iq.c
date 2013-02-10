@@ -134,7 +134,7 @@ _iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_t *item = xmpp_stanza_get_children(query);
 
         while (item != NULL) {
-            const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+            const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
             const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
             const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
 
@@ -144,11 +144,11 @@ _iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 pending_out = TRUE;
             }
 
-            gboolean added = contact_list_add(jid, name, "offline", NULL, sub,
+            gboolean added = contact_list_add(barejid, name, "offline", NULL, sub,
                 pending_out);
 
             if (!added) {
-                log_warning("Attempt to add contact twice: %s", jid);
+                log_warning("Attempt to add contact twice: %s", barejid);
             }
 
             item = xmpp_stanza_get_next(item);

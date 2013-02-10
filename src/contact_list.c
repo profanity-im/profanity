@@ -61,18 +61,18 @@ contact_list_reset_search_attempts(void)
 }
 
 gboolean
-contact_list_add(const char * const jid, const char * const name,
+contact_list_add(const char * const barejid, const char * const name,
     const char * const presence, const char * const status,
     const char * const subscription, gboolean pending_out)
 {
     gboolean added = FALSE;
-    PContact contact = g_hash_table_lookup(contacts, jid);
+    PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(jid, name, presence, status, subscription,
+        contact = p_contact_new(barejid, name, presence, status, subscription,
             pending_out, NULL);
-        g_hash_table_insert(contacts, strdup(jid), contact);
-        autocomplete_add(ac, strdup(jid));
+        g_hash_table_insert(contacts, strdup(barejid), contact);
+        autocomplete_add(ac, strdup(barejid));
         added = TRUE;
     }
 
@@ -80,17 +80,17 @@ contact_list_add(const char * const jid, const char * const name,
 }
 
 void
-contact_list_remove(const char * const jid)
+contact_list_remove(const char * const barejid)
 {
-    g_hash_table_remove(contacts, jid);
+    g_hash_table_remove(contacts, barejid);
 }
 
 gboolean
-contact_list_update_contact(const char * const jid, const char * const presence,
+contact_list_update_contact(const char * const barejid, const char * const presence,
     const char * const status, GDateTime *last_activity, const char * const caps_str)
 {
     gboolean presence_changed = FALSE;
-    PContact contact = g_hash_table_lookup(contacts, jid);
+    PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
         return FALSE;
@@ -119,15 +119,15 @@ contact_list_update_contact(const char * const jid, const char * const presence,
 }
 
 void
-contact_list_update_subscription(const char * const jid,
+contact_list_update_subscription(const char * const barejid,
     const char * const subscription, gboolean pending_out)
 {
-    PContact contact = g_hash_table_lookup(contacts, jid);
+    PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(jid, NULL, "offline", NULL, subscription,
+        contact = p_contact_new(barejid, NULL, "offline", NULL, subscription,
             pending_out, NULL);
-        g_hash_table_insert(contacts, strdup(jid), contact);
+        g_hash_table_insert(contacts, strdup(barejid), contact);
     } else {
         p_contact_set_subscription(contact, subscription);
         p_contact_set_pending_out(contact, pending_out);
@@ -176,9 +176,9 @@ contact_list_find_contact(char *search_str)
 }
 
 PContact
-contact_list_get_contact(const char const *jid)
+contact_list_get_contact(const char const *barejid)
 {
-    return g_hash_table_lookup(contacts, jid);
+    return g_hash_table_lookup(contacts, barejid);
 }
 
 static
