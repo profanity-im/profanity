@@ -34,7 +34,10 @@ Resource * resource_new(const char * const name, const char * const show,
     assert(show != NULL);
     Resource *new_resource = malloc(sizeof(struct resource_t));
     new_resource->name = strdup(name);
-    new_resource->show = strdup(show);
+    if (show == NULL || (strcmp(show, "") == 0))
+        new_resource->show = strdup("online");
+    else
+        new_resource->show = strdup(show);
     if (status != NULL) {
         new_resource->status = strdup(status);
     } else {

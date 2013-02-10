@@ -26,18 +26,16 @@
 #include <glib.h>
 
 #include "contact.h"
-
 #include "common.h"
+#include "resource.h"
 
 struct p_contact_t {
     char *barejid;
     char *name;
-    char *presence;
-    char *status;
     char *subscription;
-    char *caps_str;
     gboolean pending_out;
     GDateTime *last_activity;
+    GHashTable *resources;
 };
 
 PContact
@@ -55,28 +53,19 @@ p_contact_new(const char * const barejid, const char * const name,
         contact->name = NULL;
     }
 
-    if (presence == NULL || (strcmp(presence, "") == 0))
-        contact->presence = strdup("online");
-    else
-        contact->presence = strdup(presence);
-
-    if (status != NULL)
-        contact->status = strdup(status);
-    else
-        contact->status = NULL;
-
     if (subscription != NULL)
         contact->subscription = strdup(subscription);
     else
         contact->subscription = strdup("none");
 
-    if (caps_str != NULL)
-        contact->caps_str = strdup(caps_str);
-    else
-        contact->caps_str = NULL;
-
     contact->pending_out = pending_out;
     contact->last_activity = NULL;
+
+    contact->resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+        (GDestroyNotify)resource_destroy);
+    // TODO, priority, last activity
+    Resource *resource = resource_new("default", presence, status, 0, caps_str);
+    g_hash_table_insert(contact->resources, resource->name, resource);
 
     return contact;
 }
@@ -86,14 +75,13 @@ p_contact_free(PContact contact)
 {
     FREE_SET_NULL(contact->barejid);
     FREE_SET_NULL(contact->name);
-    FREE_SET_NULL(contact->presence);
-    FREE_SET_NULL(contact->status);
     FREE_SET_NULL(contact->subscription);
-    FREE_SET_NULL(contact->caps_str);
 
     if (contact->last_activity != NULL) {
         g_date_time_unref(contact->last_activity);
     }
+
+    g_hash_table_destroy(contact->resources);
 
     FREE_SET_NULL(contact);
 }
@@ -113,13 +101,15 @@ p_contact_name(const PContact contact)
 const char *
 p_contact_presence(const PContact contact)
 {
-    return contact->presence;
+    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    return resource->show;
 }
 
 const char *
 p_contact_status(const PContact contact)
 {
-    return contact->status;
+    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    return resource->status;
 }
 
 const char *
@@ -143,24 +133,27 @@ p_contact_last_activity(const PContact contact)
 const char *
 p_contact_caps_str(const PContact contact)
 {
-    return contact->caps_str;
+    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    return resource->caps_str;
 }
 
 void
 p_contact_set_presence(const PContact contact, const char * const presence)
 {
-    FREE_SET_NULL(contact->presence);
+    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    FREE_SET_NULL(resource->show);
     if (presence != NULL) {
-        contact->presence = strdup(presence);
+        resource->show = strdup(presence);
     }
 }
 
 void
 p_contact_set_status(const PContact contact, const char * const status)
 {
-    FREE_SET_NULL(contact->status);
+    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    FREE_SET_NULL(resource->status);
     if (status != NULL) {
-        contact->status = strdup(status);
+        resource->status = strdup(status);
     }
 }
 
@@ -195,8 +188,9 @@ p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
 void
 p_contact_set_caps_str(const PContact contact, const char * const caps_str)
 {
-    FREE_SET_NULL(contact->caps_str);
+    Resource *resource = g_hash_table_lookup(contact->resources, "default");
+    FREE_SET_NULL(resource->caps_str);
     if (caps_str != NULL) {
-        contact->caps_str = strdup(caps_str);
+        resource->caps_str = strdup(caps_str);
     }
 }
