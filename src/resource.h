@@ -23,6 +23,8 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
+#include "common.h"
+
 typedef struct resource_t {
     char *name;
     resource_presence_t presence;

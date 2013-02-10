@@ -220,7 +220,10 @@ muc_add_to_roster(const char * const room, const char * const nick,
                     (g_strcmp0(p_contact_status(old), status) != 0)) {
             updated = TRUE;
         }
-        PContact contact = p_contact_new(nick, NULL, show, status, NULL, FALSE, caps_str);
+        PContact contact = p_contact_new(nick, NULL, NULL, FALSE);
+        resource_presence_t resource_presence = resource_presence_from_string(show);
+        Resource *resource = resource_new("default", resource_presence, status, 0, caps_str);
+        p_contact_add_resource(contact, resource);
         g_hash_table_replace(chat_room->roster, strdup(nick), contact);
     }
 

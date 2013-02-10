@@ -23,14 +23,15 @@
 #ifndef CONTACT_H
 #define CONTACT_H
 
+#include "resource.h"
+
 typedef struct p_contact_t *PContact;
 
 PContact p_contact_new(const char * const barejid, const char * const name,
-    const char * const presence, const char * const status,
-    const char * const subscription, gboolean pending_out,
-    const char * const caps_str);
+    const char * const subscription, gboolean pending_out);
 PContact p_contact_new_subscription(const char * const barejid,
     const char * const subscription, gboolean pending_out);
+void p_contact_add_resource(PContact contact, Resource *resource);
 void p_contact_free(PContact contact);
 const char* p_contact_barejid(PContact contact);
 const char* p_contact_name(PContact contact);

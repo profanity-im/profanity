@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,9 +41,7 @@ struct p_contact_t {
 
 PContact
 p_contact_new(const char * const barejid, const char * const name,
-    const char * const presence, const char * const status,
-    const char * const subscription, gboolean pending_out,
-    const char * const caps_str)
+    const char * const subscription, gboolean pending_out)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
     contact->barejid = strdup(barejid);
@@ -63,14 +62,17 @@ p_contact_new(const char * const barejid, const char * const name,
 
     contact->available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
         (GDestroyNotify)resource_destroy);
-    // TODO, priority, last activity
-    if (g_strcmp0(presence, "offline") != 0) {
-        resource_presence_t resource_presence = resource_presence_from_string(presence);
-        Resource *resource = resource_new("default", resource_presence, status, 0, caps_str);
-        g_hash_table_insert(contact->available_resources, strdup(resource->name), resource);
-    }
 
     return contact;
+}
+
+void
+p_contact_add_resource(PContact contact, Resource *resource)
+{
+    assert(contact != NULL);
+    assert(resource != NULL);
+
+    g_hash_table_insert(contact->available_resources, strdup(resource->name), resource);
 }
 
 PContact

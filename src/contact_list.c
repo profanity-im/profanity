@@ -70,8 +70,7 @@ contact_list_add(const char * const barejid, const char * const name,
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(barejid, name, "offline", NULL, subscription,
-            pending_out, NULL);
+        contact = p_contact_new(barejid, name, subscription, pending_out);
         g_hash_table_insert(contacts, strdup(barejid), contact);
         autocomplete_add(ac, strdup(barejid));
         added = TRUE;
