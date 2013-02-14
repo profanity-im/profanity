@@ -161,42 +161,6 @@ static void test_status_when_no_value(void)
     assert_is_null(p_contact_status(james));
 }
 
-static void update_show(void)
-{
-    contact_list_add("James", NULL, NULL, FALSE);
-    contact_list_update_contact("James", "dnd", NULL, NULL, NULL);
-    GSList *list = get_contact_list();
-
-    assert_int_equals(1, g_slist_length(list));
-    PContact first = list->data;
-    assert_string_equals("James", p_contact_barejid(first));
-    assert_string_equals("dnd", p_contact_presence(first));
-}
-
-static void update_status(void)
-{
-    contact_list_add("James", NULL, NULL, FALSE);
-    contact_list_update_contact("James", NULL, "Gone to lunch", NULL, NULL);
-    GSList *list = get_contact_list();
-
-    assert_int_equals(1, g_slist_length(list));
-    PContact james = list->data;
-    assert_string_equals("James", p_contact_barejid(james));
-    assert_string_equals("Gone to lunch", p_contact_status(james));
-}
-
-static void set_status_to_null(void)
-{
-    contact_list_add("James", NULL, NULL, FALSE);
-    contact_list_update_contact("James", NULL, NULL, NULL, NULL);
-    GSList *list = get_contact_list();
-
-    assert_int_equals(1, g_slist_length(list));
-    PContact james = list->data;
-    assert_string_equals("James", p_contact_barejid(james));
-    assert_is_null(p_contact_status(james));
-}
-
 static void find_first_exists(void)
 {
     contact_list_add("James", NULL, NULL, FALSE);
@@ -321,9 +285,6 @@ void register_contact_list_tests(void)
     TEST(add_twice_at_end_adds_once);
     TEST(test_show_online_when_no_value);
     TEST(test_status_when_no_value);
-    TEST(update_show);
-    TEST(update_status);
-    TEST(set_status_to_null);
     TEST(find_first_exists);
     TEST(find_second_exists);
     TEST(find_third_exists);
