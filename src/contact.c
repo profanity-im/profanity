@@ -66,15 +66,6 @@ p_contact_new(const char * const barejid, const char * const name,
     return contact;
 }
 
-void
-p_contact_add_resource(PContact contact, Resource *resource)
-{
-    assert(contact != NULL);
-    assert(resource != NULL);
-
-    g_hash_table_insert(contact->available_resources, strdup(resource->name), resource);
-}
-
 gboolean
 p_contact_remove_resource(PContact contact, const char * const resource)
 {
@@ -132,26 +123,78 @@ p_contact_name(const PContact contact)
     return contact->name;
 }
 
-const char *
-p_contact_presence(const PContact contact)
+static resource_presence_t
+_highest_presence(resource_presence_t first, resource_presence_t second)
 {
-    if (g_hash_table_size(contact->available_resources) == 0) {
-        return "offline";
+    if (first == RESOURCE_CHAT) {
+        return first;
+    } else if (second == RESOURCE_CHAT) {
+        return second;
+    } else if (first == RESOURCE_ONLINE) {
+        return first;
+    } else if (second == RESOURCE_ONLINE) {
+        return second;
+    } else if (first == RESOURCE_AWAY) {
+        return first;
+    } else if (second == RESOURCE_AWAY) {
+        return second;
+    } else if (first == RESOURCE_XA) {
+        return first;
+    } else if (second == RESOURCE_XA) {
+        return second;
     } else {
-        Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
-        return string_from_resource_presence(resource->presence);
+        return first;
     }
 }
 
 const char *
-p_contact_status(const PContact contact)
+p_contact_presence(const PContact contact)
 {
+    assert(contact != NULL);
+
+    // no available resources, offline
     if (g_hash_table_size(contact->available_resources) == 0) {
-        return NULL;
-    } else {
-        Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
-        return resource->status;
+        return "offline";
     }
+
+    // find resource with highest priority, if more than one,
+    // use highest availability, in the following order:
+    //      chat
+    //      online
+    //      away
+    //      xa
+    //      dnd
+    GList *resources = g_hash_table_get_values(contact->available_resources);
+    Resource *resource = resources->data;
+    int highest_priority = resource->priority;
+    resource_presence_t presence = resource->presence;
+    resources = g_list_next(resources);
+    while (resources != NULL) {
+        resource = resources->data;
+
+        // priority is same as current highest, choose presence
+        if (resource->priority == highest_priority) {
+            presence = _highest_presence(presence, resource->presence);
+
+        // priority higher than current highest, set new presence
+        } else if (resource->priority > highest_priority) {
+            highest_priority = resource->priority;
+            presence = resource->presence;
+        }
+
+        resources = g_list_next(resources);
+    }
+
+    return string_from_resource_presence(presence);
+}
+
+const char *
+p_contact_status(const PContact contact, const char * const resource)
+{
+    assert(contact != NULL);
+    assert(resource != NULL);
+    Resource *resourcep = g_hash_table_lookup(contact->available_resources, "default");
+    return resourcep->status;
 }
 
 const char *
@@ -181,6 +224,34 @@ p_contact_caps_str(const PContact contact)
         Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
         return resource->caps_str;
     }
+}
+
+gboolean
+p_contact_is_available(const PContact contact)
+{
+    // no available resources, unavailable
+    if (g_hash_table_size(contact->available_resources) == 0) {
+        return FALSE;
+    }
+
+    // if any resource is CHAT or ONLINE, available
+    GList *resources = g_hash_table_get_values(contact->available_resources);
+    while (resources != NULL) {
+        Resource *resource = resources->data;
+        resource_presence_t presence = resource->presence;
+        if ((presence == RESOURCE_ONLINE) || (presence == RESOURCE_CHAT)) {
+            return TRUE;
+        }
+        resources = g_list_next(resources);
+    }
+
+    return FALSE;
+}
+
+gboolean
+p_contact_has_available_resource(const PContact contact)
+{
+    return (g_hash_table_size(contact->available_resources) > 0);
 }
 
 void

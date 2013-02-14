@@ -37,7 +37,7 @@ void p_contact_free(PContact contact);
 const char* p_contact_barejid(PContact contact);
 const char* p_contact_name(PContact contact);
 const char* p_contact_presence(PContact contact);
-const char* p_contact_status(PContact contact);
+const char* p_contact_status(PContact contact, const char * const resource);
 const char* p_contact_subscription(const PContact contact);
 const char* p_contact_caps_str(const PContact contact);
 GDateTime* p_contact_last_activity(const PContact contact);
@@ -48,5 +48,6 @@ void p_contact_set_subscription(const PContact contact, const char * const subsc
 void p_contact_set_caps_str(const PContact contact, const char * const caps_str);
 void p_contact_set_pending_out(const PContact contact, gboolean pending_out);
 void p_contact_set_last_activity(const PContact contact, GDateTime *last_activity);
+gboolean p_contact_is_available(const PContact contact);
 
 #endif
