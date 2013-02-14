@@ -97,14 +97,14 @@ contact_list_update_presence(const char * const barejid, Resource *resource,
     if (contact == NULL) {
         return FALSE;
     }
-    
+
     if (!_datetimes_equal(p_contact_last_activity(contact), last_activity)) {
         p_contact_set_last_activity(contact, last_activity);
     }
     p_contact_set_presence(contact, resource);
 
     return TRUE;
-}    
+}
 
 gboolean
 contact_list_contact_offline(const char * const barejid,
