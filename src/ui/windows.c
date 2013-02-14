@@ -453,18 +453,21 @@ ui_show_incoming_msg(const char * const from, const char * const message,
 }
 
 void
-ui_contact_online(const char * const from, const char * const show,
-    const char * const status, GDateTime *last_activity)
+ui_contact_online(const char * const barejid, const char * const resource,
+    const char * const show, const char * const status, GDateTime *last_activity)
 {
-    _show_status_string(console->win, from, show, status, last_activity, "++",
+    Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
+    _show_status_string(console->win, jid->fulljid, show, status, last_activity, "++",
         "online");
 
-    int win_index = _find_prof_win_index(from);
+    int win_index = _find_prof_win_index(barejid);
     if (win_index != NUM_WINS) {
         WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, from, show, status, last_activity, "++",
+        _show_status_string(win, jid->fulljid, show, status, last_activity, "++",
             "online");
     }
+
+    jid_destroy(jid);
 
     if (win_index == current_index)
         dirty = TRUE;

@@ -34,13 +34,15 @@ void contact_list_reset_search_attempts(void);
 void contact_list_remove(const char * const barejid);
 gboolean contact_list_add(const char * const barejid, const char * const name,
     const char * const subscription, gboolean pending_out);
-gboolean contact_list_update_contact(const char * const barejid, const char * const presence,
-    const char * const status, GDateTime *last_activity, const char * const caps_str);
+gboolean contact_list_update_presence(const char * const barejid,
+    Resource *resource, GDateTime *last_activity);
 void contact_list_update_subscription(const char * const barejid,
     const char * const subscription, gboolean pending_out);
 gboolean contact_list_has_pending_subscriptions(void);
 GSList * get_contact_list(void);
 char * contact_list_find_contact(char *search_str);
 PContact contact_list_get_contact(const char const *barejid);
+gboolean contact_list_contact_offline(const char * const barejid,
+    const char * const resource, const char * const status);
 
 #endif

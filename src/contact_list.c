@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include <glib.h>
@@ -86,36 +87,35 @@ contact_list_remove(const char * const barejid)
 }
 
 gboolean
-contact_list_update_contact(const char * const barejid, const char * const presence,
-    const char * const status, GDateTime *last_activity, const char * const caps_str)
+contact_list_update_presence(const char * const barejid, Resource *resource,
+    GDateTime *last_activity)
 {
-    gboolean presence_changed = FALSE;
-    PContact contact = g_hash_table_lookup(contacts, barejid);
+    assert(barejid != NULL);
+    assert(resource != NULL);
 
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+    if (contact == NULL) {
+        return FALSE;
+    }
+    
+    if (!_datetimes_equal(p_contact_last_activity(contact), last_activity)) {
+        p_contact_set_last_activity(contact, last_activity);
+    }
+    p_contact_set_presence(contact, resource);
+
+    return TRUE;
+}    
+
+gboolean
+contact_list_contact_offline(const char * const barejid,
+    const char * const resource, const char * const status)
+{
+    PContact contact = g_hash_table_lookup(contacts, barejid);
     if (contact == NULL) {
         return FALSE;
     }
 
-    if (g_strcmp0(p_contact_presence(contact), presence) != 0) {
-        p_contact_set_presence(contact, presence);
-        presence_changed = TRUE;
-    }
-
-    if (g_strcmp0(p_contact_status(contact), status) != 0) {
-        p_contact_set_status(contact, status);
-        presence_changed = TRUE;
-    }
-
-    if (!_datetimes_equal(p_contact_last_activity(contact), last_activity)) {
-        p_contact_set_last_activity(contact, last_activity);
-        presence_changed = TRUE;
-    }
-
-    if (g_strcmp0(p_contact_caps_str(contact), caps_str) != 0) {
-        p_contact_set_caps_str(contact, caps_str);
-    }
-
-    return presence_changed;
+    return p_contact_remove_resource(contact, resource);
 }
 
 void

@@ -75,6 +75,12 @@ p_contact_add_resource(PContact contact, Resource *resource)
     g_hash_table_insert(contact->available_resources, strdup(resource->name), resource);
 }
 
+gboolean
+p_contact_remove_resource(PContact contact, const char * const resource)
+{
+    return g_hash_table_remove(contact->available_resources, resource);
+}
+
 PContact
 p_contact_new_subscription(const char * const barejid,
     const char * const subscription, gboolean pending_out)
@@ -178,20 +184,9 @@ p_contact_caps_str(const PContact contact)
 }
 
 void
-p_contact_set_presence(const PContact contact, const char * const presence)
+p_contact_set_presence(const PContact contact, Resource *resource)
 {
-    if (g_strcmp0(presence, "offline") == 0) {
-        g_hash_table_remove(contact->available_resources, "default");
-    } else {
-        resource_presence_t resource_presence = resource_presence_from_string(presence);
-        if (g_hash_table_size(contact->available_resources) == 0) {
-            Resource *resource = resource_new("default", resource_presence, NULL, 0, NULL);
-            g_hash_table_insert(contact->available_resources, strdup(resource->name), resource);
-        } else {
-            Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
-                resource->presence = resource_presence;
-        }
-    }
+    g_hash_table_replace(contact->available_resources, strdup(resource->name), resource);
 }
 
 void

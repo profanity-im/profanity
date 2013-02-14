@@ -41,6 +41,7 @@
 #include "contact_list.h"
 #include "log.h"
 #include "muc.h"
+#include "resource.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
@@ -316,16 +317,17 @@ prof_handle_leave_room(const char * const room)
 }
 
 void
-prof_handle_contact_online(char *contact, char *show, char *status,
-    GDateTime *last_activity, char *caps_str)
+prof_handle_contact_online(char *contact, Resource *resource,
+    GDateTime *last_activity)
 {
-    gboolean presence_changed = contact_list_update_contact(contact, show, status, last_activity, caps_str);
+    gboolean updated = contact_list_update_presence(contact, resource, last_activity);
 
-    if (presence_changed) {
+    if (updated) {
         PContact result = contact_list_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
-                ui_contact_online(contact, show, status, last_activity);
+                const char *show = string_from_resource_presence(resource->presence);
+                ui_contact_online(contact, resource->name, show, resource->status, last_activity);
                 win_current_page_off();
             }
         }
@@ -333,15 +335,15 @@ prof_handle_contact_online(char *contact, char *show, char *status,
 }
 
 void
-prof_handle_contact_offline(char *contact, char *show, char *status)
+prof_handle_contact_offline(char *contact, char *resource, char *status)
 {
-    gboolean presence_changed = contact_list_update_contact(contact, "offline", status, NULL, NULL);
+    gboolean updated = contact_list_contact_offline(contact, resource, status);
 
-    if (presence_changed) {
+    if (updated) {
         PContact result = contact_list_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
-                ui_contact_offline(contact, show, status);
+                ui_contact_offline(contact, "offline", status);
                 win_current_page_off();
             }
         }

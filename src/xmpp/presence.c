@@ -342,7 +342,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
         status_str = NULL;
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-        prof_handle_contact_offline(from_jid->barejid, "offline", status_str);
+        prof_handle_contact_offline(from_jid->barejid, "default", status_str);
     }
 
     jid_destroy(my_jid);
@@ -406,9 +406,25 @@ _available_handler(xmpp_conn_t * const conn,
     else
         status_str = NULL;
 
+    // get priority
+    int priority = 0;
+    xmpp_stanza_t *priority_stanza =
+        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PRIORITY);
+
+    if (priority_stanza != NULL) {
+        char *priority_str = xmpp_stanza_get_text(priority_stanza);
+        if (priority_str != NULL) {
+            priority = atoi(priority_str);
+        }
+    }
+
+    // if not self presence (TODO allow self presence from other resources?)
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-        prof_handle_contact_online(from_jid->barejid, show_str, status_str,
-            last_activity, caps_key);
+        // create the resource
+        resource_presence_t presence = resource_presence_from_string(show_str);
+        Resource *resource = resource_new("default", presence,
+            status_str, priority, caps_key);
+        prof_handle_contact_online(from_jid->barejid, resource, last_activity);
     }
 
     jid_destroy(my_jid);
