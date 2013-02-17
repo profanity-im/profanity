@@ -1211,7 +1211,7 @@ cons_show_caps(const char * const contact, Resource *resource)
             // show identity
             if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
                 _win_show_time(win, '-');
-                wprintw(win, "  Identity: ");
+                wprintw(win, "Identity: ");
                 if (caps->name != NULL) {
                     wprintw(win, "%s", caps->name);
                     if ((caps->category != NULL) || (caps->type != NULL)) {
@@ -1231,7 +1231,7 @@ cons_show_caps(const char * const contact, Resource *resource)
             }
             if (caps->software != NULL) {
                 _win_show_time(win, '-');
-                wprintw(win, "  Software: %s", caps->software);
+                wprintw(win, "Software: %s", caps->software);
             }
             if (caps->software_version != NULL) {
                 wprintw(win, ", %s", caps->software_version);
@@ -1241,7 +1241,7 @@ cons_show_caps(const char * const contact, Resource *resource)
             }
             if (caps->os != NULL) {
                 _win_show_time(win, '-');
-                wprintw(win, "  OS: %s", caps->os);
+                wprintw(win, "OS: %s", caps->os);
             }
             if (caps->os_version != NULL) {
                 wprintw(win, ", %s", caps->os_version);
@@ -1252,11 +1252,11 @@ cons_show_caps(const char * const contact, Resource *resource)
 
             if (caps->features != NULL) {
                 _win_show_time(win, '-');
-                wprintw(win, "  Features:\n");
+                wprintw(win, "Features:\n");
                 GSList *feature = caps->features;
                 while (feature != NULL) {
                     _win_show_time(win, '-');
-                    wprintw(win, "    %s\n", feature->data);
+                    wprintw(win, "  %s\n", feature->data);
                     feature = g_slist_next(feature);
                 }
             }
@@ -1283,13 +1283,13 @@ cons_show_software_version(const char * const jid, const char * const  presence,
         wprintw(console->win, ":\n");
     }
     if (name != NULL) {
-        cons_show("  Name    : %s", name);
+        cons_show("Name    : %s", name);
     }
     if (version != NULL) {
-        cons_show("  Version : %s", version);
+        cons_show("Version : %s", version);
     }
     if (os != NULL) {
-        cons_show("  OS      : %s", os);
+        cons_show("OS      : %s", os);
     }
 }
 
