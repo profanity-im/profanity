@@ -33,7 +33,8 @@ void contact_list_free(void);
 void contact_list_reset_search_attempts(void);
 void contact_list_remove(const char * const barejid);
 gboolean contact_list_add(const char * const barejid, const char * const name,
-    const char * const subscription, gboolean pending_out);
+    const char * const subscription, const char * const offline_message,
+    gboolean pending_out);
 gboolean contact_list_update_presence(const char * const barejid,
     Resource *resource, GDateTime *last_activity);
 void contact_list_update_subscription(const char * const barejid,

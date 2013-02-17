@@ -339,7 +339,7 @@ prof_handle_contact_offline(char *contact, char *resource, char *status)
 {
     gboolean updated = contact_list_contact_offline(contact, resource, status);
 
-    if (updated) {
+    if (resource != NULL && updated) {
         PContact result = contact_list_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {

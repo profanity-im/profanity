@@ -144,7 +144,7 @@ _iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 pending_out = TRUE;
             }
 
-            gboolean added = contact_list_add(barejid, name, sub, pending_out);
+            gboolean added = contact_list_add(barejid, name, sub, NULL, pending_out);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", barejid);

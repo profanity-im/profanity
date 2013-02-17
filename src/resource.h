@@ -37,4 +37,6 @@ Resource * resource_new(const char * const name, resource_presence_t presence,
     const char * const status, const int priority, const char * const caps_str);
 void resource_destroy(Resource *resource);
 
+int resource_compare_availability(Resource *first, Resource *second);
+
 #endif

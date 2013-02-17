@@ -49,6 +49,36 @@ Resource * resource_new(const char * const name, resource_presence_t presence,
     return new_resource;
 }
 
+int
+resource_compare_availability(Resource *first, Resource *second)
+{
+    if (first->priority > second->priority) {
+        return -1;
+    } else if (first->priority < second->priority) {
+        return 1;
+    } else { // priorities equal
+        if (first->presence == RESOURCE_CHAT) {
+            return -1;
+        } else if (second->presence == RESOURCE_CHAT) {
+            return 1;
+        } else if (first->presence == RESOURCE_ONLINE) {
+            return -1;
+        } else if (second->presence == RESOURCE_ONLINE) {
+            return 1;
+        } else if (first->presence == RESOURCE_AWAY) {
+            return -1;
+        } else if (second->presence == RESOURCE_AWAY) {
+            return 1;
+        } else if (first->presence == RESOURCE_XA) {
+            return -1;
+        } else if (second->presence == RESOURCE_XA) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+}
+
 void resource_destroy(Resource *resource)
 {
     assert(resource != NULL);

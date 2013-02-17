@@ -1561,7 +1561,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                     win_show_room_roster(room, filtered, "unavailable");
 
-                // online, show all status that indicate online
+                // online, available resources
                 } else if (strcmp("online", presence) == 0) {
                     GList *filtered = NULL;
 
@@ -1575,7 +1575,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                     win_show_room_roster(room, filtered, "online");
 
-                // online, show all status that indicate online
+                // offline, no available resources
                 } else if (strcmp("offline", presence) == 0) {
                     GList *filtered = NULL;
 
@@ -1621,9 +1621,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                     while (list != NULL) {
                         PContact contact = list->data;
-                        const char * const contact_presence = (p_contact_presence(contact));
-                        if ((strcmp(contact_presence, "online") == 0)
-                                || (strcmp(contact_presence, "chat") == 0)) {
+                        if (p_contact_is_available(contact)) {
                             filtered = g_slist_append(filtered, contact);
                         }
                         list = g_slist_next(list);
@@ -1638,11 +1636,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                     while (list != NULL) {
                         PContact contact = list->data;
-                        const char * const contact_presence = (p_contact_presence(contact));
-                        if ((strcmp(contact_presence, "offline") == 0)
-                                || (strcmp(contact_presence, "away") == 0)
-                                || (strcmp(contact_presence, "dnd") == 0)
-                                || (strcmp(contact_presence, "xa") == 0)) {
+                        if (!p_contact_is_available(contact)) {
                             filtered = g_slist_append(filtered, contact);
                         }
                         list = g_slist_next(list);
@@ -1650,19 +1644,29 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                     cons_show_contacts(filtered);
 
-                // online, show all status that indicate online
+                // online, available resources
                 } else if (strcmp("online", presence) == 0) {
                     cons_show("Contacts (%s):", presence);
                     GSList *filtered = NULL;
 
                     while (list != NULL) {
                         PContact contact = list->data;
-                        const char * const contact_presence = (p_contact_presence(contact));
-                        if ((strcmp(contact_presence, "online") == 0)
-                                || (strcmp(contact_presence, "away") == 0)
-                                || (strcmp(contact_presence, "dnd") == 0)
-                                || (strcmp(contact_presence, "xa") == 0)
-                                || (strcmp(contact_presence, "chat") == 0)) {
+                        if (p_contact_has_available_resource(contact)) {
+                            filtered = g_slist_append(filtered, contact);
+                        }
+                        list = g_slist_next(list);
+                    }
+
+                    cons_show_contacts(filtered);
+
+                // offline, no available resources
+                } else if (strcmp("online", presence) == 0) {
+                    cons_show("Contacts (%s):", presence);
+                    GSList *filtered = NULL;
+
+                    while (list != NULL) {
+                        PContact contact = list->data;
+                        if (!p_contact_has_available_resource(contact)) {
                             filtered = g_slist_append(filtered, contact);
                         }
                         list = g_slist_next(list);

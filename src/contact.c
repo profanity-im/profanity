@@ -34,6 +34,7 @@ struct p_contact_t {
     char *barejid;
     char *name;
     char *subscription;
+    char *offline_message;
     gboolean pending_out;
     GDateTime *last_activity;
     GHashTable *available_resources;
@@ -41,7 +42,8 @@ struct p_contact_t {
 
 PContact
 p_contact_new(const char * const barejid, const char * const name,
-    const char * const subscription, gboolean pending_out)
+    const char * const subscription, const char * const offline_message,
+    gboolean pending_out)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
     contact->barejid = strdup(barejid);
@@ -56,6 +58,11 @@ p_contact_new(const char * const barejid, const char * const name,
         contact->subscription = strdup(subscription);
     else
         contact->subscription = strdup("none");
+
+    if (offline_message != NULL)
+        contact->offline_message = strdup(offline_message);
+    else
+        contact->offline_message = NULL;
 
     contact->pending_out = pending_out;
     contact->last_activity = NULL;
@@ -101,6 +108,7 @@ p_contact_free(PContact contact)
     FREE_SET_NULL(contact->barejid);
     FREE_SET_NULL(contact->name);
     FREE_SET_NULL(contact->subscription);
+    FREE_SET_NULL(contact->offline_message);
 
     if (contact->last_activity != NULL) {
         g_date_time_unref(contact->last_activity);
@@ -123,28 +131,60 @@ p_contact_name(const PContact contact)
     return contact->name;
 }
 
-static resource_presence_t
-_highest_presence(resource_presence_t first, resource_presence_t second)
+static Resource *
+_highest_presence(Resource *first, Resource *second)
 {
-    if (first == RESOURCE_CHAT) {
+    if (first->presence == RESOURCE_CHAT) {
         return first;
-    } else if (second == RESOURCE_CHAT) {
+    } else if (second->presence == RESOURCE_CHAT) {
         return second;
-    } else if (first == RESOURCE_ONLINE) {
+    } else if (first->presence == RESOURCE_ONLINE) {
         return first;
-    } else if (second == RESOURCE_ONLINE) {
+    } else if (second->presence == RESOURCE_ONLINE) {
         return second;
-    } else if (first == RESOURCE_AWAY) {
+    } else if (first->presence == RESOURCE_AWAY) {
         return first;
-    } else if (second == RESOURCE_AWAY) {
+    } else if (second->presence == RESOURCE_AWAY) {
         return second;
-    } else if (first == RESOURCE_XA) {
+    } else if (first->presence == RESOURCE_XA) {
         return first;
-    } else if (second == RESOURCE_XA) {
+    } else if (second->presence == RESOURCE_XA) {
         return second;
     } else {
         return first;
     }
+}
+
+Resource *
+_get_most_available_resource(PContact contact)
+{
+    // find resource with highest priority, if more than one,
+    // use highest availability, in the following order:
+    //      chat
+    //      online
+    //      away
+    //      xa
+    //      dnd
+    GList *resources = g_hash_table_get_values(contact->available_resources);
+    Resource *current = resources->data;
+    Resource *highest = current;
+    resources = g_list_next(resources);
+    while (resources != NULL) {
+        current = resources->data;
+
+        // priority is same as current highest, choose presence
+        if (current->priority == highest->priority) {
+            highest = _highest_presence(highest, current);
+
+        // priority higher than current highest, set new presence
+        } else if (current->priority > highest->priority) {
+            highest = current;
+        }
+
+        resources = g_list_next(resources);
+    }
+
+    return highest;
 }
 
 const char *
@@ -157,44 +197,24 @@ p_contact_presence(const PContact contact)
         return "offline";
     }
 
-    // find resource with highest priority, if more than one,
-    // use highest availability, in the following order:
-    //      chat
-    //      online
-    //      away
-    //      xa
-    //      dnd
-    GList *resources = g_hash_table_get_values(contact->available_resources);
-    Resource *resource = resources->data;
-    int highest_priority = resource->priority;
-    resource_presence_t presence = resource->presence;
-    resources = g_list_next(resources);
-    while (resources != NULL) {
-        resource = resources->data;
+    Resource *resource = _get_most_available_resource(contact);
 
-        // priority is same as current highest, choose presence
-        if (resource->priority == highest_priority) {
-            presence = _highest_presence(presence, resource->presence);
-
-        // priority higher than current highest, set new presence
-        } else if (resource->priority > highest_priority) {
-            highest_priority = resource->priority;
-            presence = resource->presence;
-        }
-
-        resources = g_list_next(resources);
-    }
-
-    return string_from_resource_presence(presence);
+    return string_from_resource_presence(resource->presence);
 }
 
 const char *
-p_contact_status(const PContact contact, const char * const resource)
+p_contact_status(const PContact contact)
 {
     assert(contact != NULL);
-    assert(resource != NULL);
-    Resource *resourcep = g_hash_table_lookup(contact->available_resources, "default");
-    return resourcep->status;
+
+    // no available resources, use offline message
+    if (g_hash_table_size(contact->available_resources) == 0) {
+        return contact->offline_message;
+    }
+
+    Resource *resource = _get_most_available_resource(contact);
+
+    return resource->status;
 }
 
 const char *
@@ -215,15 +235,12 @@ p_contact_last_activity(const PContact contact)
     return contact->last_activity;
 }
 
-const char *
-p_contact_caps_str(const PContact contact)
+GList *
+p_contact_get_available_resources(const PContact contact)
 {
-    if (g_hash_table_size(contact->available_resources) == 0) {
-        return NULL;
-    } else {
-        Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
-        return resource->caps_str;
-    }
+    assert(contact != NULL);
+
+    return g_hash_table_get_values(contact->available_resources);
 }
 
 gboolean
@@ -234,18 +251,14 @@ p_contact_is_available(const PContact contact)
         return FALSE;
     }
 
-    // if any resource is CHAT or ONLINE, available
-    GList *resources = g_hash_table_get_values(contact->available_resources);
-    while (resources != NULL) {
-        Resource *resource = resources->data;
-        resource_presence_t presence = resource->presence;
-        if ((presence == RESOURCE_ONLINE) || (presence == RESOURCE_CHAT)) {
-            return TRUE;
-        }
-        resources = g_list_next(resources);
+    // if most available resource is CHAT or ONLINE, available
+    Resource *most_available = _get_most_available_resource(contact);
+    if ((most_available->presence == RESOURCE_ONLINE) ||
+        (most_available->presence == RESOURCE_CHAT)) {
+        return TRUE;
+    } else {
+        return FALSE;
     }
-
-    return FALSE;
 }
 
 gboolean
@@ -258,16 +271,6 @@ void
 p_contact_set_presence(const PContact contact, Resource *resource)
 {
     g_hash_table_replace(contact->available_resources, strdup(resource->name), resource);
-}
-
-void
-p_contact_set_status(const PContact contact, const char * const status)
-{
-    Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
-    FREE_SET_NULL(resource->status);
-    if (status != NULL) {
-        resource->status = strdup(status);
-    }
 }
 
 void
@@ -295,15 +298,5 @@ p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
 
     if (last_activity != NULL) {
         contact->last_activity = g_date_time_ref(last_activity);
-    }
-}
-
-void
-p_contact_set_caps_str(const PContact contact, const char * const caps_str)
-{
-    Resource *resource = g_hash_table_lookup(contact->available_resources, "default");
-    FREE_SET_NULL(resource->caps_str);
-    if (caps_str != NULL) {
-        resource->caps_str = strdup(caps_str);
     }
 }

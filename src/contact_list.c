@@ -65,13 +65,15 @@ contact_list_reset_search_attempts(void)
 
 gboolean
 contact_list_add(const char * const barejid, const char * const name,
-    const char * const subscription, gboolean pending_out)
+    const char * const subscription, const char * const offline_message,
+    gboolean pending_out)
 {
     gboolean added = FALSE;
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(barejid, name, subscription, pending_out);
+        contact = p_contact_new(barejid, name, subscription, offline_message,
+            pending_out);
         g_hash_table_insert(contacts, strdup(barejid), contact);
         autocomplete_add(ac, strdup(barejid));
         added = TRUE;
@@ -114,8 +116,11 @@ contact_list_contact_offline(const char * const barejid,
     if (contact == NULL) {
         return FALSE;
     }
-
-    return p_contact_remove_resource(contact, resource);
+    if (resource == NULL) {
+        return TRUE;
+    } else {
+        return p_contact_remove_resource(contact, resource);
+    }
 }
 
 void

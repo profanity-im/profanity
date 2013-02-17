@@ -217,10 +217,10 @@ muc_add_to_roster(const char * const room, const char * const nick,
             updated = TRUE;
             autocomplete_add(chat_room->nick_ac, strdup(nick));
         } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
-                    (g_strcmp0(p_contact_status(old, nick), status) != 0)) {
+                    (g_strcmp0(p_contact_status(old), status) != 0)) {
             updated = TRUE;
         }
-        PContact contact = p_contact_new(nick, NULL, NULL, FALSE);
+        PContact contact = p_contact_new(nick, NULL, NULL, NULL, FALSE);
         resource_presence_t resource_presence = resource_presence_from_string(show);
         Resource *resource = resource_new(nick, resource_presence, status, 0, caps_str);
         p_contact_set_presence(contact, resource);

@@ -342,7 +342,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
         status_str = NULL;
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-        prof_handle_contact_offline(from_jid->barejid, "default", status_str);
+        prof_handle_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
     }
 
     jid_destroy(my_jid);
@@ -422,7 +422,7 @@ _available_handler(xmpp_conn_t * const conn,
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
         // create the resource
         resource_presence_t presence = resource_presence_from_string(show_str);
-        Resource *resource = resource_new("default", presence,
+        Resource *resource = resource_new(from_jid->resourcepart, presence,
             status_str, priority, caps_key);
         prof_handle_contact_online(from_jid->barejid, resource, last_activity);
     }
