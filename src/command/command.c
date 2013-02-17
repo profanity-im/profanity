@@ -1918,8 +1918,16 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
                     cons_show("You must provide a full jid to the /caps command.");
                 } else {
                     PContact pcontact = contact_list_get_contact(jid->barejid);
-                    Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
-                    cons_show_caps(jid->fulljid, resource);
+                    if (pcontact == NULL) {
+                        cons_show("Contact not found in roster: %s", jid->barejid);
+                    } else {
+                        Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
+                        if (resource == NULL) {
+                            cons_show("Could not find resource %s, for contact %s", jid->barejid, jid->resourcepart);
+                        } else {
+                            cons_show_caps(jid->fulljid, resource);
+                        }
+                    }
                 }
             } else {
                 cons_show("You must provide a jid to the /caps command.");
