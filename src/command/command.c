@@ -987,6 +987,7 @@ _cmd_complete_parameters(char *input, int *size)
             _parameter_autocomplete_with_ac(input, size, "/info", nick_ac);
             _parameter_autocomplete_with_ac(input, size, "/caps", nick_ac);
             _parameter_autocomplete_with_ac(input, size, "/status", nick_ac);
+            _parameter_autocomplete_with_ac(input, size, "/software", nick_ac);
         }
     } else {
         _parameter_autocomplete(input, size, "/msg",
@@ -1957,18 +1958,42 @@ _cmd_software(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    Jid *jid = jid_create(args[0]);
-
-    if (jid->fulljid == NULL) {
-        cons_show("You must provide a full jid to the /software command.");
-        return TRUE;
     } else {
-        iq_send_software_version(jid->fulljid);
-        return TRUE;
+        if (win_current_is_groupchat()) {
+            if (args[0] != NULL) {
+                PContact pcontact = muc_get_participant(win_current_get_recipient(), args[0]);
+                if (pcontact != NULL) {
+                    Jid *jid = jid_create_from_bare_and_resource(win_current_get_recipient(), args[0]);
+                    iq_send_software_version(jid->fulljid);
+                    jid_destroy(jid);
+                } else {
+                    cons_show("No such participant \"%s\" in room.", args[0]);
+                }
+            } else {
+                cons_show("No nickname supplied to /software in chat room.");
+            }
+        } else if (win_current_is_chat() || win_current_is_console()) {
+            if (args[0] != NULL) {
+                Jid *jid = jid_create(args[0]);
+
+                if (jid->fulljid == NULL) {
+                    cons_show("You must provide a full jid to the /software command.");
+                } else {
+                    iq_send_software_version(jid->fulljid);
+                }
+            } else {
+                cons_show("You must provide a jid to the /software command.");
+            }
+        } else { // private chat
+            if (args[0] != NULL) {
+                cons_show("No parameter needed to /software when in private chat.");
+            } else {
+                iq_send_software_version(win_current_get_recipient());
+            }
+        }
     }
+
+    return TRUE;
 }
 
 static gboolean
