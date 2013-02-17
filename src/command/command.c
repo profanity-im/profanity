@@ -126,6 +126,7 @@ static gboolean _cmd_chat(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_xa(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_info(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_caps(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_software(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_wins(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_theme(gchar **args, struct cmd_help_t help);
@@ -277,6 +278,15 @@ static struct cmd_t main_commands[] =
           "Find out a contact, or room members client capabilities.",
           "If in a chat window the parameter is not required, the current recipient will be used.",
           "The command output is similar to the /info command, but shows the capabilities of each available resource.",
+          NULL } } },
+
+    { "/software",
+        _cmd_software, parse_args, 0, 1,
+        { "/software [jid|nick]", "Find out a software version information about a contacts resource.",
+        { "/software [jid|nick]",
+          "--------------------",
+          "Find out a contact, or room members software version information.",
+          "If in a chat window the parameter is not required, the current recipient will be used.",
           NULL } } },
 
     { "/status",
@@ -987,6 +997,8 @@ _cmd_complete_parameters(char *input, int *size)
             contact_list_find_contact);
         _parameter_autocomplete(input, size, "/status",
             contact_list_find_contact);
+        _parameter_autocomplete(input, size, "/software",
+            contact_list_find_resource);
     }
 
     _parameter_autocomplete(input, size, "/connect",
@@ -1936,6 +1948,27 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
     }
 
     return TRUE;
+}
+
+static gboolean
+_cmd_software(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    Jid *jid = jid_create(args[0]);
+
+    if (jid->fulljid == NULL) {
+        cons_show("You must provide a full jid to the /software command.");
+        return TRUE;
+    } else {
+        iq_send_software_version(jid->fulljid);
+        return TRUE;
+    }
 }
 
 static gboolean

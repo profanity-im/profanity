@@ -1206,6 +1206,25 @@ cons_show_caps(PContact pcontact)
 }
 
 void
+cons_show_software_version(const char * const jid, const char * const name,
+    const char * const version, const char * const os)
+{
+    if ((name != NULL) || (version != NULL) || (os != NULL)) {
+        cons_show("");
+        cons_show("%s:", jid);
+    }
+    if (name != NULL) {
+        cons_show("  Name    : %s", name);
+    }
+    if (version != NULL) {
+        cons_show("  Version : %s", version);
+    }
+    if (os != NULL) {
+        cons_show("  OS      : %s", os);
+    }
+}
+
+void
 cons_show_status(const char * const contact)
 {
     PContact pcontact = contact_list_get_contact(contact);

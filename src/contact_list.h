@@ -42,6 +42,7 @@ void contact_list_update_subscription(const char * const barejid,
 gboolean contact_list_has_pending_subscriptions(void);
 GSList * get_contact_list(void);
 char * contact_list_find_contact(char *search_str);
+char * contact_list_find_resource(char *search_str);
 PContact contact_list_get_contact(const char const *barejid);
 gboolean contact_list_contact_offline(const char * const barejid,
     const char * const resource, const char * const status);

@@ -26,9 +26,11 @@
 #include <glib.h>
 
 #include "contact.h"
+#include "jid.h"
 #include "tools/autocomplete.h"
 
 static Autocomplete ac;
+static Autocomplete resource_ac;
 static GHashTable *contacts;
 
 static gboolean _key_equals(void *key1, void *key2);
@@ -38,6 +40,7 @@ void
 contact_list_init(void)
 {
     ac = autocomplete_new();
+    resource_ac = autocomplete_new();
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
 }
@@ -46,6 +49,7 @@ void
 contact_list_clear(void)
 {
     autocomplete_clear(ac);
+    autocomplete_clear(resource_ac);
     g_hash_table_destroy(contacts);
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
@@ -55,12 +59,14 @@ void
 contact_list_free()
 {
     autocomplete_free(ac);
+    autocomplete_free(resource_ac);
 }
 
 void
 contact_list_reset_search_attempts(void)
 {
     autocomplete_reset(ac);
+    autocomplete_reset(resource_ac);
 }
 
 gboolean
@@ -104,6 +110,9 @@ contact_list_update_presence(const char * const barejid, Resource *resource,
         p_contact_set_last_activity(contact, last_activity);
     }
     p_contact_set_presence(contact, resource);
+    Jid *jid = jid_create_from_bare_and_resource(barejid, resource->name);
+    autocomplete_add(resource_ac, strdup(jid->fulljid));
+    jid_destroy(jid);
 
     return TRUE;
 }
@@ -119,7 +128,14 @@ contact_list_contact_offline(const char * const barejid,
     if (resource == NULL) {
         return TRUE;
     } else {
-        return p_contact_remove_resource(contact, resource);
+        gboolean result = p_contact_remove_resource(contact, resource);
+        if (result == TRUE) {
+            Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
+            autocomplete_remove(resource_ac, jid->fulljid);
+            jid_destroy(jid);
+        }
+
+        return result;
     }
 }
 
@@ -177,6 +193,12 @@ char *
 contact_list_find_contact(char *search_str)
 {
     return autocomplete_complete(ac, search_str);
+}
+
+char *
+contact_list_find_resource(char *search_str)
+{
+    return autocomplete_complete(resource_ac, search_str);
 }
 
 PContact

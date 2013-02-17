@@ -88,6 +88,9 @@ void presence_leave_chat_room(const char * const room_jid);
 void presence_update(resource_presence_t status, const char * const msg,
     int idle);
 
+// iq functions
+void iq_send_software_version(const char * const fulljid);
+
 // caps functions
 Capabilities* caps_get(const char * const caps_str);
 void caps_close(void);

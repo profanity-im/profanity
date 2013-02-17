@@ -30,6 +30,7 @@
 #include "common.h"
 #include "contact_list.h"
 #include "log.h"
+#include "profanity.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/iq.h"
@@ -52,6 +53,8 @@ static int _iq_handle_discoinfo_get(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _iq_handle_discoinfo_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _iq_handle_version_result(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 iq_add_handlers(void)
@@ -64,6 +67,7 @@ iq_add_handlers(void)
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _iq_handle_discoinfo_get);
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_RESULT, _iq_handle_discoinfo_result);
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _iq_handle_version_get);
+    HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _iq_handle_version_result);
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
 }
 
@@ -73,6 +77,16 @@ iq_roster_request(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_roster_iq(ctx);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+void
+iq_send_software_version(const char * const fulljid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_software_version_iq(ctx, fulljid);
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -156,6 +170,44 @@ _iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         contact_presence_t conn_presence = accounts_get_login_presence(jabber_get_account_name());
         presence_update(conn_presence, NULL, 0);
     }
+
+    return 1;
+}
+
+static int
+_iq_handle_version_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *jid = xmpp_stanza_get_attribute(stanza, "from");
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        return 1;
+    }
+
+    char *ns = xmpp_stanza_get_ns(query);
+    if (g_strcmp0(ns, STANZA_NS_VERSION) != 0) {
+        return 1;
+    }
+
+    char *name_str = NULL;
+    char *version_str = NULL;
+    char *os_str = NULL;
+    xmpp_stanza_t *name = xmpp_stanza_get_child_by_name(query, "name");
+    xmpp_stanza_t *version = xmpp_stanza_get_child_by_name(query, "version");
+    xmpp_stanza_t *os = xmpp_stanza_get_child_by_name(query, "os");
+
+    if (name != NULL) {
+        name_str = xmpp_stanza_get_text(name);
+    }
+    if (version != NULL) {
+        version_str = xmpp_stanza_get_text(version);
+    }
+    if (os != NULL) {
+        os_str = xmpp_stanza_get_text(os);
+    }
+
+    prof_handle_version_result(jid, name_str, version_str, os_str);
 
     return 1;
 }
