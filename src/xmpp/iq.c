@@ -324,6 +324,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         const char *software_version = NULL;
         const char *os = NULL;
         const char *os_version = NULL;
+        GSList *features = NULL;
 
         xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
         if (identity != NULL) {
@@ -356,8 +357,17 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
             }
         }
 
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+        while (child != NULL) {
+            if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
+                features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
+            }
+
+            child = xmpp_stanza_get_next(child);
+        }
+
         caps_add(caps_key, category, type, name, software, software_version,
-            os, os_version);
+            os, os_version, features);
 
         //stanza_destroy_form(form);
         free(caps_key);

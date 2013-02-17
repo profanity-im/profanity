@@ -48,7 +48,8 @@ void
 caps_add(const char * const caps_str, const char * const category,
     const char * const type, const char * const name,
     const char * const software, const char * const software_version,
-    const char * const os, const char * const os_version)
+    const char * const os, const char * const os_version,
+    GSList *features)
 {
     Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
 
@@ -86,6 +87,11 @@ caps_add(const char * const caps_str, const char * const category,
         new_caps->os_version = strdup(os_version);
     } else {
         new_caps->os_version = NULL;
+    }
+    if (features != NULL) {
+        new_caps->features = features;
+    } else {
+        new_caps->features = NULL;
     }
 
     g_hash_table_insert(capabilities, strdup(caps_str), new_caps);
@@ -284,6 +290,10 @@ _caps_destroy(Capabilities *caps)
         FREE_SET_NULL(caps->software_version);
         FREE_SET_NULL(caps->os);
         FREE_SET_NULL(caps->os_version);
+        if (caps->features != NULL) {
+            g_slist_free_full(caps->features, free);
+            caps->features = NULL;
+        }
         FREE_SET_NULL(caps);
     }
 }

@@ -165,6 +165,7 @@ void cons_check_version(gboolean not_available_msg);
 void cons_show_wins(void);
 void cons_show_status(const char * const contact);
 void cons_show_info(PContact pcontact);
+void cons_show_caps(PContact pcontact);
 void cons_show_themes(GSList *themes);
 void cons_show_login_success(ProfAccount *account);
 

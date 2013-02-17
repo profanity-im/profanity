@@ -54,6 +54,7 @@ typedef struct capabilities_t {
     char *software_version;
     char *os;
     char *os_version;
+    GSList *features;
 } Capabilities;
 
 // connection functions
