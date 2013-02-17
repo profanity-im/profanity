@@ -68,7 +68,8 @@ void prof_handle_room_broadcast(const char *const room_jid,
     const char * const message);
 void prof_handle_idle(void);
 void prof_handle_activity(void);
-void prof_handle_version_result(const char * const jid, const char * const name,
+void prof_handle_version_result(const char * const jid,
+    const char * const presence, const char * const name,
     const char * const version, const char * const os);
 
 #endif

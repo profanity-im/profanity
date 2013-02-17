@@ -29,7 +29,9 @@
 
 #include "common.h"
 #include "contact_list.h"
+#include "jid.h"
 #include "log.h"
+#include "muc.h"
 #include "profanity.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
@@ -207,7 +209,19 @@ _iq_handle_version_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
         os_str = xmpp_stanza_get_text(os);
     }
 
-    prof_handle_version_result(jid, name_str, version_str, os_str);
+    PContact contact;
+    Jid *jidp = jid_create(jid);
+    if (muc_room_is_active(jidp)) {
+        contact = muc_get_participant(jidp->barejid, jidp->resourcepart);
+    } else {
+        contact = contact_list_get_contact(jidp->barejid);
+    }
+
+    Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
+    const char *presence = string_from_resource_presence(resource->presence);
+    prof_handle_version_result(jid, presence, name_str, version_str, os_str);
+
+    jid_destroy(jidp);
 
     return 1;
 }

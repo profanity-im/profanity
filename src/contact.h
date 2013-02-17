@@ -50,5 +50,6 @@ void p_contact_set_pending_out(const PContact contact, gboolean pending_out);
 void p_contact_set_last_activity(const PContact contact, GDateTime *last_activity);
 gboolean p_contact_is_available(const PContact contact);
 gboolean p_contact_has_available_resource(const PContact contact);
+Resource * p_contact_get_resource(const PContact contact, const char * const resource);
 
 #endif

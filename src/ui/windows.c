@@ -103,7 +103,7 @@ static void _win_resize_all(void);
 static gint _win_get_unread(void);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
-static void _win_show_info(WINDOW *win, PContact pcontact, gboolean show_caps);
+static void _win_show_info(WINDOW *win, PContact pcontact);
 static gboolean _new_release(char *found_version);
 static void _ui_draw_win_title(void);
 static void _presence_colour_on(WINDOW *win, const char * const presence);
@@ -1184,7 +1184,7 @@ cons_show_wins(void)
 void
 cons_show_info(PContact pcontact)
 {
-    _win_show_info(console->win, pcontact, FALSE);
+    _win_show_info(console->win, pcontact);
 
     if (current_index == 0) {
         dirty = TRUE;
@@ -1194,9 +1194,74 @@ cons_show_info(PContact pcontact)
 }
 
 void
-cons_show_caps(PContact pcontact)
+cons_show_caps(const char * const contact, Resource *resource)
 {
-    _win_show_info(console->win, pcontact, TRUE);
+    WINDOW *win = console->win;
+    cons_show("");
+    const char *resource_presence = string_from_resource_presence(resource->presence);
+    _win_show_time(win, '-');
+    _presence_colour_on(win, resource_presence);
+    wprintw(win, "%s", contact);
+    _presence_colour_off(win, resource_presence);
+    wprintw(win, ":\n");
+
+    if (resource->caps_str != NULL) {
+        Capabilities *caps = caps_get(resource->caps_str);
+        if (caps != NULL) {
+            // show identity
+            if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                _win_show_time(win, '-');
+                wprintw(win, "  Identity: ");
+                if (caps->name != NULL) {
+                    wprintw(win, "%s", caps->name);
+                    if ((caps->category != NULL) || (caps->type != NULL)) {
+                        wprintw(win, " ");
+                    }
+                }
+                if (caps->type != NULL) {
+                    wprintw(win, "%s", caps->type);
+                    if (caps->category != NULL) {
+                        wprintw(win, " ");
+                    }
+                }
+                if (caps->category != NULL) {
+                    wprintw(win, "%s", caps->category);
+                }
+                wprintw(win, "\n");
+            }
+            if (caps->software != NULL) {
+                _win_show_time(win, '-');
+                wprintw(win, "  Software: %s", caps->software);
+            }
+            if (caps->software_version != NULL) {
+                wprintw(win, ", %s", caps->software_version);
+            }
+            if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                wprintw(win, "\n");
+            }
+            if (caps->os != NULL) {
+                _win_show_time(win, '-');
+                wprintw(win, "  OS: %s", caps->os);
+            }
+            if (caps->os_version != NULL) {
+                wprintw(win, ", %s", caps->os_version);
+            }
+            if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                wprintw(win, "\n");
+            }
+
+            if (caps->features != NULL) {
+                _win_show_time(win, '-');
+                wprintw(win, "  Features:\n");
+                GSList *feature = caps->features;
+                while (feature != NULL) {
+                    _win_show_time(win, '-');
+                    wprintw(win, "    %s\n", feature->data);
+                    feature = g_slist_next(feature);
+                }
+            }
+        }
+    }
 
     if (current_index == 0) {
         dirty = TRUE;
@@ -1206,12 +1271,16 @@ cons_show_caps(PContact pcontact)
 }
 
 void
-cons_show_software_version(const char * const jid, const char * const name,
-    const char * const version, const char * const os)
+cons_show_software_version(const char * const jid, const char * const  presence,
+    const char * const name, const char * const version, const char * const os)
 {
     if ((name != NULL) || (version != NULL) || (os != NULL)) {
         cons_show("");
-        cons_show("%s:", jid);
+        _win_show_time(console->win, '-');
+        _presence_colour_on(console->win, presence);
+        wprintw(console->win, "%s", jid);
+        _presence_colour_off(console->win, presence);
+        wprintw(console->win, ":\n");
     }
     if (name != NULL) {
         cons_show("  Name    : %s", name);
@@ -2431,7 +2500,7 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
 }
 
 static void
-_win_show_info(WINDOW *win, PContact pcontact, gboolean show_caps)
+_win_show_info(WINDOW *win, PContact pcontact)
 {
     const char *barejid = p_contact_barejid(pcontact);
     const char *name = p_contact_name(pcontact);
@@ -2551,18 +2620,6 @@ _win_show_info(WINDOW *win, PContact pcontact, gboolean show_caps)
                 if ((caps->os != NULL) || (caps->os_version != NULL)) {
                     wprintw(win, "\n");
                 }
-
-                if (show_caps && caps->features != NULL) {
-                    _win_show_time(win, '-');
-                    wprintw(win, "    Features:\n");
-                    GSList *feature = caps->features;
-                    while (feature != NULL) {
-                        _win_show_time(win, '-');
-                        wprintw(win, "      %s\n", feature->data);
-                        feature = g_slist_next(feature);
-                    }
-                }
-
             }
         }
 

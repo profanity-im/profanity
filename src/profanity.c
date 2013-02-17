@@ -394,10 +394,10 @@ prof_handle_activity(void)
 }
 
 void
-prof_handle_version_result(const char * const jid, const char * const name,
-    const char * const version, const char * const os)
+prof_handle_version_result(const char * const jid, const char * const  presence,
+    const char * const name, const char * const version, const char * const os)
 {
-    cons_show_software_version(jid, name, version, os);
+    cons_show_software_version(jid, presence, name, version, os);
     win_current_page_off();
 }
 

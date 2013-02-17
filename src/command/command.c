@@ -277,7 +277,6 @@ static struct cmd_t main_commands[] =
           "----------------",
           "Find out a contact, or room members client capabilities.",
           "If in a chat window the parameter is not required, the current recipient will be used.",
-          "The command output is similar to the /info command, but shows the capabilities of each available resource.",
           NULL } } },
 
     { "/software",
@@ -995,7 +994,7 @@ _cmd_complete_parameters(char *input, int *size)
         _parameter_autocomplete(input, size, "/info",
             contact_list_find_contact);
         _parameter_autocomplete(input, size, "/caps",
-            contact_list_find_contact);
+            contact_list_find_resource);
         _parameter_autocomplete(input, size, "/status",
             contact_list_find_contact);
         _parameter_autocomplete(input, size, "/software",
@@ -1890,66 +1889,52 @@ _cmd_info(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_caps(gchar **args, struct cmd_help_t help)
 {
-    char *usr = args[0];
-
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
         if (win_current_is_groupchat()) {
-            if (usr != NULL) {
-                PContact pcontact = muc_get_participant(win_current_get_recipient(), usr);
+            if (args[0] != NULL) {
+                PContact pcontact = muc_get_participant(win_current_get_recipient(), args[0]);
                 if (pcontact != NULL) {
-                    cons_show_caps(pcontact);
+                    Resource *resource = p_contact_get_resource(pcontact, args[0]);
+                    cons_show_caps(args[0], resource);
                 } else {
-                    cons_show("No such participant \"%s\" in room.", usr);
+                    cons_show("No such participant \"%s\" in room.", args[0]);
                 }
             } else {
-                cons_show("No nickname supplied to /info in chat room.");
+                cons_show("No nickname supplied to /caps in chat room.");
             }
+        } else if (win_current_is_chat() || win_current_is_console()) {
+            if (args[0] != NULL) {
+                Jid *jid = jid_create(args[0]);
 
-        } else if (win_current_is_chat()) {
-            if (usr != NULL) {
-                cons_show("No parameter required for /info in chat.");
-            } else {
-                PContact pcontact = contact_list_get_contact(win_current_get_recipient());
-                if (pcontact != NULL) {
-                    cons_show_caps(pcontact);
+                if (jid->fulljid == NULL) {
+                    cons_show("You must provide a full jid to the /caps command.");
                 } else {
-                    cons_show("No such contact \"%s\" in roster.", win_current_get_recipient());
+                    PContact pcontact = contact_list_get_contact(jid->barejid);
+                    Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
+                    cons_show_caps(jid->fulljid, resource);
                 }
+            } else {
+                cons_show("You must provide a jid to the /caps command.");
             }
-
-        } else if (win_current_is_private()) {
-            if (usr != NULL) {
-                win_current_show("No parameter required when in chat.");
+        } else { // private chat
+            if (args[0] != NULL) {
+                cons_show("No parameter needed to /caps when in private chat.");
             } else {
                 Jid *jid = jid_create(win_current_get_recipient());
                 PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-                if (pcontact != NULL) {
-                    cons_show_caps(pcontact);
-                } else {
-                    cons_show("No such participant \"%s\" in room.", jid->resourcepart);
-                }
-                jid_destroy(jid);
-            }
-        } else {
-            if (usr != NULL) {
-                PContact pcontact = contact_list_get_contact(usr);
-                if (pcontact != NULL) {
-                    cons_show_caps(pcontact);
-                } else {
-                    cons_show("No such contact \"%s\" in roster.", usr);
-                }
-            } else {
-                cons_show("Usage: %s", help.usage);
+                Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
+                cons_show_caps(jid->resourcepart, resource);
             }
         }
     }
 
     return TRUE;
 }
+
 
 static gboolean
 _cmd_software(gchar **args, struct cmd_help_t help)

@@ -223,6 +223,12 @@ p_contact_subscription(const PContact contact)
     return contact->subscription;
 }
 
+Resource *
+p_contact_get_resource(const PContact contact, const char * const resource)
+{
+    return g_hash_table_lookup(contact->available_resources, resource);
+}
+
 gboolean
 p_contact_pending_out(const PContact contact)
 {
