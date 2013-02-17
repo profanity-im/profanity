@@ -340,13 +340,15 @@ prof_handle_contact_offline(char *contact, char *resource, char *status)
     gboolean updated = contact_list_contact_offline(contact, resource, status);
 
     if (resource != NULL && updated) {
+        Jid *jid = jid_create_from_bare_and_resource(contact, resource);
         PContact result = contact_list_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
-                ui_contact_offline(contact, "offline", status);
+                ui_contact_offline(jid->fulljid, "offline", status);
                 win_current_page_off();
             }
         }
+        jid_destroy(jid);
     }
 }
 
