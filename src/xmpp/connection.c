@@ -52,6 +52,8 @@ static struct _jabber_conn_t {
     int tls_disabled;
 } jabber_conn;
 
+static GHashTable *available_resources;
+
 // for auto reconnect
 static struct {
     char *name;
@@ -92,6 +94,8 @@ jabber_init(const int disable_tls)
     jabber_conn.tls_disabled = disable_tls;
     presence_init();
     caps_init();
+    available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+        (GDestroyNotify)resource_destroy);
 }
 
 jabber_conn_status_t
@@ -201,6 +205,12 @@ jabber_set_autoping(const int seconds)
     }
 }
 
+GList *
+jabber_get_available_resources(void)
+{
+    return g_hash_table_get_values(available_resources);
+}
+
 jabber_conn_status_t
 jabber_get_connection_status(void)
 {
@@ -253,6 +263,18 @@ connection_set_priority(const int priority)
 }
 
 void
+connection_add_available_resource(Resource *resource)
+{
+    g_hash_table_replace(available_resources, strdup(resource->name), resource);
+}
+
+void
+connection_remove_available_resource(const char * const resource)
+{
+    g_hash_table_remove(available_resources, resource);
+}
+
+void
 connection_free_resources(void)
 {
     FREE_SET_NULL(saved_details.name);
@@ -261,6 +283,7 @@ connection_free_resources(void)
     FREE_SET_NULL(saved_details.altdomain);
     FREE_SET_NULL(saved_account.name);
     FREE_SET_NULL(saved_account.passwd);
+    g_hash_table_destroy(available_resources);
     chat_sessions_clear();
     presence_free_sub_requests();
     xmpp_conn_release(jabber_conn.conn);

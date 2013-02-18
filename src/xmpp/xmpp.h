@@ -70,6 +70,7 @@ jabber_conn_status_t jabber_get_connection_status(void);
 char * jabber_get_presence_message(void);
 void jabber_set_autoping(int seconds);
 char* jabber_get_account_name(void);
+GList * jabber_get_available_resources(void);
 
 // message functions
 void message_send(const char * const msg, const char * const recipient);

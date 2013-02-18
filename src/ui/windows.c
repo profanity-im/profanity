@@ -1332,6 +1332,114 @@ cons_show_account_list(gchar **accounts)
 }
 
 void
+cons_show_account(ProfAccount *account)
+{
+    cons_show("");
+    cons_show("Account %s:", account->name);
+    if (account->enabled) {
+        cons_show   ("enabled        : TRUE");
+    } else {
+        cons_show   ("enabled        : FALSE");
+    }
+    cons_show       ("jid            : %s", account->jid);
+    if (account->resource != NULL) {
+        cons_show   ("resource       : %s", account->resource);
+    }
+    if (account->server != NULL) {
+        cons_show   ("server         : %s", account->server);
+    }
+    if (account->last_presence != NULL) {
+        cons_show   ("Last presence  : %s", account->last_presence);
+    }
+    if (account->login_presence != NULL) {
+        cons_show   ("Login presence : %s", account->login_presence);
+    }
+    cons_show       ("Priority       : chat:%d, online:%d, away:%d, xa:%d, dnd:%d",
+        account->priority_chat, account->priority_online, account->priority_away,
+        account->priority_xa, account->priority_dnd);
+
+    GList *resources = jabber_get_available_resources();
+    GList *ordered_resources = NULL;
+
+    WINDOW *win = console->win;
+    if (resources != NULL) {
+        _win_show_time(win, '-');
+        wprintw(win, "Resources:\n");
+
+        // sort in order of availabiltiy
+        while (resources != NULL) {
+            Resource *resource = resources->data;
+            ordered_resources = g_list_insert_sorted(ordered_resources,
+                resource, (GCompareFunc)resource_compare_availability);
+            resources = g_list_next(resources);
+        }
+    }
+
+    while (ordered_resources != NULL) {
+        Resource *resource = ordered_resources->data;
+        const char *resource_presence = string_from_resource_presence(resource->presence);
+        _win_show_time(win, '-');
+        _presence_colour_on(win, resource_presence);
+        wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+        if (resource->status != NULL) {
+            wprintw(win, ", \"%s\"", resource->status);
+        }
+        wprintw(win, "\n");
+        _presence_colour_off(win, resource_presence);
+
+        if (resource->caps_str != NULL) {
+            Capabilities *caps = caps_get(resource->caps_str);
+            if (caps != NULL) {
+                // show identity
+                if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                    _win_show_time(win, '-');
+                    wprintw(win, "    Identity: ");
+                    if (caps->name != NULL) {
+                        wprintw(win, "%s", caps->name);
+                        if ((caps->category != NULL) || (caps->type != NULL)) {
+                            wprintw(win, " ");
+                        }
+                    }
+                    if (caps->type != NULL) {
+                        wprintw(win, "%s", caps->type);
+                        if (caps->category != NULL) {
+                            wprintw(win, " ");
+                        }
+                    }
+                    if (caps->category != NULL) {
+                        wprintw(win, "%s", caps->category);
+                    }
+                    wprintw(win, "\n");
+                }
+                if (caps->software != NULL) {
+                    _win_show_time(win, '-');
+                    wprintw(win, "    Software: %s", caps->software);
+                }
+                if (caps->software_version != NULL) {
+                    wprintw(win, ", %s", caps->software_version);
+                }
+                if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                    wprintw(win, "\n");
+                }
+                if (caps->os != NULL) {
+                    _win_show_time(win, '-');
+                    wprintw(win, "    OS: %s", caps->os);
+                }
+                if (caps->os_version != NULL) {
+                    wprintw(win, ", %s", caps->os_version);
+                }
+                if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                    wprintw(win, "\n");
+                }
+            }
+        }
+
+        ordered_resources = g_list_next(ordered_resources);
+    }
+
+}
+
+void
 win_show_status(void)
 {
     char *recipient = win_current_get_recipient();
@@ -1370,36 +1478,6 @@ win_room_show_status(const char * const contact)
     } else {
         win_current_show("No such participant \"%s\" in room.", contact);
     }
-}
-
-void
-cons_show_account(ProfAccount *account)
-{
-    cons_show("%s account details:", account->name);
-    if (account->enabled) {
-        cons_show   ("enabled           : TRUE");
-    } else {
-        cons_show   ("enabled           : FALSE");
-    }
-    cons_show       ("jid               : %s", account->jid);
-    if (account->resource != NULL) {
-        cons_show   ("resource          : %s", account->resource);
-    }
-    if (account->server != NULL) {
-        cons_show   ("server            : %s", account->server);
-    }
-    if (account->last_presence != NULL) {
-        cons_show   ("Last presence     : %s", account->last_presence);
-    }
-    if (account->login_presence != NULL) {
-        cons_show   ("Login presence    : %s", account->login_presence);
-    }
-    cons_show       ("Priority (chat)   : %d", account->priority_chat);
-    cons_show       ("Priority (online) : %d", account->priority_online);
-    cons_show       ("Priority (away)   : %d", account->priority_away);
-    cons_show       ("Priority (xa)     : %d", account->priority_xa);
-    cons_show       ("Priority (dnd)    : %d", account->priority_dnd);
-    cons_show("");
 }
 
 void

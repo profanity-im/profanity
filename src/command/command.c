@@ -184,9 +184,9 @@ static struct cmd_t main_commands[] =
           NULL  } } },
 
     { "/account",
-        _cmd_account, parse_args, 1, 4,
-        { "/account command [account] [property] [value]", "Manage accounts.",
-        { "/account command [account] [property] [value]",
+        _cmd_account, parse_args, 0, 4,
+        { "/account [command] [account] [property] [value]", "Manage accounts.",
+        { "/account [command] [account] [property] [value]",
           "---------------------------------------------",
           "Commands for creating and managing accounts.",
           "list                       : List all accounts.",
@@ -197,6 +197,7 @@ static struct cmd_t main_commands[] =
           "rename account newname     : Rename account to newname.",
           "set account property value : Set 'property' of 'account' to 'value'.",
           "",
+          "When connected, the /account command can be called with no arguments, to info about the current account.",
           "The 'property' may be one of.",
           "jid              : The Jabber ID of the account, the account name will be used if this property is not set.",
           "server           : The chat service server, if different to the domain part of the JID.",
@@ -1079,7 +1080,15 @@ _cmd_account(gchar **args, struct cmd_help_t help)
 {
     char *command = args[0];
 
-    if (strcmp(command, "list") == 0) {
+    if (command == NULL) {
+        if (jabber_get_connection_status() != JABBER_CONNECTED) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            ProfAccount *account = accounts_get_account(jabber_get_account_name());
+            cons_show_account(account);
+            accounts_free_account(account);
+        }
+    } else if (strcmp(command, "list") == 0) {
         gchar **accounts = accounts_get_list();
         cons_show_account_list(accounts);
         g_strfreev(accounts);
