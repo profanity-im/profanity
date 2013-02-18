@@ -1358,85 +1358,87 @@ cons_show_account(ProfAccount *account)
         account->priority_chat, account->priority_online, account->priority_away,
         account->priority_xa, account->priority_dnd);
 
-    GList *resources = jabber_get_available_resources();
-    GList *ordered_resources = NULL;
+    if ((jabber_get_connection_status() == JABBER_CONNECTED) &&
+            (g_strcmp0(jabber_get_account_name(), account->name) == 0)) {
+        GList *resources = jabber_get_available_resources();
+        GList *ordered_resources = NULL;
 
-    WINDOW *win = console->win;
-    if (resources != NULL) {
-        _win_show_time(win, '-');
-        wprintw(win, "Resources:\n");
+        WINDOW *win = console->win;
+        if (resources != NULL) {
+            _win_show_time(win, '-');
+            wprintw(win, "Resources:\n");
 
-        // sort in order of availabiltiy
-        while (resources != NULL) {
-            Resource *resource = resources->data;
-            ordered_resources = g_list_insert_sorted(ordered_resources,
-                resource, (GCompareFunc)resource_compare_availability);
-            resources = g_list_next(resources);
-        }
-    }
-
-    while (ordered_resources != NULL) {
-        Resource *resource = ordered_resources->data;
-        const char *resource_presence = string_from_resource_presence(resource->presence);
-        _win_show_time(win, '-');
-        _presence_colour_on(win, resource_presence);
-        wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
-        if (resource->status != NULL) {
-            wprintw(win, ", \"%s\"", resource->status);
-        }
-        wprintw(win, "\n");
-        _presence_colour_off(win, resource_presence);
-
-        if (resource->caps_str != NULL) {
-            Capabilities *caps = caps_get(resource->caps_str);
-            if (caps != NULL) {
-                // show identity
-                if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                    _win_show_time(win, '-');
-                    wprintw(win, "    Identity: ");
-                    if (caps->name != NULL) {
-                        wprintw(win, "%s", caps->name);
-                        if ((caps->category != NULL) || (caps->type != NULL)) {
-                            wprintw(win, " ");
-                        }
-                    }
-                    if (caps->type != NULL) {
-                        wprintw(win, "%s", caps->type);
-                        if (caps->category != NULL) {
-                            wprintw(win, " ");
-                        }
-                    }
-                    if (caps->category != NULL) {
-                        wprintw(win, "%s", caps->category);
-                    }
-                    wprintw(win, "\n");
-                }
-                if (caps->software != NULL) {
-                    _win_show_time(win, '-');
-                    wprintw(win, "    Software: %s", caps->software);
-                }
-                if (caps->software_version != NULL) {
-                    wprintw(win, ", %s", caps->software_version);
-                }
-                if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                    wprintw(win, "\n");
-                }
-                if (caps->os != NULL) {
-                    _win_show_time(win, '-');
-                    wprintw(win, "    OS: %s", caps->os);
-                }
-                if (caps->os_version != NULL) {
-                    wprintw(win, ", %s", caps->os_version);
-                }
-                if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                    wprintw(win, "\n");
-                }
+            // sort in order of availabiltiy
+            while (resources != NULL) {
+                Resource *resource = resources->data;
+                ordered_resources = g_list_insert_sorted(ordered_resources,
+                    resource, (GCompareFunc)resource_compare_availability);
+                resources = g_list_next(resources);
             }
         }
 
-        ordered_resources = g_list_next(ordered_resources);
-    }
+        while (ordered_resources != NULL) {
+            Resource *resource = ordered_resources->data;
+            const char *resource_presence = string_from_resource_presence(resource->presence);
+            _win_show_time(win, '-');
+            _presence_colour_on(win, resource_presence);
+            wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+            if (resource->status != NULL) {
+                wprintw(win, ", \"%s\"", resource->status);
+            }
+            wprintw(win, "\n");
+            _presence_colour_off(win, resource_presence);
 
+            if (resource->caps_str != NULL) {
+                Capabilities *caps = caps_get(resource->caps_str);
+                if (caps != NULL) {
+                    // show identity
+                    if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                        _win_show_time(win, '-');
+                        wprintw(win, "    Identity: ");
+                        if (caps->name != NULL) {
+                            wprintw(win, "%s", caps->name);
+                            if ((caps->category != NULL) || (caps->type != NULL)) {
+                                wprintw(win, " ");
+                            }
+                        }
+                        if (caps->type != NULL) {
+                            wprintw(win, "%s", caps->type);
+                            if (caps->category != NULL) {
+                                wprintw(win, " ");
+                            }
+                        }
+                        if (caps->category != NULL) {
+                            wprintw(win, "%s", caps->category);
+                        }
+                        wprintw(win, "\n");
+                    }
+                    if (caps->software != NULL) {
+                        _win_show_time(win, '-');
+                        wprintw(win, "    Software: %s", caps->software);
+                    }
+                    if (caps->software_version != NULL) {
+                        wprintw(win, ", %s", caps->software_version);
+                    }
+                    if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                        wprintw(win, "\n");
+                    }
+                    if (caps->os != NULL) {
+                        _win_show_time(win, '-');
+                        wprintw(win, "    OS: %s", caps->os);
+                    }
+                    if (caps->os_version != NULL) {
+                        wprintw(win, ", %s", caps->os_version);
+                    }
+                    if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                        wprintw(win, "\n");
+                    }
+                }
+            }
+
+            ordered_resources = g_list_next(ordered_resources);
+        }
+    }
 }
 
 void
