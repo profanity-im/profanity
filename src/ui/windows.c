@@ -1306,6 +1306,32 @@ cons_show_status(const char * const contact)
 }
 
 void
+cons_show_account_list(gchar **accounts)
+{
+    int size = g_strv_length(accounts);
+    if (size > 0) {
+        cons_show("Accounts:");
+        int i = 0;
+        for (i = 0; i < size; i++) {
+            if ((jabber_get_connection_status() == JABBER_CONNECTED) &&
+                    (g_strcmp0(jabber_get_account_name(), accounts[i]) == 0)) {
+                resource_presence_t presence = accounts_get_last_presence(accounts[i]);
+                _win_show_time(console->win, '-');
+                _presence_colour_on(console->win, string_from_resource_presence(presence));
+                wprintw(console->win, "%s\n", accounts[i]);
+                _presence_colour_off(console->win, string_from_resource_presence(presence));
+            } else {
+                cons_show(accounts[i]);
+            }
+        }
+        cons_show("");
+    } else {
+        cons_show("No accounts created yet.");
+        cons_show("");
+    }
+}
+
+void
 win_show_status(void)
 {
     char *recipient = win_current_get_recipient();

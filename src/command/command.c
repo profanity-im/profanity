@@ -1081,19 +1081,8 @@ _cmd_account(gchar **args, struct cmd_help_t help)
 
     if (strcmp(command, "list") == 0) {
         gchar **accounts = accounts_get_list();
-        int size = g_strv_length(accounts);
-
-        if (size > 0) {
-            cons_show("Accounts:");
-            int i = 0;
-            for (i = 0; i < size; i++) {
-                cons_show(accounts[i]);
-            }
-            cons_show("");
-        } else {
-            cons_show("No accounts created yet.");
-            cons_show("");
-        }
+        cons_show_account_list(accounts);
+        g_strfreev(accounts);
     } else if (strcmp(command, "show") == 0) {
         char *account_name = args[1];
         if (account_name == NULL) {
