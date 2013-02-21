@@ -94,8 +94,8 @@ jabber_init(const int disable_tls)
     jabber_conn.tls_disabled = disable_tls;
     presence_init();
     caps_init();
-//    available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
-//        (GDestroyNotify)resource_destroy);
+    available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+        (GDestroyNotify)resource_destroy);
 }
 
 jabber_conn_status_t
@@ -283,7 +283,7 @@ connection_free_resources(void)
     FREE_SET_NULL(saved_details.altdomain);
     FREE_SET_NULL(saved_account.name);
     FREE_SET_NULL(saved_account.passwd);
-//    g_hash_table_remove_all(available_resources);
+    g_hash_table_remove_all(available_resources);
     chat_sessions_clear();
     presence_free_sub_requests();
     xmpp_conn_release(jabber_conn.conn);
