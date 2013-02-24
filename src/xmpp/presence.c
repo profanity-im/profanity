@@ -420,19 +420,23 @@ _available_handler(xmpp_conn_t * const conn,
         }
     }
 
-    // if not self presence (TODO allow self presence from other resources?)
+    // if not self presence
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-        // create the resource
-        resource_presence_t presence = resource_presence_from_string(show_str);
-        Resource *resource = resource_new(from_jid->resourcepart, presence,
-            status_str, priority, caps_key);
-        prof_handle_contact_online(from_jid->barejid, resource, last_activity);
+        // create the resource, if fulljid    
+        if (from_jid->resourcepart != NULL) {
+            resource_presence_t presence = resource_presence_from_string(show_str);
+            Resource *resource = resource_new(from_jid->resourcepart, presence,
+                status_str, priority, caps_key);
+            prof_handle_contact_online(from_jid->barejid, resource, last_activity);
+        }
     } else {
-        // handle self presence
-        resource_presence_t presence = resource_presence_from_string(show_str);
-        Resource *resource = resource_new(from_jid->resourcepart, presence,
-            status_str, priority, caps_key);
-        connection_add_available_resource(resource);
+        // handle self presenc, if fulljid
+        if (from_jid->resourcepart != NULL) {
+            resource_presence_t presence = resource_presence_from_string(show_str);
+            Resource *resource = resource_new(from_jid->resourcepart, presence,
+                status_str, priority, caps_key);
+            connection_add_available_resource(resource);
+        }
     }
 
     jid_destroy(my_jid);
