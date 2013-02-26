@@ -400,13 +400,16 @@ _connection_handler(xmpp_conn_t * const conn,
 
     // login success
     if (status == XMPP_CONN_CONNECT) {
+        log_debug("Connection handler: XMPP_CONN_CONNECT");
 
         // logged in with account
         if (saved_account.name != NULL) {
+            log_debug("Connection handler: logged in with account name: %s", saved_account.name);
             prof_handle_login_account_success(saved_account.name);
 
         // logged in without account, use details to create new account
         } else {
+            log_debug("Connection handler: logged in with jid: %s", saved_details.name);
             accounts_add(saved_details.name, saved_details.altdomain);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
@@ -442,9 +445,11 @@ _connection_handler(xmpp_conn_t * const conn,
         }
 
     } else if (status == XMPP_CONN_DISCONNECT) {
+        log_debug("Connection handler: XMPP_CONN_DISCONNECT");
 
         // lost connection for unkown reason
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
+            log_debug("Connection handler: Lost connection for unknown reason");
             prof_handle_lost_connection();
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
@@ -456,10 +461,13 @@ _connection_handler(xmpp_conn_t * const conn,
 
         // login attempt failed
         } else if (jabber_conn.conn_status != JABBER_DISCONNECTING) {
+            log_debug("Connection handler: Login failed");
             if (reconnect_timer == NULL) {
+                log_debug("Connection handler: No reconnect timer");
                 prof_handle_failed_login();
                 connection_free_resources();
             } else {
+                log_debug("Connection handler: Restarting reconnect timer");
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);
                 }
@@ -469,6 +477,10 @@ _connection_handler(xmpp_conn_t * const conn,
 
         // close stream response from server after disconnect is handled too
         jabber_conn.conn_status = JABBER_DISCONNECTED;
+    } else if (status == XMPP_CONN_FAIL) {
+        log_debug("Connection handler: XMPP_CONN_FAIL");
+    } else {
+        log_error("Connection handler: Unknown status");
     }
 }
 
