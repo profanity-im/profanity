@@ -85,7 +85,10 @@ static void _connection_handler(xmpp_conn_t * const conn,
     xmpp_stream_error_t * const stream_error, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
-void _connection_free_resources(void);
+void _connection_free_saved_account(void);
+void _connection_free_saved_details(void);
+void _connection_free_session_data(void);
+void _connection_shutdown(void);
 
 void
 jabber_init(const int disable_tls)
@@ -165,7 +168,10 @@ jabber_disconnect(void)
         while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
         }
-        _connection_free_resources();
+        _connection_free_saved_account();
+        _connection_free_saved_details();
+        _connection_free_session_data();
+        _connection_shutdown();
     }
 
     jabber_conn.conn_status = JABBER_STARTED;
@@ -277,17 +283,32 @@ connection_remove_available_resource(const char * const resource)
 }
 
 void
-_connection_free_resources(void)
+_connection_free_saved_account(void)
+{
+    FREE_SET_NULL(saved_account.name);
+    FREE_SET_NULL(saved_account.passwd);
+}
+
+void
+_connection_free_saved_details(void)
 {
     FREE_SET_NULL(saved_details.name);
     FREE_SET_NULL(saved_details.jid);
     FREE_SET_NULL(saved_details.passwd);
     FREE_SET_NULL(saved_details.altdomain);
-    FREE_SET_NULL(saved_account.name);
-    FREE_SET_NULL(saved_account.passwd);
+}
+
+void
+_connection_free_session_data(void)
+{
     g_hash_table_remove_all(available_resources);
     chat_sessions_clear();
     presence_free_sub_requests();
+}
+
+void
+_connection_shutdown(void)
+{
     xmpp_conn_release(jabber_conn.conn);
     xmpp_ctx_free(jabber_conn.ctx);
     xmpp_shutdown();
@@ -458,7 +479,10 @@ _connection_handler(xmpp_conn_t * const conn,
                 reconnect_timer = g_timer_new();
                 // TODO: free resources but leave saved_user untouched
             } else {
-                _connection_free_resources();
+                _connection_free_saved_account();
+                _connection_free_saved_details();
+                _connection_free_session_data();
+                _connection_shutdown();
             }
 
         // login attempt failed
@@ -467,7 +491,10 @@ _connection_handler(xmpp_conn_t * const conn,
             if (reconnect_timer == NULL) {
                 log_debug("Connection handler: No reconnect timer");
                 prof_handle_failed_login();
-                _connection_free_resources();
+                _connection_free_saved_account();
+                _connection_free_saved_details();
+                _connection_free_session_data();
+                _connection_shutdown();
             } else {
                 log_debug("Connection handler: Restarting reconnect timer");
                 if (prefs_get_reconnect() != 0) {
