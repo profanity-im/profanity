@@ -440,10 +440,7 @@ _connection_handler(xmpp_conn_t * const conn,
             saved_account.name = strdup(saved_details.name);
             saved_account.passwd = strdup(saved_details.passwd);
 
-            FREE_SET_NULL(saved_details.name);
-            FREE_SET_NULL(saved_details.jid);
-            FREE_SET_NULL(saved_details.passwd);
-            FREE_SET_NULL(saved_details.altdomain);
+            _connection_free_saved_details();
         }
 
         chat_sessions_init();
