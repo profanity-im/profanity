@@ -533,6 +533,7 @@ static void
 _shutdown(void)
 {
     jabber_disconnect();
+    jabber_shutdown();
     contact_list_free();
     caps_close();
     ui_close();

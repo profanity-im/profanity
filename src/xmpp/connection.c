@@ -95,11 +95,14 @@ jabber_init(const int disable_tls)
     log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
     jabber_conn.presence_message = NULL;
+    jabber_conn.conn = NULL;
+    jabber_conn.ctx = NULL;
     jabber_conn.tls_disabled = disable_tls;
     presence_init();
     caps_init();
     available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
         (GDestroyNotify)resource_destroy);
+    xmpp_initialize();
 }
 
 jabber_conn_status_t
@@ -171,12 +174,19 @@ jabber_disconnect(void)
         _connection_free_saved_details();
         _connection_free_session_data();
         xmpp_conn_release(jabber_conn.conn);
+        jabber_conn.conn = NULL;
         xmpp_ctx_free(jabber_conn.ctx);
-        xmpp_shutdown();
+        jabber_conn.ctx = NULL;
     }
 
     jabber_conn.conn_status = JABBER_STARTED;
     FREE_SET_NULL(jabber_conn.presence_message);
+}
+
+void
+jabber_shutdown(void)
+{
+    xmpp_shutdown();
 }
 
 void
@@ -369,15 +379,21 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     jid_destroy(jid);
 
     log_info("Connecting as %s", fulljid);
-    xmpp_initialize();
     jabber_conn.log = _xmpp_get_file_logger();
+
+    if (jabber_conn.conn != NULL) {
+        xmpp_conn_release(jabber_conn.conn);
+    }
+    if (jabber_conn.ctx != NULL) {
+        xmpp_ctx_free(jabber_conn.ctx);
+    }
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
     jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
     xmpp_conn_set_jid(jabber_conn.conn, fulljid);
     xmpp_conn_set_pass(jabber_conn.conn, passwd);
-
-    if (jabber_conn.tls_disabled)
+    if (jabber_conn.tls_disabled) {
         xmpp_conn_disable_tls(jabber_conn.conn);
+    }
 
     int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, 0,
         _connection_handler, jabber_conn.ctx);
@@ -467,14 +483,12 @@ _connection_handler(xmpp_conn_t * const conn,
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
-                // TODO: free resources but leave saved_user untouched
+                // free resources but leave saved_user untouched
+                _connection_free_session_data();
             } else {
                 _connection_free_saved_account();
                 _connection_free_saved_details();
                 _connection_free_session_data();
-                xmpp_conn_release(jabber_conn.conn);
-                xmpp_ctx_free(jabber_conn.ctx);
-                xmpp_shutdown();
             }
 
         // login attempt failed
@@ -486,15 +500,13 @@ _connection_handler(xmpp_conn_t * const conn,
                 _connection_free_saved_account();
                 _connection_free_saved_details();
                 _connection_free_session_data();
-                xmpp_conn_release(jabber_conn.conn);
-                xmpp_ctx_free(jabber_conn.ctx);
-                xmpp_shutdown();
             } else {
                 log_debug("Connection handler: Restarting reconnect timer");
                 if (prefs_get_reconnect() != 0) {
                     g_timer_start(reconnect_timer);
                 }
-                // TODO: free resources but leave saved_user untouched
+                // free resources but leave saved_user untouched
+                _connection_free_session_data();
             }
         }
 
