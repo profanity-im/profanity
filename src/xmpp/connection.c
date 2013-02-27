@@ -88,7 +88,6 @@ static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 void _connection_free_saved_account(void);
 void _connection_free_saved_details(void);
 void _connection_free_session_data(void);
-void _connection_shutdown(void);
 
 void
 jabber_init(const int disable_tls)
@@ -171,7 +170,9 @@ jabber_disconnect(void)
         _connection_free_saved_account();
         _connection_free_saved_details();
         _connection_free_session_data();
-        _connection_shutdown();
+        xmpp_conn_release(jabber_conn.conn);
+        xmpp_ctx_free(jabber_conn.ctx);
+        xmpp_shutdown();
     }
 
     jabber_conn.conn_status = JABBER_STARTED;
@@ -304,14 +305,6 @@ _connection_free_session_data(void)
     g_hash_table_remove_all(available_resources);
     chat_sessions_clear();
     presence_free_sub_requests();
-}
-
-void
-_connection_shutdown(void)
-{
-    xmpp_conn_release(jabber_conn.conn);
-    xmpp_ctx_free(jabber_conn.ctx);
-    xmpp_shutdown();
 }
 
 int
@@ -479,7 +472,9 @@ _connection_handler(xmpp_conn_t * const conn,
                 _connection_free_saved_account();
                 _connection_free_saved_details();
                 _connection_free_session_data();
-                _connection_shutdown();
+                xmpp_conn_release(jabber_conn.conn);
+                xmpp_ctx_free(jabber_conn.ctx);
+                xmpp_shutdown();
             }
 
         // login attempt failed
@@ -491,7 +486,9 @@ _connection_handler(xmpp_conn_t * const conn,
                 _connection_free_saved_account();
                 _connection_free_saved_details();
                 _connection_free_session_data();
-                _connection_shutdown();
+                xmpp_conn_release(jabber_conn.conn);
+                xmpp_ctx_free(jabber_conn.ctx);
+                xmpp_shutdown();
             } else {
                 log_debug("Connection handler: Restarting reconnect timer");
                 if (prefs_get_reconnect() != 0) {
