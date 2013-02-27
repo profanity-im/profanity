@@ -25,7 +25,6 @@
 
 #include <strophe.h>
 
-void connection_free_resources(void);
 xmpp_conn_t *connection_get_conn(void);
 xmpp_ctx_t *connection_get_ctx(void);
 int connection_error_handler(xmpp_conn_t * const conn,

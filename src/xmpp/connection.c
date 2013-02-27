@@ -85,6 +85,8 @@ static void _connection_handler(xmpp_conn_t * const conn,
     xmpp_stream_error_t * const stream_error, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
+void _connection_free_resources(void);
+
 void
 jabber_init(const int disable_tls)
 {
@@ -163,7 +165,7 @@ jabber_disconnect(void)
         while (jabber_get_connection_status() == JABBER_DISCONNECTING) {
             jabber_process_events();
         }
-        connection_free_resources();
+        _connection_free_resources();
     }
 
     jabber_conn.conn_status = JABBER_STARTED;
@@ -275,7 +277,7 @@ connection_remove_available_resource(const char * const resource)
 }
 
 void
-connection_free_resources(void)
+_connection_free_resources(void)
 {
     FREE_SET_NULL(saved_details.name);
     FREE_SET_NULL(saved_details.jid);
@@ -456,7 +458,7 @@ _connection_handler(xmpp_conn_t * const conn,
                 reconnect_timer = g_timer_new();
                 // TODO: free resources but leave saved_user untouched
             } else {
-                connection_free_resources();
+                _connection_free_resources();
             }
 
         // login attempt failed
@@ -465,7 +467,7 @@ _connection_handler(xmpp_conn_t * const conn,
             if (reconnect_timer == NULL) {
                 log_debug("Connection handler: No reconnect timer");
                 prof_handle_failed_login();
-                connection_free_resources();
+                _connection_free_resources();
             } else {
                 log_debug("Connection handler: Restarting reconnect timer");
                 if (prefs_get_reconnect() != 0) {
