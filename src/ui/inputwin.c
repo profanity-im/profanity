@@ -49,6 +49,7 @@ static int pad_start = 0;
 static int rows, cols;
 
 static int _handle_edit(int result, const wint_t ch, char *input, int *size);
+static int _handle_alt_key(char *input, int *size, int key);
 static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
@@ -359,45 +360,10 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
         switch(ch) {
 
         case 27: // ESC
-            // check for ALT-num
+            // check for ALT-key
             next_ch = wgetch(inp_win);
             if (next_ch != ERR) {
-                switch (next_ch)
-                {
-                    case '1':
-                        ui_switch_win(0);
-                        break;
-                    case '2':
-                        ui_switch_win(1);
-                        break;
-                    case '3':
-                        ui_switch_win(2);
-                        break;
-                    case '4':
-                        ui_switch_win(3);
-                        break;
-                    case '5':
-                        ui_switch_win(4);
-                        break;
-                    case '6':
-                        ui_switch_win(5);
-                        break;
-                    case '7':
-                        ui_switch_win(6);
-                        break;
-                    case '8':
-                        ui_switch_win(7);
-                        break;
-                    case '9':
-                        ui_switch_win(8);
-                        break;
-                    case '0':
-                        ui_switch_win(9);
-                        break;
-                    default:
-                        break;
-                }
-                return 1;
+                return _handle_alt_key(input, size, next_ch);
             } else {
                 *size = 0;
                 inp_win_reset();
@@ -545,6 +511,51 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 0;
         }
     }
+}
+
+static int
+_handle_alt_key(char *input, int *size, int key)
+{
+    switch (key)
+    {
+        case '1':
+            ui_switch_win(0);
+            break;
+        case '2':
+            ui_switch_win(1);
+            break;
+        case '3':
+            ui_switch_win(2);
+            break;
+        case '4':
+            ui_switch_win(3);
+            break;
+        case '5':
+            ui_switch_win(4);
+            break;
+        case '6':
+            ui_switch_win(5);
+            break;
+        case '7':
+            ui_switch_win(6);
+            break;
+        case '8':
+            ui_switch_win(7);
+            break;
+        case '9':
+            ui_switch_win(8);
+            break;
+        case '0':
+            ui_switch_win(9);
+            break;
+        case 127:
+            cons_debug("PRESSED ALT BACKSPACE");
+            return 1;
+            break;
+        default:
+            break;
+    }
+    return 1;
 }
 
 static void
