@@ -99,6 +99,7 @@ static gboolean _cmd_sub(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_msg(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_tiny(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_close(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_clear(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_join(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_beep(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_notify(gchar **args, struct cmd_help_t help);
@@ -391,6 +392,14 @@ static struct cmd_t main_commands[] =
           "Close the current chat window, no message is sent to the recipient,",
           "The chat window will become available for new chats.",
           "If in a chat room, you will leave the room.",
+          NULL } } },
+
+    { "/clear",
+        _cmd_clear, parse_args, 0, 0,
+        { "/clear", "Clear current window.",
+        { "/clear",
+          "------",
+          "Clear the current window.",
           NULL } } },
 
     { "/quit",
@@ -2097,6 +2106,13 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
         cons_show("/tiny can only be used in chat windows");
     }
 
+    return TRUE;
+}
+
+static gboolean
+_cmd_clear(gchar **args, struct cmd_help_t help)
+{
+    win_current_clear();
     return TRUE;
 }
 

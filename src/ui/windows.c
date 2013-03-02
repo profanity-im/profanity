@@ -551,6 +551,13 @@ ui_switch_win(const int i)
 }
 
 void
+win_current_clear(void)
+{
+    wclear(current->win);
+    dirty = TRUE;
+}
+
+void
 win_current_close(void)
 {
     window_free(current);
