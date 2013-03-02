@@ -173,10 +173,14 @@ jabber_disconnect(void)
         _connection_free_saved_account();
         _connection_free_saved_details();
         _connection_free_session_data();
-        xmpp_conn_release(jabber_conn.conn);
-        jabber_conn.conn = NULL;
-        xmpp_ctx_free(jabber_conn.ctx);
-        jabber_conn.ctx = NULL;
+        if (jabber_conn.conn != NULL) {
+            xmpp_conn_release(jabber_conn.conn);
+            jabber_conn.conn = NULL;
+        }
+        if (jabber_conn.ctx != NULL) {
+            xmpp_ctx_free(jabber_conn.ctx);
+            jabber_conn.ctx = NULL;
+        }
     }
 
     jabber_conn.conn_status = JABBER_STARTED;
@@ -388,7 +392,15 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
         xmpp_ctx_free(jabber_conn.ctx);
     }
     jabber_conn.ctx = xmpp_ctx_new(NULL, jabber_conn.log);
+    if (jabber_conn.ctx == NULL) {
+        log_warning("Failed to get libstrophe ctx during connect");
+        return JABBER_DISCONNECTED;
+    }
     jabber_conn.conn = xmpp_conn_new(jabber_conn.ctx);
+    if (jabber_conn.conn == NULL) {
+        log_warning("Failed to get libstrophe conn during connect");
+        return JABBER_DISCONNECTED;
+    }
     xmpp_conn_set_jid(jabber_conn.conn, fulljid);
     xmpp_conn_set_pass(jabber_conn.conn, passwd);
     if (jabber_conn.tls_disabled) {
