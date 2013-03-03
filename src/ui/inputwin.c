@@ -516,6 +516,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 static int
 _handle_alt_key(char *input, int *size, int key)
 {
+    int end_del = getcurx(inp_win);
+    int start_del = end_del;
+
     switch (key)
     {
         case '1':
@@ -549,7 +552,69 @@ _handle_alt_key(char *input, int *size, int key)
             ui_switch_win(9);
             break;
         case 127:
-            cons_debug("PRESSED ALT BACKSPACE");
+            input[*size] = '\0';
+            gchar *curr_ch = g_utf8_offset_to_pointer(input, end_del);
+            curr_ch = g_utf8_find_prev_char(input, curr_ch);
+            gchar *prev_ch;
+            gunichar curr_uni;
+            gunichar prev_uni;
+
+            while (curr_ch != NULL) {
+                curr_uni = g_utf8_get_char(curr_ch);
+
+                if (g_unichar_isspace(curr_uni)) {
+                    curr_ch = g_utf8_find_prev_char(input, curr_ch);
+                } else {
+                    prev_ch = g_utf8_find_prev_char(input, curr_ch);
+                    if (prev_ch == NULL) {
+                        curr_ch = NULL;
+                        break;
+                    } else {
+                        prev_uni = g_utf8_get_char(prev_ch);
+                        if (g_unichar_isspace(prev_uni)) {
+                            break;
+                        } else {
+                            curr_ch = prev_ch;
+                        }
+                    }
+                }
+            }
+
+            if (curr_ch == NULL) {
+                start_del = 0;
+            } else {
+                start_del = g_utf8_pointer_to_offset(input, curr_ch);
+            }
+
+            gint len = g_utf8_strlen(input, -1);
+            gchar *start_string = g_utf8_substring(input, 0, start_del);
+            gchar *end_string = g_utf8_substring(input, end_del, len);
+
+            int i;
+            for (i = 0; i < strlen(start_string); i++) {
+                input[i] = start_string[i];
+            }
+            for (i = 0; i < strlen(end_string); i++) {
+                input[strlen(start_string)+i] = end_string[i];
+            }
+
+            *size = strlen(start_string)+i;
+            input[*size] = '\0';
+
+            _clear_input();
+            waddstr(inp_win, input);
+            wmove(inp_win, 0, start_del);
+
+            // if gone off screen to left, jump left (half a screen worth)
+            if (start_del <= pad_start) {
+                pad_start = pad_start - (cols / 2);
+                if (pad_start < 0) {
+                    pad_start = 0;
+                }
+
+                _inp_win_refresh();
+            }
+
             return 1;
             break;
         default:
