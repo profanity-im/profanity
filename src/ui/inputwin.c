@@ -551,6 +551,7 @@ _handle_alt_key(char *input, int *size, int key)
         case '0':
             ui_switch_win(9);
             break;
+        case 263:
         case 127:
             input[*size] = '\0';
             gchar *curr_ch = g_utf8_offset_to_pointer(input, end_del);
