@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include <glib.h>
+#include <glib/gprintf.h>
 
 #include "common.h"
 #include "config/preferences.h"
@@ -35,6 +36,8 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+
+#include "ui/ui.h"
 
 static GHashTable *sub_requests;
 
@@ -462,6 +465,10 @@ _get_caps_key(xmpp_stanza_t * const stanza)
     char *caps_key = NULL;
     char *node = NULL;
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    guint from_hash = g_str_hash(from);
+    char from_hash_str[100];
+    g_sprintf(from_hash_str, "%d", from_hash);
+
     if (stanza_contains_caps(stanza)) {
         log_debug("Presence contains capabilities.");
         char *hash_type = stanza_caps_get_hash(stanza);
@@ -494,14 +501,14 @@ _get_caps_key(xmpp_stanza_t * const stanza)
             } else {
                 log_debug("Hash type unsupported.");
                 node = stanza_get_caps_str(stanza);
-                caps_key = from;
+                caps_key = from_hash_str;
 
                 if (node != NULL) {
                     log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {
                         log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
                         GString *id = g_string_new("disco_");
-                        g_string_append(id, from);
+                        g_string_append(id, from_hash_str);
                         xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
                         xmpp_send(conn, iq);
                         xmpp_stanza_release(iq);
@@ -520,14 +527,14 @@ _get_caps_key(xmpp_stanza_t * const stanza)
         } else {
             log_debug("No hash type, using legacy capabilities.");
             node = stanza_get_caps_str(stanza);
-            caps_key = from;
+            caps_key = from_hash_str;
 
             if (node != NULL) {
                 log_debug("Node string: %s.", node);
                 if (!caps_contains(caps_key)) {
                     log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
                     GString *id = g_string_new("disco_");
-                    g_string_append(id, from);
+                    g_string_append(id, from_hash_str);
                     xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
                     xmpp_send(conn, iq);
                     xmpp_stanza_release(iq);
