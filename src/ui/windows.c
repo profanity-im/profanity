@@ -1213,6 +1213,7 @@ cons_show_caps(const char * const contact, Resource *resource)
     wprintw(win, ":\n");
 
     if (resource->caps_str != NULL) {
+        log_debug("Getting caps, caps_str: %s", resource->caps_str);
         Capabilities *caps = caps_get(resource->caps_str);
         if (caps != NULL) {
             // show identity
@@ -1268,6 +1269,8 @@ cons_show_caps(const char * const contact, Resource *resource)
                 }
             }
         }
+    } else {
+        log_debug("No caps string found in resource");
     }
 
     if (current_index == 0) {

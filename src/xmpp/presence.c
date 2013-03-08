@@ -465,9 +465,6 @@ _get_caps_key(xmpp_stanza_t * const stanza)
     char *caps_key = NULL;
     char *node = NULL;
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    guint from_hash = g_str_hash(from);
-    char from_hash_str[100];
-    g_sprintf(from_hash_str, "%d", from_hash);
 
     if (stanza_contains_caps(stanza)) {
         log_debug("Presence contains capabilities.");
@@ -501,12 +498,15 @@ _get_caps_key(xmpp_stanza_t * const stanza)
             } else {
                 log_debug("Hash type unsupported.");
                 node = stanza_get_caps_str(stanza);
-                caps_key = from_hash_str;
+                guint from_hash = g_str_hash(from);
+                char from_hash_str[9];
+                g_sprintf(from_hash_str, "%08x", from_hash);
+                caps_key = strdup(from_hash_str);
 
                 if (node != NULL) {
                     log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {
-                        log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
+                        log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
                         GString *id = g_string_new("disco_");
                         g_string_append(id, from_hash_str);
                         xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
@@ -514,7 +514,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                         xmpp_stanza_release(iq);
                         g_string_free(id, TRUE);
                     } else {
-                        log_debug("Capabilities already cached, for %s", caps_key);
+                        log_debug("Capabilities already cached, for %s", from);
                     }
                 } else {
                     log_debug("No node string, not sending discovery IQ.");
@@ -527,12 +527,15 @@ _get_caps_key(xmpp_stanza_t * const stanza)
         } else {
             log_debug("No hash type, using legacy capabilities.");
             node = stanza_get_caps_str(stanza);
-            caps_key = from_hash_str;
+            guint from_hash = g_str_hash(from);
+            char from_hash_str[9];
+            g_sprintf(from_hash_str, "%08x", from_hash);
+            caps_key = strdup(from_hash_str);
 
             if (node != NULL) {
                 log_debug("Node string: %s.", node);
                 if (!caps_contains(caps_key)) {
-                    log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
+                    log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
                     GString *id = g_string_new("disco_");
                     g_string_append(id, from_hash_str);
                     xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
@@ -540,7 +543,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                     xmpp_stanza_release(iq);
                     g_string_free(id, TRUE);
                 } else {
-                    log_debug("Capabilities already cached, for %s", caps_key);
+                    log_debug("Capabilities already cached, for %s", from);
                 }
             } else {
                 log_debug("No node string, not sending discovery IQ.");

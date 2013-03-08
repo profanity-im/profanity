@@ -350,6 +350,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 
         // xep-0115
         if (g_strcmp0(id, "disco") == 0) {
+            log_debug("xep-0115 supported capabilities");
             caps_key = strdup(node);
 
             // validate sha1
@@ -371,7 +372,9 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 
         // non supported hash, or legacy caps
         } else {
+            log_debug("Unsupported hash, or legacy capabilities");
             caps_key = strdup(id + 6);
+            log_debug("Caps key: %s", caps_key);
         }
 
         // already cached
@@ -379,6 +382,8 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
             log_info("Client info already cached.");
             return 1;
         }
+
+        log_debug("Client info not cached");
 
         DataForm *form = NULL;
         FormField *formField = NULL;
