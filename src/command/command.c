@@ -2182,8 +2182,16 @@ _cmd_set_beep(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_states(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help, "Sending chat states",
+    gboolean result = _cmd_set_boolean_preference(args[0], help, "Sending chat states",
         PREF_STATES);
+
+    // if disabled, disable outtype and gone
+    if (result == TRUE && (strcmp(args[0], "off") == 0)) {
+        prefs_set_boolean(PREF_OUTTYPE, FALSE);
+        prefs_set_gone(0);
+    }
+
+    return result;
 }
 
 static gboolean
@@ -2201,8 +2209,15 @@ _cmd_set_titlebar(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_outtype(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help,
+    gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Sending typing notifications", PREF_OUTTYPE);
+
+    // if enabled, enable states
+    if (result == TRUE && (strcmp(args[0], "on") == 0)) {
+        prefs_set_boolean(PREF_STATES, TRUE);
+    }
+
+    return result;
 }
 
 static gboolean
@@ -2218,6 +2233,11 @@ _cmd_set_gone(gchar **args, struct cmd_help_t help)
         cons_show("Leaving conversations after 1 minute of inactivity.");
     } else {
         cons_show("Leaving conversations after %d minutes of inactivity.", period);
+    }
+
+    // if enabled, enable states
+    if (period > 0) {
+        prefs_set_boolean(PREF_STATES, TRUE);
     }
 
     return TRUE;
@@ -2462,8 +2482,15 @@ _cmd_set_splash(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_chlog(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help,
+    gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Chat logging", PREF_CHLOG);
+
+    // if set to off, disable history
+    if (result == TRUE && (strcmp(args[0], "off") == 0)) {
+        prefs_set_boolean(PREF_HISTORY, FALSE);
+    }
+
+    return result;
 }
 
 static gboolean
@@ -2476,8 +2503,15 @@ _cmd_set_mouse(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_set_history(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help,
+    gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Chat history", PREF_HISTORY);
+
+    // if set to on, set chlog
+    if (result == TRUE && (strcmp(args[0], "on") == 0)) {
+        prefs_set_boolean(PREF_CHLOG, TRUE);
+    }
+
+    return result;
 }
 
 static gboolean
