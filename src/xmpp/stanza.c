@@ -27,6 +27,7 @@
 #include <strophe.h>
 
 #include "common.h"
+#include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/capabilities.h"
 
@@ -562,6 +563,7 @@ DataForm *
 stanza_create_form(xmpp_stanza_t * const stanza)
 {
     DataForm *result = NULL;
+    xmpp_ctx_t *ctx = connection_get_ctx();
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(stanza);
 
@@ -591,7 +593,10 @@ stanza_create_form(xmpp_stanza_t * const stanza)
             // handle values
             while (value != NULL) {
                 char *text = xmpp_stanza_get_text(value);
-                field->values = g_slist_insert_sorted(field->values, strdup(text), (GCompareFunc)octet_compare);
+                if (text != NULL) {
+                    field->values = g_slist_insert_sorted(field->values, strdup(text), (GCompareFunc)octet_compare);
+                    xmpp_free(ctx, text);
+                }
                 value = xmpp_stanza_get_next(value);
             }
 
