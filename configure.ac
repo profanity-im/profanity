@@ -87,7 +87,7 @@ if test "x$enable_notifications" != xno; then
 fi
 
 # Default parameters
-AM_CFLAGS="-Wall -Werror"
+AM_CFLAGS="-Wall"
 LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
