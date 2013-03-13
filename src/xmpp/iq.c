@@ -39,6 +39,8 @@
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
+#include "ui/ui.h"
+
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 
 static int _iq_handle_error(xmpp_conn_t * const conn,
@@ -57,6 +59,8 @@ static int _iq_handle_discoinfo_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _iq_handle_version_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _iq_handle_discoitems_result(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 iq_add_handlers(void)
@@ -68,6 +72,7 @@ iq_add_handlers(void)
     HANDLE(XMPP_NS_ROSTER,      STANZA_TYPE_RESULT, _iq_handle_roster_result);
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _iq_handle_discoinfo_get);
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_RESULT, _iq_handle_discoinfo_result);
+    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _iq_handle_discoitems_result);
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _iq_handle_version_get);
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _iq_handle_version_result);
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
@@ -79,6 +84,16 @@ iq_roster_request(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_roster_iq(ctx);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+void
+iq_room_list_request(gchar *conferencejid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "confreq", conferencejid);
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -447,4 +462,40 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     } else {
         return 1;
     }
+}
+
+static int
+_iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    GSList *rooms = NULL;
+
+    log_debug("Recieved diso#items response");
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if ((id != NULL) && (g_strcmp0(id, "confreq") == 0)) {
+        log_debug("Response to query: %s", id);
+
+        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+        if (query != NULL) {
+            xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+            while (child != NULL) {
+                const char *name = xmpp_stanza_get_name(child);
+                if ((name != NULL) && (g_strcmp0(name, STANZA_NAME_ITEM) == 0)) {
+                    const char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+                    if (jid != NULL) {
+                       rooms = g_slist_append(rooms, strdup(jid));
+                    }
+                }
+
+                child = xmpp_stanza_get_next(child);
+            }
+        }
+    }
+
+    prof_handle_room_list(rooms, from);
+    g_slist_free_full(rooms, free);
+
+    return 1;
 }

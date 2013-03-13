@@ -101,6 +101,7 @@ static gboolean _cmd_tiny(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_close(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_clear(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_join(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_beep(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_notify(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_log(gchar **args, struct cmd_help_t help);
@@ -332,6 +333,19 @@ static struct cmd_t main_commands[] =
           "",
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
+          NULL } } },
+
+    { "/rooms",
+        _cmd_rooms, parse_args, 0, 1,
+        { "/rooms [conference-node]", "List chat rooms.",
+        { "/rooms [conference-node]",
+          "------------------------",
+          "List the chat rooms available at the specified conference node",
+          "If no argument is supplied, the domainpart of the current logged in JID is used,",
+          "with a prefix of 'conference'.",
+          "",
+          "Example : /rooms conference.jabber.org",
+          "Example : /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
           NULL } } },
 
     { "/nick",
@@ -2053,6 +2067,29 @@ _cmd_join(gchar **args, struct cmd_help_t help)
         presence_join_room(room_jid);
     }
     win_join_chat(room_jid);
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_rooms(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currenlty connect.");
+        return TRUE;
+    }
+
+    if (args[0] == NULL) {
+        Jid *jid = jid_create(jabber_get_jid());
+        GString *conference_node = g_string_new("conference.");
+        g_string_append(conference_node, jid->domainpart);
+        iq_room_list_request(conference_node->str);
+        g_string_free(conference_node, TRUE);
+    } else {
+        iq_room_list_request(args[0]);
+    }
 
     return TRUE;
 }

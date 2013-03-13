@@ -71,5 +71,6 @@ void prof_handle_activity(void);
 void prof_handle_version_result(const char * const jid,
     const char * const presence, const char * const name,
     const char * const version, const char * const os);
+void prof_handle_room_list(GSList *rooms, const char *conference_node);
 
 #endif

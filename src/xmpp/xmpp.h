@@ -92,6 +92,7 @@ void presence_update(resource_presence_t status, const char * const msg,
 
 // iq functions
 void iq_send_software_version(const char * const fulljid);
+void iq_room_list_request(gchar *conferencejid);
 
 // caps functions
 Capabilities* caps_get(const char * const caps_str);
