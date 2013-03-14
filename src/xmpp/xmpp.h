@@ -62,6 +62,12 @@ typedef struct disco_item_t {
     char *name;
 } DiscoItem;
 
+typedef struct disco_identity_t {
+    char *name;
+    char *type;
+    char *category;
+} DiscoIdentity;
+
 // connection functions
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect_with_details(const char * const jid,

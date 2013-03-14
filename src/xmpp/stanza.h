@@ -78,6 +78,7 @@
 #define STANZA_ATTR_VER "ver"
 #define STANZA_ATTR_VAR "var"
 #define STANZA_ATTR_HASH "hash"
+#define STANZA_ATTR_CATEGORY "category"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"

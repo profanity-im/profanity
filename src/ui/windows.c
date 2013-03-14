@@ -1324,6 +1324,45 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
 }
 
 void
+cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
+{
+    if (((identities != NULL) && (g_slist_length(identities) > 0)) ||
+        ((features != NULL) && (g_slist_length(features) > 0))) {
+        cons_show("Service disovery info for %s", jid);
+
+        if (identities != NULL) {
+            cons_show("  Identities");
+        }
+        while (identities != NULL) {
+            DiscoIdentity *identity = identities->data;  // anme trpe, cat
+            GString *identity_str = g_string_new("    ");
+            if (identity->name != NULL) {
+                identity_str = g_string_append(identity_str, strdup(identity->name));
+                identity_str = g_string_append(identity_str, " ");
+            }
+            if (identity->type != NULL) {
+                identity_str = g_string_append(identity_str, strdup(identity->type));
+                identity_str = g_string_append(identity_str, " ");
+            }
+            if (identity->category != NULL) {
+                identity_str = g_string_append(identity_str, strdup(identity->category));
+            }
+            cons_show(identity_str->str);
+            g_string_free(identity_str, FALSE);
+            identities = g_slist_next(identities);
+        }
+
+        if (features != NULL) {
+            cons_show("  Features:");
+        }
+        while (features != NULL) {
+            cons_show("    %s", features->data);
+            features = g_slist_next(features);
+        }
+    }
+}
+
+void
 cons_show_disco_items(GSList *items, const char * const jid)
 {
     if ((items != NULL) && (g_slist_length(items) > 0)) {
