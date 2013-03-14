@@ -1304,6 +1304,26 @@ cons_show_software_version(const char * const jid, const char * const  presence,
 }
 
 void
+cons_show_room_list(GSList *rooms, const char * const conference_node)
+{
+    if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
+        cons_show("Chat rooms at %s:", conference_node);
+        while (rooms != NULL) {
+            DiscoItem *room = rooms->data;
+            _win_show_time(console->win, '-');
+            wprintw(console->win, "  %s", room->jid);
+            if (room->name != NULL) {
+                wprintw(console->win, ", (%s)", room->name);
+            }
+            wprintw(console->win, "\n");
+            rooms = g_slist_next(rooms);
+        }
+    } else {
+        cons_show("No chat rooms at %s", conference_node);
+    }
+}
+
+void
 cons_show_status(const char * const contact)
 {
     PContact pcontact = contact_list_get_contact(contact);

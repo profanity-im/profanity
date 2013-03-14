@@ -173,6 +173,7 @@ void cons_show_software_version(const char * const jid,
     const char * const presence, const char * const name,
     const char * const version, const char * const os);
 void cons_show_account_list(gchar **accounts);
+void cons_show_room_list(GSList *room, const char * const conference_node);
 
 // status bar actions
 void status_bar_refresh(void);

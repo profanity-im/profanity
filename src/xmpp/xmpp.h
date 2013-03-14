@@ -57,6 +57,11 @@ typedef struct capabilities_t {
     GSList *features;
 } Capabilities;
 
+typedef struct disco_item_t {
+    char *jid;
+    char *name;
+} DiscoItem;
+
 // connection functions
 void jabber_init(const int disable_tls);
 jabber_conn_status_t jabber_connect_with_details(const char * const jid,

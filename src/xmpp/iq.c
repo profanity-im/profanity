@@ -492,20 +492,31 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     log_debug("Recieved diso#items response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char *stanza_name = NULL;
+    const char *item_jid = NULL;
+    const char *item_name = NULL;
 
     if (g_strcmp0(id, "confreq") == 0) {
         log_debug("Response to query: %s", id);
-        GSList *rooms = NULL;
+        GSList *items = NULL;
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
         if (query != NULL) {
             xmpp_stanza_t *child = xmpp_stanza_get_children(query);
             while (child != NULL) {
-                const char *name = xmpp_stanza_get_name(child);
-                if ((name != NULL) && (g_strcmp0(name, STANZA_NAME_ITEM) == 0)) {
-                    const char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
-                    if (jid != NULL) {
-                       rooms = g_slist_append(rooms, strdup(jid));
+                stanza_name = xmpp_stanza_get_name(child);
+                if ((stanza_name != NULL) && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+                    item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+                    if (item_jid != NULL) {
+                        DiscoItem *item = malloc(sizeof(struct disco_item_t));
+                        item->jid = strdup(item_jid);
+                        item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                        if (item_name != NULL) {
+                            item->name = strdup(item_name);
+                        } else {
+                            item->name = NULL;
+                        }
+                        items = g_slist_append(items, item);
                     }
                 }
 
@@ -513,8 +524,8 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
             }
         }
 
-        prof_handle_room_list(rooms, from);
-        g_slist_free_full(rooms, free);
+        prof_handle_room_list(items, from);
+        g_slist_free_full(items, free);
     } else if ((id != NULL) && (g_strcmp0(id, "discoitemsreq") == 0)) {
         cons_show("GOT DISO ITEMS RESULT");
     }

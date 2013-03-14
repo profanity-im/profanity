@@ -404,15 +404,7 @@ prof_handle_version_result(const char * const jid, const char * const  presence,
 void
 prof_handle_room_list(GSList *rooms, const char *conference_node)
 {
-    if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
-        cons_show("Chat rooms at %s:", conference_node);
-        while (rooms != NULL) {
-            cons_show("  %s", rooms->data);
-            rooms = g_slist_next(rooms);
-        }
-    } else {
-        cons_show("No chat rooms at %s", conference_node);
-    }
+    cons_show_room_list(rooms, conference_node);
     win_current_page_off();
 }
 
