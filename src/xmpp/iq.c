@@ -373,7 +373,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     log_debug("Recieved diso#info response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
-    if ((id != NULL) && (g_strcmp0(id, "discoinforeq") == 0)) {
+    if (g_strcmp0(id, "discoinforeq") == 0) {
         cons_show("GOT DISO INFO RESULT");
     } else if ((id != NULL) && (g_str_has_prefix(id, "disco"))) {
         log_debug("Response to query: %s", id);
@@ -493,7 +493,7 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if ((id != NULL) && (g_strcmp0(id, "confreq") == 0)) {
+    if (g_strcmp0(id, "confreq") == 0) {
         log_debug("Response to query: %s", id);
         GSList *rooms = NULL;
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
