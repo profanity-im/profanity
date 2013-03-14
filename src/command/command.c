@@ -350,7 +350,7 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/disco",
-        _cmd_disco, parse_args, 2, 2,
+        _cmd_disco, parse_args, 1, 2,
         { "/disco command entity", "Service discovery.",
         { "/disco command entity",
           "---------------------",
@@ -2111,7 +2111,8 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         Jid *jid = jid_create(jabber_get_jid());
         GString *conference_node = g_string_new("conference.");
-        g_string_append(conference_node, jid->domainpart);
+        g_string_append(conference_node, strdup(jid->domainpart));
+        jid_destroy(jid);
         iq_room_list_request(conference_node->str);
         g_string_free(conference_node, TRUE);
     } else {
@@ -2131,11 +2132,22 @@ _cmd_disco(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "info") == 0) {
-        iq_disco_info_request(args[1]);
+    GString *jid = g_string_new("");
+    if (args[1] != NULL) {
+        jid = g_string_append(jid, args[1]);
     } else {
-        iq_disco_items_request(args[1]);
+        Jid *jidp = jid_create(jabber_get_jid());
+        jid = g_string_append(jid, strdup(jidp->domainpart));
+        jid_destroy(jidp);
     }
+
+    if (g_strcmp0(args[0], "info") == 0) {
+        iq_disco_info_request(jid->str);
+    } else {
+        iq_disco_items_request(jid->str);
+    }
+
+    g_string_free(jid, TRUE);
 
     return TRUE;
 }
