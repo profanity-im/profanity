@@ -174,6 +174,7 @@ void cons_show_software_version(const char * const jid,
     const char * const version, const char * const os);
 void cons_show_account_list(gchar **accounts);
 void cons_show_room_list(GSList *room, const char * const conference_node);
+void cons_show_disco_items(GSList *items, const char * const jid);
 
 // status bar actions
 void status_bar_refresh(void);

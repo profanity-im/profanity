@@ -495,10 +495,10 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     const char *stanza_name = NULL;
     const char *item_jid = NULL;
     const char *item_name = NULL;
+    GSList *items = NULL;
 
-    if (g_strcmp0(id, "confreq") == 0) {
+    if ((g_strcmp0(id, "confreq") == 0) || (g_strcmp0(id, "discoitemsreq") == 0)) {
         log_debug("Response to query: %s", id);
-        GSList *items = NULL;
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
         if (query != NULL) {
@@ -523,12 +523,15 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
                 child = xmpp_stanza_get_next(child);
             }
         }
-
-        prof_handle_room_list(items, from);
-        g_slist_free_full(items, free);
-    } else if ((id != NULL) && (g_strcmp0(id, "discoitemsreq") == 0)) {
-        cons_show("GOT DISO ITEMS RESULT");
     }
+
+    if (g_strcmp0(id, "confreq") == 0) {
+        prof_handle_room_list(items, from);
+    } else if (g_strcmp0(id, "discoitemsreq") == 0) {
+        prof_handle_disco_items(items, from);
+    }
+
+    g_slist_free_full(items, free);
 
     return 1;
 }

@@ -1324,6 +1324,26 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
 }
 
 void
+cons_show_disco_items(GSList *items, const char * const jid)
+{
+    if ((items != NULL) && (g_slist_length(items) > 0)) {
+        cons_show("Service discovery items for %s:", jid);
+        while (items != NULL) {
+            DiscoItem *item = items->data;
+            _win_show_time(console->win, '-');
+            wprintw(console->win, "  %s", item->jid);
+            if (item->name != NULL) {
+                wprintw(console->win, ", (%s)", item->name);
+            }
+            wprintw(console->win, "\n");
+            items = g_slist_next(items);
+        }
+    } else {
+        cons_show("No service discovery items for %s", jid);
+    }
+}
+
+void
 cons_show_status(const char * const contact)
 {
     PContact pcontact = contact_list_get_contact(contact);
