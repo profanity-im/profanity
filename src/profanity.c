@@ -413,6 +413,7 @@ prof_handle_room_list(GSList *rooms, const char *conference_node)
     } else {
         cons_show("No chat rooms at %s", conference_node);
     }
+    win_current_page_off();
 }
 
 /*
