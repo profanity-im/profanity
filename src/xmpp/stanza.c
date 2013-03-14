@@ -178,7 +178,7 @@ stanza_create_roster_iq(xmpp_ctx_t *ctx)
 }
 
 xmpp_stanza_t *
-stanza_create_disco_iq(xmpp_ctx_t *ctx, const char * const id, const char * const to,
+stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char * const id, const char * const to,
     const char * const node)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
@@ -190,7 +190,9 @@ stanza_create_disco_iq(xmpp_ctx_t *ctx, const char * const id, const char * cons
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
     xmpp_stanza_set_ns(query, XMPP_NS_DISCO_INFO);
-    xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node);
+    if (node != NULL) {
+        xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node);
+    }
 
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_release(query);

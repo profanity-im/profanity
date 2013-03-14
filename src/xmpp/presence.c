@@ -484,7 +484,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                     log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {
                         log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
-                        xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, "disco", from, node);
+                        xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, "disco", from, node);
                         xmpp_send(conn, iq);
                         xmpp_stanza_release(iq);
                     } else {
@@ -509,7 +509,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                         log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
                         GString *id = g_string_new("disco_");
                         g_string_append(id, from_hash_str);
-                        xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
+                        xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id->str, from, node);
                         xmpp_send(conn, iq);
                         xmpp_stanza_release(iq);
                         g_string_free(id, TRUE);
@@ -538,7 +538,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                     log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
                     GString *id = g_string_new("disco_");
                     g_string_append(id, from_hash_str);
-                    xmpp_stanza_t *iq = stanza_create_disco_iq(ctx, id->str, from, node);
+                    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id->str, from, node);
                     xmpp_send(conn, iq);
                     xmpp_stanza_release(iq);
                     g_string_free(id, TRUE);

@@ -102,6 +102,7 @@ static gboolean _cmd_close(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_clear(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_join(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_disco(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_beep(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_notify(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_log(gchar **args, struct cmd_help_t help);
@@ -337,15 +338,33 @@ static struct cmd_t main_commands[] =
 
     { "/rooms",
         _cmd_rooms, parse_args, 0, 1,
-        { "/rooms [conference-node]", "List chat rooms.",
-        { "/rooms [conference-node]",
-          "------------------------",
-          "List the chat rooms available at the specified conference node",
+        { "/rooms [conference-service]", "List chat rooms.",
+        { "/rooms [conference-service]",
+          "---------------------------",
+          "List the chat rooms available at the specified conference service",
           "If no argument is supplied, the domainpart of the current logged in JID is used,",
           "with a prefix of 'conference'.",
           "",
           "Example : /rooms conference.jabber.org",
           "Example : /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
+          NULL } } },
+
+    { "/disco",
+        _cmd_disco, parse_args, 2, 2,
+        { "/disco command entity", "Service discovery.",
+        { "/disco command entity",
+          "---------------------",
+          "Find out information about an entities supported services.",
+          "Command may be one of:",
+          "info: List protocols and features supported by an entity.",
+          "items: List items associated with an entity.",
+          "",
+          "The entity must be a Jabber ID.",
+          "",
+          "Example : /disco info myserver.org",
+          "Example : /disco items myserver.org",
+          "Example : /disco items conference.jabber.org",
+          "Example : /disco info myfriend@server.com/laptop",
           NULL } } },
 
     { "/nick",
@@ -717,6 +736,7 @@ static Autocomplete titlebar_ac;
 static Autocomplete theme_ac;
 static Autocomplete theme_load_ac;
 static Autocomplete account_ac;
+static Autocomplete disco_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -779,6 +799,10 @@ cmd_init(void)
     autocomplete_add(theme_ac, strdup("list"));
     autocomplete_add(theme_ac, strdup("set"));
 
+    disco_ac = autocomplete_new();
+    autocomplete_add(disco_ac, strdup("info"));
+    autocomplete_add(disco_ac, strdup("items"));
+
     account_ac = autocomplete_new();
     autocomplete_add(account_ac, strdup("list"));
     autocomplete_add(account_ac, strdup("show"));
@@ -834,6 +858,7 @@ cmd_close(void)
         autocomplete_free(theme_load_ac);
     }
     autocomplete_free(account_ac);
+    autocomplete_free(disco_ac);
 }
 
 // Command autocompletion functions
@@ -896,6 +921,7 @@ cmd_reset_autocomplete()
         theme_load_ac = NULL;
     }
     autocomplete_reset(account_ac);
+    autocomplete_reset(disco_ac);
 }
 
 GSList *
@@ -1056,6 +1082,7 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete_with_ac(input, size, "/who", who_ac);
     _parameter_autocomplete_with_ac(input, size, "/prefs", prefs_ac);
     _parameter_autocomplete_with_ac(input, size, "/log", log_ac);
+    _parameter_autocomplete_with_ac(input, size, "/disco", disco_ac);
 
     _notify_autocomplete(input, size);
     _autoaway_autocomplete(input, size);
@@ -2089,6 +2116,25 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
         g_string_free(conference_node, TRUE);
     } else {
         iq_room_list_request(args[0]);
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_disco(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currenlty connect.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "info") == 0) {
+        iq_disco_info_request(args[1]);
+    } else {
+        iq_disco_items_request(args[1]);
     }
 
     return TRUE;

@@ -99,6 +99,26 @@ iq_room_list_request(gchar *conferencejid)
 }
 
 void
+iq_disco_info_request(gchar *jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, "discoinforeq", jid, NULL);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+void
+iq_disco_items_request(gchar *jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_disco_items_iq(ctx, "discoitemsreq", jid);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+void
 iq_send_software_version(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -353,7 +373,9 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     log_debug("Recieved diso#info response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
-    if ((id != NULL) && (g_str_has_prefix(id, "disco"))) {
+    if ((id != NULL) && (g_strcmp0(id, "discoinforeq") == 0)) {
+        cons_show("GOT DISO INFO RESULT");
+    } else if ((id != NULL) && (g_str_has_prefix(id, "disco"))) {
         log_debug("Response to query: %s", id);
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
         char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
@@ -457,18 +479,15 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 
         //stanza_destroy_form(form);
         free(caps_key);
-
-        return 1;
-    } else {
-        return 1;
     }
+
+    return 1;
 }
 
 static int
 _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    GSList *rooms = NULL;
 
     log_debug("Recieved diso#items response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
@@ -476,8 +495,9 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
 
     if ((id != NULL) && (g_strcmp0(id, "confreq") == 0)) {
         log_debug("Response to query: %s", id);
-
+        GSList *rooms = NULL;
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
         if (query != NULL) {
             xmpp_stanza_t *child = xmpp_stanza_get_children(query);
             while (child != NULL) {
@@ -492,10 +512,12 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
                 child = xmpp_stanza_get_next(child);
             }
         }
-    }
 
-    prof_handle_room_list(rooms, from);
-    g_slist_free_full(rooms, free);
+        prof_handle_room_list(rooms, from);
+        g_slist_free_full(rooms, free);
+    } else if ((id != NULL) && (g_strcmp0(id, "discoitemsreq") == 0)) {
+        cons_show("GOT DISO ITEMS RESULT");
+    }
 
     return 1;
 }
