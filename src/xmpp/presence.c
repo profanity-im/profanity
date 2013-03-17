@@ -58,6 +58,7 @@ static int _room_presence_handler(xmpp_conn_t * const conn,
 
 static char* _get_caps_key(xmpp_stanza_t * const stanza);
 static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
+void _send_caps_request(char *node, char *caps_key, char *id, char *from);
 
 void
 presence_init(void)
@@ -382,9 +383,13 @@ _available_handler(xmpp_conn_t * const conn,
 
     char *show_str = stanza_get_show(stanza, "online");
     char *status_str = stanza_get_status(stanza, NULL);
-    char *caps_key = _get_caps_key(stanza);
     int idle_seconds = stanza_get_idle_time(stanza);
     GDateTime *last_activity = NULL;
+
+    char *caps_key = NULL;
+    if (stanza_contains_caps(stanza)) {
+        caps_key = _get_caps_key(stanza);
+    }
 
     if (idle_seconds > 0) {
         GDateTime *now = g_date_time_new_now_local();
@@ -431,103 +436,68 @@ _available_handler(xmpp_conn_t * const conn,
     return 1;
 }
 
+void
+_send_caps_request(char *node, char *caps_key, char *id, char *from)
+{
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_conn_t *conn = connection_get_conn();
+
+    if (node != NULL) {
+        log_debug("Node string: %s.", node);
+        if (!caps_contains(caps_key)) {
+            log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
+            xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, from, node);
+            xmpp_send(conn, iq);
+            xmpp_stanza_release(iq);
+        } else {
+            log_debug("Capabilities already cached, for %s", caps_key);
+        }
+    } else {
+        log_debug("No node string, not sending discovery IQ.");
+    }
+}
 
 static char *
 _get_caps_key(xmpp_stanza_t * const stanza)
 {
-    xmpp_ctx_t *ctx = connection_get_ctx();
-    xmpp_conn_t *conn = connection_get_conn();
-    char *caps_key = NULL;
-    char *node = NULL;
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *hash_type = stanza_caps_get_hash(stanza);
+    char *node = stanza_get_caps_str(stanza);
+    char *caps_key = NULL;
+    char *id = NULL;
 
-    if (stanza_contains_caps(stanza)) {
-        log_debug("Presence contains capabilities.");
-        char *hash_type = stanza_caps_get_hash(stanza);
+    log_debug("Presence contains capabilities.");
 
-        // xep-0115
+    // xep-0115
+    if ((hash_type != NULL) && (strcmp(hash_type, "sha-1") == 0)) {
+        log_debug("Hash type %s supported.", hash_type);
+        caps_key = strdup(node);
+        id = "capsreq";
+
+        _send_caps_request(node, caps_key, id, from);
+
+    // unsupported hash or legacy capabilities
+    } else {
         if (hash_type != NULL) {
-            log_debug("Hash type: %s", hash_type);
-
-            // supported hash
-            if (strcmp(hash_type, "sha-1") == 0) {
-                log_debug("Hash type supported.");
-                node = stanza_get_caps_str(stanza);
-                caps_key = node;
-
-                if (node != NULL) {
-                    log_debug("Node string: %s.", node);
-                    if (!caps_contains(caps_key)) {
-                        log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
-                        xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, "capsreq", from, node);
-                        xmpp_send(conn, iq);
-                        xmpp_stanza_release(iq);
-                    } else {
-                        log_debug("Capabilities already cached, for %s", caps_key);
-                    }
-                } else {
-                    log_debug("No node string, not sending discovery IQ.");
-                }
-
-            // unsupported hash
-            } else {
-                log_debug("Hash type unsupported.");
-                node = stanza_get_caps_str(stanza);
-                guint from_hash = g_str_hash(from);
-                char from_hash_str[9];
-                g_sprintf(from_hash_str, "%08x", from_hash);
-                caps_key = strdup(from_hash_str);
-
-                if (node != NULL) {
-                    log_debug("Node string: %s.", node);
-                    if (!caps_contains(caps_key)) {
-                        log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
-                        GString *id = g_string_new("capsreq_");
-                        g_string_append(id, from_hash_str);
-                        xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id->str, from, node);
-                        xmpp_send(conn, iq);
-                        xmpp_stanza_release(iq);
-                        g_string_free(id, TRUE);
-                    } else {
-                        log_debug("Capabilities already cached, for %s", from);
-                    }
-                } else {
-                    log_debug("No node string, not sending discovery IQ.");
-                }
-            }
-
-            return strdup(caps_key);
-
-        //ignore or handle legacy caps
+            log_debug("Hash type %s unsupported.", hash_type);
         } else {
             log_debug("No hash type, using legacy capabilities.");
-            node = stanza_get_caps_str(stanza);
-            guint from_hash = g_str_hash(from);
-            char from_hash_str[9];
-            g_sprintf(from_hash_str, "%08x", from_hash);
-            caps_key = strdup(from_hash_str);
-
-            if (node != NULL) {
-                log_debug("Node string: %s.", node);
-                if (!caps_contains(caps_key)) {
-                    log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
-                    GString *id = g_string_new("capsreq_");
-                    g_string_append(id, from_hash_str);
-                    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id->str, from, node);
-                    xmpp_send(conn, iq);
-                    xmpp_stanza_release(iq);
-                    g_string_free(id, TRUE);
-                } else {
-                    log_debug("Capabilities already cached, for %s", from);
-                }
-            } else {
-                log_debug("No node string, not sending discovery IQ.");
-            }
-
-            return caps_key;
         }
+
+        guint from_hash = g_str_hash(from);
+        char from_hash_str[9];
+        g_sprintf(from_hash_str, "%08x", from_hash);
+        caps_key = strdup(from_hash_str);
+        GString *id_str = g_string_new("capsreq_");
+        g_string_append(id_str, from_hash_str);
+        id = id_str->str;
+
+        _send_caps_request(node, caps_key, id, from);
+
+        g_string_free(id_str, TRUE);
     }
-    return NULL;
+
+    return caps_key;
 }
 
 static int
@@ -576,7 +546,11 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     } else {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *show_str, *status_str;
-        char *caps_key = _get_caps_key(stanza);
+
+        char *caps_key = NULL;
+        if (stanza_contains_caps(stanza)) {
+            caps_key = _get_caps_key(stanza);
+        }
 
         log_debug("Room presence received from %s", from_jid->fulljid);
 
