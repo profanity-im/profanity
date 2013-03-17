@@ -445,7 +445,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
             g_slist_free_full(features, free);
             g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
         }
-    } else if ((id != NULL) && (g_str_has_prefix(id, "disco"))) {
+    } else if ((id != NULL) && (g_str_has_prefix(id, "capsreq"))) {
         log_debug("Response to query: %s", id);
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
         char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
@@ -456,7 +456,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         char *caps_key = NULL;
 
         // xep-0115
-        if (g_strcmp0(id, "disco") == 0) {
+        if (g_strcmp0(id, "capsreq") == 0) {
             log_debug("xep-0115 supported capabilities");
             caps_key = strdup(node);
 
@@ -480,7 +480,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         // non supported hash, or legacy caps
         } else {
             log_debug("Unsupported hash, or legacy capabilities");
-            caps_key = strdup(id + 6);
+            caps_key = strdup(id + 8);
             log_debug("Caps key: %s", caps_key);
         }
 

@@ -37,8 +37,6 @@
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
-#include "ui/ui.h"
-
 static GHashTable *sub_requests;
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, \
@@ -484,7 +482,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                     log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {
                         log_debug("Capabilities not cached for '%s', sending discovery IQ.", caps_key);
-                        xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, "disco", from, node);
+                        xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, "capsreq", from, node);
                         xmpp_send(conn, iq);
                         xmpp_stanza_release(iq);
                     } else {
@@ -507,7 +505,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                     log_debug("Node string: %s.", node);
                     if (!caps_contains(caps_key)) {
                         log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
-                        GString *id = g_string_new("disco_");
+                        GString *id = g_string_new("capsreq_");
                         g_string_append(id, from_hash_str);
                         xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id->str, from, node);
                         xmpp_send(conn, iq);
@@ -536,7 +534,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
                 log_debug("Node string: %s.", node);
                 if (!caps_contains(caps_key)) {
                     log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
-                    GString *id = g_string_new("disco_");
+                    GString *id = g_string_new("capsreq_");
                     g_string_append(id, from_hash_str);
                     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id->str, from, node);
                     xmpp_send(conn, iq);
