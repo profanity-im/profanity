@@ -280,6 +280,32 @@ stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp)
     return FALSE;
 }
 
+char *
+stanza_get_status(xmpp_stanza_t *stanza, char *def)
+{
+    xmpp_stanza_t *status =
+        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
+
+    if (status != NULL) {
+        return xmpp_stanza_get_text(status);
+    } else {
+        return def;
+    }
+}
+
+char *
+stanza_get_show(xmpp_stanza_t *stanza, char *def)
+{
+    xmpp_stanza_t *show =
+        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
+
+    if (show != NULL) {
+        return xmpp_stanza_get_text(show);
+    } else {
+        return def;
+    }
+}
+
 gboolean
 stanza_is_muc_presence(xmpp_stanza_t * const stanza)
 {

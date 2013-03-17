@@ -167,4 +167,7 @@ xmpp_stanza_t * stanza_create_software_version_iq(xmpp_ctx_t *ctx, const char * 
 xmpp_stanza_t * stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char * const id,
     const char * const jid);
 
+char * stanza_get_status(xmpp_stanza_t *stanza, char *def);
+char * stanza_get_show(xmpp_stanza_t *stanza, char *def);
+
 #endif

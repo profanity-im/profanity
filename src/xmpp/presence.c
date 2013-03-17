@@ -333,14 +333,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
     Jid *my_jid = jid_create(jid);
     Jid *from_jid = jid_create(from);
 
-    char *status_str;
-    xmpp_stanza_t *status =
-        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
-
-    if (status != NULL)
-        status_str = xmpp_stanza_get_text(status);
-    else
-        status_str = NULL;
+    char *status_str = stanza_get_status(stanza, NULL);
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
         if (from_jid->resourcepart != NULL) {
@@ -387,7 +380,8 @@ _available_handler(xmpp_conn_t * const conn,
     Jid *my_jid = jid_create(jid);
     Jid *from_jid = jid_create(from);
 
-    char *show_str, *status_str;
+    char *show_str = stanza_get_show(stanza, "online");
+    char *status_str = stanza_get_status(stanza, NULL);
     char *caps_key = _get_caps_key(stanza);
     int idle_seconds = stanza_get_idle_time(stanza);
     GDateTime *last_activity = NULL;
@@ -397,21 +391,6 @@ _available_handler(xmpp_conn_t * const conn,
         last_activity = g_date_time_add_seconds(now, 0 - idle_seconds);
         g_date_time_unref(now);
     }
-
-    xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
-
-    if (show != NULL)
-        show_str = xmpp_stanza_get_text(show);
-    else
-        show_str = "online";
-
-    xmpp_stanza_t *status =
-        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
-
-    if (status != NULL)
-        status_str = xmpp_stanza_get_text(status);
-    else
-        status_str = NULL;
 
     // get priority
     int priority = 0;
@@ -601,12 +580,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         log_debug("Room presence received from %s", from_jid->fulljid);
 
-        xmpp_stanza_t *status = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
-        if (status != NULL) {
-            status_str = xmpp_stanza_get_text(status);
-        } else {
-            status_str = NULL;
-        }
+        status_str = stanza_get_status(stanza, NULL);
 
         if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
 
@@ -618,12 +592,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 prof_handle_room_member_offline(room, nick, "offline", status_str);
             }
         } else {
-            xmpp_stanza_t *show = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
-            if (show != NULL) {
-                show_str = xmpp_stanza_get_text(show);
-            } else {
-                show_str = "online";
-            }
+            show_str = stanza_get_show(stanza, "online");
             if (!muc_get_roster_received(room)) {
                 muc_add_to_roster(room, nick, show_str, status_str, caps_key);
             } else {
