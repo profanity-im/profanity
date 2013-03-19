@@ -512,7 +512,9 @@ static struct cmd_t setting_commands[] =
           "If set to 'on', profanity will handle mouse actions, which enables scrolling the main window with the mouse wheel.",
           "To select text, use the shift key while selcting an area.",
           "If set to 'off', profanity leaves mouse handling to the terminal implementation.",
-          "The default is 'on', if you have strange behaviour with mouse actions, set to 'off'.",
+          "This feature is experimental, certain mouse click events may occasionally freeze",
+          "Profanity until a key is pressed or another mouse event is received",
+          "The default is 'off'.",
           NULL } } },
 
     { "/chlog",

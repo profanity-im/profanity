@@ -362,7 +362,6 @@ _get_default_boolean(preference_t pref)
 {
     switch (pref)
     {
-        case PREF_MOUSE:
         case PREF_STATUSES:
         case PREF_AUTOAWAY_CHECK:
             return TRUE;
