@@ -1816,7 +1816,6 @@ cons_navigation_help(void)
     cons_show("ESC                      : Clear current input.");
     cons_show("TAB                      : Autocomplete command/recipient/login.");
     cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
-    cons_show("Mouse wheel              : Scroll the main window.");
     cons_show("");
 
     if (current_index == 0) {
