@@ -250,6 +250,10 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_set_name(feature_discoinfo, STANZA_NAME_FEATURE);
     xmpp_stanza_set_attribute(feature_discoinfo, STANZA_ATTR_VAR, XMPP_NS_DISCO_INFO);
 
+    xmpp_stanza_t *feature_discoitems = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(feature_discoitems, STANZA_NAME_FEATURE);
+    xmpp_stanza_set_attribute(feature_discoitems, STANZA_ATTR_VAR, XMPP_NS_DISCO_ITEMS);
+
     xmpp_stanza_t *feature_muc = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(feature_muc, STANZA_NAME_FEATURE);
     xmpp_stanza_set_attribute(feature_muc, STANZA_ATTR_VAR, STANZA_NS_MUC);
@@ -271,6 +275,7 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_add_child(query, feature_caps);
     xmpp_stanza_add_child(query, feature_chatstates);
     xmpp_stanza_add_child(query, feature_discoinfo);
+    xmpp_stanza_add_child(query, feature_discoitems);
     xmpp_stanza_add_child(query, feature_muc);
     xmpp_stanza_add_child(query, feature_version);
     xmpp_stanza_add_child(query, feature_ping);
@@ -278,6 +283,7 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_release(identity);
     xmpp_stanza_release(feature_muc);
     xmpp_stanza_release(feature_discoinfo);
+    xmpp_stanza_release(feature_discoitems);
     xmpp_stanza_release(feature_caps);
     xmpp_stanza_release(feature_version);
     xmpp_stanza_release(feature_chatstates);
