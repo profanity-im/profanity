@@ -1328,6 +1328,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
 {
     if (((identities != NULL) && (g_slist_length(identities) > 0)) ||
         ((features != NULL) && (g_slist_length(features) > 0))) {
+        cons_show("");
         cons_show("Service disovery info for %s", jid);
 
         if (identities != NULL) {
@@ -1366,6 +1367,7 @@ void
 cons_show_disco_items(GSList *items, const char * const jid)
 {
     if ((items != NULL) && (g_slist_length(items) > 0)) {
+        cons_show("");
         cons_show("Service discovery items for %s:", jid);
         while (items != NULL) {
             DiscoItem *item = items->data;
@@ -1378,6 +1380,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
             items = g_slist_next(items);
         }
     } else {
+        cons_show("");
         cons_show("No service discovery items for %s", jid);
     }
 }
