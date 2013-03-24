@@ -349,14 +349,16 @@ _iq_handle_discoinfo_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_t *incoming_query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     const char *node_str = xmpp_stanza_get_attribute(incoming_query, STANZA_ATTR_NODE);
 
-    if (from != NULL && node_str != NULL) {
+    if (from != NULL) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(response, STANZA_NAME_IQ);
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
         xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
         xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
-        xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
+        if (node_str != NULL) {
+            xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
+        }
         xmpp_stanza_add_child(response, query);
         xmpp_send(conn, response);
 
