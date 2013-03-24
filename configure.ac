@@ -3,7 +3,8 @@
 
 AC_PREREQ([2.65])
 AC_INIT([profanity], [0.3.0], [boothj5web@gmail.com])
-AC_DEFINE([PACKAGE_STATUS], ["development"], [Status of this build])
+PACKAGE_STATUS="development"
+AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -87,7 +88,10 @@ if test "x$enable_notifications" != xno; then
 fi
 
 # Default parameters
-AM_CFLAGS="-Wall -Werror"
+AM_CFLAGS="-Wall"
+if test "x$PACKAGE_STATUS" = xdevelopment; then
+    AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
+fi
 LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
