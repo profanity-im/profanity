@@ -46,6 +46,11 @@ typedef enum {
     PRESENCE_UNSUBSCRIBED
 } jabber_subscr_t;
 
+typedef enum {
+    INVITE_DIRECT,
+    INVITE_MEDIATED
+} jabber_invite_t;
+
 typedef struct capabilities_t {
     char *category;
     char *type;

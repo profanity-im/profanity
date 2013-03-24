@@ -1398,6 +1398,20 @@ cons_show_status(const char * const contact)
 }
 
 void
+cons_show_room_invite(const char * const invitor, const char * const room,
+    const char * const reason)
+{
+    cons_show("");
+    _win_show_time(console->win, '-');
+    wprintw(console->win, "%s has invited you to join %s", invitor, room);
+    if (reason != NULL) {
+        wprintw(console->win, ", \"%s\"", reason);
+    }
+    wprintw(console->win, "\n");
+    cons_show("Type \"/join %s\" to join the room", room);
+}
+
+void
 cons_show_account_list(gchar **accounts)
 {
     int size = g_strv_length(accounts);

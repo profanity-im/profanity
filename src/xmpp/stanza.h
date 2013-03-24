@@ -49,6 +49,8 @@
 #define STANZA_NAME_C "c"
 #define STANZA_NAME_IDENTITY "identity"
 #define STANZA_NAME_FEATURE "feature"
+#define STANZA_NAME_INVITE "invite"
+#define STANZA_NAME_REASON "reason"
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
@@ -79,6 +81,7 @@
 #define STANZA_ATTR_VAR "var"
 #define STANZA_ATTR_HASH "hash"
 #define STANZA_ATTR_CATEGORY "category"
+#define STANZA_ATTR_REASON "reason"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -94,6 +97,7 @@
 #define STANZA_NS_LASTACTIVITY "jabber:iq:last"
 #define STANZA_NS_DATA "jabber:x:data"
 #define STANZA_NS_VERSION "jabber:iq:version"
+#define STANZA_NS_CONFERENCE "jabber:x:conference"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 

@@ -176,6 +176,8 @@ void cons_show_account_list(gchar **accounts);
 void cons_show_room_list(GSList *room, const char * const conference_node);
 void cons_show_disco_items(GSList *items, const char * const jid);
 void cons_show_disco_info(const char *from, GSList *identities, GSList *features);
+void cons_show_room_invite(const char * const invitor, const char * const room,
+    const char * const reason);
 
 // status bar actions
 void status_bar_refresh(void);

@@ -316,6 +316,14 @@ prof_handle_leave_room(const char * const room)
     muc_leave_room(room);
 }
 
+void prof_handle_room_invite(jabber_invite_t invite_type,
+    const char * const invitor, const char * const room,
+    const char * const reason)
+{
+    cons_show_room_invite(invitor, room, reason);
+    win_current_page_off();
+}
+
 void
 prof_handle_contact_online(char *contact, Resource *resource,
     GDateTime *last_activity)

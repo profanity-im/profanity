@@ -41,6 +41,8 @@ static int _groupchat_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _chat_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _conference_message_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 message_add_handlers(void)
@@ -48,9 +50,10 @@ message_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(NULL, STANZA_TYPE_ERROR, connection_error_handler);
-    HANDLE(NULL, STANZA_TYPE_GROUPCHAT, _groupchat_message_handler);
-    HANDLE(NULL, STANZA_TYPE_CHAT, _chat_message_handler);
+    HANDLE(NULL, STANZA_TYPE_ERROR,      connection_error_handler);
+    HANDLE(NULL, STANZA_TYPE_GROUPCHAT,  _groupchat_message_handler);
+    HANDLE(NULL, STANZA_TYPE_CHAT,       _chat_message_handler);
+    HANDLE(NULL, NULL,                   _conference_message_handler);
 }
 
 void
@@ -140,6 +143,85 @@ message_send_gone(const char * const recipient)
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
     chat_session_set_sent(recipient);
+}
+
+static int
+_conference_message_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata)
+{
+/*
+ * <message to="prof2@panesar" from="test@conference.panesar">
+ *      <x xmlns="http://jabber.org/protocol/muc#user">
+ *          <invite from="prof4@panesar/2572c43f-aa3d-42fa-a74e-c322a80a90b8">
+ *              <reason>Join the room!</reason>
+ *          </invite>
+ *      </x>
+ *      <x jid="test@conference.panesar" xmlns="jabber:x:conference">
+ *          Join the room!
+ *      </x>
+ *      <body>
+ *          prof4@panesar/2572c43f-aa3d-42fa-a74e-c322a80a90b8 invited you to the room test@conference.panesar (Join the room!)
+ *      </body>
+ * </message>
+ *
+ */
+
+    xmpp_stanza_t *x_muc = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    xmpp_stanza_t *x_groupchat = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *room = NULL;
+    char *invitor = NULL;
+    char *reason = NULL;
+
+    if (from == NULL) {
+        log_warning("Message received with no from attribute, ignoring");
+        return 1;
+    }
+
+    // XEP-0045
+    if (x_muc != NULL) {
+        room = from;
+
+        xmpp_stanza_t *invite = xmpp_stanza_get_child_by_name(x_muc, STANZA_NAME_INVITE);
+        if (invite == NULL) {
+            return 1;
+        }
+
+        char *invitor_jid = xmpp_stanza_get_attribute(invite, STANZA_ATTR_FROM);
+        if (invitor_jid == NULL) {
+            log_warning("Chat room invite received with no from attribute");
+            return 1;
+        }
+
+        Jid *jidp = jid_create(invitor_jid);
+        invitor = jidp->barejid;
+
+        xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(invite, STANZA_NAME_REASON);
+        if (reason_st != NULL) {
+            reason = xmpp_stanza_get_text(reason_st);
+        }
+
+        prof_handle_room_invite(INVITE_MEDIATED, invitor, room, reason);
+        jid_destroy(jidp);
+
+    // XEP-0429
+    } else if (x_groupchat != NULL) {
+        room = xmpp_stanza_get_attribute(x_groupchat, STANZA_ATTR_JID);
+        if (room == NULL) {
+            return 1;
+        }
+
+        Jid *jidp = jid_create(from);
+        invitor = jidp->barejid;
+
+        reason = xmpp_stanza_get_attribute(x_groupchat, STANZA_ATTR_REASON);
+
+        prof_handle_room_invite(INVITE_DIRECT, invitor, room, reason);
+
+        jid_destroy(jidp);
+    }
+
+    return 1;
 }
 
 static int
