@@ -61,6 +61,8 @@ static int _iq_handle_version_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _iq_handle_discoitems_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _iq_handle_discoitems_get(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 iq_add_handlers(void)
@@ -73,6 +75,7 @@ iq_add_handlers(void)
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _iq_handle_discoinfo_get);
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_RESULT, _iq_handle_discoinfo_result);
     HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _iq_handle_discoitems_result);
+    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_GET,    _iq_handle_discoitems_get);
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _iq_handle_version_get);
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _iq_handle_version_result);
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
@@ -338,6 +341,32 @@ _iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     return 1;
 }
+
+static int
+_iq_handle_discoitems_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if (from != NULL) {
+        xmpp_stanza_t *response = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(response, STANZA_NAME_IQ);
+        xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
+        xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
+        xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
+        xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+        xmpp_stanza_set_ns(query, XMPP_NS_DISCO_ITEMS);
+        xmpp_stanza_add_child(response, query);
+        xmpp_send(conn, response);
+
+        xmpp_stanza_release(response);
+    }
+
+    return 1;
+}
+
 
 static int
 _iq_handle_discoinfo_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
