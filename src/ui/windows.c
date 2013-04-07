@@ -457,13 +457,21 @@ ui_contact_online(const char * const barejid, const char * const resource,
     const char * const show, const char * const status, GDateTime *last_activity)
 {
     Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
-    _show_status_string(console->win, jid->fulljid, show, status, last_activity, "++",
+    char *display_str = NULL;
+
+    if (strcmp(jid->resourcepart, "__prof_default") == 0) {
+        display_str = jid->barejid;
+    } else {
+        display_str = jid->fulljid;
+    }
+
+    _show_status_string(console->win, display_str, show, status, last_activity, "++",
         "online");
 
     int win_index = _find_prof_win_index(barejid);
     if (win_index != NUM_WINS) {
         WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, jid->fulljid, show, status, last_activity, "++",
+        _show_status_string(win, display_str, show, status, last_activity, "++",
             "online");
     }
 
@@ -477,12 +485,21 @@ void
 ui_contact_offline(const char * const from, const char * const show,
     const char * const status)
 {
-    _show_status_string(console->win, from, show, status, NULL, "--", "offline");
+    Jid *jidp = jid_create(from);
+    char *display_str = NULL;
+
+    if (strcmp(jidp->resourcepart, "__prof_default") == 0) {
+        display_str = jidp->barejid;
+    } else {
+        display_str = jidp->fulljid;
+    }
+
+    _show_status_string(console->win, display_str, show, status, NULL, "--", "offline");
 
     int win_index = _find_prof_win_index(from);
     if (win_index != NUM_WINS) {
         WINDOW *win = windows[win_index]->win;
-        _show_status_string(win, from, show, status, NULL, "--", "offline");
+        _show_status_string(win, display_str, show, status, NULL, "--", "offline");
     }
 
     if (win_index == current_index)

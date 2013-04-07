@@ -339,6 +339,10 @@ _unavailable_handler(xmpp_conn_t * const conn,
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
         if (from_jid->resourcepart != NULL) {
             prof_handle_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
+
+        // hack for servers that do not send full jid with unavailable presence
+        } else {
+            prof_handle_contact_offline(from_jid->barejid, "__prof_default", status_str);
         }
     } else {
         if (from_jid->resourcepart != NULL) {
@@ -409,21 +413,26 @@ _available_handler(xmpp_conn_t * const conn,
         }
     }
 
-    // handle resource, if exists
-    if (from_jid->resourcepart != NULL) {
-        resource_presence_t presence = resource_presence_from_string(show_str);
-        Resource *resource = resource_new(from_jid->resourcepart, presence,
+    resource_presence_t presence = resource_presence_from_string(show_str);
+    Resource *resource = NULL;
+
+    // hack for servers that do not send fulljid with initial presence
+    if (from_jid->resourcepart == NULL) {
+        resource = resource_new("__prof_default", presence,
             status_str, priority, caps_key);
+    } else {
+        resource = resource_new(from_jid->resourcepart, presence,
+            status_str, priority, caps_key);
+    }
 
-        // self presence
-        if (strcmp(my_jid->barejid, from_jid->barejid) ==0) {
-            connection_add_available_resource(resource);
+    // self presence
+    if (strcmp(my_jid->barejid, from_jid->barejid) ==0) {
+        connection_add_available_resource(resource);
 
-        // contact presence
-        } else {
-            prof_handle_contact_online(from_jid->barejid, resource,
-                last_activity);
-        }
+    // contact presence
+    } else {
+        prof_handle_contact_online(from_jid->barejid, resource,
+            last_activity);
     }
 
     jid_destroy(my_jid);
