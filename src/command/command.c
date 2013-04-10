@@ -324,16 +324,18 @@ static struct cmd_t main_commands[] =
 
     { "/join",
         _cmd_join, parse_args_with_freetext, 1, 2,
-        { "/join room [nick]", "Join a chat room.",
-        { "/join room [nick]",
-          "-----------------",
+        { "/join room[@server] [nick]", "Join a chat room.",
+        { "/join room[@server] [nick]",
+          "--------------------------",
           "Join a chat room at the conference server.",
           "If nick is specified you will join with this nickname.",
           "Otherwise the 'localpart' of your JID (before the @) will be used.",
+          "If no server is supplied, it will default to 'conference.<domain-part>'",
           "If the room doesn't exist, and the server allows it, a new one will be created.",
           "",
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
+          "Example : /join jdev (as user@jabber.org will join jdev@conference.jabber.org)",
           NULL } } },
 
     { "/rooms",
@@ -2078,16 +2080,32 @@ _cmd_join(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    char *room = args[0];
-    char *nick = NULL;
-
     int num_args = g_strv_length(args);
+    char *room = NULL;
+    char *nick = NULL;
+    Jid *room_arg = jid_create(args[0]);
+    GString *room_str = g_string_new("");
+    Jid *my_jid = jid_create(jabber_get_jid());
+
+    // full room jid supplied (room@server)
+    if (room_arg->localpart != NULL) {
+        room = args[0];
+
+    // server not supplied (room), guess conference.<users-domain-part>
+    } else {
+        g_string_append(room_str, args[0]);
+        g_string_append(room_str, "@conference.");
+        g_string_append(room_str, strdup(my_jid->domainpart));
+        room = room_str->str;
+    }
+
+    // nick supplied
     if (num_args == 2) {
         nick = args[1];
+
+    // use localpart for nick
     } else {
-        Jid *jid = jid_create(jabber_get_jid());
-        nick = strdup(jid->localpart);
-        jid_destroy(jid);
+        nick = my_jid->localpart;
     }
 
     Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
@@ -2096,6 +2114,10 @@ _cmd_join(gchar **args, struct cmd_help_t help)
         presence_join_room(room_jid);
     }
     win_join_chat(room_jid);
+
+    jid_destroy(room_jid);
+    jid_destroy(my_jid);
+    g_string_free(room_str, TRUE);
 
     return TRUE;
 }
