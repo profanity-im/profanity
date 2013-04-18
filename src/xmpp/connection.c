@@ -50,6 +50,7 @@ static struct _jabber_conn_t {
     char *presence_message;
     int priority;
     int tls_disabled;
+    char *domain;
 } jabber_conn;
 
 static GHashTable *available_resources;
@@ -98,6 +99,7 @@ jabber_init(const int disable_tls)
     jabber_conn.conn = NULL;
     jabber_conn.ctx = NULL;
     jabber_conn.tls_disabled = disable_tls;
+    jabber_conn.domain = NULL;
     presence_init();
     caps_init();
     available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
@@ -185,6 +187,7 @@ jabber_disconnect(void)
 
     jabber_conn.conn_status = JABBER_STARTED;
     FREE_SET_NULL(jabber_conn.presence_message);
+    FREE_SET_NULL(jabber_conn.domain);
 }
 
 void
@@ -256,6 +259,12 @@ const char *
 jabber_get_jid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
+}
+
+const char *
+jabber_get_domain(void)
+{
+    return jabber_conn.domain;
 }
 
 char *
@@ -463,6 +472,10 @@ _connection_handler(xmpp_conn_t * const conn,
 
             _connection_free_saved_details();
         }
+
+        Jid *myJid = jid_create(jabber_get_jid());
+        jabber_conn.domain = strdup(myJid->domainpart);
+        jid_destroy(myJid);
 
         chat_sessions_init();
 

@@ -1418,14 +1418,31 @@ void
 cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason)
 {
+    char *display_room = NULL;
+    char *domain = strdup(jabber_get_domain());
+    Jid *room_jid = jid_create(room);
+    GString *default_service = g_string_new("conference.");
+    g_string_append(default_service, domain);
+
     cons_show("");
-    _win_show_time(console->win, '-');
-    wprintw(console->win, "%s has invited you to join %s", invitor, room);
+    cons_show("Chat room invite received:");
+    cons_show("  From   : %s", invitor);
+    cons_show("  Room   : %s", room);
+
     if (reason != NULL) {
-        wprintw(console->win, ", \"%s\"", reason);
+        cons_show("  Message: %s", reason);
     }
-    wprintw(console->win, "\n");
-    cons_show("Type \"/join %s\" to join the room", room);
+
+    if (strcmp(room_jid->domainpart, default_service->str) == 0) {
+        display_room = room_jid->localpart;
+    } else {
+        display_room = room_jid->barejid;
+    }
+
+    cons_show("Type \"/join %s\" to accept the invitation", display_room);
+
+    jid_destroy(room_jid);
+    g_string_free(default_service, TRUE);
 }
 
 void
