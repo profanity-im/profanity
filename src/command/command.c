@@ -101,6 +101,7 @@ static gboolean _cmd_tiny(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_close(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_clear(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_join(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_invite(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_disco(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_beep(gchar **args, struct cmd_help_t help);
@@ -336,6 +337,16 @@ static struct cmd_t main_commands[] =
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
           "Example : /join jdev (as user@jabber.org will join jdev@conference.jabber.org)",
+          NULL } } },
+
+    { "/invite",
+        _cmd_invite, parse_args_with_freetext, 1, 2,
+        { "/invite jid [message]", "Invite contact to chat room.",
+        { "/invite jid [message]",
+          "--------------------------",
+          "Send a direct invite to the specified contact to the current chat room.",
+          "The jid must be a contact in your roster.",
+          "If a message is supplied it will be send as the reason for the invite.",
           NULL } } },
 
     { "/rooms",
@@ -1078,6 +1089,8 @@ _cmd_complete_parameters(char *input, int *size)
         _parameter_autocomplete(input, size, "/software",
             contact_list_find_resource);
     }
+
+    _parameter_autocomplete(input, size, "/invite", contact_list_find_contact);
 
     _parameter_autocomplete(input, size, "/connect",
         accounts_find_enabled);
@@ -2118,6 +2131,37 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     jid_destroy(room_jid);
     jid_destroy(my_jid);
     g_string_free(room_str, TRUE);
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_invite(gchar **args, struct cmd_help_t help)
+{
+    char *contact = args[0];
+    char *reason = args[1];
+    char *room = NULL;
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (!win_current_is_groupchat()) {
+        cons_show("You must be in a chat room to send an invite.");
+        return TRUE;
+    }
+
+    room = win_current_get_recipient();
+    message_send_invite(room, contact, reason);
+    if (reason != NULL) {
+        cons_show("Room invite sent, contact: %s, room: %s, reason: \"%s\".",
+            contact, room, reason);
+    } else {
+        cons_show("Room invite sent, contact: %s, room: %s.",
+            contact, room);
+    }
 
     return TRUE;
 }

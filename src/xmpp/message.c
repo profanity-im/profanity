@@ -94,6 +94,18 @@ message_send_groupchat(const char * const msg, const char * const recipient)
 }
 
 void
+message_send_invite(const char * const room, const char * const contact,
+    const char * const reason)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *stanza = stanza_create_invite(ctx, room, contact, reason);
+
+    xmpp_send(conn, stanza);
+    xmpp_stanza_release(stanza);
+}
+
+void
 message_send_composing(const char * const recipient)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -149,23 +161,6 @@ static int
 _conference_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
-/*
- * <message to="prof2@panesar" from="test@conference.panesar">
- *      <x xmlns="http://jabber.org/protocol/muc#user">
- *          <invite from="prof4@panesar/2572c43f-aa3d-42fa-a74e-c322a80a90b8">
- *              <reason>Join the room!</reason>
- *          </invite>
- *      </x>
- *      <x jid="test@conference.panesar" xmlns="jabber:x:conference">
- *          Join the room!
- *      </x>
- *      <body>
- *          prof4@panesar/2572c43f-aa3d-42fa-a74e-c322a80a90b8 invited you to the room test@conference.panesar (Join the room!)
- *      </body>
- * </message>
- *
- */
-
     xmpp_stanza_t *x_muc = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     xmpp_stanza_t *x_groupchat = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);

@@ -87,6 +87,30 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
 }
 
 xmpp_stanza_t *
+stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
+    const char * const contact, const char * const reason)
+{
+    xmpp_stanza_t *message, *x;
+
+    message = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
+    xmpp_stanza_set_attribute(message, STANZA_ATTR_TO, contact);
+
+    x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x, STANZA_NS_CONFERENCE);
+
+    xmpp_stanza_set_attribute(x, STANZA_ATTR_JID, room);
+    if (reason != NULL) {
+        xmpp_stanza_set_attribute(x, STANZA_ATTR_REASON, reason);
+    }
+
+    xmpp_stanza_add_child(message, x);
+
+    return message;
+}
+
+xmpp_stanza_t *
 stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     const char * const full_room_jid)
 {

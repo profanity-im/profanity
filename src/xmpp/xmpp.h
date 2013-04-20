@@ -97,6 +97,8 @@ void message_send_inactive(const char * const recipient);
 void message_send_composing(const char * const recipient);
 void message_send_paused(const char * const recipient);
 void message_send_gone(const char * const recipient);
+void message_send_invite(const char * const room, const char * const contact,
+    const char * const reason);
 
 // presence functions
 void presence_subscription(const char * const jid, const jabber_subscr_t action);

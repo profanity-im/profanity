@@ -134,6 +134,9 @@ xmpp_stanza_t* stanza_create_ping_iq(xmpp_ctx_t *ctx);
 xmpp_stanza_t* stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char * const id,
     const char * const to, const char * const node);
 
+xmpp_stanza_t* stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
+    const char * const contact, const char * const reason);
+
 gboolean stanza_contains_chat_state(xmpp_stanza_t *stanza);
 
 gboolean stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp);
