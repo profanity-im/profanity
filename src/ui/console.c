@@ -384,6 +384,82 @@ cons_show_info(PContact pcontact)
     }
 }
 
+void
+cons_show_caps(const char * const contact, Resource *resource)
+{
+    WINDOW *win = console->win;
+    cons_show("");
+    const char *resource_presence = string_from_resource_presence(resource->presence);
+    window_show_time(console, '-');
+    window_presence_colour_on(console, resource_presence);
+    wprintw(console->win, "%s", contact);
+    window_presence_colour_off(console, resource_presence);
+    wprintw(win, ":\n");
+
+    if (resource->caps_str != NULL) {
+        Capabilities *caps = caps_get(resource->caps_str);
+        if (caps != NULL) {
+            // show identity
+            if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                window_show_time(console, '-');
+                wprintw(win, "Identity: ");
+                if (caps->name != NULL) {
+                    wprintw(win, "%s", caps->name);
+                    if ((caps->category != NULL) || (caps->type != NULL)) {
+                        wprintw(win, " ");
+                    }
+                }
+                if (caps->type != NULL) {
+                    wprintw(win, "%s", caps->type);
+                    if (caps->category != NULL) {
+                        wprintw(win, " ");
+                    }
+                }
+                if (caps->category != NULL) {
+                    wprintw(win, "%s", caps->category);
+                }
+                wprintw(win, "\n");
+            }
+            if (caps->software != NULL) {
+                window_show_time(console, '-');
+                wprintw(win, "Software: %s", caps->software);
+            }
+            if (caps->software_version != NULL) {
+                wprintw(win, ", %s", caps->software_version);
+            }
+            if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                wprintw(win, "\n");
+            }
+            if (caps->os != NULL) {
+                window_show_time(console, '-');
+                wprintw(win, "OS: %s", caps->os);
+            }
+            if (caps->os_version != NULL) {
+                wprintw(win, ", %s", caps->os_version);
+            }
+            if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                wprintw(win, "\n");
+            }
+
+            if (caps->features != NULL) {
+                window_show_time(console, '-');
+                wprintw(win, "Features:\n");
+                GSList *feature = caps->features;
+                while (feature != NULL) {
+                    window_show_time(console, '-');
+                    wprintw(win, "  %s\n", feature->data);
+                    feature = g_slist_next(feature);
+                }
+            }
+        }
+    }
+
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
+}
+
 static void
 _cons_splash_logo(void)
 {
