@@ -53,11 +53,6 @@
 #include "ui/ui.h"
 #include "ui/window.h"
 
-#define NUM_WINS 10
-
-// holds console at index 0 and chat wins 1 through to 9
-static ProfWin* windows[NUM_WINS];
-
 // the window currently being displayed
 static int current_index = 0;
 static ProfWin *current;
@@ -1112,78 +1107,6 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
     }
 }
 
-
-void
-cons_show_wins(void)
-{
-    int i = 0;
-    int count = 0;
-
-    cons_show("");
-    cons_show("Active windows:");
-    window_show_time(console, '-');
-    wprintw(console->win, "1: Console\n");
-
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            count++;
-        }
-    }
-
-    if (count != 0) {
-        for (i = 1; i < NUM_WINS; i++) {
-            if (windows[i] != NULL) {
-                ProfWin *window = windows[i];
-                window_show_time(console, '-');
-
-                switch (window->type)
-                {
-                    case WIN_CHAT:
-                        wprintw(console->win, "%d: chat %s", i + 1, window->from);
-                        PContact contact = contact_list_get_contact(window->from);
-
-                        if (contact != NULL) {
-                            if (p_contact_name(contact) != NULL) {
-                                wprintw(console->win, " (%s)", p_contact_name(contact));
-                            }
-                            wprintw(console->win, " - %s", p_contact_presence(contact));
-                        }
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_PRIVATE:
-                        wprintw(console->win, "%d: private %s", i + 1, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_MUC:
-                        wprintw(console->win, "%d: room %s", i + 1, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    default:
-                        break;
-                }
-
-                wprintw(console->win, "\n");
-            }
-        }
-    }
-
-    cons_show("");
-}
 
 void
 cons_show_info(PContact pcontact)

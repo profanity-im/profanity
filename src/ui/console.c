@@ -31,6 +31,7 @@
 
 #include "common.h"
 #include "config/preferences.h"
+#include "contact_list.h"
 #include "config/theme.h"
 #include "ui/window.h"
 #include "ui/ui.h"
@@ -119,6 +120,9 @@ cons_about(void)
     prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
 }
 
 void
@@ -146,6 +150,9 @@ cons_check_version(gboolean not_available_msg)
             }
 
             dirty = TRUE;
+            if (!win_current_is_console()) {
+                status_bar_new(0);
+            }
         }
     }
 }
@@ -167,6 +174,81 @@ cons_show_login_success(ProfAccount *account)
     wprintw(console->win, ".\n");
 }
 
+void
+cons_show_wins(void)
+{
+    int i = 0;
+    int count = 0;
+
+    cons_show("");
+    cons_show("Active windows:");
+    window_show_time(console, '-');
+    wprintw(console->win, "1: Console\n");
+
+    for (i = 1; i < NUM_WINS; i++) {
+        if (windows[i] != NULL) {
+            count++;
+        }
+    }
+
+    if (count != 0) {
+        for (i = 1; i < NUM_WINS; i++) {
+            if (windows[i] != NULL) {
+                ProfWin *window = windows[i];
+                window_show_time(console, '-');
+
+                switch (window->type)
+                {
+                    case WIN_CHAT:
+                        wprintw(console->win, "%d: chat %s", i + 1, window->from);
+                        PContact contact = contact_list_get_contact(window->from);
+
+                        if (contact != NULL) {
+                            if (p_contact_name(contact) != NULL) {
+                                wprintw(console->win, " (%s)", p_contact_name(contact));
+                            }
+                            wprintw(console->win, " - %s", p_contact_presence(contact));
+                        }
+
+                        if (window->unread > 0) {
+                            wprintw(console->win, ", %d unread", window->unread);
+                        }
+
+                        break;
+
+                    case WIN_PRIVATE:
+                        wprintw(console->win, "%d: private %s", i + 1, window->from);
+
+                        if (window->unread > 0) {
+                            wprintw(console->win, ", %d unread", window->unread);
+                        }
+
+                        break;
+
+                    case WIN_MUC:
+                        wprintw(console->win, "%d: room %s", i + 1, window->from);
+
+                        if (window->unread > 0) {
+                            wprintw(console->win, ", %d unread", window->unread);
+                        }
+
+                        break;
+
+                    default:
+                        break;
+                }
+
+                wprintw(console->win, "\n");
+            }
+        }
+    }
+
+    cons_show("");
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
+}
 
 static void
 _cons_splash_logo(void)

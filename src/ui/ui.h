@@ -40,6 +40,10 @@
 #include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
+#define NUM_WINS 10
+
+// holds console at index 0 and chat wins 1 through to 9
+ProfWin* windows[NUM_WINS];
 
 // gui startup and shutdown, resize
 void ui_init(void);
