@@ -460,6 +460,34 @@ cons_show_caps(const char * const contact, Resource *resource)
     }
 }
 
+void
+cons_show_software_version(const char * const jid, const char * const  presence,
+    const char * const name, const char * const version, const char * const os)
+{
+    if ((name != NULL) || (version != NULL) || (os != NULL)) {
+        cons_show("");
+        window_show_time(console, '-');
+        window_presence_colour_on(console, presence);
+        wprintw(console->win, "%s", jid);
+        window_presence_colour_off(console, presence);
+        wprintw(console->win, ":\n");
+    }
+    if (name != NULL) {
+        cons_show("Name    : %s", name);
+    }
+    if (version != NULL) {
+        cons_show("Version : %s", version);
+    }
+    if (os != NULL) {
+        cons_show("OS      : %s", os);
+    }
+
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
+}
+
 static void
 _cons_splash_logo(void)
 {

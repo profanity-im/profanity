@@ -1107,29 +1107,6 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
 }
 
 void
-cons_show_software_version(const char * const jid, const char * const  presence,
-    const char * const name, const char * const version, const char * const os)
-{
-    if ((name != NULL) || (version != NULL) || (os != NULL)) {
-        cons_show("");
-        window_show_time(console, '-');
-        window_presence_colour_on(console, presence);
-        wprintw(console->win, "%s", jid);
-        window_presence_colour_off(console, presence);
-        wprintw(console->win, ":\n");
-    }
-    if (name != NULL) {
-        cons_show("Name    : %s", name);
-    }
-    if (version != NULL) {
-        cons_show("Version : %s", version);
-    }
-    if (os != NULL) {
-        cons_show("OS      : %s", os);
-    }
-}
-
-void
 cons_show_room_list(GSList *rooms, const char * const conference_node)
 {
     if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
