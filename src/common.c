@@ -19,6 +19,7 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include "config.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -257,6 +258,32 @@ release_get_latest()
         return output.buffer;
     } else {
         return NULL;
+    }
+}
+
+gboolean
+release_is_new(char *found_version)
+{
+    int curr_maj, curr_min, curr_patch, found_maj, found_min, found_patch;
+
+    int parse_curr = sscanf(PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
+        &curr_patch);
+    int parse_found = sscanf(found_version, "%d.%d.%d", &found_maj, &found_min,
+        &found_patch);
+
+    if (parse_found == 3 && parse_curr == 3) {
+        if (found_maj > curr_maj) {
+            return TRUE;
+        } else if (found_maj == curr_maj && found_min > curr_min) {
+            return TRUE;
+        } else if (found_maj == curr_maj && found_min == curr_min
+                                        && found_patch > curr_patch) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    } else {
+        return FALSE;
     }
 }
 

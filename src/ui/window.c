@@ -64,3 +64,15 @@ window_free(ProfWin* window)
     free(window);
     window = NULL;
 }
+
+void
+window_show_time(ProfWin* window, char show_char)
+{
+    GDateTime *time = g_date_time_new_now_local();
+    gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+    wattron(window->win, COLOUR_TIME);
+    wprintw(window->win, "%s %c ", date_fmt, show_char);
+    wattroff(window->win, COLOUR_TIME);
+    g_date_time_unref(time);
+    g_free(date_fmt);
+}

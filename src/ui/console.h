@@ -25,7 +25,11 @@
 
 #include "ui/window.h"
 
-ProfWin* console_create(void);
+ProfWin* cons_create(void);
+void cons_refresh(void);
+void cons_show(const char * const msg, ...);
+void cons_about(void);
+void cons_check_version(gboolean not_available_msg);
 
 #endif
 

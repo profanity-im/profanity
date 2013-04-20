@@ -1550,6 +1550,9 @@ _cmd_about(gchar **args, struct cmd_help_t help)
 {
     cons_show("");
     cons_about();
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
     return TRUE;
 }
 
@@ -1806,6 +1809,10 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                 }
             }
         }
+    }
+
+    if (!win_current_is_console()) {
+        status_bar_new(0);
     }
 
     return TRUE;

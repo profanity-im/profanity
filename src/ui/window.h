@@ -39,4 +39,6 @@ typedef struct prof_win_t {
 ProfWin* window_create(const char * const title, int cols, win_type_t type);
 void window_free(ProfWin *window);
 
+void window_show_time(ProfWin* window, char show_char);
+
 #endif
