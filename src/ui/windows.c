@@ -50,10 +50,10 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "ui/console.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 
-#define CONS_WIN_TITLE "_cons"
 #define NUM_WINS 10
 
 // holds console at index 0 and chat wins 1 through to 9
@@ -79,7 +79,6 @@ static Display *display;
 static GTimer *ui_idle_time;
 
 static void _set_current(int index);
-static void _create_windows(void);
 static void _cons_splash_logo(void);
 static void _cons_show_basic_help(void);
 static void _win_show_contact(ProfWin *window, PContact contact);
@@ -132,7 +131,11 @@ ui_init(void)
     create_status_bar();
     status_bar_active(0);
     create_input_window();
-    _create_windows();
+    max_cols = getmaxx(stdscr);
+    windows[0] = console_create();
+    console = windows[0];
+    current = console;
+    cons_about();
 #ifdef HAVE_LIBXSS
     display = XOpenDisplay(0);
 #endif
@@ -2236,17 +2239,6 @@ _notify_typing(const char * const from)
     sprintf(message, "%s: typing...", from);
 
     _notify(message, 10000, "Incoming message");
-}
-
-static void
-_create_windows(void)
-{
-    int cols = getmaxx(stdscr);
-    max_cols = cols;
-    windows[0] = window_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
-    console = windows[0];
-    current = console;
-    cons_about();
 }
 
 static gboolean
