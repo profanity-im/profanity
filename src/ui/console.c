@@ -488,6 +488,31 @@ cons_show_software_version(const char * const jid, const char * const  presence,
     }
 }
 
+void
+cons_show_room_list(GSList *rooms, const char * const conference_node)
+{
+    if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
+        cons_show("Chat rooms at %s:", conference_node);
+        while (rooms != NULL) {
+            DiscoItem *room = rooms->data;
+            window_show_time(console, '-');
+            wprintw(console->win, "  %s", room->jid);
+            if (room->name != NULL) {
+                wprintw(console->win, ", (%s)", room->name);
+            }
+            wprintw(console->win, "\n");
+            rooms = g_slist_next(rooms);
+        }
+    } else {
+        cons_show("No chat rooms at %s", conference_node);
+    }
+
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
+}
+
 static void
 _cons_splash_logo(void)
 {
