@@ -23,7 +23,15 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "ui/ui.h"
+#define PAD_SIZE 1000
+
+typedef enum {
+    WIN_UNUSED,
+    WIN_CONSOLE,
+    WIN_CHAT,
+    WIN_MUC,
+    WIN_PRIVATE
+} win_type_t;
 
 typedef struct prof_win_t {
     char *from;
@@ -35,10 +43,11 @@ typedef struct prof_win_t {
     int history_shown;
 } ProfWin;
 
-
 ProfWin* window_create(const char * const title, int cols, win_type_t type);
 void window_free(ProfWin *window);
 
-void window_show_time(ProfWin* window, char show_char);
+void window_show_time(ProfWin *window, char show_char);
+void window_presence_colour_on(ProfWin *window, const char * const presence);
+void window_presence_colour_off(ProfWin *window, const char * const presence);
 
 #endif

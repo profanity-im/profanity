@@ -76,3 +76,40 @@ window_show_time(ProfWin* window, char show_char)
     g_date_time_unref(time);
     g_free(date_fmt);
 }
+
+void
+window_presence_colour_on(ProfWin *window, const char * const presence)
+{
+    if (g_strcmp0(presence, "online") == 0) {
+        wattron(window->win, COLOUR_ONLINE);
+    } else if (g_strcmp0(presence, "away") == 0) {
+        wattron(window->win, COLOUR_AWAY);
+    } else if (g_strcmp0(presence, "chat") == 0) {
+        wattron(window->win, COLOUR_CHAT);
+    } else if (g_strcmp0(presence, "dnd") == 0) {
+        wattron(window->win, COLOUR_DND);
+    } else if (g_strcmp0(presence, "xa") == 0) {
+        wattron(window->win, COLOUR_XA);
+    } else {
+        wattron(window->win, COLOUR_OFFLINE);
+    }
+}
+
+void
+window_presence_colour_off(ProfWin *window, const char * const presence)
+{
+    if (g_strcmp0(presence, "online") == 0) {
+        wattroff(window->win, COLOUR_ONLINE);
+    } else if (g_strcmp0(presence, "away") == 0) {
+        wattroff(window->win, COLOUR_AWAY);
+    } else if (g_strcmp0(presence, "chat") == 0) {
+        wattroff(window->win, COLOUR_CHAT);
+    } else if (g_strcmp0(presence, "dnd") == 0) {
+        wattroff(window->win, COLOUR_DND);
+    } else if (g_strcmp0(presence, "xa") == 0) {
+        wattroff(window->win, COLOUR_XA);
+    } else {
+        wattroff(window->win, COLOUR_OFFLINE);
+    }
+}
+

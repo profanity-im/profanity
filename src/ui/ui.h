@@ -36,28 +36,10 @@
 
 #include "contact.h"
 #include "jid.h"
+#include "ui/window.h"
 #include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
-#define PAD_SIZE 1000
-
-typedef enum {
-    WIN_UNUSED,
-    WIN_CONSOLE,
-    WIN_CHAT,
-    WIN_MUC,
-    WIN_PRIVATE
-} win_type_t;
-
-struct prof_win {
-    char from[100];
-    WINDOW *win;
-    win_type_t type;
-    int y_pos;
-    int paged;
-    int unread;
-    int history_shown;
-};
 
 // gui startup and shutdown, resize
 void ui_init(void);
@@ -140,6 +122,9 @@ void win_show_status(void);
 void win_private_show_status(void);
 
 // console window actions
+ProfWin* cons_create(void);
+void cons_refresh(void);
+void cons_show(const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);
 void cons_basic_help(void);
@@ -155,14 +140,12 @@ void cons_show_presence_prefs(void);
 void cons_show_connection_prefs(void);
 void cons_show_account(ProfAccount *account);
 void cons_bad_command(const char * const cmd);
-void cons_show(const char * const cmd, ...);
 void cons_debug(const char * const msg, ...);
 void cons_show_time(void);
 void cons_show_word(const char * const word);
 void cons_bad_show(const char * const cmd, ...);
 void cons_highlight_show(const char * const cmd);
 void cons_show_contacts(GSList * list);
-void cons_check_version(gboolean not_available_msg);
 void cons_show_wins(void);
 void cons_show_status(const char * const contact);
 void cons_show_info(PContact pcontact);
@@ -178,6 +161,7 @@ void cons_show_disco_items(GSList *items, const char * const jid);
 void cons_show_disco_info(const char *from, GSList *identities, GSList *features);
 void cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason);
+void cons_check_version(gboolean not_available_msg);
 
 // status bar actions
 void status_bar_refresh(void);

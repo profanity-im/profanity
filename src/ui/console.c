@@ -33,6 +33,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "ui/window.h"
+#include "ui/ui.h"
 
 #define CONS_WIN_TITLE "_cons"
 
@@ -148,6 +149,24 @@ cons_check_version(gboolean not_available_msg)
         }
     }
 }
+
+void
+cons_show_login_success(ProfAccount *account)
+{
+    window_show_time(console, '-');
+    wprintw(console->win, "%s logged in successfully, ", account->jid);
+
+    resource_presence_t presence = accounts_get_login_presence(account->name);
+    const char *presence_str = string_from_resource_presence(presence);
+
+    window_presence_colour_on(console, presence_str);
+    wprintw(console->win, "%s", presence_str);
+    window_presence_colour_off(console, presence_str);
+    wprintw(console->win, " (priority %d)",
+        accounts_get_priority_for_presence_type(account->name, presence));
+    wprintw(console->win, ".\n");
+}
+
 
 static void
 _cons_splash_logo(void)

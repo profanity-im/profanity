@@ -50,7 +50,6 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#include "ui/console.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 
@@ -102,8 +101,6 @@ static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static void _win_show_info(ProfWin *window, PContact pcontact);
 static void _ui_draw_win_title(void);
-static void _presence_colour_on(WINDOW *win, const char * const presence);
-static void _presence_colour_off(WINDOW *win, const char * const presence);
 
 static void _notify(const char * const message, int timeout,
     const char * const category);
@@ -883,9 +880,9 @@ win_show_room_roster(const char * const room, GList *roster, const char * const 
             const char const *nick = p_contact_barejid(member);
             const char const *show = p_contact_presence(member);
 
-            _presence_colour_on(window->win, show);
+            window_presence_colour_on(window, show);
             wprintw(window->win, "%s", nick);
-            _presence_colour_off(window->win, show);
+            window_presence_colour_off(window, show);
 
             if (roster->next != NULL) {
                 wprintw(window->win, ", ");
@@ -1115,23 +1112,6 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
     }
 }
 
-void
-cons_show_login_success(ProfAccount *account)
-{
-    window_show_time(console, '-');
-    wprintw(console->win, "%s logged in successfully, ", account->jid);
-
-    resource_presence_t presence = accounts_get_login_presence(account->name);
-    const char *presence_str = string_from_resource_presence(presence);
-
-    _presence_colour_on(console->win, presence_str);
-    wprintw(console->win, "%s", presence_str);
-    _presence_colour_off(console->win, presence_str);
-    wprintw(console->win, " (priority %d)",
-        accounts_get_priority_for_presence_type(account->name, presence));
-    wprintw(console->win, ".\n");
-}
-
 
 void
 cons_show_wins(void)
@@ -1222,9 +1202,9 @@ cons_show_caps(const char * const contact, Resource *resource)
     cons_show("");
     const char *resource_presence = string_from_resource_presence(resource->presence);
     window_show_time(console, '-');
-    _presence_colour_on(win, resource_presence);
+    window_presence_colour_on(console, resource_presence);
     wprintw(console->win, "%s", contact);
-    _presence_colour_off(win, resource_presence);
+    window_presence_colour_off(console, resource_presence);
     wprintw(win, ":\n");
 
     if (resource->caps_str != NULL) {
@@ -1302,9 +1282,9 @@ cons_show_software_version(const char * const jid, const char * const  presence,
     if ((name != NULL) || (version != NULL) || (os != NULL)) {
         cons_show("");
         window_show_time(console, '-');
-        _presence_colour_on(console->win, presence);
+        window_presence_colour_on(console, presence);
         wprintw(console->win, "%s", jid);
-        _presence_colour_off(console->win, presence);
+        window_presence_colour_off(console, presence);
         wprintw(console->win, ":\n");
     }
     if (name != NULL) {
@@ -1455,9 +1435,9 @@ cons_show_account_list(gchar **accounts)
                     (g_strcmp0(jabber_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
                 window_show_time(console, '-');
-                _presence_colour_on(console->win, string_from_resource_presence(presence));
+                window_presence_colour_on(console, string_from_resource_presence(presence));
                 wprintw(console->win, "%s\n", accounts[i]);
-                _presence_colour_off(console->win, string_from_resource_presence(presence));
+                window_presence_colour_off(console, string_from_resource_presence(presence));
             } else {
                 cons_show(accounts[i]);
             }
@@ -1519,13 +1499,13 @@ cons_show_account(ProfAccount *account)
             Resource *resource = ordered_resources->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
             window_show_time(console, '-');
-            _presence_colour_on(win, resource_presence);
+            window_presence_colour_on(console, resource_presence);
             wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
             if (resource->status != NULL) {
                 wprintw(win, ", \"%s\"", resource->status);
             }
             wprintw(win, "\n");
-            _presence_colour_off(win, resource_presence);
+            window_presence_colour_off(console, resource_presence);
 
             if (resource->caps_str != NULL) {
                 Capabilities *caps = caps_get(resource->caps_str);
@@ -2227,42 +2207,6 @@ _win_resize_all(void)
 }
 
 static void
-_presence_colour_on(WINDOW *win, const char * const presence)
-{
-    if (g_strcmp0(presence, "online") == 0) {
-        wattron(win, COLOUR_ONLINE);
-    } else if (g_strcmp0(presence, "away") == 0) {
-        wattron(win, COLOUR_AWAY);
-    } else if (g_strcmp0(presence, "chat") == 0) {
-        wattron(win, COLOUR_CHAT);
-    } else if (g_strcmp0(presence, "dnd") == 0) {
-        wattron(win, COLOUR_DND);
-    } else if (g_strcmp0(presence, "xa") == 0) {
-        wattron(win, COLOUR_XA);
-    } else {
-        wattron(win, COLOUR_OFFLINE);
-    }
-}
-
-static void
-_presence_colour_off(WINDOW *win, const char * const presence)
-{
-    if (g_strcmp0(presence, "online") == 0) {
-        wattroff(win, COLOUR_ONLINE);
-    } else if (g_strcmp0(presence, "away") == 0) {
-        wattroff(win, COLOUR_AWAY);
-    } else if (g_strcmp0(presence, "chat") == 0) {
-        wattroff(win, COLOUR_CHAT);
-    } else if (g_strcmp0(presence, "dnd") == 0) {
-        wattroff(win, COLOUR_DND);
-    } else if (g_strcmp0(presence, "xa") == 0) {
-        wattroff(win, COLOUR_XA);
-    } else {
-        wattroff(win, COLOUR_OFFLINE);
-    }
-}
-
-static void
 _show_status_string(ProfWin *window, const char * const from,
     const char * const show, const char * const status,
     GDateTime *last_activity, const char * const pre,
@@ -2376,7 +2320,7 @@ _win_show_contact(ProfWin *window, PContact contact)
     GDateTime *last_activity = p_contact_last_activity(contact);
 
     window_show_time(window, '-');
-    _presence_colour_on(window->win, presence);
+    window_presence_colour_on(window, presence);
     wprintw(window->win, "%s", barejid);
 
     if (name != NULL) {
@@ -2410,7 +2354,7 @@ _win_show_contact(ProfWin *window, PContact contact)
     }
 
     wprintw(window->win, "\n");
-    _presence_colour_off(window->win, presence);
+    window_presence_colour_off(window, presence);
 }
 
 static void
@@ -2559,12 +2503,12 @@ _win_show_info(ProfWin *window, PContact pcontact)
     window_show_time(window, '-');
     wprintw(win, "\n");
     window_show_time(window, '-');
-    _presence_colour_on(win, presence);
+    window_presence_colour_on(window, presence);
     wprintw(win, "%s", barejid);
     if (name != NULL) {
         wprintw(win, " (%s)", name);
     }
-    _presence_colour_off(win, presence);
+    window_presence_colour_off(window, presence);
     wprintw(win, ":\n");
 
     if (sub != NULL) {
@@ -2614,13 +2558,13 @@ _win_show_info(ProfWin *window, PContact pcontact)
         Resource *resource = ordered_resources->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
         window_show_time(window, '-');
-        _presence_colour_on(win, resource_presence);
+        window_presence_colour_on(window, resource_presence);
         wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status != NULL) {
             wprintw(win, ", \"%s\"", resource->status);
         }
         wprintw(win, "\n");
-        _presence_colour_off(win, resource_presence);
+        window_presence_colour_off(window, resource_presence);
 
         if (resource->caps_str != NULL) {
             Capabilities *caps = caps_get(resource->caps_str);
