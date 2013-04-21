@@ -1146,27 +1146,6 @@ win_room_show_status(const char * const contact)
 }
 
 void
-cons_bad_show(const char * const msg, ...)
-{
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    window_show_time(console, '-');
-    wattron(console->win, COLOUR_ERROR);
-    wprintw(console->win, "%s\n", fmt_msg->str);
-    wattroff(console->win, COLOUR_ERROR);
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
-
-    if (current_index == 0) {
-        dirty = TRUE;
-    } else {
-        status_bar_new(0);
-    }
-}
-
-void
 cons_show_time(void)
 {
     window_show_time(console, '-');

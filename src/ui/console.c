@@ -1134,6 +1134,31 @@ cons_show_contacts(GSList *list)
         }
         curr = g_slist_next(curr);
     }
+
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
+}
+
+void
+cons_bad_show(const char * const msg, ...)
+{
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    window_show_time(console, '-');
+    wattron(console->win, COLOUR_ERROR);
+    wprintw(console->win, "%s\n", fmt_msg->str);
+    wattroff(console->win, COLOUR_ERROR);
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
 }
 
 static void
