@@ -38,7 +38,7 @@
 #define CONS_WIN_TITLE "_cons"
 
 ProfWin*
-window_create(const char * const title, int cols, win_type_t type)
+win_create(const char * const title, int cols, win_type_t type)
 {
     ProfWin *new_win = malloc(sizeof(struct prof_win_t));
     new_win->from = strdup(title);
@@ -55,7 +55,7 @@ window_create(const char * const title, int cols, win_type_t type)
 }
 
 void
-window_free(ProfWin* window)
+win_free(ProfWin* window)
 {
     delwin(window->win);
     free(window->from);
@@ -66,7 +66,7 @@ window_free(ProfWin* window)
 }
 
 void
-window_print_time(ProfWin* window, char show_char)
+win_print_time(ProfWin* window, char show_char)
 {
     GDateTime *time = g_date_time_new_now_local();
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
@@ -78,7 +78,7 @@ window_print_time(ProfWin* window, char show_char)
 }
 
 void
-window_presence_colour_on(ProfWin *window, const char * const presence)
+win_presence_colour_on(ProfWin *window, const char * const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
         wattron(window->win, COLOUR_ONLINE);
@@ -96,7 +96,7 @@ window_presence_colour_on(ProfWin *window, const char * const presence)
 }
 
 void
-window_presence_colour_off(ProfWin *window, const char * const presence)
+win_presence_colour_off(ProfWin *window, const char * const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
         wattroff(window->win, COLOUR_ONLINE);
@@ -114,7 +114,7 @@ window_presence_colour_off(ProfWin *window, const char * const presence)
 }
 
 void
-window_show_contact(ProfWin *window, PContact contact)
+win_show_contact(ProfWin *window, PContact contact)
 {
     const char *barejid = p_contact_barejid(contact);
     const char *name = p_contact_name(contact);
@@ -122,8 +122,8 @@ window_show_contact(ProfWin *window, PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    window_print_time(window, '-');
-    window_presence_colour_on(window, presence);
+    win_print_time(window, '-');
+    win_presence_colour_on(window, presence);
     wprintw(window->win, "%s", barejid);
 
     if (name != NULL) {
@@ -157,5 +157,5 @@ window_show_contact(ProfWin *window, PContact contact)
     }
 
     wprintw(window->win, "\n");
-    window_presence_colour_off(window, presence);
+    win_presence_colour_off(window, presence);
 }

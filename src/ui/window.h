@@ -45,12 +45,12 @@ typedef struct prof_win_t {
     int history_shown;
 } ProfWin;
 
-ProfWin* window_create(const char * const title, int cols, win_type_t type);
-void window_free(ProfWin *window);
+ProfWin* win_create(const char * const title, int cols, win_type_t type);
+void win_free(ProfWin *window);
 
-void window_print_time(ProfWin *window, char show_char);
-void window_presence_colour_on(ProfWin *window, const char * const presence);
-void window_presence_colour_off(ProfWin *window, const char * const presence);
-void window_show_contact(ProfWin *window, PContact contact);
+void win_print_time(ProfWin *window, char show_char);
+void win_presence_colour_on(ProfWin *window, const char * const presence);
+void win_presence_colour_off(ProfWin *window, const char * const presence);
+void win_show_contact(ProfWin *window, PContact contact);
 
 #endif
