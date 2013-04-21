@@ -238,7 +238,7 @@ inp_win_reset(void)
 static void
 _clear_input(void)
 {
-    wclear(inp_win);
+    werase(inp_win);
     wmove(inp_win, 0, 0);
 }
 

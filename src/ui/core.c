@@ -500,7 +500,7 @@ ui_switch_win(const int i)
 void
 ui_clear_current(void)
 {
-    wclear(current->win);
+    werase(current->win);
     dirty = TRUE;
 }
 
