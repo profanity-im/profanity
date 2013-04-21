@@ -28,9 +28,6 @@
 #include <X11/extensions/scrnsaver.h>
 #endif
 #include <glib.h>
-#ifdef PLATFORM_CYGWIN
-#include <windows.h>
-#endif
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H

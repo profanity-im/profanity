@@ -28,6 +28,9 @@
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
+#ifdef PLATFORM_CYGWIN
+#include <windows.h>
+#endif
 
 #include "log.h"
 #include "ui/ui.h"
