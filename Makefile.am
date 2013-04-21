@@ -8,7 +8,7 @@ profanity_SOURCES = src/contact.c src/contact.h src/log.c src/common.c \
 	src/xmpp/iq.c src/xmpp/message.c src/xmpp/presence.c src/xmpp/stanza.c \
 	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
-	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/windows.c \
+	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c \
 	src/command/command.h src/command/command.c src/command/history.c \
