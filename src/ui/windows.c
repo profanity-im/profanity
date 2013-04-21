@@ -74,7 +74,6 @@ static GTimer *ui_idle_time;
 
 static void _set_current(int index);
 static void _cons_show_basic_help(void);
-static void _win_show_contact(ProfWin *window, PContact contact);
 static int _find_prof_win_index(const char * const contact);
 static int _new_prof_win(const char * const contact, win_type_t type);
 static void _current_window_refresh(void);
@@ -1107,18 +1106,6 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
 }
 
 void
-cons_show_status(const char * const contact)
-{
-    PContact pcontact = contact_list_get_contact(contact);
-
-    if (pcontact != NULL) {
-        _win_show_contact(console, pcontact);
-    } else {
-        cons_show("No such contact \"%s\" in roster.", contact);
-    }
-}
-
-void
 cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason)
 {
@@ -1292,7 +1279,7 @@ win_show_status(void)
     PContact pcontact = contact_list_get_contact(recipient);
 
     if (pcontact != NULL) {
-        _win_show_contact(current, pcontact);
+        window_show_contact(current, pcontact);
     } else {
         win_current_show("Error getting contact info.");
     }
@@ -1306,7 +1293,7 @@ win_private_show_status(void)
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
 
     if (pcontact != NULL) {
-        _win_show_contact(current, pcontact);
+        window_show_contact(current, pcontact);
     } else {
         win_current_show("Error getting contact info.");
     }
@@ -1320,7 +1307,7 @@ win_room_show_status(const char * const contact)
     PContact pcontact = muc_get_participant(win_current_get_recipient(), contact);
 
     if (pcontact != NULL) {
-        _win_show_contact(current, pcontact);
+        window_show_contact(current, pcontact);
     } else {
         win_current_show("No such participant \"%s\" in room.", contact);
     }
@@ -1667,7 +1654,7 @@ cons_show_contacts(GSList *list)
     while(curr) {
         PContact contact = curr->data;
         if (strcmp(p_contact_subscription(contact), "none") != 0) {
-            _win_show_contact(console, contact);
+            window_show_contact(console, contact);
         }
         curr = g_slist_next(curr);
     }
@@ -2034,53 +2021,6 @@ _cons_show_incoming_message(const char * const short_from, const int win_index)
     wattron(console->win, COLOUR_INCOMING);
     wprintw(console->win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
     wattroff(console->win, COLOUR_INCOMING);
-}
-
-static void
-_win_show_contact(ProfWin *window, PContact contact)
-{
-    const char *barejid = p_contact_barejid(contact);
-    const char *name = p_contact_name(contact);
-    const char *presence = p_contact_presence(contact);
-    const char *status = p_contact_status(contact);
-    GDateTime *last_activity = p_contact_last_activity(contact);
-
-    window_show_time(window, '-');
-    window_presence_colour_on(window, presence);
-    wprintw(window->win, "%s", barejid);
-
-    if (name != NULL) {
-        wprintw(window->win, " (%s)", name);
-    }
-
-    wprintw(window->win, " is %s", presence);
-
-    if (last_activity != NULL) {
-        GDateTime *now = g_date_time_new_now_local();
-        GTimeSpan span = g_date_time_difference(now, last_activity);
-
-        wprintw(window->win, ", idle ");
-
-        int hours = span / G_TIME_SPAN_HOUR;
-        span = span - hours * G_TIME_SPAN_HOUR;
-        if (hours > 0) {
-            wprintw(window->win, "%dh", hours);
-        }
-
-        int minutes = span / G_TIME_SPAN_MINUTE;
-        span = span - minutes * G_TIME_SPAN_MINUTE;
-        wprintw(window->win, "%dm", minutes);
-
-        int seconds = span / G_TIME_SPAN_SECOND;
-        wprintw(window->win, "%ds", seconds);
-    }
-
-    if (status != NULL) {
-        wprintw(window->win, ", \"%s\"", p_contact_status(contact));
-    }
-
-    wprintw(window->win, "\n");
-    window_presence_colour_off(window, presence);
 }
 
 static void

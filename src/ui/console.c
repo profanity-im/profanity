@@ -584,6 +584,18 @@ cons_show_disco_items(GSList *items, const char * const jid)
     }
 }
 
+void
+cons_show_status(const char * const contact)
+{
+    PContact pcontact = contact_list_get_contact(contact);
+
+    if (pcontact != NULL) {
+        window_show_contact(console, pcontact);
+    } else {
+        cons_show("No such contact \"%s\" in roster.", contact);
+    }
+}
+
 static void
 _cons_splash_logo(void)
 {

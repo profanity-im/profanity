@@ -113,3 +113,49 @@ window_presence_colour_off(ProfWin *window, const char * const presence)
     }
 }
 
+void
+window_show_contact(ProfWin *window, PContact contact)
+{
+    const char *barejid = p_contact_barejid(contact);
+    const char *name = p_contact_name(contact);
+    const char *presence = p_contact_presence(contact);
+    const char *status = p_contact_status(contact);
+    GDateTime *last_activity = p_contact_last_activity(contact);
+
+    window_show_time(window, '-');
+    window_presence_colour_on(window, presence);
+    wprintw(window->win, "%s", barejid);
+
+    if (name != NULL) {
+        wprintw(window->win, " (%s)", name);
+    }
+
+    wprintw(window->win, " is %s", presence);
+
+    if (last_activity != NULL) {
+        GDateTime *now = g_date_time_new_now_local();
+        GTimeSpan span = g_date_time_difference(now, last_activity);
+
+        wprintw(window->win, ", idle ");
+
+        int hours = span / G_TIME_SPAN_HOUR;
+        span = span - hours * G_TIME_SPAN_HOUR;
+        if (hours > 0) {
+            wprintw(window->win, "%dh", hours);
+        }
+
+        int minutes = span / G_TIME_SPAN_MINUTE;
+        span = span - minutes * G_TIME_SPAN_MINUTE;
+        wprintw(window->win, "%dm", minutes);
+
+        int seconds = span / G_TIME_SPAN_SECOND;
+        wprintw(window->win, "%ds", seconds);
+    }
+
+    if (status != NULL) {
+        wprintw(window->win, ", \"%s\"", p_contact_status(contact));
+    }
+
+    wprintw(window->win, "\n");
+    window_presence_colour_off(window, presence);
+}
