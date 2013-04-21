@@ -166,6 +166,8 @@ void cons_show_disco_info(const char *from, GSList *identities, GSList *features
 void cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason);
 void cons_check_version(gboolean not_available_msg);
+void cons_show_typing(const char * const short_from);
+void cons_show_incoming_message(const char * const short_from, const int win_index);
 
 // status bar actions
 void status_bar_refresh(void);

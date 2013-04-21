@@ -83,9 +83,6 @@ static void _show_status_string(ProfWin *window, const char * const from,
     const char * const show, const char * const status,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show);
-static void _cons_show_typing(const char * const short_from);
-static void _cons_show_incoming_message(const char * const short_from,
-    const int win_index);
 static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch);
 static void _win_resize_all(void);
@@ -266,11 +263,11 @@ ui_show_typing(const char * const from)
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
         if (win_index == NUM_WINS) {
-            _cons_show_typing(from);
+            cons_show_typing(from);
 
         // have chat window but not currently in it
         } else if (win_index != current_index) {
-            _cons_show_typing(from);
+            cons_show_typing(from);
             dirty = TRUE;
 
         // in chat window with user
@@ -400,7 +397,7 @@ ui_show_incoming_msg(const char * const from, const char * const message,
         // not currently viewing chat window with sender
         } else {
             status_bar_new(win_index);
-            _cons_show_incoming_message(from, win_index);
+            cons_show_incoming_message(from, win_index);
             if (prefs_get_boolean(PREF_FLASH))
                 flash();
 
@@ -1034,7 +1031,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
     // not currenlty on groupchat window
     } else {
         status_bar_new(win_index);
-        _cons_show_incoming_message(nick, win_index);
+        cons_show_incoming_message(nick, win_index);
         if (current_index == 0) {
             dirty = TRUE;
         }
@@ -1412,24 +1409,6 @@ _show_status_string(ProfWin *window, const char * const from,
     } else {
         wattroff(win, COLOUR_OFFLINE);
     }
-}
-
-static void
-_cons_show_typing(const char * const short_from)
-{
-    window_show_time(console, '-');
-    wattron(console->win, COLOUR_TYPING);
-    wprintw(console->win, "!! %s is typing a message...\n", short_from);
-    wattroff(console->win, COLOUR_TYPING);
-}
-
-static void
-_cons_show_incoming_message(const char * const short_from, const int win_index)
-{
-    window_show_time(console, '-');
-    wattron(console->win, COLOUR_INCOMING);
-    wprintw(console->win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
-    wattroff(console->win, COLOUR_INCOMING);
 }
 
 static void

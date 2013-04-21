@@ -153,6 +153,24 @@ cons_bad_command(const char * const cmd)
 }
 
 void
+cons_show_typing(const char * const short_from)
+{
+    window_show_time(console, '-');
+    wattron(console->win, COLOUR_TYPING);
+    wprintw(console->win, "!! %s is typing a message...\n", short_from);
+    wattroff(console->win, COLOUR_TYPING);
+}
+
+void
+cons_show_incoming_message(const char * const short_from, const int win_index)
+{
+    window_show_time(console, '-');
+    wattron(console->win, COLOUR_INCOMING);
+    wprintw(console->win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
+    wattroff(console->win, COLOUR_INCOMING);
+}
+
+void
 cons_about(void)
 {
     int rows, cols;
