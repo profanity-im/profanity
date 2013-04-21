@@ -353,7 +353,7 @@ ui_show_incoming_msg(const char * const from, const char * const message,
             _win_show_message(console->win, message);
         }
 
-        cons_bad_show("Windows all used, close a window to respond.");
+        cons_show("Windows all used, close a window to respond.");
 
         if (current_index == 0) {
            dirty = TRUE;

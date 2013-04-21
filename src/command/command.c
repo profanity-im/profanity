@@ -1149,7 +1149,7 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
         }
 
         if (conn_status == JABBER_DISCONNECTED) {
-            cons_bad_show("Connection attempt for %s failed.", jid);
+            cons_show_error("Connection attempt for %s failed.", jid);
             log_debug("Connection attempt for %s failed", jid);
         }
 
@@ -1832,7 +1832,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
     }
 
     if (ui_windows_full()) {
-        cons_bad_show("Windows all used, close a window and try again.");
+        cons_show_error("Windows all used, close a window and try again.");
         return TRUE;
     }
 
@@ -2096,7 +2096,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     }
 
     if (ui_windows_full()) {
-        cons_bad_show("Windows all used, close a window and try again.");
+        cons_show_error("Windows all used, close a window and try again.");
         return TRUE;
     }
 
@@ -2256,7 +2256,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
     if (!tinyurl_valid(url)) {
         GString *error = g_string_new("/tiny, badly formed URL: ");
         g_string_append(error, url);
-        cons_bad_show(error->str);
+        cons_show_error(error->str);
         if (!win_current_is_console()) {
             win_current_bad_show(error->str);
         }
@@ -2290,7 +2290,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
             }
             free(tiny);
         } else {
-            cons_bad_show("Couldn't get tinyurl.");
+            cons_show_error("Couldn't get tinyurl.");
         }
     } else {
         cons_show("/tiny can only be used in chat windows");

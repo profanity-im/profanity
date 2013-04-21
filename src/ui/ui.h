@@ -146,7 +146,7 @@ void cons_show_account(ProfAccount *account);
 void cons_debug(const char * const msg, ...);
 void cons_show_time(void);
 void cons_show_word(const char * const word);
-void cons_bad_show(const char * const cmd, ...);
+void cons_show_error(const char * const cmd, ...);
 void cons_highlight_show(const char * const cmd);
 void cons_show_contacts(GSList * list);
 void cons_show_wins(void);

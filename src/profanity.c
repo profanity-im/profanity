@@ -143,15 +143,15 @@ void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
     if (err_msg == NULL) {
-        cons_bad_show("Unknown error received from service.");
+        cons_show_error("Unknown error received from service.");
     } else if (strcmp(err_msg, "conflict") == 0) {
         if (win_current_is_groupchat()) {
             win_current_show("Nickname already in use.");
         } else {
-            cons_bad_show("Error received from server: %s", err_msg);
+            cons_show_error("Error received from server: %s", err_msg);
         }
     } else {
-        cons_bad_show("Error received from server: %s", err_msg);
+        cons_show_error("Error received from server: %s", err_msg);
     }
 
     win_show_error_msg(from, err_msg);
@@ -212,7 +212,7 @@ prof_handle_gone(const char * const from)
 void
 prof_handle_failed_login(void)
 {
-    cons_bad_show("Login failed.");
+    cons_show_error("Login failed.");
     log_info("Login failed");
     win_current_page_off();
 }
@@ -220,7 +220,7 @@ prof_handle_failed_login(void)
 void
 prof_handle_lost_connection(void)
 {
-    cons_bad_show("Lost connection.");
+    cons_show_error("Lost connection.");
     contact_list_clear();
     chat_sessions_clear();
     ui_disconnected();

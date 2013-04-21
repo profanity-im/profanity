@@ -121,7 +121,7 @@ cons_show(const char * const msg, ...)
 }
 
 void
-cons_bad_show(const char * const msg, ...)
+cons_show_error(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
