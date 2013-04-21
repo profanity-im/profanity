@@ -214,7 +214,7 @@ ui_windows_full(void)
 }
 
 void
-ui_show_typing(const char * const from)
+ui_contact_typing(const char * const from)
 {
     int win_index = _find_prof_win_index(from);
 
@@ -269,7 +269,7 @@ ui_idle(void)
 }
 
 void
-ui_show_incoming_msg(const char * const from, const char * const message,
+ui_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
     char *display_from;
@@ -491,11 +491,11 @@ ui_handle_special_keys(const wint_t * const ch, const char * const inp,
 void
 ui_switch_win(const int i)
 {
-    win_current_page_off();
+    ui_current_page_off();
     if (windows[i] != NULL) {
         current_index = i;
         current = windows[current_index];
-        win_current_page_off();
+        ui_current_page_off();
 
         current->unread = 0;
 
@@ -543,13 +543,13 @@ ui_current_win_type(void)
 }
 
 char *
-ui_current_win_recipient(void)
+ui_current_recipient(void)
 {
     return strdup(current->from);
 }
 
 void
-win_current_show(const char * const msg, ...)
+ui_current_print_line(const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -564,7 +564,7 @@ win_current_show(const char * const msg, ...)
 }
 
 void
-win_current_bad_show(const char * const msg)
+ui_current_error_line(const char * const msg)
 {
     window_print_time(current, '-');
     wattron(current->win, COLOUR_ERROR);
@@ -575,7 +575,7 @@ win_current_bad_show(const char * const msg)
 }
 
 void
-win_current_page_off(void)
+ui_current_page_off(void)
 {
     int rows = getmaxy(stdscr);
     ProfWin *window = windows[current_index];
@@ -594,7 +594,7 @@ win_current_page_off(void)
 }
 
 void
-win_show_error_msg(const char * const from, const char *err_msg)
+ui_print_error_from_recipient(const char * const from, const char *err_msg)
 {
     int win_index;
     ProfWin *window;
@@ -615,7 +615,7 @@ win_show_error_msg(const char * const from, const char *err_msg)
 }
 
 void
-win_show_system_msg(const char * const from, const char *message)
+ui_print_system_msg_from_recipient(const char * const from, const char *message)
 {
     int win_index;
     ProfWin *window;
@@ -646,7 +646,7 @@ win_show_system_msg(const char * const from, const char *message)
 }
 
 void
-win_show_gone(const char * const from)
+ui_recipient_gone(const char * const from)
 {
     int win_index;
     ProfWin *window;
@@ -671,7 +671,7 @@ win_show_gone(const char * const from)
 }
 
 void
-win_new_chat_win(const char * const to)
+ui_new_chat_win(const char * const to)
 {
     // if the contact is offline, show a message
     PContact contact = contact_list_get_contact(to);
@@ -713,7 +713,7 @@ win_new_chat_win(const char * const to)
 }
 
 void
-win_show_outgoing_msg(const char * const from, const char * const to,
+ui_outgoing_msg(const char * const from, const char * const to,
     const char * const message)
 {
     // if the contact is offline, show a message
@@ -767,7 +767,7 @@ win_show_outgoing_msg(const char * const from, const char * const to,
 }
 
 void
-win_join_chat(Jid *jid)
+ui_room_join(Jid *jid)
 {
     int win_index = _find_prof_win_index(jid->barejid);
 
@@ -780,7 +780,7 @@ win_join_chat(Jid *jid)
 }
 
 void
-win_show_room_roster(const char * const room, GList *roster, const char * const presence)
+ui_room_roster(const char * const room, GList *roster, const char * const presence)
 {
     int win_index = _find_prof_win_index(room);
     ProfWin *window = windows[win_index];
@@ -829,7 +829,7 @@ win_show_room_roster(const char * const room, GList *roster, const char * const 
 }
 
 void
-win_show_room_member_offline(const char * const room, const char * const nick)
+ui_room_member_offline(const char * const room, const char * const nick)
 {
     int win_index = _find_prof_win_index(room);
     ProfWin *window = windows[win_index];
@@ -844,7 +844,7 @@ win_show_room_member_offline(const char * const room, const char * const nick)
 }
 
 void
-win_show_room_member_online(const char * const room, const char * const nick,
+ui_room_member_online(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     int win_index = _find_prof_win_index(room);
@@ -860,7 +860,7 @@ win_show_room_member_online(const char * const room, const char * const nick,
 }
 
 void
-win_show_room_member_presence(const char * const room, const char * const nick,
+ui_room_member_presence(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     int win_index = _find_prof_win_index(room);
@@ -874,7 +874,7 @@ win_show_room_member_presence(const char * const room, const char * const nick,
 }
 
 void
-win_show_room_member_nick_change(const char * const room,
+ui_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick)
 {
     int win_index = _find_prof_win_index(room);
@@ -890,7 +890,7 @@ win_show_room_member_nick_change(const char * const room,
 }
 
 void
-win_show_room_nick_change(const char * const room, const char * const nick)
+ui_room_nick_change(const char * const room, const char * const nick)
 {
     int win_index = _find_prof_win_index(room);
     ProfWin *window = windows[win_index];
@@ -905,7 +905,7 @@ win_show_room_nick_change(const char * const room, const char * const nick)
 }
 
 void
-win_show_room_history(const char * const room_jid, const char * const nick,
+ui_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
     int win_index = _find_prof_win_index(room_jid);
@@ -931,7 +931,7 @@ win_show_room_history(const char * const room_jid, const char * const nick,
 }
 
 void
-win_show_room_message(const char * const room_jid, const char * const nick,
+ui_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
     int win_index = _find_prof_win_index(room_jid);
@@ -996,7 +996,7 @@ win_show_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-win_show_room_subject(const char * const room_jid, const char * const subject)
+ui_room_subject(const char * const room_jid, const char * const subject)
 {
     int win_index = _find_prof_win_index(room_jid);
     ProfWin *window = windows[win_index];
@@ -1019,7 +1019,7 @@ win_show_room_subject(const char * const room_jid, const char * const subject)
 }
 
 void
-win_show_room_broadcast(const char * const room_jid, const char * const message)
+ui_room_broadcast(const char * const room_jid, const char * const message)
 {
     int win_index = _find_prof_win_index(room_jid);
     ProfWin *window = windows[win_index];
@@ -1042,43 +1042,43 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
 }
 
 void
-win_show_status(void)
+ui_status(void)
 {
-    char *recipient = ui_current_win_recipient();
+    char *recipient = ui_current_recipient();
     PContact pcontact = contact_list_get_contact(recipient);
 
     if (pcontact != NULL) {
         window_show_contact(current, pcontact);
     } else {
-        win_current_show("Error getting contact info.");
+        ui_current_print_line("Error getting contact info.");
     }
 }
 
 void
-win_private_show_status(void)
+ui_status_private(void)
 {
-    Jid *jid = jid_create(ui_current_win_recipient());
+    Jid *jid = jid_create(ui_current_recipient());
 
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
 
     if (pcontact != NULL) {
         window_show_contact(current, pcontact);
     } else {
-        win_current_show("Error getting contact info.");
+        ui_current_print_line("Error getting contact info.");
     }
 
     jid_destroy(jid);
 }
 
 void
-win_room_show_status(const char * const contact)
+ui_status_room(const char * const contact)
 {
-    PContact pcontact = muc_get_participant(ui_current_win_recipient(), contact);
+    PContact pcontact = muc_get_participant(ui_current_recipient(), contact);
 
     if (pcontact != NULL) {
         window_show_contact(current, pcontact);
     } else {
-        win_current_show("No such participant \"%s\" in room.", contact);
+        ui_current_print_line("No such participant \"%s\" in room.", contact);
     }
 }
 

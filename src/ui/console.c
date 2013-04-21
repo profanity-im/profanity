@@ -100,7 +100,7 @@ cons_debug(const char * const msg, ...)
             status_bar_new(0);
         }
 
-        win_current_page_off();
+        ui_current_page_off();
         ui_refresh();
     }
 }

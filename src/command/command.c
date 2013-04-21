@@ -918,7 +918,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(sub_ac);
 
     if (ui_current_win_type() == WIN_MUC) {
-        Autocomplete nick_ac = muc_get_roster_ac(ui_current_win_recipient());
+        Autocomplete nick_ac = muc_get_roster_ac(ui_current_recipient());
         if (nick_ac != NULL) {
             autocomplete_reset(nick_ac);
         }
@@ -992,7 +992,7 @@ cmd_execute(const char * const command, const char * const inp)
             if (ui_current_win_type() == WIN_CHAT) {
                 char usage[strlen(cmd->help.usage) + 8];
                 sprintf(usage, "Usage: %s", cmd->help.usage);
-                win_current_show(usage);
+                ui_current_print_line(usage);
             }
             return TRUE;
         } else {
@@ -1010,13 +1010,13 @@ cmd_execute_default(const char * const inp)
 {
     win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
-    char *recipient = ui_current_win_recipient();
+    char *recipient = ui_current_recipient();
 
     switch (win_type)
     {
         case WIN_MUC:
             if (status != JABBER_CONNECTED) {
-                win_current_show("You are not currently connected.");
+                ui_current_print_line("You are not currently connected.");
             } else {
                 message_send_groupchat(inp, recipient);
                 free(recipient);
@@ -1025,7 +1025,7 @@ cmd_execute_default(const char * const inp)
 
         case WIN_CHAT:
             if (status != JABBER_CONNECTED) {
-                win_current_show("You are not currently connected.");
+                ui_current_print_line("You are not currently connected.");
             } else {
                 message_send(inp, recipient);
 
@@ -1036,17 +1036,17 @@ cmd_execute_default(const char * const inp)
                     jid_destroy(jidp);
                 }
 
-                win_show_outgoing_msg("me", recipient, inp);
+                ui_outgoing_msg("me", recipient, inp);
                 free(recipient);
             }
             break;
 
         case WIN_PRIVATE:
             if (status != JABBER_CONNECTED) {
-                win_current_show("You are not currently connected.");
+                ui_current_print_line("You are not currently connected.");
             } else {
                 message_send(inp, recipient);
-                win_show_outgoing_msg("me", recipient, inp);
+                ui_outgoing_msg("me", recipient, inp);
                 free(recipient);
             }
             break;
@@ -1088,7 +1088,7 @@ _cmd_complete_parameters(char *input, int *size)
         prefs_autocomplete_boolean_choice);
 
     if (ui_current_win_type() == WIN_MUC) {
-        Autocomplete nick_ac = muc_get_roster_ac(ui_current_win_recipient());
+        Autocomplete nick_ac = muc_get_roster_ac(ui_current_recipient());
         if (nick_ac != NULL) {
             _parameter_autocomplete_with_ac(input, size, "/msg", nick_ac);
             _parameter_autocomplete_with_ac(input, size, "/info", nick_ac);
@@ -1411,7 +1411,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
     if (jid != NULL) {
         jid = strdup(jid);
     } else {
-        jid = ui_current_win_recipient();
+        jid = ui_current_recipient();
     }
 
     bare_jid = strtok(jid, "/");
@@ -1432,17 +1432,17 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         PContact contact = contact_list_get_contact(bare_jid);
         if ((contact == NULL) || (p_contact_subscription(contact) == NULL)) {
             if (win_type == WIN_CHAT) {
-                win_current_show("No subscription information for %s.", bare_jid);
+                ui_current_print_line("No subscription information for %s.", bare_jid);
             } else {
                 cons_show("No subscription information for %s.", bare_jid);
             }
         } else {
             if (win_type == WIN_CHAT) {
                 if (p_contact_pending_out(contact)) {
-                    win_current_show("%s subscription status: %s, request pending.",
+                    ui_current_print_line("%s subscription status: %s, request pending.",
                         bare_jid, p_contact_subscription(contact));
                 } else {
-                    win_current_show("%s subscription status: %s.", bare_jid,
+                    ui_current_print_line("%s subscription status: %s.", bare_jid,
                         p_contact_subscription(contact));
                 }
             } else {
@@ -1665,12 +1665,12 @@ _cmd_who(gchar **args, struct cmd_help_t help)
         // valid arg
         } else {
             if (win_type == WIN_MUC) {
-                char *room = ui_current_win_recipient();
+                char *room = ui_current_recipient();
                 GList *list = muc_get_roster(room);
 
                 // no arg, show all contacts
                 if (presence == NULL) {
-                    win_show_room_roster(room, list, NULL);
+                    ui_room_roster(room, list, NULL);
 
                 // available
                 } else if (strcmp("available", presence) == 0) {
@@ -1684,7 +1684,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                         list = g_list_next(list);
                     }
 
-                    win_show_room_roster(room, filtered, "available");
+                    ui_room_roster(room, filtered, "available");
 
                 // unavailable
                 } else if (strcmp("unavailable", presence) == 0) {
@@ -1698,7 +1698,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                         list = g_list_next(list);
                     }
 
-                    win_show_room_roster(room, filtered, "unavailable");
+                    ui_room_roster(room, filtered, "unavailable");
 
                 // online, available resources
                 } else if (strcmp("online", presence) == 0) {
@@ -1712,7 +1712,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                         list = g_list_next(list);
                     }
 
-                    win_show_room_roster(room, filtered, "online");
+                    ui_room_roster(room, filtered, "online");
 
                 // offline, no available resources
                 } else if (strcmp("offline", presence) == 0) {
@@ -1726,7 +1726,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                         list = g_list_next(list);
                     }
 
-                    win_show_room_roster(room, filtered, "offline");
+                    ui_room_roster(room, filtered, "offline");
 
                 // show specific status
                 } else {
@@ -1740,7 +1740,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                         list = g_list_next(list);
                     }
 
-                    win_show_room_roster(room, filtered, presence);
+                    ui_room_roster(room, filtered, presence);
                 }
 
             // not in groupchat window
@@ -1859,7 +1859,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
     }
 
     if (win_type == WIN_MUC) {
-        char *room_name = ui_current_win_recipient();
+        char *room_name = ui_current_recipient();
         if (muc_nick_in_roster(room_name, usr)) {
             GString *full_jid = g_string_new(room_name);
             g_string_append(full_jid, "/");
@@ -1867,15 +1867,15 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
             if (msg != NULL) {
                 message_send(msg, full_jid->str);
-                win_show_outgoing_msg("me", full_jid->str, msg);
+                ui_outgoing_msg("me", full_jid->str, msg);
             } else {
-                win_new_chat_win(full_jid->str);
+                ui_new_chat_win(full_jid->str);
             }
 
             g_string_free(full_jid, TRUE);
 
         } else {
-            win_current_show("No such participant \"%s\" in room.", usr);
+            ui_current_print_line("No such participant \"%s\" in room.", usr);
         }
 
         return TRUE;
@@ -1883,7 +1883,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
     } else {
         if (msg != NULL) {
             message_send(msg, usr);
-            win_show_outgoing_msg("me", usr, msg);
+            ui_outgoing_msg("me", usr, msg);
 
             if ((win_type == WIN_CHAT) && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_jid();
@@ -1894,7 +1894,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
             return TRUE;
         } else {
-            win_new_chat_win(usr);
+            ui_new_chat_win(usr);
             return TRUE;
         }
     }
@@ -1917,23 +1917,23 @@ _cmd_status(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (usr != NULL) {
-                win_room_show_status(usr);
+                ui_status_room(usr);
             } else {
-                win_current_show("You must specify a nickname.");
+                ui_current_print_line("You must specify a nickname.");
             }
             break;
         case WIN_CHAT:
             if (usr != NULL) {
-                win_current_show("No parameter required when in chat.");
+                ui_current_print_line("No parameter required when in chat.");
             } else {
-                win_show_status();
+                ui_status();
             }
             break;
         case WIN_PRIVATE:
             if (usr != NULL) {
-                win_current_show("No parameter required when in chat.");
+                ui_current_print_line("No parameter required when in chat.");
             } else {
-                win_private_show_status();
+                ui_status_private();
             }
             break;
         case WIN_CONSOLE:
@@ -1968,7 +1968,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (usr != NULL) {
-                pcontact = muc_get_participant(ui_current_win_recipient(), usr);
+                pcontact = muc_get_participant(ui_current_recipient(), usr);
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
                 } else {
@@ -1982,19 +1982,19 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             if (usr != NULL) {
                 cons_show("No parameter required for /info in chat.");
             } else {
-                pcontact = contact_list_get_contact(ui_current_win_recipient());
+                pcontact = contact_list_get_contact(ui_current_recipient());
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
                 } else {
-                    cons_show("No such contact \"%s\" in roster.", ui_current_win_recipient());
+                    cons_show("No such contact \"%s\" in roster.", ui_current_recipient());
                 }
             }
             break;
         case WIN_PRIVATE:
             if (usr != NULL) {
-                win_current_show("No parameter required when in chat.");
+                ui_current_print_line("No parameter required when in chat.");
             } else {
-                Jid *jid = jid_create(ui_current_win_recipient());
+                Jid *jid = jid_create(ui_current_recipient());
                 pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
@@ -2039,7 +2039,7 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (args[0] != NULL) {
-                pcontact = muc_get_participant(ui_current_win_recipient(), args[0]);
+                pcontact = muc_get_participant(ui_current_recipient(), args[0]);
                 if (pcontact != NULL) {
                     Resource *resource = p_contact_get_resource(pcontact, args[0]);
                     cons_show_caps(args[0], resource);
@@ -2078,7 +2078,7 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
             if (args[0] != NULL) {
                 cons_show("No parameter needed to /caps when in private chat.");
             } else {
-                Jid *jid = jid_create(ui_current_win_recipient());
+                Jid *jid = jid_create(ui_current_recipient());
                 pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
                 Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
                 cons_show_caps(jid->resourcepart, resource);
@@ -2108,9 +2108,9 @@ _cmd_software(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (args[0] != NULL) {
-                pcontact = muc_get_participant(ui_current_win_recipient(), args[0]);
+                pcontact = muc_get_participant(ui_current_recipient(), args[0]);
                 if (pcontact != NULL) {
-                    Jid *jid = jid_create_from_bare_and_resource(ui_current_win_recipient(), args[0]);
+                    Jid *jid = jid_create_from_bare_and_resource(ui_current_recipient(), args[0]);
                     iq_send_software_version(jid->fulljid);
                     jid_destroy(jid);
                 } else {
@@ -2138,7 +2138,7 @@ _cmd_software(gchar **args, struct cmd_help_t help)
             if (args[0] != NULL) {
                 cons_show("No parameter needed to /software when in private chat.");
             } else {
-                iq_send_software_version(ui_current_win_recipient());
+                iq_send_software_version(ui_current_recipient());
             }
             break;
         default:
@@ -2196,7 +2196,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     if (!muc_room_is_active(room_jid)) {
         presence_join_room(room_jid);
     }
-    win_join_chat(room_jid);
+    ui_room_join(room_jid);
 
     jid_destroy(room_jid);
     jid_destroy(my_jid);
@@ -2223,7 +2223,7 @@ _cmd_invite(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    room = ui_current_win_recipient();
+    room = ui_current_recipient();
     message_send_invite(room, contact, reason);
     if (reason != NULL) {
         cons_show("Room invite sent, contact: %s, room: %s, reason: \"%s\".",
@@ -2304,7 +2304,7 @@ _cmd_nick(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    char *room = ui_current_win_recipient();
+    char *room = ui_current_recipient();
     char *nick = args[0];
     presence_change_room_nick(room, nick);
 
@@ -2322,7 +2322,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
         g_string_append(error, url);
         cons_show_error(error->str);
         if (win_type != WIN_CONSOLE) {
-            win_current_bad_show(error->str);
+            ui_current_error_line(error->str);
         }
         g_string_free(error, TRUE);
     } else if (win_type != WIN_CONSOLE) {
@@ -2330,7 +2330,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
 
         if (tiny != NULL) {
             if (win_type == WIN_CHAT) {
-                char *recipient = ui_current_win_recipient();
+                char *recipient = ui_current_recipient();
                 message_send(tiny, recipient);
 
                 if (prefs_get_boolean(PREF_CHLOG)) {
@@ -2340,15 +2340,15 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
                     jid_destroy(jidp);
                 }
 
-                win_show_outgoing_msg("me", recipient, tiny);
+                ui_outgoing_msg("me", recipient, tiny);
                 free(recipient);
             } else if (win_type == WIN_PRIVATE) {
-                char *recipient = ui_current_win_recipient();
+                char *recipient = ui_current_recipient();
                 message_send(tiny, recipient);
-                win_show_outgoing_msg("me", recipient, tiny);
+                ui_outgoing_msg("me", recipient, tiny);
                 free(recipient);
             } else { // groupchat
-                char *recipient = ui_current_win_recipient();
+                char *recipient = ui_current_recipient();
                 message_send_groupchat(tiny, recipient);
                 free(recipient);
             }
@@ -2385,12 +2385,12 @@ _cmd_close(gchar **args, struct cmd_help_t help)
     // handle leaving rooms, or chat
     if (conn_status == JABBER_CONNECTED) {
         if (win_type == WIN_MUC) {
-            char *room_jid = ui_current_win_recipient();
+            char *room_jid = ui_current_recipient();
             presence_leave_chat_room(room_jid);
         } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
 
             if (prefs_get_boolean(PREF_STATES)) {
-                char *recipient = ui_current_win_recipient();
+                char *recipient = ui_current_recipient();
 
                 // send <gone/> chat state before closing
                 if (chat_session_get_recipient_supports(recipient)) {
