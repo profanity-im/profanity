@@ -142,10 +142,11 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
 void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
+    win_type_t win_type = ui_current_win_type();
     if (err_msg == NULL) {
         cons_show_error("Unknown error received from service.");
     } else if (strcmp(err_msg, "conflict") == 0) {
-        if (win_current_is_groupchat()) {
+        if (win_type == WIN_MUC) {
             win_current_show("Nickname already in use.");
         } else {
             cons_show_error("Error received from server: %s", err_msg);
@@ -388,15 +389,15 @@ prof_handle_idle(void)
 void
 prof_handle_activity(void)
 {
+    win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
-    if (status == JABBER_CONNECTED) {
-        if (win_current_is_chat()) {
-            char *recipient = win_current_get_recipient();
-            chat_session_set_composing(recipient);
-            if (!chat_session_get_sent(recipient) ||
-                    chat_session_is_paused(recipient)) {
-                message_send_composing(recipient);
-            }
+
+    if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
+        char *recipient = win_current_get_recipient();
+        chat_session_set_composing(recipient);
+        if (!chat_session_get_sent(recipient) ||
+                chat_session_is_paused(recipient)) {
+            message_send_composing(recipient);
         }
     }
 }

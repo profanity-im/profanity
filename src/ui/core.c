@@ -536,28 +536,10 @@ ui_close_current(void)
     dirty = TRUE;
 }
 
-int
-win_current_is_console(void)
+win_type_t
+ui_current_win_type(void)
 {
-    return (current->type == WIN_CONSOLE);
-}
-
-int
-win_current_is_chat(void)
-{
-    return (current->type == WIN_CHAT);
-}
-
-int
-win_current_is_groupchat(void)
-{
-    return (current->type == WIN_MUC);
-}
-
-int
-win_current_is_private(void)
-{
-    return (current->type == WIN_PRIVATE);
+    return current->type;
 }
 
 char *

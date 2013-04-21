@@ -77,7 +77,7 @@ cons_show_word(const char * const word)
     wprintw(console->win, "%s", word);
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -96,7 +96,7 @@ cons_debug(const char * const msg, ...)
         va_end(arg);
 
         dirty = TRUE;
-        if (!win_current_is_console()) {
+        if (ui_current_win_type() != WIN_CONSOLE) {
             status_bar_new(0);
         }
 
@@ -135,7 +135,7 @@ cons_show_error(const char * const msg, ...)
     va_end(arg);
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -200,7 +200,7 @@ cons_about(void)
     prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -230,7 +230,7 @@ cons_check_version(gboolean not_available_msg)
             }
 
             dirty = TRUE;
-            if (!win_current_is_console()) {
+            if (ui_current_win_type() != WIN_CONSOLE) {
                 status_bar_new(0);
             }
         }
@@ -325,7 +325,7 @@ cons_show_wins(void)
 
     cons_show("");
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -459,7 +459,7 @@ cons_show_info(PContact pcontact)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -535,7 +535,7 @@ cons_show_caps(const char * const contact, Resource *resource)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -563,7 +563,7 @@ cons_show_software_version(const char * const jid, const char * const  presence,
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -588,7 +588,7 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -632,7 +632,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
         }
 
         dirty = TRUE;
-        if (!win_current_is_console()) {
+        if (ui_current_win_type() != WIN_CONSOLE) {
             status_bar_new(0);
         }
     }
@@ -659,7 +659,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
         cons_show("No service discovery items for %s", jid);
     }
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -707,7 +707,7 @@ cons_show_room_invite(const char * const invitor, const char * const room,
     g_string_free(default_service, TRUE);
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -738,7 +738,7 @@ cons_show_account_list(gchar **accounts)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -853,7 +853,7 @@ cons_show_account(ProfAccount *account)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -912,7 +912,7 @@ cons_show_ui_prefs(void)
         cons_show("Status (/statuses)           : OFF");
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -969,7 +969,7 @@ cons_show_chat_prefs(void)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -988,7 +988,7 @@ cons_show_log_prefs(void)
         cons_show("Chat logging (/chlog)       : OFF");
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1021,7 +1021,7 @@ cons_show_presence_prefs(void)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1051,7 +1051,7 @@ cons_show_connection_prefs(void)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1072,7 +1072,7 @@ cons_show_themes(GSList *themes)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1095,7 +1095,7 @@ cons_prefs(void)
     cons_show("");
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1115,7 +1115,7 @@ cons_help(void)
     cons_show("");
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1128,7 +1128,7 @@ cons_basic_help(void)
     _cons_show_basic_help();
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1150,7 +1150,7 @@ cons_settings_help(void)
     cons_show("");
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1172,7 +1172,7 @@ cons_presence_help(void)
     cons_show("");
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1195,7 +1195,7 @@ cons_navigation_help(void)
     cons_show("");
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }
@@ -1214,7 +1214,7 @@ cons_show_contacts(GSList *list)
     }
 
     dirty = TRUE;
-    if (!win_current_is_console()) {
+    if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(0);
     }
 }

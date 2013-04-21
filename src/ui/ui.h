@@ -86,10 +86,7 @@ void title_bar_draw(void);
 // current window actions
 void ui_close_current(void);
 void ui_clear_current(void);
-int win_current_is_console(void);
-int win_current_is_chat(void);
-int win_current_is_groupchat(void);
-int win_current_is_private(void);
+win_type_t ui_current_win_type(void);
 char* win_current_get_recipient(void);
 void win_current_show(const char * const msg, ...);
 void win_current_bad_show(const char * const msg);
