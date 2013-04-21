@@ -1146,20 +1146,6 @@ win_room_show_status(const char * const contact)
 }
 
 void
-cons_show_contacts(GSList *list)
-{
-    GSList *curr = list;
-
-    while(curr) {
-        PContact contact = curr->data;
-        if (strcmp(p_contact_subscription(contact), "none") != 0) {
-            window_show_contact(console, contact);
-        }
-        curr = g_slist_next(curr);
-    }
-}
-
-void
 cons_bad_show(const char * const msg, ...)
 {
     va_list arg;
