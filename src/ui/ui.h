@@ -143,7 +143,6 @@ void cons_show_log_prefs(void);
 void cons_show_presence_prefs(void);
 void cons_show_connection_prefs(void);
 void cons_show_account(ProfAccount *account);
-void cons_bad_command(const char * const cmd);
 void cons_debug(const char * const msg, ...);
 void cons_show_time(void);
 void cons_show_word(const char * const word);

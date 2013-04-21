@@ -1036,7 +1036,7 @@ cmd_execute_default(const char * const inp)
             free(recipient);
         }
     } else {
-        cons_bad_command(inp);
+        cons_show("Unknown command: %s", inp);
     }
 
     return TRUE;
