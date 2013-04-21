@@ -1146,12 +1146,6 @@ win_room_show_status(const char * const contact)
 }
 
 void
-cons_show_time(void)
-{
-    window_show_time(console, '-');
-}
-
-void
 cons_debug(const char * const msg, ...)
 {
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
