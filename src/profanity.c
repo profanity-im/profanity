@@ -42,6 +42,7 @@
 #include "log.h"
 #include "muc.h"
 #include "resource.h"
+#include "ui/notifier.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 

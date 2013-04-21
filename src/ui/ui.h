@@ -62,6 +62,7 @@ void ui_reset_idle_time(void);
 void ui_new_chat_win(const char * const to);
 void ui_print_error_from_recipient(const char * const from, const char *err_msg);
 void ui_print_system_msg_from_recipient(const char * const from, const char *message);
+gint ui_unread(void);
 
 // current window actions
 void ui_close_current(void);
@@ -188,5 +189,4 @@ void inp_block(void);
 void inp_get_password(char *passwd);
 void inp_replace_input(char *input, const char * const new_input, int *size);
 
-void notify_remind(void);
 #endif

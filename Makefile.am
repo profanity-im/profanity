@@ -10,7 +10,7 @@ profanity_SOURCES = src/contact.c src/contact.h src/log.c src/common.c \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
-	src/ui/console.c \
+	src/ui/console.c src/ui/notifier.c src/ui/notifier.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/history.h src/command/parser.c \
 	src/command/parser.h \

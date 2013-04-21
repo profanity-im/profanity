@@ -28,9 +28,6 @@
 #include <X11/extensions/scrnsaver.h>
 #endif
 #include <glib.h>
-#ifdef HAVE_LIBNOTIFY
-#include <libnotify/notify.h>
-#endif
 #ifdef PLATFORM_CYGWIN
 #include <windows.h>
 #endif
@@ -50,6 +47,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "ui/notifier.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 
@@ -86,16 +84,9 @@ static void _show_status_string(ProfWin *window, const char * const from,
 static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch);
 static void _win_resize_all(void);
-static gint _win_get_unread(void);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static void _ui_draw_win_title(void);
-
-static void _notify(const char * const message, int timeout,
-    const char * const category);
-static void _notify_remind(gint unread);
-static void _notify_message(const char * const short_from);
-static void _notify_typing(const char * const from);
 
 void
 ui_init(void)
@@ -119,6 +110,7 @@ ui_init(void)
     console = windows[0];
     current = console;
     cons_about();
+    notifier_init();
 #ifdef HAVE_LIBXSS
     display = XOpenDisplay(0);
 #endif
@@ -171,11 +163,7 @@ ui_reset_idle_time(void)
 void
 ui_close(void)
 {
-#ifdef HAVE_LIBNOTIFY
-    if (notify_is_initted()) {
-        notify_uninit();
-    }
-#endif
+    notifier_uninit();
     endwin();
 }
 
@@ -239,7 +227,7 @@ ui_contact_typing(const char * const from)
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING))
-        _notify_typing(from);
+        notify_typing(from);
 }
 
 void
@@ -392,7 +380,7 @@ ui_incoming_msg(const char * const from, const char * const message,
     if (prefs_get_boolean(PREF_BEEP))
         beep();
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
-        _notify_message(display_from);
+        notify_message(display_from);
 
     g_free(display_from);
 }
@@ -990,7 +978,7 @@ ui_room_message(const char * const room_jid, const char * const nick,
             beep();
         }
         if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-            _notify_message(nick);
+            notify_message(nick);
         }
     }
 }
@@ -1082,13 +1070,17 @@ ui_status_room(const char * const contact)
     }
 }
 
-void
-notify_remind(void)
+gint
+ui_unread(void)
 {
-    gint unread = _win_get_unread();
-    if (unread > 0) {
-        _notify_remind(unread);
+    int i;
+    gint result = 0;
+    for (i = 0; i < NUM_WINS; i++) {
+        if (windows[i] != NULL) {
+            result += windows[i]->unread;
+        }
     }
+    return result;
 }
 
 static void
@@ -1110,7 +1102,7 @@ _ui_draw_win_title(void)
 
     if (status == JABBER_CONNECTED) {
         const char * const jid = jabber_get_jid();
-        gint unread = _win_get_unread();
+        gint unread = ui_unread();
 
         if (unread != 0) {
             snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
@@ -1131,90 +1123,6 @@ _ui_draw_win_title(void)
         }
         win_title = strdup(new_win_title);
     }
-}
-
-static void
-_notify(const char * const message, int timeout,
-    const char * const category)
-{
-#ifdef HAVE_LIBNOTIFY
-    gboolean notify_initted = notify_is_initted();
-
-    if (!notify_initted) {
-        notify_initted = notify_init("Profanity");
-    }
-
-    if (notify_initted) {
-        NotifyNotification *notification;
-        notification = notify_notification_new("Profanity", message, NULL);
-        notify_notification_set_timeout(notification, timeout);
-        notify_notification_set_category(notification, category);
-        notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
-
-        GError *error = NULL;
-        gboolean notify_success = notify_notification_show(notification, &error);
-
-        if (!notify_success) {
-            log_error("Error sending desktop notification:");
-            log_error("  -> Message : %s", message);
-            log_error("  -> Error   : %s", error->message);
-        }
-    } else {
-        log_error("Libnotify initialisation error.");
-    }
-#endif
-#ifdef PLATFORM_CYGWIN
-    NOTIFYICONDATA nid;
-    nid.cbSize = sizeof(NOTIFYICONDATA);
-    //nid.hWnd = hWnd;
-    nid.uID = 100;
-    nid.uVersion = NOTIFYICON_VERSION;
-    //nid.uCallbackMessage = WM_MYMESSAGE;
-    nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    strcpy(nid.szTip, "Tray Icon");
-    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-    Shell_NotifyIcon(NIM_ADD, &nid);
-
-    // For a Ballon Tip
-    nid.uFlags = NIF_INFO;
-    strcpy(nid.szInfoTitle, "Profanity"); // Title
-    strcpy(nid.szInfo, message); // Copy Tip
-    nid.uTimeout = timeout;  // 3 Seconds
-    nid.dwInfoFlags = NIIF_INFO;
-
-    Shell_NotifyIcon(NIM_MODIFY, &nid);
-#endif
-}
-
-static void
-_notify_remind(gint unread)
-{
-    char message[20];
-    if (unread == 1) {
-        sprintf(message, "1 unread message");
-    } else {
-        snprintf(message, sizeof(message), "%d unread messages", unread);
-    }
-
-    _notify(message, 5000, "Incoming message");
-}
-
-static void
-_notify_message(const char * const short_from)
-{
-    char message[strlen(short_from) + 1 + 10];
-    sprintf(message, "%s: message.", short_from);
-
-    _notify(message, 10000, "Incoming message");
-}
-
-static void
-_notify_typing(const char * const from)
-{
-    char message[strlen(from) + 1 + 11];
-    sprintf(message, "%s: typing...", from);
-
-    _notify(message, 10000, "Incoming message");
 }
 
 static int
@@ -1491,19 +1399,6 @@ _win_handle_page(const wint_t * const ch)
         current->paged = 1;
         dirty = TRUE;
     }
-}
-
-static gint
-_win_get_unread(void)
-{
-    int i;
-    gint result = 0;
-    for (i = 0; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            result += windows[i]->unread;
-        }
-    }
-    return result;
 }
 
 static void
