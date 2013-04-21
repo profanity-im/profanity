@@ -1146,18 +1146,6 @@ win_room_show_status(const char * const contact)
 }
 
 void
-cons_show_word(const char * const word)
-{
-    wprintw(console->win, "%s", word);
-
-    if (current_index == 0) {
-        dirty = TRUE;
-    } else {
-        status_bar_new(0);
-    }
-}
-
-void
 cons_bad_command(const char * const cmd)
 {
     window_show_time(console, '-');

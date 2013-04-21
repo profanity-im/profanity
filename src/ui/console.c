@@ -72,6 +72,17 @@ cons_show_time(void)
 }
 
 void
+cons_show_word(const char * const word)
+{
+    wprintw(console->win, "%s", word);
+
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
+}
+
+void
 cons_debug(const char * const msg, ...)
 {
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
