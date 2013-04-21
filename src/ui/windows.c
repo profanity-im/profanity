@@ -143,48 +143,6 @@ ui_refresh(void)
     inp_put_back();
 }
 
-static void
-_ui_draw_win_title(void)
-{
-    char new_win_title[100];
-
-    GString *version_str = g_string_new("");
-
-    if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
-        g_string_append(version_str, " ");
-        g_string_append(version_str, PACKAGE_VERSION);
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-            g_string_append(version_str, "dev");
-        }
-    }
-
-    jabber_conn_status_t status = jabber_get_connection_status();
-
-    if (status == JABBER_CONNECTED) {
-        const char * const jid = jabber_get_jid();
-        gint unread = _win_get_unread();
-
-        if (unread != 0) {
-            snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
-        } else {
-            snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
-        }
-    } else {
-        snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s%c", '\033', "Profanity", version_str->str, '\007');
-    }
-
-    g_string_free(version_str, TRUE);
-
-    if (g_strcmp0(win_title, new_win_title) != 0) {
-        // print to x-window title bar
-        printf("%s", new_win_title);
-        if (win_title != NULL) {
-            free(win_title);
-        }
-        win_title = strdup(new_win_title);
-    }
-}
-
 unsigned long
 ui_get_idle_time(void)
 {
@@ -1148,6 +1106,48 @@ notify_remind(void)
     gint unread = _win_get_unread();
     if (unread > 0) {
         _notify_remind(unread);
+    }
+}
+
+static void
+_ui_draw_win_title(void)
+{
+    char new_win_title[100];
+
+    GString *version_str = g_string_new("");
+
+    if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
+        g_string_append(version_str, " ");
+        g_string_append(version_str, PACKAGE_VERSION);
+        if (strcmp(PACKAGE_STATUS, "development") == 0) {
+            g_string_append(version_str, "dev");
+        }
+    }
+
+    jabber_conn_status_t status = jabber_get_connection_status();
+
+    if (status == JABBER_CONNECTED) {
+        const char * const jid = jabber_get_jid();
+        gint unread = _win_get_unread();
+
+        if (unread != 0) {
+            snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str, unread, jid, '\007');
+        } else {
+            snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid, '\007');
+        }
+    } else {
+        snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s%c", '\033', "Profanity", version_str->str, '\007');
+    }
+
+    g_string_free(version_str, TRUE);
+
+    if (g_strcmp0(win_title, new_win_title) != 0) {
+        // print to x-window title bar
+        printf("%s", new_win_title);
+        if (win_title != NULL) {
+            free(win_title);
+        }
+        win_title = strdup(new_win_title);
     }
 }
 
