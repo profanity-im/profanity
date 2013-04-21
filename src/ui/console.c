@@ -72,6 +72,29 @@ cons_show_time(void)
 }
 
 void
+cons_debug(const char * const msg, ...)
+{
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+        va_list arg;
+        va_start(arg, msg);
+        GString *fmt_msg = g_string_new(NULL);
+        g_string_vprintf(fmt_msg, msg, arg);
+        window_show_time(console, '-');
+        wprintw(console->win, "%s\n", fmt_msg->str);
+        g_string_free(fmt_msg, TRUE);
+        va_end(arg);
+
+        dirty = TRUE;
+        if (!win_current_is_console()) {
+            status_bar_new(0);
+        }
+
+        win_current_page_off();
+        ui_refresh();
+    }
+}
+
+void
 cons_show(const char * const msg, ...)
 {
     va_list arg;
