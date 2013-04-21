@@ -141,6 +141,18 @@ cons_bad_show(const char * const msg, ...)
 }
 
 void
+cons_bad_command(const char * const cmd)
+{
+    window_show_time(console, '-');
+    wprintw(console->win, "Unknown command: %s\n", cmd);
+
+    dirty = TRUE;
+    if (!win_current_is_console()) {
+        status_bar_new(0);
+    }
+}
+
+void
 cons_about(void)
 {
     int rows, cols;
