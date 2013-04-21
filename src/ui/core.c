@@ -543,7 +543,7 @@ ui_current_win_type(void)
 }
 
 char *
-win_current_get_recipient(void)
+ui_current_win_recipient(void)
 {
     return strdup(current->from);
 }
@@ -1044,7 +1044,7 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
 void
 win_show_status(void)
 {
-    char *recipient = win_current_get_recipient();
+    char *recipient = ui_current_win_recipient();
     PContact pcontact = contact_list_get_contact(recipient);
 
     if (pcontact != NULL) {
@@ -1057,7 +1057,7 @@ win_show_status(void)
 void
 win_private_show_status(void)
 {
-    Jid *jid = jid_create(win_current_get_recipient());
+    Jid *jid = jid_create(ui_current_win_recipient());
 
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
 
@@ -1073,7 +1073,7 @@ win_private_show_status(void)
 void
 win_room_show_status(const char * const contact)
 {
-    PContact pcontact = muc_get_participant(win_current_get_recipient(), contact);
+    PContact pcontact = muc_get_participant(ui_current_win_recipient(), contact);
 
     if (pcontact != NULL) {
         window_show_contact(current, pcontact);

@@ -393,7 +393,7 @@ prof_handle_activity(void)
     jabber_conn_status_t status = jabber_get_connection_status();
 
     if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
-        char *recipient = win_current_get_recipient();
+        char *recipient = ui_current_win_recipient();
         chat_session_set_composing(recipient);
         if (!chat_session_get_sent(recipient) ||
                 chat_session_is_paused(recipient)) {

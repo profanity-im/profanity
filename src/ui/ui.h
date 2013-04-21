@@ -87,7 +87,7 @@ void title_bar_draw(void);
 void ui_close_current(void);
 void ui_clear_current(void);
 win_type_t ui_current_win_type(void);
-char* win_current_get_recipient(void);
+char* ui_current_win_recipient(void);
 void win_current_show(const char * const msg, ...);
 void win_current_bad_show(const char * const msg);
 void win_current_page_off(void);
