@@ -1106,37 +1106,6 @@ win_show_room_broadcast(const char * const room_jid, const char * const message)
 }
 
 void
-cons_show_room_invite(const char * const invitor, const char * const room,
-    const char * const reason)
-{
-    char *display_room = NULL;
-    char *domain = strdup(jabber_get_domain());
-    Jid *room_jid = jid_create(room);
-    GString *default_service = g_string_new("conference.");
-    g_string_append(default_service, domain);
-
-    cons_show("");
-    cons_show("Chat room invite received:");
-    cons_show("  From   : %s", invitor);
-    cons_show("  Room   : %s", room);
-
-    if (reason != NULL) {
-        cons_show("  Message: %s", reason);
-    }
-
-    if (strcmp(room_jid->domainpart, default_service->str) == 0) {
-        display_room = room_jid->localpart;
-    } else {
-        display_room = room_jid->barejid;
-    }
-
-    cons_show("Type \"/join %s\" to accept the invitation", display_room);
-
-    jid_destroy(room_jid);
-    g_string_free(default_service, TRUE);
-}
-
-void
 cons_show_account_list(gchar **accounts)
 {
     int size = g_strv_length(accounts);
