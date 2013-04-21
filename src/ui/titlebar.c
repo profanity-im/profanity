@@ -52,7 +52,7 @@ create_title_bar(void)
 void
 title_bar_title(void)
 {
-    wclear(title_bar);
+    werase(title_bar);
     recipient = NULL;
     typing_elapsed = NULL;
     title_bar_show("Profanity. Type /help for help information.");
@@ -67,7 +67,7 @@ title_bar_resize(void)
 
     wresize(title_bar, 1, cols);
     wbkgd(title_bar, COLOUR_TITLE_TEXT);
-    wclear(title_bar);
+    werase(title_bar);
     _title_bar_draw_title();
     _title_bar_draw_status();
     dirty = TRUE;
@@ -173,7 +173,7 @@ title_bar_set_typing(gboolean is_typing)
 void
 title_bar_draw(void)
 {
-    wclear(title_bar);
+    werase(title_bar);
     _title_bar_draw_status();
     _title_bar_draw_title();
 }

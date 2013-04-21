@@ -570,7 +570,7 @@ ui_switch_win(const int i)
 void
 win_current_clear(void)
 {
-    wclear(current->win);
+    werase(current->win);
     dirty = TRUE;
 }
 

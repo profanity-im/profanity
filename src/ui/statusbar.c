@@ -98,7 +98,7 @@ status_bar_resize(void)
     mvwin(status_bar, rows-2, 0);
     wresize(status_bar, 1, cols);
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
-    wclear(status_bar);
+    werase(status_bar);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwprintw(status_bar, 0, cols - 31, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
@@ -189,7 +189,7 @@ status_bar_print_message(const char * const msg)
         message = NULL;
     }
 
-    wclear(status_bar);
+    werase(status_bar);
 
     message = (char *) malloc((strlen(msg) + 1) * sizeof(char));
     strcpy(message, msg);
@@ -228,7 +228,7 @@ status_bar_clear(void)
         is_new[i] = FALSE;
     }
 
-    wclear(status_bar);
+    werase(status_bar);
 
     int cols = getmaxx(stdscr);
 
@@ -247,7 +247,7 @@ status_bar_clear_message(void)
         message = NULL;
     }
 
-    wclear(status_bar);
+    werase(status_bar);
 
     int cols = getmaxx(stdscr);
 
