@@ -68,7 +68,7 @@ cons_refresh(void)
 void
 cons_show_time(void)
 {
-    window_show_time(console, '-');
+    window_print_time(console, '-');
 }
 
 void
@@ -90,7 +90,7 @@ cons_debug(const char * const msg, ...)
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
         g_string_vprintf(fmt_msg, msg, arg);
-        window_show_time(console, '-');
+        window_print_time(console, '-');
         wprintw(console->win, "%s\n", fmt_msg->str);
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
@@ -112,7 +112,7 @@ cons_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
@@ -127,7 +127,7 @@ cons_bad_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_ERROR);
     wprintw(console->win, "%s\n", fmt_msg->str);
     wattroff(console->win, COLOUR_ERROR);
@@ -143,7 +143,7 @@ cons_bad_show(const char * const msg, ...)
 void
 cons_bad_command(const char * const cmd)
 {
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "Unknown command: %s\n", cmd);
 
     dirty = TRUE;
@@ -155,7 +155,7 @@ cons_bad_command(const char * const cmd)
 void
 cons_show_typing(const char * const short_from)
 {
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_TYPING);
     wprintw(console->win, "!! %s is typing a message...\n", short_from);
     wattroff(console->win, COLOUR_TYPING);
@@ -164,7 +164,7 @@ cons_show_typing(const char * const short_from)
 void
 cons_show_incoming_message(const char * const short_from, const int win_index)
 {
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_INCOMING);
     wprintw(console->win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
     wattroff(console->win, COLOUR_INCOMING);
@@ -179,7 +179,7 @@ cons_about(void)
     if (prefs_get_boolean(PREF_SPLASH)) {
         _cons_splash_logo();
     } else {
-        window_show_time(console, '-');
+        window_print_time(console, '-');
 
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
             wprintw(console->win, "Welcome to Profanity, version %sdev\n", PACKAGE_VERSION);
@@ -188,21 +188,21 @@ cons_about(void)
         }
     }
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "Copyright (C) 2012, 2013 James Booth <%s>.\n", PACKAGE_BUGREPORT);
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "This is free software; you are free to change and redistribute it.\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "There is NO WARRANTY, to the extent permitted by law.\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "Type '/help' to show complete help.\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "\n");
 
     if (prefs_get_boolean(PREF_VERCHECK)) {
@@ -227,12 +227,12 @@ cons_check_version(gboolean not_available_msg)
 
         if (relase_valid) {
             if (release_is_new(latest_release)) {
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 wprintw(console->win, "A new version of Profanity is available: %s", latest_release);
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 wprintw(console->win, "Check <http://www.profanity.im> for details.\n");
                 free(latest_release);
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 wprintw(console->win, "\n");
             } else {
                 if (not_available_msg) {
@@ -252,7 +252,7 @@ cons_check_version(gboolean not_available_msg)
 void
 cons_show_login_success(ProfAccount *account)
 {
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "%s logged in successfully, ", account->jid);
 
     resource_presence_t presence = accounts_get_login_presence(account->name);
@@ -274,7 +274,7 @@ cons_show_wins(void)
 
     cons_show("");
     cons_show("Active windows:");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "1: Console\n");
 
     for (i = 1; i < NUM_WINS; i++) {
@@ -287,7 +287,7 @@ cons_show_wins(void)
         for (i = 1; i < NUM_WINS; i++) {
             if (windows[i] != NULL) {
                 ProfWin *window = windows[i];
-                window_show_time(console, '-');
+                window_print_time(console, '-');
 
                 switch (window->type)
                 {
@@ -354,9 +354,9 @@ cons_show_info(PContact pcontact)
     GDateTime *last_activity = p_contact_last_activity(pcontact);
     WINDOW *win = console->win;
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(win, "\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     window_presence_colour_on(console, presence);
     wprintw(win, "%s", barejid);
     if (name != NULL) {
@@ -366,7 +366,7 @@ cons_show_info(PContact pcontact)
     wprintw(win, ":\n");
 
     if (sub != NULL) {
-        window_show_time(console, '-');
+        window_print_time(console, '-');
         wprintw(win, "Subscription: %s\n", sub);
     }
 
@@ -374,7 +374,7 @@ cons_show_info(PContact pcontact)
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
-        window_show_time(console, '-');
+        window_print_time(console, '-');
         wprintw(win, "Last activity: ");
 
         int hours = span / G_TIME_SPAN_HOUR;
@@ -396,7 +396,7 @@ cons_show_info(PContact pcontact)
     }
 
     if (resources != NULL) {
-        window_show_time(console, '-');
+        window_print_time(console, '-');
         wprintw(win, "Resources:\n");
 
         // sort in order of availabiltiy
@@ -411,7 +411,7 @@ cons_show_info(PContact pcontact)
     while (ordered_resources != NULL) {
         Resource *resource = ordered_resources->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
-        window_show_time(console, '-');
+        window_print_time(console, '-');
         window_presence_colour_on(console, resource_presence);
         wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status != NULL) {
@@ -425,7 +425,7 @@ cons_show_info(PContact pcontact)
             if (caps != NULL) {
                 // show identity
                 if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                    window_show_time(console, '-');
+                    window_print_time(console, '-');
                     wprintw(win, "    Identity: ");
                     if (caps->name != NULL) {
                         wprintw(win, "%s", caps->name);
@@ -445,7 +445,7 @@ cons_show_info(PContact pcontact)
                     wprintw(win, "\n");
                 }
                 if (caps->software != NULL) {
-                    window_show_time(console, '-');
+                    window_print_time(console, '-');
                     wprintw(win, "    Software: %s", caps->software);
                 }
                 if (caps->software_version != NULL) {
@@ -455,7 +455,7 @@ cons_show_info(PContact pcontact)
                     wprintw(win, "\n");
                 }
                 if (caps->os != NULL) {
-                    window_show_time(console, '-');
+                    window_print_time(console, '-');
                     wprintw(win, "    OS: %s", caps->os);
                 }
                 if (caps->os_version != NULL) {
@@ -482,7 +482,7 @@ cons_show_caps(const char * const contact, Resource *resource)
     WINDOW *win = console->win;
     cons_show("");
     const char *resource_presence = string_from_resource_presence(resource->presence);
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     window_presence_colour_on(console, resource_presence);
     wprintw(console->win, "%s", contact);
     window_presence_colour_off(console, resource_presence);
@@ -493,7 +493,7 @@ cons_show_caps(const char * const contact, Resource *resource)
         if (caps != NULL) {
             // show identity
             if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 wprintw(win, "Identity: ");
                 if (caps->name != NULL) {
                     wprintw(win, "%s", caps->name);
@@ -513,7 +513,7 @@ cons_show_caps(const char * const contact, Resource *resource)
                 wprintw(win, "\n");
             }
             if (caps->software != NULL) {
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 wprintw(win, "Software: %s", caps->software);
             }
             if (caps->software_version != NULL) {
@@ -523,7 +523,7 @@ cons_show_caps(const char * const contact, Resource *resource)
                 wprintw(win, "\n");
             }
             if (caps->os != NULL) {
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 wprintw(win, "OS: %s", caps->os);
             }
             if (caps->os_version != NULL) {
@@ -534,11 +534,11 @@ cons_show_caps(const char * const contact, Resource *resource)
             }
 
             if (caps->features != NULL) {
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 wprintw(win, "Features:\n");
                 GSList *feature = caps->features;
                 while (feature != NULL) {
-                    window_show_time(console, '-');
+                    window_print_time(console, '-');
                     wprintw(win, "  %s\n", feature->data);
                     feature = g_slist_next(feature);
                 }
@@ -558,7 +558,7 @@ cons_show_software_version(const char * const jid, const char * const  presence,
 {
     if ((name != NULL) || (version != NULL) || (os != NULL)) {
         cons_show("");
-        window_show_time(console, '-');
+        window_print_time(console, '-');
         window_presence_colour_on(console, presence);
         wprintw(console->win, "%s", jid);
         window_presence_colour_off(console, presence);
@@ -587,7 +587,7 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
         cons_show("Chat rooms at %s:", conference_node);
         while (rooms != NULL) {
             DiscoItem *room = rooms->data;
-            window_show_time(console, '-');
+            window_print_time(console, '-');
             wprintw(console->win, "  %s", room->jid);
             if (room->name != NULL) {
                 wprintw(console->win, ", (%s)", room->name);
@@ -658,7 +658,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
         cons_show("Service discovery items for %s:", jid);
         while (items != NULL) {
             DiscoItem *item = items->data;
-            window_show_time(console, '-');
+            window_print_time(console, '-');
             wprintw(console->win, "  %s", item->jid);
             if (item->name != NULL) {
                 wprintw(console->win, ", (%s)", item->name);
@@ -735,7 +735,7 @@ cons_show_account_list(gchar **accounts)
             if ((jabber_get_connection_status() == JABBER_CONNECTED) &&
                     (g_strcmp0(jabber_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
-                window_show_time(console, '-');
+                window_print_time(console, '-');
                 window_presence_colour_on(console, string_from_resource_presence(presence));
                 wprintw(console->win, "%s\n", accounts[i]);
                 window_presence_colour_off(console, string_from_resource_presence(presence));
@@ -789,7 +789,7 @@ cons_show_account(ProfAccount *account)
 
         WINDOW *win = console->win;
         if (resources != NULL) {
-            window_show_time(console, '-');
+            window_print_time(console, '-');
             wprintw(win, "Resources:\n");
 
             // sort in order of availabiltiy
@@ -804,7 +804,7 @@ cons_show_account(ProfAccount *account)
         while (ordered_resources != NULL) {
             Resource *resource = ordered_resources->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
-            window_show_time(console, '-');
+            window_print_time(console, '-');
             window_presence_colour_on(console, resource_presence);
             wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
             if (resource->status != NULL) {
@@ -818,7 +818,7 @@ cons_show_account(ProfAccount *account)
                 if (caps != NULL) {
                     // show identity
                     if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                        window_show_time(console, '-');
+                        window_print_time(console, '-');
                         wprintw(win, "    Identity: ");
                         if (caps->name != NULL) {
                             wprintw(win, "%s", caps->name);
@@ -838,7 +838,7 @@ cons_show_account(ProfAccount *account)
                         wprintw(win, "\n");
                     }
                     if (caps->software != NULL) {
-                        window_show_time(console, '-');
+                        window_print_time(console, '-');
                         wprintw(win, "    Software: %s", caps->software);
                     }
                     if (caps->software_version != NULL) {
@@ -848,7 +848,7 @@ cons_show_account(ProfAccount *account)
                         wprintw(win, "\n");
                     }
                     if (caps->os != NULL) {
-                        window_show_time(console, '-');
+                        window_print_time(console, '-');
                         wprintw(win, "    OS: %s", caps->os);
                     }
                     if (caps->os_version != NULL) {
@@ -1234,47 +1234,47 @@ cons_show_contacts(GSList *list)
 static void
 _cons_splash_logo(void)
 {
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "Welcome to\n");
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "                   ___            _           \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "                  / __)          (_)_         \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wattron(console->win, COLOUR_SPLASH);
     wprintw(console->win, "|_|                                    (____/ \n");
     wattroff(console->win, COLOUR_SPLASH);
 
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     wprintw(console->win, "\n");
-    window_show_time(console, '-');
+    window_print_time(console, '-');
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
         wprintw(console->win, "Version %sdev\n", PACKAGE_VERSION);
     } else {

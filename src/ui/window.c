@@ -66,7 +66,7 @@ window_free(ProfWin* window)
 }
 
 void
-window_show_time(ProfWin* window, char show_char)
+window_print_time(ProfWin* window, char show_char)
 {
     GDateTime *time = g_date_time_new_now_local();
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
@@ -122,7 +122,7 @@ window_show_contact(ProfWin *window, PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    window_show_time(window, '-');
+    window_print_time(window, '-');
     window_presence_colour_on(window, presence);
     wprintw(window->win, "%s", barejid);
 

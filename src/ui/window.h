@@ -48,7 +48,7 @@ typedef struct prof_win_t {
 ProfWin* window_create(const char * const title, int cols, win_type_t type);
 void window_free(ProfWin *window);
 
-void window_show_time(ProfWin *window, char show_char);
+void window_print_time(ProfWin *window, char show_char);
 void window_presence_colour_on(ProfWin *window, const char * const presence);
 void window_presence_colour_off(ProfWin *window, const char * const presence);
 void window_show_contact(ProfWin *window, PContact contact);
