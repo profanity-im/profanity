@@ -84,8 +84,8 @@ void title_bar_set_typing(gboolean is_typing);
 void title_bar_draw(void);
 
 // current window actions
-void win_current_close(void);
-void win_current_clear(void);
+void ui_close_current(void);
+void ui_clear_current(void);
 int win_current_is_console(void);
 int win_current_is_chat(void);
 int win_current_is_groupchat(void);

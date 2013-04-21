@@ -2302,7 +2302,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_clear(gchar **args, struct cmd_help_t help)
 {
-    win_current_clear();
+    ui_clear_current();
     return TRUE;
 }
 
@@ -2338,7 +2338,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
     }
 
     // close the window
-    win_current_close();
+    ui_close_current();
 
     return TRUE;
 }
