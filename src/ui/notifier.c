@@ -66,6 +66,19 @@ notify_typing(const char * const from)
 }
 
 void
+notify_invite(const char * const from, const char * const room)
+{
+    GString *message = g_string_new("Room invite\nfrom: ");
+    g_string_append(message, from);
+    g_string_append(message, "\nto: ");
+    g_string_append(message, room);
+
+    _notify(message->str, 10000, "Incoming message");
+
+    g_string_free(message, FALSE);
+}
+
+void
 notify_message(const char * const short_from)
 {
     char message[strlen(short_from) + 1 + 10];

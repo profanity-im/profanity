@@ -299,6 +299,7 @@ _get_group(preference_t pref)
             return "chatstates";
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_MESSAGE:
+        case PREF_NOTIFY_INVITE:
             return "notifications";
         case PREF_CHLOG:
             return "logging";
@@ -344,6 +345,8 @@ _get_key(preference_t pref)
             return "typing";
         case PREF_NOTIFY_MESSAGE:
             return "message";
+        case PREF_NOTIFY_INVITE:
+            return "invite";
         case PREF_CHLOG:
             return "chlog";
         case PREF_AUTOAWAY_CHECK:

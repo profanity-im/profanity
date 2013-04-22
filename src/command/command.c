@@ -499,11 +499,14 @@ static struct cmd_t setting_commands[] =
           "        : use 0 to disable.",
           "typing  : Notifications when contacts are typing.",
           "        : on|off",
+          "invite  : Notifications for chat room invites.",
+          "        : on|off",
           "",
           "Example : /notify message on (enable message notifications)",
           "Example : /notify remind 10  (remind every 10 seconds)",
           "Example : /notify remind 0   (switch off reminders)",
           "Example : /notify typing on  (enable typing notifications)",
+          "Example : /notify invite on  (enable chat room invite notifications)",
           NULL } } },
 
     { "/flash",
@@ -783,6 +786,7 @@ cmd_init(void)
     autocomplete_add(notify_ac, strdup("message"));
     autocomplete_add(notify_ac, strdup("typing"));
     autocomplete_add(notify_ac, strdup("remind"));
+    autocomplete_add(notify_ac, strdup("invite"));
     autocomplete_add(notify_ac, strdup("status"));
 
     sub_ac = autocomplete_new();
@@ -2487,7 +2491,7 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
 
     // bad kind
     if ((strcmp(kind, "message") != 0) && (strcmp(kind, "typing") != 0) &&
-            (strcmp(kind, "remind") != 0)) {
+            (strcmp(kind, "remind") != 0) && (strcmp(kind, "invite") != 0)) {
         cons_show("Usage: %s", help.usage);
 
     // set message setting
@@ -2512,6 +2516,18 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
             prefs_set_boolean(PREF_NOTIFY_TYPING, FALSE);
         } else {
             cons_show("Usage: /notify typing on|off");
+        }
+
+    // set invite setting
+    } else if (strcmp(kind, "invite") == 0) {
+        if (strcmp(value, "on") == 0) {
+            cons_show("Chat room invite notifications enabled.");
+            prefs_set_boolean(PREF_NOTIFY_INVITE, TRUE);
+        } else if (strcmp(value, "off") == 0) {
+            cons_show("Chat room invite notifications disabled.");
+            prefs_set_boolean(PREF_NOTIFY_INVITE, FALSE);
+        } else {
+            cons_show("Usage: /notify invite on|off");
         }
 
     // set remind setting

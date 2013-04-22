@@ -26,3 +26,4 @@ void notifier_uninit(void);
 void notify_typing(const char * const from);
 void notify_message(const char * const short_from);
 void notify_remind(void);
+void notify_invite(const char * const from, const char * const room);

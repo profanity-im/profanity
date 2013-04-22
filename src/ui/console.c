@@ -34,6 +34,7 @@
 #include "config/preferences.h"
 #include "contact_list.h"
 #include "config/theme.h"
+#include "ui/notifier.h"
 #include "ui/window.h"
 #include "ui/ui.h"
 
@@ -675,6 +676,10 @@ cons_show_room_invite(const char * const invitor, const char * const room,
 
     cons_show("Type \"/join %s\" to accept the invitation", display_room);
 
+    if (prefs_get_boolean(PREF_NOTIFY_INVITE)) {
+        notify_invite(invitor, room);
+    }
+
     jid_destroy(room_jid);
     g_string_free(default_service, TRUE);
 
@@ -896,6 +901,11 @@ cons_show_desktop_prefs(void)
         cons_show("Composing (/notify typing)       : ON");
     else
         cons_show("Composing (/notify typing)       : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_INVITE))
+        cons_show("Room invites (/notify invite)    : ON");
+    else
+        cons_show("Room invites (/notify invite)    : OFF");
 
     gint remind_period = prefs_get_notify_remind();
     if (remind_period == 0) {
