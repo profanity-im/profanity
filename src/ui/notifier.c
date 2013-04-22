@@ -91,16 +91,35 @@ void
 notify_remind(void)
 {
     gint unread = ui_unread();
+    //gint open = jabber_open_invites();
+    gint open = 0;
+
+    GString *text = g_string_new("");
+
     if (unread > 0) {
-        char message[20];
         if (unread == 1) {
-            sprintf(message, "1 unread message");
+            g_string_append(text, "1 unread message");
         } else {
-            snprintf(message, sizeof(message), "%d unread messages", unread);
+            g_string_append_printf(text, "%d unread messages", unread);
         }
 
-        _notify(message, 5000, "Incoming message");
     }
+    if (open > 0) {
+        if (unread > 0) {
+            g_string_append(text, "\n");
+        }
+        if (open == 1) {
+            g_string_append(text, "1 open invite");
+        } else {
+            g_string_append_printf(text, "%d open invites", open);
+        }
+    }
+
+    if ((unread > 0) || (open > 0)) {
+        _notify(text->str, 5000, "Incoming message");
+    }
+
+    g_string_free(text, TRUE);
 }
 
 static void
