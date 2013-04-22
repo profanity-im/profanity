@@ -54,7 +54,7 @@ static ProfWin *current;
 static ProfWin *console;
 
 // current window state
-static int dirty;
+static gboolean current_win_dirty;
 
 // max columns for main windows, never resize below
 static int max_cols = 0;
@@ -112,7 +112,7 @@ ui_init(void)
     display = XOpenDisplay(0);
 #endif
     ui_idle_time = g_timer_new();
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 void
@@ -122,14 +122,21 @@ ui_refresh(void)
 
     title_bar_refresh();
     status_bar_refresh();
-    cons_refresh();
 
-    if (dirty) {
+    if (current_win_dirty) {
         _current_window_refresh();
-        dirty = FALSE;
+        current_win_dirty = FALSE;
     }
 
     inp_put_back();
+}
+
+void
+ui_console_dirty(void)
+{
+    if (ui_current_win_type() == WIN_CONSOLE) {
+        current_win_dirty = TRUE;
+    }
 }
 
 unsigned long
@@ -172,7 +179,7 @@ ui_resize(const int ch, const char * const input, const int size)
     status_bar_resize();
     _win_resize_all();
     inp_win_resize(input, size);
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 void
@@ -211,7 +218,7 @@ ui_contact_typing(const char * const from)
         // have chat window but not currently in it
         } else if (win_index != current_index) {
             cons_show_typing(from);
-            dirty = TRUE;
+            current_win_dirty = TRUE;
 
         // in chat window with user
         } else {
@@ -219,7 +226,7 @@ ui_contact_typing(const char * const from)
             title_bar_draw();
 
             status_bar_active(win_index);
-            dirty = TRUE;
+            current_win_dirty = TRUE;
        }
     }
 
@@ -299,7 +306,7 @@ ui_incoming_msg(const char * const from, const char * const message,
         cons_show("Windows all used, close a window to respond.");
 
         if (current_index == 0) {
-           dirty = TRUE;
+           current_win_dirty = TRUE;
         } else {
             status_bar_new(0);
         }
@@ -335,7 +342,7 @@ ui_incoming_msg(const char * const from, const char * const message,
             title_bar_set_typing(FALSE);
             title_bar_draw();
             status_bar_active(win_index);
-            dirty = TRUE;
+            current_win_dirty = TRUE;
 
         // not currently viewing chat window with sender
         } else {
@@ -408,7 +415,7 @@ ui_contact_online(const char * const barejid, const char * const resource,
     jid_destroy(jid);
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -433,7 +440,7 @@ ui_contact_offline(const char * const from, const char * const show,
     }
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -449,9 +456,9 @@ ui_disconnected(void)
             wprintw(window->win, "%s\n", "Lost connection.");
             wattroff(window->win, COLOUR_ERROR);
 
-            // if current win, set dirty
+            // if current win, set current_win_dirty
             if (i == current_index) {
-                dirty = TRUE;
+                current_win_dirty = TRUE;
             }
         }
     }
@@ -494,14 +501,14 @@ ui_switch_win(const int i)
         }
     }
 
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 void
 ui_clear_current(void)
 {
     werase(current->win);
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 void
@@ -518,7 +525,7 @@ ui_close_current(void)
     status_bar_active(0);
     title_bar_title();
 
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 win_type_t
@@ -545,7 +552,7 @@ ui_current_print_line(const char * const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 void
@@ -556,7 +563,7 @@ ui_current_error_line(const char * const msg)
     wprintw(current->win, "%s\n", msg);
     wattroff(current->win, COLOUR_ERROR);
 
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 void
@@ -575,7 +582,7 @@ ui_current_page_off(void)
     if (window->y_pos < 0)
         window->y_pos = 0;
 
-    dirty = TRUE;
+    current_win_dirty = TRUE;
 }
 
 void
@@ -594,7 +601,7 @@ ui_print_error_from_recipient(const char * const from, const char *err_msg)
         win_print_time(window, '-');
         _win_show_error_msg(window->win, err_msg);
         if (win_index == current_index) {
-            dirty = TRUE;
+            current_win_dirty = TRUE;
         }
     }
 }
@@ -617,7 +624,7 @@ ui_print_system_msg_from_recipient(const char * const from, const char *message)
     if (win_index == NUM_WINS) {
         win_index = _new_prof_win(bare_jid, WIN_CHAT);
         status_bar_active(win_index);
-        dirty = TRUE;
+        current_win_dirty = TRUE;
     }
     window = windows[win_index];
 
@@ -626,7 +633,7 @@ ui_print_system_msg_from_recipient(const char * const from, const char *message)
 
     // this is the current window
     if (win_index == current_index) {
-        dirty = TRUE;
+        current_win_dirty = TRUE;
     }
 }
 
@@ -650,7 +657,7 @@ ui_recipient_gone(const char * const from)
         wprintw(window->win, "\n");
         wattroff(window->win, COLOUR_GONE);
         if (win_index == current_index) {
-            dirty = TRUE;
+            current_win_dirty = TRUE;
         }
     }
 }
@@ -810,7 +817,7 @@ ui_room_roster(const char * const room, GList *roster, const char * const presen
     }
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -825,7 +832,7 @@ ui_room_member_offline(const char * const room, const char * const nick)
     wattroff(window->win, COLOUR_OFFLINE);
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -841,7 +848,7 @@ ui_room_member_online(const char * const room, const char * const nick,
     wattroff(window->win, COLOUR_ONLINE);
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -855,7 +862,7 @@ ui_room_member_presence(const char * const room, const char * const nick,
     }
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -871,7 +878,7 @@ ui_room_member_nick_change(const char * const room,
     wattroff(window->win, COLOUR_THEM);
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -886,7 +893,7 @@ ui_room_nick_change(const char * const room, const char * const nick)
     wattroff(window->win, COLOUR_ME);
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -912,7 +919,7 @@ ui_room_history(const char * const room_jid, const char * const nick,
     }
 
     if (win_index == current_index)
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 }
 
 void
@@ -951,14 +958,14 @@ ui_room_message(const char * const room_jid, const char * const nick,
     // currently in groupchat window
     if (win_index == current_index) {
         status_bar_active(win_index);
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 
     // not currenlty on groupchat window
     } else {
         status_bar_new(win_index);
         cons_show_incoming_message(nick, win_index);
         if (current_index == 0) {
-            dirty = TRUE;
+            current_win_dirty = TRUE;
         }
 
         if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
@@ -995,7 +1002,7 @@ ui_room_subject(const char * const room_jid, const char * const subject)
     // currently in groupchat window
     if (win_index == current_index) {
         status_bar_active(win_index);
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 
     // not currenlty on groupchat window
     } else {
@@ -1018,7 +1025,7 @@ ui_room_broadcast(const char * const room_jid, const char * const message)
     // currently in groupchat window
     if (win_index == current_index) {
         status_bar_active(win_index);
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 
     // not currenlty on groupchat window
     } else {
@@ -1355,7 +1362,7 @@ _win_handle_page(const wint_t * const ch)
                         *page_start = y - page_space;
 
                     current->paged = 1;
-                    dirty = TRUE;
+                    current_win_dirty = TRUE;
                 } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
                     *page_start -= 4;
 
@@ -1364,7 +1371,7 @@ _win_handle_page(const wint_t * const ch)
                         *page_start = 0;
 
                     current->paged = 1;
-                    dirty = TRUE;
+                    current_win_dirty = TRUE;
                 }
             }
         }
@@ -1379,7 +1386,7 @@ _win_handle_page(const wint_t * const ch)
             *page_start = 0;
 
         current->paged = 1;
-        dirty = TRUE;
+        current_win_dirty = TRUE;
 
     // page down
     } else if (*ch == KEY_NPAGE) {
@@ -1394,7 +1401,7 @@ _win_handle_page(const wint_t * const ch)
             *page_start = y - page_space;
 
         current->paged = 1;
-        dirty = TRUE;
+        current_win_dirty = TRUE;
     }
 }
 

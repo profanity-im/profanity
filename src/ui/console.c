@@ -40,46 +40,31 @@
 #define CONS_WIN_TITLE "_cons"
 
 static ProfWin* console;
-static int dirty;
 
 static void _cons_splash_logo(void);
 static void _cons_show_basic_help(void);
+static void _cons_alert(void);
 
 ProfWin *
 cons_create(void)
 {
     int cols = getmaxx(stdscr);
     console = win_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
-    dirty = FALSE;
     return console;
-}
-
-void
-cons_refresh(void)
-{
-    int rows, cols;
-    if (dirty == TRUE) {
-        getmaxyx(stdscr, rows, cols);
-        prefresh(console->win, console->y_pos, 0, 1, 0, rows-3, cols-1);
-        dirty = FALSE;
-    }
 }
 
 void
 cons_show_time(void)
 {
     win_print_time(console, '-');
+    ui_console_dirty();
 }
 
 void
 cons_show_word(const char * const word)
 {
     wprintw(console->win, "%s", word);
-
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
 }
 
 void
@@ -95,10 +80,8 @@ cons_debug(const char * const msg, ...)
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
 
-        dirty = TRUE;
-        if (ui_current_win_type() != WIN_CONSOLE) {
-            status_bar_new(0);
-        }
+        ui_console_dirty();
+        _cons_alert();
 
         ui_current_page_off();
         ui_refresh();
@@ -116,8 +99,7 @@ cons_show(const char * const msg, ...)
     wprintw(console->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-
-    dirty = TRUE;
+    ui_console_dirty();
 }
 
 void
@@ -134,10 +116,8 @@ cons_show_error(const char * const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -147,6 +127,9 @@ cons_show_typing(const char * const short_from)
     wattron(console->win, COLOUR_TYPING);
     wprintw(console->win, "!! %s is typing a message...\n", short_from);
     wattroff(console->win, COLOUR_TYPING);
+
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -156,6 +139,9 @@ cons_show_incoming_message(const char * const short_from, const int win_index)
     wattron(console->win, COLOUR_INCOMING);
     wprintw(console->win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
     wattroff(console->win, COLOUR_INCOMING);
+
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -199,10 +185,8 @@ cons_about(void)
 
     prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -229,10 +213,8 @@ cons_check_version(gboolean not_available_msg)
                 }
             }
 
-            dirty = TRUE;
-            if (ui_current_win_type() != WIN_CONSOLE) {
-                status_bar_new(0);
-            }
+            ui_console_dirty();
+            _cons_alert();
         }
     }
 }
@@ -252,6 +234,8 @@ cons_show_login_success(ProfAccount *account)
     wprintw(console->win, " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
     wprintw(console->win, ".\n");
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -324,10 +308,8 @@ cons_show_wins(void)
     }
 
     cons_show("");
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -458,10 +440,8 @@ cons_show_info(PContact pcontact)
         ordered_resources = g_list_next(ordered_resources);
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -534,10 +514,8 @@ cons_show_caps(const char * const contact, Resource *resource)
         }
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -562,10 +540,8 @@ cons_show_software_version(const char * const jid, const char * const  presence,
         cons_show("OS      : %s", os);
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -587,10 +563,8 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
         cons_show("No chat rooms at %s", conference_node);
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -631,10 +605,8 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
             features = g_slist_next(features);
         }
 
-        dirty = TRUE;
-        if (ui_current_win_type() != WIN_CONSOLE) {
-            status_bar_new(0);
-        }
+        ui_console_dirty();
+        _cons_alert();
     }
 }
 
@@ -658,10 +630,8 @@ cons_show_disco_items(GSList *items, const char * const jid)
         cons_show("");
         cons_show("No service discovery items for %s", jid);
     }
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -674,6 +644,8 @@ cons_show_status(const char * const contact)
     } else {
         cons_show("No such contact \"%s\" in roster.", contact);
     }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -706,10 +678,8 @@ cons_show_room_invite(const char * const invitor, const char * const room,
     jid_destroy(room_jid);
     g_string_free(default_service, TRUE);
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -737,10 +707,8 @@ cons_show_account_list(gchar **accounts)
         cons_show("");
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -852,10 +820,8 @@ cons_show_account(ProfAccount *account)
         }
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -911,10 +877,8 @@ cons_show_ui_prefs(void)
     else
         cons_show("Status (/statuses)           : OFF");
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -941,6 +905,9 @@ cons_show_desktop_prefs(void)
     } else {
         cons_show("Reminder period (/notify remind) : %d seconds", remind_period);
     }
+
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -968,10 +935,8 @@ cons_show_chat_prefs(void)
         cons_show("Leave conversation (/gone) : %d minutes", gone_time);
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -987,10 +952,8 @@ cons_show_log_prefs(void)
     else
         cons_show("Chat logging (/chlog)       : OFF");
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1020,10 +983,8 @@ cons_show_presence_prefs(void)
         cons_show("Autoaway check (/autoaway check)     : OFF");
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1050,10 +1011,8 @@ cons_show_connection_prefs(void)
         cons_show("Autoping interval (/autoping)   : %d seconds", autoping_interval);
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1071,10 +1030,8 @@ cons_show_themes(GSList *themes)
         }
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1094,10 +1051,8 @@ cons_prefs(void)
     cons_show_connection_prefs();
     cons_show("");
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1114,10 +1069,8 @@ cons_help(void)
     cons_show("/help [command]  - Detailed help on a specific command.");
     cons_show("");
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1127,10 +1080,8 @@ cons_basic_help(void)
     cons_show("Basic Commands:");
     _cons_show_basic_help();
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1149,10 +1100,8 @@ cons_settings_help(void)
 
     cons_show("");
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1171,10 +1120,8 @@ cons_presence_help(void)
 
     cons_show("");
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1194,10 +1141,8 @@ cons_navigation_help(void)
     cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
     cons_show("");
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 void
@@ -1213,10 +1158,8 @@ cons_show_contacts(GSList *list)
         curr = g_slist_next(curr);
     }
 
-    dirty = TRUE;
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
+    ui_console_dirty();
+    _cons_alert();
 }
 
 static void
@@ -1283,5 +1226,15 @@ _cons_show_basic_help(void)
     }
 
     cons_show("");
+    ui_console_dirty();
+    _cons_alert();
+}
+
+static void
+_cons_alert(void)
+{
+    if (ui_current_win_type() != WIN_CONSOLE) {
+        status_bar_new(0);
+    }
 }
 

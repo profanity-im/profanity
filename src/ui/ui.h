@@ -63,6 +63,7 @@ void ui_new_chat_win(const char * const to);
 void ui_print_error_from_recipient(const char * const from, const char *err_msg);
 void ui_print_system_msg_from_recipient(const char * const from, const char *message);
 gint ui_unread(void);
+void ui_console_dirty(void);
 
 // current window actions
 void ui_close_current(void);
@@ -126,7 +127,6 @@ void title_bar_draw(void);
 
 // console window actions
 ProfWin* cons_create(void);
-void cons_refresh(void);
 void cons_show(const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);
