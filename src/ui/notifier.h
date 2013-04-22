@@ -1,5 +1,5 @@
 /*
- * window.h
+ * notifier.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,37 +20,10 @@
  *
  */
 
-#ifndef WINDOW_H
-#define WINDOW_H
+void notifier_init(void);
+void notifier_uninit(void);
 
-#include "contact.h"
-
-#define PAD_SIZE 1000
-
-typedef enum {
-    WIN_UNUSED,
-    WIN_CONSOLE,
-    WIN_CHAT,
-    WIN_MUC,
-    WIN_PRIVATE
-} win_type_t;
-
-typedef struct prof_win_t {
-    char *from;
-    WINDOW *win;
-    win_type_t type;
-    int y_pos;
-    int paged;
-    int unread;
-    int history_shown;
-} ProfWin;
-
-ProfWin* win_create(const char * const title, int cols, win_type_t type);
-void win_free(ProfWin *window);
-
-void win_print_time(ProfWin *window, char show_char);
-void win_presence_colour_on(ProfWin *window, const char * const presence);
-void win_presence_colour_off(ProfWin *window, const char * const presence);
-void win_show_contact(ProfWin *window, PContact contact);
-
-#endif
+void notify_typing(const char * const from);
+void notify_message(const char * const short_from);
+void notify_remind(void);
+void notify_invite(const char * const from, const char * const room);
