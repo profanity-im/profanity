@@ -314,6 +314,24 @@ cons_show_wins(void)
 }
 
 void
+cons_show_room_invites(GSList *invites)
+{
+    cons_show("");
+    if (invites == NULL) {
+        cons_show("No outstanding chat room invites.");
+    } else {
+        cons_show("Chat room invites, use /join or /decline commands:");
+        while (invites != NULL) {
+            cons_show("  %s", invites->data);
+            invites = g_slist_next(invites);
+        }
+    }
+
+    ui_console_dirty();
+    _cons_alert();
+}
+
+void
 cons_show_info(PContact pcontact)
 {
     const char *barejid = p_contact_barejid(pcontact);
@@ -653,12 +671,6 @@ void
 cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason)
 {
-    char *display_room = NULL;
-    char *domain = strdup(jabber_get_domain());
-    Jid *room_jid = jid_create(room);
-    GString *default_service = g_string_new("conference.");
-    g_string_append(default_service, domain);
-
     cons_show("");
     cons_show("Chat room invite received:");
     cons_show("  From   : %s", invitor);
@@ -668,20 +680,11 @@ cons_show_room_invite(const char * const invitor, const char * const room,
         cons_show("  Message: %s", reason);
     }
 
-    if (strcmp(room_jid->domainpart, default_service->str) == 0) {
-        display_room = room_jid->localpart;
-    } else {
-        display_room = room_jid->barejid;
-    }
-
-    cons_show("Type \"/join %s\" to accept the invitation", display_room);
+    cons_show("Use /join or /decline");
 
     if (prefs_get_boolean(PREF_NOTIFY_INVITE)) {
-        notify_invite(invitor, room);
+        notify_invite(invitor, room, reason);
     }
-
-    jid_destroy(room_jid);
-    g_string_free(default_service, TRUE);
 
     ui_console_dirty();
     _cons_alert();

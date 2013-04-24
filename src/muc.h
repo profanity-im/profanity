@@ -29,6 +29,7 @@
 #include "jid.h"
 #include "tools/autocomplete.h"
 
+void muc_init(void);
 void muc_join_room(const char * const room, const char * const nick);
 void muc_leave_room(const char * const room);
 gboolean muc_room_is_active(Jid *jid);
@@ -55,5 +56,14 @@ void muc_set_roster_pending_nick_change(const char * const room,
     const char * const new_nick, const char * const old_nick);
 char* muc_complete_roster_nick_change(const char * const room,
     const char * const nick);
+
+void muc_add_invite(const char *room);
+void muc_remove_invite(const char * const room);
+gint muc_invite_count(void);
+GSList* muc_get_invites(void);
+gboolean muc_invites_include(const char * const room);
+void muc_reset_invites_ac(void);
+char* muc_find_invite(char *search_str);
+void muc_clear_invites(void);
 
 #endif

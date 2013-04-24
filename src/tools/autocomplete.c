@@ -71,6 +71,12 @@ autocomplete_free(Autocomplete ac)
     ac = NULL;
 }
 
+gint
+autocomplete_length(Autocomplete ac)
+{
+    return g_slist_length(ac->items);
+}
+
 gboolean
 autocomplete_add(Autocomplete ac, void *item)
 {

@@ -29,6 +29,8 @@
 #include "jid.h"
 #include "tools/autocomplete.h"
 
+#include "ui/ui.h"
+
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
     char *nick; // e.g. Some User
@@ -41,8 +43,74 @@ typedef struct _muc_room_t {
 } ChatRoom;
 
 GHashTable *rooms = NULL;
+Autocomplete invite_ac;
 
 static void _free_room(ChatRoom *room);
+
+void
+muc_init(void)
+{
+    invite_ac = autocomplete_new();
+}
+
+void
+muc_add_invite(char *room)
+{
+    autocomplete_add(invite_ac, strdup(room));
+}
+
+void
+muc_remove_invite(char *room)
+{
+    autocomplete_remove(invite_ac, room);
+}
+
+gint
+muc_invite_count(void)
+{
+    return autocomplete_length(invite_ac);
+}
+
+GSList *
+muc_get_invites(void)
+{
+    return autocomplete_get_list(invite_ac);
+}
+
+gboolean
+muc_invites_include(const char * const room)
+{
+    GSList *invites = autocomplete_get_list(invite_ac);
+    GSList *curr = invites;
+    while (curr != NULL) {
+        if (strcmp(curr->data, room) == 0) {
+            g_slist_free_full(invites, g_free);
+            return TRUE;
+        } else {
+            curr = g_slist_next(curr);
+        }
+    }
+    g_slist_free_full(invites, g_free);
+    return FALSE;
+}
+
+void
+muc_reset_invites_ac(void)
+{
+    autocomplete_reset(invite_ac);
+}
+
+char *
+muc_find_invite(char *search_str)
+{
+    return autocomplete_complete(invite_ac, search_str);
+}
+
+void
+muc_clear_invites(void)
+{
+    autocomplete_clear(invite_ac);
+}
 
 /*
  * Join the chat room with the specified nickname

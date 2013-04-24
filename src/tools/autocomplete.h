@@ -41,5 +41,6 @@ gboolean autocomplete_add(Autocomplete ac, void *item);
 gboolean autocomplete_remove(Autocomplete ac, const char * const item);
 GSList * autocomplete_get_list(Autocomplete ac);
 gchar * autocomplete_complete(Autocomplete ac, gchar *search_str);
+gint autocomplete_length(Autocomplete ac);
 
 #endif

@@ -224,6 +224,7 @@ prof_handle_lost_connection(void)
 {
     cons_show_error("Lost connection.");
     contact_list_clear();
+    muc_clear_invites();
     chat_sessions_clear();
     ui_disconnected();
     ui_current_page_off();
@@ -235,6 +236,7 @@ prof_handle_disconnect(const char * const jid)
     cons_show("%s logged out successfully.", jid);
     jabber_disconnect();
     contact_list_clear();
+    muc_clear_invites();
     chat_sessions_clear();
     ui_disconnected();
     ui_current_page_off();
@@ -322,8 +324,13 @@ void prof_handle_room_invite(jabber_invite_t invite_type,
     const char * const invitor, const char * const room,
     const char * const reason)
 {
-    cons_show_room_invite(invitor, room, reason);
-    ui_current_page_off();
+    Jid *room_jid = jid_create(room);
+    if (!muc_room_is_active(room_jid) && !muc_invites_include(room)) {
+        cons_show_room_invite(invitor, room, reason);
+        muc_add_invite(room);
+        ui_current_page_off();
+    }
+    jid_destroy(room_jid);
 }
 
 void
@@ -557,6 +564,7 @@ _init(const int disable_tls, char *log_level)
     cmd_init();
     log_info("Initialising contact list");
     contact_list_init();
+    muc_init();
     atexit(_shutdown);
 }
 

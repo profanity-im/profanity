@@ -102,6 +102,8 @@ static gboolean _cmd_close(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_clear(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_join(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_invite(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_invites(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_decline(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_disco(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_beep(gchar **args, struct cmd_help_t help);
@@ -347,6 +349,24 @@ static struct cmd_t main_commands[] =
           "Send a direct invite to the specified contact to the current chat room.",
           "The jid must be a contact in your roster.",
           "If a message is supplied it will be send as the reason for the invite.",
+          NULL } } },
+
+    { "/invites",
+        _cmd_invites, parse_args_with_freetext, 0, 0,
+        { "/invites", "Show outstanding chat room invites.",
+        { "/invites",
+          "--------",
+          "Show all rooms that you have been invited to, and have not yet been accepted or declind.",
+          "Use \"/join <room>\" to accept a room invitation.",
+          "Use \"/decline <room>\" to decline a room invitation.",
+          NULL } } },
+
+    { "/decline",
+        _cmd_decline, parse_args_with_freetext, 1, 1,
+        { "/decline room", "Decline a chat room invite.",
+        { "/decline room",
+          "-------------",
+          "Decline invitation to a chat room, the room will no longer be in the list of outstanding invites.",
           NULL } } },
 
     { "/rooms",
@@ -914,6 +934,7 @@ void
 cmd_reset_autocomplete()
 {
     contact_list_reset_search_attempts();
+    muc_reset_invites_ac();
     accounts_reset_all_search();
     accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
@@ -1114,6 +1135,9 @@ _cmd_complete_parameters(char *input, int *size)
     }
 
     _parameter_autocomplete(input, size, "/invite", contact_list_find_contact);
+    _parameter_autocomplete(input, size, "/decline", muc_find_invite);
+    _parameter_autocomplete(input, size, "/join", muc_find_invite);
+
 
     _parameter_autocomplete(input, size, "/connect",
         accounts_find_enabled);
@@ -2201,6 +2225,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
         presence_join_room(room_jid);
     }
     ui_room_join(room_jid);
+    muc_remove_invite(room);
 
     jid_destroy(room_jid);
     jid_destroy(my_jid);
@@ -2235,6 +2260,28 @@ _cmd_invite(gchar **args, struct cmd_help_t help)
     } else {
         cons_show("Room invite sent, contact: %s, room: %s.",
             contact, room);
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_invites(gchar **args, struct cmd_help_t help)
+{
+    GSList *invites = muc_get_invites();
+    cons_show_room_invites(invites);
+    g_slist_free_full(invites, g_free);
+    return TRUE;
+}
+
+static gboolean
+_cmd_decline(gchar **args, struct cmd_help_t help)
+{
+    if (!muc_invites_include(args[0])) {
+        cons_show("No such invite exists.");
+    } else {
+        muc_remove_invite(args[0]);
+        cons_show("Declined invite to %s.", args[0]);
     }
 
     return TRUE;

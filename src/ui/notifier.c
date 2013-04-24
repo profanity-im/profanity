@@ -33,6 +33,7 @@
 #endif
 
 #include "log.h"
+#include "muc.h"
 #include "ui/ui.h"
 
 static void _notify(const char * const message, int timeout,
@@ -66,12 +67,16 @@ notify_typing(const char * const from)
 }
 
 void
-notify_invite(const char * const from, const char * const room)
+notify_invite(const char * const from, const char * const room,
+    const char * const reason)
 {
     GString *message = g_string_new("Room invite\nfrom: ");
     g_string_append(message, from);
     g_string_append(message, "\nto: ");
     g_string_append(message, room);
+    if (reason != NULL) {
+        g_string_append_printf(message, "\n\"%s\"", reason);
+    }
 
     _notify(message->str, 10000, "Incoming message");
 
@@ -91,8 +96,7 @@ void
 notify_remind(void)
 {
     gint unread = ui_unread();
-    //gint open = jabber_open_invites();
-    gint open = 0;
+    gint open = muc_invite_count();
 
     GString *text = g_string_new("");
 
@@ -109,9 +113,9 @@ notify_remind(void)
             g_string_append(text, "\n");
         }
         if (open == 1) {
-            g_string_append(text, "1 open invite");
+            g_string_append(text, "1 room invite");
         } else {
-            g_string_append_printf(text, "%d open invites", open);
+            g_string_append_printf(text, "%d room invites", open);
         }
     }
 
