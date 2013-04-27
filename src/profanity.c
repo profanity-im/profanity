@@ -169,6 +169,9 @@ prof_handle_subscription(const char *from, jabber_subscr_t type)
         log_info("Received authorization request from %s", from);
         ui_print_system_msg_from_recipient(from, "Authorization request, type '/sub allow' to accept or '/sub deny' to reject");
         ui_current_page_off();
+        if (prefs_get_boolean(PREF_NOTIFY_SUB)) {
+            notify_subscription(from);
+        }
         break;
     case PRESENCE_SUBSCRIBED:
         cons_show("Subscription received from %s", from);

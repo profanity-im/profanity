@@ -522,6 +522,9 @@ static struct cmd_t setting_commands[] =
           "invite  : Notifications for chat room invites.",
           "        : on|off",
           "",
+          "sub     : Notifications for subscription requests.",
+          "        : on|off",
+          "",
           "Example : /notify message on (enable message notifications)",
           "Example : /notify remind 10  (remind every 10 seconds)",
           "Example : /notify remind 0   (switch off reminders)",
@@ -807,6 +810,7 @@ cmd_init(void)
     autocomplete_add(notify_ac, strdup("typing"));
     autocomplete_add(notify_ac, strdup("remind"));
     autocomplete_add(notify_ac, strdup("invite"));
+    autocomplete_add(notify_ac, strdup("sub"));
     autocomplete_add(notify_ac, strdup("status"));
 
     sub_ac = autocomplete_new();
@@ -2513,7 +2517,8 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
 
     // bad kind
     if ((strcmp(kind, "message") != 0) && (strcmp(kind, "typing") != 0) &&
-            (strcmp(kind, "remind") != 0) && (strcmp(kind, "invite") != 0)) {
+            (strcmp(kind, "remind") != 0) && (strcmp(kind, "invite") != 0) &&
+            (strcmp(kind, "sub") != 0)) {
         cons_show("Usage: %s", help.usage);
 
     // set message setting
@@ -2550,6 +2555,18 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
             prefs_set_boolean(PREF_NOTIFY_INVITE, FALSE);
         } else {
             cons_show("Usage: /notify invite on|off");
+        }
+
+    // set subscription setting
+    } else if (strcmp(kind, "sub") == 0) {
+        if (strcmp(value, "on") == 0) {
+            cons_show("Subscription notifications enabled.");
+            prefs_set_boolean(PREF_NOTIFY_SUB, TRUE);
+        } else if (strcmp(value, "off") == 0) {
+            cons_show("Subscription notifications disabled.");
+            prefs_set_boolean(PREF_NOTIFY_SUB, FALSE);
+        } else {
+            cons_show("Usage: /notify sub on|off");
         }
 
     // set remind setting
@@ -3003,6 +3020,34 @@ _notify_autocomplete(char *input, int *size)
         if (found != NULL) {
             auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
             strcpy(auto_msg, "/notify typing ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify invite ", 15) == 0) && (*size > 15)) {
+        for(i = 15; i < *size; i++) {
+            inp_cpy[i-15] = input[i];
+        }
+        inp_cpy[(*size) - 15] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify invite ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/notify sub ", 12) == 0) && (*size > 12)) {
+        for(i = 12; i < *size; i++) {
+            inp_cpy[i-12] = input[i];
+        }
+        inp_cpy[(*size) - 12] = '\0';
+        found = prefs_autocomplete_boolean_choice(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((12 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/notify sub ");
             strcat(auto_msg, found);
             inp_replace_input(input, auto_msg, size);
             free(auto_msg);

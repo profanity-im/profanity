@@ -300,6 +300,7 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_MESSAGE:
         case PREF_NOTIFY_INVITE:
+        case PREF_NOTIFY_SUB:
             return "notifications";
         case PREF_CHLOG:
             return "logging";
@@ -347,6 +348,8 @@ _get_key(preference_t pref)
             return "message";
         case PREF_NOTIFY_INVITE:
             return "invite";
+        case PREF_NOTIFY_SUB:
+            return "sub";
         case PREF_CHLOG:
             return "chlog";
         case PREF_AUTOAWAY_CHECK:

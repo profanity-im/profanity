@@ -28,3 +28,4 @@ void notify_message(const char * const short_from);
 void notify_remind(void);
 void notify_invite(const char * const from, const char * const room,
     const char * const reason);
+void notify_subscription(const char * const from);

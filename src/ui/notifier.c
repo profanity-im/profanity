@@ -93,6 +93,15 @@ notify_message(const char * const short_from)
 }
 
 void
+notify_subscription(const char * const from)
+{
+    GString *message = g_string_new("Subscription request: \n");
+    g_string_append(message, from);
+    _notify(message->str, 10000, "Incomming message");
+    g_string_free(message, FALSE);
+}
+
+void
 notify_remind(void)
 {
     gint unread = ui_unread();
