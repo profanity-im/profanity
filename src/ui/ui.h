@@ -167,6 +167,8 @@ void cons_check_version(gboolean not_available_msg);
 void cons_show_typing(const char * const short_from);
 void cons_show_incoming_message(const char * const short_from, const int win_index);
 void cons_show_room_invites(GSList *invites);
+void cons_show_received_subs(void);
+void cons_show_sent_subs(void);
 
 // status bar actions
 void status_bar_refresh(void);

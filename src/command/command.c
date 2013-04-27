@@ -1397,37 +1397,12 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
     }
 
     if (strcmp(subcmd, "sent") == 0) {
-        if (contact_list_has_pending_subscriptions()) {
-            cons_show("Awaiting subscription responses from:");
-            GSList *contacts = get_contact_list();
-            while (contacts != NULL) {
-                PContact contact = (PContact) contacts->data;
-                if (p_contact_pending_out(contact)) {
-                    cons_show(p_contact_barejid(contact));
-                }
-                contacts = g_slist_next(contacts);
-            }
-        } else {
-            cons_show("No pending requests sent.");
-        }
-
+        cons_show_sent_subs();
         return TRUE;
     }
 
     if (strcmp(subcmd, "received") == 0) {
-        GList *received = presence_get_subscription_requests();
-
-        if (received == NULL) {
-            cons_show("No outstanding subscription requests.");
-        } else {
-            cons_show("Outstanding subscription requests from:",
-                g_list_length(received));
-            while (received != NULL) {
-                cons_show(received->data);
-                received = g_list_next(received);
-            }
-        }
-
+        cons_show_received_subs();
         return TRUE;
     }
 

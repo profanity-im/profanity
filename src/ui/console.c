@@ -564,6 +564,41 @@ cons_show_software_version(const char * const jid, const char * const  presence,
 }
 
 void
+cons_show_received_subs(void)
+{
+    GList *received = presence_get_subscription_requests();
+    if (received == NULL) {
+        cons_show("No outstanding subscription requests.");
+    } else {
+        cons_show("Outstanding subscription requests from:",
+            g_list_length(received));
+        while (received != NULL) {
+            cons_show("  %s", received->data);
+            received = g_list_next(received);
+        }
+    }
+}
+
+void
+cons_show_sent_subs(void)
+{
+   if (contact_list_has_pending_subscriptions()) {
+        GSList *contacts = get_contact_list();
+        PContact contact = NULL;
+        cons_show("Awaiting subscription responses from:");
+        while (contacts != NULL) {
+            contact = (PContact) contacts->data;
+            if (p_contact_pending_out(contact)) {
+                cons_show("  %s", p_contact_barejid(contact));
+            }
+            contacts = g_slist_next(contacts);
+        }
+    } else {
+        cons_show("No pending requests sent.");
+    }
+}
+
+void
 cons_show_room_list(GSList *rooms, const char * const conference_node)
 {
     if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
