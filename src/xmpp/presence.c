@@ -129,6 +129,16 @@ presence_get_subscription_requests(void)
     return g_hash_table_get_keys(sub_requests);
 }
 
+gint
+presence_sub_request_count(void)
+{
+    if (sub_requests == NULL) {
+        return 0;
+    } else {
+       return g_hash_table_size(sub_requests);
+    }
+}
+
 void
 presence_free_sub_requests(void)
 {

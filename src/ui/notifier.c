@@ -106,6 +106,7 @@ notify_remind(void)
 {
     gint unread = ui_unread();
     gint open = muc_invite_count();
+    gint subs = presence_sub_request_count();
 
     GString *text = g_string_new("");
 
@@ -127,8 +128,18 @@ notify_remind(void)
             g_string_append_printf(text, "%d room invites", open);
         }
     }
+    if (subs > 0) {
+        if ((unread > 0) || (open > 0)) {
+            g_string_append(text, "\n");
+        }
+        if (subs == 1) {
+            g_string_append(text, "1 subscription request");
+        } else {
+            g_string_append_printf(text, "%d subscription requests", subs);
+        }
+    }
 
-    if ((unread > 0) || (open > 0)) {
+    if ((unread > 0) || (open > 0) || (subs > 0)) {
         _notify(text->str, 5000, "Incoming message");
     }
 
