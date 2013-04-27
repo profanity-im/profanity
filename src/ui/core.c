@@ -264,6 +264,7 @@ void
 ui_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
+    gboolean win_created = FALSE;
     char *display_from;
     win_type_t win_type;
     if (priv) {
@@ -275,8 +276,10 @@ ui_incoming_msg(const char * const from, const char * const message,
     }
 
     int win_index = _find_prof_win_index(from);
-    if (win_index == NUM_WINS)
+    if (win_index == NUM_WINS) {
         win_index = _new_prof_win(from, win_type);
+        win_created = TRUE;
+    }
 
     // no spare windows left
     if (win_index == 0) {
@@ -359,6 +362,11 @@ ui_incoming_msg(const char * const from, const char * const message,
             if (tv_stamp == NULL) {
                 win_print_time(window, '-');
             } else {
+                // if show users status first, when receiving message via delayed delivery
+                if (win_created) {
+                    PContact pcontact = contact_list_get_contact(from);
+                    win_show_contact(window, pcontact);
+                }
                 GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
                 gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
                 wattron(window->win, COLOUR_TIME);
