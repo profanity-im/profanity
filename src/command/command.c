@@ -1892,7 +1892,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             message_send(msg, usr);
             ui_outgoing_msg("me", usr, msg);
 
-            if ((win_type == WIN_CHAT) && prefs_get_boolean(PREF_CHLOG)) {
+            if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_jid();
                 Jid *jidp = jid_create(jid);
                 chat_log_chat(jidp->barejid, usr, msg, PROF_OUT_LOG, NULL);
