@@ -1000,6 +1000,11 @@ cons_show_log_prefs(void)
     else
         cons_show("Chat logging (/chlog)       : OFF");
 
+    if (prefs_get_boolean(PREF_GRLOG))
+        cons_show("Groupchat logging (/grlog)  : ON");
+    else
+        cons_show("Groupchat logging (/grlog)  : OFF");
+
     ui_console_dirty();
     _cons_alert();
 }

@@ -115,6 +115,7 @@ static gboolean _cmd_set_intype(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_flash(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_splash(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_chlog(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_set_grlog(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
@@ -597,6 +598,16 @@ static struct cmd_t setting_commands[] =
           "Switch chat logging on or off.",
           "This setting will be enabled if /history is set to on.",
           "When disabling this option, /history will also be disabled.",
+          "See the /grlog setting for enabling logging of chat room (groupchat) messages.",
+          NULL } } },
+
+    { "/grlog",
+        _cmd_set_grlog, parse_args, 1, 1,
+        { "/grlog on|off", "Chat logging of chat rooms to file",
+        { "/grlog on|off",
+          "-------------",
+          "Switch chat room logging on or off.",
+          "See the /chlog setting for enabling logging of one to one chat.",
           NULL } } },
 
     { "/states",
@@ -1106,6 +1117,8 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/splash",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/chlog",
+        prefs_autocomplete_boolean_choice);
+    _parameter_autocomplete(input, size, "/grlog",
         prefs_autocomplete_boolean_choice);
     _parameter_autocomplete(input, size, "/mouse",
         prefs_autocomplete_boolean_choice);
@@ -2779,6 +2792,15 @@ _cmd_set_chlog(gchar **args, struct cmd_help_t help)
     if (result == TRUE && (strcmp(args[0], "off") == 0)) {
         prefs_set_boolean(PREF_HISTORY, FALSE);
     }
+
+    return result;
+}
+
+static gboolean
+_cmd_set_grlog(gchar **args, struct cmd_help_t help)
+{
+    gboolean result = _cmd_set_boolean_preference(args[0], help,
+        "Groupchat logging", PREF_GRLOG);
 
     return result;
 }

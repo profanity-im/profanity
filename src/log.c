@@ -49,6 +49,7 @@ static GDateTime *dt;
 static log_level_t level_filter;
 
 static GHashTable *logs;
+static GHashTable *groupchat_logs;
 static GDateTime *session_started;
 
 struct dated_chat_log {
@@ -57,11 +58,14 @@ struct dated_chat_log {
 };
 
 static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
-static struct dated_chat_log *_create_log(char *other, const  char * const login);
+static struct dated_chat_log * _create_log(char *other, const  char * const login);
+static struct dated_chat_log * _create_groupchat_log(char *room, const char * const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
 static char * _get_log_filename(const char * const other, const char * const login,
     GDateTime *dt, gboolean create);
+static char * _get_groupchat_log_filename(const char * const room,
+    const char * const login, GDateTime *dt, gboolean create);
 static gchar * _get_chatlog_dir(void);
 static gchar * _get_log_file(void);
 static void _rotate_log_file(void);
@@ -210,6 +214,15 @@ chat_log_init(void)
 }
 
 void
+groupchat_log_init(void)
+{
+    session_started = g_date_time_new_now_local();
+    log_info("Initialising groupchat logs");
+    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
+        (GDestroyNotify)_free_chat_log);
+}
+
+void
 chat_log_chat(const gchar * const login, gchar *other,
     const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
 {
@@ -261,6 +274,47 @@ chat_log_chat(const gchar * const login, gchar *other,
     g_free(date_fmt);
     g_date_time_unref(dt);
 }
+
+void
+groupchat_log_chat(const gchar * const login, const gchar * const room,
+    const gchar * const nick, const gchar * const msg)
+{
+    gchar *room_copy = strdup(room);
+    struct dated_chat_log *dated_log = g_hash_table_lookup(groupchat_logs, room_copy);
+
+    // no log for room
+    if (dated_log == NULL) {
+        dated_log = _create_groupchat_log(room_copy, login);
+        g_hash_table_insert(groupchat_logs, room_copy, dated_log);
+
+    // log exists but needs rolling
+    } else if (_log_roll_needed(dated_log)) {
+        dated_log = _create_groupchat_log(room_copy, login);
+        g_hash_table_replace(logs, room_copy, dated_log);
+    }
+
+    GDateTime *dt = g_date_time_new_now_local();
+
+    gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
+
+    FILE *logp = fopen(dated_log->filename, "a");
+
+    if (strncmp(msg, "/me ", 4) == 0) {
+        fprintf(logp, "%s - *%s %s\n", date_fmt, nick, msg + 4);
+    } else {
+        fprintf(logp, "%s - %s: %s\n", date_fmt, nick, msg);
+    }
+
+    fflush(logp);
+    int result = fclose(logp);
+    if (result == EOF) {
+        log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
+    }
+
+    g_free(date_fmt);
+    g_date_time_unref(dt);
+}
+
 
 GSList *
 chat_log_get_previous(const gchar * const login, const gchar * const recipient,
@@ -315,6 +369,7 @@ void
 chat_log_close(void)
 {
     g_hash_table_remove_all(logs);
+    g_hash_table_remove_all(groupchat_logs);
     g_date_time_unref(session_started);
 }
 
@@ -323,6 +378,21 @@ _create_log(char *other, const char * const login)
 {
     GDateTime *now = g_date_time_new_now_local();
     char *filename = _get_log_filename(other, login, now, TRUE);
+
+    struct dated_chat_log *new_log = malloc(sizeof(struct dated_chat_log));
+    new_log->filename = strdup(filename);
+    new_log->date = now;
+
+    free(filename);
+
+    return new_log;
+}
+
+static struct dated_chat_log *
+_create_groupchat_log(char *room, const char * const login)
+{
+    GDateTime *now = g_date_time_new_now_local();
+    char *filename = _get_groupchat_log_filename(room, login, now, TRUE);
 
     struct dated_chat_log *new_log = malloc(sizeof(struct dated_chat_log));
     new_log->filename = strdup(filename);
@@ -393,6 +463,42 @@ _get_log_filename(const char * const other, const char * const login,
         create_dir(log_file->str);
     }
     free(other_file);
+
+    gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
+    g_string_append(log_file, date);
+
+    char *result = strdup(log_file->str);
+    g_string_free(log_file, TRUE);
+
+    return result;
+}
+
+static char *
+_get_groupchat_log_filename(const char * const room, const char * const login,
+    GDateTime *dt, gboolean create)
+{
+    gchar *chatlogs_dir = _get_chatlog_dir();
+    GString *log_file = g_string_new(chatlogs_dir);
+    g_free(chatlogs_dir);
+
+    gchar *login_dir = str_replace(login, "@", "_at_");
+    g_string_append_printf(log_file, "/%s", login_dir);
+    if (create) {
+        create_dir(log_file->str);
+    }
+    free(login_dir);
+
+    g_string_append(log_file, "/rooms");
+    if (create) {
+        create_dir(log_file->str);
+    }
+
+    gchar *room_file = str_replace(room, "@", "_at_");
+    g_string_append_printf(log_file, "/%s", room_file);
+    if (create) {
+        create_dir(log_file->str);
+    }
+    free(room_file);
 
     gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
     g_string_append(log_file, date);

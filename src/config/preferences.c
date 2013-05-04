@@ -303,6 +303,7 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_SUB:
             return "notifications";
         case PREF_CHLOG:
+        case PREF_GRLOG:
             return "logging";
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
@@ -352,6 +353,8 @@ _get_key(preference_t pref)
             return "sub";
         case PREF_CHLOG:
             return "chlog";
+        case PREF_GRLOG:
+            return "grlog";
         case PREF_AUTOAWAY_CHECK:
             return "autoaway.check";
         case PREF_AUTOAWAY_MODE:

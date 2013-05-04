@@ -259,6 +259,12 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
 {
     ui_room_message(room_jid, nick, message);
     ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_GRLOG)) {
+        Jid *jid = jid_create(jabber_get_jid());
+        groupchat_log_chat(jid->barejid, room_jid, nick, message);
+        jid_destroy(jid);
+    }
 }
 
 void
@@ -560,6 +566,7 @@ _init(const int disable_tls, char *log_level)
         log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
     }
     chat_log_init();
+    groupchat_log_init();
     prefs_load();
     accounts_load();
     gchar *theme = prefs_get_string(PREF_THEME);
