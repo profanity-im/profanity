@@ -74,7 +74,13 @@ autocomplete_free(Autocomplete ac)
 gint
 autocomplete_length(Autocomplete ac)
 {
-    return g_slist_length(ac->items);
+    if (ac == NULL) {
+        return 0;
+    } else if (ac->items == NULL) {
+        return 0;
+    } else {
+        return g_slist_length(ac->items);
+    }
 }
 
 gboolean

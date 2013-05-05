@@ -100,7 +100,7 @@ jabber_init(const int disable_tls)
     jabber_conn.ctx = NULL;
     jabber_conn.tls_disabled = disable_tls;
     jabber_conn.domain = NULL;
-    presence_init();
+    presence_sub_requests_init();
     caps_init();
     available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
         (GDestroyNotify)resource_destroy);
@@ -327,7 +327,7 @@ _connection_free_session_data(void)
 {
     g_hash_table_remove_all(available_resources);
     chat_sessions_clear();
-    presence_free_sub_requests();
+    presence_clear_sub_requests();
 }
 
 int

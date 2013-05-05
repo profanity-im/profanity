@@ -62,6 +62,7 @@ prof_run(const int disable_tls, char *log_level)
     inp_non_block();
     GTimer *timer = g_timer_new();
     gboolean cmd_result = TRUE;
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     char inp[INP_WIN_MAX];
     int size = 0;
@@ -71,7 +72,7 @@ prof_run(const int disable_tls, char *log_level)
         size = 0;
 
         while(ch != '\n') {
-            if (jabber_get_connection_status() == JABBER_CONNECTED) {
+            if (conn_status == JABBER_CONNECTED) {
                 _handle_idle_time();
             }
 

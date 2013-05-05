@@ -61,7 +61,7 @@ static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
 void _send_caps_request(char *node, char *caps_key, char *id, char *from);
 
 void
-presence_init(void)
+presence_sub_requests_init(void)
 {
     sub_requests_ac = autocomplete_new();
 }
@@ -139,6 +139,12 @@ void
 presence_free_sub_requests(void)
 {
     autocomplete_free(sub_requests_ac);
+}
+
+void
+presence_clear_sub_requests(void)
+{
+    autocomplete_clear(sub_requests_ac);
 }
 
 char *
