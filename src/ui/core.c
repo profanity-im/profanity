@@ -764,12 +764,25 @@ void
 ui_duck_result(const char * const result)
 {
     int win_index = _find_prof_win_index("DuckDuckGo search");
+
     if (win_index != NUM_WINS) {
         win_print_time(windows[win_index], '-');
         wattron(windows[win_index]->win, COLOUR_THEM);
         wprintw(windows[win_index]->win, "Result : ");
         wattroff(windows[win_index]->win, COLOUR_THEM);
-        wprintw(windows[win_index]->win, result);
+
+        int i = 0;
+        while (i < strlen(result)) {
+            if (result[i] == '\n') {
+                wprintw(windows[win_index]->win, "\n");
+                win_print_time(windows[win_index], '-');
+            } else {
+                waddch(windows[win_index]->win, result[i]);
+            }
+
+            i++;
+        }
+
         wprintw(windows[win_index]->win, "\n");
     }
 }
