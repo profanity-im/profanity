@@ -74,6 +74,7 @@ static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     const char * const display, preference_t pref);
 
 static void _cmd_complete_parameters(char *input, int *size);
+static void _sub_autocomplete(char *input, int *size);
 static void _notify_autocomplete(char *input, int *size);
 static void _titlebar_autocomplete(char *input, int *size);
 static void _theme_autocomplete(char *input, int *size);
@@ -965,6 +966,7 @@ cmd_reset_autocomplete()
     accounts_reset_all_search();
     accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
+    presence_reset_sub_request_search();
     autocomplete_reset(help_ac);
     autocomplete_reset(notify_ac);
     autocomplete_reset(sub_ac);
@@ -1181,13 +1183,13 @@ _cmd_complete_parameters(char *input, int *size)
 
     _parameter_autocomplete(input, size, "/connect",
         accounts_find_enabled);
-    _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
     _parameter_autocomplete_with_ac(input, size, "/help", help_ac);
     _parameter_autocomplete_with_ac(input, size, "/who", who_ac);
     _parameter_autocomplete_with_ac(input, size, "/prefs", prefs_ac);
     _parameter_autocomplete_with_ac(input, size, "/log", log_ac);
     _parameter_autocomplete_with_ac(input, size, "/disco", disco_ac);
 
+    _sub_autocomplete(input, size);
     _notify_autocomplete(input, size);
     _autoaway_autocomplete(input, size);
     _titlebar_autocomplete(input, size);
@@ -3071,6 +3073,33 @@ _parameter_autocomplete_with_ac(char *input, int *size, char *command,
         }
     }
     free(command_cpy);
+}
+
+static void
+_sub_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+
+    if ((strncmp(input, "/sub allow ", 11) == 0) && (*size > 11)) {
+        for (i = 11; i < *size; i++) {
+            inp_cpy[i-11] = input[i];
+        }
+        inp_cpy[(*size) - 11] = '\0';
+        found = presence_sub_request_find(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((11 + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, "/sub allow ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
+    } else if ((strncmp(input, "/sub ", 5) == 0) && (*size > 5)) {
+        _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
+    }
 }
 
 static void

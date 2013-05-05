@@ -105,6 +105,8 @@ void message_send_duck(const char * const query);
 void presence_subscription(const char * const jid, const jabber_subscr_t action);
 GSList* presence_get_subscription_requests(void);
 gint presence_sub_request_count(void);
+void presence_reset_sub_request_search(void);
+char * presence_sub_request_find(char * search_str);
 void presence_join_room(Jid *jid);
 void presence_change_room_nick(const char * const room, const char * const nick);
 void presence_leave_chat_room(const char * const room_jid);

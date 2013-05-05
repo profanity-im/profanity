@@ -141,6 +141,18 @@ presence_free_sub_requests(void)
     autocomplete_free(sub_requests_ac);
 }
 
+char *
+presence_sub_request_find(char * search_str)
+{
+    return autocomplete_complete(sub_requests_ac, search_str);
+}
+
+void
+presence_reset_sub_request_search(void)
+{
+    autocomplete_reset(sub_requests_ac);
+}
+
 void
 presence_update(const resource_presence_t presence_type, const char * const msg,
     const int idle)
