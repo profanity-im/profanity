@@ -55,7 +55,7 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
 xmpp_stanza_t *
 stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     const char * const type, const char * const message,
-    const char * const state)
+    const char * const state, const char * const id)
 {
     char *encoded_xml = encode_xml(message);
 
@@ -65,6 +65,9 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, type);
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
+    if (id != NULL) {
+        xmpp_stanza_set_id(msg, id);
+    }
 
     body = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(body, STANZA_NAME_BODY);

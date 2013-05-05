@@ -265,7 +265,7 @@ cons_show_wins(void)
                 switch (window->type)
                 {
                     case WIN_CHAT:
-                        wprintw(console->win, "%d: chat %s", i + 1, window->from);
+                        wprintw(console->win, "%d: Chat %s", i + 1, window->from);
                         PContact contact = contact_list_get_contact(window->from);
 
                         if (contact != NULL) {
@@ -282,7 +282,7 @@ cons_show_wins(void)
                         break;
 
                     case WIN_PRIVATE:
-                        wprintw(console->win, "%d: private %s", i + 1, window->from);
+                        wprintw(console->win, "%d: Private %s", i + 1, window->from);
 
                         if (window->unread > 0) {
                             wprintw(console->win, ", %d unread", window->unread);
@@ -291,11 +291,16 @@ cons_show_wins(void)
                         break;
 
                     case WIN_MUC:
-                        wprintw(console->win, "%d: room %s", i + 1, window->from);
+                        wprintw(console->win, "%d: Room %s", i + 1, window->from);
 
                         if (window->unread > 0) {
                             wprintw(console->win, ", %d unread", window->unread);
                         }
+
+                        break;
+
+                    case WIN_DUCK:
+                        wprintw(console->win, "%d: DuckDuckGo search", i + 1);
 
                         break;
 

@@ -78,5 +78,7 @@ void prof_handle_room_list(GSList *rooms, const char *conference_node);
 void prof_handle_disco_items(GSList *items, const char *jid);
 void prof_handle_disco_info(const char *from, GSList *identities,
     GSList *features);
+void prof_handle_duck_help(const char * const result);
+void prof_handle_duck_result(const char * const result);
 
 #endif

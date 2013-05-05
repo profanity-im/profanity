@@ -71,10 +71,10 @@ message_send(const char * const msg, const char * const recipient)
     if (prefs_get_boolean(PREF_STATES) && chat_session_get_recipient_supports(recipient)) {
         chat_session_set_active(recipient);
         message = stanza_create_message(ctx, recipient, STANZA_TYPE_CHAT,
-            msg, STANZA_NAME_ACTIVE);
+            msg, STANZA_NAME_ACTIVE, NULL);
     } else {
         message = stanza_create_message(ctx, recipient, STANZA_TYPE_CHAT,
-            msg, NULL);
+            msg, NULL, NULL);
     }
 
     xmpp_send(conn, message);
@@ -87,7 +87,19 @@ message_send_groupchat(const char * const msg, const char * const recipient)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *message = stanza_create_message(ctx, recipient,
-        STANZA_TYPE_GROUPCHAT, msg, NULL);
+        STANZA_TYPE_GROUPCHAT, msg, NULL, NULL);
+
+    xmpp_send(conn, message);
+    xmpp_stanza_release(message);
+}
+
+void
+message_send_duck(const char * const query)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *message = stanza_create_message(ctx, "im@ddg.gg",
+        STANZA_TYPE_CHAT, query, NULL, NULL);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
@@ -293,8 +305,19 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *jid = jid_create(from);
 
+    // handle ddg searches
+    if (strcmp(jid->barejid, "im@ddg.gg") == 0) {
+        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+        if (body != NULL) {
+            char *message = xmpp_stanza_get_text(body);
+            prof_handle_duck_result(message);
+        }
+
+        jid_destroy(jid);
+        return 1;
+
     // private message from chat room use full jid (room/nick)
-    if (muc_room_is_active(jid)) {
+    } else if (muc_room_is_active(jid)) {
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;
         gboolean delayed = stanza_get_delay(stanza, &tv_stamp);

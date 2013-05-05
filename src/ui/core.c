@@ -205,6 +205,20 @@ ui_windows_full(void)
     return TRUE;
 }
 
+gboolean
+ui_duck_exists(void)
+{
+    int i;
+    for (i = 1; i < NUM_WINS; i++) {
+        if (windows[i] != NULL) {
+            if (windows[i]->type == WIN_DUCK)
+                return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 void
 ui_contact_typing(const char * const from)
 {
@@ -710,6 +724,54 @@ ui_new_chat_win(const char * const to)
     }
 
     ui_switch_win(win_index);
+}
+
+void
+ui_create_duck_win(void)
+{
+    int win_index = _new_prof_win("DuckDuckGo search", WIN_DUCK);
+    ui_switch_win(win_index);
+    win_print_time(windows[win_index], '-');
+    wprintw(windows[win_index]->win, "Type ':help' to find out more.\n");
+}
+
+void
+ui_open_duck_win(void)
+{
+    int win_index = _find_prof_win_index("DuckDuckGo search");
+    if (win_index != NUM_WINS) {
+        ui_switch_win(win_index);
+    }
+}
+
+void
+ui_duck(const char * const query)
+{
+    int win_index = _find_prof_win_index("DuckDuckGo search");
+    if (win_index != NUM_WINS) {
+        win_print_time(windows[win_index], '-');
+        wprintw(windows[win_index]->win, "\n");
+        win_print_time(windows[win_index], '-');
+        wattron(windows[win_index]->win, COLOUR_ME);
+        wprintw(windows[win_index]->win, "Query  : ");
+        wattroff(windows[win_index]->win, COLOUR_ME);
+        wprintw(windows[win_index]->win, query);
+        wprintw(windows[win_index]->win, "\n");
+    }
+}
+
+void
+ui_duck_result(const char * const result)
+{
+    int win_index = _find_prof_win_index("DuckDuckGo search");
+    if (win_index != NUM_WINS) {
+        win_print_time(windows[win_index], '-');
+        wattron(windows[win_index]->win, COLOUR_THEM);
+        wprintw(windows[win_index]->win, "Result : ");
+        wattroff(windows[win_index]->win, COLOUR_THEM);
+        wprintw(windows[win_index]->win, result);
+        wprintw(windows[win_index]->win, "\n");
+    }
 }
 
 void

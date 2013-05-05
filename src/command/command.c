@@ -138,6 +138,7 @@ static gboolean _cmd_wins(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_theme(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_status(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_duck(gchar **args, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -452,6 +453,17 @@ static struct cmd_t main_commands[] =
           "Send the url as a tiny url.",
           "",
           "Example : /tiny http://www.google.com",
+          NULL } } },
+
+    { "/duck",
+        _cmd_duck, parse_args_with_freetext, 1, 1,
+        { "/duck query", "Perform search using DuckDuckGo chatbot.",
+        { "/duck query",
+          "-----------",
+          "Send a search query to the DuckDuckGo chatbot.",
+          "Your chat service must be federated, i.e. allow message to be sent/received outside of its domain.",
+          "",
+          "Example : /duck dennis ritchie",
           NULL } } },
 
     { "/who",
@@ -1094,6 +1106,17 @@ cmd_execute_default(const char * const inp)
         case WIN_CONSOLE:
             cons_show("Unknown command: %s", inp);
             break;
+
+        case WIN_DUCK:
+            if (status != JABBER_CONNECTED) {
+                ui_current_print_line("You are not currently connected.");
+            } else {
+                message_send_duck(inp);
+                ui_duck(inp);
+                free(recipient);
+            }
+            break;
+
         default:
             break;
     }
@@ -1918,6 +1941,45 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
     }
+}
+
+static gboolean
+_cmd_duck(gchar **args, struct cmd_help_t help)
+{
+    char *query = args[0];
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (ui_windows_full()) {
+        cons_show_error("Windows all used, close a window and try again.");
+        return TRUE;
+    }
+
+    // if no duck win open, create it and send a help command
+    if (!ui_duck_exists()) {
+        ui_create_duck_win();
+
+        if (query != NULL) {
+            message_send_duck(query);
+            ui_duck(query);
+        }
+
+    // window exists, send query
+    } else {
+        ui_open_duck_win();
+
+        if (query != NULL) {
+            message_send_duck(query);
+            ui_duck(query);
+        }
+    }
+
+    return TRUE;
 }
 
 static gboolean

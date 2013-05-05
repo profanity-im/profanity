@@ -141,6 +141,13 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
 }
 
 void
+prof_handle_duck_result(const char * const result)
+{
+    ui_duck_result(result);
+    ui_current_page_off();
+}
+
+void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
     win_type_t win_type = ui_current_win_type();

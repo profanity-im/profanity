@@ -32,7 +32,8 @@ typedef enum {
     WIN_CONSOLE,
     WIN_CHAT,
     WIN_MUC,
-    WIN_PRIVATE
+    WIN_PRIVATE,
+    WIN_DUCK
 } win_type_t;
 
 typedef struct prof_win_t {

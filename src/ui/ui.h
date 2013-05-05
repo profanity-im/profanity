@@ -110,6 +110,12 @@ void ui_status_room(const char * const contact);
 void ui_status(void);
 void ui_status_private(void);
 
+void ui_create_duck_win(void);
+void ui_open_duck_win(void);
+void ui_duck(const char * const query);
+void ui_duck_result(const char * const result);
+gboolean ui_duck_exists(void);
+
 // create windows
 void create_title_bar(void);
 void create_status_bar(void);
