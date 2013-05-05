@@ -37,7 +37,7 @@
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
-static GHashTable *sub_requests;
+static Autocomplete sub_requests_ac;
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, \
                                                 STANZA_NAME_PRESENCE, type, ctx)
@@ -63,8 +63,7 @@ void _send_caps_request(char *node, char *caps_key, char *id, char *from);
 void
 presence_init(void)
 {
-    sub_requests =
-        g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    sub_requests_ac = autocomplete_new();
 }
 
 void
@@ -92,7 +91,8 @@ presence_subscription(const char * const jid, const jabber_subscr_t action)
     const char *type = NULL;
 
     Jid *jidp = jid_create(jid);
-    g_hash_table_remove(sub_requests, jidp->barejid);
+
+    autocomplete_remove(sub_requests_ac, jidp->barejid);
 
     switch (action)
     {
@@ -123,28 +123,22 @@ presence_subscription(const char * const jid, const jabber_subscr_t action)
     jid_destroy(jidp);
 }
 
-GList *
+GSList *
 presence_get_subscription_requests(void)
 {
-    return g_hash_table_get_keys(sub_requests);
+    return autocomplete_get_list(sub_requests_ac);
 }
 
 gint
 presence_sub_request_count(void)
 {
-    if (sub_requests == NULL) {
-        return 0;
-    } else {
-       return g_hash_table_size(sub_requests);
-    }
+    return autocomplete_length(sub_requests_ac);
 }
 
 void
 presence_free_sub_requests(void)
 {
-    if (sub_requests != NULL) {
-        g_hash_table_remove_all(sub_requests);
-    }
+    autocomplete_free(sub_requests_ac);
 }
 
 void
@@ -293,7 +287,7 @@ _unsubscribed_handler(xmpp_conn_t * const conn,
     log_debug("Unsubscribed presence handler fired for %s", from);
 
     prof_handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
-    g_hash_table_remove(sub_requests, from_jid->barejid);
+    autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
 
@@ -309,7 +303,7 @@ _subscribed_handler(xmpp_conn_t * const conn,
     log_debug("Subscribed presence handler fired for %s", from);
 
     prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
-    g_hash_table_remove(sub_requests, from_jid->barejid);
+    autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
 
@@ -325,8 +319,7 @@ _subscribe_handler(xmpp_conn_t * const conn,
     log_debug("Subscribe presence handler fired for %s", from);
 
     prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
-    g_hash_table_insert(sub_requests, strdup(from_jid->barejid),
-        strdup(from_jid->barejid));
+    autocomplete_add(sub_requests_ac, strdup(from_jid->barejid));
 
     jid_destroy(from_jid);
 

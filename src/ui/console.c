@@ -571,16 +571,17 @@ cons_show_software_version(const char * const jid, const char * const  presence,
 void
 cons_show_received_subs(void)
 {
-    GList *received = presence_get_subscription_requests();
+    GSList *received = presence_get_subscription_requests();
     if (received == NULL) {
         cons_show("No outstanding subscription requests.");
     } else {
         cons_show("Outstanding subscription requests from:",
-            g_list_length(received));
+            g_slist_length(received));
         while (received != NULL) {
             cons_show("  %s", received->data);
-            received = g_list_next(received);
+            received = g_slist_next(received);
         }
+        g_slist_free_full(received, g_free);
     }
 }
 

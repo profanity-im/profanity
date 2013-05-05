@@ -103,7 +103,7 @@ void message_send_duck(const char * const query);
 
 // presence functions
 void presence_subscription(const char * const jid, const jabber_subscr_t action);
-GList* presence_get_subscription_requests(void);
+GSList* presence_get_subscription_requests(void);
 gint presence_sub_request_count(void);
 void presence_join_room(Jid *jid);
 void presence_change_room_nick(const char * const room, const char * const nick);
