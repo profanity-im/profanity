@@ -378,7 +378,7 @@ ui_incoming_msg(const char * const from, const char * const message,
             } else {
                 // if show users status first, when receiving message via delayed delivery
                 if (win_created) {
-                    PContact pcontact = contact_list_get_contact(from);
+                    PContact pcontact = roster_get_contact(from);
                     win_show_contact(window, pcontact);
                 }
                 GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
@@ -688,7 +688,7 @@ void
 ui_new_chat_win(const char * const to)
 {
     // if the contact is offline, show a message
-    PContact contact = contact_list_get_contact(to);
+    PContact contact = roster_get_contact(to);
     int win_index = _find_prof_win_index(to);
     ProfWin *window = NULL;
 
@@ -798,7 +798,7 @@ ui_outgoing_msg(const char * const from, const char * const to,
     const char * const message)
 {
     // if the contact is offline, show a message
-    PContact contact = contact_list_get_contact(to);
+    PContact contact = roster_get_contact(to);
     int win_index = _find_prof_win_index(to);
     ProfWin *window = NULL;
 
@@ -1126,7 +1126,7 @@ void
 ui_status(void)
 {
     char *recipient = ui_current_recipient();
-    PContact pcontact = contact_list_get_contact(recipient);
+    PContact pcontact = roster_get_contact(recipient);
 
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);

@@ -72,7 +72,7 @@ _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
     if (g_strcmp0(sub, "remove") == 0) {
-        contact_list_remove(jid);
+        roster_remove(jid);
         return 1;
     }
 
@@ -82,7 +82,7 @@ _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         pending_out = TRUE;
     }
 
-    contact_list_update_subscription(jid, sub, pending_out);
+    roster_update_subscription(jid, sub, pending_out);
 
     return 1;
 }
@@ -109,7 +109,7 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 pending_out = TRUE;
             }
 
-            gboolean added = contact_list_add(barejid, name, sub, NULL, pending_out);
+            gboolean added = roster_add(barejid, name, sub, NULL, pending_out);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", barejid);

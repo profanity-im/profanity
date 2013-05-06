@@ -961,7 +961,7 @@ cmd_autocomplete(char *input, int *size)
 void
 cmd_reset_autocomplete()
 {
-    contact_list_reset_search_attempts();
+    roster_reset_search_attempts();
     muc_reset_invites_ac();
     accounts_reset_all_search();
     accounts_reset_enabled_search();
@@ -1165,18 +1165,18 @@ _cmd_complete_parameters(char *input, int *size)
         }
     } else {
         _parameter_autocomplete(input, size, "/msg",
-            contact_list_find_contact);
+            roster_find_contact);
         _parameter_autocomplete(input, size, "/info",
-            contact_list_find_contact);
+            roster_find_contact);
         _parameter_autocomplete(input, size, "/caps",
-            contact_list_find_resource);
+            roster_find_resource);
         _parameter_autocomplete(input, size, "/status",
-            contact_list_find_contact);
+            roster_find_contact);
         _parameter_autocomplete(input, size, "/software",
-            contact_list_find_resource);
+            roster_find_resource);
     }
 
-    _parameter_autocomplete(input, size, "/invite", contact_list_find_contact);
+    _parameter_autocomplete(input, size, "/invite", roster_find_contact);
     _parameter_autocomplete(input, size, "/decline", muc_find_invite);
     _parameter_autocomplete(input, size, "/join", muc_find_invite);
 
@@ -1474,7 +1474,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         cons_show("Sent subscription request to %s.", bare_jid);
         log_info("Sent subscription request to %s.", bare_jid);
     } else if (strcmp(subcmd, "show") == 0) {
-        PContact contact = contact_list_get_contact(bare_jid);
+        PContact contact = roster_get_contact(bare_jid);
         if ((contact == NULL) || (p_contact_subscription(contact) == NULL)) {
             if (win_type == WIN_CHAT) {
                 ui_current_print_line("No subscription information for %s.", bare_jid);
@@ -1791,7 +1791,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
             // not in groupchat window
             } else {
                 cons_show("");
-                GSList *list = get_contact_list();
+                GSList *list = roster_get_contacts();
 
                 // no arg, show all contacts
                 if (presence == NULL) {
@@ -2066,7 +2066,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             if (usr != NULL) {
                 cons_show("No parameter required for /info in chat.");
             } else {
-                pcontact = contact_list_get_contact(ui_current_recipient());
+                pcontact = roster_get_contact(ui_current_recipient());
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
                 } else {
@@ -2090,7 +2090,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CONSOLE:
             if (usr != NULL) {
-                pcontact = contact_list_get_contact(usr);
+                pcontact = roster_get_contact(usr);
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
                 } else {
@@ -2142,7 +2142,7 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
                 if (jid->fulljid == NULL) {
                     cons_show("You must provide a full jid to the /caps command.");
                 } else {
-                    pcontact = contact_list_get_contact(jid->barejid);
+                    pcontact = roster_get_contact(jid->barejid);
                     if (pcontact == NULL) {
                         cons_show("Contact not found in roster: %s", jid->barejid);
                     } else {

@@ -37,7 +37,7 @@ static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 
 void
-contact_list_init(void)
+roster_init(void)
 {
     ac = autocomplete_new();
     resource_ac = autocomplete_new();
@@ -46,7 +46,7 @@ contact_list_init(void)
 }
 
 void
-contact_list_clear(void)
+roster_clear(void)
 {
     autocomplete_clear(ac);
     autocomplete_clear(resource_ac);
@@ -56,21 +56,21 @@ contact_list_clear(void)
 }
 
 void
-contact_list_free()
+roster_free()
 {
     autocomplete_free(ac);
     autocomplete_free(resource_ac);
 }
 
 void
-contact_list_reset_search_attempts(void)
+roster_reset_search_attempts(void)
 {
     autocomplete_reset(ac);
     autocomplete_reset(resource_ac);
 }
 
 gboolean
-contact_list_add(const char * const barejid, const char * const name,
+roster_add(const char * const barejid, const char * const name,
     const char * const subscription, const char * const offline_message,
     gboolean pending_out)
 {
@@ -89,13 +89,13 @@ contact_list_add(const char * const barejid, const char * const name,
 }
 
 void
-contact_list_remove(const char * const barejid)
+roster_remove(const char * const barejid)
 {
     g_hash_table_remove(contacts, barejid);
 }
 
 gboolean
-contact_list_update_presence(const char * const barejid, Resource *resource,
+roster_update_presence(const char * const barejid, Resource *resource,
     GDateTime *last_activity)
 {
     assert(barejid != NULL);
@@ -118,7 +118,7 @@ contact_list_update_presence(const char * const barejid, Resource *resource,
 }
 
 gboolean
-contact_list_contact_offline(const char * const barejid,
+roster_contact_offline(const char * const barejid,
     const char * const resource, const char * const status)
 {
     PContact contact = g_hash_table_lookup(contacts, barejid);
@@ -140,7 +140,7 @@ contact_list_contact_offline(const char * const barejid,
 }
 
 void
-contact_list_update_subscription(const char * const barejid,
+roster_update_subscription(const char * const barejid,
     const char * const subscription, gboolean pending_out)
 {
     PContact contact = g_hash_table_lookup(contacts, barejid);
@@ -155,7 +155,7 @@ contact_list_update_subscription(const char * const barejid,
 }
 
 gboolean
-contact_list_has_pending_subscriptions(void)
+roster_has_pending_subscriptions(void)
 {
     GHashTableIter iter;
     gpointer key;
@@ -173,7 +173,7 @@ contact_list_has_pending_subscriptions(void)
 }
 
 GSList *
-get_contact_list(void)
+roster_get_contacts(void)
 {
     GSList *result = NULL;
     GHashTableIter iter;
@@ -190,19 +190,19 @@ get_contact_list(void)
 }
 
 char *
-contact_list_find_contact(char *search_str)
+roster_find_contact(char *search_str)
 {
     return autocomplete_complete(ac, search_str);
 }
 
 char *
-contact_list_find_resource(char *search_str)
+roster_find_resource(char *search_str)
 {
     return autocomplete_complete(resource_ac, search_str);
 }
 
 PContact
-contact_list_get_contact(const char const *barejid)
+roster_get_contact(const char const *barejid)
 {
     return g_hash_table_lookup(contacts, barejid);
 }

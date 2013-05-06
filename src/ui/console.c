@@ -266,7 +266,7 @@ cons_show_wins(void)
                 {
                     case WIN_CHAT:
                         wprintw(console->win, "%d: Chat %s", i + 1, window->from);
-                        PContact contact = contact_list_get_contact(window->from);
+                        PContact contact = roster_get_contact(window->from);
 
                         if (contact != NULL) {
                             if (p_contact_name(contact) != NULL) {
@@ -588,8 +588,8 @@ cons_show_received_subs(void)
 void
 cons_show_sent_subs(void)
 {
-   if (contact_list_has_pending_subscriptions()) {
-        GSList *contacts = get_contact_list();
+   if (roster_has_pending_subscriptions()) {
+        GSList *contacts = roster_get_contacts();
         PContact contact = NULL;
         cons_show("Awaiting subscription responses from:");
         while (contacts != NULL) {
@@ -697,7 +697,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
 void
 cons_show_status(const char * const contact)
 {
-    PContact pcontact = contact_list_get_contact(contact);
+    PContact pcontact = roster_get_contact(contact);
 
     if (pcontact != NULL) {
         win_show_contact(console, pcontact);

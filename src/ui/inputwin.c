@@ -372,7 +372,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 
         case 127:
         case KEY_BACKSPACE:
-            contact_list_reset_search_attempts();
+            roster_reset_search_attempts();
             if (display_size > 0) {
 
                 // if at end, delete last char

@@ -163,7 +163,7 @@ _iq_handle_version_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     if (muc_room_is_active(jidp)) {
         contact = muc_get_participant(jidp->barejid, jidp->resourcepart);
     } else {
-        contact = contact_list_get_contact(jidp->barejid);
+        contact = roster_get_contact(jidp->barejid);
     }
 
     Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);

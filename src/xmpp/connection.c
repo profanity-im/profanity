@@ -29,7 +29,6 @@
 #include "chat_session.h"
 #include "common.h"
 #include "config/preferences.h"
-#include "contact_list.h"
 #include "jid.h"
 #include "log.h"
 #include "muc.h"

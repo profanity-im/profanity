@@ -234,7 +234,7 @@ void
 prof_handle_lost_connection(void)
 {
     cons_show_error("Lost connection.");
-    contact_list_clear();
+    roster_clear();
     muc_clear_invites();
     chat_sessions_clear();
     ui_disconnected();
@@ -246,7 +246,7 @@ prof_handle_disconnect(const char * const jid)
 {
     cons_show("%s logged out successfully.", jid);
     jabber_disconnect();
-    contact_list_clear();
+    roster_clear();
     muc_clear_invites();
     chat_sessions_clear();
     ui_disconnected();
@@ -354,10 +354,10 @@ void
 prof_handle_contact_online(char *contact, Resource *resource,
     GDateTime *last_activity)
 {
-    gboolean updated = contact_list_update_presence(contact, resource, last_activity);
+    gboolean updated = roster_update_presence(contact, resource, last_activity);
 
     if (updated) {
-        PContact result = contact_list_get_contact(contact);
+        PContact result = roster_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
                 const char *show = string_from_resource_presence(resource->presence);
@@ -371,11 +371,11 @@ prof_handle_contact_online(char *contact, Resource *resource,
 void
 prof_handle_contact_offline(char *contact, char *resource, char *status)
 {
-    gboolean updated = contact_list_contact_offline(contact, resource, status);
+    gboolean updated = roster_contact_offline(contact, resource, status);
 
     if (resource != NULL && updated) {
         Jid *jid = jid_create_from_bare_and_resource(contact, resource);
-        PContact result = contact_list_get_contact(contact);
+        PContact result = roster_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
                 ui_contact_offline(jid->fulljid, "offline", status);
@@ -489,7 +489,7 @@ _process_input(char *inp)
     }
 
     inp_win_reset();
-    contact_list_reset_search_attempts();
+    roster_reset_search_attempts();
     ui_current_page_off();
 
     return result;
@@ -584,7 +584,7 @@ _init(const int disable_tls, char *log_level)
     jabber_init(disable_tls);
     cmd_init();
     log_info("Initialising contact list");
-    contact_list_init();
+    roster_init();
     muc_init();
     atexit(_shutdown);
 }
@@ -594,7 +594,7 @@ _shutdown(void)
 {
     jabber_disconnect();
     jabber_shutdown();
-    contact_list_free();
+    roster_free();
     caps_close();
     ui_close();
     chat_log_close();
