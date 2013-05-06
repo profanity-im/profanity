@@ -780,7 +780,10 @@ ui_duck_result(const char * const result)
                 win_print_time(windows[win_index], '-');
             } else {
                 gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
-                wprintw(windows[win_index]->win, string);
+                if (string != NULL) {
+                    wprintw(windows[win_index]->win, string);
+                    g_free(string);
+                }
             }
 
             offset++;
