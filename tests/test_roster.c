@@ -6,7 +6,7 @@
 #include <glib.h>
 
 #include "contact.h"
-#include "contact_list.h"
+#include "xmpp/xmpp.h"
 
 static void setup(void)
 {

@@ -37,10 +37,10 @@
 #include "common.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "contact_list.h"
 #include "log.h"
 #include "profanity.h"
 #include "ui/ui.h"
+#include "xmpp/xmpp.h"
 
 #define _inp_win_refresh() prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
 

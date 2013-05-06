@@ -26,6 +26,7 @@
 #include <strophe.h>
 
 #include "config/accounts.h"
+#include "contact.h"
 #include "jid.h"
 
 #define JABBER_PRIORITY_MIN -128
@@ -122,5 +123,22 @@ void iq_disco_items_request(gchar *jid);
 // caps functions
 Capabilities* caps_get(const char * const caps_str);
 void caps_close(void);
+
+void roster_clear(void);
+gboolean roster_update_presence(const char * const barejid,
+    Resource *resource, GDateTime *last_activity);
+PContact roster_get_contact(const char const *barejid);
+gboolean roster_contact_offline(const char * const barejid,
+    const char * const resource, const char * const status);
+void roster_reset_search_attempts(void);
+void roster_init(void);
+void roster_free(void);
+gboolean roster_has_pending_subscriptions(void);
+GSList * roster_get_contacts(void);
+char * roster_find_contact(char *search_str);
+char * roster_find_resource(char *search_str);
+gboolean roster_add(const char * const barejid, const char * const name,
+    const char * const subscription, const char * const offline_message,
+    gboolean pending_out);
 
 #endif

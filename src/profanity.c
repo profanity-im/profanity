@@ -38,7 +38,6 @@
 #include "command/command.h"
 #include "common.h"
 #include "contact.h"
-#include "contact_list.h"
 #include "log.h"
 #include "muc.h"
 #include "resource.h"

@@ -28,13 +28,13 @@
 #include <glib.h>
 #include <strophe.h>
 
-#include "contact_list.h"
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
+#include "xmpp/xmpp.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 

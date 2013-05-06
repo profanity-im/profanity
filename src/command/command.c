@@ -36,7 +36,6 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "contact.h"
-#include "contact_list.h"
 #include "jid.h"
 #include "log.h"
 #include "muc.h"

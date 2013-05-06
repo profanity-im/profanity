@@ -20,14 +20,16 @@
  *
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include <glib.h>
 #include <strophe.h>
 
-#include "contact_list.h"
 #include "log.h"
+#include "tools/autocomplete.h"
 #include "xmpp/connection.h"
+#include "xmpp/roster.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
@@ -37,6 +39,13 @@ static int _roster_handle_set(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _roster_handle_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+
+static Autocomplete ac;
+static Autocomplete resource_ac;
+static GHashTable *contacts;
+
+static gboolean _key_equals(void *key1, void *key2);
+static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 
 void
 roster_add_handlers(void)
@@ -123,4 +132,198 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     }
 
     return 1;
+}
+
+void
+roster_init(void)
+{
+    ac = autocomplete_new();
+    resource_ac = autocomplete_new();
+    contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
+        (GDestroyNotify)p_contact_free);
+}
+
+void
+roster_clear(void)
+{
+    autocomplete_clear(ac);
+    autocomplete_clear(resource_ac);
+    g_hash_table_destroy(contacts);
+    contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
+        (GDestroyNotify)p_contact_free);
+}
+
+void
+roster_free()
+{
+    autocomplete_free(ac);
+    autocomplete_free(resource_ac);
+}
+
+void
+roster_reset_search_attempts(void)
+{
+    autocomplete_reset(ac);
+    autocomplete_reset(resource_ac);
+}
+
+gboolean
+roster_add(const char * const barejid, const char * const name,
+    const char * const subscription, const char * const offline_message,
+    gboolean pending_out)
+{
+    gboolean added = FALSE;
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+
+    if (contact == NULL) {
+        contact = p_contact_new(barejid, name, subscription, offline_message,
+            pending_out);
+        g_hash_table_insert(contacts, strdup(barejid), contact);
+        autocomplete_add(ac, strdup(barejid));
+        added = TRUE;
+    }
+
+    return added;
+}
+
+void
+roster_remove(const char * const barejid)
+{
+    g_hash_table_remove(contacts, barejid);
+}
+
+gboolean
+roster_update_presence(const char * const barejid, Resource *resource,
+    GDateTime *last_activity)
+{
+    assert(barejid != NULL);
+    assert(resource != NULL);
+
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+    if (contact == NULL) {
+        return FALSE;
+    }
+
+    if (!_datetimes_equal(p_contact_last_activity(contact), last_activity)) {
+        p_contact_set_last_activity(contact, last_activity);
+    }
+    p_contact_set_presence(contact, resource);
+    Jid *jid = jid_create_from_bare_and_resource(barejid, resource->name);
+    autocomplete_add(resource_ac, strdup(jid->fulljid));
+    jid_destroy(jid);
+
+    return TRUE;
+}
+
+gboolean
+roster_contact_offline(const char * const barejid,
+    const char * const resource, const char * const status)
+{
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+    if (contact == NULL) {
+        return FALSE;
+    }
+    if (resource == NULL) {
+        return TRUE;
+    } else {
+        gboolean result = p_contact_remove_resource(contact, resource);
+        if (result == TRUE) {
+            Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
+            autocomplete_remove(resource_ac, jid->fulljid);
+            jid_destroy(jid);
+        }
+
+        return result;
+    }
+}
+
+void
+roster_update_subscription(const char * const barejid,
+    const char * const subscription, gboolean pending_out)
+{
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+
+    if (contact == NULL) {
+        contact = p_contact_new_subscription(barejid, subscription, pending_out);
+        g_hash_table_insert(contacts, strdup(barejid), contact);
+    } else {
+        p_contact_set_subscription(contact, subscription);
+        p_contact_set_pending_out(contact, pending_out);
+    }
+}
+
+gboolean
+roster_has_pending_subscriptions(void)
+{
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        PContact contact = (PContact) value;
+        if (p_contact_pending_out(contact)) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+GSList *
+roster_get_contacts(void)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        result = g_slist_append(result, value);
+    }
+
+    // resturn all contact structs
+    return result;
+}
+
+char *
+roster_find_contact(char *search_str)
+{
+    return autocomplete_complete(ac, search_str);
+}
+
+char *
+roster_find_resource(char *search_str)
+{
+    return autocomplete_complete(resource_ac, search_str);
+}
+
+PContact
+roster_get_contact(const char const *barejid)
+{
+    return g_hash_table_lookup(contacts, barejid);
+}
+
+static
+gboolean _key_equals(void *key1, void *key2)
+{
+    gchar *str1 = (gchar *) key1;
+    gchar *str2 = (gchar *) key2;
+
+    return (g_strcmp0(str1, str2) == 0);
+}
+
+static gboolean
+_datetimes_equal(GDateTime *dt1, GDateTime *dt2)
+{
+    if ((dt1 == NULL) && (dt2 == NULL)) {
+        return TRUE;
+    } else if ((dt1 == NULL) && (dt2 != NULL)) {
+        return FALSE;
+    } else if ((dt1 != NULL) && (dt2 == NULL)) {
+        return FALSE;
+    } else {
+        return g_date_time_equal(dt1, dt2);
+    }
 }

@@ -32,11 +32,11 @@
 #include "command/command.h"
 #include "common.h"
 #include "config/preferences.h"
-#include "contact_list.h"
 #include "config/theme.h"
 #include "ui/notifier.h"
 #include "ui/window.h"
 #include "ui/ui.h"
+#include "xmpp/xmpp.h"
 
 #define CONS_WIN_TITLE "_cons"
 

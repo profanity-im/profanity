@@ -40,13 +40,13 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "contact.h"
-#include "contact_list.h"
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
 #include "ui/notifier.h"
 #include "ui/ui.h"
 #include "ui/window.h"
+#include "xmpp/xmpp.h"
 
 // the window currently being displayed
 static int current_index = 0;
