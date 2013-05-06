@@ -771,16 +771,21 @@ ui_duck_result(const char * const result)
         wprintw(windows[win_index]->win, "Result : ");
         wattroff(windows[win_index]->win, COLOUR_THEM);
 
-        int i = 0;
-        while (i < strlen(result)) {
-            if (result[i] == '\n') {
+
+
+        glong offset = 0;
+        while (offset < g_utf8_strlen(result, -1)) {
+            gchar *ptr = g_utf8_offset_to_pointer(result, offset);
+            gunichar unichar = g_utf8_get_char(ptr);
+            if (unichar == '\n') {
                 wprintw(windows[win_index]->win, "\n");
                 win_print_time(windows[win_index], '-');
             } else {
-                waddch(windows[win_index]->win, result[i]);
+                gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
+                wprintw(windows[win_index]->win, string);
             }
 
-            i++;
+            offset++;
         }
 
         wprintw(windows[win_index]->win, "\n");
