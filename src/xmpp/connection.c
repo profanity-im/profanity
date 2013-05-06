@@ -39,6 +39,7 @@
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
 #include "xmpp/presence.h"
+#include "xmpp/roster.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
@@ -479,6 +480,7 @@ _connection_handler(xmpp_conn_t * const conn,
 
         chat_sessions_init();
 
+        roster_add_handlers();
         message_add_handlers();
         presence_add_handlers();
         iq_add_handlers();
@@ -488,7 +490,7 @@ _connection_handler(xmpp_conn_t * const conn,
             xmpp_timed_handler_add(conn, _ping_timed_handler, millis, ctx);
         }
 
-        iq_roster_request();
+        roster_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {

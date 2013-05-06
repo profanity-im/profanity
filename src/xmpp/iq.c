@@ -45,10 +45,6 @@
 
 static int _iq_handle_error(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_roster_set(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_roster_result(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
 static int _iq_handle_ping_get(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _iq_handle_version_get(xmpp_conn_t * const conn,
@@ -70,8 +66,6 @@ iq_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     HANDLE(NULL,                STANZA_TYPE_ERROR,  _iq_handle_error);
-    HANDLE(XMPP_NS_ROSTER,      STANZA_TYPE_SET,    _iq_handle_roster_set);
-    HANDLE(XMPP_NS_ROSTER,      STANZA_TYPE_RESULT, _iq_handle_roster_result);
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _iq_handle_discoinfo_get);
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_RESULT, _iq_handle_discoinfo_result);
     HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _iq_handle_discoitems_result);
@@ -79,16 +73,6 @@ iq_add_handlers(void)
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _iq_handle_version_get);
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _iq_handle_version_result);
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
-}
-
-void
-iq_roster_request(void)
-{
-    xmpp_conn_t * const conn = connection_get_conn();
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_roster_iq(ctx);
-    xmpp_send(conn, iq);
-    xmpp_stanza_release(iq);
 }
 
 void
@@ -141,74 +125,6 @@ _iq_handle_error(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         log_error("IQ error received, id: %s.", id);
     } else {
         log_error("IQ error recieved.");
-    }
-
-    return 1;
-}
-
-static int
-_iq_handle_roster_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
-{
-    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-    xmpp_stanza_t *item =
-        xmpp_stanza_get_child_by_name(query, STANZA_NAME_ITEM);
-
-    if (item == NULL) {
-        return 1;
-    }
-
-    const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-    const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
-    if (g_strcmp0(sub, "remove") == 0) {
-        contact_list_remove(jid);
-        return 1;
-    }
-
-    gboolean pending_out = FALSE;
-    const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-    if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
-        pending_out = TRUE;
-    }
-
-    contact_list_update_subscription(jid, sub, pending_out);
-
-    return 1;
-}
-
-static int
-_iq_handle_roster_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
-{
-    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
-
-    // handle initial roster response
-    if (g_strcmp0(id, "roster") == 0) {
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        xmpp_stanza_t *item = xmpp_stanza_get_children(query);
-
-        while (item != NULL) {
-            const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-            const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
-            const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
-
-            gboolean pending_out = FALSE;
-            const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-            if (g_strcmp0(ask, "subscribe") == 0) {
-                pending_out = TRUE;
-            }
-
-            gboolean added = contact_list_add(barejid, name, sub, NULL, pending_out);
-
-            if (!added) {
-                log_warning("Attempt to add contact twice: %s", barejid);
-            }
-
-            item = xmpp_stanza_get_next(item);
-        }
-
-        contact_presence_t conn_presence = accounts_get_login_presence(jabber_get_account_name());
-        presence_update(conn_presence, NULL, 0);
     }
 
     return 1;
