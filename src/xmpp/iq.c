@@ -25,21 +25,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
 #include <strophe.h>
 
-#include "common.h"
 #include "contact_list.h"
-#include "jid.h"
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
-#include "xmpp/iq.h"
 #include "xmpp/stanza.h"
-#include "xmpp/xmpp.h"
-
-#include "ui/ui.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 
