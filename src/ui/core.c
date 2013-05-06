@@ -771,8 +771,6 @@ ui_duck_result(const char * const result)
         wprintw(windows[win_index]->win, "Result : ");
         wattroff(windows[win_index]->win, COLOUR_THEM);
 
-
-
         glong offset = 0;
         while (offset < g_utf8_strlen(result, -1)) {
             gchar *ptr = g_utf8_offset_to_pointer(result, offset);
