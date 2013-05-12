@@ -481,12 +481,14 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/close",
-        _cmd_close, parse_args, 0, 0,
-        { "/close", "Close current chat window.",
-        { "/close",
-          "------",
-          "Close the current chat window, no message is sent to the recipient,",
-          "The chat window will become available for new chats.",
+        _cmd_close, parse_args, 0, 1,
+        { "/close [win|all]", "Close a window window.",
+        { "/close [win|all]",
+          "----------------",
+          "Passing no argument will close the current window.",
+          "Passing 2,3,4,5,6,7,8,9 or 0 will close the specified window.",
+          "Passing 'all' will close all currently open windows.",
+          "The console window cannot be closed.",
           "If in a chat room, you will leave the room.",
           NULL } } },
 
@@ -2476,40 +2478,81 @@ _cmd_clear(gchar **args, struct cmd_help_t help)
     return TRUE;
 }
 
+static void _close_connected_win(index)
+{
+    win_type_t win_type = ui_win_type(index);
+    if (win_type == WIN_MUC) {
+        char *room_jid = ui_recipient(index);
+        presence_leave_chat_room(room_jid);
+    } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
+
+        if (prefs_get_boolean(PREF_STATES)) {
+            char *recipient = ui_recipient(index);
+
+            // send <gone/> chat state before closing
+            if (chat_session_get_recipient_supports(recipient)) {
+                chat_session_set_gone(recipient);
+                message_send_gone(recipient);
+                chat_session_end(recipient);
+            }
+        }
+    }
+}
+
 static gboolean
 _cmd_close(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    win_type_t win_type = ui_current_win_type();
+    int index = 0;
+    int curr = 0;
 
-    // cannot close console window
-    if (win_type == WIN_CONSOLE) {
+    if (args[0] == NULL) {
+        index = ui_current_win_index();
+    } else if (strcmp(args[0], "all") == 0) {
+        for (curr = 1; curr <= 9; curr++) {
+            if (ui_win_exists(curr)) {
+                if (conn_status == JABBER_CONNECTED) {
+                    _close_connected_win(curr);
+                }
+                ui_close_win(curr);
+            }
+        }
+
+        cons_show("Closed all windows.");
+        return TRUE;
+    } else {
+        index = atoi(args[0]);
+        if (index == 0) {
+            index = 9;
+        } else {
+            index--;
+        }
+    }
+
+    if (index == 0) {
         cons_show("Cannot close console window.");
         return TRUE;
     }
 
+    if (index > 9 || index < 0) {
+        cons_show("No such window exists.");
+        return TRUE;
+    }
+
+    if (!ui_win_exists(index)) {
+        cons_show("Window is not open.");
+        return TRUE;
+    }
+
+
     // handle leaving rooms, or chat
     if (conn_status == JABBER_CONNECTED) {
-        if (win_type == WIN_MUC) {
-            char *room_jid = ui_current_recipient();
-            presence_leave_chat_room(room_jid);
-        } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
-
-            if (prefs_get_boolean(PREF_STATES)) {
-                char *recipient = ui_current_recipient();
-
-                // send <gone/> chat state before closing
-                if (chat_session_get_recipient_supports(recipient)) {
-                    chat_session_set_gone(recipient);
-                    message_send_gone(recipient);
-                    chat_session_end(recipient);
-                }
-            }
-        }
+        _close_connected_win(index);
     }
 
     // close the window
-    ui_close_current();
+    ui_close_win(index);
+    cons_show("Closed window %d", index + 1);
 
     return TRUE;
 }

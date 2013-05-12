@@ -69,10 +69,16 @@ void ui_console_dirty(void);
 void ui_close_current(void);
 void ui_clear_current(void);
 win_type_t ui_current_win_type(void);
+int ui_current_win_index(void);
 char* ui_current_recipient(void);
 void ui_current_print_line(const char * const msg, ...);
 void ui_current_error_line(const char * const msg);
 void ui_current_page_off(void);
+
+win_type_t ui_win_type(int index);
+char * ui_recipient(int index);
+void ui_close_win(int index);
+gboolean ui_win_exists(int index);
 
 // ui events
 void ui_contact_typing(const char * const from);

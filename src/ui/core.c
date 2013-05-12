@@ -205,6 +205,11 @@ ui_windows_full(void)
     return TRUE;
 }
 
+gboolean ui_win_exists(int index)
+{
+    return (windows[index] != NULL);
+}
+
 gboolean
 ui_duck_exists(void)
 {
@@ -550,10 +555,44 @@ ui_close_current(void)
     current_win_dirty = TRUE;
 }
 
+void ui_close_win(int index)
+{
+    win_free(windows[index]);
+    windows[index] = NULL;
+    status_bar_inactive(index);
+
+    if (index == current_index) {
+        _set_current(0);
+    }
+
+    status_bar_active(0);
+    title_bar_title();
+
+    current_win_dirty = TRUE;
+}
+
 win_type_t
 ui_current_win_type(void)
 {
     return current->type;
+}
+
+int
+ui_current_win_index(void)
+{
+    return current_index;
+}
+
+win_type_t
+ui_win_type(int index)
+{
+    return windows[index]->type;
+}
+
+char *
+ui_recipient(int index)
+{
+    return strdup(windows[index]->from);
 }
 
 char *
