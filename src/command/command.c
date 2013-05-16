@@ -2544,7 +2544,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         index = atoi(args[0]);
         if (index == 0) {
             index = 9;
-        } else {
+        } else if (index != 10) {
             index--;
         }
     }
