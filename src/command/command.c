@@ -804,6 +804,7 @@ static Autocomplete theme_ac;
 static Autocomplete theme_load_ac;
 static Autocomplete account_ac;
 static Autocomplete disco_ac;
+static Autocomplete close_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -881,6 +882,10 @@ cmd_init(void)
     autocomplete_add(account_ac, strdup("rename"));
     autocomplete_add(account_ac, strdup("set"));
 
+    close_ac = autocomplete_new();
+    autocomplete_add(close_ac, strdup("read"));
+    autocomplete_add(close_ac, strdup("all"));
+
     theme_load_ac = NULL;
 
     unsigned int i;
@@ -928,6 +933,7 @@ cmd_close(void)
     }
     autocomplete_free(account_ac);
     autocomplete_free(disco_ac);
+    autocomplete_free(close_ac);
 }
 
 // Command autocompletion functions
@@ -993,6 +999,7 @@ cmd_reset_autocomplete()
     }
     autocomplete_reset(account_ac);
     autocomplete_reset(disco_ac);
+    autocomplete_reset(close_ac);
 }
 
 GSList *
@@ -1190,6 +1197,7 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete_with_ac(input, size, "/prefs", prefs_ac);
     _parameter_autocomplete_with_ac(input, size, "/log", log_ac);
     _parameter_autocomplete_with_ac(input, size, "/disco", disco_ac);
+    _parameter_autocomplete_with_ac(input, size, "/close", close_ac);
 
     _sub_autocomplete(input, size);
     _notify_autocomplete(input, size);
