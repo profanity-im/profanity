@@ -1215,6 +1215,16 @@ ui_unread(void)
     return result;
 }
 
+int
+ui_win_unread(int index)
+{
+    if (windows[index] != NULL) {
+        return windows[index]->unread;
+    } else {
+        return 0;
+    }
+}
+
 static void
 _ui_draw_win_title(void)
 {

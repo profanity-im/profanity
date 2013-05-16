@@ -482,12 +482,13 @@ static struct cmd_t main_commands[] =
 
     { "/close",
         _cmd_close, parse_args, 0, 1,
-        { "/close [win|all]", "Close a window window.",
-        { "/close [win|all]",
-          "----------------",
+        { "/close [win|read|all]", "Close a window window.",
+        { "/close [win|read|all]",
+          "---------------------",
           "Passing no argument will close the current window.",
           "Passing 2,3,4,5,6,7,8,9 or 0 will close the specified window.",
           "Passing 'all' will close all currently open windows.",
+          "Passing 'read' will close all windows that have no unread messages.",
           "The console window cannot be closed.",
           "If in a chat room, you will leave the room.",
           NULL } } },
@@ -2519,6 +2520,17 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         }
 
         cons_show("Closed all windows.");
+        return TRUE;
+    } else if (strcmp(args[0], "read") == 0) {
+        for (curr = 1; curr <= 9; curr++) {
+            if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
+                if (conn_status == JABBER_CONNECTED) {
+                    _close_connected_win(curr);
+                }
+                ui_close_win(curr);
+            }
+        }
+        cons_show("Closed windows.");
         return TRUE;
     } else {
         index = atoi(args[0]);

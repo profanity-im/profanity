@@ -79,6 +79,7 @@ win_type_t ui_win_type(int index);
 char * ui_recipient(int index);
 void ui_close_win(int index);
 gboolean ui_win_exists(int index);
+int ui_win_unread(int index);
 
 // ui events
 void ui_contact_typing(const char * const from);
