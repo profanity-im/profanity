@@ -248,6 +248,7 @@ cons_show_wins(void)
 {
     int i = 0;
     int count = 0;
+    int ui_index = 0;
 
     cons_show("");
     cons_show("Active windows:");
@@ -265,11 +266,15 @@ cons_show_wins(void)
             if (windows[i] != NULL) {
                 ProfWin *window = windows[i];
                 win_print_time(console, '-');
+                ui_index = i + 1;
+                if (ui_index == 10) {
+                    ui_index = 0;
+                }
 
                 switch (window->type)
                 {
                     case WIN_CHAT:
-                        wprintw(console->win, "%d: Chat %s", i + 1, window->from);
+                        wprintw(console->win, "%d: Chat %s", ui_index, window->from);
                         PContact contact = roster_get_contact(window->from);
 
                         if (contact != NULL) {
@@ -286,7 +291,7 @@ cons_show_wins(void)
                         break;
 
                     case WIN_PRIVATE:
-                        wprintw(console->win, "%d: Private %s", i + 1, window->from);
+                        wprintw(console->win, "%d: Private %s", ui_index, window->from);
 
                         if (window->unread > 0) {
                             wprintw(console->win, ", %d unread", window->unread);
@@ -295,7 +300,7 @@ cons_show_wins(void)
                         break;
 
                     case WIN_MUC:
-                        wprintw(console->win, "%d: Room %s", i + 1, window->from);
+                        wprintw(console->win, "%d: Room %s", ui_index, window->from);
 
                         if (window->unread > 0) {
                             wprintw(console->win, ", %d unread", window->unread);
@@ -304,7 +309,7 @@ cons_show_wins(void)
                         break;
 
                     case WIN_DUCK:
-                        wprintw(console->win, "%d: DuckDuckGo search", i + 1);
+                        wprintw(console->win, "%d: DuckDuckGo search", ui_index);
 
                         break;
 
