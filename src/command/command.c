@@ -2572,7 +2572,11 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 
     // close the window
     ui_close_win(index);
-    cons_show("Closed window %d", index + 1);
+    int ui_index = index + 1;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+    cons_show("Closed window %d", ui_index);
 
     return TRUE;
 }
