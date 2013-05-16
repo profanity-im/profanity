@@ -84,6 +84,7 @@ static void _win_resize_all(void);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static void _ui_draw_win_title(void);
+gboolean _tidy(void);
 
 void
 ui_init(void)
@@ -508,6 +509,28 @@ ui_handle_special_keys(const wint_t * const ch, const char * const inp,
 }
 
 void
+ui_close_connected_win(int index)
+{
+    win_type_t win_type = ui_win_type(index);
+    if (win_type == WIN_MUC) {
+        char *room_jid = ui_recipient(index);
+        presence_leave_chat_room(room_jid);
+    } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
+
+        if (prefs_get_boolean(PREF_STATES)) {
+            char *recipient = ui_recipient(index);
+
+            // send <gone/> chat state before closing
+            if (chat_session_get_recipient_supports(recipient)) {
+                chat_session_set_gone(recipient);
+                message_send_gone(recipient);
+                chat_session_end(recipient);
+            }
+        }
+    }
+}
+
+void
 ui_switch_win(const int i)
 {
     ui_current_page_off();
@@ -555,7 +578,8 @@ ui_close_current(void)
     current_win_dirty = TRUE;
 }
 
-void ui_close_win(int index)
+void
+ui_close_win(int index)
 {
     win_free(windows[index]);
     windows[index] = NULL;
@@ -569,6 +593,43 @@ void ui_close_win(int index)
     title_bar_title();
 
     current_win_dirty = TRUE;
+}
+
+void
+ui_tidy_wins(void)
+{
+    gboolean tidied = _tidy();
+
+    if (tidied) {
+        cons_show("Windows tidied.");
+    } else {
+        cons_show("No tidy needed.");
+    }
+}
+
+void
+ui_prune_wins(void)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    int curr = 0;
+    gboolean pruned = FALSE;
+
+    for (curr = 1; curr <= 9; curr++) {
+        if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
+            if (conn_status == JABBER_CONNECTED) {
+                ui_close_connected_win(curr);
+            }
+            ui_close_win(curr);
+            pruned = TRUE;
+        }
+    }
+
+    _tidy();
+    if (pruned) {
+        cons_show("Windows pruned.");
+    } else {
+        cons_show("No prune needed.");
+    }
 }
 
 win_type_t
@@ -1566,5 +1627,37 @@ _set_current(int index)
 {
     current_index = index;
     current = windows[current_index];
+}
+
+gboolean
+_tidy(void)
+{
+    int gap = 1;
+    int filler = 1;
+    gboolean tidied = FALSE;
+
+    for (gap = 1; gap < NUM_WINS; gap++) {
+        // if a gap
+        if (!ui_win_exists(gap)) {
+
+            // find next used window and move into gap
+            for (filler = gap + 1; filler < NUM_WINS; filler++) {
+                if (ui_win_exists(filler)) {
+                    windows[gap] = windows[filler];
+                    if (windows[gap]->unread > 0) {
+                        status_bar_new(gap);
+                    } else {
+                        status_bar_active(gap);
+                    }
+                    windows[filler] = NULL;
+                    status_bar_inactive(filler);
+                    tidied = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+
+    return tidied;
 }
 

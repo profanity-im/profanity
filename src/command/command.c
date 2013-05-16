@@ -415,11 +415,13 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/wins",
-        _cmd_wins, parse_args, 0, 0,
-        { "/wins", "List active windows.",
-        { "/wins",
-          "-----",
-          "List all currently active windows and information about their usage.",
+        _cmd_wins, parse_args, 0, 1,
+        { "/wins [tidy|prune]", "List or tidy active windows.",
+        { "/wins [tidy|prune]",
+          "------------------",
+          "Passing no argument will list all currently active windows and information about their usage.",
+          "tidy  : Shuffle windows so there are no gaps between used windows.",
+          "prune : Close all windows with no unread messages, and then tidy as above.",
           NULL } } },
 
     { "/sub",
@@ -486,9 +488,9 @@ static struct cmd_t main_commands[] =
         { "/close [win|read|all]",
           "---------------------",
           "Passing no argument will close the current window.",
-          "Passing 2,3,4,5,6,7,8,9 or 0 will close the specified window.",
-          "Passing 'all' will close all currently open windows.",
-          "Passing 'read' will close all windows that have no unread messages.",
+          "2,3,4,5,6,7,8,9 or 0 : Close the specified window.",
+          "all                  : Close all currently open windows.",
+          "read                 : Close all windows that have no new messages.",
           "The console window cannot be closed.",
           "If in a chat room, you will leave the room.",
           NULL } } },
@@ -805,6 +807,7 @@ static Autocomplete theme_load_ac;
 static Autocomplete account_ac;
 static Autocomplete disco_ac;
 static Autocomplete close_ac;
+static Autocomplete wins_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -886,6 +889,10 @@ cmd_init(void)
     autocomplete_add(close_ac, strdup("read"));
     autocomplete_add(close_ac, strdup("all"));
 
+    wins_ac = autocomplete_new();
+    autocomplete_add(wins_ac, strdup("prune"));
+    autocomplete_add(wins_ac, strdup("tidy"));
+
     theme_load_ac = NULL;
 
     unsigned int i;
@@ -934,6 +941,7 @@ cmd_close(void)
     autocomplete_free(account_ac);
     autocomplete_free(disco_ac);
     autocomplete_free(close_ac);
+    autocomplete_free(wins_ac);
 }
 
 // Command autocompletion functions
@@ -1000,6 +1008,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(account_ac);
     autocomplete_reset(disco_ac);
     autocomplete_reset(close_ac);
+    autocomplete_reset(wins_ac);
 }
 
 GSList *
@@ -1198,6 +1207,7 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete_with_ac(input, size, "/log", log_ac);
     _parameter_autocomplete_with_ac(input, size, "/disco", disco_ac);
     _parameter_autocomplete_with_ac(input, size, "/close", close_ac);
+    _parameter_autocomplete_with_ac(input, size, "/wins", wins_ac);
 
     _sub_autocomplete(input, size);
     _notify_autocomplete(input, size);
@@ -1543,7 +1553,13 @@ _cmd_quit(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_wins(gchar **args, struct cmd_help_t help)
 {
-    cons_show_wins();
+    if (args[0] == NULL) {
+        cons_show_wins();
+    } else if (strcmp(args[0], "tidy") == 0) {
+        ui_tidy_wins();
+    } else if (strcmp(args[0], "prune") == 0) {
+        ui_prune_wins();
+    }
     return TRUE;
 }
 
@@ -2487,27 +2503,6 @@ _cmd_clear(gchar **args, struct cmd_help_t help)
     return TRUE;
 }
 
-static void _close_connected_win(index)
-{
-    win_type_t win_type = ui_win_type(index);
-    if (win_type == WIN_MUC) {
-        char *room_jid = ui_recipient(index);
-        presence_leave_chat_room(room_jid);
-    } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
-
-        if (prefs_get_boolean(PREF_STATES)) {
-            char *recipient = ui_recipient(index);
-
-            // send <gone/> chat state before closing
-            if (chat_session_get_recipient_supports(recipient)) {
-                chat_session_set_gone(recipient);
-                message_send_gone(recipient);
-                chat_session_end(recipient);
-            }
-        }
-    }
-}
-
 static gboolean
 _cmd_close(gchar **args, struct cmd_help_t help)
 {
@@ -2522,7 +2517,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         for (curr = 1; curr <= 9; curr++) {
             if (ui_win_exists(curr)) {
                 if (conn_status == JABBER_CONNECTED) {
-                    _close_connected_win(curr);
+                    ui_close_connected_win(curr);
                 }
                 ui_close_win(curr);
                 count++;
@@ -2540,7 +2535,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         for (curr = 1; curr <= 9; curr++) {
             if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
                 if (conn_status == JABBER_CONNECTED) {
-                    _close_connected_win(curr);
+                    ui_close_connected_win(curr);
                 }
                 ui_close_win(curr);
                 count++;
@@ -2581,7 +2576,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 
     // handle leaving rooms, or chat
     if (conn_status == JABBER_CONNECTED) {
-        _close_connected_win(index);
+        ui_close_connected_win(index);
     }
 
     // close the window

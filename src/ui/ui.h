@@ -64,6 +64,7 @@ void ui_print_error_from_recipient(const char * const from, const char *err_msg)
 void ui_print_system_msg_from_recipient(const char * const from, const char *message);
 gint ui_unread(void);
 void ui_console_dirty(void);
+void ui_close_connected_win(int index);
 
 // current window actions
 void ui_close_current(void);
@@ -122,6 +123,9 @@ void ui_open_duck_win(void);
 void ui_duck(const char * const query);
 void ui_duck_result(const char * const result);
 gboolean ui_duck_exists(void);
+
+void ui_tidy_wins(void);
+void ui_prune_wins(void);
 
 // create windows
 void create_title_bar(void);
