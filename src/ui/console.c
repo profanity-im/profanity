@@ -136,9 +136,13 @@ cons_show_typing(const char * const short_from)
 void
 cons_show_incoming_message(const char * const short_from, const int win_index)
 {
+    int ui_index = win_index + 1;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
     win_print_time(console, '-');
     wattron(console->win, COLOUR_INCOMING);
-    wprintw(console->win, "<< incoming from %s (%d)\n", short_from, win_index + 1);
+    wprintw(console->win, "<< incoming from %s (%d)\n", short_from, ui_index);
     wattroff(console->win, COLOUR_INCOMING);
 
     ui_console_dirty();
