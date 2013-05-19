@@ -2114,6 +2114,7 @@ static gboolean
 _cmd_info(gchar **args, struct cmd_help_t help)
 {
     char *usr = args[0];
+    char *usr_jid = NULL;
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
@@ -2166,7 +2167,11 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CONSOLE:
             if (usr != NULL) {
-                pcontact = roster_get_contact(usr);
+                usr_jid = roster_jid_from_handle(usr);
+                if (usr_jid == NULL) {
+                    usr_jid = usr;
+                }
+                pcontact = roster_get_contact(usr_jid);
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
                 } else {
