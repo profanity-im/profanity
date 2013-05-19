@@ -79,6 +79,7 @@ static void _titlebar_autocomplete(char *input, int *size);
 static void _theme_autocomplete(char *input, int *size);
 static void _autoaway_autocomplete(char *input, int *size);
 static void _account_autocomplete(char *input, int *size);
+static void _roster_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
 static void _parameter_autocomplete_with_ac(char *input, int *size, char *command,
@@ -820,6 +821,7 @@ static Autocomplete account_ac;
 static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
+static Autocomplete roster_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -904,6 +906,9 @@ cmd_init(void)
     autocomplete_add(wins_ac, strdup("prune"));
     autocomplete_add(wins_ac, strdup("tidy"));
 
+    roster_ac = autocomplete_new();
+    autocomplete_add(roster_ac, strdup("nick"));
+
     theme_load_ac = NULL;
 
     unsigned int i;
@@ -953,6 +958,7 @@ cmd_close(void)
     autocomplete_free(disco_ac);
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
+    autocomplete_free(roster_ac);
 }
 
 // Command autocompletion functions
@@ -1020,6 +1026,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(disco_ac);
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
+    autocomplete_reset(roster_ac);
 }
 
 GSList *
@@ -1226,6 +1233,7 @@ _cmd_complete_parameters(char *input, int *size)
     _titlebar_autocomplete(input, size);
     _theme_autocomplete(input, size);
     _account_autocomplete(input, size);
+    _roster_autocomplete(input, size);
 }
 
 // The command functions
@@ -3213,6 +3221,16 @@ _sub_autocomplete(char *input, int *size)
         }
     } else if ((strncmp(input, "/sub ", 5) == 0) && (*size > 5)) {
         _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
+    }
+}
+
+static void
+_roster_autocomplete(char *input, int *size)
+{
+    if ((strncmp(input, "/roster nick ", 13) == 0) && (*size > 13)) {
+        _parameter_autocomplete(input, size, "/roster nick", roster_find_contact);
+    } else if ((strncmp(input, "/roster ", 8) == 0) && (*size > 8)) {
+        _parameter_autocomplete_with_ac(input, size, "/roster", roster_ac);
     }
 }
 
