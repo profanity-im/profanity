@@ -73,33 +73,20 @@ p_contact_new(const char * const barejid, const char * const name,
     return contact;
 }
 
+void
+p_contact_set_name(const PContact contact, const char * const name)
+{
+    if (contact->name != NULL) {
+        FREE_SET_NULL(contact->name);
+    }
+
+    contact->name = strdup(name);
+}
+
 gboolean
 p_contact_remove_resource(PContact contact, const char * const resource)
 {
     return g_hash_table_remove(contact->available_resources, resource);
-}
-
-PContact
-p_contact_new_subscription(const char * const barejid,
-    const char * const subscription, gboolean pending_out)
-{
-    PContact contact = malloc(sizeof(struct p_contact_t));
-    contact->barejid = strdup(barejid);
-
-    contact->name = NULL;
-
-    if (subscription != NULL)
-        contact->subscription = strdup(subscription);
-    else
-        contact->subscription = strdup("none");
-
-    contact->pending_out = pending_out;
-    contact->last_activity = NULL;
-
-    contact->available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
-        (GDestroyNotify)resource_destroy);
-
-    return contact;
 }
 
 void

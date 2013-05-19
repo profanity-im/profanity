@@ -79,6 +79,7 @@ _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     }
 
     const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+    const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
     if (g_strcmp0(sub, "remove") == 0) {
         roster_remove(jid);
@@ -91,7 +92,7 @@ _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         pending_out = TRUE;
     }
 
-    roster_update_subscription(jid, sub, pending_out);
+    roster_update(jid, name, sub, pending_out);
 
     return 1;
 }
@@ -238,17 +239,36 @@ roster_contact_offline(const char * const barejid,
 }
 
 void
-roster_update_subscription(const char * const barejid,
+roster_change_handle(const char * const barejid, const char * const handle)
+{
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+
+    if (contact != NULL) {
+        p_contact_set_name(contact, handle);
+    }
+
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_roster_set(ctx, barejid, handle);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+void
+roster_update(const char * const barejid, const char * const name,
     const char * const subscription, gboolean pending_out)
 {
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new_subscription(barejid, subscription, pending_out);
+        contact = p_contact_new(barejid, name, subscription, NULL, pending_out);
         g_hash_table_insert(contacts, strdup(barejid), contact);
     } else {
         p_contact_set_subscription(contact, subscription);
         p_contact_set_pending_out(contact, pending_out);
+        if (name != NULL) {
+            p_contact_set_name(contact, name);
+        }
     }
 }
 

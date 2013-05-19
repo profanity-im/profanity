@@ -90,6 +90,29 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
 }
 
 xmpp_stanza_t *
+stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const jid,
+    const char * const handle)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, XMPP_NS_ROSTER);
+
+    xmpp_stanza_t *item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    xmpp_stanza_set_attribute(item, STANZA_ATTR_JID, jid);
+    xmpp_stanza_set_attribute(item, STANZA_ATTR_NAME, handle);
+
+    xmpp_stanza_add_child(query, item);
+    xmpp_stanza_add_child(iq, query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
 stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     const char * const contact, const char * const reason)
 {

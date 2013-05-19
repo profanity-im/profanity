@@ -139,6 +139,7 @@ static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_theme(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_status(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_duck(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_roster(gchar **args, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -270,6 +271,17 @@ static struct cmd_t main_commands[] =
           "Example : /msg otherfriend@server.com",
           "Example : /msg Bob Here is a private message",
           "Example : /msg \"My Friend\" Hi, how are you?",
+          NULL } } },
+
+    { "/roster",
+        _cmd_roster, parse_args_with_freetext, 3, 3,
+        { "/roster nick jid handle", "Add or change a contacts handle.",
+        { "/roster nick jid handle",
+          "-----------------------",
+          "Change the nickname (handle) associated with a contact in your roster."
+          "",
+          "Example : /roster nick bob.smith@server.com bobby",
+          "Example : /roster nick myfriend@chat.org My Friend",
           NULL } } },
 
     { "/info",
@@ -1968,6 +1980,34 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             ui_new_chat_win(usr);
             return TRUE;
         }
+    }
+}
+
+static gboolean
+_cmd_roster(gchar **args, struct cmd_help_t help)
+{
+    if (strcmp(args[0], "nick") != 0) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    } else {
+        char *jid = args[1];
+        char *handle = args[2];
+        jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+
+        // contact does not exist
+        PContact contact = roster_get_contact(jid);
+        if (contact == NULL) {
+            cons_show("Contact not found in roster: %s", jid);
+            return TRUE;
+        }
+
+        roster_change_handle(jid, handle);
+        return TRUE;
     }
 }
 

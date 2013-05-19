@@ -30,8 +30,6 @@ typedef struct p_contact_t *PContact;
 PContact p_contact_new(const char * const barejid, const char * const name,
     const char * const subscription, const char * const offline_message,
     gboolean pending_out);
-PContact p_contact_new_subscription(const char * const barejid,
-    const char * const subscription, gboolean pending_out);
 void p_contact_add_resource(PContact contact, Resource *resource);
 gboolean p_contact_remove_resource(PContact contact, const char * const resource);
 void p_contact_free(PContact contact);
@@ -45,6 +43,7 @@ GDateTime* p_contact_last_activity(const PContact contact);
 gboolean p_contact_pending_out(const PContact contact);
 void p_contact_set_presence(const PContact contact, Resource *resource);
 void p_contact_set_status(const PContact contact, const char * const status);
+void p_contact_set_name(const PContact contact, const char * const name);
 void p_contact_set_subscription(const PContact contact, const char * const subscription);
 void p_contact_set_pending_out(const PContact contact, gboolean pending_out);
 void p_contact_set_last_activity(const PContact contact, GDateTime *last_activity);
