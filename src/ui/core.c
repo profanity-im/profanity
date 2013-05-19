@@ -379,7 +379,7 @@ ui_incoming_msg(const char * const from, const char * const message,
         // not currently viewing chat window with sender
         } else {
             status_bar_new(win_index);
-            cons_show_incoming_message(from, win_index);
+            cons_show_incoming_message(display_from, win_index);
             if (prefs_get_boolean(PREF_FLASH))
                 flash();
 
