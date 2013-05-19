@@ -292,7 +292,16 @@ ui_incoming_msg(const char * const from, const char * const message,
         display_from = get_nick_from_full_jid(from);
     } else {
         win_type = WIN_CHAT;
-        display_from = strdup(from);
+        PContact contact = roster_get_contact(from);
+        if (contact != NULL) {
+            if (p_contact_name(contact) != NULL) {
+                display_from = strdup(p_contact_name(contact));
+            } else {
+                display_from = strdup(from);
+            }
+        } else {
+            display_from = strdup(from);
+        }
     }
 
     int win_index = _find_prof_win_index(from);
@@ -317,12 +326,12 @@ ui_incoming_msg(const char * const from, const char * const message,
 
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(console->win, COLOUR_THEM);
-            wprintw(console->win, "*%s ", from);
+            wprintw(console->win, "*%s ", display_from);
             wprintw(console->win, "%s", message + 4);
             wprintw(console->win, "\n");
             wattroff(console->win, COLOUR_THEM);
         } else {
-            _win_show_user(console->win, from, 1);
+            _win_show_user(console->win, display_from, 1);
             _win_show_message(console->win, message);
         }
 
@@ -414,7 +423,7 @@ ui_incoming_msg(const char * const from, const char * const message,
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
         notify_message(display_from);
 
-    g_free(display_from);
+    FREE_SET_NULL(display_from);
 }
 
 void
