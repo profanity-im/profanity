@@ -43,6 +43,7 @@ static int _roster_handle_result(xmpp_conn_t * const conn,
 static Autocomplete ac;
 static Autocomplete resource_ac;
 static GHashTable *contacts;
+static GHashTable *handle_to_jid;
 
 static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
@@ -66,6 +67,12 @@ roster_request(void)
     xmpp_stanza_release(iq);
 }
 
+char *
+roster_jid_from_handle(const char * const handle)
+{
+    return g_hash_table_lookup(handle_to_jid, handle);
+}
+
 static int
 _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
@@ -82,7 +89,9 @@ _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
     if (g_strcmp0(sub, "remove") == 0) {
-        roster_remove(jid);
+        autocomplete_remove(ac, name);
+        g_hash_table_remove(handle_to_jid, name);
+        g_hash_table_remove(contacts, jid);
         return 1;
     }
 
@@ -142,6 +151,7 @@ roster_init(void)
     resource_ac = autocomplete_new();
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
+    handle_to_jid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
@@ -152,6 +162,8 @@ roster_clear(void)
     g_hash_table_destroy(contacts);
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
+    g_hash_table_destroy(handle_to_jid);
+    handle_to_jid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
@@ -180,17 +192,17 @@ roster_add(const char * const barejid, const char * const name,
         contact = p_contact_new(barejid, name, subscription, offline_message,
             pending_out);
         g_hash_table_insert(contacts, strdup(barejid), contact);
-        autocomplete_add(ac, strdup(barejid));
+        if (name != NULL) {
+            autocomplete_add(ac, strdup(name));
+            g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
+        } else {
+            autocomplete_add(ac, strdup(barejid));
+            g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
+        }
         added = TRUE;
     }
 
     return added;
-}
-
-void
-roster_remove(const char * const barejid)
-{
-    g_hash_table_remove(contacts, barejid);
 }
 
 gboolean
@@ -243,6 +255,22 @@ roster_change_handle(const char * const barejid, const char * const handle)
 {
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
+    if (p_contact_name(contact) != NULL) {
+        autocomplete_remove(ac, p_contact_name(contact));
+        g_hash_table_remove(handle_to_jid, p_contact_name(contact));
+    } else {
+        autocomplete_remove(ac, barejid);
+        g_hash_table_remove(handle_to_jid, barejid);
+    }
+
+    if (handle != NULL) {
+        autocomplete_add(ac, strdup(handle));
+        g_hash_table_insert(handle_to_jid, strdup(handle), strdup(barejid));
+    } else {
+        autocomplete_add(ac, strdup(barejid));
+        g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
+    }
+
     if (contact != NULL) {
         p_contact_set_name(contact, handle);
     }
@@ -262,10 +290,29 @@ roster_update(const char * const barejid, const char * const name,
 
     if (contact == NULL) {
         contact = p_contact_new(barejid, name, subscription, NULL, pending_out);
+        autocomplete_add(ac, strdup(name));
+        g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
         g_hash_table_insert(contacts, strdup(barejid), contact);
     } else {
         p_contact_set_subscription(contact, subscription);
         p_contact_set_pending_out(contact, pending_out);
+
+        if (p_contact_name(contact) == NULL) {
+            if (name != NULL) {
+                autocomplete_add(ac, strdup(name));
+                autocomplete_remove(ac, barejid);
+                g_hash_table_remove(handle_to_jid, barejid);
+                g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
+            }
+        } else {
+            if (name != NULL) {
+                autocomplete_add(ac, strdup(name));
+                autocomplete_remove(ac, p_contact_name(contact));
+                g_hash_table_remove(handle_to_jid, p_contact_name(contact));
+                g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
+            }
+        }
+
         if (name != NULL) {
             p_contact_set_name(contact, name);
         }

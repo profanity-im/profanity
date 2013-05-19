@@ -32,6 +32,7 @@
 #include "profanity.h"
 #include "xmpp/connection.h"
 #include "xmpp/message.h"
+#include "xmpp/roster.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 
@@ -59,21 +60,29 @@ message_add_handlers(void)
 void
 message_send(const char * const msg, const char * const recipient)
 {
+    const char * jid = NULL;
+
+    if (roster_jid_from_handle(recipient) != NULL) {
+        jid = roster_jid_from_handle(recipient);
+    } else {
+        jid = recipient;
+    }
+
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     if (prefs_get_boolean(PREF_STATES)) {
-        if (!chat_session_exists(recipient)) {
-            chat_session_start(recipient, TRUE);
+        if (!chat_session_exists(jid)) {
+            chat_session_start(jid, TRUE);
         }
     }
 
     xmpp_stanza_t *message;
-    if (prefs_get_boolean(PREF_STATES) && chat_session_get_recipient_supports(recipient)) {
-        chat_session_set_active(recipient);
-        message = stanza_create_message(ctx, recipient, STANZA_TYPE_CHAT,
+    if (prefs_get_boolean(PREF_STATES) && chat_session_get_recipient_supports(jid)) {
+        chat_session_set_active(jid);
+        message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT,
             msg, STANZA_NAME_ACTIVE, NULL);
     } else {
-        message = stanza_create_message(ctx, recipient, STANZA_TYPE_CHAT,
+        message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT,
             msg, NULL, NULL);
     }
 

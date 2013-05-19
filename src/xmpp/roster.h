@@ -26,7 +26,6 @@
 void roster_add_handlers(void);
 void roster_request(void);
 
-void roster_remove(const char * const barejid);
 void roster_update(const char * const barejid, const char * const name,
     const char * const subscription, gboolean pending_out);
 

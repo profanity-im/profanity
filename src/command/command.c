@@ -1973,14 +1973,15 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
         return TRUE;
 
     } else {
+        char *usr_jid = roster_jid_from_handle(usr);
         if (msg != NULL) {
-            message_send(msg, usr);
-            ui_outgoing_msg("me", usr, msg);
+            message_send(msg, usr_jid);
+            ui_outgoing_msg("me", usr_jid, msg);
 
             if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_jid();
                 Jid *jidp = jid_create(jid);
-                chat_log_chat(jidp->barejid, usr, msg, PROF_OUT_LOG, NULL);
+                chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
                 jid_destroy(jidp);
             }
 
