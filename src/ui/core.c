@@ -569,7 +569,16 @@ ui_switch_win(const int i)
             title_bar_title();
             status_bar_active(0);
         } else {
-            title_bar_set_recipient(current->from);
+            PContact contact = roster_get_contact(current->from);
+            if (contact != NULL) {
+                if (p_contact_name(contact) != NULL) {
+                    title_bar_set_recipient(p_contact_name(contact));
+                } else {
+                    title_bar_set_recipient(current->from);
+                }
+            } else {
+                title_bar_set_recipient(current->from);
+            }
             title_bar_draw();;
             status_bar_active(i);
         }

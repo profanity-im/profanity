@@ -29,7 +29,7 @@
 
 static WINDOW *title_bar;
 static char *current_title = NULL;
-static char *recipient = NULL;
+static const char *recipient = NULL;
 static GTimer *typing_elapsed;
 static int dirty;
 static contact_presence_t current_status;
@@ -126,7 +126,7 @@ title_bar_set_status(contact_presence_t status)
 }
 
 void
-title_bar_set_recipient(char *from)
+title_bar_set_recipient(const char * const from)
 {
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
