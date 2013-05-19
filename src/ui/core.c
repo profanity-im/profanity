@@ -422,25 +422,35 @@ ui_contact_online(const char * const barejid, const char * const resource,
     const char * const show, const char * const status, GDateTime *last_activity)
 {
     Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
-    char *display_str = NULL;
+    PContact contact = roster_get_contact(barejid);
+    GString *display_str = g_string_new("");
 
-    if (strcmp(jid->resourcepart, "__prof_default") == 0) {
-        display_str = jid->barejid;
+    // use nickname if exists
+    if (p_contact_name(contact) != NULL) {
+        g_string_append(display_str, strdup(p_contact_name(contact)));
     } else {
-        display_str = jid->fulljid;
+        g_string_append(display_str, strdup(barejid));
     }
 
-    _show_status_string(console, display_str, show, status, last_activity, "++",
-        "online");
+    // add resource if not default provided by profanity
+    if (strcmp(jid->resourcepart, "__prof_default") != 0) {
+        g_string_append(display_str, " (");
+        g_string_append(display_str, strdup(jid->resourcepart));
+        g_string_append(display_str, ")");
+    }
+
+    _show_status_string(console, display_str->str, show, status, last_activity,
+        "++", "online");
 
     int win_index = _find_prof_win_index(barejid);
     if (win_index != NUM_WINS) {
         ProfWin *window = windows[win_index];
-        _show_status_string(window, display_str, show, status, last_activity, "++",
-            "online");
+        _show_status_string(window, display_str->str, show, status,
+            last_activity, "++", "online");
     }
 
     jid_destroy(jid);
+    g_string_free(display_str, TRUE);
 
     if (win_index == current_index)
         current_win_dirty = TRUE;
@@ -451,21 +461,35 @@ ui_contact_offline(const char * const from, const char * const show,
     const char * const status)
 {
     Jid *jidp = jid_create(from);
-    char *display_str = NULL;
+    PContact contact = roster_get_contact(jidp->barejid);
+    GString *display_str = g_string_new("");
 
-    if (strcmp(jidp->resourcepart, "__prof_default") == 0) {
-        display_str = jidp->barejid;
+    // use nickname if exists
+    if (p_contact_name(contact) != NULL) {
+        g_string_append(display_str, strdup(p_contact_name(contact)));
     } else {
-        display_str = jidp->fulljid;
+        g_string_append(display_str, strdup(jidp->barejid));
     }
 
-    _show_status_string(console, display_str, show, status, NULL, "--", "offline");
+    // add resource if not default provided by profanity
+    if (strcmp(jidp->resourcepart, "__prof_default") != 0) {
+        g_string_append(display_str, " (");
+        g_string_append(display_str, strdup(jidp->resourcepart));
+        g_string_append(display_str, ")");
+    }
+
+    _show_status_string(console, display_str->str, show, status, NULL, "--",
+        "offline");
 
     int win_index = _find_prof_win_index(from);
     if (win_index != NUM_WINS) {
         ProfWin *window = windows[win_index];
-        _show_status_string(window, display_str, show, status, NULL, "--", "offline");
+        _show_status_string(window, display_str->str, show, status, NULL, "--",
+            "offline");
     }
+
+    jid_destroy(jidp);
+    g_string_free(display_str, TRUE);
 
     if (win_index == current_index)
         current_win_dirty = TRUE;
