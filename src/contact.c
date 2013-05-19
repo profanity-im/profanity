@@ -80,7 +80,9 @@ p_contact_set_name(const PContact contact, const char * const name)
         FREE_SET_NULL(contact->name);
     }
 
-    contact->name = strdup(name);
+    if (name != NULL) {
+        contact->name = strdup(name);
+    }
 }
 
 gboolean

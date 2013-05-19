@@ -275,14 +275,16 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/roster",
-        _cmd_roster, parse_args_with_freetext, 3, 3,
-        { "/roster nick jid handle", "Add or change a contacts handle.",
-        { "/roster nick jid handle",
-          "-----------------------",
+        _cmd_roster, parse_args_with_freetext, 2, 3,
+        { "/roster nick jid [handle]", "Add or change a contacts handle.",
+        { "/roster nick jid [handle]",
+          "-------------------------",
           "Change the nickname (handle) associated with a contact in your roster."
+          "If no handle is supplied, any existing handle will be removed.",
           "",
           "Example : /roster nick bob.smith@server.com bobby",
           "Example : /roster nick myfriend@chat.org My Friend",
+          "Example : /roster nick kai@server.com (clears handle)",
           NULL } } },
 
     { "/info",
