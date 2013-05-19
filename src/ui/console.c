@@ -946,19 +946,24 @@ cons_show_desktop_prefs(void)
     cons_show("");
 
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
-        cons_show("Messages (/notify message)       : ON");
+        cons_show("Messages (/notify message)          : ON");
     else
-        cons_show("Messages (/notify message)       : OFF");
+        cons_show("Messages (/notify message)          : OFF");
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING))
-        cons_show("Composing (/notify typing)       : ON");
+        cons_show("Composing (/notify typing)          : ON");
     else
-        cons_show("Composing (/notify typing)       : OFF");
+        cons_show("Composing (/notify typing)          : OFF");
 
     if (prefs_get_boolean(PREF_NOTIFY_INVITE))
-        cons_show("Room invites (/notify invite)    : ON");
+        cons_show("Room invites (/notify invite)       : ON");
     else
-        cons_show("Room invites (/notify invite)    : OFF");
+        cons_show("Room invites (/notify invite)       : OFF");
+
+    if (prefs_get_boolean(PREF_NOTIFY_SUB))
+        cons_show("Subscription requests (/notify sub) : ON");
+    else
+        cons_show("Subscription requests (/notify sub) : OFF");
 
     gint remind_period = prefs_get_notify_remind();
     if (remind_period == 0) {

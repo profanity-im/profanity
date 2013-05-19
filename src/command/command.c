@@ -853,7 +853,6 @@ cmd_init(void)
     autocomplete_add(notify_ac, strdup("remind"));
     autocomplete_add(notify_ac, strdup("invite"));
     autocomplete_add(notify_ac, strdup("sub"));
-    autocomplete_add(notify_ac, strdup("status"));
 
     sub_ac = autocomplete_new();
     autocomplete_add(sub_ac, strdup("request"));
