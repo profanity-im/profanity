@@ -124,10 +124,11 @@ win_show_contact(ProfWin *window, PContact contact)
 
     win_print_time(window, '-');
     win_presence_colour_on(window, presence);
-    wprintw(window->win, "%s", barejid);
 
     if (name != NULL) {
-        wprintw(window->win, " (%s)", name);
+        wprintw(window->win, "%s", name);
+    } else {
+        wprintw(window->win, "%s", barejid);
     }
 
     wprintw(window->win, " is %s", presence);
