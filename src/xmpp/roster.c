@@ -40,7 +40,8 @@ static int _roster_handle_set(xmpp_conn_t * const conn,
 static int _roster_handle_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 
-static Autocomplete ac;
+static Autocomplete handle_ac;
+static Autocomplete jid_ac;
 static Autocomplete resource_ac;
 static GHashTable *contacts;
 static GHashTable *handle_to_jid;
@@ -89,7 +90,8 @@ _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
     if (g_strcmp0(sub, "remove") == 0) {
-        autocomplete_remove(ac, name);
+        autocomplete_remove(jid_ac, jid);
+        autocomplete_remove(handle_ac, name);
         g_hash_table_remove(handle_to_jid, name);
         g_hash_table_remove(contacts, jid);
         return 1;
@@ -147,7 +149,8 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 void
 roster_init(void)
 {
-    ac = autocomplete_new();
+    handle_ac = autocomplete_new();
+    jid_ac = autocomplete_new();
     resource_ac = autocomplete_new();
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
@@ -157,7 +160,8 @@ roster_init(void)
 void
 roster_clear(void)
 {
-    autocomplete_clear(ac);
+    autocomplete_clear(handle_ac);
+    autocomplete_clear(jid_ac);
     autocomplete_clear(resource_ac);
     g_hash_table_destroy(contacts);
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
@@ -169,14 +173,16 @@ roster_clear(void)
 void
 roster_free()
 {
-    autocomplete_free(ac);
+    autocomplete_free(handle_ac);
+    autocomplete_free(jid_ac);
     autocomplete_free(resource_ac);
 }
 
 void
 roster_reset_search_attempts(void)
 {
-    autocomplete_reset(ac);
+    autocomplete_reset(handle_ac);
+    autocomplete_reset(jid_ac);
     autocomplete_reset(resource_ac);
 }
 
@@ -193,12 +199,14 @@ roster_add(const char * const barejid, const char * const name,
             pending_out);
         g_hash_table_insert(contacts, strdup(barejid), contact);
         if (name != NULL) {
-            autocomplete_add(ac, strdup(name));
+            autocomplete_add(handle_ac, strdup(name));
             g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
         } else {
-            autocomplete_add(ac, strdup(barejid));
+            autocomplete_add(handle_ac, strdup(barejid));
             g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
         }
+        autocomplete_add(jid_ac, strdup(barejid));
+
         added = TRUE;
     }
 
@@ -256,18 +264,18 @@ roster_change_handle(const char * const barejid, const char * const handle)
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (p_contact_name(contact) != NULL) {
-        autocomplete_remove(ac, p_contact_name(contact));
+        autocomplete_remove(handle_ac, p_contact_name(contact));
         g_hash_table_remove(handle_to_jid, p_contact_name(contact));
     } else {
-        autocomplete_remove(ac, barejid);
+        autocomplete_remove(handle_ac, barejid);
         g_hash_table_remove(handle_to_jid, barejid);
     }
 
     if (handle != NULL) {
-        autocomplete_add(ac, strdup(handle));
+        autocomplete_add(handle_ac, strdup(handle));
         g_hash_table_insert(handle_to_jid, strdup(handle), strdup(barejid));
     } else {
-        autocomplete_add(ac, strdup(barejid));
+        autocomplete_add(handle_ac, strdup(barejid));
         g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
     }
 
@@ -290,7 +298,8 @@ roster_update(const char * const barejid, const char * const name,
 
     if (contact == NULL) {
         contact = p_contact_new(barejid, name, subscription, NULL, pending_out);
-        autocomplete_add(ac, strdup(name));
+        autocomplete_add(jid_ac, strdup(barejid));
+        autocomplete_add(handle_ac, strdup(name));
         g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
         g_hash_table_insert(contacts, strdup(barejid), contact);
     } else {
@@ -299,15 +308,15 @@ roster_update(const char * const barejid, const char * const name,
 
         if (p_contact_name(contact) == NULL) {
             if (name != NULL) {
-                autocomplete_add(ac, strdup(name));
-                autocomplete_remove(ac, barejid);
+                autocomplete_add(handle_ac, strdup(name));
+                autocomplete_remove(handle_ac, barejid);
                 g_hash_table_remove(handle_to_jid, barejid);
                 g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
             }
         } else {
             if (name != NULL) {
-                autocomplete_add(ac, strdup(name));
-                autocomplete_remove(ac, p_contact_name(contact));
+                autocomplete_add(handle_ac, strdup(name));
+                autocomplete_remove(handle_ac, p_contact_name(contact));
                 g_hash_table_remove(handle_to_jid, p_contact_name(contact));
                 g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
             }
@@ -357,7 +366,13 @@ roster_get_contacts(void)
 char *
 roster_find_contact(char *search_str)
 {
-    return autocomplete_complete(ac, search_str);
+    return autocomplete_complete(handle_ac, search_str);
+}
+
+char *
+roster_find_jid(char *search_str)
+{
+    return autocomplete_complete(jid_ac, search_str);
 }
 
 char *

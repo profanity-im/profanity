@@ -136,6 +136,7 @@ void roster_free(void);
 gboolean roster_has_pending_subscriptions(void);
 GSList * roster_get_contacts(void);
 char * roster_find_contact(char *search_str);
+char * roster_find_jid(char *search_str);
 char * roster_find_resource(char *search_str);
 gboolean roster_add(const char * const barejid, const char * const name,
     const char * const subscription, const char * const offline_message,
