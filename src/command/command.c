@@ -1987,7 +1987,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
             return TRUE;
         } else {
-            ui_new_chat_win(usr);
+            ui_new_chat_win(usr_jid);
             return TRUE;
         }
     }
