@@ -2017,6 +2017,12 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
         }
 
         roster_change_handle(jid, handle);
+
+        if (handle == NULL) {
+            cons_show("Nickname for %s removed.", jid);
+        } else {
+            cons_show("Nickname for %s set to: %s.", jid, handle);
+        }
         return TRUE;
     }
 }
@@ -2064,6 +2070,7 @@ static gboolean
 _cmd_status(gchar **args, struct cmd_help_t help)
 {
     char *usr = args[0];
+    char *usr_jid = NULL;
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
@@ -2098,7 +2105,11 @@ _cmd_status(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CONSOLE:
             if (usr != NULL) {
-                cons_show_status(usr);
+                usr_jid = roster_jid_from_handle(usr);
+                if (usr_jid == NULL) {
+                    usr_jid = usr;
+                }
+                cons_show_status(usr_jid);
             } else {
                 cons_show("Usage: %s", help.usage);
             }

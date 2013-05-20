@@ -226,18 +226,18 @@ ui_duck_exists(void)
 }
 
 void
-ui_contact_typing(const char * const from)
+ui_contact_typing(const char * const barejid)
 {
-    int win_index = _find_prof_win_index(from);
+    int win_index = _find_prof_win_index(barejid);
 
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
         if (win_index == NUM_WINS) {
-            cons_show_typing(from);
+            cons_show_typing(barejid);
 
         // have chat window but not currently in it
         } else if (win_index != current_index) {
-            cons_show_typing(from);
+            cons_show_typing(barejid);
             current_win_dirty = TRUE;
 
         // in chat window with user
@@ -250,8 +250,16 @@ ui_contact_typing(const char * const from)
        }
     }
 
-    if (prefs_get_boolean(PREF_NOTIFY_TYPING))
-        notify_typing(from);
+    if (prefs_get_boolean(PREF_NOTIFY_TYPING)) {
+        PContact contact = roster_get_contact(barejid);
+        char const *display_usr = NULL;
+        if (p_contact_name(contact) != NULL) {
+            display_usr = p_contact_name(contact);
+        } else {
+            display_usr = barejid;
+        }
+        notify_typing(display_usr);
+    }
 }
 
 void
@@ -490,7 +498,8 @@ ui_contact_offline(const char * const from, const char * const show,
     _show_status_string(console, display_str->str, show, status, NULL, "--",
         "offline");
 
-    int win_index = _find_prof_win_index(from);
+    int win_index = _find_prof_win_index(jidp->barejid);
+    cons_debug("INDEX %d", win_index);
     if (win_index != NUM_WINS) {
         ProfWin *window = windows[win_index];
         _show_status_string(window, display_str->str, show, status, NULL, "--",
@@ -802,21 +811,29 @@ ui_print_system_msg_from_recipient(const char * const from, const char *message)
 }
 
 void
-ui_recipient_gone(const char * const from)
+ui_recipient_gone(const char * const barejid)
 {
     int win_index;
     ProfWin *window;
 
-    if (from == NULL)
+    if (barejid == NULL)
         return;
 
-    win_index = _find_prof_win_index(from);
+    PContact contact = roster_get_contact(barejid);
+    const char * display_usr = NULL;
+    if (p_contact_name(contact) != NULL) {
+        display_usr = p_contact_name(contact);
+    } else {
+        display_usr = barejid;
+    }
+
+    win_index = _find_prof_win_index(barejid);
     // chat window exists
     if (win_index < NUM_WINS) {
         window = windows[win_index];
-        win_print_time(window, '-');
+        win_print_time(window, '!');
         wattron(window->win, COLOUR_GONE);
-        wprintw(window->win, "*%s ", from);
+        wprintw(window->win, "<- %s ", display_usr);
         wprintw(window->win, "has left the conversation.");
         wprintw(window->win, "\n");
         wattroff(window->win, COLOUR_GONE);

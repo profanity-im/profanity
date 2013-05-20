@@ -58,10 +58,10 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const char * const from)
+notify_typing(const char * const handle)
 {
-    char message[strlen(from) + 1 + 11];
-    sprintf(message, "%s: typing...", from);
+    char message[strlen(handle) + 1 + 11];
+    sprintf(message, "%s: typing...", handle);
 
     _notify(message, 10000, "Incoming message");
 }
@@ -84,10 +84,10 @@ notify_invite(const char * const from, const char * const room,
 }
 
 void
-notify_message(const char * const short_from)
+notify_message(const char * const handle)
 {
-    char message[strlen(short_from) + 1 + 10];
-    sprintf(message, "%s: message.", short_from);
+    char message[strlen(handle) + 1 + 10];
+    sprintf(message, "%s: message.", handle);
 
     _notify(message, 10000, "Incoming message");
 }

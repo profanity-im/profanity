@@ -122,11 +122,19 @@ cons_show_error(const char * const msg, ...)
 }
 
 void
-cons_show_typing(const char * const short_from)
+cons_show_typing(const char * const barejid)
 {
+    PContact contact = roster_get_contact(barejid);
+    const char * display_usr = NULL;
+    if (p_contact_name(contact) != NULL) {
+        display_usr = p_contact_name(contact);
+    } else {
+        display_usr = barejid;
+    }
+
     win_print_time(console, '-');
     wattron(console->win, COLOUR_TYPING);
-    wprintw(console->win, "!! %s is typing a message...\n", short_from);
+    wprintw(console->win, "!! %s is typing a message...\n", display_usr);
     wattroff(console->win, COLOUR_TYPING);
 
     ui_console_dirty();
@@ -704,14 +712,14 @@ cons_show_disco_items(GSList *items, const char * const jid)
 }
 
 void
-cons_show_status(const char * const contact)
+cons_show_status(const char * const barejid)
 {
-    PContact pcontact = roster_get_contact(contact);
+    PContact pcontact = roster_get_contact(barejid);
 
     if (pcontact != NULL) {
         win_show_contact(console, pcontact);
     } else {
-        cons_show("No such contact \"%s\" in roster.", contact);
+        cons_show("No such contact \"%s\" in roster.", barejid);
     }
     ui_console_dirty();
     _cons_alert();

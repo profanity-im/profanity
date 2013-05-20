@@ -91,7 +91,7 @@ void ui_contact_online(const char * const barejid, const char * const resource,
 void ui_contact_offline(const char * const from, const char * const show,
     const char * const status);
 void ui_disconnected(void);
-void ui_recipient_gone(const char * const from);
+void ui_recipient_gone(const char * const barejid);
 void ui_outgoing_msg(const char * const from, const char * const to,
     const char * const message);
 void ui_room_join(Jid *jid);
@@ -166,7 +166,7 @@ void cons_show_error(const char * const cmd, ...);
 void cons_highlight_show(const char * const cmd);
 void cons_show_contacts(GSList * list);
 void cons_show_wins(void);
-void cons_show_status(const char * const contact);
+void cons_show_status(const char * const barejid);
 void cons_show_info(PContact pcontact);
 void cons_show_caps(const char * const contact, Resource *resource);
 void cons_show_themes(GSList *themes);
@@ -181,7 +181,7 @@ void cons_show_disco_info(const char *from, GSList *identities, GSList *features
 void cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason);
 void cons_check_version(gboolean not_available_msg);
-void cons_show_typing(const char * const short_from);
+void cons_show_typing(const char * const barejid);
 void cons_show_incoming_message(const char * const short_from, const int win_index);
 void cons_show_room_invites(GSList *invites);
 void cons_show_received_subs(void);
