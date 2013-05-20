@@ -499,7 +499,6 @@ ui_contact_offline(const char * const from, const char * const show,
         "offline");
 
     int win_index = _find_prof_win_index(jidp->barejid);
-    cons_debug("INDEX %d", win_index);
     if (win_index != NUM_WINS) {
         ProfWin *window = windows[win_index];
         _show_status_string(window, display_str->str, show, status, NULL, "--",
