@@ -82,6 +82,8 @@ p_contact_set_name(const PContact contact, const char * const name)
 
     if (name != NULL) {
         contact->name = strdup(name);
+    } else {
+        FREE_SET_NULL(contact->name);
     }
 }
 

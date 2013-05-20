@@ -259,35 +259,46 @@ roster_contact_offline(const char * const barejid,
 }
 
 void
-roster_change_handle(const char * const barejid, const char * const handle)
+roster_change_handle(const char * const barejid, const char * const new_handle)
 {
     PContact contact = g_hash_table_lookup(contacts, barejid);
-
+    const char * current_handle = NULL;
     if (p_contact_name(contact) != NULL) {
-        autocomplete_remove(handle_ac, p_contact_name(contact));
-        g_hash_table_remove(handle_to_jid, p_contact_name(contact));
-    } else {
-        autocomplete_remove(handle_ac, barejid);
-        g_hash_table_remove(handle_to_jid, barejid);
-    }
-
-    if (handle != NULL) {
-        autocomplete_add(handle_ac, strdup(handle));
-        g_hash_table_insert(handle_to_jid, strdup(handle), strdup(barejid));
-    } else {
-        autocomplete_add(handle_ac, strdup(barejid));
-        g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
+        current_handle = strdup(p_contact_name(contact));
     }
 
     if (contact != NULL) {
-        p_contact_set_name(contact, handle);
-    }
+        p_contact_set_name(contact, new_handle);
 
-    xmpp_conn_t * const conn = connection_get_conn();
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_roster_set(ctx, barejid, handle);
-    xmpp_send(conn, iq);
-    xmpp_stanza_release(iq);
+        // current handle exists already
+        if (current_handle != NULL) {
+            autocomplete_remove(handle_ac, current_handle);
+            g_hash_table_remove(handle_to_jid, current_handle);
+
+            if (new_handle != NULL) {
+                autocomplete_add(handle_ac, strdup(new_handle));
+                g_hash_table_insert(handle_to_jid, strdup(new_handle), strdup(barejid));
+            } else {
+                autocomplete_add(handle_ac, strdup(barejid));
+                g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
+            }
+        // no current handle
+        } else {
+            if (new_handle != NULL) {
+                autocomplete_remove(handle_ac, barejid);
+                g_hash_table_remove(handle_to_jid, barejid);
+
+                autocomplete_add(handle_ac, strdup(new_handle));
+                g_hash_table_insert(handle_to_jid, strdup(new_handle), strdup(barejid));
+            }
+        }
+
+        xmpp_conn_t * const conn = connection_get_conn();
+        xmpp_ctx_t * const ctx = connection_get_ctx();
+        xmpp_stanza_t *iq = stanza_create_roster_set(ctx, barejid, new_handle);
+        xmpp_send(conn, iq);
+        xmpp_stanza_release(iq);
+    }
 }
 
 void
@@ -298,32 +309,48 @@ roster_update(const char * const barejid, const char * const name,
 
     if (contact == NULL) {
         contact = p_contact_new(barejid, name, subscription, NULL, pending_out);
-        autocomplete_add(jid_ac, strdup(barejid));
-        autocomplete_add(handle_ac, strdup(name));
-        g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
         g_hash_table_insert(contacts, strdup(barejid), contact);
+        if (name != NULL) {
+            autocomplete_add(handle_ac, strdup(name));
+            g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
+        } else {
+            autocomplete_add(handle_ac, strdup(barejid));
+            g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
+        }
+        autocomplete_add(jid_ac, strdup(barejid));
     } else {
         p_contact_set_subscription(contact, subscription);
         p_contact_set_pending_out(contact, pending_out);
 
-        if (p_contact_name(contact) == NULL) {
-            if (name != NULL) {
-                autocomplete_add(handle_ac, strdup(name));
-                autocomplete_remove(handle_ac, barejid);
-                g_hash_table_remove(handle_to_jid, barejid);
-                g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
-            }
-        } else {
-            if (name != NULL) {
-                autocomplete_add(handle_ac, strdup(name));
-                autocomplete_remove(handle_ac, p_contact_name(contact));
-                g_hash_table_remove(handle_to_jid, p_contact_name(contact));
-                g_hash_table_insert(handle_to_jid, strdup(name), strdup(barejid));
-            }
+        const char * const new_handle = name;
+        const char * current_handle = NULL;
+        if (p_contact_name(contact) != NULL) {
+            current_handle = strdup(p_contact_name(contact));
         }
 
-        if (name != NULL) {
-            p_contact_set_name(contact, name);
+        p_contact_set_name(contact, new_handle);
+
+        // current handle exists already
+        if (current_handle != NULL) {
+            autocomplete_remove(handle_ac, current_handle);
+            g_hash_table_remove(handle_to_jid, current_handle);
+
+            if (new_handle != NULL) {
+                autocomplete_add(handle_ac, strdup(new_handle));
+                g_hash_table_insert(handle_to_jid, strdup(new_handle), strdup(barejid));
+            } else {
+                autocomplete_add(handle_ac, strdup(barejid));
+                g_hash_table_insert(handle_to_jid, strdup(barejid), strdup(barejid));
+            }
+        // no current handle
+        } else {
+            if (new_handle != NULL) {
+                autocomplete_remove(handle_ac, barejid);
+                g_hash_table_remove(handle_to_jid, barejid);
+
+                autocomplete_add(handle_ac, strdup(new_handle));
+                g_hash_table_insert(handle_to_jid, strdup(new_handle), strdup(barejid));
+            }
         }
     }
 }
