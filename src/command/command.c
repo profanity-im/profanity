@@ -2001,7 +2001,7 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else {
         char *jid = args[1];
-        char *handle = args[2];
+        char *name = args[2];
         jabber_conn_status_t conn_status = jabber_get_connection_status();
 
         if (conn_status != JABBER_CONNECTED) {
@@ -2016,12 +2016,12 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        roster_change_handle(jid, handle);
+        roster_change_name(jid, name);
 
-        if (handle == NULL) {
+        if (name == NULL) {
             cons_show("Nickname for %s removed.", jid);
         } else {
-            cons_show("Nickname for %s set to: %s.", jid, handle);
+            cons_show("Nickname for %s set to: %s.", jid, name);
         }
         return TRUE;
     }
