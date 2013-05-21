@@ -62,8 +62,8 @@ message_send(const char * const msg, const char * const recipient)
 {
     const char * jid = NULL;
 
-    if (roster_jid_from_handle(recipient) != NULL) {
-        jid = roster_jid_from_handle(recipient);
+    if (roster_barejid_from_handle(recipient) != NULL) {
+        jid = roster_barejid_from_handle(recipient);
     } else {
         jid = recipient;
     }

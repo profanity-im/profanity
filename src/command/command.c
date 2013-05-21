@@ -1973,7 +1973,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
         return TRUE;
 
     } else {
-        char *usr_jid = roster_jid_from_handle(usr);
+        char *usr_jid = roster_barejid_from_handle(usr);
         if (msg != NULL) {
             message_send(msg, usr_jid);
             ui_outgoing_msg("me", usr_jid, msg);
@@ -2105,7 +2105,7 @@ _cmd_status(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CONSOLE:
             if (usr != NULL) {
-                usr_jid = roster_jid_from_handle(usr);
+                usr_jid = roster_barejid_from_handle(usr);
                 if (usr_jid == NULL) {
                     usr_jid = usr;
                 }
@@ -2178,7 +2178,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CONSOLE:
             if (usr != NULL) {
-                usr_jid = roster_jid_from_handle(usr);
+                usr_jid = roster_barejid_from_handle(usr);
                 if (usr_jid == NULL) {
                     usr_jid = usr;
                 }

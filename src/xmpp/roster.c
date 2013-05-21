@@ -40,12 +40,22 @@ static int _roster_handle_set(xmpp_conn_t * const conn,
 static int _roster_handle_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 
+// nicknames
 static Autocomplete handle_ac;
+
+// barejids
 static Autocomplete jid_ac;
+
+// fulljids
 static Autocomplete resource_ac;
+
+// contacts, indexed on barejid
 static GHashTable *contacts;
+
+// nickname to jid map
 static GHashTable *handle_to_jid;
 
+// helper functions
 static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 
@@ -69,7 +79,7 @@ roster_request(void)
 }
 
 char *
-roster_jid_from_handle(const char * const handle)
+roster_barejid_from_handle(const char * const handle)
 {
     return g_hash_table_lookup(handle_to_jid, handle);
 }
