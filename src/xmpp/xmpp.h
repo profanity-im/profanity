@@ -142,6 +142,6 @@ gboolean roster_add(const char * const barejid, const char * const name,
     const char * const subscription, const char * const offline_message,
     gboolean pending_out);
 void roster_change_handle(const char * const barejid, const char * const handle);
-char * roster_barejid_from_handle(const char * const handle);
+char * roster_barejid_from_name(const char * const name);
 
 #endif

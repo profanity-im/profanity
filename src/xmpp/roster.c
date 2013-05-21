@@ -79,9 +79,9 @@ roster_request(void)
 }
 
 char *
-roster_barejid_from_handle(const char * const handle)
+roster_barejid_from_name(const char * const name)
 {
-    return g_hash_table_lookup(name_to_barejid, handle);
+    return g_hash_table_lookup(name_to_barejid, name);
 }
 
 static int
