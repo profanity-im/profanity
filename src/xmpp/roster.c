@@ -35,7 +35,7 @@
 
 #define HANDLE(type, func) xmpp_handler_add(conn, func, XMPP_NS_ROSTER, STANZA_NAME_IQ, type, ctx)
 
-static int _roster_handle_set(xmpp_conn_t * const conn,
+static int _roster_handle_push(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _roster_handle_result(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
@@ -64,7 +64,7 @@ roster_add_handlers(void)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    HANDLE(STANZA_TYPE_SET,    _roster_handle_set);
+    HANDLE(STANZA_TYPE_SET,    _roster_handle_push);
     HANDLE(STANZA_TYPE_RESULT, _roster_handle_result);
 }
 
@@ -85,7 +85,7 @@ roster_barejid_from_handle(const char * const handle)
 }
 
 static int
-_roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
@@ -99,6 +99,8 @@ _roster_handle_set(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
     const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+
+    // remove from roster
     if (g_strcmp0(sub, "remove") == 0) {
         autocomplete_remove(jid_ac, jid);
         autocomplete_remove(handle_ac, name);
