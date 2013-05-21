@@ -548,7 +548,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *nick = from_jid->resourcepart;
 
     // handle self presence
-    if (stanza_is_muc_self_presence(stanza, jabber_get_jid())) {
+    if (stanza_is_muc_self_presence(stanza, jabber_get_fulljid())) {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         gboolean nick_change = stanza_is_room_nick_change(stanza);
 

@@ -115,7 +115,7 @@ prof_handle_incoming_message(char *from, char *message, gboolean priv)
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
-        const char *jid = jabber_get_jid();
+        const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
         chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, NULL);
         jid_destroy(jidp);
@@ -132,7 +132,7 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
-        const char *jid = jabber_get_jid();
+        const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
         chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, &tv_stamp);
         jid_destroy(jidp);
@@ -268,7 +268,7 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
     ui_current_page_off();
 
     if (prefs_get_boolean(PREF_GRLOG)) {
-        Jid *jid = jid_create(jabber_get_jid());
+        Jid *jid = jid_create(jabber_get_fulljid());
         groupchat_log_chat(jid->barejid, room_jid, nick, message);
         jid_destroy(jid);
     }

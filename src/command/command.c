@@ -1122,7 +1122,7 @@ cmd_execute_default(const char * const inp)
                 message_send(inp, recipient);
 
                 if (prefs_get_boolean(PREF_CHLOG)) {
-                    const char *jid = jabber_get_jid();
+                    const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
                     chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
                     jid_destroy(jidp);
@@ -1553,7 +1553,7 @@ static gboolean
 _cmd_disconnect(gchar **args, struct cmd_help_t help)
 {
     if (jabber_get_connection_status() == JABBER_CONNECTED) {
-        char *jid = strdup(jabber_get_jid());
+        char *jid = strdup(jabber_get_fulljid());
         prof_handle_disconnect(jid);
         free(jid);
     } else {
@@ -1979,7 +1979,7 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             ui_outgoing_msg("me", usr_jid, msg);
 
             if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
-                const char *jid = jabber_get_jid();
+                const char *jid = jabber_get_fulljid();
                 Jid *jidp = jid_create(jid);
                 chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
                 jid_destroy(jidp);
@@ -2344,7 +2344,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     char *nick = NULL;
     Jid *room_arg = jid_create(args[0]);
     GString *room_str = g_string_new("");
-    Jid *my_jid = jid_create(jabber_get_jid());
+    Jid *my_jid = jid_create(jabber_get_fulljid());
 
     // full room jid supplied (room@server)
     if (room_arg->localpart != NULL) {
@@ -2446,7 +2446,7 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
     }
 
     if (args[0] == NULL) {
-        Jid *jid = jid_create(jabber_get_jid());
+        Jid *jid = jid_create(jabber_get_fulljid());
         GString *conference_node = g_string_new("conference.");
         g_string_append(conference_node, strdup(jid->domainpart));
         jid_destroy(jid);
@@ -2473,7 +2473,7 @@ _cmd_disco(gchar **args, struct cmd_help_t help)
     if (args[1] != NULL) {
         jid = g_string_append(jid, args[1]);
     } else {
-        Jid *jidp = jid_create(jabber_get_jid());
+        Jid *jidp = jid_create(jabber_get_fulljid());
         jid = g_string_append(jid, strdup(jidp->domainpart));
         jid_destroy(jidp);
     }
@@ -2533,7 +2533,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
                 message_send(tiny, recipient);
 
                 if (prefs_get_boolean(PREF_CHLOG)) {
-                    const char *jid = jabber_get_jid();
+                    const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
                     chat_log_chat(jidp->barejid, recipient, tiny, PROF_OUT_LOG, NULL);
                     jid_destroy(jidp);

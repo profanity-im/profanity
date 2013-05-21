@@ -88,7 +88,8 @@ static int
 _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    xmpp_stanza_t *query =
+        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     xmpp_stanza_t *item =
         xmpp_stanza_get_child_by_name(query, STANZA_NAME_ITEM);
 
@@ -96,26 +97,54 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         return 1;
     }
 
-    const char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+    // if from attribute exists and it is not current users barejid, ignore push
+    Jid *my_jid = jid_create(jabber_get_fulljid());
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if ((from != NULL) && (strcmp(from, my_jid->barejid) != 0)) {
+        jid_destroy(my_jid);
+        return 1;
+    }
+    jid_destroy(my_jid);
+
+    const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
     const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+    const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
 
     // remove from roster
     if (g_strcmp0(sub, "remove") == 0) {
-        autocomplete_remove(barejid_ac, jid);
+        // remove barejid and name
+        autocomplete_remove(barejid_ac, barejid);
         autocomplete_remove(name_ac, name);
         g_hash_table_remove(name_to_barejid, name);
-        g_hash_table_remove(contacts, jid);
-        return 1;
-    }
 
-    gboolean pending_out = FALSE;
-    const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
-    if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
-        pending_out = TRUE;
-    }
+        // remove each fulljid
+        PContact contact = roster_get_contact(barejid);
+        GList *resources = p_contact_get_available_resources(contact);
+        while (resources != NULL) {
+            GString *fulljid = g_string_new(strdup(barejid));
+            g_string_append(fulljid, "/");
+            g_string_append(fulljid, strdup(resources->data));
+            autocomplete_remove(fulljid_ac, fulljid->str);
+            g_string_free(fulljid, TRUE);
+            resources = g_list_next(resources);
+        }
 
-    roster_update(jid, name, sub, pending_out);
+        // remove the contact
+        g_hash_table_remove(contacts, barejid);
+
+    // otherwise update local roster
+    } else {
+
+        // check for pending out subscriptions
+        gboolean pending_out = FALSE;
+        if ((ask != NULL) && (strcmp(ask, "subscribe") == 0)) {
+            pending_out = TRUE;
+        }
+
+        // update the local roster
+        roster_update(barejid, name, sub, pending_out);
+    }
 
     return 1;
 }

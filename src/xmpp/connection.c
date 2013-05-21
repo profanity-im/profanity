@@ -256,7 +256,7 @@ connection_get_ctx(void)
 }
 
 const char *
-jabber_get_jid(void)
+jabber_get_fulljid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
@@ -473,7 +473,7 @@ _connection_handler(xmpp_conn_t * const conn,
             _connection_free_saved_details();
         }
 
-        Jid *myJid = jid_create(jabber_get_jid());
+        Jid *myJid = jid_create(jabber_get_fulljid());
         jabber_conn.domain = strdup(myJid->domainpart);
         jid_destroy(myJid);
 

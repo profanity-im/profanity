@@ -83,7 +83,7 @@ jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const accou
 void jabber_disconnect(void);
 void jabber_shutdown(void);
 void jabber_process_events(void);
-const char * jabber_get_jid(void);
+const char * jabber_get_fulljid(void);
 const char * jabber_get_domain(void);
 jabber_conn_status_t jabber_get_connection_status(void);
 char * jabber_get_presence_message(void);

@@ -1362,7 +1362,7 @@ _ui_draw_win_title(void)
     jabber_conn_status_t status = jabber_get_connection_status();
 
     if (status == JABBER_CONNECTED) {
-        const char * const jid = jabber_get_jid();
+        const char * const jid = jabber_get_fulljid();
         gint unread = ui_unread();
 
         if (unread != 0) {
@@ -1667,7 +1667,7 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
 {
     if (!windows[win_index]->history_shown) {
         GSList *history = NULL;
-        Jid *jid = jid_create(jabber_get_jid());
+        Jid *jid = jid_create(jabber_get_fulljid());
         history = chat_log_get_previous(jid->barejid, contact, history);
         jid_destroy(jid);
         while (history != NULL) {
