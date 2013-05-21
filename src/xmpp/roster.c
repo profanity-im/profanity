@@ -171,7 +171,7 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 pending_out = TRUE;
             }
 
-            gboolean added = roster_add(barejid, name, sub, NULL, pending_out);
+            gboolean added = roster_add(barejid, name, sub, pending_out);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", barejid);
@@ -229,15 +229,13 @@ roster_reset_search_attempts(void)
 
 gboolean
 roster_add(const char * const barejid, const char * const name,
-    const char * const subscription, const char * const offline_message,
-    gboolean pending_out)
+    const char * const subscription, gboolean pending_out)
 {
     gboolean added = FALSE;
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(barejid, name, subscription, offline_message,
-            pending_out);
+        contact = p_contact_new(barejid, name, subscription, NULL, pending_out);
         g_hash_table_insert(contacts, strdup(barejid), contact);
         if (name != NULL) {
             autocomplete_add(name_ac, strdup(name));
