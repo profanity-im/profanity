@@ -84,12 +84,25 @@ notify_invite(const char * const from, const char * const room,
 }
 
 void
-notify_message(const char * const handle)
+notify_message(const char * const handle, int win)
 {
-    char message[strlen(handle) + 1 + 10];
-    sprintf(message, "%s: message.", handle);
+    char message[strlen(handle) + 1 + 14];
+    sprintf(message, "%s: message (%d).", handle, win);
 
-    _notify(message, 10000, "Incoming message");
+    _notify(message, 10000, "incoming message");
+}
+
+void
+notify_room_message(const char * const handle, const char * const room, int win)
+{
+    GString *text = g_string_new("");
+
+    g_string_append_printf(text, "Room: %s\n", room);
+    g_string_append_printf(text, "%s: message (%d).", handle, win);
+
+    _notify(text->str, 10000, "incoming message");
+
+    g_string_free(text, FALSE);
 }
 
 void

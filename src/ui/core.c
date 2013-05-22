@@ -426,10 +426,15 @@ ui_incoming_msg(const char * const from, const char * const message,
         }
     }
 
+    int ui_index = win_index + 1;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
     if (prefs_get_boolean(PREF_BEEP))
         beep();
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
-        notify_message(display_from);
+        notify_message(display_from, ui_index);
 
     FREE_SET_NULL(display_from);
 }
@@ -1227,12 +1232,19 @@ ui_room_message(const char * const room_jid, const char * const nick,
         windows[win_index]->unread++;
     }
 
+    int ui_index = win_index + 1;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
     if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
         if (prefs_get_boolean(PREF_BEEP)) {
             beep();
         }
         if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-            notify_message(nick);
+            Jid *jidp = jid_create(room_jid);
+            notify_room_message(nick, jidp->localpart, ui_index);
+            jid_destroy(jidp);
         }
     }
 }
