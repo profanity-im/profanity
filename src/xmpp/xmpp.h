@@ -139,7 +139,7 @@ char * roster_find_contact(char *search_str);
 char * roster_find_jid(char *search_str);
 char * roster_find_resource(char *search_str);
 gboolean roster_add(const char * const barejid, const char * const name,
-    const char * const subscription, gboolean pending_out);
+    GSList *groups, const char * const subscription, gboolean pending_out);
 void roster_change_name(const char * const barejid, const char * const new_name);
 char * roster_barejid_from_name(const char * const name);
 

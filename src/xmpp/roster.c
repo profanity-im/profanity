@@ -45,6 +45,9 @@ static Autocomplete barejid_ac;
 // fulljids
 static Autocomplete fulljid_ac;
 
+// groups
+static Autocomplete groups_ac;
+
 // contacts, indexed on barejid
 static GHashTable *contacts;
 
@@ -62,6 +65,7 @@ static void _add_name_and_barejid(const char * const name,
     const char * const barejid);
 static void _replace_name(const char * const current_name,
     const char * const new_name, const char * const barejid);
+GSList * _get_groups_from_item(xmpp_stanza_t *item);
 static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
 
@@ -90,6 +94,7 @@ roster_init(void)
     name_ac = autocomplete_new();
     barejid_ac = autocomplete_new();
     fulljid_ac = autocomplete_new();
+    groups_ac = autocomplete_new();
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
     name_to_barejid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
@@ -102,6 +107,7 @@ roster_clear(void)
     autocomplete_clear(name_ac);
     autocomplete_clear(barejid_ac);
     autocomplete_clear(fulljid_ac);
+    autocomplete_clear(groups_ac);
     g_hash_table_destroy(contacts);
     contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
         (GDestroyNotify)p_contact_free);
@@ -116,6 +122,7 @@ roster_free()
     autocomplete_free(name_ac);
     autocomplete_free(barejid_ac);
     autocomplete_free(fulljid_ac);
+    autocomplete_free(groups_ac);
 }
 
 void
@@ -124,20 +131,30 @@ roster_reset_search_attempts(void)
     autocomplete_reset(name_ac);
     autocomplete_reset(barejid_ac);
     autocomplete_reset(fulljid_ac);
+    autocomplete_reset(groups_ac);
 }
 
 gboolean
-roster_add(const char * const barejid, const char * const name,
+roster_add(const char * const barejid, const char * const name, GSList *groups,
     const char * const subscription, gboolean pending_out)
 {
     gboolean added = FALSE;
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        contact = p_contact_new(barejid, name, subscription, NULL, pending_out);
+        contact = p_contact_new(barejid, name, groups, subscription, NULL,
+            pending_out);
+
+        // add groups
+        while (groups != NULL) {
+            autocomplete_add(groups_ac, strdup(groups->data));
+            groups = g_slist_next(groups);
+        }
+
         g_hash_table_insert(contacts, strdup(barejid), contact);
         autocomplete_add(barejid_ac, strdup(barejid));
         _add_name_and_barejid(name, barejid);
+
         added = TRUE;
     }
 
@@ -146,12 +163,12 @@ roster_add(const char * const barejid, const char * const name,
 
 void
 roster_update(const char * const barejid, const char * const name,
-    const char * const subscription, gboolean pending_out)
+    GSList *groups, const char * const subscription, gboolean pending_out)
 {
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        roster_add(barejid, name, subscription, pending_out);
+        roster_add(barejid, name, groups, subscription, pending_out);
     } else {
         p_contact_set_subscription(contact, subscription);
         p_contact_set_pending_out(contact, pending_out);
@@ -163,7 +180,14 @@ roster_update(const char * const barejid, const char * const name,
         }
 
         p_contact_set_name(contact, new_name);
+        p_contact_set_groups(contact, groups);
         _replace_name(current_name, new_name, barejid);
+
+        // add groups
+        while (groups != NULL) {
+            autocomplete_add(groups_ac, strdup(groups->data));
+            groups = g_slist_next(groups);
+        }
     }
 }
 
@@ -225,9 +249,12 @@ roster_change_name(const char * const barejid, const char * const new_name)
         p_contact_set_name(contact, new_name);
         _replace_name(current_name, new_name, barejid);
 
+        GSList *groups = p_contact_groups(contact);
+
         xmpp_conn_t * const conn = connection_get_conn();
         xmpp_ctx_t * const ctx = connection_get_ctx();
-        xmpp_stanza_t *iq = stanza_create_roster_set(ctx, barejid, new_name);
+        xmpp_stanza_t *iq = stanza_create_roster_set(ctx, barejid, new_name,
+            groups);
         xmpp_send(conn, iq);
         xmpp_stanza_release(iq);
     }
@@ -356,8 +383,10 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             pending_out = TRUE;
         }
 
+        GSList *groups = _get_groups_from_item(item);
+
         // update the local roster
-        roster_update(barejid, name, sub, pending_out);
+        roster_update(barejid, name, groups, sub, pending_out);
     }
 
     return 1;
@@ -389,7 +418,9 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 pending_out = TRUE;
             }
 
-            gboolean added = roster_add(barejid, name, sub, pending_out);
+            GSList *groups = _get_groups_from_item(item);
+
+            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", barejid);
@@ -433,6 +464,25 @@ _replace_name(const char * const current_name, const char * const new_name,
         g_hash_table_remove(name_to_barejid, barejid);
         _add_name_and_barejid(new_name, barejid);
     }
+}
+
+GSList *
+_get_groups_from_item(xmpp_stanza_t *item)
+{
+    GSList *groups = NULL;
+    xmpp_stanza_t *group_element = xmpp_stanza_get_children(item);
+
+    while (group_element != NULL) {
+        if (strcmp(xmpp_stanza_get_name(group_element), STANZA_NAME_GROUP) == 0) {
+            char *groupname = xmpp_stanza_get_text(group_element);
+            if (groupname != NULL) {
+                groups = g_slist_append(groups, groupname);
+            }
+        }
+        group_element = xmpp_stanza_get_next(group_element);
+    }
+
+    return groups;
 }
 
 static

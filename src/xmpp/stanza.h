@@ -51,6 +51,7 @@
 #define STANZA_NAME_FEATURE "feature"
 #define STANZA_NAME_INVITE "invite"
 #define STANZA_NAME_REASON "reason"
+#define STANZA_NAME_GROUP "group"
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
@@ -178,6 +179,6 @@ char * stanza_get_status(xmpp_stanza_t *stanza, char *def);
 char * stanza_get_show(xmpp_stanza_t *stanza, char *def);
 
 xmpp_stanza_t * stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const jid,
-    const char * const handle);
+    const char * const handle, GSList *groups);
 
 #endif

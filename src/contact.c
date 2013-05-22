@@ -33,6 +33,7 @@
 struct p_contact_t {
     char *barejid;
     char *name;
+    GSList *groups;
     char *subscription;
     char *offline_message;
     gboolean pending_out;
@@ -42,8 +43,8 @@ struct p_contact_t {
 
 PContact
 p_contact_new(const char * const barejid, const char * const name,
-    const char * const subscription, const char * const offline_message,
-    gboolean pending_out)
+    GSList *groups, const char * const subscription,
+    const char * const offline_message, gboolean pending_out)
 {
     PContact contact = malloc(sizeof(struct p_contact_t));
     contact->barejid = strdup(barejid);
@@ -53,6 +54,8 @@ p_contact_new(const char * const barejid, const char * const name,
     } else {
         contact->name = NULL;
     }
+
+    contact->groups = groups;
 
     if (subscription != NULL)
         contact->subscription = strdup(subscription);
@@ -87,6 +90,23 @@ p_contact_set_name(const PContact contact, const char * const name)
     }
 }
 
+void
+p_contact_set_groups(const PContact contact, GSList *groups)
+{
+    if (contact->groups != NULL) {
+        g_slist_free_full(contact->groups, g_free);
+        contact->groups = NULL;
+    }
+
+    contact->groups = groups;
+}
+
+GSList *
+p_contact_groups(const PContact contact)
+{
+    return contact->groups;
+}
+
 gboolean
 p_contact_remove_resource(PContact contact, const char * const resource)
 {
@@ -100,6 +120,10 @@ p_contact_free(PContact contact)
     FREE_SET_NULL(contact->name);
     FREE_SET_NULL(contact->subscription);
     FREE_SET_NULL(contact->offline_message);
+
+    if (contact->groups != NULL) {
+        g_slist_free_full(contact->groups, g_free);
+    }
 
     if (contact->last_activity != NULL) {
         g_date_time_unref(contact->last_activity);

@@ -91,7 +91,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
 
 xmpp_stanza_t *
 stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const jid,
-    const char * const handle)
+    const char * const handle, GSList *groups)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
@@ -104,10 +104,21 @@ stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const jid,
     xmpp_stanza_t *item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
     xmpp_stanza_set_attribute(item, STANZA_ATTR_JID, jid);
+
     if (handle != NULL) {
         xmpp_stanza_set_attribute(item, STANZA_ATTR_NAME, handle);
     } else {
         xmpp_stanza_set_attribute(item, STANZA_ATTR_NAME, "");
+    }
+
+    while (groups != NULL) {
+        xmpp_stanza_t *group = xmpp_stanza_new(ctx);
+        xmpp_stanza_t *groupname = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(group, STANZA_NAME_GROUP);
+        xmpp_stanza_set_text(groupname, groups->data);
+        xmpp_stanza_add_child(group, groupname);
+        xmpp_stanza_add_child(item, group);
+        groups = g_slist_next(groups);
     }
 
     xmpp_stanza_add_child(query, item);
