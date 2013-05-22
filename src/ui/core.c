@@ -665,12 +665,15 @@ ui_prune_wins(void)
     gboolean pruned = FALSE;
 
     for (curr = 1; curr <= 9; curr++) {
-        if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
-            if (conn_status == JABBER_CONNECTED) {
-                ui_close_connected_win(curr);
+        if (ui_win_exists(curr)) {
+            win_type_t win_type = windows[curr]->type;
+            if ((ui_win_unread(curr) == 0) && (win_type != WIN_MUC)) {
+                if (conn_status == JABBER_CONNECTED) {
+                    ui_close_connected_win(curr);
+                }
+                ui_close_win(curr);
+                pruned = TRUE;
             }
-            ui_close_win(curr);
-            pruned = TRUE;
         }
     }
 
