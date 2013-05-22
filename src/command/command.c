@@ -1974,6 +1974,9 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
     } else {
         char *usr_jid = roster_barejid_from_name(usr);
+        if (usr_jid == NULL) {
+            usr_jid = usr;
+        }
         if (msg != NULL) {
             message_send(msg, usr_jid);
             ui_outgoing_msg("me", usr_jid, msg);
