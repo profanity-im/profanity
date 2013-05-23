@@ -38,6 +38,7 @@ typedef struct prof_account_t {
     gint priority_xa;
     gint priority_dnd;
     gboolean enabled;
+    GSList *room_history;
 } ProfAccount;
 
 void accounts_load(void);

@@ -212,6 +212,22 @@ accounts_get_account(const char * const name)
         account->priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
         account->priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
 
+        // get room history
+        account->room_history = NULL;
+        gsize history_size = 0;
+        gchar **room_history_values = g_key_file_get_string_list(accounts, name,
+            "rooms.history", &history_size, NULL);
+
+        if (room_history_values != NULL) {
+            int i = 0;
+            for (i = 0; i < history_size; i++) {
+                account->room_history = g_slist_append(account->room_history,
+                    strdup(room_history_values[i]));
+            }
+
+            g_strfreev(room_history_values);
+        }
+
         return account;
     }
 }
