@@ -729,9 +729,21 @@ void
 cons_show_room_invite(const char * const invitor, const char * const room,
     const char * const reason)
 {
+    char *display_from = NULL;
+    PContact contact = roster_get_contact(invitor);
+    if (contact != NULL) {
+        if (p_contact_name(contact) != NULL) {
+            display_from = strdup(p_contact_name(contact));
+        } else {
+            display_from = strdup(invitor);
+        }
+    } else {
+        display_from = strdup(invitor);
+    }
+
     cons_show("");
     cons_show("Chat room invite received:");
-    cons_show("  From   : %s", invitor);
+    cons_show("  From   : %s", display_from);
     cons_show("  Room   : %s", room);
 
     if (reason != NULL) {
@@ -741,8 +753,10 @@ cons_show_room_invite(const char * const invitor, const char * const room,
     cons_show("Use /join or /decline");
 
     if (prefs_get_boolean(PREF_NOTIFY_INVITE)) {
-        notify_invite(invitor, room, reason);
+        notify_invite(display_from, room, reason);
     }
+
+    FREE_SET_NULL(display_from);
 
     ui_console_dirty();
     _cons_alert();
