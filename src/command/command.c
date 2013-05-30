@@ -2403,8 +2403,12 @@ _cmd_invite(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    char *usr_jid = roster_barejid_from_name(contact);
+    if (usr_jid == NULL) {
+        usr_jid = contact;
+    }
     room = ui_current_recipient();
-    message_send_invite(room, contact, reason);
+    message_send_invite(room, usr_jid, reason);
     if (reason != NULL) {
         cons_show("Room invite sent, contact: %s, room: %s, reason: \"%s\".",
             contact, room, reason);
