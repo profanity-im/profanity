@@ -1038,18 +1038,24 @@ ui_room_roster(const char * const room, GList *roster, const char * const presen
         if (presence == NULL) {
             wprintw(window->win, "Room is empty.\n");
         } else {
-            wprintw(window->win, "No participants are %s.\n", presence);
+            wprintw(window->win, "No participants %s.\n", presence);
         }
         wattroff(window->win, COLOUR_ROOMINFO);
     } else {
+        int length = g_list_length(roster);
         wattron(window->win, COLOUR_ROOMINFO);
         if (presence == NULL) {
-            wprintw(window->win, "Participants: ");
+            length++;
+            wprintw(window->win, "%d participants: ", length);
+            wattroff(window->win, COLOUR_ROOMINFO);
+            wattron(window->win, COLOUR_ONLINE);
+            wprintw(window->win, "%s", muc_get_room_nick(room));
+            wprintw(window->win, ", ");
         } else {
-            wprintw(window->win, "Participants (%s): ", presence);
+            wprintw(window->win, "%d %s: ", length, presence);
+            wattroff(window->win, COLOUR_ROOMINFO);
+            wattron(window->win, COLOUR_ONLINE);
         }
-        wattroff(window->win, COLOUR_ROOMINFO);
-        wattron(window->win, COLOUR_ONLINE);
 
         while (roster != NULL) {
             PContact member = roster->data;
