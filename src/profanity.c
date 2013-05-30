@@ -71,6 +71,7 @@ prof_run(const int disable_tls, char *log_level)
         size = 0;
 
         while(ch != '\n') {
+            conn_status = jabber_get_connection_status();
             if (conn_status == JABBER_CONNECTED) {
                 _handle_idle_time();
             }
