@@ -46,6 +46,7 @@ GHashTable *rooms = NULL;
 Autocomplete invite_ac;
 
 static void _free_room(ChatRoom *room);
+static gint _compare_participants(PContact a, PContact b);
 
 void
 muc_init(void)
@@ -335,7 +336,17 @@ muc_get_roster(const char * const room)
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
-        return g_hash_table_get_values(chat_room->roster);
+        GList *result = NULL;
+        GHashTableIter iter;
+        gpointer key;
+        gpointer value;
+
+        g_hash_table_iter_init(&iter, chat_room->roster);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            result = g_list_insert_sorted(result, value, (GCompareFunc)_compare_participants);
+        }
+
+        return result;
     } else {
         return NULL;
     }
@@ -457,4 +468,21 @@ _free_room(ChatRoom *room)
         g_free(room);
     }
     room = NULL;
+}
+
+static
+gint _compare_participants(PContact a, PContact b)
+{
+    const char * utf8_str_a = p_contact_barejid(a);
+    const char * utf8_str_b = p_contact_barejid(b);
+
+    gchar *key_a = g_utf8_collate_key(utf8_str_a, -1);
+    gchar *key_b = g_utf8_collate_key(utf8_str_b, -1);
+
+    gint result = g_strcmp0(key_a, key_b);
+
+    g_free(key_a);
+    g_free(key_b);
+
+    return result;
 }
