@@ -44,7 +44,6 @@ static ProfWin* console;
 
 static void _cons_splash_logo(void);
 static void _cons_show_basic_help(void);
-static void _cons_alert(void);
 
 ProfWin *
 cons_create(void)
@@ -82,7 +81,7 @@ cons_debug(const char * const msg, ...)
         va_end(arg);
 
         ui_console_dirty();
-        _cons_alert();
+        cons_alert();
 
         ui_current_page_off();
         ui_refresh();
@@ -118,7 +117,7 @@ cons_show_error(const char * const msg, ...)
     va_end(arg);
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -138,7 +137,7 @@ cons_show_typing(const char * const barejid)
     wattroff(console->win, COLOUR_TYPING);
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -154,7 +153,7 @@ cons_show_incoming_message(const char * const short_from, const int win_index)
     wattroff(console->win, COLOUR_INCOMING);
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -199,7 +198,7 @@ cons_about(void)
     prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -227,7 +226,7 @@ cons_check_version(gboolean not_available_msg)
             }
 
             ui_console_dirty();
-            _cons_alert();
+            cons_alert();
         }
     }
 }
@@ -248,7 +247,7 @@ cons_show_login_success(ProfAccount *account)
         accounts_get_priority_for_presence_type(account->name, presence));
     wprintw(console->win, ".\n");
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -332,7 +331,7 @@ cons_show_wins(void)
 
     cons_show("");
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -350,7 +349,7 @@ cons_show_room_invites(GSList *invites)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -482,7 +481,7 @@ cons_show_info(PContact pcontact)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -556,7 +555,7 @@ cons_show_caps(const char * const contact, Resource *resource)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -582,7 +581,7 @@ cons_show_software_version(const char * const jid, const char * const  presence,
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -641,7 +640,7 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -683,7 +682,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
         }
 
         ui_console_dirty();
-        _cons_alert();
+        cons_alert();
     }
 }
 
@@ -708,7 +707,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
         cons_show("No service discovery items for %s", jid);
     }
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -722,7 +721,7 @@ cons_show_status(const char * const barejid)
         cons_show("No such contact \"%s\" in roster.", barejid);
     }
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -759,7 +758,7 @@ cons_show_room_invite(const char * const invitor, const char * const room,
     FREE_SET_NULL(display_from);
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -788,7 +787,7 @@ cons_show_account_list(gchar **accounts)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -901,7 +900,7 @@ cons_show_account(ProfAccount *account)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -958,7 +957,7 @@ cons_show_ui_prefs(void)
         cons_show("Status (/statuses)           : OFF");
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -997,7 +996,7 @@ cons_show_desktop_prefs(void)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1026,7 +1025,7 @@ cons_show_chat_prefs(void)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1048,7 +1047,7 @@ cons_show_log_prefs(void)
         cons_show("Groupchat logging (/grlog)  : OFF");
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1079,7 +1078,7 @@ cons_show_presence_prefs(void)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1107,7 +1106,7 @@ cons_show_connection_prefs(void)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1126,7 +1125,7 @@ cons_show_themes(GSList *themes)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1147,7 +1146,7 @@ cons_prefs(void)
     cons_show("");
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1165,7 +1164,7 @@ cons_help(void)
     cons_show("");
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1176,7 +1175,7 @@ cons_basic_help(void)
     _cons_show_basic_help();
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1196,7 +1195,7 @@ cons_settings_help(void)
     cons_show("");
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1216,7 +1215,7 @@ cons_presence_help(void)
     cons_show("");
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1237,7 +1236,7 @@ cons_navigation_help(void)
     cons_show("");
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
 void
@@ -1254,7 +1253,15 @@ cons_show_contacts(GSList *list)
     }
 
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
+}
+
+void
+cons_alert(void)
+{
+    if (ui_current_win_type() != WIN_CONSOLE) {
+        status_bar_new(0);
+    }
 }
 
 static void
@@ -1322,14 +1329,7 @@ _cons_show_basic_help(void)
 
     cons_show("");
     ui_console_dirty();
-    _cons_alert();
+    cons_alert();
 }
 
-static void
-_cons_alert(void)
-{
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
-}
 

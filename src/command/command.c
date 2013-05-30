@@ -102,6 +102,7 @@ static gboolean _cmd_tiny(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_close(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_clear(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_join(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_leave(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_invite(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_invites(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_decline(gchar **args, struct cmd_help_t help);
@@ -356,6 +357,14 @@ static struct cmd_t main_commands[] =
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
           "Example : /join jdev (as user@jabber.org will join jdev@conference.jabber.org)",
+          NULL } } },
+
+    { "/leave",
+        _cmd_leave, parse_args, 0, 0,
+        { "/leave", "Leave a chat room.",
+        { "/leave",
+          "------",
+          "Leave the current chat room.",
           NULL } } },
 
     { "/invite",
@@ -2659,6 +2668,30 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         ui_index = 0;
     }
     cons_show("Closed window %d", ui_index);
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_leave(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    win_type_t win_type = ui_current_win_type();
+    int index = ui_current_win_index();
+
+    if (win_type != WIN_MUC) {
+        cons_show("You can only use the /leave command in a chat room.");
+        cons_alert();
+        return TRUE;
+    }
+
+    // handle leaving rooms, or chat
+    if (conn_status == JABBER_CONNECTED) {
+        ui_close_connected_win(index);
+    }
+
+    // close the window
+    ui_close_win(index);
 
     return TRUE;
 }
