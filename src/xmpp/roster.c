@@ -68,6 +68,7 @@ static void _replace_name(const char * const current_name,
 GSList * _get_groups_from_item(xmpp_stanza_t *item);
 static gboolean _key_equals(void *key1, void *key2);
 static gboolean _datetimes_equal(GDateTime *dt1, GDateTime *dt2);
+static gint _compare_contacts(PContact a, PContact b);
 
 void
 roster_add_handlers(void)
@@ -288,7 +289,7 @@ roster_get_contacts(void)
 
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        result = g_slist_append(result, value);
+        result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
     }
 
     // resturn all contact structs
@@ -492,6 +493,34 @@ gboolean _key_equals(void *key1, void *key2)
     gchar *str2 = (gchar *) key2;
 
     return (g_strcmp0(str1, str2) == 0);
+}
+
+static
+gint _compare_contacts(PContact a, PContact b)
+{
+    const char * utf8_str_a = NULL;
+    const char * utf8_str_b = NULL;
+
+    if (p_contact_name(a) != NULL) {
+        utf8_str_a = p_contact_name(a);
+    } else {
+        utf8_str_a = p_contact_barejid(a);
+    }
+    if (p_contact_name(b) != NULL) {
+        utf8_str_b = p_contact_name(b);
+    } else {
+        utf8_str_b = p_contact_barejid(b);
+    }
+
+    gchar *key_a = g_utf8_collate_key(utf8_str_a, -1);
+    gchar *key_b = g_utf8_collate_key(utf8_str_b, -1);
+
+    gint result = g_strcmp0(key_a, key_b);
+
+    g_free(key_a);
+    g_free(key_b);
+
+    return result;
 }
 
 static gboolean
