@@ -3351,6 +3351,8 @@ _roster_autocomplete(char *input, int *size)
 {
     if ((strncmp(input, "/roster nick ", 13) == 0) && (*size > 13)) {
         _parameter_autocomplete(input, size, "/roster nick", roster_find_jid);
+    } else if ((strncmp(input, "/roster remove ", 15) == 0) && (*size > 15)) {
+        _parameter_autocomplete(input, size, "/roster remove", roster_find_jid);
     } else if ((strncmp(input, "/roster ", 8) == 0) && (*size > 8)) {
         _parameter_autocomplete_with_ac(input, size, "/roster", roster_ac);
     }
