@@ -3278,6 +3278,20 @@ _sub_autocomplete(char *input, int *size)
             free(auto_msg);
             free(found);
         }
+    } else if ((strncmp(input, "/sub deny ", 10) == 0) && (*size > 10)) {
+        for (i = 10; i < *size; i++) {
+            inp_cpy[i-10] = input[i];
+        }
+        inp_cpy[(*size) - 10] = '\0';
+        found = presence_sub_request_find(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((10 + (strlen(found) + 0)) * sizeof(char));
+            strcpy(auto_msg, "/sub deny ");
+            strcat(auto_msg, found);
+            inp_replace_input(input, auto_msg, size);
+            free(auto_msg);
+            free(found);
+        }
     } else if ((strncmp(input, "/sub ", 5) == 0) && (*size > 5)) {
         _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
     }
