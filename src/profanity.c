@@ -207,6 +207,13 @@ prof_handle_roster_add(const char * const barejid, const char * const name)
 }
 
 void
+prof_handle_roster_remove(const char * const barejid)
+{
+    ui_roster_remove(barejid);
+    ui_current_page_off();
+}
+
+void
 prof_handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);

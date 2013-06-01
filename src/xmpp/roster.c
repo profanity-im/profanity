@@ -403,6 +403,8 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         // remove the contact
         g_hash_table_remove(contacts, barejid);
 
+        prof_handle_roster_remove(barejid);
+
     // otherwise update local roster
     } else {
 

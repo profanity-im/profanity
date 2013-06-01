@@ -450,6 +450,12 @@ ui_roster_add(const char * const barejid, const char * const name)
 }
 
 void
+ui_roster_remove(const char * const barejid)
+{
+    cons_show("Roster item removed: %s", barejid);
+}
+
+void
 ui_contact_online(const char * const barejid, const char * const resource,
     const char * const show, const char * const status, GDateTime *last_activity)
 {
