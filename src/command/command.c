@@ -2008,26 +2008,6 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_roster(gchar **args, struct cmd_help_t help)
 {
-    // show roster
-    if (args[0] == NULL) {
-        GSList *list = roster_get_contacts();
-        cons_show_roster(list);
-        return TRUE;
-    }
-
-    // first arg invalid
-    if (strcmp(args[0], "nick") != 0) {
-        cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
-
-    if (args[1] == NULL) {
-        cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
-
-    char *jid = args[1];
-    char *name = args[2];
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
@@ -2035,21 +2015,59 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    // contact does not exist
-    PContact contact = roster_get_contact(jid);
-    if (contact == NULL) {
-        cons_show("Contact not found in roster: %s", jid);
+    // show roster
+    if (args[0] == NULL) {
+        GSList *list = roster_get_contacts();
+        cons_show_roster(list);
         return TRUE;
     }
 
-    roster_change_name(jid, name);
+    // add contact
+    if (strcmp(args[0], "add") == 0) {
 
-    if (name == NULL) {
-        cons_show("Nickname for %s removed.", jid);
-    } else {
-        cons_show("Nickname for %s set to: %s.", jid, name);
+        if (args[1] == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *jid = args[1];
+        char *name = args[2];
+
+        roster_add_new(jid, name);
+
+        return TRUE;
     }
 
+    // change nickname
+    if (strcmp(args[0], "nick") == 0) {
+
+        if (args[1] == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *jid = args[1];
+        char *name = args[2];
+
+        // contact does not exist
+        PContact contact = roster_get_contact(jid);
+        if (contact == NULL) {
+            cons_show("Contact not found in roster: %s", jid);
+            return TRUE;
+        }
+
+        roster_change_name(jid, name);
+
+        if (name == NULL) {
+            cons_show("Nickname for %s removed.", jid);
+        } else {
+            cons_show("Nickname for %s set to: %s.", jid, name);
+        }
+
+        return TRUE;
+    }
+
+    cons_show("Usage: %s", help.usage);
     return TRUE;
 }
 
