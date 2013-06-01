@@ -1246,7 +1246,8 @@ cons_show_contacts(GSList *list)
 
     while(curr) {
         PContact contact = curr->data;
-        if (strcmp(p_contact_subscription(contact), "none") != 0) {
+        if ((strcmp(p_contact_subscription(contact), "to") == 0) ||
+            (strcmp(p_contact_subscription(contact), "both") == 0)) {
             win_show_contact(console, contact);
         }
         curr = g_slist_next(curr);
