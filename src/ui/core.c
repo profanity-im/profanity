@@ -335,7 +335,7 @@ ui_incoming_msg(const char * const from, const char * const message,
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(console->win, COLOUR_THEM);
             wprintw(console->win, "*%s ", display_from);
-            wprintw(console->win, "%s", message + 4);
+            waddstr(console->win, message + 4);
             wprintw(console->win, "\n");
             wattroff(console->win, COLOUR_THEM);
         } else {
@@ -372,7 +372,7 @@ ui_incoming_msg(const char * const from, const char * const message,
             if (strncmp(message, "/me ", 4) == 0) {
                 wattron(window->win, COLOUR_THEM);
                 wprintw(window->win, "*%s ", display_from);
-                wprintw(window->win, "%s", message + 4);
+                waddstr(window->win, message + 4);
                 wprintw(window->win, "\n");
                 wattroff(window->win, COLOUR_THEM);
             } else {
@@ -416,7 +416,7 @@ ui_incoming_msg(const char * const from, const char * const message,
             if (strncmp(message, "/me ", 4) == 0) {
                 wattron(window->win, COLOUR_THEM);
                 wprintw(window->win, "*%s ", display_from);
-                wprintw(window->win, "%s", message + 4);
+                waddstr(window->win, message + 4);
                 wprintw(window->win, "\n");
                 wattroff(window->win, COLOUR_THEM);
             } else {
@@ -1172,7 +1172,7 @@ ui_room_history(const char * const room_jid, const char * const nick,
 
     if (strncmp(message, "/me ", 4) == 0) {
         wprintw(win, "*%s ", nick);
-        wprintw(win, "%s", message + 4);
+        waddstr(win, message + 4);
         wprintw(win, "\n");
     } else {
         wprintw(win, "%s: ", nick);
@@ -1195,7 +1195,7 @@ ui_room_message(const char * const room_jid, const char * const nick,
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(window->win, COLOUR_THEM);
             wprintw(window->win, "*%s ", nick);
-            wprintw(window->win, "%s", message + 4);
+            waddstr(window->win, message + 4);
             wprintw(window->win, "\n");
             wattroff(window->win, COLOUR_THEM);
         } else {
@@ -1207,7 +1207,7 @@ ui_room_message(const char * const room_jid, const char * const nick,
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(window->win, COLOUR_ME);
             wprintw(window->win, "*%s ", nick);
-            wprintw(window->win, "%s", message + 4);
+            waddstr(window->win, message + 4);
             wprintw(window->win, "\n");
             wattroff(window->win, COLOUR_ME);
         } else {
@@ -1456,7 +1456,8 @@ _win_show_user(WINDOW *win, const char * const user, const int colour)
 static void
 _win_show_message(WINDOW *win, const char * const message)
 {
-    wprintw(win, "%s\n", message);
+    waddstr(win, message);
+    wprintw(win, "\n");
 }
 
 static void
