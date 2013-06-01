@@ -918,7 +918,9 @@ cmd_init(void)
     autocomplete_add(wins_ac, strdup("tidy"));
 
     roster_ac = autocomplete_new();
+    autocomplete_add(roster_ac, strdup("add"));
     autocomplete_add(roster_ac, strdup("nick"));
+    autocomplete_add(roster_ac, strdup("remove"));
 
     theme_load_ac = NULL;
 
@@ -2034,6 +2036,21 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
         char *name = args[2];
 
         roster_add_new(jid, name);
+
+        return TRUE;
+    }
+
+    // remove contact
+    if (strcmp(args[0], "remove") == 0) {
+
+        if (args[1] == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *jid = args[1];
+
+        roster_remove(jid);
 
         return TRUE;
     }

@@ -180,5 +180,7 @@ char * stanza_get_show(xmpp_stanza_t *stanza, char *def);
 
 xmpp_stanza_t * stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const jid,
     const char * const handle, GSList *groups);
+xmpp_stanza_t * stanza_create_roster_remove_set(xmpp_ctx_t *ctx,
+    const char * const barejid);
 
 #endif

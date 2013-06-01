@@ -144,5 +144,6 @@ gboolean roster_add(const char * const barejid, const char * const name,
 void roster_change_name(const char * const barejid, const char * const new_name);
 char * roster_barejid_from_name(const char * const name);
 void roster_add_new(const char * const barejid, const char * const name);
+void roster_remove(const char * const barejid);
 
 #endif

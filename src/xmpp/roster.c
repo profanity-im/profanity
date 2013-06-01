@@ -145,6 +145,16 @@ roster_add_new(const char * const barejid, const char * const name)
     xmpp_stanza_release(iq);
 }
 
+void
+roster_remove(const char * const barejid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_roster_remove_set(ctx, barejid);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
 gboolean
 roster_add(const char * const barejid, const char * const name, GSList *groups,
     const char * const subscription, gboolean pending_out)
@@ -366,6 +376,9 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // remove from roster
     if (g_strcmp0(sub, "remove") == 0) {
         // remove barejid and name
+        if (name == NULL) {
+            name = barejid;
+        }
         autocomplete_remove(barejid_ac, barejid);
         autocomplete_remove(name_ac, name);
         g_hash_table_remove(name_to_barejid, name);
