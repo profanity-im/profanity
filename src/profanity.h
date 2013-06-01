@@ -80,5 +80,6 @@ void prof_handle_disco_info(const char *from, GSList *identities,
     GSList *features);
 void prof_handle_duck_help(const char * const result);
 void prof_handle_duck_result(const char * const result);
+void prof_handle_roster_add(const char * const barejid, const char * const name);
 
 #endif

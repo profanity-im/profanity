@@ -27,6 +27,7 @@
 #include <strophe.h>
 
 #include "log.h"
+#include "profanity.h"
 #include "tools/autocomplete.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
@@ -157,7 +158,7 @@ roster_remove(const char * const barejid)
 
 gboolean
 roster_add(const char * const barejid, const char * const name, GSList *groups,
-    const char * const subscription, gboolean pending_out)
+    const char * const subscription, gboolean pending_out, gboolean from_initial)
 {
     gboolean added = FALSE;
     PContact contact = g_hash_table_lookup(contacts, barejid);
@@ -176,6 +177,10 @@ roster_add(const char * const barejid, const char * const name, GSList *groups,
         autocomplete_add(barejid_ac, strdup(barejid));
         _add_name_and_barejid(name, barejid);
 
+        if (!from_initial) {
+            prof_handle_roster_add(barejid, name);
+        }
+
         added = TRUE;
     }
 
@@ -189,7 +194,7 @@ roster_update(const char * const barejid, const char * const name,
     PContact contact = g_hash_table_lookup(contacts, barejid);
 
     if (contact == NULL) {
-        roster_add(barejid, name, groups, subscription, pending_out);
+        roster_add(barejid, name, groups, subscription, pending_out, FALSE);
     } else {
         p_contact_set_subscription(contact, subscription);
         p_contact_set_pending_out(contact, pending_out);
@@ -444,7 +449,7 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             GSList *groups = _get_groups_from_item(item);
 
-            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
+            gboolean added = roster_add(barejid, name, groups, sub, pending_out, TRUE);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", barejid);

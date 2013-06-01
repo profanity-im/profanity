@@ -200,6 +200,13 @@ prof_handle_subscription(const char *from, jabber_subscr_t type)
 }
 
 void
+prof_handle_roster_add(const char * const barejid, const char * const name)
+{
+    ui_roster_add(barejid, name);
+    ui_current_page_off();
+}
+
+void
 prof_handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);

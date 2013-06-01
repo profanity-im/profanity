@@ -440,6 +440,16 @@ ui_incoming_msg(const char * const from, const char * const message,
 }
 
 void
+ui_roster_add(const char * const barejid, const char * const name)
+{
+    if (name != NULL) {
+        cons_show("Roster item added: %s (%s)", barejid, name);
+    } else {
+        cons_show("Roster item added: %s", barejid);
+    }
+}
+
+void
 ui_contact_online(const char * const barejid, const char * const resource,
     const char * const show, const char * const status, GDateTime *last_activity)
 {
