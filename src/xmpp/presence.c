@@ -153,6 +153,19 @@ presence_sub_request_find(char * search_str)
     return autocomplete_complete(sub_requests_ac, search_str);
 }
 
+gboolean
+presence_sub_request_exists(const char * const bare_jid)
+{
+    GSList *requests = autocomplete_get_list(sub_requests_ac);
+    while (requests != NULL) {
+        if (strcmp(requests->data, bare_jid) == 0) {
+            return TRUE;
+        }
+        requests = g_slist_next(requests);
+    }
+    return FALSE;
+}
+
 void
 presence_reset_sub_request_search(void)
 {

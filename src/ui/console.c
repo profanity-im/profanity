@@ -1240,6 +1240,42 @@ cons_navigation_help(void)
 }
 
 void
+cons_show_roster(GSList *list)
+{
+    GSList *curr = list;
+    cons_show("");
+    cons_show("Roster:");
+
+    while(curr) {
+        PContact contact = curr->data;
+        GString *title = g_string_new("  ");
+        title = g_string_append(title, p_contact_barejid(contact));
+        if (p_contact_name(contact) != NULL) {
+            title = g_string_append(title, " (");
+            title = g_string_append(title, strdup(p_contact_name(contact)));
+            title = g_string_append(title, ")");
+        }
+        cons_show(title->str);
+        g_string_free(title, TRUE);
+
+        GString *sub = g_string_new("    Subscription : ");
+        sub = g_string_append(sub, p_contact_subscription(contact));
+        if (p_contact_pending_out(contact)) {
+            sub = g_string_append(sub, ", request sent");
+        }
+        if (presence_sub_request_exists(p_contact_barejid(contact))) {
+            sub = g_string_append(sub, ", request received");
+        }
+        cons_show(sub->str);
+        g_string_free(sub, TRUE);
+        curr = g_slist_next(curr);
+    }
+
+    ui_console_dirty();
+    cons_alert();
+}
+
+void
 cons_show_contacts(GSList *list)
 {
     GSList *curr = list;

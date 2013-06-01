@@ -165,6 +165,7 @@ void cons_show_word(const char * const word);
 void cons_show_error(const char * const cmd, ...);
 void cons_highlight_show(const char * const cmd);
 void cons_show_contacts(GSList * list);
+void cons_show_roster(GSList * list);
 void cons_show_wins(void);
 void cons_show_status(const char * const barejid);
 void cons_show_info(PContact pcontact);

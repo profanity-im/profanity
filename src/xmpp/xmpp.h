@@ -113,6 +113,7 @@ void presence_change_room_nick(const char * const room, const char * const nick)
 void presence_leave_chat_room(const char * const room_jid);
 void presence_update(resource_presence_t status, const char * const msg,
     int idle);
+gboolean presence_sub_request_exists(const char * const bare_jid);
 
 // iq functions
 void iq_send_software_version(const char * const fulljid);
