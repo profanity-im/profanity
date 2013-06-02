@@ -139,6 +139,7 @@ GSList * roster_get_contacts(void);
 char * roster_find_contact(char *search_str);
 char * roster_find_jid(char *search_str);
 char * roster_find_resource(char *search_str);
+char * roster_find_group(char *search_str);
 gboolean roster_add(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out,
     gboolean from_initial);

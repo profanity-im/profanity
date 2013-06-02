@@ -421,6 +421,12 @@ roster_find_resource(char *search_str)
 }
 
 char *
+roster_find_group(char *search_str)
+{
+    return autocomplete_complete(groups_ac, search_str);
+}
+
+char *
 roster_barejid_from_name(const char * const name)
 {
     return g_hash_table_lookup(name_to_barejid, name);

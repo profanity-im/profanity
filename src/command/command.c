@@ -79,7 +79,9 @@ static void _titlebar_autocomplete(char *input, int *size);
 static void _theme_autocomplete(char *input, int *size);
 static void _autoaway_autocomplete(char *input, int *size);
 static void _account_autocomplete(char *input, int *size);
+static void _who_autocomplete(char *input, int *size);
 static void _roster_autocomplete(char *input, int *size);
+static void _group_autocomplete(char *input, int *size);
 static void _parameter_autocomplete(char *input, int *size, char *command,
     autocomplete_func func);
 static void _parameter_autocomplete_with_ac(char *input, int *size, char *command,
@@ -277,7 +279,7 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/roster",
-        _cmd_roster, parse_args_with_freetext, 0, 4,
+        _cmd_roster, parse_args_with_freetext, 0, 3,
         { "/roster [add|remove|nick] [jid] [handle]", "Manage your roster.",
         { "/roster [add|remove|nick] [jid] [handle]",
           "----------------------------------------",
@@ -519,7 +521,7 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/who",
-        _cmd_who, parse_args_with_freetext, 0, 2,
+        _cmd_who, parse_args, 0, 2,
         { "/who [status] [group]", "Show contacts/room participants with chosen status.",
         { "/who [status] [group]",
           "---------------------",
@@ -861,6 +863,7 @@ static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
+static Autocomplete group_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -950,6 +953,11 @@ cmd_init(void)
     autocomplete_add(roster_ac, strdup("nick"));
     autocomplete_add(roster_ac, strdup("remove"));
 
+    group_ac = autocomplete_new();
+    autocomplete_add(group_ac, strdup("show"));
+    autocomplete_add(group_ac, strdup("add"));
+    autocomplete_add(group_ac, strdup("remove"));
+
     theme_load_ac = NULL;
 
     unsigned int i;
@@ -1001,6 +1009,7 @@ cmd_close(void)
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
+    autocomplete_free(group_ac);
 }
 
 // Command autocompletion functions
@@ -1069,6 +1078,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
+    autocomplete_reset(group_ac);
 }
 
 GSList *
@@ -1262,13 +1272,13 @@ _cmd_complete_parameters(char *input, int *size)
     _parameter_autocomplete(input, size, "/connect",
         accounts_find_enabled);
     _parameter_autocomplete_with_ac(input, size, "/help", help_ac);
-    _parameter_autocomplete_with_ac(input, size, "/who", who_ac);
     _parameter_autocomplete_with_ac(input, size, "/prefs", prefs_ac);
     _parameter_autocomplete_with_ac(input, size, "/log", log_ac);
     _parameter_autocomplete_with_ac(input, size, "/disco", disco_ac);
     _parameter_autocomplete_with_ac(input, size, "/close", close_ac);
     _parameter_autocomplete_with_ac(input, size, "/wins", wins_ac);
 
+    _who_autocomplete(input, size);
     _sub_autocomplete(input, size);
     _notify_autocomplete(input, size);
     _autoaway_autocomplete(input, size);
@@ -1276,6 +1286,7 @@ _cmd_complete_parameters(char *input, int *size)
     _theme_autocomplete(input, size);
     _account_autocomplete(input, size);
     _roster_autocomplete(input, size);
+    _group_autocomplete(input, size);
 }
 
 // The command functions
@@ -3500,6 +3511,32 @@ _sub_autocomplete(char *input, int *size)
 }
 
 static void
+_who_autocomplete(char *input, int *size)
+{
+    if ((strncmp(input, "/who any ", 9) == 0) && (*size > 9)) {
+        _parameter_autocomplete(input, size, "/who any", roster_find_group);
+    } else if ((strncmp(input, "/who online ", 12) == 0) && (*size > 12)) {
+        _parameter_autocomplete(input, size, "/who online", roster_find_group);
+    } else if ((strncmp(input, "/who offline ", 13) == 0) && (*size > 13)) {
+        _parameter_autocomplete(input, size, "/who offline", roster_find_group);
+    } else if ((strncmp(input, "/who chat ", 10) == 0) && (*size > 10)) {
+        _parameter_autocomplete(input, size, "/who chat", roster_find_group);
+    } else if ((strncmp(input, "/who away ", 10) == 0) && (*size > 10)) {
+        _parameter_autocomplete(input, size, "/who away", roster_find_group);
+    } else if ((strncmp(input, "/who xa ", 8) == 0) && (*size > 8)) {
+        _parameter_autocomplete(input, size, "/who xa", roster_find_group);
+    } else if ((strncmp(input, "/who dnd ", 9) == 0) && (*size > 9)) {
+        _parameter_autocomplete(input, size, "/who dnd", roster_find_group);
+    } else if ((strncmp(input, "/who available ", 15) == 0) && (*size > 15)) {
+        _parameter_autocomplete(input, size, "/who available", roster_find_group);
+    } else if ((strncmp(input, "/who unavailable ", 14) == 0) && (*size > 14)) {
+        _parameter_autocomplete(input, size, "/who unavailable", roster_find_group);
+    } else if ((strncmp(input, "/who ", 5) == 0) && (*size > 5)) {
+        _parameter_autocomplete_with_ac(input, size, "/who", who_ac);
+    }
+}
+
+static void
 _roster_autocomplete(char *input, int *size)
 {
     if ((strncmp(input, "/roster nick ", 13) == 0) && (*size > 13)) {
@@ -3508,6 +3545,20 @@ _roster_autocomplete(char *input, int *size)
         _parameter_autocomplete(input, size, "/roster remove", roster_find_jid);
     } else if ((strncmp(input, "/roster ", 8) == 0) && (*size > 8)) {
         _parameter_autocomplete_with_ac(input, size, "/roster", roster_ac);
+    }
+}
+
+static void
+_group_autocomplete(char *input, int *size)
+{
+    if ((strncmp(input, "/group show ", 12) == 0) && (*size > 12)) {
+        _parameter_autocomplete(input, size, "/group show", roster_find_group);
+    } else if ((strncmp(input, "/group add ", 11) == 0) && (*size > 11)) {
+        _parameter_autocomplete(input, size, "/group add", roster_find_group);
+    } else if ((strncmp(input, "/group remove ", 14) == 0) && (*size > 14)) {
+        _parameter_autocomplete(input, size, "/group remove", roster_find_group);
+    } else if ((strncmp(input, "/group ", 7) == 0) && (*size > 7)) {
+        _parameter_autocomplete_with_ac(input, size, "/group", group_ac);
     }
 }
 
