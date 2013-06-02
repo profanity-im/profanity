@@ -20,6 +20,7 @@
  *
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -200,6 +201,65 @@ autocomplete_complete(Autocomplete ac, gchar *search_str)
         return NULL;
     }
 }
+
+char *
+autocomplete_param_with_func(char *input, int *size, char *command,
+    autocomplete_func func)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+    char *command_cpy = malloc(strlen(command) + 2);
+    sprintf(command_cpy, "%s ", command);
+    int len = strlen(command_cpy);
+    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        for(i = len; i < *size; i++) {
+            inp_cpy[i-len] = input[i];
+        }
+        inp_cpy[(*size) - len] = '\0';
+        found = func(inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, command_cpy);
+            strcat(auto_msg, found);
+            free(found);
+        }
+    }
+    free(command_cpy);
+
+    return auto_msg;
+}
+
+char *
+autocomplete_param_with_ac(char *input, int *size, char *command,
+    Autocomplete ac)
+{
+    char *found = NULL;
+    char *auto_msg = NULL;
+    char inp_cpy[*size];
+    int i;
+    char *command_cpy = malloc(strlen(command) + 2);
+    sprintf(command_cpy, "%s ", command);
+    int len = strlen(command_cpy);
+    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        for(i = len; i < *size; i++) {
+            inp_cpy[i-len] = input[i];
+        }
+        inp_cpy[(*size) - len] = '\0';
+        found = autocomplete_complete(ac, inp_cpy);
+        if (found != NULL) {
+            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            strcpy(auto_msg, command_cpy);
+            strcat(auto_msg, found);
+            free(found);
+        }
+    }
+    free(command_cpy);
+
+    return auto_msg;
+}
+
 
 static gchar *
 _search_from(Autocomplete ac, GSList *curr)

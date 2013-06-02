@@ -45,8 +45,6 @@
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
-typedef char*(*autocomplete_func)(char *);
-
 /*
  * Command structure
  *
@@ -73,19 +71,16 @@ static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     const char * const display, preference_t pref);
 
 static void _cmd_complete_parameters(char *input, int *size);
-static void _sub_autocomplete(char *input, int *size);
-static void _notify_autocomplete(char *input, int *size);
-static void _titlebar_autocomplete(char *input, int *size);
-static void _theme_autocomplete(char *input, int *size);
-static void _autoaway_autocomplete(char *input, int *size);
-static void _account_autocomplete(char *input, int *size);
-static void _who_autocomplete(char *input, int *size);
-static void _roster_autocomplete(char *input, int *size);
-static void _group_autocomplete(char *input, int *size);
-static void _parameter_autocomplete(char *input, int *size, char *command,
-    autocomplete_func func);
-static void _parameter_autocomplete_with_ac(char *input, int *size, char *command,
-    Autocomplete ac);
+
+static char * _sub_autocomplete(char *input, int *size);
+static char * _notify_autocomplete(char *input, int *size);
+static char * _titlebar_autocomplete(char *input, int *size);
+static char * _theme_autocomplete(char *input, int *size);
+static char * _autoaway_autocomplete(char *input, int *size);
+static char * _account_autocomplete(char *input, int *size);
+static char * _who_autocomplete(char *input, int *size);
+static char * _roster_autocomplete(char *input, int *size);
+static char * _group_autocomplete(char *input, int *size);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
 
@@ -1217,76 +1212,159 @@ cmd_execute_default(const char * const inp)
 static void
 _cmd_complete_parameters(char *input, int *size)
 {
-    _parameter_autocomplete(input, size, "/beep",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/intype",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/states",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/outtype",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/flash",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/splash",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/chlog",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/grlog",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/mouse",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/history",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/vercheck",
-        prefs_autocomplete_boolean_choice);
-    _parameter_autocomplete(input, size, "/statuses",
-        prefs_autocomplete_boolean_choice);
+    int i;
+    char *result = NULL;
 
+    // autocomplete boolean settings
+    gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
+        "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
+        "/vercheck", "/statuses" };
+
+    for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
+        result = autocomplete_param_with_func(input, size, boolean_choices[i],
+            prefs_autocomplete_boolean_choice);
+        if (result != NULL) {
+            inp_replace_input(input, result, size);
+            g_free(result);
+            return;
+        }
+    }
+
+    // autocomplete nickname in chat rooms
     if (ui_current_win_type() == WIN_MUC) {
         Autocomplete nick_ac = muc_get_roster_ac(ui_current_recipient());
         if (nick_ac != NULL) {
-            _parameter_autocomplete_with_ac(input, size, "/msg", nick_ac);
-            _parameter_autocomplete_with_ac(input, size, "/info", nick_ac);
-            _parameter_autocomplete_with_ac(input, size, "/caps", nick_ac);
-            _parameter_autocomplete_with_ac(input, size, "/status", nick_ac);
-            _parameter_autocomplete_with_ac(input, size, "/software", nick_ac);
+            gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
+
+            for (i = 0; i < ARRAY_SIZE(nick_choices); i++) {
+                result = autocomplete_param_with_ac(input, size, nick_choices[i],
+                    nick_ac);
+                if (result != NULL) {
+                    inp_replace_input(input, result, size);
+                    g_free(result);
+                    return;
+                }
+            }
         }
+
+    // otherwise autocomple using roster
     } else {
-        _parameter_autocomplete(input, size, "/msg",
-            roster_find_contact);
-        _parameter_autocomplete(input, size, "/info",
-            roster_find_contact);
-        _parameter_autocomplete(input, size, "/caps",
-            roster_find_resource);
-        _parameter_autocomplete(input, size, "/status",
-            roster_find_contact);
-        _parameter_autocomplete(input, size, "/software",
-            roster_find_resource);
+        gchar *contact_choices[] = { "/msg", "/info", "/status" };
+        for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
+            result = autocomplete_param_with_func(input, size, contact_choices[i],
+                roster_find_contact);
+            if (result != NULL) {
+                inp_replace_input(input, result, size);
+                g_free(result);
+                return;
+            }
+        }
+
+        gchar *resource_choices[] = { "/caps", "/software" };
+        for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {
+            result = autocomplete_param_with_func(input, size, resource_choices[i],
+                roster_find_resource);
+            if (result != NULL) {
+                inp_replace_input(input, result, size);
+                g_free(result);
+                return;
+            }
+        }
     }
 
-    _parameter_autocomplete(input, size, "/invite", roster_find_contact);
-    _parameter_autocomplete(input, size, "/decline", muc_find_invite);
-    _parameter_autocomplete(input, size, "/join", muc_find_invite);
+    result = autocomplete_param_with_func(input, size, "/invite", roster_find_contact);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
 
+    gchar *invite_choices[] = { "/decline", "/join" };
+    for (i = 0; i < ARRAY_SIZE(invite_choices); i++) {
+        result = autocomplete_param_with_func(input, size, invite_choices[i],
+            muc_find_invite);
+        if (result != NULL) {
+            inp_replace_input(input, result, size);
+            g_free(result);
+            return;
+        }
+    }
 
-    _parameter_autocomplete(input, size, "/connect",
-        accounts_find_enabled);
-    _parameter_autocomplete_with_ac(input, size, "/help", help_ac);
-    _parameter_autocomplete_with_ac(input, size, "/prefs", prefs_ac);
-    _parameter_autocomplete_with_ac(input, size, "/log", log_ac);
-    _parameter_autocomplete_with_ac(input, size, "/disco", disco_ac);
-    _parameter_autocomplete_with_ac(input, size, "/close", close_ac);
-    _parameter_autocomplete_with_ac(input, size, "/wins", wins_ac);
+    result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
 
-    _who_autocomplete(input, size);
-    _sub_autocomplete(input, size);
-    _notify_autocomplete(input, size);
-    _autoaway_autocomplete(input, size);
-    _titlebar_autocomplete(input, size);
-    _theme_autocomplete(input, size);
-    _account_autocomplete(input, size);
-    _roster_autocomplete(input, size);
-    _group_autocomplete(input, size);
+    gchar *commands[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
+
+    for (i = 0; i < ARRAY_SIZE(commands); i++) {
+        result = autocomplete_param_with_ac(input, size, commands[i], completers[i]);
+        if (result != NULL) {
+            inp_replace_input(input, result, size);
+            g_free(result);
+            return;
+        }
+    }
+
+    result = _who_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _sub_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _notify_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _autoaway_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _titlebar_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _theme_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _account_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _roster_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+    result = _group_autocomplete(input, size);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+
+    return;
 }
 
 // The command functions
@@ -3411,285 +3489,161 @@ _cmd_get_command(const char * const command)
     return NULL;
 }
 
-static void
-_parameter_autocomplete(char *input, int *size, char *command,
-    autocomplete_func func)
-{
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
-    char *command_cpy = malloc(strlen(command) + 2);
-    sprintf(command_cpy, "%s ", command);
-    int len = strlen(command_cpy);
-    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
-        for(i = len; i < *size; i++) {
-            inp_cpy[i-len] = input[i];
-        }
-        inp_cpy[(*size) - len] = '\0';
-        found = func(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, command_cpy);
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    }
-    free(command_cpy);
-}
-
-static void
-_parameter_autocomplete_with_ac(char *input, int *size, char *command,
-    Autocomplete ac)
-{
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
-    char *command_cpy = malloc(strlen(command) + 2);
-    sprintf(command_cpy, "%s ", command);
-    int len = strlen(command_cpy);
-    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
-        for(i = len; i < *size; i++) {
-            inp_cpy[i-len] = input[i];
-        }
-        inp_cpy[(*size) - len] = '\0';
-        found = autocomplete_complete(ac, inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, command_cpy);
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    }
-    free(command_cpy);
-}
-
-static void
+static char *
 _sub_autocomplete(char *input, int *size)
 {
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
-
-    if ((strncmp(input, "/sub allow ", 11) == 0) && (*size > 11)) {
-        for (i = 11; i < *size; i++) {
-            inp_cpy[i-11] = input[i];
-        }
-        inp_cpy[(*size) - 11] = '\0';
-        found = presence_sub_request_find(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((11 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/sub allow ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/sub deny ", 10) == 0) && (*size > 10)) {
-        for (i = 10; i < *size; i++) {
-            inp_cpy[i-10] = input[i];
-        }
-        inp_cpy[(*size) - 10] = '\0';
-        found = presence_sub_request_find(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((10 + (strlen(found) + 0)) * sizeof(char));
-            strcpy(auto_msg, "/sub deny ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/sub ", 5) == 0) && (*size > 5)) {
-        _parameter_autocomplete_with_ac(input, size, "/sub", sub_ac);
+    char *result = NULL;
+    result = autocomplete_param_with_func(input, size, "/sub allow", presence_sub_request_find);
+    if (result != NULL) {
+        return result;
     }
+    result = autocomplete_param_with_func(input, size, "/sub deny", presence_sub_request_find);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/sub", sub_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _who_autocomplete(char *input, int *size)
 {
-    if ((strncmp(input, "/who any ", 9) == 0) && (*size > 9)) {
-        _parameter_autocomplete(input, size, "/who any", roster_find_group);
-    } else if ((strncmp(input, "/who online ", 12) == 0) && (*size > 12)) {
-        _parameter_autocomplete(input, size, "/who online", roster_find_group);
-    } else if ((strncmp(input, "/who offline ", 13) == 0) && (*size > 13)) {
-        _parameter_autocomplete(input, size, "/who offline", roster_find_group);
-    } else if ((strncmp(input, "/who chat ", 10) == 0) && (*size > 10)) {
-        _parameter_autocomplete(input, size, "/who chat", roster_find_group);
-    } else if ((strncmp(input, "/who away ", 10) == 0) && (*size > 10)) {
-        _parameter_autocomplete(input, size, "/who away", roster_find_group);
-    } else if ((strncmp(input, "/who xa ", 8) == 0) && (*size > 8)) {
-        _parameter_autocomplete(input, size, "/who xa", roster_find_group);
-    } else if ((strncmp(input, "/who dnd ", 9) == 0) && (*size > 9)) {
-        _parameter_autocomplete(input, size, "/who dnd", roster_find_group);
-    } else if ((strncmp(input, "/who available ", 15) == 0) && (*size > 15)) {
-        _parameter_autocomplete(input, size, "/who available", roster_find_group);
-    } else if ((strncmp(input, "/who unavailable ", 14) == 0) && (*size > 14)) {
-        _parameter_autocomplete(input, size, "/who unavailable", roster_find_group);
-    } else if ((strncmp(input, "/who ", 5) == 0) && (*size > 5)) {
-        _parameter_autocomplete_with_ac(input, size, "/who", who_ac);
+    int i = 0;
+    char *result = NULL;
+    gchar *group_commands[] = { "/who any", "/who online", "/who offline",
+        "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
+        "/who unavailable" };
+
+    for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
+        result = autocomplete_param_with_func(input, size, group_commands[i], roster_find_group);
+        if (result != NULL) {
+            return result;
+        }
     }
+
+    result = autocomplete_param_with_ac(input, size, "/who", who_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _roster_autocomplete(char *input, int *size)
 {
-    if ((strncmp(input, "/roster nick ", 13) == 0) && (*size > 13)) {
-        _parameter_autocomplete(input, size, "/roster nick", roster_find_jid);
-    } else if ((strncmp(input, "/roster remove ", 15) == 0) && (*size > 15)) {
-        _parameter_autocomplete(input, size, "/roster remove", roster_find_jid);
-    } else if ((strncmp(input, "/roster ", 8) == 0) && (*size > 8)) {
-        _parameter_autocomplete_with_ac(input, size, "/roster", roster_ac);
+    char *result = NULL;
+    result = autocomplete_param_with_func(input, size, "/roster nick", roster_find_jid);
+    if (result != NULL) {
+        return result;
     }
+    result = autocomplete_param_with_func(input, size, "/roster remove", roster_find_jid);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/roster", roster_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _group_autocomplete(char *input, int *size)
 {
-    if ((strncmp(input, "/group show ", 12) == 0) && (*size > 12)) {
-        _parameter_autocomplete(input, size, "/group show", roster_find_group);
-    } else if ((strncmp(input, "/group add ", 11) == 0) && (*size > 11)) {
-        _parameter_autocomplete(input, size, "/group add", roster_find_group);
-    } else if ((strncmp(input, "/group remove ", 14) == 0) && (*size > 14)) {
-        _parameter_autocomplete(input, size, "/group remove", roster_find_group);
-    } else if ((strncmp(input, "/group ", 7) == 0) && (*size > 7)) {
-        _parameter_autocomplete_with_ac(input, size, "/group", group_ac);
+    char *result = NULL;
+    result = autocomplete_param_with_func(input, size, "/group show", roster_find_group);
+    if (result != NULL) {
+        return result;
     }
+    result = autocomplete_param_with_func(input, size, "/group add", roster_find_group);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, size, "/group remove", roster_find_group);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/group", group_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _notify_autocomplete(char *input, int *size)
 {
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
+    int i = 0;
+    char *result = NULL;
 
-    if ((strncmp(input, "/notify message ", 16) == 0) && (*size > 16)) {
-        for(i = 16; i < *size; i++) {
-            inp_cpy[i-16] = input[i];
+    gchar *boolean_choices[] = { "/notify message", "/notify typing",
+        "/notify invite", "/notify sub" };
+    for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
+        result = autocomplete_param_with_func(input, size, boolean_choices[i],
+            prefs_autocomplete_boolean_choice);
+        if (result != NULL) {
+            return result;
         }
-        inp_cpy[(*size) - 16] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify message ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/notify typing ", 15) == 0) && (*size > 15)) {
-        for(i = 15; i < *size; i++) {
-            inp_cpy[i-15] = input[i];
-        }
-        inp_cpy[(*size) - 15] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify typing ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/notify invite ", 15) == 0) && (*size > 15)) {
-        for(i = 15; i < *size; i++) {
-            inp_cpy[i-15] = input[i];
-        }
-        inp_cpy[(*size) - 15] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((15 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify invite ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/notify sub ", 12) == 0) && (*size > 12)) {
-        for(i = 12; i < *size; i++) {
-            inp_cpy[i-12] = input[i];
-        }
-        inp_cpy[(*size) - 12] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((12 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/notify sub ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/notify ", 8) == 0) && (*size > 8)) {
-        _parameter_autocomplete_with_ac(input, size, "/notify", notify_ac);
     }
+
+    result = autocomplete_param_with_ac(input, size, "/notify", notify_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _titlebar_autocomplete(char *input, int *size)
 {
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
-
-    if ((strncmp(input, "/titlebar version ", 18) == 0) && (*size > 18)) {
-        for(i = 18; i < *size; i++) {
-            inp_cpy[i-18] = input[i];
-        }
-        inp_cpy[(*size) - 18] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((18 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/titlebar version ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/titlebar ", 10) == 0) && (*size > 10)) {
-        _parameter_autocomplete_with_ac(input, size, "/titlebar", titlebar_ac);
+    char *result = NULL;
+    result = autocomplete_param_with_func(input, size, "/titlebar version",
+        prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
     }
+    result = autocomplete_param_with_ac(input, size, "/titlebar", titlebar_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _autoaway_autocomplete(char *input, int *size)
 {
-    char *found = NULL;
-    char *auto_msg = NULL;
-    char inp_cpy[*size];
-    int i;
+    char *result = NULL;
 
-    if ((strncmp(input, "/autoaway mode ", 15) == 0) && (*size > 15)) {
-        _parameter_autocomplete_with_ac(input, size, "/autoaway mode", autoaway_mode_ac);
-    } else if ((strncmp(input, "/autoaway check ", 16) == 0) && (*size > 16)) {
-        for(i = 16; i < *size; i++) {
-            inp_cpy[i-16] = input[i];
-        }
-        inp_cpy[(*size) - 16] = '\0';
-        found = prefs_autocomplete_boolean_choice(inp_cpy);
-        if (found != NULL) {
-            auto_msg = (char *) malloc((16 + (strlen(found) + 1)) * sizeof(char));
-            strcpy(auto_msg, "/autoaway check ");
-            strcat(auto_msg, found);
-            inp_replace_input(input, auto_msg, size);
-            free(auto_msg);
-            free(found);
-        }
-    } else if ((strncmp(input, "/autoaway ", 10) == 0) && (*size > 10)) {
-        _parameter_autocomplete_with_ac(input, size, "/autoaway", autoaway_ac);
+    result = autocomplete_param_with_ac(input, size, "/autoaway mode", autoaway_mode_ac);
+    if (result != NULL) {
+        return result;
     }
+    result = autocomplete_param_with_func(input, size, "/autoaway check",
+        prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/autoaway", autoaway_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _theme_autocomplete(char *input, int *size)
 {
+    char *result = NULL;
     if ((strncmp(input, "/theme set ", 11) == 0) && (*size > 11)) {
         if (theme_load_ac == NULL) {
             theme_load_ac = autocomplete_new();
@@ -3700,29 +3654,42 @@ _theme_autocomplete(char *input, int *size)
             }
             g_slist_free(themes);
             autocomplete_add(theme_load_ac, "default");
-         }
-        _parameter_autocomplete_with_ac(input, size, "/theme set", theme_load_ac);
-    } else if ((strncmp(input, "/theme ", 7) == 0) && (*size > 7)) {
-        _parameter_autocomplete_with_ac(input, size, "/theme", theme_ac);
+        }
+        result = autocomplete_param_with_ac(input, size, "/theme set", theme_load_ac);
+        if (result != NULL) {
+            return result;
+        }
     }
+    result = autocomplete_param_with_ac(input, size, "/theme", theme_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
-static void
+static char *
 _account_autocomplete(char *input, int *size)
 {
-    if ((strncmp(input, "/account set ", 13) == 0) && (*size > 13)) {
-        _parameter_autocomplete(input, size, "/account set", accounts_find_all);
-    } else if ((strncmp(input, "/account show ", 14) == 0) && (*size > 14)) {
-        _parameter_autocomplete(input, size, "/account show", accounts_find_all);
-    } else if ((strncmp(input, "/account enable ", 16) == 0) && (*size > 16)) {
-        _parameter_autocomplete(input, size, "/account enable", accounts_find_all);
-    } else if ((strncmp(input, "/account disable ", 17) == 0) && (*size > 17)) {
-        _parameter_autocomplete(input, size, "/account disable", accounts_find_all);
-    } else if ((strncmp(input, "/account rename ", 16) == 0) && (*size > 16)) {
-        _parameter_autocomplete(input, size, "/account rename", accounts_find_all);
-    } else if ((strncmp(input, "/account ", 9) == 0) && (*size > 9)) {
-        _parameter_autocomplete_with_ac(input, size, "/account", account_ac);
+    char *result = NULL;
+    int i = 0;
+    gchar *account_choice[] = { "/account set", "/account show", "/account enable",
+        "/account disable", "/account rename" };
+
+    for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
+        result = autocomplete_param_with_func(input, size, account_choice[i],
+            accounts_find_all);
+        if (result != NULL) {
+            return result;
+        }
     }
+
+    result = autocomplete_param_with_ac(input, size, "/account", account_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
 }
 
 static int

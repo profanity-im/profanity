@@ -25,6 +25,7 @@
 
 #include <glib.h>
 
+typedef char*(*autocomplete_func)(char *);
 typedef struct autocomplete_t *Autocomplete;
 typedef const char * (*PStrFunc)(const void *obj);
 typedef void * (*PCopyFunc)(const void *obj);
@@ -42,5 +43,9 @@ gboolean autocomplete_remove(Autocomplete ac, const char * const item);
 GSList * autocomplete_get_list(Autocomplete ac);
 gchar * autocomplete_complete(Autocomplete ac, gchar *search_str);
 gint autocomplete_length(Autocomplete ac);
+char * autocomplete_param_with_func(char *input, int *size, char *command,
+    autocomplete_func func);
+char * autocomplete_param_with_ac(char *input, int *size, char *command,
+    Autocomplete ac);
 
 #endif
