@@ -146,5 +146,9 @@ void roster_change_name(const char * const barejid, const char * const new_name)
 char * roster_barejid_from_name(const char * const name);
 void roster_add_new(const char * const barejid, const char * const name);
 void roster_remove(const char * const barejid);
+GSList * roster_get_group(const char * const group);
+void roster_add_to_group(const char * const group, const char * const barejid);
+void roster_remove_from_group(const char * const group,
+    const char * const barejid);
 
 #endif

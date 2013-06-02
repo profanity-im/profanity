@@ -1240,13 +1240,19 @@ cons_navigation_help(void)
 }
 
 void
-cons_show_roster(GSList *list)
+cons_show_roster_group(const char * const group, GSList *list)
 {
     GSList *curr = list;
     cons_show("");
-    cons_show("Roster:");
+
+    if (curr != NULL) {
+        cons_show("%s:", group);
+    } else {
+        cons_show("No group named %s exists.", group);
+    }
 
     while(curr) {
+
         PContact contact = curr->data;
         GString *title = g_string_new("  ");
         title = g_string_append(title, p_contact_barejid(contact));
@@ -1268,6 +1274,60 @@ cons_show_roster(GSList *list)
         }
         cons_show(sub->str);
         g_string_free(sub, TRUE);
+
+        curr = g_slist_next(curr);
+    }
+
+    ui_console_dirty();
+    cons_alert();
+}
+
+void
+cons_show_roster(GSList *list)
+{
+    GSList *curr = list;
+    cons_show("");
+    cons_show("Roster:");
+
+    while(curr) {
+
+        PContact contact = curr->data;
+        GString *title = g_string_new("  ");
+        title = g_string_append(title, p_contact_barejid(contact));
+        if (p_contact_name(contact) != NULL) {
+            title = g_string_append(title, " (");
+            title = g_string_append(title, strdup(p_contact_name(contact)));
+            title = g_string_append(title, ")");
+        }
+        cons_show(title->str);
+        g_string_free(title, TRUE);
+
+        GString *sub = g_string_new("    Subscription : ");
+        sub = g_string_append(sub, p_contact_subscription(contact));
+        if (p_contact_pending_out(contact)) {
+            sub = g_string_append(sub, ", request sent");
+        }
+        if (presence_sub_request_exists(p_contact_barejid(contact))) {
+            sub = g_string_append(sub, ", request received");
+        }
+        cons_show(sub->str);
+        g_string_free(sub, TRUE);
+
+        GSList *groups = p_contact_groups(contact);
+        if (groups != NULL) {
+            GString *groups_str = g_string_new("    Groups : ");
+            while (groups != NULL) {
+                g_string_append(groups_str, strdup(groups->data));
+                if (g_slist_next(groups) != NULL) {
+                    g_string_append(groups_str, ", ");
+                }
+                groups = g_slist_next(groups);
+            }
+
+            cons_show(groups_str->str);
+            g_string_free(groups_str, TRUE);
+        }
+
         curr = g_slist_next(curr);
     }
 

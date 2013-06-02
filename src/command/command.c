@@ -276,7 +276,7 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/roster",
-        _cmd_roster, parse_args_with_freetext, 0, 3,
+        _cmd_roster, parse_args_with_freetext, 0, 4,
         { "/roster [add|remove|nick] [jid] [handle]", "Manage your roster.",
         { "/roster [add|remove|nick] [jid] [handle]",
           "----------------------------------------",
@@ -927,6 +927,7 @@ cmd_init(void)
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, strdup("add"));
     autocomplete_add(roster_ac, strdup("nick"));
+    autocomplete_add(roster_ac, strdup("group"));
     autocomplete_add(roster_ac, strdup("remove"));
 
     theme_load_ac = NULL;
@@ -2089,6 +2090,63 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
         }
 
         return TRUE;
+    }
+
+    // group command
+    if (strcmp(args[0], "group") == 0) {
+        char *command = args[1];
+        char *group = args[2];
+        char *jid = args[3];
+
+        if (command == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        if (strcmp(command, "show") == 0) {
+            if (group == NULL) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            }
+
+            GSList *list = roster_get_group(group);
+            cons_show_roster_group(group, list);
+            return TRUE;
+        }
+
+        if (strcmp(command, "add") == 0) {
+            if ((group == NULL) || (jid == NULL)) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            }
+
+            PContact contact = roster_get_contact(jid);
+            if (contact == NULL) {
+                cons_show("Contact not found in roster: %s", jid);
+                return TRUE;
+            }
+
+            roster_add_to_group(group, jid);
+
+            return TRUE;
+        }
+
+        if (strcmp(command, "remove") == 0) {
+            if ((group == NULL) || (jid == NULL)) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            }
+
+            PContact contact = roster_get_contact(jid);
+            if (contact == NULL) {
+                cons_show("Contact not found in roster: %s", jid);
+                return TRUE;
+            }
+
+            roster_remove_from_group(group, jid);
+
+            return TRUE;
+        }
     }
 
     cons_show("Usage: %s", help.usage);

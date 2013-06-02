@@ -286,6 +286,63 @@ roster_change_name(const char * const barejid, const char * const new_name)
     }
 }
 
+void
+roster_add_to_group(const char * const group, const char * const barejid)
+{
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+
+    if (contact != NULL) {
+        if (p_contact_in_group(contact, group)) {
+            return;
+        }
+
+        GSList *groups = p_contact_groups(contact);
+        GSList *new_groups = NULL;
+        while (groups != NULL) {
+            new_groups = g_slist_append(new_groups, strdup(groups->data));
+            groups = g_slist_next(groups);
+        }
+
+        new_groups = g_slist_append(new_groups, strdup(group));
+
+        xmpp_conn_t * const conn = connection_get_conn();
+        xmpp_ctx_t * const ctx = connection_get_ctx();
+        xmpp_stanza_t *iq = stanza_create_roster_set(ctx, barejid,
+            p_contact_name(contact), new_groups);
+        xmpp_send(conn, iq);
+        xmpp_stanza_release(iq);
+    }
+}
+
+void
+roster_remove_from_group(const char * const group, const char * const barejid)
+{
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+
+    if (contact != NULL) {
+        if (!p_contact_in_group(contact, group)) {
+            return;
+        }
+
+        GSList *groups = p_contact_groups(contact);
+        GSList *new_groups = NULL;
+        while (groups != NULL) {
+            if (strcmp(groups->data, group) != 0) {
+                new_groups = g_slist_append(new_groups, strdup(groups->data));
+            }
+            groups = g_slist_next(groups);
+        }
+
+        xmpp_conn_t * const conn = connection_get_conn();
+        xmpp_ctx_t * const ctx = connection_get_ctx();
+        xmpp_stanza_t *iq = stanza_create_roster_set(ctx, barejid,
+            p_contact_name(contact), new_groups);
+        xmpp_send(conn, iq);
+        xmpp_stanza_release(iq);
+    }
+
+}
+
 gboolean
 roster_has_pending_subscriptions(void)
 {
@@ -315,6 +372,30 @@ roster_get_contacts(void)
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+    }
+
+    // resturn all contact structs
+    return result;
+}
+
+GSList *
+roster_get_group(const char * const group)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        GSList *groups = p_contact_groups(value);
+        while (groups != NULL) {
+            if (strcmp(groups->data, group) == 0) {
+                result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+                break;
+            }
+            groups = g_slist_next(groups);
+        }
     }
 
     // resturn all contact structs

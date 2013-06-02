@@ -101,6 +101,20 @@ p_contact_set_groups(const PContact contact, GSList *groups)
     contact->groups = groups;
 }
 
+gboolean
+p_contact_in_group(const PContact contact, const char * const group)
+{
+    GSList *groups = contact->groups;
+    while (groups != NULL) {
+        if (strcmp(groups->data, group) == 0) {
+            return TRUE;
+        }
+        groups = g_slist_next(groups);
+    }
+
+    return FALSE;
+}
+
 GSList *
 p_contact_groups(const PContact contact)
 {

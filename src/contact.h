@@ -52,5 +52,6 @@ gboolean p_contact_has_available_resource(const PContact contact);
 Resource * p_contact_get_resource(const PContact contact, const char * const resource);
 void p_contact_set_groups(const PContact contact, GSList *groups);
 GSList * p_contact_groups(const PContact contact);
+gboolean p_contact_in_group(const PContact contact, const char * const group);
 
 #endif
