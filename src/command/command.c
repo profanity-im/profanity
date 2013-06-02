@@ -500,17 +500,19 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/who",
-        _cmd_who, parse_args, 0, 1,
-        { "/who [status]", "Show contacts/room participants with chosen status.",
-        { "/who [status]",
-          "-------------",
+        _cmd_who, parse_args, 0, 2,
+        { "/who [status] [group]", "Show contacts/room participants with chosen status.",
+        { "/who [status] [group]",
+          "---------------------",
           "Show contacts with the specified status, no status shows all contacts.",
           "Possible statuses are: online, offline, away, dnd, xa, chat, available, unavailable.",
+          "The groups argument will show only contacts in that group.",
           "If in a chat room, the participants with the supplied status are displayed.",
           "",
           "online      : Contacts that are connected, i.e. online, chat, away, xa, dnd",
           "available   : Contacts that are available for chat, i.e. online, chat.",
           "unavailable : Contacts that are not available for chat, i.e. offline, away, xa, dnd.",
+          "any         : Contacts with any status (same as calling with no argument.",
           NULL } } },
 
     { "/close",
@@ -1761,6 +1763,10 @@ _cmd_who(gchar **args, struct cmd_help_t help)
         cons_show("You are not currently connected.");
     } else {
         char *presence = args[0];
+        char *group = NULL;
+        if ((g_strv_length(args) == 2) && (args[1] != NULL)) {
+            group = args[1];
+        }
 
         // bad arg
         if ((presence != NULL)
@@ -1778,6 +1784,11 @@ _cmd_who(gchar **args, struct cmd_help_t help)
         // valid arg
         } else {
             if (win_type == WIN_MUC) {
+                if (group != NULL) {
+                    cons_show("The group argument is not valid when in a chat room.");
+                    return TRUE;
+                }
+
                 char *room = ui_current_recipient();
                 GList *list = muc_get_roster(room);
 
@@ -1859,16 +1870,29 @@ _cmd_who(gchar **args, struct cmd_help_t help)
             // not in groupchat window
             } else {
                 cons_show("");
-                GSList *list = roster_get_contacts();
+                GSList *list = NULL;
+                if (group != NULL) {
+                    list = roster_get_group(group);
+                } else {
+                    list = roster_get_contacts();
+                }
 
                 // no arg, show all contacts
                 if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
-                    cons_show("All contacts:");
+                    if (group != NULL) {
+                        cons_show("%s:", group);
+                    } else {
+                        cons_show("All contacts:");
+                    }
                     cons_show_contacts(list);
 
                 // available
                 } else if (strcmp("available", presence) == 0) {
-                    cons_show("Contacts (%s):", presence);
+                    if (group != NULL) {
+                        cons_show("%s (%s):", group, presence);
+                    } else {
+                        cons_show("Contacts (%s):", presence);
+                    }
                     GSList *filtered = NULL;
 
                     while (list != NULL) {
@@ -1883,7 +1907,11 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                 // unavailable
                 } else if (strcmp("unavailable", presence) == 0) {
-                    cons_show("Contacts (%s):", presence);
+                    if (group != NULL) {
+                        cons_show("%s (%s):", group, presence);
+                    } else {
+                        cons_show("Contacts (%s):", presence);
+                    }
                     GSList *filtered = NULL;
 
                     while (list != NULL) {
@@ -1898,7 +1926,11 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                 // online, available resources
                 } else if (strcmp("online", presence) == 0) {
-                    cons_show("Contacts (%s):", presence);
+                    if (group != NULL) {
+                        cons_show("%s (%s):", group, presence);
+                    } else {
+                        cons_show("Contacts (%s):", presence);
+                    }
                     GSList *filtered = NULL;
 
                     while (list != NULL) {
@@ -1912,8 +1944,12 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                     cons_show_contacts(filtered);
 
                 // offline, no available resources
-                } else if (strcmp("online", presence) == 0) {
-                    cons_show("Contacts (%s):", presence);
+                } else if (strcmp("offline", presence) == 0) {
+                    if (group != NULL) {
+                        cons_show("%s (%s):", group, presence);
+                    } else {
+                        cons_show("Contacts (%s):", presence);
+                    }
                     GSList *filtered = NULL;
 
                     while (list != NULL) {
@@ -1928,7 +1964,11 @@ _cmd_who(gchar **args, struct cmd_help_t help)
 
                 // show specific status
                 } else {
-                    cons_show("Contacts (%s):", presence);
+                    if (group != NULL) {
+                        cons_show("%s (%s):", group, presence);
+                    } else {
+                        cons_show("Contacts (%s):", presence);
+                    }
                     GSList *filtered = NULL;
 
                     while (list != NULL) {
