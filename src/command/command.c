@@ -142,6 +142,7 @@ static gboolean _cmd_theme(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_status(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_duck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_roster(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_group(gchar **args, struct cmd_help_t help);
 
 /*
  * The commands are broken down into three groups:
@@ -293,6 +294,24 @@ static struct cmd_t main_commands[] =
           "Example : /roster remove someone@contacts.org (remove the contact)",
           "Example : /roster nick myfriend@chat.org My Friend",
           "Example : /roster nick kai@server.com (clears handle)",
+          NULL } } },
+
+    { "/group",
+        _cmd_group, parse_args_with_freetext, 0, 3,
+        { "/group show|add|remove [group] [contact]", "Manage roster groups.",
+        { "/group show|add|remove [group] [contact]",
+          "-------------------------------------",
+          "View, add to, and remove from roster groups.",
+          "Passing no argument will list all roster groups.",
+          "The 'show' command takes 'group' as an argument, and lists all roster items in that group.",
+          "The 'add' command takes 'group' and 'contact' arguments, and add the contact to the group.",
+          "The 'remove' command takes 'group' and 'contact' arguments and removed the contact from the group,",
+          "",
+          "Example : /group",
+          "Example : /group show friends",
+          "Example : /group add friends newfriend@server.org",
+          "Example : /group add family brother (using contacts nickname)",
+          "Example : /group remove colleagues boss@work.com",
           NULL } } },
 
     { "/info",
@@ -929,7 +948,6 @@ cmd_init(void)
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, strdup("add"));
     autocomplete_add(roster_ac, strdup("nick"));
-    autocomplete_add(roster_ac, strdup("group"));
     autocomplete_add(roster_ac, strdup("remove"));
 
     theme_load_ac = NULL;
@@ -2058,6 +2076,91 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
+_cmd_group(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    // list all groups
+    if (args[0] == NULL) {
+        cons_show("LIST GROUPS");
+        return TRUE;
+    }
+
+    // show contacts in group
+    if (strcmp(args[0], "show") == 0) {
+        char *group = args[1];
+        if (group == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        GSList *list = roster_get_group(group);
+        cons_show_roster_group(group, list);
+        return TRUE;
+    }
+
+    // add contact to group
+    if (strcmp(args[0], "add") == 0) {
+        char *group = args[1];
+        char *contact = args[2];
+
+        if ((group == NULL) || (contact == NULL)) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *barejid = roster_barejid_from_name(contact);
+        if (barejid == NULL) {
+            barejid = contact;
+        }
+
+        PContact pcontact = roster_get_contact(barejid);
+        if (pcontact == NULL) {
+            cons_show("Contact not found in roster: %s", barejid);
+            return TRUE;
+        }
+
+        roster_add_to_group(group, barejid);
+
+        return TRUE;
+    }
+
+    // remove contact from group
+    if (strcmp(args[0], "remove") == 0) {
+        char *group = args[1];
+        char *contact = args[2];
+
+        if ((group == NULL) || (contact == NULL)) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *barejid = roster_barejid_from_name(contact);
+        if (barejid == NULL) {
+            barejid = contact;
+        }
+
+        PContact pcontact = roster_get_contact(barejid);
+        if (pcontact == NULL) {
+            cons_show("Contact not found in roster: %s", barejid);
+            return TRUE;
+        }
+
+        roster_remove_from_group(group, barejid);
+
+        return TRUE;
+    }
+
+    cons_show("Usage: %s", help.usage);
+    return TRUE;
+}
+
+static gboolean
 _cmd_roster(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -2132,63 +2235,6 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
         }
 
         return TRUE;
-    }
-
-    // group command
-    if (strcmp(args[0], "group") == 0) {
-        char *command = args[1];
-        char *group = args[2];
-        char *jid = args[3];
-
-        if (command == NULL) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        if (strcmp(command, "show") == 0) {
-            if (group == NULL) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            }
-
-            GSList *list = roster_get_group(group);
-            cons_show_roster_group(group, list);
-            return TRUE;
-        }
-
-        if (strcmp(command, "add") == 0) {
-            if ((group == NULL) || (jid == NULL)) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            }
-
-            PContact contact = roster_get_contact(jid);
-            if (contact == NULL) {
-                cons_show("Contact not found in roster: %s", jid);
-                return TRUE;
-            }
-
-            roster_add_to_group(group, jid);
-
-            return TRUE;
-        }
-
-        if (strcmp(command, "remove") == 0) {
-            if ((group == NULL) || (jid == NULL)) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            }
-
-            PContact contact = roster_get_contact(jid);
-            if (contact == NULL) {
-                cons_show("Contact not found in roster: %s", jid);
-                return TRUE;
-            }
-
-            roster_remove_from_group(group, jid);
-
-            return TRUE;
-        }
     }
 
     cons_show("Usage: %s", help.usage);
