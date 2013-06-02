@@ -64,6 +64,8 @@ struct cmd_t {
     struct cmd_help_t help;
 };
 
+typedef char*(*autocompleter)(char*, int*);
+
 static struct cmd_t * _cmd_get_command(const char * const command);
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
@@ -1309,59 +1311,17 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    result = _who_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _sub_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _notify_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _autoaway_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _titlebar_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _theme_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _account_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _roster_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-    result = _group_autocomplete(input, size);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
+    autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
+        _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
+        _account_autocomplete, _roster_autocomplete, _group_autocomplete };
+
+    for (i = 0; i < ARRAY_SIZE(acs); i++) {
+        result = acs[i](input, size);
+        if (result != NULL) {
+            inp_replace_input(input, result, size);
+            g_free(result);
+            return;
+        }
     }
 
     return;
