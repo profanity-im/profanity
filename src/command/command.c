@@ -500,7 +500,7 @@ static struct cmd_t main_commands[] =
           NULL } } },
 
     { "/who",
-        _cmd_who, parse_args, 0, 2,
+        _cmd_who, parse_args_with_freetext, 0, 2,
         { "/who [status] [group]", "Show contacts/room participants with chosen status.",
         { "/who [status] [group]",
           "---------------------",
