@@ -2136,7 +2136,19 @@ _cmd_group(gchar **args, struct cmd_help_t help)
 
     // list all groups
     if (args[0] == NULL) {
-        cons_show("LIST GROUPS");
+        GSList *groups = roster_get_groups();
+        GSList *curr = groups;
+        if (curr != NULL) {
+            cons_show("Groups:");
+            while (curr != NULL) {
+                cons_show("  %s", curr->data);
+                curr = g_slist_next(curr);
+            }
+
+            g_slist_free_full(groups, g_free);
+        } else {
+            cons_show("No groups.");
+        }
         return TRUE;
     }
 

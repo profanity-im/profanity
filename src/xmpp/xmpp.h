@@ -151,5 +151,6 @@ GSList * roster_get_group(const char * const group);
 void roster_add_to_group(const char * const group, const char * const barejid);
 void roster_remove_from_group(const char * const group,
     const char * const barejid);
+GSList * roster_get_groups(void);
 
 #endif

@@ -379,6 +379,12 @@ roster_get_contacts(void)
 }
 
 GSList *
+roster_get_groups(void)
+{
+    return autocomplete_get_list(groups_ac);
+}
+
+GSList *
 roster_get_group(const char * const group)
 {
     GSList *result = NULL;
