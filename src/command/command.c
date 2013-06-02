@@ -955,6 +955,7 @@ cmd_init(void)
     autocomplete_add(who_ac, strdup("offline"));
     autocomplete_add(who_ac, strdup("available"));
     autocomplete_add(who_ac, strdup("unavailable"));
+    autocomplete_add(who_ac, strdup("any"));
 
     cmd_history_init();
 }
@@ -1770,7 +1771,8 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                 && (strcmp(presence, "away") != 0)
                 && (strcmp(presence, "chat") != 0)
                 && (strcmp(presence, "xa") != 0)
-                && (strcmp(presence, "dnd") != 0)) {
+                && (strcmp(presence, "dnd") != 0)
+                && (strcmp(presence, "any") != 0)) {
             cons_show("Usage: %s", help.usage);
 
         // valid arg
@@ -1780,7 +1782,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                 GList *list = muc_get_roster(room);
 
                 // no arg, show all contacts
-                if (presence == NULL) {
+                if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
                     ui_room_roster(room, list, NULL);
 
                 // available
@@ -1860,7 +1862,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                 GSList *list = roster_get_contacts();
 
                 // no arg, show all contacts
-                if (presence == NULL) {
+                if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
                     cons_show("All contacts:");
                     cons_show_contacts(list);
 
