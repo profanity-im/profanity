@@ -358,7 +358,7 @@ static struct cmd_t main_commands[] =
 
     { "/status",
         _cmd_status, parse_args, 0, 1,
-        { "/status [jid|nick]", "Find out a contacts presence information.",
+        { "/status [jid|nick]", "Find out your contacts presence information.",
         { "/status [jid|nick]",
           "------------------",
           "Find out a contact, or room members presence information.",
