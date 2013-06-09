@@ -184,6 +184,7 @@ _conference_message_handler(xmpp_conn_t * const conn,
 {
     xmpp_stanza_t *x_muc = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     xmpp_stanza_t *x_groupchat = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
+    xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *room = NULL;
     char *invitor = NULL;
@@ -235,6 +236,17 @@ _conference_message_handler(xmpp_conn_t * const conn,
         prof_handle_room_invite(INVITE_DIRECT, invitor, room, reason);
 
         jid_destroy(jidp);
+
+    // XEP-0158
+    } else if (captcha != NULL) {
+        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+        if (body != NULL) {
+            char *message = xmpp_stanza_get_text(body);
+            if (message != NULL) {
+                prof_handle_room_broadcast(from, message);
+                xmpp_free(ctx, message);
+            }
+        }
     }
 
     return 1;

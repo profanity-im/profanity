@@ -99,6 +99,7 @@
 #define STANZA_NS_DATA "jabber:x:data"
 #define STANZA_NS_VERSION "jabber:iq:version"
 #define STANZA_NS_CONFERENCE "jabber:x:conference"
+#define STANZA_NS_CAPTCHA "urn:xmpp:captcha"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
