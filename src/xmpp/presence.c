@@ -224,11 +224,12 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
     while (rooms != NULL) {
         const char *room = rooms->data;
         const char *nick = muc_get_room_nick(room);
-        const char *full_room_jid = create_fulljid(room, nick);
+        char *full_room_jid = create_fulljid(room, nick);
 
         xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
         log_debug("Sending presence to room: %s", full_room_jid);
         xmpp_send(conn, presence);
+        free(full_room_jid);
 
         rooms = g_list_next(rooms);
     }
@@ -384,6 +385,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
         }
     }
 
+    FREE_SET_NULL(status_str);
     jid_destroy(my_jid);
     jid_destroy(from_jid);
 
@@ -469,6 +471,8 @@ _available_handler(xmpp_conn_t * const conn,
             last_activity);
     }
 
+    FREE_SET_NULL(status_str);
+    FREE_SET_NULL(show_str);
     jid_destroy(my_jid);
     jid_destroy(from_jid);
 
@@ -529,7 +533,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
 
         guint from_hash = g_str_hash(from);
         char from_hash_str[9];
-        g_sprintf(from_hash_str, "%08x", from_hash);
+        g_snprintf(from_hash_str, sizeof(from_hash_str), "%08x", from_hash);
         caps_key = strdup(from_hash_str);
         GString *id_str = g_string_new("capsreq_");
         g_string_append(id_str, from_hash_str);
@@ -626,7 +630,11 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                     }
                 }
             }
+
+           FREE_SET_NULL(show_str);
         }
+
+        FREE_SET_NULL(status_str);
     }
 
     jid_destroy(my_jid);
