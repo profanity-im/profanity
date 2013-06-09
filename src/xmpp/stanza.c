@@ -383,26 +383,48 @@ stanza_get_delay(xmpp_stanza_t * const stanza, GTimeVal *tv_stamp)
 char *
 stanza_get_status(xmpp_stanza_t *stanza, char *def)
 {
+    xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *status =
         xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_STATUS);
 
     if (status != NULL) {
-        return xmpp_stanza_get_text(status);
+        // xmpp_free and free may be different functions so convert all to
+        // libc malloc
+        char *s1, *s2 = NULL;
+        s1 = xmpp_stanza_get_text(status);
+        if (s1 != NULL) {
+            s2 = strdup(s1);
+            xmpp_free(ctx, s1);
+        }
+        return s2;
+    } else if (def != NULL) {
+        return strdup(def);
     } else {
-        return def;
+        return NULL;
     }
 }
 
 char *
 stanza_get_show(xmpp_stanza_t *stanza, char *def)
 {
+    xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *show =
         xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SHOW);
 
     if (show != NULL) {
-        return xmpp_stanza_get_text(show);
+        // xmpp_free and free may be different functions so convert all to
+        // libc malloc
+        char *s1, *s2 = NULL;
+        s1 = xmpp_stanza_get_text(show);
+        if (s1 != NULL) {
+            s2 = strdup(s1);
+            xmpp_free(ctx, s1);
+        }
+        return s2;
+    } else if (def != NULL) {
+        return strdup(def);
     } else {
-        return def;
+        return NULL;
     }
 }
 
@@ -730,7 +752,7 @@ stanza_create_form(xmpp_stanza_t * const stanza)
             xmpp_stanza_t *value = xmpp_stanza_get_child_by_name(child, "value");
             char *value_text = xmpp_stanza_get_text(value);
             result->form_type = strdup(value_text);
-	    xmpp_free(ctx, value_text);
+            xmpp_free(ctx, value_text);
 
         // handle regular fields
         } else {
