@@ -182,6 +182,7 @@ static int
 _conference_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *x_muc = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     xmpp_stanza_t *x_groupchat = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -219,6 +220,9 @@ _conference_message_handler(xmpp_conn_t * const conn,
 
         prof_handle_room_invite(INVITE_MEDIATED, invitor, room, reason);
         jid_destroy(jidp);
+        if (reason != NULL) {
+            xmpp_free(ctx, reason);
+        }
 
     // XEP-0429
     } else if (x_groupchat != NULL) {
@@ -244,6 +248,7 @@ static int
 _groupchat_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    xmpp_ctx_t *ctx = connection_get_ctx();
     char *message = NULL;
     char *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *jid = jid_create(room_jid);
@@ -259,6 +264,7 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
                 prof_handle_room_subject(jid->barejid, message);
             }
 
+            jid_destroy(jid);
             return 1;
 
         // handle other room broadcasts
@@ -268,9 +274,11 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
                 message = xmpp_stanza_get_text(body);
                 if (message != NULL) {
                     prof_handle_room_broadcast(room_jid, message);
+                    xmpp_free(ctx, message);
                 }
             }
 
+            jid_destroy(jid);
             return 1;
         }
     }
@@ -278,12 +286,14 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
 
     if (!jid_is_valid_room_form(jid)) {
         log_error("Invalid room JID: %s", jid->str);
+        jid_destroy(jid);
         return 1;
     }
 
     // room not active in profanity
     if (!muc_room_is_active(jid)) {
         log_error("Message recieved for inactive chat room: %s", jid->str);
+        jid_destroy(jid);
         return 1;
     }
 
@@ -294,11 +304,14 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
 
     // check for and deal with message
     if (body != NULL) {
-        char *message = xmpp_stanza_get_text(body);
-        if (delayed) {
-            prof_handle_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
-        } else {
-            prof_handle_room_message(jid->barejid, jid->resourcepart, message);
+        message = xmpp_stanza_get_text(body);
+        if (message != NULL) {
+            if (delayed) {
+                prof_handle_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
+            } else {
+                prof_handle_room_message(jid->barejid, jid->resourcepart, message);
+            }
+            xmpp_free(ctx, message);
         }
     }
 
@@ -311,6 +324,7 @@ static int
 _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
+    xmpp_ctx_t *ctx = connection_get_ctx();
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *jid = jid_create(from);
 
@@ -319,7 +333,10 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
         if (body != NULL) {
             char *message = xmpp_stanza_get_text(body);
-            prof_handle_duck_result(message);
+            if (message != NULL) {
+                prof_handle_duck_result(message);
+                xmpp_free(ctx, message);
+            }
         }
 
         jid_destroy(jid);
@@ -335,14 +352,17 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
         if (body != NULL) {
             char *message = xmpp_stanza_get_text(body);
-            if (delayed) {
-                prof_handle_delayed_message(jid->str, message, tv_stamp, TRUE);
-            } else {
-                prof_handle_incoming_message(jid->str, message, TRUE);
+            if (message != NULL) {
+                if (delayed) {
+                    prof_handle_delayed_message(jid->str, message, tv_stamp, TRUE);
+                } else {
+                    prof_handle_incoming_message(jid->str, message, TRUE);
+                }
+                xmpp_free(ctx, message);
             }
         }
 
-        free(jid);
+        jid_destroy(jid);
         return 1;
 
     // standard chat message, use jid without resource
@@ -385,14 +405,17 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
         if (body != NULL) {
             char *message = xmpp_stanza_get_text(body);
-            if (delayed) {
-                prof_handle_delayed_message(jid->barejid, message, tv_stamp, FALSE);
-            } else {
-                prof_handle_incoming_message(jid->barejid, message, FALSE);
+            if (message != NULL) {
+                if (delayed) {
+                    prof_handle_delayed_message(jid->barejid, message, tv_stamp, FALSE);
+                } else {
+                    prof_handle_incoming_message(jid->barejid, message, FALSE);
+                }
+                xmpp_free(ctx, message);
             }
         }
 
-        free(jid);
+        jid_destroy(jid);
         return 1;
     }
 }

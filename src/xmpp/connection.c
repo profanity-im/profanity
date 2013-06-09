@@ -123,7 +123,7 @@ jabber_connect_with_account(const ProfAccount * const account,
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
     jabber_conn_status_t result = _jabber_connect(jidp->fulljid, passwd, account->server);
-    free(jidp);
+    jid_destroy(jidp);
 
     return result;
 }
@@ -334,6 +334,7 @@ int
 connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
+    xmpp_ctx_t *ctx = connection_get_ctx();
     gchar *err_msg = NULL;
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
@@ -347,7 +348,10 @@ connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         // check for text
         if (text_stanza != NULL) {
             err_msg = xmpp_stanza_get_text(text_stanza);
-            prof_handle_error_message(from, err_msg);
+            if (err_msg != NULL) {
+                prof_handle_error_message(from, err_msg);
+                xmpp_free(ctx, err_msg);
+            }
 
             // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
 

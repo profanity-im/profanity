@@ -48,6 +48,7 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(chat_state, state);
     xmpp_stanza_set_ns(chat_state, STANZA_NS_CHATSTATES);
     xmpp_stanza_add_child(msg, chat_state);
+    xmpp_stanza_release(chat_state);
 
     return msg;
 }
@@ -75,13 +76,16 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     text = xmpp_stanza_new(ctx);
     xmpp_stanza_set_text(text, encoded_xml);
     xmpp_stanza_add_child(body, text);
+    xmpp_stanza_release(text);
     xmpp_stanza_add_child(msg, body);
+    xmpp_stanza_release(body);
 
     if (state != NULL) {
         xmpp_stanza_t *chat_state = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(chat_state, state);
         xmpp_stanza_set_ns(chat_state, STANZA_NS_CHATSTATES);
         xmpp_stanza_add_child(msg, chat_state);
+	xmpp_stanza_release(chat_state);
     }
 
     g_free(encoded_xml);
@@ -106,7 +110,9 @@ stanza_create_roster_remove_set(xmpp_ctx_t *ctx, const char * const barejid)
     xmpp_stanza_set_attribute(item, STANZA_ATTR_SUBSCRIPTION, "remove");
 
     xmpp_stanza_add_child(query, item);
+    xmpp_stanza_release(item);
     xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
 
     return iq;
 
@@ -140,12 +146,16 @@ stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const jid,
         xmpp_stanza_set_name(group, STANZA_NAME_GROUP);
         xmpp_stanza_set_text(groupname, groups->data);
         xmpp_stanza_add_child(group, groupname);
+        xmpp_stanza_release(groupname);
         xmpp_stanza_add_child(item, group);
+        xmpp_stanza_release(group);
         groups = g_slist_next(groups);
     }
 
     xmpp_stanza_add_child(query, item);
+    xmpp_stanza_release(item);
     xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
 
     return iq;
 }
@@ -170,6 +180,7 @@ stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     }
 
     xmpp_stanza_add_child(message, x);
+    xmpp_stanza_release(x);
 
     return message;
 }
@@ -186,6 +197,7 @@ stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     xmpp_stanza_set_name(x, STANZA_NAME_X);
     xmpp_stanza_set_ns(x, STANZA_NS_MUC);
     xmpp_stanza_add_child(presence, x);
+    xmpp_stanza_release(x);
 
     return presence;
 }
@@ -704,7 +716,7 @@ stanza_create_form(xmpp_stanza_t * const stanza)
     xmpp_stanza_t *child = xmpp_stanza_get_children(stanza);
 
     if (child != NULL) {
-        result = malloc(sizeof(struct data_form_t));
+        result = malloc(sizeof(DataForm));
         result->form_type = NULL;
         result->fields = NULL;
     }
@@ -718,10 +730,11 @@ stanza_create_form(xmpp_stanza_t * const stanza)
             xmpp_stanza_t *value = xmpp_stanza_get_child_by_name(child, "value");
             char *value_text = xmpp_stanza_get_text(value);
             result->form_type = strdup(value_text);
+	    xmpp_free(ctx, value_text);
 
         // handle regular fields
         } else {
-            FormField *field = malloc(sizeof(struct form_field_t));
+            FormField *field = malloc(sizeof(FormField));
             field->var = strdup(var);
             field->values = NULL;
             xmpp_stanza_t *value = xmpp_stanza_get_children(child);
@@ -758,10 +771,12 @@ stanza_destroy_form(DataForm *form)
                 if ((field->values) != NULL) {
                     g_slist_free_full(field->values, free);
                 }
+                curr_field = curr_field->next;
             }
+            g_slist_free_full(form->fields, free);
         }
 
-        form = NULL;
+        free(form);
     }
 }
 
@@ -779,6 +794,7 @@ stanza_attach_priority(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence,
         xmpp_stanza_set_name(priority, STANZA_NAME_PRIORITY);
         xmpp_stanza_set_text(value, pri_str);
         xmpp_stanza_add_child(priority, value);
+        xmpp_stanza_release(value);
         xmpp_stanza_add_child(presence, priority);
         xmpp_stanza_release(priority);
     }
