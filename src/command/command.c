@@ -2118,6 +2118,20 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
             return TRUE;
         } else {
+            const char * jid = NULL;
+
+            if (roster_barejid_from_name(usr_jid) != NULL) {
+                jid = roster_barejid_from_name(usr_jid);
+            } else {
+                jid = usr_jid;
+            }
+
+            if (prefs_get_boolean(PREF_STATES)) {
+                if (!chat_session_exists(jid)) {
+                    chat_session_start(jid, TRUE);
+                }
+            }
+
             ui_new_chat_win(usr_jid);
             return TRUE;
         }
