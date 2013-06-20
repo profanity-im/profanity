@@ -68,8 +68,6 @@ message_send(const char * const msg, const char * const recipient)
         jid = recipient;
     }
 
-    xmpp_conn_t * const conn = connection_get_conn();
-    xmpp_ctx_t * const ctx = connection_get_ctx();
     if (prefs_get_boolean(PREF_STATES)) {
         if (!chat_session_exists(jid)) {
             chat_session_start(jid, TRUE);
@@ -77,6 +75,8 @@ message_send(const char * const msg, const char * const recipient)
     }
 
     xmpp_stanza_t *message;
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
     if (prefs_get_boolean(PREF_STATES) && chat_session_get_recipient_supports(jid)) {
         chat_session_set_active(jid);
         message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT,
