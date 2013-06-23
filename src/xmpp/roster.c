@@ -326,6 +326,11 @@ roster_remove_from_group(const char * const group, const char * const barejid)
 
     if (contact != NULL) {
         if (!p_contact_in_group(contact, group)) {
+            if (p_contact_name(contact) != NULL) {
+                prof_handle_not_in_group(p_contact_name(contact), group);
+            } else {
+                prof_handle_not_in_group(p_contact_barejid(contact), group);
+            }
             return;
         }
 

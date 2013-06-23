@@ -149,10 +149,18 @@ prof_handle_duck_result(const char * const result)
 }
 
 void
-prof_handle_already_in_group(const char * const barejid,
+prof_handle_already_in_group(const char * const contact,
     const char * const group)
 {
-    ui_contact_already_in_group(barejid, group);
+    ui_contact_already_in_group(contact, group);
+    ui_current_page_off();
+}
+
+void
+prof_handle_not_in_group(const char * const contact,
+    const char * const group)
+{
+    ui_contact_not_in_group(contact, group);
     ui_current_page_off();
 }
 

@@ -82,6 +82,7 @@ void prof_handle_duck_help(const char * const result);
 void prof_handle_duck_result(const char * const result);
 void prof_handle_roster_add(const char * const barejid, const char * const name);
 void prof_handle_roster_remove(const char * const barejid);
-void prof_handle_already_in_group(const char * const barejid, const char * const group);
+void prof_handle_already_in_group(const char * const contact, const char * const group);
+void prof_handle_not_in_group(const char * const contact, const char * const group);
 
 #endif
