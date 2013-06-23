@@ -149,6 +149,14 @@ prof_handle_duck_result(const char * const result)
 }
 
 void
+prof_handle_already_in_group(const char * const barejid,
+    const char * const group)
+{
+    ui_contact_already_in_group(barejid, group);
+    ui_current_page_off();
+}
+
+void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
     win_type_t win_type = ui_current_win_type();

@@ -456,6 +456,12 @@ ui_roster_remove(const char * const barejid)
 }
 
 void
+ui_contact_already_in_group(const char * const barejid, const char * const group)
+{
+    cons_show("%s already in group %s", barejid, group);
+}
+
+void
 ui_contact_online(const char * const barejid, const char * const resource,
     const char * const show, const char * const status, GDateTime *last_activity)
 {
