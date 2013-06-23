@@ -119,12 +119,15 @@ stanza_create_roster_remove_set(xmpp_ctx_t *ctx, const char * const barejid)
 }
 
 xmpp_stanza_t *
-stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const jid,
-    const char * const handle, GSList *groups)
+stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const id,
+    const char * const jid, const char * const handle, GSList *groups)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+    if (id != NULL) {
+        xmpp_stanza_set_id(iq, id);
+    }
 
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);

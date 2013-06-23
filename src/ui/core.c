@@ -468,6 +468,18 @@ ui_contact_not_in_group(const char * const contact, const char * const group)
 }
 
 void
+ui_group_added(const char * const contact, const char * const group)
+{
+    cons_show("%s added to group %s", contact, group);
+}
+
+void
+ui_group_removed(const char * const contact, const char * const group)
+{
+    cons_show("%s removed from group %s", contact, group);
+}
+
+void
 ui_contact_online(const char * const barejid, const char * const resource,
     const char * const show, const char * const status, GDateTime *last_activity)
 {

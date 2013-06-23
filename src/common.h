@@ -92,4 +92,6 @@ const char * string_from_resource_presence(resource_presence_t presence);
 resource_presence_t resource_presence_from_string(const char * const str);
 contact_presence_t contact_presence_from_resource_presence(resource_presence_t resource_presence);
 
+char * get_unique_id(void);
+
 #endif

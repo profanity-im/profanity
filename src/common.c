@@ -37,6 +37,9 @@
 // and page size is at least 4KB
 #define READ_BUF_SIZE 4088
 
+// for generating ids
+static int unique_id = 0;
+
 struct curl_data_t
 {
     char *buffer;
@@ -392,6 +395,19 @@ xdg_get_data_home(void)
 
         return result;
     }
+}
+
+char *
+get_unique_id(void)
+{
+    char *result = NULL;
+    unique_id++;
+    GString *result_str = g_string_new("");
+    g_string_printf(result_str, "prof%d", unique_id);
+    result = result_str->str;
+    g_string_free(result_str, FALSE);
+
+    return result;
 }
 
 static size_t

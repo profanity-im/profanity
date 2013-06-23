@@ -116,6 +116,8 @@ void ui_roster_add(const char * const barejid, const char * const name);
 void ui_roster_remove(const char * const barejid);
 void ui_contact_already_in_group(const char * const contact, const char * const group);
 void ui_contact_not_in_group(const char * const contact, const char * const group);
+void ui_group_added(const char * const contact, const char * const group);
+void ui_group_removed(const char * const contact, const char * const group);
 
 // contact status functions
 void ui_status_room(const char * const contact);

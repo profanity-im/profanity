@@ -165,6 +165,22 @@ prof_handle_not_in_group(const char * const contact,
 }
 
 void
+prof_handle_group_add(const char * const contact,
+    const char * const group)
+{
+    ui_group_added(contact, group);
+    ui_current_page_off();
+}
+
+void
+prof_handle_group_remove(const char * const contact,
+    const char * const group)
+{
+    ui_group_removed(contact, group);
+    ui_current_page_off();
+}
+
+void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
     win_type_t win_type = ui_current_win_type();
