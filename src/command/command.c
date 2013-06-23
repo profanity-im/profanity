@@ -3547,6 +3547,15 @@ _group_autocomplete(char *input, int *size)
     if (result != NULL) {
         return result;
     }
+
+    result = autocomplete_param_no_with_func(input, size, "/group add", 4, roster_find_contact);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_no_with_func(input, size, "/group remove", 4, roster_find_contact);
+    if (result != NULL) {
+        return result;
+    }
     result = autocomplete_param_with_func(input, size, "/group add", roster_find_group);
     if (result != NULL) {
         return result;

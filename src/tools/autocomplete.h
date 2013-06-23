@@ -47,5 +47,7 @@ char * autocomplete_param_with_func(char *input, int *size, char *command,
     autocomplete_func func);
 char * autocomplete_param_with_ac(char *input, int *size, char *command,
     Autocomplete ac);
+char * autocomplete_param_no_with_func(char *input, int *size, char *command,
+    int arg_number, autocomplete_func func);
 
 #endif
