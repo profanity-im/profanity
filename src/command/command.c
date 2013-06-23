@@ -107,25 +107,25 @@ static gboolean _cmd_invites(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_decline(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_disco(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_beep(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_notify(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_log(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_priority(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_reconnect(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_intype(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_flash(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_splash(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_chlog(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_grlog(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_history(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_states(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_outtype(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_gone(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_autoping(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_titlebar(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_autoaway(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_mouse(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_set_statuses(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_beep(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_notify(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_log(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_priority(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_reconnect(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_intype(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_flash(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_splash(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_chlog(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_grlog(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_history(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_states(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_outtype(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_gone(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_autoping(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_titlebar(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_autoaway(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_mouse(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_statuses(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
@@ -502,7 +502,7 @@ static struct cmd_t main_commands[] =
 static struct cmd_t setting_commands[] =
 {
     { "/beep",
-        _cmd_set_beep, parse_args, 1, 1,
+        _cmd_beep, parse_args, 1, 1,
         { "/beep on|off", "Terminal beep on new messages.",
         { "/beep on|off",
           "------------",
@@ -512,7 +512,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/notify",
-        _cmd_set_notify, parse_args, 2, 2,
+        _cmd_notify, parse_args, 2, 2,
         { "/notify type value", "Control various desktop noficiations.",
         { "/notify type value",
           "------------------",
@@ -538,7 +538,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/flash",
-        _cmd_set_flash, parse_args, 1, 1,
+        _cmd_flash, parse_args, 1, 1,
         { "/flash on|off", "Terminal flash on new messages.",
         { "/flash on|off",
           "-------------",
@@ -548,7 +548,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/intype",
-        _cmd_set_intype, parse_args, 1, 1,
+        _cmd_intype, parse_args, 1, 1,
         { "/intype on|off", "Show when contact is typing.",
         { "/intype on|off",
           "--------------",
@@ -556,7 +556,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/splash",
-        _cmd_set_splash, parse_args, 1, 1,
+        _cmd_splash, parse_args, 1, 1,
         { "/splash on|off", "Splash logo on startup and /about command.",
         { "/splash on|off",
           "--------------",
@@ -573,7 +573,7 @@ static struct cmd_t setting_commands[] =
           NULL  } } },
 
     { "/titlebar",
-        _cmd_set_titlebar, parse_args, 2, 2,
+        _cmd_titlebar, parse_args, 2, 2,
         { "/titlebar property on|off", "Show various properties in the window title bar.",
         { "/titlebar property on|off",
           "-------------------------",
@@ -582,7 +582,7 @@ static struct cmd_t setting_commands[] =
           NULL  } } },
 
     { "/mouse",
-        _cmd_set_mouse, parse_args, 1, 1,
+        _cmd_mouse, parse_args, 1, 1,
         { "/mouse on|off", "Use profanity mouse handling.",
         { "/mouse on|off",
           "-------------",
@@ -595,7 +595,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/chlog",
-        _cmd_set_chlog, parse_args, 1, 1,
+        _cmd_chlog, parse_args, 1, 1,
         { "/chlog on|off", "Chat logging to file",
         { "/chlog on|off",
           "-------------",
@@ -606,7 +606,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/grlog",
-        _cmd_set_grlog, parse_args, 1, 1,
+        _cmd_grlog, parse_args, 1, 1,
         { "/grlog on|off", "Chat logging of chat rooms to file",
         { "/grlog on|off",
           "-------------",
@@ -615,7 +615,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/states",
-        _cmd_set_states, parse_args, 1, 1,
+        _cmd_states, parse_args, 1, 1,
         { "/states on|off", "Send chat states during a chat session.",
         { "/states on|off",
           "--------------",
@@ -624,7 +624,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/outtype",
-        _cmd_set_outtype, parse_args, 1, 1,
+        _cmd_outtype, parse_args, 1, 1,
         { "/outtype on|off", "Send typing notification to recipient.",
         { "/outtype on|off",
           "---------------",
@@ -633,7 +633,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/gone",
-        _cmd_set_gone, parse_args, 1, 1,
+        _cmd_gone, parse_args, 1, 1,
         { "/gone minutes", "Send 'gone' state to recipient after a period.",
         { "/gone minutes",
           "-------------",
@@ -644,7 +644,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/history",
-        _cmd_set_history, parse_args, 1, 1,
+        _cmd_history, parse_args, 1, 1,
         { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
           "---------------",
@@ -653,7 +653,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/log",
-        _cmd_set_log, parse_args, 2, 2,
+        _cmd_log, parse_args, 2, 2,
         { "/log maxsize value", "Manage system logging settings.",
         { "/log maxsize value",
           "------------------",
@@ -662,7 +662,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/reconnect",
-        _cmd_set_reconnect, parse_args, 1, 1,
+        _cmd_reconnect, parse_args, 1, 1,
         { "/reconnect seconds", "Set reconnect interval.",
         { "/reconnect seconds",
           "------------------",
@@ -671,7 +671,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/autoping",
-        _cmd_set_autoping, parse_args, 1, 1,
+        _cmd_autoping, parse_args, 1, 1,
         { "/autoping seconds", "Server ping interval.",
         { "/autoping seconds",
           "-----------------",
@@ -680,7 +680,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/autoaway",
-        _cmd_set_autoaway, parse_args_with_freetext, 2, 2,
+        _cmd_autoaway, parse_args_with_freetext, 2, 2,
         { "/autoaway setting value", "Set auto idle/away properties.",
         { "/autoaway setting value",
           "-----------------------",
@@ -701,7 +701,7 @@ static struct cmd_t setting_commands[] =
           NULL } } },
 
     { "/priority",
-        _cmd_set_priority, parse_args, 1, 1,
+        _cmd_priority, parse_args, 1, 1,
         { "/priority value", "Set priority for the current account.",
         { "/priority value",
           "---------------",
@@ -776,7 +776,7 @@ static struct cmd_t setting_commands[] =
 
 
     { "/statuses",
-        _cmd_set_statuses, parse_args, 1, 1,
+        _cmd_statuses, parse_args, 1, 1,
         { "/statuses on|off", "Set notifications for status messages.",
         { "/statuses on|off",
           "----------------",
@@ -2975,13 +2975,13 @@ _cmd_leave(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_beep(gchar **args, struct cmd_help_t help)
+_cmd_beep(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help, "Sound", PREF_BEEP);
 }
 
 static gboolean
-_cmd_set_states(gchar **args, struct cmd_help_t help)
+_cmd_states(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help, "Sending chat states",
         PREF_STATES);
@@ -2996,7 +2996,7 @@ _cmd_set_states(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_titlebar(gchar **args, struct cmd_help_t help)
+_cmd_titlebar(gchar **args, struct cmd_help_t help)
 {
     if (strcmp(args[0], "version") != 0) {
         cons_show("Usage: %s", help.usage);
@@ -3008,7 +3008,7 @@ _cmd_set_titlebar(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_outtype(gchar **args, struct cmd_help_t help)
+_cmd_outtype(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Sending typing notifications", PREF_OUTTYPE);
@@ -3022,7 +3022,7 @@ _cmd_set_outtype(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_gone(gchar **args, struct cmd_help_t help)
+_cmd_gone(gchar **args, struct cmd_help_t help)
 {
     char *value = args[0];
 
@@ -3046,7 +3046,7 @@ _cmd_set_gone(gchar **args, struct cmd_help_t help)
 
 
 static gboolean
-_cmd_set_notify(gchar **args, struct cmd_help_t help)
+_cmd_notify(gchar **args, struct cmd_help_t help)
 {
     char *kind = args[0];
     char *value = args[1];
@@ -3125,7 +3125,7 @@ _cmd_set_notify(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_log(gchar **args, struct cmd_help_t help)
+_cmd_log(gchar **args, struct cmd_help_t help)
 {
     char *subcmd = args[0];
     char *value = args[1];
@@ -3146,7 +3146,7 @@ _cmd_set_log(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_reconnect(gchar **args, struct cmd_help_t help)
+_cmd_reconnect(gchar **args, struct cmd_help_t help)
 {
     char *value = args[0];
     int intval;
@@ -3166,7 +3166,7 @@ _cmd_set_reconnect(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_autoping(gchar **args, struct cmd_help_t help)
+_cmd_autoping(gchar **args, struct cmd_help_t help)
 {
     char *value = args[0];
     int intval;
@@ -3187,7 +3187,7 @@ _cmd_set_autoping(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_autoaway(gchar **args, struct cmd_help_t help)
+_cmd_autoaway(gchar **args, struct cmd_help_t help)
 {
     char *setting = args[0];
     char *value = args[1];
@@ -3241,7 +3241,7 @@ _cmd_set_autoaway(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_priority(gchar **args, struct cmd_help_t help)
+_cmd_priority(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
@@ -3264,7 +3264,7 @@ _cmd_set_priority(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_statuses(gchar **args, struct cmd_help_t help)
+_cmd_statuses(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
         "Status notifications", PREF_STATUSES);
@@ -3285,28 +3285,28 @@ _cmd_vercheck(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_flash(gchar **args, struct cmd_help_t help)
+_cmd_flash(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
         "Screen flash", PREF_FLASH);
 }
 
 static gboolean
-_cmd_set_intype(gchar **args, struct cmd_help_t help)
+_cmd_intype(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
         "Show contact typing", PREF_INTYPE);
 }
 
 static gboolean
-_cmd_set_splash(gchar **args, struct cmd_help_t help)
+_cmd_splash(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
         "Splash screen", PREF_SPLASH);
 }
 
 static gboolean
-_cmd_set_chlog(gchar **args, struct cmd_help_t help)
+_cmd_chlog(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Chat logging", PREF_CHLOG);
@@ -3320,7 +3320,7 @@ _cmd_set_chlog(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_grlog(gchar **args, struct cmd_help_t help)
+_cmd_grlog(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Groupchat logging", PREF_GRLOG);
@@ -3329,14 +3329,14 @@ _cmd_set_grlog(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
-_cmd_set_mouse(gchar **args, struct cmd_help_t help)
+_cmd_mouse(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
         "Mouse handling", PREF_MOUSE);
 }
 
 static gboolean
-_cmd_set_history(gchar **args, struct cmd_help_t help)
+_cmd_history(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Chat history", PREF_HISTORY);
