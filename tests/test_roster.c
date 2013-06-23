@@ -8,19 +8,14 @@
 #include "contact.h"
 #include "xmpp/xmpp.h"
 
-static void setup(void)
+static void beforetest(void)
 {
     roster_init();
 }
 
-static void beforetest(void)
-{
-    roster_clear();
-}
-
 static void aftertest(void)
 {
-    roster_clear();
+    roster_free();
 }
 
 static void empty_list_when_none_added(void)
@@ -31,14 +26,18 @@ static void empty_list_when_none_added(void)
 
 static void contains_one_element(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
+    printf("0\n");
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    printf("1\n");
     GSList *list = roster_get_contacts();
+    printf("2\n");
     assert_int_equals(1, g_slist_length(list));
+    printf("3\n");
 }
 
 static void first_element_correct(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
     PContact james = list->data;
 
@@ -47,8 +46,8 @@ static void first_element_correct(void)
 
 static void contains_two_elements(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
 
     assert_int_equals(2, g_slist_length(list));
@@ -56,22 +55,22 @@ static void contains_two_elements(void)
 
 static void first_and_second_elements_correct(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
 
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
 
-    assert_string_equals("James", p_contact_barejid(first));
-    assert_string_equals("Dave", p_contact_barejid(second));
+    assert_string_equals("Dave", p_contact_barejid(first));
+    assert_string_equals("James", p_contact_barejid(second));
 }
 
 static void contains_three_elements(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
 
     assert_int_equals(3, g_slist_length(list));
@@ -79,9 +78,9 @@ static void contains_three_elements(void)
 
 static void first_three_elements_correct(void)
 {
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("James", NULL, NULL, NULL, FALSE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
     PContact bob = list->data;
     PContact dave = (g_slist_next(list))->data;
@@ -94,58 +93,58 @@ static void first_three_elements_correct(void)
 
 static void add_twice_at_beginning_adds_once(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
     PContact third = (g_slist_next(g_slist_next(list)))->data;
 
     assert_int_equals(3, g_slist_length(list));
-    assert_string_equals("James", p_contact_barejid(first));
+    assert_string_equals("Bob", p_contact_barejid(first));
     assert_string_equals("Dave", p_contact_barejid(second));
-    assert_string_equals("Bob", p_contact_barejid(third));
+    assert_string_equals("James", p_contact_barejid(third));
 }
 
 static void add_twice_in_middle_adds_once(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
     PContact third = (g_slist_next(g_slist_next(list)))->data;
 
     assert_int_equals(3, g_slist_length(list));
-    assert_string_equals("James", p_contact_barejid(first));
+    assert_string_equals("Bob", p_contact_barejid(first));
     assert_string_equals("Dave", p_contact_barejid(second));
-    assert_string_equals("Bob", p_contact_barejid(third));
+    assert_string_equals("James", p_contact_barejid(third));
 }
 
 static void add_twice_at_end_adds_once(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
-    roster_add("James", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
     PContact first = list->data;
     PContact second = (g_slist_next(list))->data;
     PContact third = (g_slist_next(g_slist_next(list)))->data;
 
     assert_int_equals(3, g_slist_length(list));
-    assert_string_equals("James", p_contact_barejid(first));
+    assert_string_equals("Bob", p_contact_barejid(first));
     assert_string_equals("Dave", p_contact_barejid(second));
-    assert_string_equals("Bob", p_contact_barejid(third));
+    assert_string_equals("James", p_contact_barejid(third));
 }
 
 static void test_show_online_when_no_value(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
     PContact james = list->data;
 
@@ -154,7 +153,7 @@ static void test_show_online_when_no_value(void)
 
 static void test_status_when_no_value(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
     GSList *list = roster_get_contacts();
     PContact james = list->data;
 
@@ -163,9 +162,9 @@ static void test_status_when_no_value(void)
 
 static void find_first_exists(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
 
     char *search = (char *) malloc(2 * sizeof(char));
     strcpy(search, "B");
@@ -178,9 +177,9 @@ static void find_first_exists(void)
 
 static void find_second_exists(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
 
     char *result = roster_find_contact("Dav");
     assert_string_equals("Dave", result);
@@ -189,9 +188,9 @@ static void find_second_exists(void)
 
 static void find_third_exists(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
 
     char *result = roster_find_contact("Ja");
     assert_string_equals("James", result);
@@ -200,9 +199,9 @@ static void find_third_exists(void)
 
 static void find_returns_null(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
 
     char *result = roster_find_contact("Mike");
     assert_is_null(result);
@@ -216,9 +215,9 @@ static void find_on_empty_returns_null(void)
 
 static void find_twice_returns_second_when_two_match(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Jamie", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamie", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
 
     char *result1 = roster_find_contact("Jam");
     char *result2 = roster_find_contact(result1);
@@ -229,16 +228,16 @@ static void find_twice_returns_second_when_two_match(void)
 
 static void find_five_times_finds_fifth(void)
 {
-    roster_add("Jama", NULL, NULL, NULL, FALSE);
-    roster_add("Jamb", NULL, NULL, NULL, FALSE);
-    roster_add("Mike", NULL, NULL, NULL, FALSE);
-    roster_add("Dave", NULL, NULL, NULL, FALSE);
-    roster_add("Jamm", NULL, NULL, NULL, FALSE);
-    roster_add("Jamn", NULL, NULL, NULL, FALSE);
-    roster_add("Matt", NULL, NULL, NULL, FALSE);
-    roster_add("Jamo", NULL, NULL, NULL, FALSE);
-    roster_add("Jamy", NULL, NULL, NULL, FALSE);
-    roster_add("Jamz", NULL, NULL, NULL, FALSE);
+    roster_add("Jama", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamb", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Mike", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Dave", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamm", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamn", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Matt", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamo", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamy", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamz", NULL, NULL, NULL, FALSE, TRUE);
 
     char *result1 = roster_find_contact("Jam");
     char *result2 = roster_find_contact(result1);
@@ -255,9 +254,9 @@ static void find_five_times_finds_fifth(void)
 
 static void find_twice_returns_first_when_two_match_and_reset(void)
 {
-    roster_add("James", NULL, NULL, NULL, FALSE);
-    roster_add("Jamie", NULL, NULL, NULL, FALSE);
-    roster_add("Bob", NULL, NULL, NULL, FALSE);
+    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Jamie", NULL, NULL, NULL, FALSE, TRUE);
+    roster_add("Bob", NULL, NULL, NULL, FALSE, TRUE);
 
     char *result1 = roster_find_contact("Jam");
     roster_reset_search_attempts();
@@ -270,7 +269,6 @@ static void find_twice_returns_first_when_two_match_and_reset(void)
 void register_roster_tests(void)
 {
     TEST_MODULE("roster tests");
-    SETUP(setup);
     BEFORETEST(beforetest);
     AFTERTEST(aftertest);
     TEST(empty_list_when_none_added);
