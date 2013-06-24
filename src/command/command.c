@@ -1300,11 +1300,11 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *commands[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
 
-    for (i = 0; i < ARRAY_SIZE(commands); i++) {
-        result = autocomplete_param_with_ac(input, size, commands[i], completers[i]);
+    for (i = 0; i < ARRAY_SIZE(cmds); i++) {
+        result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
         if (result != NULL) {
             inp_replace_input(input, result, size);
             g_free(result);
