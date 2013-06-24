@@ -26,11 +26,11 @@
 #include <glib.h>
 
 // Command help strings
-struct cmd_help_t {
+typedef struct cmd_help_t {
     const gchar *usage;
     const gchar *short_help;
     const gchar *long_help[50];
-};
+} CommandHelp;
 
 void cmd_init(void);
 void cmd_close(void);

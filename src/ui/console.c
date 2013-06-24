@@ -43,7 +43,6 @@
 static ProfWin* console;
 
 static void _cons_splash_logo(void);
-static void _cons_show_basic_help(void);
 
 ProfWin *
 cons_create(void)
@@ -1155,63 +1154,17 @@ cons_help(void)
     cons_show("");
     cons_show("Choose a help option:");
     cons_show("");
-    cons_show("/help list       - List all commands.");
-    cons_show("/help basic      - Summary of basic usage commands.");
-    cons_show("/help presence   - Summary of online status change commands.");
-    cons_show("/help settings   - Summary of commands for changing Profanity settings.");
+    cons_show("/help commands   - List all commands.");
+    cons_show("/help basic      - List basic commands for getting started.");
+    cons_show("/help chatting   - List chat commands.");
+    cons_show("/help groupchat  - List groupchat commands.");
+    cons_show("/help presence   - List commands to change presence.");
+    cons_show("/help roster     - List commands for manipulating your roster.");
+    cons_show("/help service    - List service discovery commands");
+    cons_show("/help settings   - List commands for changing settings.");
+    cons_show("/help other      - Other commands.");
     cons_show("/help navigation - How to navigate around Profanity.");
     cons_show("/help [command]  - Detailed help on a specific command.");
-    cons_show("");
-
-    ui_console_dirty();
-    cons_alert();
-}
-
-void
-cons_basic_help(void)
-{
-    cons_show("");
-    cons_show("Basic Commands:");
-    _cons_show_basic_help();
-
-    ui_console_dirty();
-    cons_alert();
-}
-
-void
-cons_settings_help(void)
-{
-    cons_show("");
-    cons_show("Settings:");
-    cons_show("");
-
-    GSList *settings_helpers = cmd_get_settings_help();
-    while (settings_helpers != NULL) {
-        struct cmd_help_t *help = (struct cmd_help_t *)settings_helpers->data;
-        cons_show("%-27s: %s", help->usage, help->short_help);
-        settings_helpers = g_slist_next(settings_helpers);
-    }
-
-    cons_show("");
-
-    ui_console_dirty();
-    cons_alert();
-}
-
-void
-cons_presence_help(void)
-{
-    cons_show("");
-    cons_show("Presence changes:");
-    cons_show("");
-
-    GSList *presence_helpers = cmd_get_presence_help();
-    while (presence_helpers != NULL) {
-        struct cmd_help_t *help = (struct cmd_help_t *)presence_helpers->data;
-        cons_show("%-25s: %s", help->usage, help->short_help);
-        presence_helpers = g_slist_next(presence_helpers);
-    }
-
     cons_show("");
 
     ui_console_dirty();
@@ -1230,8 +1183,9 @@ cons_navigation_help(void)
     cons_show("F2..F10                  : Chat windows.");
     cons_show("UP, DOWN                 : Navigate input history.");
     cons_show("LEFT, RIGHT, HOME, END   : Edit current input.");
+    cons_show("CTRL-LEFT, CTRL-RIGHT    : Jump word in input.");
     cons_show("ESC                      : Clear current input.");
-    cons_show("TAB                      : Autocomplete command/recipient/login.");
+    cons_show("TAB                      : Autocomplete.");
     cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
     cons_show("");
 
@@ -1411,22 +1365,3 @@ _cons_splash_logo(void)
         wprintw(console->win, "Version %s\n", PACKAGE_VERSION);
     }
 }
-
-static void
-_cons_show_basic_help(void)
-{
-    cons_show("");
-
-    GSList *basic_helpers = cmd_get_basic_help();
-    while (basic_helpers != NULL) {
-        struct cmd_help_t *help = (struct cmd_help_t *)basic_helpers->data;
-        cons_show("%-30s: %s", help->usage, help->short_help);
-        basic_helpers = g_slist_next(basic_helpers);
-    }
-
-    cons_show("");
-    ui_console_dirty();
-    cons_alert();
-}
-
-
