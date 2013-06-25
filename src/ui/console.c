@@ -903,68 +903,101 @@ cons_show_account(ProfAccount *account)
 }
 
 void
-cons_show_ui_prefs(void)
+cons_theme_setting(void)
 {
-    cons_show("UI preferences:");
-    cons_show("");
-
     gchar *theme = prefs_get_string(PREF_THEME);
     if (theme == NULL) {
         cons_show("Theme (/theme)               : default");
     } else {
         cons_show("Theme (/theme)               : %s", theme);
     }
+}
 
+void
+cons_beep_setting(void)
+{
     if (prefs_get_boolean(PREF_BEEP))
         cons_show("Terminal beep (/beep)        : ON");
     else
         cons_show("Terminal beep (/beep)        : OFF");
+}
 
+void
+cons_flash_setting(void)
+{
     if (prefs_get_boolean(PREF_FLASH))
         cons_show("Terminal flash (/flash)      : ON");
     else
         cons_show("Terminal flash (/flash)      : OFF");
+}
 
-    if (prefs_get_boolean(PREF_INTYPE))
-        cons_show("Show typing (/intype)        : ON");
-    else
-        cons_show("Show typing (/intype)        : OFF");
-
+void
+cons_splash_setting(void)
+{
     if (prefs_get_boolean(PREF_SPLASH))
         cons_show("Splash screen (/splash)      : ON");
     else
         cons_show("Splash screen (/splash)      : OFF");
+}
 
-    if (prefs_get_boolean(PREF_HISTORY))
-        cons_show("Chat history (/history)      : ON");
-    else
-        cons_show("Chat history (/history)      : OFF");
-
+void
+cons_vercheck_setting(void)
+{
     if (prefs_get_boolean(PREF_VERCHECK))
         cons_show("Version checking (/vercheck) : ON");
     else
         cons_show("Version checking (/vercheck) : OFF");
+}
 
+void
+cons_mouse_setting(void)
+{
     if (prefs_get_boolean(PREF_MOUSE))
         cons_show("Mouse handling (/mouse)      : ON");
     else
         cons_show("Mouse handling (/mouse)      : OFF");
+}
 
+void
+cons_statuses_setting(void)
+{
     if (prefs_get_boolean(PREF_STATUSES))
         cons_show("Status (/statuses)           : ON");
     else
         cons_show("Status (/statuses)           : OFF");
+}
+
+void
+cons_titlebar_setting(void)
+{
+    if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
+        cons_show("Titlebar display (/titlebar) : version");
+    } else {
+        cons_show("Titlebar display (/titlebar) : NONE");
+    }
+}
+
+void
+cons_show_ui_prefs(void)
+{
+    cons_show("UI preferences:");
+    cons_show("");
+    cons_theme_setting();
+    cons_beep_setting();
+    cons_flash_setting();
+    cons_splash_setting();
+    cons_vercheck_setting();
+    cons_mouse_setting();
+    cons_statuses_setting();
+    cons_titlebar_setting();
 
     ui_console_dirty();
     cons_alert();
 }
 
 void
-cons_show_desktop_prefs(void)
+cons_notify_setting(void)
 {
-    cons_show("Desktop notification preferences:");
-    cons_show("");
-
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
         cons_show("Messages (/notify message)          : ON");
     else
@@ -987,33 +1020,55 @@ cons_show_desktop_prefs(void)
 
     gint remind_period = prefs_get_notify_remind();
     if (remind_period == 0) {
-        cons_show("Reminder period (/notify remind) : OFF");
+        cons_show("Reminder period (/notify remind)    : OFF");
     } else if (remind_period == 1) {
-        cons_show("Reminder period (/notify remind) : 1 second");
+        cons_show("Reminder period (/notify remind)    : 1 second");
     } else {
-        cons_show("Reminder period (/notify remind) : %d seconds", remind_period);
+        cons_show("Reminder period (/notify remind)    : %d seconds", remind_period);
     }
+}
+
+void
+cons_show_desktop_prefs(void)
+{
+    cons_show("Desktop notification preferences:");
+    cons_show("");
+    cons_notify_setting();
 
     ui_console_dirty();
     cons_alert();
 }
 
 void
-cons_show_chat_prefs(void)
+cons_states_setting(void)
 {
-    cons_show("Chat preferences:");
-    cons_show("");
-
     if (prefs_get_boolean(PREF_STATES))
         cons_show("Send chat states (/states) : ON");
     else
         cons_show("Send chat states (/states) : OFF");
+}
 
+void
+cons_outtype_setting(void)
+{
     if (prefs_get_boolean(PREF_OUTTYPE))
         cons_show("Send composing (/outtype)  : ON");
     else
         cons_show("Send composing (/outtype)  : OFF");
+}
 
+void
+cons_intype_setting(void)
+{
+    if (prefs_get_boolean(PREF_INTYPE))
+        cons_show("Show typing (/intype)      : ON");
+    else
+        cons_show("Show typing (/intype)      : OFF");
+}
+
+void
+cons_gone_setting(void)
+{
     gint gone_time = prefs_get_gone();
     if (gone_time == 0) {
         cons_show("Leave conversation (/gone) : OFF");
@@ -1022,9 +1077,54 @@ cons_show_chat_prefs(void)
     } else {
         cons_show("Leave conversation (/gone) : %d minutes", gone_time);
     }
+}
+
+void
+cons_history_setting(void)
+{
+    if (prefs_get_boolean(PREF_HISTORY))
+        cons_show("Chat history (/history)    : ON");
+    else
+        cons_show("Chat history (/history)    : OFF");
+}
+
+void
+cons_show_chat_prefs(void)
+{
+    cons_show("Chat preferences:");
+    cons_show("");
+    cons_states_setting();
+    cons_outtype_setting();
+    cons_intype_setting();
+    cons_gone_setting();
+    cons_history_setting();
 
     ui_console_dirty();
     cons_alert();
+}
+
+void
+cons_log_setting(void)
+{
+    cons_show("Max log size (/log maxsize) : %d bytes", prefs_get_max_log_size());
+}
+
+void
+cons_chlog_setting(void)
+{
+    if (prefs_get_boolean(PREF_CHLOG))
+        cons_show("Chat logging (/chlog)       : ON");
+    else
+        cons_show("Chat logging (/chlog)       : OFF");
+}
+
+void
+cons_grlog_setting(void)
+{
+    if (prefs_get_boolean(PREF_GRLOG))
+        cons_show("Groupchat logging (/grlog)  : ON");
+    else
+        cons_show("Groupchat logging (/grlog)  : OFF");
 }
 
 void
@@ -1032,29 +1132,17 @@ cons_show_log_prefs(void)
 {
     cons_show("Logging preferences:");
     cons_show("");
-
-    cons_show("Max log size (/log maxsize) : %d bytes", prefs_get_max_log_size());
-
-    if (prefs_get_boolean(PREF_CHLOG))
-        cons_show("Chat logging (/chlog)       : ON");
-    else
-        cons_show("Chat logging (/chlog)       : OFF");
-
-    if (prefs_get_boolean(PREF_GRLOG))
-        cons_show("Groupchat logging (/grlog)  : ON");
-    else
-        cons_show("Groupchat logging (/grlog)  : OFF");
+    cons_log_setting();
+    cons_chlog_setting();
+    cons_grlog_setting();
 
     ui_console_dirty();
     cons_alert();
 }
 
 void
-cons_show_presence_prefs(void)
+cons_autoaway_setting(void)
 {
-    cons_show("Presence preferences:");
-    cons_show("");
-
     if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "off") == 0) {
         cons_show("Autoaway (/autoaway mode)            : OFF");
     } else {
@@ -1075,17 +1163,22 @@ cons_show_presence_prefs(void)
     } else {
         cons_show("Autoaway check (/autoaway check)     : OFF");
     }
+}
+
+void
+cons_show_presence_prefs(void)
+{
+    cons_show("Presence preferences:");
+    cons_show("");
+    cons_autoaway_setting();
 
     ui_console_dirty();
     cons_alert();
 }
 
 void
-cons_show_connection_prefs(void)
+cons_reconnect_setting(void)
 {
-    cons_show("Connection preferences:");
-    cons_show("");
-
     gint reconnect_interval = prefs_get_reconnect();
     if (reconnect_interval == 0) {
         cons_show("Reconnect interval (/reconnect) : OFF");
@@ -1094,7 +1187,11 @@ cons_show_connection_prefs(void)
     } else {
         cons_show("Reconnect interval (/reconnect) : %d seconds", reconnect_interval);
     }
+}
 
+void
+cons_autoping_setting(void)
+{
     gint autoping_interval = prefs_get_autoping();
     if (autoping_interval == 0) {
         cons_show("Autoping interval (/autoping)   : OFF");
@@ -1103,6 +1200,22 @@ cons_show_connection_prefs(void)
     } else {
         cons_show("Autoping interval (/autoping)   : %d seconds", autoping_interval);
     }
+}
+
+void
+cons_priority_setting(void)
+{
+    gint priority = prefs_get_priority();
+    cons_show("Priority (/priority) : %d", priority);
+}
+
+void
+cons_show_connection_prefs(void)
+{
+    cons_show("Connection preferences:");
+    cons_show("");
+    cons_reconnect_setting();
+    cons_autoping_setting();
 
     ui_console_dirty();
     cons_alert();

@@ -195,6 +195,28 @@ void cons_show_room_invites(GSList *invites);
 void cons_show_received_subs(void);
 void cons_show_sent_subs(void);
 void cons_alert(void);
+void cons_theme_setting(void);
+void cons_beep_setting(void);
+void cons_flash_setting(void);
+void cons_splash_setting(void);
+void cons_vercheck_setting(void);
+void cons_mouse_setting(void);
+void cons_statuses_setting(void);
+void cons_titlebar_setting(void);
+void cons_notify_setting(void);
+void cons_show_desktop_prefs(void);
+void cons_states_setting(void);
+void cons_outtype_setting(void);
+void cons_intype_setting(void);
+void cons_gone_setting(void);
+void cons_history_setting(void);
+void cons_log_setting(void);
+void cons_chlog_setting(void);
+void cons_grlog_setting(void);
+void cons_autoaway_setting(void);
+void cons_reconnect_setting(void);
+void cons_autoping_setting(void);
+void cons_priority_setting(void);
 
 // status bar actions
 void status_bar_refresh(void);

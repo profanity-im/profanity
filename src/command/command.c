@@ -61,6 +61,7 @@ typedef struct cmd_t {
     gchar** (*parser)(const char * const inp, int min, int max);
     int min_args;
     int max_args;
+    void (*setting_func)(void);
     CommandHelp help;
 } Command;
 
@@ -150,7 +151,7 @@ static GHashTable *commands = NULL;
 static struct cmd_t command_defs[] =
 {
     { "/help",
-        _cmd_help, parse_args, 0, 1,
+        _cmd_help, parse_args, 0, 1, NULL,
         { "/help [area|command]", "Get help on using Profanity",
         { "/help [area|command]",
           "-------------------------",
@@ -166,7 +167,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/about",
-        _cmd_about, parse_args, 0, 0,
+        _cmd_about, parse_args, 0, 0, NULL,
         { "/about", "About Profanity",
         { "/about",
           "------",
@@ -174,7 +175,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/connect",
-        _cmd_connect, parse_args, 1, 2,
+        _cmd_connect, parse_args, 1, 2, NULL,
         { "/connect account [server]", "Login to a chat service.",
         { "/connect account [server]",
           "-------------------------",
@@ -187,7 +188,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/disconnect",
-        _cmd_disconnect, parse_args, 0, 0,
+        _cmd_disconnect, parse_args, 0, 0, NULL,
         { "/disconnect", "Logout of current session.",
         { "/disconnect",
           "-----------",
@@ -195,7 +196,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/msg",
-        _cmd_msg, parse_args_with_freetext, 1, 2,
+        _cmd_msg, parse_args_with_freetext, 1, 2, NULL,
         { "/msg jid|nick [message]", "Start chat with user.",
         { "/msg jid|nick [message]",
           "-----------------------",
@@ -210,7 +211,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/roster",
-        _cmd_roster, parse_args_with_freetext, 0, 3,
+        _cmd_roster, parse_args_with_freetext, 0, 3, NULL,
         { "/roster [add|remove|nick] [jid] [handle]", "Manage your roster.",
         { "/roster [add|remove|nick] [jid] [handle]",
           "----------------------------------------",
@@ -230,7 +231,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/group",
-        _cmd_group, parse_args_with_freetext, 0, 3,
+        _cmd_group, parse_args_with_freetext, 0, 3, NULL,
         { "/group show|add|remove [group] [contact]", "Manage roster groups.",
         { "/group show|add|remove [group] [contact]",
           "-------------------------------------",
@@ -248,7 +249,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/info",
-        _cmd_info, parse_args, 0, 1,
+        _cmd_info, parse_args, 0, 1, NULL,
         { "/info [jid|nick]", "Show basic information about a contact, or room member.",
         { "/info [jid|nick]",
           "----------------",
@@ -260,7 +261,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/caps",
-        _cmd_caps, parse_args, 0, 1,
+        _cmd_caps, parse_args, 0, 1, NULL,
         { "/caps [fulljid|nick]", "Find out a contacts client software capabilities.",
         { "/caps [fulljid|nick]",
           "--------------------",
@@ -275,7 +276,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/software",
-        _cmd_software, parse_args, 0, 1,
+        _cmd_software, parse_args, 0, 1, NULL,
         { "/software [fulljid|nick]", "Find out software version information about a contacts resource.",
         { "/software [fulljid|nick]",
           "------------------------",
@@ -291,7 +292,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/status",
-        _cmd_status, parse_args, 0, 1,
+        _cmd_status, parse_args, 0, 1, NULL,
         { "/status [jid|nick]", "Find out your contacts presence information.",
         { "/status [jid|nick]",
           "------------------",
@@ -303,7 +304,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/join",
-        _cmd_join, parse_args_with_freetext, 1, 2,
+        _cmd_join, parse_args_with_freetext, 1, 2, NULL,
         { "/join room[@server] [nick]", "Join a chat room.",
         { "/join room[@server] [nick]",
           "--------------------------",
@@ -319,7 +320,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/leave",
-        _cmd_leave, parse_args, 0, 0,
+        _cmd_leave, parse_args, 0, 0, NULL,
         { "/leave", "Leave a chat room.",
         { "/leave",
           "------",
@@ -327,7 +328,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/invite",
-        _cmd_invite, parse_args_with_freetext, 1, 2,
+        _cmd_invite, parse_args_with_freetext, 1, 2, NULL,
         { "/invite jid [message]", "Invite contact to chat room.",
         { "/invite jid [message]",
           "--------------------------",
@@ -337,7 +338,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/invites",
-        _cmd_invites, parse_args_with_freetext, 0, 0,
+        _cmd_invites, parse_args_with_freetext, 0, 0, NULL,
         { "/invites", "Show outstanding chat room invites.",
         { "/invites",
           "--------",
@@ -347,7 +348,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/decline",
-        _cmd_decline, parse_args_with_freetext, 1, 1,
+        _cmd_decline, parse_args_with_freetext, 1, 1, NULL,
         { "/decline room", "Decline a chat room invite.",
         { "/decline room",
           "-------------",
@@ -355,7 +356,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/rooms",
-        _cmd_rooms, parse_args, 0, 1,
+        _cmd_rooms, parse_args, 0, 1, NULL,
         { "/rooms [conference-service]", "List chat rooms.",
         { "/rooms [conference-service]",
           "---------------------------",
@@ -368,7 +369,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/disco",
-        _cmd_disco, parse_args, 1, 2,
+        _cmd_disco, parse_args, 1, 2, NULL,
         { "/disco command entity", "Service discovery.",
         { "/disco command entity",
           "---------------------",
@@ -386,7 +387,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/nick",
-        _cmd_nick, parse_args_with_freetext, 1, 1,
+        _cmd_nick, parse_args_with_freetext, 1, 1, NULL,
         { "/nick nickname", "Change nickname in chat room.",
         { "/nick nickname",
           "--------------",
@@ -398,7 +399,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/wins",
-        _cmd_wins, parse_args, 0, 1,
+        _cmd_wins, parse_args, 0, 1, NULL,
         { "/wins [tidy|prune]", "List or tidy active windows.",
         { "/wins [tidy|prune]",
           "------------------",
@@ -408,7 +409,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/sub",
-        _cmd_sub, parse_args, 1, 2,
+        _cmd_sub, parse_args, 1, 2, NULL,
         { "/sub command [jid]", "Manage subscriptions.",
         { "/sub command [jid]",
           "------------------",
@@ -431,7 +432,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/tiny",
-        _cmd_tiny, parse_args, 1, 1,
+        _cmd_tiny, parse_args, 1, 1, NULL,
         { "/tiny url", "Send url as tinyurl in current chat.",
         { "/tiny url",
           "---------",
@@ -441,7 +442,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/duck",
-        _cmd_duck, parse_args_with_freetext, 1, 1,
+        _cmd_duck, parse_args_with_freetext, 1, 1, NULL,
         { "/duck query", "Perform search using DuckDuckGo chatbot.",
         { "/duck query",
           "-----------",
@@ -452,7 +453,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/who",
-        _cmd_who, parse_args, 0, 2,
+        _cmd_who, parse_args, 0, 2, NULL,
         { "/who [status] [group]", "Show contacts/room participants with chosen status.",
         { "/who [status] [group]",
           "---------------------",
@@ -468,7 +469,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/close",
-        _cmd_close, parse_args, 0, 1,
+        _cmd_close, parse_args, 0, 1, NULL,
         { "/close [win|read|all]", "Close windows.",
         { "/close [win|read|all]",
           "---------------------",
@@ -481,7 +482,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/clear",
-        _cmd_clear, parse_args, 0, 0,
+        _cmd_clear, parse_args, 0, 0, NULL,
         { "/clear", "Clear current window.",
         { "/clear",
           "------",
@@ -489,7 +490,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/quit",
-        _cmd_quit, parse_args, 0, 0,
+        _cmd_quit, parse_args, 0, 0, NULL,
         { "/quit", "Quit Profanity.",
         { "/quit",
           "-----",
@@ -497,7 +498,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/beep",
-        _cmd_beep, parse_args, 1, 1,
+        _cmd_beep, parse_args, 1, 1, cons_beep_setting,
         { "/beep on|off", "Terminal beep on new messages.",
         { "/beep on|off",
           "------------",
@@ -507,7 +508,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/notify",
-        _cmd_notify, parse_args, 2, 2,
+        _cmd_notify, parse_args, 2, 2, cons_notify_setting,
         { "/notify type value", "Control various desktop noficiations.",
         { "/notify type value",
           "------------------",
@@ -533,7 +534,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/flash",
-        _cmd_flash, parse_args, 1, 1,
+        _cmd_flash, parse_args, 1, 1, cons_flash_setting,
         { "/flash on|off", "Terminal flash on new messages.",
         { "/flash on|off",
           "-------------",
@@ -543,7 +544,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/intype",
-        _cmd_intype, parse_args, 1, 1,
+        _cmd_intype, parse_args, 1, 1, cons_intype_setting,
         { "/intype on|off", "Show when contact is typing.",
         { "/intype on|off",
           "--------------",
@@ -551,7 +552,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/splash",
-        _cmd_splash, parse_args, 1, 1,
+        _cmd_splash, parse_args, 1, 1, cons_splash_setting,
         { "/splash on|off", "Splash logo on startup and /about command.",
         { "/splash on|off",
           "--------------",
@@ -559,7 +560,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/vercheck",
-        _cmd_vercheck, parse_args, 0, 1,
+        _cmd_vercheck, parse_args, 0, 1, NULL,
         { "/vercheck [on|off]", "Check for a new release.",
         { "/vercheck [on|off]",
           "------------------",
@@ -568,7 +569,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/titlebar",
-        _cmd_titlebar, parse_args, 2, 2,
+        _cmd_titlebar, parse_args, 2, 2, cons_titlebar_setting,
         { "/titlebar property on|off", "Show various properties in the window title bar.",
         { "/titlebar property on|off",
           "-------------------------",
@@ -577,7 +578,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/mouse",
-        _cmd_mouse, parse_args, 1, 1,
+        _cmd_mouse, parse_args, 1, 1, cons_mouse_setting,
         { "/mouse on|off", "Use profanity mouse handling.",
         { "/mouse on|off",
           "-------------",
@@ -590,7 +591,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/chlog",
-        _cmd_chlog, parse_args, 1, 1,
+        _cmd_chlog, parse_args, 1, 1, cons_chlog_setting,
         { "/chlog on|off", "Chat logging to file",
         { "/chlog on|off",
           "-------------",
@@ -601,7 +602,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/grlog",
-        _cmd_grlog, parse_args, 1, 1,
+        _cmd_grlog, parse_args, 1, 1, cons_grlog_setting,
         { "/grlog on|off", "Chat logging of chat rooms to file",
         { "/grlog on|off",
           "-------------",
@@ -610,7 +611,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/states",
-        _cmd_states, parse_args, 1, 1,
+        _cmd_states, parse_args, 1, 1, cons_states_setting,
         { "/states on|off", "Send chat states during a chat session.",
         { "/states on|off",
           "--------------",
@@ -619,7 +620,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/outtype",
-        _cmd_outtype, parse_args, 1, 1,
+        _cmd_outtype, parse_args, 1, 1, cons_outtype_setting,
         { "/outtype on|off", "Send typing notification to recipient.",
         { "/outtype on|off",
           "---------------",
@@ -628,7 +629,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/gone",
-        _cmd_gone, parse_args, 1, 1,
+        _cmd_gone, parse_args, 1, 1, cons_gone_setting,
         { "/gone minutes", "Send 'gone' state to recipient after a period.",
         { "/gone minutes",
           "-------------",
@@ -639,7 +640,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/history",
-        _cmd_history, parse_args, 1, 1,
+        _cmd_history, parse_args, 1, 1, cons_history_setting,
         { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
           "---------------",
@@ -648,7 +649,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/log",
-        _cmd_log, parse_args, 2, 2,
+        _cmd_log, parse_args, 2, 2, cons_log_setting,
         { "/log maxsize value", "Manage system logging settings.",
         { "/log maxsize value",
           "------------------",
@@ -657,7 +658,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/reconnect",
-        _cmd_reconnect, parse_args, 1, 1,
+        _cmd_reconnect, parse_args, 1, 1, cons_reconnect_setting,
         { "/reconnect seconds", "Set reconnect interval.",
         { "/reconnect seconds",
           "------------------",
@@ -666,7 +667,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/autoping",
-        _cmd_autoping, parse_args, 1, 1,
+        _cmd_autoping, parse_args, 1, 1, cons_autoping_setting,
         { "/autoping seconds", "Server ping interval.",
         { "/autoping seconds",
           "-----------------",
@@ -675,7 +676,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/autoaway",
-        _cmd_autoaway, parse_args_with_freetext, 2, 2,
+        _cmd_autoaway, parse_args_with_freetext, 2, 2, cons_autoaway_setting,
         { "/autoaway setting value", "Set auto idle/away properties.",
         { "/autoaway setting value",
           "-----------------------",
@@ -696,7 +697,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/priority",
-        _cmd_priority, parse_args, 1, 1,
+        _cmd_priority, parse_args, 1, 1, cons_priority_setting,
         { "/priority value", "Set priority for the current account.",
         { "/priority value",
           "---------------",
@@ -706,7 +707,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/account",
-        _cmd_account, parse_args, 0, 4,
+        _cmd_account, parse_args, 0, 4, NULL,
         { "/account [command] [account] [property] [value]", "Manage accounts.",
         { "/account [command] [account] [property] [value]",
           "-----------------------------------------------",
@@ -739,7 +740,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/prefs",
-        _cmd_prefs, parse_args, 0, 1,
+        _cmd_prefs, parse_args, 0, 1, NULL,
         { "/prefs [area]", "Show configuration.",
         { "/prefs [area]",
           "-------------",
@@ -755,7 +756,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/theme",
-        _cmd_theme, parse_args, 1, 2,
+        _cmd_theme, parse_args, 1, 2, cons_theme_setting,
         { "/theme command [theme-name]", "Change colour theme.",
         { "/theme command [theme-name]",
           "---------------------------",
@@ -771,7 +772,7 @@ static struct cmd_t command_defs[] =
 
 
     { "/statuses",
-        _cmd_statuses, parse_args, 1, 1,
+        _cmd_statuses, parse_args, 1, 1, cons_statuses_setting,
         { "/statuses on|off", "Set notifications for status messages.",
         { "/statuses on|off",
           "----------------",
@@ -781,7 +782,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/away",
-        _cmd_away, parse_args_with_freetext, 0, 1,
+        _cmd_away, parse_args_with_freetext, 0, 1, NULL,
         { "/away [msg]", "Set status to away.",
         { "/away [msg]",
           "-----------",
@@ -792,7 +793,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/chat",
-        _cmd_chat, parse_args_with_freetext, 0, 1,
+        _cmd_chat, parse_args_with_freetext, 0, 1, NULL,
         { "/chat [msg]", "Set status to chat (available for chat).",
         { "/chat [msg]",
           "-----------",
@@ -803,7 +804,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/dnd",
-        _cmd_dnd, parse_args_with_freetext, 0, 1,
+        _cmd_dnd, parse_args_with_freetext, 0, 1, NULL,
         { "/dnd [msg]", "Set status to dnd (do not disturb).",
         { "/dnd [msg]",
           "----------",
@@ -814,7 +815,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/online",
-        _cmd_online, parse_args_with_freetext, 0, 1,
+        _cmd_online, parse_args_with_freetext, 0, 1, NULL,
         { "/online [msg]", "Set status to online.",
         { "/online [msg]",
           "-------------",
@@ -825,7 +826,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/xa",
-        _cmd_xa, parse_args_with_freetext, 0, 1,
+        _cmd_xa, parse_args_with_freetext, 0, 1, NULL,
         { "/xa [msg]", "Set status to xa (extended away).",
         { "/xa [msg]",
           "---------",
@@ -1084,7 +1085,12 @@ cmd_execute(const char * const command, const char * const inp)
 
     if (cmd != NULL) {
         gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args);
-        if (args == NULL) {
+        if ((args == NULL) && (cmd->setting_func != NULL)) {
+            cons_show("");
+            cmd->setting_func();
+            return TRUE;
+        } else if (args == NULL) {
+            cons_show("");
             cons_show("Usage: %s", cmd->help.usage);
             if (ui_current_win_type() == WIN_CHAT) {
                 char usage[strlen(cmd->help.usage) + 8];
@@ -1801,6 +1807,7 @@ _cmd_prefs(gchar **args, struct cmd_help_t help)
 {
     if (args[0] == NULL) {
         cons_prefs();
+        cons_show("Use the /account command for preferences for individual accounts.");
     } else if (strcmp(args[0], "ui") == 0) {
         cons_show("");
         cons_show_ui_prefs();
