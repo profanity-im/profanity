@@ -1088,6 +1088,7 @@ cmd_execute(const char * const command, const char * const inp)
         if ((args == NULL) && (cmd->setting_func != NULL)) {
             cons_show("");
             cmd->setting_func();
+            cons_show("Usage: %s", cmd->help.usage);
             return TRUE;
         } else if (args == NULL) {
             cons_show("");
