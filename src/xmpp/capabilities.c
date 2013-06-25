@@ -233,7 +233,7 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_t *identity = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(identity, "identity");
     xmpp_stanza_set_attribute(identity, "category", "client");
-    xmpp_stanza_set_attribute(identity, "type", "pc");
+    xmpp_stanza_set_attribute(identity, "type", "console");
 
     GString *name_str = g_string_new("Profanity ");
     g_string_append(name_str, PACKAGE_VERSION);
