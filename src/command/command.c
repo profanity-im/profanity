@@ -2690,7 +2690,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     } else {
         g_string_append(room_str, args[0]);
         g_string_append(room_str, "@conference.");
-        g_string_append(room_str, strdup(my_jid->domainpart));
+        g_string_append(room_str, my_jid->domainpart);
         room = room_str->str;
     }
 
@@ -2711,6 +2711,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     ui_room_join(room_jid);
     muc_remove_invite(room);
 
+    jid_destroy(room_arg);
     jid_destroy(room_jid);
     jid_destroy(my_jid);
     g_string_free(room_str, TRUE);
@@ -2788,7 +2789,7 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         Jid *jid = jid_create(jabber_get_fulljid());
         GString *conference_node = g_string_new("conference.");
-        g_string_append(conference_node, strdup(jid->domainpart));
+        g_string_append(conference_node, jid->domainpart);
         jid_destroy(jid);
         iq_room_list_request(conference_node->str);
         g_string_free(conference_node, TRUE);
@@ -2814,7 +2815,7 @@ _cmd_disco(gchar **args, struct cmd_help_t help)
         jid = g_string_append(jid, args[1]);
     } else {
         Jid *jidp = jid_create(jabber_get_fulljid());
-        jid = g_string_append(jid, strdup(jidp->domainpart));
+        jid = g_string_append(jid, jidp->domainpart);
         jid_destroy(jidp);
     }
 
