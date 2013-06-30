@@ -10,6 +10,7 @@ profanity_SOURCES = \
 	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
+	src/xmpp/bookmark.c src/xmpp/bookmark.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c src/ui/notifier.h \
@@ -36,6 +37,7 @@ tests_testsuite_SOURCES = \
 	src/xmpp/stanza.h src/xmpp/message.h src/xmpp/iq.h src/xmpp/presence.h \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
+	src/xmpp/bookmark.c src/xmpp/bookmark.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c src/ui/notifier.h \

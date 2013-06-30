@@ -33,6 +33,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "xmpp/bookmark.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/iq.h"
@@ -229,6 +230,19 @@ jabber_set_autoping(const int seconds)
                 jabber_conn.ctx);
         }
     }
+}
+
+int
+jabber_get_id(void)
+{
+    static int xmpp_id;
+
+    ++xmpp_id;
+    if (xmpp_id < 0) {
+        xmpp_id = 1;
+    }
+
+    return xmpp_id;
 }
 
 GList *
@@ -494,6 +508,7 @@ _connection_handler(xmpp_conn_t * const conn,
         }
 
         roster_request();
+        bookmark_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {
