@@ -1463,7 +1463,7 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                     cons_show("");
                 } else if (strcmp(property, "status") == 0) {
                     if (!valid_resource_presence_string(value) && (strcmp(value, "last") != 0)) {
-                        cons_show("Invalud status: %s", value);
+                        cons_show("Invalid status: %s", value);
                     } else {
                         accounts_set_login_presence(account_name, value);
                         cons_show("Updated login status for account %s: %s", account_name, value);
