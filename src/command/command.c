@@ -870,7 +870,7 @@ cmd_init(void)
     autocomplete_add(help_ac, strdup("chatting"));
     autocomplete_add(help_ac, strdup("groupchat"));
     autocomplete_add(help_ac, strdup("presence"));
-    autocomplete_add(help_ac, strdup("roster"));
+    autocomplete_add(help_ac, strdup("contacts"));
     autocomplete_add(help_ac, strdup("service"));
     autocomplete_add(help_ac, strdup("settings"));
     autocomplete_add(help_ac, strdup("other"));
@@ -1739,7 +1739,7 @@ _cmd_help(gchar **args, struct cmd_help_t help)
             "/xa" };
         _cmd_show_filtered_help("Presence commands", filter, ARRAY_SIZE(filter));
 
-    } else if (strcmp(args[0], "roster") == 0) {
+    } else if (strcmp(args[0], "contacts") == 0) {
         gchar *filter[] = { "/group", "/roster", "/sub", "/who" };
         _cmd_show_filtered_help("Roster commands", filter, ARRAY_SIZE(filter));
 
