@@ -26,8 +26,6 @@
 
 #include "autocomplete.h"
 
-#include "ui/ui.h"
-
 struct autocomplete_t {
     GSList *items;
     GSList *last_found;
@@ -267,18 +265,14 @@ _count_tokens(char *string)
 {
     int num_tokens = 0;
 
-    cons_debug("String: %s", string);
-
     // if no quotes, use glib
     if (g_strrstr(string, "\"") == NULL) {
-        cons_debug("NO QUOTES");
         gchar **tokens = g_strsplit(string, " ", 0);
         num_tokens = g_strv_length(tokens);
         g_strfreev(tokens);
 
     // else count tokens including quoted
     } else {
-        cons_debug("QUOTES");
         int length = strlen(string);
         int i = 0;
         gboolean in_quotes = FALSE;
@@ -360,14 +354,10 @@ autocomplete_param_no_with_func(char *input, int *size, char *command,
 
         // count tokens properly
         int num_tokens = _count_tokens(inp_cpy);
-        cons_debug("tokens: %d", num_tokens);
 
         // if correct number of tokens, then candidate for autocompletion of last param
         if (num_tokens == arg_number) {
-
             gchar *start_str = _get_start(inp_cpy, arg_number);
-            cons_debug("STARTSTR: %s", start_str);
-
             gchar *comp_str = g_strdup(&inp_cpy[strlen(start_str)]);
 
             // autocomplete param
