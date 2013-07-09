@@ -562,14 +562,16 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         // remove each fulljid
         PContact contact = roster_get_contact(barejid);
-        GList *resources = p_contact_get_available_resources(contact);
-        while (resources != NULL) {
-            GString *fulljid = g_string_new(strdup(barejid));
-            g_string_append(fulljid, "/");
-            g_string_append(fulljid, strdup(resources->data));
-            autocomplete_remove(fulljid_ac, fulljid->str);
-            g_string_free(fulljid, TRUE);
-            resources = g_list_next(resources);
+        if (contact != NULL) {
+            GList *resources = p_contact_get_available_resources(contact);
+            while (resources != NULL) {
+                GString *fulljid = g_string_new(strdup(barejid));
+                g_string_append(fulljid, "/");
+                g_string_append(fulljid, strdup(resources->data));
+                autocomplete_remove(fulljid_ac, fulljid->str);
+                g_string_free(fulljid, TRUE);
+                resources = g_list_next(resources);
+            }
         }
 
         // remove the contact

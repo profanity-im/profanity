@@ -26,6 +26,8 @@
 
 #include "autocomplete.h"
 
+#include "ui/ui.h"
+
 struct autocomplete_t {
     GSList *items;
     GSList *last_found;
@@ -260,6 +262,84 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
     return auto_msg;
 }
 
+int
+_count_tokens(char *string)
+{
+    int num_tokens = 0;
+
+    cons_debug("String: %s", string);
+
+    // if no quotes, use glib
+    if (g_strrstr(string, "\"") == NULL) {
+        cons_debug("NO QUOTES");
+        gchar **tokens = g_strsplit(string, " ", 0);
+        num_tokens = g_strv_length(tokens);
+        g_strfreev(tokens);
+
+    // else count tokens including quoted
+    } else {
+        cons_debug("QUOTES");
+        int length = strlen(string);
+        int i = 0;
+        gboolean in_quotes = FALSE;
+
+        // include first token
+        num_tokens++;
+
+        for (i = 0; i < length; i++) {
+            if (string[i] == ' ') {
+                if (!in_quotes) {
+                    num_tokens++;
+                }
+            } else if (string[i] == '"') {
+                if (in_quotes) {
+                    in_quotes = FALSE;
+                } else {
+                    in_quotes = TRUE;
+                }
+            }
+        }
+    }
+
+    return num_tokens;
+}
+
+char *
+_get_start(char *string, int tokens)
+{
+    char *result_str = NULL;
+    int num_tokens = 0;
+    int length = strlen(string);
+    int i = 0;
+    gboolean in_quotes = FALSE;
+    GString *result = g_string_new("");
+
+    // include first token
+    num_tokens++;
+
+    for (i = 0; i < length; i++) {
+        if (num_tokens < tokens) {
+            g_string_append_c(result, string[i]);
+        }
+        if (string[i] == ' ') {
+            if (!in_quotes) {
+                num_tokens++;
+            }
+        } else if (string[i] == '"') {
+            if (in_quotes) {
+                in_quotes = FALSE;
+            } else {
+                in_quotes = TRUE;
+            }
+        }
+    }
+
+    result_str = result->str;
+    g_string_free(result, FALSE);
+
+    return result_str;
+}
+
 char *
 autocomplete_param_no_with_func(char *input, int *size, char *command,
     int arg_number, autocomplete_func func)
@@ -267,44 +347,35 @@ autocomplete_param_no_with_func(char *input, int *size, char *command,
     char *result = NULL;
     if (strncmp(input, command, strlen(command)) == 0 && (*size > strlen(command))) {
         int i = 0;
-        int quote_count = 0;
         char *found = NULL;
         GString *result_str = NULL;
 
-        // copy and null terminate input, count quotes
+        // copy and null terminate input
         gchar inp_cpy[*size];
         for (i = 0; i < *size; i++) {
-            if (input[i] == '"') {
-                quote_count++;
-            }
             inp_cpy[i] = input[i];
         }
         inp_cpy[i] = '\0';
         g_strstrip(inp_cpy);
 
-        // count tokens
-        gchar **tokens = g_strsplit(inp_cpy, " ", 0);
-        int num_tokens = g_strv_length(tokens);
+        // count tokens properly
+        int num_tokens = _count_tokens(inp_cpy);
+        cons_debug("tokens: %d", num_tokens);
 
-        // if num tokens, or 2 quotes then candidate for autocompletion of last param
-        if (((num_tokens > arg_number - 1) && quote_count == 0) || quote_count == 2) {
+        // if correct number of tokens, then candidate for autocompletion of last param
+        if (num_tokens == arg_number) {
 
-            gchar *comp_str = NULL;
+            gchar *start_str = _get_start(inp_cpy, arg_number);
+            cons_debug("STARTSTR: %s", start_str);
 
-            // find start of autocompletion string
-            if (num_tokens > 3 && quote_count == 0) {
-                comp_str = g_strrstr(inp_cpy, tokens[arg_number - 1]);
-            } else {
-                comp_str = g_strrstr(inp_cpy, "\"");
-                comp_str = comp_str + 2;
-            }
+            gchar *comp_str = g_strdup(&inp_cpy[strlen(start_str)]);
 
             // autocomplete param
             if (comp_str != NULL) {
                 found = func(comp_str);
                 if (found != NULL) {
                     result_str = g_string_new("");
-                    g_string_append(result_str, g_strndup(inp_cpy, strlen(inp_cpy) - strlen(comp_str)));
+                    g_string_append(result_str, start_str);
                     g_string_append(result_str, found);
                     result = result_str->str;
                     g_string_free(result_str, FALSE);
