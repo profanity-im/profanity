@@ -205,8 +205,6 @@ parse_args_with_freetext(const char * const inp, int min, int max)
                     token_start = &copy[i+1];
                 } else {
                     token_start = &copy[i];
-                }
-                if (copy[i] != '"') {
                     token_size++;
                 }
             }
