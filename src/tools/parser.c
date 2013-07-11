@@ -271,3 +271,79 @@ parse_args_with_freetext(const char * const inp, int min, int max)
         return args;
     }
 }
+
+int
+count_tokens(char *string)
+{
+    int num_tokens = 0;
+
+    // if no quotes, use glib
+    if (g_strrstr(string, "\"") == NULL) {
+        gchar **tokens = g_strsplit(string, " ", 0);
+        num_tokens = g_strv_length(tokens);
+        g_strfreev(tokens);
+
+    // else count tokens including quoted
+    } else {
+        int length = strlen(string);
+        int i = 0;
+        gboolean in_quotes = FALSE;
+
+        // include first token
+        num_tokens++;
+
+        for (i = 0; i < length; i++) {
+            if (string[i] == ' ') {
+                if (!in_quotes) {
+                    num_tokens++;
+                }
+            } else if (string[i] == '"') {
+                if (in_quotes) {
+                    in_quotes = FALSE;
+                } else {
+                    in_quotes = TRUE;
+                }
+            }
+        }
+    }
+
+    return num_tokens;
+}
+
+char *
+get_start(char *string, int tokens)
+{
+    char *result_str = NULL;
+    int num_tokens = 0;
+    int length = strlen(string);
+    int i = 0;
+    gboolean in_quotes = FALSE;
+    GString *result = g_string_new("");
+
+    // include first token
+    num_tokens++;
+
+    for (i = 0; i < length; i++) {
+        if (num_tokens < tokens) {
+            g_string_append_c(result, string[i]);
+        }
+        if (string[i] == ' ') {
+            if (!in_quotes) {
+                num_tokens++;
+            }
+        } else if (string[i] == '"') {
+            if (in_quotes) {
+                in_quotes = FALSE;
+            } else {
+                in_quotes = TRUE;
+            }
+        }
+    }
+
+    result_str = result->str;
+    g_string_free(result, FALSE);
+
+    return result_str;
+}
+
+
