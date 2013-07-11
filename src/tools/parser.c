@@ -58,7 +58,7 @@ parse_args(const char * const inp, int min, int max)
     char *copy = strdup(inp);
     g_strstrip(copy);
 
-    int inp_size = strlen(copy);
+    int inp_size = g_utf8_strlen(copy, -1);
     gboolean in_token = FALSE;
     gboolean in_quotes = FALSE;
     char *token_start = &copy[0];
@@ -67,42 +67,47 @@ parse_args(const char * const inp, int min, int max)
 
     // add tokens to GSList
     int i;
-    for (i = 0; i <= inp_size; i++) {
+    for (i = 0; i < inp_size; i++) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
         if (!in_token) {
-            if (copy[i] == ' ') {
+            if (curr_uni  == ' ') {
                 continue;
             } else {
                 in_token = TRUE;
-                if (copy[i] == '"') {
+                if (curr_uni == '"') {
                     in_quotes = TRUE;
                     i++;
                 }
-                token_start = &copy[i];
-                token_size++;
+                token_start = curr_ch;
+                token_size += g_unichar_to_utf8(curr_uni, NULL);
             }
         } else {
             if (in_quotes) {
-                if ((copy[i] == '\0') || (copy[i] == '"')) {
+                if (curr_uni == '"') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
                         token_size));
                     token_size = 0;
                     in_token = FALSE;
                     in_quotes = FALSE;
                 } else {
-                    token_size++;
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
             } else {
-                if (copy[i] == ' ' || copy[i] == '\0') {
+                if (curr_uni == ' ') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
                         token_size));
                     token_size = 0;
                     in_token = FALSE;
                 } else {
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                     token_size++;
                 }
             }
         }
     }
+
+    tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
 
     int num = g_slist_length(tokens) - 1;
 
