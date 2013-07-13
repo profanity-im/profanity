@@ -146,6 +146,10 @@ history_next(History history, char *item)
         return NULL;
     }
 
+    if (g_list_next(history->session.sess_curr) == NULL) {
+        return NULL;
+    }
+
     char *copied = "";
     if (item != NULL) {
         copied = strdup(item);
