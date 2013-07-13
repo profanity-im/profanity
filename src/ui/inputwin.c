@@ -490,6 +490,10 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             next = cmd_history_next(input, size);
             if (next) {
                 inp_replace_input(input, next, size);
+            } else if (*size != 0) {
+                input[*size] = '\0';
+                cmd_history_append(input);
+                inp_replace_input(input, "", size);
             }
             return 1;
 
