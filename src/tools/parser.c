@@ -367,5 +367,3 @@ get_start(char *string, int tokens)
 
     return result_str;
 }
-
-
