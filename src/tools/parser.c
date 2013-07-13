@@ -65,11 +65,18 @@ parse_args(const char * const inp, int min, int max)
     int token_size = 0;
     GSList *tokens = NULL;
 
+
     // add tokens to GSList
     int i;
     for (i = 0; i < inp_size; i++) {
         gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
+
+        gchar *character = malloc(7);
+        gint num_written = 0;
+        num_written = g_unichar_to_utf8(curr_uni, character);
+        character[num_written] = '\0';
+
         if (!in_token) {
             if (curr_uni  == ' ') {
                 continue;
@@ -78,9 +85,14 @@ parse_args(const char * const inp, int min, int max)
                 if (curr_uni == '"') {
                     in_quotes = TRUE;
                     i++;
+                    gchar *next_ch = g_utf8_next_char(curr_ch);
+                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    token_start = next_ch;
+                    token_size += g_unichar_to_utf8(next_uni, NULL);
+                } else {
+                    token_start = curr_ch;
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
-                token_start = curr_ch;
-                token_size += g_unichar_to_utf8(curr_uni, NULL);
             }
         } else {
             if (in_quotes) {
@@ -101,13 +113,14 @@ parse_args(const char * const inp, int min, int max)
                     in_token = FALSE;
                 } else {
                     token_size += g_unichar_to_utf8(curr_uni, NULL);
-                    token_size++;
                 }
             }
         }
     }
 
-    tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
+    if (in_token) {
+        tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
+    }
 
     int num = g_slist_length(tokens) - 1;
 
