@@ -24,7 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "autocomplete.h"
+#include "tools/autocomplete.h"
+#include "tools/parser.h"
 
 struct autocomplete_t {
     GSList *items;
@@ -260,80 +261,6 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
     return auto_msg;
 }
 
-int
-_count_tokens(char *string)
-{
-    int num_tokens = 0;
-
-    // if no quotes, use glib
-    if (g_strrstr(string, "\"") == NULL) {
-        gchar **tokens = g_strsplit(string, " ", 0);
-        num_tokens = g_strv_length(tokens);
-        g_strfreev(tokens);
-
-    // else count tokens including quoted
-    } else {
-        int length = strlen(string);
-        int i = 0;
-        gboolean in_quotes = FALSE;
-
-        // include first token
-        num_tokens++;
-
-        for (i = 0; i < length; i++) {
-            if (string[i] == ' ') {
-                if (!in_quotes) {
-                    num_tokens++;
-                }
-            } else if (string[i] == '"') {
-                if (in_quotes) {
-                    in_quotes = FALSE;
-                } else {
-                    in_quotes = TRUE;
-                }
-            }
-        }
-    }
-
-    return num_tokens;
-}
-
-char *
-_get_start(char *string, int tokens)
-{
-    char *result_str = NULL;
-    int num_tokens = 0;
-    int length = strlen(string);
-    int i = 0;
-    gboolean in_quotes = FALSE;
-    GString *result = g_string_new("");
-
-    // include first token
-    num_tokens++;
-
-    for (i = 0; i < length; i++) {
-        if (num_tokens < tokens) {
-            g_string_append_c(result, string[i]);
-        }
-        if (string[i] == ' ') {
-            if (!in_quotes) {
-                num_tokens++;
-            }
-        } else if (string[i] == '"') {
-            if (in_quotes) {
-                in_quotes = FALSE;
-            } else {
-                in_quotes = TRUE;
-            }
-        }
-    }
-
-    result_str = result->str;
-    g_string_free(result, FALSE);
-
-    return result_str;
-}
-
 char *
 autocomplete_param_no_with_func(char *input, int *size, char *command,
     int arg_number, autocomplete_func func)
@@ -353,11 +280,11 @@ autocomplete_param_no_with_func(char *input, int *size, char *command,
         g_strstrip(inp_cpy);
 
         // count tokens properly
-        int num_tokens = _count_tokens(inp_cpy);
+        int num_tokens = count_tokens(inp_cpy);
 
         // if correct number of tokens, then candidate for autocompletion of last param
         if (num_tokens == arg_number) {
-            gchar *start_str = _get_start(inp_cpy, arg_number);
+            gchar *start_str = get_start(inp_cpy, arg_number);
             gchar *comp_str = g_strdup(&inp_cpy[strlen(start_str)]);
 
             // autocomplete param

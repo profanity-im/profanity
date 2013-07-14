@@ -58,7 +58,7 @@ parse_args(const char * const inp, int min, int max)
     char *copy = strdup(inp);
     g_strstrip(copy);
 
-    int inp_size = strlen(copy);
+    int inp_size = g_utf8_strlen(copy, -1);
     gboolean in_token = FALSE;
     gboolean in_quotes = FALSE;
     char *token_start = &copy[0];
@@ -67,41 +67,53 @@ parse_args(const char * const inp, int min, int max)
 
     // add tokens to GSList
     int i;
-    for (i = 0; i <= inp_size; i++) {
+    for (i = 0; i < inp_size; i++) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
+
         if (!in_token) {
-            if (copy[i] == ' ') {
+            if (curr_uni  == ' ') {
                 continue;
             } else {
                 in_token = TRUE;
-                if (copy[i] == '"') {
+                if (curr_uni == '"') {
                     in_quotes = TRUE;
                     i++;
+                    gchar *next_ch = g_utf8_next_char(curr_ch);
+                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    token_start = next_ch;
+                    token_size += g_unichar_to_utf8(next_uni, NULL);
+                } else {
+                    token_start = curr_ch;
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
-                token_start = &copy[i];
-                token_size++;
             }
         } else {
             if (in_quotes) {
-                if ((copy[i] == '\0') || (copy[i] == '"')) {
+                if (curr_uni == '"') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
                         token_size));
                     token_size = 0;
                     in_token = FALSE;
                     in_quotes = FALSE;
                 } else {
-                    token_size++;
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
             } else {
-                if (copy[i] == ' ' || copy[i] == '\0') {
+                if (curr_uni == ' ') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
                         token_size));
                     token_size = 0;
                     in_token = FALSE;
                 } else {
-                    token_size++;
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
             }
         }
+    }
+
+    if (in_token) {
+        tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
     }
 
     int num = g_slist_length(tokens) - 1;
@@ -177,7 +189,7 @@ parse_args_with_freetext(const char * const inp, int min, int max)
     char *copy = strdup(inp);
     g_strstrip(copy);
 
-    int inp_size = strlen(copy);
+    int inp_size = g_utf8_strlen(copy, -1);
     gboolean in_token = FALSE;
     gboolean in_freetext = FALSE;
     gboolean in_quotes = FALSE;
@@ -188,54 +200,64 @@ parse_args_with_freetext(const char * const inp, int min, int max)
 
     // add tokens to GSList
     int i;
-    for (i = 0; i <= inp_size; i++) {
+    for (i = 0; i < inp_size; i++) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
+
         if (!in_token) {
-            if (copy[i] == ' ') {
+            if (curr_uni == ' ') {
                 continue;
             } else {
                 in_token = TRUE;
                 num_tokens++;
                 if (num_tokens == max + 1) {
                     in_freetext = TRUE;
-                } else if (copy[i] == '"') {
+                } else if (curr_uni == '"') {
                     in_quotes = TRUE;
                     i++;
+                    gchar *next_ch = g_utf8_next_char(curr_ch);
+                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    token_start = next_ch;
+                    token_size += g_unichar_to_utf8(next_uni, NULL);
                 }
-                if (copy[i] == '"') {
-                    token_start = &copy[i+1];
+                if (curr_uni == '"') {
+                    gchar *next_ch = g_utf8_next_char(curr_ch);
+                    token_start = next_ch;
                 } else {
-                    token_start = &copy[i];
-                }
-                if (copy[i] != '"') {
-                    token_size++;
+                    token_start = curr_ch;
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
             }
         } else {
             if (in_quotes) {
-                if ((copy[i] == '\0') || (copy[i] == '"')) {
+                if (curr_uni == '"') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
                         token_size));
                     token_size = 0;
                     in_token = FALSE;
                     in_quotes = FALSE;
                 } else {
-                    if (copy[i] != '"') {
-                        token_size++;
+                    if (curr_uni != '"') {
+                        token_size += g_unichar_to_utf8(curr_uni, NULL);
                     }
                 }
             } else {
-                if ((!in_freetext && copy[i] == ' ') || copy[i] == '\0') {
+                if (!in_freetext && curr_uni == ' ') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
                         token_size));
                     token_size = 0;
                     in_token = FALSE;
                 } else {
-                    if (copy[i] != '"') {
-                        token_size++;
+                    if (curr_uni != '"') {
+                        token_size += g_unichar_to_utf8(curr_uni, NULL);
                     }
                 }
             }
         }
+    }
+
+    if (in_token) {
+        tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
     }
 
     int num = g_slist_length(tokens) - 1;
@@ -270,4 +292,77 @@ parse_args_with_freetext(const char * const inp, int min, int max)
 
         return args;
     }
+}
+
+int
+count_tokens(char *string)
+{
+    int length = g_utf8_strlen(string, -1);
+    gboolean in_quotes = FALSE;
+    int num_tokens = 0;
+    int i = 0;
+
+    // include first token
+    num_tokens++;
+
+    for (i = 0; i < length; i++) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(string, i);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
+
+        if (curr_uni == ' ') {
+            if (!in_quotes) {
+                num_tokens++;
+            }
+        } else if (curr_uni == '"') {
+            if (in_quotes) {
+                in_quotes = FALSE;
+            } else {
+                in_quotes = TRUE;
+            }
+        }
+    }
+
+    return num_tokens;
+}
+
+char *
+get_start(char *string, int tokens)
+{
+    GString *result = g_string_new("");
+    int length = g_utf8_strlen(string, -1);
+    gboolean in_quotes = FALSE;
+    char *result_str = NULL;
+    int num_tokens = 0;
+    int i = 0;
+
+    // include first token
+    num_tokens++;
+
+    for (i = 0; i < length; i++) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(string, i);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
+
+        if (num_tokens < tokens) {
+            gchar *uni_char = malloc(7);
+            int len = g_unichar_to_utf8(curr_uni, uni_char);
+            uni_char[len] = '\0';
+            g_string_append(result, uni_char);
+        }
+        if (curr_uni == ' ') {
+            if (!in_quotes) {
+                num_tokens++;
+            }
+        } else if (curr_uni == '"') {
+            if (in_quotes) {
+                in_quotes = FALSE;
+            } else {
+                in_quotes = TRUE;
+            }
+        }
+    }
+
+    result_str = result->str;
+    g_string_free(result, FALSE);
+
+    return result_str;
 }

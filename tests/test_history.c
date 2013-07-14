@@ -93,7 +93,7 @@ void prev_with_val_then_next_returns_val(void)
     assert_string_equals("Oioi", item2);
 }
 
-void prev_with_val_then_next_twice_returns_val(void)
+void prev_with_val_then_next_twice_returns_null(void)
 {
     History history = history_new(10);
     history_append(history, "Hello");
@@ -102,7 +102,7 @@ void prev_with_val_then_next_twice_returns_val(void)
     char *item2 = history_next(history, item1);
     char *item3 = history_next(history, item2);
 
-    assert_string_equals("Oioi", item3);
+    assert_is_null(item3);
 }
 
 void navigate_then_append_new(void)
@@ -225,7 +225,7 @@ void register_history_tests(void)
     TEST(previous_goes_to_correct_element);
     TEST(prev_then_next_returns_empty);
     TEST(prev_with_val_then_next_returns_val);
-    TEST(prev_with_val_then_next_twice_returns_val);
+    TEST(prev_with_val_then_next_twice_returns_null);
     TEST(navigate_then_append_new);
     TEST(edit_item_mid_history);
     TEST(edit_previous_and_append);

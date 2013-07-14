@@ -15,8 +15,8 @@ profanity_SOURCES = \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c src/ui/notifier.h \
 	src/command/command.h src/command/command.c src/command/history.c \
-	src/command/history.h src/command/parser.c \
-	src/command/parser.h \
+	src/command/history.h src/tools/parser.c \
+	src/tools/parser.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
@@ -42,8 +42,8 @@ tests_testsuite_SOURCES = \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c src/ui/notifier.h \
 	src/command/command.h src/command/command.c src/command/history.c \
-	src/command/history.h src/command/parser.c \
-	src/command/parser.h \
+	src/command/history.h src/tools/parser.c \
+	src/tools/parser.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \

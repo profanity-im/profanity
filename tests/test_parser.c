@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <head-unit.h>
-#include "command/parser.h"
+#include "tools/parser.h"
 
 void
 parse_null_returns_null(void)
@@ -279,6 +279,124 @@ parse_cmd_freetext_with_many_quoted_and_many_spaces(void)
     assert_string_equals("and heres the free text", result[2]);
     g_strfreev(result);
 }
+
+void
+count_one_token(void)
+{
+    char *inp = "one";
+    int result = count_tokens(inp);
+
+    assert_int_equals(1, result);
+}
+
+void
+count_one_token_quoted_no_whitespace(void)
+{
+    char *inp = "\"one\"";
+    int result = count_tokens(inp);
+
+    assert_int_equals(1, result);
+}
+
+void
+count_one_token_quoted_with_whitespace(void)
+{
+    char *inp = "\"one two\"";
+    int result = count_tokens(inp);
+
+    assert_int_equals(1, result);
+}
+
+void
+count_two_tokens(void)
+{
+    char *inp = "one two";
+    int result = count_tokens(inp);
+
+    assert_int_equals(2, result);
+}
+
+void
+count_two_tokens_first_quoted(void)
+{
+    char *inp = "\"one and\" two";
+    int result = count_tokens(inp);
+
+    assert_int_equals(2, result);
+}
+
+void
+count_two_tokens_second_quoted(void)
+{
+    char *inp = "one \"two and\"";
+    int result = count_tokens(inp);
+
+    assert_int_equals(2, result);
+}
+
+void
+count_two_tokens_both_quoted(void)
+{
+    char *inp = "\"one and then\" \"two and\"";
+    int result = count_tokens(inp);
+
+    assert_int_equals(2, result);
+}
+
+void
+get_first_of_one(void)
+{
+    char *inp = "one";
+    char *result = get_start(inp, 2);
+
+    assert_string_equals("one", result);
+}
+
+void
+get_first_of_two(void)
+{
+    char *inp = "one two";
+    char *result = get_start(inp, 2);
+
+    assert_string_equals("one ", result);
+}
+
+void
+get_first_two_of_three(void)
+{
+    char *inp = "one two three";
+    char *result = get_start(inp, 3);
+
+    assert_string_equals("one two ", result);
+}
+
+void
+get_first_two_of_three_first_quoted(void)
+{
+    char *inp = "\"one\" two three";
+    char *result = get_start(inp, 3);
+
+    assert_string_equals("\"one\" two ", result);
+}
+
+void
+get_first_two_of_three_second_quoted(void)
+{
+    char *inp = "one \"two\" three";
+    char *result = get_start(inp, 3);
+
+    assert_string_equals("one \"two\" ", result);
+}
+
+void
+get_first_two_of_three_first_and_second_quoted(void)
+{
+    char *inp = "\"one\" \"two\" three";
+    char *result = get_start(inp, 3);
+
+    assert_string_equals("\"one\" \"two\" ", result);
+}
+
 void
 register_parser_tests(void)
 {
@@ -307,4 +425,17 @@ register_parser_tests(void)
     TEST(parse_cmd_freetext_with_quoted_and_space);
     TEST(parse_cmd_freetext_with_quoted_and_many_spaces);
     TEST(parse_cmd_freetext_with_many_quoted_and_many_spaces);
+    TEST(count_one_token);
+    TEST(count_one_token_quoted_no_whitespace);
+    TEST(count_one_token_quoted_with_whitespace);
+    TEST(count_two_tokens);
+    TEST(count_two_tokens_first_quoted);
+    TEST(count_two_tokens_second_quoted);
+    TEST(count_two_tokens_both_quoted);
+    TEST(get_first_of_one);
+    TEST(get_first_of_two);
+    TEST(get_first_two_of_three);
+    TEST(get_first_two_of_three_first_quoted);
+    TEST(get_first_two_of_three_second_quoted);
+    TEST(get_first_two_of_three_first_and_second_quoted);
 }
