@@ -2780,7 +2780,7 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are currenlty connect.");
+        cons_show("You are not currenlty connected.");
         return TRUE;
     }
 
@@ -2804,7 +2804,7 @@ _cmd_disco(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are currenlty connect.");
+        cons_show("You are not currenlty connected.");
         return TRUE;
     }
 
