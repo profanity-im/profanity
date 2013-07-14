@@ -232,19 +232,6 @@ jabber_set_autoping(const int seconds)
     }
 }
 
-int
-jabber_get_id(void)
-{
-    static int xmpp_id;
-
-    ++xmpp_id;
-    if (xmpp_id < 0) {
-        xmpp_id = 1;
-    }
-
-    return xmpp_id;
-}
-
 GList *
 jabber_get_available_resources(void)
 {

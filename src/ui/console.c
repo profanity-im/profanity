@@ -37,6 +37,7 @@
 #include "ui/window.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/bookmark.h"
 
 #define CONS_WIN_TITLE "_cons"
 
@@ -637,6 +638,34 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
         }
     } else {
         cons_show("No chat rooms at %s", conference_node);
+    }
+
+    ui_console_dirty();
+    cons_alert();
+}
+
+void
+cons_show_bookmarks(const GList *list)
+{
+    Bookmark *item;
+
+    cons_show("");
+    cons_show("Bookmarks:");
+
+    /* TODO: show status (connected or not) and window number */
+    while (list != NULL) {
+        item = list->data;
+
+        win_print_time(console, '-');
+        wprintw(console->win, "  %s", item->jid);
+        if (item->nick != NULL) {
+            wprintw(console->win, "/%s", item->nick);
+        }
+        if (item->autojoin) {
+            wprintw(console->win, " (autojoin)");
+        }
+        wprintw(console->win, "\n");
+        list = g_list_next(list);
     }
 
     ui_console_dirty();

@@ -37,9 +37,6 @@
 // and page size is at least 4KB
 #define READ_BUF_SIZE 4088
 
-// for generating ids
-static int unique_id = 0;
-
 struct curl_data_t
 {
     char *buffer;
@@ -400,10 +397,12 @@ xdg_get_data_home(void)
 char *
 get_unique_id(void)
 {
+    static unsigned long unique_id;
     char *result = NULL;
-    unique_id++;
     GString *result_str = g_string_new("");
-    g_string_printf(result_str, "prof%d", unique_id);
+
+    unique_id++;
+    g_string_printf(result_str, "prof%lu", unique_id);
     result = result_str->str;
     g_string_free(result_str, FALSE);
 

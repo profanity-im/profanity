@@ -44,6 +44,7 @@
 #include "tools/tinyurl.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/bookmark.h"
 
 /*
  * Command structure
@@ -83,6 +84,7 @@ static char * _account_autocomplete(char *input, int *size);
 static char * _who_autocomplete(char *input, int *size);
 static char * _roster_autocomplete(char *input, int *size);
 static char * _group_autocomplete(char *input, int *size);
+static char * _bookmark_autocomplete(char *input, int *size);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
 
@@ -128,6 +130,7 @@ static gboolean _cmd_priority(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_reconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_bookmark(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_roster(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_software(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_splash(gchar **args, struct cmd_help_t help);
@@ -365,6 +368,15 @@ static struct cmd_t command_defs[] =
           "",
           "Example : /rooms conference.jabber.org",
           "Example : /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
+          NULL } } },
+
+    { "/bookmark",
+        _cmd_bookmark, parse_args, 0, 4, NULL,
+        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
+          "Manage bookmarks.",
+        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
+          "---------------------------------------------------------------------------",
+          "Manage bookmarks.",
           NULL } } },
 
     { "/disco",
@@ -853,6 +865,7 @@ static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete group_ac;
+static Autocomplete bookmark_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -978,6 +991,11 @@ cmd_init(void)
     autocomplete_add(who_ac, strdup("unavailable"));
     autocomplete_add(who_ac, strdup("any"));
 
+    bookmark_ac = autocomplete_new();
+    autocomplete_add(bookmark_ac, strdup("add"));
+    autocomplete_add(bookmark_ac, strdup("list"));
+    autocomplete_add(bookmark_ac, strdup("remove"));
+
     cmd_history_init();
 }
 
@@ -1003,6 +1021,7 @@ cmd_close(void)
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
     autocomplete_free(group_ac);
+    autocomplete_free(bookmark_ac);
 }
 
 // Command autocompletion functions
@@ -1072,6 +1091,8 @@ cmd_reset_autocomplete()
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
     autocomplete_reset(group_ac);
+    autocomplete_reset(bookmark_ac);
+    bookmark_autocomplete_reset();
 }
 
 // Command execution
@@ -1255,6 +1276,13 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
+    result = autocomplete_param_with_func(input, size, "/join", bookmark_find);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+
     result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
     if (result != NULL) {
         inp_replace_input(input, result, size);
@@ -1276,7 +1304,8 @@ _cmd_complete_parameters(char *input, int *size)
 
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
-        _account_autocomplete, _roster_autocomplete, _group_autocomplete };
+        _account_autocomplete, _roster_autocomplete, _group_autocomplete,
+        _bookmark_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -2799,6 +2828,73 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
+_cmd_bookmark(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    gchar *cmd = args[0];
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currenlty connect.");
+        return TRUE;
+    }
+
+    /* TODO: /bookmark list room@server */
+
+    if (cmd == NULL || strcmp(cmd, "list") == 0) {
+        cons_show_bookmarks(bookmark_get_list());
+    } else {
+        gboolean autojoin = FALSE;
+        gboolean jid_release = FALSE;
+        gchar *jid = NULL;
+        gchar *nick = NULL;
+        int idx = 1;
+
+        while (args[idx] != NULL) {
+            gchar *opt = args[idx];
+
+            if (strcmp(opt, "autojoin") == 0) {
+                autojoin = TRUE;
+            } else if (jid == NULL) {
+                jid = opt;
+            } else if (nick == NULL) {
+                nick = opt;
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+
+            ++idx;
+        }
+
+        if (jid == NULL) {
+            win_type_t win_type = ui_current_win_type();
+
+            if (win_type == WIN_MUC) {
+                jid = ui_current_recipient();
+                jid_release = TRUE;
+                nick = muc_get_room_nick(jid);
+            } else {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            }
+        }
+
+        if (strcmp(cmd, "add") == 0) {
+            bookmark_add(jid, nick, autojoin);
+        } else if (strcmp(cmd, "remove") == 0) {
+            bookmark_remove(jid, autojoin);
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+
+        if (jid_release) {
+            free(jid);
+        }
+    }
+
+    return TRUE;
+}
+
+static gboolean
 _cmd_disco(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -3586,6 +3682,34 @@ _group_autocomplete(char *input, int *size)
     }
 
     return NULL;
+}
+
+static char *
+_bookmark_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    if (strcmp(input, "/bookmark add ") == 0) {
+        GString *str = g_string_new(input);
+
+        str = g_string_append(str, "autojoin");
+        result = str->str;
+        g_string_free(str, FALSE);
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/bookmark list", bookmark_find);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, size, "/bookmark remove", bookmark_find);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/bookmark", bookmark_ac);
+
+    return result;
 }
 
 static char *
