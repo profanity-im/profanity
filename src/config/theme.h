@@ -55,6 +55,8 @@
 #define COLOUR_XA               COLOR_PAIR(55)
 #define COLOUR_TYPING           COLOR_PAIR(60)
 #define COLOUR_GONE             COLOR_PAIR(61)
+#define COLOUR_SUBSCRIBED       COLOR_PAIR(70)
+#define COLOUR_UNSUBSCRIBED     COLOR_PAIR(71)
 
 void theme_init(const char * const theme_name);
 void theme_init_colours(void);

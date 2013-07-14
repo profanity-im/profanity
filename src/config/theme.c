@@ -72,6 +72,8 @@ static struct colours_t {
         NCURSES_COLOR_T inputtext;
         NCURSES_COLOR_T timetext;
         NCURSES_COLOR_T splashtext;
+        NCURSES_COLOR_T subscribed;
+        NCURSES_COLOR_T unsubscribed;
         NCURSES_COLOR_T online;
         NCURSES_COLOR_T away;
         NCURSES_COLOR_T xa;
@@ -220,6 +222,10 @@ theme_init_colours(void)
     // states
     init_pair(60, colour_prefs.typing, colour_prefs.bkgnd);
     init_pair(61, colour_prefs.gone, colour_prefs.bkgnd);
+
+    // subscription status
+    init_pair(70, colour_prefs.subscribed, colour_prefs.bkgnd);
+    init_pair(71, colour_prefs.unsubscribed, colour_prefs.bkgnd);
 }
 
 static NCURSES_COLOR_T
@@ -305,6 +311,14 @@ _load_colours(void)
     gchar *timetext_val = g_key_file_get_string(theme, "colours", "main.time", NULL);
     _set_colour(timetext_val, &colour_prefs.timetext, COLOR_WHITE);
     g_free(timetext_val);
+
+    gchar *subscribed_val = g_key_file_get_string(theme, "colours", "subscribed", NULL);
+    _set_colour(subscribed_val, &colour_prefs.subscribed, COLOR_GREEN);
+    g_free(subscribed_val);
+
+    gchar *unsubscribed_val = g_key_file_get_string(theme, "colours", "unsubscribed", NULL);
+    _set_colour(unsubscribed_val, &colour_prefs.unsubscribed, COLOR_RED);
+    g_free(unsubscribed_val);
 
     gchar *online_val = g_key_file_get_string(theme, "colours", "online", NULL);
     _set_colour(online_val, &colour_prefs.online, COLOR_GREEN);

@@ -201,8 +201,14 @@ parse_args_with_freetext(const char * const inp, int min, int max)
                     in_quotes = TRUE;
                     i++;
                 }
-                token_start = &copy[i];
-                token_size++;
+                if (copy[i] == '"') {
+                    token_start = &copy[i+1];
+                } else {
+                    token_start = &copy[i];
+                }
+                if (copy[i] != '"') {
+                    token_size++;
+                }
             }
         } else {
             if (in_quotes) {
@@ -213,7 +219,9 @@ parse_args_with_freetext(const char * const inp, int min, int max)
                     in_token = FALSE;
                     in_quotes = FALSE;
                 } else {
-                    token_size++;
+                    if (copy[i] != '"') {
+                        token_size++;
+                    }
                 }
             } else {
                 if ((!in_freetext && copy[i] == ' ') || copy[i] == '\0') {
@@ -222,7 +230,9 @@ parse_args_with_freetext(const char * const inp, int min, int max)
                     token_size = 0;
                     in_token = FALSE;
                 } else {
-                    token_size++;
+                    if (copy[i] != '"') {
+                        token_size++;
+                    }
                 }
             }
         }

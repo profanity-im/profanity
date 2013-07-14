@@ -163,7 +163,7 @@ static struct cmd_t command_defs[] =
           "Example : /help presence",
           "Example : /help who",
           "",
-          "For more details help, see the user guide at http://www.profanity.im/userguide.html.",
+          "For more detailed help, see the user guide at http://www.profanity.im/userguide.html.",
           NULL } } },
 
     { "/about",
@@ -197,11 +197,11 @@ static struct cmd_t command_defs[] =
 
     { "/msg",
         _cmd_msg, parse_args_with_freetext, 1, 2, NULL,
-        { "/msg jid|nick [message]", "Start chat with user.",
-        { "/msg jid|nick [message]",
-          "-----------------------",
-          "Open a chat window with for the user JID (Jabber ID) and send the message if one is supplied.",
-          "When in a chat room, supply the nickname to start private chat with the room member.",
+        { "/msg contact|nick [message]", "Start chat with user.",
+        { "/msg contact|nick [message]",
+          "---------------------------",
+          "Open a chat window for the contact and send the message if one is supplied.",
+          "When in a chat room, supply a nickname to start private chat with a room member.",
           "Use quotes if the nickname includes spaces.",
           "",
           "Example : /msg myfriend@server.com Hey, here's a message!",
@@ -232,32 +232,32 @@ static struct cmd_t command_defs[] =
 
     { "/group",
         _cmd_group, parse_args_with_freetext, 0, 3, NULL,
-        { "/group show|add|remove [group] [contact]", "Manage roster groups.",
-        { "/group show|add|remove [group] [contact]",
-          "-------------------------------------",
+        { "/group [show|add|remove] [group] [contact]", "Manage roster groups.",
+        { "/group [show|add|remove] [group] [contact]",
+          "------------------------------------------",
           "View, add to, and remove from roster groups.",
           "Passing no argument will list all roster groups.",
           "The 'show' command takes 'group' as an argument, and lists all roster items in that group.",
-          "The 'add' command takes 'group' and 'contact' arguments, and add the contact to the group.",
-          "The 'remove' command takes 'group' and 'contact' arguments and removed the contact from the group,",
+          "The 'add' command takes 'group' and 'contact' arguments, and adds the contact to the group.",
+          "The 'remove' command takes 'group' and 'contact' arguments and removes the contact from the group,",
           "",
           "Example : /group",
           "Example : /group show friends",
           "Example : /group add friends newfriend@server.org",
-          "Example : /group add family brother (using contacts nickname)",
+          "Example : /group add family Brother (using contacts nickname)",
           "Example : /group remove colleagues boss@work.com",
           NULL } } },
 
     { "/info",
         _cmd_info, parse_args, 0, 1, NULL,
-        { "/info [jid|nick]", "Show basic information about a contact, or room member.",
-        { "/info [jid|nick]",
-          "----------------",
+        { "/info [contact|nick]", "Show basic information about a contact, or room member.",
+        { "/info [contact|nick]",
+          "--------------------",
           "Show information including current subscription status and summary information for each connected resource.",
           "If in a chat window the parameter is not required, the current recipient will be used.",
           "",
-          "Example : /info mybuddy@chat.server.org (contact)",
-          "Example : /info kai (room member)",
+          "Example : /info mybuddy@chat.server.org",
+          "Example : /info kai",
           NULL } } },
 
     { "/caps",
@@ -284,7 +284,7 @@ static struct cmd_t command_defs[] =
           "If in the console window or a regular chat window, a full JID is required.",
           "If in a chat room, the nickname is required.",
           "If in private chat, no parameter is required.",
-          "If the contacts software does not support software version requests, nothing will be displayed.",
+          "If the contact's software does not support software version requests, nothing will be displayed.",
           "",
           "Example : /software mybuddy@chat.server.org/laptop (contact's laptop resource)",
           "Example : /software mybuddy@chat.server.org/phone (contact's phone resource)",
@@ -293,14 +293,14 @@ static struct cmd_t command_defs[] =
 
     { "/status",
         _cmd_status, parse_args, 0, 1, NULL,
-        { "/status [jid|nick]", "Find out your contacts presence information.",
-        { "/status [jid|nick]",
-          "------------------",
+        { "/status [contact|nick]", "Find out a contacts presence information.",
+        { "/status [contact|nick]",
+          "----------------------",
           "Find out a contact, or room members presence information.",
           "If in a chat window the parameter is not required, the current recipient will be used.",
           "",
-          "Example : /status buddy@server.com (contact)",
-          "Example : /status jon (room member)",
+          "Example : /status buddy@server.com",
+          "Example : /status jon",
           NULL } } },
 
     { "/join",
@@ -311,7 +311,7 @@ static struct cmd_t command_defs[] =
           "Join a chat room at the conference server.",
           "If nick is specified you will join with this nickname.",
           "Otherwise the 'localpart' of your JID (before the @) will be used.",
-          "If no server is supplied, it will default to 'conference.<domain-part>'",
+          "If no server is supplied, a default of 'conference.<domain-part>' will be used.",
           "If the room doesn't exist, and the server allows it, a new one will be created.",
           "",
           "Example : /join jdev@conference.jabber.org",
@@ -329,11 +329,10 @@ static struct cmd_t command_defs[] =
 
     { "/invite",
         _cmd_invite, parse_args_with_freetext, 1, 2, NULL,
-        { "/invite jid [message]", "Invite contact to chat room.",
-        { "/invite jid [message]",
-          "--------------------------",
+        { "/invite contact [message]", "Invite contact to chat room.",
+        { "/invite contact [message]",
+          "-------------------------",
           "Send a direct invite to the specified contact to the current chat room.",
-          "The jid must be a contact in your roster.",
           "If a message is supplied it will be send as the reason for the invite.",
           NULL } } },
 
@@ -404,7 +403,7 @@ static struct cmd_t command_defs[] =
         { "/wins [tidy|prune]",
           "------------------",
           "Passing no argument will list all currently active windows and information about their usage.",
-          "tidy  : Shuffle windows so there are no gaps between used windows.",
+          "tidy  : Shuffle windows so there are no gaps.",
           "prune : Close all windows with no unread messages, and then tidy as above.",
           NULL } } },
 
@@ -438,7 +437,7 @@ static struct cmd_t command_defs[] =
           "---------",
           "Send the url as a tiny url.",
           "",
-          "Example : /tiny http://www.google.com",
+          "Example : /tiny http://www.profanity.im",
           NULL } } },
 
     { "/duck",
@@ -522,7 +521,6 @@ static struct cmd_t command_defs[] =
           "        : on|off",
           "invite  : Notifications for chat room invites.",
           "        : on|off",
-          "",
           "sub     : Notifications for subscription requests.",
           "        : on|off",
           "",
@@ -644,7 +642,7 @@ static struct cmd_t command_defs[] =
         { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
           "---------------",
-          "Switch chat history on or off, requires /chlog will automatically be enabled when this setting in on.",
+          "Switch chat history on or off, /chlog will automatically be enabled when this setting is on.",
           "When history is enabled, previous messages are shown in chat windows.",
           NULL } } },
 
@@ -663,7 +661,7 @@ static struct cmd_t command_defs[] =
         { "/reconnect seconds",
           "------------------",
           "Set the reconnect attempt interval in seconds for when the connection is lost.",
-          "A value of 0 will switch of reconnect attempts.",
+          "A value of 0 will switch off reconnect attempts.",
           NULL } } },
 
     { "/autoping",
@@ -872,7 +870,7 @@ cmd_init(void)
     autocomplete_add(help_ac, strdup("chatting"));
     autocomplete_add(help_ac, strdup("groupchat"));
     autocomplete_add(help_ac, strdup("presence"));
-    autocomplete_add(help_ac, strdup("roster"));
+    autocomplete_add(help_ac, strdup("contacts"));
     autocomplete_add(help_ac, strdup("service"));
     autocomplete_add(help_ac, strdup("settings"));
     autocomplete_add(help_ac, strdup("other"));
@@ -1463,7 +1461,7 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                     cons_show("");
                 } else if (strcmp(property, "status") == 0) {
                     if (!valid_resource_presence_string(value) && (strcmp(value, "last") != 0)) {
-                        cons_show("Invalud status: %s", value);
+                        cons_show("Invalid status: %s", value);
                     } else {
                         accounts_set_login_presence(account_name, value);
                         cons_show("Updated login status for account %s: %s", account_name, value);
@@ -1741,7 +1739,7 @@ _cmd_help(gchar **args, struct cmd_help_t help)
             "/xa" };
         _cmd_show_filtered_help("Presence commands", filter, ARRAY_SIZE(filter));
 
-    } else if (strcmp(args[0], "roster") == 0) {
+    } else if (strcmp(args[0], "contacts") == 0) {
         gchar *filter[] = { "/group", "/roster", "/sub", "/who" };
         _cmd_show_filtered_help("Roster commands", filter, ARRAY_SIZE(filter));
 
@@ -2690,7 +2688,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     } else {
         g_string_append(room_str, args[0]);
         g_string_append(room_str, "@conference.");
-        g_string_append(room_str, strdup(my_jid->domainpart));
+        g_string_append(room_str, my_jid->domainpart);
         room = room_str->str;
     }
 
@@ -2711,6 +2709,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     ui_room_join(room_jid);
     muc_remove_invite(room);
 
+    jid_destroy(room_arg);
     jid_destroy(room_jid);
     jid_destroy(my_jid);
     g_string_free(room_str, TRUE);
@@ -2788,7 +2787,7 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         Jid *jid = jid_create(jabber_get_fulljid());
         GString *conference_node = g_string_new("conference.");
-        g_string_append(conference_node, strdup(jid->domainpart));
+        g_string_append(conference_node, jid->domainpart);
         jid_destroy(jid);
         iq_room_list_request(conference_node->str);
         g_string_free(conference_node, TRUE);
@@ -2814,7 +2813,7 @@ _cmd_disco(gchar **args, struct cmd_help_t help)
         jid = g_string_append(jid, args[1]);
     } else {
         Jid *jidp = jid_create(jabber_get_fulljid());
-        jid = g_string_append(jid, strdup(jidp->domainpart));
+        jid = g_string_append(jid, jidp->domainpart);
         jid_destroy(jidp);
     }
 

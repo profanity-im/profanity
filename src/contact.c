@@ -252,6 +252,20 @@ p_contact_subscription(const PContact contact)
     return contact->subscription;
 }
 
+gboolean
+p_contact_subscribed(const PContact contact)
+{
+    if (contact->subscription == NULL) {
+        return FALSE;
+    } else if (strcmp(contact->subscription, "to") == 0) {
+        return TRUE;
+    } else if (strcmp(contact->subscription, "both") == 0) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
 Resource *
 p_contact_get_resource(const PContact contact, const char * const resource)
 {
