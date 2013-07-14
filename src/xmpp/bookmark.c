@@ -18,21 +18,25 @@ static int _bookmark_handle_result(xmpp_conn_t * const conn,
 void
 bookmark_request(void)
 {
-    int id;
-    char id_str[10];
+    char *id;
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_storage_bookmarks(ctx);
+    xmpp_stanza_t *iq;
 
-    id = jabber_get_id();
-    snprintf(id_str, sizeof(id_str), "%u", id);
+    id = get_unique_id();
+    if (!id) {
+        return;
+    }
 
     /* TODO: timed handler to remove this id_handler */
-    xmpp_id_handler_add(conn, _bookmark_handle_result, id_str, ctx);
+    xmpp_id_handler_add(conn, _bookmark_handle_result, id, ctx);
 
-    xmpp_stanza_set_id(iq, id_str);
+    iq = stanza_create_storage_bookmarks(ctx);
+    xmpp_stanza_set_id(iq, id);
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
+
+    g_free(id);
 }
 
 static int
