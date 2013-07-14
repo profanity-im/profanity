@@ -144,11 +144,13 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
     ptr = xmpp_stanza_get_children(ptr);
     while (ptr) {
         name = xmpp_stanza_get_name(ptr);
-        if (strcmp(name, STANZA_NAME_CONFERENCE) != 0) {
+        if (!name || strcmp(name, STANZA_NAME_CONFERENCE) != 0) {
+            ptr = xmpp_stanza_get_next(ptr);
             continue;
         }
         jid = xmpp_stanza_get_attribute(ptr, STANZA_ATTR_JID);
         if (!jid) {
+            ptr = xmpp_stanza_get_next(ptr);
             continue;
         }
 
@@ -166,7 +168,7 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
         }
 
         autojoin = xmpp_stanza_get_attribute(ptr, "autojoin");
-        if (autojoin && strcmp(autojoin, "1") == 0) {
+        if (autojoin && (strcmp(autojoin, "1") == 0 || strcmp(autojoin, "true") == 0)) {
             autojoin_val = TRUE;
         } else {
             autojoin_val = FALSE;
