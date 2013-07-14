@@ -68,8 +68,7 @@ void
 autocomplete_free(Autocomplete ac)
 {
     autocomplete_clear(ac);
-    g_free(ac);
-    ac = NULL;
+    free(ac);
 }
 
 gint
