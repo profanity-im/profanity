@@ -297,34 +297,27 @@ parse_args_with_freetext(const char * const inp, int min, int max)
 int
 count_tokens(char *string)
 {
+    int length = g_utf8_strlen(string, -1);
+    gboolean in_quotes = FALSE;
     int num_tokens = 0;
+    int i = 0;
 
-    // if no quotes, use glib
-    if (g_strrstr(string, "\"") == NULL) {
-        gchar **tokens = g_strsplit(string, " ", 0);
-        num_tokens = g_strv_length(tokens);
-        g_strfreev(tokens);
+    // include first token
+    num_tokens++;
 
-    // else count tokens including quoted
-    } else {
-        int length = strlen(string);
-        int i = 0;
-        gboolean in_quotes = FALSE;
+    for (i = 0; i < length; i++) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(string, i);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
 
-        // include first token
-        num_tokens++;
-
-        for (i = 0; i < length; i++) {
-            if (string[i] == ' ') {
-                if (!in_quotes) {
-                    num_tokens++;
-                }
-            } else if (string[i] == '"') {
-                if (in_quotes) {
-                    in_quotes = FALSE;
-                } else {
-                    in_quotes = TRUE;
-                }
+        if (curr_uni == ' ') {
+            if (!in_quotes) {
+                num_tokens++;
+            }
+        } else if (curr_uni == '"') {
+            if (in_quotes) {
+                in_quotes = FALSE;
+            } else {
+                in_quotes = TRUE;
             }
         }
     }
@@ -335,25 +328,31 @@ count_tokens(char *string)
 char *
 get_start(char *string, int tokens)
 {
+    GString *result = g_string_new("");
+    int length = g_utf8_strlen(string, -1);
+    gboolean in_quotes = FALSE;
     char *result_str = NULL;
     int num_tokens = 0;
-    int length = strlen(string);
     int i = 0;
-    gboolean in_quotes = FALSE;
-    GString *result = g_string_new("");
 
     // include first token
     num_tokens++;
 
     for (i = 0; i < length; i++) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(string, i);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
+
         if (num_tokens < tokens) {
-            g_string_append_c(result, string[i]);
+            gchar *uni_char = malloc(7);
+            int len = g_unichar_to_utf8(curr_uni, uni_char);
+            uni_char[len] = '\0';
+            g_string_append(result, uni_char);
         }
-        if (string[i] == ' ') {
+        if (curr_uni == ' ') {
             if (!in_quotes) {
                 num_tokens++;
             }
-        } else if (string[i] == '"') {
+        } else if (curr_uni == '"') {
             if (in_quotes) {
                 in_quotes = FALSE;
             } else {
