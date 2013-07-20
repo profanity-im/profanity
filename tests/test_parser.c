@@ -281,6 +281,18 @@ parse_cmd_freetext_with_many_quoted_and_many_spaces(void)
 }
 
 void
+parse_cmd_with_quoted_freetext(void)
+{
+    char *inp = "/cmd arg1 here is \"some\" quoted freetext";
+    gchar **result = parse_args_with_freetext(inp, 1, 2);
+
+    assert_int_equals(2, g_strv_length(result));
+    assert_string_equals("arg1", result[0]);
+    assert_string_equals("here is \"some\" quoted freetext", result[1]);
+    g_strfreev(result);
+}
+
+void
 count_one_token(void)
 {
     char *inp = "one";
@@ -425,6 +437,7 @@ register_parser_tests(void)
     TEST(parse_cmd_freetext_with_quoted_and_space);
     TEST(parse_cmd_freetext_with_quoted_and_many_spaces);
     TEST(parse_cmd_freetext_with_many_quoted_and_many_spaces);
+    TEST(parse_cmd_with_quoted_freetext);
     TEST(count_one_token);
     TEST(count_one_token_quoted_no_whitespace);
     TEST(count_one_token_quoted_with_whitespace);
