@@ -333,7 +333,7 @@ static struct cmd_t command_defs[] =
         { "/invite contact [message]",
           "-------------------------",
           "Send a direct invite to the specified contact to the current chat room.",
-          "If a message is supplied it will be send as the reason for the invite.",
+          "If a message is supplied it will be sent as the reason for the invite.",
           NULL } } },
 
     { "/invites",
