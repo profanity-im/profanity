@@ -242,15 +242,15 @@ parse_args_with_freetext(const char * const inp, int min, int max)
                     }
                 }
             } else {
-                if (!in_freetext && curr_uni == ' ') {
+                if (in_freetext) {
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
+                } else if (curr_uni == ' ') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
                         token_size));
                     token_size = 0;
                     in_token = FALSE;
-                } else {
-                    if (curr_uni != '"') {
-                        token_size += g_unichar_to_utf8(curr_uni, NULL);
-                    }
+                } else if (curr_uni != '"') {
+                    token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
             }
         }
