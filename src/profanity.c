@@ -31,6 +31,7 @@
 
 #include "profanity.h"
 
+#include "api/api.h"
 #include "chat_session.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -633,6 +634,7 @@ _init(const int disable_tls, char *log_level)
     roster_init();
     muc_init();
     atexit(_shutdown);
+    api_init();
 }
 
 static void

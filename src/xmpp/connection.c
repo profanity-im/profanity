@@ -71,11 +71,11 @@ static struct {
 static GTimer *reconnect_timer;
 
 static log_level_t _get_log_level(xmpp_log_level_t xmpp_level);
-static xmpp_log_level_t _get_xmpp_log_level();
+static xmpp_log_level_t _get_xmpp_log_level(void);
 static void _xmpp_file_logger(void * const userdata,
     const xmpp_log_level_t level, const char * const area,
     const char * const msg);
-static xmpp_log_t * _xmpp_get_file_logger();
+static xmpp_log_t * _xmpp_get_file_logger(void);
 
 static jabber_conn_status_t _jabber_connect(const char * const fulljid,
     const char * const passwd, const char * const altdomain);

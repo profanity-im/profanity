@@ -88,11 +88,11 @@ if test "x$enable_notifications" != xno; then
 fi
 
 # Default parameters
-AM_CFLAGS="-Wall"
+AM_CFLAGS="-Wall -I/usr/include/python2.7 -I/usr/include/python2.7 -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -g -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security -L/usr/lib/python2.7/config -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions"
 if test "x$PACKAGE_STATUS" = xdevelopment; then
     AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
 fi
-LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
+LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS -lpthread -ldl -lutil -lm -lpython2.7"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 
