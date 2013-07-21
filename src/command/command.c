@@ -336,7 +336,7 @@ static struct cmd_t command_defs[] =
         { "/invite contact [message]",
           "-------------------------",
           "Send a direct invite to the specified contact to the current chat room.",
-          "If a message is supplied it will be send as the reason for the invite.",
+          "If a message is supplied it will be sent as the reason for the invite.",
           NULL } } },
 
     { "/invites",
@@ -2809,7 +2809,7 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are currenlty connect.");
+        cons_show("You are not currenlty connected.");
         return TRUE;
     }
 
@@ -2900,7 +2900,7 @@ _cmd_disco(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are currenlty connect.");
+        cons_show("You are not currenlty connected.");
         return TRUE;
     }
 
