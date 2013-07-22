@@ -46,7 +46,7 @@ install_lib_strophe()
     echo
     echo Profanity installer... installing libstrophe
     echo
-    git clone git://github.com/metajack/libstrophe.git
+    git clone git://github.com/strophe/libstrophe.git
     cd libstrophe
     ./bootstrap.sh
     ./configure
@@ -71,7 +71,7 @@ cyg_install_lib_strophe()
     echo
     echo Profanity installer... installing libstrophe
     echo
-    git clone git://github.com/metajack/libstrophe.git
+    git clone git://github.com/strophe/libstrophe.git
     cd libstrophe
     ./bootstrap.sh
     ./bootstrap.sh # second call seems to fix problem on cygwin
