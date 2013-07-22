@@ -31,11 +31,12 @@ api_init(void)
     PyObject *pValue;
 
     Py_Initialize();
-    pName = PyString_FromString("test");
+    pName = PyString_FromString("profplugin");
     pModule = PyImport_Import(pName);
     Py_DECREF(pName);
 
     if (pModule != NULL) {
+
         pFunc = PyObject_GetAttrString(pModule, "pluginname");
 
         if (pFunc == NULL) {
