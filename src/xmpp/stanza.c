@@ -58,8 +58,6 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     const char * const type, const char * const message,
     const char * const state, const char * const id)
 {
-    char *encoded_xml = encode_xml(message);
-
     xmpp_stanza_t *msg, *body, *text;
 
     msg = xmpp_stanza_new(ctx);
@@ -74,7 +72,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(body, STANZA_NAME_BODY);
 
     text = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(text, encoded_xml);
+    xmpp_stanza_set_text(text, message);
     xmpp_stanza_add_child(body, text);
     xmpp_stanza_release(text);
     xmpp_stanza_add_child(msg, body);
@@ -87,8 +85,6 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
         xmpp_stanza_add_child(msg, chat_state);
 	xmpp_stanza_release(chat_state);
     }
-
-    g_free(encoded_xml);
 
     return msg;
 }
