@@ -49,7 +49,7 @@ tests_testsuite_SOURCES = \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-    src/api/apu.h src/api/api.c
+    src/api/apu.h src/api/api.c \
 	tests/test_roster.c tests/test_common.c tests/test_history.c \
 	tests/test_autocomplete.c tests/testsuite.c tests/test_parser.c \
 	tests/test_jid.c

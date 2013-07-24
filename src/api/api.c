@@ -24,42 +24,43 @@
 
 #include "ui/ui.h"
 
+// API
+
+static PyObject*
+api_cons_show(PyObject *self, PyObject *args)
+{
+    cons_show("Printed to console!");
+    return NULL;
+}
+
+static PyMethodDef apiMethods[] = {
+    { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
+    { NULL, NULL, 0, NULL }
+};
+
 void
 api_init(void)
 {
     PyObject *pName, *pModule, *pFunc;
-    PyObject *pValue;
 
     Py_Initialize();
-    pName = PyString_FromString("profplugin");
+    Py_InitModule("prof", apiMethods);
+    pName = PyString_FromString("helloworld");
     pModule = PyImport_Import(pName);
     Py_DECREF(pName);
 
     if (pModule != NULL) {
 
-        pFunc = PyObject_GetAttrString(pModule, "pluginname");
+        pFunc = PyObject_GetAttrString(pModule, "helloworld");
 
         if (pFunc == NULL) {
             cons_show("NULL pfunc");
         }
 
         if (pFunc && PyCallable_Check(pFunc)) {
-            pValue = PyObject_CallObject(pFunc, NULL);
-            if (pValue != NULL) {
-                cons_show("Plugin loaded");
-                cons_show("Result of call: %s", PyString_AsString(pValue));
-                Py_DECREF(pValue);
-            }
-            else {
-                Py_DECREF(pFunc);
-                Py_DECREF(pModule);
-                cons_show("Error loading plugin");
-                return;
-            }
+            PyObject_CallObject(pFunc, NULL);
         }
         else {
-            if (PyErr_Occurred())
-                cons_show("PyErr occurred");
             cons_show("Could not find function");
         }
         Py_XDECREF(pFunc);
@@ -70,13 +71,6 @@ api_init(void)
         return ;
     }
     Py_Finalize();
-    return;    
+    return;
 }
 
-void
-api_prof_cons_show(const char *message)
-{
-    if (message != NULL) {
-        cons_show("%s", message);
-    }
-}
