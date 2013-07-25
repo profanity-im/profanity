@@ -55,7 +55,7 @@ api_init(void)
 
     if (pModule != NULL) {
 
-        pFunc = PyObject_GetAttrString(pModule, "helloworld");
+        pFunc = PyObject_GetAttrString(pModule, "prof_on_start");
 
         if (pFunc == NULL) {
             cons_show("NULL pfunc");
