@@ -29,7 +29,11 @@
 static PyObject*
 api_cons_show(PyObject *self, PyObject *args)
 {
-    cons_show("Printed to console!");
+    const char *message = NULL;
+    if (!PyArg_ParseTuple(args, "s", &message)) {
+        return NULL;
+    }
+    cons_show("%s", message);
     return NULL;
 }
 
