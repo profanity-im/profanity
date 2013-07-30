@@ -34,13 +34,14 @@ jid_create(const gchar * const str)
 {
     Jid *result = NULL;
 
-    if (str == NULL) {
+    /* if str is NULL g_strdup returns NULL */
+    gchar *trimmed = g_strdup(str);
+    if (trimmed == NULL) {
         return NULL;
     }
 
-    gchar *trimmed = g_strdup(str);
-
     if (strlen(trimmed) == 0) {
+        g_free(trimmed);
         return NULL;
     }
 
@@ -50,10 +51,12 @@ jid_create(const gchar * const str)
     }
 
     if (!g_utf8_validate(trimmed, -1, NULL)) {
+        g_free(trimmed);
         return NULL;
     }
 
     result = malloc(sizeof(struct jid_t));
+    result->str = NULL;
     result->localpart = NULL;
     result->domainpart = NULL;
     result->resourcepart = NULL;
@@ -81,13 +84,11 @@ jid_create(const gchar * const str)
     }
 
     if (result->domainpart == NULL) {
-        free(trimmed);
+        jid_destroy(result);
         return NULL;
     }
 
-    result->str = g_strdup(trimmed);
-
-    free(trimmed);
+    result->str = trimmed;
 
     return result;
 }
@@ -181,17 +182,17 @@ char *
 get_room_from_full_jid(const char * const full_room_jid)
 {
     char **tokens = g_strsplit(full_room_jid, "/", 0);
-    char *room_part;
+    char *room_part = NULL;
 
-    if (tokens == NULL || tokens[0] == NULL) {
-        return NULL;
-    } else {
-        room_part = strdup(tokens[0]);
+    if (tokens != NULL) {
+        if (tokens[0] != NULL) {
+            room_part = strdup(tokens[0]);
+        }
 
         g_strfreev(tokens);
-
-        return room_part;
     }
+
+    return room_part;
 }
 
 /*
@@ -203,16 +204,15 @@ char *
 get_nick_from_full_jid(const char * const full_room_jid)
 {
     char **tokens = g_strsplit(full_room_jid, "/", 0);
-    char *nick_part;
+    char *nick_part = NULL;
 
-    if (tokens == NULL || tokens[1] == NULL) {
-        return NULL;
-    } else {
-        nick_part = strdup(tokens[1]);
+    if (tokens != NULL) {
+        if (tokens[0] != NULL && tokens[1] != NULL) {
+            nick_part = strdup(tokens[1]);
+        }
 
         g_strfreev(tokens);
-
-        return nick_part;
     }
-}
 
+    return nick_part;
+}
