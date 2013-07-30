@@ -45,7 +45,7 @@ static PyMethodDef apiMethods[] = {
 void
 api_init(void)
 {
-    PyObject *pName, *pModule, *pFunc;
+    PyObject *pName, *pModule, *pProfInit, *pProfOnStart, *pArgs;
 
     Py_Initialize();
     Py_InitModule("prof", apiMethods);
@@ -54,20 +54,20 @@ api_init(void)
     Py_DECREF(pName);
 
     if (pModule != NULL) {
-
-        pFunc = PyObject_GetAttrString(pModule, "prof_on_start");
-
-        if (pFunc == NULL) {
-            cons_show("NULL pfunc");
+        pProfInit = PyObject_GetAttrString(pModule, "prof_init");
+        if (pProfInit && PyCallable_Check(pProfInit)) {
+            pArgs = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
+            PyObject_CallObject(pProfInit, pArgs);
+//            Py_XDECREF(pArgs);
         }
+        Py_XDECREF(pProfInit);
 
-        if (pFunc && PyCallable_Check(pFunc)) {
-            PyObject_CallObject(pFunc, NULL);
+        pProfOnStart = PyObject_GetAttrString(pModule, "prof_on_start");
+        if (pProfOnStart && PyCallable_Check(pProfOnStart)) {
+            PyObject_CallObject(pProfOnStart, NULL);
         }
-        else {
-            cons_show("Could not find function");
-        }
-        Py_XDECREF(pFunc);
+        Py_XDECREF(pProfOnStart);
+
         Py_DECREF(pModule);
     }
     else {
