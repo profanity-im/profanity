@@ -48,6 +48,7 @@ api_init(void)
     PyObject *pName, *pModule, *pProfInit, *pProfOnStart, *pArgs;
 
     Py_Initialize();
+    PySys_SetPath("$PYTHONPATH:./plugins/");
     Py_InitModule("prof", apiMethods);
     pName = PyString_FromString("helloworld");
     pModule = PyImport_Import(pName);
@@ -58,7 +59,7 @@ api_init(void)
         if (pProfInit && PyCallable_Check(pProfInit)) {
             pArgs = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
             PyObject_CallObject(pProfInit, pArgs);
-//            Py_XDECREF(pArgs);
+            Py_XDECREF(pArgs);
         }
         Py_XDECREF(pProfInit);
 
