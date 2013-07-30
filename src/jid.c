@@ -108,12 +108,12 @@ void
 jid_destroy(Jid *jid)
 {
     if (jid != NULL) {
-        FREE_SET_NULL(jid->str);
-        FREE_SET_NULL(jid->localpart);
-        FREE_SET_NULL(jid->domainpart);
-        FREE_SET_NULL(jid->resourcepart);
-        FREE_SET_NULL(jid->barejid);
-        FREE_SET_NULL(jid->fulljid);
+        GFREE_SET_NULL(jid->str);
+        GFREE_SET_NULL(jid->localpart);
+        GFREE_SET_NULL(jid->domainpart);
+        GFREE_SET_NULL(jid->resourcepart);
+        GFREE_SET_NULL(jid->barejid);
+        GFREE_SET_NULL(jid->fulljid);
         FREE_SET_NULL(jid);
     }
 }
