@@ -42,18 +42,16 @@
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 #define FREE_SET_NULL(resource) \
-{ \
-    if (resource != NULL) { \
-        free(resource); \
-        resource = NULL; \
-    } \
-}
+do { \
+    free(resource); \
+    resource = NULL; \
+} while (0)
 
 #define GFREE_SET_NULL(resource) \
-{ \
+do { \
     g_free(resource); \
     resource = NULL; \
-}
+} while (0)
 
 typedef enum {
     CONTACT_OFFLINE,
