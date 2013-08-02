@@ -15,7 +15,7 @@ def prof_on_start():
     helloworld()
 
 def prof_on_connect():
-    helloworld();
+    prof.cons_show("Connected hello world plugin")
 
 # local functions
 
