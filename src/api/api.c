@@ -25,6 +25,9 @@
 #include "ui/ui.h"
 
 static GSList* _get_module_names(void);
+static void _init(void);
+static void _on_start(void);
+static GSList* plugins;
 
 // API
 
@@ -47,7 +50,8 @@ static PyMethodDef apiMethods[] = {
 void
 api_init(void)
 {
-    PyObject *p_module, *p_prof_init, *p_args, *p_prof_on_start;
+    plugins = NULL;
+    PyObject *p_module;
 
     GSList *module_names = _get_module_names();
 
@@ -63,35 +67,19 @@ api_init(void)
         GSList *module_name = module_names;
 
         while (module_name != NULL) {
-            cons_show("Loading plugin: %s", module_name->data);
-
             p_module = PyImport_ImportModule(module_name->data);
-
             if (p_module != NULL) {
-                cons_show("LOADED");
-                p_prof_init = PyObject_GetAttrString(p_module, "prof_init");
-                if (p_prof_init && PyCallable_Check(p_prof_init)) {
-                    p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
-                    PyObject_CallObject(p_prof_init, p_args);
-                    Py_XDECREF(p_args);
-                    Py_XDECREF(p_prof_init);
-                }
-
-                p_prof_on_start = PyObject_GetAttrString(p_module, "prof_on_start");
-                if (p_prof_on_start && PyCallable_Check(p_prof_on_start)) {
-                    PyObject_CallObject(p_prof_on_start, NULL);
-                    Py_XDECREF(p_prof_on_start);
-                }
-                Py_XDECREF(p_module);
-            } else {
-                cons_show("p_module NULL");
-                if (PyErr_Occurred()) {
-                    PyErr_Print();
-                }
+                cons_show("Loaded plugin: %s", module_name->data);
+                plugins = g_slist_append(plugins, p_module);
             }
 
             module_name = g_slist_next(module_name);
         }
+
+        cons_show("");
+
+        _init();
+        _on_start();
     }
     Py_Finalize();
     return;
@@ -119,4 +107,42 @@ _get_module_names(void)
     } else {
         return NULL;
     }
+}
+
+static void
+_init(void)
+{
+    GSList *plugin = plugins;
+    PyObject *p_prof_init, *p_args;
+
+    while (plugin != NULL) {
+        PyObject *module = plugin->data;
+        p_prof_init = PyObject_GetAttrString(module, "prof_init");
+        if (p_prof_init && PyCallable_Check(p_prof_init)) {
+            p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
+            PyObject_CallObject(p_prof_init, p_args);
+            Py_XDECREF(p_args);
+            Py_XDECREF(p_prof_init);
+        }
+
+        plugin = g_slist_next(plugin);
+    }
+}
+
+static void
+_on_start(void)
+{
+    GSList *plugin = plugins;
+    PyObject *p_prof_on_start;
+
+    while (plugin != NULL) {
+        PyObject *module = plugin->data;
+        p_prof_on_start = PyObject_GetAttrString(module, "prof_on_start");
+        if (p_prof_on_start && PyCallable_Check(p_prof_on_start)) {
+            PyObject_CallObject(p_prof_on_start, NULL);
+            Py_XDECREF(p_prof_on_start);
+        }
+
+        plugin = g_slist_next(plugin);
+   }
 }
