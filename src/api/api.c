@@ -28,6 +28,7 @@
 static GSList* _get_module_names(void);
 static void _init(void);
 static void _on_start(void);
+static void _run_plugins(const char * const function, PyObject *p_args);
 
 static GSList* plugins;
 static PyObject *prof_module;
@@ -119,53 +120,35 @@ _get_module_names(void)
 static void
 _init(void)
 {
-    GSList *plugin = plugins;
-    PyObject *p_prof_init, *p_args;
-
-    while (plugin != NULL) {
-        PyObject *module = plugin->data;
-        p_prof_init = PyObject_GetAttrString(module, "prof_init");
-        if (p_prof_init && PyCallable_Check(p_prof_init)) {
-            p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
-            PyObject_CallObject(p_prof_init, p_args);
-            Py_XDECREF(p_args);
-            Py_XDECREF(p_prof_init);
-        }
-
-        plugin = g_slist_next(plugin);
-    }
+    PyObject *p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
+    _run_plugins("prof_init", p_args);
+    Py_XDECREF(p_args);
 }
 
 static void
 _on_start(void)
 {
-    GSList *plugin = plugins;
-    PyObject *p_prof_on_start;
-
-    while (plugin != NULL) {
-        PyObject *module = plugin->data;
-        p_prof_on_start = PyObject_GetAttrString(module, "prof_on_start");
-        if (p_prof_on_start && PyCallable_Check(p_prof_on_start)) {
-            PyObject_CallObject(p_prof_on_start, NULL);
-            Py_XDECREF(p_prof_on_start);
-        }
-
-        plugin = g_slist_next(plugin);
-   }
+    _run_plugins("prof_on_start", NULL);
 }
 
 void
 plugins_on_connect(void)
 {
+    _run_plugins("prof_on_connect", NULL);
+}
+
+static void
+_run_plugins(const char * const function, PyObject *p_args)
+{
     GSList *plugin = plugins;
-    PyObject *p_prof_on_connect;
+    PyObject *p_function;
 
     while (plugin != NULL) {
-        PyObject *module = plugin->data;
-        p_prof_on_connect = PyObject_GetAttrString(module, "prof_on_connect");
-        if (p_prof_on_connect && PyCallable_Check(p_prof_on_connect)) {
-            PyObject_CallObject(p_prof_on_connect, NULL);
-            Py_XDECREF(p_prof_on_connect);
+        PyObject *p_module = plugin->data;
+        p_function = PyObject_GetAttrString(p_module, function);
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            Py_XDECREF(p_function);
         }
 
         plugin = g_slist_next(plugin);
