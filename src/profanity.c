@@ -31,7 +31,7 @@
 
 #include "profanity.h"
 
-#include "plugins/api.h"
+#include "plugins/plugins.h"
 #include "chat_session.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -635,7 +635,7 @@ _init(const int disable_tls, char *log_level)
     roster_init();
     muc_init();
     atexit(_shutdown);
-    api_init();
+    plugins_init();
 }
 
 static void
@@ -652,7 +652,7 @@ _shutdown(void)
     accounts_close();
     cmd_close();
     log_close();
-    api_shutdown();
+    plugins_shutdown();
 }
 
 static void

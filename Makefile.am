@@ -22,7 +22,7 @@ profanity_SOURCES = \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-    src/plugins/api.h src/plugins/api.c
+    src/plugins/plugins.h src/plugins/plugins.c
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
@@ -49,7 +49,7 @@ tests_testsuite_SOURCES = \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-    src/plugins/api.h src/plugins/api.c \
+    src/plugins/plugins.h src/plugins/plugins.c \
 	tests/test_roster.c tests/test_common.c tests/test_history.c \
 	tests/test_autocomplete.c tests/testsuite.c tests/test_parser.c \
 	tests/test_jid.c

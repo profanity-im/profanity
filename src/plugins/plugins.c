@@ -22,7 +22,7 @@
 
 #include <Python.h>
 
-#include "plugins/api.h"
+#include "plugins/plugins.h"
 #include "ui/ui.h"
 
 static GSList* _get_module_names(void);
@@ -51,7 +51,7 @@ static PyMethodDef apiMethods[] = {
 };
 
 void
-api_init(void)
+plugins_init(void)
 {
     plugins = NULL;
     PyObject *p_module;
@@ -88,7 +88,7 @@ api_init(void)
 }
 
 void
-api_shutdown(void)
+plugins_shutdown(void)
 {
     Py_Finalize();
 }
