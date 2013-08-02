@@ -24,6 +24,8 @@
 
 #include "ui/ui.h"
 
+static GSList* _get_module_names(void);
+
 // API
 
 static PyObject*
@@ -34,7 +36,7 @@ api_cons_show(PyObject *self, PyObject *args)
         return NULL;
     }
     cons_show("%s", message);
-    return NULL;
+    return Py_BuildValue("");
 }
 
 static PyMethodDef apiMethods[] = {
@@ -42,40 +44,96 @@ static PyMethodDef apiMethods[] = {
     { NULL, NULL, 0, NULL }
 };
 
+//PyMODINIT_FUNC
+//initprof(void)
+//{
+//    Py_InitModule("prof", apiMethods);
+//}
+
 void
 api_init(void)
 {
-    PyObject *pName, *pModule, *pProfInit, *pProfOnStart, *pArgs;
+    //PyObject *p_module_name
+    PyObject *p_module, *p_prof_init, *p_args, *p_prof_on_start;
+//    PyObject *p_prof_module;
+
+    GSList *module_names = _get_module_names();
 
     Py_Initialize();
-    PySys_SetPath("$PYTHONPATH:./plugins/");
     Py_InitModule("prof", apiMethods);
-    pName = PyString_FromString("helloworld");
-    pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
+//    p_prof_module = Py_InitModule("prof", apiMethods);
+//    PyObject *p_prof_module_name = PyString_FromString("prof");
+    
+//    PyObject *main_module = PyImport_ImportModule("__main__");
+//    PyObject *main_dict   = PyModule_GetDict(main_module);
 
-    if (pModule != NULL) {
-        pProfInit = PyObject_GetAttrString(pModule, "prof_init");
-        if (pProfInit && PyCallable_Check(pProfInit)) {
-            pArgs = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
-            PyObject_CallObject(pProfInit, pArgs);
-            Py_XDECREF(pArgs);
+//    PyDict_SetItem(main_dict, p_prof_module_name, p_prof_module);
+
+    // TODO change to use XDG spec
+    PySys_SetPath("$PYTHONPATH:./plugins/");
+
+    if (module_names != NULL) {
+        cons_show("Loading plugins...");
+
+        GSList *module_name = module_names;
+
+        while (module_name != NULL) {
+            cons_show("Loading plugin: %s", module_name->data);
+
+            //p_module_name = PyString_FromString(module_name->data);
+            p_module = PyImport_ImportModule(module_name->data);
+            //Py_XDECREF(p_module_name);
+
+            if (p_module != NULL) {
+                cons_show("LOADED");
+                p_prof_init = PyObject_GetAttrString(p_module, "prof_init");
+                if (p_prof_init && PyCallable_Check(p_prof_init)) {
+                    p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
+                    PyObject_CallObject(p_prof_init, p_args);
+                    //Py_XDECREF(p_args);
+                    //Py_XDECREF(p_prof_init);
+                }
+
+                p_prof_on_start = PyObject_GetAttrString(p_module, "prof_on_start");
+                if (p_prof_on_start && PyCallable_Check(p_prof_on_start)) {
+                    PyObject_CallObject(p_prof_on_start, NULL);
+                    //Py_XDECREF(p_prof_on_start);
+                }
+                //Py_XDECREF(p_module);
+            } else {
+                cons_show("p_module NULL");
+                if (PyErr_Occurred()) {
+                    PyErr_Print();
+                }
+            }
+
+            module_name = g_slist_next(module_name);
         }
-        Py_XDECREF(pProfInit);
-
-        pProfOnStart = PyObject_GetAttrString(pModule, "prof_on_start");
-        if (pProfOnStart && PyCallable_Check(pProfOnStart)) {
-            PyObject_CallObject(pProfOnStart, NULL);
-        }
-        Py_XDECREF(pProfOnStart);
-
-        Py_DECREF(pModule);
-    }
-    else {
-        cons_show("Failed to load plugin");
-        return ;
     }
     Py_Finalize();
     return;
 }
 
+static GSList *
+_get_module_names(void)
+{
+    GSList *result = NULL;
+
+    // TODO change to use XDG
+    GDir *plugins_dir = g_dir_open("./plugins", 0, NULL);
+
+    if (plugins_dir != NULL) {
+        const gchar *file = g_dir_read_name(plugins_dir);
+        while (file != NULL) {
+            if (g_str_has_suffix(file, ".py")) {
+                gchar *module_name = g_strndup(file, strlen(file) - 3);
+                result = g_slist_append(result, module_name);
+            }
+            file = g_dir_read_name(plugins_dir);
+        }
+        g_dir_close(plugins_dir);
+        return result;
+    } else {
+        return NULL;
+    }
+}
