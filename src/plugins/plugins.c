@@ -1,5 +1,5 @@
 /*
- * api.c
+ * plugins.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -22,6 +22,7 @@
 
 #include <Python.h>
 
+#include "plugins/api.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 
@@ -31,25 +32,6 @@ static void _on_start(void);
 static void _run_plugins(const char * const function, PyObject *p_args);
 
 static GSList* plugins;
-static PyObject *prof_module;
-// API
-
-static PyObject*
-api_cons_show(PyObject *self, PyObject *args)
-{
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
-        return NULL;
-    }
-    cons_show("%s", message);
-    return Py_BuildValue("");
-}
-
-static PyMethodDef apiMethods[] = {
-    { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
-    { NULL, NULL, 0, NULL }
-};
-
 void
 plugins_init(void)
 {
@@ -59,7 +41,7 @@ plugins_init(void)
     GSList *module_names = _get_module_names();
 
     Py_Initialize();
-    prof_module = Py_InitModule("prof", apiMethods);
+    api_init();
 
     // TODO change to use XDG spec
     PySys_SetPath("$PYTHONPATH:./plugins/");
@@ -91,6 +73,12 @@ void
 plugins_shutdown(void)
 {
     Py_Finalize();
+}
+
+void
+plugins_on_connect(void)
+{
+    _run_plugins("prof_on_connect", NULL);
 }
 
 static GSList *
@@ -129,12 +117,6 @@ static void
 _on_start(void)
 {
     _run_plugins("prof_on_start", NULL);
-}
-
-void
-plugins_on_connect(void)
-{
-    _run_plugins("prof_on_connect", NULL);
 }
 
 static void
