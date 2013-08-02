@@ -44,30 +44,15 @@ static PyMethodDef apiMethods[] = {
     { NULL, NULL, 0, NULL }
 };
 
-//PyMODINIT_FUNC
-//initprof(void)
-//{
-//    Py_InitModule("prof", apiMethods);
-//}
-
 void
 api_init(void)
 {
-    //PyObject *p_module_name
     PyObject *p_module, *p_prof_init, *p_args, *p_prof_on_start;
-//    PyObject *p_prof_module;
 
     GSList *module_names = _get_module_names();
 
     Py_Initialize();
     Py_InitModule("prof", apiMethods);
-//    p_prof_module = Py_InitModule("prof", apiMethods);
-//    PyObject *p_prof_module_name = PyString_FromString("prof");
-    
-//    PyObject *main_module = PyImport_ImportModule("__main__");
-//    PyObject *main_dict   = PyModule_GetDict(main_module);
-
-//    PyDict_SetItem(main_dict, p_prof_module_name, p_prof_module);
 
     // TODO change to use XDG spec
     PySys_SetPath("$PYTHONPATH:./plugins/");
@@ -80,9 +65,7 @@ api_init(void)
         while (module_name != NULL) {
             cons_show("Loading plugin: %s", module_name->data);
 
-            //p_module_name = PyString_FromString(module_name->data);
             p_module = PyImport_ImportModule(module_name->data);
-            //Py_XDECREF(p_module_name);
 
             if (p_module != NULL) {
                 cons_show("LOADED");
@@ -90,16 +73,16 @@ api_init(void)
                 if (p_prof_init && PyCallable_Check(p_prof_init)) {
                     p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
                     PyObject_CallObject(p_prof_init, p_args);
-                    //Py_XDECREF(p_args);
-                    //Py_XDECREF(p_prof_init);
+                    Py_XDECREF(p_args);
+                    Py_XDECREF(p_prof_init);
                 }
 
                 p_prof_on_start = PyObject_GetAttrString(p_module, "prof_on_start");
                 if (p_prof_on_start && PyCallable_Check(p_prof_on_start)) {
                     PyObject_CallObject(p_prof_on_start, NULL);
-                    //Py_XDECREF(p_prof_on_start);
+                    Py_XDECREF(p_prof_on_start);
                 }
-                //Py_XDECREF(p_module);
+                Py_XDECREF(p_module);
             } else {
                 cons_show("p_module NULL");
                 if (PyErr_Occurred()) {
