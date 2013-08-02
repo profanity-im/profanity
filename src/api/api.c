@@ -22,13 +22,15 @@
 
 #include <Python.h>
 
+#include "api/api.h"
 #include "ui/ui.h"
 
 static GSList* _get_module_names(void);
 static void _init(void);
 static void _on_start(void);
-static GSList* plugins;
 
+static GSList* plugins;
+static PyObject *prof_module;
 // API
 
 static PyObject*
@@ -56,7 +58,7 @@ api_init(void)
     GSList *module_names = _get_module_names();
 
     Py_Initialize();
-    Py_InitModule("prof", apiMethods);
+    prof_module = Py_InitModule("prof", apiMethods);
 
     // TODO change to use XDG spec
     PySys_SetPath("$PYTHONPATH:./plugins/");
@@ -81,8 +83,13 @@ api_init(void)
         _init();
         _on_start();
     }
-    Py_Finalize();
     return;
+}
+
+void
+api_shutdown(void)
+{
+    Py_Finalize();
 }
 
 static GSList *
@@ -141,6 +148,24 @@ _on_start(void)
         if (p_prof_on_start && PyCallable_Check(p_prof_on_start)) {
             PyObject_CallObject(p_prof_on_start, NULL);
             Py_XDECREF(p_prof_on_start);
+        }
+
+        plugin = g_slist_next(plugin);
+   }
+}
+
+void
+plugins_on_connect(void)
+{
+    GSList *plugin = plugins;
+    PyObject *p_prof_on_connect;
+
+    while (plugin != NULL) {
+        PyObject *module = plugin->data;
+        p_prof_on_connect = PyObject_GetAttrString(module, "prof_on_connect");
+        if (p_prof_on_connect && PyCallable_Check(p_prof_on_connect)) {
+            PyObject_CallObject(p_prof_on_connect, NULL);
+            Py_XDECREF(p_prof_on_connect);
         }
 
         plugin = g_slist_next(plugin);

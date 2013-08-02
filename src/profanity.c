@@ -260,6 +260,7 @@ prof_handle_login_account_success(char *account_name)
     status_bar_refresh();
 
     accounts_free_account(account);
+    plugins_on_connect();
 }
 
 void
@@ -651,6 +652,7 @@ _shutdown(void)
     accounts_close();
     cmd_close();
     log_close();
+    api_shutdown();
 }
 
 static void

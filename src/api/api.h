@@ -24,5 +24,7 @@
 #define API_H
 
 void api_init(void);
+void plugins_on_connect(void);
+void api_shutdown(void);
 
 #endif
