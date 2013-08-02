@@ -22,7 +22,7 @@
 
 #include <Python.h>
 
-#include "api/api.h"
+#include "plugins/api.h"
 #include "ui/ui.h"
 
 static GSList* _get_module_names(void);

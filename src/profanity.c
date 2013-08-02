@@ -31,7 +31,7 @@
 
 #include "profanity.h"
 
-#include "api/api.h"
+#include "plugins/api.h"
 #include "chat_session.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
