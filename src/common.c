@@ -25,12 +25,14 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <glib.h>
 
+#include "log.h"
 #include "common.h"
 
 // assume malloc stores at most 8 bytes for size of allocated memory
@@ -69,29 +71,43 @@ p_slist_free_full(GSList *items, GDestroyNotify free_func)
     g_slist_free (items);
 }
 
-void
+gboolean
 create_dir(char *name)
 {
-    int e;
     struct stat sb;
 
-    e = stat(name, &sb);
-    if (e != 0)
-        if (errno == ENOENT)
-            e = mkdir(name, S_IRWXU);
+    if (stat(name, &sb) != 0) {
+        if (errno != ENOENT || mkdir(name, S_IRWXU) != 0) {
+            return FALSE;
+        }
+    } else {
+        if ((sb.st_mode & S_IFDIR) != S_IFDIR) {
+            log_debug("create_dir: %s exists and is not a directory!", name);
+            return FALSE;
+        }
+    }
+
+    return TRUE;
 }
 
-void
+gboolean
 mkdir_recursive(const char *dir)
 {
     int i;
+    gboolean result = TRUE;
+
     for (i = 1; i <= strlen(dir); i++) {
         if (dir[i] == '/' || dir[i] == '\0') {
             gchar *next_dir = g_strndup(dir, i);
-            create_dir(next_dir);
+            result = create_dir(next_dir);
             g_free(next_dir);
+            if (!result) {
+                break;
+            }
         }
     }
+
+    return result;
 }
 
 char *
