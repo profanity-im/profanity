@@ -44,7 +44,10 @@ plugins_init(void)
     api_init();
 
     // TODO change to use XDG spec
-    PySys_SetPath("$PYTHONPATH:./plugins/");
+    GString *path = g_string_new(Py_GetPath());
+    g_string_append(path, ":./plugins/");
+    PySys_SetPath(path->str);
+    g_string_free(path, TRUE);
 
     if (module_names != NULL) {
         cons_show("Loading plugins...");
@@ -65,6 +68,10 @@ plugins_init(void)
 
         _init();
         _on_start();
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+            PyErr_Clear();
+        }
     }
     return;
 }
@@ -127,10 +134,12 @@ _run_plugins(const char * const function, PyObject *p_args)
 
     while (plugin != NULL) {
         PyObject *p_module = plugin->data;
-        p_function = PyObject_GetAttrString(p_module, function);
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
-            Py_XDECREF(p_function);
+        if (PyObject_HasAttrString(p_module, function)) {
+            p_function = PyObject_GetAttrString(p_module, function);
+            if (p_function && PyCallable_Check(p_function)) {
+                PyObject_CallObject(p_function, p_args);
+                Py_XDECREF(p_function);
+            }
         }
 
         plugin = g_slist_next(plugin);

@@ -22,23 +22,56 @@
 
 #include <Python.h>
 
+#include "plugins/command.h"
 #include "ui/ui.h"
-
-// API functions
 
 static PyObject*
 api_cons_show(PyObject *self, PyObject *args)
 {
     const char *message = NULL;
+
     if (!PyArg_ParseTuple(args, "s", &message)) {
         return NULL;
     }
     cons_show("%s", message);
+
+    return Py_BuildValue("");
+}
+
+static PyObject*
+api_register_command(PyObject *self, PyObject *args)
+{
+    const char *command_name = NULL;
+    int min_args = 0;
+    int max_args = 0;
+    const char *usage = NULL;
+    const char *short_help = NULL;
+    const char *long_help = NULL;
+    PyObject *p_callback = NULL;
+
+    if (!PyArg_ParseTuple(args, "siisssO", &command_name, &min_args, &max_args, &usage, &short_help, &long_help, &p_callback)) {
+        return NULL;
+    }
+
+    if (p_callback && PyCallable_Check(p_callback)) {
+        PluginCommand *command = malloc(sizeof(PluginCommand));
+        command->command_name = command_name;
+        command->min_args = min_args;
+        command->max_args = max_args;
+        command->usage = usage;
+        command->short_help = short_help;
+        command->long_help = long_help;
+        command->p_callback = p_callback;
+
+        add_command(command);
+    }
+
     return Py_BuildValue("");
 }
 
 static PyMethodDef apiMethods[] = {
     { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
+    { "register_command", api_register_command, METH_VARARGS, "Register a command." },
     { NULL, NULL, 0, NULL }
 };
 
