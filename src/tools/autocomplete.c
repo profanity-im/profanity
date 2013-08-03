@@ -220,7 +220,7 @@ autocomplete_param_with_func(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
         found = func(inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            auto_msg = (char *) malloc(len + strlen(found) + 1);
             strcpy(auto_msg, command_cpy);
             strcat(auto_msg, found);
             free(found);
@@ -249,7 +249,7 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
         found = autocomplete_complete(ac, inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            auto_msg = (char *) malloc(len + strlen(found) + 1);
             strcpy(auto_msg, command_cpy);
             strcat(auto_msg, found);
             free(found);

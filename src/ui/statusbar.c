@@ -191,7 +191,7 @@ status_bar_print_message(const char * const msg)
 
     werase(status_bar);
 
-    message = (char *) malloc((strlen(msg) + 1) * sizeof(char));
+    message = (char *) malloc(strlen(msg) + 1);
     strcpy(message, msg);
     mvwprintw(status_bar, 0, 10, message);
 
