@@ -49,4 +49,6 @@ void cmd_history_append(char *inp);
 char *cmd_history_previous(char *inp, int *size);
 char *cmd_history_next(char *inp, int *size);
 
+void cmd_autocomplete_add(const char * const command);
+
 #endif

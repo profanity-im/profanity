@@ -20,7 +20,11 @@
  *
  */
 
+#include "command/command.h"
 #include "plugins/command.h"
+#include "tools/autocomplete.h"
+
+#include "ui/ui.h"
 
 // API functions
 
@@ -30,6 +34,7 @@ void
 add_command(PluginCommand *command)
 {
     p_commands = g_slist_append(p_commands, command);
+    cmd_autocomplete_add(command->command_name);
 }
 
 gboolean

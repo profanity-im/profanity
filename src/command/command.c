@@ -981,6 +981,12 @@ cmd_init(void)
 }
 
 void
+cmd_autocomplete_add(const char * const command)
+{
+    autocomplete_add(commands_ac, strdup(command));
+}
+
+void
 cmd_close(void)
 {
     autocomplete_free(commands_ac);
