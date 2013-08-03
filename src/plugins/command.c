@@ -20,25 +20,30 @@
  *
  */
 
-#include <Python.h>
-#include <glib.h>
+#include "plugins/command.h"
 
 // API functions
 
 static GSList *p_commands = NULL;
 
-typedef struct p_command {
-    const char *command_name;
-    int min_args;
-    int max_args;
-    const char *usage;
-    const char *short_help;
-    const char *long_help;
-    PyObject *p_callback;
-} PluginCommand;
-
 void
 add_command(PluginCommand *command)
 {
     p_commands = g_slist_append(p_commands, command);
+}
+
+gboolean
+plugin_command_run(const char * const cmd)
+{
+    GSList *p_command = p_commands;
+
+    while (p_command != NULL) {
+        PluginCommand *command = p_command->data;
+        if (strcmp(command->command_name, cmd) == 0) {
+            PyObject_CallObject(command->p_callback, NULL);
+            return TRUE;
+        }
+        p_command = g_slist_next(p_command);
+    }
+    return FALSE;
 }

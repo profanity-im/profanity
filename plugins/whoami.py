@@ -10,6 +10,4 @@ def prof_init(version, status):
 
 def cmd_whoami():
     me = getpass.getuser()
-    prof.cons_show("")
     prof.cons_show(me)
-    prof.cons_show("")

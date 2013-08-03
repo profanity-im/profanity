@@ -24,9 +24,7 @@
 #define PLUGINS_H
 
 void plugins_init(void);
-
 void plugins_on_connect(void);
-
 void plugins_shutdown(void);
 
 #endif

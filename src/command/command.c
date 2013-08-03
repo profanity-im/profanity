@@ -20,12 +20,11 @@
  *
  */
 
+#include "plugins/command.h"
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <glib.h>
 
 #include "chat_session.h"
 #include "command/command.h"
@@ -1102,6 +1101,8 @@ cmd_execute(const char * const command, const char * const inp)
             g_strfreev(args);
             return result;
         }
+    } else if (plugin_command_run(command)) {
+        return TRUE;
     } else {
         return cmd_execute_default(inp);
     }

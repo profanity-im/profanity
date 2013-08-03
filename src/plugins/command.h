@@ -20,7 +20,12 @@
  *
  */
 
+#ifndef PLUGIN_COMMAND_H
+#define PLUGIN_COMMAND_H
+
 #include <Python.h>
+
+#include <glib.h>
 
 typedef struct p_command {
     const char *command_name;
@@ -33,3 +38,6 @@ typedef struct p_command {
 } PluginCommand;
 
 void add_command(PluginCommand *command);
+gboolean plugin_command_run(const char * const cmd);
+
+#endif
