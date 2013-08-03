@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 
@@ -59,10 +60,7 @@ void
 autocomplete_reset(Autocomplete ac)
 {
     ac->last_found = NULL;
-    if (ac->search_str != NULL) {
-        free(ac->search_str);
-        ac->search_str = NULL;
-    }
+    FREE_SET_NULL(ac->search_str);
 }
 
 void

@@ -236,13 +236,13 @@ void
 accounts_free_account(ProfAccount *account)
 {
     if (account != NULL) {
-        FREE_SET_NULL(account->name);
-        FREE_SET_NULL(account->jid);
-        FREE_SET_NULL(account->resource);
-        FREE_SET_NULL(account->server);
-        FREE_SET_NULL(account->last_presence);
-        FREE_SET_NULL(account->login_presence);
-        FREE_SET_NULL(account);
+        free(account->name);
+        free(account->jid);
+        free(account->resource);
+        free(account->server);
+        free(account->last_presence);
+        free(account->login_presence);
+        free(account);
     }
 }
 

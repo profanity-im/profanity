@@ -385,7 +385,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
         }
     }
 
-    FREE_SET_NULL(status_str);
+    free(status_str);
     jid_destroy(my_jid);
     jid_destroy(from_jid);
 
@@ -471,8 +471,8 @@ _available_handler(xmpp_conn_t * const conn,
             last_activity);
     }
 
-    FREE_SET_NULL(status_str);
-    FREE_SET_NULL(show_str);
+    free(status_str);
+    free(show_str);
     jid_destroy(my_jid);
     jid_destroy(from_jid);
 
@@ -556,10 +556,11 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         return 1;
     }
 
-    const char *jid = xmpp_conn_get_jid(conn);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    Jid *my_jid = jid_create(jid);
     Jid *from_jid = jid_create(from);
+    if (from_jid == NULL || from_jid->resourcepart == NULL) {
+        return 1;
+    }
 
     char *room = from_jid->barejid;
     char *nick = from_jid->resourcepart;
@@ -592,7 +593,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // handle presence from room members
     } else {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-        char *show_str, *status_str;
+        char *status_str;
 
         char *caps_key = NULL;
         if (stanza_contains_caps(stanza)) {
@@ -608,12 +609,15 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             // handle nickname change
             if (stanza_is_room_nick_change(stanza)) {
                 char *new_nick = stanza_get_new_nick(stanza);
-                muc_set_roster_pending_nick_change(room, new_nick, nick);
+                if (new_nick != NULL) {
+                    muc_set_roster_pending_nick_change(room, new_nick, nick);
+                    free(new_nick);
+                }
             } else {
                 prof_handle_room_member_offline(room, nick, "offline", status_str);
             }
         } else {
-            show_str = stanza_get_show(stanza, "online");
+            char *show_str = stanza_get_show(stanza, "online");
             if (!muc_get_roster_received(room)) {
                 muc_add_to_roster(room, nick, show_str, status_str, caps_key);
             } else {
@@ -631,13 +635,13 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 }
             }
 
-           FREE_SET_NULL(show_str);
+           free(show_str);
         }
 
-        FREE_SET_NULL(status_str);
+        free(status_str);
+        free(caps_key);
     }
 
-    jid_destroy(my_jid);
     jid_destroy(from_jid);
 
     return 1;

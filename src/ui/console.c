@@ -784,7 +784,7 @@ cons_show_room_invite(const char * const invitor, const char * const room,
         notify_invite(display_from, room, reason);
     }
 
-    FREE_SET_NULL(display_from);
+    free(display_from);
 
     ui_console_dirty();
     cons_alert();

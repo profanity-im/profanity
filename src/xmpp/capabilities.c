@@ -301,17 +301,16 @@ static void
 _caps_destroy(Capabilities *caps)
 {
     if (caps != NULL) {
-        FREE_SET_NULL(caps->category);
-        FREE_SET_NULL(caps->type);
-        FREE_SET_NULL(caps->name);
-        FREE_SET_NULL(caps->software);
-        FREE_SET_NULL(caps->software_version);
-        FREE_SET_NULL(caps->os);
-        FREE_SET_NULL(caps->os_version);
+        free(caps->category);
+        free(caps->type);
+        free(caps->name);
+        free(caps->software);
+        free(caps->software_version);
+        free(caps->os);
+        free(caps->os_version);
         if (caps->features != NULL) {
             g_slist_free_full(caps->features, free);
-            caps->features = NULL;
         }
-        FREE_SET_NULL(caps);
+        free(caps);
     }
 }

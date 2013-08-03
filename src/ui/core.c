@@ -293,8 +293,9 @@ ui_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
     gboolean win_created = FALSE;
-    char *display_from;
+    char *display_from = NULL;
     win_type_t win_type;
+
     if (priv) {
         win_type = WIN_PRIVATE;
         display_from = get_nick_from_full_jid(from);
@@ -436,7 +437,7 @@ ui_incoming_msg(const char * const from, const char * const message,
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
         notify_message(display_from, ui_index);
 
-    FREE_SET_NULL(display_from);
+    free(display_from);
 }
 
 void
