@@ -39,12 +39,6 @@
 // and page size is at least 4KB
 #define READ_BUF_SIZE 4088
 
-#ifdef _WIN32
-// replace 'struct stat' and 'stat()' for windows
-#define stat _stat
-#define S_IFDIR _S_IFDIR
-#endif /* _WIN32 */
-
 struct curl_data_t
 {
     char *buffer;
