@@ -266,15 +266,11 @@ static void
 _chat_session_free(ChatSession session)
 {
     if (session != NULL) {
-        if (session->recipient != NULL) {
-            g_free(session->recipient);
-            session->recipient = NULL;
-        }
+        free(session->recipient);
         if (session->active_timer != NULL) {
             g_timer_destroy(session->active_timer);
             session->active_timer = NULL;
         }
-        g_free(session);
+        free(session);
     }
-    session = NULL;
 }

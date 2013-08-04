@@ -312,10 +312,10 @@ static void
 _identity_destroy(DiscoIdentity *identity)
 {
     if (identity != NULL) {
-        FREE_SET_NULL(identity->name);
-        FREE_SET_NULL(identity->type);
-        FREE_SET_NULL(identity->category);
-        FREE_SET_NULL(identity);
+        free(identity->name);
+        free(identity->type);
+        free(identity->category);
+        free(identity);
     }
 }
 
@@ -323,9 +323,9 @@ static void
 _item_destroy(DiscoItem *item)
 {
     if (item != NULL) {
-        FREE_SET_NULL(item->jid);
-        FREE_SET_NULL(item->name);
-        FREE_SET_NULL(item);
+        free(item->jid);
+        free(item->name);
+        free(item);
     }
 }
 
@@ -411,12 +411,13 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
                 log_info("Generated sha-1 does not match given:");
                 log_info("Generated : %s", generated_sha1);
                 log_info("Given     : %s", given_sha1);
-                FREE_SET_NULL(generated_sha1);
+                g_free(generated_sha1);
                 g_strfreev(split);
+                free(caps_key);
 
                 return 1;
             }
-            FREE_SET_NULL(generated_sha1);
+            g_free(generated_sha1);
             g_strfreev(split);
 
         // non supported hash, or legacy caps
@@ -429,6 +430,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         // already cached
         if (caps_contains(caps_key)) {
             log_info("Client info already cached.");
+            free(caps_key);
             return 1;
         }
 

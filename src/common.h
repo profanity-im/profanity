@@ -72,8 +72,8 @@ typedef enum {
 
 gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
-void create_dir(char *name);
-void mkdir_recursive(const char *dir);
+gboolean create_dir(char *name);
+gboolean mkdir_recursive(const char *dir);
 char * str_replace(const char *string, const char *substr,
     const char *replacement);
 int str_contains(char str[], int size, char ch);
