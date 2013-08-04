@@ -26,5 +26,6 @@
 void plugins_init(void);
 void plugins_on_connect(void);
 void plugins_shutdown(void);
+gboolean plugins_command_run(const char * const cmd);
 
 #endif

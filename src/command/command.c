@@ -20,7 +20,6 @@
  *
  */
 
-#include "plugins/command.h"
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -37,6 +36,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "plugins/plugins.h"
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -1107,7 +1107,7 @@ cmd_execute(const char * const command, const char * const inp)
             g_strfreev(args);
             return result;
         }
-    } else if (plugin_command_run(command)) {
+    } else if (plugins_command_run(command)) {
         return TRUE;
     } else {
         return cmd_execute_default(inp);

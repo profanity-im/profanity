@@ -70,6 +70,19 @@ api_register_command(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject *
+api_register_timed(PyObject *self, PyObject *args)
+{
+    PyObject *p_callback = NULL;
+    int interval_ms = 0;
+
+    if (!PyArg_ParseTuple(args, "Oi", &p_callback, &interval_ms)) {
+        return NULL;
+    }
+
+    return Py_BuildValue("");
+}
+
 static PyObject*
 api_notify(PyObject *self, PyObject *args)
 {
@@ -89,6 +102,7 @@ api_notify(PyObject *self, PyObject *args)
 static PyMethodDef apiMethods[] = {
     { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
     { "register_command", api_register_command, METH_VARARGS, "Register a command." },
+    { "register_timed", api_register_timed, METH_VARARGS, "Register a timed function." },
     { "notify", api_notify, METH_VARARGS, "Send desktop notification." },
     { NULL, NULL, 0, NULL }
 };

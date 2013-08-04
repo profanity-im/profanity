@@ -38,6 +38,5 @@ typedef struct p_command {
 } PluginCommand;
 
 void add_command(PluginCommand *command);
-gboolean plugin_command_run(const char * const cmd);
 
 #endif

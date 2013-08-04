@@ -31,7 +31,6 @@
 
 #include "profanity.h"
 
-#include "plugins/plugins.h"
 #include "chat_session.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -41,6 +40,7 @@
 #include "contact.h"
 #include "log.h"
 #include "muc.h"
+#include "plugins/plugins.h"
 #include "resource.h"
 #include "ui/notifier.h"
 #include "ui/ui.h"

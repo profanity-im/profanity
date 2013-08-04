@@ -22,6 +22,7 @@
 
 #include "command/command.h"
 #include "plugins/command.h"
+#include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 
 #include "ui/ui.h"
@@ -38,7 +39,7 @@ add_command(PluginCommand *command)
 }
 
 gboolean
-plugin_command_run(const char * const cmd)
+plugins_command_run(const char * const cmd)
 {
     GSList *p_command = p_commands;
 
