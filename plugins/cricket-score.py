@@ -21,7 +21,7 @@ def get_scores():
 
     notify = None
     new_summary = None
-    change = True
+    change = False
 
     req = urllib2.Request(score_url, None, {'Content-Type': 'application/json'})
     f = urllib2.urlopen(req)
