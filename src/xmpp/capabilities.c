@@ -122,7 +122,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     GSList *form_names = NULL;
     DataForm *form = NULL;
     FormField *field = NULL;
-    GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)stanza_destroy_form);
+    GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)stanza_destroy_form);
 
     GString *s = g_string_new("");
 
@@ -134,18 +134,18 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
             lang = xmpp_stanza_get_attribute(child, "xml:lang");
             name = xmpp_stanza_get_attribute(child, "name");
 
-            GString *identity_str = g_string_new(g_strdup(category));
+            GString *identity_str = g_string_new(category);
             g_string_append(identity_str, "/");
             if (type != NULL) {
-                g_string_append(identity_str, g_strdup(type));
+                g_string_append(identity_str, type);
             }
             g_string_append(identity_str, "/");
             if (lang != NULL) {
-                g_string_append(identity_str, g_strdup(lang));
+                g_string_append(identity_str, lang);
             }
             g_string_append(identity_str, "/");
             if (name != NULL) {
-                g_string_append(identity_str, g_strdup(name));
+                g_string_append(identity_str, name);
             }
             g_string_append(identity_str, "<");
             identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)octet_compare);
@@ -156,8 +156,8 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (strcmp(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
                 form = stanza_create_form(child);
-                form_names = g_slist_insert_sorted(form_names, strdup(form->form_type), (GCompareFunc)octet_compare);
-                g_hash_table_insert(forms, strdup(form->form_type), form);
+                form_names = g_slist_insert_sorted(form_names, g_strdup(form->form_type), (GCompareFunc)octet_compare);
+                g_hash_table_insert(forms, g_strdup(form->form_type), form);
             }
         }
         child = xmpp_stanza_get_next(child);
@@ -165,13 +165,13 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
 
     GSList *curr = identities;
     while (curr != NULL) {
-        g_string_append(s, strdup(curr->data));
+        g_string_append(s, curr->data);
         curr = g_slist_next(curr);
     }
 
     curr = features;
     while (curr != NULL) {
-        g_string_append(s, strdup(curr->data));
+        g_string_append(s, curr->data);
         g_string_append(s, "<");
         curr = g_slist_next(curr);
     }
@@ -179,17 +179,17 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     curr = form_names;
     while (curr != NULL) {
         form = g_hash_table_lookup(forms, curr->data);
-        g_string_append(s, strdup(form->form_type));
+        g_string_append(s, form->form_type);
         g_string_append(s, "<");
 
         GSList *curr_field = form->fields;
         while (curr_field != NULL) {
             field = curr_field->data;
-            g_string_append(s, strdup(field->var));
+            g_string_append(s, field->var);
             g_string_append(s, "<");
             GSList *curr_value = field->values;
             while (curr_value != NULL) {
-                g_string_append(s, strdup(curr_value->data));
+                g_string_append(s, curr_value->data);
                 g_string_append(s, "<");
                 curr_value = g_slist_next(curr_value);
             }
@@ -215,10 +215,10 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     char *result = g_base64_encode(md_value, md_len);
 
     g_string_free(s, TRUE);
-    g_slist_free_full(identities, free);
-    g_slist_free_full(features, free);
-    g_slist_free_full(form_names, free);
-    //g_hash_table_destroy(forms);
+    g_slist_free_full(identities, g_free);
+    g_slist_free_full(features, g_free);
+    g_slist_free_full(form_names, g_free);
+    g_hash_table_destroy(forms);
 
     return result;
 }
@@ -301,17 +301,16 @@ static void
 _caps_destroy(Capabilities *caps)
 {
     if (caps != NULL) {
-        FREE_SET_NULL(caps->category);
-        FREE_SET_NULL(caps->type);
-        FREE_SET_NULL(caps->name);
-        FREE_SET_NULL(caps->software);
-        FREE_SET_NULL(caps->software_version);
-        FREE_SET_NULL(caps->os);
-        FREE_SET_NULL(caps->os_version);
+        free(caps->category);
+        free(caps->type);
+        free(caps->name);
+        free(caps->software);
+        free(caps->software_version);
+        free(caps->os);
+        free(caps->os_version);
         if (caps->features != NULL) {
             g_slist_free_full(caps->features, free);
-            caps->features = NULL;
         }
-        FREE_SET_NULL(caps);
+        free(caps);
     }
 }

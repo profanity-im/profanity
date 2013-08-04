@@ -212,6 +212,9 @@ _conference_message_handler(xmpp_conn_t * const conn,
         }
 
         Jid *jidp = jid_create(invitor_jid);
+        if (jidp == NULL) {
+            return 1;
+        }
         invitor = jidp->barejid;
 
         xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(invite, STANZA_NAME_REASON);
@@ -233,6 +236,9 @@ _conference_message_handler(xmpp_conn_t * const conn,
         }
 
         Jid *jidp = jid_create(from);
+        if (jidp == NULL) {
+            return 1;
+        }
         invitor = jidp->barejid;
 
         reason = xmpp_stanza_get_attribute(x_groupchat, STANZA_ATTR_REASON);

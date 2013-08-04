@@ -79,14 +79,9 @@ p_contact_new(const char * const barejid, const char * const name,
 void
 p_contact_set_name(const PContact contact, const char * const name)
 {
-    if (contact->name != NULL) {
-        FREE_SET_NULL(contact->name);
-    }
-
+    FREE_SET_NULL(contact->name);
     if (name != NULL) {
         contact->name = strdup(name);
-    } else {
-        FREE_SET_NULL(contact->name);
     }
 }
 
@@ -130,22 +125,23 @@ p_contact_remove_resource(PContact contact, const char * const resource)
 void
 p_contact_free(PContact contact)
 {
-    FREE_SET_NULL(contact->barejid);
-    FREE_SET_NULL(contact->name);
-    FREE_SET_NULL(contact->subscription);
-    FREE_SET_NULL(contact->offline_message);
+    if (contact != NULL) {
+        free(contact->barejid);
+        free(contact->name);
+        free(contact->subscription);
+        free(contact->offline_message);
 
-    if (contact->groups != NULL) {
-        g_slist_free_full(contact->groups, g_free);
+        if (contact->groups != NULL) {
+            g_slist_free_full(contact->groups, g_free);
+        }
+
+        if (contact->last_activity != NULL) {
+            g_date_time_unref(contact->last_activity);
+        }
+
+        g_hash_table_destroy(contact->available_resources);
+        free(contact);
     }
-
-    if (contact->last_activity != NULL) {
-        g_date_time_unref(contact->last_activity);
-    }
-
-    g_hash_table_destroy(contact->available_resources);
-
-    FREE_SET_NULL(contact);
 }
 
 const char *
