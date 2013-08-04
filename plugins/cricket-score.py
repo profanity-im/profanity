@@ -8,7 +8,7 @@ score_url = "http://api.scorescard.com/?type=score&teamone=Australia&teamtwo=Eng
 # hooks
 
 def prof_init(version, status):
-    prof.register_timed(get_scores, 10)
+    prof.register_timed(get_scores, 5)
 
 def get_scores():
     req = urllib2.Request(score_url, None, {'Content-Type': 'application/json'})
@@ -17,26 +17,35 @@ def get_scores():
     f.close()
     result_json = json.loads(response);
     summary = None
+    change = False
 
     if 't1FI' in result_json.keys():
+        change = True
         summary = result_json['t1FI']
         prof.cons_show(result_json['t1FI'])
 
     if 't2FI' in result_json.keys():
+        change = True
         summary += "\n" + result_json['t2FI']
         prof.cons_show(result_json['t2FI'])
 
     if 't1SI' in result_json.keys():
+        change = True
         summary += "\n" + result_json['t1SI']
         prof.cons_show(result_json['t1SI'])
 
     if 't2SI' in result_json.keys():
+        change = True
         summary += "\n" + result_json['t2SI']
         prof.cons_show(result_json['t2SI'])
 
     if 'ms' in result_json.keys():
+        change = True
         summary += "\n\n" + result_json['ms']
         prof.cons_show("")
         prof.cons_show(result_json['ms'])
+
+    if change:
+        prof.cons_alert()
 
     prof.notify(summary, 5000, "Cricket score")

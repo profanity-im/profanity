@@ -29,6 +29,13 @@
 #include "ui/ui.h"
 
 static PyObject*
+api_cons_alert(PyObject *self, PyObject *args)
+{
+    cons_alert();
+    return Py_BuildValue("");
+}
+
+static PyObject*
 api_cons_show(PyObject *self, PyObject *args)
 {
     const char *message = NULL;
@@ -37,6 +44,7 @@ api_cons_show(PyObject *self, PyObject *args)
         return NULL;
     }
     cons_show("%s", message);
+    ui_current_page_off();
 
     return Py_BuildValue("");
 }
@@ -111,6 +119,7 @@ api_notify(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef apiMethods[] = {
+    { "cons_alert", api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
     { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
     { "register_command", api_register_command, METH_VARARGS, "Register a command." },
     { "register_timed", api_register_timed, METH_VARARGS, "Register a timed function." },
