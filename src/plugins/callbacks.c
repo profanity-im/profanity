@@ -1,5 +1,5 @@
 /*
- * command.c
+ * callbacks.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -21,21 +21,26 @@
  */
 
 #include "command/command.h"
-#include "plugins/command.h"
+#include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 
 #include "ui/ui.h"
 
-// API functions
-
 static GSList *p_commands = NULL;
+static GSList *p_timed_functions = NULL;
 
 void
-add_command(PluginCommand *command)
+callbacks_add_command(PluginCommand *command)
 {
     p_commands = g_slist_append(p_commands, command);
     cmd_autocomplete_add(command->command_name);
+}
+
+void
+callbacks_add_timed(PluginTimedFunction *timed_function)
+{
+    p_timed_functions = g_slist_append(p_timed_functions, timed_function);
 }
 
 gboolean
@@ -52,4 +57,23 @@ plugins_command_run(const char * const cmd)
         p_command = g_slist_next(p_command);
     }
     return FALSE;
+}
+
+void
+plugins_run_timed(void)
+{
+    GSList *p_timed_function = p_timed_functions;
+
+    while (p_timed_function != NULL) {
+        PluginTimedFunction *timed_function = p_timed_function->data;
+        gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
+
+        if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
+            PyObject_CallObject(timed_function->p_callback, NULL);
+            g_timer_start(timed_function->timer);
+        }
+
+        p_timed_function = g_slist_next(p_timed_function);
+    }
+    return;
 }

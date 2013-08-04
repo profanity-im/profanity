@@ -22,7 +22,9 @@
 
 #include <Python.h>
 
-#include "plugins/command.h"
+#include <glib.h>
+
+#include "plugins/callbacks.h"
 #include "ui/notifier.h"
 #include "ui/ui.h"
 
@@ -64,7 +66,7 @@ api_register_command(PyObject *self, PyObject *args)
         command->long_help = long_help;
         command->p_callback = p_callback;
 
-        add_command(command);
+        callbacks_add_command(command);
     }
 
     return Py_BuildValue("");
@@ -74,10 +76,19 @@ static PyObject *
 api_register_timed(PyObject *self, PyObject *args)
 {
     PyObject *p_callback = NULL;
-    int interval_ms = 0;
+    int interval_seconds = 0;
 
-    if (!PyArg_ParseTuple(args, "Oi", &p_callback, &interval_ms)) {
+    if (!PyArg_ParseTuple(args, "Oi", &p_callback, &interval_seconds)) {
         return NULL;
+    }
+
+    if (p_callback && PyCallable_Check(p_callback)) {
+        PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
+        timed_function->p_callback = p_callback;
+        timed_function->interval_seconds = interval_seconds;
+        timed_function->timer = g_timer_new();
+
+        callbacks_add_timed(timed_function);
     }
 
     return Py_BuildValue("");

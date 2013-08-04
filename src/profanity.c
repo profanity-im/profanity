@@ -85,6 +85,8 @@ prof_run(const int disable_tls, char *log_level)
                 g_timer_start(timer);
             }
 
+            plugins_run_timed();
+
             ui_handle_special_keys(&ch, inp, size);
             ui_refresh();
             jabber_process_events();

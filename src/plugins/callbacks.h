@@ -1,5 +1,5 @@
 /*
- * command.h
+ * callbacks.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef PLUGIN_COMMAND_H
-#define PLUGIN_COMMAND_H
+#ifndef CALLBACKS_H
+#define CALLBACKS_H
 
 #include <Python.h>
 
@@ -37,6 +37,13 @@ typedef struct p_command {
     PyObject *p_callback;
 } PluginCommand;
 
-void add_command(PluginCommand *command);
+typedef struct p_timed_function {
+    PyObject *p_callback;
+    int interval_seconds;
+    GTimer *timer;
+} PluginTimedFunction;
+
+void callbacks_add_command(PluginCommand *command);
+void callbacks_add_timed(PluginTimedFunction *timed_function);
 
 #endif

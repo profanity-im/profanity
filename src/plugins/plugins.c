@@ -23,7 +23,7 @@
 #include <Python.h>
 
 #include "plugins/api.h"
-#include "plugins/command.h"
+#include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 

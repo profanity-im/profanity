@@ -16,6 +16,6 @@ def cmd_platform():
 #    result_release = platform.release()
 #    result_system = platform.system()
 #    result_version = platform.version()
-    
+
 #    prof.cons_show(result_machine + " " + result_node + " " + result_processor + " " + result_release + " " + result_release + " " + result_system + " " + result_version)
     prof.cons_show(result_summary)

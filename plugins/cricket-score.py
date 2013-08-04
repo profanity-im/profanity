@@ -7,20 +7,36 @@ score_url = "http://api.scorescard.com/?type=score&teamone=Australia&teamtwo=Eng
 
 # hooks
 
-def prof_on_start():
+def prof_init(version, status):
+    prof.register_timed(get_scores, 10)
+
+def get_scores():
     req = urllib2.Request(score_url, None, {'Content-Type': 'application/json'})
     f = urllib2.urlopen(req)
     response = f.read()
     f.close()
     result_json = json.loads(response);
-    batting1 = result_json['cb1']
-    batting2 = result_json['cb2']
-    team1_first = result_json['t1FI']
-    team2_first = result_json['t2FI']
+    summary = None
 
-    prof.cons_show(batting1)
-    prof.cons_show(batting2)
-    prof.cons_show(team1_first)
-    prof.cons_show(team2_first)
+    if 't1FI' in result_json.keys():
+        summary = result_json['t1FI']
+        prof.cons_show(result_json['t1FI'])
 
-    prof.notify(team2_first, 5000, "Cricket score")
+    if 't2FI' in result_json.keys():
+        summary += "\n" + result_json['t2FI']
+        prof.cons_show(result_json['t2FI'])
+
+    if 't1SI' in result_json.keys():
+        summary += "\n" + result_json['t1SI']
+        prof.cons_show(result_json['t1SI'])
+
+    if 't2SI' in result_json.keys():
+        summary += "\n" + result_json['t2SI']
+        prof.cons_show(result_json['t2SI'])
+
+    if 'ms' in result_json.keys():
+        summary += "\n\n" + result_json['ms']
+        prof.cons_show("")
+        prof.cons_show(result_json['ms'])
+
+    prof.notify(summary, 5000, "Cricket score")
