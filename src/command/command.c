@@ -2680,10 +2680,15 @@ _cmd_join(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    Jid *room_arg = jid_create(args[0]);
+    if (room_arg == NULL) {
+        cons_show_error("Specified room has incorrect format");
+        return TRUE;
+    }
+
     int num_args = g_strv_length(args);
     char *room = NULL;
     char *nick = NULL;
-    Jid *room_arg = jid_create(args[0]);
     GString *room_str = g_string_new("");
     Jid *my_jid = jid_create(jabber_get_fulljid());
 
