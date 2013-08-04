@@ -399,10 +399,12 @@ ui_incoming_msg(const char * const from, const char * const message,
             if (tv_stamp == NULL) {
                 win_print_time(window, '-');
             } else {
-                // if show users status first, when receiving message via delayed delivery
+                // show users status first, when receiving message via delayed delivery
                 if (win_created) {
                     PContact pcontact = roster_get_contact(from);
-                    win_show_contact(window, pcontact);
+                    if (pcontact != NULL) {
+                        win_show_contact(window, pcontact);
+                    }
                 }
                 GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
                 gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
