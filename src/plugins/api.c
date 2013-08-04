@@ -23,6 +23,7 @@
 #include <Python.h>
 
 #include "plugins/command.h"
+#include "ui/notifier.h"
 #include "ui/ui.h"
 
 static PyObject*
@@ -69,9 +70,26 @@ api_register_command(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject*
+api_notify(PyObject *self, PyObject *args)
+{
+    const char *message = NULL;
+    const char *category = NULL;
+    int timeout_ms = 5000;
+
+    if (!PyArg_ParseTuple(args, "sis", &message, &timeout_ms, &category)) {
+        return NULL;
+    }
+
+    notify(message, timeout_ms, category);
+
+    return Py_BuildValue("");
+}
+
 static PyMethodDef apiMethods[] = {
     { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
     { "register_command", api_register_command, METH_VARARGS, "Register a command." },
+    { "notify", api_notify, METH_VARARGS, "Send desktop notification." },
     { NULL, NULL, 0, NULL }
 };
 

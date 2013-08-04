@@ -34,10 +34,8 @@
 
 #include "log.h"
 #include "muc.h"
+#include "ui/notifier.h"
 #include "ui/ui.h"
-
-static void _notify(const char * const message, int timeout,
-    const char * const category);
 
 void
 notifier_init(void)
@@ -63,7 +61,7 @@ notify_typing(const char * const handle)
     char message[strlen(handle) + 1 + 11];
     sprintf(message, "%s: typing...", handle);
 
-    _notify(message, 10000, "Incoming message");
+    notify(message, 10000, "Incoming message");
 }
 
 void
@@ -78,7 +76,7 @@ notify_invite(const char * const from, const char * const room,
         g_string_append_printf(message, "\n\"%s\"", reason);
     }
 
-    _notify(message->str, 10000, "Incoming message");
+    notify(message->str, 10000, "Incoming message");
 
     g_string_free(message, FALSE);
 }
@@ -89,7 +87,7 @@ notify_message(const char * const handle, int win)
     char message[strlen(handle) + 1 + 14];
     sprintf(message, "%s: message (%d).", handle, win);
 
-    _notify(message, 10000, "incoming message");
+    notify(message, 10000, "incoming message");
 }
 
 void
@@ -100,7 +98,7 @@ notify_room_message(const char * const handle, const char * const room, int win)
     g_string_append_printf(text, "Room: %s\n", room);
     g_string_append_printf(text, "%s: message (%d).", handle, win);
 
-    _notify(text->str, 10000, "incoming message");
+    notify(text->str, 10000, "incoming message");
 
     g_string_free(text, FALSE);
 }
@@ -110,7 +108,7 @@ notify_subscription(const char * const from)
 {
     GString *message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
-    _notify(message->str, 10000, "Incomming message");
+    notify(message->str, 10000, "Incomming message");
     g_string_free(message, FALSE);
 }
 
@@ -153,14 +151,14 @@ notify_remind(void)
     }
 
     if ((unread > 0) || (open > 0) || (subs > 0)) {
-        _notify(text->str, 5000, "Incoming message");
+        notify(text->str, 5000, "Incoming message");
     }
 
     g_string_free(text, TRUE);
 }
 
-static void
-_notify(const char * const message, int timeout,
+void
+notify(const char * const message, int timeout,
     const char * const category)
 {
 #ifdef HAVE_LIBNOTIFY

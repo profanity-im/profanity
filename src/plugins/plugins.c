@@ -33,6 +33,16 @@ static void _on_start(void);
 static void _run_plugins(const char * const function, PyObject *p_args);
 
 static GSList* plugins;
+
+static void
+_check_error(void)
+{
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+        PyErr_Clear();
+    }
+}
+
 void
 plugins_init(void)
 {
@@ -42,12 +52,15 @@ plugins_init(void)
     GSList *module_names = _get_module_names();
 
     Py_Initialize();
+    _check_error();
     api_init();
+    _check_error();
 
     // TODO change to use XDG spec
     GString *path = g_string_new(Py_GetPath());
     g_string_append(path, ":./plugins/");
     PySys_SetPath(path->str);
+    _check_error();
     g_string_free(path, TRUE);
 
     if (module_names != NULL) {
@@ -57,6 +70,7 @@ plugins_init(void)
 
         while (module_name != NULL) {
             p_module = PyImport_ImportModule(module_name->data);
+            _check_error();
             if (p_module != NULL) {
                 cons_show("Loaded plugin: %s", module_name->data);
                 plugins = g_slist_append(plugins, p_module);
@@ -68,11 +82,9 @@ plugins_init(void)
         cons_show("");
 
         _init();
+        _check_error();
         _on_start();
-        if (PyErr_Occurred()) {
-            PyErr_Print();
-            PyErr_Clear();
-        }
+        _check_error();
     }
     return;
 }
@@ -137,8 +149,10 @@ _run_plugins(const char * const function, PyObject *p_args)
         PyObject *p_module = plugin->data;
         if (PyObject_HasAttrString(p_module, function)) {
             p_function = PyObject_GetAttrString(p_module, function);
+            _check_error();
             if (p_function && PyCallable_Check(p_function)) {
                 PyObject_CallObject(p_function, p_args);
+                _check_error();
                 Py_XDECREF(p_function);
             }
         }

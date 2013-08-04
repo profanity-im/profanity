@@ -31,3 +31,6 @@ void notify_remind(void);
 void notify_invite(const char * const from, const char * const room,
     const char * const reason);
 void notify_subscription(const char * const from);
+
+void notify(const char * const message, int timeout,
+    const char * const category);
