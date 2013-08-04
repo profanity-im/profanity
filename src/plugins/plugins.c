@@ -79,8 +79,6 @@ plugins_init(void)
             module_name = g_slist_next(module_name);
         }
 
-        cons_show("");
-
         _init();
         _check_error();
         _on_start();
