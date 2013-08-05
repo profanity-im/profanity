@@ -31,6 +31,8 @@
 #include "xmpp/stanza.h"
 #include "xmpp/capabilities.h"
 
+#include "muc.h"
+
 static int _field_compare(FormField *f1, FormField *f2);
 
 #if 0
@@ -565,6 +567,37 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
         x_children = xmpp_stanza_get_next(x_children);
     }
 
+    // for servers that don't send status 110 or Jid property
+
+    // first check if 'from' attribute identifies this user
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (from != NULL) {
+        Jid *jidp = jid_create(from);
+        if (muc_room_is_active(jidp)) {
+            char *nick = muc_get_room_nick(jidp->barejid);
+            if (g_strcmp0(jidp->resourcepart, nick) == 0) {
+                return TRUE;
+            }
+        }
+        jid_destroy(jidp);
+    }
+
+    // secondly check if the new nickname maps to a pending nick change for this user
+    if (from != NULL) {
+        Jid *jidp = jid_create(from);
+        if (muc_is_room_pending_nick_change(jidp->barejid)) {
+            char *new_nick = jidp->resourcepart;
+            if (new_nick != NULL) {
+                char *nick = muc_get_room_nick(jidp->barejid);
+                char *old_nick = muc_get_old_nick(jidp->barejid, new_nick);
+                if (g_strcmp0(old_nick, nick) == 0) {
+                    return TRUE;
+                }
+            }
+        }
+        jid_destroy(jidp);
+    }
+
     return FALSE;
 }
 
@@ -608,7 +641,6 @@ stanza_is_room_nick_change(xmpp_stanza_t * const stanza)
     }
 
     return FALSE;
-
 }
 
 char *

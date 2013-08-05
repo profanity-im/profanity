@@ -36,10 +36,11 @@ gboolean muc_room_is_active(Jid *jid);
 GList* muc_get_active_room_list(void);
 char * muc_get_room_nick(const char * const room);
 
-void muc_set_room_pending_nick_change(const char * const room);
+void muc_set_room_pending_nick_change(const char * const room, const char * const new_nick);
 gboolean muc_is_room_pending_nick_change(const char * const room);
 void muc_complete_room_nick_change(const char * const room,
     const char * const nick);
+char * muc_get_old_nick(const char * const room, const char * const new_nick);
 
 gboolean muc_add_to_roster(const char * const room, const char * const nick,
     const char * const show, const char * const status,

@@ -605,13 +605,13 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // handle self presence
     if (stanza_is_muc_self_presence(stanza, jabber_get_fulljid())) {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-        gboolean nick_change = stanza_is_room_nick_change(stanza);
+        char *new_nick = stanza_get_new_nick(stanza);
 
         if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
 
             // leave room if not self nick change
-            if (nick_change) {
-                muc_set_room_pending_nick_change(room);
+            if (new_nick != NULL) {
+                muc_set_room_pending_nick_change(room, new_nick);
             } else {
                 prof_handle_leave_room(room);
             }
