@@ -46,7 +46,6 @@
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
-static gboolean _process_input(char *inp);
 static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
@@ -66,6 +65,9 @@ prof_run(const int disable_tls, char *log_level)
 
     char inp[INP_WIN_MAX];
     int size = 0;
+
+    ui_refresh();
+    plugins_on_start();
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
@@ -98,7 +100,7 @@ prof_run(const int disable_tls, char *log_level)
         }
 
         inp[size++] = '\0';
-        cmd_result = _process_input(inp);
+        cmd_result = prof_process_input(inp);
     }
 
     g_timer_destroy(timer);
@@ -262,7 +264,6 @@ prof_handle_login_account_success(char *account_name)
     status_bar_refresh();
 
     accounts_free_account(account);
-    plugins_on_connect();
 }
 
 void
@@ -510,8 +511,8 @@ prof_handle_disco_info(const char *from, GSList *identities, GSList *features)
  * Take a line of input and process it, return TRUE if profanity is to
  * continue, FALSE otherwise
  */
-static gboolean
-_process_input(char *inp)
+gboolean
+prof_process_input(char *inp)
 {
     log_debug("Input recieved: %s", inp);
     gboolean result = FALSE;

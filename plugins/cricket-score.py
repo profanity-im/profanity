@@ -3,17 +3,20 @@ import urllib2
 import json
 import time
 
-score_url = "http://api.scorescard.com/?type=score&teamone=Australia&teamtwo=England"
+#score_url = "http://api.scorescard.com/?type=score&teamone=Australia&teamtwo=England"
+score_url = None
 
 summary = None
 
 # hooks
 
 def prof_init(version, status):
-    prof.register_timed(get_scores, 60)
+    if score_url:
+        prof.register_timed(get_scores, 60)
 
 def prof_on_start():
-    get_scores()
+    if score_url:
+        get_scores()
 
 def get_scores():
     global score_url

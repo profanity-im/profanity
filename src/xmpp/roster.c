@@ -28,6 +28,7 @@
 #include <strophe.h>
 
 #include "log.h"
+#include "plugins/plugins.h"
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "xmpp/connection.h"
@@ -637,6 +638,8 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         contact_presence_t conn_presence =
             accounts_get_login_presence(jabber_get_account_name());
         presence_update(conn_presence, NULL, 0);
+
+        plugins_on_connect();
     }
 
     return 1;

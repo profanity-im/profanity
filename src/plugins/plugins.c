@@ -28,8 +28,6 @@
 #include "ui/ui.h"
 
 static GSList* _get_module_names(void);
-static void _init(void);
-static void _on_start(void);
 static void _run_plugins(const char * const function, PyObject *p_args);
 
 static GSList* plugins;
@@ -79,12 +77,19 @@ plugins_init(void)
             module_name = g_slist_next(module_name);
         }
 
-        _init();
-        _check_error();
-        _on_start();
+        PyObject *p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
+        _run_plugins("prof_init", p_args);
+        Py_XDECREF(p_args);
         _check_error();
     }
     return;
+}
+
+void
+plugins_on_start(void)
+{
+    _run_plugins("prof_on_start", NULL);
+    _check_error();
 }
 
 void
@@ -121,20 +126,6 @@ _get_module_names(void)
     } else {
         return NULL;
     }
-}
-
-static void
-_init(void)
-{
-    PyObject *p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
-    _run_plugins("prof_init", p_args);
-    Py_XDECREF(p_args);
-}
-
-static void
-_on_start(void)
-{
-    _run_plugins("prof_on_start", NULL);
 }
 
 static void

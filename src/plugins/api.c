@@ -25,6 +25,7 @@
 #include <glib.h>
 
 #include "plugins/callbacks.h"
+#include "profanity.h"
 #include "ui/notifier.h"
 #include "ui/ui.h"
 
@@ -45,6 +46,7 @@ api_cons_show(PyObject *self, PyObject *args)
     }
     cons_show("%s", message);
     ui_current_page_off();
+    ui_refresh();
 
     return Py_BuildValue("");
 }
@@ -118,11 +120,25 @@ api_notify(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject*
+api_send_line(PyObject *self, PyObject *args)
+{
+    char *line = NULL;
+    if (!PyArg_ParseTuple(args, "s", &line)) {
+        return NULL;
+    }
+
+    prof_process_input(line);
+
+    return Py_BuildValue("");
+}
+
 static PyMethodDef apiMethods[] = {
     { "cons_alert", api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
     { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
     { "register_command", api_register_command, METH_VARARGS, "Register a command." },
     { "register_timed", api_register_timed, METH_VARARGS, "Register a timed function." },
+    { "send_line", api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", api_notify, METH_VARARGS, "Send desktop notification." },
     { NULL, NULL, 0, NULL }
 };
