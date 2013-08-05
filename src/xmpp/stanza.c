@@ -538,6 +538,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
                 }
             }
         }
+        jid_destroy(jidp);
     }
 
     return FALSE;
