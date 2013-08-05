@@ -511,24 +511,30 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     }
 
     // for servers that don't send status 110 or Jid property
+
+    // first check if 'from' attribute identifies this user
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (from != NULL) {
         Jid *jidp = jid_create(from);
         if (muc_room_is_active(jidp)) {
             char *nick = muc_get_room_nick(jidp->barejid);
-            if (nick != NULL) {
-                if (strcmp(jidp->resourcepart, nick) == 0) {
+            if (g_strcmp0(jidp->resourcepart, nick) == 0) {
+                return TRUE;
+            }
+        }
+        jid_destroy(jidp);
+    }
+
+    // secondly check if the new nickname maps to a pending nick change for this user
+    if (from != NULL) {
+        Jid *jidp = jid_create(from);
+        if (muc_is_room_pending_nick_change(jidp->barejid)) {
+            char *new_nick = jidp->resourcepart;
+            if (new_nick != NULL) {
+                char *nick = muc_get_room_nick(jidp->barejid);
+                char *old_nick = muc_get_old_nick(jidp->barejid, new_nick);
+                if (g_strcmp0(old_nick, nick) == 0) {
                     return TRUE;
-                } else if (muc_is_room_pending_nick_change(jidp->barejid)) {
-                    char *new_nick = jidp->resourcepart;
-                    if (new_nick != NULL) {
-                        char *old_nick = muc_get_old_nick(jidp->barejid, new_nick);
-                        if (old_nick != NULL) {
-                            if (strcmp(old_nick, nick) == 0) {
-                                return TRUE;
-                            }
-                        }
-                    }
                 }
             }
         }
