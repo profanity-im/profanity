@@ -167,17 +167,30 @@ muc_room_is_active(Jid *jid)
     }
 }
 
+char *
+muc_get_old_nick(const char * const room, const char * const new_nick)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+    if ((chat_room != NULL) && (chat_room->pending_nick_change)) {
+        return g_hash_table_lookup(chat_room->nick_changes, new_nick);
+    }
+
+    return NULL;
+}
+
 /*
  * Flag that the user has sent a nick change to the service
  * and is awaiting the response
  */
 void
-muc_set_room_pending_nick_change(const char * const room)
+muc_set_room_pending_nick_change(const char * const room, const char * const new_nick)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
     if (chat_room != NULL) {
         chat_room->pending_nick_change = TRUE;
+        g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(chat_room->nick));
     }
 }
 
@@ -210,6 +223,7 @@ muc_complete_room_nick_change(const char * const room, const char * const nick)
         free(chat_room->nick);
         chat_room->nick = strdup(nick);
         chat_room->pending_nick_change = FALSE;
+        g_hash_table_remove(chat_room->nick_changes, nick);
     }
 }
 
