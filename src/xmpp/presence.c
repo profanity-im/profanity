@@ -567,7 +567,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // handle self presence
     if (stanza_is_muc_self_presence(stanza, jabber_get_fulljid())) {
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
-        char *new_nick = stanza_is_room_nick_change(stanza);
+        char *new_nick = stanza_get_new_nick(stanza);
 
         if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
 
@@ -606,7 +606,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
 
             // handle nickname change
-            if (stanza_is_room_nick_change(stanza) != NULL) {
+            if (stanza_is_room_nick_change(stanza)) {
                 char *new_nick = stanza_get_new_nick(stanza);
                 muc_set_roster_pending_nick_change(room, new_nick, nick);
             } else {

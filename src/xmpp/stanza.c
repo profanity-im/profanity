@@ -543,62 +543,46 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     return FALSE;
 }
 
-char *
+gboolean
 stanza_is_room_nick_change(xmpp_stanza_t * const stanza)
 {
     if (stanza == NULL) {
-        return NULL;
+        return FALSE;
     }
     if (strcmp(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
-        return NULL;
+        return FALSE;
     }
 
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
 
     if (x == NULL) {
-        return NULL;
+        return FALSE;
     }
 
     char *ns = xmpp_stanza_get_ns(x);
     if (ns == NULL) {
-        return NULL;
+        return FALSE;
     }
     if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
-        return NULL;
+        return FALSE;
     }
 
     xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
     if (x_children == NULL) {
-        return NULL;
+        return FALSE;
     }
 
-    gboolean is_nick_change = FALSE;
     while (x_children != NULL) {
         if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
             char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
             if (strcmp(code, "303") == 0) {
-                is_nick_change = TRUE;
-                break;
+                return TRUE;
             }
         }
         x_children = xmpp_stanza_get_next(x_children);
     }
 
-    if (is_nick_change) {
-        xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
-        while (x_children != NULL) {
-            if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
-                char *new_nick = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_NICK);
-                if (new_nick != NULL) {
-                    return new_nick;
-                }
-            }
-
-            x_children = xmpp_stanza_get_next(x_children);
-        }
-    }
-
-    return NULL;
+    return FALSE;
 }
 
 char *
