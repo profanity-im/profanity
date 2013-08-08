@@ -24,6 +24,7 @@
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
+#include "tools/parser.h"
 
 #include "ui/ui.h"
 
@@ -44,18 +45,63 @@ callbacks_add_timed(PluginTimedFunction *timed_function)
 }
 
 gboolean
-plugins_command_run(const char * const cmd)
+plugins_command_run(const char * const input)
 {
-    GSList *p_command = p_commands;
+    gchar **split = g_strsplit(input, " ", -1);
 
+    GSList *p_command = p_commands;
     while (p_command != NULL) {
         PluginCommand *command = p_command->data;
-        if (strcmp(command->command_name, cmd) == 0) {
-            PyObject_CallObject(command->p_callback, NULL);
-            return TRUE;
+        if (g_strcmp0(split[0], command->command_name) == 0) {
+            gchar **args = parse_args(input, command->min_args, command->max_args);
+            if (args == NULL) {
+                cons_show("");
+                cons_show("Usage: %s", command->usage);
+                if (ui_current_win_type() == WIN_CHAT) {
+                    char usage[strlen(command->usage) + 8];
+                    sprintf(usage, "Usage: %s", command->usage);
+                    ui_current_print_line(usage);
+                }
+                return TRUE;
+            } else {
+                int num_args = g_strv_length(args);
+                PyObject *p_args = NULL;
+                if (num_args == 0) {
+                    PyObject_CallObject(command->p_callback, p_args);
+                } else if (num_args == 1) {
+                    p_args = Py_BuildValue("(s)", args[0]);
+                    PyObject_CallObject(command->p_callback, p_args);
+                    Py_XDECREF(p_args);
+                } else if (num_args == 2) {
+                    p_args = Py_BuildValue("ss", args[0], args[1]);
+                    PyObject_CallObject(command->p_callback, p_args);
+                    Py_XDECREF(p_args);
+                } else if (num_args == 3) {
+                    p_args = Py_BuildValue("sss", args[0], args[1], args[2]);
+                    PyObject_CallObject(command->p_callback, p_args);
+                    Py_XDECREF(p_args);
+                } else if (num_args == 4) {
+                    p_args = Py_BuildValue("ssss", args[0], args[1], args[2], args[3]);
+                    PyObject_CallObject(command->p_callback, p_args);
+                    Py_XDECREF(p_args);
+                } else if (num_args == 5) {
+                    p_args = Py_BuildValue("sssss", args[0], args[1], args[2], args[3], args[4]);
+                    PyObject_CallObject(command->p_callback, p_args);
+                    Py_XDECREF(p_args);
+                }
+
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+        PyErr_Clear();
+    }
+                g_strfreev(split);
+                return TRUE;
+            }
+            g_strfreev(args);
         }
         p_command = g_slist_next(p_command);
     }
+    g_strfreev(split);
     return FALSE;
 }
 

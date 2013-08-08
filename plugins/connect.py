@@ -1,7 +1,8 @@
 import prof
 
-user = "jabber.org"
+user = "prof1@panesar"
 
+# hooks
 def prof_on_start():
     global user
     prof.cons_show("")

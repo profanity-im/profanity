@@ -4,7 +4,6 @@ package_version = None
 package_status = None
 
 # hooks
-
 def prof_init(version, status):
     global package_version
     global package_status
@@ -14,11 +13,7 @@ def prof_init(version, status):
 def prof_on_start():
     helloworld()
 
-def prof_on_connect():
-    prof.cons_show("Connected hello world plugin")
-
 # local functions
-
 def helloworld():
     global package_version
     global package_status
