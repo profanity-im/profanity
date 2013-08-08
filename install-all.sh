@@ -35,7 +35,7 @@ cygwin_prepare()
     chmod +x apt-cyg
     mv apt-cyg /usr/local/bin/
 
-    apt-cyg install make gcc automake autoconf pkg-config openssl-devel expat zlib-devel libncurses-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+    apt-cyg install make gcc automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncurses-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
     ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
 
     export LIBRARY_PATH=/usr/local/lib/
