@@ -133,6 +133,18 @@ api_send_line(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject *
+api_get_current_recipient(void)
+{
+    win_type_t win_type = ui_current_win_type();
+    if (win_type == WIN_CHAT) {
+        char *recipient = ui_current_recipient();
+        return Py_BuildValue("s", recipient);
+    } else {
+        return Py_BuildValue("");
+    }
+}
+
 static PyMethodDef apiMethods[] = {
     { "cons_alert", api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
     { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
@@ -140,6 +152,7 @@ static PyMethodDef apiMethods[] = {
     { "register_timed", api_register_timed, METH_VARARGS, "Register a timed function." },
     { "send_line", api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", api_notify, METH_VARARGS, "Send desktop notification." },
+    { "get_current_recipient", api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
     { NULL, NULL, 0, NULL }
 };
 
