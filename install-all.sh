@@ -31,7 +31,8 @@ cygwin_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
+    wget --no-check-certificate https://raw.github.com/boothj5/apt-cyg/master/apt-cyg
+    #wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
     chmod +x apt-cyg
     mv apt-cyg /usr/local/bin/
 
