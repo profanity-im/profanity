@@ -104,6 +104,14 @@ plugins_on_connect(void)
     _run_plugins("prof_on_connect", NULL);
 }
 
+void
+plugins_on_message(const char * const jid, const char * const message)
+{
+    PyObject *p_args = Py_BuildValue("ss", jid, message);
+    _run_plugins("prof_on_message", p_args);
+    Py_XDECREF(p_args);
+}
+
 static GSList *
 _get_module_names(void)
 {

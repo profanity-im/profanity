@@ -67,7 +67,13 @@ plugins_command_run(const char * const input)
                 int num_args = g_strv_length(args);
                 PyObject *p_args = NULL;
                 if (num_args == 0) {
-                    PyObject_CallObject(command->p_callback, p_args);
+                    if (command->max_args == 1) {
+                        p_args = Py_BuildValue("(O)", Py_BuildValue(""));
+                        PyObject_CallObject(command->p_callback, p_args);
+                        Py_XDECREF(p_args);
+                    } else {
+                        PyObject_CallObject(command->p_callback, p_args);
+                    }
                 } else if (num_args == 1) {
                     p_args = Py_BuildValue("(s)", args[0]);
                     PyObject_CallObject(command->p_callback, p_args);
