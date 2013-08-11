@@ -3,8 +3,8 @@ import urllib2
 import json
 import time
 
-score_url = "http://api.scorescard.com/?type=score&teamone=Australia&teamtwo=England"
-#score_url = None
+#score_url = "http://api.scorescard.com/?type=score&teamone=Australia&teamtwo=England"
+score_url = None
 
 summary = None
 
@@ -12,7 +12,7 @@ summary = None
 def prof_init(version, status):
     if score_url:
         prof.register_timed(get_scores, 60)
-    prof.register_command("/cricket", 0, 0, "/cricket", "Get latest cricket score.", "Get latest cricket score.", cmd_cricket)
+        prof.register_command("/cricket", 0, 0, "/cricket", "Get latest cricket score.", "Get latest cricket score.", cmd_cricket)
 
 def prof_on_start():
     if score_url:
