@@ -1107,7 +1107,7 @@ cmd_execute(const char * const command, const char * const inp)
             g_strfreev(args);
             return result;
         }
-    } else if (plugins_command_run(inp)) {
+    } else if (plugins_run_command(inp)) {
         return TRUE;
     } else {
         return cmd_execute_default(inp);

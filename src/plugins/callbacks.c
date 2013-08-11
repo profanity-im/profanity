@@ -45,7 +45,7 @@ callbacks_add_timed(PluginTimedFunction *timed_function)
 }
 
 gboolean
-plugins_command_run(const char * const input)
+plugins_run_command(const char * const input)
 {
     gchar **split = g_strsplit(input, " ", -1);
 
