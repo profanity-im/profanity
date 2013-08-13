@@ -36,7 +36,8 @@ core_sources = \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
-	src/config/theme.c src/config/theme.h
+	src/config/theme.c src/config/theme.h \
+	src/otr.c src/otr.h
 
 test_sources = \
 	tests/test_roster.c tests/test_common.c tests/test_history.c \

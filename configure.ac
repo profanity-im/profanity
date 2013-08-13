@@ -35,6 +35,8 @@ AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine indle time])])
+AC_ARG_WITH([otr],
+    [AS_HELP_STRING([--with-libotr], [enable otr entryption using libtr library])])
 
 # Checks for libraries.
 if test "x$with_libxml2" = xyes; then
@@ -63,7 +65,14 @@ elif test "x$with_xscreensaver" = x; then
         [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
     AC_CHECK_LIB([X11], [main], [], 
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
+fi
 
+if test "x$with_otr" = xyes; then
+    AC_CHECK_LIB([otr], [main], [],
+        [AC_MSG_ERROR([libotr is required for otr encryption support])])
+elif test "x$enable_otr" = x; then
+    AC_CHECK_LIB([otr], [main], [],
+        [AC_MSG_NOTICE([libotr not found, otr entryption support no enabled])])
 fi
 
 AC_CHECK_LIB([resolv], [main], [],
@@ -96,14 +105,19 @@ if test "x$enable_notifications" != xno; then
         [AC_MSG_NOTICE([libnotify module not found])])
 fi
 
+if test "x$with_otr" != xno; then
+    PKG_CHECK_MODULES([OTR], [libotr], [],
+        [AC_MSG_NOTICE([libotr module not found])])
+fi
+
 # Default parameters
 AM_CFLAGS="-Wall"
 if test "x$PACKAGE_STATUS" = xdevelopment; then
     AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
 fi
-LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
+LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS $OTR_LIBS"
 
-AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
+AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS $OTR_CLAGS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
