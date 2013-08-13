@@ -21,7 +21,8 @@ profanity_SOURCES = \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
-	src/config/theme.c src/config/theme.h
+	src/config/theme.c src/config/theme.h \
+	src/otr.c src/otr.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
