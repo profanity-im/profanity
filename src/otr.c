@@ -39,34 +39,35 @@ otr_init(void)
 void
 otr_account_load(ProfAccount *account)
 {
-    gcry_error_t err = 0;
     cons_debug("otr_account_load()");
+
+    gcry_error_t err = 0;
     GString *keys_filename = g_string_new("./");
     g_string_append(keys_filename, account->jid);
     g_string_append(keys_filename, "_keys.txt");
 
-    GString *fp_filename = g_string_new("./");
-    g_string_append(fp_filename, account->jid);
-    g_string_append(fp_filename, "_fingerprints.txt");
-
     user_state = otrl_userstate_create();
 
-    err = otrl_privkey_read(user_state, keys_filename->str);
+    if (!g_file_test(keys_filename->str, G_FILE_TEST_IS_REGULAR)) {
+        cons_debug("Private key not found, generating one");
+        err = otrl_privkey_generate(user_state, keys_filename->str, account->jid, "xmpp");
+        if (err != 0) {
+            cons_debug("Failed to generate private key");
+            g_string_free(keys_filename, TRUE);
+            return;
+        }
+        cons_debug("Generated private key");
+    }
+    
+    cons_debug("Loading private key");
+    err = otrl_privkey_read(user_state, keys_filename->str);  
     if (err != 0) {
-        cons_debug("Failed to load private keys");
+        cons_debug("Failed to load private key");
         g_string_free(keys_filename, TRUE);
-        g_string_free(fp_filename, TRUE);
         return;
     }
-
-    err = otrl_privkey_read_fingerprints(user_state, fp_filename->str, NULL, NULL);
-    if (err != 0) {
-        cons_debug("Failed to load fingerprints");
-        g_string_free(keys_filename, TRUE);
-        g_string_free(fp_filename, TRUE);
-        return;
-    }
-
+    cons_debug("Loaded private key");
+    
     g_string_free(keys_filename, TRUE);
-    g_string_free(fp_filename, TRUE);
+    return;
 }
