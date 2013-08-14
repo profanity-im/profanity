@@ -21,15 +21,52 @@
  */
 
 #include <libotr/proto.h>
-#include <libotr/userstate.h>
-#include <libotr/message.h>
 #include <libotr/privkey.h>
+#include <glib.h>
 
+#include "otr.h"
 #include "ui/ui.h"
+
+static OtrlUserState user_state;
 
 void
 otr_init(void)
 {
     cons_debug("otr_init()");
     OTRL_INIT;
+}
+
+void
+otr_account_load(ProfAccount *account)
+{
+    gcry_error_t err = 0;
+    cons_debug("otr_account_load()");
+    GString *keys_filename = g_string_new("./");
+    g_string_append(keys_filename, account->jid);
+    g_string_append(keys_filename, "_keys.txt");
+
+    GString *fp_filename = g_string_new("./");
+    g_string_append(fp_filename, account->jid);
+    g_string_append(fp_filename, "_fingerprints.txt");
+
+    user_state = otrl_userstate_create();
+
+    err = otrl_privkey_read(user_state, keys_filename->str);
+    if (err != 0) {
+        cons_debug("Failed to load private keys");
+        g_string_free(keys_filename, TRUE);
+        g_string_free(fp_filename, TRUE);
+        return;
+    }
+
+    err = otrl_privkey_read_fingerprints(user_state, fp_filename->str, NULL, NULL);
+    if (err != 0) {
+        cons_debug("Failed to load fingerprints");
+        g_string_free(keys_filename, TRUE);
+        g_string_free(fp_filename, TRUE);
+        return;
+    }
+
+    g_string_free(keys_filename, TRUE);
+    g_string_free(fp_filename, TRUE);
 }

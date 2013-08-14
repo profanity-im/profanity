@@ -23,6 +23,9 @@
 #ifndef OTR_H
 #define OTR_H
 
+#include "config/accounts.h"
+
 void otr_init(void);
+void otr_account_load(ProfAccount *account);
 
 #endif
