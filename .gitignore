@@ -30,3 +30,5 @@ core
 bugs/
 TODO
 plugins/
+*_key.txt
+*_fingerprints.txt
