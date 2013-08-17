@@ -23,6 +23,8 @@
 #ifndef PYTHON_API_H
 #define PYTHON_API_H
 
+void python_init(void);
 void python_api_init(void);
+void python_shutdown(void);
 
 #endif

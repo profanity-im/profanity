@@ -26,8 +26,24 @@
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
+#include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
 #include "ui/ui.h"
+
+void
+python_init(void)
+{
+    Py_Initialize();
+    python_check_error();
+    python_api_init();
+    python_check_error();
+    // TODO change to use XDG spec
+    GString *path = g_string_new(Py_GetPath());
+    g_string_append(path, ":./plugins/");
+    PySys_SetPath(path->str);
+    python_check_error();
+    g_string_free(path, TRUE);
+}
 
 ProfPlugin *
 python_plugin_create(const char * const filename)
@@ -129,4 +145,10 @@ python_check_error(void)
         PyErr_Print();
         PyErr_Clear();
     }
+}
+
+void
+python_shutdown(void)
+{
+    Py_Finalize();
 }

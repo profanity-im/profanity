@@ -20,10 +20,7 @@
  *
  */
 
-#include <Python.h>
-
 #include "config/preferences.h"
-#include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "plugins/python_api.h"
@@ -37,17 +34,7 @@ plugins_init(void)
 {
     plugins = NULL;
 
-    // initialse python and path
-    Py_Initialize();
-    python_check_error();
-    python_api_init();
-    python_check_error();
-    // TODO change to use XDG spec
-    GString *path = g_string_new(Py_GetPath());
-    g_string_append(path, ":./plugins/");
-    PySys_SetPath(path->str);
-    python_check_error();
-    g_string_free(path, TRUE);
+    python_init();
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();
@@ -114,5 +101,5 @@ plugins_on_message(const char * const jid, const char * const message)
 void
 plugins_shutdown(void)
 {
-    Py_Finalize();
+    python_shutdown();
 }
