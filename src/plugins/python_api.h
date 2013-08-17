@@ -27,4 +27,7 @@ void python_init(void);
 void python_api_init(void);
 void python_shutdown(void);
 
+void python_command_callback(PluginCommand *command, gchar **args);
+void python_timed_callback(PluginTimedFunction *timed_function);
+
 #endif
