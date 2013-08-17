@@ -14,7 +14,7 @@ def prof_init(version, status):
         "the last received URL will be used.",
         cmd_browser)
 
-def prof_on_message(jid, message):
+def prof_on_message_received(jid, message):
     global lastlink
     links = re.findall(r'(https?://\S+)', message)
     if (len(links) > 0):

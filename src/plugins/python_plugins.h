@@ -30,7 +30,7 @@ ProfPlugin* python_plugin_create(const char * const filename);
 void python_init_hook(ProfPlugin *plugin, const char * const version, const char * const status);
 void python_on_start_hook(ProfPlugin *plugin);
 void python_on_connect_hook(ProfPlugin *plugin);
-void python_on_message_hook(ProfPlugin *plugin, const char * const jid, const char * const message);
+void python_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message);
 
 void python_check_error(void);
 

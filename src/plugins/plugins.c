@@ -88,12 +88,12 @@ plugins_on_connect(void)
 }
 
 void
-plugins_on_message(const char * const jid, const char * const message)
+plugins_on_message_received(const char * const jid, const char * const message)
 {
     GSList *curr = plugins;
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
-        plugin->on_message_func(plugin, jid, message);
+        plugin->on_message_received_func(plugin, jid, message);
         curr = g_slist_next(curr);
     }
 }
