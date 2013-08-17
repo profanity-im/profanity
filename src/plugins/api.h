@@ -23,6 +23,8 @@
 #ifndef API_H
 #define API_H
 
+#include "plugins/callbacks.h"
+
 void api_cons_alert(void);
 void api_cons_show(const char * const message);
 void api_notify(const char *message, const char *category, int timeout_ms);
@@ -31,7 +33,8 @@ char * api_get_current_recipient(void);
 
 void api_register_command(const char *command_name, int min_args, int max_args,
     const char *usage, const char *short_help, const char *long_help,
-    void *callback);
-void api_register_timed(void *callback, int interval_seconds);
+    void *callback, void(*callback_func)(PluginCommand *command, gchar **args));
+void api_register_timed(void *callback, int interval_seconds,
+    void (*callback_func)(PluginTimedFunction *timed_function));
 
 #endif

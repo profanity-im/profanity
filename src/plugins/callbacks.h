@@ -33,10 +33,12 @@ typedef struct p_command {
     const char *short_help;
     const char *long_help;
     void *callback;
+    void (*callback_func)(struct p_command *command, gchar **args);
 } PluginCommand;
 
 typedef struct p_timed_function {
     void *callback;
+    void (*callback_func)(struct p_timed_function *timed_function);
     int interval_seconds;
     GTimer *timer;
 } PluginTimedFunction;

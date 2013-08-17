@@ -47,7 +47,8 @@ api_cons_show(const char * const message)
 
 void
 api_register_command(const char *command_name, int min_args, int max_args,
-    const char *usage, const char *short_help, const char *long_help, void *callback)
+    const char *usage, const char *short_help, const char *long_help, void *callback,
+    void(*callback_func)(PluginCommand *command, gchar **args))
 {
     PluginCommand *command = malloc(sizeof(PluginCommand));
     command->command_name = command_name;
@@ -57,15 +58,18 @@ api_register_command(const char *command_name, int min_args, int max_args,
     command->short_help = short_help;
     command->long_help = long_help;
     command->callback = callback;
+    command->callback_func =callback_func;
 
     callbacks_add_command(command);
 }
 
 void
-api_register_timed(void *callback, int interval_seconds)
+api_register_timed(void *callback, int interval_seconds,
+    void (*callback_func)(PluginTimedFunction *timed_function))
 {
     PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
     timed_function->callback = callback;
+    timed_function->callback_func = callback_func;
     timed_function->interval_seconds = interval_seconds;
     timed_function->timer = g_timer_new();
 

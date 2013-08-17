@@ -46,53 +46,6 @@ callbacks_add_timed(PluginTimedFunction *timed_function)
     p_timed_functions = g_slist_append(p_timed_functions, timed_function);
 }
 
-void
-python_command_callback(PluginCommand *command, gchar **args)
-{
-    PyObject *p_args = NULL;
-    int num_args = g_strv_length(args);
-    if (num_args == 0) {
-        if (command->max_args == 1) {
-            p_args = Py_BuildValue("(O)", Py_BuildValue(""));
-            PyObject_CallObject(command->callback, p_args);
-            Py_XDECREF(p_args);
-        } else {
-            PyObject_CallObject(command->callback, p_args);
-        }
-    } else if (num_args == 1) {
-        p_args = Py_BuildValue("(s)", args[0]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
-    } else if (num_args == 2) {
-        p_args = Py_BuildValue("ss", args[0], args[1]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
-    } else if (num_args == 3) {
-        p_args = Py_BuildValue("sss", args[0], args[1], args[2]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
-    } else if (num_args == 4) {
-        p_args = Py_BuildValue("ssss", args[0], args[1], args[2], args[3]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
-    } else if (num_args == 5) {
-        p_args = Py_BuildValue("sssss", args[0], args[1], args[2], args[3], args[4]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
-    }
-
-    if (PyErr_Occurred()) {
-        PyErr_Print();
-        PyErr_Clear();
-    }
-}
-
-void
-python_timed_callback(PluginTimedFunction *timed_function)
-{
-    PyObject_CallObject(timed_function->callback, NULL);
-}
-
 gboolean
 plugins_run_command(const char * const input)
 {
@@ -113,7 +66,7 @@ plugins_run_command(const char * const input)
                 }
                 return TRUE;
             } else {
-                python_command_callback(command, args);
+                command->callback_func(command, args);
                 g_strfreev(split);
                 return TRUE;
             }
@@ -135,7 +88,7 @@ plugins_run_timed(void)
         gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
 
         if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
-            python_timed_callback(timed_function);
+            timed_function->callback_func(timed_function);
             g_timer_start(timed_function->timer);
         }
 
