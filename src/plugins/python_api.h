@@ -1,5 +1,5 @@
 /*
- * callbacks.h
+ * python_api.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,30 +20,9 @@
  *
  */
 
-#ifndef CALLBACKS_H
-#define CALLBACKS_H
+#ifndef PYTHON_API_H
+#define PYTHON_API_H
 
-#include <Python.h>
-
-#include <glib.h>
-
-typedef struct p_command {
-    const char *command_name;
-    int min_args;
-    int max_args;
-    const char *usage;
-    const char *short_help;
-    const char *long_help;
-    PyObject *callback;
-} PluginCommand;
-
-typedef struct p_timed_function {
-    PyObject *callback;
-    int interval_seconds;
-    GTimer *timer;
-} PluginTimedFunction;
-
-void callbacks_add_command(PluginCommand *command);
-void callbacks_add_timed(PluginTimedFunction *timed_function);
+void python_api_init(void);
 
 #endif

@@ -23,6 +23,15 @@
 #ifndef API_H
 #define API_H
 
-void api_init(void);
+void api_cons_alert(void);
+void api_cons_show(const char * const message);
+void api_notify(const char *message, const char *category, int timeout_ms);
+void api_send_line(char *line);
+char * api_get_current_recipient(void);
+
+void api_register_command(const char *command_name, int min_args, int max_args,
+    const char *usage, const char *short_help, const char *long_help,
+    void *callback);
+void api_register_timed(void *callback, int interval_seconds);
 
 #endif

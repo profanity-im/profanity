@@ -20,8 +20,6 @@
  *
  */
 
-#include <Python.h>
-
 #include <glib.h>
 
 #include "plugins/callbacks.h"
@@ -29,135 +27,69 @@
 #include "ui/notifier.h"
 #include "ui/ui.h"
 
-static PyObject*
-api_cons_alert(PyObject *self, PyObject *args)
+void
+api_cons_alert(void)
 {
     cons_alert();
-    return Py_BuildValue("");
 }
 
-static PyObject*
-api_cons_show(PyObject *self, PyObject *args)
+void
+api_cons_show(const char * const message)
 {
-    const char *message = NULL;
-
-    if (!PyArg_ParseTuple(args, "s", &message)) {
-        return NULL;
+    if (message != NULL) {
+        cons_show("%s", message);
+        ui_current_page_off();
+        ui_refresh();
     }
-    cons_show("%s", message);
-    ui_current_page_off();
-    ui_refresh();
-
-    return Py_BuildValue("");
 }
 
-static PyObject*
-api_register_command(PyObject *self, PyObject *args)
+void
+api_register_command(const char *command_name, int min_args, int max_args,
+    const char *usage, const char *short_help, const char *long_help, void *callback)
 {
-    const char *command_name = NULL;
-    int min_args = 0;
-    int max_args = 0;
-    const char *usage = NULL;
-    const char *short_help = NULL;
-    const char *long_help = NULL;
-    PyObject *p_callback = NULL;
+    PluginCommand *command = malloc(sizeof(PluginCommand));
+    command->command_name = command_name;
+    command->min_args = min_args;
+    command->max_args = max_args;
+    command->usage = usage;
+    command->short_help = short_help;
+    command->long_help = long_help;
+    command->callback = callback;
 
-    if (!PyArg_ParseTuple(args, "siisssO", &command_name, &min_args, &max_args, &usage, &short_help, &long_help, &p_callback)) {
-        return NULL;
-    }
-
-    if (p_callback && PyCallable_Check(p_callback)) {
-        PluginCommand *command = malloc(sizeof(PluginCommand));
-        command->command_name = command_name;
-        command->min_args = min_args;
-        command->max_args = max_args;
-        command->usage = usage;
-        command->short_help = short_help;
-        command->long_help = long_help;
-        command->p_callback = p_callback;
-
-        callbacks_add_command(command);
-    }
-
-    return Py_BuildValue("");
+    callbacks_add_command(command);
 }
 
-static PyObject *
-api_register_timed(PyObject *self, PyObject *args)
+void
+api_register_timed(void *callback, int interval_seconds)
 {
-    PyObject *p_callback = NULL;
-    int interval_seconds = 0;
+    PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
+    timed_function->callback = callback;
+    timed_function->interval_seconds = interval_seconds;
+    timed_function->timer = g_timer_new();
 
-    if (!PyArg_ParseTuple(args, "Oi", &p_callback, &interval_seconds)) {
-        return NULL;
-    }
-
-    if (p_callback && PyCallable_Check(p_callback)) {
-        PluginTimedFunction *timed_function = malloc(sizeof(PluginTimedFunction));
-        timed_function->p_callback = p_callback;
-        timed_function->interval_seconds = interval_seconds;
-        timed_function->timer = g_timer_new();
-
-        callbacks_add_timed(timed_function);
-    }
-
-    return Py_BuildValue("");
+    callbacks_add_timed(timed_function);
 }
 
-static PyObject*
-api_notify(PyObject *self, PyObject *args)
+void
+api_notify(const char *message, const char *category, int timeout_ms)
 {
-    const char *message = NULL;
-    const char *category = NULL;
-    int timeout_ms = 5000;
-
-    if (!PyArg_ParseTuple(args, "sis", &message, &timeout_ms, &category)) {
-        return NULL;
-    }
-
     notify(message, timeout_ms, category);
-
-    return Py_BuildValue("");
 }
 
-static PyObject*
-api_send_line(PyObject *self, PyObject *args)
+void
+api_send_line(char *line)
 {
-    char *line = NULL;
-    if (!PyArg_ParseTuple(args, "s", &line)) {
-        return NULL;
-    }
-
     prof_process_input(line);
-
-    return Py_BuildValue("");
 }
 
-static PyObject *
-api_get_current_recipient(PyObject *self, PyObject *args)
+char *
+api_get_current_recipient(void)
 {
     win_type_t win_type = ui_current_win_type();
     if (win_type == WIN_CHAT) {
         char *recipient = ui_current_recipient();
-        return Py_BuildValue("s", recipient);
+        return recipient;
     } else {
-        return Py_BuildValue("");
+        return NULL;
     }
-}
-
-static PyMethodDef apiMethods[] = {
-    { "cons_alert", api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
-    { "cons_show", api_cons_show, METH_VARARGS, "Print a line to the console." },
-    { "register_command", api_register_command, METH_VARARGS, "Register a command." },
-    { "register_timed", api_register_timed, METH_VARARGS, "Register a timed function." },
-    { "send_line", api_send_line, METH_VARARGS, "Send a line of input." },
-    { "notify", api_notify, METH_VARARGS, "Send desktop notification." },
-    { "get_current_recipient", api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
-    { NULL, NULL, 0, NULL }
-};
-
-void
-api_init(void)
-{
-    Py_InitModule("prof", apiMethods);
 }

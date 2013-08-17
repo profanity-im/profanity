@@ -26,6 +26,7 @@
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
+#include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
 #include "ui/ui.h"
 
@@ -39,7 +40,7 @@ plugins_init(void)
     // initialse python and path
     Py_Initialize();
     python_check_error();
-    api_init();
+    python_api_init();
     python_check_error();
     // TODO change to use XDG spec
     GString *path = g_string_new(Py_GetPath());

@@ -69,30 +69,30 @@ plugins_run_command(const char * const input)
                 if (num_args == 0) {
                     if (command->max_args == 1) {
                         p_args = Py_BuildValue("(O)", Py_BuildValue(""));
-                        PyObject_CallObject(command->p_callback, p_args);
+                        PyObject_CallObject(command->callback, p_args);
                         Py_XDECREF(p_args);
                     } else {
-                        PyObject_CallObject(command->p_callback, p_args);
+                        PyObject_CallObject(command->callback, p_args);
                     }
                 } else if (num_args == 1) {
                     p_args = Py_BuildValue("(s)", args[0]);
-                    PyObject_CallObject(command->p_callback, p_args);
+                    PyObject_CallObject(command->callback, p_args);
                     Py_XDECREF(p_args);
                 } else if (num_args == 2) {
                     p_args = Py_BuildValue("ss", args[0], args[1]);
-                    PyObject_CallObject(command->p_callback, p_args);
+                    PyObject_CallObject(command->callback, p_args);
                     Py_XDECREF(p_args);
                 } else if (num_args == 3) {
                     p_args = Py_BuildValue("sss", args[0], args[1], args[2]);
-                    PyObject_CallObject(command->p_callback, p_args);
+                    PyObject_CallObject(command->callback, p_args);
                     Py_XDECREF(p_args);
                 } else if (num_args == 4) {
                     p_args = Py_BuildValue("ssss", args[0], args[1], args[2], args[3]);
-                    PyObject_CallObject(command->p_callback, p_args);
+                    PyObject_CallObject(command->callback, p_args);
                     Py_XDECREF(p_args);
                 } else if (num_args == 5) {
                     p_args = Py_BuildValue("sssss", args[0], args[1], args[2], args[3], args[4]);
-                    PyObject_CallObject(command->p_callback, p_args);
+                    PyObject_CallObject(command->callback, p_args);
                     Py_XDECREF(p_args);
                 }
 
@@ -121,7 +121,7 @@ plugins_run_timed(void)
         gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
 
         if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
-            PyObject_CallObject(timed_function->p_callback, NULL);
+            PyObject_CallObject(timed_function->callback, NULL);
             g_timer_start(timed_function->timer);
         }
 
