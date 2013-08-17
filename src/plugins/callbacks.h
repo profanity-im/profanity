@@ -23,8 +23,6 @@
 #ifndef CALLBACKS_H
 #define CALLBACKS_H
 
-#include <Python.h>
-
 #include <glib.h>
 
 typedef struct p_command {
@@ -34,11 +32,11 @@ typedef struct p_command {
     const char *usage;
     const char *short_help;
     const char *long_help;
-    PyObject *callback;
+    void *callback;
 } PluginCommand;
 
 typedef struct p_timed_function {
-    PyObject *callback;
+    void *callback;
     int interval_seconds;
     GTimer *timer;
 } PluginTimedFunction;

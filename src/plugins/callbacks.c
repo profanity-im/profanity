@@ -20,6 +20,8 @@
  *
  */
 
+#include "Python.h"
+
 #include "command/command.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"

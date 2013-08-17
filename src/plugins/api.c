@@ -20,6 +20,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include <glib.h>
 
 #include "plugins/callbacks.h"
