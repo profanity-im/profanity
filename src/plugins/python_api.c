@@ -27,9 +27,6 @@
 #include "plugins/api.h"
 #include "plugins/python_api.h"
 #include "plugins/callbacks.h"
-#include "profanity.h"
-#include "ui/notifier.h"
-#include "ui/ui.h"
 
 static PyObject*
 python_api_cons_alert(PyObject *self, PyObject *args)
