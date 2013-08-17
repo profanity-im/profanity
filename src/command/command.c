@@ -39,6 +39,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "otr.h"
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -1176,7 +1177,13 @@ cmd_execute_default(const char * const inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
+#ifdef HAVE_LIBOTR
+                char *encrypted = otr_encrypt_message(recipient, inp);
+                message_send(encrypted, recipient);
+                otr_free_message(encrypted);
+#else
                 message_send(inp, recipient);
+#endif
 
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
@@ -2230,7 +2237,14 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             usr_jid = usr;
         }
         if (msg != NULL) {
+#ifdef HAVE_LIBOTR
+            cons_debug("HAVE_LIBOTR, user_jid: %sm msg: %s", usr_jid, msg);
+            char *encrypted = otr_encrypt_message(usr_jid, msg);
+            message_send(encrypted, usr_jid);
+            otr_free_message(encrypted);
+#else
             message_send(msg, usr_jid);
+#endif
             ui_outgoing_msg("me", usr_jid, msg);
 
             if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
@@ -3015,7 +3029,13 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
         if (tiny != NULL) {
             if (win_type == WIN_CHAT) {
                 char *recipient = ui_current_recipient();
+#ifdef HAVE_LIBOTR
+                char *encrypted = otr_encrypt_message(recipient, tiny);
+                message_send(encrypted, recipient);
+                otr_free_message(encrypted);
+#else
                 message_send(tiny, recipient);
+#endif
 
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();

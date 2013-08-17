@@ -27,5 +27,7 @@
 
 void otr_init(void);
 void otr_account_load(ProfAccount *account);
+char * otr_encrypt_message(const char * const to, const char * const message);
+void otr_free_message(char *message);
 
 #endif

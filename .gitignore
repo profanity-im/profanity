@@ -31,3 +31,5 @@ bugs/
 TODO
 plugins/
 src/gitversion.c
+*_key.txt
+*_fingerprints.txt
