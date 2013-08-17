@@ -20,7 +20,7 @@
  *
  */
 
-#include "Python.h"
+#include <string.h>
 
 #include "command/command.h"
 #include "plugins/callbacks.h"
