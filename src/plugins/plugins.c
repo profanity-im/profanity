@@ -22,24 +22,14 @@
 
 #include <Python.h>
 
+#include "config/preferences.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
+#include "plugins/python_plugins.h"
 #include "ui/ui.h"
 
-static GSList* _get_module_names(void);
-static void _run_plugins(const char * const function, PyObject *p_args);
-
 static GSList* plugins;
-
-static void
-_check_error(void)
-{
-    if (PyErr_Occurred()) {
-        PyErr_Print();
-        PyErr_Clear();
-    }
-}
 
 void
 plugins_init(void)
@@ -47,113 +37,93 @@ plugins_init(void)
     plugins = NULL;
     PyObject *p_module;
 
-    GSList *module_names = _get_module_names();
-
+    // initialse python and path
     Py_Initialize();
-    _check_error();
+    python_check_error();
     api_init();
-    _check_error();
-
+    python_check_error();
     // TODO change to use XDG spec
     GString *path = g_string_new(Py_GetPath());
     g_string_append(path, ":./plugins/");
     PySys_SetPath(path->str);
-    _check_error();
+    python_check_error();
     g_string_free(path, TRUE);
 
-    if (module_names != NULL) {
-        cons_show("Loading plugins...");
-
-        GSList *module_name = module_names;
-
-        while (module_name != NULL) {
-            p_module = PyImport_ImportModule(module_name->data);
-            _check_error();
-            if (p_module != NULL) {
-                cons_show("Loaded plugin: %s", module_name->data);
-                plugins = g_slist_append(plugins, p_module);
+    // load plugins
+    gchar **plugins_load = prefs_get_plugins();
+    if (plugins_load != NULL) {
+        int i;
+        for (i = 0; i < g_strv_length(plugins_load); i++)
+        {
+            gchar *filename = plugins_load[i];
+            if (g_str_has_suffix(filename, ".py")) {
+                gchar *module_name = g_strndup(filename, strlen(filename) - 3);
+                p_module = PyImport_ImportModule(module_name);
+                python_check_error();
+                if (p_module != NULL) {
+                    cons_show("Loaded plugin: %s", module_name);
+                    ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
+                    plugin->name = module_name;
+                    plugin->lang = PYTHON;
+                    plugin->module = p_module;
+                    plugin->init_func = python_init_hook;
+                    plugin->on_start_func = python_on_start_hook;
+                    plugin->on_connect_func = python_on_connect_hook;
+                    plugin->on_message_func = python_on_message_hook;
+                    plugins = g_slist_append(plugins, plugin);
+                }
+                g_free(module_name);
             }
-
-            module_name = g_slist_next(module_name);
         }
 
-        PyObject *p_args = Py_BuildValue("ss", PACKAGE_VERSION, PACKAGE_STATUS);
-        _run_plugins("prof_init", p_args);
-        Py_XDECREF(p_args);
-        _check_error();
+        // initialise plugins
+        GSList *curr = plugins;
+        while (curr != NULL) {
+            ProfPlugin *plugin = curr->data;
+            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
+            python_check_error();
+            curr = g_slist_next(curr);
+        }
     }
+
     return;
 }
 
 void
 plugins_on_start(void)
 {
-    _run_plugins("prof_on_start", NULL);
-    _check_error();
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_start_func(plugin);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
+plugins_on_connect(void)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_connect_func(plugin);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
+plugins_on_message(const char * const jid, const char * const message)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_message_func(plugin, jid, message);
+        curr = g_slist_next(curr);
+    }
 }
 
 void
 plugins_shutdown(void)
 {
     Py_Finalize();
-}
-
-void
-plugins_on_connect(void)
-{
-    _run_plugins("prof_on_connect", NULL);
-}
-
-void
-plugins_on_message(const char * const jid, const char * const message)
-{
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
-    _run_plugins("prof_on_message", p_args);
-    Py_XDECREF(p_args);
-}
-
-static GSList *
-_get_module_names(void)
-{
-    GSList *result = NULL;
-
-    // TODO change to use XDG
-    GDir *plugins_dir = g_dir_open("./plugins", 0, NULL);
-
-    if (plugins_dir != NULL) {
-        const gchar *file = g_dir_read_name(plugins_dir);
-        while (file != NULL) {
-            if (g_str_has_suffix(file, ".py")) {
-                gchar *module_name = g_strndup(file, strlen(file) - 3);
-                result = g_slist_append(result, module_name);
-            }
-            file = g_dir_read_name(plugins_dir);
-        }
-        g_dir_close(plugins_dir);
-        return result;
-    } else {
-        return NULL;
-    }
-}
-
-static void
-_run_plugins(const char * const function, PyObject *p_args)
-{
-    GSList *plugin = plugins;
-    PyObject *p_function;
-
-    while (plugin != NULL) {
-        PyObject *p_module = plugin->data;
-        if (PyObject_HasAttrString(p_module, function)) {
-            p_function = PyObject_GetAttrString(p_module, function);
-            _check_error();
-            if (p_function && PyCallable_Check(p_function)) {
-                PyObject_CallObject(p_function, p_args);
-                _check_error();
-                Py_XDECREF(p_function);
-            }
-        }
-
-        plugin = g_slist_next(plugin);
-   }
 }

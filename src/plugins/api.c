@@ -134,7 +134,7 @@ api_send_line(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-api_get_current_recipient(void)
+api_get_current_recipient(PyObject *self, PyObject *args)
 {
     win_type_t win_type = ui_current_win_type();
     if (win_type == WIN_CHAT) {

@@ -257,6 +257,19 @@ prefs_set_autoaway_time(gint value)
     _save_prefs();
 }
 
+gchar **
+prefs_get_plugins(void)
+{
+    if (!g_key_file_has_group(prefs, "plugins")) {
+        return NULL;
+    }
+    if (!g_key_file_has_key(prefs, "plugins", "load", NULL)) {
+        return NULL;
+    }
+
+    return g_key_file_get_string_list(prefs, "plugins", "load", NULL, NULL);
+}
+
 static void
 _save_prefs(void)
 {

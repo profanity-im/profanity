@@ -84,6 +84,8 @@ gint prefs_get_autoping(void);
 gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);
 
+gchar** prefs_get_plugins(void);
+
 void prefs_add_login(const char *jid);
 
 gboolean prefs_get_boolean(preference_t pref);
