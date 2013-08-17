@@ -35,7 +35,6 @@ void
 plugins_init(void)
 {
     plugins = NULL;
-    PyObject *p_module;
 
     // initialse python and path
     Py_Initialize();
@@ -57,22 +56,11 @@ plugins_init(void)
         {
             gchar *filename = plugins_load[i];
             if (g_str_has_suffix(filename, ".py")) {
-                gchar *module_name = g_strndup(filename, strlen(filename) - 3);
-                p_module = PyImport_ImportModule(module_name);
-                python_check_error();
-                if (p_module != NULL) {
-                    cons_show("Loaded plugin: %s", module_name);
-                    ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
-                    plugin->name = module_name;
-                    plugin->lang = PYTHON;
-                    plugin->module = p_module;
-                    plugin->init_func = python_init_hook;
-                    plugin->on_start_func = python_on_start_hook;
-                    plugin->on_connect_func = python_on_connect_hook;
-                    plugin->on_message_func = python_on_message_hook;
+                ProfPlugin *plugin = python_plugin_create(filename);
+                if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
+                    cons_show("Loaded plugin: %s", filename);
                 }
-                g_free(module_name);
             }
         }
 
