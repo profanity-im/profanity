@@ -25,7 +25,10 @@
 #include "plugins/plugins.h"
 #include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
+#include "plugins/c_plugins.h"
 #include "ui/ui.h"
+
+
 
 static GSList* plugins;
 
@@ -47,7 +50,16 @@ plugins_init(void)
                 ProfPlugin *plugin = python_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
-                    cons_show("Loaded plugin: %s", filename);
+                    cons_show("Loaded python plugin: %s", filename);
+                }
+            // TODO include configure option to vary on windows and
+            // unix i.e. so, dll, or maybe we can come up with unified 
+            // shared library plugin name... dunno...
+            } else if (g_str_has_suffix(filename, ".so")) {
+                ProfPlugin *plugin = c_plugin_create(filename);
+                if (plugin != NULL) {
+                    plugins = g_slist_append(plugins, plugin);
+                    cons_show("Loaded C plugin: %s", filename);
                 }
             }
         }
@@ -56,7 +68,9 @@ plugins_init(void)
         GSList *curr = plugins;
         while (curr != NULL) {
             ProfPlugin *plugin = curr->data;
+            
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
+            // TODO well, it should be more of a generic check error here
             python_check_error();
             curr = g_slist_next(curr);
         }
@@ -101,5 +115,19 @@ plugins_on_message_received(const char * const jid, const char * const message)
 void
 plugins_shutdown(void)
 {
+    GSList *curr = plugins;
+    
     python_shutdown();
+
+    //FIXME do we need to clean the plugins list?
+    //for the time being I'll just call dlclose for 
+    //every C plugin.
+    
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        if (plugin->lang == C)
+            c_close_library (plugin);
+        
+        curr = g_slist_next(curr);
+    }
 }
