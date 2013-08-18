@@ -160,7 +160,8 @@ static VALUE prof_module;
 void
 ruby_api_init(void)
 {
-    prof_module = rb_define_module("prof");
+    prof_module = rb_define_module("Prof");
+
     rb_define_module_function(prof_module, "cons_alert", RUBY_METHOD_FUNC(ruby_api_cons_alert), 0);
     rb_define_module_function(prof_module, "cons_show", RUBY_METHOD_FUNC(ruby_api_cons_show), 1);
     rb_define_module_function(prof_module, "register_command", RUBY_METHOD_FUNC(ruby_api_register_command), 7);

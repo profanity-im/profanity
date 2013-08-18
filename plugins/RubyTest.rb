@@ -1,5 +1,5 @@
 module RubyTest
     def RubyTest.prof_init(version, status)
-        $stderr.puts "From Ruby: " + version + " " + status
+        Prof::cons_show("RubyTest: " + version + " " + status)
     end
 end

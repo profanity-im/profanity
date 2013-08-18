@@ -35,7 +35,6 @@ void
 ruby_env_init(void)
 {
     ruby_init();
-    ruby_script("prof");
     ruby_init_loadpath();
     ruby_api_init();
     ruby_check_error();
