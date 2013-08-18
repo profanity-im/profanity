@@ -1,23 +1,23 @@
 module RubyTest
-    def RubyTest.prof_init(version, status)
+    def self.prof_init(version, status)
         Prof::cons_show("RubyTest: init, " + version + ", " + status)
         Prof::register_command("/ruby", 0, 1, "/ruby", "RubyTest", "RubyTest", cmd_ruby)
         Prof::register_timed(timer_test, 5)
     end
 
-    def RubyTest.prof_on_start()
+    def self.prof_on_start()
         Prof::cons_show("RubyTest: on_start")
     end
 
-    def RubyTest.prof_on_connect()
+    def self.prof_on_connect()
         Prof::cons_show("RubyTest: on_connect")
     end
 
-    def RubyTest.prof_on_message_received(jid, message)
+    def self.prof_on_message_received(jid, message)
         Prof::cons_show("RubyTest: on_message_received, " + jid + ", " + message)
     end
 
-    def RubyTest.cmd_ruby()
+    def self.cmd_ruby()
         return Proc.new {
             | msg |
 
@@ -29,7 +29,7 @@ module RubyTest
         }
     end
 
-    def RubyTest.timer_test()
+    def self.timer_test()
         return Proc.new {
             Prof::cons_show("Ruby timer fired.")
         }
