@@ -30,6 +30,8 @@
 #include "plugins/ruby_plugins.h"
 #include "ui/ui.h"
 
+static gboolean _method_exists(ProfPlugin *plugin, const char * const name);
+
 void
 ruby_env_init(void)
 {
@@ -66,8 +68,7 @@ ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * cons
     VALUE v_status = rb_str_new2(status);
 
     VALUE module = (VALUE) plugin->module;
-    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_init)");
-    if (TYPE(exists) == T_TRUE) {
+    if (_method_exists(plugin, "prof_init")) {
         rb_funcall(module, rb_intern("prof_init"), 2, v_version, v_status);
     }
 }
@@ -76,8 +77,7 @@ void
 ruby_on_start_hook(ProfPlugin *plugin)
 {
     VALUE module = (VALUE) plugin->module;
-    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_on_start)");
-    if (TYPE(exists) == T_TRUE) {
+    if (_method_exists(plugin, "prof_on_start")) {
         rb_funcall(module, rb_intern("prof_on_start"), 0);
     }
 }
@@ -86,8 +86,7 @@ void
 ruby_on_connect_hook(ProfPlugin *plugin)
 {
     VALUE module = (VALUE) plugin->module;
-    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_on_connect)");
-    if (TYPE(exists) == T_TRUE) {
+    if (_method_exists(plugin, "prof_on_connect")) {
         rb_funcall(module, rb_intern("prof_on_connect"), 0);
     }
 }
@@ -99,8 +98,7 @@ ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const 
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
-    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_on_message_received)");
-    if (TYPE(exists) == T_TRUE) {
+    if (_method_exists(plugin, "prof_on_message_received")) {
         rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
     }
 }
@@ -114,4 +112,23 @@ void
 ruby_shutdown(void)
 {
     ruby_finalize();
+}
+
+static gboolean
+_method_exists(ProfPlugin *plugin, const char * const name)
+{
+    gboolean result = FALSE;
+    GString *respond = g_string_new(plugin->name);
+    g_string_append(respond, ".respond_to?(:");
+    g_string_append(respond, name);
+    g_string_append(respond, ")");
+
+    VALUE exists = rb_eval_string(respond->str);
+    if (TYPE(exists) == T_TRUE) {
+        result = TRUE;
+    }
+
+    g_string_free(respond, TRUE);
+
+    return result;
 }
