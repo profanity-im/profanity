@@ -20,7 +20,6 @@
  *
  */
 
-#include <Python.h>
 #include <ruby.h>
 
 #include "config/preferences.h"
@@ -38,12 +37,6 @@ ruby_env_init(void)
     ruby_init_loadpath();
     ruby_api_init();
     ruby_check_error();
-    // TODO set loadpath for ruby interpreter
-    //GString *path = g_string_new(Py_GetPath());
-    //g_string_append(path, ":./plugins/");
-    //PySys_SetPath(path->str);
-    //ruby_check_error();
-    //g_string_free(path, TRUE);
 }
 
 ProfPlugin *
@@ -103,12 +96,6 @@ ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const 
 void
 ruby_check_error(void)
 {
-/* TODO
-    if (PyErr_Occurred()) {
-        PyErr_Print();
-        PyErr_Clear();
-    }
-*/
 }
 
 void
