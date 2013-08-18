@@ -38,12 +38,12 @@ ruby_env_init(void)
     ruby_check_error();
     ruby_api_init();
     ruby_check_error();
-    // TODO change to use XDG spec
-    GString *path = g_string_new(Py_GetPath());
-    g_string_append(path, ":./plugins/");
-    PySys_SetPath(path->str);
-    ruby_check_error();
-    g_string_free(path, TRUE);
+    // TODO set loadpath for ruby interpreter
+    //GString *path = g_string_new(Py_GetPath());
+    //g_string_append(path, ":./plugins/");
+    //PySys_SetPath(path->str);
+    //ruby_check_error();
+    //g_string_free(path, TRUE);
 }
 
 ProfPlugin *
@@ -72,6 +72,7 @@ ruby_plugin_create(const char * const filename)
 void
 ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * const status)
 {
+/* TODO
     PyObject *p_args = Py_BuildValue("ss", version, status);
     PyObject *p_function;
 
@@ -85,11 +86,13 @@ ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * cons
             Py_XDECREF(p_function);
         }
     }
+*/
 }
 
 void
 ruby_on_start_hook(ProfPlugin *plugin)
 {
+/*
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -102,11 +105,13 @@ ruby_on_start_hook(ProfPlugin *plugin)
             Py_XDECREF(p_function);
         }
     }
+*/
 }
 
 void
 ruby_on_connect_hook(ProfPlugin *plugin)
 {
+/*
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -119,11 +124,13 @@ ruby_on_connect_hook(ProfPlugin *plugin)
             Py_XDECREF(p_function);
         }
     }
+*/
 }
 
 void
 ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message)
 {
+/* TODO
     PyObject *p_args = Py_BuildValue("ss", jid, message);
     PyObject *p_function;
 
@@ -137,19 +144,24 @@ ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const 
             Py_XDECREF(p_function);
         }
     }
+*/
 }
 
 void
 ruby_check_error(void)
 {
+/* TODO
     if (PyErr_Occurred()) {
         PyErr_Print();
         PyErr_Clear();
     }
+*/
 }
 
 void
 ruby_shutdown(void)
 {
+/* TODO
     Py_Finalize();
+*/
 }
