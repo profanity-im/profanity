@@ -23,7 +23,7 @@ prof_on_connect (void)
 }
 
 void
-c_on_message_received (const char * const jid, const char * const message)
+prof_on_message_received (const char * const jid, const char * const message)
 {
     fprintf (stderr, "called %s with args=<%s, %s>\n", __func__, jid, message);
 }

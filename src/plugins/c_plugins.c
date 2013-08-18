@@ -1,34 +1,33 @@
+// FIXME  on windows this might be a different header
+#include <dlfcn.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include <glib.h>
 
 #include "config/preferences.h"
+#include "log.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "plugins/c_plugins.h"
 #include "ui/ui.h"
 
-// FIXME  on windows this might be a different header
-#include <dlfcn.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-
 ProfPlugin *
 c_plugin_create(const char * const filename)
 {
     ProfPlugin *plugin;
-    void *  handle = NULL;
-    char *  path = NULL;
+    void *handle = NULL;
 
-    // FIXME so where is the right path for the plugin dir?
-    if (-1 == asprintf (&path, "./plugins/%s", filename)) {
-        log_warning ("asprintf failed, plugin %s not loaded", filename);
-        return NULL;
-    }
+    // TODO use XDG for path
+    GString *path = g_string_new("./plugins/");
+    g_string_append(path, filename);
 
-    handle = dlopen (path, RTLD_NOW | RTLD_GLOBAL);
+    handle = dlopen (path->str, RTLD_NOW | RTLD_GLOBAL);
 
     if (!handle) {
         log_warning ("dlopen failed to open `%s', %s", filename, dlerror ());
+        g_string_free(path, TRUE);
         return NULL;
     }
 
@@ -41,8 +40,7 @@ c_plugin_create(const char * const filename)
     plugin->on_connect_func = c_on_connect_hook;
     plugin->on_message_received_func = c_on_message_received_hook;
 
-    if (!path)
-        free (path);
+    g_string_free(path, TRUE);
 
     return plugin;
 }
