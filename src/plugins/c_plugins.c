@@ -24,9 +24,9 @@ c_plugin_create(const char * const filename)
         log_warning ("asprintf failed, plugin %s not loaded", filename);
         return NULL;
     }
-   
+
     handle = dlopen (path, RTLD_NOW | RTLD_GLOBAL);
-    
+
     if (!handle) {
         log_warning ("dlopen failed to open `%s', %s", filename, dlerror ());
         return NULL;
@@ -40,7 +40,7 @@ c_plugin_create(const char * const filename)
     plugin->on_start_func = c_on_start_hook;
     plugin->on_connect_func = c_on_connect_hook;
     plugin->on_message_received_func = c_on_message_received_hook;
-    
+
     if (!path)
         free (path);
 
@@ -54,14 +54,14 @@ c_init_hook(ProfPlugin *plugin, const char *  const version, const char *  const
     void (*func)(const char * const __version, const char * const __status);
 
     assert (plugin && plugin->module);
-    
+
     if (NULL == (f = dlsym (plugin->module, "prof_init"))) {
         log_warning ("warning: %s does not have init function", plugin->name);
         return ;
     }
 
     func = (void (*)(const char * const, const char * const))f;
-    
+
     // FIXME maybe we want to make it boolean to see if it succeeded or not?
     func (version, status);
 }
@@ -70,10 +70,10 @@ c_init_hook(ProfPlugin *plugin, const char *  const version, const char *  const
 void
 c_on_start_hook (ProfPlugin *plugin)
 {
-    void * f = NULL;   
+    void * f = NULL;
     void (*func)(void);
     assert (plugin && plugin->module);
-    
+
     if (NULL == (f = dlsym (plugin->module, "prof_on_start")))
         return ;
 
@@ -85,10 +85,10 @@ c_on_start_hook (ProfPlugin *plugin)
 void
 c_on_connect_hook (ProfPlugin *plugin)
 {
-    void * f = NULL;   
+    void * f = NULL;
     void (*func)(void);
     assert (plugin && plugin->module);
-    
+
     if (NULL == (f = dlsym (plugin->module, "prof_on_connect")))
         return ;
 
@@ -101,10 +101,10 @@ c_on_connect_hook (ProfPlugin *plugin)
 void
 c_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message)
 {
-    void * f = NULL;   
+    void * f = NULL;
     void (*func)(const char * const __jid, const char * const __message);
     assert (plugin && plugin->module);
-    
+
     if (NULL == (f = dlsym (plugin->module, "prof_on_message_received")))
         return;
 

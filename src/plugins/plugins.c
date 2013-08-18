@@ -53,7 +53,7 @@ plugins_init(void)
                     cons_show("Loaded python plugin: %s", filename);
                 }
             // TODO include configure option to vary on windows and
-            // unix i.e. so, dll, or maybe we can come up with unified 
+            // unix i.e. so, dll, or maybe we can come up with unified
             // shared library plugin name... dunno...
             } else if (g_str_has_suffix(filename, ".so")) {
                 ProfPlugin *plugin = c_plugin_create(filename);
@@ -68,7 +68,7 @@ plugins_init(void)
         GSList *curr = plugins;
         while (curr != NULL) {
             ProfPlugin *plugin = curr->data;
-            
+
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
             // TODO well, it should be more of a generic check error here
             python_check_error();
@@ -116,18 +116,18 @@ void
 plugins_shutdown(void)
 {
     GSList *curr = plugins;
-    
+
     python_shutdown();
 
     //FIXME do we need to clean the plugins list?
-    //for the time being I'll just call dlclose for 
+    //for the time being I'll just call dlclose for
     //every C plugin.
-    
+
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
         if (plugin->lang == C)
             c_close_library (plugin);
-        
+
         curr = g_slist_next(curr);
     }
 }
