@@ -49,7 +49,6 @@ plugins_init(void)
         for (i = 0; i < g_strv_length(plugins_load); i++)
         {
             gchar *filename = plugins_load[i];
-            ProfPlugin *plugin = NULL;
             if (g_str_has_suffix(filename, ".py")) {
                 ProfPlugin *plugin = python_plugin_create(filename);
                 if (plugin != NULL) {
