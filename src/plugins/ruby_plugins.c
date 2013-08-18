@@ -66,21 +66,30 @@ ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * cons
     VALUE v_status = rb_str_new2(status);
 
     VALUE module = (VALUE) plugin->module;
-    rb_funcall(module, rb_intern("prof_init"), 2, v_version, v_status);
+    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_init)");
+    if (TYPE(exists) == T_TRUE) {
+        rb_funcall(module, rb_intern("prof_init"), 2, v_version, v_status);
+    }
 }
 
 void
 ruby_on_start_hook(ProfPlugin *plugin)
 {
     VALUE module = (VALUE) plugin->module;
-    rb_funcall(module, rb_intern("prof_on_start"), 0);
+    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_on_start)");
+    if (TYPE(exists) == T_TRUE) {
+        rb_funcall(module, rb_intern("prof_on_start"), 0);
+    }
 }
 
 void
 ruby_on_connect_hook(ProfPlugin *plugin)
 {
     VALUE module = (VALUE) plugin->module;
-    rb_funcall(module, rb_intern("prof_on_connect"), 0);
+    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_on_connect)");
+    if (TYPE(exists) == T_TRUE) {
+        rb_funcall(module, rb_intern("prof_on_connect"), 0);
+    }
 }
 
 void
@@ -90,7 +99,10 @@ ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const 
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
-    rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
+    VALUE exists = rb_eval_string("RubyTest.respond_to?(:prof_on_message_received)");
+    if (TYPE(exists) == T_TRUE) {
+        rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
+    }
 }
 
 void
