@@ -26,6 +26,7 @@ profanity_SOURCES = \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c \
     src/plugins/python_plugins.h src/plugins/python_plugins.c \
+    src/plugins/c_plugins.h src/plugins/c_plugins.c \
     src/plugins/python_api.h src/plugins/python_api.c
 
 TESTS = tests/testsuite
@@ -57,6 +58,7 @@ tests_testsuite_SOURCES = \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c \
     src/plugins/python_plugins.h src/plugins/python_plugins.c \
+    src/plugins/c_plugins.h src/plugins/c_plugins.c \
     src/plugins/python_api.h src/plugins/python_api.c \
 	tests/test_roster.c tests/test_common.c tests/test_history.c \
 	tests/test_autocomplete.c tests/testsuite.c tests/test_parser.c \
