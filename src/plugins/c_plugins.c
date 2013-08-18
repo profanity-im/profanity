@@ -1,5 +1,6 @@
 
 #include "config/preferences.h"
+#include "log.h"
 #include "plugins/api.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
