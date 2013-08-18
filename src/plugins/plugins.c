@@ -133,7 +133,7 @@ plugins_shutdown(void)
 
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
-        if (plugin->lang == C)
+        if (plugin->lang == LANG_C)
             c_close_library (plugin);
 
         curr = g_slist_next(curr);

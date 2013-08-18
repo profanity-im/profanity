@@ -54,7 +54,7 @@ python_plugin_create(const char * const filename)
     if (p_module != NULL) {
         ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
         plugin->name = module_name;
-        plugin->lang = PYTHON;
+        plugin->lang = LANG_PYTHON;
         plugin->module = p_module;
         plugin->init_func = python_init_hook;
         plugin->on_start_func = python_on_start_hook;

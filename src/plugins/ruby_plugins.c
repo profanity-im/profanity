@@ -35,7 +35,8 @@ void
 ruby_env_init(void)
 {
     ruby_init();
-    ruby_check_error();
+    ruby_script("prof");
+    ruby_init_loadpath();
     ruby_api_init();
     ruby_check_error();
     // TODO set loadpath for ruby interpreter
@@ -49,44 +50,31 @@ ruby_env_init(void)
 ProfPlugin *
 ruby_plugin_create(const char * const filename)
 {
+    GString *path = g_string_new("./plugins/");
+    g_string_append(path, filename);
+    rb_require(path->str);
     gchar *module_name = g_strndup(filename, strlen(filename) - 3);
-    PyObject *p_module = PyImport_ImportModule(module_name);
     ruby_check_error();
-    if (p_module != NULL) {
-        ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
-        plugin->name = module_name;
-        plugin->lang = PYTHON;
-        plugin->module = p_module;
-        plugin->init_func = ruby_init_hook;
-        plugin->on_start_func = ruby_on_start_hook;
-        plugin->on_connect_func = ruby_on_connect_hook;
-        plugin->on_message_received_func = ruby_on_message_received_hook;
-        g_free(module_name);
-        return plugin;
-    } else {
-        g_free(module_name);
-        return NULL;
-    }
+
+    ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
+    plugin->name = module_name;
+    plugin->lang = LANG_RUBY;
+    plugin->module = NULL;
+    plugin->init_func = ruby_init_hook;
+    plugin->on_start_func = ruby_on_start_hook;
+    plugin->on_connect_func = ruby_on_connect_hook;
+    plugin->on_message_received_func = ruby_on_message_received_hook;
+    return plugin;
 }
 
 void
 ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * const status)
 {
-/* TODO
-    PyObject *p_args = Py_BuildValue("ss", version, status);
-    PyObject *p_function;
+    VALUE v_version = rb_str_new2(version);
+    VALUE v_status = rb_str_new2(status);
 
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_init")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_init");
-        ruby_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
-            ruby_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-*/
+    VALUE module = rb_const_get(rb_cObject, rb_intern(plugin->name));
+    rb_funcall(module, rb_intern("prof_init"), 2, v_version, v_status);
 }
 
 void

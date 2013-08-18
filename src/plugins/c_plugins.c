@@ -33,7 +33,7 @@ c_plugin_create(const char * const filename)
 
     plugin = malloc(sizeof(ProfPlugin));
     plugin->name = g_strdup(filename);
-    plugin->lang = C;
+    plugin->lang = LANG_C;
     plugin->module = handle;
     plugin->init_func = c_init_hook;
     plugin->on_start_func = c_on_start_hook;

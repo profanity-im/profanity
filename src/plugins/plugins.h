@@ -24,8 +24,9 @@
 #define PLUGINS_H
 
 typedef enum {
-    PYTHON,
-    C
+    LANG_PYTHON,
+    LANG_RUBY,
+    LANG_C
 } lang_t;
 
 typedef struct prof_plugin_t {
