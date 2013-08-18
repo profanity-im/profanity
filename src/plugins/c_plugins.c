@@ -27,6 +27,7 @@ c_plugin_create(const char * const filename)
 
     if (!handle) {
         log_warning ("dlopen failed to open `%s', %s", filename, dlerror ());
+        g_string_free(path, TRUE);
         return NULL;
     }
 
