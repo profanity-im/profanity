@@ -79,59 +79,25 @@ ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * cons
 void
 ruby_on_start_hook(ProfPlugin *plugin)
 {
-/*
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_on_start")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_on_start");
-        ruby_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, NULL);
-            ruby_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-*/
+    VALUE module = (VALUE) plugin->module;
+    rb_funcall(module, rb_intern("prof_on_start"), 0);
 }
 
 void
 ruby_on_connect_hook(ProfPlugin *plugin)
 {
-/*
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_on_connect")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_on_connect");
-        ruby_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, NULL);
-            ruby_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-*/
+    VALUE module = (VALUE) plugin->module;
+    rb_funcall(module, rb_intern("prof_on_connect"), 0);
 }
 
 void
 ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message)
 {
-/* TODO
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
-    PyObject *p_function;
+    VALUE v_jid = rb_str_new2(jid);
+    VALUE v_message = rb_str_new2(message);
 
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_on_message_received")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_on_message_received");
-        ruby_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
-            ruby_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-*/
+    VALUE module = (VALUE) plugin->module;
+    rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
 }
 
 void
@@ -148,7 +114,5 @@ ruby_check_error(void)
 void
 ruby_shutdown(void)
 {
-/* TODO
-    Py_Finalize();
-*/
+    ruby_finalize();
 }
