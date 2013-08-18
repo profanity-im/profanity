@@ -9,6 +9,7 @@ AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
+AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 
 # Checks for programs.
 AC_PROG_CC
@@ -88,12 +89,19 @@ if test "x$enable_notifications" != xno; then
 fi
 
 # Default parameters
-AM_CFLAGS="-Wall -I/usr/include/python2.7 -I/usr/include/python2.7 -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security -L/usr/lib/python2.7/config -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions"
+AM_CFLAGS="-Wall"
+
+# Python
+AM_CFLAGS="$AM_CFLAGS -I/usr/include/python2.7 -I/usr/include/python2.7 -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security -L/usr/lib/python2.7/config -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions"
+
+# Ruby
+AM_CFLAGS="$AM_CFLAGS -I/usr/lib/ruby/1.8/x86_64-linux -L/usr/lib/ruby/1.8/x86_64-linux"
+
 if test "x$PACKAGE_STATUS" = xdevelopment; then
 #    AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
     AM_CFLAGS="$AM_CFLAGS -Wunused"
 fi
-LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS -lpthread -ldl -lutil -lm -lpython2.7"
+LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS -lpthread -ldl -lutil -lm -lpython2.7 -lruby1.8"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 

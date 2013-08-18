@@ -1,5 +1,5 @@
 /*
- * notifier.h
+ * ruby_api.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,22 +20,14 @@
  *
  */
 
-#ifndef NOTIFIER_H
-#define NOTIFIER_H
+#ifndef RUBY_API_H
+#define RUBY_API_H
 
-void notifier_init(void);
-void notifier_uninit(void);
+void ruby_env_init(void);
+void ruby_api_init(void);
+void ruby_shutdown(void);
 
-void notify_typing(const char * const handle);
-void notify_message(const char * const handle, int win);
-void notify_room_message(const char * const handle, const char * const room,
-    int win);
-void notify_remind(void);
-void notify_invite(const char * const from, const char * const room,
-    const char * const reason);
-void notify_subscription(const char * const from);
-
-void notify(const char * const message, int timeout,
-    const char * const category);
+void ruby_command_callback(PluginCommand *command, gchar **args);
+void ruby_timed_callback(PluginTimedFunction *timed_function);
 
 #endif

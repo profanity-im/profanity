@@ -23,9 +23,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_NCURSESW_NCURSES_H
+#ifdef PROF_HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
+#elif PROF_HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -70,7 +70,7 @@ cons_show_word(const char * const word)
 void
 cons_debug(const char * const msg, ...)
 {
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
         va_list arg;
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
@@ -167,15 +167,15 @@ cons_about(void)
     } else {
         win_print_time(console, '-');
 
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-            wprintw(console->win, "Welcome to Profanity, version %sdev\n", PACKAGE_VERSION);
+        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+            wprintw(console->win, "Welcome to Profanity, version %sdev\n", PROF_PACKAGE_VERSION);
         } else {
-            wprintw(console->win, "Welcome to Profanity, version %s\n", PACKAGE_VERSION);
+            wprintw(console->win, "Welcome to Profanity, version %s\n", PROF_PACKAGE_VERSION);
         }
     }
 
     win_print_time(console, '-');
-    wprintw(console->win, "Copyright (C) 2012, 2013 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+    wprintw(console->win, "Copyright (C) 2012, 2013 James Booth <%s>.\n", PROF_PACKAGE_BUGREPORT);
     win_print_time(console, '-');
     wprintw(console->win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
     win_print_time(console, '-');
@@ -1479,9 +1479,9 @@ _cons_splash_logo(void)
     win_print_time(console, '-');
     wprintw(console->win, "\n");
     win_print_time(console, '-');
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-        wprintw(console->win, "Version %sdev\n", PACKAGE_VERSION);
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+        wprintw(console->win, "Version %sdev\n", PROF_PACKAGE_VERSION);
     } else {
-        wprintw(console->win, "Version %s\n", PACKAGE_VERSION);
+        wprintw(console->win, "Version %s\n", PROF_PACKAGE_VERSION);
     }
 }

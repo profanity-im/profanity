@@ -19,16 +19,16 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include "config.h"
+#include "prof_config.h"
 
 #include <stdio.h>
 #include <string.h>
 
 #include <glib.h>
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
-#ifdef PLATFORM_CYGWIN
+#ifdef PROF_PLATFORM_CYGWIN
 #include <windows.h>
 #endif
 
@@ -40,7 +40,7 @@
 void
 notifier_init(void)
 {
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
     notify_init("Profanity");
 #endif
 }
@@ -48,7 +48,7 @@ notifier_init(void)
 void
 notifier_uninit(void)
 {
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
     if (notify_is_initted()) {
         notify_uninit();
     }
@@ -161,7 +161,7 @@ void
 notify(const char * const message, int timeout,
     const char * const category)
 {
-#ifdef HAVE_LIBNOTIFY
+#ifdef PROF_HAVE_LIBNOTIFY
 
     if (notify_is_initted()) {
         NotifyNotification *notification;
@@ -182,7 +182,7 @@ notify(const char * const message, int timeout,
         log_error("Libnotify initialisation error.");
     }
 #endif
-#ifdef PLATFORM_CYGWIN
+#ifdef PROF_PLATFORM_CYGWIN
     NOTIFYICONDATA nid;
     nid.cbSize = sizeof(NOTIFYICONDATA);
     //nid.hWnd = hWnd;

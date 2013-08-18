@@ -20,7 +20,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -234,8 +234,8 @@ _iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_t *version = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(version, "version");
         xmpp_stanza_t *version_txt = xmpp_stanza_new(ctx);
-        GString *version_str = g_string_new(PACKAGE_VERSION);
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
+        GString *version_str = g_string_new(PROF_PACKAGE_VERSION);
+        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
             g_string_append(version_str, "dev");
         }
         xmpp_stanza_set_text(version_txt, version_str->str);

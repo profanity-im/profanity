@@ -18,6 +18,7 @@ Makefile.in
 aclocal.m4
 autom4te.cache/
 src/config.h
+src/prof_config.h
 src/config.h.in
 config.status
 configure
@@ -30,3 +31,7 @@ core
 bugs/
 *.pyc
 TODO
+_configs.sed
+gource.sh
+*_fingerprints.txt
+*_key.txt

@@ -19,7 +19,7 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include "config.h"
+#include "prof_config.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -269,7 +269,7 @@ release_is_new(char *found_version)
 {
     int curr_maj, curr_min, curr_patch, found_maj, found_min, found_patch;
 
-    int parse_curr = sscanf(PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
+    int parse_curr = sscanf(PROF_PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
         &curr_patch);
     int parse_found = sscanf(found_version, "%d.%d.%d", &found_maj, &found_min,
         &found_patch);

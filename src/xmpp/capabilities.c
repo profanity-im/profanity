@@ -20,7 +20,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -236,8 +236,8 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_set_attribute(identity, "type", "console");
 
     GString *name_str = g_string_new("Profanity ");
-    g_string_append(name_str, PACKAGE_VERSION);
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+    g_string_append(name_str, PROF_PACKAGE_VERSION);
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
         g_string_append(name_str, "dev");
     }
     xmpp_stanza_set_attribute(identity, "name", name_str->str);

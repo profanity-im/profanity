@@ -1,5 +1,5 @@
 /*
- * notifier.h
+ * ruby_plugins.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,22 +20,18 @@
  *
  */
 
-#ifndef NOTIFIER_H
-#define NOTIFIER_H
+#ifndef RUBY_PLUGINS_H
+#define RUBY_PLUGINS_H
 
-void notifier_init(void);
-void notifier_uninit(void);
+#include "plugins/plugins.h"
 
-void notify_typing(const char * const handle);
-void notify_message(const char * const handle, int win);
-void notify_room_message(const char * const handle, const char * const room,
-    int win);
-void notify_remind(void);
-void notify_invite(const char * const from, const char * const room,
-    const char * const reason);
-void notify_subscription(const char * const from);
+ProfPlugin* ruby_plugin_create(const char * const filename);
 
-void notify(const char * const message, int timeout,
-    const char * const category);
+void ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * const status);
+void ruby_on_start_hook(ProfPlugin *plugin);
+void ruby_on_connect_hook(ProfPlugin *plugin);
+void ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message);
+
+void ruby_check_error(void);
 
 #endif

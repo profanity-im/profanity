@@ -20,17 +20,17 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_LIBXSS
+#ifdef PROF_HAVE_LIBXSS
 #include <X11/extensions/scrnsaver.h>
 #endif
 #include <glib.h>
-#ifdef HAVE_NCURSESW_NCURSES_H
+#ifdef PROF_HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
-#elif HAVE_NCURSES_H
+#elif PROF_HAVE_NCURSES_H
 #include <ncurses.h>
 #endif
 
@@ -61,7 +61,7 @@ static int max_cols = 0;
 
 static char *win_title;
 
-#ifdef HAVE_LIBXSS
+#ifdef PROF_HAVE_LIBXSS
 static Display *display;
 #endif
 
@@ -109,7 +109,7 @@ ui_init(void)
     current = console;
     cons_about();
     notifier_init();
-#ifdef HAVE_LIBXSS
+#ifdef PROF_HAVE_LIBXSS
     display = XOpenDisplay(0);
 #endif
     ui_idle_time = g_timer_new();
@@ -144,7 +144,7 @@ unsigned long
 ui_get_idle_time(void)
 {
 // if compiled with libxss, get the x sessions idle time
-#ifdef HAVE_LIBXSS
+#ifdef PROF_HAVE_LIBXSS
     XScreenSaverInfo *info = XScreenSaverAllocInfo();
     if (info != NULL && display != NULL) {
         XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
@@ -1416,8 +1416,8 @@ _ui_draw_win_title(void)
 
     if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
         g_string_append(version_str, " ");
-        g_string_append(version_str, PACKAGE_VERSION);
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
+        g_string_append(version_str, PROF_PACKAGE_VERSION);
+        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
             g_string_append(version_str, "dev");
         }
     }

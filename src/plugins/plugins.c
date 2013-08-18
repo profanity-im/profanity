@@ -23,9 +23,11 @@
 #include "config/preferences.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
-#include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
 #include "plugins/c_plugins.h"
+#include "plugins/python_api.h"
+#include "plugins/ruby_plugins.h"
+#include "plugins/ruby_api.h"
 #include "ui/ui.h"
 
 
@@ -37,7 +39,8 @@ plugins_init(void)
 {
     plugins = NULL;
 
-    python_init();
+    python_env_init();
+    ruby_env_init();
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();
@@ -46,6 +49,7 @@ plugins_init(void)
         for (i = 0; i < g_strv_length(plugins_load); i++)
         {
             gchar *filename = plugins_load[i];
+            ProfPlugin *plugin = NULL;
             if (g_str_has_suffix(filename, ".py")) {
                 ProfPlugin *plugin = python_plugin_create(filename);
                 if (plugin != NULL) {
@@ -61,6 +65,12 @@ plugins_init(void)
                     plugins = g_slist_append(plugins, plugin);
                     cons_show("Loaded C plugin: %s", filename);
                 }
+            } else if (g_str_has_suffix(filename, ".rb")) {
+                ProfPlugin *plugin = ruby_plugin_create(filename);
+                if (plugin != NULL) {
+                    plugins = g_slist_append(plugins, plugin);
+                    cons_show("Loaded Ruby plugin: %s", filename);
+                }
             }
         }
 
@@ -68,8 +78,7 @@ plugins_init(void)
         GSList *curr = plugins;
         while (curr != NULL) {
             ProfPlugin *plugin = curr->data;
-
-            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS);
+            plugin->init_func(plugin, PROF_PACKAGE_VERSION, PROF_PACKAGE_STATUS);
             // TODO well, it should be more of a generic check error here
             python_check_error();
             curr = g_slist_next(curr);

@@ -20,7 +20,7 @@
  *
  */
 
-#include "config.h"
+#include "prof_config.h"
 
 #include <locale.h>
 #include <signal.h>
@@ -623,10 +623,10 @@ _init(const int disable_tls, char *log_level)
     _create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     log_init(prof_log_level);
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-        log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+        log_info("Starting Profanity (%sdev)...", PROF_PACKAGE_VERSION);
     } else {
-        log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
+        log_info("Starting Profanity (%s)...", PROF_PACKAGE_VERSION);
     }
     chat_log_init();
     groupchat_log_init();
