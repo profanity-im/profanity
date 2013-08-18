@@ -58,7 +58,7 @@ ruby_plugin_create(const char * const filename)
     ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
     plugin->name = module_name;
     plugin->lang = LANG_RUBY;
-    plugin->module = NULL;
+    plugin->module = (void *)rb_const_get(rb_cObject, rb_intern(module_name));
     plugin->init_func = ruby_init_hook;
     plugin->on_start_func = ruby_on_start_hook;
     plugin->on_connect_func = ruby_on_connect_hook;
@@ -72,7 +72,7 @@ ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * cons
     VALUE v_version = rb_str_new2(version);
     VALUE v_status = rb_str_new2(status);
 
-    VALUE module = rb_const_get(rb_cObject, rb_intern(plugin->name));
+    VALUE module = (VALUE) plugin->module;
     rb_funcall(module, rb_intern("prof_init"), 2, v_version, v_status);
 }
 
