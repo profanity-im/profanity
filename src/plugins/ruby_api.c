@@ -20,7 +20,6 @@
  *
  */
 
-#include <Python.h>
 #include <ruby.h>
 
 #include <glib.h>
