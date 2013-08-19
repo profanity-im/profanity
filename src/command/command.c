@@ -2097,7 +2097,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
         }
     }
 
-    if (win_type != WIN_CONSOLE) {
+    if (win_type != WIN_CONSOLE && win_type != WIN_MUC) {
         status_bar_new(0);
     }
 
