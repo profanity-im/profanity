@@ -1434,7 +1434,7 @@ _cmd_account(gchar **args, struct cmd_help_t help)
             char *value = args[3];
 
             if (!accounts_account_exists(account_name)) {
-                cons_show("Account %s doesn't exist");
+                cons_show("Account %s doesn't exist", account_name);
                 cons_show("");
             } else {
                 if (strcmp(property, "jid") == 0) {
