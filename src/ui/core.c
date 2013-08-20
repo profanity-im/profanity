@@ -46,18 +46,8 @@
 #include "ui/notifier.h"
 #include "ui/ui.h"
 #include "ui/window.h"
+#include "ui/windows.h"
 #include "xmpp/xmpp.h"
-
-// the window currently being displayed
-static int current_index = 0;
-static ProfWin *current;
-static ProfWin *console;
-
-// current window state
-static gboolean current_win_dirty;
-
-// max columns for main windows, never resize below
-static int max_cols = 0;
 
 static char *win_title;
 
@@ -67,10 +57,6 @@ static Display *display;
 
 static GTimer *ui_idle_time;
 
-static void _set_current(int index);
-static int _find_prof_win_index(const char * const contact);
-static int _new_prof_win(const char * const contact, win_type_t type);
-static void _current_window_refresh(void);
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
 static void _win_show_error_msg(WINDOW *win, const char * const message);
@@ -80,11 +66,9 @@ static void _show_status_string(ProfWin *window, const char * const from,
     const char * const default_show);
 static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch);
-static void _win_resize_all(void);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static void _ui_draw_win_title(void);
-gboolean _tidy(void);
 
 void
 ui_init(void)
@@ -103,41 +87,23 @@ ui_init(void)
     create_status_bar();
     status_bar_active(0);
     create_input_window();
-    max_cols = getmaxx(stdscr);
-    windows[0] = cons_create();
-    console = windows[0];
-    current = console;
+    wins_init();
     cons_about();
     notifier_init();
 #ifdef HAVE_LIBXSS
     display = XOpenDisplay(0);
 #endif
     ui_idle_time = g_timer_new();
-    current_win_dirty = TRUE;
+    wins_refresh_current();
 }
 
 void
 ui_refresh(void)
 {
     _ui_draw_win_title();
-
     title_bar_refresh();
     status_bar_refresh();
-
-    if (current_win_dirty) {
-        _current_window_refresh();
-        current_win_dirty = FALSE;
-    }
-
     inp_put_back();
-}
-
-void
-ui_console_dirty(void)
-{
-    if (ui_current_win_type() == WIN_CONSOLE) {
-        current_win_dirty = TRUE;
-    }
 }
 
 unsigned long
@@ -178,9 +144,9 @@ ui_resize(const int ch, const char * const input, const int size)
     log_info("Resizing UI");
     title_bar_resize();
     status_bar_resize();
-    _win_resize_all();
+    wins_resize_all();
     inp_win_resize(input, size);
-    current_win_dirty = TRUE;
+    wins_refresh_current();
 }
 
 void
@@ -196,57 +162,44 @@ ui_load_colours(void)
 gboolean
 ui_windows_full(void)
 {
-    int i;
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] == NULL) {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
+    return wins_full();
 }
 
 gboolean ui_win_exists(int index)
 {
-    return (windows[index] != NULL);
+    ProfWin *window = wins_get_by_num(index);
+    return (window != NULL);
 }
 
 gboolean
 ui_duck_exists(void)
 {
-    int i;
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            if (windows[i]->type == WIN_DUCK)
-                return TRUE;
-        }
-    }
-
-    return FALSE;
+    return wins_duck_exists();
 }
 
 void
 ui_contact_typing(const char * const barejid)
 {
-    int win_index = _find_prof_win_index(barejid);
+    ProfWin *window = wins_get_by_recipient(barejid);
 
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
-        if (win_index == NUM_WINS) {
+        if (window == NULL) {
             cons_show_typing(barejid);
 
         // have chat window but not currently in it
-        } else if (win_index != current_index) {
+        } else if (!wins_is_current(window)) {
             cons_show_typing(barejid);
-            current_win_dirty = TRUE;
+            wins_refresh_current();
 
         // in chat window with user
         } else {
             title_bar_set_typing(TRUE);
             title_bar_draw();
 
-            status_bar_active(win_index);
-            current_win_dirty = TRUE;
+            int num = wins_get_num(window);
+            status_bar_active(num);
+            wins_refresh_current();
        }
     }
 
@@ -265,26 +218,29 @@ ui_contact_typing(const char * const barejid)
 void
 ui_idle(void)
 {
-    int i;
+    GSList *recipients = wins_get_chat_recipients();
+    GSList *curr = recipients;
+    while (curr != NULL) {
+        char *recipient = curr->data;
+        chat_session_no_activity(recipient);
 
-    // loop through regular chat windows and update states
-    for (i = 1; i < NUM_WINS; i++) {
-        if ((windows[i] != NULL) && (windows[i]->type == WIN_CHAT)) {
-            char *recipient = windows[i]->from;
-            chat_session_no_activity(recipient);
-
-            if (chat_session_is_gone(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                message_send_gone(recipient);
-            } else if (chat_session_is_inactive(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                message_send_inactive(recipient);
-            } else if (prefs_get_boolean(PREF_OUTTYPE) &&
-                    chat_session_is_paused(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                message_send_paused(recipient);
-            }
+        if (chat_session_is_gone(recipient) &&
+                !chat_session_get_sent(recipient)) {
+            message_send_gone(recipient);
+        } else if (chat_session_is_inactive(recipient) &&
+                !chat_session_get_sent(recipient)) {
+            message_send_inactive(recipient);
+        } else if (prefs_get_boolean(PREF_OUTTYPE) &&
+                chat_session_is_paused(recipient) &&
+                !chat_session_get_sent(recipient)) {
+            message_send_paused(recipient);
         }
+
+        curr = g_slist_next(curr);
+    }
+
+    if (recipients != NULL) {
+        g_slist_free(recipients);
     }
 }
 
@@ -312,14 +268,16 @@ ui_incoming_msg(const char * const from, const char * const message,
         }
     }
 
-    int win_index = _find_prof_win_index(from);
-    if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(from, win_type);
+    ProfWin *window = wins_get_by_recipient(from);
+    if (window == NULL) {
+        window = wins_new(from, win_type);
         win_created = TRUE;
     }
 
+    int num = wins_get_num(window);
     // no spare windows left
-    if (win_index == 0) {
+    if (wins_full()) {
+        ProfWin *console = wins_get_console();
         if (tv_stamp == NULL) {
             win_print_time(console, '-');
         } else {
@@ -345,18 +303,16 @@ ui_incoming_msg(const char * const from, const char * const message,
 
         cons_show("Windows all used, close a window to respond.");
 
-        if (current_index == 0) {
-           current_win_dirty = TRUE;
+        if (wins_get_current_num() == 0) {
+            wins_refresh_current();
         } else {
             status_bar_new(0);
         }
 
     // window found or created
     } else {
-        ProfWin *window = windows[win_index];
-
         // currently viewing chat window with sender
-        if (win_index == current_index) {
+        if (wins_is_current(window)) {
             if (tv_stamp == NULL) {
                 win_print_time(window, '-');
             } else {
@@ -381,19 +337,19 @@ ui_incoming_msg(const char * const from, const char * const message,
             }
             title_bar_set_typing(FALSE);
             title_bar_draw();
-            status_bar_active(win_index);
-            current_win_dirty = TRUE;
+            status_bar_active(num);
+            wins_refresh_current();
 
         // not currently viewing chat window with sender
         } else {
-            status_bar_new(win_index);
-            cons_show_incoming_message(display_from, win_index);
+            status_bar_new(num);
+            cons_show_incoming_message(display_from, num);
             if (prefs_get_boolean(PREF_FLASH))
                 flash();
 
-            windows[win_index]->unread++;
+            window->unread++;
             if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-                _win_show_history(window->win, win_index, from);
+                _win_show_history(window->win, num, from);
             }
 
             if (tv_stamp == NULL) {
@@ -428,7 +384,7 @@ ui_incoming_msg(const char * const from, const char * const message,
         }
     }
 
-    int ui_index = win_index + 1;
+    int ui_index = num + 1;
     if (ui_index == 10) {
         ui_index = 0;
     }
@@ -503,12 +459,12 @@ ui_contact_online(const char * const barejid, const char * const resource,
         g_string_append(display_str, ")");
     }
 
+    ProfWin *console = wins_get_console();
     _show_status_string(console, display_str->str, show, status, last_activity,
         "++", "online");
 
-    int win_index = _find_prof_win_index(barejid);
-    if (win_index != NUM_WINS) {
-        ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(barejid);
+    if (window != NULL) {
         _show_status_string(window, display_str->str, show, status,
             last_activity, "++", "online");
     }
@@ -516,8 +472,8 @@ ui_contact_online(const char * const barejid, const char * const resource,
     jid_destroy(jid);
     g_string_free(display_str, TRUE);
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window))
+        wins_refresh_current();
 }
 
 void
@@ -542,12 +498,12 @@ ui_contact_offline(const char * const from, const char * const show,
         g_string_append(display_str, ")");
     }
 
+    ProfWin *console = wins_get_console();
     _show_status_string(console, display_str->str, show, status, NULL, "--",
         "offline");
 
-    int win_index = _find_prof_win_index(jidp->barejid);
-    if (win_index != NUM_WINS) {
-        ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(jidp->barejid);
+    if (window != NULL) {
         _show_status_string(window, display_str->str, show, status, NULL, "--",
             "offline");
     }
@@ -555,30 +511,14 @@ ui_contact_offline(const char * const from, const char * const show,
     jid_destroy(jidp);
     g_string_free(display_str, TRUE);
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window))
+        wins_refresh_current();
 }
 
 void
 ui_disconnected(void)
 {
-    int i;
-    // show message in all active chats
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            ProfWin *window = windows[i];
-            win_print_time(window, '-');
-            wattron(window->win, COLOUR_ERROR);
-            wprintw(window->win, "%s\n", "Lost connection.");
-            wattroff(window->win, COLOUR_ERROR);
-
-            // if current win, set current_win_dirty
-            if (i == current_index) {
-                current_win_dirty = TRUE;
-            }
-        }
-    }
-
+    wins_lost_connection();
     title_bar_set_status(CONTACT_OFFLINE);
     status_bar_clear_message();
     status_bar_refresh();
@@ -622,80 +562,66 @@ void
 ui_switch_win(const int i)
 {
     ui_current_page_off();
-    if (windows[i] != NULL) {
-        current_index = i;
-        current = windows[current_index];
+    ProfWin *new_current = wins_get_by_num(i);
+    if (new_current != NULL) {
+        wins_set_current_by_num(i);
         ui_current_page_off();
 
-        current->unread = 0;
+        new_current->unread = 0;
 
         if (i == 0) {
             title_bar_title();
             status_bar_active(0);
         } else {
-            PContact contact = roster_get_contact(current->from);
+            PContact contact = roster_get_contact(new_current->from);
             if (contact != NULL) {
                 if (p_contact_name(contact) != NULL) {
                     title_bar_set_recipient(p_contact_name(contact));
                 } else {
-                    title_bar_set_recipient(current->from);
+                    title_bar_set_recipient(new_current->from);
                 }
             } else {
-                title_bar_set_recipient(current->from);
+                title_bar_set_recipient(new_current->from);
             }
             title_bar_draw();;
             status_bar_active(i);
         }
+        wins_refresh_current();
     }
 
-    current_win_dirty = TRUE;
 }
 
 void
 ui_clear_current(void)
 {
-    werase(current->win);
-    current_win_dirty = TRUE;
+    wins_clear_current();
 }
 
 void
 ui_close_current(void)
 {
-    win_free(current);
-    windows[current_index] = NULL;
-
-    // set it as inactive in the status bar
+    int current_index = wins_get_current_num();
+    wins_close_current();
     status_bar_inactive(current_index);
-
-    // go back to console window
-    _set_current(0);
     status_bar_active(0);
     title_bar_title();
-
-    current_win_dirty = TRUE;
 }
 
 void
 ui_close_win(int index)
 {
-    win_free(windows[index]);
-    windows[index] = NULL;
+    wins_close_by_num(index);
     status_bar_inactive(index);
-
-    if (index == current_index) {
-        _set_current(0);
-    }
-
     status_bar_active(0);
     title_bar_title();
 
-    current_win_dirty = TRUE;
+    wins_refresh_current();
 }
 
 void
 ui_tidy_wins(void)
 {
-    gboolean tidied = _tidy();
+    gboolean tidied = wins_tidy();
 
     if (tidied) {
         cons_show("Windows tidied.");
@@ -708,23 +634,40 @@ void
 ui_prune_wins(void)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    int curr = 0;
     gboolean pruned = FALSE;
 
-    for (curr = 1; curr <= 9; curr++) {
-        if (ui_win_exists(curr)) {
-            win_type_t win_type = windows[curr]->type;
-            if ((ui_win_unread(curr) == 0) && (win_type != WIN_MUC)) {
-                if (conn_status == JABBER_CONNECTED) {
-                    ui_close_connected_win(curr);
+    GSList *recipients = wins_get_prune_recipients();
+    if (recipients != NULL) {
+        pruned = TRUE;
+    }
+    GSList *curr = recipients;
+    while (curr != NULL) {
+        char *recipient = curr->data;
+
+        if (conn_status == JABBER_CONNECTED) {
+            if (prefs_get_boolean(PREF_STATES)) {
+
+                // send <gone/> chat state before closing
+                if (chat_session_get_recipient_supports(recipient)) {
+                    chat_session_set_gone(recipient);
+                    message_send_gone(recipient);
+                    chat_session_end(recipient);
                 }
-                ui_close_win(curr);
-                pruned = TRUE;
             }
         }
+
+        ProfWin *window = wins_get_by_recipient(recipient);
+        int num = wins_get_num(window);
+        ui_close_win(num);
+
+        curr = g_slist_next(curr);
     }
 
-    _tidy();
+    if (recipients != NULL) {
+        g_slist_free(recipients);
+    }
+
+    wins_tidy();
     if (pruned) {
         cons_show("Windows pruned.");
     } else {
@@ -735,36 +678,41 @@ ui_prune_wins(void)
 win_type_t
 ui_current_win_type(void)
 {
+    ProfWin *current = wins_get_current();
     return current->type;
 }
 
 int
 ui_current_win_index(void)
 {
-    return current_index;
+    return wins_get_current_num();
 }
 
 win_type_t
 ui_win_type(int index)
 {
-    return windows[index]->type;
+    ProfWin *window = wins_get_by_num(index);
+    return window->type;
 }
 
 char *
 ui_recipient(int index)
 {
-    return strdup(windows[index]->from);
+    ProfWin *window = wins_get_by_num(index);
+    return window->from;
 }
 
 char *
 ui_current_recipient(void)
 {
-    return strdup(current->from);
+    ProfWin *current = wins_get_current();
+    return current->from;
 }
 
 void
 ui_current_print_line(const char * const msg, ...)
 {
+    ProfWin *current = wins_get_current();
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
@@ -774,56 +722,51 @@ ui_current_print_line(const char * const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    current_win_dirty = TRUE;
+    wins_refresh_current();
 }
 
 void
 ui_current_error_line(const char * const msg)
 {
+    ProfWin *current = wins_get_current();
     win_print_time(current, '-');
     wattron(current->win, COLOUR_ERROR);
     wprintw(current->win, "%s\n", msg);
     wattroff(current->win, COLOUR_ERROR);
 
-    current_win_dirty = TRUE;
+    wins_refresh_current();
 }
 
 void
 ui_current_page_off(void)
 {
+    ProfWin *current = wins_get_current();
+    current->paged = 0;
+
     int rows = getmaxy(stdscr);
-    ProfWin *window = windows[current_index];
-
-    window->paged = 0;
-
-    int y = getcury(window->win);
-
+    int y = getcury(current->win);
     int size = rows - 3;
 
-    window->y_pos = y - (size - 1);
-    if (window->y_pos < 0)
-        window->y_pos = 0;
+    current->y_pos = y - (size - 1);
+    if (current->y_pos < 0) {
+        current->y_pos = 0;
+    }
 
-    current_win_dirty = TRUE;
+    wins_refresh_current();
 }
 
 void
 ui_print_error_from_recipient(const char * const from, const char *err_msg)
 {
-    int win_index;
-    ProfWin *window;
-
     if (from == NULL || err_msg == NULL)
         return;
 
-    win_index = _find_prof_win_index(from);
-    // chat window exists
-    if (win_index < NUM_WINS) {
-        window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(from);
+    if (window != NULL) {
         win_print_time(window, '-');
         _win_show_error_msg(window->win, err_msg);
-        if (win_index == current_index) {
-            current_win_dirty = TRUE;
+        if (wins_is_current(window)) {
+            wins_refresh_current();
         }
     }
 }
@@ -831,8 +774,7 @@ ui_print_error_from_recipient(const char * const from, const char *err_msg)
 void
 ui_print_system_msg_from_recipient(const char * const from, const char *message)
 {
-    int win_index;
-    ProfWin *window;
+    int num = 0;
     char from_cpy[strlen(from) + 1];
     char *bare_jid;
 
@@ -842,29 +784,31 @@ ui_print_system_msg_from_recipient(const char * const from, const char *message)
     strcpy(from_cpy, from);
     bare_jid = strtok(from_cpy, "/");
 
-    win_index = _find_prof_win_index(bare_jid);
-    if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(bare_jid, WIN_CHAT);
-        status_bar_active(win_index);
-        current_win_dirty = TRUE;
+    ProfWin *window = wins_get_by_recipient(bare_jid);
+    if (window == NULL) {
+        window = wins_new(bare_jid, WIN_CHAT);
+        if (window != NULL) {
+            num = wins_get_num(window);
+            status_bar_active(num);
+        } else {
+            num = 0;
+            window = wins_get_console();
+            status_bar_active(0);
+        }
     }
-    window = windows[win_index];
 
     win_print_time(window, '-');
     wprintw(window->win, "*%s %s\n", bare_jid, message);
 
     // this is the current window
-    if (win_index == current_index) {
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
     }
 }
 
 void
 ui_recipient_gone(const char * const barejid)
 {
-    int win_index;
-    ProfWin *window;
-
     if (barejid == NULL)
         return;
 
@@ -876,18 +820,16 @@ ui_recipient_gone(const char * const barejid)
         display_usr = barejid;
     }
 
-    win_index = _find_prof_win_index(barejid);
-    // chat window exists
-    if (win_index < NUM_WINS) {
-        window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(barejid);
+    if (window != NULL) {
         win_print_time(window, '!');
         wattron(window->win, COLOUR_GONE);
         wprintw(window->win, "<- %s ", display_usr);
         wprintw(window->win, "has left the conversation.");
         wprintw(window->win, "\n");
         wattroff(window->win, COLOUR_GONE);
-        if (win_index == current_index) {
-            current_win_dirty = TRUE;
+        if (wins_is_current(window)) {
+            wins_refresh_current();
         }
     }
 }
@@ -897,25 +839,24 @@ ui_new_chat_win(const char * const to)
 {
     // if the contact is offline, show a message
     PContact contact = roster_get_contact(to);
-    int win_index = _find_prof_win_index(to);
-    ProfWin *window = NULL;
+    ProfWin *window = wins_get_by_recipient(to);
+    int num = 0;
 
     // create new window
-    if (win_index == NUM_WINS) {
+    if (window == NULL) {
         Jid *jid = jid_create(to);
 
         if (muc_room_is_active(jid)) {
-            win_index = _new_prof_win(to, WIN_PRIVATE);
+            window = wins_new(to, WIN_PRIVATE);
         } else {
-            win_index = _new_prof_win(to, WIN_CHAT);
+            window = wins_new(to, WIN_CHAT);
         }
 
         jid_destroy(jid);
-
-        window = windows[win_index];
+        num = wins_get_num(window);
 
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(window->win, win_index, to);
+            _win_show_history(window->win, num, to);
         }
 
         if (contact != NULL) {
@@ -925,71 +866,71 @@ ui_new_chat_win(const char * const to)
                 _show_status_string(window, to, show, status, NULL, "--", "offline");
             }
         }
-
-    // use existing window
     } else {
-        window = windows[win_index];
+        num = wins_get_num(window);
     }
 
-    ui_switch_win(win_index);
+    ui_switch_win(num);
 }
 
 void
 ui_create_duck_win(void)
 {
-    int win_index = _new_prof_win("DuckDuckGo search", WIN_DUCK);
-    ui_switch_win(win_index);
-    win_print_time(windows[win_index], '-');
-    wprintw(windows[win_index]->win, "Type ':help' to find out more.\n");
+    ProfWin *window = wins_new("DuckDuckGo search", WIN_DUCK);
+    int num = wins_get_num(window);
+    ui_switch_win(num);
+    win_print_time(window, '-');
+    wprintw(window->win, "Type ':help' to find out more.\n");
 }
 
 void
 ui_open_duck_win(void)
 {
-    int win_index = _find_prof_win_index("DuckDuckGo search");
-    if (win_index != NUM_WINS) {
-        ui_switch_win(win_index);
+    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
+    if (window != NULL) {
+        int num = wins_get_num(window);
+        ui_switch_win(num);
     }
 }
 
 void
 ui_duck(const char * const query)
 {
-    int win_index = _find_prof_win_index("DuckDuckGo search");
-    if (win_index != NUM_WINS) {
-        win_print_time(windows[win_index], '-');
-        wprintw(windows[win_index]->win, "\n");
-        win_print_time(windows[win_index], '-');
-        wattron(windows[win_index]->win, COLOUR_ME);
-        wprintw(windows[win_index]->win, "Query  : ");
-        wattroff(windows[win_index]->win, COLOUR_ME);
-        wprintw(windows[win_index]->win, query);
-        wprintw(windows[win_index]->win, "\n");
+    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
+    if (window != NULL) {
+        win_print_time(window, '-');
+        wprintw(window->win, "\n");
+        win_print_time(window, '-');
+        wattron(window->win, COLOUR_ME);
+        wprintw(window->win, "Query  : ");
+        wattroff(window->win, COLOUR_ME);
+        wprintw(window->win, query);
+        wprintw(window->win, "\n");
     }
 }
 
 void
 ui_duck_result(const char * const result)
 {
-    int win_index = _find_prof_win_index("DuckDuckGo search");
+    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
 
-    if (win_index != NUM_WINS) {
-        win_print_time(windows[win_index], '-');
-        wattron(windows[win_index]->win, COLOUR_THEM);
-        wprintw(windows[win_index]->win, "Result : ");
-        wattroff(windows[win_index]->win, COLOUR_THEM);
+    if (window != NULL) {
+        win_print_time(window, '-');
+        wattron(window->win, COLOUR_THEM);
+        wprintw(window->win, "Result : ");
+        wattroff(window->win, COLOUR_THEM);
 
         glong offset = 0;
         while (offset < g_utf8_strlen(result, -1)) {
             gchar *ptr = g_utf8_offset_to_pointer(result, offset);
             gunichar unichar = g_utf8_get_char(ptr);
             if (unichar == '\n') {
-                wprintw(windows[win_index]->win, "\n");
-                win_print_time(windows[win_index], '-');
+                wprintw(window->win, "\n");
+                win_print_time(window, '-');
             } else {
                 gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
                 if (string != NULL) {
-                    wprintw(windows[win_index]->win, string);
+                    wprintw(window->win, string);
                     g_free(string);
                 }
             }
@@ -997,7 +938,7 @@ ui_duck_result(const char * const result)
             offset++;
         }
 
-        wprintw(windows[win_index]->win, "\n");
+        wprintw(window->win, "\n");
     }
 }
 
@@ -1005,27 +946,25 @@ void
 ui_outgoing_msg(const char * const from, const char * const to,
     const char * const message)
 {
-    // if the contact is offline, show a message
     PContact contact = roster_get_contact(to);
-    int win_index = _find_prof_win_index(to);
-    ProfWin *window = NULL;
+    ProfWin *window = wins_get_by_recipient(to);
+    int num = 0;
 
     // create new window
-    if (win_index == NUM_WINS) {
+    if (window == NULL) {
         Jid *jid = jid_create(to);
 
         if (muc_room_is_active(jid)) {
-            win_index = _new_prof_win(to, WIN_PRIVATE);
+            window = wins_new(to, WIN_PRIVATE);
         } else {
-            win_index = _new_prof_win(to, WIN_CHAT);
+            window = wins_new(to, WIN_CHAT);
         }
 
         jid_destroy(jid);
-
-        window = windows[win_index];
+        num = wins_get_num(window);
 
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(window->win, win_index, to);
+            _win_show_history(window->win, num, to);
         }
 
         if (contact != NULL) {
@@ -1038,7 +977,7 @@ ui_outgoing_msg(const char * const from, const char * const to,
 
     // use existing window
     } else {
-        window = windows[win_index];
+        num = wins_get_num(window);
     }
 
     win_print_time(window, '-');
@@ -1052,27 +991,28 @@ ui_outgoing_msg(const char * const from, const char * const to,
         _win_show_user(window->win, from, 0);
         _win_show_message(window->win, message);
     }
-    ui_switch_win(win_index);
+    ui_switch_win(num);
 }
 
 void
 ui_room_join(Jid *jid)
 {
-    int win_index = _find_prof_win_index(jid->barejid);
+    ProfWin *window = wins_get_by_recipient(jid->barejid);
+    int num = 0;
 
     // create new window
-    if (win_index == NUM_WINS) {
-        win_index = _new_prof_win(jid->barejid, WIN_MUC);
+    if (window == NULL) {
+        window = wins_new(jid->barejid, WIN_MUC);
     }
 
-    ui_switch_win(win_index);
+    num = wins_get_num(window);
+    ui_switch_win(num);
 }
 
 void
 ui_room_roster(const char * const room, GList *roster, const char * const presence)
 {
-    int win_index = _find_prof_win_index(room);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room);
 
     win_print_time(window, '!');
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
@@ -1119,118 +1059,120 @@ ui_room_roster(const char * const room, GList *roster, const char * const presen
         wattroff(window->win, COLOUR_ONLINE);
     }
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
+    }
 }
 
 void
 ui_room_member_offline(const char * const room, const char * const nick)
 {
-    int win_index = _find_prof_win_index(room);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room);
 
     win_print_time(window, '!');
     wattron(window->win, COLOUR_OFFLINE);
     wprintw(window->win, "<- %s has left the room.\n", nick);
     wattroff(window->win, COLOUR_OFFLINE);
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
+    }
 }
 
 void
 ui_room_member_online(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
-    int win_index = _find_prof_win_index(room);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room);
 
     win_print_time(window, '!');
     wattron(window->win, COLOUR_ONLINE);
     wprintw(window->win, "-> %s has joined the room.\n", nick);
     wattroff(window->win, COLOUR_ONLINE);
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
+    }
 }
 
 void
 ui_room_member_presence(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
-    int win_index = _find_prof_win_index(room);
-    if (win_index != NUM_WINS) {
-        ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room);
+
+    if (window != NULL) {
         _show_status_string(window, nick, show, status, NULL, "++", "online");
     }
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
+    }
 }
 
 void
 ui_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick)
 {
-    int win_index = _find_prof_win_index(room);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room);
 
     win_print_time(window, '!');
     wattron(window->win, COLOUR_THEM);
     wprintw(window->win, "** %s is now known as %s\n", old_nick, nick);
     wattroff(window->win, COLOUR_THEM);
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
+    }
 }
 
 void
 ui_room_nick_change(const char * const room, const char * const nick)
 {
-    int win_index = _find_prof_win_index(room);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room);
 
     win_print_time(window, '!');
     wattron(window->win, COLOUR_ME);
     wprintw(window->win, "** You are now known as %s\n", nick);
     wattroff(window->win, COLOUR_ME);
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
+    }
 }
 
 void
 ui_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
-    int win_index = _find_prof_win_index(room_jid);
-    WINDOW *win = windows[win_index]->win;
+    ProfWin *window = wins_get_by_recipient(room_jid);
 
     GDateTime *time = g_date_time_new_from_timeval_utc(&tv_stamp);
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-    wprintw(win, "%s - ", date_fmt);
+    wprintw(window->win, "%s - ", date_fmt);
     g_date_time_unref(time);
     g_free(date_fmt);
 
     if (strncmp(message, "/me ", 4) == 0) {
-        wprintw(win, "*%s ", nick);
-        waddstr(win, message + 4);
-        wprintw(win, "\n");
+        wprintw(window->win, "*%s ", nick);
+        waddstr(window->win, message + 4);
+        wprintw(window->win, "\n");
     } else {
-        wprintw(win, "%s: ", nick);
-        _win_show_message(win, message);
+        wprintw(window->win, "%s: ", nick);
+        _win_show_message(window->win, message);
     }
 
-    if (win_index == current_index)
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        wins_refresh_current();
+    }
 }
 
 void
 ui_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
-    int win_index = _find_prof_win_index(room_jid);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room_jid);
+    int num = wins_get_num(window);
 
     win_print_time(window, '-');
     if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
@@ -1259,16 +1201,16 @@ ui_room_message(const char * const room_jid, const char * const nick,
     }
 
     // currently in groupchat window
-    if (win_index == current_index) {
-        status_bar_active(win_index);
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        status_bar_active(num);
+        wins_refresh_current();
 
     // not currenlty on groupchat window
     } else {
-        status_bar_new(win_index);
-        cons_show_incoming_message(nick, win_index);
-        if (current_index == 0) {
-            current_win_dirty = TRUE;
+        status_bar_new(num);
+        cons_show_incoming_message(nick, num);
+        if (wins_get_current_num() == 0) {
+            wins_refresh_current();
         }
 
         if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
@@ -1277,10 +1219,10 @@ ui_room_message(const char * const room_jid, const char * const nick,
             }
         }
 
-        windows[win_index]->unread++;
+        window->unread++;
     }
 
-    int ui_index = win_index + 1;
+    int ui_index = num + 1;
     if (ui_index == 10) {
         ui_index = 0;
     }
@@ -1300,8 +1242,8 @@ ui_room_message(const char * const room_jid, const char * const nick,
 void
 ui_room_subject(const char * const room_jid, const char * const subject)
 {
-    int win_index = _find_prof_win_index(room_jid);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room_jid);
+    int num = wins_get_num(window);
 
     win_print_time(window, '!');
     wattron(window->win, COLOUR_ROOMINFO);
@@ -1310,21 +1252,21 @@ ui_room_subject(const char * const room_jid, const char * const subject)
     wprintw(window->win, "%s\n", subject);
 
     // currently in groupchat window
-    if (win_index == current_index) {
-        status_bar_active(win_index);
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        status_bar_active(num);
+        wins_refresh_current();
 
     // not currenlty on groupchat window
     } else {
-        status_bar_new(win_index);
+        status_bar_new(num);
     }
 }
 
 void
 ui_room_broadcast(const char * const room_jid, const char * const message)
 {
-    int win_index = _find_prof_win_index(room_jid);
-    ProfWin *window = windows[win_index];
+    ProfWin *window = wins_get_by_recipient(room_jid);
+    int num = wins_get_num(window);
 
     win_print_time(window, '!');
     wattron(window->win, COLOUR_ROOMINFO);
@@ -1333,13 +1275,13 @@ ui_room_broadcast(const char * const room_jid, const char * const message)
     wprintw(window->win, "%s\n", message);
 
     // currently in groupchat window
-    if (win_index == current_index) {
-        status_bar_active(win_index);
-        current_win_dirty = TRUE;
+    if (wins_is_current(window)) {
+        status_bar_active(num);
+        wins_refresh_current();
 
     // not currenlty on groupchat window
     } else {
-        status_bar_new(win_index);
+        status_bar_new(num);
     }
 }
 
@@ -1348,6 +1290,7 @@ ui_status(void)
 {
     char *recipient = ui_current_recipient();
     PContact pcontact = roster_get_contact(recipient);
+    ProfWin *current = wins_get_current();
 
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
@@ -1360,8 +1303,8 @@ void
 ui_status_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
-
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+    ProfWin *current = wins_get_current();
 
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
@@ -1376,6 +1319,7 @@ void
 ui_status_room(const char * const contact)
 {
     PContact pcontact = muc_get_participant(ui_current_recipient(), contact);
+    ProfWin *current = wins_get_current();
 
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
@@ -1387,21 +1331,15 @@ ui_status_room(const char * const contact)
 gint
 ui_unread(void)
 {
-    int i;
-    gint result = 0;
-    for (i = 0; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            result += windows[i]->unread;
-        }
-    }
-    return result;
+    return wins_get_total_unread();
 }
 
 int
 ui_win_unread(int index)
 {
-    if (windows[index] != NULL) {
-        return windows[index]->unread;
+    ProfWin *window = wins_get_by_num(index);
+    if (window != NULL) {
+        return window->unread;
     } else {
         return 0;
     }
@@ -1449,38 +1387,6 @@ _ui_draw_win_title(void)
     }
 }
 
-static int
-_find_prof_win_index(const char * const contact)
-{
-    int i;
-    for (i = 1; i < NUM_WINS; i++) {
-        if ((windows[i] != NULL) && (strcmp(windows[i]->from, contact) == 0)) {
-            break;
-        }
-    }
-
-    return i;
-}
-
-static int
-_new_prof_win(const char * const contact, win_type_t type)
-{
-    int i;
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] == NULL) {
-            break;
-        }
-    }
-
-    if (i != NUM_WINS) {
-        int cols = getmaxx(stdscr);
-        windows[i] = win_create(contact, cols, type);
-        return i;
-    } else {
-        return 0;
-    }
-}
-
 static void
 _win_show_user(WINDOW *win, const char * const user, const int colour)
 {
@@ -1508,36 +1414,6 @@ _win_show_error_msg(WINDOW *win, const char * const message)
     wattron(win, COLOUR_ERROR);
     wprintw(win, "%s\n", message);
     wattroff(win, COLOUR_ERROR);
-}
-
-static void
-_current_window_refresh(void)
-{
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-
-    prefresh(current->win, current->y_pos, 0, 1, 0, rows-3, cols-1);
-}
-
-void
-_win_resize_all(void)
-{
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-
-    // only make the pads bigger, to avoid data loss on cropping
-    if (cols > max_cols) {
-        max_cols = cols;
-
-        int i;
-        for (i = 0; i < NUM_WINS; i++) {
-            if (windows[i] != NULL) {
-                wresize(windows[i]->win, PAD_SIZE, cols);
-            }
-        }
-    }
-
-    prefresh(current->win, current->y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
 static void
@@ -1655,6 +1531,7 @@ _win_handle_switch(const wint_t * const ch)
 static void
 _win_handle_page(const wint_t * const ch)
 {
+    ProfWin *current = wins_get_current();
     int rows = getmaxy(stdscr);
     int y = getcury(current->win);
 
@@ -1683,7 +1560,7 @@ _win_handle_page(const wint_t * const ch)
                         *page_start = y - page_space;
 
                     current->paged = 1;
-                    current_win_dirty = TRUE;
+                    wins_refresh_current();
                 } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
                     *page_start -= 4;
 
@@ -1692,7 +1569,7 @@ _win_handle_page(const wint_t * const ch)
                         *page_start = 0;
 
                     current->paged = 1;
-                    current_win_dirty = TRUE;
+                    wins_refresh_current();
                 }
             }
         }
@@ -1707,7 +1584,7 @@ _win_handle_page(const wint_t * const ch)
             *page_start = 0;
 
         current->paged = 1;
-        current_win_dirty = TRUE;
+        wins_refresh_current();
 
     // page down
     } else if (*ch == KEY_NPAGE) {
@@ -1722,14 +1599,15 @@ _win_handle_page(const wint_t * const ch)
             *page_start = y - page_space;
 
         current->paged = 1;
-        current_win_dirty = TRUE;
+        wins_refresh_current();
     }
 }
 
 static void
 _win_show_history(WINDOW *win, int win_index, const char * const contact)
 {
-    if (!windows[win_index]->history_shown) {
+    ProfWin *window = wins_get_by_num(win_index);
+    if (!window->history_shown) {
         GSList *history = NULL;
         Jid *jid = jid_create(jabber_get_fulljid());
         history = chat_log_get_previous(jid->barejid, contact, history);
@@ -1738,48 +1616,8 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
             wprintw(win, "%s\n", history->data);
             history = g_slist_next(history);
         }
-        windows[win_index]->history_shown = 1;
+        window->history_shown = 1;
 
         g_slist_free_full(history, free);
     }
 }
-
-void
-_set_current(int index)
-{
-    current_index = index;
-    current = windows[current_index];
-}
-
-gboolean
-_tidy(void)
-{
-    int gap = 1;
-    int filler = 1;
-    gboolean tidied = FALSE;
-
-    for (gap = 1; gap < NUM_WINS; gap++) {
-        // if a gap
-        if (!ui_win_exists(gap)) {
-
-            // find next used window and move into gap
-            for (filler = gap + 1; filler < NUM_WINS; filler++) {
-                if (ui_win_exists(filler)) {
-                    windows[gap] = windows[filler];
-                    if (windows[gap]->unread > 0) {
-                        status_bar_new(gap);
-                    } else {
-                        status_bar_active(gap);
-                    }
-                    windows[filler] = NULL;
-                    status_bar_inactive(filler);
-                    tidied = TRUE;
-                    break;
-                }
-            }
-        }
-    }
-
-    return tidied;
-}
-

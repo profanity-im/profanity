@@ -40,10 +40,6 @@
 #include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
-#define NUM_WINS 10
-
-// holds console at index 0 and chat wins 1 through to 9
-ProfWin* windows[NUM_WINS];
 
 // ui startup and control
 void ui_init(void);
@@ -63,7 +59,6 @@ void ui_new_chat_win(const char * const to);
 void ui_print_error_from_recipient(const char * const from, const char *err_msg);
 void ui_print_system_msg_from_recipient(const char * const from, const char *message);
 gint ui_unread(void);
-void ui_console_dirty(void);
 void ui_close_connected_win(int index);
 
 // current window actions

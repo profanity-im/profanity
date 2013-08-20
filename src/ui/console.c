@@ -35,6 +35,7 @@
 #include "config/theme.h"
 #include "ui/notifier.h"
 #include "ui/window.h"
+#include "ui/windows.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
@@ -57,14 +58,14 @@ void
 cons_show_time(void)
 {
     win_print_time(console, '-');
-    ui_console_dirty();
+    wins_refresh_console();
 }
 
 void
 cons_show_word(const char * const word)
 {
     wprintw(console->win, "%s", word);
-    ui_console_dirty();
+    wins_refresh_console();
 }
 
 void
@@ -80,7 +81,7 @@ cons_debug(const char * const msg, ...)
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
 
-        ui_console_dirty();
+        wins_refresh_console();
         cons_alert();
 
         ui_current_page_off();
@@ -99,7 +100,7 @@ cons_show(const char * const msg, ...)
     wprintw(console->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-    ui_console_dirty();
+    wins_refresh_console();
 }
 
 void
@@ -116,7 +117,7 @@ cons_show_error(const char * const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -136,7 +137,7 @@ cons_show_typing(const char * const barejid)
     wprintw(console->win, "!! %s is typing a message...\n", display_usr);
     wattroff(console->win, COLOUR_TYPING);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -152,7 +153,7 @@ cons_show_incoming_message(const char * const short_from, const int win_index)
     wprintw(console->win, "<< incoming from %s (%d)\n", short_from, ui_index);
     wattroff(console->win, COLOUR_INCOMING);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -197,7 +198,7 @@ cons_about(void)
 
     prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -225,7 +226,7 @@ cons_check_version(gboolean not_available_msg)
                 }
             }
 
-            ui_console_dirty();
+            wins_refresh_console();
             cons_alert();
         }
     }
@@ -246,91 +247,27 @@ cons_show_login_success(ProfAccount *account)
     wprintw(console->win, " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
     wprintw(console->win, ".\n");
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_wins(void)
 {
-    int i = 0;
-    int count = 0;
-    int ui_index = 0;
-
     cons_show("");
     cons_show("Active windows:");
-    win_print_time(console, '-');
-    wprintw(console->win, "1: Console\n");
+    GSList *window_strings = wins_create_summary();
 
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            count++;
-        }
-    }
-
-    if (count != 0) {
-        for (i = 1; i < NUM_WINS; i++) {
-            if (windows[i] != NULL) {
-                ProfWin *window = windows[i];
-                win_print_time(console, '-');
-                ui_index = i + 1;
-                if (ui_index == 10) {
-                    ui_index = 0;
-                }
-
-                switch (window->type)
-                {
-                    case WIN_CHAT:
-                        wprintw(console->win, "%d: Chat %s", ui_index, window->from);
-                        PContact contact = roster_get_contact(window->from);
-
-                        if (contact != NULL) {
-                            if (p_contact_name(contact) != NULL) {
-                                wprintw(console->win, " (%s)", p_contact_name(contact));
-                            }
-                            wprintw(console->win, " - %s", p_contact_presence(contact));
-                        }
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_PRIVATE:
-                        wprintw(console->win, "%d: Private %s", ui_index, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_MUC:
-                        wprintw(console->win, "%d: Room %s", ui_index, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_DUCK:
-                        wprintw(console->win, "%d: DuckDuckGo search", ui_index);
-
-                        break;
-
-                    default:
-                        break;
-                }
-
-                wprintw(console->win, "\n");
-            }
-        }
+    GSList *curr = window_strings;
+    while (curr != NULL) {
+        win_print_time(console, '-');
+        wprintw(console->win, curr->data);
+        wprintw(console->win, "\n");
+        curr = g_slist_next(curr);
     }
 
     cons_show("");
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -348,7 +285,7 @@ cons_show_room_invites(GSList *invites)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -480,7 +417,7 @@ cons_show_info(PContact pcontact)
         ordered_resources = g_list_next(ordered_resources);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -554,7 +491,7 @@ cons_show_caps(const char * const contact, Resource *resource)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -580,7 +517,7 @@ cons_show_software_version(const char * const jid, const char * const  presence,
         cons_show("OS      : %s", os);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -599,6 +536,9 @@ cons_show_received_subs(void)
         }
         g_slist_free_full(received, g_free);
     }
+
+    wins_refresh_console();
+    cons_alert();
 }
 
 void
@@ -618,6 +558,9 @@ cons_show_sent_subs(void)
     } else {
         cons_show("No pending requests sent.");
     }
+
+    wins_refresh_console();
+    cons_alert();
 }
 
 void
@@ -639,7 +582,7 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
         cons_show("No chat rooms at %s", conference_node);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -681,7 +624,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
             features = g_slist_next(features);
         }
 
-        ui_console_dirty();
+        wins_refresh_console();
         cons_alert();
     }
 }
@@ -706,7 +649,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
         cons_show("");
         cons_show("No service discovery items for %s", jid);
     }
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -720,7 +663,7 @@ cons_show_status(const char * const barejid)
     } else {
         cons_show("No such contact \"%s\" in roster.", barejid);
     }
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -757,7 +700,7 @@ cons_show_room_invite(const char * const invitor, const char * const room,
 
     FREE_SET_NULL(display_from);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -786,7 +729,7 @@ cons_show_account_list(gchar **accounts)
         cons_show("");
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -899,7 +842,7 @@ cons_show_account(ProfAccount *account)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -992,7 +935,7 @@ cons_show_ui_prefs(void)
     cons_statuses_setting();
     cons_titlebar_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1036,7 +979,7 @@ cons_show_desktop_prefs(void)
     cons_show("");
     cons_notify_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1100,7 +1043,7 @@ cons_show_chat_prefs(void)
     cons_gone_setting();
     cons_history_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1137,7 +1080,7 @@ cons_show_log_prefs(void)
     cons_chlog_setting();
     cons_grlog_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1173,7 +1116,7 @@ cons_show_presence_prefs(void)
     cons_show("");
     cons_autoaway_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1218,7 +1161,7 @@ cons_show_connection_prefs(void)
     cons_reconnect_setting();
     cons_autoping_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1237,7 +1180,7 @@ cons_show_themes(GSList *themes)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1258,7 +1201,7 @@ cons_prefs(void)
     cons_show_connection_prefs();
     cons_show("");
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1281,7 +1224,7 @@ cons_help(void)
     cons_show("/help [command]  - Detailed help on a specific command.");
     cons_show("");
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1303,7 +1246,7 @@ cons_navigation_help(void)
     cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
     cons_show("");
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1394,7 +1337,7 @@ cons_show_roster_group(const char * const group, GSList *list)
     }
 
     _show_roster_contacts(list, FALSE);
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1405,7 +1348,7 @@ cons_show_roster(GSList *list)
     cons_show("Roster:");
 
     _show_roster_contacts(list, TRUE);
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1423,7 +1366,7 @@ cons_show_contacts(GSList *list)
         curr = g_slist_next(curr);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
