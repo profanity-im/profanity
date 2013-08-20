@@ -41,8 +41,6 @@
 
 #define CONS_WIN_TITLE "_cons"
 
-static ProfWin* console;
-
 static void _cons_splash_logo(void);
 void _show_roster_contacts(GSList *list, gboolean show_groups);
 
@@ -50,13 +48,13 @@ ProfWin *
 cons_create(void)
 {
     int cols = getmaxx(stdscr);
-    console = win_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
-    return console;
+    return win_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
 }
 
 void
 cons_show_time(void)
 {
+    ProfWin *console = wins_get_console();
     win_print_time(console, '-');
     wins_refresh_console();
 }
@@ -64,6 +62,7 @@ cons_show_time(void)
 void
 cons_show_word(const char * const word)
 {
+    ProfWin *console = wins_get_console();
     wprintw(console->win, "%s", word);
     wins_refresh_console();
 }
@@ -71,6 +70,7 @@ cons_show_word(const char * const word)
 void
 cons_debug(const char * const msg, ...)
 {
+    ProfWin *console = wins_get_console();
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
         va_list arg;
         va_start(arg, msg);
@@ -92,6 +92,7 @@ cons_debug(const char * const msg, ...)
 void
 cons_show(const char * const msg, ...)
 {
+    ProfWin *console = wins_get_console();
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
@@ -106,6 +107,7 @@ cons_show(const char * const msg, ...)
 void
 cons_show_error(const char * const msg, ...)
 {
+    ProfWin *console = wins_get_console();
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
@@ -124,6 +126,7 @@ cons_show_error(const char * const msg, ...)
 void
 cons_show_typing(const char * const barejid)
 {
+    ProfWin *console = wins_get_console();
     PContact contact = roster_get_contact(barejid);
     const char * display_usr = NULL;
     if (p_contact_name(contact) != NULL) {
@@ -144,6 +147,7 @@ cons_show_typing(const char * const barejid)
 void
 cons_show_incoming_message(const char * const short_from, const int win_index)
 {
+    ProfWin *console = wins_get_console();
     int ui_index = win_index + 1;
     if (ui_index == 10) {
         ui_index = 0;
@@ -160,6 +164,7 @@ cons_show_incoming_message(const char * const short_from, const int win_index)
 void
 cons_about(void)
 {
+    ProfWin *console = wins_get_console();
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
@@ -205,6 +210,7 @@ cons_about(void)
 void
 cons_check_version(gboolean not_available_msg)
 {
+    ProfWin *console = wins_get_console();
     char *latest_release = release_get_latest();
 
     if (latest_release != NULL) {
@@ -235,6 +241,7 @@ cons_check_version(gboolean not_available_msg)
 void
 cons_show_login_success(ProfAccount *account)
 {
+    ProfWin *console = wins_get_console();
     win_print_time(console, '-');
     wprintw(console->win, "%s logged in successfully, ", account->jid);
 
@@ -254,6 +261,7 @@ cons_show_login_success(ProfAccount *account)
 void
 cons_show_wins(void)
 {
+    ProfWin *console = wins_get_console();
     cons_show("");
     cons_show("Active windows:");
     GSList *window_strings = wins_create_summary();
@@ -292,6 +300,7 @@ cons_show_room_invites(GSList *invites)
 void
 cons_show_info(PContact pcontact)
 {
+    ProfWin *console = wins_get_console();
     const char *barejid = p_contact_barejid(pcontact);
     const char *name = p_contact_name(pcontact);
     const char *presence = p_contact_presence(pcontact);
@@ -424,6 +433,7 @@ cons_show_info(PContact pcontact)
 void
 cons_show_caps(const char * const contact, Resource *resource)
 {
+    ProfWin *console = wins_get_console();
     WINDOW *win = console->win;
     cons_show("");
     const char *resource_presence = string_from_resource_presence(resource->presence);
@@ -499,6 +509,7 @@ void
 cons_show_software_version(const char * const jid, const char * const  presence,
     const char * const name, const char * const version, const char * const os)
 {
+    ProfWin *console = wins_get_console();
     if ((name != NULL) || (version != NULL) || (os != NULL)) {
         cons_show("");
         win_print_time(console, '-');
@@ -566,6 +577,7 @@ cons_show_sent_subs(void)
 void
 cons_show_room_list(GSList *rooms, const char * const conference_node)
 {
+    ProfWin *console = wins_get_console();
     if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
         cons_show("Chat rooms at %s:", conference_node);
         while (rooms != NULL) {
@@ -632,6 +644,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
 void
 cons_show_disco_items(GSList *items, const char * const jid)
 {
+    ProfWin *console = wins_get_console();
     if ((items != NULL) && (g_slist_length(items) > 0)) {
         cons_show("");
         cons_show("Service discovery items for %s:", jid);
@@ -656,6 +669,7 @@ cons_show_disco_items(GSList *items, const char * const jid)
 void
 cons_show_status(const char * const barejid)
 {
+    ProfWin *console = wins_get_console();
     PContact pcontact = roster_get_contact(barejid);
 
     if (pcontact != NULL) {
@@ -707,6 +721,7 @@ cons_show_room_invite(const char * const invitor, const char * const room,
 void
 cons_show_account_list(gchar **accounts)
 {
+    ProfWin *console = wins_get_console();
     int size = g_strv_length(accounts);
     if (size > 0) {
         cons_show("Accounts:");
@@ -736,6 +751,7 @@ cons_show_account_list(gchar **accounts)
 void
 cons_show_account(ProfAccount *account)
 {
+    ProfWin *console = wins_get_console();
     cons_show("");
     cons_show("Account %s:", account->name);
     if (account->enabled) {
@@ -1253,6 +1269,7 @@ cons_navigation_help(void)
 void
 _show_roster_contacts(GSList *list, gboolean show_groups)
 {
+    ProfWin *console = wins_get_console();
     GSList *curr = list;
     while(curr) {
 
@@ -1355,6 +1372,7 @@ cons_show_roster(GSList *list)
 void
 cons_show_contacts(GSList *list)
 {
+    ProfWin *console = wins_get_console();
     GSList *curr = list;
 
     while(curr) {
@@ -1381,6 +1399,7 @@ cons_alert(void)
 static void
 _cons_splash_logo(void)
 {
+    ProfWin *console = wins_get_console();
     win_print_time(console, '-');
     wprintw(console->win, "Welcome to\n");
 
