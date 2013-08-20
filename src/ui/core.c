@@ -472,8 +472,11 @@ ui_contact_online(const char * const barejid, const char * const resource,
     jid_destroy(jid);
     g_string_free(display_str, TRUE);
 
-    if (wins_is_current(window))
+    if (wins_is_current(console)) {
         wins_refresh_current();
+    } else if ((window != NULL) && (wins_is_current(window))) {
+        wins_refresh_current();
+    }
 }
 
 void
@@ -511,8 +514,11 @@ ui_contact_offline(const char * const from, const char * const show,
     jid_destroy(jidp);
     g_string_free(display_str, TRUE);
 
-    if (wins_is_current(window))
+    if (wins_is_current(console)) {
         wins_refresh_current();
+    } else if ((window != NULL) && (wins_is_current(window))) {
+        wins_refresh_current();
+    }
 }
 
 void
