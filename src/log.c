@@ -205,7 +205,6 @@ chat_log_init(void)
 void
 groupchat_log_init(void)
 {
-    session_started = g_date_time_new_now_local();
     log_info("Initialising groupchat logs");
     groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
         (GDestroyNotify)_free_chat_log);
