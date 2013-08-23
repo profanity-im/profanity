@@ -302,6 +302,7 @@ _iq_handle_discoinfo_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_add_child(response, query);
         xmpp_send(conn, response);
 
+        xmpp_stanza_release(query);
         xmpp_stanza_release(response);
     }
 
