@@ -493,7 +493,7 @@ _available_handler(xmpp_conn_t * const conn,
     }
 
     // self presence
-    if (strcmp(my_jid->barejid, from_jid->barejid) ==0) {
+    if (strcmp(my_jid->barejid, from_jid->barejid) == 0) {
         connection_add_available_resource(resource);
 
     // contact presence
