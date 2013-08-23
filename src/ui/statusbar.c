@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -63,6 +64,8 @@ create_status_bar(void)
     mvwprintw(status_bar, 0, cols - 31, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
+    if (last_time != NULL)
+        g_date_time_unref(last_time);
     last_time = g_date_time_new_now_local();
 
     dirty = TRUE;
@@ -76,6 +79,8 @@ status_bar_refresh(void)
 
     if (elapsed >= 60000000) {
         dirty = TRUE;
+        if (last_time != NULL)
+            g_date_time_unref(last_time);
         last_time = g_date_time_new_now_local();
     }
 
@@ -113,6 +118,8 @@ status_bar_resize(void)
     if (message != NULL)
         mvwprintw(status_bar, 0, 10, message);
 
+    if (last_time != NULL)
+        g_date_time_unref(last_time);
     last_time = g_date_time_new_now_local();
     dirty = TRUE;
 }
@@ -184,13 +191,11 @@ status_bar_get_password(void)
 void
 status_bar_print_message(const char * const msg)
 {
-    if (message != NULL) {
-        free(message);
-        message = NULL;
-    }
-
     werase(status_bar);
 
+    if (message != NULL) {
+        free(message);
+    }
     message = (char *) malloc(strlen(msg) + 1);
     strcpy(message, msg);
     mvwprintw(status_bar, 0, 10, message);
@@ -270,6 +275,7 @@ static void
 _status_bar_update_time(void)
 {
     gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
+    assert(date_fmt != NULL);
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwaddch(status_bar, 0, 1, '[');
@@ -279,7 +285,7 @@ _status_bar_update_time(void)
     mvwaddch(status_bar, 0, 7, ']');
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    free(date_fmt);
+    g_free(date_fmt);
 
     dirty = TRUE;
 }
