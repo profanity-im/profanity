@@ -611,6 +611,8 @@ cons_show_bookmarks(const GList *list)
     while (list != NULL) {
         item = list->data;
 
+        ProfWin *console = wins_get_console();
+
         win_print_time(console, '-');
         wprintw(console->win, "  %s", item->jid);
         if (item->nick != NULL) {
@@ -623,7 +625,7 @@ cons_show_bookmarks(const GList *list)
         list = g_list_next(list);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
