@@ -79,7 +79,6 @@ char * str_replace(const char *string, const char *substr,
 int str_contains(char str[], int size, char ch);
 char* encode_xml(const char * const xml);
 char * prof_getline(FILE *stream);
-int octet_compare(unsigned char *str1, unsigned char *str2);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);
 gchar * xdg_get_config_home(void);
