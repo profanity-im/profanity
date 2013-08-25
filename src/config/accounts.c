@@ -72,10 +72,7 @@ accounts_load(void)
         _fix_legacy_accounts(account_names[i]);
     }
 
-    for (i = 0; i < naccounts; i++) {
-        free(account_names[i]);
-    }
-    free(account_names);
+    g_strfreev(account_names);
 }
 
 void
@@ -166,6 +163,7 @@ accounts_get_account(const char * const name)
         gchar *jid = g_key_file_get_string(accounts, name, "jid", NULL);
         if (jid != NULL) {
             account->jid = strdup(jid);
+            g_free(jid);
         } else {
             account->jid = strdup(name);
             g_key_file_set_string(accounts, name, "jid", name);
@@ -177,6 +175,7 @@ accounts_get_account(const char * const name)
         gchar *server = g_key_file_get_string(accounts, name, "server", NULL);
         if (server != NULL) {
             account->server = strdup(server);
+            g_free(server);
         } else {
             account->server = NULL;
         }
@@ -184,6 +183,7 @@ accounts_get_account(const char * const name)
         gchar *resource = g_key_file_get_string(accounts, name, "resource", NULL);
         if (resource != NULL) {
             account->resource = strdup(resource);
+            g_free(resource);
         } else {
             account->resource = NULL;
         }
@@ -195,6 +195,10 @@ accounts_get_account(const char * const name)
             account->last_presence = strdup(presence);
         }
 
+        if (presence != NULL) {
+            g_free(presence);
+        }
+
         presence = g_key_file_get_string(accounts, name, "presence.login", NULL);
         if (presence == NULL) {
             account->login_presence = strdup("online");
@@ -204,6 +208,10 @@ accounts_get_account(const char * const name)
             account->login_presence = strdup("online");
         } else {
             account->login_presence = strdup(presence);
+        }
+
+        if (presence != NULL) {
+            g_free(presence);
         }
 
         account->priority_online = g_key_file_get_integer(accounts, name, "priority.online", NULL);
@@ -302,7 +310,7 @@ accounts_rename(const char * const account_name, const char * const new_name)
         char *value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
         if (value != NULL) {
             g_key_file_set_string(accounts, new_name, string_keys[i], value);
-            free(value);
+            g_free(value);
         }
     }
 
@@ -469,45 +477,59 @@ accounts_set_login_presence(const char * const account_name, const char * const 
 resource_presence_t
 accounts_get_last_presence(const char * const account_name)
 {
+    resource_presence_t result;
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
+
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
-        return RESOURCE_ONLINE;
+        result = RESOURCE_ONLINE;
     } else if (strcmp(setting, "chat") == 0) {
-        return RESOURCE_CHAT;
+        result = RESOURCE_CHAT;
     } else if (strcmp(setting, "away") == 0) {
-        return RESOURCE_AWAY;
+        result = RESOURCE_AWAY;
     } else if (strcmp(setting, "xa") == 0) {
-        return RESOURCE_XA;
+        result = RESOURCE_XA;
     } else if (strcmp(setting, "dnd") == 0) {
-        return RESOURCE_DND;
+        result = RESOURCE_DND;
     } else {
         log_warning("Error reading presence.last for account: '%s', value: '%s', defaulting to 'online'",
             account_name, setting);
-        return RESOURCE_ONLINE;
+        result = RESOURCE_ONLINE;
     }
+
+    if (setting != NULL) {
+        g_free(setting);
+    }
+    return result;
 }
 
 resource_presence_t
 accounts_get_login_presence(const char * const account_name)
 {
+    resource_presence_t result;
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
+
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
-        return RESOURCE_ONLINE;
+        result = RESOURCE_ONLINE;
     } else if (strcmp(setting, "chat") == 0) {
-        return RESOURCE_CHAT;
+        result = RESOURCE_CHAT;
     } else if (strcmp(setting, "away") == 0) {
-        return RESOURCE_AWAY;
+        result = RESOURCE_AWAY;
     } else if (strcmp(setting, "xa") == 0) {
-        return RESOURCE_XA;
+        result = RESOURCE_XA;
     } else if (strcmp(setting, "dnd") == 0) {
-        return RESOURCE_DND;
+        result = RESOURCE_DND;
     } else if (strcmp(setting, "last") == 0) {
-        return accounts_get_last_presence(account_name);
+        result = accounts_get_last_presence(account_name);
     } else {
         log_warning("Error reading presence.login for account: '%s', value: '%s', defaulting to 'online'",
             account_name, setting);
-        return RESOURCE_ONLINE;
+        result = RESOURCE_ONLINE;
     }
+
+    if (setting != NULL) {
+        g_free(setting);
+    }
+    return result;
 }
 
 static void
@@ -543,8 +565,9 @@ static void
 _save_accounts(void)
 {
     gsize g_data_size;
-    char *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
+    gchar *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
     g_file_set_contents(accounts_loc, g_accounts_data, g_data_size, NULL);
+    g_free(g_accounts_data);
 }
 
 static gchar *

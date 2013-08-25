@@ -205,7 +205,6 @@ chat_log_init(void)
 void
 groupchat_log_init(void)
 {
-    session_started = g_date_time_new_now_local();
     log_info("Initialising groupchat logs");
     groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
         (GDestroyNotify)_free_chat_log);
@@ -309,8 +308,6 @@ GSList *
 chat_log_get_previous(const gchar * const login, const gchar * const recipient,
     GSList *history)
 {
-    GTimeZone *tz = g_time_zone_new_local();
-
     GDateTime *now = g_date_time_new_now_local();
     GDateTime *log_date = g_date_time_new(tz,
         g_date_time_get_year(session_started),
@@ -348,8 +345,6 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
         g_date_time_unref(log_date);
         log_date = g_date_time_ref(next);
     }
-
-    g_time_zone_unref(tz);
 
     return history;
 }

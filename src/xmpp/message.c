@@ -280,6 +280,7 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
             message = xmpp_stanza_get_text(subject);
             if (message != NULL) {
                 prof_handle_room_subject(jid->barejid, message);
+                xmpp_free(ctx, message);
             }
 
             jid_destroy(jid);
