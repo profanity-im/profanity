@@ -37,6 +37,7 @@
 #include "ui/window.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/bookmark.h"
 
 #define CONS_WIN_TITLE "_cons"
 
@@ -644,6 +645,34 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
 }
 
 void
+cons_show_bookmarks(const GList *list)
+{
+    Bookmark *item;
+
+    cons_show("");
+    cons_show("Bookmarks:");
+
+    /* TODO: show status (connected or not) and window number */
+    while (list != NULL) {
+        item = list->data;
+
+        win_print_time(console, '-');
+        wprintw(console->win, "  %s", item->jid);
+        if (item->nick != NULL) {
+            wprintw(console->win, "/%s", item->nick);
+        }
+        if (item->autojoin) {
+            wprintw(console->win, " (autojoin)");
+        }
+        wprintw(console->win, "\n");
+        list = g_list_next(list);
+    }
+
+    ui_console_dirty();
+    cons_alert();
+}
+
+void
 cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
 {
     if (((identities != NULL) && (g_slist_length(identities) > 0)) ||
@@ -658,15 +687,15 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
             DiscoIdentity *identity = identities->data;  // anme trpe, cat
             GString *identity_str = g_string_new("    ");
             if (identity->name != NULL) {
-                identity_str = g_string_append(identity_str, strdup(identity->name));
+                identity_str = g_string_append(identity_str, identity->name);
                 identity_str = g_string_append(identity_str, " ");
             }
             if (identity->type != NULL) {
-                identity_str = g_string_append(identity_str, strdup(identity->type));
+                identity_str = g_string_append(identity_str, identity->type);
                 identity_str = g_string_append(identity_str, " ");
             }
             if (identity->category != NULL) {
-                identity_str = g_string_append(identity_str, strdup(identity->category));
+                identity_str = g_string_append(identity_str, identity->category);
             }
             cons_show(identity_str->str);
             g_string_free(identity_str, FALSE);
@@ -755,7 +784,7 @@ cons_show_room_invite(const char * const invitor, const char * const room,
         notify_invite(display_from, room, reason);
     }
 
-    FREE_SET_NULL(display_from);
+    free(display_from);
 
     ui_console_dirty();
     cons_alert();
@@ -1318,7 +1347,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         title = g_string_append(title, p_contact_barejid(contact));
         if (p_contact_name(contact) != NULL) {
             title = g_string_append(title, " (");
-            title = g_string_append(title, strdup(p_contact_name(contact)));
+            title = g_string_append(title, p_contact_name(contact));
             title = g_string_append(title, ")");
         }
 
@@ -1365,7 +1394,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
             if (groups != NULL) {
                 GString *groups_str = g_string_new("    Groups : ");
                 while (groups != NULL) {
-                    g_string_append(groups_str, strdup(groups->data));
+                    g_string_append(groups_str, groups->data);
                     if (g_slist_next(groups) != NULL) {
                         g_string_append(groups_str, ", ");
                     }

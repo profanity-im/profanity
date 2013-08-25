@@ -78,7 +78,7 @@ notify_invite(const char * const from, const char * const room,
 
     notify(message->str, 10000, "Incoming message");
 
-    g_string_free(message, FALSE);
+    g_string_free(message, TRUE);
 }
 
 void
@@ -100,7 +100,7 @@ notify_room_message(const char * const handle, const char * const room, int win)
 
     notify(text->str, 10000, "incoming message");
 
-    g_string_free(text, FALSE);
+    g_string_free(text, TRUE);
 }
 
 void
@@ -109,7 +109,7 @@ notify_subscription(const char * const from)
     GString *message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
     notify(message->str, 10000, "Incomming message");
-    g_string_free(message, FALSE);
+    g_string_free(message, TRUE);
 }
 
 void

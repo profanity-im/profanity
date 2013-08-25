@@ -247,6 +247,12 @@ _iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         xmpp_send(conn, response);
 
+        g_free(version_str);
+        xmpp_stanza_release(name_txt);
+        xmpp_stanza_release(version_txt);
+        xmpp_stanza_release(name);
+        xmpp_stanza_release(version);
+        xmpp_stanza_release(query);
         xmpp_stanza_release(response);
     }
 
@@ -302,6 +308,7 @@ _iq_handle_discoinfo_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_add_child(response, query);
         xmpp_send(conn, response);
 
+        xmpp_stanza_release(query);
         xmpp_stanza_release(response);
     }
 
@@ -312,10 +319,10 @@ static void
 _identity_destroy(DiscoIdentity *identity)
 {
     if (identity != NULL) {
-        FREE_SET_NULL(identity->name);
-        FREE_SET_NULL(identity->type);
-        FREE_SET_NULL(identity->category);
-        FREE_SET_NULL(identity);
+        free(identity->name);
+        free(identity->type);
+        free(identity->category);
+        free(identity);
     }
 }
 
@@ -323,9 +330,9 @@ static void
 _item_destroy(DiscoItem *item)
 {
     if (item != NULL) {
-        FREE_SET_NULL(item->jid);
-        FREE_SET_NULL(item->name);
-        FREE_SET_NULL(item);
+        free(item->jid);
+        free(item->name);
+        free(item);
     }
 }
 
@@ -411,12 +418,13 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
                 log_info("Generated sha-1 does not match given:");
                 log_info("Generated : %s", generated_sha1);
                 log_info("Given     : %s", given_sha1);
-                FREE_SET_NULL(generated_sha1);
+                g_free(generated_sha1);
                 g_strfreev(split);
+                free(caps_key);
 
                 return 1;
             }
-            FREE_SET_NULL(generated_sha1);
+            g_free(generated_sha1);
             g_strfreev(split);
 
         // non supported hash, or legacy caps
@@ -429,13 +437,11 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         // already cached
         if (caps_contains(caps_key)) {
             log_info("Client info already cached.");
+            free(caps_key);
             return 1;
         }
 
         log_debug("Client info not cached");
-
-        DataForm *form = NULL;
-        FormField *formField = NULL;
 
         const char *category = NULL;
         const char *type = NULL;
@@ -455,7 +461,8 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 
         xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
         if (softwareinfo != NULL) {
-            form = stanza_create_form(softwareinfo);
+            DataForm *form = stanza_create_form(softwareinfo);
+            FormField *formField = NULL;
 
             if (g_strcmp0(form->form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
                 GSList *field = form->fields;
@@ -475,6 +482,8 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
                     field = g_slist_next(field);
                 }
             }
+
+            stanza_destroy_form(form);
         }
 
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
@@ -489,7 +498,6 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         caps_add(caps_key, category, type, name, software, software_version,
             os, os_version, features);
 
-        //stanza_destroy_form(form);
         free(caps_key);
     }
 

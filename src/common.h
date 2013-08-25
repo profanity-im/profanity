@@ -42,18 +42,16 @@
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 #define FREE_SET_NULL(resource) \
-{ \
-    if (resource != NULL) { \
-        free(resource); \
-        resource = NULL; \
-    } \
-}
+do { \
+    free(resource); \
+    resource = NULL; \
+} while (0)
 
 #define GFREE_SET_NULL(resource) \
-{ \
+do { \
     g_free(resource); \
     resource = NULL; \
-}
+} while (0)
 
 typedef enum {
     CONTACT_OFFLINE,
@@ -74,8 +72,8 @@ typedef enum {
 
 gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
-void create_dir(char *name);
-void mkdir_recursive(const char *dir);
+gboolean create_dir(char *name);
+gboolean mkdir_recursive(const char *dir);
 char * str_replace(const char *string, const char *substr,
     const char *replacement);
 int str_contains(char str[], int size, char ch);

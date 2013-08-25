@@ -33,6 +33,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "xmpp/bookmark.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/iq.h"
@@ -494,6 +495,7 @@ _connection_handler(xmpp_conn_t * const conn,
         }
 
         roster_request();
+        bookmark_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {

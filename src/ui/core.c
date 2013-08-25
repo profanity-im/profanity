@@ -293,8 +293,9 @@ ui_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
     gboolean win_created = FALSE;
-    char *display_from;
+    char *display_from = NULL;
     win_type_t win_type;
+
     if (priv) {
         win_type = WIN_PRIVATE;
         display_from = get_nick_from_full_jid(from);
@@ -438,7 +439,7 @@ ui_incoming_msg(const char * const from, const char * const message,
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
         notify_message(display_from, ui_index);
 
-    FREE_SET_NULL(display_from);
+    free(display_from);
 }
 
 void
@@ -491,15 +492,15 @@ ui_contact_online(const char * const barejid, const char * const resource,
 
     // use nickname if exists
     if (p_contact_name(contact) != NULL) {
-        g_string_append(display_str, strdup(p_contact_name(contact)));
+        g_string_append(display_str, p_contact_name(contact));
     } else {
-        g_string_append(display_str, strdup(barejid));
+        g_string_append(display_str, barejid);
     }
 
     // add resource if not default provided by profanity
     if (strcmp(jid->resourcepart, "__prof_default") != 0) {
         g_string_append(display_str, " (");
-        g_string_append(display_str, strdup(jid->resourcepart));
+        g_string_append(display_str, jid->resourcepart);
         g_string_append(display_str, ")");
     }
 
@@ -530,15 +531,15 @@ ui_contact_offline(const char * const from, const char * const show,
 
     // use nickname if exists
     if (p_contact_name(contact) != NULL) {
-        g_string_append(display_str, strdup(p_contact_name(contact)));
+        g_string_append(display_str, p_contact_name(contact));
     } else {
-        g_string_append(display_str, strdup(jidp->barejid));
+        g_string_append(display_str, jidp->barejid);
     }
 
     // add resource if not default provided by profanity
     if (strcmp(jidp->resourcepart, "__prof_default") != 0) {
         g_string_append(display_str, " (");
-        g_string_append(display_str, strdup(jidp->resourcepart));
+        g_string_append(display_str, jidp->resourcepart);
         g_string_append(display_str, ")");
     }
 
