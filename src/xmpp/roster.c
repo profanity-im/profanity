@@ -567,7 +567,7 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             while (resources != NULL) {
                 GString *fulljid = g_string_new(strdup(barejid));
                 g_string_append(fulljid, "/");
-                g_string_append(fulljid, strdup(resources->data));
+                g_string_append(fulljid, resources->data);
                 autocomplete_remove(fulljid_ac, fulljid->str);
                 g_string_free(fulljid, TRUE);
                 resources = g_list_next(resources);

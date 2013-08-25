@@ -44,6 +44,7 @@
 #include "tools/tinyurl.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/bookmark.h"
 
 /*
  * Command structure
@@ -83,6 +84,7 @@ static char * _account_autocomplete(char *input, int *size);
 static char * _who_autocomplete(char *input, int *size);
 static char * _roster_autocomplete(char *input, int *size);
 static char * _group_autocomplete(char *input, int *size);
+static char * _bookmark_autocomplete(char *input, int *size);
 
 static int _strtoi(char *str, int *saveptr, int min, int max);
 
@@ -128,6 +130,7 @@ static gboolean _cmd_priority(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_reconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_bookmark(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_roster(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_software(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_splash(gchar **args, struct cmd_help_t help);
@@ -365,6 +368,15 @@ static struct cmd_t command_defs[] =
           "",
           "Example : /rooms conference.jabber.org",
           "Example : /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
+          NULL } } },
+
+    { "/bookmark",
+        _cmd_bookmark, parse_args, 0, 4, NULL,
+        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
+          "Manage bookmarks.",
+        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
+          "---------------------------------------------------------------------------",
+          "Manage bookmarks.",
           NULL } } },
 
     { "/disco",
@@ -853,6 +865,7 @@ static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete group_ac;
+static Autocomplete bookmark_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -978,6 +991,11 @@ cmd_init(void)
     autocomplete_add(who_ac, strdup("unavailable"));
     autocomplete_add(who_ac, strdup("any"));
 
+    bookmark_ac = autocomplete_new();
+    autocomplete_add(bookmark_ac, strdup("add"));
+    autocomplete_add(bookmark_ac, strdup("list"));
+    autocomplete_add(bookmark_ac, strdup("remove"));
+
     cmd_history_init();
 }
 
@@ -989,6 +1007,7 @@ cmd_close(void)
     autocomplete_free(help_ac);
     autocomplete_free(notify_ac);
     autocomplete_free(sub_ac);
+    autocomplete_free(titlebar_ac);
     autocomplete_free(log_ac);
     autocomplete_free(prefs_ac);
     autocomplete_free(autoaway_ac);
@@ -1003,6 +1022,7 @@ cmd_close(void)
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
     autocomplete_free(group_ac);
+    autocomplete_free(bookmark_ac);
 }
 
 // Command autocompletion functions
@@ -1022,7 +1042,7 @@ cmd_autocomplete(char *input, int *size)
         inp_cpy[i] = '\0';
         found = autocomplete_complete(commands_ac, inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc((strlen(found) + 1) * sizeof(char));
+            auto_msg = (char *) malloc(strlen(found) + 1);
             strcpy(auto_msg, found);
             inp_replace_input(input, auto_msg, size);
             free(auto_msg);
@@ -1072,6 +1092,8 @@ cmd_reset_autocomplete()
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
     autocomplete_reset(group_ac);
+    autocomplete_reset(bookmark_ac);
+    bookmark_autocomplete_reset();
 }
 
 // Command execution
@@ -1121,7 +1143,6 @@ cmd_execute_default(const char * const inp)
                 ui_current_print_line("You are not currently connected.");
             } else {
                 message_send_groupchat(inp, recipient);
-                free(recipient);
             }
             break;
 
@@ -1139,7 +1160,6 @@ cmd_execute_default(const char * const inp)
                 }
 
                 ui_outgoing_msg("me", recipient, inp);
-                free(recipient);
             }
             break;
 
@@ -1149,7 +1169,6 @@ cmd_execute_default(const char * const inp)
             } else {
                 message_send(inp, recipient);
                 ui_outgoing_msg("me", recipient, inp);
-                free(recipient);
             }
             break;
 
@@ -1163,13 +1182,14 @@ cmd_execute_default(const char * const inp)
             } else {
                 message_send_duck(inp);
                 ui_duck(inp);
-                free(recipient);
             }
             break;
 
         default:
             break;
     }
+
+    free(recipient);
 
     return TRUE;
 }
@@ -1197,7 +1217,9 @@ _cmd_complete_parameters(char *input, int *size)
 
     // autocomplete nickname in chat rooms
     if (ui_current_win_type() == WIN_MUC) {
-        Autocomplete nick_ac = muc_get_roster_ac(ui_current_recipient());
+        char *recipient = ui_current_recipient();
+        Autocomplete nick_ac = muc_get_roster_ac(recipient);
+        free(recipient);
         if (nick_ac != NULL) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
@@ -1255,6 +1277,13 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
+    result = autocomplete_param_with_func(input, size, "/join", bookmark_find);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+
     result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
     if (result != NULL) {
         inp_replace_input(input, result, size);
@@ -1276,7 +1305,8 @@ _cmd_complete_parameters(char *input, int *size)
 
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
-        _account_autocomplete, _roster_autocomplete, _group_autocomplete };
+        _account_autocomplete, _roster_autocomplete, _group_autocomplete,
+        _bookmark_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1979,6 +2009,8 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                     ui_room_roster(room, filtered, presence);
                 }
 
+                free(room);
+
             // not in groupchat window
             } else {
                 cons_show("");
@@ -2142,6 +2174,8 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
         } else {
             ui_current_print_line("No such participant \"%s\" in room.", usr);
         }
+
+        free(room_name);
 
         return TRUE;
 
@@ -2464,17 +2498,20 @@ _cmd_info(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
+    char *recipient;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
         return TRUE;
     }
 
+    recipient = ui_current_recipient();
+
     switch (win_type)
     {
         case WIN_MUC:
             if (usr != NULL) {
-                pcontact = muc_get_participant(ui_current_recipient(), usr);
+                pcontact = muc_get_participant(recipient, usr);
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
                 } else {
@@ -2488,11 +2525,11 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             if (usr != NULL) {
                 cons_show("No parameter required for /info in chat.");
             } else {
-                pcontact = roster_get_contact(ui_current_recipient());
+                pcontact = roster_get_contact(recipient);
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
                 } else {
-                    cons_show("No such contact \"%s\" in roster.", ui_current_recipient());
+                    cons_show("No such contact \"%s\" in roster.", recipient);
                 }
             }
             break;
@@ -2500,7 +2537,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             if (usr != NULL) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
-                Jid *jid = jid_create(ui_current_recipient());
+                Jid *jid = jid_create(recipient);
                 pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
                 if (pcontact != NULL) {
                     cons_show_info(pcontact);
@@ -2530,6 +2567,8 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             break;
     }
 
+    free(recipient);
+
     return TRUE;
 }
 
@@ -2539,6 +2578,7 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
+    char *recipient;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -2549,13 +2589,15 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (args[0] != NULL) {
-                pcontact = muc_get_participant(ui_current_recipient(), args[0]);
+                recipient = ui_current_recipient();
+                pcontact = muc_get_participant(recipient, args[0]);
                 if (pcontact != NULL) {
                     Resource *resource = p_contact_get_resource(pcontact, args[0]);
                     cons_show_caps(args[0], resource);
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
                 }
+                free(recipient);
             } else {
                 cons_show("No nickname supplied to /caps in chat room.");
             }
@@ -2588,10 +2630,15 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
             if (args[0] != NULL) {
                 cons_show("No parameter needed to /caps when in private chat.");
             } else {
-                Jid *jid = jid_create(ui_current_recipient());
-                pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-                Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
-                cons_show_caps(jid->resourcepart, resource);
+                recipient = ui_current_recipient();
+                Jid *jid = jid_create(recipient);
+                if (jid) {
+                    pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+                    Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
+                    cons_show_caps(jid->resourcepart, resource);
+                    jid_destroy(jid);
+                }
+                free(recipient);
             }
             break;
         default:
@@ -2608,6 +2655,7 @@ _cmd_software(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
+    char *recipient;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -2618,14 +2666,16 @@ _cmd_software(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (args[0] != NULL) {
-                pcontact = muc_get_participant(ui_current_recipient(), args[0]);
+                recipient = ui_current_recipient();
+                pcontact = muc_get_participant(recipient, args[0]);
                 if (pcontact != NULL) {
-                    Jid *jid = jid_create_from_bare_and_resource(ui_current_recipient(), args[0]);
+                    Jid *jid = jid_create_from_bare_and_resource(recipient, args[0]);
                     iq_send_software_version(jid->fulljid);
                     jid_destroy(jid);
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
                 }
+                free(recipient);
             } else {
                 cons_show("No nickname supplied to /software in chat room.");
             }
@@ -2635,11 +2685,12 @@ _cmd_software(gchar **args, struct cmd_help_t help)
             if (args[0] != NULL) {
                 Jid *jid = jid_create(args[0]);
 
-                if (jid->fulljid == NULL) {
+                if (jid == NULL || jid->fulljid == NULL) {
                     cons_show("You must provide a full jid to the /software command.");
                 } else {
                     iq_send_software_version(jid->fulljid);
                 }
+                jid_destroy(jid);
             } else {
                 cons_show("You must provide a jid to the /software command.");
             }
@@ -2648,7 +2699,9 @@ _cmd_software(gchar **args, struct cmd_help_t help)
             if (args[0] != NULL) {
                 cons_show("No parameter needed to /software when in private chat.");
             } else {
-                iq_send_software_version(ui_current_recipient());
+                recipient = ui_current_recipient();
+                iq_send_software_version(recipient);
+                free(recipient);
             }
             break;
         default:
@@ -2798,6 +2851,73 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
         g_string_free(conference_node, TRUE);
     } else {
         iq_room_list_request(args[0]);
+    }
+
+    return TRUE;
+}
+
+static gboolean
+_cmd_bookmark(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    gchar *cmd = args[0];
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currenlty connect.");
+        return TRUE;
+    }
+
+    /* TODO: /bookmark list room@server */
+
+    if (cmd == NULL || strcmp(cmd, "list") == 0) {
+        cons_show_bookmarks(bookmark_get_list());
+    } else {
+        gboolean autojoin = FALSE;
+        gboolean jid_release = FALSE;
+        gchar *jid = NULL;
+        gchar *nick = NULL;
+        int idx = 1;
+
+        while (args[idx] != NULL) {
+            gchar *opt = args[idx];
+
+            if (strcmp(opt, "autojoin") == 0) {
+                autojoin = TRUE;
+            } else if (jid == NULL) {
+                jid = opt;
+            } else if (nick == NULL) {
+                nick = opt;
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+
+            ++idx;
+        }
+
+        if (jid == NULL) {
+            win_type_t win_type = ui_current_win_type();
+
+            if (win_type == WIN_MUC) {
+                jid = ui_current_recipient();
+                jid_release = TRUE;
+                nick = muc_get_room_nick(jid);
+            } else {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            }
+        }
+
+        if (strcmp(cmd, "add") == 0) {
+            bookmark_add(jid, nick, autojoin);
+        } else if (strcmp(cmd, "remove") == 0) {
+            bookmark_remove(jid, autojoin);
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+
+        if (jid_release) {
+            free(jid);
+        }
     }
 
     return TRUE;
@@ -3591,6 +3711,34 @@ _group_autocomplete(char *input, int *size)
     }
 
     return NULL;
+}
+
+static char *
+_bookmark_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    if (strcmp(input, "/bookmark add ") == 0) {
+        GString *str = g_string_new(input);
+
+        str = g_string_append(str, "autojoin");
+        result = str->str;
+        g_string_free(str, FALSE);
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/bookmark list", bookmark_find);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, size, "/bookmark remove", bookmark_find);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/bookmark", bookmark_ac);
+
+    return result;
 }
 
 static char *

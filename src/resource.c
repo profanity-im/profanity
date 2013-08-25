@@ -81,9 +81,10 @@ resource_compare_availability(Resource *first, Resource *second)
 
 void resource_destroy(Resource *resource)
 {
-    assert(resource != NULL);
-    FREE_SET_NULL(resource->name);
-    FREE_SET_NULL(resource->status);
-    FREE_SET_NULL(resource->caps_str);
-    FREE_SET_NULL(resource);
+    if (resource != NULL) {
+        free(resource->name);
+        free(resource->status);
+        free(resource->caps_str);
+        free(resource);
+    }
 }

@@ -87,7 +87,7 @@ title_bar_refresh(void)
                     free(current_title);
                 }
 
-                current_title = (char *) malloc((strlen(recipient) + 1) * sizeof(char));
+                current_title = (char *) malloc(strlen(recipient) + 1);
                 strcpy(current_title, recipient);
 
                 title_bar_draw();
@@ -113,7 +113,7 @@ title_bar_show(const char * const title)
     if (current_title != NULL)
         free(current_title);
 
-    current_title = (char *) malloc((strlen(title) + 1) * sizeof(char));
+    current_title = (char *) malloc(strlen(title) + 1);
     strcpy(current_title, title);
     _title_bar_draw_title();
 }
@@ -138,7 +138,7 @@ title_bar_set_recipient(const char * const from)
         free(current_title);
     }
 
-    current_title = (char *) malloc((strlen(from) + 1) * sizeof(char));
+    current_title = (char *) malloc(strlen(from) + 1);
     strcpy(current_title, from);
 
     dirty = TRUE;
@@ -160,10 +160,10 @@ title_bar_set_typing(gboolean is_typing)
     }
 
     if (is_typing) {
-        current_title = (char *) malloc((strlen(recipient) + 13) * sizeof(char));
+        current_title = (char *) malloc(strlen(recipient) + 13);
         sprintf(current_title, "%s (typing...)", recipient);
     } else {
-        current_title = (char *) malloc((strlen(recipient) + 1) * sizeof(char));
+        current_title = (char *) malloc(strlen(recipient) + 1);
         strcpy(current_title, recipient);
     }
 
