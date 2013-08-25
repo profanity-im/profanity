@@ -502,6 +502,7 @@ _available_handler(xmpp_conn_t * const conn,
             last_activity);
     }
 
+    free(caps_key);
     free(status_str);
     free(show_str);
     jid_destroy(my_jid);

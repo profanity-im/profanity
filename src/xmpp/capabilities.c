@@ -280,13 +280,14 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     xmpp_stanza_add_child(query, feature_version);
     xmpp_stanza_add_child(query, feature_ping);
 
-    xmpp_stanza_release(identity);
-    xmpp_stanza_release(feature_muc);
-    xmpp_stanza_release(feature_discoinfo);
-    xmpp_stanza_release(feature_discoitems);
-    xmpp_stanza_release(feature_caps);
+    xmpp_stanza_release(feature_ping);
     xmpp_stanza_release(feature_version);
+    xmpp_stanza_release(feature_muc);
+    xmpp_stanza_release(feature_discoitems);
+    xmpp_stanza_release(feature_discoinfo);
     xmpp_stanza_release(feature_chatstates);
+    xmpp_stanza_release(feature_caps);
+    xmpp_stanza_release(identity);
 
     return query;
 }

@@ -247,6 +247,12 @@ _iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         xmpp_send(conn, response);
 
+        g_free(version_str);
+        xmpp_stanza_release(name_txt);
+        xmpp_stanza_release(version_txt);
+        xmpp_stanza_release(name);
+        xmpp_stanza_release(version);
+        xmpp_stanza_release(query);
         xmpp_stanza_release(response);
     }
 
@@ -437,9 +443,6 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 
         log_debug("Client info not cached");
 
-        DataForm *form = NULL;
-        FormField *formField = NULL;
-
         const char *category = NULL;
         const char *type = NULL;
         const char *name = NULL;
@@ -458,7 +461,8 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 
         xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
         if (softwareinfo != NULL) {
-            form = stanza_create_form(softwareinfo);
+            DataForm *form = stanza_create_form(softwareinfo);
+            FormField *formField = NULL;
 
             if (g_strcmp0(form->form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
                 GSList *field = form->fields;
@@ -478,6 +482,8 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
                     field = g_slist_next(field);
                 }
             }
+
+            stanza_destroy_form(form);
         }
 
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
@@ -492,7 +498,6 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         caps_add(caps_key, category, type, name, software, software_version,
             os, os_version, features);
 
-        //stanza_destroy_form(form);
         free(caps_key);
     }
 
