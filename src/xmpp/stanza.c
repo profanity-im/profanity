@@ -35,6 +35,63 @@
 
 static int _field_compare(FormField *f1, FormField *f2);
 
+#if 0
+xmpp_stanza_t *
+stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *iq, *pubsub, *items;
+
+    /* TODO: check pointers for NULL */
+    iq = xmpp_stanza_new(ctx);
+    pubsub = xmpp_stanza_new(ctx);
+    items = xmpp_stanza_new(ctx);
+
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_set_name(items, STANZA_NAME_ITEMS);
+    xmpp_stanza_set_attribute(items, "node", "storage:bookmarks");
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+    xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+#endif
+
+xmpp_stanza_t *
+stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
+{
+    xmpp_stanza_t *iq, *query, *storage;
+
+    /* TODO: check pointers for NULL */
+    iq = xmpp_stanza_new(ctx);
+    query = xmpp_stanza_new(ctx);
+    storage = xmpp_stanza_new(ctx);
+
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    xmpp_stanza_set_ns(iq, "jabber:client");
+
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, "jabber:iq:private");
+
+    xmpp_stanza_set_name(storage, STANZA_NAME_STORAGE);
+    xmpp_stanza_set_ns(storage, "storage:bookmarks");
+
+    xmpp_stanza_add_child(query, storage);
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(storage);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
 xmpp_stanza_t *
 stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
     const char * const state)
@@ -85,7 +142,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
         xmpp_stanza_set_name(chat_state, state);
         xmpp_stanza_set_ns(chat_state, STANZA_NS_CHATSTATES);
         xmpp_stanza_add_child(msg, chat_state);
-	xmpp_stanza_release(chat_state);
+        xmpp_stanza_release(chat_state);
     }
 
     return msg;
@@ -815,12 +872,11 @@ void
 stanza_destroy_form(DataForm *form)
 {
     if (form != NULL) {
-        FREE_SET_NULL(form->form_type);
         if (form->fields != NULL) {
             GSList *curr_field = form->fields;
             while (curr_field != NULL) {
                 FormField *field = curr_field->data;
-                FREE_SET_NULL(field->var);
+                free(field->var);
                 if ((field->values) != NULL) {
                     g_slist_free_full(field->values, free);
                 }
@@ -829,6 +885,7 @@ stanza_destroy_form(DataForm *form)
             g_slist_free_full(form->fields, free);
         }
 
+        free(form->form_type);
         free(form);
     }
 }
@@ -916,7 +973,7 @@ stanza_attach_caps(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence)
     xmpp_stanza_add_child(presence, caps);
     xmpp_stanza_release(caps);
     xmpp_stanza_release(query);
-    FREE_SET_NULL(sha1);
+    g_free(sha1);
 }
 
 const char *

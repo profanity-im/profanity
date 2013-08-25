@@ -52,6 +52,9 @@
 #define STANZA_NAME_INVITE "invite"
 #define STANZA_NAME_REASON "reason"
 #define STANZA_NAME_GROUP "group"
+#define STANZA_NAME_PUBSUB "pubsub"
+#define STANZA_NAME_STORAGE "storage"
+#define STANZA_NAME_CONFERENCE "conference"
 
 #define STANZA_TYPE_CHAT "chat"
 #define STANZA_TYPE_GROUPCHAT "groupchat"
@@ -100,6 +103,7 @@
 #define STANZA_NS_VERSION "jabber:iq:version"
 #define STANZA_NS_CONFERENCE "jabber:x:conference"
 #define STANZA_NS_CAPTCHA "urn:xmpp:captcha"
+#define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -112,6 +116,8 @@ typedef struct data_form_t {
     char *form_type;
     GSList *fields;
 } DataForm;
+
+xmpp_stanza_t* stanza_create_storage_bookmarks(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const recipient, const char * const state);

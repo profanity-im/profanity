@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 
@@ -59,10 +60,7 @@ void
 autocomplete_reset(Autocomplete ac)
 {
     ac->last_found = NULL;
-    if (ac->search_str != NULL) {
-        free(ac->search_str);
-        ac->search_str = NULL;
-    }
+    FREE_SET_NULL(ac->search_str);
 }
 
 void
@@ -220,7 +218,7 @@ autocomplete_param_with_func(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
         found = func(inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            auto_msg = (char *) malloc(len + strlen(found) + 1);
             strcpy(auto_msg, command_cpy);
             strcat(auto_msg, found);
             free(found);
@@ -249,7 +247,7 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
         found = autocomplete_complete(ac, inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc((len + (strlen(found) + 1)) * sizeof(char));
+            auto_msg = (char *) malloc(len + strlen(found) + 1);
             strcpy(auto_msg, command_cpy);
             strcat(auto_msg, found);
             free(found);

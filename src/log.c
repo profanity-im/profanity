@@ -25,8 +25,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include "glib.h"
 
@@ -36,11 +34,6 @@
 #include "config/preferences.h"
 
 #define PROF "prof"
-
-#ifdef _WIN32
-// replace 'struct stat' and 'stat()' for windows
-#define stat _stat
-#endif
 
 static FILE *logp;
 
@@ -125,7 +118,7 @@ log_init(log_level_t filter)
     tz = g_time_zone_new_local();
     gchar *log_file = _get_log_file();
     logp = fopen(log_file, "a");
-    g_free(log_file);
+    free(log_file);
 }
 
 log_level_t
@@ -145,9 +138,7 @@ void
 log_msg(log_level_t level, const char * const area, const char * const msg)
 {
     if (level >= level_filter) {
-        struct stat st;
-        int result;
-        gchar *log_file = _get_log_file();
+        long result;
         dt = g_date_time_new_now(tz);
 
         gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
@@ -157,12 +148,10 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
         fflush(logp);
         g_free(date_fmt);
 
-        result = stat(log_file, &st);
-        if (result == 0 && st.st_size >= prefs_get_max_log_size()) {
+        result = ftell(logp);
+        if (result != -1 && result >= prefs_get_max_log_size()) {
             _rotate_log_file();
         }
-
-        g_free(log_file);
     }
 }
 
@@ -200,7 +189,7 @@ _rotate_log_file(void)
     log_init(log_get_filter());
 
     free(log_file_new);
-    g_free(log_file);
+    free(log_file);
     log_info("Log has been rotated");
 }
 
@@ -216,7 +205,6 @@ chat_log_init(void)
 void
 groupchat_log_init(void)
 {
-    session_started = g_date_time_new_now_local();
     log_info("Initialising groupchat logs");
     groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
         (GDestroyNotify)_free_chat_log);
@@ -320,8 +308,6 @@ GSList *
 chat_log_get_previous(const gchar * const login, const gchar * const recipient,
     GSList *history)
 {
-    GTimeZone *tz = g_time_zone_new_local();
-
     GDateTime *now = g_date_time_new_now_local();
     GDateTime *log_date = g_date_time_new(tz,
         g_date_time_get_year(session_started),
@@ -359,8 +345,6 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
         g_date_time_unref(log_date);
         log_date = g_date_time_ref(next);
     }
-
-    g_time_zone_unref(tz);
 
     return history;
 }
@@ -448,7 +432,7 @@ _get_log_filename(const char * const other, const char * const login,
 {
     gchar *chatlogs_dir = _get_chatlog_dir();
     GString *log_file = g_string_new(chatlogs_dir);
-    g_free(chatlogs_dir);
+    free(chatlogs_dir);
 
     gchar *login_dir = str_replace(login, "@", "_at_");
     g_string_append_printf(log_file, "/%s", login_dir);
@@ -516,7 +500,7 @@ _get_chatlog_dir(void)
     GString *chatlogs_dir = g_string_new(xdg_data);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
     gchar *result = strdup(chatlogs_dir->str);
-    g_free(xdg_data);
+    free(xdg_data);
     g_string_free(chatlogs_dir, TRUE);
 
     return result;
@@ -529,7 +513,7 @@ _get_log_file(void)
     GString *logfile = g_string_new(xdg_data);
     g_string_append(logfile, "/profanity/logs/profanity.log");
     gchar *result = strdup(logfile->str);
-    g_free(xdg_data);
+    free(xdg_data);
     g_string_free(logfile, TRUE);
 
     return result;

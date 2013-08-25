@@ -456,32 +456,20 @@ static void
 _free_room(ChatRoom *room)
 {
     if (room != NULL) {
-        if (room->room != NULL) {
-            g_free(room->room);
-            room->room = NULL;
-        }
-        if (room->nick != NULL) {
-            g_free(room->nick);
-            room->nick = NULL;
-        }
-        if (room->subject != NULL) {
-            g_free(room->subject);
-            room->subject = NULL;
-        }
+        free(room->room);
+        free(room->nick);
+        free(room->subject);
         if (room->roster != NULL) {
             g_hash_table_remove_all(room->roster);
-            room->roster = NULL;
         }
         if (room->nick_ac != NULL) {
             autocomplete_free(room->nick_ac);
         }
         if (room->nick_changes != NULL) {
             g_hash_table_remove_all(room->nick_changes);
-            room->nick_changes = NULL;
         }
-        g_free(room);
+        free(room);
     }
-    room = NULL;
 }
 
 static
