@@ -1007,6 +1007,7 @@ cmd_close(void)
     autocomplete_free(help_ac);
     autocomplete_free(notify_ac);
     autocomplete_free(sub_ac);
+    autocomplete_free(titlebar_ac);
     autocomplete_free(log_ac);
     autocomplete_free(prefs_ac);
     autocomplete_free(autoaway_ac);

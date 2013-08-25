@@ -687,15 +687,15 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
             DiscoIdentity *identity = identities->data;  // anme trpe, cat
             GString *identity_str = g_string_new("    ");
             if (identity->name != NULL) {
-                identity_str = g_string_append(identity_str, strdup(identity->name));
+                identity_str = g_string_append(identity_str, identity->name);
                 identity_str = g_string_append(identity_str, " ");
             }
             if (identity->type != NULL) {
-                identity_str = g_string_append(identity_str, strdup(identity->type));
+                identity_str = g_string_append(identity_str, identity->type);
                 identity_str = g_string_append(identity_str, " ");
             }
             if (identity->category != NULL) {
-                identity_str = g_string_append(identity_str, strdup(identity->category));
+                identity_str = g_string_append(identity_str, identity->category);
             }
             cons_show(identity_str->str);
             g_string_free(identity_str, FALSE);
@@ -1347,7 +1347,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         title = g_string_append(title, p_contact_barejid(contact));
         if (p_contact_name(contact) != NULL) {
             title = g_string_append(title, " (");
-            title = g_string_append(title, strdup(p_contact_name(contact)));
+            title = g_string_append(title, p_contact_name(contact));
             title = g_string_append(title, ")");
         }
 
@@ -1394,7 +1394,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
             if (groups != NULL) {
                 GString *groups_str = g_string_new("    Groups : ");
                 while (groups != NULL) {
-                    g_string_append(groups_str, strdup(groups->data));
+                    g_string_append(groups_str, groups->data);
                     if (g_slist_next(groups) != NULL) {
                         g_string_append(groups_str, ", ");
                     }
