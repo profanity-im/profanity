@@ -83,71 +83,39 @@ autocomplete_length(Autocomplete ac)
 }
 
 gboolean
-autocomplete_add(Autocomplete ac, void *item)
+autocomplete_add(Autocomplete ac, const char *item)
 {
-    if (ac->items == NULL) {
-        ac->items = g_slist_append(ac->items, item);
-        return TRUE;
-    } else {
-        GSList *curr = ac->items;
+    char *item_cpy;
+    GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
-        while(curr) {
-
-            // insert
-            if (g_strcmp0(curr->data, item) > 0) {
-                ac->items = g_slist_insert_before(ac->items,
-                    curr, item);
-                return TRUE;
-
-            // update
-            } else if (g_strcmp0(curr->data, item) == 0) {
-                // only update if data different
-                if (strcmp(curr->data, item) != 0) {
-                    free(curr->data);
-                    curr->data = item;
-                    return TRUE;
-                } else {
-                    return FALSE;
-                }
-            }
-
-            curr = g_slist_next(curr);
-        }
-
-        // hit end, append
-        ac->items = g_slist_append(ac->items, item);
-
-        return TRUE;
+    // if item already exists
+    if (curr != NULL) {
+        return FALSE;
     }
+
+    item_cpy = strdup(item);
+    ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
+    return TRUE;
 }
 
 gboolean
 autocomplete_remove(Autocomplete ac, const char * const item)
 {
-    // reset last found if it points to the item to be removed
-    if (ac->last_found != NULL)
-        if (g_strcmp0(ac->last_found->data, item) == 0)
-            ac->last_found = NULL;
+    GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
-    if (!ac->items) {
-        return FALSE;
-    } else {
-        GSList *curr = ac->items;
-
-        while(curr) {
-            if (g_strcmp0(curr->data, item) == 0) {
-                void *current_item = curr->data;
-                ac->items = g_slist_remove(ac->items, curr->data);
-                free(current_item);
-
-                return TRUE;
-            }
-
-            curr = g_slist_next(curr);
-        }
-
+    if (!curr) {
         return FALSE;
     }
+
+    // reset last found if it points to the item to be removed
+    if (ac->last_found == curr) {
+        ac->last_found = NULL;
+    }
+
+    free(curr->data);
+    ac->items = g_slist_delete_link(ac->items, curr);
+
+    return TRUE;
 }
 
 GSList *

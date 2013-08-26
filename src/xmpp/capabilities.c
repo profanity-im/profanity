@@ -148,15 +148,15 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
                 g_string_append(identity_str, name);
             }
             g_string_append(identity_str, "<");
-            identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)octet_compare);
+            identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)strcmp);
             g_string_free(identity_str, TRUE);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
             feature_str = xmpp_stanza_get_attribute(child, "var");
-            features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)octet_compare);
+            features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (strcmp(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
                 form = stanza_create_form(child);
-                form_names = g_slist_insert_sorted(form_names, g_strdup(form->form_type), (GCompareFunc)octet_compare);
+                form_names = g_slist_insert_sorted(form_names, g_strdup(form->form_type), (GCompareFunc)strcmp);
                 g_hash_table_insert(forms, g_strdup(form->form_type), form);
             }
         }

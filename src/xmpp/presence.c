@@ -372,7 +372,7 @@ _subscribe_handler(xmpp_conn_t * const conn,
     }
 
     prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
-    autocomplete_add(sub_requests_ac, strdup(from_jid->barejid));
+    autocomplete_add(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
 

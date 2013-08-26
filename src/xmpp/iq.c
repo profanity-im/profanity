@@ -247,7 +247,7 @@ _iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         xmpp_send(conn, response);
 
-        g_free(version_str);
+        g_string_free(version_str, TRUE);
         xmpp_stanza_release(name_txt);
         xmpp_stanza_release(version_txt);
         xmpp_stanza_release(name);

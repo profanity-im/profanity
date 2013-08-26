@@ -185,12 +185,12 @@ roster_add(const char * const barejid, const char * const name, GSList *groups,
 
         // add groups
         while (groups != NULL) {
-            autocomplete_add(groups_ac, strdup(groups->data));
+            autocomplete_add(groups_ac, groups->data);
             groups = g_slist_next(groups);
         }
 
         g_hash_table_insert(contacts, strdup(barejid), contact);
-        autocomplete_add(barejid_ac, strdup(barejid));
+        autocomplete_add(barejid_ac, barejid);
         _add_name_and_barejid(name, barejid);
 
         if (!from_initial) {
@@ -227,7 +227,7 @@ roster_update(const char * const barejid, const char * const name,
 
         // add groups
         while (groups != NULL) {
-            autocomplete_add(groups_ac, strdup(groups->data));
+            autocomplete_add(groups_ac, groups->data);
             groups = g_slist_next(groups);
         }
     }
@@ -249,7 +249,7 @@ roster_update_presence(const char * const barejid, Resource *resource,
     }
     p_contact_set_presence(contact, resource);
     Jid *jid = jid_create_from_bare_and_resource(barejid, resource->name);
-    autocomplete_add(fulljid_ac, strdup(jid->fulljid));
+    autocomplete_add(fulljid_ac, jid->fulljid);
     jid_destroy(jid);
 
     return TRUE;
@@ -649,10 +649,10 @@ static void
 _add_name_and_barejid(const char * const name, const char * const barejid)
 {
     if (name != NULL) {
-        autocomplete_add(name_ac, strdup(name));
+        autocomplete_add(name_ac, name);
         g_hash_table_insert(name_to_barejid, strdup(name), strdup(barejid));
     } else {
-        autocomplete_add(name_ac, strdup(barejid));
+        autocomplete_add(name_ac, barejid);
         g_hash_table_insert(name_to_barejid, strdup(barejid), strdup(barejid));
     }
 }

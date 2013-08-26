@@ -57,7 +57,7 @@ muc_init(void)
 void
 muc_add_invite(char *room)
 {
-    autocomplete_add(invite_ac, strdup(room));
+    autocomplete_add(invite_ac, room);
 }
 
 void
@@ -298,7 +298,7 @@ muc_add_to_roster(const char * const room, const char * const nick,
 
         if (old == NULL) {
             updated = TRUE;
-            autocomplete_add(chat_room->nick_ac, strdup(nick));
+            autocomplete_add(chat_room->nick_ac, nick);
         } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
                     (g_strcmp0(p_contact_status(old), status) != 0)) {
             updated = TRUE;
