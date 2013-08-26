@@ -210,7 +210,7 @@ parse_args_with_freetext(const char * const inp, int min, int max)
             } else {
                 in_token = TRUE;
                 num_tokens++;
-                if (num_tokens == max + 1) {
+                if ((num_tokens == max + 1) && (curr_uni != '"')) {
                     in_freetext = TRUE;
                 } else if (curr_uni == '"') {
                     in_quotes = TRUE;
