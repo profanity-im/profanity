@@ -3100,7 +3100,6 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-
     // handle leaving rooms, or chat
     if (conn_status == JABBER_CONNECTED) {
         ui_close_connected_win(index);
