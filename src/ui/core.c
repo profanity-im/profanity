@@ -166,7 +166,8 @@ ui_windows_full(void)
     return wins_full();
 }
 
-gboolean ui_win_exists(int index)
+gboolean
+ui_win_exists(int index)
 {
     ProfWin *window = wins_get_by_num(index);
     return (window != NULL);
