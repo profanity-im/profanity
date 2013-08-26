@@ -455,3 +455,14 @@ wins_create_summary(void)
 
     return result;
 }
+
+void
+wins_destroy(void)
+{
+    int i;
+    for (i = 0; i < NUM_WINS; i++) {
+        if (windows[i] != NULL) {
+            win_free(windows[i]);
+        }
+    }
+}

@@ -47,5 +47,6 @@ GSList * wins_get_prune_recipients(void);
 void wins_lost_connection(void);
 gboolean wins_tidy(void);
 GSList * wins_create_summary(void);
+void wins_destroy(void);
 
 #endif

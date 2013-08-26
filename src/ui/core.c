@@ -135,6 +135,7 @@ void
 ui_close(void)
 {
     notifier_uninit();
+    wins_destroy();
     endwin();
 }
 

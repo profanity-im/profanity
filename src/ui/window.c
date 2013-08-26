@@ -57,8 +57,6 @@ win_free(ProfWin* window)
 {
     delwin(window->win);
     free(window->from);
-    window->from = NULL;
-    window->win = NULL;
     free(window);
     window = NULL;
 }
