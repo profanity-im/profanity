@@ -144,7 +144,6 @@ void title_bar_set_typing(gboolean is_typing);
 void title_bar_draw(void);
 
 // console window actions
-ProfWin* cons_create(void);
 void cons_show(const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);

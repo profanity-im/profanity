@@ -40,17 +40,8 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
-#define CONS_WIN_TITLE "_cons"
-
 static void _cons_splash_logo(void);
 void _show_roster_contacts(GSList *list, gboolean show_groups);
-
-ProfWin *
-cons_create(void)
-{
-    int cols = getmaxx(stdscr);
-    return win_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
-}
 
 void
 cons_show_time(void)

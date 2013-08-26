@@ -38,6 +38,7 @@
 #include "ui/windows.h"
 
 #define NUM_WINS 10
+#define CONS_WIN_TITLE "_cons"
 
 static ProfWin* windows[NUM_WINS];
 static int current;
@@ -65,7 +66,7 @@ wins_init(void)
 
     max_cols = getmaxx(stdscr);
     int cols = getmaxx(stdscr);
-    windows[0] = win_create("_cons", cols, WIN_CONSOLE);
+    windows[0] = win_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
     current = 0;
 }
 
