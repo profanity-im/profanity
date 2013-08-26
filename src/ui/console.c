@@ -1289,82 +1289,6 @@ cons_navigation_help(void)
 }
 
 void
-_show_roster_contacts(GSList *list, gboolean show_groups)
-{
-    ProfWin *console = wins_get_console();
-    GSList *curr = list;
-    while(curr) {
-
-        PContact contact = curr->data;
-        GString *title = g_string_new("  ");
-        title = g_string_append(title, p_contact_barejid(contact));
-        if (p_contact_name(contact) != NULL) {
-            title = g_string_append(title, " (");
-            title = g_string_append(title, p_contact_name(contact));
-            title = g_string_append(title, ")");
-        }
-
-        const char *presence = p_contact_presence(contact);
-        win_print_time(console, '-');
-        if (p_contact_subscribed(contact)) {
-            win_presence_colour_on(console, presence);
-            wprintw(console->win, "%s\n", title->str);
-            win_presence_colour_off(console, presence);
-        } else {
-            win_presence_colour_on(console, "offline");
-            wprintw(console->win, "%s\n", title->str);
-            win_presence_colour_off(console, "offline");
-        }
-
-        g_string_free(title, TRUE);
-
-        win_print_time(console, '-');
-        wprintw(console->win, "    Subscription : ");
-        GString *sub = g_string_new("");
-        sub = g_string_append(sub, p_contact_subscription(contact));
-        if (p_contact_pending_out(contact)) {
-            sub = g_string_append(sub, ", request sent");
-        }
-        if (presence_sub_request_exists(p_contact_barejid(contact))) {
-            sub = g_string_append(sub, ", request received");
-        }
-        if (p_contact_subscribed(contact)) {
-            wattron(console->win, COLOUR_SUBSCRIBED);
-        } else {
-            wattron(console->win, COLOUR_UNSUBSCRIBED);
-        }
-        wprintw(console->win, "%s\n", sub->str);
-        if (p_contact_subscribed(contact)) {
-            wattroff(console->win, COLOUR_SUBSCRIBED);
-        } else {
-            wattroff(console->win, COLOUR_UNSUBSCRIBED);
-        }
-
-        g_string_free(sub, TRUE);
-
-        if (show_groups) {
-            GSList *groups = p_contact_groups(contact);
-            if (groups != NULL) {
-                GString *groups_str = g_string_new("    Groups : ");
-                while (groups != NULL) {
-                    g_string_append(groups_str, groups->data);
-                    if (g_slist_next(groups) != NULL) {
-                        g_string_append(groups_str, ", ");
-                    }
-                    groups = g_slist_next(groups);
-                }
-
-                cons_show(groups_str->str);
-                g_string_free(groups_str, TRUE);
-            }
-        }
-
-        curr = g_slist_next(curr);
-    }
-
-}
-
-void
 cons_show_roster_group(const char * const group, GSList *list)
 {
     cons_show("");
@@ -1468,4 +1392,80 @@ _cons_splash_logo(void)
     } else {
         wprintw(console->win, "Version %s\n", PACKAGE_VERSION);
     }
+}
+
+void
+_show_roster_contacts(GSList *list, gboolean show_groups)
+{
+    ProfWin *console = wins_get_console();
+    GSList *curr = list;
+    while(curr) {
+
+        PContact contact = curr->data;
+        GString *title = g_string_new("  ");
+        title = g_string_append(title, p_contact_barejid(contact));
+        if (p_contact_name(contact) != NULL) {
+            title = g_string_append(title, " (");
+            title = g_string_append(title, p_contact_name(contact));
+            title = g_string_append(title, ")");
+        }
+
+        const char *presence = p_contact_presence(contact);
+        win_print_time(console, '-');
+        if (p_contact_subscribed(contact)) {
+            win_presence_colour_on(console, presence);
+            wprintw(console->win, "%s\n", title->str);
+            win_presence_colour_off(console, presence);
+        } else {
+            win_presence_colour_on(console, "offline");
+            wprintw(console->win, "%s\n", title->str);
+            win_presence_colour_off(console, "offline");
+        }
+
+        g_string_free(title, TRUE);
+
+        win_print_time(console, '-');
+        wprintw(console->win, "    Subscription : ");
+        GString *sub = g_string_new("");
+        sub = g_string_append(sub, p_contact_subscription(contact));
+        if (p_contact_pending_out(contact)) {
+            sub = g_string_append(sub, ", request sent");
+        }
+        if (presence_sub_request_exists(p_contact_barejid(contact))) {
+            sub = g_string_append(sub, ", request received");
+        }
+        if (p_contact_subscribed(contact)) {
+            wattron(console->win, COLOUR_SUBSCRIBED);
+        } else {
+            wattron(console->win, COLOUR_UNSUBSCRIBED);
+        }
+        wprintw(console->win, "%s\n", sub->str);
+        if (p_contact_subscribed(contact)) {
+            wattroff(console->win, COLOUR_SUBSCRIBED);
+        } else {
+            wattroff(console->win, COLOUR_UNSUBSCRIBED);
+        }
+
+        g_string_free(sub, TRUE);
+
+        if (show_groups) {
+            GSList *groups = p_contact_groups(contact);
+            if (groups != NULL) {
+                GString *groups_str = g_string_new("    Groups : ");
+                while (groups != NULL) {
+                    g_string_append(groups_str, groups->data);
+                    if (g_slist_next(groups) != NULL) {
+                        g_string_append(groups_str, ", ");
+                    }
+                    groups = g_slist_next(groups);
+                }
+
+                cons_show(groups_str->str);
+                g_string_free(groups_str, TRUE);
+            }
+        }
+
+        curr = g_slist_next(curr);
+    }
+
 }
