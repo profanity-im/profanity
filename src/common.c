@@ -225,32 +225,6 @@ prof_getline(FILE *stream)
     return s;
 }
 
-int
-octet_compare(unsigned char *str1, unsigned char *str2)
-{
-    if ((strcmp((char *)str1, "") == 0) && (strcmp((char *)str2, "") == 0)) {
-        return 0;
-    }
-
-    if ((strcmp((char *)str1, "") == 0) && (strcmp((char *)str2, "") != 0)) {
-        return -1;
-    }
-
-    if ((strcmp((char *)str1, "") != 0) && (strcmp((char *)str2, "") == 0)) {
-        return 1;
-    }
-
-    if (str1[0] == str2[0]) {
-        return octet_compare(&str1[1], &str2[1]);
-    }
-
-    if (str1[0] < str2[0]) {
-        return -1;
-    }
-
-    return 1;
-}
-
 char *
 release_get_latest()
 {

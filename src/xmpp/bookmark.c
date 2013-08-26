@@ -69,7 +69,7 @@ bookmark_add(const char *jid, const char *nick, gboolean autojoin)
 
     /* this may be command for modifying */
     autocomplete_remove(bookmark_ac, jid);
-    autocomplete_add(bookmark_ac, strdup(jid));
+    autocomplete_add(bookmark_ac, jid);
 }
 
 void
@@ -174,7 +174,7 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
             autojoin_val = FALSE;
         }
 
-        autocomplete_add(bookmark_ac, strdup(jid));
+        autocomplete_add(bookmark_ac, jid);
         item = malloc(sizeof(*item));
         item->jid = strdup(jid);
         item->nick = name;
