@@ -38,7 +38,7 @@ Autocomplete obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
 void autocomplete_clear(Autocomplete ac);
 void autocomplete_reset(Autocomplete ac);
 void autocomplete_free(Autocomplete ac);
-gboolean autocomplete_add(Autocomplete ac, void *item);
+gboolean autocomplete_add(Autocomplete ac, const char *item);
 gboolean autocomplete_remove(Autocomplete ac, const char * const item);
 GSList * autocomplete_get_list(Autocomplete ac);
 gchar * autocomplete_complete(Autocomplete ac, gchar *search_str);

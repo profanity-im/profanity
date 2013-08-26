@@ -853,7 +853,7 @@ stanza_create_form(xmpp_stanza_t * const stanza)
             while (value != NULL) {
                 char *text = xmpp_stanza_get_text(value);
                 if (text != NULL) {
-                    field->values = g_slist_insert_sorted(field->values, strdup(text), (GCompareFunc)octet_compare);
+                    field->values = g_slist_insert_sorted(field->values, strdup(text), (GCompareFunc)strcmp);
                     xmpp_free(ctx, text);
                 }
                 value = xmpp_stanza_get_next(value);
@@ -997,5 +997,5 @@ stanza_get_presence_string_from_type(resource_presence_t presence_type)
 static int
 _field_compare(FormField *f1, FormField *f2)
 {
-    return octet_compare((unsigned char *)f1->var, (unsigned char *)f2->var);
+    return strcmp(f1->var, f2->var);
 }
