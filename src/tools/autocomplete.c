@@ -101,30 +101,21 @@ autocomplete_add(Autocomplete ac, const char *item)
 gboolean
 autocomplete_remove(Autocomplete ac, const char * const item)
 {
-    // reset last found if it points to the item to be removed
-    if (ac->last_found != NULL)
-        if (g_strcmp0(ac->last_found->data, item) == 0)
-            ac->last_found = NULL;
+    GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
-    if (!ac->items) {
-        return FALSE;
-    } else {
-        GSList *curr = ac->items;
-
-        while(curr) {
-            if (g_strcmp0(curr->data, item) == 0) {
-                void *current_item = curr->data;
-                ac->items = g_slist_remove(ac->items, curr->data);
-                free(current_item);
-
-                return TRUE;
-            }
-
-            curr = g_slist_next(curr);
-        }
-
+    if (!curr) {
         return FALSE;
     }
+
+    // reset last found if it points to the item to be removed
+    if (ac->last_found == curr) {
+        ac->last_found = NULL;
+    }
+
+    free(curr->data);
+    ac->items = g_slist_delete_link(ac->items, curr);
+
+    return TRUE;
 }
 
 GSList *
