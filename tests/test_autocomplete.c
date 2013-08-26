@@ -39,9 +39,8 @@ static void get_after_create_returns_null(void)
 
 static void add_one_and_complete(void)
 {
-    char *item = strdup("Hello");
     Autocomplete ac = autocomplete_new();
-    autocomplete_add(ac, item);
+    autocomplete_add(ac, "Hello");
     char *result = autocomplete_complete(ac, "Hel");
 
     assert_string_equals("Hello", result);
@@ -51,11 +50,9 @@ static void add_one_and_complete(void)
 
 static void add_two_and_complete_returns_first(void)
 {
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Help");
     Autocomplete ac = autocomplete_new();
-    autocomplete_add(ac, item1);
-    autocomplete_add(ac, item2);
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Help");
     char *result = autocomplete_complete(ac, "Hel");
 
     assert_string_equals("Hello", result);
@@ -65,11 +62,9 @@ static void add_two_and_complete_returns_first(void)
 
 static void add_two_and_complete_returns_second(void)
 {
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Help");
     Autocomplete ac = autocomplete_new();
-    autocomplete_add(ac, item1);
-    autocomplete_add(ac, item2);
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Help");
     char *result1 = autocomplete_complete(ac, "Hel");
     char *result2 = autocomplete_complete(ac, result1);
 
@@ -80,11 +75,9 @@ static void add_two_and_complete_returns_second(void)
 
 static void add_two_adds_two(void)
 {
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Help");
     Autocomplete ac = autocomplete_new();
-    autocomplete_add(ac, item1);
-    autocomplete_add(ac, item2);
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Help");
     GSList *result = autocomplete_get_list(ac);
 
     assert_int_equals(2, g_slist_length(result));
@@ -94,11 +87,9 @@ static void add_two_adds_two(void)
 
 static void add_two_same_adds_one(void)
 {
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Hello");
     Autocomplete ac = autocomplete_new();
-    autocomplete_add(ac, item1);
-    autocomplete_add(ac, item2);
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Hello");
     GSList *result = autocomplete_get_list(ac);
 
     assert_int_equals(1, g_slist_length(result));
@@ -108,11 +99,9 @@ static void add_two_same_adds_one(void)
 
 static void add_two_same_updates(void)
 {
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Hello");
     Autocomplete ac = autocomplete_new();
-    autocomplete_add(ac, item1);
-    autocomplete_add(ac, item2);
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Hello");
     GSList *result = autocomplete_get_list(ac);
 
     GSList *first = g_slist_nth(result, 0);
@@ -126,9 +115,8 @@ static void add_two_same_updates(void)
 
 static void add_one_returns_true(void)
 {
-    char *item = strdup("Hello");
     Autocomplete ac = autocomplete_new();
-    int result = autocomplete_add(ac, item);
+    int result = autocomplete_add(ac, "Hello");
 
     assert_true(result);
 
@@ -137,11 +125,9 @@ static void add_one_returns_true(void)
 
 static void add_two_different_returns_true(void)
 {
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Hello there");
     Autocomplete ac = autocomplete_new();
-    int result1 = autocomplete_add(ac, item1);
-    int result2 = autocomplete_add(ac, item2);
+    int result1 = autocomplete_add(ac, "Hello");
+    int result2 = autocomplete_add(ac, "Hello there");
 
     assert_true(result1);
     assert_true(result2);
@@ -151,11 +137,9 @@ static void add_two_different_returns_true(void)
 
 static void add_two_same_returns_false(void)
 {
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Hello");
     Autocomplete ac = autocomplete_new();
-    int result1 = autocomplete_add(ac, item1);
-    int result2 = autocomplete_add(ac, item2);
+    int result1 = autocomplete_add(ac, "Hello");
+    int result2 = autocomplete_add(ac, "Hello");
 
     assert_true(result1);
     assert_false(result2);

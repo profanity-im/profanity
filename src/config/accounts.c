@@ -64,9 +64,9 @@ accounts_load(void)
 
     gsize i;
     for (i = 0; i < naccounts; i++) {
-        autocomplete_add(all_ac, strdup(account_names[i]));
+        autocomplete_add(all_ac, account_names[i]);
         if (g_key_file_get_boolean(accounts, account_names[i], "enabled", NULL)) {
-            autocomplete_add(enabled_ac, strdup(account_names[i]));
+            autocomplete_add(enabled_ac, account_names[i]);
         }
 
         _fix_legacy_accounts(account_names[i]);
@@ -138,8 +138,8 @@ accounts_add(const char *account_name, const char *altdomain)
         g_key_file_set_integer(accounts, account_name, "priority.dnd", 0);
 
         _save_accounts();
-        autocomplete_add(all_ac, strdup(account_name));
-        autocomplete_add(enabled_ac, strdup(account_name));
+        autocomplete_add(all_ac, account_name);
+        autocomplete_add(enabled_ac, account_name);
     }
 
     jid_destroy(jid);
@@ -260,7 +260,7 @@ accounts_enable(const char * const name)
     if (g_key_file_has_group(accounts, name)) {
         g_key_file_set_boolean(accounts, name, "enabled", TRUE);
         _save_accounts();
-        autocomplete_add(enabled_ac, strdup(name));
+        autocomplete_add(enabled_ac, name);
         return TRUE;
     } else {
         return FALSE;
@@ -273,7 +273,7 @@ accounts_disable(const char * const name)
     if (g_key_file_has_group(accounts, name)) {
         g_key_file_set_boolean(accounts, name, "enabled", FALSE);
         _save_accounts();
-        autocomplete_remove(enabled_ac, strdup(name));
+        autocomplete_remove(enabled_ac, name);
         return TRUE;
     } else {
         return FALSE;
@@ -317,11 +317,11 @@ accounts_rename(const char * const account_name, const char * const new_name)
     g_key_file_remove_group(accounts, account_name, NULL);
     _save_accounts();
 
-    autocomplete_remove(all_ac, strdup(account_name));
-    autocomplete_add(all_ac, strdup(new_name));
+    autocomplete_remove(all_ac, account_name);
+    autocomplete_add(all_ac, new_name);
     if (g_key_file_get_boolean(accounts, new_name, "enabled", NULL)) {
-        autocomplete_remove(enabled_ac, strdup(account_name));
-        autocomplete_add(enabled_ac, strdup(new_name));
+        autocomplete_remove(enabled_ac, account_name);
+        autocomplete_add(enabled_ac, new_name);
     }
 
     return TRUE;

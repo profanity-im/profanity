@@ -77,8 +77,8 @@ prefs_load(void)
     }
 
     boolean_choice_ac = autocomplete_new();
-    autocomplete_add(boolean_choice_ac, strdup("on"));
-    autocomplete_add(boolean_choice_ac, strdup("off"));
+    autocomplete_add(boolean_choice_ac, "on");
+    autocomplete_add(boolean_choice_ac, "off");
 }
 
 void
