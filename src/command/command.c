@@ -878,16 +878,16 @@ cmd_init(void)
     commands_ac = autocomplete_new();
 
     help_ac = autocomplete_new();
-    autocomplete_add(help_ac, strdup("commands"));
-    autocomplete_add(help_ac, strdup("basic"));
-    autocomplete_add(help_ac, strdup("chatting"));
-    autocomplete_add(help_ac, strdup("groupchat"));
-    autocomplete_add(help_ac, strdup("presence"));
-    autocomplete_add(help_ac, strdup("contacts"));
-    autocomplete_add(help_ac, strdup("service"));
-    autocomplete_add(help_ac, strdup("settings"));
-    autocomplete_add(help_ac, strdup("other"));
-    autocomplete_add(help_ac, strdup("navigation"));
+    autocomplete_add(help_ac, "commands");
+    autocomplete_add(help_ac, "basic");
+    autocomplete_add(help_ac, "chatting");
+    autocomplete_add(help_ac, "groupchat");
+    autocomplete_add(help_ac, "presence");
+    autocomplete_add(help_ac, "contacts");
+    autocomplete_add(help_ac, "service");
+    autocomplete_add(help_ac, "settings");
+    autocomplete_add(help_ac, "other");
+    autocomplete_add(help_ac, "navigation");
 
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
@@ -899,102 +899,102 @@ cmd_init(void)
         g_hash_table_insert(commands, pcmd->cmd, pcmd);
 
         // add to commands and help autocompleters
-        autocomplete_add(commands_ac, (gchar *)strdup(pcmd->cmd));
-        autocomplete_add(help_ac, (gchar *)strdup(pcmd->cmd+1));
+        autocomplete_add(commands_ac, pcmd->cmd);
+        autocomplete_add(help_ac, pcmd->cmd+1);
     }
 
     prefs_ac = autocomplete_new();
-    autocomplete_add(prefs_ac, strdup("ui"));
-    autocomplete_add(prefs_ac, strdup("desktop"));
-    autocomplete_add(prefs_ac, strdup("chat"));
-    autocomplete_add(prefs_ac, strdup("log"));
-    autocomplete_add(prefs_ac, strdup("conn"));
-    autocomplete_add(prefs_ac, strdup("presence"));
+    autocomplete_add(prefs_ac, "ui");
+    autocomplete_add(prefs_ac, "desktop");
+    autocomplete_add(prefs_ac, "chat");
+    autocomplete_add(prefs_ac, "log");
+    autocomplete_add(prefs_ac, "conn");
+    autocomplete_add(prefs_ac, "presence");
 
     notify_ac = autocomplete_new();
-    autocomplete_add(notify_ac, strdup("message"));
-    autocomplete_add(notify_ac, strdup("typing"));
-    autocomplete_add(notify_ac, strdup("remind"));
-    autocomplete_add(notify_ac, strdup("invite"));
-    autocomplete_add(notify_ac, strdup("sub"));
+    autocomplete_add(notify_ac, "message");
+    autocomplete_add(notify_ac, "typing");
+    autocomplete_add(notify_ac, "remind");
+    autocomplete_add(notify_ac, "invite");
+    autocomplete_add(notify_ac, "sub");
 
     sub_ac = autocomplete_new();
-    autocomplete_add(sub_ac, strdup("request"));
-    autocomplete_add(sub_ac, strdup("allow"));
-    autocomplete_add(sub_ac, strdup("deny"));
-    autocomplete_add(sub_ac, strdup("show"));
-    autocomplete_add(sub_ac, strdup("sent"));
-    autocomplete_add(sub_ac, strdup("received"));
+    autocomplete_add(sub_ac, "request");
+    autocomplete_add(sub_ac, "allow");
+    autocomplete_add(sub_ac, "deny");
+    autocomplete_add(sub_ac, "show");
+    autocomplete_add(sub_ac, "sent");
+    autocomplete_add(sub_ac, "received");
 
     titlebar_ac = autocomplete_new();
-    autocomplete_add(titlebar_ac, strdup("version"));
+    autocomplete_add(titlebar_ac, "version");
 
     log_ac = autocomplete_new();
-    autocomplete_add(log_ac, strdup("maxsize"));
+    autocomplete_add(log_ac, "maxsize");
 
     autoaway_ac = autocomplete_new();
-    autocomplete_add(autoaway_ac, strdup("mode"));
-    autocomplete_add(autoaway_ac, strdup("time"));
-    autocomplete_add(autoaway_ac, strdup("message"));
-    autocomplete_add(autoaway_ac, strdup("check"));
+    autocomplete_add(autoaway_ac, "mode");
+    autocomplete_add(autoaway_ac, "time");
+    autocomplete_add(autoaway_ac, "message");
+    autocomplete_add(autoaway_ac, "check");
 
     autoaway_mode_ac = autocomplete_new();
-    autocomplete_add(autoaway_mode_ac, strdup("away"));
-    autocomplete_add(autoaway_mode_ac, strdup("idle"));
-    autocomplete_add(autoaway_mode_ac, strdup("off"));
+    autocomplete_add(autoaway_mode_ac, "away");
+    autocomplete_add(autoaway_mode_ac, "idle");
+    autocomplete_add(autoaway_mode_ac, "off");
 
     theme_ac = autocomplete_new();
-    autocomplete_add(theme_ac, strdup("list"));
-    autocomplete_add(theme_ac, strdup("set"));
+    autocomplete_add(theme_ac, "list");
+    autocomplete_add(theme_ac, "set");
 
     disco_ac = autocomplete_new();
-    autocomplete_add(disco_ac, strdup("info"));
-    autocomplete_add(disco_ac, strdup("items"));
+    autocomplete_add(disco_ac, "info");
+    autocomplete_add(disco_ac, "items");
 
     account_ac = autocomplete_new();
-    autocomplete_add(account_ac, strdup("list"));
-    autocomplete_add(account_ac, strdup("show"));
-    autocomplete_add(account_ac, strdup("add"));
-    autocomplete_add(account_ac, strdup("enable"));
-    autocomplete_add(account_ac, strdup("disable"));
-    autocomplete_add(account_ac, strdup("rename"));
-    autocomplete_add(account_ac, strdup("set"));
+    autocomplete_add(account_ac, "list");
+    autocomplete_add(account_ac, "show");
+    autocomplete_add(account_ac, "add");
+    autocomplete_add(account_ac, "enable");
+    autocomplete_add(account_ac, "disable");
+    autocomplete_add(account_ac, "rename");
+    autocomplete_add(account_ac, "set");
 
     close_ac = autocomplete_new();
-    autocomplete_add(close_ac, strdup("read"));
-    autocomplete_add(close_ac, strdup("all"));
+    autocomplete_add(close_ac, "read");
+    autocomplete_add(close_ac, "all");
 
     wins_ac = autocomplete_new();
-    autocomplete_add(wins_ac, strdup("prune"));
-    autocomplete_add(wins_ac, strdup("tidy"));
+    autocomplete_add(wins_ac, "prune");
+    autocomplete_add(wins_ac, "tidy");
 
     roster_ac = autocomplete_new();
-    autocomplete_add(roster_ac, strdup("add"));
-    autocomplete_add(roster_ac, strdup("nick"));
-    autocomplete_add(roster_ac, strdup("remove"));
+    autocomplete_add(roster_ac, "add");
+    autocomplete_add(roster_ac, "nick");
+    autocomplete_add(roster_ac, "remove");
 
     group_ac = autocomplete_new();
-    autocomplete_add(group_ac, strdup("show"));
-    autocomplete_add(group_ac, strdup("add"));
-    autocomplete_add(group_ac, strdup("remove"));
+    autocomplete_add(group_ac, "show");
+    autocomplete_add(group_ac, "add");
+    autocomplete_add(group_ac, "remove");
 
     theme_load_ac = NULL;
 
     who_ac = autocomplete_new();
-    autocomplete_add(who_ac, strdup("chat"));
-    autocomplete_add(who_ac, strdup("online"));
-    autocomplete_add(who_ac, strdup("away"));
-    autocomplete_add(who_ac, strdup("xa"));
-    autocomplete_add(who_ac, strdup("dnd"));
-    autocomplete_add(who_ac, strdup("offline"));
-    autocomplete_add(who_ac, strdup("available"));
-    autocomplete_add(who_ac, strdup("unavailable"));
-    autocomplete_add(who_ac, strdup("any"));
+    autocomplete_add(who_ac, "chat");
+    autocomplete_add(who_ac, "online");
+    autocomplete_add(who_ac, "away");
+    autocomplete_add(who_ac, "xa");
+    autocomplete_add(who_ac, "dnd");
+    autocomplete_add(who_ac, "offline");
+    autocomplete_add(who_ac, "available");
+    autocomplete_add(who_ac, "unavailable");
+    autocomplete_add(who_ac, "any");
 
     bookmark_ac = autocomplete_new();
-    autocomplete_add(bookmark_ac, strdup("add"));
-    autocomplete_add(bookmark_ac, strdup("list"));
-    autocomplete_add(bookmark_ac, strdup("remove"));
+    autocomplete_add(bookmark_ac, "add");
+    autocomplete_add(bookmark_ac, "list");
+    autocomplete_add(bookmark_ac, "remove");
 
     cmd_history_init();
 }
@@ -3813,7 +3813,7 @@ _theme_autocomplete(char *input, int *size)
             theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
             while (themes != NULL) {
-                autocomplete_add(theme_load_ac, strdup(themes->data));
+                autocomplete_add(theme_load_ac, themes->data);
                 themes = g_slist_next(themes);
             }
             g_slist_free(themes);
