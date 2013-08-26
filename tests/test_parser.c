@@ -293,6 +293,42 @@ parse_cmd_with_quoted_freetext(void)
 }
 
 void
+parse_cmd_with_third_arg_quoted_0_min_3_max(void)
+{
+    char *inp = "/group add friends \"The User\"";
+    gchar **result = parse_args_with_freetext(inp, 0, 3);
+
+    assert_int_equals(3, g_strv_length(result));
+    assert_string_equals("add", result[0]);
+    assert_string_equals("friends", result[1]);
+    assert_string_equals("The User", result[2]);
+}
+
+void
+parse_cmd_with_second_arg_quoted_0_min_3_max(void)
+{
+    char *inp = "/group add \"The Group\" friend";
+    gchar **result = parse_args_with_freetext(inp, 0, 3);
+
+    assert_int_equals(3, g_strv_length(result));
+    assert_string_equals("add", result[0]);
+    assert_string_equals("The Group", result[1]);
+    assert_string_equals("friend", result[2]);
+}
+
+void
+parse_cmd_with_second_and_third_arg_quoted_0_min_3_max(void)
+{
+    char *inp = "/group add \"The Group\" \"The User\"";
+    gchar **result = parse_args_with_freetext(inp, 0, 3);
+
+    assert_int_equals(3, g_strv_length(result));
+    assert_string_equals("add", result[0]);
+    assert_string_equals("The Group", result[1]);
+    assert_string_equals("The User", result[2]);
+}
+
+void
 count_one_token(void)
 {
     char *inp = "one";
@@ -451,4 +487,7 @@ register_parser_tests(void)
     TEST(get_first_two_of_three_first_quoted);
     TEST(get_first_two_of_three_second_quoted);
     TEST(get_first_two_of_three_first_and_second_quoted);
+    TEST(parse_cmd_with_third_arg_quoted_0_min_3_max);
+    TEST(parse_cmd_with_second_arg_quoted_0_min_3_max);
+    TEST(parse_cmd_with_second_and_third_arg_quoted_0_min_3_max);
 }
