@@ -39,7 +39,6 @@ static void get_after_create_returns_null(void)
 
 static void add_one_and_complete(void)
 {
-    char *item = "Hello";
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     char *result = autocomplete_complete(ac, "Hel");
