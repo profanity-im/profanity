@@ -3035,21 +3035,12 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     int index = 0;
-    int curr = 0;
     int count = 0;
 
     if (args[0] == NULL) {
         index = ui_current_win_index();
     } else if (strcmp(args[0], "all") == 0) {
-        for (curr = 1; curr <= 9; curr++) {
-            if (ui_win_exists(curr)) {
-                if (conn_status == JABBER_CONNECTED) {
-                    ui_close_connected_win(curr);
-                }
-                ui_close_win(curr);
-                count++;
-            }
-        }
+        count = ui_close_all_wins();
         if (count == 0) {
             cons_show("No windows to close.");
         } else if (count == 1) {
@@ -3059,15 +3050,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         }
         return TRUE;
     } else if (strcmp(args[0], "read") == 0) {
-        for (curr = 1; curr <= 9; curr++) {
-            if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
-                if (conn_status == JABBER_CONNECTED) {
-                    ui_close_connected_win(curr);
-                }
-                ui_close_win(curr);
-                count++;
-            }
-        }
+        count = ui_close_read_wins();
         if (count == 0) {
             cons_show("No windows to close.");
         } else if (count == 1) {

@@ -60,6 +60,8 @@ void ui_print_error_from_recipient(const char * const from, const char *err_msg)
 void ui_print_system_msg_from_recipient(const char * const from, const char *message);
 gint ui_unread(void);
 void ui_close_connected_win(int index);
+int ui_close_all_wins(void);
+int ui_close_read_wins(void);
 
 // current window actions
 void ui_close_current(void);
