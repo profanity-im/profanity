@@ -1189,8 +1189,6 @@ cmd_execute_default(const char * const inp)
             break;
     }
 
-    free(recipient);
-
     return TRUE;
 }
 

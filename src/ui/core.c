@@ -595,7 +595,6 @@ ui_switch_win(const int i)
         }
         wins_refresh_current();
     }
-
 }
 
 void
