@@ -423,23 +423,23 @@ cmp_win_num(gconstpointer a, gconstpointer b)
 }
 
 int
-get_next_available_win_num(GSList *used)
+get_next_available_win_num(GList *used)
 {
     int result = 0;
-    used = g_slist_sort(used, cmp_win_num);
+    used = g_list_sort(used, cmp_win_num);
     // only console used
-    if (g_slist_length(used) == 1) {
+    if (g_list_length(used) == 1) {
         return 2;
     } else {
         int last_num = 1;
-        GSList *curr = used;
+        GList *curr = used;
         // skip console
-        curr = g_slist_next(curr);
+        curr = g_list_next(curr);
         while (curr != NULL) {
             int curr_num = GPOINTER_TO_INT(curr->data);
             if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
                     ((last_num == 9) && (curr_num != 0))) {
-                g_slist_free(curr);
+                g_list_free(curr);
                 result = last_num + 1;
                 if (result == 10) {
                     result = 0;
@@ -451,7 +451,7 @@ get_next_available_win_num(GSList *used)
                     last_num = 10;
                 }
             }
-            curr = g_slist_next(curr);
+            curr = g_list_next(curr);
         }
         result = last_num + 1;
         if (result == 10) {

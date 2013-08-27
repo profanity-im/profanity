@@ -248,8 +248,8 @@ void compare_9_less_than_0(void)
 
 void next_available_when_only_console(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
 
     int result = get_next_available_win_num(used);
 
@@ -258,9 +258,9 @@ void next_available_when_only_console(void)
 
 void next_available_3_at_end(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(2));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(2));
 
     int result = get_next_available_win_num(used);
 
@@ -269,15 +269,15 @@ void next_available_3_at_end(void)
 
 void next_available_9_at_end(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(2));
-    used = g_slist_append(used, GINT_TO_POINTER(3));
-    used = g_slist_append(used, GINT_TO_POINTER(4));
-    used = g_slist_append(used, GINT_TO_POINTER(5));
-    used = g_slist_append(used, GINT_TO_POINTER(6));
-    used = g_slist_append(used, GINT_TO_POINTER(7));
-    used = g_slist_append(used, GINT_TO_POINTER(8));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(2));
+    used = g_list_append(used, GINT_TO_POINTER(3));
+    used = g_list_append(used, GINT_TO_POINTER(4));
+    used = g_list_append(used, GINT_TO_POINTER(5));
+    used = g_list_append(used, GINT_TO_POINTER(6));
+    used = g_list_append(used, GINT_TO_POINTER(7));
+    used = g_list_append(used, GINT_TO_POINTER(8));
 
     int result = get_next_available_win_num(used);
 
@@ -286,16 +286,16 @@ void next_available_9_at_end(void)
 
 void next_available_0_at_end(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(2));
-    used = g_slist_append(used, GINT_TO_POINTER(3));
-    used = g_slist_append(used, GINT_TO_POINTER(4));
-    used = g_slist_append(used, GINT_TO_POINTER(5));
-    used = g_slist_append(used, GINT_TO_POINTER(6));
-    used = g_slist_append(used, GINT_TO_POINTER(7));
-    used = g_slist_append(used, GINT_TO_POINTER(8));
-    used = g_slist_append(used, GINT_TO_POINTER(9));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(2));
+    used = g_list_append(used, GINT_TO_POINTER(3));
+    used = g_list_append(used, GINT_TO_POINTER(4));
+    used = g_list_append(used, GINT_TO_POINTER(5));
+    used = g_list_append(used, GINT_TO_POINTER(6));
+    used = g_list_append(used, GINT_TO_POINTER(7));
+    used = g_list_append(used, GINT_TO_POINTER(8));
+    used = g_list_append(used, GINT_TO_POINTER(9));
 
     int result = get_next_available_win_num(used);
 
@@ -304,13 +304,13 @@ void next_available_0_at_end(void)
 
 void next_available_2_in_first_gap(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(3));
-    used = g_slist_append(used, GINT_TO_POINTER(4));
-    used = g_slist_append(used, GINT_TO_POINTER(5));
-    used = g_slist_append(used, GINT_TO_POINTER(9));
-    used = g_slist_append(used, GINT_TO_POINTER(0));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(3));
+    used = g_list_append(used, GINT_TO_POINTER(4));
+    used = g_list_append(used, GINT_TO_POINTER(5));
+    used = g_list_append(used, GINT_TO_POINTER(9));
+    used = g_list_append(used, GINT_TO_POINTER(0));
 
     int result = get_next_available_win_num(used);
 
@@ -319,20 +319,20 @@ void next_available_2_in_first_gap(void)
 
 void next_available_9_in_first_gap(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(2));
-    used = g_slist_append(used, GINT_TO_POINTER(3));
-    used = g_slist_append(used, GINT_TO_POINTER(4));
-    used = g_slist_append(used, GINT_TO_POINTER(5));
-    used = g_slist_append(used, GINT_TO_POINTER(6));
-    used = g_slist_append(used, GINT_TO_POINTER(7));
-    used = g_slist_append(used, GINT_TO_POINTER(8));
-    used = g_slist_append(used, GINT_TO_POINTER(0));
-    used = g_slist_append(used, GINT_TO_POINTER(11));
-    used = g_slist_append(used, GINT_TO_POINTER(12));
-    used = g_slist_append(used, GINT_TO_POINTER(13));
-    used = g_slist_append(used, GINT_TO_POINTER(20));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(2));
+    used = g_list_append(used, GINT_TO_POINTER(3));
+    used = g_list_append(used, GINT_TO_POINTER(4));
+    used = g_list_append(used, GINT_TO_POINTER(5));
+    used = g_list_append(used, GINT_TO_POINTER(6));
+    used = g_list_append(used, GINT_TO_POINTER(7));
+    used = g_list_append(used, GINT_TO_POINTER(8));
+    used = g_list_append(used, GINT_TO_POINTER(0));
+    used = g_list_append(used, GINT_TO_POINTER(11));
+    used = g_list_append(used, GINT_TO_POINTER(12));
+    used = g_list_append(used, GINT_TO_POINTER(13));
+    used = g_list_append(used, GINT_TO_POINTER(20));
 
     int result = get_next_available_win_num(used);
 
@@ -341,20 +341,20 @@ void next_available_9_in_first_gap(void)
 
 void next_available_0_in_first_gap(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(2));
-    used = g_slist_append(used, GINT_TO_POINTER(3));
-    used = g_slist_append(used, GINT_TO_POINTER(4));
-    used = g_slist_append(used, GINT_TO_POINTER(5));
-    used = g_slist_append(used, GINT_TO_POINTER(6));
-    used = g_slist_append(used, GINT_TO_POINTER(7));
-    used = g_slist_append(used, GINT_TO_POINTER(8));
-    used = g_slist_append(used, GINT_TO_POINTER(9));
-    used = g_slist_append(used, GINT_TO_POINTER(11));
-    used = g_slist_append(used, GINT_TO_POINTER(12));
-    used = g_slist_append(used, GINT_TO_POINTER(13));
-    used = g_slist_append(used, GINT_TO_POINTER(20));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(2));
+    used = g_list_append(used, GINT_TO_POINTER(3));
+    used = g_list_append(used, GINT_TO_POINTER(4));
+    used = g_list_append(used, GINT_TO_POINTER(5));
+    used = g_list_append(used, GINT_TO_POINTER(6));
+    used = g_list_append(used, GINT_TO_POINTER(7));
+    used = g_list_append(used, GINT_TO_POINTER(8));
+    used = g_list_append(used, GINT_TO_POINTER(9));
+    used = g_list_append(used, GINT_TO_POINTER(11));
+    used = g_list_append(used, GINT_TO_POINTER(12));
+    used = g_list_append(used, GINT_TO_POINTER(13));
+    used = g_list_append(used, GINT_TO_POINTER(20));
 
     int result = get_next_available_win_num(used);
 
@@ -363,20 +363,20 @@ void next_available_0_in_first_gap(void)
 
 void next_available_11_in_first_gap(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(2));
-    used = g_slist_append(used, GINT_TO_POINTER(3));
-    used = g_slist_append(used, GINT_TO_POINTER(4));
-    used = g_slist_append(used, GINT_TO_POINTER(5));
-    used = g_slist_append(used, GINT_TO_POINTER(6));
-    used = g_slist_append(used, GINT_TO_POINTER(7));
-    used = g_slist_append(used, GINT_TO_POINTER(8));
-    used = g_slist_append(used, GINT_TO_POINTER(9));
-    used = g_slist_append(used, GINT_TO_POINTER(0));
-    used = g_slist_append(used, GINT_TO_POINTER(12));
-    used = g_slist_append(used, GINT_TO_POINTER(13));
-    used = g_slist_append(used, GINT_TO_POINTER(20));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(2));
+    used = g_list_append(used, GINT_TO_POINTER(3));
+    used = g_list_append(used, GINT_TO_POINTER(4));
+    used = g_list_append(used, GINT_TO_POINTER(5));
+    used = g_list_append(used, GINT_TO_POINTER(6));
+    used = g_list_append(used, GINT_TO_POINTER(7));
+    used = g_list_append(used, GINT_TO_POINTER(8));
+    used = g_list_append(used, GINT_TO_POINTER(9));
+    used = g_list_append(used, GINT_TO_POINTER(0));
+    used = g_list_append(used, GINT_TO_POINTER(12));
+    used = g_list_append(used, GINT_TO_POINTER(13));
+    used = g_list_append(used, GINT_TO_POINTER(20));
 
     int result = get_next_available_win_num(used);
 
@@ -385,38 +385,38 @@ void next_available_11_in_first_gap(void)
 
 void next_available_24_first_big_gap(void)
 {
-    GSList *used = NULL;
-    used = g_slist_append(used, GINT_TO_POINTER(1));
-    used = g_slist_append(used, GINT_TO_POINTER(2));
-    used = g_slist_append(used, GINT_TO_POINTER(3));
-    used = g_slist_append(used, GINT_TO_POINTER(4));
-    used = g_slist_append(used, GINT_TO_POINTER(5));
-    used = g_slist_append(used, GINT_TO_POINTER(6));
-    used = g_slist_append(used, GINT_TO_POINTER(7));
-    used = g_slist_append(used, GINT_TO_POINTER(8));
-    used = g_slist_append(used, GINT_TO_POINTER(9));
-    used = g_slist_append(used, GINT_TO_POINTER(0));
-    used = g_slist_append(used, GINT_TO_POINTER(11));
-    used = g_slist_append(used, GINT_TO_POINTER(12));
-    used = g_slist_append(used, GINT_TO_POINTER(13));
-    used = g_slist_append(used, GINT_TO_POINTER(14));
-    used = g_slist_append(used, GINT_TO_POINTER(15));
-    used = g_slist_append(used, GINT_TO_POINTER(16));
-    used = g_slist_append(used, GINT_TO_POINTER(17));
-    used = g_slist_append(used, GINT_TO_POINTER(18));
-    used = g_slist_append(used, GINT_TO_POINTER(19));
-    used = g_slist_append(used, GINT_TO_POINTER(20));
-    used = g_slist_append(used, GINT_TO_POINTER(21));
-    used = g_slist_append(used, GINT_TO_POINTER(22));
-    used = g_slist_append(used, GINT_TO_POINTER(23));
-    used = g_slist_append(used, GINT_TO_POINTER(51));
-    used = g_slist_append(used, GINT_TO_POINTER(52));
-    used = g_slist_append(used, GINT_TO_POINTER(53));
-    used = g_slist_append(used, GINT_TO_POINTER(89));
-    used = g_slist_append(used, GINT_TO_POINTER(90));
-    used = g_slist_append(used, GINT_TO_POINTER(100));
-    used = g_slist_append(used, GINT_TO_POINTER(101));
-    used = g_slist_append(used, GINT_TO_POINTER(102));
+    GList *used = NULL;
+    used = g_list_append(used, GINT_TO_POINTER(1));
+    used = g_list_append(used, GINT_TO_POINTER(2));
+    used = g_list_append(used, GINT_TO_POINTER(3));
+    used = g_list_append(used, GINT_TO_POINTER(4));
+    used = g_list_append(used, GINT_TO_POINTER(5));
+    used = g_list_append(used, GINT_TO_POINTER(6));
+    used = g_list_append(used, GINT_TO_POINTER(7));
+    used = g_list_append(used, GINT_TO_POINTER(8));
+    used = g_list_append(used, GINT_TO_POINTER(9));
+    used = g_list_append(used, GINT_TO_POINTER(0));
+    used = g_list_append(used, GINT_TO_POINTER(11));
+    used = g_list_append(used, GINT_TO_POINTER(12));
+    used = g_list_append(used, GINT_TO_POINTER(13));
+    used = g_list_append(used, GINT_TO_POINTER(14));
+    used = g_list_append(used, GINT_TO_POINTER(15));
+    used = g_list_append(used, GINT_TO_POINTER(16));
+    used = g_list_append(used, GINT_TO_POINTER(17));
+    used = g_list_append(used, GINT_TO_POINTER(18));
+    used = g_list_append(used, GINT_TO_POINTER(19));
+    used = g_list_append(used, GINT_TO_POINTER(20));
+    used = g_list_append(used, GINT_TO_POINTER(21));
+    used = g_list_append(used, GINT_TO_POINTER(22));
+    used = g_list_append(used, GINT_TO_POINTER(23));
+    used = g_list_append(used, GINT_TO_POINTER(51));
+    used = g_list_append(used, GINT_TO_POINTER(52));
+    used = g_list_append(used, GINT_TO_POINTER(53));
+    used = g_list_append(used, GINT_TO_POINTER(89));
+    used = g_list_append(used, GINT_TO_POINTER(90));
+    used = g_list_append(used, GINT_TO_POINTER(100));
+    used = g_list_append(used, GINT_TO_POINTER(101));
+    used = g_list_append(used, GINT_TO_POINTER(102));
 
     int result = get_next_available_win_num(used);
 

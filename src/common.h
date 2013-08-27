@@ -92,6 +92,6 @@ contact_presence_t contact_presence_from_resource_presence(resource_presence_t r
 char * get_unique_id(void);
 
 int cmp_win_num(gconstpointer a, gconstpointer b);
-int get_next_available_win_num(GSList *used);
+int get_next_available_win_num(GList *used);
 
 #endif

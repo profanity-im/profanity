@@ -2144,11 +2144,6 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (ui_windows_full()) {
-        cons_show_error("Windows all used, close a window and try again.");
-        return TRUE;
-    }
-
     if (win_type == WIN_MUC) {
         char *room_name = ui_current_recipient();
         if (muc_nick_in_roster(room_name, usr)) {
@@ -2396,11 +2391,6 @@ _cmd_duck(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    if (ui_windows_full()) {
-        cons_show_error("Windows all used, close a window and try again.");
         return TRUE;
     }
 
@@ -2704,11 +2694,6 @@ _cmd_join(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    if (ui_windows_full()) {
-        cons_show_error("Windows all used, close a window and try again.");
         return TRUE;
     }
 
