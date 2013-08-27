@@ -1217,7 +1217,6 @@ _cmd_complete_parameters(char *input, int *size)
     if (ui_current_win_type() == WIN_MUC) {
         char *recipient = ui_current_recipient();
         Autocomplete nick_ac = muc_get_roster_ac(recipient);
-        free(recipient);
         if (nick_ac != NULL) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
@@ -2006,8 +2005,6 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                     ui_room_roster(room, filtered, presence);
                 }
 
-                free(room);
-
             // not in groupchat window
             } else {
                 cons_show("");
@@ -2171,8 +2168,6 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
         } else {
             ui_current_print_line("No such participant \"%s\" in room.", usr);
         }
-
-        free(room_name);
 
         return TRUE;
 
@@ -2564,8 +2559,6 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             break;
     }
 
-    free(recipient);
-
     return TRUE;
 }
 
@@ -2594,7 +2587,6 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
                 }
-                free(recipient);
             } else {
                 cons_show("No nickname supplied to /caps in chat room.");
             }
@@ -2635,7 +2627,6 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
                     cons_show_caps(jid->resourcepart, resource);
                     jid_destroy(jid);
                 }
-                free(recipient);
             }
             break;
         default:
@@ -2672,7 +2663,6 @@ _cmd_software(gchar **args, struct cmd_help_t help)
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
                 }
-                free(recipient);
             } else {
                 cons_show("No nickname supplied to /software in chat room.");
             }
@@ -2698,7 +2688,6 @@ _cmd_software(gchar **args, struct cmd_help_t help)
             } else {
                 recipient = ui_current_recipient();
                 iq_send_software_version(recipient);
-                free(recipient);
             }
             break;
         default:
@@ -2870,7 +2859,6 @@ _cmd_bookmark(gchar **args, struct cmd_help_t help)
         cons_show_bookmarks(bookmark_get_list());
     } else {
         gboolean autojoin = FALSE;
-        gboolean jid_release = FALSE;
         gchar *jid = NULL;
         gchar *nick = NULL;
         int idx = 1;
@@ -2896,7 +2884,6 @@ _cmd_bookmark(gchar **args, struct cmd_help_t help)
 
             if (win_type == WIN_MUC) {
                 jid = ui_current_recipient();
-                jid_release = TRUE;
                 nick = muc_get_room_nick(jid);
             } else {
                 cons_show("Usage: %s", help.usage);
@@ -2910,10 +2897,6 @@ _cmd_bookmark(gchar **args, struct cmd_help_t help)
             bookmark_remove(jid, autojoin);
         } else {
             cons_show("Usage: %s", help.usage);
-        }
-
-        if (jid_release) {
-            free(jid);
         }
     }
 
