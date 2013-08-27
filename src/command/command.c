@@ -3001,16 +3001,13 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
                 }
 
                 ui_outgoing_msg("me", recipient, tiny);
-                free(recipient);
             } else if (win_type == WIN_PRIVATE) {
                 char *recipient = ui_current_recipient();
                 message_send(tiny, recipient);
                 ui_outgoing_msg("me", recipient, tiny);
-                free(recipient);
             } else { // groupchat
                 char *recipient = ui_current_recipient();
                 message_send_groupchat(tiny, recipient);
-                free(recipient);
             }
             free(tiny);
         } else {
