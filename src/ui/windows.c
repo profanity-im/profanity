@@ -32,6 +32,7 @@
 #include <ncurses.h>
 #endif
 
+#include "common.h"
 #include "config/theme.h"
 #include "ui/ui.h"
 #include "ui/window.h"

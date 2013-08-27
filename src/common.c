@@ -399,6 +399,70 @@ get_unique_id(void)
     return result;
 }
 
+int
+cmp_win_num(gconstpointer a, gconstpointer b)
+{
+    int real_a = GPOINTER_TO_INT(a);
+    int real_b = GPOINTER_TO_INT(b);
+
+    if (real_a == 0) {
+        real_a = 10;
+    }
+
+    if (real_b == 0) {
+        real_b = 10;
+    }
+
+    if (real_a < real_b) {
+        return -1;
+    } else if (real_a == real_b) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int
+get_next_available_win_num(GSList *used)
+{
+    int result = 0;
+    used = g_slist_sort(used, cmp_win_num);
+    // only console used
+    if (g_slist_length(used) == 1) {
+        return 2;
+    } else {
+        int last_num = 1;
+        GSList *curr = used;
+        // skip console
+        curr = g_slist_next(curr);
+        while (curr != NULL) {
+            int curr_num = GPOINTER_TO_INT(curr->data);
+            if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
+                    ((last_num == 9) && (curr_num != 0))) {
+                g_slist_free(curr);
+                result = last_num + 1;
+                if (result == 10) {
+                    result = 0;
+                }
+                return (result);
+            } else {
+                last_num = curr_num;
+                if (last_num == 0) {
+                    last_num = 10;
+                }
+            }
+            curr = g_slist_next(curr);
+        }
+        result = last_num + 1;
+        if (result == 10) {
+            result = 0;
+        }
+
+        return result;
+    }
+}
+
+
 static size_t
 _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
 {
