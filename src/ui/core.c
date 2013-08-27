@@ -85,7 +85,7 @@ ui_init(void)
     refresh();
     create_title_bar();
     create_status_bar();
-    status_bar_active(0);
+    status_bar_active(1);
     create_input_window();
     wins_init();
     cons_about();
@@ -574,9 +574,9 @@ ui_switch_win(const int i)
 
         new_current->unread = 0;
 
-        if (i == 0) {
+        if (i == 1) {
             title_bar_title();
-            status_bar_active(0);
+            status_bar_active(1);
         } else {
             PContact contact = roster_get_contact(new_current->from);
             if (contact != NULL) {
@@ -607,7 +607,7 @@ ui_close_current(void)
     int current_index = wins_get_current_num();
     wins_close_current();
     status_bar_inactive(current_index);
-    status_bar_active(0);
+    status_bar_active(1);
     title_bar_title();
 }
 
@@ -616,7 +616,7 @@ ui_close_win(int index)
 {
     wins_close_by_num(index);
     status_bar_inactive(index);
-    status_bar_active(0);
+    status_bar_active(1);
     title_bar_title();
 
     wins_refresh_current();
@@ -797,7 +797,7 @@ ui_print_system_msg_from_recipient(const char * const from, const char *message)
         } else {
             num = 0;
             window = wins_get_console();
-            status_bar_active(0);
+            status_bar_active(1);
         }
     }
 

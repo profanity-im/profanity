@@ -37,9 +37,10 @@
 
 static WINDOW *status_bar;
 static char *message = NULL;
-static char _active[31] = "[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]";
-static int is_active[10];
-static int is_new[10];
+//                          1  2  3  4  5  6  7  8  9  0  >
+static char _active[34] = "[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]";
+static int is_active[12];
+static int is_new[12];
 static int dirty;
 static GDateTime *last_time;
 
@@ -51,9 +52,9 @@ create_status_bar(void)
     int rows, cols, i;
     getmaxyx(stdscr, rows, cols);
 
-    is_active[0] = TRUE;
-    is_new[0] = FALSE;
-    for (i = 1; i < 10; i++) {
+    is_active[1] = TRUE;
+    is_new[1] = FALSE;
+    for (i = 2; i < 12; i++) {
         is_active[i] = FALSE;
         is_new[i] = FALSE;
     }
@@ -61,7 +62,7 @@ create_status_bar(void)
     status_bar = newwin(1, cols, rows-2, 0);
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 31, _active);
+    mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     if (last_time != NULL)
@@ -105,10 +106,10 @@ status_bar_resize(void)
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
     werase(status_bar);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 31, _active);
+    mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    for(i = 0; i < 10; i++) {
+    for(i = 1; i < 12; i++) {
         if (is_new[i])
             status_bar_new(i);
         else if (is_active[i])
@@ -127,14 +128,18 @@ status_bar_resize(void)
 void
 status_bar_inactive(const int win)
 {
-    is_active[win] = FALSE;
-    is_new[win] = FALSE;
+    int true_win = win;
+    if (true_win == 0) {
+        true_win = 10;
+    }
+    is_active[true_win] = FALSE;
+    is_new[true_win] = FALSE;
 
-    int active_pos = 1 + (win * 3);
+    int active_pos = 1 + ((true_win-1) * 3);
 
     int cols = getmaxx(stdscr);
 
-    mvwaddch(status_bar, 0, cols - 31 + active_pos, ' ');
+    mvwaddch(status_bar, 0, cols - 34 + active_pos, ' ');
 
     dirty = TRUE;
 }
@@ -142,18 +147,27 @@ status_bar_inactive(const int win)
 void
 status_bar_active(const int win)
 {
-    is_active[win] = TRUE;
-    is_new[win] = FALSE;
+    int true_win = win;
+    if (true_win == 0) {
+        true_win = 10;
+    }
+    is_active[true_win] = TRUE;
+    is_new[true_win] = FALSE;
 
-    int active_pos = 1 + (win * 3);
+    int active_pos = 1 + ((true_win-1) * 3);
 
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_ACTIVE);
-    if (win+1 < 10)
-        mvwprintw(status_bar, 0, cols - 31 + active_pos, "%d", win+1);
-    else
-        mvwprintw(status_bar, 0, cols - 31 + active_pos, "0");
+
+    if (true_win == 10) {
+        mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
+    } else if (true_win > 10) {
+        mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+    } else {
+        mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", true_win);
+    }
+
     wattroff(status_bar, COLOUR_STATUS_ACTIVE);
 
     dirty = TRUE;
@@ -162,19 +176,28 @@ status_bar_active(const int win)
 void
 status_bar_new(const int win)
 {
-    is_active[win] = TRUE;
-    is_new[win] = TRUE;
+    int true_win = win;
+    if (true_win == 0) {
+        true_win = 10;
+    }
+    is_active[true_win] = TRUE;
+    is_new[true_win] = TRUE;
 
-    int active_pos = 1 + (win * 3);
+    int active_pos = 1 + ((true_win-1) * 3);
 
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_NEW);
     wattron(status_bar, A_BLINK);
-    if (win+1 < 10)
-        mvwprintw(status_bar, 0, cols - 31 + active_pos, "%d", win+1);
-    else
-        mvwprintw(status_bar, 0, cols - 31 + active_pos, "0");
+
+    if (true_win == 10) {
+        mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
+    } else if (true_win > 10) {
+        mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+    } else {
+        mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", true_win);
+    }
+
     wattroff(status_bar, COLOUR_STATUS_NEW);
     wattroff(status_bar, A_BLINK);
 
@@ -203,11 +226,11 @@ status_bar_print_message(const char * const msg)
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 31, _active);
+    mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     int i;
-    for(i = 0; i < 10; i++) {
+    for(i = 1; i < 12; i++) {
         if (is_new[i])
             status_bar_new(i);
         else if (is_active[i])
@@ -226,9 +249,9 @@ status_bar_clear(void)
     }
 
     int i;
-    is_active[0] = TRUE;
-    is_new[0] = FALSE;
-    for (i = 1; i < 10; i++) {
+    is_active[1] = TRUE;
+    is_new[1] = FALSE;
+    for (i = 2; i < 12; i++) {
         is_active[i] = FALSE;
         is_new[i] = FALSE;
     }
@@ -238,7 +261,7 @@ status_bar_clear(void)
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 31, _active);
+    mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     dirty = TRUE;
@@ -257,11 +280,11 @@ status_bar_clear_message(void)
     int cols = getmaxx(stdscr);
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, cols - 31, _active);
+    mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     int i;
-    for(i = 0; i < 10; i++) {
+    for(i = 1; i < 12; i++) {
         if (is_new[i])
             status_bar_new(i);
         else if (is_active[i])

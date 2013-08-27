@@ -1338,7 +1338,7 @@ void
 cons_alert(void)
 {
     if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
+        status_bar_new(1);
     }
 }
 
