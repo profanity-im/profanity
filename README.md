@@ -1,7 +1,7 @@
 Profanity
 =========
 
-Profanity is a console based jabber client inspired by [Irssi](http://www.irssi.org/),
+Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.org/),
 
 ![alt tag](http://www.profanity.im/images/prof-1.png)
 
