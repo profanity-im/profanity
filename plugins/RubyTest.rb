@@ -37,7 +37,7 @@ module RubyTest
             Prof::cons_show("RubyTest: timer fired.")
             recipient = Prof::get_current_recipient
             if recipient
-                Prof::cons_show("          current recipient = " + recipient)
+                Prof::cons_show("  current recipient = " + recipient)
             end
             Prof::cons_alert
         }
