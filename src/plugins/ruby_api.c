@@ -43,7 +43,7 @@ ruby_api_cons_show(VALUE self, VALUE v_message)
     if (message != NULL) {
         api_cons_show(message);
     }
-    return self;
+    return Qnil;
 }
 
 static VALUE
