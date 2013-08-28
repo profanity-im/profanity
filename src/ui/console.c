@@ -140,7 +140,8 @@ void
 cons_show_incoming_message(const char * const short_from, const int win_index)
 {
     ProfWin *console = wins_get_console();
-    int ui_index = win_index + 1;
+
+    int ui_index = win_index;
     if (ui_index == 10) {
         ui_index = 0;
     }
