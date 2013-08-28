@@ -439,7 +439,6 @@ get_next_available_win_num(GList *used)
             int curr_num = GPOINTER_TO_INT(curr->data);
             if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
                     ((last_num == 9) && (curr_num != 0))) {
-                g_list_free(curr);
                 result = last_num + 1;
                 if (result == 10) {
                     result = 0;

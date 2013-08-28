@@ -331,16 +331,16 @@ wins_tidy(void)
         int num = 1;
         GList *curr = keys;
         while (curr != NULL) {
-            ProfWin *window = g_hash_table_lookup(windows, GINT_TO_POINTER(curr->data));
+            ProfWin *window = g_hash_table_lookup(windows, curr->data);
             if (num == 10) {
-                g_hash_table_insert(windows, GINT_TO_POINTER(0), window);
+                g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
                 if (window->unread > 0) {
                     status_bar_new(0);
                 } else {
                     status_bar_active(0);
                 }
             } else {
-                g_hash_table_insert(windows, GINT_TO_POINTER(num), window);
+                g_hash_table_insert(new_windows, GINT_TO_POINTER(num), window);
                 if (window->unread > 0) {
                     status_bar_new(num);
                 } else {
