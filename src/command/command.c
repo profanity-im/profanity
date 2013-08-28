@@ -3026,21 +3026,20 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else {
         index = atoi(args[0]);
-        if (index == 0) {
-            index = 9;
-        } else if (index != 10) {
-            index--;
-        }
     }
 
-    if (index == 0) {
+    if (index < 0 || index == 10) {
+        cons_show("No such window exists.");
+        return TRUE;
+    }
+
+    if (index == 1) {
         cons_show("Cannot close console window.");
         return TRUE;
     }
 
-    if (index > 9 || index < 0) {
-        cons_show("No such window exists.");
-        return TRUE;
+    if (index == 0) {
+        index = 10;
     }
 
     if (!ui_win_exists(index)) {
@@ -3055,11 +3054,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 
     // close the window
     ui_close_win(index);
-    int ui_index = index + 1;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-    cons_show("Closed window %d", ui_index);
+    cons_show("Closed window %d", index);
 
     return TRUE;
 }
