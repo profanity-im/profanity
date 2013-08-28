@@ -45,6 +45,7 @@ static int dirty;
 static GDateTime *last_time;
 
 static void _status_bar_update_time(void);
+static void _update_win_statuses(void);
 
 void
 create_status_bar(void)
@@ -87,13 +88,7 @@ status_bar_refresh(void)
 
     if (dirty) {
         _status_bar_update_time();
-        int i;
-        for(i = 1; i < 12; i++) {
-            if (is_new[i])
-                status_bar_new(i);
-            else if (is_active[i])
-                status_bar_active(i);
-        }
+        _update_win_statuses();
         wrefresh(status_bar);
         inp_put_back();
         dirty = FALSE;
@@ -105,7 +100,7 @@ status_bar_refresh(void)
 void
 status_bar_resize(void)
 {
-    int rows, cols, i;
+    int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
     mvwin(status_bar, rows-2, 0);
@@ -116,12 +111,7 @@ status_bar_resize(void)
     mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    for(i = 1; i < 12; i++) {
-        if (is_new[i])
-            status_bar_new(i);
-        else if (is_active[i])
-            status_bar_active(i);
-    }
+    _update_win_statuses();
 
     if (message != NULL)
         mvwprintw(status_bar, 0, 10, message);
@@ -236,14 +226,7 @@ status_bar_print_message(const char * const msg)
     mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    int i;
-    for(i = 1; i < 12; i++) {
-        if (is_new[i])
-            status_bar_new(i);
-        else if (is_active[i])
-            status_bar_active(i);
-    }
-
+    _update_win_statuses();
     dirty = TRUE;
 }
 
@@ -290,14 +273,7 @@ status_bar_clear_message(void)
     mvwprintw(status_bar, 0, cols - 34, _active);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    int i;
-    for(i = 1; i < 12; i++) {
-        if (is_new[i])
-            status_bar_new(i);
-        else if (is_active[i])
-            status_bar_active(i);
-    }
-
+    _update_win_statuses();
     dirty = TRUE;
 }
 
@@ -318,4 +294,16 @@ _status_bar_update_time(void)
     g_free(date_fmt);
 
     dirty = TRUE;
+}
+
+static void
+_update_win_statuses(void)
+{
+    int i;
+    for(i = 1; i < 12; i++) {
+        if (is_new[i])
+            status_bar_new(i);
+        else if (is_active[i])
+            status_bar_active(i);
+    }
 }
