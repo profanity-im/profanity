@@ -345,7 +345,7 @@ ui_incoming_msg(const char * const from, const char * const message,
         }
     }
 
-    int ui_index = num + 1;
+    int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
     }
@@ -1226,7 +1226,7 @@ ui_room_message(const char * const room_jid, const char * const nick,
         window->unread++;
     }
 
-    int ui_index = num + 1;
+    int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
     }
