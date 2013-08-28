@@ -319,8 +319,8 @@ wins_tidy(void)
     // find first free num TODO - Will sort again
     int next_available = get_next_available_win_num(keys);
 
-    // found gap (next available after last window)
-    if (cmp_win_num(GINT_TO_POINTER(next_available), GINT_TO_POINTER(last_num)) > 0) {
+    // found gap (next available before last window)
+    if (cmp_win_num(GINT_TO_POINTER(next_available), GINT_TO_POINTER(last_num)) < 0) {
         tidy_required = TRUE;
     }
 
