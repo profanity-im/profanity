@@ -87,6 +87,13 @@ status_bar_refresh(void)
 
     if (dirty) {
         _status_bar_update_time();
+        int i;
+        for(i = 1; i < 12; i++) {
+            if (is_new[i])
+                status_bar_new(i);
+            else if (is_active[i])
+                status_bar_active(i);
+        }
         wrefresh(status_bar);
         inp_put_back();
         dirty = FALSE;
