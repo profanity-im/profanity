@@ -13,6 +13,7 @@ def prof_on_connect():
 
 def prof_on_message_received(jid, message):
     prof.cons_show("python-test: on_message_received, " + jid + ", " + message)
+    prof.cons_alert()
 
 def cmd_python(msg):
     if msg:
@@ -31,6 +32,3 @@ def timer_test():
         prof.cons_show("  current recipient = " + recipient)
     prof.cons_alert()
 
-def on_message_received(jid, message):
-    prof.cons_show("python-test: on_message_received, jid = " + jid + ", message = " + message)
-    prof.cons_alert()

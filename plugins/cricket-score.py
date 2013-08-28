@@ -7,7 +7,6 @@ score_url = None
 
 summary = None
 
-# hooks
 def prof_init(version, status):
     if score_url:
         prof.register_timed(get_scores, 60)
@@ -21,7 +20,6 @@ def prof_on_start():
     if score_url:
         get_scores()
 
-# commands
 def cmd_cricket():
     global score_url
     global summary
@@ -51,7 +49,6 @@ def cmd_cricket():
     prof.cons_show("  " + summary)
     prof.cons_alert()
 
-# local functions
 def get_scores():
     global score_url
     global summary

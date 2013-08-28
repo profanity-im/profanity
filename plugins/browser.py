@@ -5,7 +5,6 @@ import re
 
 lastlink = {}
 
-# hooks
 def prof_init(version, status):
     prof.register_command("/browser", 0, 1,
         "/browser [url]",
@@ -20,7 +19,6 @@ def prof_on_message_received(jid, message):
     if (len(links) > 0):
         lastlink[jid] = links[len(links)-1]
 
-# commands
 def cmd_browser(url):
     global lastlink
     link = None
