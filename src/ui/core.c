@@ -531,7 +531,7 @@ ui_close_all_wins(void)
     int curr = 0, count = 0;
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-    for (curr = 1; curr <= 9; curr++) {
+    for (curr = 2; curr <= 10; curr++) {
         if (ui_win_exists(curr)) {
             if (conn_status == JABBER_CONNECTED) {
                 ui_close_connected_win(curr);
@@ -550,7 +550,7 @@ ui_close_read_wins(void)
     int curr = 0, count = 0;
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-    for (curr = 1; curr <= 9; curr++) {
+    for (curr = 2; curr <= 10; curr++) {
         if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
             if (conn_status == JABBER_CONNECTED) {
                 ui_close_connected_win(curr);
@@ -615,7 +615,6 @@ void
 ui_close_win(int index)
 {
     wins_close_by_num(index);
-    status_bar_inactive(index);
     status_bar_active(1);
     title_bar_title();
 

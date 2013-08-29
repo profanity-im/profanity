@@ -140,6 +140,7 @@ wins_close_by_num(int i)
             wins_refresh_current();
         }
         g_hash_table_remove(windows, GINT_TO_POINTER(i));
+        status_bar_inactive(i);
     }
 }
 
