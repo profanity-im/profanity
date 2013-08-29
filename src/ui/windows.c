@@ -332,10 +332,7 @@ wins_tidy(void)
     }
 
     if (tidy_required) {
-        int i = 0;
-        for (i = 0; i < 12; i++) {
-            status_bar_inactive(i);
-        }
+        status_bar_set_all_inactive();
         GHashTable *new_windows = g_hash_table_new_full(g_direct_hash,
             g_direct_equal, NULL, (GDestroyNotify)win_free);
 

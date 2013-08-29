@@ -621,8 +621,8 @@ void
 ui_close_current(void)
 {
     int current_index = wins_get_current_num();
-    wins_close_current();
     status_bar_inactive(current_index);
+    wins_close_current();
     status_bar_active(1);
     title_bar_title();
 }

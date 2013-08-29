@@ -130,6 +130,20 @@ status_bar_resize(void)
 }
 
 void
+status_bar_set_all_inactive(void)
+{
+    int i = 0;
+    for (i = 0; i < 12; i++) {
+        is_active[i] = FALSE;
+        is_new[i] = FALSE;
+        _mark_inactive(i);
+    }
+
+    g_hash_table_remove_all(remaining_active);
+    g_hash_table_remove_all(remaining_new);
+}
+
+void
 status_bar_inactive(const int win)
 {
     int true_win = win;

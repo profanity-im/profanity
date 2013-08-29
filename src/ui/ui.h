@@ -225,6 +225,7 @@ void status_bar_inactive(const int win);
 void status_bar_active(const int win);
 void status_bar_new(const int win);
 void status_bar_update_time(void);
+void status_bar_set_all_inactive(void);
 
 // input window actions
 wint_t inp_get_char(char *input, int *size);
