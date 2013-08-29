@@ -144,6 +144,7 @@ static gboolean _cmd_tiny(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_titlebar(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_who(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_win(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_wins(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_xa(gchar **args, struct cmd_help_t help);
 
@@ -408,6 +409,14 @@ static struct cmd_t command_defs[] =
           "",
           "Example : /nick kai hansen",
           "Example : /nick bob",
+          NULL } } },
+
+    { "/win",
+        _cmd_win, parse_args, 1, 1, NULL,
+        { "/win num", "View a window.",
+        { "/win num",
+          "------------------",
+          "Show the contents of a specific window in the main window area.",
           NULL } } },
 
     { "/wins",
@@ -1196,8 +1205,6 @@ cmd_execute_default(const char * const inp)
             break;
     }
 
-    free(recipient);
-
     return TRUE;
 }
 
@@ -1226,7 +1233,6 @@ _cmd_complete_parameters(char *input, int *size)
     if (ui_current_win_type() == WIN_MUC) {
         char *recipient = ui_current_recipient();
         Autocomplete nick_ac = muc_get_roster_ac(recipient);
-        free(recipient);
         if (nick_ac != NULL) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
@@ -1559,7 +1565,7 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    char *subcmd, *jid, *bare_jid;
+    char *subcmd, *jid;
     subcmd = args[0];
     jid = args[1];
 
@@ -1583,49 +1589,47 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (jid != NULL) {
-        jid = strdup(jid);
-    } else {
+    if (jid == NULL) {
         jid = ui_current_recipient();
     }
 
-    bare_jid = strtok(jid, "/");
+    Jid *jidp = jid_create(jid);
 
     if (strcmp(subcmd, "allow") == 0) {
-        presence_subscription(bare_jid, PRESENCE_SUBSCRIBED);
-        cons_show("Accepted subscription for %s", bare_jid);
-        log_info("Accepted subscription for %s", bare_jid);
+        presence_subscription(jidp->barejid, PRESENCE_SUBSCRIBED);
+        cons_show("Accepted subscription for %s", jidp->barejid);
+        log_info("Accepted subscription for %s", jidp->barejid);
     } else if (strcmp(subcmd, "deny") == 0) {
-        presence_subscription(bare_jid, PRESENCE_UNSUBSCRIBED);
-        cons_show("Deleted/denied subscription for %s", bare_jid);
-        log_info("Deleted/denied subscription for %s", bare_jid);
+        presence_subscription(jidp->barejid, PRESENCE_UNSUBSCRIBED);
+        cons_show("Deleted/denied subscription for %s", jidp->barejid);
+        log_info("Deleted/denied subscription for %s", jidp->barejid);
     } else if (strcmp(subcmd, "request") == 0) {
-        presence_subscription(bare_jid, PRESENCE_SUBSCRIBE);
-        cons_show("Sent subscription request to %s.", bare_jid);
-        log_info("Sent subscription request to %s.", bare_jid);
+        presence_subscription(jidp->barejid, PRESENCE_SUBSCRIBE);
+        cons_show("Sent subscription request to %s.", jidp->barejid);
+        log_info("Sent subscription request to %s.", jidp->barejid);
     } else if (strcmp(subcmd, "show") == 0) {
-        PContact contact = roster_get_contact(bare_jid);
+        PContact contact = roster_get_contact(jidp->barejid);
         if ((contact == NULL) || (p_contact_subscription(contact) == NULL)) {
             if (win_type == WIN_CHAT) {
-                ui_current_print_line("No subscription information for %s.", bare_jid);
+                ui_current_print_line("No subscription information for %s.", jidp->barejid);
             } else {
-                cons_show("No subscription information for %s.", bare_jid);
+                cons_show("No subscription information for %s.", jidp->barejid);
             }
         } else {
             if (win_type == WIN_CHAT) {
                 if (p_contact_pending_out(contact)) {
                     ui_current_print_line("%s subscription status: %s, request pending.",
-                        bare_jid, p_contact_subscription(contact));
+                        jidp->barejid, p_contact_subscription(contact));
                 } else {
-                    ui_current_print_line("%s subscription status: %s.", bare_jid,
+                    ui_current_print_line("%s subscription status: %s.", jidp->barejid,
                         p_contact_subscription(contact));
                 }
             } else {
                 if (p_contact_pending_out(contact)) {
                     cons_show("%s subscription status: %s, request pending.",
-                        bare_jid, p_contact_subscription(contact));
+                        jidp->barejid, p_contact_subscription(contact));
                 } else {
-                    cons_show("%s subscription status: %s.", bare_jid,
+                    cons_show("%s subscription status: %s.", jidp->barejid,
                         p_contact_subscription(contact));
                 }
             }
@@ -1634,7 +1638,8 @@ _cmd_sub(gchar **args, struct cmd_help_t help)
         cons_show("Usage: %s", help.usage);
     }
 
-    free(jid);
+    jid_destroy(jidp);
+
     return TRUE;
 }
 
@@ -1670,6 +1675,19 @@ _cmd_wins(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "prune") == 0) {
         ui_prune_wins();
     }
+    return TRUE;
+}
+
+static gboolean
+_cmd_win(gchar **args, struct cmd_help_t help)
+{
+    int num = atoi(args[0]);
+    if (ui_win_exists(num)) {
+        ui_switch_win(num);
+    } else {
+        cons_show("Window %d does not exist.", num);
+    }
+
     return TRUE;
 }
 
@@ -1833,7 +1851,7 @@ _cmd_about(gchar **args, struct cmd_help_t help)
     cons_show("");
     cons_about();
     if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
+        status_bar_new(1);
     }
     return TRUE;
 }
@@ -2016,8 +2034,6 @@ _cmd_who(gchar **args, struct cmd_help_t help)
                     ui_room_roster(room, filtered, presence);
                 }
 
-                free(room);
-
             // not in groupchat window
             } else {
                 cons_show("");
@@ -2137,7 +2153,7 @@ _cmd_who(gchar **args, struct cmd_help_t help)
     }
 
     if (win_type != WIN_CONSOLE && win_type != WIN_MUC) {
-        status_bar_new(0);
+        status_bar_new(1);
     }
 
     return TRUE;
@@ -2154,11 +2170,6 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    if (ui_windows_full()) {
-        cons_show_error("Windows all used, close a window and try again.");
         return TRUE;
     }
 
@@ -2181,8 +2192,6 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
         } else {
             ui_current_print_line("No such participant \"%s\" in room.", usr);
         }
-
-        free(room_name);
 
         return TRUE;
 
@@ -2421,11 +2430,6 @@ _cmd_duck(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (ui_windows_full()) {
-        cons_show_error("Windows all used, close a window and try again.");
-        return TRUE;
-    }
-
     // if no duck win open, create it and send a help command
     if (!ui_duck_exists()) {
         ui_create_duck_win();
@@ -2581,8 +2585,6 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             break;
     }
 
-    free(recipient);
-
     return TRUE;
 }
 
@@ -2611,7 +2613,6 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
                 }
-                free(recipient);
             } else {
                 cons_show("No nickname supplied to /caps in chat room.");
             }
@@ -2652,7 +2653,6 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
                     cons_show_caps(jid->resourcepart, resource);
                     jid_destroy(jid);
                 }
-                free(recipient);
             }
             break;
         default:
@@ -2689,7 +2689,6 @@ _cmd_software(gchar **args, struct cmd_help_t help)
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
                 }
-                free(recipient);
             } else {
                 cons_show("No nickname supplied to /software in chat room.");
             }
@@ -2715,7 +2714,6 @@ _cmd_software(gchar **args, struct cmd_help_t help)
             } else {
                 recipient = ui_current_recipient();
                 iq_send_software_version(recipient);
-                free(recipient);
             }
             break;
         default:
@@ -2732,11 +2730,6 @@ _cmd_join(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    if (ui_windows_full()) {
-        cons_show_error("Windows all used, close a window and try again.");
         return TRUE;
     }
 
@@ -2887,7 +2880,6 @@ _cmd_bookmark(gchar **args, struct cmd_help_t help)
         cons_show_bookmarks(bookmark_get_list());
     } else {
         gboolean autojoin = FALSE;
-        gboolean jid_release = FALSE;
         gchar *jid = NULL;
         gchar *nick = NULL;
         int idx = 1;
@@ -2913,7 +2905,6 @@ _cmd_bookmark(gchar **args, struct cmd_help_t help)
 
             if (win_type == WIN_MUC) {
                 jid = ui_current_recipient();
-                jid_release = TRUE;
                 nick = muc_get_room_nick(jid);
             } else {
                 cons_show("Usage: %s", help.usage);
@@ -2927,10 +2918,6 @@ _cmd_bookmark(gchar **args, struct cmd_help_t help)
             bookmark_remove(jid, autojoin);
         } else {
             cons_show("Usage: %s", help.usage);
-        }
-
-        if (jid_release) {
-            free(jid);
         }
     }
 
@@ -3024,16 +3011,13 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
                 }
 
                 ui_outgoing_msg("me", recipient, tiny);
-                free(recipient);
             } else if (win_type == WIN_PRIVATE) {
                 char *recipient = ui_current_recipient();
                 message_send(tiny, recipient);
                 ui_outgoing_msg("me", recipient, tiny);
-                free(recipient);
             } else { // groupchat
                 char *recipient = ui_current_recipient();
                 message_send_groupchat(tiny, recipient);
-                free(recipient);
             }
             free(tiny);
         } else {
@@ -3058,21 +3042,12 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     int index = 0;
-    int curr = 0;
     int count = 0;
 
     if (args[0] == NULL) {
         index = ui_current_win_index();
     } else if (strcmp(args[0], "all") == 0) {
-        for (curr = 1; curr <= 9; curr++) {
-            if (ui_win_exists(curr)) {
-                if (conn_status == JABBER_CONNECTED) {
-                    ui_close_connected_win(curr);
-                }
-                ui_close_win(curr);
-                count++;
-            }
-        }
+        count = ui_close_all_wins();
         if (count == 0) {
             cons_show("No windows to close.");
         } else if (count == 1) {
@@ -3082,15 +3057,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         }
         return TRUE;
     } else if (strcmp(args[0], "read") == 0) {
-        for (curr = 1; curr <= 9; curr++) {
-            if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
-                if (conn_status == JABBER_CONNECTED) {
-                    ui_close_connected_win(curr);
-                }
-                ui_close_win(curr);
-                count++;
-            }
-        }
+        count = ui_close_read_wins();
         if (count == 0) {
             cons_show("No windows to close.");
         } else if (count == 1) {
@@ -3101,28 +3068,26 @@ _cmd_close(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else {
         index = atoi(args[0]);
-        if (index == 0) {
-            index = 9;
-        } else if (index != 10) {
-            index--;
-        }
     }
 
-    if (index == 0) {
+    if (index < 0 || index == 10) {
+        cons_show("No such window exists.");
+        return TRUE;
+    }
+
+    if (index == 1) {
         cons_show("Cannot close console window.");
         return TRUE;
     }
 
-    if (index > 9 || index < 0) {
-        cons_show("No such window exists.");
-        return TRUE;
+    if (index == 0) {
+        index = 10;
     }
 
     if (!ui_win_exists(index)) {
         cons_show("Window is not open.");
         return TRUE;
     }
-
 
     // handle leaving rooms, or chat
     if (conn_status == JABBER_CONNECTED) {
@@ -3131,11 +3096,7 @@ _cmd_close(gchar **args, struct cmd_help_t help)
 
     // close the window
     ui_close_win(index);
-    int ui_index = index + 1;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
-    cons_show("Closed window %d", ui_index);
+    cons_show("Closed window %d", index);
 
     return TRUE;
 }

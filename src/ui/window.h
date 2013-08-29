@@ -23,6 +23,14 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "config.h"
+
+#ifdef HAVE_NCURSESW_NCURSES_H
+#include <ncursesw/ncurses.h>
+#elif HAVE_NCURSES_H
+#include <ncurses.h>
+#endif
+
 #include "contact.h"
 
 #define PAD_SIZE 1000

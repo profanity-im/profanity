@@ -40,10 +40,6 @@
 #include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
-#define NUM_WINS 10
-
-// holds console at index 0 and chat wins 1 through to 9
-ProfWin* windows[NUM_WINS];
 
 // ui startup and control
 void ui_init(void);
@@ -56,15 +52,15 @@ void ui_idle(void);
 void ui_handle_special_keys(const wint_t * const ch, const char * const inp,
     const int size);
 void ui_switch_win(const int i);
-gboolean ui_windows_full(void);
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
 void ui_new_chat_win(const char * const to);
 void ui_print_error_from_recipient(const char * const from, const char *err_msg);
 void ui_print_system_msg_from_recipient(const char * const from, const char *message);
 gint ui_unread(void);
-void ui_console_dirty(void);
 void ui_close_connected_win(int index);
+int ui_close_all_wins(void);
+int ui_close_read_wins(void);
 
 // current window actions
 void ui_close_current(void);
@@ -149,7 +145,6 @@ void title_bar_set_typing(gboolean is_typing);
 void title_bar_draw(void);
 
 // console window actions
-ProfWin* cons_create(void);
 void cons_show(const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);
@@ -230,6 +225,7 @@ void status_bar_inactive(const int win);
 void status_bar_active(const int win);
 void status_bar_new(const int win);
 void status_bar_update_time(void);
+void status_bar_set_all_inactive(void);
 
 // input window actions
 wint_t inp_get_char(char *input, int *size);

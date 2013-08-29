@@ -35,8 +35,6 @@
 #include "config/theme.h"
 #include "ui/window.h"
 
-#define CONS_WIN_TITLE "_cons"
-
 ProfWin*
 win_create(const char * const title, int cols, win_type_t type)
 {
@@ -59,8 +57,6 @@ win_free(ProfWin* window)
 {
     delwin(window->win);
     free(window->from);
-    window->from = NULL;
-    window->win = NULL;
     free(window);
     window = NULL;
 }

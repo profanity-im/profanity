@@ -14,6 +14,7 @@ profanity_SOURCES = \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c src/ui/notifier.h \
+    src/ui/windows.c src/ui/windows.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/history.h src/tools/parser.c \
 	src/tools/parser.h \
@@ -42,6 +43,7 @@ tests_testsuite_SOURCES = \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c src/ui/notifier.h \
+    src/ui/windows.c src/ui/windows.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/history.h src/tools/parser.c \
 	src/tools/parser.h \
