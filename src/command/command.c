@@ -143,6 +143,7 @@ static gboolean _cmd_tiny(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_titlebar(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_vercheck(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_who(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_win(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_wins(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_xa(gchar **args, struct cmd_help_t help);
 
@@ -407,6 +408,14 @@ static struct cmd_t command_defs[] =
           "",
           "Example : /nick kai hansen",
           "Example : /nick bob",
+          NULL } } },
+
+    { "/win",
+        _cmd_win, parse_args, 1, 1, NULL,
+        { "/win num", "View a window.",
+        { "/win num",
+          "------------------",
+          "Show the contents of a specific window in the main window area.",
           NULL } } },
 
     { "/wins",
@@ -1659,6 +1668,19 @@ _cmd_wins(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "prune") == 0) {
         ui_prune_wins();
     }
+    return TRUE;
+}
+
+static gboolean
+_cmd_win(gchar **args, struct cmd_help_t help)
+{
+    int num = atoi(args[0]);
+    if (ui_win_exists(num)) {
+        ui_switch_win(num);
+    } else {
+        cons_show("Window %d does not exist.", num);
+    }
+
     return TRUE;
 }
 
