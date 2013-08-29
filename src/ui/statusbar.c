@@ -40,7 +40,9 @@ static char *message = NULL;
 //                          1  2  3  4  5  6  7  8  9  0  >
 static char _active[34] = "[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]";
 static int is_active[12];
+static GHashTable *remaining_active;
 static int is_new[12];
+static GHashTable *remaining_new;
 static int dirty;
 static GDateTime *last_time;
 
@@ -59,6 +61,8 @@ create_status_bar(void)
         is_active[i] = FALSE;
         is_new[i] = FALSE;
     }
+    remaining_active = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
+    remaining_new = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
 
     status_bar = newwin(1, cols, rows-2, 0);
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
@@ -129,16 +133,55 @@ status_bar_inactive(const int win)
     if (true_win == 0) {
         true_win = 10;
     }
-    is_active[true_win] = FALSE;
-    is_new[true_win] = FALSE;
 
-    int active_pos = 1 + ((true_win-1) * 3);
+    // extra windows
+    if (true_win > 10) {
+        g_hash_table_remove(remaining_active, GINT_TO_POINTER(true_win));
+        g_hash_table_remove(remaining_new, GINT_TO_POINTER(true_win));
 
-    int cols = getmaxx(stdscr);
+        // still have new windows
+        if (g_hash_table_size(remaining_new) != 0) {
+            is_active[11] = TRUE;
+            is_new[11] = TRUE;
+            int active_pos = 1 + ((11-1) * 3);
+            int cols = getmaxx(stdscr);
+            wattron(status_bar, COLOUR_STATUS_NEW);
+            wattron(status_bar, A_BLINK);
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+            wattroff(status_bar, COLOUR_STATUS_NEW);
+            wattroff(status_bar, A_BLINK);
+            dirty = TRUE;
 
-    mvwaddch(status_bar, 0, cols - 34 + active_pos, ' ');
+        // still have active winsows
+        } else if (g_hash_table_size(remaining_active) != 0) {
+            is_active[11] = TRUE;
+            is_new[11] = FALSE;
+            int active_pos = 1 + ((11-1) * 3);
+            int cols = getmaxx(stdscr);
+            wattron(status_bar, COLOUR_STATUS_ACTIVE);
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+            wattroff(status_bar, COLOUR_STATUS_ACTIVE);
+            dirty = TRUE;
 
-    dirty = TRUE;
+        // no active or new windows
+        } else {
+            is_active[11] = FALSE;
+            is_new[11] = FALSE;
+            int active_pos = 1 + ((11-1) * 3);
+            int cols = getmaxx(stdscr);
+            mvwaddch(status_bar, 0, cols - 34 + active_pos, ' ');
+            dirty = TRUE;
+        }
+
+    // visible window indicators
+    } else {
+        is_active[true_win] = FALSE;
+        is_new[true_win] = FALSE;
+        int active_pos = 1 + ((true_win-1) * 3);
+        int cols = getmaxx(stdscr);
+        mvwaddch(status_bar, 0, cols - 34 + active_pos, ' ');
+        dirty = TRUE;
+    }
 }
 
 void
@@ -148,26 +191,56 @@ status_bar_active(const int win)
     if (true_win == 0) {
         true_win = 10;
     }
-    is_active[true_win] = TRUE;
-    is_new[true_win] = FALSE;
 
-    int active_pos = 1 + ((true_win-1) * 3);
+    // extra windows
+    if (true_win > 10) {
+        g_hash_table_add(remaining_active, GINT_TO_POINTER(true_win));
+        g_hash_table_remove(remaining_new, GINT_TO_POINTER(true_win));
 
-    int cols = getmaxx(stdscr);
+        // still have new windows
+        if (g_hash_table_size(remaining_new) != 0) {
+            is_active[11] = TRUE;
+            is_new[11] = TRUE;
+            int active_pos = 1 + ((11-1) * 3);
+            int cols = getmaxx(stdscr);
+            wattron(status_bar, COLOUR_STATUS_NEW);
+            wattron(status_bar, A_BLINK);
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+            wattroff(status_bar, COLOUR_STATUS_NEW);
+            wattroff(status_bar, A_BLINK);
+            dirty = TRUE;
 
-    wattron(status_bar, COLOUR_STATUS_ACTIVE);
+        // only active windows
+        } else {
+            is_active[11] = TRUE;
+            is_new[11] = FALSE;
+            int active_pos = 1 + ((11-1) * 3);
+            int cols = getmaxx(stdscr);
+            wattron(status_bar, COLOUR_STATUS_ACTIVE);
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+            wattroff(status_bar, COLOUR_STATUS_ACTIVE);
+            dirty = TRUE;
+        }
 
-    if (true_win == 10) {
-        mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
-    } else if (true_win > 10) {
-        mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+    // visible winsow indicators
     } else {
-        mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", true_win);
+        is_active[true_win] = TRUE;
+        is_new[true_win] = FALSE;
+        int active_pos = 1 + ((true_win-1) * 3);
+        int cols = getmaxx(stdscr);
+        wattron(status_bar, COLOUR_STATUS_ACTIVE);
+
+        if (true_win == 10) {
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
+        } else if (true_win > 10) {
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+        } else {
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", true_win);
+        }
+
+        wattroff(status_bar, COLOUR_STATUS_ACTIVE);
+        dirty = TRUE;
     }
-
-    wattroff(status_bar, COLOUR_STATUS_ACTIVE);
-
-    dirty = TRUE;
 }
 
 void
@@ -177,28 +250,42 @@ status_bar_new(const int win)
     if (true_win == 0) {
         true_win = 10;
     }
-    is_active[true_win] = TRUE;
-    is_new[true_win] = TRUE;
 
-    int active_pos = 1 + ((true_win-1) * 3);
+    if (true_win > 10) {
+        g_hash_table_add(remaining_active, GINT_TO_POINTER(true_win));
+        g_hash_table_add(remaining_new, GINT_TO_POINTER(true_win));
 
-    int cols = getmaxx(stdscr);
-
-    wattron(status_bar, COLOUR_STATUS_NEW);
-    wattron(status_bar, A_BLINK);
-
-    if (true_win == 10) {
-        mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
-    } else if (true_win > 10) {
+        is_active[11] = TRUE;
+        is_new[11] = TRUE;
+        int active_pos = 1 + ((11-1) * 3);
+        int cols = getmaxx(stdscr);
+        wattron(status_bar, COLOUR_STATUS_NEW);
+        wattron(status_bar, A_BLINK);
         mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+        wattroff(status_bar, COLOUR_STATUS_NEW);
+        wattroff(status_bar, A_BLINK);
+        dirty = TRUE;
+
     } else {
-        mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", true_win);
+        is_active[true_win] = TRUE;
+        is_new[true_win] = TRUE;
+        int active_pos = 1 + ((true_win-1) * 3);
+        int cols = getmaxx(stdscr);
+        wattron(status_bar, COLOUR_STATUS_NEW);
+        wattron(status_bar, A_BLINK);
+
+        if (true_win == 10) {
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
+        } else if (true_win > 10) {
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+        } else {
+            mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", true_win);
+        }
+
+        wattroff(status_bar, COLOUR_STATUS_NEW);
+        wattroff(status_bar, A_BLINK);
+        dirty = TRUE;
     }
-
-    wattroff(status_bar, COLOUR_STATUS_NEW);
-    wattroff(status_bar, A_BLINK);
-
-    dirty = TRUE;
 }
 
 void
@@ -301,9 +388,42 @@ _update_win_statuses(void)
 {
     int i;
     for(i = 1; i < 12; i++) {
-        if (is_new[i])
-            status_bar_new(i);
-        else if (is_active[i])
-            status_bar_active(i);
+        if (is_new[i]) {
+            int active_pos = 1 + ((i-1) * 3);
+            int cols = getmaxx(stdscr);
+            wattron(status_bar, COLOUR_STATUS_NEW);
+            wattron(status_bar, A_BLINK);
+
+            if (i == 10) {
+                mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
+            } else if (i > 10) {
+                mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+            } else {
+                mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", i);
+            }
+
+            wattroff(status_bar, COLOUR_STATUS_NEW);
+            wattroff(status_bar, A_BLINK);
+        }
+        else if (is_active[i]) {
+            int active_pos = 1 + ((i-1) * 3);
+            int cols = getmaxx(stdscr);
+            wattron(status_bar, COLOUR_STATUS_ACTIVE);
+
+            if (i == 10) {
+                mvwprintw(status_bar, 0, cols - 34 + active_pos, "0");
+            } else if (i > 10) {
+                mvwprintw(status_bar, 0, cols - 34 + active_pos, ">");
+            } else {
+                mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", i);
+            }
+
+            wattroff(status_bar, COLOUR_STATUS_ACTIVE);
+        }
+        else {
+            int active_pos = 1 + ((i-1) * 3);
+            int cols = getmaxx(stdscr);
+            mvwaddch(status_bar, 0, cols - 34 + active_pos, ' ');
+        }
     }
 }
