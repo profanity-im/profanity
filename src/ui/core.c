@@ -528,18 +528,26 @@ ui_close_connected_win(int index)
 int
 ui_close_all_wins(void)
 {
-    int curr = 0, count = 0;
+    int count = 0;
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-    for (curr = 2; curr <= 10; curr++) {
-        if (ui_win_exists(curr)) {
+    GList *win_nums = wins_get_nums();
+    GList *curr = win_nums;
+
+    while (curr != NULL) {
+        int num = GPOINTER_TO_INT(curr->data);
+        if (num != 1) {
             if (conn_status == JABBER_CONNECTED) {
-                ui_close_connected_win(curr);
+                ui_close_connected_win(num);
             }
-            ui_close_win(curr);
+            ui_close_win(num);
             count++;
         }
+        curr = g_list_next(curr);
     }
+
+    g_list_free(curr);
+    g_list_free(win_nums);
 
     return count;
 }
@@ -547,18 +555,26 @@ ui_close_all_wins(void)
 int
 ui_close_read_wins(void)
 {
-    int curr = 0, count = 0;
+    int count = 0;
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
-    for (curr = 2; curr <= 10; curr++) {
-        if (ui_win_exists(curr) && (ui_win_unread(curr) == 0)) {
+    GList *win_nums = wins_get_nums();
+    GList *curr = win_nums;
+
+    while (curr != NULL) {
+        int num = GPOINTER_TO_INT(curr->data);
+        if ((num != 1) && (ui_win_unread(num) == 0)) {
             if (conn_status == JABBER_CONNECTED) {
-                ui_close_connected_win(curr);
+                ui_close_connected_win(num);
             }
-            ui_close_win(curr);
+            ui_close_win(num);
             count++;
         }
+        curr = g_list_next(curr);
     }
+
+    g_list_free(curr);
+    g_list_free(win_nums);
 
     return count;
 }

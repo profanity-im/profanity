@@ -70,6 +70,12 @@ wins_get_current(void)
     return g_hash_table_lookup(windows, GINT_TO_POINTER(current));
 }
 
+GList *
+wins_get_nums(void)
+{
+    return g_hash_table_get_keys(windows);
+}
+
 void
 wins_set_current_by_num(int i)
 {

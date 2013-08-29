@@ -47,5 +47,6 @@ void wins_lost_connection(void);
 gboolean wins_tidy(void);
 GSList * wins_create_summary(void);
 void wins_destroy(void);
+GList * wins_get_nums(void);
 
 #endif
