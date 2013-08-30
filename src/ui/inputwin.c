@@ -526,34 +526,34 @@ _handle_alt_key(char *input, int *size, int key)
     switch (key)
     {
         case '1':
-            ui_switch_win(0);
-            break;
-        case '2':
             ui_switch_win(1);
             break;
-        case '3':
+        case '2':
             ui_switch_win(2);
             break;
-        case '4':
+        case '3':
             ui_switch_win(3);
             break;
-        case '5':
+        case '4':
             ui_switch_win(4);
             break;
-        case '6':
+        case '5':
             ui_switch_win(5);
             break;
-        case '7':
+        case '6':
             ui_switch_win(6);
             break;
-        case '8':
+        case '7':
             ui_switch_win(7);
             break;
-        case '9':
+        case '8':
             ui_switch_win(8);
             break;
-        case '0':
+        case '9':
             ui_switch_win(9);
+            break;
+        case '0':
+            ui_switch_win(0);
             break;
         case 263:
         case 127:

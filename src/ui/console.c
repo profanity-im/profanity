@@ -35,42 +35,34 @@
 #include "config/theme.h"
 #include "ui/notifier.h"
 #include "ui/window.h"
+#include "ui/windows.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
-#define CONS_WIN_TITLE "_cons"
-
-static ProfWin* console;
-
 static void _cons_splash_logo(void);
 void _show_roster_contacts(GSList *list, gboolean show_groups);
-
-ProfWin *
-cons_create(void)
-{
-    int cols = getmaxx(stdscr);
-    console = win_create(CONS_WIN_TITLE, cols, WIN_CONSOLE);
-    return console;
-}
 
 void
 cons_show_time(void)
 {
+    ProfWin *console = wins_get_console();
     win_print_time(console, '-');
-    ui_console_dirty();
+    wins_refresh_console();
 }
 
 void
 cons_show_word(const char * const word)
 {
+    ProfWin *console = wins_get_console();
     wprintw(console->win, "%s", word);
-    ui_console_dirty();
+    wins_refresh_console();
 }
 
 void
 cons_debug(const char * const msg, ...)
 {
+    ProfWin *console = wins_get_console();
     if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
         va_list arg;
         va_start(arg, msg);
@@ -81,7 +73,7 @@ cons_debug(const char * const msg, ...)
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
 
-        ui_console_dirty();
+        wins_refresh_console();
         cons_alert();
 
         ui_current_page_off();
@@ -92,6 +84,7 @@ cons_debug(const char * const msg, ...)
 void
 cons_show(const char * const msg, ...)
 {
+    ProfWin *console = wins_get_console();
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
@@ -100,12 +93,13 @@ cons_show(const char * const msg, ...)
     wprintw(console->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-    ui_console_dirty();
+    wins_refresh_console();
 }
 
 void
 cons_show_error(const char * const msg, ...)
 {
+    ProfWin *console = wins_get_console();
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
@@ -117,13 +111,14 @@ cons_show_error(const char * const msg, ...)
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_typing(const char * const barejid)
 {
+    ProfWin *console = wins_get_console();
     PContact contact = roster_get_contact(barejid);
     const char * display_usr = NULL;
     if (p_contact_name(contact) != NULL) {
@@ -137,14 +132,16 @@ cons_show_typing(const char * const barejid)
     wprintw(console->win, "!! %s is typing a message...\n", display_usr);
     wattroff(console->win, COLOUR_TYPING);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_incoming_message(const char * const short_from, const int win_index)
 {
-    int ui_index = win_index + 1;
+    ProfWin *console = wins_get_console();
+
+    int ui_index = win_index;
     if (ui_index == 10) {
         ui_index = 0;
     }
@@ -153,13 +150,14 @@ cons_show_incoming_message(const char * const short_from, const int win_index)
     wprintw(console->win, "<< incoming from %s (%d)\n", short_from, ui_index);
     wattroff(console->win, COLOUR_INCOMING);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_about(void)
 {
+    ProfWin *console = wins_get_console();
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
@@ -198,13 +196,14 @@ cons_about(void)
 
     prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_check_version(gboolean not_available_msg)
 {
+    ProfWin *console = wins_get_console();
     char *latest_release = release_get_latest();
 
     if (latest_release != NULL) {
@@ -226,7 +225,7 @@ cons_check_version(gboolean not_available_msg)
                 }
             }
 
-            ui_console_dirty();
+            wins_refresh_console();
             cons_alert();
         }
     }
@@ -235,6 +234,7 @@ cons_check_version(gboolean not_available_msg)
 void
 cons_show_login_success(ProfAccount *account)
 {
+    ProfWin *console = wins_get_console();
     win_print_time(console, '-');
     wprintw(console->win, "%s logged in successfully, ", account->jid);
 
@@ -247,91 +247,28 @@ cons_show_login_success(ProfAccount *account)
     wprintw(console->win, " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
     wprintw(console->win, ".\n");
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_wins(void)
 {
-    int i = 0;
-    int count = 0;
-    int ui_index = 0;
-
+    ProfWin *console = wins_get_console();
     cons_show("");
     cons_show("Active windows:");
-    win_print_time(console, '-');
-    wprintw(console->win, "1: Console\n");
+    GSList *window_strings = wins_create_summary();
 
-    for (i = 1; i < NUM_WINS; i++) {
-        if (windows[i] != NULL) {
-            count++;
-        }
-    }
-
-    if (count != 0) {
-        for (i = 1; i < NUM_WINS; i++) {
-            if (windows[i] != NULL) {
-                ProfWin *window = windows[i];
-                win_print_time(console, '-');
-                ui_index = i + 1;
-                if (ui_index == 10) {
-                    ui_index = 0;
-                }
-
-                switch (window->type)
-                {
-                    case WIN_CHAT:
-                        wprintw(console->win, "%d: Chat %s", ui_index, window->from);
-                        PContact contact = roster_get_contact(window->from);
-
-                        if (contact != NULL) {
-                            if (p_contact_name(contact) != NULL) {
-                                wprintw(console->win, " (%s)", p_contact_name(contact));
-                            }
-                            wprintw(console->win, " - %s", p_contact_presence(contact));
-                        }
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_PRIVATE:
-                        wprintw(console->win, "%d: Private %s", ui_index, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_MUC:
-                        wprintw(console->win, "%d: Room %s", ui_index, window->from);
-
-                        if (window->unread > 0) {
-                            wprintw(console->win, ", %d unread", window->unread);
-                        }
-
-                        break;
-
-                    case WIN_DUCK:
-                        wprintw(console->win, "%d: DuckDuckGo search", ui_index);
-
-                        break;
-
-                    default:
-                        break;
-                }
-
-                wprintw(console->win, "\n");
-            }
-        }
+    GSList *curr = window_strings;
+    while (curr != NULL) {
+        win_print_time(console, '-');
+        wprintw(console->win, curr->data);
+        wprintw(console->win, "\n");
+        curr = g_slist_next(curr);
     }
 
     cons_show("");
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -349,13 +286,14 @@ cons_show_room_invites(GSList *invites)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_info(PContact pcontact)
 {
+    ProfWin *console = wins_get_console();
     const char *barejid = p_contact_barejid(pcontact);
     const char *name = p_contact_name(pcontact);
     const char *presence = p_contact_presence(pcontact);
@@ -481,13 +419,14 @@ cons_show_info(PContact pcontact)
         ordered_resources = g_list_next(ordered_resources);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_caps(const char * const contact, Resource *resource)
 {
+    ProfWin *console = wins_get_console();
     WINDOW *win = console->win;
     cons_show("");
     const char *resource_presence = string_from_resource_presence(resource->presence);
@@ -555,7 +494,7 @@ cons_show_caps(const char * const contact, Resource *resource)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -563,6 +502,7 @@ void
 cons_show_software_version(const char * const jid, const char * const  presence,
     const char * const name, const char * const version, const char * const os)
 {
+    ProfWin *console = wins_get_console();
     if ((name != NULL) || (version != NULL) || (os != NULL)) {
         cons_show("");
         win_print_time(console, '-');
@@ -581,7 +521,7 @@ cons_show_software_version(const char * const jid, const char * const  presence,
         cons_show("OS      : %s", os);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -600,6 +540,9 @@ cons_show_received_subs(void)
         }
         g_slist_free_full(received, g_free);
     }
+
+    wins_refresh_console();
+    cons_alert();
 }
 
 void
@@ -619,11 +562,15 @@ cons_show_sent_subs(void)
     } else {
         cons_show("No pending requests sent.");
     }
+
+    wins_refresh_console();
+    cons_alert();
 }
 
 void
 cons_show_room_list(GSList *rooms, const char * const conference_node)
 {
+    ProfWin *console = wins_get_console();
     if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
         cons_show("Chat rooms at %s:", conference_node);
         while (rooms != NULL) {
@@ -640,7 +587,7 @@ cons_show_room_list(GSList *rooms, const char * const conference_node)
         cons_show("No chat rooms at %s", conference_node);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -656,6 +603,8 @@ cons_show_bookmarks(const GList *list)
     while (list != NULL) {
         item = list->data;
 
+        ProfWin *console = wins_get_console();
+
         win_print_time(console, '-');
         wprintw(console->win, "  %s", item->jid);
         if (item->nick != NULL) {
@@ -668,7 +617,7 @@ cons_show_bookmarks(const GList *list)
         list = g_list_next(list);
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -710,7 +659,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
             features = g_slist_next(features);
         }
 
-        ui_console_dirty();
+        wins_refresh_console();
         cons_alert();
     }
 }
@@ -718,6 +667,7 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
 void
 cons_show_disco_items(GSList *items, const char * const jid)
 {
+    ProfWin *console = wins_get_console();
     if ((items != NULL) && (g_slist_length(items) > 0)) {
         cons_show("");
         cons_show("Service discovery items for %s:", jid);
@@ -735,13 +685,14 @@ cons_show_disco_items(GSList *items, const char * const jid)
         cons_show("");
         cons_show("No service discovery items for %s", jid);
     }
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_status(const char * const barejid)
 {
+    ProfWin *console = wins_get_console();
     PContact pcontact = roster_get_contact(barejid);
 
     if (pcontact != NULL) {
@@ -749,7 +700,7 @@ cons_show_status(const char * const barejid)
     } else {
         cons_show("No such contact \"%s\" in roster.", barejid);
     }
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -786,13 +737,14 @@ cons_show_room_invite(const char * const invitor, const char * const room,
 
     free(display_from);
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_account_list(gchar **accounts)
 {
+    ProfWin *console = wins_get_console();
     int size = g_strv_length(accounts);
     if (size > 0) {
         cons_show("Accounts:");
@@ -815,13 +767,14 @@ cons_show_account_list(gchar **accounts)
         cons_show("");
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
 void
 cons_show_account(ProfAccount *account)
 {
+    ProfWin *console = wins_get_console();
     cons_show("");
     cons_show("Account %s:", account->name);
     if (account->enabled) {
@@ -928,7 +881,7 @@ cons_show_account(ProfAccount *account)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1021,7 +974,7 @@ cons_show_ui_prefs(void)
     cons_statuses_setting();
     cons_titlebar_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1065,7 +1018,7 @@ cons_show_desktop_prefs(void)
     cons_show("");
     cons_notify_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1129,7 +1082,7 @@ cons_show_chat_prefs(void)
     cons_gone_setting();
     cons_history_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1166,7 +1119,7 @@ cons_show_log_prefs(void)
     cons_chlog_setting();
     cons_grlog_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1202,7 +1155,7 @@ cons_show_presence_prefs(void)
     cons_show("");
     cons_autoaway_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1247,7 +1200,7 @@ cons_show_connection_prefs(void)
     cons_reconnect_setting();
     cons_autoping_setting();
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1266,7 +1219,7 @@ cons_show_themes(GSList *themes)
         }
     }
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1287,7 +1240,7 @@ cons_prefs(void)
     cons_show_connection_prefs();
     cons_show("");
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1310,7 +1263,7 @@ cons_help(void)
     cons_show("/help [command]  - Detailed help on a specific command.");
     cons_show("");
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
 }
 
@@ -1332,13 +1285,120 @@ cons_navigation_help(void)
     cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
     cons_show("");
 
-    ui_console_dirty();
+    wins_refresh_console();
     cons_alert();
+}
+
+void
+cons_show_roster_group(const char * const group, GSList *list)
+{
+    cons_show("");
+
+    if (list != NULL) {
+        cons_show("%s:", group);
+    } else {
+        cons_show("No group named %s exists.", group);
+    }
+
+    _show_roster_contacts(list, FALSE);
+    wins_refresh_console();
+    cons_alert();
+}
+
+void
+cons_show_roster(GSList *list)
+{
+    cons_show("");
+    cons_show("Roster:");
+
+    _show_roster_contacts(list, TRUE);
+    wins_refresh_console();
+    cons_alert();
+}
+
+void
+cons_show_contacts(GSList *list)
+{
+    ProfWin *console = wins_get_console();
+    GSList *curr = list;
+
+    while(curr) {
+        PContact contact = curr->data;
+        if ((strcmp(p_contact_subscription(contact), "to") == 0) ||
+            (strcmp(p_contact_subscription(contact), "both") == 0)) {
+            win_show_contact(console, contact);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    wins_refresh_console();
+    cons_alert();
+}
+
+void
+cons_alert(void)
+{
+    if (ui_current_win_type() != WIN_CONSOLE) {
+        status_bar_new(1);
+    }
+}
+
+static void
+_cons_splash_logo(void)
+{
+    ProfWin *console = wins_get_console();
+    win_print_time(console, '-');
+    wprintw(console->win, "Welcome to\n");
+
+    win_print_time(console, '-');
+    wattron(console->win, COLOUR_SPLASH);
+    wprintw(console->win, "                   ___            _           \n");
+    wattroff(console->win, COLOUR_SPLASH);
+
+    win_print_time(console, '-');
+    wattron(console->win, COLOUR_SPLASH);
+    wprintw(console->win, "                  / __)          (_)_         \n");
+    wattroff(console->win, COLOUR_SPLASH);
+
+    win_print_time(console, '-');
+    wattron(console->win, COLOUR_SPLASH);
+    wprintw(console->win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
+    wattroff(console->win, COLOUR_SPLASH);
+
+    win_print_time(console, '-');
+    wattron(console->win, COLOUR_SPLASH);
+    wprintw(console->win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
+    wattroff(console->win, COLOUR_SPLASH);
+
+    win_print_time(console, '-');
+    wattron(console->win, COLOUR_SPLASH);
+    wprintw(console->win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
+    wattroff(console->win, COLOUR_SPLASH);
+
+    win_print_time(console, '-');
+    wattron(console->win, COLOUR_SPLASH);
+    wprintw(console->win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
+    wattroff(console->win, COLOUR_SPLASH);
+
+    win_print_time(console, '-');
+    wattron(console->win, COLOUR_SPLASH);
+    wprintw(console->win, "|_|                                    (____/ \n");
+    wattroff(console->win, COLOUR_SPLASH);
+
+    win_print_time(console, '-');
+    wprintw(console->win, "\n");
+    win_print_time(console, '-');
+    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+        wprintw(console->win, "Version %sdev\n", PROF_PACKAGE_VERSION);
+    } else {
+        wprintw(console->win, "Version %s\n", PROF_PACKAGE_VERSION);
+    }
 }
 
 void
 _show_roster_contacts(GSList *list, gboolean show_groups)
 {
+    ProfWin *console = wins_get_console();
     GSList *curr = list;
     while(curr) {
 
@@ -1409,108 +1469,4 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         curr = g_slist_next(curr);
     }
 
-}
-
-void
-cons_show_roster_group(const char * const group, GSList *list)
-{
-    cons_show("");
-
-    if (list != NULL) {
-        cons_show("%s:", group);
-    } else {
-        cons_show("No group named %s exists.", group);
-    }
-
-    _show_roster_contacts(list, FALSE);
-    ui_console_dirty();
-    cons_alert();
-}
-
-void
-cons_show_roster(GSList *list)
-{
-    cons_show("");
-    cons_show("Roster:");
-
-    _show_roster_contacts(list, TRUE);
-    ui_console_dirty();
-    cons_alert();
-}
-
-void
-cons_show_contacts(GSList *list)
-{
-    GSList *curr = list;
-
-    while(curr) {
-        PContact contact = curr->data;
-        if ((strcmp(p_contact_subscription(contact), "to") == 0) ||
-            (strcmp(p_contact_subscription(contact), "both") == 0)) {
-            win_show_contact(console, contact);
-        }
-        curr = g_slist_next(curr);
-    }
-
-    ui_console_dirty();
-    cons_alert();
-}
-
-void
-cons_alert(void)
-{
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(0);
-    }
-}
-
-static void
-_cons_splash_logo(void)
-{
-    win_print_time(console, '-');
-    wprintw(console->win, "Welcome to\n");
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "                   ___            _           \n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "                  / __)          (_)_         \n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "|_|                                    (____/ \n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wprintw(console->win, "\n");
-    win_print_time(console, '-');
-    if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
-        wprintw(console->win, "Version %sdev\n", PROF_PACKAGE_VERSION);
-    } else {
-        wprintw(console->win, "Version %s\n", PROF_PACKAGE_VERSION);
-    }
 }
