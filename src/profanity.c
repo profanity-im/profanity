@@ -116,19 +116,20 @@ prof_handle_typing(char *from)
 void
 prof_handle_incoming_message(char *from, char *message, gboolean priv)
 {
-    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
-        Jid *from_jid = jid_create(from);
-        const char *jid = jabber_get_fulljid();
-        Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, NULL);
-        jid_destroy(jidp);
-        jid_destroy(from_jid);
-    }
-
     char *new_message = plugins_on_message_received(from, message);
 
     ui_incoming_msg(from, new_message, NULL, priv);
     ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, new_message, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
+
 
     free(new_message);
 }
@@ -137,19 +138,20 @@ void
 prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     gboolean priv)
 {
-    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
-        Jid *from_jid = jid_create(from);
-        const char *jid = jabber_get_fulljid();
-        Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, &tv_stamp);
-        jid_destroy(jidp);
-        jid_destroy(from_jid);
-    }
-
     char * new_message = plugins_on_message_received(from, message);
 
     ui_incoming_msg(from, new_message, &tv_stamp, priv);
     ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, new_message, PROF_IN_LOG, &tv_stamp);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
+
 
     free(new_message);
 }
