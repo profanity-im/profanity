@@ -1166,16 +1166,27 @@ cmd_execute_default(const char * const inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                message_send(inp, recipient);
+                const char * recipient_jid = NULL;
+                if (roster_barejid_from_name(recipient) != NULL) {
+                    recipient_jid = roster_barejid_from_name(recipient);
+                } else {
+                    recipient_jid = recipient;
+                }
+
+                char *new_message = plugins_on_message_send(recipient_jid, inp);
+
+                message_send(new_message, recipient);
 
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                    chat_log_chat(jidp->barejid, recipient, new_message, PROF_OUT_LOG, NULL);
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_msg("me", recipient, inp);
+                ui_outgoing_msg("me", recipient, new_message);
+
+                free(new_message);
             }
             break;
 
@@ -2201,15 +2212,19 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             usr_jid = usr;
         }
         if (msg != NULL) {
-            message_send(msg, usr_jid);
-            ui_outgoing_msg("me", usr_jid, msg);
+            char *new_message = plugins_on_message_send(usr_jid, msg);
+
+            message_send(new_message, usr_jid);
+            ui_outgoing_msg("me", usr_jid, new_message);
 
             if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_fulljid();
                 Jid *jidp = jid_create(jid);
-                chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
+                chat_log_chat(jidp->barejid, usr_jid, new_message, PROF_OUT_LOG, NULL);
                 jid_destroy(jidp);
             }
+
+            free(new_message);
 
             return TRUE;
         } else {

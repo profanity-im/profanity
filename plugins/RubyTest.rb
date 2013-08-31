@@ -20,6 +20,12 @@ module RubyTest
         return message + "[RUBY]"
     end
 
+    def self.prof_on_message_send(jid, message)
+        Prof::cons_show("RubyTest: on_message_send, " + jid + ", " + message)
+        Prof::cons_alert
+        return message + "[RUBY]"
+    end
+
     def self.cmd_ruby()
         return Proc.new { | msg |
             if msg

@@ -39,6 +39,7 @@ c_plugin_create(const char * const filename)
     plugin->on_start_func = c_on_start_hook;
     plugin->on_connect_func = c_on_connect_hook;
     plugin->on_message_received_func = c_on_message_received_hook;
+    plugin->on_message_send_func = c_on_message_send_hook;
 
     g_string_free(path, TRUE);
 
@@ -103,6 +104,21 @@ c_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const cha
     assert (plugin && plugin->module);
 
     if (NULL == (f = dlsym (plugin->module, "prof_on_message_received")))
+        return NULL;
+
+    func = (char* (*)(const char * const, const char *)) f;
+    return func (jid, message);
+
+}
+
+char *
+c_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+{
+    void * f = NULL;
+    char* (*func)(const char * const __jid, const char * __message);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_message_send")))
         return NULL;
 
     func = (char* (*)(const char * const, const char *)) f;

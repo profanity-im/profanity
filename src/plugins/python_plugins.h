@@ -31,6 +31,7 @@ void python_init_hook(ProfPlugin *plugin, const char * const version, const char
 void python_on_start_hook(ProfPlugin *plugin);
 void python_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 char * python_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char * python_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 
 void python_check_error(void);
 

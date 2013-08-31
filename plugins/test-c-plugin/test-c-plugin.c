@@ -31,4 +31,12 @@ prof_on_message_received (const char * const jid, const char *message)
     return result;
 }
 
+char *
+prof_on_message_send (const char * const jid, const char *message)
+{
+    fprintf (stderr, "called %s with args=<%s, %s>\n", __func__, jid, message);
+    char *result = malloc(strlen(message) + 4);
+    sprintf(result, "%s%s", message, "[C]");
 
+    return result;
+}

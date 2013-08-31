@@ -16,6 +16,11 @@ def prof_on_message_received(jid, message):
     prof.cons_alert()
     return message + "[PYTHON]"
 
+def prof_on_message_send(jid, message):
+    prof.cons_show("python-test: on_message_send, " + jid + ", " + message)
+    prof.cons_alert()
+    return message + "[PYTHON]"
+
 def cmd_python(msg):
     if msg:
         prof.cons_show("python-test: /python command called, arg = " + msg)

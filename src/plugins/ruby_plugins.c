@@ -58,6 +58,7 @@ ruby_plugin_create(const char * const filename)
     plugin->on_start_func = ruby_on_start_hook;
     plugin->on_connect_func = ruby_on_connect_hook;
     plugin->on_message_received_func = ruby_on_message_received_hook;
+    plugin->on_message_send_func = ruby_on_message_send_hook;
     return plugin;
 }
 
@@ -104,6 +105,28 @@ ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
     VALUE module = (VALUE) plugin->module;
     if (_method_exists(plugin, "prof_on_message_received")) {
         VALUE result = rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
+        if (TYPE(result) != T_NIL) {
+            char *result_str = STR2CSTR(result);
+            rb_gc_unregister_address(&result);
+            return result_str;
+        } else {
+            return NULL;
+        }
+    }
+
+    return NULL;
+}
+
+char *
+ruby_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
+    const char *message)
+{
+    VALUE v_jid = rb_str_new2(jid);
+    VALUE v_message = rb_str_new2(message);
+
+    VALUE module = (VALUE) plugin->module;
+    if (_method_exists(plugin, "prof_on_message_send")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_message_send"), 2, v_jid, v_message);
         if (TYPE(result) != T_NIL) {
             char *result_str = STR2CSTR(result);
             rb_gc_unregister_address(&result);
