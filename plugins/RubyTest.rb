@@ -17,6 +17,7 @@ module RubyTest
     def self.prof_on_message_received(jid, message)
         Prof::cons_show("RubyTest: on_message_received, " + jid + ", " + message)
         Prof::cons_alert
+        return message + "[RUBY]"
     end
 
     def self.cmd_ruby()

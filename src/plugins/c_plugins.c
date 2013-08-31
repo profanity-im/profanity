@@ -95,19 +95,18 @@ c_on_connect_hook (ProfPlugin *plugin, const char * const account_name, const ch
 }
 
 
-// FIXME wooow, if the message is cosntant, then how could I possibly fiddle around with it?
-void
-c_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message)
+char *
+c_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message)
 {
     void * f = NULL;
-    void (*func)(const char * const __jid, const char * const __message);
+    char* (*func)(const char * const __jid, const char * __message);
     assert (plugin && plugin->module);
 
     if (NULL == (f = dlsym (plugin->module, "prof_on_message_received")))
-        return;
+        return NULL;
 
-    func = (void (*)(const char * const, const char * const)) f;
-    func (jid, message);
+    func = (char* (*)(const char * const, const char *)) f;
+    return func (jid, message);
 
 }
 

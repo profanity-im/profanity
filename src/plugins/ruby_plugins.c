@@ -94,17 +94,26 @@ ruby_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
     }
 }
 
-void
+char *
 ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
-    const char * const message)
+    const char *message)
 {
     VALUE v_jid = rb_str_new2(jid);
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
     if (_method_exists(plugin, "prof_on_message_received")) {
-        rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
+        VALUE result = rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
+        if (TYPE(result) != T_NIL) {
+            char *result_str = STR2CSTR(result);
+            rb_gc_unregister_address(&result);
+            return result_str;
+        } else {
+            return NULL;
+        }
     }
+
+    return NULL;
 }
 
 void

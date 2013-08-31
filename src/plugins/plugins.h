@@ -38,14 +38,14 @@ typedef struct prof_plugin_t {
     void (*on_start_func)(struct prof_plugin_t* plugin);
     void (*on_connect_func)(struct prof_plugin_t* plugin,
         const char * const account_name, const char * const fulljid);
-    void (*on_message_received_func)(struct prof_plugin_t* plugin,
+    char* (*on_message_received_func)(struct prof_plugin_t* plugin,
         const char * const jid, const char * const message);
 } ProfPlugin;
 
 void plugins_init(void);
 void plugins_on_start(void);
 void plugins_on_connect(const char * const account_name, const char * const fulljid);
-void plugins_on_message_received(const char * const jid, const char * const message);
+char * plugins_on_message_received(const char * const jid, const char *message);
 void plugins_shutdown(void);
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);

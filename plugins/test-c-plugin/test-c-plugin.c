@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
-static FILE * f = NULL;
+#include <string.h>
 
 void
 prof_init (const char * const version, const char * const status)
@@ -22,10 +21,14 @@ prof_on_connect (const char * const account_name, const char * const fulljid)
     fprintf (stderr, "called %s with args=<%s, %s>\n", __func__, account_name, fulljid);
 }
 
-void
-prof_on_message_received (const char * const jid, const char * const message)
+char *
+prof_on_message_received (const char * const jid, const char *message)
 {
     fprintf (stderr, "called %s with args=<%s, %s>\n", __func__, jid, message);
+    char *result = malloc(strlen(message) + 4);
+    sprintf(result, "%s%s", message, "[C]");
+
+    return result;
 }
 
 
