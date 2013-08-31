@@ -1,3 +1,3 @@
 #!/bin/sh
 
-autoreconf --install
+autoreconf -f -i -Wall,no-obsolete

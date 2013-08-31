@@ -33,6 +33,12 @@ profanity_SOURCES = \
     src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
     src/plugins/ruby_api.h src/plugins/ruby_api.c
 
+lib_LTLIBRARIES = libprofanity.la
+libprofanity_la_SOURCES = src/plugins/profapi.c
+
+library_includedir=$(includedir)
+library_include_HEADERS = src/plugins/profapi.h
+
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = \
