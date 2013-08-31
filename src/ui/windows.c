@@ -391,16 +391,13 @@ wins_create_summary(void)
                 break;
             case WIN_CHAT:
                 chat_string = g_string_new("");
-                g_string_printf(chat_string, "%d: Chat %s", ui_index, window->from);
-                PContact contact = roster_get_contact(window->from);
 
-                if (contact != NULL) {
-                    if (p_contact_name(contact) != NULL) {
-                        GString *chat_name = g_string_new("");
-                        g_string_printf(chat_name, " (%s)", p_contact_name(contact));
-                        g_string_append(chat_string, chat_name->str);
-                        g_string_free(chat_name, TRUE);
-                    }
+                PContact contact = roster_get_contact(window->from);
+                if (contact == NULL) {
+                    g_string_printf(chat_string, "%d: Chat %s", ui_index, window->from);
+                } else {
+                    const char *display_name = p_contact_name_or_jid(contact);
+                    g_string_printf(chat_string, "%d: Chat %s", ui_index, display_name);
                     GString *chat_presence = g_string_new("");
                     g_string_printf(chat_presence, " - %s", p_contact_presence(contact));
                     g_string_append(chat_string, chat_presence->str);
