@@ -83,16 +83,20 @@ ruby_on_start_hook(ProfPlugin *plugin)
 }
 
 void
-ruby_on_connect_hook(ProfPlugin *plugin)
+ruby_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
+    const  char * const fulljid)
 {
+    VALUE v_account_name = rb_str_new2(account_name);
+    VALUE v_fulljid = rb_str_new2(fulljid);
     VALUE module = (VALUE) plugin->module;
     if (_method_exists(plugin, "prof_on_connect")) {
-        rb_funcall(module, rb_intern("prof_on_connect"), 0);
+        rb_funcall(module, rb_intern("prof_on_connect"), 2, v_account_name, v_fulljid);
     }
 }
 
 void
-ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message)
+ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
+    const char * const message)
 {
     VALUE v_jid = rb_str_new2(jid);
     VALUE v_message = rb_str_new2(message);

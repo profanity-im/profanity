@@ -635,11 +635,14 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             item = xmpp_stanza_get_next(item);
         }
 
+        char *account_name = jabber_get_account_name();
+        const char *fulljid = jabber_get_fulljid();
+
         contact_presence_t conn_presence =
-            accounts_get_login_presence(jabber_get_account_name());
+            accounts_get_login_presence(account_name);
         presence_update(conn_presence, NULL, 0);
 
-        plugins_on_connect();
+        plugins_on_connect(account_name, fulljid);
     }
 
     return 1;

@@ -29,7 +29,7 @@ ProfPlugin* ruby_plugin_create(const char * const filename);
 
 void ruby_init_hook(ProfPlugin *plugin, const char * const version, const char * const status);
 void ruby_on_start_hook(ProfPlugin *plugin);
-void ruby_on_connect_hook(ProfPlugin *plugin);
+void ruby_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 void ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message);
 
 void ruby_check_error(void);

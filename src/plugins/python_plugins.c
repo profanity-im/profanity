@@ -104,8 +104,10 @@ python_on_start_hook(ProfPlugin *plugin)
 }
 
 void
-python_on_connect_hook(ProfPlugin *plugin)
+python_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
+    const char * const fulljid)
 {
+    PyObject *p_args = Py_BuildValue("ss", account_name, fulljid);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
@@ -113,7 +115,7 @@ python_on_connect_hook(ProfPlugin *plugin)
         p_function = PyObject_GetAttrString(p_module, "prof_on_connect");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, NULL);
+            PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
         }
@@ -121,7 +123,8 @@ python_on_connect_hook(ProfPlugin *plugin)
 }
 
 void
-python_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char * const message)
+python_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
+    const char * const message)
 {
     PyObject *p_args = Py_BuildValue("ss", jid, message);
     PyObject *p_function;

@@ -81,17 +81,17 @@ c_on_start_hook (ProfPlugin *plugin)
 
 
 void
-c_on_connect_hook (ProfPlugin *plugin)
+c_on_connect_hook (ProfPlugin *plugin, const char * const account_name, const char * const fulljid)
 {
     void * f = NULL;
-    void (*func)(void);
+    void (*func)(const char * const __account_name, const char * const __fulljid);
     assert (plugin && plugin->module);
 
     if (NULL == (f = dlsym (plugin->module, "prof_on_connect")))
         return ;
 
-    func = (void (*)(void)) f;
-    func ();
+    func = (void (*)(const char * const, const char * const)) f;
+    func (account_name, fulljid);
 }
 
 

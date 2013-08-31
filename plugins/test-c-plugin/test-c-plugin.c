@@ -17,9 +17,9 @@ prof_on_start (void)
 }
 
 void
-prof_on_connect (void)
+prof_on_connect (const char * const account_name, const char * const fulljid)
 {
-    fprintf (stderr, "called %s with no args\n", __func__);
+    fprintf (stderr, "called %s with args=<%s, %s>\n", __func__, account_name, fulljid);
 }
 
 void

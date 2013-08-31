@@ -10,8 +10,8 @@ module RubyTest
         Prof::cons_show("RubyTest: on_start")
     end
 
-    def self.prof_on_connect()
-        Prof::cons_show("RubyTest: on_connect")
+    def self.prof_on_connect(account_name, fulljid)
+        Prof::cons_show("RubyTest: on_connect, " + account_name + ", " + fulljid)
     end
 
     def self.prof_on_message_received(jid, message)

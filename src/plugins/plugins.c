@@ -99,12 +99,12 @@ plugins_on_start(void)
 }
 
 void
-plugins_on_connect(void)
+plugins_on_connect(const char * const account_name, const char * const fulljid)
 {
     GSList *curr = plugins;
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
-        plugin->on_connect_func(plugin);
+        plugin->on_connect_func(plugin, account_name, fulljid);
         curr = g_slist_next(curr);
     }
 }

@@ -8,8 +8,8 @@ def prof_init(version, status):
 def prof_on_start():
     prof.cons_show("python-test: on_start")
 
-def prof_on_connect():
-    prof.cons_show("python-test: on_connect")
+def prof_on_connect(account_name, fulljid):
+    prof.cons_show("python-test: on_connect, " + account_name + ", " + fulljid)
 
 def prof_on_message_received(jid, message):
     prof.cons_show("python-test: on_message_received, " + jid + ", " + message)
