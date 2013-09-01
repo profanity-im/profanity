@@ -38,4 +38,9 @@ void (*prof_send_line)(char *line);
 
 char* (*prof_get_current_recipient)(void);
 
+void (*prof_log_debug)(const char *message);
+void (*prof_log_info)(const char *message);
+void (*prof_log_warning)(const char *message);
+void (*prof_log_error)(const char *message);
+
 #endif

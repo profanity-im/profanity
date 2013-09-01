@@ -40,7 +40,7 @@ python_api_cons_show(PyObject *self, PyObject *args)
 {
     const char *message = NULL;
     if (!PyArg_ParseTuple(args, "s", &message)) {
-        return NULL;
+        return Py_BuildValue("");
     }
     api_cons_show(message);
     return Py_BuildValue("");
@@ -59,7 +59,7 @@ python_api_register_command(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "siisssO", &command_name, &min_args, &max_args,
             &usage, &short_help, &long_help, &p_callback)) {
-        return NULL;
+        return Py_BuildValue("");
     }
 
     if (p_callback && PyCallable_Check(p_callback)) {
@@ -77,7 +77,7 @@ python_api_register_timed(PyObject *self, PyObject *args)
     int interval_seconds = 0;
 
     if (!PyArg_ParseTuple(args, "Oi", &p_callback, &interval_seconds)) {
-        return NULL;
+        return Py_BuildValue("");
     }
 
     if (p_callback && PyCallable_Check(p_callback)) {
@@ -95,7 +95,7 @@ python_api_notify(PyObject *self, PyObject *args)
     int timeout_ms = 5000;
 
     if (!PyArg_ParseTuple(args, "sis", &message, &timeout_ms, &category)) {
-        return NULL;
+        return Py_BuildValue("");
     }
 
     api_notify(message, category, timeout_ms);
@@ -108,7 +108,7 @@ python_api_send_line(PyObject *self, PyObject *args)
 {
     char *line = NULL;
     if (!PyArg_ParseTuple(args, "s", &line)) {
-        return NULL;
+        return Py_BuildValue("");
     }
 
     api_send_line(line);
@@ -125,6 +125,50 @@ python_api_get_current_recipient(PyObject *self, PyObject *args)
     } else {
         return Py_BuildValue("");
     }
+}
+
+static PyObject *
+python_api_log_debug(PyObject *self, PyObject *args)
+{
+    const char *message = NULL;
+    if (!PyArg_ParseTuple(args, "s", &message)) {
+        return Py_BuildValue("");
+    }
+    api_log_debug(message);
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_log_info(PyObject *self, PyObject *args)
+{
+    const char *message = NULL;
+    if (!PyArg_ParseTuple(args, "s", &message)) {
+        return Py_BuildValue("");
+    }
+    api_log_info(message);
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_log_warning(PyObject *self, PyObject *args)
+{
+    const char *message = NULL;
+    if (!PyArg_ParseTuple(args, "s", &message)) {
+        return Py_BuildValue("");
+    }
+    api_log_warning(message);
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_log_error(PyObject *self, PyObject *args)
+{
+    const char *message = NULL;
+    if (!PyArg_ParseTuple(args, "s", &message)) {
+        return Py_BuildValue("");
+    }
+    api_log_error(message);
+    return Py_BuildValue("");
 }
 
 void
@@ -182,6 +226,10 @@ static PyMethodDef apiMethods[] = {
     { "send_line", python_api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
+    { "log_debug", python_api_log_debug, METH_VARARGS, "Log a debug message" },
+    { "log_info", python_api_log_info, METH_VARARGS, "Log an info message" },
+    { "log_warning", python_api_log_warning, METH_VARARGS, "Log a warning message" },
+    { "log_error", python_api_log_error, METH_VARARGS, "Log an error message" },
     { NULL, NULL, 0, NULL }
 };
 

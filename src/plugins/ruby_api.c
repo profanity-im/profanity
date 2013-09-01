@@ -107,6 +107,50 @@ ruby_api_get_current_recipient(VALUE self)
     }
 }
 
+static VALUE
+ruby_api_log_debug(VALUE self, VALUE v_message)
+{
+    char *message = STR2CSTR(v_message);
+
+    if (message != NULL) {
+        api_log_debug(message);
+    }
+    return Qnil;
+}
+
+static VALUE
+ruby_api_log_info(VALUE self, VALUE v_message)
+{
+    char *message = STR2CSTR(v_message);
+
+    if (message != NULL) {
+        api_log_info(message);
+    }
+    return Qnil;
+}
+
+static VALUE
+ruby_api_log_warning(VALUE self, VALUE v_message)
+{
+    char *message = STR2CSTR(v_message);
+
+    if (message != NULL) {
+        api_log_warning(message);
+    }
+    return Qnil;
+}
+
+static VALUE
+ruby_api_log_error(VALUE self, VALUE v_message)
+{
+    char *message = STR2CSTR(v_message);
+
+    if (message != NULL) {
+        api_log_error(message);
+    }
+    return Qnil;
+}
+
 void
 ruby_command_callback(PluginCommand *command, gchar **args)
 {
@@ -157,4 +201,8 @@ ruby_api_init(void)
     rb_define_module_function(prof_module, "send_line", RUBY_METHOD_FUNC(ruby_api_send_line), 1);
     rb_define_module_function(prof_module, "notify", RUBY_METHOD_FUNC(ruby_api_notify), 3);
     rb_define_module_function(prof_module, "get_current_recipient", RUBY_METHOD_FUNC(ruby_api_get_current_recipient), 0);
+    rb_define_module_function(prof_module, "log_debug", RUBY_METHOD_FUNC(ruby_api_log_debug), 1);
+    rb_define_module_function(prof_module, "log_info", RUBY_METHOD_FUNC(ruby_api_log_info), 1);
+    rb_define_module_function(prof_module, "log_warning", RUBY_METHOD_FUNC(ruby_api_log_warning), 1);
+    rb_define_module_function(prof_module, "log_error", RUBY_METHOD_FUNC(ruby_api_log_error), 1);
 }

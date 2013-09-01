@@ -87,6 +87,30 @@ c_api_get_current_recipient(void)
     return api_get_current_recipient();
 }
 
+static void
+c_api_log_debug(const char *message)
+{
+    api_log_debug(message);
+}
+
+static void
+c_api_log_info(const char *message)
+{
+    api_log_info(message);
+}
+
+static void
+c_api_log_warning(const char *message)
+{
+    api_log_warning(message);
+}
+
+static void
+c_api_log_error(const char *message)
+{
+    api_log_error(message);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -113,4 +137,8 @@ c_api_init(void)
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;
     prof_get_current_recipient = c_api_get_current_recipient;
+    prof_log_debug = c_api_log_debug;
+    prof_log_info = c_api_log_info;
+    prof_log_warning = c_api_log_warning;
+    prof_log_error = c_api_log_error;
 }

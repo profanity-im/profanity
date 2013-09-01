@@ -24,6 +24,7 @@
 
 #include <glib.h>
 
+#include "log.h"
 #include "plugins/callbacks.h"
 #include "profanity.h"
 #include "ui/notifier.h"
@@ -98,4 +99,28 @@ api_get_current_recipient(void)
     } else {
         return NULL;
     }
+}
+
+void
+api_log_debug(const char *message)
+{
+    log_debug("%s", message);
+}
+
+void
+api_log_info(const char *message)
+{
+    log_info("%s", message);
+}
+
+void
+api_log_warning(const char *message)
+{
+    log_warning("%s", message);
+}
+
+void
+api_log_error(const char *message)
+{
+    log_error("%s", message);
 }

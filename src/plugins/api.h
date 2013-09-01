@@ -37,4 +37,9 @@ void api_register_command(const char *command_name, int min_args, int max_args,
 void api_register_timed(void *callback, int interval_seconds,
     void (*callback_func)(PluginTimedFunction *timed_function));
 
+void api_log_debug(const char *message);
+void api_log_info(const char *message);
+void api_log_warning(const char *message);
+void api_log_error(const char *message);
+
 #endif
