@@ -1,0 +1,116 @@
+/*
+ * c_api.c
+ *
+ * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
+ *
+ * This file is part of Profanity.
+ *
+ * Profanity is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Profanity is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include <stdlib.h>
+#include <glib.h>
+
+#include "log.h"
+#include "plugins/api.h"
+#include "plugins/c_api.h"
+#include "plugins/callbacks.h"
+#include "plugins/profapi.h"
+
+typedef struct command_wrapper_t {
+    void(*func)(char **args);
+} CommandWrapper;
+
+typedef struct timed_wrapper_t {
+    void(*func)(void);
+} TimedWrapper;
+
+static void
+c_api_cons_alert(void)
+{
+    api_cons_alert();
+}
+
+static void
+c_api_cons_show(const char * const message)
+{
+    if (message != NULL) {
+        api_cons_show(message);
+    }
+}
+
+static void
+c_api_register_command(const char *command_name, int min_args, int max_args,
+    const char *usage, const char *short_help, const char *long_help, void(*callback)(char **args))
+{
+    CommandWrapper *wrapper = malloc(sizeof(CommandWrapper));
+    wrapper->func = callback;
+    api_register_command(command_name, min_args, max_args, usage,
+        short_help, long_help, wrapper, c_command_callback);
+}
+
+static void
+c_api_register_timed(void(*callback)(void), int interval_seconds)
+{
+    TimedWrapper *wrapper = malloc(sizeof(TimedWrapper));
+    wrapper->func = callback;
+    api_register_timed(wrapper, interval_seconds, c_timed_callback);
+}
+
+static void
+c_api_notify(const char *message, int timeout_ms, const char *category)
+{
+    api_notify(message, category, timeout_ms);
+}
+
+static void
+c_api_send_line(char *line)
+{
+    api_send_line(line);
+}
+
+static char *
+c_api_get_current_recipient(void)
+{
+    return api_get_current_recipient();
+}
+
+void
+c_command_callback(PluginCommand *command, gchar **args)
+{
+    CommandWrapper *wrapper = command->callback;
+    void(*f)(gchar **args) = wrapper->func;
+    f(args);
+}
+
+void
+c_timed_callback(PluginTimedFunction *timed_function)
+{
+    TimedWrapper *wrapper = timed_function->callback;
+    void(*f)(void) = wrapper->func;
+    f();
+}
+
+void
+c_api_init(void)
+{
+    prof_cons_alert = c_api_cons_alert;
+    prof_cons_show = c_api_cons_show;
+    prof_register_command = c_api_register_command;
+    prof_register_timed = c_api_register_timed;
+    prof_notify = c_api_notify;
+    prof_send_line = c_api_send_line;
+    prof_get_current_recipient = c_api_get_current_recipient;
+}

@@ -58,7 +58,7 @@ api_register_command(const char *command_name, int min_args, int max_args,
     command->short_help = short_help;
     command->long_help = long_help;
     command->callback = callback;
-    command->callback_func =callback_func;
+    command->callback_func = callback_func;
 
     callbacks_add_command(command);
 }

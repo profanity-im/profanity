@@ -3,6 +3,8 @@
 
 #include "plugins/plugins.h"
 
+void c_env_init(void);
+
 ProfPlugin* c_plugin_create(const char * const filename);
 
 void c_init_hook(ProfPlugin *plugin, const char * const version, const char * const status);

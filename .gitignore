@@ -35,3 +35,9 @@ _configs.sed
 gource.sh
 *_fingerprints.txt
 *_key.txt
+.libs/
+libprofanity.la
+libtool
+m4/
+*.so
+*.lo

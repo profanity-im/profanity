@@ -27,13 +27,12 @@
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "plugins/python_plugins.h"
-#include "plugins/c_plugins.h"
 #include "plugins/python_api.h"
+#include "plugins/c_plugins.h"
+#include "plugins/c_api.h"
 #include "plugins/ruby_plugins.h"
 #include "plugins/ruby_api.h"
 #include "ui/ui.h"
-
-
 
 static GSList* plugins;
 
@@ -44,6 +43,7 @@ plugins_init(void)
 
     python_env_init();
     ruby_env_init();
+    c_env_init();
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();

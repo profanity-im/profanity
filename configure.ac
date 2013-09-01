@@ -3,12 +3,12 @@
 
 AC_PREREQ([2.65])
 AC_INIT([profanity], [0.4.0], [boothj5web@gmail.com])
+AC_CONFIG_AUX_DIR([build-aux])
 LT_INIT
 PACKAGE_STATUS="development"
 AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 

@@ -31,9 +31,11 @@ profanity_SOURCES = \
     src/plugins/python_api.h src/plugins/python_api.c \
     src/plugins/c_plugins.h src/plugins/c_plugins.c \
     src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
-    src/plugins/ruby_api.h src/plugins/ruby_api.c
+    src/plugins/ruby_api.h src/plugins/ruby_api.c \
+    src/plugins/c_api.h src/plugins/c_api.c
 
 lib_LTLIBRARIES = libprofanity.la
+libprofanity_la_LDFLAGS=-module -avoid-version -shared
 libprofanity_la_SOURCES = src/plugins/profapi.c
 
 library_includedir=$(includedir)

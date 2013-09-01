@@ -11,7 +11,14 @@
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "plugins/c_plugins.h"
+#include "plugins/c_api.h"
 #include "ui/ui.h"
+
+void
+c_env_init(void)
+{
+    c_api_init();
+}
 
 ProfPlugin *
 c_plugin_create(const char * const filename)
