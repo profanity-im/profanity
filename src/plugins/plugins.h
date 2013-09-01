@@ -52,5 +52,6 @@ char * plugins_on_message_send(const char * const jid, const char *message);
 void plugins_shutdown(void);
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
+gchar * plugins_get_dir(void);
 
 #endif

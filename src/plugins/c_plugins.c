@@ -26,8 +26,10 @@ c_plugin_create(const char * const filename)
     ProfPlugin *plugin;
     void *handle = NULL;
 
-    // TODO use XDG for path
-    GString *path = g_string_new("./plugins/");
+    gchar *plugins_dir = plugins_get_dir();
+    GString *path = g_string_new(plugins_dir);
+    g_free(plugins_dir);
+    g_string_append(path, "/");
     g_string_append(path, filename);
 
     handle = dlopen (path->str, RTLD_NOW | RTLD_GLOBAL);

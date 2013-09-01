@@ -39,7 +39,11 @@ python_env_init(void)
     python_check_error();
     // TODO change to use XDG spec
     GString *path = g_string_new(Py_GetPath());
-    g_string_append(path, ":./plugins/");
+    g_string_append(path, ":");
+    gchar *plugins_dir = plugins_get_dir();
+    g_string_append(path, plugins_dir);
+    g_string_append(path, "/");
+    g_free(plugins_dir);
     PySys_SetPath(path->str);
     python_check_error();
     g_string_free(path, TRUE);

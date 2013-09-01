@@ -44,7 +44,10 @@ ruby_env_init(void)
 ProfPlugin *
 ruby_plugin_create(const char * const filename)
 {
-    GString *path = g_string_new("./plugins/");
+    gchar *plugins_dir = plugins_get_dir();
+    GString *path = g_string_new(plugins_dir);
+    g_free(plugins_dir);
+    g_string_append(path, "/");
     g_string_append(path, filename);
     rb_require(path->str);
     gchar *module_name = g_strndup(filename, strlen(filename) - 3);

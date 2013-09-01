@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "config/preferences.h"
 #include "log.h"
 #include "plugins/callbacks.h"
@@ -172,4 +173,17 @@ plugins_shutdown(void)
 
         curr = g_slist_next(curr);
     }
+}
+
+gchar *
+plugins_get_dir(void)
+{
+    gchar *xdg_data = xdg_get_data_home();
+    GString *plugins_dir = g_string_new(xdg_data);
+    g_string_append(plugins_dir, "/profanity/plugins");
+    gchar *result = strdup(plugins_dir->str);
+    g_free(xdg_data);
+    g_string_free(plugins_dir, TRUE);
+
+    return result;
 }
