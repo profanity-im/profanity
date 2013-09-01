@@ -161,6 +161,8 @@ plugins_shutdown(void)
     GSList *curr = plugins;
 
     python_shutdown();
+    ruby_shutdown();
+    c_shutdown();
 
     //FIXME do we need to clean the plugins list?
     //for the time being I'll just call dlclose for
