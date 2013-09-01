@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 #include "config/preferences.h"
+#include "log.h"
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
 #include "plugins/python_plugins.h"
@@ -51,28 +52,29 @@ plugins_init(void)
         int i;
         for (i = 0; i < g_strv_length(plugins_load); i++)
         {
+            gboolean loaded = FALSE;
             gchar *filename = plugins_load[i];
             if (g_str_has_suffix(filename, ".py")) {
                 ProfPlugin *plugin = python_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
-                    cons_show("Loaded python plugin: %s", filename);
+                    loaded = TRUE;
                 }
-            // TODO include configure option to vary on windows and
-            // unix i.e. so, dll, or maybe we can come up with unified
-            // shared library plugin name... dunno...
             } else if (g_str_has_suffix(filename, ".so")) {
                 ProfPlugin *plugin = c_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
-                    cons_show("Loaded C plugin: %s", filename);
+                    loaded = TRUE;
                 }
             } else if (g_str_has_suffix(filename, ".rb")) {
                 ProfPlugin *plugin = ruby_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
-                    cons_show("Loaded Ruby plugin: %s", filename);
+                    loaded = TRUE;
                 }
+            }
+            if (loaded == TRUE) {
+                log_info("Loaded plugin: %s", filename);
             }
         }
 
@@ -81,8 +83,6 @@ plugins_init(void)
         while (curr != NULL) {
             ProfPlugin *plugin = curr->data;
             plugin->init_func(plugin, PROF_PACKAGE_VERSION, PROF_PACKAGE_STATUS);
-            // TODO well, it should be more of a generic check error here
-            python_check_error();
             curr = g_slist_next(curr);
         }
     }
