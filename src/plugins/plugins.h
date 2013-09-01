@@ -45,6 +45,8 @@ typedef struct prof_plugin_t {
 } ProfPlugin;
 
 void plugins_init(void);
+GSList * plugins_get_list(void);
+char * plugins_get_lang_string(ProfPlugin *plugin);
 void plugins_on_start(void);
 void plugins_on_connect(const char * const account_name, const char * const fulljid);
 char * plugins_on_message_received(const char * const jid, const char *message);

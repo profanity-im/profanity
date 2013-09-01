@@ -91,6 +91,28 @@ plugins_init(void)
     return;
 }
 
+GSList *
+plugins_get_list(void)
+{
+    return plugins;
+}
+
+char *
+plugins_get_lang_string(ProfPlugin *plugin)
+{
+    switch (plugin->lang)
+    {
+        case LANG_PYTHON:
+            return "Python";
+        case LANG_RUBY:
+            return "Ruby";
+        case LANG_C:
+            return "C";
+        default:
+            return "Unknown";
+    }
+}
+
 void
 plugins_on_start(void)
 {

@@ -94,6 +94,7 @@ static gboolean _cmd_autoaway(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_beep(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_bookmark(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_caps(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_chat(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_chlog(gchar **args, struct cmd_help_t help);
@@ -124,12 +125,12 @@ static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_notify(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_outtype(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_plugins(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_prefs(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_priority(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_reconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_bookmark(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_roster(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_software(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_splash(gchar **args, struct cmd_help_t help);
@@ -756,6 +757,14 @@ static struct cmd_t command_defs[] =
           "        : /account set work online 10",
           "        : /account rename work gtalk",
           NULL  } } },
+
+    { "/plugins",
+        _cmd_plugins, parse_args, 0, 0, NULL,
+        { "/plugins", "Show installed plugins.",
+        { "/plugins",
+          "-------------",
+          "Show currently installed plugins.",
+          NULL } } },
 
     { "/prefs",
         _cmd_prefs, parse_args, 0, 1, NULL,
@@ -1864,6 +1873,27 @@ _cmd_about(gchar **args, struct cmd_help_t help)
     if (ui_current_win_type() != WIN_CONSOLE) {
         status_bar_new(1);
     }
+    return TRUE;
+}
+
+static gboolean
+_cmd_plugins(gchar **args, struct cmd_help_t help)
+{
+    GSList *plugins = plugins_get_list();
+
+    GSList *curr = plugins;
+    if (curr == NULL) {
+        cons_show("No plugins installed.");
+    } else {
+        cons_show("Installed plugins:");
+        while (curr != NULL) {
+            ProfPlugin *plugin = curr->data;
+            char *lang = plugins_get_lang_string(plugin);
+            cons_show("  %s (%s)", plugin->name, lang);
+            curr = g_slist_next(curr);
+        }
+    }
+    g_slist_free(curr);
     return TRUE;
 }
 

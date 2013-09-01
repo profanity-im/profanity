@@ -2,6 +2,7 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include <glib.h>
 
@@ -40,8 +41,10 @@ c_plugin_create(const char * const filename)
         return NULL;
     }
 
+    gchar *module_name = g_strndup(filename, strlen(filename) - 3);
+
     plugin = malloc(sizeof(ProfPlugin));
-    plugin->name = g_strdup(filename);
+    plugin->name = strdup(module_name);
     plugin->lang = LANG_C;
     plugin->module = handle;
     plugin->init_func = c_init_hook;
@@ -51,6 +54,7 @@ c_plugin_create(const char * const filename)
     plugin->on_message_send_func = c_on_message_send_hook;
 
     g_string_free(path, TRUE);
+    g_free(module_name);
 
     return plugin;
 }
