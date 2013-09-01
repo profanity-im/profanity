@@ -33,6 +33,7 @@ void ruby_on_connect_hook(ProfPlugin *plugin, const char * const account_name, c
 char * ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 char * ruby_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 
+void ruby_plugin_destroy(ProfPlugin *plugin);
 void ruby_check_error(void);
 
 #endif

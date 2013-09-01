@@ -54,7 +54,7 @@ ruby_plugin_create(const char * const filename)
     ruby_check_error();
 
     ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
-    plugin->name = module_name;
+    plugin->name = strdup(module_name);
     plugin->lang = LANG_RUBY;
     plugin->module = (void *)rb_const_get(rb_cObject, rb_intern(module_name));
     plugin->init_func = ruby_init_hook;
@@ -62,6 +62,7 @@ ruby_plugin_create(const char * const filename)
     plugin->on_connect_func = ruby_on_connect_hook;
     plugin->on_message_received_func = ruby_on_message_received_hook;
     plugin->on_message_send_func = ruby_on_message_send_hook;
+    g_free(module_name);
     return plugin;
 }
 
@@ -145,6 +146,13 @@ ruby_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
 void
 ruby_check_error(void)
 {
+}
+
+void
+ruby_plugin_destroy(ProfPlugin *plugin)
+{
+    free(plugin->name);
+    free(plugin);
 }
 
 void

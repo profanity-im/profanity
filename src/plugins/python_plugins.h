@@ -33,6 +33,7 @@ void python_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
 char * python_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 char * python_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 
+void python_plugin_destroy(ProfPlugin *plugin);
 void python_check_error(void);
 
 #endif

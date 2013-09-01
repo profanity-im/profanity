@@ -136,16 +136,20 @@ c_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *m
 }
 
 void
-c_shutdown(void)
-{
-
-}
-
-void
-c_close_library (ProfPlugin * plugin)
+c_plugin_destroy(ProfPlugin *plugin)
 {
     assert (plugin && plugin->module);
 
-    if (dlclose (plugin->module))
+    if (dlclose (plugin->module)) {
         log_warning ("dlclose failed to close `%s' with `%s'", plugin->name, dlerror ());
+    }
+
+    free(plugin->name);
+    free(plugin);
+}
+
+void
+c_shutdown(void)
+{
+
 }

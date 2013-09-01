@@ -160,21 +160,22 @@ plugins_shutdown(void)
 {
     GSList *curr = plugins;
 
-    python_shutdown();
-    ruby_shutdown();
-    c_shutdown();
-
-    //FIXME do we need to clean the plugins list?
-    //for the time being I'll just call dlclose for
-    //every C plugin.
-
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
-        if (plugin->lang == LANG_C)
-            c_close_library (plugin);
+        if (plugin->lang == LANG_C) {
+            c_plugin_destroy(plugin);
+        } else if (plugin->lang == LANG_PYTHON) {
+            python_plugin_destroy(plugin);
+        } else if (plugin->lang == LANG_RUBY) {
+            ruby_plugin_destroy(plugin);
+        }
 
         curr = g_slist_next(curr);
     }
+
+    python_shutdown();
+    ruby_shutdown();
+    c_shutdown();
 }
 
 gchar *

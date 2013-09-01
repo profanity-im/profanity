@@ -57,7 +57,7 @@ python_plugin_create(const char * const filename)
     python_check_error();
     if (p_module != NULL) {
         ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
-        plugin->name = module_name;
+        plugin->name = strdup(module_name);
         plugin->lang = LANG_PYTHON;
         plugin->module = p_module;
         plugin->init_func = python_init_hook;
@@ -190,6 +190,14 @@ python_check_error(void)
         PyErr_Print();
         PyErr_Clear();
     }
+}
+
+void
+python_plugin_destroy(ProfPlugin *plugin)
+{
+    free(plugin->name);
+    Py_XDECREF(plugin->module);
+    free(plugin);
 }
 
 void
