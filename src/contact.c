@@ -156,6 +156,16 @@ p_contact_name(const PContact contact)
     return contact->name;
 }
 
+const char *
+p_contact_name_or_jid(const PContact contact)
+{
+    if (contact->name != NULL) {
+        return contact->name;
+    } else {
+        return contact->barejid;
+    }
+}
+
 static Resource *
 _highest_presence(Resource *first, Resource *second)
 {

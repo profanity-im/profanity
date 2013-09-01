@@ -35,6 +35,7 @@ gboolean p_contact_remove_resource(PContact contact, const char * const resource
 void p_contact_free(PContact contact);
 const char* p_contact_barejid(PContact contact);
 const char* p_contact_name(PContact contact);
+const char * p_contact_name_or_jid(const PContact contact);
 const char* p_contact_presence(PContact contact);
 const char* p_contact_status(PContact contact);
 const char* p_contact_subscription(const PContact contact);
