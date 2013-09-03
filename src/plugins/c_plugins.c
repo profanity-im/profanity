@@ -52,6 +52,7 @@ c_plugin_create(const char * const filename)
     plugin->on_connect_func = c_on_connect_hook;
     plugin->on_message_received_func = c_on_message_received_hook;
     plugin->on_message_send_func = c_on_message_send_hook;
+    plugin->on_shutdown_func = c_on_shutdown_hook;
 
     g_string_free(path, TRUE);
     g_free(module_name);
@@ -78,7 +79,6 @@ c_init_hook(ProfPlugin *plugin, const char *  const version, const char *  const
     func (version, status);
 }
 
-
 void
 c_on_start_hook (ProfPlugin *plugin)
 {
@@ -93,7 +93,6 @@ c_on_start_hook (ProfPlugin *plugin)
     func ();
 }
 
-
 void
 c_on_connect_hook (ProfPlugin *plugin, const char * const account_name, const char * const fulljid)
 {
@@ -107,7 +106,6 @@ c_on_connect_hook (ProfPlugin *plugin, const char * const account_name, const ch
     func = (void (*)(const char * const, const char * const)) f;
     func (account_name, fulljid);
 }
-
 
 char *
 c_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message)
@@ -137,6 +135,20 @@ c_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *m
     func = (char* (*)(const char * const, const char *)) f;
     return func (jid, message);
 
+}
+
+void
+c_on_shutdown_hook(ProfPlugin *plugin)
+{
+    void * f = NULL;
+    void (*func)(void);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_shutdown")))
+        return ;
+
+    func = (void (*)(void)) f;
+    func ();
 }
 
 void

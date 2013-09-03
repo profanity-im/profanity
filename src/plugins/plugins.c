@@ -178,6 +178,17 @@ plugins_on_message_send(const char * const jid, const char *message)
 }
 
 void
+plugins_on_shutdown(void)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_shutdown_func(plugin);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
 plugins_shutdown(void)
 {
     GSList *curr = plugins;

@@ -62,6 +62,7 @@ ruby_plugin_create(const char * const filename)
     plugin->on_connect_func = ruby_on_connect_hook;
     plugin->on_message_received_func = ruby_on_message_received_hook;
     plugin->on_message_send_func = ruby_on_message_send_hook;
+    plugin->on_shutdown_func = ruby_on_shutdown_hook;
     g_free(module_name);
     return plugin;
 }
@@ -141,6 +142,15 @@ ruby_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
     }
 
     return NULL;
+}
+
+void
+ruby_on_shutdown_hook(ProfPlugin *plugin)
+{
+    VALUE module = (VALUE) plugin->module;
+    if (_method_exists(plugin, "prof_on_shutdown")) {
+        rb_funcall(module, rb_intern("prof_on_shutdown"), 0);
+    }
 }
 
 void

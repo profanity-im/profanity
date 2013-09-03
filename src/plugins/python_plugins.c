@@ -65,6 +65,7 @@ python_plugin_create(const char * const filename)
         plugin->on_connect_func = python_on_connect_hook;
         plugin->on_message_received_func = python_on_message_received_hook;
         plugin->on_message_send_func = python_on_message_send_hook;
+        plugin->on_shutdown_func = python_on_shutdown_hook;
         g_free(module_name);
         return plugin;
     } else {
@@ -181,6 +182,23 @@ python_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
     }
 
     return NULL;
+}
+
+void
+python_on_shutdown_hook(ProfPlugin *plugin)
+{
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_shutdown")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_shutdown");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, NULL);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
 }
 
 void
