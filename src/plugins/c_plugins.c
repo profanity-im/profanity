@@ -50,6 +50,7 @@ c_plugin_create(const char * const filename)
     plugin->init_func = c_init_hook;
     plugin->on_start_func = c_on_start_hook;
     plugin->on_connect_func = c_on_connect_hook;
+    plugin->on_disconnect_func = c_on_disconnect_hook;
     plugin->on_message_received_func = c_on_message_received_hook;
     plugin->on_message_send_func = c_on_message_send_hook;
     plugin->on_shutdown_func = c_on_shutdown_hook;
@@ -94,13 +95,27 @@ c_on_start_hook (ProfPlugin *plugin)
 }
 
 void
-c_on_connect_hook (ProfPlugin *plugin, const char * const account_name, const char * const fulljid)
+c_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid)
 {
     void * f = NULL;
     void (*func)(const char * const __account_name, const char * const __fulljid);
     assert (plugin && plugin->module);
 
     if (NULL == (f = dlsym (plugin->module, "prof_on_connect")))
+        return ;
+
+    func = (void (*)(const char * const, const char * const)) f;
+    func (account_name, fulljid);
+}
+
+void
+c_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid)
+{
+    void * f = NULL;
+    void (*func)(const char * const __account_name, const char * const __fulljid);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_disconnect")))
         return ;
 
     func = (void (*)(const char * const, const char * const)) f;

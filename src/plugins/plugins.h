@@ -38,6 +38,8 @@ typedef struct prof_plugin_t {
     void (*on_start_func)(struct prof_plugin_t* plugin);
     void (*on_connect_func)(struct prof_plugin_t* plugin,
         const char * const account_name, const char * const fulljid);
+    void (*on_disconnect_func)(struct prof_plugin_t* plugin,
+        const char * const account_name, const char * const fulljid);
     char* (*on_message_received_func)(struct prof_plugin_t* plugin,
         const char * const jid, const char * const message);
     char* (*on_message_send_func)(struct prof_plugin_t* plugin,
@@ -50,6 +52,7 @@ GSList * plugins_get_list(void);
 char * plugins_get_lang_string(ProfPlugin *plugin);
 void plugins_on_start(void);
 void plugins_on_connect(const char * const account_name, const char * const fulljid);
+void plugins_on_disconnect(const char * const account_name, const char * const fulljid);
 char * plugins_on_message_received(const char * const jid, const char *message);
 char * plugins_on_message_send(const char * const jid, const char *message);
 void plugins_on_shutdown(void);

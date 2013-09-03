@@ -60,6 +60,7 @@ ruby_plugin_create(const char * const filename)
     plugin->init_func = ruby_init_hook;
     plugin->on_start_func = ruby_on_start_hook;
     plugin->on_connect_func = ruby_on_connect_hook;
+    plugin->on_disconnect_func = ruby_on_disconnect_hook;
     plugin->on_message_received_func = ruby_on_message_received_hook;
     plugin->on_message_send_func = ruby_on_message_send_hook;
     plugin->on_shutdown_func = ruby_on_shutdown_hook;
@@ -97,6 +98,18 @@ ruby_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
     VALUE module = (VALUE) plugin->module;
     if (_method_exists(plugin, "prof_on_connect")) {
         rb_funcall(module, rb_intern("prof_on_connect"), 2, v_account_name, v_fulljid);
+    }
+}
+
+void
+ruby_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
+    const  char * const fulljid)
+{
+    VALUE v_account_name = rb_str_new2(account_name);
+    VALUE v_fulljid = rb_str_new2(fulljid);
+    VALUE module = (VALUE) plugin->module;
+    if (_method_exists(plugin, "prof_on_disconnect")) {
+        rb_funcall(module, rb_intern("prof_on_disconnect"), 2, v_account_name, v_fulljid);
     }
 }
 

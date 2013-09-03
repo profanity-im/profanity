@@ -32,6 +32,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "plugins/plugins.h"
 #include "profanity.h"
 #include "xmpp/bookmark.h"
 #include "xmpp/capabilities.h"
@@ -166,6 +167,9 @@ jabber_disconnect(void)
 {
     // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
+        char *account_name = jabber_get_account_name();
+        const char *fulljid = jabber_get_fulljid();
+        plugins_on_disconnect(account_name, fulljid);
         log_info("Closing connection");
         jabber_conn.conn_status = JABBER_DISCONNECTING;
         xmpp_disconnect(jabber_conn.conn);
@@ -511,6 +515,9 @@ _connection_handler(xmpp_conn_t * const conn,
         // lost connection for unkown reason
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
             log_debug("Connection handler: Lost connection for unknown reason");
+            char *account_name = jabber_get_account_name();
+            const char *fulljid = jabber_get_fulljid();
+            plugins_on_disconnect(account_name, fulljid);
             prof_handle_lost_connection();
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);

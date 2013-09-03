@@ -63,6 +63,7 @@ python_plugin_create(const char * const filename)
         plugin->init_func = python_init_hook;
         plugin->on_start_func = python_on_start_hook;
         plugin->on_connect_func = python_on_connect_hook;
+        plugin->on_disconnect_func = python_on_disconnect_hook;
         plugin->on_message_received_func = python_on_message_received_hook;
         plugin->on_message_send_func = python_on_message_send_hook;
         plugin->on_shutdown_func = python_on_shutdown_hook;
@@ -119,6 +120,25 @@ python_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_on_connect")) {
         p_function = PyObject_GetAttrString(p_module, "prof_on_connect");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+        }
+    }
+}
+
+void
+python_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
+    const char * const fulljid)
+{
+    PyObject *p_args = Py_BuildValue("ss", account_name, fulljid);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_disconnect")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_disconnect");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);

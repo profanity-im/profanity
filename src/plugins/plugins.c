@@ -135,6 +135,17 @@ plugins_on_connect(const char * const account_name, const char * const fulljid)
     }
 }
 
+void
+plugins_on_disconnect(const char * const account_name, const char * const fulljid)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_disconnect_func(plugin, account_name, fulljid);
+        curr = g_slist_next(curr);
+    }
+}
+
 char *
 plugins_on_message_received(const char * const jid, const char *message)
 {
