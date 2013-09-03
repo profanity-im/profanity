@@ -654,9 +654,9 @@ _init(const int disable_tls, char *log_level)
 static void
 _shutdown(void)
 {
-    plugins_on_shutdown();
     jabber_disconnect();
     jabber_shutdown();
+    plugins_on_shutdown();
     roster_free();
     caps_close();
     ui_close();
