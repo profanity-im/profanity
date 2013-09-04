@@ -73,6 +73,7 @@ tests_testsuite_SOURCES = \
     src/plugins/callbacks.h src/plugins/callbacks.c \
     src/plugins/python_plugins.h src/plugins/python_plugins.c \
     src/plugins/c_plugins.h src/plugins/c_plugins.c \
+    src/plugins/c_api.h src/plugins/c_api.c \
     src/plugins/python_api.h src/plugins/python_api.c \
     src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
     src/plugins/ruby_api.h src/plugins/ruby_api.c \
