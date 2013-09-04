@@ -250,6 +250,9 @@ _clear_input(void)
 static int
 _handle_edit(int result, const wint_t ch, char *input, int *size)
 {
+    if (result != KEY_CODE_YES) {
+        return 0;
+    }
     char *prev = NULL;
     char *next = NULL;
     int inp_x = 0;
