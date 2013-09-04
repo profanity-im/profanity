@@ -250,9 +250,6 @@ _clear_input(void)
 static int
 _handle_edit(int result, const wint_t ch, char *input, int *size)
 {
-    if (result != KEY_CODE_YES) {
-        return 0;
-    }
     char *prev = NULL;
     char *next = NULL;
     int inp_x = 0;
@@ -375,6 +372,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 
         case 127:
         case KEY_BACKSPACE:
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             roster_reset_search_attempts();
             if (display_size > 0) {
 
@@ -426,6 +426,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case KEY_DC: // DEL
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             if (inp_x == display_size-1) {
                 gchar *start = g_utf8_substring(input, 0, inp_x);
                 for (*size = 0; *size < strlen(start); (*size)++) {
@@ -459,6 +462,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case KEY_LEFT:
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             if (inp_x > 0) {
                 wmove(inp_win, 0, inp_x-1);
 
@@ -471,6 +477,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case KEY_RIGHT:
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             if (inp_x < display_size) {
                 wmove(inp_win, 0, inp_x+1);
 
@@ -483,6 +492,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case KEY_UP:
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             prev = cmd_history_previous(input, size);
             if (prev) {
                 inp_replace_input(input, prev, size);
@@ -490,6 +502,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case KEY_DOWN:
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             next = cmd_history_next(input, size);
             if (next) {
                 inp_replace_input(input, next, size);
@@ -501,12 +516,18 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case KEY_HOME:
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             wmove(inp_win, 0, 0);
             pad_start = 0;
             _inp_win_refresh();
             return 1;
 
         case KEY_END:
+            if (result != KEY_CODE_YES) {
+                return 0;
+            }
             _go_to_end(display_size);
             return 1;
 
