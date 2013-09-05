@@ -116,7 +116,17 @@ prof_handle_typing(char *from)
 void
 prof_handle_incoming_message(char *from, char *message, gboolean priv)
 {
-    char *new_message = plugins_on_message_received(from, message);
+    char *new_message = NULL;
+
+    if (priv) {
+        Jid *jid = jid_create(from);
+        char *room = jid->barejid;
+        char *nick = jid->resourcepart;
+        new_message = plugins_on_private_message_received(room, nick, message);
+        jid_destroy(jid);
+    } else {
+        new_message = plugins_on_message_received(from, message);
+    }
 
     ui_incoming_msg(from, new_message, NULL, priv);
     ui_current_page_off();
@@ -130,7 +140,6 @@ prof_handle_incoming_message(char *from, char *message, gboolean priv)
         jid_destroy(from_jid);
     }
 
-
     free(new_message);
 }
 
@@ -138,7 +147,17 @@ void
 prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     gboolean priv)
 {
-    char * new_message = plugins_on_message_received(from, message);
+    char *new_message = NULL;
+
+    if (priv) {
+        Jid *jid = jid_create(from);
+        char *room = jid->barejid;
+        char *nick = jid->resourcepart;
+        new_message = plugins_on_private_message_received(room, nick, message);
+        jid_destroy(jid);
+    } else {
+        new_message = plugins_on_message_received(from, message);
+    }
 
     ui_incoming_msg(from, new_message, &tv_stamp, priv);
     ui_current_page_off();
@@ -151,7 +170,6 @@ prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
         jid_destroy(jidp);
         jid_destroy(from_jid);
     }
-
 
     free(new_message);
 }
@@ -326,7 +344,14 @@ void
 prof_handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
-    ui_room_message(room_jid, nick, message);
+    char *new_message = NULL;
+    if (g_strcmp0(nick, muc_get_room_nick(room_jid)) != 0) {
+        new_message = plugins_on_room_message_received(room_jid, nick, message);
+    } else {
+        new_message = strdup(message);
+    }
+
+    ui_room_message(room_jid, nick, new_message);
     ui_current_page_off();
 
     if (prefs_get_boolean(PREF_GRLOG)) {
@@ -334,6 +359,8 @@ prof_handle_room_message(const char * const room_jid, const char * const nick,
         groupchat_log_chat(jid->barejid, room_jid, nick, message);
         jid_destroy(jid);
     }
+
+    free(new_message);
 }
 
 void

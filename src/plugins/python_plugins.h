@@ -32,6 +32,10 @@ void python_on_start_hook(ProfPlugin *plugin);
 void python_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 void python_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 char * python_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char * python_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
+char * python_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
 char * python_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 void python_on_shutdown_hook(ProfPlugin *plugin);
 

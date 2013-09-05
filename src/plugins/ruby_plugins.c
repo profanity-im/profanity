@@ -62,6 +62,8 @@ ruby_plugin_create(const char * const filename)
     plugin->on_connect_func = ruby_on_connect_hook;
     plugin->on_disconnect_func = ruby_on_disconnect_hook;
     plugin->on_message_received_func = ruby_on_message_received_hook;
+    plugin->on_room_message_received_func = ruby_on_room_message_received_hook;
+    plugin->on_private_message_received_func = ruby_on_private_message_received_hook;
     plugin->on_message_send_func = ruby_on_message_send_hook;
     plugin->on_shutdown_func = ruby_on_shutdown_hook;
     g_free(module_name);
@@ -123,6 +125,52 @@ ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
     VALUE module = (VALUE) plugin->module;
     if (_method_exists(plugin, "prof_on_message_received")) {
         VALUE result = rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
+        if (TYPE(result) != T_NIL) {
+            char *result_str = STR2CSTR(result);
+            rb_gc_unregister_address(&result);
+            return result_str;
+        } else {
+            return NULL;
+        }
+    }
+
+    return NULL;
+}
+
+char *
+ruby_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
+{
+    VALUE v_room = rb_str_new2(room);
+    VALUE v_nick = rb_str_new2(nick);
+    VALUE v_message = rb_str_new2(message);
+
+    VALUE module = (VALUE) plugin->module;
+    if (_method_exists(plugin, "prof_on_private_message_received")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_private_message_received"), 3, v_room, v_nick, v_message);
+        if (TYPE(result) != T_NIL) {
+            char *result_str = STR2CSTR(result);
+            rb_gc_unregister_address(&result);
+            return result_str;
+        } else {
+            return NULL;
+        }
+    }
+
+    return NULL;
+}
+
+char *
+ruby_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
+{
+    VALUE v_room = rb_str_new2(room);
+    VALUE v_nick = rb_str_new2(nick);
+    VALUE v_message = rb_str_new2(message);
+
+    VALUE module = (VALUE) plugin->module;
+    if (_method_exists(plugin, "prof_on_room_message_received")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_room_message_received"), 3, v_room, v_nick, v_message);
         if (TYPE(result) != T_NIL) {
             char *result_str = STR2CSTR(result);
             rb_gc_unregister_address(&result);
