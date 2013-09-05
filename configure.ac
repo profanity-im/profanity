@@ -92,17 +92,23 @@ fi
 # Default parameters
 AM_CFLAGS="-Wall"
 
-# Python
-AM_CFLAGS="$AM_CFLAGS -I/usr/include/python2.7 -I/usr/include/python2.7 -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security -L/usr/lib/python2.7/config -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions"
+# TODO use python-config?
+PYTHON_CFLAGS="-I/usr/include/python2.7 -I/usr/include/python2.7 -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security -L/usr/lib/python2.7/config -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions"
+PYTHON_LIBS="-lpthread -ldl -lutil -lm -lpython2.7 -lruby1.8"
 
-# Ruby
-AM_CFLAGS="$AM_CFLAGS -I/usr/lib/ruby/1.8/x86_64-linux -L/usr/lib/ruby/1.8/x86_64-linux"
+# TODO use another method to get flags for system
+RUBY_CFLAGS="-I/usr/lib/ruby/1.8/x86_64-linux -L/usr/lib/ruby/1.8/x86_64-linux"
+RUBY_LIBS="-lruby1.8"
+
+# add python and ruby CFLAGS
+AM_CFLAGS="$AM_CFLAGS $PYTHON_CFLAGS $RUBY_CFLAGS"
 
 if test "x$PACKAGE_STATUS" = xdevelopment; then
 #    AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
     AM_CFLAGS="$AM_CFLAGS -Wunused"
 fi
-LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS -lpthread -ldl -lutil -lm -lpython2.7 -lruby1.8"
+
+LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS $PYTHON_LIBS $RUBY_LIBS"
 
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 
