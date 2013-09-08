@@ -19,6 +19,7 @@ char * c_on_room_message_received_hook(ProfPlugin *plugin, const char * const ro
 char * c_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 char * c_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
     const char * const nick, const char *message);
+char * c_on_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message);
 void c_plugin_destroy(ProfPlugin * plugin);
 void c_on_shutdown_hook(ProfPlugin *plugin);
 

@@ -1167,7 +1167,9 @@ cmd_execute_default(const char * const inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                message_send_groupchat(inp, recipient);
+                char *new_message = plugins_on_room_message_send(recipient, inp);
+                message_send_groupchat(new_message, recipient);
+                free(new_message);
             }
             break;
 

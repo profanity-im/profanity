@@ -53,6 +53,8 @@ typedef struct prof_plugin_t {
     char* (*on_private_message_send_func)(struct prof_plugin_t* plugin,
         const char * const room, const char * const nick,
         const char * const message);
+    char* (*on_room_message_send_func)(struct prof_plugin_t* plugin,
+        const char * const room, const char * const message);
     void (*on_shutdown_func)(struct prof_plugin_t* plugin);
 } ProfPlugin;
 
@@ -68,6 +70,7 @@ char * plugins_on_private_message_received(const char * const room, const char *
 char * plugins_on_message_send(const char * const jid, const char *message);
 char * plugins_on_private_message_send(const char * const room, const char * const nick,
     const char * const message);
+char * plugins_on_room_message_send(const char * const room, const char *message);
 void plugins_on_shutdown(void);
 void plugins_shutdown(void);
 gboolean plugins_run_command(const char * const cmd);
