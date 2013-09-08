@@ -232,6 +232,28 @@ plugins_on_message_send(const char * const jid, const char *message)
     return curr_message;
 }
 
+char *
+plugins_on_private_message_send(const char * const room, const char * const nick,
+    const char * const message)
+{
+    GSList *curr = plugins;
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
+
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        new_message = plugin->on_private_message_send_func(plugin, room, nick, curr_message);
+        if (new_message != NULL) {
+            free(curr_message);
+            curr_message = strdup(new_message);
+            free(new_message);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_message;
+}
+
 void
 plugins_on_shutdown(void)
 {

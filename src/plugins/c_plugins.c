@@ -55,6 +55,7 @@ c_plugin_create(const char * const filename)
     plugin->on_room_message_received_func = c_on_room_message_received_hook;
     plugin->on_private_message_received_func = c_on_private_message_received_hook;
     plugin->on_message_send_func = c_on_message_send_hook;
+    plugin->on_private_message_send_func = c_on_private_message_send_hook;
     plugin->on_shutdown_func = c_on_shutdown_hook;
 
     g_string_free(path, TRUE);
@@ -181,6 +182,21 @@ c_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *m
     func = (char* (*)(const char * const, const char *)) f;
     return func (jid, message);
 
+}
+
+char *
+c_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
+{
+    void * f = NULL;
+    char* (*func)(const char * const __room, const char * const __nick, const char * __message);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_on_private_message_send")))
+        return NULL;
+
+    func = (char* (*)(const char * const, const char * const, const char *)) f;
+    return func (room, nick, message);
 }
 
 void

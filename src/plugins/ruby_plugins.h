@@ -37,6 +37,8 @@ char * ruby_on_private_message_received_hook(ProfPlugin *plugin, const char * co
 char * ruby_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
     const char * const nick, const char *message);
 char * ruby_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char * ruby_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
 void ruby_on_shutdown_hook(ProfPlugin *plugin);
 
 void ruby_plugin_destroy(ProfPlugin *plugin);

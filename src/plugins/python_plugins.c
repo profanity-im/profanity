@@ -68,6 +68,7 @@ python_plugin_create(const char * const filename)
         plugin->on_room_message_received_func = python_on_room_message_received_hook;
         plugin->on_private_message_received_func = python_on_private_message_received_hook;
         plugin->on_message_send_func = python_on_message_send_hook;
+        plugin->on_private_message_send_func = python_on_private_message_send_hook;
         plugin->on_shutdown_func = python_on_shutdown_hook;
         g_free(module_name);
         return plugin;
@@ -244,6 +245,34 @@ python_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_on_message_send")) {
         p_function = PyObject_GetAttrString(p_module, "prof_on_message_send");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                return result_str;;
+            } else {
+                return NULL;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+char *
+python_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
+{
+    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_private_message_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_private_message_send");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject *result = PyObject_CallObject(p_function, p_args);

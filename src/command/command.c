@@ -1203,8 +1203,14 @@ cmd_execute_default(const char * const inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                message_send(inp, recipient);
-                ui_outgoing_msg("me", recipient, inp);
+                Jid *jidp = jid_create(recipient);
+                char *new_message = plugins_on_private_message_send(jidp->barejid, jidp->resourcepart, inp);
+
+                message_send(new_message, recipient);
+                ui_outgoing_msg("me", recipient, new_message);
+
+                free(new_message);
+                jid_destroy(jidp);
             }
             break;
 
@@ -2222,8 +2228,12 @@ _cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, usr);
 
             if (msg != NULL) {
-                message_send(msg, full_jid->str);
-                ui_outgoing_msg("me", full_jid->str, msg);
+                char *new_message = plugins_on_private_message_send(room_name, usr, msg);
+
+                message_send(new_message, full_jid->str);
+                ui_outgoing_msg("me", full_jid->str, new_message);
+
+                free(new_message);
             } else {
                 ui_new_chat_win(full_jid->str);
             }
