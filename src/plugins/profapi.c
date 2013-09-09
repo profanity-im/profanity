@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 
+#include "plugins/profapi.h"
 #include "plugins/callbacks.h"
 
 void (*prof_cons_alert)(void) = NULL;
@@ -43,3 +44,9 @@ void (*prof_log_debug)(const char *message) = NULL;
 void (*prof_log_info)(const char *message) = NULL;
 void (*prof_log_warning)(const char *message) = NULL;
 void (*prof_log_error)(const char *message) = NULL;
+
+int (*prof_win_exists)(PROF_WIN_TAG win) = NULL;
+void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line)) = NULL;
+void (*prof_win_focus)(PROF_WIN_TAG win) = NULL;
+void (*prof_win_process_line)(PROF_WIN_TAG win, char *line) = NULL;
+void (*prof_win_show)(PROF_WIN_TAG win, char *line) = NULL;

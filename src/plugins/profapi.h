@@ -23,6 +23,8 @@
 #ifndef PROF_API_H
 #define PROF_API_H
 
+typedef char* PROF_WIN_TAG;
+
 void (*prof_cons_alert)(void);
 
 void (*prof_cons_show)(const char * const message);
@@ -42,5 +44,11 @@ void (*prof_log_debug)(const char *message);
 void (*prof_log_info)(const char *message);
 void (*prof_log_warning)(const char *message);
 void (*prof_log_error)(const char *message);
+
+int (*prof_win_exists)(PROF_WIN_TAG win);
+void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
+void (*prof_win_focus)(PROF_WIN_TAG win);
+void (*prof_win_process_line)(PROF_WIN_TAG win, char *line);
+void (*prof_win_show)(PROF_WIN_TAG win, char *line);
 
 #endif

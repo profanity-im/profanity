@@ -43,7 +43,14 @@ typedef struct p_timed_function {
     GTimer *timer;
 } PluginTimedFunction;
 
+typedef struct p_window_input_callback {
+    void *callback;
+    void (*callback_func)(struct p_window_input_callback *window_callback, char *tag, const char * const line);
+} PluginWindowCallback;
+
 void callbacks_add_command(PluginCommand *command);
 void callbacks_add_timed(PluginTimedFunction *timed_function);
+void callbacks_add_window_handler(char *tag, PluginWindowCallback *window_callback);
+void * callbacks_get_window_handler(char *tag);
 
 #endif

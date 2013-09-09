@@ -171,6 +171,79 @@ python_api_log_error(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject *
+python_api_win_exists(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+    if (!PyArg_ParseTuple(args, "s", &tag)) {
+        return Py_BuildValue("");
+    }
+
+    if (api_win_exists(tag)) {
+        return Py_BuildValue("i", 1);
+    } else {
+        return Py_BuildValue("i", 0);
+    }
+}
+
+static PyObject *
+python_api_win_create(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+    PyObject *p_callback = NULL;
+
+    if (!PyArg_ParseTuple(args, "sO", &tag, &p_callback)) {
+        return Py_BuildValue("");
+    }
+
+    if (p_callback && PyCallable_Check(p_callback)) {
+        api_win_create(tag, p_callback, python_window_callback);
+    }
+
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_win_focus(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+
+    if (!PyArg_ParseTuple(args, "s", &tag)) {
+        return Py_BuildValue("");
+    }
+
+    api_win_focus(tag);
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_win_process_line(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+    char *line = NULL;
+
+    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
+        return Py_BuildValue("");
+    }
+
+    api_win_process_line(tag, line);
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_win_show(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+    char *line = NULL;
+
+    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
+        return Py_BuildValue("");
+    }
+
+    api_win_show(tag, line);
+    return Py_BuildValue("");
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -218,6 +291,20 @@ python_timed_callback(PluginTimedFunction *timed_function)
     PyObject_CallObject(timed_function->callback, NULL);
 }
 
+void
+python_window_callback(PluginWindowCallback *window_callback, char *tag, char *line)
+{
+    PyObject *p_args = NULL;
+    p_args = Py_BuildValue("ss", tag, line);
+    PyObject_CallObject(window_callback->callback, p_args);
+    Py_XDECREF(p_args);
+
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+        PyErr_Clear();
+    }
+}
+
 static PyMethodDef apiMethods[] = {
     { "cons_alert", python_api_cons_alert, METH_NOARGS, "Highlight the console window in the status bar." },
     { "cons_show", python_api_cons_show, METH_VARARGS, "Print a line to the console." },
@@ -230,6 +317,11 @@ static PyMethodDef apiMethods[] = {
     { "log_info", python_api_log_info, METH_VARARGS, "Log an info message" },
     { "log_warning", python_api_log_warning, METH_VARARGS, "Log a warning message" },
     { "log_error", python_api_log_error, METH_VARARGS, "Log an error message" },
+    { "win_exists", python_api_win_exists, METH_VARARGS, "Determine whether a window exists." },
+    { "win_create", python_api_win_create, METH_VARARGS, "Create a new window." },
+    { "win_focus", python_api_win_focus, METH_VARARGS, "Focus a window." },
+    { "win_show", python_api_win_show, METH_VARARGS, "Show text in the window." },
+    { "win_process_line", python_api_win_process_line, METH_VARARGS, "Send a line of input to a window." },
     { NULL, NULL, 0, NULL }
 };
 

@@ -151,6 +151,57 @@ ruby_api_log_error(VALUE self, VALUE v_message)
     return Qnil;
 }
 
+static VALUE
+ruby_api_win_exists(VALUE self, VALUE v_tag)
+{
+    char *tag = STR2CSTR(v_tag);
+
+    if (api_win_exists(tag)) {
+        return Qtrue;
+    } else {
+        return Qfalse;
+    }
+}
+
+static VALUE
+ruby_api_win_create(VALUE self, VALUE v_tag, VALUE v_callback)
+{
+    char *tag = STR2CSTR(v_tag);
+
+    api_win_create(tag, (void*)v_callback, ruby_window_callback);
+
+    return Qnil;
+}
+
+static VALUE
+ruby_api_win_focus(VALUE self, VALUE v_tag)
+{
+    char *tag = STR2CSTR(v_tag);
+
+    api_win_focus(tag);
+    return Qnil;
+}
+
+static VALUE
+ruby_api_win_process_line(VALUE self, VALUE v_tag, VALUE v_line)
+{
+    char *tag = STR2CSTR(v_tag);
+    char *line = STR2CSTR(v_line);
+
+    api_win_process_line(tag, line);
+    return Qnil;
+}
+
+static VALUE
+ruby_api_win_show(VALUE self, VALUE v_tag, VALUE v_line)
+{
+    char *tag = STR2CSTR(v_tag);
+    char *line = STR2CSTR(v_line);
+
+    api_win_show(tag, line);
+    return Qnil;
+}
+
 void
 ruby_command_callback(PluginCommand *command, gchar **args)
 {
@@ -187,6 +238,14 @@ ruby_timed_callback(PluginTimedFunction *timed_function)
     rb_funcall((VALUE)timed_function->callback, rb_intern("call"), 0);
 }
 
+void
+ruby_window_callback(PluginWindowCallback *window_callback, char *tag, char *line)
+{
+    rb_funcall((VALUE)window_callback->callback, rb_intern("call"), 2,
+            rb_str_new2(tag), rb_str_new2(line));
+}
+
+
 static VALUE prof_module;
 
 void
@@ -205,4 +264,9 @@ ruby_api_init(void)
     rb_define_module_function(prof_module, "log_info", RUBY_METHOD_FUNC(ruby_api_log_info), 1);
     rb_define_module_function(prof_module, "log_warning", RUBY_METHOD_FUNC(ruby_api_log_warning), 1);
     rb_define_module_function(prof_module, "log_error", RUBY_METHOD_FUNC(ruby_api_log_error), 1);
+    rb_define_module_function(prof_module, "win_exists", RUBY_METHOD_FUNC(ruby_api_win_exists), 1);
+    rb_define_module_function(prof_module, "win_create", RUBY_METHOD_FUNC(ruby_api_win_create), 2);
+    rb_define_module_function(prof_module, "win_focus", RUBY_METHOD_FUNC(ruby_api_win_focus), 1);
+    rb_define_module_function(prof_module, "win_process_line", RUBY_METHOD_FUNC(ruby_api_win_process_line), 2);
+    rb_define_module_function(prof_module, "win_show", RUBY_METHOD_FUNC(ruby_api_win_show), 2);
 }

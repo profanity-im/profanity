@@ -383,6 +383,7 @@ wins_create_summary(void)
         GString *priv_string;
         GString *muc_string;
         GString *duck_string;
+        GString *plugin_string;
 
         switch (window->type)
         {
@@ -455,7 +456,21 @@ wins_create_summary(void)
                 g_string_free(duck_string, TRUE);
 
                 break;
+            case WIN_PLUGIN:
+                plugin_string = g_string_new("");
+                g_string_printf(plugin_string, "%d: %s plugin", ui_index, window->from);
 
+                if (window->unread > 0) {
+                    GString *plugin_unread = g_string_new("");
+                    g_string_printf(plugin_unread, ", %d unread", window->unread);
+                    g_string_append(plugin_string, plugin_unread->str);
+                    g_string_free(plugin_unread, TRUE);
+                }
+
+                result = g_slist_append(result, strdup(plugin_string->str));
+                g_string_free(plugin_string, TRUE);
+
+                break;
             default:
                 break;
         }

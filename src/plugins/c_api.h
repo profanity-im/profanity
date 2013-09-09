@@ -26,3 +26,4 @@ void c_api_init(void);
 
 void c_command_callback(PluginCommand *command, gchar **args);
 void c_timed_callback(PluginTimedFunction *timed_function);
+void c_window_callback(PluginWindowCallback *window_callback, char *tag, char *line);

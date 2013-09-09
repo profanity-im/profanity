@@ -1229,6 +1229,10 @@ cmd_execute_default(const char * const inp)
             }
             break;
 
+        case WIN_PLUGIN:
+            plugins_win_process_line(recipient, inp);
+            break;
+
         default:
             break;
     }
@@ -2540,6 +2544,7 @@ _cmd_status(gchar **args, struct cmd_help_t help)
             }
             break;
         case WIN_CONSOLE:
+        case WIN_PLUGIN:
             if (usr != NULL) {
                 usr_jid = roster_barejid_from_name(usr);
                 if (usr_jid == NULL) {
@@ -2616,6 +2621,7 @@ _cmd_info(gchar **args, struct cmd_help_t help)
             }
             break;
         case WIN_CONSOLE:
+        case WIN_PLUGIN:
             if (usr != NULL) {
                 usr_jid = roster_barejid_from_name(usr);
                 if (usr_jid == NULL) {
@@ -2669,6 +2675,7 @@ _cmd_caps(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CHAT:
         case WIN_CONSOLE:
+        case WIN_PLUGIN:
             if (args[0] != NULL) {
                 Jid *jid = jid_create(args[0]);
 
@@ -2745,6 +2752,7 @@ _cmd_software(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CHAT:
         case WIN_CONSOLE:
+        case WIN_PLUGIN:
             if (args[0] != NULL) {
                 Jid *jid = jid_create(args[0]);
 
@@ -3039,7 +3047,7 @@ _cmd_tiny(gchar **args, struct cmd_help_t help)
             ui_current_error_line(error->str);
         }
         g_string_free(error, TRUE);
-    } else if (win_type != WIN_CONSOLE) {
+    } else if (win_type != WIN_CONSOLE && win_type != WIN_PLUGIN) {
         char *tiny = tinyurl_get(url);
 
         if (tiny != NULL) {

@@ -42,4 +42,11 @@ void api_log_info(const char *message);
 void api_log_warning(const char *message);
 void api_log_error(const char *message);
 
+int api_win_exists(char *tag);
+void api_win_create(char *tag, void *callback,
+    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
+void api_win_focus(char *tag);
+void api_win_process_line(char *tag, const char * const line);
+void api_win_show(char *tag, char *line);
+
 #endif

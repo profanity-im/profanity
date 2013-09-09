@@ -29,5 +29,6 @@ void ruby_shutdown(void);
 
 void ruby_command_callback(PluginCommand *command, gchar **args);
 void ruby_timed_callback(PluginTimedFunction *timed_function);
+void ruby_window_callback(PluginWindowCallback *window_callback, char *tag, char *line);
 
 #endif

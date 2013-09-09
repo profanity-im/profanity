@@ -27,6 +27,7 @@
 #include "config/preferences.h"
 #include "log.h"
 #include "plugins/callbacks.h"
+#include "plugins/api.h"
 #include "plugins/plugins.h"
 #include "plugins/python_plugins.h"
 #include "plugins/python_api.h"
@@ -111,6 +112,12 @@ plugins_get_lang_string(ProfPlugin *plugin)
         default:
             return "Unknown";
     }
+}
+
+void
+plugins_win_process_line(char *win, const char * const line)
+{
+    api_win_process_line(win, line);
 }
 
 void

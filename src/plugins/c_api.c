@@ -37,6 +37,10 @@ typedef struct timed_wrapper_t {
     void(*func)(void);
 } TimedWrapper;
 
+typedef struct window_wrapper_t {
+    void(*func)(char *tag, char *line);
+} WindowWrapper;
+
 static void
 c_api_cons_alert(void)
 {
@@ -111,6 +115,38 @@ c_api_log_error(const char *message)
     api_log_error(message);
 }
 
+int
+c_api_win_exists(char *tag)
+{
+    return api_win_exists(tag);
+}
+
+void
+c_api_win_create(char *tag, void(*callback)(char *tag, char *line))
+{
+    WindowWrapper *wrapper = malloc(sizeof(WindowWrapper));
+    wrapper->func = callback;
+    api_win_create(tag, wrapper, c_window_callback);
+}
+
+void
+c_api_win_focus(char *tag)
+{
+    api_win_focus(tag);
+}
+
+void
+c_api_win_process_line(char *tag, char *line)
+{
+    api_win_process_line(tag, line);
+}
+
+void
+c_api_win_show(char *tag, char *line)
+{
+    api_win_show(tag, line);
+}
+
 void
 c_command_callback(PluginCommand *command, gchar **args)
 {
@@ -128,6 +164,14 @@ c_timed_callback(PluginTimedFunction *timed_function)
 }
 
 void
+c_window_callback(PluginWindowCallback *window_callback, char *tag, char *line)
+{
+    WindowWrapper *wrapper = window_callback->callback;
+    void(*f)(char *tag, char *line) = wrapper->func;
+    f(tag, line);
+}
+
+void
 c_api_init(void)
 {
     prof_cons_alert = c_api_cons_alert;
@@ -141,4 +185,9 @@ c_api_init(void)
     prof_log_info = c_api_log_info;
     prof_log_warning = c_api_log_warning;
     prof_log_error = c_api_log_error;
+    prof_win_exists = c_api_win_exists;
+    prof_win_create = c_api_win_create;
+    prof_win_focus = c_api_win_focus;
+    prof_win_process_line = c_api_win_process_line;
+    prof_win_show = c_api_win_show;
 }

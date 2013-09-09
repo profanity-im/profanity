@@ -28,6 +28,7 @@
 #include "plugins/callbacks.h"
 #include "profanity.h"
 #include "ui/notifier.h"
+#include "ui/windows.h"
 #include "ui/ui.h"
 
 void
@@ -123,4 +124,44 @@ void
 api_log_error(const char *message)
 {
     log_error("%s", message);
+}
+
+int
+api_win_exists(char *tag)
+{
+    return (wins_get_by_recipient(tag) != NULL);
+}
+
+void
+api_win_create(char *tag, void *callback,
+    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, const char * const line))
+{
+    PluginWindowCallback *window = malloc(sizeof(PluginWindowCallback));
+    window->callback = callback;
+    window->callback_func = callback_func;
+    callbacks_add_window_handler(tag, window);
+    wins_new(tag, WIN_PLUGIN);
+}
+
+void
+api_win_focus(char *tag)
+{
+    ProfWin *win = wins_get_by_recipient(tag);
+    int num = wins_get_num(win);
+    ui_switch_win(num);
+}
+
+void
+api_win_process_line(char *tag, const char * const line)
+{
+    PluginWindowCallback *window = callbacks_get_window_handler(tag);
+    window->callback_func(window, tag, line);
+}
+
+void
+api_win_show(char *tag, char *line)
+{
+    ProfWin *window = wins_get_by_recipient(tag);
+    win_print_time(window, '-');
+    wprintw(window->win, "%s\n", line);
 }

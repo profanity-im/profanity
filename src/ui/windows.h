@@ -23,6 +23,8 @@
 #ifndef WINDOWS_H
 #define WINDOWS_H
 
+#include "ui/window.h"
+
 void wins_init(void);
 ProfWin * wins_get_console(void);
 ProfWin * wins_get_current(void);

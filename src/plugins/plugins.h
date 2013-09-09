@@ -77,4 +77,5 @@ gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
 gchar * plugins_get_dir(void);
 
+void plugins_win_process_line(char *win, const char * const line);
 #endif

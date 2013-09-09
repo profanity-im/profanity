@@ -32,6 +32,7 @@
 
 static GSList *p_commands = NULL;
 static GSList *p_timed_functions = NULL;
+static GHashTable *p_window_callbacks = NULL;
 
 void
 callbacks_add_command(PluginCommand *command)
@@ -44,6 +45,26 @@ void
 callbacks_add_timed(PluginTimedFunction *timed_function)
 {
     p_timed_functions = g_slist_append(p_timed_functions, timed_function);
+}
+
+void
+callbacks_add_window_handler(char *tag, PluginWindowCallback *window_callback)
+{
+    if (p_window_callbacks == NULL) {
+        p_window_callbacks = g_hash_table_new(g_str_hash, g_str_equal);
+    }
+
+    g_hash_table_insert(p_window_callbacks, tag, window_callback);
+}
+
+void *
+callbacks_get_window_handler(char *tag)
+{
+    if (p_window_callbacks != NULL) {
+        return g_hash_table_lookup(p_window_callbacks, tag);
+    } else {
+        return NULL;
+    }
 }
 
 gboolean
