@@ -50,6 +50,7 @@ static int rows, cols;
 
 static int _handle_edit(int result, const wint_t ch, char *input, int *size);
 static int _handle_alt_key(char *input, int *size, int key);
+static void _handle_backspace(int display_size, int inp_x, int *size, char *input);
 static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
@@ -371,58 +372,13 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             }
 
         case 127:
+            _handle_backspace(display_size, inp_x, size, input);
+            return 1;
         case KEY_BACKSPACE:
             if (result != KEY_CODE_YES) {
                 return 0;
             }
-            roster_reset_search_attempts();
-            if (display_size > 0) {
-
-                // if at end, delete last char
-                if (inp_x >= display_size) {
-                    gchar *start = g_utf8_substring(input, 0, inp_x-1);
-                    for (*size = 0; *size < strlen(start); (*size)++) {
-                        input[*size] = start[*size];
-                    }
-                    input[*size] = '\0';
-
-                    g_free(start);
-
-                    _clear_input();
-                    waddstr(inp_win, input);
-                    wmove(inp_win, 0, inp_x -1);
-
-                // if in middle, delete and shift chars left
-                } else if (inp_x > 0 && inp_x < display_size) {
-                    gchar *start = g_utf8_substring(input, 0, inp_x - 1);
-                    gchar *end = g_utf8_substring(input, inp_x, *size);
-                    GString *new = g_string_new(start);
-                    g_string_append(new, end);
-
-                    for (*size = 0; *size < strlen(new->str); (*size)++) {
-                        input[*size] = new->str[*size];
-                    }
-                    input[*size] = '\0';
-
-                    g_free(start);
-                    g_free(end);
-                    g_string_free(new, FALSE);
-
-                    _clear_input();
-                    waddstr(inp_win, input);
-                    wmove(inp_win, 0, inp_x -1);
-                }
-
-                // if gone off screen to left, jump left (half a screen worth)
-                if (inp_x <= pad_start) {
-                    pad_start = pad_start - (cols / 2);
-                    if (pad_start < 0) {
-                        pad_start = 0;
-                    }
-
-                    _inp_win_refresh();
-                }
-            }
+            _handle_backspace(display_size, inp_x, size, input);
             return 1;
 
         case KEY_DC: // DEL
@@ -539,6 +495,60 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 0;
         }
     }
+}
+
+static void
+_handle_backspace(int display_size, int inp_x, int *size, char *input)
+{
+    roster_reset_search_attempts();
+    if (display_size > 0) {
+
+        // if at end, delete last char
+        if (inp_x >= display_size) {
+            gchar *start = g_utf8_substring(input, 0, inp_x-1);
+            for (*size = 0; *size < strlen(start); (*size)++) {
+                input[*size] = start[*size];
+            }
+            input[*size] = '\0';
+
+            g_free(start);
+
+            _clear_input();
+            waddstr(inp_win, input);
+            wmove(inp_win, 0, inp_x -1);
+
+        // if in middle, delete and shift chars left
+        } else if (inp_x > 0 && inp_x < display_size) {
+            gchar *start = g_utf8_substring(input, 0, inp_x - 1);
+            gchar *end = g_utf8_substring(input, inp_x, *size);
+            GString *new = g_string_new(start);
+            g_string_append(new, end);
+
+            for (*size = 0; *size < strlen(new->str); (*size)++) {
+                input[*size] = new->str[*size];
+            }
+            input[*size] = '\0';
+
+            g_free(start);
+            g_free(end);
+            g_string_free(new, FALSE);
+
+            _clear_input();
+            waddstr(inp_win, input);
+            wmove(inp_win, 0, inp_x -1);
+        }
+
+        // if gone off screen to left, jump left (half a screen worth)
+        if (inp_x <= pad_start) {
+            pad_start = pad_start - (cols / 2);
+            if (pad_start < 0) {
+                pad_start = 0;
+            }
+
+            _inp_win_refresh();
+        }
+    }
+
 }
 
 static int
