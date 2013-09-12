@@ -314,8 +314,8 @@ static struct cmd_t command_defs[] =
           "--------------------------",
           "Join a chat room at the conference server.",
           "If nick is specified you will join with this nickname.",
-          "Otherwise the 'localpart' of your JID (before the @) will be used.",
-          "If no server is supplied, a default of 'conference.<domain-part>' will be used.",
+          "Otherwise the account preference 'muc.nick' will be used which is the localpart of your JID (before the @).",
+          "If no server is supplied, the account preference 'muc.service' is used, which is 'conference.<domain-part>' by default.",
           "If the room doesn't exist, and the server allows it, a new one will be created.",
           "",
           "Example : /join jdev@conference.jabber.org",
@@ -364,8 +364,7 @@ static struct cmd_t command_defs[] =
         { "/rooms [conference-service]",
           "---------------------------",
           "List the chat rooms available at the specified conference service",
-          "If no argument is supplied, the domainpart of the current logged in JID is used,",
-          "with a prefix of 'conference'.",
+          "If no argument is supplied, the account preference 'muc.service' is used, which is 'conference.<domain-part>' by default.",
           "",
           "Example : /rooms conference.jabber.org",
           "Example : /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
@@ -747,11 +746,15 @@ static struct cmd_t command_defs[] =
           "online|chat|away",
           "|xa|dnd          : Priority for the specified presence.",
           "resource         : The resource to be used.",
+          "muc              : The default MUC chat service to use.",
+          "nick             : The default nickname to use when joining chat rooms.",
           "",
           "Example : /account add work",
           "        : /account set work jid myuser@mycompany.com",
           "        : /account set work server talk.google.com",
           "        : /account set work resource desktop",
+          "        : /account set work muc chatservice.mycompany.com",
+          "        : /account set work nick dennis",
           "        : /account set work status dnd",
           "        : /account set work dnd -1",
           "        : /account set work online 10",
@@ -1533,6 +1536,14 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                 } else if (strcmp(property, "resource") == 0) {
                     accounts_set_resource(account_name, value);
                     cons_show("Updated resource for account %s: %s", account_name, value);
+                    cons_show("");
+                } else if (strcmp(property, "muc") == 0) {
+                    accounts_set_muc_service(account_name, value);
+                    cons_show("Updated muc service for account %s: %s", account_name, value);
+                    cons_show("");
+                } else if (strcmp(property, "nick") == 0) {
+                    accounts_set_muc_nick(account_name, value);
+                    cons_show("Updated muc nick for account %s: %s", account_name, value);
                     cons_show("");
                 } else if (strcmp(property, "status") == 0) {
                     if (!valid_resource_presence_string(value) && (strcmp(value, "last") != 0)) {
@@ -2807,11 +2818,12 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     if (room_arg->localpart != NULL) {
         room = args[0];
 
-    // server not supplied (room), guess conference.<users-domain-part>
+    // server not supplied (room), use account preference
     } else {
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
         g_string_append(room_str, args[0]);
-        g_string_append(room_str, "@conference.");
-        g_string_append(room_str, my_jid->domainpart);
+        g_string_append(room_str, "@");
+        g_string_append(room_str, account->muc_service);
         room = room_str->str;
     }
 
@@ -2819,9 +2831,10 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     if (num_args == 2) {
         nick = args[1];
 
-    // use localpart for nick
+    // otherwise use account preference
     } else {
-        nick = my_jid->localpart;
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        nick = account->muc_nick;
     }
 
     Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
@@ -2908,12 +2921,8 @@ _cmd_rooms(gchar **args, struct cmd_help_t help)
     }
 
     if (args[0] == NULL) {
-        Jid *jid = jid_create(jabber_get_fulljid());
-        GString *conference_node = g_string_new("conference.");
-        g_string_append(conference_node, jid->domainpart);
-        jid_destroy(jid);
-        iq_room_list_request(conference_node->str);
-        g_string_free(conference_node, TRUE);
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        iq_room_list_request(account->muc_service);
     } else {
         iq_room_list_request(args[0]);
     }

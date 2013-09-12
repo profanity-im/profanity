@@ -789,6 +789,12 @@ cons_show_account(ProfAccount *account)
     if (account->server != NULL) {
         cons_show   ("server         : %s", account->server);
     }
+    if (account->muc_service != NULL) {
+        cons_show   ("muc service    : %s", account->muc_service);
+    }
+    if (account->muc_nick != NULL) {
+        cons_show   ("muc nick       : %s", account->muc_nick);
+    }
     if (account->last_presence != NULL) {
         cons_show   ("Last presence  : %s", account->last_presence);
     }
