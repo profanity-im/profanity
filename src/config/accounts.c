@@ -39,7 +39,15 @@ static GKeyFile *accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
-static gchar *string_keys[] = {"jid", "server", "resource", "presence.last", "presence.login"};
+static gchar *string_keys[] = {
+    "jid",
+    "server",
+    "resource",
+    "presence.last",
+    "presence.login",
+    "muc.service",
+    "muc.nick"
+};
 
 static void _fix_legacy_accounts(const char * const account_name);
 static void _save_accounts(void);
@@ -132,6 +140,19 @@ accounts_add(const char *account_name, const char *altdomain)
         if (altdomain != NULL) {
             g_key_file_set_string(accounts, account_name, "server", altdomain);
         }
+
+        Jid *jidp = jid_create(barejid);
+        GString *muc_service = g_string_new("conference.");
+        g_string_append(muc_service, jidp->domainpart);
+        g_key_file_set_string(accounts, account_name, "muc.service", muc_service->str);
+        g_string_free(muc_service, TRUE);
+        if (jidp->localpart == NULL) {
+            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->domainpart);
+        } else {
+            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->localpart);
+        }
+        jid_destroy(jidp);
+
         g_key_file_set_string(accounts, account_name, "presence.last", "online");
         g_key_file_set_string(accounts, account_name, "presence.login", "online");
         g_key_file_set_integer(accounts, account_name, "priority.online", 0);
@@ -212,6 +233,27 @@ accounts_get_account(const char * const name)
         account->priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
         account->priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
 
+        gchar *muc_service = g_key_file_get_string(accounts, name, "muc.service", NULL);
+        if (muc_service == NULL) {
+            GString *g_muc_service = g_string_new("conference.");
+            Jid *jidp = jid_create(account->jid);
+            g_string_append(g_muc_service, jidp->domainpart);
+            account->muc_service = strdup(g_muc_service->str);
+            g_string_free(g_muc_service, TRUE);
+            jid_destroy(jidp);
+        } else {
+            account->muc_service = strdup(muc_service);
+        }
+
+        gchar *muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
+        if (muc_nick == NULL) {
+            Jid *jidp = jid_create(account->jid);
+            account->muc_nick = strdup(jidp->localpart);
+            jid_destroy(jidp);
+        } else {
+            account->muc_nick = strdup(muc_nick);
+        }
+
         // get room history
         account->room_history = NULL;
         gsize history_size = 0;
@@ -242,6 +284,8 @@ accounts_free_account(ProfAccount *account)
         FREE_SET_NULL(account->server);
         FREE_SET_NULL(account->last_presence);
         FREE_SET_NULL(account->login_presence);
+        FREE_SET_NULL(account->muc_service);
+        FREE_SET_NULL(account->muc_nick);
         FREE_SET_NULL(account);
     }
 }
@@ -336,6 +380,17 @@ accounts_set_jid(const char * const account_name, const char * const value)
             if (jid->resourcepart != NULL) {
                 g_key_file_set_string(accounts, account_name, "resource", jid->resourcepart);
             }
+
+            GString *muc_service = g_string_new("conference.");
+            g_string_append(muc_service, jid->domainpart);
+            g_key_file_set_string(accounts, account_name, "muc.service", muc_service->str);
+            g_string_free(muc_service, TRUE);
+            if (jid->localpart == NULL) {
+                g_key_file_set_string(accounts, account_name, "muc.nick", jid->domainpart);
+            } else {
+                g_key_file_set_string(accounts, account_name, "muc.nick", jid->localpart);
+            }
+
             _save_accounts();
         }
     }
@@ -355,6 +410,24 @@ accounts_set_resource(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "resource", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_muc_service(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "muc.service", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_muc_nick(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "muc.nick", value);
         _save_accounts();
     }
 }
@@ -534,6 +607,27 @@ _fix_legacy_accounts(const char * const account_name)
     if (!g_key_file_has_key(accounts, account_name, "resource", NULL)) {
         g_key_file_set_string(accounts, account_name, "resource", resource);
         _save_accounts();
+    }
+
+    // acounts with no muc service or nick
+    if (!g_key_file_has_key(accounts, account_name, "muc.service", NULL)) {
+        gchar *account_jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
+        Jid *jidp = jid_create(account_jid);
+        GString *muc_service = g_string_new("conference.");
+        g_string_append(muc_service, jidp->domainpart);
+        g_key_file_set_string(accounts, account_name, "muc.service", muc_service->str);
+        g_string_free(muc_service, TRUE);
+        jid_destroy(jidp);
+    }
+    if (!g_key_file_has_key(accounts, account_name, "muc.nick", NULL)) {
+        gchar *account_jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
+        Jid *jidp = jid_create(account_jid);
+        if (jidp->localpart == NULL) {
+            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->domainpart);
+        } else {
+            g_key_file_set_string(accounts, account_name, "muc.nick", jidp->localpart);
+        }
+        jid_destroy(jidp);
     }
 
     jid_destroy(jid);
