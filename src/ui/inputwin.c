@@ -127,8 +127,11 @@ inp_get_char(char *input, int *size)
         if (result == ERR) {
             prof_handle_idle();
         }
-        if (prefs_get_boolean(PREF_OUTTYPE) && (result != ERR) && !in_command
-                                                && _printable(ch)) {
+        if (prefs_get_boolean(PREF_OUTTYPE)
+                && (result != ERR)
+                && (result != KEY_CODE_YES)
+                && !in_command
+                && _printable(ch)) {
             prof_handle_activity();
         }
     }
