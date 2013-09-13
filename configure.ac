@@ -83,6 +83,8 @@ if test $PYTHON_CONFIG = yes; then
     AC_MSG_NOTICE([Python CFLAGS=$PYTHON_CFLAGS])
     PYTHON_LIBS=`python-config --libs`
     AC_MSG_NOTICE([Python LIBS=$PYTHON_LIBS])
+    PYTHON_LDFLAGS=`python-config --ldflags`
+    AC_MSG_NOTICE([Python LDFLAGS=$PYTHON_LDFLAGS])
 else
     AC_MSG_NOTICE([Python not supported])
 fi
@@ -109,7 +111,6 @@ AM_CFLAGS="-Wall"
 RUBY_CFLAGS="-I/usr/lib/ruby/1.8/x86_64-linux -L/usr/lib/ruby/1.8/x86_64-linux"
 RUBY_LIBS="-lruby1.8"
 
-# add python and ruby CFLAGS
 AM_CFLAGS="$AM_CFLAGS $PYTHON_CFLAGS $RUBY_CFLAGS"
 
 if test "x$PACKAGE_STATUS" = xdevelopment; then
@@ -118,9 +119,10 @@ if test "x$PACKAGE_STATUS" = xdevelopment; then
 fi
 
 LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS $PYTHON_LIBS $RUBY_LIBS"
-
+AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS"
 AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
 
+AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
