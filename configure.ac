@@ -74,6 +74,19 @@ AC_CHECK_LIB([curl], [main], [],
 AC_CHECK_LIB([headunit], [main], [],
     [AC_MSG_NOTICE([headunit not found, will not be able to run tests])])
 
+# check for python development, for python plugin support
+AC_CHECK_PROG(PYTHON_CONFIG, python-config, yes, no)
+if test $PYTHON_CONFIG = yes; then
+    AC_MSG_NOTICE([Python supported.])
+    AC_DEFINE([HAVE_PYTHON], [1], [Python])
+    PYTHON_CFLAGS=`python-config --cflags`
+    AC_MSG_NOTICE([Python CFLAGS=$PYTHON_CFLAGS])
+    PYTHON_LIBS=`python-config --libs`
+    AC_MSG_NOTICE([Python LIBS=$PYTHON_LIBS])
+else
+    AC_MSG_NOTICE([Python not supported])
+fi
+
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
@@ -91,10 +104,6 @@ fi
 
 # Default parameters
 AM_CFLAGS="-Wall"
-
-# TODO use python-config?
-PYTHON_CFLAGS="-I/usr/include/python2.7 -I/usr/include/python2.7 -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security -L/usr/lib/python2.7/config -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions"
-PYTHON_LIBS="-lpthread -ldl -lutil -lm -lpython2.7 -lruby1.8"
 
 # TODO use another method to get flags for system
 RUBY_CFLAGS="-I/usr/lib/ruby/1.8/x86_64-linux -L/usr/lib/ruby/1.8/x86_64-linux"
