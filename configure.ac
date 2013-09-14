@@ -12,17 +12,34 @@ AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 
-AC_DEFUN([AX_WITH_RUBY],[
-    AX_WITH_PROG(RUBY,ruby,$1,$2)
-])
-AX_RUBY_DEVEL
-AM_CONDITIONAL([BUILD_RUBY_API], [true])
-AC_DEFINE([HAVE_RUBY], [1], [Ruby support])
+AC_CHECK_PROG(RUBY_CMD_EXISTS, ruby, yes, no)
+if test "$RUBY_CMD_EXISTS" == "yes"; then
+    ac_mkmf_result=`ruby -rmkmf -e ";" 2>&1`
+    if test -z "$ac_mkmf_result"; then
+        AC_DEFUN([AX_WITH_RUBY],[
+            AX_WITH_PROG(RUBY,ruby,$1,$2)
+        ])
+        AX_RUBY_DEVEL
+        AM_CONDITIONAL([BUILD_RUBY_API], [true])
+        AC_DEFINE([HAVE_RUBY], [1], [Ruby support])
+    else
+        AM_CONDITIONAL([BUILD_RUBY_API], [false])
+        AC_MSG_NOTICE([Ruby development package not found, Ruby plugin support disabled.])
+    fi
+else
+    AM_CONDITIONAL([BUILD_RUBY_API], [false])
+    AC_MSG_NOTICE([Ruby not installed, Ruby plugin support disabled.])
+fi
 
-AX_PYTHON_DEVEL
-AM_CONDITIONAL([BUILD_PYTHON_API], [true])
-AC_DEFINE([HAVE_PYTHON], [1], [Python support])
-#AC_CHECK_PROG(PYTHON_CONFIG, python-config, yes, no)
+AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
+if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
+    AX_PYTHON_DEVEL
+    AM_CONDITIONAL([BUILD_PYTHON_API], [true])
+    AC_DEFINE([HAVE_PYTHON], [1], [Python support])
+else
+    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
+    AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
+fi
 
 # Checks for programs.
 AC_PROG_CC
