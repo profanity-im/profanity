@@ -27,8 +27,6 @@ core_sources = \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c \
     src/plugins/c_plugins.h src/plugins/c_plugins.c \
-    src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
-    src/plugins/ruby_api.h src/plugins/ruby_api.c \
     src/plugins/c_api.h src/plugins/c_api.c
 
 main_source = src/main.c
@@ -37,19 +35,29 @@ python_sources = \
     src/plugins/python_plugins.h src/plugins/python_plugins.c \
     src/plugins/python_api.h src/plugins/python_api.c
 
+ruby_sources = \
+    src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
+    src/plugins/ruby_api.h src/plugins/ruby_api.c
+
 test_sources = \
     tests/test_roster.c tests/test_common.c tests/test_history.c \
     tests/test_autocomplete.c tests/testsuite.c tests/test_parser.c \
     tests/test_jid.c
 
 if BUILD_PYTHON_API
-all_sources = $(core_sources) $(python_sources)
+with_python_sources = $(core_sources) $(python_sources)
 else
-all_sources = $(core_sources)
+with_python_sources = $(core_sources)
+endif
+
+if BUILD_RUBY_API
+with_ruby_sources = $(with_python_sources) $(ruby_sources)
+else
+with_ruby_sources = $(with_python_sources)
 endif
 
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(main_source) $(all_sources)
+profanity_SOURCES = $(main_source) $(with_ruby_sources)
 
 lib_LTLIBRARIES = libprofanity.la
 libprofanity_la_LDFLAGS=-module -avoid-version -shared
@@ -60,7 +68,7 @@ library_include_HEADERS = src/plugins/profapi.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(all_sources) $(test_sources)
+tests_testsuite_SOURCES = $(with_ruby_sources) $(test_sources)
 tests_testsuite_LDADD = -lheadunit -lstdc++
 
 man_MANS = docs/profanity.1

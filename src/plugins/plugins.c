@@ -35,10 +35,13 @@
 #include "plugins/python_api.h"
 #endif
 
-#include "plugins/c_plugins.h"
-#include "plugins/c_api.h"
+#ifdef PROF_HAVE_RUBY
 #include "plugins/ruby_plugins.h"
 #include "plugins/ruby_api.h"
+#endif
+
+#include "plugins/c_plugins.h"
+#include "plugins/c_api.h"
 #include "ui/ui.h"
 
 static GSList* plugins;
@@ -51,7 +54,9 @@ plugins_init(void)
 #ifdef PROF_HAVE_PYTHON
     python_env_init();
 #endif
+#ifdef PROF_HAVE_RUBY
     ruby_env_init();
+#endif
     c_env_init();
 
     // load plugins
@@ -71,15 +76,17 @@ plugins_init(void)
                 }
             }
 #endif
-            if (g_str_has_suffix(filename, ".so")) {
-                ProfPlugin *plugin = c_plugin_create(filename);
+#ifdef PROF_HAVE_RUBY
+            if (g_str_has_suffix(filename, ".rb")) {
+                ProfPlugin *plugin = ruby_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
                 }
             }
-            if (g_str_has_suffix(filename, ".rb")) {
-                ProfPlugin *plugin = ruby_plugin_create(filename);
+#endif
+            if (g_str_has_suffix(filename, ".so")) {
+                ProfPlugin *plugin = c_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
@@ -310,16 +317,18 @@ plugins_shutdown(void)
 
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
-        if (plugin->lang == LANG_C) {
-            c_plugin_destroy(plugin);
-        }
 #ifdef PROF_HAVE_PYTHON
         if (plugin->lang == LANG_PYTHON) {
             python_plugin_destroy(plugin);
         }
 #endif
+#ifdef PROF_HAVE_RUBY
         if (plugin->lang == LANG_RUBY) {
             ruby_plugin_destroy(plugin);
+        }
+#endif
+        if (plugin->lang == LANG_C) {
+            c_plugin_destroy(plugin);
         }
 
         curr = g_slist_next(curr);
@@ -327,7 +336,9 @@ plugins_shutdown(void)
 #ifdef PROF_HAVE_PYTHON
     python_shutdown();
 #endif
+#ifdef PROF_HAVE_RUBY
     ruby_shutdown();
+#endif
     c_shutdown();
 }
 

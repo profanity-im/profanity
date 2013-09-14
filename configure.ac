@@ -12,6 +12,18 @@ AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 
+AC_DEFUN([AX_WITH_RUBY],[
+    AX_WITH_PROG(RUBY,ruby,$1,$2)
+])
+AX_RUBY_DEVEL
+AM_CONDITIONAL([BUILD_RUBY_API], [true])
+AC_DEFINE([HAVE_RUBY], [1], [Ruby support])
+
+AX_PYTHON_DEVEL
+AM_CONDITIONAL([BUILD_PYTHON_API], [true])
+AC_DEFINE([HAVE_PYTHON], [1], [Python support])
+#AC_CHECK_PROG(PYTHON_CONFIG, python-config, yes, no)
+
 # Checks for programs.
 AC_PROG_CC
 
@@ -76,23 +88,6 @@ AC_CHECK_LIB([headunit], [main], [],
 AC_CHECK_LIB([dl], [main], [],
     [AC_MSG_ERROR([dl library needed to run C plugins])])
 
-# check for python development, for python plugin support
-AC_CHECK_PROG(PYTHON_CONFIG, python-config, yes, no)
-if test $PYTHON_CONFIG = yes; then
-    AC_MSG_NOTICE([Python supported.])
-    AC_DEFINE([HAVE_PYTHON], [1], [Python])
-    PYTHON_CFLAGS=`python-config --cflags`
-    AC_MSG_NOTICE([Python CFLAGS=$PYTHON_CFLAGS])
-    PYTHON_LIBS=`python-config --libs`
-    AC_MSG_NOTICE([Python LIBS=$PYTHON_LIBS])
-    PYTHON_LDFLAGS=`python-config --ldflags`
-    AC_MSG_NOTICE([Python LDFLAGS=$PYTHON_LDFLAGS])
-    AM_CONDITIONAL([BUILD_PYTHON_API], [true])
-else
-    AC_MSG_NOTICE([Python not supported])
-    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
-fi
-
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
 
@@ -111,20 +106,14 @@ fi
 # Default parameters
 AM_CFLAGS="-Wall -export-dynamic"
 
-# TODO use another method to get flags for system
-RUBY_CFLAGS="-I/usr/lib/ruby/1.8/x86_64-linux -L/usr/lib/ruby/1.8/x86_64-linux"
-RUBY_LIBS="-lruby1.8"
-
-AM_CFLAGS="$AM_CFLAGS $PYTHON_CFLAGS $RUBY_CFLAGS"
-
 if test "x$PACKAGE_STATUS" = xdevelopment; then
 #    AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
     AM_CFLAGS="$AM_CFLAGS -Wunused"
 fi
 
-LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS $PYTHON_LIBS $RUBY_LIBS"
-AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS"
-AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS"
+LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"
+AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS $RUBY_LDFLAGS"
+AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS $PYTHON_CPPFLAGS $RUBY_CPPFLAGS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
