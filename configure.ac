@@ -73,6 +73,8 @@ AC_CHECK_LIB([curl], [main], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 AC_CHECK_LIB([headunit], [main], [],
     [AC_MSG_NOTICE([headunit not found, will not be able to run tests])])
+AC_CHECK_LIB([dl], [main], [],
+    [AC_MSG_ERROR([dl library needed to run C plugins])])
 
 # check for python development, for python plugin support
 AC_CHECK_PROG(PYTHON_CONFIG, python-config, yes, no)
@@ -85,8 +87,10 @@ if test $PYTHON_CONFIG = yes; then
     AC_MSG_NOTICE([Python LIBS=$PYTHON_LIBS])
     PYTHON_LDFLAGS=`python-config --ldflags`
     AC_MSG_NOTICE([Python LDFLAGS=$PYTHON_LDFLAGS])
+    AM_CONDITIONAL([BUILD_PYTHON_API], [true])
 else
     AC_MSG_NOTICE([Python not supported])
+    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 fi
 
 # Checks for header files.
@@ -105,7 +109,7 @@ if test "x$enable_notifications" != xno; then
 fi
 
 # Default parameters
-AM_CFLAGS="-Wall"
+AM_CFLAGS="-Wall -export-dynamic"
 
 # TODO use another method to get flags for system
 RUBY_CFLAGS="-I/usr/lib/ruby/1.8/x86_64-linux -L/usr/lib/ruby/1.8/x86_64-linux"

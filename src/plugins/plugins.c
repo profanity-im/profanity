@@ -29,8 +29,12 @@
 #include "plugins/callbacks.h"
 #include "plugins/api.h"
 #include "plugins/plugins.h"
+
+#ifdef PROF_HAVE_PYTHON
 #include "plugins/python_plugins.h"
 #include "plugins/python_api.h"
+#endif
+
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
 #include "plugins/ruby_plugins.h"
@@ -44,7 +48,9 @@ plugins_init(void)
 {
     plugins = NULL;
 
+#ifdef PROF_HAVE_PYTHON
     python_env_init();
+#endif
     ruby_env_init();
     c_env_init();
 
@@ -56,19 +62,23 @@ plugins_init(void)
         {
             gboolean loaded = FALSE;
             gchar *filename = plugins_load[i];
+#ifdef PROF_HAVE_PYTHON
             if (g_str_has_suffix(filename, ".py")) {
                 ProfPlugin *plugin = python_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
                 }
-            } else if (g_str_has_suffix(filename, ".so")) {
+            }
+#endif
+            if (g_str_has_suffix(filename, ".so")) {
                 ProfPlugin *plugin = c_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
                 }
-            } else if (g_str_has_suffix(filename, ".rb")) {
+            }
+            if (g_str_has_suffix(filename, ".rb")) {
                 ProfPlugin *plugin = ruby_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
@@ -302,16 +312,21 @@ plugins_shutdown(void)
         ProfPlugin *plugin = curr->data;
         if (plugin->lang == LANG_C) {
             c_plugin_destroy(plugin);
-        } else if (plugin->lang == LANG_PYTHON) {
+        }
+#ifdef PROF_HAVE_PYTHON
+        if (plugin->lang == LANG_PYTHON) {
             python_plugin_destroy(plugin);
-        } else if (plugin->lang == LANG_RUBY) {
+        }
+#endif
+        if (plugin->lang == LANG_RUBY) {
             ruby_plugin_destroy(plugin);
         }
 
         curr = g_slist_next(curr);
     }
-
+#ifdef PROF_HAVE_PYTHON
     python_shutdown();
+#endif
     ruby_shutdown();
     c_shutdown();
 }
