@@ -39,6 +39,10 @@ ruby_sources = \
     src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
     src/plugins/ruby_api.h src/plugins/ruby_api.c
 
+lua_sources = \
+    src/plugins/lua_plugins.h src/plugins/lua_plugins.c \
+    src/plugins/lua_api.h src/plugins/lua_api.c
+
 test_sources = \
     tests/test_roster.c tests/test_common.c tests/test_history.c \
     tests/test_autocomplete.c tests/testsuite.c tests/test_parser.c \
@@ -56,8 +60,14 @@ else
 with_ruby_sources = $(with_python_sources)
 endif
 
+if BUILD_LUA_API
+with_lua_sources = $(with_ruby_sources) $(lua_sources)
+else
+with_lua_sources = $(with_ruby_sources)
+endif
+
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(main_source) $(with_ruby_sources)
+profanity_SOURCES = $(main_source) $(with_lua_sources)
 
 lib_LTLIBRARIES = libprofanity.la
 libprofanity_la_LDFLAGS=-module -avoid-version -shared
@@ -68,7 +78,7 @@ library_include_HEADERS = src/plugins/profapi.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(with_ruby_sources) $(test_sources)
+tests_testsuite_SOURCES = $(with_lua_sources) $(test_sources)
 tests_testsuite_LDADD = -lheadunit -lstdc++
 
 man_MANS = docs/profanity.1

@@ -26,6 +26,7 @@
 typedef enum {
     LANG_PYTHON,
     LANG_RUBY,
+    LANG_LUA,
     LANG_C
 } lang_t;
 

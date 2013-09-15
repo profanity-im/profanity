@@ -40,6 +40,11 @@
 #include "plugins/ruby_api.h"
 #endif
 
+#ifdef PROF_HAVE_LUA
+#include "plugins/lua_plugins.h"
+#include "plugins/lua_api.h"
+#endif
+
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
 #include "ui/ui.h"
@@ -56,6 +61,9 @@ plugins_init(void)
 #endif
 #ifdef PROF_HAVE_RUBY
     ruby_env_init();
+#endif
+#ifdef PROF_HAVE_LUA
+    lua_env_init();
 #endif
     c_env_init();
 
@@ -79,6 +87,15 @@ plugins_init(void)
 #ifdef PROF_HAVE_RUBY
             if (g_str_has_suffix(filename, ".rb")) {
                 ProfPlugin *plugin = ruby_plugin_create(filename);
+                if (plugin != NULL) {
+                    plugins = g_slist_append(plugins, plugin);
+                    loaded = TRUE;
+                }
+            }
+#endif
+#ifdef PROF_HAVE_LUA
+            if (g_str_has_suffix(filename, ".lua")) {
+                ProfPlugin *plugin = lua_plugin_create(filename);
                 if (plugin != NULL) {
                     plugins = g_slist_append(plugins, plugin);
                     loaded = TRUE;
@@ -327,6 +344,11 @@ plugins_shutdown(void)
             ruby_plugin_destroy(plugin);
         }
 #endif
+#ifdef PROF_HAVE_LUA
+        if (plugin->lang == LANG_LUA) {
+            lua_plugin_destroy(plugin);
+        }
+#endif
         if (plugin->lang == LANG_C) {
             c_plugin_destroy(plugin);
         }
@@ -338,6 +360,9 @@ plugins_shutdown(void)
 #endif
 #ifdef PROF_HAVE_RUBY
     ruby_shutdown();
+#endif
+#ifdef PROF_HAVE_LUA
+    lua_shutdown();
 #endif
     c_shutdown();
 }
