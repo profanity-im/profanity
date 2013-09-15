@@ -37,6 +37,8 @@
 
 static lua_State *L;
 
+static void _l_stackDump(lua_State *L);
+
 void
 lua_env_init(void)
 {
@@ -55,23 +57,20 @@ lua_plugin_create(const char * const filename)
 
     int load_result = luaL_loadfile(L, abs_path->str);
     lua_check_error(load_result);
-    
-    // first call returns function
-    int call_result = lua_pcall(L, 0, 0, 0);
+
+    int call_result = lua_pcall(L, 0, 1, 0);
     lua_check_error(call_result);
-    
-    // store reference to function table
-    int r = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    int *module_p = malloc(sizeof(int));
+    *module_p = luaL_ref(L, LUA_REGISTRYINDEX);
 
     gchar *module_name = g_strndup(filename, strlen(filename) - 4);
 
     if (load_result == 0 && call_result == 0) {
-        cons_debug("LOADING PLUGIN");
-
         ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
         plugin->name = strdup(module_name);
         plugin->lang = LANG_LUA;
-        plugin->module = &r;
+        plugin->module = module_p;
         plugin->init_func = lua_init_hook;
         plugin->on_start_func = lua_on_start_hook;
         plugin->on_connect_func = lua_on_connect_hook;
@@ -98,40 +97,21 @@ lua_plugin_create(const char * const filename)
 void
 lua_init_hook(ProfPlugin *plugin, const char * const version, const char * const status)
 {
-/*
     int *p_ref = (int *)plugin->module;
-    cons_debug("OK 1");
-
-    // push function table
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    cons_debug("OK 2");
-
-    int res1 = lua_pcall(L, 0, 0, 0);
-    lua_check_error(res1);
-    cons_debug("OK 2.1");
-
-    // push key
     lua_pushstring(L, "prof_init");
-    cons_debug("OK 3");
-
-    // push args
+    lua_gettable(L, -2);
     lua_pushstring(L, version);
     lua_pushstring(L, status);
-    cons_debug("OK 4");
-
-    // push function
-    lua_gettable(L, -2);
-    cons_debug("OK 5");
-
-    int res2 = lua_pcall(L, 0, 0, 0);
+    int res2 = lua_pcall(L, 2, 0, 0);
     lua_check_error(res2);
-    cons_debug("OK 6");
-*/
+    lua_pop(L, 1);
 }
 
 void
 lua_on_start_hook(ProfPlugin *plugin)
 {
+
 }
 
 void
@@ -199,8 +179,7 @@ lua_check_error(int value)
     if (value) {
         cons_debug("%s", lua_tostring(L, -1));
         lua_pop(L, 1);
-    } else {
-        cons_debug("Success");
+        _l_stackDump(L);
     }
 }
 
@@ -215,4 +194,36 @@ void
 lua_shutdown(void)
 {
     lua_close(L);
+}
+
+static void
+_l_stackDump(lua_State *L)
+{
+    cons_debug("Lua stack:");
+    int i;
+    int top = lua_gettop(L);
+    for (i = 1; i <= top; i++) {  /* repeat for each level */
+        int t = lua_type(L, i);
+        switch (t) {
+
+        case LUA_TSTRING:  /* strings */
+            cons_debug("  \"%s\"", lua_tostring(L, i));
+            break;
+
+        case LUA_TBOOLEAN:  /* booleans */
+            cons_debug(lua_toboolean(L, i) ? "  true" : "  false");
+            break;
+
+        case LUA_TNUMBER:  /* numbers */
+            cons_debug("  %g", lua_tonumber(L, i));
+            break;
+
+        default:  /* other values */
+            cons_debug("  %s", lua_typename(L, t));
+            break;
+
+        }
+    }
+    cons_debug("End stack");
+    cons_debug("");
 }
