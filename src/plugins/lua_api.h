@@ -25,6 +25,8 @@
 
 #include <lua.h>
 
+lua_State * lua_get_state(void);
+
 void lua_env_init(void);
 void lua_api_init(lua_State *L);
 void lua_shutdown(void);

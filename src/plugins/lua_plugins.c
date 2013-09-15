@@ -39,6 +39,12 @@ static lua_State *L;
 
 static void _l_stackDump(lua_State *L);
 
+lua_State *
+lua_get_state(void)
+{
+    return L;
+}
+
 void
 lua_env_init(void)
 {

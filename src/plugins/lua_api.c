@@ -20,7 +20,12 @@
  *
  */
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 #include <glib.h>
 
@@ -46,27 +51,19 @@ lua_api_cons_show(lua_State *L)
 static int
 lua_api_register_command(lua_State *L)
 {
-/*
-    const char *command_name = NULL;
-    int min_args = 0;
-    int max_args = 0;
-    const char *usage = NULL;
-    const char *short_help = NULL;
-    const char *long_help = NULL;
-    PyObject *p_callback = NULL;
+    const char *command_name = lua_tostring(L, -7);
+    int min_args = lua_tonumber(L, -6);
+    int max_args = lua_tonumber(L, -5);
+    const char *usage = lua_tostring(L, -4);
+    const char *short_help = lua_tostring(L, -3);
+    const char *long_help = lua_tostring(L, -2);
 
-    if (!PyArg_ParseTuple(args, "siisssO", &command_name, &min_args, &max_args,
-            &usage, &short_help, &long_help, &p_callback)) {
-        return Py_BuildValue("");
-    }
+    int *p_callback_ref = malloc(sizeof(int));
+    *p_callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    if (p_callback && PyCallable_Check(p_callback)) {
-        api_register_command(command_name, min_args, max_args, usage,
-            short_help, long_help, p_callback, python_command_callback);
-    }
+    api_register_command(command_name, min_args, max_args, usage, short_help,
+        long_help, p_callback_ref, lua_command_callback);
 
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
@@ -106,7 +103,7 @@ static int
 lua_api_send_line(lua_State *L)
 {
     const char *line = lua_tostring(L, -1);
-    api_send_line(line);
+    api_send_line(strdup(line));
     return 0;
 }
 
@@ -203,7 +200,7 @@ lua_api_win_process_line(lua_State *L)
 {
     const char *tag = lua_tostring(L, -2);
     const char *line = lua_tostring(L, -1);
-    api_win_process_line(tag, line);
+    api_win_process_line(tag, strdup(line));
     return 0;
 }
 
@@ -219,44 +216,50 @@ lua_api_win_show(lua_State *L)
 void
 lua_command_callback(PluginCommand *command, gchar **args)
 {
-/*
-    PyObject *p_args = NULL;
+    lua_State *L = lua_get_state();
+    int *p_ref = (int *)command->callback;
+
     int num_args = g_strv_length(args);
     if (num_args == 0) {
         if (command->max_args == 1) {
-            p_args = Py_BuildValue("(O)", Py_BuildValue(""));
-            PyObject_CallObject(command->callback, p_args);
-            Py_XDECREF(p_args);
+            lua_pushnil(L);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+            lua_pcall(L, 1, 0, 0);
         } else {
-            PyObject_CallObject(command->callback, p_args);
+            lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+            lua_pcall(L, 0, 0, 0);
         }
     } else if (num_args == 1) {
-        p_args = Py_BuildValue("(s)", args[0]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
+        lua_pushstring(L, args[0]);
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+        lua_pcall(L, 1, 0, 0);
     } else if (num_args == 2) {
-        p_args = Py_BuildValue("ss", args[0], args[1]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
+        lua_pushstring(L, args[0]);
+        lua_pushstring(L, args[1]);
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+        lua_pcall(L, 2, 0, 0);
     } else if (num_args == 3) {
-        p_args = Py_BuildValue("sss", args[0], args[1], args[2]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
+        lua_pushstring(L, args[0]);
+        lua_pushstring(L, args[1]);
+        lua_pushstring(L, args[2]);
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+        lua_pcall(L, 3, 0, 0);
     } else if (num_args == 4) {
-        p_args = Py_BuildValue("ssss", args[0], args[1], args[2], args[3]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
+        lua_pushstring(L, args[0]);
+        lua_pushstring(L, args[1]);
+        lua_pushstring(L, args[2]);
+        lua_pushstring(L, args[3]);
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+        lua_pcall(L, 4, 0, 0);
     } else if (num_args == 5) {
-        p_args = Py_BuildValue("sssss", args[0], args[1], args[2], args[3], args[4]);
-        PyObject_CallObject(command->callback, p_args);
-        Py_XDECREF(p_args);
+        lua_pushstring(L, args[0]);
+        lua_pushstring(L, args[1]);
+        lua_pushstring(L, args[2]);
+        lua_pushstring(L, args[3]);
+        lua_pushstring(L, args[4]);
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+        lua_pcall(L, 5, 0, 0);
     }
-
-    if (PyErr_Occurred()) {
-        PyErr_Print();
-        PyErr_Clear();
-    }
-*/
 }
 
 void
