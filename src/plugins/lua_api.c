@@ -166,20 +166,13 @@ lua_api_win_exists(lua_State *L)
 static int
 lua_api_win_create(lua_State *L)
 {
-/*
-    char *tag = NULL;
-    PyObject *p_callback = NULL;
+    const char *tag = lua_tostring(L, -2);
 
-    if (!PyArg_ParseTuple(args, "sO", &tag, &p_callback)) {
-        return Py_BuildValue("");
-    }
+    int *p_callback_ref = malloc(sizeof(int));
+    *p_callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    if (p_callback && PyCallable_Check(p_callback)) {
-        api_win_create(tag, p_callback, python_window_callback);
-    }
+    api_win_create(tag, p_callback_ref, lua_window_callback);
 
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
@@ -271,17 +264,13 @@ lua_timed_callback(PluginTimedFunction *timed_function)
 void
 lua_window_callback(PluginWindowCallback *window_callback, char *tag, char *line)
 {
-/*
-    PyObject *p_args = NULL;
-    p_args = Py_BuildValue("ss", tag, line);
-    PyObject_CallObject(window_callback->callback, p_args);
-    Py_XDECREF(p_args);
+    int *p_ref = (int *)window_callback->callback;
 
-    if (PyErr_Occurred()) {
-        PyErr_Print();
-        PyErr_Clear();
-    }
-*/
+    lua_State *L = lua_get_state();
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, tag);
+    lua_pushstring(L, line);
+    lua_pcall(L, 2, 0, 0);
 }
 void
 lua_api_init(lua_State *L)
