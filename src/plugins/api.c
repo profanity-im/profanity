@@ -85,7 +85,7 @@ api_notify(const char *message, const char *category, int timeout_ms)
 }
 
 void
-api_send_line(char *line)
+api_send_line(const char *line)
 {
     prof_process_input(line);
 }
@@ -127,14 +127,14 @@ api_log_error(const char *message)
 }
 
 int
-api_win_exists(char *tag)
+api_win_exists(const char *tag)
 {
     return (wins_get_by_recipient(tag) != NULL);
 }
 
 void
-api_win_create(char *tag, void *callback,
-    void(*callback_func)(PluginWindowCallback *window_callback, char *tag, const char * const line))
+api_win_create(const char *tag, void *callback,
+    void(*callback_func)(PluginWindowCallback *window_callback, const char *tag, const char * const line))
 {
     PluginWindowCallback *window = malloc(sizeof(PluginWindowCallback));
     window->callback = callback;
@@ -144,7 +144,7 @@ api_win_create(char *tag, void *callback,
 }
 
 void
-api_win_focus(char *tag)
+api_win_focus(const char *tag)
 {
     ProfWin *win = wins_get_by_recipient(tag);
     int num = wins_get_num(win);
@@ -152,14 +152,14 @@ api_win_focus(char *tag)
 }
 
 void
-api_win_process_line(char *tag, const char * const line)
+api_win_process_line(const char *tag, const char * const line)
 {
     PluginWindowCallback *window = callbacks_get_window_handler(tag);
     window->callback_func(window, tag, line);
 }
 
 void
-api_win_show(char *tag, char *line)
+api_win_show(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
     win_print_time(window, '-');

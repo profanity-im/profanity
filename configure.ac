@@ -132,8 +132,7 @@ fi
 AM_CFLAGS="-Wall -export-dynamic"
 
 if test "x$PACKAGE_STATUS" = xdevelopment; then
-#    AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
-    AM_CFLAGS="$AM_CFLAGS -Wunused"
+    AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
 fi
 
 LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS"

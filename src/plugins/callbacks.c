@@ -48,17 +48,17 @@ callbacks_add_timed(PluginTimedFunction *timed_function)
 }
 
 void
-callbacks_add_window_handler(char *tag, PluginWindowCallback *window_callback)
+callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callback)
 {
     if (p_window_callbacks == NULL) {
         p_window_callbacks = g_hash_table_new(g_str_hash, g_str_equal);
     }
 
-    g_hash_table_insert(p_window_callbacks, tag, window_callback);
+    g_hash_table_insert(p_window_callbacks, strdup(tag), window_callback);
 }
 
 void *
-callbacks_get_window_handler(char *tag)
+callbacks_get_window_handler(const char *tag)
 {
     if (p_window_callbacks != NULL) {
         return g_hash_table_lookup(p_window_callbacks, tag);

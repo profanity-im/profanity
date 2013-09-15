@@ -28,7 +28,7 @@
 void api_cons_alert(void);
 void api_cons_show(const char * const message);
 void api_notify(const char *message, const char *category, int timeout_ms);
-void api_send_line(char *line);
+void api_send_line(const char *line);
 char * api_get_current_recipient(void);
 
 void api_register_command(const char *command_name, int min_args, int max_args,
@@ -42,11 +42,11 @@ void api_log_info(const char *message);
 void api_log_warning(const char *message);
 void api_log_error(const char *message);
 
-int api_win_exists(char *tag);
-void api_win_create(char *tag, void *callback,
+int api_win_exists(const char *tag);
+void api_win_create(const char *tag, void *callback,
     void(*callback_func)(PluginWindowCallback *window_callback, char *tag, char *line));
-void api_win_focus(char *tag);
-void api_win_process_line(char *tag, const char * const line);
-void api_win_show(char *tag, char *line);
+void api_win_focus(const char *tag);
+void api_win_process_line(const char *tag, const char * const line);
+void api_win_show(const char *tag, const char *line);
 
 #endif

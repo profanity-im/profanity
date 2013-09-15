@@ -38,7 +38,7 @@ lua_api_cons_alert(lua_State *L)
 static int
 lua_api_cons_show(lua_State *L)
 {
-    const char *message = lua_tostring(L, 1);
+    const char *message = lua_tostring(L, -1);
     api_cons_show(message);
     return 0;
 }
@@ -105,7 +105,7 @@ lua_api_notify(lua_State *L)
 static int
 lua_api_send_line(lua_State *L)
 {
-    const char *line = lua_tostring(L, 1);
+    const char *line = lua_tostring(L, -1);
     api_send_line(line);
     return 0;
 }
@@ -127,7 +127,7 @@ lua_api_get_current_recipient(lua_State *L)
 static int
 lua_api_log_debug(lua_State *L)
 {
-    const char *message = lua_tostring(L, 1);
+    const char *message = lua_tostring(L, -1);
     api_log_debug(message);
     return 0;
 }
@@ -135,7 +135,7 @@ lua_api_log_debug(lua_State *L)
 static int
 lua_api_log_info(lua_State *L)
 {
-    const char *message = lua_tostring(L, 1);
+    const char *message = lua_tostring(L, -1);
     api_log_info(message);
     return 0;
 }
@@ -143,7 +143,7 @@ lua_api_log_info(lua_State *L)
 static int
 lua_api_log_warning(lua_State *L)
 {
-    const char *message = lua_tostring(L, 1);
+    const char *message = lua_tostring(L, -1);
     api_log_warning(message);
     return 0;
 }
@@ -151,7 +151,7 @@ lua_api_log_warning(lua_State *L)
 static int
 lua_api_log_error(lua_State *L)
 {
-    const char *message = lua_tostring(L, 1);
+    const char *message = lua_tostring(L, -1);
     api_log_error(message);
     return 0;
 }
@@ -159,7 +159,7 @@ lua_api_log_error(lua_State *L)
 static int
 lua_api_win_exists(lua_State *L)
 {
-    const char *tag = lua_tostring(L, 1);
+    const char *tag = lua_tostring(L, -1);
 
     if (api_win_exists(tag)) {
         lua_pushboolean(L, 1);
@@ -193,50 +193,26 @@ lua_api_win_create(lua_State *L)
 static int
 lua_api_win_focus(lua_State *L)
 {
-/*
-    char *tag = NULL;
-
-    if (!PyArg_ParseTuple(args, "s", &tag)) {
-        return Py_BuildValue("");
-    }
-
+    const char *tag = lua_tostring(L, -1);
     api_win_focus(tag);
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
 static int
 lua_api_win_process_line(lua_State *L)
 {
-/*
-    char *tag = NULL;
-    char *line = NULL;
-
-    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
-        return Py_BuildValue("");
-    }
-
+    const char *tag = lua_tostring(L, -2);
+    const char *line = lua_tostring(L, -1);
     api_win_process_line(tag, line);
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
 static int
 lua_api_win_show(lua_State *L)
 {
-/*
-    char *tag = NULL;
-    char *line = NULL;
-
-    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
-        return Py_BuildValue("");
-    }
-
+    const char *tag = lua_tostring(L, -2);
+    const char *line = lua_tostring(L, -1);
     api_win_show(tag, line);
-    return Py_BuildValue("");
-*/
     return 0;
 }
 

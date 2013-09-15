@@ -86,6 +86,6 @@ void prof_handle_already_in_group(const char * const contact, const char * const
 void prof_handle_not_in_group(const char * const contact, const char * const group);
 void prof_handle_group_add(const char * const contact, const char * const group);
 void prof_handle_group_remove(const char * const contact, const char * const group);
-gboolean prof_process_input(char *inp);
+gboolean prof_process_input(const char *inp);
 
 #endif
