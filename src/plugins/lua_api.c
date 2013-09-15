@@ -105,16 +105,8 @@ lua_api_notify(lua_State *L)
 static int
 lua_api_send_line(lua_State *L)
 {
-/*
-    char *line = NULL;
-    if (!PyArg_ParseTuple(args, "s", &line)) {
-        return Py_BuildValue("");
-    }
-
+    const char *line = lua_tostring(L, 1);
     api_send_line(line);
-
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
