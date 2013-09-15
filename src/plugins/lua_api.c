@@ -159,19 +159,15 @@ lua_api_log_error(lua_State *L)
 static int
 lua_api_win_exists(lua_State *L)
 {
-/*
-    char *tag = NULL;
-    if (!PyArg_ParseTuple(args, "s", &tag)) {
-        return Py_BuildValue("");
-    }
+    const char *tag = lua_tostring(L, 1);
 
     if (api_win_exists(tag)) {
-        return Py_BuildValue("i", 1);
+        lua_pushboolean(L, 1);
     } else {
-        return Py_BuildValue("i", 0);
+        lua_pushboolean(L, 0);
     }
-*/
-    return 0;
+
+    return 1;
 }
 
 static int
