@@ -113,15 +113,15 @@ lua_api_send_line(lua_State *L)
 static int
 lua_api_get_current_recipient(lua_State *L)
 {
-/*
-    char *recipient = api_get_current_recipient();
+    const char *recipient = api_get_current_recipient();
+
     if (recipient != NULL) {
-        return Py_BuildValue("s", recipient);
+        lua_pushstring(L, recipient);
     } else {
-        return Py_BuildValue("");
+        lua_pushnil(L);
     }
-*/
-    return 0;
+
+    return 1;
 }
 
 static int
