@@ -142,55 +142,32 @@ lua_api_get_current_recipient(lua_State *L)
 static int
 lua_api_log_debug(lua_State *L)
 {
-/*
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
-        return Py_BuildValue("");
-    }
+    const char *message = lua_tostring(L, 1);
     api_log_debug(message);
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
 static int
 lua_api_log_info(lua_State *L)
 {
-/*
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
-        return Py_BuildValue("");
-    }
+    const char *message = lua_tostring(L, 1);
     api_log_info(message);
-    return Py_BuildValue("");
-*/
+    return 0;
 }
 
 static int
 lua_api_log_warning(lua_State *L)
 {
-/*
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
-        return Py_BuildValue("");
-    }
+    const char *message = lua_tostring(L, 1);
     api_log_warning(message);
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
 static int
 lua_api_log_error(lua_State *L)
 {
-/*
-    const char *message = NULL;
-    if (!PyArg_ParseTuple(args, "s", &message)) {
-        return Py_BuildValue("");
-    }
+    const char *message = lua_tostring(L, 1);
     api_log_error(message);
-    return Py_BuildValue("");
-*/
     return 0;
 }
 

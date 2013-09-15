@@ -294,6 +294,13 @@ lua_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
 void
 lua_on_shutdown_hook(ProfPlugin *plugin)
 {
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_shutdown");
+    lua_gettable(L, -2);
+    int res2 = lua_pcall(L, 0, 0, 0);
+    lua_check_error(res2);
+    lua_pop(L, 1);
 }
 
 void
