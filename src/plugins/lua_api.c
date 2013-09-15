@@ -33,6 +33,8 @@
 #include "plugins/lua_api.h"
 #include "plugins/callbacks.h"
 
+#include "ui/ui.h"
+
 static int
 lua_api_cons_alert(lua_State *L)
 {
@@ -216,48 +218,48 @@ lua_api_win_show(lua_State *L)
 void
 lua_command_callback(PluginCommand *command, gchar **args)
 {
-    lua_State *L = lua_get_state();
     int *p_ref = (int *)command->callback;
+    lua_State *L = lua_get_state();
 
     int num_args = g_strv_length(args);
     if (num_args == 0) {
         if (command->max_args == 1) {
-            lua_pushnil(L);
             lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+            lua_pushnil(L);
             lua_pcall(L, 1, 0, 0);
         } else {
             lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
             lua_pcall(L, 0, 0, 0);
         }
     } else if (num_args == 1) {
-        lua_pushstring(L, args[0]);
         lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+        lua_pushstring(L, args[0]);
         lua_pcall(L, 1, 0, 0);
     } else if (num_args == 2) {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pushstring(L, args[0]);
         lua_pushstring(L, args[1]);
-        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pcall(L, 2, 0, 0);
     } else if (num_args == 3) {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pushstring(L, args[0]);
         lua_pushstring(L, args[1]);
         lua_pushstring(L, args[2]);
-        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pcall(L, 3, 0, 0);
     } else if (num_args == 4) {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pushstring(L, args[0]);
         lua_pushstring(L, args[1]);
         lua_pushstring(L, args[2]);
         lua_pushstring(L, args[3]);
-        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pcall(L, 4, 0, 0);
     } else if (num_args == 5) {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pushstring(L, args[0]);
         lua_pushstring(L, args[1]);
         lua_pushstring(L, args[2]);
         lua_pushstring(L, args[3]);
         lua_pushstring(L, args[4]);
-        lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
         lua_pcall(L, 5, 0, 0);
     }
 }

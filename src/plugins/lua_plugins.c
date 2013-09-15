@@ -37,8 +37,6 @@
 
 static lua_State *L;
 
-static void _l_stackDump(lua_State *L);
-
 lua_State *
 lua_get_state(void)
 {
@@ -315,7 +313,7 @@ lua_check_error(int value)
     if (value) {
         cons_debug("%s", lua_tostring(L, -1));
         lua_pop(L, 1);
-        _l_stackDump(L);
+        l_stackdump(L);
     }
 }
 
@@ -332,8 +330,8 @@ lua_shutdown(void)
     lua_close(L);
 }
 
-static void
-_l_stackDump(lua_State *L)
+void
+l_stackdump(lua_State *L)
 {
     cons_debug("Lua stack:");
     int i;

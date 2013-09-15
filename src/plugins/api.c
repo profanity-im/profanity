@@ -85,7 +85,7 @@ api_notify(const char *message, const char *category, int timeout_ms)
 }
 
 void
-api_send_line(const char *line)
+api_send_line(char *line)
 {
     prof_process_input(line);
 }

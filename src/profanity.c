@@ -549,39 +549,36 @@ prof_handle_disco_info(const char *from, GSList *identities, GSList *features)
  * continue, FALSE otherwise
  */
 gboolean
-prof_process_input(const char *inp)
+prof_process_input(char *inp)
 {
     log_debug("Input recieved: %s", inp);
     gboolean result = FALSE;
-    gchar *inp_cpy = strdup(inp);
-    g_strstrip(inp_cpy);
+    g_strstrip(inp);
 
     // add line to history if something typed
-    if (strlen(inp_cpy) > 0) {
-        cmd_history_append(inp_cpy);
+    if (strlen(inp) > 0) {
+        cmd_history_append(inp);
     }
 
     // just carry on if no input
-    if (strlen(inp_cpy) == 0) {
+    if (strlen(inp) == 0) {
         result = TRUE;
 
     // habdle command if input starts with a '/'
-    } else if (inp_cpy[0] == '/') {
-        char inp_cpy[strlen(inp_cpy) + 1];
-        strcpy(inp_cpy, inp_cpy);
+    } else if (inp[0] == '/') {
+        char inp_cpy[strlen(inp) + 1];
+        strcpy(inp_cpy, inp);
         char *command = strtok(inp_cpy, " ");
-        result = cmd_execute(command, inp_cpy);
+        result = cmd_execute(command, inp);
 
     // call a default handler if input didn't start with '/'
     } else {
-        result = cmd_execute_default(inp_cpy);
+        result = cmd_execute_default(inp);
     }
 
     inp_win_reset();
     roster_reset_search_attempts();
     ui_current_page_off();
-
-    g_free(inp_cpy);
 
     return result;
 }
