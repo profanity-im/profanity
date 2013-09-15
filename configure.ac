@@ -41,9 +41,10 @@ else
     AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
 fi
 
-AX_PROG_LUA
-AX_LUA_HEADERS
-AX_LUA_LIBS
+# TODO get the following macros working
+#AX_PROG_LUA
+#AX_LUA_HEADERS
+#AX_LUA_LIBS
 LUA_INCLUDE="-I/usr/include/lua5.1"
 LUA_LIB="-llua5.1"
 AM_CONDITIONAL([BUILD_LUA_API], [true])
