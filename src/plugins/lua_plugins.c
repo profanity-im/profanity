@@ -225,21 +225,70 @@ char *
 lua_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
     const char *message)
 {
-    return NULL;
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_message_send");
+    lua_gettable(L, -2);
+    lua_pushstring(L, jid);
+    lua_pushstring(L, message);
+    int res2 = lua_pcall(L, 2, 1, 0);
+    lua_check_error(res2);
+
+    char *result = NULL;
+    if (lua_isstring(L, -1)) {
+        result = strdup(lua_tostring(L, -1));
+    }
+
+    lua_pop(L, 2);
+
+    return result;
 }
 
 char *
 lua_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
     const char * const nick, const char *message)
 {
-    return NULL;
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_private_message_send");
+    lua_gettable(L, -2);
+    lua_pushstring(L, room);
+    lua_pushstring(L, nick);
+    lua_pushstring(L, message);
+    int res2 = lua_pcall(L, 3, 1, 0);
+    lua_check_error(res2);
+
+    char *result = NULL;
+    if (lua_isstring(L, -1)) {
+        result = strdup(lua_tostring(L, -1));
+    }
+
+    lua_pop(L, 2);
+
+    return result;
 }
 
 char *
 lua_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
     const char *message)
 {
-    return NULL;
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_room_message_send");
+    lua_gettable(L, -2);
+    lua_pushstring(L, room);
+    lua_pushstring(L, message);
+    int res2 = lua_pcall(L, 2, 1, 0);
+    lua_check_error(res2);
+
+    char *result = NULL;
+    if (lua_isstring(L, -1)) {
+        result = strdup(lua_tostring(L, -1));
+    }
+
+    lua_pop(L, 2);
+
+    return result;
 }
 
 void
