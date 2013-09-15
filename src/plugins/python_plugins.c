@@ -37,7 +37,6 @@ python_env_init(void)
     python_check_error();
     python_api_init();
     python_check_error();
-    // TODO change to use XDG spec
     GString *path = g_string_new(Py_GetPath());
     g_string_append(path, ":");
     gchar *plugins_dir = plugins_get_dir();
