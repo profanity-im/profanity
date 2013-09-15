@@ -72,20 +72,14 @@ lua_api_register_command(lua_State *L)
 static int
 lua_api_register_timed(lua_State *L)
 {
-/*
-    PyObject *p_callback = NULL;
-    int interval_seconds = 0;
+    int interval_seconds = lua_tonumber(L, -1);
+    cons_show("interval seconds = %d", interval_seconds);
+    lua_pop(L, 1);
+    int *p_callback_ref = malloc(sizeof(int));
+    *p_callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    if (!PyArg_ParseTuple(args, "Oi", &p_callback, &interval_seconds)) {
-        return Py_BuildValue("");
-    }
+    api_register_timed(p_callback_ref, interval_seconds, lua_timed_callback);
 
-    if (p_callback && PyCallable_Check(p_callback)) {
-        api_register_timed(p_callback, interval_seconds, python_timed_callback);
-    }
-
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
@@ -267,9 +261,11 @@ lua_command_callback(PluginCommand *command, gchar **args)
 void
 lua_timed_callback(PluginTimedFunction *timed_function)
 {
-/*
-    PyObject_CallObject(timed_function->callback, NULL);
-*/
+    int *p_ref = (int *)timed_function->callback;
+    lua_State *L = lua_get_state();
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pcall(L, 0, 0, 0);
 }
 
 void
