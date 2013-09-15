@@ -111,26 +111,66 @@ lua_init_hook(ProfPlugin *plugin, const char * const version, const char * const
 void
 lua_on_start_hook(ProfPlugin *plugin)
 {
-
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_start");
+    lua_gettable(L, -2);
+    int res2 = lua_pcall(L, 0, 0, 0);
+    lua_check_error(res2);
+    lua_pop(L, 1);
 }
 
 void
 lua_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
     const char * const fulljid)
 {
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_connect");
+    lua_gettable(L, -2);
+    lua_pushstring(L, account_name);
+    lua_pushstring(L, fulljid);
+    int res2 = lua_pcall(L, 2, 0, 0);
+    lua_check_error(res2);
+    lua_pop(L, 1);
 }
 
 void
 lua_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
     const char * const fulljid)
 {
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_disconnect");
+    lua_gettable(L, -2);
+    lua_pushstring(L, account_name);
+    lua_pushstring(L, fulljid);
+    int res2 = lua_pcall(L, 2, 0, 0);
+    lua_check_error(res2);
+    lua_pop(L, 1);
 }
 
 char *
 lua_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
     const char *message)
 {
-    return NULL;
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_message_received");
+    lua_gettable(L, -2);
+    lua_pushstring(L, jid);
+    lua_pushstring(L, message);
+    int res2 = lua_pcall(L, 2, 1, 0);
+    lua_check_error(res2);
+
+    char *result = NULL;
+    if (lua_isstring(L, -1)) {
+        result = strdup(lua_tostring(L, -1));
+    }
+
+    lua_pop(L, 2);
+
+    return result;
 }
 
 char *
