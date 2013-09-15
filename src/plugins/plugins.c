@@ -141,6 +141,8 @@ plugins_get_lang_string(ProfPlugin *plugin)
             return "Python";
         case LANG_RUBY:
             return "Ruby";
+        case LANG_LUA:
+            return "Lua";
         case LANG_C:
             return "C";
         default:
