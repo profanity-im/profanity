@@ -93,19 +93,12 @@ lua_api_register_timed(lua_State *L)
 static int
 lua_api_notify(lua_State *L)
 {
-/*
-    const char *message = NULL;
-    const char *category = NULL;
-    int timeout_ms = 5000;
-
-    if (!PyArg_ParseTuple(args, "sis", &message, &timeout_ms, &category)) {
-        return Py_BuildValue("");
-    }
+    const char *message = lua_tostring(L, -3);
+    int timeout_ms = lua_tonumber(L, -2);
+    const char *category = lua_tostring(L, -1);
 
     api_notify(message, category, timeout_ms);
 
-    return Py_BuildValue("");
-*/
     return 0;
 }
 
