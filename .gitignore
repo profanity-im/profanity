@@ -27,6 +27,8 @@ stamp-h1
 *~
 *dirstamp
 valgrind.out
+runvalgrind.sh
+valgrind.out.*
 core
 bugs/
 *.pyc

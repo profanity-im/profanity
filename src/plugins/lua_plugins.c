@@ -111,6 +111,8 @@ lua_init_hook(ProfPlugin *plugin, const char * const version, const char * const
         int res2 = lua_pcall(L, 2, 0, 0);
         lua_check_error(res2);
         lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
     }
 }
 
@@ -125,6 +127,8 @@ lua_on_start_hook(ProfPlugin *plugin)
         int res2 = lua_pcall(L, 0, 0, 0);
         lua_check_error(res2);
         lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
     }
 }
 
@@ -142,6 +146,8 @@ lua_on_connect_hook(ProfPlugin *plugin, const char * const account_name,
         int res2 = lua_pcall(L, 2, 0, 0);
         lua_check_error(res2);
         lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
     }
 }
 
@@ -159,6 +165,8 @@ lua_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
         int res2 = lua_pcall(L, 2, 0, 0);
         lua_check_error(res2);
         lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
     }
 }
 
@@ -184,9 +192,10 @@ lua_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
         lua_pop(L, 2);
 
         return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
     }
-
-    return NULL;
 }
 
 char *
@@ -212,9 +221,10 @@ lua_on_private_message_received_hook(ProfPlugin *plugin, const char * const room
         lua_pop(L, 2);
 
         return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
     }
-
-    return  NULL;
 }
 
 char *
@@ -240,9 +250,10 @@ lua_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
         lua_pop(L, 2);
 
         return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
     }
-
-    return NULL;
 }
 
 char *
@@ -267,6 +278,9 @@ lua_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
         lua_pop(L, 2);
 
         return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
     }
 
     return NULL;
@@ -295,9 +309,10 @@ lua_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
         lua_pop(L, 2);
 
         return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
     }
-
-    return NULL;
 }
 
 char *
@@ -322,9 +337,10 @@ lua_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
         lua_pop(L, 2);
 
         return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
     }
-
-    return NULL;
 }
 
 void
@@ -338,6 +354,8 @@ lua_on_shutdown_hook(ProfPlugin *plugin)
         int res2 = lua_pcall(L, 0, 0, 0);
         lua_check_error(res2);
         lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
     }
 }
 
