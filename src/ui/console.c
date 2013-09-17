@@ -40,6 +40,10 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
+#ifdef PROF_HAVE_GIT_VERSION
+#include "gitversion.c"
+#endif
+
 static void _cons_splash_logo(void);
 void _show_roster_contacts(GSList *list, gboolean show_groups);
 
@@ -167,7 +171,11 @@ cons_about(void)
         win_print_time(console, '-');
 
         if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+            wprintw(console->win, "Welcome to Profanity, version %sdev.%s.%s\n", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+#else
             wprintw(console->win, "Welcome to Profanity, version %sdev\n", PROF_PACKAGE_VERSION);
+#endif
         } else {
             wprintw(console->win, "Welcome to Profanity, version %s\n", PROF_PACKAGE_VERSION);
         }
@@ -1395,7 +1403,11 @@ _cons_splash_logo(void)
     wprintw(console->win, "\n");
     win_print_time(console, '-');
     if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+        wprintw(console->win, "Version %sdev.%s.%s\n", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+#else
         wprintw(console->win, "Version %sdev\n", PROF_PACKAGE_VERSION);
+#endif
     } else {
         wprintw(console->win, "Version %s\n", PROF_PACKAGE_VERSION);
     }

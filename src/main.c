@@ -19,10 +19,13 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
+#include <string.h>
 #include <glib.h>
 
 #include "prof_config.h"
+#ifdef PROF_HAVE_GIT_VERSION
+#include "gitversion.c"
+#endif
 
 #include "profanity.h"
 
@@ -55,7 +58,16 @@ main(int argc, char **argv)
     g_option_context_free(context);
 
     if (version == TRUE) {
-        g_print("Profanity, version %s\n", PROF_PACKAGE_VERSION);
+        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+            g_print("Profanity, version %sdev.%s.%s\n", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+#else
+            g_print("Profanity, version %sdev\n", PROF_PACKAGE_VERSION);
+#endif
+        } else {
+            g_print("Profanity, version %s\n", PROF_PACKAGE_VERSION);
+        }
+
         g_print("Copyright (C) 2012, 2013 James Booth <%s>.\n", PROF_PACKAGE_BUGREPORT);
         g_print("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
         g_print("\n");

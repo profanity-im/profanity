@@ -22,6 +22,10 @@
 
 #include "prof_config.h"
 
+#ifdef PROF_HAVE_GIT_VERSION
+#include "gitversion.c"
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -238,7 +242,14 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     GString *name_str = g_string_new("Profanity ");
     g_string_append(name_str, PROF_PACKAGE_VERSION);
     if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+        g_string_append(name_str, "dev.");
+        g_string_append(name_str, PROF_GIT_BRANCH);
+        g_string_append(name_str, ".");
+        g_string_append(name_str, PROF_GIT_REVISION);
+#else
         g_string_append(name_str, "dev");
+#endif
     }
     xmpp_stanza_set_attribute(identity, "name", name_str->str);
 

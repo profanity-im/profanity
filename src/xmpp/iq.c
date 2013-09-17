@@ -22,6 +22,10 @@
 
 #include "prof_config.h"
 
+#ifdef PROF_HAVE_GIT_VERSION
+#include "gitversion.c"
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -236,7 +240,14 @@ _iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         xmpp_stanza_t *version_txt = xmpp_stanza_new(ctx);
         GString *version_str = g_string_new(PROF_PACKAGE_VERSION);
         if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
+#ifdef PROF_HAVE_GIT_VERSION
+            g_string_append(version_str, "dev.");
+            g_string_append(version_str, PROF_GIT_BRANCH);
+            g_string_append(version_str, ".");
+            g_string_append(version_str, PROF_GIT_REVISION);
+#else
             g_string_append(version_str, "dev");
+#endif
         }
         xmpp_stanza_set_text(version_txt, version_str->str);
         xmpp_stanza_add_child(version, version_txt);

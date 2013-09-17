@@ -1,3 +1,20 @@
+if INCLUDE_GIT_VERSION
+
+FORCE:
+
+src/gitversion.c: .git/HEAD .git/index FORCE
+	rm -f src/gitversion.c src/gitversion.o
+	echo "#ifndef PROF_GIT_BRANCH" >> $@
+	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
+	echo "#endif" >> $@
+	echo "#ifndef PROF_GIT_REVISION" >> $@
+	echo "#define PROF_GIT_REVISION \"$(shell git log --pretty=format:'%h' -n 1)\"" >> $@
+	echo "#endif" >> $@
+
+clean-local:
+	rm -f src/gitversion.c src/gitversion.o
+endif
+
 core_sources = \
     src/contact.c src/contact.h src/log.c src/common.c \
     src/log.h src/profanity.c src/common.h \
@@ -48,6 +65,9 @@ test_sources = \
     tests/test_autocomplete.c tests/testsuite.c tests/test_parser.c \
     tests/test_jid.c
 
+git_sources = \
+    src/gitversion.c
+
 if BUILD_PYTHON_API
 with_python_sources = $(core_sources) $(python_sources)
 else
@@ -66,8 +86,14 @@ else
 with_lua_sources = $(with_ruby_sources)
 endif
 
+if INCLUDE_GIT_VERSION
+with_git_sources = $(git_sources) $(with_lua_sources)
+else
+with_git_sources = $(with_lua_sources)
+endif
+
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(main_source) $(with_lua_sources)
+profanity_SOURCES = $(with_git_sources) $(main_source)
 
 lib_LTLIBRARIES = libprofanity.la
 libprofanity_la_LDFLAGS=-module -avoid-version -shared
@@ -78,7 +104,7 @@ library_include_HEADERS = src/plugins/profapi.h
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(with_lua_sources) $(test_sources)
+tests_testsuite_SOURCES = $(with_git_sources) $(test_sources)
 tests_testsuite_LDADD = -lheadunit -lstdc++
 
 man_MANS = docs/profanity.1
