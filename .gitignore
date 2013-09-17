@@ -30,3 +30,4 @@ core
 bugs/
 TODO
 plugins/
+src/gitversion.c
