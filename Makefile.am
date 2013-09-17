@@ -1,8 +1,5 @@
 if INCLUDE_GIT_VERSION
-
-FORCE:
-
-src/gitversion.c: .git/HEAD .git/index FORCE
+src/gitversion.c: .git/HEAD .git/index
 	rm -f src/gitversion.c src/gitversion.o
 	echo "#ifndef PROF_GIT_BRANCH" >> $@
 	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
