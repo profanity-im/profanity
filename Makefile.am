@@ -55,7 +55,7 @@ with_git_sources = $(core_sources)
 endif
 
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(main_source) $(with_git_sources)
+profanity_SOURCES = $(with_git_sources) $(main_source)
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
