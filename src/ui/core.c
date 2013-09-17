@@ -22,6 +22,10 @@
 
 #include "config.h"
 
+#ifdef HAVE_GIT_VERSION
+#include "gitversion.c"
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #ifdef HAVE_LIBXSS
@@ -1375,7 +1379,14 @@ _ui_draw_win_title(void)
         g_string_append(version_str, " ");
         g_string_append(version_str, PACKAGE_VERSION);
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
+            g_string_append(version_str, "dev.");
+            g_string_append(version_str, PROF_GIT_BRANCH);
+            g_string_append(version_str, ".");
+            g_string_append(version_str, PROF_GIT_REVISION);
+#else
             g_string_append(version_str, "dev");
+#endif
         }
     }
 
