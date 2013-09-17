@@ -4,6 +4,15 @@
 AC_PREREQ([2.65])
 AC_INIT([profanity], [0.4.0], [boothj5web@gmail.com])
 PACKAGE_STATUS="development"
+
+## get git branch and revision if in development
+if test "x$PACKAGE_STATUS" = xdevelopment; then
+    AM_CONDITIONAL([INCLUDE_GIT_VERSION], [true])
+    AC_DEFINE_UNQUOTED([HAVE_GIT_VERSION], [1], [Include git info])
+else
+    AM_CONDITIONAL([INCLUDE_GIT_VERSION], [false])
+fi
+
 AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
