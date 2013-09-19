@@ -166,11 +166,14 @@ python_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (result != Py_None) {
-                char *result_str = NULL;
-                PyArg_Parse(result, "(s)", result_str);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
                 Py_XDECREF(result);
-                return result_str;;
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                return result_str;
             } else {
                 return NULL;
             }
