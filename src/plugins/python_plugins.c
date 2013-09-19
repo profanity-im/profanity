@@ -198,10 +198,14 @@ python_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (result != Py_None) {
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                return result_str;
+            } else if (result != Py_None) {
                 char *result_str = strdup(PyString_AsString(result));
                 Py_XDECREF(result);
-                return result_str;;
+                return result_str;
             } else {
                 return NULL;
             }
@@ -226,10 +230,14 @@ python_on_private_message_received_hook(ProfPlugin *plugin, const char * const r
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (result != Py_None) {
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                return result_str;
+            } else if (result != Py_None) {
                 char *result_str = strdup(PyString_AsString(result));
                 Py_XDECREF(result);
-                return result_str;;
+                return result_str;
             } else {
                 return NULL;
             }
@@ -254,10 +262,14 @@ python_on_room_message_received_hook(ProfPlugin *plugin, const char * const room
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (result != Py_None) {
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                return result_str;
+            } else if (result != Py_None) {
                 char *result_str = strdup(PyString_AsString(result));
                 Py_XDECREF(result);
-                return result_str;;
+                return result_str;
             } else {
                 return NULL;
             }
@@ -282,10 +294,14 @@ python_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (result != Py_None) {
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                return result_str;
+            } else if (result != Py_None) {
                 char *result_str = strdup(PyString_AsString(result));
                 Py_XDECREF(result);
-                return result_str;;
+                return result_str;
             } else {
                 return NULL;
             }
@@ -310,10 +326,14 @@ python_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (result != Py_None) {
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                return result_str;
+            } else if (result != Py_None) {
                 char *result_str = strdup(PyString_AsString(result));
                 Py_XDECREF(result);
-                return result_str;;
+                return result_str;
             } else {
                 return NULL;
             }
@@ -338,10 +358,14 @@ python_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
             PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
-            if (result != Py_None) {
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                return result_str;
+            } else if (result != Py_None) {
                 char *result_str = strdup(PyString_AsString(result));
                 Py_XDECREF(result);
-                return result_str;;
+                return result_str;
             } else {
                 return NULL;
             }
