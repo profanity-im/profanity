@@ -51,6 +51,7 @@ c_plugin_create(const char * const filename)
     plugin->on_start_func = c_on_start_hook;
     plugin->on_connect_func = c_on_connect_hook;
     plugin->on_disconnect_func = c_on_disconnect_hook;
+    plugin->before_message_displayed_func = c_before_message_displayed_hook;
     plugin->on_message_received_func = c_on_message_received_hook;
     plugin->on_room_message_received_func = c_on_room_message_received_hook;
     plugin->on_private_message_received_func = c_on_private_message_received_hook;
@@ -124,6 +125,20 @@ c_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const 
 
     func = (void (*)(const char * const, const char * const)) f;
     func (account_name, fulljid);
+}
+
+char *
+c_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
+{
+    void * f = NULL;
+    char* (*func)(const char * __message);
+    assert (plugin && plugin->module);
+
+    if (NULL == (f = dlsym (plugin->module, "prof_before_message_displayed")))
+        return NULL;
+
+    func = (char* (*)(const char * const)) f;
+    return func (message);
 }
 
 char *

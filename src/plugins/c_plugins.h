@@ -11,6 +11,7 @@ void c_init_hook(ProfPlugin *plugin, const char * const version, const char * co
 void c_on_start_hook(ProfPlugin *plugin);
 void c_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 void c_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
+char * c_before_message_displayed_hook(ProfPlugin *plugin, const char *message);
 char * c_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 char * c_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
     const char * const nick, const char *message);
