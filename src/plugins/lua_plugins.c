@@ -187,13 +187,11 @@ lua_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
         if (lua_isstring(L, -1)) {
             result = strdup(lua_tostring(L, -1));
         }
-        l_stackdump(L);
-        //lua_pop(L, 2);
+        lua_pop(L, 2);
 
         return result;
     } else {
-        l_stackdump(L);
-        //lua_pop(L, 2);
+        lua_pop(L, 2);
         return NULL;
     }
 }
