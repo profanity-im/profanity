@@ -52,6 +52,7 @@
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
+#include "plugins/plugins.h"
 
 static char *win_title;
 
@@ -248,6 +249,8 @@ void
 ui_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
+    char *new_message = plugins_before_message_displayed(message);
+
     gboolean win_created = FALSE;
     char *display_from = NULL;
     win_type_t win_type;
@@ -299,7 +302,7 @@ ui_incoming_msg(const char * const from, const char * const message,
             wattroff(window->win, COLOUR_THEM);
         } else {
             _win_show_user(window->win, display_from, 1);
-            _win_show_message(window->win, message);
+            _win_show_message(window->win, new_message);
         }
         title_bar_set_typing(FALSE);
         title_bar_draw();
@@ -345,7 +348,7 @@ ui_incoming_msg(const char * const from, const char * const message,
             wattroff(window->win, COLOUR_THEM);
         } else {
             _win_show_user(window->win, display_from, 1);
-            _win_show_message(window->win, message);
+            _win_show_message(window->win, new_message);
         }
     }
 
@@ -969,6 +972,8 @@ void
 ui_outgoing_msg(const char * const from, const char * const to,
     const char * const message)
 {
+    char *new_message = plugins_before_message_displayed(message);
+
     PContact contact = roster_get_contact(to);
     ProfWin *window = wins_get_by_recipient(to);
     int num = 0;
@@ -1012,7 +1017,7 @@ ui_outgoing_msg(const char * const from, const char * const to,
         wattroff(window->win, COLOUR_ME);
     } else {
         _win_show_user(window->win, from, 0);
-        _win_show_message(window->win, message);
+        _win_show_message(window->win, new_message);
     }
     ui_switch_win(num);
 }

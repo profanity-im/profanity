@@ -63,6 +63,7 @@ python_plugin_create(const char * const filename)
         plugin->on_start_func = python_on_start_hook;
         plugin->on_connect_func = python_on_connect_hook;
         plugin->on_disconnect_func = python_on_disconnect_hook;
+        plugin->before_message_displayed_func = python_before_message_displayed_hook;
         plugin->on_message_received_func = python_on_message_received_hook;
         plugin->on_room_message_received_func = python_on_room_message_received_hook;
         plugin->on_private_message_received_func = python_on_private_message_received_hook;
@@ -149,6 +150,34 @@ python_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
             Py_XDECREF(p_function);
         }
     }
+}
+
+char *
+python_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
+{
+    PyObject *p_args = Py_BuildValue("(s)", message);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_before_message_displayed")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_before_message_displayed");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (result != Py_None) {
+                char *result_str = NULL;
+                PyArg_Parse(result, "(s)", result_str);
+                Py_XDECREF(result);
+                return result_str;;
+            } else {
+                return NULL;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 char *

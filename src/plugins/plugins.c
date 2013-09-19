@@ -190,6 +190,27 @@ plugins_on_disconnect(const char * const account_name, const char * const fullji
 }
 
 char *
+plugins_before_message_displayed(const char * const message)
+{
+    GSList *curr = plugins;
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
+
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        new_message = plugin->before_message_displayed_func(plugin, curr_message);
+        if (new_message != NULL) {
+            free(curr_message);
+            curr_message = strdup(new_message);
+            free(new_message);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_message;
+}
+
+char *
 plugins_on_message_received(const char * const jid, const char *message)
 {
     GSList *curr = plugins;

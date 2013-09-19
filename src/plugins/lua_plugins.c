@@ -79,6 +79,7 @@ lua_plugin_create(const char * const filename)
         plugin->on_start_func = lua_on_start_hook;
         plugin->on_connect_func = lua_on_connect_hook;
         plugin->on_disconnect_func = lua_on_disconnect_hook;
+        plugin->before_message_displayed_func = lua_before_message_displayed_hook;
         plugin->on_message_received_func = lua_on_message_received_hook;
         plugin->on_room_message_received_func = lua_on_room_message_received_hook;
         plugin->on_private_message_received_func = lua_on_private_message_received_hook;
@@ -167,6 +168,33 @@ lua_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
         lua_pop(L, 1);
     } else {
         lua_pop(L, 2);
+    }
+}
+
+char *
+lua_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_before_message_displayed");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 1, 1, 0);
+        lua_check_error(res2);
+
+        char *result = NULL;
+        if (lua_isstring(L, -1)) {
+            result = strdup(lua_tostring(L, -1));
+        }
+        l_stackdump(L);
+        //lua_pop(L, 2);
+
+        return result;
+    } else {
+        l_stackdump(L);
+        //lua_pop(L, 2);
+        return NULL;
     }
 }
 

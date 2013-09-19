@@ -31,6 +31,7 @@ void lua_init_hook(ProfPlugin *plugin, const char * const version, const char * 
 void lua_on_start_hook(ProfPlugin *plugin);
 void lua_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 void lua_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
+char * lua_before_message_displayed_hook(ProfPlugin *plugin, const char *message);
 char * lua_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
 char * lua_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
     const char * const nick, const char *message);

@@ -41,6 +41,8 @@ typedef struct prof_plugin_t {
         const char * const account_name, const char * const fulljid);
     void (*on_disconnect_func)(struct prof_plugin_t* plugin,
         const char * const account_name, const char * const fulljid);
+    char* (*before_message_displayed_func)(struct prof_plugin_t* plugin,
+        const char * const message);
     char* (*on_message_received_func)(struct prof_plugin_t* plugin,
         const char * const jid, const char * const message);
     char* (*on_private_message_received_func)(struct prof_plugin_t* plugin,
@@ -65,6 +67,7 @@ char * plugins_get_lang_string(ProfPlugin *plugin);
 void plugins_on_start(void);
 void plugins_on_connect(const char * const account_name, const char * const fulljid);
 void plugins_on_disconnect(const char * const account_name, const char * const fulljid);
+char * plugins_before_message_displayed(const char * const message);
 char * plugins_on_message_received(const char * const jid, const char *message);
 char * plugins_on_room_message_received(const char * const room, const char * const nick, const char *message);
 char * plugins_on_private_message_received(const char * const room, const char * const nick, const char *message);
