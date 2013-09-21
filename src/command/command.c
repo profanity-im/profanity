@@ -129,6 +129,7 @@ static gboolean _cmd_nick(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_notify(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_online(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_outtype(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_otr(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_prefs(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_priority(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
@@ -649,6 +650,14 @@ static struct cmd_t command_defs[] =
           "--------------",
           "Sending of chat state notifications during chat sessions.",
           "Such as whether you have become inactive, or have closed the chat window.",
+          NULL } } },
+
+    { "/otr",
+        _cmd_otr, parse_args, 1, 2, NULL,
+        { "/otr gen|start|end|trust|untrust [contact]", "Off The Record encryption commands.",
+        { "/otr gen|start|end|trust|untrust [contact]",
+          "-----------------------------------------",
+          "gen - Load or create private key and fingerprints.",
           NULL } } },
 
     { "/outtype",
@@ -3204,6 +3213,29 @@ _cmd_outtype(gchar **args, struct cmd_help_t help)
     }
 
     return result;
+}
+
+static gboolean
+_cmd_otr(gchar **args, struct cmd_help_t help)
+{
+#ifdef HAVE_LIBOTR
+    if (strcmp(args[0], "gen") == 0) {
+        if (jabber_get_connection_status() != JABBER_CONNECTED) {
+            cons_show("You must be connected with an account to load OTR information.");
+            return TRUE;
+        } else {
+            ProfAccount *account = accounts_get_account(jabber_get_account_name());
+            otr_account_load(account);
+            return TRUE;
+        }
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+#else
+    cons_show("This version of Profanity has not been build with OTR support enabled");
+    return TRUE;
+#endif
 }
 
 static gboolean

@@ -261,9 +261,6 @@ void
 prof_handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
-#ifdef HAVE_LIBOTR
-    otr_account_load(account);
-#endif
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account);
