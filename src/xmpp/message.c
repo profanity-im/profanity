@@ -51,7 +51,6 @@ message_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(NULL, STANZA_TYPE_ERROR,      connection_error_handler);
     HANDLE(NULL, STANZA_TYPE_GROUPCHAT,  _groupchat_message_handler);
     HANDLE(NULL, STANZA_TYPE_CHAT,       _chat_message_handler);
     HANDLE(NULL, NULL,                   _conference_message_handler);

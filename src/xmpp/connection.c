@@ -483,6 +483,7 @@ _connection_handler(xmpp_conn_t * const conn,
 
         chat_sessions_init();
 
+        xmpp_handler_add(conn, connection_error_handler, NULL, NULL, STANZA_TYPE_ERROR, ctx);
         roster_add_handlers();
         message_add_handlers();
         presence_add_handlers();
