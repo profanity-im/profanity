@@ -72,7 +72,6 @@ presence_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(NULL,               STANZA_TYPE_ERROR,        connection_error_handler);
     HANDLE(STANZA_NS_MUC_USER, NULL,                     _room_presence_handler);
     HANDLE(NULL,               STANZA_TYPE_UNAVAILABLE,  _unavailable_handler);
     HANDLE(NULL,               STANZA_TYPE_SUBSCRIBE,    _subscribe_handler);
@@ -321,10 +320,12 @@ presence_leave_chat_room(const char * const room_jid)
     xmpp_conn_t *conn = connection_get_conn();
     char *nick = muc_get_room_nick(room_jid);
 
-    xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
-        nick);
-    xmpp_send(conn, presence);
-    xmpp_stanza_release(presence);
+    if (nick != NULL) {
+        xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
+            nick);
+        xmpp_send(conn, presence);
+        xmpp_stanza_release(presence);
+    }
 }
 
 static int
