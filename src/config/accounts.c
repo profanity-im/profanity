@@ -259,7 +259,7 @@ accounts_get_account(const char * const name)
             account->muc_nick = strdup(jidp->localpart);
             jid_destroy(jidp);
         } else {
-            account->muc_nick = strdup(muc_nick);
+            account->muc_nick = muc_nick;
         }
 
         // get room history
