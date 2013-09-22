@@ -145,7 +145,9 @@ muc_join_room(const char * const room, const char * const nick)
 void
 muc_leave_room(const char * const room)
 {
-    g_hash_table_remove(rooms, room);
+    if (rooms != NULL) {
+        g_hash_table_remove(rooms, room);
+    }
 }
 
 /*

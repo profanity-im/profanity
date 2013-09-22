@@ -303,10 +303,12 @@ presence_leave_chat_room(const char * const room_jid)
     xmpp_conn_t *conn = connection_get_conn();
     char *nick = muc_get_room_nick(room_jid);
 
-    xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
-        nick);
-    xmpp_send(conn, presence);
-    xmpp_stanza_release(presence);
+    if (nick != NULL) {
+        xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
+            nick);
+        xmpp_send(conn, presence);
+        xmpp_stanza_release(presence);
+    }
 }
 
 static int
