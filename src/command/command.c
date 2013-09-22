@@ -1368,6 +1368,7 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain);
         }
+        g_free(lower);
 
         if (conn_status == JABBER_DISCONNECTED) {
             cons_show_error("Connection attempt for %s failed.", jid);
