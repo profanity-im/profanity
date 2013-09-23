@@ -486,6 +486,7 @@ _get_groupchat_log_filename(const char * const room, const char * const login,
 
     gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
     g_string_append(log_file, date);
+    g_free(date);
 
     char *result = strdup(log_file->str);
     g_string_free(log_file, TRUE);
