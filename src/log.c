@@ -214,18 +214,17 @@ void
 chat_log_chat(const gchar * const login, gchar *other,
     const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
 {
-    gchar *other_copy = strdup(other);
-    struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other_copy);
+    struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other);
 
     // no log for user
     if (dated_log == NULL) {
-        dated_log = _create_log(other_copy, login);
-        g_hash_table_insert(logs, other_copy, dated_log);
+        dated_log = _create_log(other, login);
+        g_hash_table_insert(logs, strdup(other), dated_log);
 
     // log exists but needs rolling
     } else if (_log_roll_needed(dated_log)) {
-        dated_log = _create_log(other_copy, login);
-        g_hash_table_replace(logs, other_copy, dated_log);
+        dated_log = _create_log(other, login);
+        g_hash_table_replace(logs, strdup(other), dated_log);
     }
 
     gchar *date_fmt = NULL;
@@ -242,9 +241,9 @@ chat_log_chat(const gchar * const login, gchar *other,
 
     if (direction == PROF_IN_LOG) {
         if (strncmp(msg, "/me ", 4) == 0) {
-            fprintf(logp, "%s - *%s %s\n", date_fmt, other_copy, msg + 4);
+            fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
         } else {
-            fprintf(logp, "%s - %s: %s\n", date_fmt, other_copy, msg);
+            fprintf(logp, "%s - %s: %s\n", date_fmt, other, msg);
         }
     } else {
         if (strncmp(msg, "/me ", 4) == 0) {
@@ -413,8 +412,8 @@ _free_chat_log(struct dated_chat_log *dated_log)
             g_date_time_unref(dated_log->date);
             dated_log->date = NULL;
         }
+        free(dated_log);
     }
-    dated_log = NULL;
 }
 
 static
@@ -450,6 +449,7 @@ _get_log_filename(const char * const other, const char * const login,
 
     gchar *date = g_date_time_format(dt, "/%Y_%m_%d.log");
     g_string_append(log_file, date);
+    g_free(date);
 
     char *result = strdup(log_file->str);
     g_string_free(log_file, TRUE);
