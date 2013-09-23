@@ -260,12 +260,13 @@ parse_args_with_freetext(const char * const inp, int min, int max)
         tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
     }
 
+    free(copy);
+
     int num = g_slist_length(tokens) - 1;
 
     // if num args not valid return NULL
     if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
-        free(copy);
         return NULL;
 
     // if min allowed is 0 and 0 found, return empty char* array
@@ -288,7 +289,6 @@ parse_args_with_freetext(const char * const inp, int min, int max)
 
         args[arg_count] = NULL;
         g_slist_free_full(tokens, free);
-        free(copy);
 
         return args;
     }

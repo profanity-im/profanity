@@ -1384,6 +1384,7 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain);
         }
+        g_free(lower);
 
         if (conn_status == JABBER_DISCONNECTED) {
             cons_show_error("Connection attempt for %s failed.", jid);
@@ -2747,6 +2748,7 @@ static gboolean
 _cmd_join(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
+    ProfAccount *account = accounts_get_account(jabber_get_account_name());
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -2771,7 +2773,6 @@ _cmd_join(gchar **args, struct cmd_help_t help)
 
     // server not supplied (room), use account preference
     } else {
-        ProfAccount *account = accounts_get_account(jabber_get_account_name());
         g_string_append(room_str, args[0]);
         g_string_append(room_str, "@");
         g_string_append(room_str, account->muc_service);
@@ -2784,7 +2785,6 @@ _cmd_join(gchar **args, struct cmd_help_t help)
 
     // otherwise use account preference
     } else {
-        ProfAccount *account = accounts_get_account(jabber_get_account_name());
         nick = account->muc_nick;
     }
 
@@ -2800,6 +2800,7 @@ _cmd_join(gchar **args, struct cmd_help_t help)
     jid_destroy(room_jid);
     jid_destroy(my_jid);
     g_string_free(room_str, TRUE);
+    accounts_free_account(account);
 
     return TRUE;
 }
