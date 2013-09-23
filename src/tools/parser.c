@@ -256,11 +256,11 @@ parse_args_with_freetext(const char * const inp, int min, int max)
         }
     }
 
-    free(copy);
-
     if (in_token) {
         tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
     }
+
+    free(copy);
 
     int num = g_slist_length(tokens) - 1;
 
