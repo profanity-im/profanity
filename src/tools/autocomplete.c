@@ -176,7 +176,7 @@ autocomplete_param_with_func(char *input, int *size, char *command,
     char *auto_msg = NULL;
     char inp_cpy[*size];
     int i;
-    char *command_cpy = malloc(strlen(command) + 2);
+    char command_cpy[strlen(command) + 2];
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
     if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
@@ -192,7 +192,6 @@ autocomplete_param_with_func(char *input, int *size, char *command,
             free(found);
         }
     }
-    free(command_cpy);
 
     return auto_msg;
 }

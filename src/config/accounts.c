@@ -250,7 +250,7 @@ accounts_get_account(const char * const name)
             g_string_free(g_muc_service, TRUE);
             jid_destroy(jidp);
         } else {
-            account->muc_service = strdup(muc_service);
+            account->muc_service = muc_service;
         }
 
         gchar *muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
@@ -259,7 +259,7 @@ accounts_get_account(const char * const name)
             account->muc_nick = strdup(jidp->localpart);
             jid_destroy(jidp);
         } else {
-            account->muc_nick = strdup(muc_nick);
+            account->muc_nick = muc_nick;
         }
 
         // get room history

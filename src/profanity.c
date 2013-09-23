@@ -231,7 +231,9 @@ prof_handle_error_message(const char *from, const char *err_msg)
         }
         // remove the room from muc
         Jid *room_jid = jid_create(from);
-        muc_leave_room(room_jid->barejid);
+        if (!muc_get_roster_received(room_jid->barejid)) {
+            muc_leave_room(room_jid->barejid);
+        }
         jid_destroy(room_jid);
 
     } else {
