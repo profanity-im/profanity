@@ -40,6 +40,7 @@
 #include "log.h"
 #include "profanity.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 #include "xmpp/xmpp.h"
 
 #define _inp_win_refresh() prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
@@ -359,6 +360,16 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 
         return 1;
 
+    // ALT-LEFT
+    } else if ((result == KEY_CODE_YES) && (ch == 537)) {
+        ui_previous_win();
+        return 1;
+
+    // ALT-RIGHT
+    } else if ((result == KEY_CODE_YES) && (ch == 552)) {
+        ui_next_win();
+        return 1;
+
     // other editing keys
     } else {
         switch(ch) {
@@ -591,6 +602,12 @@ _handle_alt_key(char *input, int *size, int key)
             break;
         case '0':
             ui_switch_win(0);
+            break;
+        case KEY_LEFT:
+            ui_previous_win();
+            break;
+        case KEY_RIGHT:
+            ui_next_win();
             break;
         case 263:
         case 127:

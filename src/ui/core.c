@@ -616,6 +616,68 @@ ui_switch_win(const int i)
 }
 
 void
+ui_next_win(void)
+{
+    ui_current_page_off();
+    ProfWin *new_current = wins_get_next();
+    int i = wins_get_num(new_current);
+    wins_set_current_by_num(i);
+    ui_current_page_off();
+
+    new_current->unread = 0;
+
+    if (i == 1) {
+        title_bar_title();
+        status_bar_active(1);
+    } else {
+        PContact contact = roster_get_contact(new_current->from);
+        if (contact != NULL) {
+            if (p_contact_name(contact) != NULL) {
+                title_bar_set_recipient(p_contact_name(contact));
+            } else {
+                title_bar_set_recipient(new_current->from);
+            }
+        } else {
+            title_bar_set_recipient(new_current->from);
+        }
+        title_bar_draw();;
+        status_bar_active(i);
+    }
+    wins_refresh_current();
+}
+
+void
+ui_previous_win(void)
+{
+    ui_current_page_off();
+    ProfWin *new_current = wins_get_previous();
+    int i = wins_get_num(new_current);
+    wins_set_current_by_num(i);
+    ui_current_page_off();
+
+    new_current->unread = 0;
+
+    if (i == 1) {
+        title_bar_title();
+        status_bar_active(1);
+    } else {
+        PContact contact = roster_get_contact(new_current->from);
+        if (contact != NULL) {
+            if (p_contact_name(contact) != NULL) {
+                title_bar_set_recipient(p_contact_name(contact));
+            } else {
+                title_bar_set_recipient(new_current->from);
+            }
+        } else {
+            title_bar_set_recipient(new_current->from);
+        }
+        title_bar_draw();;
+        status_bar_active(i);
+    }
+    wins_refresh_current();
+}
+
+void
 ui_clear_current(void)
 {
     wins_clear_current();

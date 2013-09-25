@@ -28,6 +28,8 @@ ProfWin * wins_get_console(void);
 ProfWin * wins_get_current(void);
 void wins_set_current_by_num(int i);
 ProfWin * wins_get_by_num(int i);
+ProfWin * wins_get_next(void);
+ProfWin * wins_get_previous(void);
 ProfWin * wins_get_by_recipient(const char * const recipient);
 int wins_get_num(ProfWin *window);
 int wins_get_current_num(void);
