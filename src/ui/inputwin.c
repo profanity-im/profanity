@@ -360,6 +360,16 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 
         return 1;
 
+    // ALT-LEFT
+    } else if ((result == KEY_CODE_YES) && (ch == 537)) {
+        ui_previous_win();
+        return 1;
+
+    // ALT-RIGHT
+    } else if ((result == KEY_CODE_YES) && (ch == 552)) {
+        ui_next_win();
+        return 1;
+
     // other editing keys
     } else {
         switch(ch) {
@@ -560,8 +570,6 @@ _handle_alt_key(char *input, int *size, int key)
 {
     int end_del = getcurx(inp_win);
     int start_del = end_del;
-    int current = wins_get_current_num();
-    int new;
 
     switch (key)
     {
@@ -596,22 +604,10 @@ _handle_alt_key(char *input, int *size, int key)
             ui_switch_win(0);
             break;
         case KEY_LEFT:
-            if (current == 0) {
-                new = 9;
-            } else {
-                new = current - 1;
-            }
-
-            ui_switch_win(new);
+            ui_previous_win();
             break;
         case KEY_RIGHT:
-            if (current == 9) {
-                new = 0;
-            } else {
-                new = current + 1;
-            }
-
-            ui_switch_win(new);
+            ui_next_win();
             break;
         case 263:
         case 127:
