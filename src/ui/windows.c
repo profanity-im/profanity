@@ -91,6 +91,59 @@ wins_get_by_num(int i)
 }
 
 ProfWin *
+wins_get_next(void)
+{
+    // get and sort win nums
+    GList *keys = g_hash_table_get_keys(windows);
+    keys = g_list_sort(keys, cmp_win_num);
+    GList *curr = keys;
+
+    // find our place in the list
+    while (curr != NULL) {
+        if (current == GPOINTER_TO_INT(curr->data)) {
+            break;
+        }
+        curr = g_list_next(curr);
+    }
+
+    // if there is a next window return it
+    curr = g_list_next(curr);
+    if (curr != NULL) {
+        return wins_get_by_num(GPOINTER_TO_INT(curr->data));
+    // otherwise return the first window (console)
+    } else {
+        return wins_get_console();
+    }
+}
+
+ProfWin *
+wins_get_previous(void)
+{
+    // get and sort win nums
+    GList *keys = g_hash_table_get_keys(windows);
+    keys = g_list_sort(keys, cmp_win_num);
+    GList *curr = keys;
+
+    // find our place in the list
+    while (curr != NULL) {
+        if (current == GPOINTER_TO_INT(curr->data)) {
+            break;
+        }
+        curr = g_list_next(curr);
+    }
+
+    // if there is a previous window return it
+    curr = g_list_previous(curr);
+    if (curr != NULL) {
+        return wins_get_by_num(GPOINTER_TO_INT(curr->data));
+    // otherwise return the last window
+    } else {
+        int new_num = GPOINTER_TO_INT(g_list_last(keys)->data);
+        return wins_get_by_num(new_num);
+    }
+}
+
+ProfWin *
 wins_get_by_recipient(const char * const recipient)
 {
     GList *values = g_hash_table_get_values(windows);

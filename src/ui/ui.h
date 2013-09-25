@@ -52,6 +52,8 @@ void ui_idle(void);
 void ui_handle_special_keys(const wint_t * const ch, const char * const inp,
     const int size);
 void ui_switch_win(const int i);
+void ui_next_win(void);
+void ui_previous_win(void);
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
 void ui_new_chat_win(const char * const to);
