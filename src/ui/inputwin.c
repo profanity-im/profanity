@@ -40,6 +40,7 @@
 #include "log.h"
 #include "profanity.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 #include "xmpp/xmpp.h"
 
 #define _inp_win_refresh() prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
@@ -559,6 +560,8 @@ _handle_alt_key(char *input, int *size, int key)
 {
     int end_del = getcurx(inp_win);
     int start_del = end_del;
+    int current = wins_get_current_num();
+    int new;
 
     switch (key)
     {
@@ -591,6 +594,24 @@ _handle_alt_key(char *input, int *size, int key)
             break;
         case '0':
             ui_switch_win(0);
+            break;
+        case KEY_LEFT:
+            if (current == 0) {
+                new = 9;
+            } else {
+                new = current - 1;
+            }
+
+            ui_switch_win(new);
+            break;
+        case KEY_RIGHT:
+            if (current == 9) {
+                new = 0;
+            } else {
+                new = current + 1;
+            }
+
+            ui_switch_win(new);
             break;
         case 263:
         case 127:
