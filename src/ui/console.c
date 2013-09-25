@@ -1289,6 +1289,8 @@ cons_navigation_help(void)
     cons_show("");
     cons_show("Alt-1                    : This console window.");
     cons_show("Alt-2..Alt-0             : Chat windows.");
+    cons_show("Alt-LEFT                 : Previous chat window");
+    cons_show("Alt-RIGHT                : Next chat window");
     cons_show("F1                       : This console window.");
     cons_show("F2..F10                  : Chat windows.");
     cons_show("UP, DOWN                 : Navigate input history.");
