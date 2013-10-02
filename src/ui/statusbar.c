@@ -39,12 +39,14 @@ static WINDOW *status_bar;
 static char *message = NULL;
 //                          1  2  3  4  5  6  7  8  9  0  >
 static char _active[34] = "[ ][ ][ ][ ][ ][ ][ ][ ][ ][ ][ ]";
+static char *bracket = "- -";
 static int is_active[12];
 static GHashTable *remaining_active;
 static int is_new[12];
 static GHashTable *remaining_new;
 static int dirty;
 static GDateTime *last_time;
+static int current;
 
 static void _status_bar_update_time(void);
 static void _update_win_statuses(void);
@@ -66,11 +68,13 @@ create_status_bar(void)
     }
     remaining_active = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
     remaining_new = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
+    current = 1;
 
     status_bar = newwin(1, cols, rows-2, 0);
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwprintw(status_bar, 0, cols - 34, _active);
+    mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     if (last_time != NULL)
@@ -116,6 +120,7 @@ status_bar_resize(void)
     werase(status_bar);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwprintw(status_bar, 0, cols - 34, _active);
+    mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     _update_win_statuses();
@@ -141,6 +146,23 @@ status_bar_set_all_inactive(void)
 
     g_hash_table_remove_all(remaining_active);
     g_hash_table_remove_all(remaining_new);
+}
+
+void
+status_bar_current(int i)
+{
+    if (i == 0) {
+        current = 10;
+    } else if (i > 10) {
+        current = 11;
+    } else {
+        current = i;
+    }
+    int cols = getmaxx(stdscr);
+    wattron(status_bar, COLOUR_STATUS_BRACKET);
+    mvwprintw(status_bar, 0, cols - 34, _active);
+    mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
+    wattroff(status_bar, COLOUR_STATUS_BRACKET);
 }
 
 void
@@ -263,6 +285,7 @@ status_bar_print_message(const char * const msg)
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwprintw(status_bar, 0, cols - 34, _active);
+    mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     _update_win_statuses();
@@ -291,6 +314,7 @@ status_bar_clear(void)
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwprintw(status_bar, 0, cols - 34, _active);
+    mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     dirty = TRUE;
@@ -310,6 +334,7 @@ status_bar_clear_message(void)
 
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwprintw(status_bar, 0, cols - 34, _active);
+    mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     _update_win_statuses();
