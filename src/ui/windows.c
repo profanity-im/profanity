@@ -413,6 +413,8 @@ wins_tidy(void)
         }
 
         windows = new_windows;
+        current = 1;
+        ui_switch_win(1);
         return TRUE;
     } else {
         return FALSE;
