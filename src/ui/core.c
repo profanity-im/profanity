@@ -414,13 +414,6 @@ ui_handle_error_message(const char * const from, const char * const err_msg)
         } else {
             cons_show_error("Error received from server: %s", err_msg);
         }
-        // remove the room from muc
-        Jid *room_jid = jid_create(from);
-        if (!muc_get_roster_received(room_jid->barejid)) {
-            muc_leave_room(room_jid->barejid);
-        }
-        jid_destroy(room_jid);
-
     } else {
         cons_show_error("Error received from server: %s", err_msg);
     }
