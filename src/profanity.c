@@ -187,27 +187,7 @@ prof_handle_group_remove(const char * const contact,
 void
 prof_handle_error_message(const char *from, const char *err_msg)
 {
-    win_type_t win_type = ui_current_win_type();
-    if (err_msg == NULL) {
-        cons_show_error("Unknown error received from service.");
-    } else if (strcmp(err_msg, "conflict") == 0) {
-        if (win_type == WIN_MUC) {
-            ui_current_print_line("Nickname already in use.");
-        } else {
-            cons_show_error("Error received from server: %s", err_msg);
-        }
-        // remove the room from muc
-        Jid *room_jid = jid_create(from);
-        if (!muc_get_roster_received(room_jid->barejid)) {
-            muc_leave_room(room_jid->barejid);
-        }
-        jid_destroy(room_jid);
-
-    } else {
-        cons_show_error("Error received from server: %s", err_msg);
-    }
-
-    ui_print_error_from_recipient(from, err_msg);
+    ui_handle_error_message(from, err_msg);
 }
 
 void
