@@ -405,17 +405,27 @@ ui_group_removed(const char * const contact, const char * const group)
 void
 ui_handle_error_message(const char * const from, const char * const err_msg)
 {
-    win_type_t win_type = ui_current_win_type();
     if (err_msg == NULL) {
         cons_show_error("Unknown error received from service.");
-    } else if (strcmp(err_msg, "conflict") == 0) {
-        if (win_type == WIN_MUC) {
-            ui_current_print_line("Nickname already in use.");
-        } else {
+    } else {
+        win_type_t win_type = ui_current_win_type();
+        gboolean handled = FALSE;
+
+        switch (win_type)
+        {
+            case WIN_MUC:
+                if (g_strcmp0(err_msg, "conflict") == 0) {
+                    ui_current_print_line("Nickname already in use.");
+                    handled = TRUE;
+                }
+                break;
+            default:
+                break;
+        }
+
+        if (handled != TRUE) {
             cons_show_error("Error received from server: %s", err_msg);
         }
-    } else {
-        cons_show_error("Error received from server: %s", err_msg);
     }
 
     ui_print_error_from_recipient(from, err_msg);
