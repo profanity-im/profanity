@@ -207,9 +207,7 @@ void
 wins_refresh_current(void)
 {
     ProfWin *window = wins_get_current();
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    prefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
+    win_refresh(window);
 }
 
 void
