@@ -131,10 +131,7 @@ cons_show_typing(const char * const barejid)
         display_usr = barejid;
     }
 
-    console->print_time(console, '-');
-    wattron(console->win, COLOUR_TYPING);
-    wprintw(console->win, "!! %s is typing a message...\n", display_usr);
-    wattroff(console->win, COLOUR_TYPING);
+    console->print_line(console, '-', COLOUR_TYPING, "!! %s is typing a message...", display_usr);
 
     wins_refresh_console();
     cons_alert();
