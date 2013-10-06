@@ -824,14 +824,8 @@ ui_current_print_line(const char * const msg, ...)
     ProfWin *current = wins_get_current();
     va_list arg;
     va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    current->print_time(current, '-');
-    wprintw(current->win, "%s\n", fmt_msg->str);
-    g_string_free(fmt_msg, TRUE);
+    current->print_line(current, msg, arg);
     va_end(arg);
-
-    wins_refresh_current();
 }
 
 void
