@@ -400,13 +400,15 @@ ui_contact_online(const char * const barejid, const char * const resource,
     }
 
     ProfWin *console = wins_get_console();
-    _show_status_string(console, display_str->str, show, status, last_activity,
-        "++", "online");
-
     ProfWin *window = wins_get_by_recipient(barejid);
-    if (window != NULL) {
-        _show_status_string(window, display_str->str, show, status,
-            last_activity, "++", "online");
+
+    if (prefs_get_boolean(PREF_STATUSES)) {
+        _show_status_string(console, display_str->str, show, status, last_activity,
+            "++", "online");
+        if (window != NULL) {
+            _show_status_string(window, display_str->str, show, status,
+                last_activity, "++", "online");
+        }
     }
 
     jid_destroy(jid);
@@ -442,13 +444,15 @@ ui_contact_offline(const char * const from, const char * const show,
     }
 
     ProfWin *console = wins_get_console();
-    _show_status_string(console, display_str->str, show, status, NULL, "--",
-        "offline");
-
     ProfWin *window = wins_get_by_recipient(jidp->barejid);
-    if (window != NULL) {
-        _show_status_string(window, display_str->str, show, status, NULL, "--",
+
+    if (prefs_get_boolean(PREF_STATUSES)) {
+        _show_status_string(console, display_str->str, show, status, NULL, "--",
             "offline");
+        if (window != NULL) {
+            _show_status_string(window, display_str->str, show, status, NULL, "--",
+                "offline");
+        }
     }
 
     jid_destroy(jidp);
@@ -922,7 +926,9 @@ ui_new_chat_win(const char * const to)
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
                 const char const *show = p_contact_presence(contact);
                 const char const *status = p_contact_status(contact);
-                _show_status_string(window, to, show, status, NULL, "--", "offline");
+                if (prefs_get_boolean(PREF_STATUSES)) {
+                    _show_status_string(window, to, show, status, NULL, "--", "offline");
+                }
             }
         }
     } else {
@@ -1030,7 +1036,9 @@ ui_outgoing_msg(const char * const from, const char * const to,
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
                 const char const *show = p_contact_presence(contact);
                 const char const *status = p_contact_status(contact);
-                _show_status_string(window, to, show, status, NULL, "--", "offline");
+                if (prefs_get_boolean(PREF_STATUSES)) {
+                    _show_status_string(window, to, show, status, NULL, "--", "offline");
+                }
             }
         }
 
@@ -1161,7 +1169,9 @@ ui_room_member_presence(const char * const room, const char * const nick,
     ProfWin *window = wins_get_by_recipient(room);
 
     if (window != NULL) {
-        _show_status_string(window, nick, show, status, NULL, "++", "online");
+        if (prefs_get_boolean(PREF_STATUSES)) {
+            _show_status_string(window, nick, show, status, NULL, "++", "online");
+        }
     }
 
     if (wins_is_current(window)) {
@@ -1489,9 +1499,6 @@ _show_status_string(ProfWin *window, const char * const from,
     const char * const default_show)
 {
     WINDOW *win = window->win;
-
-    if (!prefs_get_boolean(PREF_STATUSES))
-        return;
 
     win_print_time(window, '-');
 
