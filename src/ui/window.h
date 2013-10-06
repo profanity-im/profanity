@@ -52,12 +52,15 @@ typedef struct prof_win_t {
     int paged;
     int unread;
     int history_shown;
+    gboolean (*handle_error_message)(struct prof_win_t *self,
+        const char * const from, const char * const err_msg);
 } ProfWin;
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
 void win_free(ProfWin *window);
 
 void win_print_time(ProfWin *window, char show_char);
+void win_print_line(ProfWin *window, const char * const msg, ...);
 void win_presence_colour_on(ProfWin *window, const char * const presence);
 void win_presence_colour_off(ProfWin *window, const char * const presence);
 void win_show_contact(ProfWin *window, PContact contact);

@@ -408,21 +408,8 @@ ui_handle_error_message(const char * const from, const char * const err_msg)
     if (err_msg == NULL) {
         cons_show_error("Unknown error received from service.");
     } else {
-        win_type_t win_type = ui_current_win_type();
-        gboolean handled = FALSE;
-
-        switch (win_type)
-        {
-            case WIN_MUC:
-                if (g_strcmp0(err_msg, "conflict") == 0) {
-                    ui_current_print_line("Nickname already in use.");
-                    handled = TRUE;
-                }
-                break;
-            default:
-                break;
-        }
-
+        ProfWin *win = wins_get_current();
+        gboolean handled = win->handle_error_message(win, from, err_msg);
         if (handled != TRUE) {
             cons_show_error("Error received from server: %s", err_msg);
         }

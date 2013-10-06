@@ -35,6 +35,11 @@
 #include "config/theme.h"
 #include "ui/window.h"
 
+gboolean _muc_handle_error_message(ProfWin *self, const char * const from,
+    const char * const err_msg);
+gboolean _default_handle_error_message(ProfWin *self, const char * const from,
+    const char * const err_msg);
+
 ProfWin*
 win_create(const char * const title, int cols, win_type_t type)
 {
@@ -47,6 +52,17 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->unread = 0;
     new_win->history_shown = 0;
     new_win->type = type;
+
+    switch (new_win->type)
+    {
+        case WIN_MUC:
+            new_win->handle_error_message = _muc_handle_error_message;
+            break;
+        default:
+            new_win->handle_error_message = _default_handle_error_message;
+            break;
+    }
+
     scrollok(new_win->win, TRUE);
 
     return new_win;
@@ -71,6 +87,23 @@ win_print_time(ProfWin* window, char show_char)
     wattroff(window->win, COLOUR_TIME);
     g_date_time_unref(time);
     g_free(date_fmt);
+}
+
+void
+win_print_line(ProfWin *window, const char * const msg, ...)
+{
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    win_print_time(window, '-');
+    wprintw(window->win, "%s\n", fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
+    va_end(arg);
+
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    prefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
 void
@@ -155,4 +188,25 @@ win_show_contact(ProfWin *window, PContact contact)
 
     wprintw(window->win, "\n");
     win_presence_colour_off(window, presence);
+}
+
+gboolean
+_muc_handle_error_message(ProfWin *self, const char * const from,
+    const char * const err_msg)
+{
+    gboolean handled = FALSE;
+    if (g_strcmp0(err_msg, "conflict") == 0) {
+        win_print_line(self, "Nickname already in use.");
+        handled = TRUE;
+    }
+
+    return handled;
+}
+
+gboolean
+_default_handle_error_message(ProfWin *self, const char * const from,
+    const char * const err_msg)
+{
+    return FALSE;
+
 }
