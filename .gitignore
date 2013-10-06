@@ -43,5 +43,4 @@ libtool
 m4/
 *.so
 *.lo
-plugins/
 src/gitversion.c

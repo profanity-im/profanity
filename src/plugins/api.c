@@ -162,6 +162,6 @@ void
 api_win_show(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    win_print_time(window, '-');
+    window->print_time(window, '-');
     wprintw(window->win, "%s\n", line);
 }

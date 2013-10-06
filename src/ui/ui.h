@@ -59,6 +59,7 @@ void ui_reset_idle_time(void);
 void ui_new_chat_win(const char * const to);
 void ui_print_error_from_recipient(const char * const from, const char *err_msg);
 void ui_print_system_msg_from_recipient(const char * const from, const char *message);
+void ui_handle_error_message(const char * const from, const char * const err_msg);
 gint ui_unread(void);
 void ui_close_connected_win(int index);
 int ui_close_all_wins(void);
@@ -228,6 +229,7 @@ void status_bar_active(const int win);
 void status_bar_new(const int win);
 void status_bar_update_time(void);
 void status_bar_set_all_inactive(void);
+void status_bar_current(int i);
 
 // input window actions
 wint_t inp_get_char(char *input, int *size);
