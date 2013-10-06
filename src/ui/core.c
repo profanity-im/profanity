@@ -297,16 +297,17 @@ ui_incoming_msg(const char * const from, const char * const message,
             _win_show_history(window->win, num, from);
         }
 
+        // show users status first, when receiving message via delayed delivery
+        if ((tv_stamp != NULL) && (win_created)) {
+            PContact pcontact = roster_get_contact(from);
+            if (pcontact != NULL) {
+                window->show_contact(window, pcontact);
+            }
+        }
+
         if (tv_stamp == NULL) {
             window->print_time(window, '-');
         } else {
-            // show users status first, when receiving message via delayed delivery
-            if (win_created) {
-                PContact pcontact = roster_get_contact(from);
-                if (pcontact != NULL) {
-                    window->show_contact(window, pcontact);
-                }
-            }
             GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
             gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
             wattron(window->win, COLOUR_TIME);
