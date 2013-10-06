@@ -377,36 +377,20 @@ void
 ui_contact_online(const char * const barejid, const char * const resource,
     const char * const show, const char * const status, GDateTime *last_activity)
 {
-    Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
     PContact contact = roster_get_contact(barejid);
-    GString *display_str = g_string_new("");
-
-    // use nickname if exists
-    if (p_contact_name(contact) != NULL) {
-        g_string_append(display_str, p_contact_name(contact));
-    } else {
-        g_string_append(display_str, barejid);
-    }
-
-    // add resource if not default provided by profanity
-    if (strcmp(jid->resourcepart, "__prof_default") != 0) {
-        g_string_append(display_str, " (");
-        g_string_append(display_str, jid->resourcepart);
-        g_string_append(display_str, ")");
-    }
+    char *display_str = p_contact_create_display_string(contact, resource);
 
     ProfWin *console = wins_get_console();
-    win_show_status_string(console, display_str->str, show, status, last_activity,
+    win_show_status_string(console, display_str, show, status, last_activity,
         "++", "online");
 
     ProfWin *window = wins_get_by_recipient(barejid);
     if (window != NULL) {
-        win_show_status_string(window, display_str->str, show, status,
+        win_show_status_string(window, display_str, show, status,
             last_activity, "++", "online");
     }
 
-    jid_destroy(jid);
-    g_string_free(display_str, TRUE);
+    free(display_str);
 
     if (wins_is_current(console)) {
         wins_refresh_current();
@@ -421,34 +405,20 @@ ui_contact_offline(const char * const from, const char * const show,
 {
     Jid *jidp = jid_create(from);
     PContact contact = roster_get_contact(jidp->barejid);
-    GString *display_str = g_string_new("");
-
-    // use nickname if exists
-    if (p_contact_name(contact) != NULL) {
-        g_string_append(display_str, p_contact_name(contact));
-    } else {
-        g_string_append(display_str, jidp->barejid);
-    }
-
-    // add resource if not default provided by profanity
-    if (strcmp(jidp->resourcepart, "__prof_default") != 0) {
-        g_string_append(display_str, " (");
-        g_string_append(display_str, jidp->resourcepart);
-        g_string_append(display_str, ")");
-    }
+    char *display_str = p_contact_create_display_string(contact, jidp->resourcepart);
 
     ProfWin *console = wins_get_console();
-    win_show_status_string(console, display_str->str, show, status, NULL, "--",
+    win_show_status_string(console, display_str, show, status, NULL, "--",
         "offline");
 
     ProfWin *window = wins_get_by_recipient(jidp->barejid);
     if (window != NULL) {
-        win_show_status_string(window, display_str->str, show, status, NULL, "--",
+        win_show_status_string(window, display_str, show, status, NULL, "--",
             "offline");
     }
 
     jid_destroy(jidp);
-    g_string_free(display_str, TRUE);
+    free(display_str);
 
     if (wins_is_current(console)) {
         wins_refresh_current();
