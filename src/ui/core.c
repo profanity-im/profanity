@@ -826,6 +826,7 @@ ui_current_print_line(const char * const msg, ...)
     va_start(arg, msg);
     current->print_line(current, msg, arg);
     va_end(arg);
+    current->refresh_win(current);
 }
 
 void

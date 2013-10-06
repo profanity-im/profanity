@@ -61,7 +61,7 @@ win_create(const char * const title, int cols, win_type_t type)
 
     new_win->print_time = _win_print_time;
     new_win->print_line = _win_print_line;
-    new_win->refresh = _win_refresh;
+    new_win->refresh_win = _win_refresh;
     new_win->presence_colour_on = _win_presence_colour_on;
     new_win->presence_colour_off = _win_presence_colour_off;
     new_win->show_contact = _win_show_contact;
@@ -113,7 +113,6 @@ _win_print_line(ProfWin *self, const char * const msg, ...)
     wprintw(self->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-    _win_refresh(self);
 }
 
 static void
@@ -215,6 +214,7 @@ _muc_handle_error_message(ProfWin *self, const char * const from,
     gboolean handled = FALSE;
     if (g_strcmp0(err_msg, "conflict") == 0) {
         _win_print_line(self, "Nickname already in use.");
+        _win_refresh(self);
         handled = TRUE;
     }
 

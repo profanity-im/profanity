@@ -54,7 +54,7 @@ typedef struct prof_win_t {
     int history_shown;
     void (*print_time)(struct prof_win_t *self, char show_char);
     void (*print_line)(struct prof_win_t *self, const char * const msg, ...);
-    void (*refresh)(struct prof_win_t *self);
+    void (*refresh_win)(struct prof_win_t *self);
     void (*presence_colour_on)(struct prof_win_t *self, const char * const presence);
     void (*presence_colour_off)(struct prof_win_t *self, const char * const presence);
     void (*show_contact)(struct prof_win_t *self, PContact contact);
