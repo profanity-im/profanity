@@ -35,10 +35,16 @@
 #include "config/theme.h"
 #include "ui/window.h"
 
-gboolean _muc_handle_error_message(ProfWin *self, const char * const from,
+static gboolean _muc_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg);
-gboolean _default_handle_error_message(ProfWin *self, const char * const from,
+static gboolean _default_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg);
+static void _win_print_time(ProfWin *self, char show_char);
+static void _win_print_line(ProfWin *self, const char * const msg, ...);
+static void _win_refresh(ProfWin *self);
+static void _win_presence_colour_on(ProfWin *self, const char * const presence);
+static void _win_presence_colour_off(ProfWin *self, const char * const presence);
+static void _win_show_contact(ProfWin *self, PContact contact);
 
 ProfWin*
 win_create(const char * const title, int cols, win_type_t type)
@@ -52,6 +58,13 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->unread = 0;
     new_win->history_shown = 0;
     new_win->type = type;
+
+    new_win->print_time = _win_print_time;
+    new_win->print_line = _win_print_line;
+    new_win->refresh = _win_refresh;
+    new_win->presence_colour_on = _win_presence_colour_on;
+    new_win->presence_colour_off = _win_presence_colour_off;
+    new_win->show_contact = _win_show_contact;
 
     switch (new_win->type)
     {
@@ -77,78 +90,78 @@ win_free(ProfWin* window)
     window = NULL;
 }
 
-void
-win_print_time(ProfWin* window, char show_char)
+static void
+_win_print_time(ProfWin* self, char show_char)
 {
     GDateTime *time = g_date_time_new_now_local();
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-    wattron(window->win, COLOUR_TIME);
-    wprintw(window->win, "%s %c ", date_fmt, show_char);
-    wattroff(window->win, COLOUR_TIME);
+    wattron(self->win, COLOUR_TIME);
+    wprintw(self->win, "%s %c ", date_fmt, show_char);
+    wattroff(self->win, COLOUR_TIME);
     g_date_time_unref(time);
     g_free(date_fmt);
 }
 
-void
-win_print_line(ProfWin *window, const char * const msg, ...)
+static void
+_win_print_line(ProfWin *self, const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_print_time(window, '-');
-    wprintw(window->win, "%s\n", fmt_msg->str);
+    _win_print_time(self, '-');
+    wprintw(self->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
-    win_refresh(window);
+    _win_refresh(self);
 }
 
-void
-win_refresh(ProfWin *window)
+static void
+_win_refresh(ProfWin *self)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    prefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
+    prefresh(self->win, self->y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
-void
-win_presence_colour_on(ProfWin *window, const char * const presence)
+static void
+_win_presence_colour_on(ProfWin *self, const char * const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
-        wattron(window->win, COLOUR_ONLINE);
+        wattron(self->win, COLOUR_ONLINE);
     } else if (g_strcmp0(presence, "away") == 0) {
-        wattron(window->win, COLOUR_AWAY);
+        wattron(self->win, COLOUR_AWAY);
     } else if (g_strcmp0(presence, "chat") == 0) {
-        wattron(window->win, COLOUR_CHAT);
+        wattron(self->win, COLOUR_CHAT);
     } else if (g_strcmp0(presence, "dnd") == 0) {
-        wattron(window->win, COLOUR_DND);
+        wattron(self->win, COLOUR_DND);
     } else if (g_strcmp0(presence, "xa") == 0) {
-        wattron(window->win, COLOUR_XA);
+        wattron(self->win, COLOUR_XA);
     } else {
-        wattron(window->win, COLOUR_OFFLINE);
+        wattron(self->win, COLOUR_OFFLINE);
     }
 }
 
-void
-win_presence_colour_off(ProfWin *window, const char * const presence)
+static void
+_win_presence_colour_off(ProfWin *self, const char * const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
-        wattroff(window->win, COLOUR_ONLINE);
+        wattroff(self->win, COLOUR_ONLINE);
     } else if (g_strcmp0(presence, "away") == 0) {
-        wattroff(window->win, COLOUR_AWAY);
+        wattroff(self->win, COLOUR_AWAY);
     } else if (g_strcmp0(presence, "chat") == 0) {
-        wattroff(window->win, COLOUR_CHAT);
+        wattroff(self->win, COLOUR_CHAT);
     } else if (g_strcmp0(presence, "dnd") == 0) {
-        wattroff(window->win, COLOUR_DND);
+        wattroff(self->win, COLOUR_DND);
     } else if (g_strcmp0(presence, "xa") == 0) {
-        wattroff(window->win, COLOUR_XA);
+        wattroff(self->win, COLOUR_XA);
     } else {
-        wattroff(window->win, COLOUR_OFFLINE);
+        wattroff(self->win, COLOUR_OFFLINE);
     }
 }
 
-void
-win_show_contact(ProfWin *window, PContact contact)
+static void
+_win_show_contact(ProfWin *self, PContact contact)
 {
     const char *barejid = p_contact_barejid(contact);
     const char *name = p_contact_name(contact);
@@ -156,62 +169,61 @@ win_show_contact(ProfWin *window, PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    win_print_time(window, '-');
-    win_presence_colour_on(window, presence);
+    _win_print_time(self, '-');
+    _win_presence_colour_on(self, presence);
 
     if (name != NULL) {
-        wprintw(window->win, "%s", name);
+        wprintw(self->win, "%s", name);
     } else {
-        wprintw(window->win, "%s", barejid);
+        wprintw(self->win, "%s", barejid);
     }
 
-    wprintw(window->win, " is %s", presence);
+    wprintw(self->win, " is %s", presence);
 
     if (last_activity != NULL) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
-        wprintw(window->win, ", idle ");
+        wprintw(self->win, ", idle ");
 
         int hours = span / G_TIME_SPAN_HOUR;
         span = span - hours * G_TIME_SPAN_HOUR;
         if (hours > 0) {
-            wprintw(window->win, "%dh", hours);
+            wprintw(self->win, "%dh", hours);
         }
 
         int minutes = span / G_TIME_SPAN_MINUTE;
         span = span - minutes * G_TIME_SPAN_MINUTE;
-        wprintw(window->win, "%dm", minutes);
+        wprintw(self->win, "%dm", minutes);
 
         int seconds = span / G_TIME_SPAN_SECOND;
-        wprintw(window->win, "%ds", seconds);
+        wprintw(self->win, "%ds", seconds);
     }
 
     if (status != NULL) {
-        wprintw(window->win, ", \"%s\"", p_contact_status(contact));
+        wprintw(self->win, ", \"%s\"", p_contact_status(contact));
     }
 
-    wprintw(window->win, "\n");
-    win_presence_colour_off(window, presence);
+    wprintw(self->win, "\n");
+    _win_presence_colour_off(self, presence);
 }
 
-gboolean
+static gboolean
 _muc_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg)
 {
     gboolean handled = FALSE;
     if (g_strcmp0(err_msg, "conflict") == 0) {
-        win_print_line(self, "Nickname already in use.");
+        _win_print_line(self, "Nickname already in use.");
         handled = TRUE;
     }
 
     return handled;
 }
 
-gboolean
+static gboolean
 _default_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg)
 {
     return FALSE;
-
 }
