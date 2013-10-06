@@ -216,6 +216,89 @@ win_show_contact(ProfWin *window, PContact contact)
     win_presence_colour_off(window, presence);
 }
 
+void
+win_show_status_string(ProfWin *window, const char * const from,
+    const char * const show, const char * const status,
+    GDateTime *last_activity, const char * const pre,
+    const char * const default_show)
+{
+    WINDOW *win = window->win;
+
+    win_print_time(window, '-');
+
+    if (show != NULL) {
+        if (strcmp(show, "away") == 0) {
+            wattron(win, COLOUR_AWAY);
+        } else if (strcmp(show, "chat") == 0) {
+            wattron(win, COLOUR_CHAT);
+        } else if (strcmp(show, "dnd") == 0) {
+            wattron(win, COLOUR_DND);
+        } else if (strcmp(show, "xa") == 0) {
+            wattron(win, COLOUR_XA);
+        } else if (strcmp(show, "online") == 0) {
+            wattron(win, COLOUR_ONLINE);
+        } else {
+            wattron(win, COLOUR_OFFLINE);
+        }
+    } else if (strcmp(default_show, "online") == 0) {
+        wattron(win, COLOUR_ONLINE);
+    } else {
+        wattron(win, COLOUR_OFFLINE);
+    }
+
+    wprintw(win, "%s %s", pre, from);
+
+    if (show != NULL)
+        wprintw(win, " is %s", show);
+    else
+        wprintw(win, " is %s", default_show);
+
+    if (last_activity != NULL) {
+        GDateTime *now = g_date_time_new_now_local();
+        GTimeSpan span = g_date_time_difference(now, last_activity);
+
+        wprintw(win, ", idle ");
+
+        int hours = span / G_TIME_SPAN_HOUR;
+        span = span - hours * G_TIME_SPAN_HOUR;
+        if (hours > 0) {
+            wprintw(win, "%dh", hours);
+        }
+
+        int minutes = span / G_TIME_SPAN_MINUTE;
+        span = span - minutes * G_TIME_SPAN_MINUTE;
+        wprintw(win, "%dm", minutes);
+
+        int seconds = span / G_TIME_SPAN_SECOND;
+        wprintw(win, "%ds", seconds);
+    }
+
+    if (status != NULL)
+        wprintw(win, ", \"%s\"", status);
+
+    wprintw(win, "\n");
+
+    if (show != NULL) {
+        if (strcmp(show, "away") == 0) {
+            wattroff(win, COLOUR_AWAY);
+        } else if (strcmp(show, "chat") == 0) {
+            wattroff(win, COLOUR_CHAT);
+        } else if (strcmp(show, "dnd") == 0) {
+            wattroff(win, COLOUR_DND);
+        } else if (strcmp(show, "xa") == 0) {
+            wattroff(win, COLOUR_XA);
+        } else if (strcmp(show, "online") == 0) {
+            wattroff(win, COLOUR_ONLINE);
+        } else {
+            wattroff(win, COLOUR_OFFLINE);
+        }
+    } else if (strcmp(default_show, "online") == 0) {
+        wattroff(win, COLOUR_ONLINE);
+    } else {
+        wattroff(win, COLOUR_OFFLINE);
+    }
+}
+
 static gboolean
 _default_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg)

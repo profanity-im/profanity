@@ -64,10 +64,6 @@ static GTimer *ui_idle_time;
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
 static void _win_show_error_msg(WINDOW *win, const char * const message);
-static void _show_status_string(ProfWin *window, const char * const from,
-    const char * const show, const char * const status,
-    GDateTime *last_activity, const char * const pre,
-    const char * const default_show);
 static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch);
 static void _win_show_history(WINDOW *win, int win_index,
@@ -400,12 +396,12 @@ ui_contact_online(const char * const barejid, const char * const resource,
     }
 
     ProfWin *console = wins_get_console();
-    _show_status_string(console, display_str->str, show, status, last_activity,
+    win_show_status_string(console, display_str->str, show, status, last_activity,
         "++", "online");
 
     ProfWin *window = wins_get_by_recipient(barejid);
     if (window != NULL) {
-        _show_status_string(window, display_str->str, show, status,
+        win_show_status_string(window, display_str->str, show, status,
             last_activity, "++", "online");
     }
 
@@ -442,12 +438,12 @@ ui_contact_offline(const char * const from, const char * const show,
     }
 
     ProfWin *console = wins_get_console();
-    _show_status_string(console, display_str->str, show, status, NULL, "--",
+    win_show_status_string(console, display_str->str, show, status, NULL, "--",
         "offline");
 
     ProfWin *window = wins_get_by_recipient(jidp->barejid);
     if (window != NULL) {
-        _show_status_string(window, display_str->str, show, status, NULL, "--",
+        win_show_status_string(window, display_str->str, show, status, NULL, "--",
             "offline");
     }
 
@@ -922,7 +918,7 @@ ui_new_chat_win(const char * const to)
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
                 const char const *show = p_contact_presence(contact);
                 const char const *status = p_contact_status(contact);
-                _show_status_string(window, to, show, status, NULL, "--", "offline");
+                win_show_status_string(window, to, show, status, NULL, "--", "offline");
             }
         }
     } else {
@@ -1030,7 +1026,7 @@ ui_outgoing_msg(const char * const from, const char * const to,
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
                 const char const *show = p_contact_presence(contact);
                 const char const *status = p_contact_status(contact);
-                _show_status_string(window, to, show, status, NULL, "--", "offline");
+                win_show_status_string(window, to, show, status, NULL, "--", "offline");
             }
         }
 
@@ -1161,7 +1157,7 @@ ui_room_member_presence(const char * const room, const char * const nick,
     ProfWin *window = wins_get_by_recipient(room);
 
     if (window != NULL) {
-        _show_status_string(window, nick, show, status, NULL, "++", "online");
+        win_show_status_string(window, nick, show, status, NULL, "++", "online");
     }
 
     if (wins_is_current(window)) {
@@ -1480,89 +1476,6 @@ _win_show_error_msg(WINDOW *win, const char * const message)
     wattron(win, COLOUR_ERROR);
     wprintw(win, "%s\n", message);
     wattroff(win, COLOUR_ERROR);
-}
-
-static void
-_show_status_string(ProfWin *window, const char * const from,
-    const char * const show, const char * const status,
-    GDateTime *last_activity, const char * const pre,
-    const char * const default_show)
-{
-    WINDOW *win = window->win;
-
-    win_print_time(window, '-');
-
-    if (show != NULL) {
-        if (strcmp(show, "away") == 0) {
-            wattron(win, COLOUR_AWAY);
-        } else if (strcmp(show, "chat") == 0) {
-            wattron(win, COLOUR_CHAT);
-        } else if (strcmp(show, "dnd") == 0) {
-            wattron(win, COLOUR_DND);
-        } else if (strcmp(show, "xa") == 0) {
-            wattron(win, COLOUR_XA);
-        } else if (strcmp(show, "online") == 0) {
-            wattron(win, COLOUR_ONLINE);
-        } else {
-            wattron(win, COLOUR_OFFLINE);
-        }
-    } else if (strcmp(default_show, "online") == 0) {
-        wattron(win, COLOUR_ONLINE);
-    } else {
-        wattron(win, COLOUR_OFFLINE);
-    }
-
-    wprintw(win, "%s %s", pre, from);
-
-    if (show != NULL)
-        wprintw(win, " is %s", show);
-    else
-        wprintw(win, " is %s", default_show);
-
-    if (last_activity != NULL) {
-        GDateTime *now = g_date_time_new_now_local();
-        GTimeSpan span = g_date_time_difference(now, last_activity);
-
-        wprintw(win, ", idle ");
-
-        int hours = span / G_TIME_SPAN_HOUR;
-        span = span - hours * G_TIME_SPAN_HOUR;
-        if (hours > 0) {
-            wprintw(win, "%dh", hours);
-        }
-
-        int minutes = span / G_TIME_SPAN_MINUTE;
-        span = span - minutes * G_TIME_SPAN_MINUTE;
-        wprintw(win, "%dm", minutes);
-
-        int seconds = span / G_TIME_SPAN_SECOND;
-        wprintw(win, "%ds", seconds);
-    }
-
-    if (status != NULL)
-        wprintw(win, ", \"%s\"", status);
-
-    wprintw(win, "\n");
-
-    if (show != NULL) {
-        if (strcmp(show, "away") == 0) {
-            wattroff(win, COLOUR_AWAY);
-        } else if (strcmp(show, "chat") == 0) {
-            wattroff(win, COLOUR_CHAT);
-        } else if (strcmp(show, "dnd") == 0) {
-            wattroff(win, COLOUR_DND);
-        } else if (strcmp(show, "xa") == 0) {
-            wattroff(win, COLOUR_XA);
-        } else if (strcmp(show, "online") == 0) {
-            wattroff(win, COLOUR_ONLINE);
-        } else {
-            wattroff(win, COLOUR_OFFLINE);
-        }
-    } else if (strcmp(default_show, "online") == 0) {
-        wattroff(win, COLOUR_ONLINE);
-    } else {
-        wattroff(win, COLOUR_OFFLINE);
-    }
 }
 
 static void
