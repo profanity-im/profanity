@@ -100,7 +100,12 @@ win_print_line(ProfWin *window, const char * const msg, ...)
     wprintw(window->win, "%s\n", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
+    win_refresh(window);
+}
 
+void
+win_refresh(ProfWin *window)
+{
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
     prefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);

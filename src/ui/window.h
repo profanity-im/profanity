@@ -61,6 +61,7 @@ void win_free(ProfWin *window);
 
 void win_print_time(ProfWin *window, char show_char);
 void win_print_line(ProfWin *window, const char * const msg, ...);
+void win_refresh(ProfWin *window);
 void win_presence_colour_on(ProfWin *window, const char * const presence);
 void win_presence_colour_off(ProfWin *window, const char * const presence);
 void win_show_contact(ProfWin *window, PContact contact);
