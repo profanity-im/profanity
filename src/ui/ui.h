@@ -48,7 +48,7 @@ void ui_refresh(void);
 void ui_close(void);
 void ui_resize(const int ch, const char * const input,
     const int size);
-void ui_idle(void);
+GSList* ui_get_recipients(void);
 void ui_handle_special_keys(const wint_t * const ch, const char * const inp,
     const int size);
 void ui_switch_win(const int i);

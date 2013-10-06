@@ -211,33 +211,11 @@ ui_contact_typing(const char * const barejid)
     }
 }
 
-void
-ui_idle(void)
+GSList *
+ui_get_recipients(void)
 {
     GSList *recipients = wins_get_chat_recipients();
-    GSList *curr = recipients;
-    while (curr != NULL) {
-        char *recipient = curr->data;
-        chat_session_no_activity(recipient);
-
-        if (chat_session_is_gone(recipient) &&
-                !chat_session_get_sent(recipient)) {
-            message_send_gone(recipient);
-        } else if (chat_session_is_inactive(recipient) &&
-                !chat_session_get_sent(recipient)) {
-            message_send_inactive(recipient);
-        } else if (prefs_get_boolean(PREF_OUTTYPE) &&
-                chat_session_is_paused(recipient) &&
-                !chat_session_get_sent(recipient)) {
-            message_send_paused(recipient);
-        }
-
-        curr = g_slist_next(curr);
-    }
-
-    if (recipients != NULL) {
-        g_slist_free(recipients);
-    }
+    return recipients;
 }
 
 void
