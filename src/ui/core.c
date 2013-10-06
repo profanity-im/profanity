@@ -305,28 +305,7 @@ ui_incoming_msg(const char * const from, const char * const message,
             }
         }
 
-        if (tv_stamp == NULL) {
-            window->print_time(window, '-');
-        } else {
-            GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
-            gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-            wattron(window->win, COLOUR_TIME);
-            wprintw(window->win, "%s - ", date_fmt);
-            wattroff(window->win, COLOUR_TIME);
-            g_date_time_unref(time);
-            g_free(date_fmt);
-        }
-
-        if (strncmp(message, "/me ", 4) == 0) {
-            wattron(window->win, COLOUR_THEM);
-            wprintw(window->win, "*%s ", display_from);
-            waddstr(window->win, message + 4);
-            wprintw(window->win, "\n");
-            wattroff(window->win, COLOUR_THEM);
-        } else {
-            _win_show_user(window->win, display_from, 1);
-            _win_show_message(window->win, message);
-        }
+        window->print_incoming_message(window, tv_stamp, display_from, message);
     }
 
     int ui_index = num;
