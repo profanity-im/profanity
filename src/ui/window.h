@@ -61,6 +61,8 @@ typedef struct prof_win_t {
     void (*show_contact)(struct prof_win_t *self, PContact contact);
     gboolean (*handle_error_message)(struct prof_win_t *self,
         const char * const from, const char * const err_msg);
+    void (*print_incoming_message)(struct prof_win_t *self, GTimeVal *tv_stamp,
+        const char * const from, const char * const message);
 } ProfWin;
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
