@@ -133,6 +133,21 @@ win_refresh(ProfWin *window)
 }
 
 void
+win_page_off(ProfWin *window)
+{
+    window->paged = 0;
+
+    int rows = getmaxy(stdscr);
+    int y = getcury(window->win);
+    int size = rows - 3;
+
+    window->y_pos = y - (size - 1);
+    if (window->y_pos < 0) {
+        window->y_pos = 0;
+    }
+}
+
+void
 win_presence_colour_on(ProfWin *window, const char * const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {

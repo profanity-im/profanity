@@ -744,18 +744,8 @@ void
 ui_current_page_off(void)
 {
     ProfWin *current = wins_get_current();
-    current->paged = 0;
-
-    int rows = getmaxy(stdscr);
-    int y = getcury(current->win);
-    int size = rows - 3;
-
-    current->y_pos = y - (size - 1);
-    if (current->y_pos < 0) {
-        current->y_pos = 0;
-    }
-
-    wins_refresh_current();
+    win_page_off(current);
+    win_refresh(current);
 }
 
 void
