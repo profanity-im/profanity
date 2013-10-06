@@ -824,7 +824,7 @@ ui_current_print_line(const char * const msg, ...)
     ProfWin *current = wins_get_current();
     va_list arg;
     va_start(arg, msg);
-    current->print_line(current, msg, arg);
+    current->print_line(current, '-', 0, msg, arg);
     va_end(arg);
     current->refresh_win(current);
 }

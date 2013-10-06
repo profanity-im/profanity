@@ -100,14 +100,17 @@ _win_print_time(ProfWin* self, char show_char)
 }
 
 void
-win_print_line(ProfWin *self, const char * const msg, ...)
+win_print_line(ProfWin *self, const char show_char, int attrs,
+    const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    _win_print_time(self, '-');
+    _win_print_time(self, show_char);
+    wattron(self->win, attrs);
     wprintw(self->win, "%s\n", fmt_msg->str);
+    wattroff(self->win, attrs);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }

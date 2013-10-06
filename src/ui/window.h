@@ -53,7 +53,8 @@ typedef struct prof_win_t {
     int unread;
     int history_shown;
     void (*print_time)(struct prof_win_t *self, char show_char);
-    void (*print_line)(struct prof_win_t *self, const char * const msg, ...);
+    void (*print_line)(struct prof_win_t *self, const char show_char,
+        int attrs, const char * const msg, ...);
     void (*refresh_win)(struct prof_win_t *self);
     void (*presence_colour_on)(struct prof_win_t *self, const char * const presence);
     void (*presence_colour_off)(struct prof_win_t *self, const char * const presence);
@@ -64,7 +65,8 @@ typedef struct prof_win_t {
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
 void win_free(ProfWin *window);
-void win_print_line(ProfWin *self, const char * const msg, ...);
+void win_print_line(ProfWin *self, const char show_char, int attrs,
+    const char * const msg, ...);
 void win_refresh(ProfWin *self);
 
 #endif

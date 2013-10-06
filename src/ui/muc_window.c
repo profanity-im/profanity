@@ -30,7 +30,7 @@ muc_handle_error_message(ProfWin *self, const char * const from,
 {
     gboolean handled = FALSE;
     if (g_strcmp0(err_msg, "conflict") == 0) {
-        win_print_line(self, "Nickname already in use.");
+        win_print_line(self, '-', 0, "Nickname already in use.");
         win_refresh(self);
         handled = TRUE;
     }
