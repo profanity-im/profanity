@@ -792,12 +792,8 @@ void
 ui_current_error_line(const char * const msg)
 {
     ProfWin *current = wins_get_current();
-    current->print_time(current, '-');
-    wattron(current->win, COLOUR_ERROR);
-    wprintw(current->win, "%s\n", msg);
-    wattroff(current->win, COLOUR_ERROR);
-
-    wins_refresh_current();
+    current->print_line(current, '-', COLOUR_ERROR, msg);
+    current->refresh_win(current);
 }
 
 void
