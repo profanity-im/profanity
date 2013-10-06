@@ -34,14 +34,11 @@
 
 #include "config/theme.h"
 #include "ui/window.h"
+#include "ui/muc_window.h"
 
-static gboolean _muc_handle_error_message(ProfWin *self, const char * const from,
-    const char * const err_msg);
 static gboolean _default_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg);
 static void _win_print_time(ProfWin *self, char show_char);
-static void _win_print_line(ProfWin *self, const char * const msg, ...);
-static void _win_refresh(ProfWin *self);
 static void _win_presence_colour_on(ProfWin *self, const char * const presence);
 static void _win_presence_colour_off(ProfWin *self, const char * const presence);
 static void _win_show_contact(ProfWin *self, PContact contact);
@@ -60,8 +57,8 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->type = type;
 
     new_win->print_time = _win_print_time;
-    new_win->print_line = _win_print_line;
-    new_win->refresh_win = _win_refresh;
+    new_win->print_line = win_print_line;
+    new_win->refresh_win = win_refresh;
     new_win->presence_colour_on = _win_presence_colour_on;
     new_win->presence_colour_off = _win_presence_colour_off;
     new_win->show_contact = _win_show_contact;
@@ -69,7 +66,7 @@ win_create(const char * const title, int cols, win_type_t type)
     switch (new_win->type)
     {
         case WIN_MUC:
-            new_win->handle_error_message = _muc_handle_error_message;
+            new_win->handle_error_message = muc_handle_error_message;
             break;
         default:
             new_win->handle_error_message = _default_handle_error_message;
@@ -102,8 +99,8 @@ _win_print_time(ProfWin* self, char show_char)
     g_free(date_fmt);
 }
 
-static void
-_win_print_line(ProfWin *self, const char * const msg, ...)
+void
+win_print_line(ProfWin *self, const char * const msg, ...)
 {
     va_list arg;
     va_start(arg, msg);
@@ -115,8 +112,8 @@ _win_print_line(ProfWin *self, const char * const msg, ...)
     va_end(arg);
 }
 
-static void
-_win_refresh(ProfWin *self)
+void
+win_refresh(ProfWin *self)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -205,20 +202,6 @@ _win_show_contact(ProfWin *self, PContact contact)
 
     wprintw(self->win, "\n");
     _win_presence_colour_off(self, presence);
-}
-
-static gboolean
-_muc_handle_error_message(ProfWin *self, const char * const from,
-    const char * const err_msg)
-{
-    gboolean handled = FALSE;
-    if (g_strcmp0(err_msg, "conflict") == 0) {
-        _win_print_line(self, "Nickname already in use.");
-        _win_refresh(self);
-        handled = TRUE;
-    }
-
-    return handled;
 }
 
 static gboolean
