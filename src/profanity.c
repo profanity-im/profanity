@@ -402,7 +402,7 @@ prof_handle_contact_online(char *contact, Resource *resource,
 {
     gboolean updated = roster_update_presence(contact, resource, last_activity);
 
-    if (updated) {
+    if (updated && prefs_get_boolean(PREF_STATUSES)) {
         PContact result = roster_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
@@ -419,7 +419,7 @@ prof_handle_contact_offline(char *contact, char *resource, char *status)
 {
     gboolean updated = roster_contact_offline(contact, resource, status);
 
-    if (resource != NULL && updated) {
+    if (resource != NULL && updated && prefs_get_boolean(PREF_STATUSES)) {
         Jid *jid = jid_create_from_bare_and_resource(contact, resource);
         PContact result = roster_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
