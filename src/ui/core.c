@@ -63,7 +63,6 @@ static GTimer *ui_idle_time;
 
 static void _win_show_user(WINDOW *win, const char * const user, const int colour);
 static void _win_show_message(WINDOW *win, const char * const message);
-static void _win_show_error_msg(WINDOW *win, const char * const message);
 static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch);
 static void _win_show_history(WINDOW *win, int win_index,
@@ -756,8 +755,7 @@ ui_print_error_from_recipient(const char * const from, const char *err_msg)
 
     ProfWin *window = wins_get_by_recipient(from);
     if (window != NULL) {
-        win_print_time(window, '-');
-        _win_show_error_msg(window->win, err_msg);
+        win_print_line(window, '-', COLOUR_ERROR, "%s", err_msg);
         if (wins_is_current(window)) {
             wins_refresh_current();
         }
@@ -1400,14 +1398,6 @@ _win_show_message(WINDOW *win, const char * const message)
 {
     waddstr(win, message);
     wprintw(win, "\n");
-}
-
-static void
-_win_show_error_msg(WINDOW *win, const char * const message)
-{
-    wattron(win, COLOUR_ERROR);
-    wprintw(win, "%s\n", message);
-    wattroff(win, COLOUR_ERROR);
 }
 
 static void
