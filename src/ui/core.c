@@ -815,12 +815,7 @@ ui_recipient_gone(const char * const barejid)
 
     ProfWin *window = wins_get_by_recipient(barejid);
     if (window != NULL) {
-        win_print_time(window, '!');
-        wattron(window->win, COLOUR_GONE);
-        wprintw(window->win, "<- %s ", display_usr);
-        wprintw(window->win, "has left the conversation.");
-        wprintw(window->win, "\n");
-        wattroff(window->win, COLOUR_GONE);
+        win_print_line(window, '!', COLOUR_GONE, "<- %s has left the conversation.", display_usr);
         if (wins_is_current(window)) {
             wins_refresh_current();
         }
