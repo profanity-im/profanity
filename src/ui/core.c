@@ -1280,7 +1280,7 @@ ui_status(void)
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
     } else {
-        ui_current_print_line("Error getting contact info.");
+        win_print_line(current, '-', 0, "Error getting contact info.");
     }
 }
 
@@ -1294,7 +1294,7 @@ ui_status_private(void)
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
     } else {
-        ui_current_print_line("Error getting contact info.");
+        win_print_line(current, '-', 0, "Error getting contact info.");
     }
 
     jid_destroy(jid);
@@ -1309,7 +1309,7 @@ ui_status_room(const char * const contact)
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
     } else {
-        ui_current_print_line("No such participant \"%s\" in room.", contact);
+        win_print_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
     }
 }
 
