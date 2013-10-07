@@ -867,8 +867,7 @@ ui_create_duck_win(void)
     ProfWin *window = wins_new("DuckDuckGo search", WIN_DUCK);
     int num = wins_get_num(window);
     ui_switch_win(num);
-    win_print_time(window, '-');
-    wprintw(window->win, "Type ':help' to find out more.\n");
+    win_print_line(window, '-', 0, "Type ':help' to find out more.");
 }
 
 void
