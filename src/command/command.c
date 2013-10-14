@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -68,6 +69,7 @@ typedef struct cmd_t {
 
 typedef char*(*autocompleter)(char*, int*);
 
+static void _ask_password(char * passwd);
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
@@ -1347,13 +1349,6 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
 
-        status_bar_get_password();
-        status_bar_refresh();
-        char passwd[21];
-        inp_block();
-        inp_get_password(passwd);
-        inp_non_block();
-
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
             if (account->resource != NULL) {
@@ -1361,9 +1356,16 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
             } else {
                 jid = strdup(account->jid);
             }
+
+            if (strlen(account->password) == 0) {
+              account->password = (gchar *) realloc(account->password, 21);
+              _ask_password(account->password);
+            }
             cons_show("Connecting with account %s as %s", account->name, jid);
-            conn_status = jabber_connect_with_account(account, passwd);
+            conn_status = jabber_connect_with_account(account);
         } else {
+            char passwd[21];
+            _ask_password(passwd);
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain);
@@ -3523,6 +3525,18 @@ _cmd_xa(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_XA, "xa", args);
     return TRUE;
+}
+
+// helper function that asks the user for a password and saves it in passwd
+
+static void
+_ask_password(char * passwd) {
+  assert(passwd != NULL);
+  status_bar_get_password();
+  status_bar_refresh();
+  inp_block();
+  inp_get_password(passwd);
+  inp_non_block();
 }
 
 // helper function for status change commands

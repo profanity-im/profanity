@@ -793,6 +793,7 @@ cons_show_account(ProfAccount *account)
         cons_show   ("enabled        : FALSE");
     }
     cons_show       ("jid            : %s", account->jid);
+    cons_show       ("password       : [redacted]");
     if (account->resource != NULL) {
         cons_show   ("resource       : %s", account->resource);
     }
