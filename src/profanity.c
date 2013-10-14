@@ -58,7 +58,7 @@ static void _create_directories(void);
 static gboolean idle = FALSE;
 
 void
-prof_run(const int disable_tls, char *log_level)
+prof_run(const int disable_tls, char *log_level, char *account_name)
 {
     _init(disable_tls, log_level);
     log_info("Starting main event loop");
@@ -69,6 +69,12 @@ prof_run(const int disable_tls, char *log_level)
 
     char inp[INP_WIN_MAX];
     int size = 0;
+
+    if (strlen(account_name) != 0) {
+      char *cmd = "/connect";
+      snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
+      cmd_execute(cmd, inp);
+    }
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
