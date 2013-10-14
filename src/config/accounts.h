@@ -28,6 +28,7 @@
 typedef struct prof_account_t {
     gchar *name;
     gchar *jid;
+    gchar *password;
     gchar *resource;
     gchar *server;
     gchar *last_presence;

@@ -133,6 +133,7 @@ accounts_add(const char *account_name, const char *altdomain)
     if (!g_key_file_has_group(accounts, account_name)) {
         g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
         g_key_file_set_string(accounts, account_name, "jid", barejid);
+        g_key_file_set_string(accounts, account_name, "password", "");
         g_key_file_set_string(accounts, account_name, "resource", resource);
         if (altdomain != NULL) {
             g_key_file_set_string(accounts, account_name, "server", altdomain);
@@ -188,6 +189,16 @@ accounts_get_account(const char * const name)
         } else {
             account->jid = strdup(name);
             g_key_file_set_string(accounts, name, "jid", name);
+            _save_accounts();
+        }
+
+        gchar *password = g_key_file_get_string(accounts, name, "password", NULL);
+        if (password != NULL) {
+            account->password = strdup(password);
+            g_free(password);
+        } else {
+            account->password = strdup("");
+            g_key_file_set_string(accounts, name, "password", account->password);
             _save_accounts();
         }
 
@@ -288,6 +299,7 @@ accounts_free_account(ProfAccount *account)
     if (account != NULL) {
         free(account->name);
         free(account->jid);
+        free(account->password);
         free(account->resource);
         free(account->server);
         free(account->last_presence);
