@@ -350,15 +350,15 @@ accounts_rename(const char * const account_name, const char * const new_name)
         g_key_file_get_boolean(accounts, account_name, "enabled", NULL));
 
     g_key_file_set_integer(accounts, new_name, "priority.online",
-        g_key_file_get_boolean(accounts, account_name, "priority.online", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.online", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.chat",
-        g_key_file_get_boolean(accounts, account_name, "priority.chat", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.chat", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.away",
-        g_key_file_get_boolean(accounts, account_name, "priority.away", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.away", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.xa",
-        g_key_file_get_boolean(accounts, account_name, "priority.xa", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.xa", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.dnd",
-        g_key_file_get_boolean(accounts, account_name, "priority.dnd", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL));
 
     // copy other string properties
     int i;
