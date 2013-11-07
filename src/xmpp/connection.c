@@ -108,21 +108,20 @@ jabber_init(const int disable_tls)
 }
 
 jabber_conn_status_t
-jabber_connect_with_account(const ProfAccount * const account,
-    const char * const passwd)
+jabber_connect_with_account(const ProfAccount * const account)
 {
     assert(account != NULL);
-    assert(passwd != NULL);
 
     log_info("Connecting using account: %s", account->name);
 
     // save account name and password for reconnect
     saved_account.name = strdup(account->name);
-    saved_account.passwd = strdup(passwd);
+    saved_account.passwd = strdup(account->password);
 
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
-    jabber_conn_status_t result = _jabber_connect(jidp->fulljid, passwd, account->server);
+    jabber_conn_status_t result =
+      _jabber_connect(jidp->fulljid, account->password, account->server);
     jid_destroy(jidp);
 
     return result;
