@@ -427,6 +427,15 @@ accounts_set_resource(const char * const account_name, const char * const value)
 }
 
 void
+accounts_set_password(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "password", value);
+        _save_accounts();
+    }
+}
+
+void
 accounts_set_muc_service(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
