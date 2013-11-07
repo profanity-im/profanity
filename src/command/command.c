@@ -92,6 +92,7 @@ static int _strtoi(char *str, int *saveptr, int min, int max);
 static gboolean _cmd_about(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_account(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_autoaway(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_autoconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_beep(gchar **args, struct cmd_help_t help);
@@ -556,6 +557,16 @@ static struct cmd_t command_defs[] =
         { "/splash on|off",
           "--------------",
           "Switch on or off the ascii logo on start up and when the /about command is called.",
+          NULL } } },
+
+    { "/autoconnect",
+        _cmd_autoconnect, parse_args, 0, 1, cons_autoconnect_setting,
+        { "/autoconnect [account]", "Set account to autoconnect with.",
+        { "/autoconnect [account]",
+          "----------------------",
+          "Set the account to autoconnect with.",
+          "Will be overridden by any command line options specified.",
+          "Passing no account will clear the setting.",
           NULL } } },
 
     { "/vercheck",
@@ -1267,6 +1278,13 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
+    result = autocomplete_param_with_func(input, size, "/autoconnect", accounts_find_enabled);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+
     gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
 
@@ -1760,7 +1778,7 @@ _cmd_help(gchar **args, struct cmd_help_t help)
         _cmd_show_filtered_help("Service discovery commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "settings") == 0) {
-        gchar *filter[] = { "/account", "/autoaway", "/autoping", "/beep",
+        gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
             "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
@@ -3363,6 +3381,19 @@ _cmd_splash(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
         "Splash screen", PREF_SPLASH);
+}
+
+static gboolean
+_cmd_autoconnect(gchar **args, struct cmd_help_t help)
+{
+    if (args[0] == NULL) {
+         prefs_set_string(PREF_CONNECT_ACCOUNT, NULL);
+         cons_show("Autoconnect account disabled.");
+    } else {
+        prefs_set_string(PREF_CONNECT_ACCOUNT, args[0]);
+        cons_show("Autoconnect account set to: %s.", args[0]);
+    }
+    return true;
 }
 
 static gboolean
