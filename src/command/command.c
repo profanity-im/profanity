@@ -759,6 +759,7 @@ static struct cmd_t command_defs[] =
           "online|chat|away",
           "|xa|dnd          : Priority for the specified presence.",
           "resource         : The resource to be used.",
+          "password         : Password for the account, note this is currently stored in plaintext if set.",
           "muc              : The default MUC chat service to use.",
           "nick             : The default nickname to use when joining chat rooms.",
           "",
@@ -1517,6 +1518,10 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                 } else if (strcmp(property, "resource") == 0) {
                     accounts_set_resource(account_name, value);
                     cons_show("Updated resource for account %s: %s", account_name, value);
+                    cons_show("");
+                } else if (strcmp(property, "password") == 0) {
+                    accounts_set_password(account_name, value);
+                    cons_show("Updated password for account %s", account_name);
                     cons_show("");
                 } else if (strcmp(property, "muc") == 0) {
                     accounts_set_muc_service(account_name, value);
