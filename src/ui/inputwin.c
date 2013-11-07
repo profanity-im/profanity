@@ -35,6 +35,7 @@
 
 #include "command/command.h"
 #include "common.h"
+#include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "log.h"
@@ -206,7 +207,7 @@ inp_get_password(char *passwd)
     _clear_input();
     _inp_win_refresh();
     noecho();
-    mvwgetnstr(inp_win, 0, 1, passwd, 20);
+    mvwgetnstr(inp_win, 0, 1, passwd, MAX_PASSWORD_SIZE);
     wmove(inp_win, 0, 0);
     echo();
     status_bar_clear();

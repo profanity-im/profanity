@@ -23,6 +23,8 @@
 #ifndef ACCOUNTS_H
 #define ACCOUNTS_H
 
+#define MAX_PASSWORD_SIZE 64
+
 #include "common.h"
 
 typedef struct prof_account_t {

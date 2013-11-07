@@ -3448,7 +3448,7 @@ _cmd_xa(gchar **args, struct cmd_help_t help)
 
 static char *
 _ask_password(void) {
-  char *passwd = malloc(sizeof(char) * 21);
+  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
   status_bar_get_password();
   status_bar_refresh();
   inp_block();
