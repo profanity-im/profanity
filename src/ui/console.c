@@ -943,6 +943,15 @@ cons_splash_setting(void)
 }
 
 void
+cons_autoconnect_setting(void)
+{
+    if (prefs_get_string(PREF_CONNECT_ACCOUNT) != NULL)
+        cons_show("Autoconnect (/autoconnect)      : %s", prefs_get_string(PREF_CONNECT_ACCOUNT));
+    else
+        cons_show("Autoconnect (/autoconnect)      : OFF");
+}
+
+void
 cons_vercheck_setting(void)
 {
     if (prefs_get_boolean(PREF_VERCHECK))
@@ -1218,6 +1227,7 @@ cons_show_connection_prefs(void)
     cons_show("");
     cons_reconnect_setting();
     cons_autoping_setting();
+    cons_autoconnect_setting();
 
     wins_refresh_console();
     cons_alert();

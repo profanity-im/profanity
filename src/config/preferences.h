@@ -56,7 +56,8 @@ typedef enum {
     PREF_GRLOG,
     PREF_AUTOAWAY_CHECK,
     PREF_AUTOAWAY_MODE,
-    PREF_AUTOAWAY_MESSAGE
+    PREF_AUTOAWAY_MESSAGE,
+    PREF_CONNECT_ACCOUNT
 } preference_t;
 
 void prefs_load(void);
