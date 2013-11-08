@@ -30,6 +30,8 @@ core
 bugs/
 TODO
 plugins/
+*_key.txt
+*_fingerprints.txt
 src/gitversion.c
 *_key.txt
 *_fingerprints.txt
