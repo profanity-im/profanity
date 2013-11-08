@@ -23,11 +23,14 @@
 #ifndef ACCOUNTS_H
 #define ACCOUNTS_H
 
+#define MAX_PASSWORD_SIZE 64
+
 #include "common.h"
 
 typedef struct prof_account_t {
     gchar *name;
     gchar *jid;
+    gchar *password;
     gchar *resource;
     gchar *server;
     gchar *last_presence;
@@ -62,6 +65,7 @@ gboolean accounts_account_exists(const char * const account_name);
 void accounts_set_jid(const char * const account_name, const char * const value);
 void accounts_set_server(const char * const account_name, const char * const value);
 void accounts_set_resource(const char * const account_name, const char * const value);
+void accounts_set_password(const char * const account_name, const char * const value);
 void accounts_set_muc_service(const char * const account_name, const char * const value);
 void accounts_set_muc_nick(const char * const account_name, const char * const value);
 void accounts_set_last_presence(const char * const account_name, const char * const value);

@@ -39,10 +39,12 @@ static GKeyFile *accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
+// used to rename account (copies properties to new account)
 static gchar *string_keys[] = {
     "jid",
     "server",
     "resource",
+    "password",
     "presence.last",
     "presence.login",
     "muc.service",
@@ -191,6 +193,14 @@ accounts_get_account(const char * const name)
             _save_accounts();
         }
 
+        gchar *password = g_key_file_get_string(accounts, name, "password", NULL);
+        if (password != NULL) {
+            account->password = strdup(password);
+            g_free(password);
+        } else {
+            account->password = NULL;
+        }
+
         account->enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
 
         gchar *server = g_key_file_get_string(accounts, name, "server", NULL);
@@ -288,6 +298,7 @@ accounts_free_account(ProfAccount *account)
     if (account != NULL) {
         free(account->name);
         free(account->jid);
+        free(account->password);
         free(account->resource);
         free(account->server);
         free(account->last_presence);
@@ -339,16 +350,17 @@ accounts_rename(const char * const account_name, const char * const new_name)
         g_key_file_get_boolean(accounts, account_name, "enabled", NULL));
 
     g_key_file_set_integer(accounts, new_name, "priority.online",
-        g_key_file_get_boolean(accounts, account_name, "priority.online", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.online", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.chat",
-        g_key_file_get_boolean(accounts, account_name, "priority.chat", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.chat", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.away",
-        g_key_file_get_boolean(accounts, account_name, "priority.away", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.away", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.xa",
-        g_key_file_get_boolean(accounts, account_name, "priority.xa", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.xa", NULL));
     g_key_file_set_integer(accounts, new_name, "priority.dnd",
-        g_key_file_get_boolean(accounts, account_name, "priority.dnd", NULL));
+        g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL));
 
+    // copy other string properties
     int i;
     for (i = 0; i < ARRAY_SIZE(string_keys); i++) {
         char *value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
@@ -418,6 +430,15 @@ accounts_set_resource(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "resource", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_password(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "password", value);
         _save_accounts();
     }
 }

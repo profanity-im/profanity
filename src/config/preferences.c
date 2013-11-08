@@ -322,6 +322,8 @@ _get_group(preference_t pref)
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
             return "presence";
+        case PREF_CONNECT_ACCOUNT:
+            return "connection";
         default:
             return NULL;
     }
@@ -374,6 +376,8 @@ _get_key(preference_t pref)
             return "autoaway.mode";
         case PREF_AUTOAWAY_MESSAGE:
             return "autoaway.message";
+        case PREF_CONNECT_ACCOUNT:
+            return "account";
         default:
             return NULL;
     }

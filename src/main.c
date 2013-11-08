@@ -32,6 +32,7 @@
 static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
 static char *log = "INFO";
+static char *account_name = NULL;
 
 int
 main(int argc, char **argv)
@@ -40,6 +41,7 @@ main(int argc, char **argv)
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "disable-tls", 'd', 0, G_OPTION_ARG_NONE, &disable_tls, "Disable TLS", NULL },
+        { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on start-up" },
         { "log",'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
         { NULL }
     };
@@ -76,7 +78,7 @@ main(int argc, char **argv)
         return 0;
     }
 
-    prof_run(disable_tls, log);
+    prof_run(disable_tls, log, account_name);
 
     return 0;
 }

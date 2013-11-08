@@ -793,6 +793,9 @@ cons_show_account(ProfAccount *account)
         cons_show   ("enabled        : FALSE");
     }
     cons_show       ("jid            : %s", account->jid);
+    if (account->password != NULL) {
+        cons_show       ("password       : [redacted]");
+    }
     if (account->resource != NULL) {
         cons_show   ("resource       : %s", account->resource);
     }
@@ -937,6 +940,15 @@ cons_splash_setting(void)
         cons_show("Splash screen (/splash)      : ON");
     else
         cons_show("Splash screen (/splash)      : OFF");
+}
+
+void
+cons_autoconnect_setting(void)
+{
+    if (prefs_get_string(PREF_CONNECT_ACCOUNT) != NULL)
+        cons_show("Autoconnect (/autoconnect)      : %s", prefs_get_string(PREF_CONNECT_ACCOUNT));
+    else
+        cons_show("Autoconnect (/autoconnect)      : OFF");
 }
 
 void
@@ -1215,6 +1227,7 @@ cons_show_connection_prefs(void)
     cons_show("");
     cons_reconnect_setting();
     cons_autoping_setting();
+    cons_autoconnect_setting();
 
     wins_refresh_console();
     cons_alert();

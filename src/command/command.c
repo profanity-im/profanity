@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -67,6 +68,7 @@ typedef struct cmd_t {
 
 typedef char*(*autocompleter)(char*, int*);
 
+static char * _ask_password(void);
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
@@ -91,6 +93,7 @@ static int _strtoi(char *str, int *saveptr, int min, int max);
 static gboolean _cmd_about(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_account(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_autoaway(gchar **args, struct cmd_help_t help);
+static gboolean _cmd_autoconnect(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_autoping(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_away(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_beep(gchar **args, struct cmd_help_t help);
@@ -577,6 +580,16 @@ static struct cmd_t command_defs[] =
           "Switch on or off the ascii logo on start up and when the /about command is called.",
           NULL } } },
 
+    { "/autoconnect",
+        _cmd_autoconnect, parse_args, 0, 1, cons_autoconnect_setting,
+        { "/autoconnect [account]", "Set account to autoconnect with.",
+        { "/autoconnect [account]",
+          "----------------------",
+          "Set the account to autoconnect with.",
+          "Will be overridden by any command line options specified.",
+          "Passing no account will clear the setting.",
+          NULL } } },
+
     { "/vercheck",
         _cmd_vercheck, parse_args, 0, 1, NULL,
         { "/vercheck [on|off]", "Check for a new release.",
@@ -746,6 +759,7 @@ static struct cmd_t command_defs[] =
           "online|chat|away",
           "|xa|dnd          : Priority for the specified presence.",
           "resource         : The resource to be used.",
+          "password         : Password for the account, note this is currently stored in plaintext if set.",
           "muc              : The default MUC chat service to use.",
           "nick             : The default nickname to use when joining chat rooms.",
           "",
@@ -1339,6 +1353,13 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
+    result = autocomplete_param_with_func(input, size, "/autoconnect", accounts_find_enabled);
+    if (result != NULL) {
+        inp_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
+
     gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
 
@@ -1386,13 +1407,6 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
 
-        status_bar_get_password();
-        status_bar_refresh();
-        char passwd[21];
-        inp_block();
-        inp_get_password(passwd);
-        inp_non_block();
-
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
             if (account->resource != NULL) {
@@ -1400,12 +1414,18 @@ _cmd_connect(gchar **args, struct cmd_help_t help)
             } else {
                 jid = strdup(account->jid);
             }
+
+            if (account->password == NULL) {
+                account->password = _ask_password();
+            }
             cons_show("Connecting with account %s as %s", account->name, jid);
-            conn_status = jabber_connect_with_account(account, passwd);
+            conn_status = jabber_connect_with_account(account);
         } else {
+            char *passwd = _ask_password();
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain);
+            free(passwd);
         }
         g_free(lower);
 
@@ -1537,6 +1557,10 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                 } else if (strcmp(property, "resource") == 0) {
                     accounts_set_resource(account_name, value);
                     cons_show("Updated resource for account %s: %s", account_name, value);
+                    cons_show("");
+                } else if (strcmp(property, "password") == 0) {
+                    accounts_set_password(account_name, value);
+                    cons_show("Updated password for account %s", account_name);
                     cons_show("");
                 } else if (strcmp(property, "muc") == 0) {
                     accounts_set_muc_service(account_name, value);
@@ -1847,7 +1871,7 @@ _cmd_help(gchar **args, struct cmd_help_t help)
         _cmd_show_filtered_help("Service discovery commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "settings") == 0) {
-        gchar *filter[] = { "/account", "/autoaway", "/autoping", "/beep",
+        gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
             "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
@@ -3519,6 +3543,19 @@ _cmd_splash(gchar **args, struct cmd_help_t help)
 }
 
 static gboolean
+_cmd_autoconnect(gchar **args, struct cmd_help_t help)
+{
+    if (args[0] == NULL) {
+         prefs_set_string(PREF_CONNECT_ACCOUNT, NULL);
+         cons_show("Autoconnect account disabled.");
+    } else {
+        prefs_set_string(PREF_CONNECT_ACCOUNT, args[0]);
+        cons_show("Autoconnect account set to: %s.", args[0]);
+    }
+    return true;
+}
+
+static gboolean
 _cmd_chlog(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help,
@@ -3595,6 +3632,20 @@ _cmd_xa(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_XA, "xa", args);
     return TRUE;
+}
+
+// helper function that asks the user for a password and saves it in passwd
+
+static char *
+_ask_password(void) {
+  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
+  status_bar_get_password();
+  status_bar_refresh();
+  inp_block();
+  inp_get_password(passwd);
+  inp_non_block();
+
+  return passwd;
 }
 
 // helper function for status change commands
