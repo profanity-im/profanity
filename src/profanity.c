@@ -76,11 +76,11 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     if (account_name != NULL) {
       char *cmd = "/connect";
       snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
-      _process_input(inp);
+      prof_process_input(inp);
     } else if (prefs_get_string(PREF_CONNECT_ACCOUNT) != NULL) {
       char *cmd = "/connect";
       snprintf(inp, sizeof(inp), "%s %s", cmd, prefs_get_string(PREF_CONNECT_ACCOUNT));
-      _process_input(inp);
+      prof_process_input(inp);
     }
 
     while(cmd_result == TRUE) {
