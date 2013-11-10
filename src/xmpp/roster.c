@@ -518,7 +518,7 @@ roster_barejid_from_name(const char * const name)
 }
 
 PContact
-roster_get_contact(const char const *barejid)
+roster_get_contact(const char * const barejid)
 {
     return g_hash_table_lookup(contacts, barejid);
 }

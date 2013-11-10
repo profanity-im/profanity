@@ -127,7 +127,7 @@ void caps_close(void);
 void roster_clear(void);
 gboolean roster_update_presence(const char * const barejid,
     Resource *resource, GDateTime *last_activity);
-PContact roster_get_contact(const char const *barejid);
+PContact roster_get_contact(const char * const barejid);
 gboolean roster_contact_offline(const char * const barejid,
     const char * const resource, const char * const status);
 void roster_reset_search_attempts(void);
