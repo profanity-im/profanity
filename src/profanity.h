@@ -26,7 +26,7 @@
 #include "resource.h"
 #include "xmpp/xmpp.h"
 
-void prof_run(const int disable_tls, char *log_level);
+void prof_run(const int disable_tls, char *log_level, char *account_name);
 
 void prof_handle_login_success(const char *jid, const char *altdomain);
 void prof_handle_login_account_success(char *account_name);

@@ -847,8 +847,8 @@ ui_new_chat_win(const char * const to)
 
         if (contact != NULL) {
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
-                const char const *show = p_contact_presence(contact);
-                const char const *status = p_contact_status(contact);
+                const char * const show = p_contact_presence(contact);
+                const char * const status = p_contact_status(contact);
                 win_show_status_string(window, to, show, status, NULL, "--", "offline");
             }
         }
