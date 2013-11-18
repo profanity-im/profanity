@@ -10,7 +10,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install git autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev
+    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev
 
 }
 
