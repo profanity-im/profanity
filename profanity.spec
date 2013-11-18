@@ -1,5 +1,5 @@
 Name:		profanity
-Version:	0.2.1
+Version:	0.3.0
 Release:	2%{?dist}
 Summary:	A console based XMPP client
 
@@ -26,6 +26,7 @@ Profanity is a console based XMPP client written in C using ncurses and libstrop
 
 %prep
 %setup -q
+./bootstrap.sh
 
 %build
 %configure
