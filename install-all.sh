@@ -1,5 +1,7 @@
 #!/bin/sh
 
+STATUS=development
+
 debian_prepare()
 {
     echo
@@ -10,7 +12,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install git autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev
+    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev
 
 }
 
@@ -36,7 +38,13 @@ cygwin_prepare()
     chmod +x apt-cyg
     mv apt-cyg /usr/local/bin/
 
-    apt-cyg install make gcc automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncurses-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+    if [ -n "$CYG_MIRROR" ]; then
+        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+    else
+        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+
+    fi
+
     ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
 
     export LIBRARY_PATH=/usr/local/lib/
@@ -62,6 +70,9 @@ install_profanity()
     echo
     echo Profanity installer... installing Profanity
     echo
+    if [ "${STATUS}" = "development" ]; then
+        ./bootstrap.sh
+    fi
     ./configure
     make
     sudo make install
@@ -88,6 +99,9 @@ cyg_install_profanity()
     echo
     echo Profanity installer... installing Profanity
     echo
+    if [ "${STATUS}" = "development" ]; then
+        ./bootstrap.sh
+    fi
     ./configure
     make
     make install
@@ -108,6 +122,13 @@ cleanup()
     echo Type \'profanity\' to run.
     echo
 }
+
+while getopts m: opt
+do
+    case "$opt" in
+        m) CYG_MIRROR=$OPTARG;;
+    esac
+done
 
 OS=`uname -s`
 DIST=unknown
