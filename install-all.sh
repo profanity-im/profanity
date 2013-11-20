@@ -1,5 +1,7 @@
 #!/bin/sh
 
+STATUS=development
+
 debian_prepare()
 {
     echo
@@ -68,6 +70,9 @@ install_profanity()
     echo
     echo Profanity installer... installing Profanity
     echo
+    if [ "${STATUS}" = "development" ]; then
+        ./bootstrap.sh
+    fi
     ./configure
     make
     sudo make install
@@ -94,6 +99,9 @@ cyg_install_profanity()
     echo
     echo Profanity installer... installing Profanity
     echo
+    if [ "${STATUS}" = "development" ]; then
+        ./bootstrap.sh
+    fi
     ./configure
     make
     make install
