@@ -1420,7 +1420,7 @@ _cons_splash_logo(void)
     wprintw(console->win, "\n");
     console->print_time(console, '-');
     if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
+#ifdef PROF_HAVE_GIT_VERSION
         wprintw(console->win, "Version %sdev.%s.%s\n", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
         wprintw(console->win, "Version %sdev\n", PROF_PACKAGE_VERSION);
