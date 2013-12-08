@@ -436,6 +436,15 @@ accounts_set_password(const char * const account_name, const char * const value)
 }
 
 void
+accounts_clear_password(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "password", NULL);
+        _save_accounts();
+    }
+}
+
+void
 accounts_set_muc_service(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
