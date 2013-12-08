@@ -756,16 +756,18 @@ static struct cmd_t command_defs[] =
         { "/account [command] [account] [property] [value]",
           "-----------------------------------------------",
           "Commands for creating and managing accounts.",
-          "list                       : List all accounts.",
-          "show account               : Show information about an account.",
-          "enable account             : Enable the account, it will be used for autocomplete.",
-          "disable account            : Disable the account.",
-          "add account                : Create a new account.",
-          "rename account newname     : Rename account to newname.",
-          "set account property value : Set 'property' of 'account' to 'value'.",
+          "list                         : List all accounts.",
+          "show account                 : Show information about an account.",
+          "enable account               : Enable the account, it will be used for autocomplete.",
+          "disable account              : Disable the account.",
+          "add account                  : Create a new account.",
+          "rename account newname       : Rename account to newname.",
+          "set account property value   : Set 'property' of 'account' to 'value'.",
+          "clear account property value : Clear 'property' of 'account'.",
           "",
           "When connected, the /account command can be called with no arguments, to show current account settings.",
-          "The 'property' may be one of.",
+          "",
+          "The set command may use one of the following for 'property'.",
           "jid              : The Jabber ID of the account, the account name will be used if this property is not set.",
           "server           : The chat server, if different to the domainpart of the JID.",
           "status           : The presence status to use on login, use 'last' to use whatever your last status was.",
@@ -775,6 +777,9 @@ static struct cmd_t command_defs[] =
           "password         : Password for the account, note this is currently stored in plaintext if set.",
           "muc              : The default MUC chat service to use.",
           "nick             : The default nickname to use when joining chat rooms.",
+          "",
+          "The clear command may use one of the following for 'property'.",
+          "password         : Clears the password for the account.",
           "",
           "Example : /account add work",
           "        : /account set work jid myuser@mycompany.com",
@@ -1003,6 +1008,7 @@ cmd_init(void)
     autocomplete_add(account_ac, "disable");
     autocomplete_add(account_ac, "rename");
     autocomplete_add(account_ac, "set");
+    autocomplete_add(account_ac, "clear");
 
     close_ac = autocomplete_new();
     autocomplete_add(close_ac, "read");
@@ -1589,6 +1595,27 @@ _cmd_account(gchar **args, struct cmd_help_t help)
                             cons_show("Updated %s priority for account %s: %s", property, account_name, value);
                             cons_show("");
                         }
+                } else {
+                    cons_show("Invalid property: %s", property);
+                    cons_show("");
+                }
+            }
+        }
+    } else if (strcmp(command, "clear") == 0) {
+        if (g_strv_length(args) != 3) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            char *account_name = args[1];
+            char *property = args[2];
+
+            if (!accounts_account_exists(account_name)) {
+                cons_show("Account %s doesn't exist", account_name);
+                cons_show("");
+            } else {
+                if (strcmp(property, "password") == 0) {
+                    accounts_clear_password(account_name);
+                    cons_show("Removed password for account %s", account_name);
+                    cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);
                     cons_show("");
@@ -3935,7 +3962,7 @@ _account_autocomplete(char *input, int *size)
     char *result = NULL;
     int i = 0;
     gchar *account_choice[] = { "/account set", "/account show", "/account enable",
-        "/account disable", "/account rename" };
+        "/account disable", "/account rename", "/account clear" };
 
     for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
         result = autocomplete_param_with_func(input, size, account_choice[i],
