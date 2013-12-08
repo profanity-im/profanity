@@ -81,6 +81,7 @@ static char * _notify_autocomplete(char *input, int *size);
 static char * _titlebar_autocomplete(char *input, int *size);
 static char * _theme_autocomplete(char *input, int *size);
 static char * _autoaway_autocomplete(char *input, int *size);
+static char * _autoconnect_autocomplete(char *input, int *size);
 static char * _account_autocomplete(char *input, int *size);
 static char * _who_autocomplete(char *input, int *size);
 static char * _roster_autocomplete(char *input, int *size);
@@ -560,13 +561,15 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/autoconnect",
-        _cmd_autoconnect, parse_args, 0, 1, cons_autoconnect_setting,
-        { "/autoconnect [account]", "Set account to autoconnect with.",
-        { "/autoconnect [account]",
-          "----------------------",
-          "Set the account to autoconnect with.",
-          "Will be overridden by any command line options specified.",
-          "Passing no account will clear the setting.",
+        _cmd_autoconnect, parse_args, 1, 2, cons_autoconnect_setting,
+        { "/autoconnect set|off [account]", "Set account to autoconnect with.",
+        { "/autoconnect set|off [account]",
+          "------------------------------",
+          "Enable or disable autoconnect on start up.",
+          "The setting can be overridden by the -a (--account) command line option.",
+          "",
+          "Example: /autoconnect set jc@stuntteam.org (autoconnect with the specified account).",
+          "Example: /autoconnect off                  (disable autoconnect).",
           NULL } } },
 
     { "/vercheck",
@@ -861,6 +864,7 @@ static Autocomplete sub_ac;
 static Autocomplete log_ac;
 static Autocomplete autoaway_ac;
 static Autocomplete autoaway_mode_ac;
+static Autocomplete autoconnect_ac;
 static Autocomplete titlebar_ac;
 static Autocomplete theme_ac;
 static Autocomplete theme_load_ac;
@@ -947,6 +951,10 @@ cmd_init(void)
     autocomplete_add(autoaway_mode_ac, strdup("idle"));
     autocomplete_add(autoaway_mode_ac, strdup("off"));
 
+    autoconnect_ac = autocomplete_new();
+    autocomplete_add(autoconnect_ac, strdup("set"));
+    autocomplete_add(autoconnect_ac, strdup("off"));
+
     theme_ac = autocomplete_new();
     autocomplete_add(theme_ac, strdup("list"));
     autocomplete_add(theme_ac, strdup("set"));
@@ -1010,6 +1018,7 @@ cmd_close(void)
     autocomplete_free(prefs_ac);
     autocomplete_free(autoaway_ac);
     autocomplete_free(autoaway_mode_ac);
+    autocomplete_free(autoconnect_ac);
     autocomplete_free(theme_ac);
     if (theme_load_ac != NULL) {
         autocomplete_free(theme_load_ac);
@@ -1078,6 +1087,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(commands_ac);
     autocomplete_reset(autoaway_ac);
     autocomplete_reset(autoaway_mode_ac);
+    autocomplete_reset(autoconnect_ac);
     autocomplete_reset(theme_ac);
     if (theme_load_ac != NULL) {
         autocomplete_reset(theme_load_ac);
@@ -1279,13 +1289,6 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    result = autocomplete_param_with_func(input, size, "/autoconnect", accounts_find_enabled);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-
     gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
 
@@ -1300,7 +1303,8 @@ _cmd_complete_parameters(char *input, int *size)
 
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
-        _account_autocomplete, _roster_autocomplete, _group_autocomplete };
+        _account_autocomplete, _roster_autocomplete, _group_autocomplete,
+        _autoconnect_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -3391,12 +3395,14 @@ _cmd_splash(gchar **args, struct cmd_help_t help)
 static gboolean
 _cmd_autoconnect(gchar **args, struct cmd_help_t help)
 {
-    if (args[0] == NULL) {
-         prefs_set_string(PREF_CONNECT_ACCOUNT, NULL);
-         cons_show("Autoconnect account disabled.");
+    if (strcmp(args[0], "off") == 0) {
+        prefs_set_string(PREF_CONNECT_ACCOUNT, NULL);
+        cons_show("Autoconnect account disabled.");
+    } else if (strcmp(args[0], "set") == 0) {
+        prefs_set_string(PREF_CONNECT_ACCOUNT, args[1]);
+        cons_show("Autoconnect account set to: %s.", args[1]);
     } else {
-        prefs_set_string(PREF_CONNECT_ACCOUNT, args[0]);
-        cons_show("Autoconnect account set to: %s.", args[0]);
+        cons_show("Usage: %s", help.usage);
     }
     return true;
 }
@@ -3709,6 +3715,24 @@ _autoaway_autocomplete(char *input, int *size)
         return result;
     }
     result = autocomplete_param_with_ac(input, size, "/autoaway", autoaway_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_autoconnect_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, size, "/autoconnect set", accounts_find_enabled);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/autoconnect", autoconnect_ac);
     if (result != NULL) {
         return result;
     }
