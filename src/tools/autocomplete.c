@@ -84,12 +84,12 @@ autocomplete_length(Autocomplete ac)
     }
 }
 
-gboolean
+void
 autocomplete_add(Autocomplete ac, void *item)
 {
     if (ac->items == NULL) {
         ac->items = g_slist_append(ac->items, item);
-        return TRUE;
+        return;
     } else {
         GSList *curr = ac->items;
 
@@ -99,7 +99,7 @@ autocomplete_add(Autocomplete ac, void *item)
             if (g_strcmp0(curr->data, item) > 0) {
                 ac->items = g_slist_insert_before(ac->items,
                     curr, item);
-                return TRUE;
+                return;
 
             // update
             } else if (g_strcmp0(curr->data, item) == 0) {
@@ -107,10 +107,8 @@ autocomplete_add(Autocomplete ac, void *item)
                 if (strcmp(curr->data, item) != 0) {
                     free(curr->data);
                     curr->data = item;
-                    return TRUE;
-                } else {
-                    return FALSE;
                 }
+                return;
             }
 
             curr = g_slist_next(curr);
@@ -119,11 +117,11 @@ autocomplete_add(Autocomplete ac, void *item)
         // hit end, append
         ac->items = g_slist_append(ac->items, item);
 
-        return TRUE;
+        return;
     }
 }
 
-gboolean
+void
 autocomplete_remove(Autocomplete ac, const char * const item)
 {
     // reset last found if it points to the item to be removed
@@ -132,7 +130,7 @@ autocomplete_remove(Autocomplete ac, const char * const item)
             ac->last_found = NULL;
 
     if (!ac->items) {
-        return FALSE;
+        return;
     } else {
         GSList *curr = ac->items;
 
@@ -142,13 +140,13 @@ autocomplete_remove(Autocomplete ac, const char * const item)
                 ac->items = g_slist_remove(ac->items, curr->data);
                 free(current_item);
 
-                return TRUE;
+                return;
             }
 
             curr = g_slist_next(curr);
         }
 
-        return FALSE;
+        return;
     }
 }
 

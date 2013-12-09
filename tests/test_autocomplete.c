@@ -124,45 +124,6 @@ static void add_two_same_updates(void)
     autocomplete_clear(ac);
 }
 
-static void add_one_returns_true(void)
-{
-    char *item = strdup("Hello");
-    Autocomplete ac = autocomplete_new();
-    int result = autocomplete_add(ac, item);
-
-    assert_true(result);
-
-    autocomplete_clear(ac);
-}
-
-static void add_two_different_returns_true(void)
-{
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Hello there");
-    Autocomplete ac = autocomplete_new();
-    int result1 = autocomplete_add(ac, item1);
-    int result2 = autocomplete_add(ac, item2);
-
-    assert_true(result1);
-    assert_true(result2);
-
-    autocomplete_clear(ac);
-}
-
-static void add_two_same_returns_false(void)
-{
-    char *item1 = strdup("Hello");
-    char *item2 = strdup("Hello");
-    Autocomplete ac = autocomplete_new();
-    int result1 = autocomplete_add(ac, item1);
-    int result2 = autocomplete_add(ac, item2);
-
-    assert_true(result1);
-    assert_false(result2);
-
-    autocomplete_clear(ac);
-}
-
 void register_autocomplete_tests(void)
 {
     TEST_MODULE("autocomplete tests");
@@ -176,7 +137,4 @@ void register_autocomplete_tests(void)
     TEST(add_two_adds_two);
     TEST(add_two_same_adds_one);
     TEST(add_two_same_updates);
-    TEST(add_one_returns_true);
-    TEST(add_two_different_returns_true);
-    TEST(add_two_same_returns_false);
 }
