@@ -29,18 +29,24 @@ typedef char*(*autocomplete_func)(char *);
 typedef struct autocomplete_t *Autocomplete;
 
 Autocomplete autocomplete_new(void);
+
 void autocomplete_clear(Autocomplete ac);
 void autocomplete_reset(Autocomplete ac);
 void autocomplete_free(Autocomplete ac);
+
 void autocomplete_add(Autocomplete ac, void *item);
 void autocomplete_remove(Autocomplete ac, const char * const item);
-GSList * autocomplete_get_list(Autocomplete ac);
 gchar * autocomplete_complete(Autocomplete ac, gchar *search_str);
+
+GSList * autocomplete_get_list(Autocomplete ac);
 gint autocomplete_length(Autocomplete ac);
+
 char * autocomplete_param_with_func(char *input, int *size, char *command,
     autocomplete_func func);
+
 char * autocomplete_param_with_ac(char *input, int *size, char *command,
     Autocomplete ac);
+
 char * autocomplete_param_no_with_func(char *input, int *size, char *command,
     int arg_number, autocomplete_func func);
 
