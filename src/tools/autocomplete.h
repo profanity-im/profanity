@@ -27,14 +27,8 @@
 
 typedef char*(*autocomplete_func)(char *);
 typedef struct autocomplete_t *Autocomplete;
-typedef const char * (*PStrFunc)(const void *obj);
-typedef void * (*PCopyFunc)(const void *obj);
-typedef int (*PEqualFunc)(const void *o1, const void *o2);
-typedef int (*PEqualDeepFunc)(const void *o1, const void *o2);
 
 Autocomplete autocomplete_new(void);
-Autocomplete obj_autocomplete_new(PStrFunc str_func, PCopyFunc copy_func,
-    PEqualDeepFunc equal_deep_func, GDestroyNotify free_func);
 void autocomplete_clear(Autocomplete ac);
 void autocomplete_reset(Autocomplete ac);
 void autocomplete_free(Autocomplete ac);
