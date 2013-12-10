@@ -981,21 +981,21 @@ cmd_init(void)
     autocomplete_add(account_ac, strdup("clear"));
 
     account_set_ac = autocomplete_new();
-    autocomplete_add(account_set_ac, "jid");
-    autocomplete_add(account_set_ac, "server");
-    autocomplete_add(account_set_ac, "status");
-    autocomplete_add(account_set_ac, "online");
-    autocomplete_add(account_set_ac, "chat");
-    autocomplete_add(account_set_ac, "away");
-    autocomplete_add(account_set_ac, "xa");
-    autocomplete_add(account_set_ac, "dnd");
-    autocomplete_add(account_set_ac, "resource");
-    autocomplete_add(account_set_ac, "password");
-    autocomplete_add(account_set_ac, "muc");
-    autocomplete_add(account_set_ac, "nick");
+    autocomplete_add(account_set_ac, strdup("jid"));
+    autocomplete_add(account_set_ac, strdup("server"));
+    autocomplete_add(account_set_ac, strdup("status"));
+    autocomplete_add(account_set_ac, strdup("online"));
+    autocomplete_add(account_set_ac, strdup("chat"));
+    autocomplete_add(account_set_ac, strdup("away"));
+    autocomplete_add(account_set_ac, strdup("xa"));
+    autocomplete_add(account_set_ac, strdup("dnd"));
+    autocomplete_add(account_set_ac, strdup("resource"));
+    autocomplete_add(account_set_ac, strdup("password"));
+    autocomplete_add(account_set_ac, strdup("muc"));
+    autocomplete_add(account_set_ac, strdup("nick"));
 
     account_clear_ac = autocomplete_new();
-    autocomplete_add(account_clear_ac, "password");
+    autocomplete_add(account_clear_ac, strdup("password"));
 
     close_ac = autocomplete_new();
     autocomplete_add(close_ac, strdup("read"));
