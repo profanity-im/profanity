@@ -82,7 +82,7 @@ autocomplete_length(Autocomplete ac)
     }
 }
 
-gboolean
+void
 autocomplete_add(Autocomplete ac, const char *item)
 {
     char *item_cpy;
@@ -90,21 +90,21 @@ autocomplete_add(Autocomplete ac, const char *item)
 
     // if item already exists
     if (curr != NULL) {
-        return FALSE;
+        return;
     }
 
     item_cpy = strdup(item);
     ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
-    return TRUE;
+    return;
 }
 
-gboolean
+void
 autocomplete_remove(Autocomplete ac, const char * const item)
 {
     GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
     if (!curr) {
-        return FALSE;
+        return;
     }
 
     // reset last found if it points to the item to be removed
@@ -115,7 +115,7 @@ autocomplete_remove(Autocomplete ac, const char * const item)
     free(curr->data);
     ac->items = g_slist_delete_link(ac->items, curr);
 
-    return TRUE;
+    return;
 }
 
 GSList *
