@@ -903,6 +903,8 @@ static Autocomplete titlebar_ac;
 static Autocomplete theme_ac;
 static Autocomplete theme_load_ac;
 static Autocomplete account_ac;
+static Autocomplete account_set_ac;
+static Autocomplete account_clear_ac;
 static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
@@ -1008,6 +1010,23 @@ cmd_init(void)
     autocomplete_add(account_ac, "set");
     autocomplete_add(account_ac, "clear");
 
+    account_set_ac = autocomplete_new();
+    autocomplete_add(account_set_ac, "jid");
+    autocomplete_add(account_set_ac, "server");
+    autocomplete_add(account_set_ac, "status");
+    autocomplete_add(account_set_ac, "online");
+    autocomplete_add(account_set_ac, "chat");
+    autocomplete_add(account_set_ac, "away");
+    autocomplete_add(account_set_ac, "xa");
+    autocomplete_add(account_set_ac, "dnd");
+    autocomplete_add(account_set_ac, "resource");
+    autocomplete_add(account_set_ac, "password");
+    autocomplete_add(account_set_ac, "muc");
+    autocomplete_add(account_set_ac, "nick");
+
+    account_clear_ac = autocomplete_new();
+    autocomplete_add(account_clear_ac, "password");
+
     close_ac = autocomplete_new();
     autocomplete_add(close_ac, "read");
     autocomplete_add(close_ac, "all");
@@ -1072,6 +1091,8 @@ cmd_close(void)
         autocomplete_free(theme_load_ac);
     }
     autocomplete_free(account_ac);
+    autocomplete_free(account_set_ac);
+    autocomplete_free(account_clear_ac);
     autocomplete_free(disco_ac);
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
@@ -1143,6 +1164,8 @@ cmd_reset_autocomplete()
         theme_load_ac = NULL;
     }
     autocomplete_reset(account_ac);
+    autocomplete_reset(account_set_ac);
+    autocomplete_reset(account_clear_ac);
     autocomplete_reset(disco_ac);
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
@@ -3980,6 +4003,32 @@ static char *
 _account_autocomplete(char *input, int *size)
 {
     char *result = NULL;
+
+    input[*size] = '\0';
+    gchar **args = parse_args(input, 3, 3);
+
+    if ((strncmp(input, "/account set", 12) == 0) && (args != NULL)) {
+        GString *beginning = g_string_new("/account set ");
+        g_string_append(beginning, args[1]);
+        result = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    if ((strncmp(input, "/account clear", 14) == 0) && (args != NULL)) {
+        GString *beginning = g_string_new("/account clear ");
+        g_string_append(beginning, args[1]);
+        result = autocomplete_param_with_ac(input, size, beginning->str, account_clear_ac);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    g_strfreev(args);
+
     int i = 0;
     gchar *account_choice[] = { "/account set", "/account show", "/account enable",
         "/account disable", "/account rename", "/account clear" };
