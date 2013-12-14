@@ -13,8 +13,14 @@
 
 int main(int argc, char* argv[]) {
     const UnitTest tests[] = {
-        unit_test(cmd_rooms_shows_message_when_not_connected),
-
+        unit_test(cmd_rooms_shows_message_when_disconnected),
+        unit_test(cmd_rooms_shows_message_when_disconnecting),
+        unit_test(cmd_rooms_shows_message_when_connecting),
+        unit_test(cmd_rooms_shows_message_when_started),
+        unit_test(cmd_rooms_shows_message_when_undefined),
+        unit_test(cmd_rooms_uses_account_default_when_no_arg),
+        unit_test(cmd_arg_used_when_passed),
+ 
         unit_test(replace_one_substr),
         unit_test(replace_one_substr_beginning),
         unit_test(replace_one_substr_end),

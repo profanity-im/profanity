@@ -1,5 +1,5 @@
 /*
- * xmpp.h
+ * mock_xmpp.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -116,7 +116,12 @@ gboolean presence_sub_request_exists(const char * const bare_jid)
 
 // iq functions
 void iq_send_software_version(const char * const fulljid) {}
-void iq_room_list_request(gchar *conferencejid) {}
+
+void iq_room_list_request(gchar *conferencejid)
+{
+    check_expected(conferencejid);
+}
+
 void iq_disco_info_request(gchar *jid) {}
 void iq_disco_items_request(gchar *jid) {}
 

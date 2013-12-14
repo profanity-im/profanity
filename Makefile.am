@@ -55,11 +55,12 @@ test_sources = \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
-	src/config/accounts.c src/config/accounts.h \
+	src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
     tests/ui/mock_ui.c \
     tests/xmpp/mock_xmpp.c \
+    tests/config/mock_accounts.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
 	tests/test_command.c \
