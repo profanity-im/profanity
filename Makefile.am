@@ -69,8 +69,8 @@ test_sources = \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
-	src/xmpp/xmpp.h tests/xmpp/mock_xmpp.c \
-	src/ui/ui.h tests/ui/mock_ui.c \
+	src/xmpp/xmpp.h \
+	src/ui/ui.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/history.h src/tools/parser.c \
 	src/tools/parser.h \
@@ -80,6 +80,8 @@ test_sources = \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+    tests/ui/mock_ui.c \
+    tests/xmpp/mock_xmpp.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
 	tests/test_command.c \
