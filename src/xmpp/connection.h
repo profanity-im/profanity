@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#ifndef XMPP_CONNECTION_H
+#define XMPP_CONNECTION_H
 
 #include <strophe.h>
 

@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef WINDOWS_H
-#define WINDOWS_H
+#ifndef UI_WINDOWS_H
+#define UI_WINDOWS_H
 
 void wins_init(void);
 ProfWin * wins_get_console(void);

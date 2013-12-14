@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef STANZA_H
-#define STANZA_H
+#ifndef XMPP_STANZA_H
+#define XMPP_STANZA_H
 
 #include <strophe.h>
 

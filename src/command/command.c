@@ -36,6 +36,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "contact.h"
+#include "roster_list.h"
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
@@ -133,7 +134,6 @@ static gboolean _cmd_prefs(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_priority(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_quit(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_reconnect(gchar **args, struct cmd_help_t help);
-static gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_bookmark(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_roster(gchar **args, struct cmd_help_t help);
 static gboolean _cmd_software(gchar **args, struct cmd_help_t help);
@@ -2455,7 +2455,7 @@ _cmd_roster(gchar **args, struct cmd_help_t help)
 
         char *jid = args[1];
 
-        roster_remove(jid);
+        roster_send_remove(jid);
 
         return TRUE;
     }
@@ -2916,13 +2916,13 @@ _cmd_decline(gchar **args, struct cmd_help_t help)
     return TRUE;
 }
 
-static gboolean
+gboolean
 _cmd_rooms(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currenlty connected.");
+        cons_show("You are not currently connected.");
         return TRUE;
     }
 

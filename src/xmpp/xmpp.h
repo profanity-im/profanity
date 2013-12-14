@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef XMPP_H
-#define XMPP_H
+#ifndef XMPP_XMPP_H
+#define XMPP_XMPP_H
 
 #include <strophe.h>
 
@@ -124,32 +124,16 @@ void iq_disco_items_request(gchar *jid);
 Capabilities* caps_get(const char * const caps_str);
 void caps_close(void);
 
-void roster_clear(void);
-gboolean roster_update_presence(const char * const barejid,
-    Resource *resource, GDateTime *last_activity);
-PContact roster_get_contact(const char * const barejid);
-gboolean roster_contact_offline(const char * const barejid,
-    const char * const resource, const char * const status);
-void roster_reset_search_attempts(void);
-void roster_init(void);
-void roster_free(void);
-gboolean roster_has_pending_subscriptions(void);
-GSList * roster_get_contacts(void);
-char * roster_find_contact(char *search_str);
-char * roster_find_jid(char *search_str);
-char * roster_find_resource(char *search_str);
-char * roster_find_group(char *search_str);
-gboolean roster_add(const char * const barejid, const char * const name,
-    GSList *groups, const char * const subscription, gboolean pending_out,
-    gboolean from_initial);
-void roster_change_name(const char * const barejid, const char * const new_name);
-char * roster_barejid_from_name(const char * const name);
+void bookmark_add(const char *jid, const char *nick, gboolean autojoin);
+void bookmark_remove(const char *jid, gboolean autojoin);
+const GList *bookmark_get_list(void);
+char *bookmark_find(char *search_str);
+void bookmark_autocomplete_reset(void);
+
+void roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups);
+void roster_send_add_to_group(const char * const group, PContact contact);
+void roster_send_remove_from_group(const char * const group, PContact contact);
 void roster_add_new(const char * const barejid, const char * const name);
-void roster_remove(const char * const barejid);
-GSList * roster_get_group(const char * const group);
-void roster_add_to_group(const char * const group, const char * const barejid);
-void roster_remove_from_group(const char * const group,
-    const char * const barejid);
-GSList * roster_get_groups(void);
+void roster_send_remove(const char * const barejid);
 
 #endif

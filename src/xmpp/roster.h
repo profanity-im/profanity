@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef ROSTER_H
-#define ROSTER_H
+#ifndef XMPP_ROSTER_H
+#define XMPP_ROSTER_H
 
 void roster_add_handlers(void);
 void roster_request(void);

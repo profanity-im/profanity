@@ -49,4 +49,6 @@ void cmd_history_append(char *inp);
 char *cmd_history_previous(char *inp, int *size);
 char *cmd_history_next(char *inp, int *size);
 
+gboolean _cmd_rooms(gchar **args, struct cmd_help_t help);
+
 #endif

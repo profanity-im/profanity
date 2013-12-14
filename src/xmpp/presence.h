@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef PRESENCE_H
-#define PRESENCE_H
+#ifndef XMPP_PRESENCE_H
+#define XMPP_PRESENCE_H
 
 void presence_sub_requests_init(void);
 void presence_add_handlers(void);

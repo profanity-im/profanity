@@ -6,7 +6,7 @@
 #include <glib.h>
 
 #include "contact.h"
-#include "xmpp/xmpp.h"
+#include "roster_list.h"
 
 static void beforetest(void)
 {
@@ -266,9 +266,9 @@ static void find_twice_returns_first_when_two_match_and_reset(void)
     free(result2);
 }
 
-void register_roster_tests(void)
+void register_roster_list_tests(void)
 {
-    TEST_MODULE("roster tests");
+    TEST_MODULE("roster_list tests");
     BEFORETEST(beforetest);
     AFTERTEST(aftertest);
     TEST(empty_list_when_none_added);

@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef MUC_WINDOW_H
-#define MUC_WINDOW_H
+#ifndef UI_MUC_WINDOW_H
+#define UI_MUC_WINDOW_H
 
 #include <glib.h>
 

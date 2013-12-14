@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#ifndef XMPP_MESSAGE_H
+#define XMPP_MESSAGE_H
 
 void message_add_handlers(void);
 

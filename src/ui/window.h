@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef UI_WINDOW_H
+#define UI_WINDOW_H
 
 #include "config.h"
 

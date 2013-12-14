@@ -33,6 +33,7 @@
 #endif
 
 #include "common.h"
+#include "roster_list.h"
 #include "config/theme.h"
 #include "ui/ui.h"
 #include "ui/window.h"

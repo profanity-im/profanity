@@ -31,9 +31,9 @@
 
 #include "command/command.h"
 #include "common.h"
+#include "roster_list.h"
 #include "config/preferences.h"
 #include "config/theme.h"
-#include "ui/notifier.h"
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "ui/ui.h"
