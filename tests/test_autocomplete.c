@@ -1,66 +1,67 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <head-unit.h>
 #include <glib.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+#include <stdlib.h>
 
 #include "contact.h"
 #include "tools/autocomplete.h"
 
-static void clear_empty(void)
+void clear_empty(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_clear(ac);
 }
 
-static void reset_after_create(void)
+void reset_after_create(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_reset(ac);
     autocomplete_clear(ac);
 }
 
-static void find_after_create(void)
+void find_after_create(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_complete(ac, "hello");
     autocomplete_clear(ac);
 }
 
-static void get_after_create_returns_null(void)
+void get_after_create_returns_null(void **state)
 {
     Autocomplete ac = autocomplete_new();
     GSList *result = autocomplete_get_list(ac);
 
-    assert_is_null(result);
+    assert_null(result);
 
     autocomplete_clear(ac);
 }
 
-static void add_one_and_complete(void)
+void add_one_and_complete(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     char *result = autocomplete_complete(ac, "Hel");
 
-    assert_string_equals("Hello", result);
+    assert_string_equal("Hello", result);
 
     autocomplete_clear(ac);
 }
 
-static void add_two_and_complete_returns_first(void)
+void add_two_and_complete_returns_first(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Help");
     char *result = autocomplete_complete(ac, "Hel");
 
-    assert_string_equals("Hello", result);
+    assert_string_equal("Hello", result);
 
     autocomplete_clear(ac);
 }
 
-static void add_two_and_complete_returns_second(void)
+void add_two_and_complete_returns_second(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
@@ -68,36 +69,36 @@ static void add_two_and_complete_returns_second(void)
     char *result1 = autocomplete_complete(ac, "Hel");
     char *result2 = autocomplete_complete(ac, result1);
 
-    assert_string_equals("Help", result2);
+    assert_string_equal("Help", result2);
 
     autocomplete_clear(ac);
 }
 
-static void add_two_adds_two(void)
+void add_two_adds_two(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Help");
     GSList *result = autocomplete_get_list(ac);
 
-    assert_int_equals(2, g_slist_length(result));
+    assert_int_equal(2, g_slist_length(result));
 
     autocomplete_clear(ac);
 }
 
-static void add_two_same_adds_one(void)
+void add_two_same_adds_one(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Hello");
     GSList *result = autocomplete_get_list(ac);
 
-    assert_int_equals(1, g_slist_length(result));
+    assert_int_equal(1, g_slist_length(result));
 
     autocomplete_clear(ac);
 }
 
-static void add_two_same_updates(void)
+void add_two_same_updates(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
@@ -108,22 +109,7 @@ static void add_two_same_updates(void)
 
     char *str = first->data;
 
-    assert_string_equals("Hello", str);
+    assert_string_equal("Hello", str);
 
     autocomplete_clear(ac);
-}
-
-void register_autocomplete_tests(void)
-{
-    TEST_MODULE("autocomplete tests");
-    TEST(clear_empty);
-    TEST(reset_after_create);
-    TEST(find_after_create);
-    TEST(get_after_create_returns_null);
-    TEST(add_one_and_complete);
-    TEST(add_two_and_complete_returns_first);
-    TEST(add_two_and_complete_returns_second);
-    TEST(add_two_adds_two);
-    TEST(add_two_same_adds_one);
-    TEST(add_two_same_updates);
 }

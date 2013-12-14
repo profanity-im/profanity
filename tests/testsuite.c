@@ -3,6 +3,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include "test_autocomplete.h"
 #include "test_common.h"
 #include "test_command.h"
 
@@ -41,7 +42,18 @@ int main(int argc, char* argv[]) {
         unit_test(next_available_9_in_first_gap),
         unit_test(next_available_0_in_first_gap),
         unit_test(next_available_11_in_first_gap),
-        unit_test(next_available_24_first_big_gap)
-    };
+        unit_test(next_available_24_first_big_gap),
+
+        unit_test(clear_empty),
+        unit_test(reset_after_create),
+        unit_test(find_after_create),
+        unit_test(get_after_create_returns_null),
+        unit_test(add_one_and_complete),
+        unit_test(add_two_and_complete_returns_first),
+        unit_test(add_two_and_complete_returns_second),
+        unit_test(add_two_adds_two),
+        unit_test(add_two_same_adds_one),
+        unit_test(add_two_same_updates)
+     };
     return run_tests(tests);
 }

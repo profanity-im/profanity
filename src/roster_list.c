@@ -156,19 +156,19 @@ roster_free(void)
     autocomplete_free(groups_ac);
 }
 
-void                                                                                  
+void
 roster_change_name(const char * const barejid, const char * const new_name)
 {
-    PContact contact = g_hash_table_lookup(contacts, barejid);                   
-    const char * current_name = NULL;                                            
-    if (p_contact_name(contact) != NULL) {                                       
-        current_name = strdup(p_contact_name(contact));                          
-    }                                                                            
-                                                                                 
-    if (contact != NULL) {                                                       
-        p_contact_set_name(contact, new_name);                                   
-        _replace_name(current_name, new_name, barejid);                          
-                                                                                 
+    PContact contact = g_hash_table_lookup(contacts, barejid);
+    const char * current_name = NULL;
+    if (p_contact_name(contact) != NULL) {
+        current_name = strdup(p_contact_name(contact));
+    }
+
+    if (contact != NULL) {
+        p_contact_set_name(contact, new_name);
+        _replace_name(current_name, new_name, barejid);
+
         GSList *groups = p_contact_groups(contact);
         roster_send_name_change(barejid, new_name, groups);
     }

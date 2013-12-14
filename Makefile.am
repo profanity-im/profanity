@@ -80,6 +80,7 @@ test_sources = \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+    tests/test_autocomplete.c \
     tests/test_common.c \
 	tests/test_command.c \
     tests/testsuite.c
