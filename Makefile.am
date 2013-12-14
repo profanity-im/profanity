@@ -40,28 +40,6 @@ core_sources = \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h
 
-#test_sources = \
-#	src/contact.c src/contact.h src/log.c src/common.c \
-#	src/log.h src/profanity.c src/common.h \
-#	src/profanity.h src/chat_session.c \
-#	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
-#	src/resource.c src/resource.h \
-#	src/roster_list.c src/roster_list.h \
-#	src/xmpp/xmpp.h tests/xmpp/mock_xmpp.c \
-#	src/ui/ui.h tests/ui/mock_ui.c \
-#	src/command/command.h src/command/command.c src/command/history.c \
-#	src/command/history.h src/tools/parser.c \
-#	src/tools/parser.h \
-#	src/tools/autocomplete.c src/tools/autocomplete.h \
-#	src/tools/history.c src/tools/history.h \
-#	src/tools/tinyurl.c src/tools/tinyurl.h \
-#	src/config/accounts.c src/config/accounts.h \
-#	src/config/preferences.c src/config/preferences.h \
-#	src/config/theme.c src/config/theme.h \
-#	tests/test_roster_list.c tests/test_common.c tests/test_history.c \
-#	tests/test_autocomplete.c tests/testsuite.c tests/test_parser.c \
-#	tests/test_jid.c tests/test_command.c
-
 test_sources = \
 	src/contact.c src/contact.h src/log.c src/common.c \
 	src/log.h src/profanity.c src/common.h \
