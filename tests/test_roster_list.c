@@ -20,13 +20,9 @@ void empty_list_when_none_added(void **state)
 void contains_one_element(void **state)
 {
     roster_init();
-    printf("0\n");
     roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
-    printf("1\n");
     GSList *list = roster_get_contacts();
-    printf("2\n");
     assert_int_equal(1, g_slist_length(list));
-    printf("3\n");
     roster_free();
 }
 
