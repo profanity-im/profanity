@@ -6,6 +6,8 @@
 #include "test_autocomplete.h"
 #include "test_common.h"
 #include "test_command.h"
+#include "test_history.h"
+#include "test_jid.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest tests[] = {
@@ -53,7 +55,45 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_and_complete_returns_second),
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
-        unit_test(add_two_same_updates)
-     };
+        unit_test(add_two_same_updates),
+
+        unit_test(previous_on_empty_returns_null),
+        unit_test(next_on_empty_returns_null),
+        unit_test(previous_once_returns_last),
+        unit_test(previous_twice_when_one_returns_first),
+        unit_test(previous_always_stops_at_first),
+        unit_test(previous_goes_to_correct_element),
+        unit_test(prev_then_next_returns_empty),
+        unit_test(prev_with_val_then_next_returns_val),
+        unit_test(prev_with_val_then_next_twice_returns_null),
+        unit_test(navigate_then_append_new),
+        unit_test(edit_item_mid_history),
+        unit_test(edit_previous_and_append),
+        unit_test(start_session_add_new_submit_previous),
+
+        unit_test(create_jid_from_null_returns_null),
+        unit_test(create_jid_from_empty_string_returns_null),
+        unit_test(create_jid_from_full_returns_full),
+        unit_test(create_jid_from_full_returns_bare),
+        unit_test(create_jid_from_full_returns_resourcepart),
+        unit_test(create_jid_from_full_returns_localpart),
+        unit_test(create_jid_from_full_returns_domainpart),
+        unit_test(create_jid_from_full_nolocal_returns_full),
+        unit_test(create_jid_from_full_nolocal_returns_bare),
+        unit_test(create_jid_from_full_nolocal_returns_resourcepart),
+        unit_test(create_jid_from_full_nolocal_returns_domainpart),
+        unit_test(create_jid_from_full_nolocal_returns_null_localpart),
+        unit_test(create_jid_from_bare_returns_null_full),
+        unit_test(create_jid_from_bare_returns_null_resource),
+        unit_test(create_jid_from_bare_returns_bare),
+        unit_test(create_jid_from_bare_returns_localpart),
+        unit_test(create_jid_from_bare_returns_domainpart),
+        unit_test(create_room_jid_returns_room),
+        unit_test(create_room_jid_returns_nick),
+        unit_test(create_with_slash_in_resource),
+        unit_test(create_with_at_in_resource),
+        unit_test(create_with_at_and_slash_in_resource),
+        unit_test(create_full_with_trailing_slash)
+    };
     return run_tests(tests);
 }

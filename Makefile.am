@@ -83,6 +83,8 @@ test_sources = \
     tests/test_autocomplete.c \
     tests/test_common.c \
 	tests/test_command.c \
+	tests/test_history.c \
+	tests/test_jid.c \
     tests/testsuite.c
 
 main_source = src/main.c
