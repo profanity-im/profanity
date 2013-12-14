@@ -85,6 +85,7 @@ test_sources = \
 	tests/test_command.c \
 	tests/test_history.c \
 	tests/test_jid.c \
+	tests/test_parser.c \
     tests/testsuite.c
 
 main_source = src/main.c

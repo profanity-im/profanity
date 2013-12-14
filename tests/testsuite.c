@@ -8,6 +8,7 @@
 #include "test_command.h"
 #include "test_history.h"
 #include "test_jid.h"
+#include "test_parser.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest tests[] = {
@@ -93,7 +94,49 @@ int main(int argc, char* argv[]) {
         unit_test(create_with_slash_in_resource),
         unit_test(create_with_at_in_resource),
         unit_test(create_with_at_and_slash_in_resource),
-        unit_test(create_full_with_trailing_slash)
+        unit_test(create_full_with_trailing_slash),
+
+        unit_test(parse_null_returns_null),
+        unit_test(parse_empty_returns_null),
+        unit_test(parse_space_returns_null),
+        unit_test(parse_cmd_no_args_returns_null),
+        unit_test(parse_cmd_with_space_returns_null),
+        unit_test(parse_cmd_with_too_few_returns_null),
+        unit_test(parse_cmd_with_too_many_returns_null),
+        unit_test(parse_cmd_one_arg),
+        unit_test(parse_cmd_two_args),
+        unit_test(parse_cmd_three_args),
+        unit_test(parse_cmd_three_args_with_spaces),
+        unit_test(parse_cmd_with_freetext),
+        unit_test(parse_cmd_one_arg_with_freetext),
+        unit_test(parse_cmd_two_args_with_freetext),
+        unit_test(parse_cmd_min_zero),
+        unit_test(parse_cmd_min_zero_with_freetext),
+        unit_test(parse_cmd_with_quoted),
+        unit_test(parse_cmd_with_quoted_and_space),
+        unit_test(parse_cmd_with_quoted_and_many_spaces),
+        unit_test(parse_cmd_with_many_quoted_and_many_spaces),
+        unit_test(parse_cmd_freetext_with_quoted),
+        unit_test(parse_cmd_freetext_with_quoted_and_space),
+        unit_test(parse_cmd_freetext_with_quoted_and_many_spaces),
+        unit_test(parse_cmd_freetext_with_many_quoted_and_many_spaces),
+        unit_test(parse_cmd_with_quoted_freetext),
+        unit_test(parse_cmd_with_third_arg_quoted_0_min_3_max),
+        unit_test(parse_cmd_with_second_arg_quoted_0_min_3_max),
+        unit_test(parse_cmd_with_second_and_third_arg_quoted_0_min_3_max),
+        unit_test(count_one_token),
+        unit_test(count_one_token_quoted_no_whitespace),
+        unit_test(count_one_token_quoted_with_whitespace),
+        unit_test(count_two_tokens),
+        unit_test(count_two_tokens_first_quoted),
+        unit_test(count_two_tokens_second_quoted),
+        unit_test(count_two_tokens_both_quoted),
+        unit_test(get_first_of_one),
+        unit_test(get_first_of_two),
+        unit_test(get_first_two_of_three),
+        unit_test(get_first_two_of_three_first_quoted),
+        unit_test(get_first_two_of_three_second_quoted),
+        unit_test(get_first_two_of_three_first_and_second_quoted),
     };
     return run_tests(tests);
 }
