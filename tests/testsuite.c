@@ -9,6 +9,7 @@
 #include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
+#include "test_roster_list.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest tests[] = {
@@ -137,6 +138,27 @@ int main(int argc, char* argv[]) {
         unit_test(get_first_two_of_three_first_quoted),
         unit_test(get_first_two_of_three_second_quoted),
         unit_test(get_first_two_of_three_first_and_second_quoted),
+
+        unit_test(empty_list_when_none_added),
+        unit_test(contains_one_element),
+        unit_test(first_element_correct),
+        unit_test(contains_two_elements),
+        unit_test(first_and_second_elements_correct),
+        unit_test(contains_three_elements),
+        unit_test(first_three_elements_correct),
+        unit_test(add_twice_at_beginning_adds_once),
+        unit_test(add_twice_in_middle_adds_once),
+        unit_test(add_twice_at_end_adds_once),
+        unit_test(test_show_online_when_no_value),
+        unit_test(test_status_when_no_value),
+        unit_test(find_first_exists),
+        unit_test(find_second_exists),
+        unit_test(find_third_exists),
+        unit_test(find_returns_null),
+        unit_test(find_on_empty_returns_null),
+        unit_test(find_twice_returns_second_when_two_match),
+        unit_test(find_five_times_finds_fifth),
+        unit_test(find_twice_returns_first_when_two_match_and_reset),
     };
     return run_tests(tests);
 }
