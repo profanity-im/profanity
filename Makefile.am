@@ -80,7 +80,9 @@ test_sources = \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-	tests/test_command.c
+    tests/test_common.c \
+	tests/test_command.c \
+    tests/testsuite.c
 
 main_source = src/main.c
 
@@ -101,6 +103,6 @@ profanity_SOURCES = $(with_git_sources) $(main_source)
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = $(tests_with_git_sources)
-tests_testsuite_LDADD = -lheadunit -lstdc++ -lcmocka
+tests_testsuite_LDADD = -lcmocka
 
 man_MANS = docs/profanity.1
