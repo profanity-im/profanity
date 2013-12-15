@@ -41,7 +41,11 @@ char * accounts_find_enabled(char *prefix)
 
 void accounts_reset_all_search(void) {}
 void accounts_reset_enabled_search(void) {}
-void accounts_add(const char *jid, const char *altdomain) {}
+
+void accounts_add(const char *jid, const char *altdomain)
+{
+    check_expected(jid);
+}
 
 gchar** accounts_get_list(void)
 {

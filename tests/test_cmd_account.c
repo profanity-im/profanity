@@ -88,7 +88,7 @@ void cmd_account_show_shows_usage_when_no_arg(void **state)
 void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "show", "account_name" };
+    gchar *args[] = { "show", "account_name", NULL };
 
     expect_string(accounts_get_account, name, "account_name");
     will_return(accounts_get_account, NULL);
@@ -105,7 +105,7 @@ void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
 void cmd_account_show_shows_message_when_account_exists(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "show", "account_name" };
+    gchar *args[] = { "show", "account_name", NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
 
     expect_string(accounts_get_account, name, "account_name");
@@ -128,6 +128,21 @@ void cmd_account_add_shows_usage_when_no_arg(void **state)
     gchar *args[] = { "add", NULL };
 
     expect_string(cons_show, output, "Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_add_adds_account(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", "new_account", NULL };
+
+    expect_string(accounts_add, jid, "new_account");
+
+    expect_any_count(cons_show, output, 2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
