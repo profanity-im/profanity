@@ -53,7 +53,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 void cmd_account_list_shows_accounts(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "list" };
+    gchar *args[] = { "list", NULL };
 
     gchar **accounts = malloc(sizeof(gchar *) * 4);
     accounts[0] = strdup("account1");
@@ -65,6 +65,20 @@ void cmd_account_list_shows_accounts(void **state)
 
     expect_memory(cons_show_account_list, accounts, accounts, sizeof(accounts));
 
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_show_shows_usage_when_no_arg(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "show", NULL };
+
+    expect_string(cons_show, output, "Usage: some usage");
+    
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
