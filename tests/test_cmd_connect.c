@@ -170,3 +170,29 @@ void cmd_connect_asks_password_when_not_in_account(void **state)
     free(help);
     free(account);
 }
+
+void cmd_connect_shows_message_when_connecting_with_account(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "jabber_org", NULL };
+    ProfAccount *account = malloc(sizeof(ProfAccount));
+    account->password = "password";
+    account->name = "jabber_org";
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any(accounts_get_account, name);
+    will_return(accounts_get_account, account);
+
+    will_return(accounts_create_full_jid, strdup("user@jabber.org/laptop"));
+
+    expect_string(cons_show, output, "Connecting with account jabber_org as user@jabber.org/laptop");
+    will_return(jabber_connect_with_account, JABBER_CONNECTING);
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+    free(account);
+    
+}
