@@ -3,6 +3,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
@@ -14,7 +15,7 @@ static void test_with_connection_status(jabber_conn_status_t status)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     
     will_return(jabber_get_connection_status, status);
-    expect_string(cons_show, msg, "You are either connected already, or a login is in process.");
+    expect_string(cons_show, output, "You are either connected already, or a login is in process.");
     
     gboolean result = cmd_connect(NULL, *help);
     assert_true(result);
@@ -41,39 +42,28 @@ void cmd_connect_shows_message_when_undefined(void **state)
 {
     test_with_connection_status(JABBER_UNDEFINED);
 }
-/*
-void cmd_rooms_uses_account_default_when_no_arg(void **state)
+
+void cmd_connect_when_no_account(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    ProfAccount *account = malloc(sizeof(ProfAccount));
-    account->muc_service = "default_conf_server";
-    gchar *args[] = { NULL }; 
+    gchar *args[] = { "user@server.org", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, "account_name");
-    will_return(accounts_get_account, account);
-    expect_string(iq_room_list_request, conferencejid, "default_conf_server");
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
     
-    gboolean result = cmd_rooms(args, *help);
+    expect_string(accounts_get_account, name, "user@server.org");
+    will_return(accounts_get_account, NULL);
 
-    assert_true(result);
+    will_return(ui_ask_password, strdup("password"));
 
-    free(help);
-    free(account);
-}
+    expect_string(cons_show, output, "Connecting as user@server.org");
 
-void cmd_rooms_arg_used_when_passed(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "conf_server_arg" }; 
+    expect_string(jabber_connect_with_details, jid, "user@server.org");
+    expect_string(jabber_connect_with_details, passwd, "password");
+    expect_any(jabber_connect_with_details, altdomain);
+    will_return(jabber_connect_with_details, JABBER_CONNECTING);
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    expect_string(iq_room_list_request, conferencejid, "conf_server_arg");
-    
-    gboolean result = cmd_rooms(args, *help);
-
+    gboolean result = cmd_connect(args, *help);
     assert_true(result);
 
     free(help);
 }
-*/

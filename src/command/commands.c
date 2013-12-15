@@ -44,7 +44,6 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
-static char * _ask_password(void);
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
@@ -80,12 +79,12 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             }
 
             if (account->password == NULL) {
-                account->password = _ask_password();
+                account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
             conn_status = jabber_connect_with_account(account);
         } else {
-            char *passwd = _ask_password();
+            char *passwd = ui_ask_password();
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain);
@@ -2241,19 +2240,6 @@ cmd_xa(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_XA, "xa", args);
     return TRUE;
-}
-
-// helper function that asks the user for a password and saves it in passwd
-static char *
-_ask_password(void) {
-  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
-  status_bar_get_password();
-  status_bar_refresh();
-  inp_block();
-  inp_get_password(passwd);
-  inp_non_block();
-
-  return passwd;
 }
 
 // helper function for status change commands

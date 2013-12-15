@@ -26,6 +26,8 @@
 
 #include "ui/ui.h"
 
+char output[256];
+
 // ui startup and control
 void ui_init(void) {}
 void ui_load_colours(void) {}
@@ -173,6 +175,11 @@ gboolean ui_duck_exists(void)
 void ui_tidy_wins(void) {}
 void ui_prune_wins(void) {}
 
+char * ui_ask_password(void)
+{
+    return (char *)mock();
+}
+
 // create windows
 void create_title_bar(void) {}
 void create_status_bar(void) {}
@@ -191,7 +198,11 @@ void title_bar_draw(void) {}
 // console window actions
 void cons_show(const char * const msg, ...)
 {
-    check_expected(msg);
+    va_list args;
+    va_start(args, msg);
+    vsnprintf(output, sizeof(output), msg, args);
+    check_expected(output);
+    va_end(args);
 }
 
 void cons_about(void) {}
