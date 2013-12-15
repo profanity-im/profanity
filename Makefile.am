@@ -65,7 +65,8 @@ test_sources = \
     tests/config/mock_accounts.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
-	tests/test_command.c \
+	tests/test_cmd_connect.c \
+	tests/test_cmd_rooms.c \
 	tests/test_history.c \
 	tests/test_jid.c \
 	tests/test_parser.c \

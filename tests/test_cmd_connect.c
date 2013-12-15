@@ -14,39 +14,34 @@ static void test_with_connection_status(jabber_conn_status_t status)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     
     will_return(jabber_get_connection_status, status);
-    expect_string(cons_show, msg, "You are not currently connected.");
+    expect_string(cons_show, msg, "You are either connected already, or a login is in process.");
     
-    gboolean result = cmd_rooms(NULL, *help);
+    gboolean result = cmd_connect(NULL, *help);
     assert_true(result);
 
     free(help);
 }
 
-void cmd_rooms_shows_message_when_disconnected(void **state)
-{
-    test_with_connection_status(JABBER_DISCONNECTED);
-}
-
-void cmd_rooms_shows_message_when_disconnecting(void **state)
+void cmd_connect_shows_message_when_disconnecting(void **state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
-void cmd_rooms_shows_message_when_connecting(void **state)
+void cmd_connect_shows_message_when_connecting(void **state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
-void cmd_rooms_shows_message_when_started(void **state)
+void cmd_connect_shows_message_when_connected(void **state)
 {
-    test_with_connection_status(JABBER_STARTED);
+    test_with_connection_status(JABBER_CONNECTED);
 }
 
-void cmd_rooms_shows_message_when_undefined(void **state)
+void cmd_connect_shows_message_when_undefined(void **state)
 {
     test_with_connection_status(JABBER_UNDEFINED);
 }
-
+/*
 void cmd_rooms_uses_account_default_when_no_arg(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -67,7 +62,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     free(account);
 }
 
-void cmd_arg_used_when_passed(void **state)
+void cmd_rooms_arg_used_when_passed(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "conf_server_arg" }; 
@@ -81,3 +76,4 @@ void cmd_arg_used_when_passed(void **state)
 
     free(help);
 }
+*/
