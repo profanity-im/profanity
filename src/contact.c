@@ -166,6 +166,31 @@ p_contact_name_or_jid(const PContact contact)
     }
 }
 
+char *
+p_contact_create_display_string(const PContact contact, const char * const resource)
+{
+    GString *result_str = g_string_new("");
+
+    // use nickname if exists
+    if (contact->name != NULL) {
+        g_string_append(result_str, contact->name);
+    } else {
+        g_string_append(result_str, contact->barejid);
+    }
+
+    // add resource if not default provided by profanity
+    if (strcmp(resource, "__prof_default") != 0) {
+        g_string_append(result_str, " (");
+        g_string_append(result_str, resource);
+        g_string_append(result_str, ")");
+    }
+
+    char *result = result_str->str;
+    g_string_free(result_str, FALSE);
+
+    return result;
+}
+
 static Resource *
 _highest_presence(Resource *first, Resource *second)
 {

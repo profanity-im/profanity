@@ -1,192 +1,167 @@
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
 #include <stdlib.h>
-#include <string.h>
-#include <head-unit.h>
+
 #include "jid.h"
 
-void create_jid_from_null_returns_null(void)
+void create_jid_from_null_returns_null(void **state)
 {
     Jid *result = jid_create(NULL);
-    assert_is_null(result);
+    assert_null(result);
 }
 
-void create_jid_from_empty_string_returns_null(void)
+void create_jid_from_empty_string_returns_null(void **state)
 {
     Jid *result = jid_create("");
-    assert_is_null(result);
+    assert_null(result);
 }
 
-void create_jid_from_full_returns_full(void)
+void create_jid_from_full_returns_full(void **state)
 {
     Jid *result = jid_create("myuser@mydomain/laptop");
-    assert_string_equals("myuser@mydomain/laptop", result->fulljid);
+    assert_string_equal("myuser@mydomain/laptop", result->fulljid);
 }
 
-void create_jid_from_full_returns_bare(void)
+void create_jid_from_full_returns_bare(void **state)
 {
     Jid *result = jid_create("myuser@mydomain/laptop");
-    assert_string_equals("myuser@mydomain", result->barejid);
+    assert_string_equal("myuser@mydomain", result->barejid);
 }
 
-void create_jid_from_full_returns_resourcepart(void)
+void create_jid_from_full_returns_resourcepart(void **state)
 {
     Jid *result = jid_create("myuser@mydomain/laptop");
-    assert_string_equals("laptop", result->resourcepart);
+    assert_string_equal("laptop", result->resourcepart);
 }
 
-void create_jid_from_full_returns_localpart(void)
+void create_jid_from_full_returns_localpart(void **state)
 {
     Jid *result = jid_create("myuser@mydomain/laptop");
-    assert_string_equals("myuser", result->localpart);
+    assert_string_equal("myuser", result->localpart);
 }
 
-void create_jid_from_full_returns_domainpart(void)
+void create_jid_from_full_returns_domainpart(void **state)
 {
     Jid *result = jid_create("myuser@mydomain/laptop");
-    assert_string_equals("mydomain", result->domainpart);
+    assert_string_equal("mydomain", result->domainpart);
 }
 
-void create_jid_from_full_nolocal_returns_full(void)
+void create_jid_from_full_nolocal_returns_full(void **state)
 {
     Jid *result = jid_create("mydomain/laptop");
-    assert_string_equals("mydomain/laptop", result->fulljid);
+    assert_string_equal("mydomain/laptop", result->fulljid);
 }
 
-void create_jid_from_full_nolocal_returns_bare(void)
+void create_jid_from_full_nolocal_returns_bare(void **state)
 {
     Jid *result = jid_create("mydomain/laptop");
-    assert_string_equals("mydomain", result->barejid);
+    assert_string_equal("mydomain", result->barejid);
 }
 
-void create_jid_from_full_nolocal_returns_resourcepart(void)
+void create_jid_from_full_nolocal_returns_resourcepart(void **state)
 {
     Jid *result = jid_create("mydomain/laptop");
-    assert_string_equals("laptop", result->resourcepart);
+    assert_string_equal("laptop", result->resourcepart);
 }
 
-void create_jid_from_full_nolocal_returns_domainpart(void)
+void create_jid_from_full_nolocal_returns_domainpart(void **state)
 {
     Jid *result = jid_create("mydomain/laptop");
-    assert_string_equals("mydomain", result->domainpart);
+    assert_string_equal("mydomain", result->domainpart);
 }
 
-void create_jid_from_full_nolocal_returns_null_localpart(void)
+void create_jid_from_full_nolocal_returns_null_localpart(void **state)
 {
     Jid *result = jid_create("mydomain/laptop");
-    assert_is_null(result->localpart);
+    assert_null(result->localpart);
 }
 
-void create_jid_from_bare_returns_null_full(void)
+void create_jid_from_bare_returns_null_full(void **state)
 {
     Jid *result = jid_create("myuser@mydomain");
-    assert_is_null(result->fulljid);
+    assert_null(result->fulljid);
 }
 
-void create_jid_from_bare_returns_null_resource(void)
+void create_jid_from_bare_returns_null_resource(void **state)
 {
     Jid *result = jid_create("myuser@mydomain");
-    assert_is_null(result->resourcepart);
+    assert_null(result->resourcepart);
 }
 
-void create_jid_from_bare_returns_bare(void)
+void create_jid_from_bare_returns_bare(void **state)
 {
     Jid *result = jid_create("myuser@mydomain");
-    assert_string_equals("myuser@mydomain", result->barejid);
+    assert_string_equal("myuser@mydomain", result->barejid);
 }
 
-void create_jid_from_bare_returns_localpart(void)
+void create_jid_from_bare_returns_localpart(void **state)
 {
     Jid *result = jid_create("myuser@mydomain");
-    assert_string_equals("myuser", result->localpart);
+    assert_string_equal("myuser", result->localpart);
 }
 
-void create_jid_from_bare_returns_domainpart(void)
+void create_jid_from_bare_returns_domainpart(void **state)
 {
     Jid *result = jid_create("myuser@mydomain");
-    assert_string_equals("mydomain", result->domainpart);
+    assert_string_equal("mydomain", result->domainpart);
 }
 
-void create_room_jid_returns_room(void)
+void create_room_jid_returns_room(void **state)
 {
     Jid *result = jid_create_from_bare_and_resource("room@conference.domain.org", "myname");
 
-    assert_string_equals("room@conference.domain.org", result->barejid);
+    assert_string_equal("room@conference.domain.org", result->barejid);
 }
 
-void create_room_jid_returns_nick(void)
+void create_room_jid_returns_nick(void **state)
 {
     Jid *result = jid_create_from_bare_and_resource("room@conference.domain.org", "myname");
 
-    assert_string_equals("myname", result->resourcepart);
+    assert_string_equal("myname", result->resourcepart);
 }
 
-void create_with_slash_in_resource(void)
+void create_with_slash_in_resource(void **state)
 {
     Jid *result = jid_create("room@conference.domain.org/my/nick");
 
-    assert_string_equals("room", result->localpart);
-    assert_string_equals("conference.domain.org", result->domainpart);
-    assert_string_equals("my/nick", result->resourcepart);
-    assert_string_equals("room@conference.domain.org", result->barejid);
-    assert_string_equals("room@conference.domain.org/my/nick", result->fulljid);
+    assert_string_equal("room", result->localpart);
+    assert_string_equal("conference.domain.org", result->domainpart);
+    assert_string_equal("my/nick", result->resourcepart);
+    assert_string_equal("room@conference.domain.org", result->barejid);
+    assert_string_equal("room@conference.domain.org/my/nick", result->fulljid);
 }
 
-void create_with_at_in_resource(void)
+void create_with_at_in_resource(void **state)
 {
     Jid *result = jid_create("room@conference.domain.org/my@nick");
 
-    assert_string_equals("room", result->localpart);
-    assert_string_equals("conference.domain.org", result->domainpart);
-    assert_string_equals("my@nick", result->resourcepart);
-    assert_string_equals("room@conference.domain.org", result->barejid);
-    assert_string_equals("room@conference.domain.org/my@nick", result->fulljid);
+    assert_string_equal("room", result->localpart);
+    assert_string_equal("conference.domain.org", result->domainpart);
+    assert_string_equal("my@nick", result->resourcepart);
+    assert_string_equal("room@conference.domain.org", result->barejid);
+    assert_string_equal("room@conference.domain.org/my@nick", result->fulljid);
 }
 
-void create_with_at_and_slash_in_resource(void)
+void create_with_at_and_slash_in_resource(void **state)
 {
     Jid *result = jid_create("room@conference.domain.org/my@nick/something");
 
-    assert_string_equals("room", result->localpart);
-    assert_string_equals("conference.domain.org", result->domainpart);
-    assert_string_equals("my@nick/something", result->resourcepart);
-    assert_string_equals("room@conference.domain.org", result->barejid);
-    assert_string_equals("room@conference.domain.org/my@nick/something", result->fulljid);
+    assert_string_equal("room", result->localpart);
+    assert_string_equal("conference.domain.org", result->domainpart);
+    assert_string_equal("my@nick/something", result->resourcepart);
+    assert_string_equal("room@conference.domain.org", result->barejid);
+    assert_string_equal("room@conference.domain.org/my@nick/something", result->fulljid);
 }
 
-void create_full_with_trailing_slash(void)
+void create_full_with_trailing_slash(void **state)
 {
     Jid *result = jid_create("room@conference.domain.org/nick/");
 
-    assert_string_equals("room", result->localpart);
-    assert_string_equals("conference.domain.org", result->domainpart);
-    assert_string_equals("nick/", result->resourcepart);
-    assert_string_equals("room@conference.domain.org", result->barejid);
-    assert_string_equals("room@conference.domain.org/nick/", result->fulljid);
-}
-
-void register_jid_tests(void)
-{
-    TEST_MODULE("jid tests");
-    TEST(create_jid_from_null_returns_null);
-    TEST(create_jid_from_empty_string_returns_null);
-    TEST(create_jid_from_full_returns_full);
-    TEST(create_jid_from_full_returns_bare);
-    TEST(create_jid_from_full_returns_resourcepart);
-    TEST(create_jid_from_full_returns_localpart);
-    TEST(create_jid_from_full_returns_domainpart);
-    TEST(create_jid_from_full_nolocal_returns_full);
-    TEST(create_jid_from_full_nolocal_returns_bare);
-    TEST(create_jid_from_full_nolocal_returns_resourcepart);
-    TEST(create_jid_from_full_nolocal_returns_domainpart);
-    TEST(create_jid_from_full_nolocal_returns_null_localpart);
-    TEST(create_jid_from_bare_returns_null_full);
-    TEST(create_jid_from_bare_returns_null_resource);
-    TEST(create_jid_from_bare_returns_bare);
-    TEST(create_jid_from_bare_returns_localpart);
-    TEST(create_jid_from_bare_returns_domainpart);
-    TEST(create_room_jid_returns_room);
-    TEST(create_room_jid_returns_nick);
-    TEST(create_with_slash_in_resource);
-    TEST(create_with_at_in_resource);
-    TEST(create_with_at_and_slash_in_resource);
-    TEST(create_full_with_trailing_slash);
+    assert_string_equal("room", result->localpart);
+    assert_string_equal("conference.domain.org", result->domainpart);
+    assert_string_equal("nick/", result->resourcepart);
+    assert_string_equal("room@conference.domain.org", result->barejid);
+    assert_string_equal("room@conference.domain.org/nick/", result->fulljid);
 }

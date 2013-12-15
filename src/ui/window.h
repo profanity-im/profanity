@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef UI_WINDOW_H
+#define UI_WINDOW_H
 
 #include "config.h"
 
@@ -52,17 +52,25 @@ typedef struct prof_win_t {
     int paged;
     int unread;
     int history_shown;
-    void (*print_time)(struct prof_win_t *self, char show_char);
-    void (*print_line)(struct prof_win_t *self, const char * const msg, ...);
-    void (*refresh_win)(struct prof_win_t *self);
-    void (*presence_colour_on)(struct prof_win_t *self, const char * const presence);
-    void (*presence_colour_off)(struct prof_win_t *self, const char * const presence);
-    void (*show_contact)(struct prof_win_t *self, PContact contact);
     gboolean (*handle_error_message)(struct prof_win_t *self,
         const char * const from, const char * const err_msg);
+    void (*print_incoming_message)(struct prof_win_t *self, GTimeVal *tv_stamp,
+        const char * const from, const char * const message);
 } ProfWin;
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
 void win_free(ProfWin *window);
+void win_print_line(ProfWin *self, const char show_char, int attrs,
+    const char * const msg, ...);
+void win_refresh(ProfWin *window);
+void win_page_off(ProfWin *window);
+void win_print_time(ProfWin *window, char show_char);
+void win_presence_colour_on(ProfWin *window, const char * const presence);
+void win_presence_colour_off(ProfWin *window, const char * const presence);
+void win_show_contact(ProfWin *window, PContact contact);
+void win_show_status_string(ProfWin *window, const char * const from,
+    const char * const show, const char * const status,
+    GDateTime *last_activity, const char * const pre,
+    const char * const default_show);
 
 #endif
