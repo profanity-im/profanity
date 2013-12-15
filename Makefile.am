@@ -31,6 +31,7 @@ core_sources = \
     src/ui/windows.c src/ui/windows.h \
     src/ui/muc_window.c src/ui/muc_window.h \
 	src/command/command.h src/command/command.c src/command/history.c \
+	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
@@ -50,6 +51,7 @@ test_sources = \
 	src/xmpp/xmpp.h \
 	src/ui/ui.h \
 	src/command/command.h src/command/command.c src/command/history.c \
+	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \

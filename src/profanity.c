@@ -687,7 +687,7 @@ _shutdown(void)
     prefs_close();
     theme_close();
     accounts_close();
-    cmd_close();
+    cmd_uninit();
     log_close();
 }
 
