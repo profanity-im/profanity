@@ -56,6 +56,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(jabber_get_account_name, "account_name");
+    expect_string(accounts_get_account, name, "account_name");
     will_return(accounts_get_account, account);
     expect_string(iq_room_list_request, conferencejid, "default_conf_server");
     
