@@ -54,7 +54,10 @@ ProfAccount* accounts_get_account(const char * const name)
     return (ProfAccount *)mock();
 }
 
-void accounts_free_account(ProfAccount *account) {}
+void accounts_free_account(ProfAccount *account)
+{
+    check_expected(account);
+}
 
 gboolean accounts_enable(const char * const name)
 {

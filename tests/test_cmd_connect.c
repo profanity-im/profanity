@@ -166,6 +166,8 @@ void cmd_connect_asks_password_when_not_in_account(void **state)
     expect_any(jabber_connect_with_account, account);
     will_return(jabber_connect_with_account, JABBER_CONNECTING);
 
+    expect_any(accounts_free_account, account);
+
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
 
@@ -192,6 +194,8 @@ void cmd_connect_shows_message_when_connecting_with_account(void **state)
 
     expect_any(jabber_connect_with_account, account);
     will_return(jabber_connect_with_account, JABBER_CONNECTING);
+
+    expect_any(accounts_free_account, account);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -220,10 +224,38 @@ void cmd_connect_connects_with_account(void **state)
     expect_memory(jabber_connect_with_account, account, account, sizeof(ProfAccount));
     will_return(jabber_connect_with_account, JABBER_CONNECTING);
 
+    expect_any(accounts_free_account, account);
+
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
 
     free(help);
     free(account);
+}
 
+void cmd_connect_frees_account_after_connecting(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "jabber_org", NULL };
+    ProfAccount *account = malloc(sizeof(ProfAccount));
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any(accounts_get_account, name);
+    will_return(accounts_get_account, account);
+
+    will_return(accounts_create_full_jid, strdup("user@jabber.org/laptop"));
+
+    expect_any(cons_show, output);
+
+    expect_any(jabber_connect_with_account, account);
+    will_return(jabber_connect_with_account, JABBER_CONNECTING);
+
+    expect_memory(accounts_free_account, account, account, sizeof(ProfAccount));
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+    free(account);
 }

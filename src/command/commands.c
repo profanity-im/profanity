@@ -78,6 +78,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
             conn_status = jabber_connect_with_account(account);
+            accounts_free_account(account);
         } else {
             char *passwd = ui_ask_password();
             jid = strdup(lower);
@@ -92,7 +93,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             log_debug("Connection attempt for %s failed", jid);
         }
 
-        accounts_free_account(account);
         free(jid);
 
         result = TRUE;
