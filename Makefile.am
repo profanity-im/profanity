@@ -67,6 +67,7 @@ test_sources = \
     tests/test_autocomplete.c \
     tests/test_common.c \
 	tests/test_cmd_connect.c \
+	tests/test_cmd_account.c \
 	tests/test_cmd_rooms.c \
 	tests/test_history.c \
 	tests/test_jid.c \

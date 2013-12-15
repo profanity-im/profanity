@@ -6,6 +6,7 @@
 #include "test_autocomplete.h"
 #include "test_common.h"
 #include "test_cmd_connect.h"
+#include "test_cmd_account.h"
 #include "test_cmd_rooms.h"
 #include "test_history.h"
 #include "test_jid.h"
@@ -26,6 +27,9 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_shows_message_when_connecting_with_account),
         unit_test(cmd_connect_connects_with_account),
         unit_test(cmd_connect_frees_account_after_connecting),
+
+        unit_test(cmd_account_shows_usage_when_not_connected_and_no_args),
+        unit_test(cmd_account_shows_account_when_connected_and_no_args),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
