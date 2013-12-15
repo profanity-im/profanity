@@ -1,5 +1,5 @@
 /*
- * notifier.h
+ * muc_window.h
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,22 +20,14 @@
  *
  */
 
-#ifndef NOTIFIER_H
-#define NOTIFIER_H
+#ifndef UI_MUC_WINDOW_H
+#define UI_MUC_WINDOW_H
 
-void notifier_init(void);
-void notifier_uninit(void);
+#include <glib.h>
 
-void notify_typing(const char * const handle);
-void notify_message(const char * const handle, int win);
-void notify_room_message(const char * const handle, const char * const room,
-    int win);
-void notify_remind(void);
-void notify_invite(const char * const from, const char * const room,
-    const char * const reason);
-void notify_subscription(const char * const from);
+#include "ui/window.h"
 
-void notify(const char * const message, int timeout,
-    const char * const category);
+gboolean muc_handle_error_message(ProfWin *self, const char * const from,
+    const char * const err_msg);
 
 #endif

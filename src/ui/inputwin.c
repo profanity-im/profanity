@@ -40,6 +40,7 @@
 #include "config/theme.h"
 #include "log.h"
 #include "profanity.h"
+#include "roster_list.h"
 #include "ui/ui.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"

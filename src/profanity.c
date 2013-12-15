@@ -42,11 +42,11 @@
 #include "command/command.h"
 #include "common.h"
 #include "contact.h"
+#include "roster_list.h"
 #include "log.h"
 #include "muc.h"
 #include "plugins/plugins.h"
 #include "resource.h"
-#include "ui/notifier.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
@@ -454,7 +454,7 @@ prof_handle_contact_online(char *contact, Resource *resource,
 {
     gboolean updated = roster_update_presence(contact, resource, last_activity);
 
-    if (updated) {
+    if (updated && prefs_get_boolean(PREF_STATUSES)) {
         PContact result = roster_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
             if (strcmp(p_contact_subscription(result), "none") != 0) {
@@ -471,7 +471,7 @@ prof_handle_contact_offline(char *contact, char *resource, char *status)
 {
     gboolean updated = roster_contact_offline(contact, resource, status);
 
-    if (resource != NULL && updated) {
+    if (resource != NULL && updated && prefs_get_boolean(PREF_STATUSES)) {
         Jid *jid = jid_create_from_bare_and_resource(contact, resource);
         PContact result = roster_get_contact(contact);
         if (p_contact_subscription(result) != NULL) {
@@ -505,7 +505,31 @@ prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
-        ui_idle();
+        GSList *recipients = ui_get_recipients();
+        GSList *curr = recipients;
+
+        while (curr != NULL) {
+            char *recipient = curr->data;
+            chat_session_no_activity(recipient);
+
+            if (chat_session_is_gone(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                message_send_gone(recipient);
+            } else if (chat_session_is_inactive(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                message_send_inactive(recipient);
+            } else if (prefs_get_boolean(PREF_OUTTYPE) &&
+                    chat_session_is_paused(recipient) &&
+                    !chat_session_get_sent(recipient)) {
+                message_send_paused(recipient);
+            }
+
+            curr = g_slist_next(curr);
+        }
+
+        if (recipients != NULL) {
+            g_slist_free(recipients);
+        }
     }
 }
 
@@ -705,7 +729,7 @@ _shutdown(void)
     prefs_close();
     theme_close();
     accounts_close();
-    cmd_close();
+    cmd_uninit();
     log_close();
     plugins_shutdown();
 }

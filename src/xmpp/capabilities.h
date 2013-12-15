@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef CAPABILITIES_H
-#define CAPABILITIES_H
+#ifndef XMPP_CAPABILITIES_H
+#define XMPP_CAPABILITIES_H
 
 #include <strophe.h>
 

@@ -27,7 +27,6 @@
 #include "log.h"
 #include "plugins/callbacks.h"
 #include "profanity.h"
-#include "ui/notifier.h"
 #include "ui/windows.h"
 #include "ui/ui.h"
 
@@ -162,6 +161,6 @@ void
 api_win_show(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    window->print_time(window, '-');
+    win_print_time(window, '-');
     wprintw(window->win, "%s\n", line);
 }

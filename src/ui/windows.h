@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef WINDOWS_H
-#define WINDOWS_H
+#ifndef UI_WINDOWS_H
+#define UI_WINDOWS_H
 
 #include "ui/window.h"
 

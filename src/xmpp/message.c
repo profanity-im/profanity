@@ -33,6 +33,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/message.h"
 #include "xmpp/roster.h"
+#include "roster_list.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
 

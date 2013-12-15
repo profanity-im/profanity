@@ -118,10 +118,10 @@ AC_CHECK_LIB([glib-2.0], [main], [],
     [AC_MSG_ERROR([glib-2.0 is required for profanity])])
 AC_CHECK_LIB([curl], [main], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
-AC_CHECK_LIB([headunit], [main], [],
-    [AC_MSG_NOTICE([headunit not found, will not be able to run tests])])
 AC_CHECK_LIB([dl], [main], [],
     [AC_MSG_ERROR([dl library needed to run C plugins])])
+AC_CHECK_LIB([cmocka], [main], [],
+    [AC_MSG_NOTICE([cmocka not found, will not be able to run tests])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])

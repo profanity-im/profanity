@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef UI_H
-#define UI_H
+#ifndef UI_UI_H
+#define UI_UI_H
 
 #include "prof_config.h"
 
@@ -48,7 +48,7 @@ void ui_refresh(void);
 void ui_close(void);
 void ui_resize(const int ch, const char * const input,
     const int size);
-void ui_idle(void);
+GSList* ui_get_recipients(void);
 void ui_handle_special_keys(const wint_t * const ch, const char * const inp,
     const int size);
 void ui_switch_win(const int i);
@@ -241,5 +241,20 @@ void inp_non_block(void);
 void inp_block(void);
 void inp_get_password(char *passwd);
 void inp_replace_input(char *input, const char * const new_input, int *size);
+
+// desktop notifier actions
+void notifier_init(void);
+void notifier_uninit(void);
+
+void notify_typing(const char * const handle);
+void notify_message(const char * const handle, int win);
+void notify_room_message(const char * const handle, const char * const room,
+    int win);
+void notify_remind(void);
+void notify_invite(const char * const from, const char * const room,
+    const char * const reason);
+void notify_subscription(const char * const from);
+void notify(const char * const message, int timeout,
+    const char * const category);
 
 #endif

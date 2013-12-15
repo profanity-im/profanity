@@ -1,5 +1,5 @@
 /*
- * roster.h
+ * muc_window.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -20,13 +20,20 @@
  *
  */
 
-#ifndef XMPP_ROSTER_H
-#define XMPP_ROSTER_H
+#include <glib.h>
 
-void roster_add_handlers(void);
-void roster_request(void);
+#include "ui/window.h"
 
-void roster_update(const char * const barejid, const char * const name,
-    GSList *groups, const char * const subscription, gboolean pending_out);
+gboolean
+muc_handle_error_message(ProfWin *self, const char * const from,
+    const char * const err_msg)
+{
+    gboolean handled = FALSE;
+    if (g_strcmp0(err_msg, "conflict") == 0) {
+        win_print_line(self, '-', 0, "Nickname already in use.");
+        win_refresh(self);
+        handled = TRUE;
+    }
 
-#endif
+    return handled;
+}

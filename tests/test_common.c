@@ -1,9 +1,11 @@
-#include <stdlib.h>
-#include <string.h>
-#include <head-unit.h>
 #include "common.h"
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+#include <stdlib.h>
 
-void replace_one_substr(void)
+void replace_one_substr(void **state)
 {
     char *string = "it is a string";
     char *sub = "is";
@@ -11,10 +13,10 @@ void replace_one_substr(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("it was a string", result);
+    assert_string_equal("it was a string", result);
 }
 
-void replace_one_substr_beginning(void)
+void replace_one_substr_beginning(void **state)
 {
     char *string = "it is a string";
     char *sub = "it";
@@ -22,10 +24,10 @@ void replace_one_substr_beginning(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("that is a string", result);
+    assert_string_equal("that is a string", result);
 }
 
-void replace_one_substr_end(void)
+void replace_one_substr_end(void **state)
 {
     char *string = "it is a string";
     char *sub = "string";
@@ -33,10 +35,10 @@ void replace_one_substr_end(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("it is a thing", result);
+    assert_string_equal("it is a thing", result);
 }
 
-void replace_two_substr(void)
+void replace_two_substr(void **state)
 {
     char *string = "it is a is string";
     char *sub = "is";
@@ -44,10 +46,10 @@ void replace_two_substr(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("it was a was string", result);
+    assert_string_equal("it was a was string", result);
 }
 
-void replace_char(void)
+void replace_char(void **state)
 {
     char *string = "some & a thing & something else";
     char *sub = "&";
@@ -55,10 +57,10 @@ void replace_char(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("some &amp; a thing &amp; something else", result);
+    assert_string_equal("some &amp; a thing &amp; something else", result);
 }
 
-void replace_when_none(void)
+void replace_when_none(void **state)
 {
     char *string = "its another string";
     char *sub = "haha";
@@ -66,10 +68,10 @@ void replace_when_none(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("its another string", result);
+    assert_string_equal("its another string", result);
 }
 
-void replace_when_match(void)
+void replace_when_match(void **state)
 {
     char *string = "hello";
     char *sub = "hello";
@@ -77,10 +79,10 @@ void replace_when_match(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("goodbye", result);
+    assert_string_equal("goodbye", result);
 }
 
-void replace_when_string_empty(void)
+void replace_when_string_empty(void **state)
 {
     char *string = "";
     char *sub = "hello";
@@ -88,10 +90,10 @@ void replace_when_string_empty(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("", result);
+    assert_string_equal("", result);
 }
 
-void replace_when_string_null(void)
+void replace_when_string_null(void **state)
 {
     char *string = NULL;
     char *sub = "hello";
@@ -99,10 +101,10 @@ void replace_when_string_null(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_is_null(result);
+    assert_null(result);
 }
 
-void replace_when_sub_empty(void)
+void replace_when_sub_empty(void **state)
 {
     char *string = "hello";
     char *sub = "";
@@ -110,10 +112,10 @@ void replace_when_sub_empty(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("hello", result);
+    assert_string_equal("hello", result);
 }
 
-void replace_when_sub_null(void)
+void replace_when_sub_null(void **state)
 {
     char *string = "hello";
     char *sub = NULL;
@@ -121,10 +123,10 @@ void replace_when_sub_null(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("hello", result);
+    assert_string_equal("hello", result);
 }
 
-void replace_when_new_empty(void)
+void replace_when_new_empty(void **state)
 {
     char *string = "hello";
     char *sub = "hello";
@@ -132,10 +134,10 @@ void replace_when_new_empty(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("", result);
+    assert_string_equal("", result);
 }
 
-void replace_when_new_null(void)
+void replace_when_new_null(void **state)
 {
     char *string = "hello";
     char *sub = "hello";
@@ -143,10 +145,10 @@ void replace_when_new_null(void)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equals("hello", result);
+    assert_string_equal("hello", result);
 }
 
-void compare_win_nums_less(void)
+void compare_win_nums_less(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(2);
     gconstpointer b = GINT_TO_POINTER(3);
@@ -156,7 +158,7 @@ void compare_win_nums_less(void)
     assert_true(result < 0);
 }
 
-void compare_win_nums_equal(void)
+void compare_win_nums_equal(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(5);
     gconstpointer b = GINT_TO_POINTER(5);
@@ -166,7 +168,7 @@ void compare_win_nums_equal(void)
     assert_true(result == 0);
 }
 
-void compare_win_nums_greater(void)
+void compare_win_nums_greater(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(7);
     gconstpointer b = GINT_TO_POINTER(6);
@@ -176,7 +178,7 @@ void compare_win_nums_greater(void)
     assert_true(result > 0);
 }
 
-void compare_0s_equal(void)
+void compare_0s_equal(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(0);
     gconstpointer b = GINT_TO_POINTER(0);
@@ -186,7 +188,7 @@ void compare_0s_equal(void)
     assert_true(result == 0);
 }
 
-void compare_0_greater_than_1(void)
+void compare_0_greater_than_1(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(0);
     gconstpointer b = GINT_TO_POINTER(1);
@@ -196,7 +198,7 @@ void compare_0_greater_than_1(void)
     assert_true(result > 0);
 }
 
-void compare_1_less_than_0(void)
+void compare_1_less_than_0(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(1);
     gconstpointer b = GINT_TO_POINTER(0);
@@ -206,7 +208,7 @@ void compare_1_less_than_0(void)
     assert_true(result < 0);
 }
 
-void compare_0_less_than_11(void)
+void compare_0_less_than_11(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(0);
     gconstpointer b = GINT_TO_POINTER(11);
@@ -216,7 +218,7 @@ void compare_0_less_than_11(void)
     assert_true(result < 0);
 }
 
-void compare_11_greater_than_0(void)
+void compare_11_greater_than_0(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(11);
     gconstpointer b = GINT_TO_POINTER(0);
@@ -226,7 +228,7 @@ void compare_11_greater_than_0(void)
     assert_true(result > 0);
 }
 
-void compare_0_greater_than_9(void)
+void compare_0_greater_than_9(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(0);
     gconstpointer b = GINT_TO_POINTER(9);
@@ -236,7 +238,7 @@ void compare_0_greater_than_9(void)
     assert_true(result > 0);
 }
 
-void compare_9_less_than_0(void)
+void compare_9_less_than_0(void **state)
 {
     gconstpointer a = GINT_TO_POINTER(9);
     gconstpointer b = GINT_TO_POINTER(0);
@@ -246,17 +248,17 @@ void compare_9_less_than_0(void)
     assert_true(result < 0);
 }
 
-void next_available_when_only_console(void)
+void next_available_when_only_console(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(2, result);
+    assert_int_equal(2, result);
 }
 
-void next_available_3_at_end(void)
+void next_available_3_at_end(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -264,10 +266,10 @@ void next_available_3_at_end(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(3, result);
+    assert_int_equal(3, result);
 }
 
-void next_available_9_at_end(void)
+void next_available_9_at_end(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -281,10 +283,10 @@ void next_available_9_at_end(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(9, result);
+    assert_int_equal(9, result);
 }
 
-void next_available_0_at_end(void)
+void next_available_0_at_end(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -299,10 +301,10 @@ void next_available_0_at_end(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(0, result);
+    assert_int_equal(0, result);
 }
 
-void next_available_2_in_first_gap(void)
+void next_available_2_in_first_gap(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -314,10 +316,10 @@ void next_available_2_in_first_gap(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(2, result);
+    assert_int_equal(2, result);
 }
 
-void next_available_9_in_first_gap(void)
+void next_available_9_in_first_gap(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -336,10 +338,10 @@ void next_available_9_in_first_gap(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(9, result);
+    assert_int_equal(9, result);
 }
 
-void next_available_0_in_first_gap(void)
+void next_available_0_in_first_gap(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -358,10 +360,10 @@ void next_available_0_in_first_gap(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(0, result);
+    assert_int_equal(0, result);
 }
 
-void next_available_11_in_first_gap(void)
+void next_available_11_in_first_gap(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -380,10 +382,10 @@ void next_available_11_in_first_gap(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(11, result);
+    assert_int_equal(11, result);
 }
 
-void next_available_24_first_big_gap(void)
+void next_available_24_first_big_gap(void **state)
 {
     GList *used = NULL;
     used = g_list_append(used, GINT_TO_POINTER(1));
@@ -420,42 +422,5 @@ void next_available_24_first_big_gap(void)
 
     int result = get_next_available_win_num(used);
 
-    assert_int_equals(24, result);
-}
-
-void register_common_tests(void)
-{
-    TEST_MODULE("common tests");
-    TEST(replace_one_substr);
-    TEST(replace_one_substr_beginning);
-    TEST(replace_one_substr_end);
-    TEST(replace_two_substr);
-    TEST(replace_char);
-    TEST(replace_when_none);
-    TEST(replace_when_match);
-    TEST(replace_when_string_empty);
-    TEST(replace_when_string_null);
-    TEST(replace_when_sub_empty);
-    TEST(replace_when_sub_null);
-    TEST(replace_when_new_empty);
-    TEST(replace_when_new_null);
-    TEST(compare_win_nums_less);
-    TEST(compare_win_nums_equal);
-    TEST(compare_win_nums_greater);
-    TEST(compare_0s_equal);
-    TEST(compare_0_greater_than_1);
-    TEST(compare_1_less_than_0);
-    TEST(compare_0_less_than_11);
-    TEST(compare_11_greater_than_0);
-    TEST(compare_0_greater_than_9);
-    TEST(compare_9_less_than_0);
-    TEST(next_available_when_only_console);
-    TEST(next_available_3_at_end);
-    TEST(next_available_9_at_end);
-    TEST(next_available_0_at_end);
-    TEST(next_available_2_in_first_gap);
-    TEST(next_available_9_in_first_gap);
-    TEST(next_available_0_in_first_gap);
-    TEST(next_available_11_in_first_gap);
-    TEST(next_available_24_first_big_gap);
+    assert_int_equal(24, result);
 }

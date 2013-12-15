@@ -34,7 +34,6 @@
 
 #include "log.h"
 #include "muc.h"
-#include "ui/notifier.h"
 #include "ui/ui.h"
 
 void

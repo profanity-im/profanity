@@ -33,6 +33,7 @@
 #endif
 
 #include "common.h"
+#include "roster_list.h"
 #include "config/theme.h"
 #include "ui/ui.h"
 #include "ui/window.h"
@@ -207,9 +208,7 @@ void
 wins_refresh_current(void)
 {
     ProfWin *window = wins_get_current();
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    prefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
+    win_refresh(window);
 }
 
 void
@@ -350,7 +349,7 @@ wins_lost_connection(void)
     while (curr != NULL) {
         ProfWin *window = curr->data;
         if (window->type != WIN_CONSOLE) {
-            window->print_time(window, '-');
+            win_print_time(window, '-');
             wattron(window->win, COLOUR_ERROR);
             wprintw(window->win, "%s\n", "Lost connection.");
             wattroff(window->win, COLOUR_ERROR);

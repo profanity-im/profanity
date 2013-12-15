@@ -25,15 +25,10 @@
 
 #include <glib.h>
 
-// Command help strings
-typedef struct cmd_help_t {
-    const gchar *usage;
-    const gchar *short_help;
-    const gchar *long_help[50];
-} CommandHelp;
+GHashTable *commands;
 
 void cmd_init(void);
-void cmd_close(void);
+void cmd_uninit(void);
 
 void cmd_autocomplete(char *input, int *size);
 void cmd_reset_autocomplete(void);

@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef IQ_H
-#define IQ_H
+#ifndef XMPP_IQ_H
+#define XMPP_IQ_H
 
 void iq_add_handlers(void);
 void iq_roster_request(void);
