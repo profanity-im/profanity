@@ -84,3 +84,20 @@ void cmd_account_show_shows_usage_when_no_arg(void **state)
 
     free(help);
 }
+
+void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "show", "account_name" };
+
+    expect_string(accounts_get_account, name, "account_name");
+    will_return(accounts_get_account, NULL);
+
+    expect_string(cons_show, output, "No such account.");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
