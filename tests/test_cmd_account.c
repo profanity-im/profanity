@@ -165,3 +165,67 @@ void cmd_account_add_shows_message(void **state)
 
     free(help);
 }
+
+void cmd_account_enable_shows_usage_when_no_arg(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "enable", NULL };
+
+    expect_string(cons_show, output, "Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_enable_enables_account(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "enable", "account_name" };
+
+    expect_string(accounts_enable, name, "account_name");
+    will_return(accounts_enable, TRUE);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_enable_shows_message_when_enabled(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "enable", "account_name" };
+
+    expect_any(accounts_enable, name);
+    will_return(accounts_enable, TRUE);
+
+    expect_string(cons_show, output, "Account enabled.");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "enable", "account_name" };
+
+    expect_any(accounts_enable, name);
+    will_return(accounts_enable, FALSE);
+
+    expect_string(cons_show, output, "No such account: account_name");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}

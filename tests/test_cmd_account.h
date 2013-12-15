@@ -7,3 +7,7 @@ void cmd_account_show_shows_message_when_account_exists(void **state);
 void cmd_account_add_shows_usage_when_no_arg(void **state);
 void cmd_account_add_adds_account(void **state);
 void cmd_account_add_shows_message(void **state);
+void cmd_account_enable_shows_usage_when_no_arg(void **state);
+void cmd_account_enable_enables_account(void **state);
+void cmd_account_enable_shows_message_when_enabled(void **state);
+void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state);

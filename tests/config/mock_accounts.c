@@ -65,6 +65,7 @@ void accounts_free_account(ProfAccount *account)
 
 gboolean accounts_enable(const char * const name)
 {
+    check_expected(name);
     return (gboolean)mock();
 }
 

@@ -37,6 +37,10 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_add_shows_usage_when_no_arg),
         unit_test(cmd_account_add_adds_account),
         unit_test(cmd_account_add_shows_message),
+        unit_test(cmd_account_enable_shows_usage_when_no_arg),
+        unit_test(cmd_account_enable_enables_account),
+        unit_test(cmd_account_enable_shows_message_when_enabled),
+        unit_test(cmd_account_enable_shows_message_when_account_doesnt_exist),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
