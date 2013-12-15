@@ -120,3 +120,17 @@ void cmd_account_show_shows_message_when_account_exists(void **state)
 
     free(help);
 }
+
+void cmd_account_add_shows_usage_when_no_arg(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "add", NULL };
+
+    expect_string(cons_show, output, "Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
