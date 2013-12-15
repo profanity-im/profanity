@@ -222,7 +222,16 @@ void cons_show_account(ProfAccount *account) {}
 void cons_debug(const char * const msg, ...) {}
 void cons_show_time(void) {}
 void cons_show_word(const char * const word) {}
-void cons_show_error(const char * const cmd, ...) {}
+
+void cons_show_error(const char * const cmd, ...)
+{
+    va_list args;
+    va_start(args, cmd);
+    vsnprintf(output, sizeof(output), cmd, args);
+    check_expected(output);
+    va_end(args);
+}
+
 void cons_highlight_show(const char * const cmd) {}
 void cons_show_contacts(GSList * list) {}
 void cons_show_roster(GSList * list) {}

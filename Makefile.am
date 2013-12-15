@@ -42,7 +42,7 @@ core_sources = \
 	src/config/theme.c src/config/theme.h
 
 test_sources = \
-	src/contact.c src/contact.h src/log.c src/common.c \
+	src/contact.c src/contact.h src/common.c \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/chat_session.c \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
@@ -62,6 +62,7 @@ test_sources = \
 	src/config/theme.c src/config/theme.h \
     tests/ui/mock_ui.c \
     tests/xmpp/mock_xmpp.c \
+    tests/log/mock_log.c \
     tests/config/mock_accounts.c \
     tests/test_autocomplete.c \
     tests/test_common.c \

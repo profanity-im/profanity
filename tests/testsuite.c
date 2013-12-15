@@ -19,6 +19,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_shows_message_when_connected),
         unit_test(cmd_connect_shows_message_when_undefined),
         unit_test(cmd_connect_when_no_account),
+        unit_test(cmd_connect_with_altdomain_when_provided),
+        unit_test(cmd_connect_fail_message),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
