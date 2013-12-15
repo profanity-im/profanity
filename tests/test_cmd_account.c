@@ -7,6 +7,7 @@
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
+#include "ui/ui.h"
 #include "command/commands.h"
 
 void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
@@ -32,7 +33,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
     gchar *args[] = { NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    
+
     will_return(jabber_get_account_name, "account_name");
 
     expect_string(accounts_get_account, name, "account_name");
@@ -41,6 +42,28 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
     expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
 
     expect_any(accounts_free_account, account);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+    free(account);
+}
+
+void cmd_account_list_shows_accounts(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "list" };
+
+    gchar **accounts = malloc(sizeof(gchar *) * 4);
+    accounts[0] = strdup("account1");
+    accounts[1] = strdup("account2");
+    accounts[2] = strdup("account3");
+    accounts[3] = NULL;
+
+    will_return(accounts_get_list, accounts);
+
+    expect_memory(cons_show_account_list, accounts, accounts, sizeof(accounts));
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
