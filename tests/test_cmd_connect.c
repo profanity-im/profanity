@@ -13,10 +13,10 @@
 static void test_with_connection_status(jabber_conn_status_t status)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    
+
     will_return(jabber_get_connection_status, status);
     expect_string(cons_show, output, "You are either connected already, or a login is in process.");
-    
+
     gboolean result = cmd_connect(NULL, *help);
     assert_true(result);
 
@@ -49,7 +49,7 @@ void cmd_connect_when_no_account(void **state)
     gchar *args[] = { "user@server.org", NULL };
 
     will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
-    
+
     expect_string(accounts_get_account, name, "user@server.org");
     will_return(accounts_get_account, NULL);
 
@@ -74,7 +74,7 @@ void cmd_connect_with_altdomain_when_provided(void **state)
     gchar *args[] = { "user@server.org", "altdomain" };
 
     will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
-    
+
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, NULL);
 
@@ -99,7 +99,7 @@ void cmd_connect_fail_message(void **state)
     gchar *args[] = { "user@server.org", NULL };
 
     will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
-    
+
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, NULL);
 
@@ -113,6 +113,31 @@ void cmd_connect_fail_message(void **state)
     will_return(jabber_connect_with_details, JABBER_DISCONNECTED);
 
     expect_string(cons_show_error, output, "Connection attempt for user@server.org failed.");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_lowercases_argument(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "USER@server.ORG", NULL };
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_string(accounts_get_account, name, "user@server.org");
+    will_return(accounts_get_account, NULL);
+
+    will_return(ui_ask_password, strdup("password"));
+
+    expect_any(cons_show, output);
+
+    expect_any(jabber_connect_with_details, jid);
+    expect_any(jabber_connect_with_details, passwd);
+    expect_any(jabber_connect_with_details, altdomain);
+    will_return(jabber_connect_with_details, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);

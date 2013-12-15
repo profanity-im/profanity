@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_when_no_account),
         unit_test(cmd_connect_with_altdomain_when_provided),
         unit_test(cmd_connect_fail_message),
+        unit_test(cmd_connect_lowercases_argument),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
@@ -29,7 +30,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_rooms_shows_message_when_undefined),
         unit_test(cmd_rooms_uses_account_default_when_no_arg),
         unit_test(cmd_rooms_arg_used_when_passed),
- 
+
         unit_test(replace_one_substr),
         unit_test(replace_one_substr_beginning),
         unit_test(replace_one_substr_end),
