@@ -40,6 +40,7 @@ jabber_conn_status_t jabber_connect_with_details(const char * const jid,
 
 jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const account)
 {
+    check_expected(account);
     return (jabber_conn_status_t)mock();
 }
 
