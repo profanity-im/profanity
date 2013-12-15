@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_with_altdomain_when_provided),
         unit_test(cmd_connect_fail_message),
         unit_test(cmd_connect_lowercases_argument),
+        unit_test(cmd_connect_asks_password_when_not_in_account),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),

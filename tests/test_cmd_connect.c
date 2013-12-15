@@ -144,3 +144,29 @@ void cmd_connect_lowercases_argument(void **state)
 
     free(help);
 }
+
+void cmd_connect_asks_password_when_not_in_account(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "jabber_org", NULL };
+    ProfAccount *account = malloc(sizeof(ProfAccount));
+    account->password = NULL;
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any(accounts_get_account, name);
+    will_return(accounts_get_account, account);
+
+    will_return(accounts_create_full_jid, strdup("user@jabber.org"));
+
+    will_return(ui_ask_password, strdup("password"));
+
+    expect_any(cons_show, output);
+    will_return(jabber_connect_with_account, JABBER_CONNECTING);
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+    free(account);
+}
