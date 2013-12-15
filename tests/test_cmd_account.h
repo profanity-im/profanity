@@ -11,3 +11,7 @@ void cmd_account_enable_shows_usage_when_no_arg(void **state);
 void cmd_account_enable_enables_account(void **state);
 void cmd_account_enable_shows_message_when_enabled(void **state);
 void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state);
+void cmd_account_disable_shows_usage_when_no_arg(void **state);
+void cmd_account_disable_disables_account(void **state);
+void cmd_account_disable_shows_message_when_disabled(void **state);
+void cmd_account_disable_shows_message_when_account_doesnt_exist(void **state);

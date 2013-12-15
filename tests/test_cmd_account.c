@@ -229,3 +229,67 @@ void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state)
 
     free(help);
 }
+
+void cmd_account_disable_shows_usage_when_no_arg(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "disable", NULL };
+
+    expect_string(cons_show, output, "Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_disable_disables_account(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "disable", "account_name" };
+
+    expect_string(accounts_disable, name, "account_name");
+    will_return(accounts_disable, TRUE);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_disable_shows_message_when_disabled(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "disable", "account_name" };
+
+    expect_any(accounts_disable, name);
+    will_return(accounts_disable, TRUE);
+
+    expect_string(cons_show, output, "Account disabled.");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_disable_shows_message_when_account_doesnt_exist(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "disable", "account_name" };
+
+    expect_any(accounts_disable, name);
+    will_return(accounts_disable, FALSE);
+
+    expect_string(cons_show, output, "No such account: account_name");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
