@@ -149,3 +149,19 @@ void cmd_account_add_adds_account(void **state)
 
     free(help);
 }
+
+void cmd_account_add_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", "new_account", NULL };
+
+    expect_any(accounts_add, jid);
+
+    expect_string(cons_show, output, "Account created.");;
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
