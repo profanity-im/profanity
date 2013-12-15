@@ -72,12 +72,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
-            if (account->resource != NULL) {
-                jid = create_fulljid(account->jid, account->resource);
-            } else {
-                jid = strdup(account->jid);
-            }
-
+            jid = accounts_create_full_jid(account);
             if (account->password == NULL) {
                 account->password = ui_ask_password();
             }
