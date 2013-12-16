@@ -374,3 +374,149 @@ void cmd_account_rename_shows_message_when_not_renamed(void **state)
 
     free(help);
 }
+
+void cmd_account_set_shows_usage_when_no_args(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", NULL };
+
+    expect_string(cons_show, output, "Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_shows_usage_when_one_arg(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", NULL };
+
+    expect_string(cons_show, output, "Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_shows_usage_when_two_args(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "a_property", NULL };
+
+    expect_string(cons_show, output, "Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_checks_account_exists(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
+
+    expect_string(accounts_account_exists, account_name, "a_account");
+    will_return(accounts_account_exists, FALSE);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, FALSE);
+
+    expect_string(cons_show, output, "Account a_account doesn't exist");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "jid", "@malformed", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(cons_show, output, "Malformed jid: @malformed");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_jid_sets_barejid(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_jid, account_name, "a_account");
+    expect_string(accounts_set_jid, value, "a_local@a_domain");
+
+    expect_string(cons_show, output, "Updated jid for account a_account: a_local@a_domain");
+
+    expect_any(accounts_set_resource, account_name);
+    expect_any(accounts_set_resource, value);
+
+    expect_any(cons_show, output);
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_jid_sets_resource(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_jid, account_name);
+    expect_any(accounts_set_jid, value);
+
+    expect_any(cons_show, output);
+
+    expect_string(accounts_set_resource, account_name, "a_account");
+    expect_string(accounts_set_resource, value, "a_resource");
+
+    expect_string(cons_show, output, "Updated resource for account a_account: a_resource");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
