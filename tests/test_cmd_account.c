@@ -36,7 +36,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 
     will_return(jabber_get_account_name, "account_name");
 
-    expect_string(accounts_get_account, name, "account_name");
+    expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
     expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
@@ -90,7 +90,7 @@ void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
 
-    expect_string(accounts_get_account, name, "account_name");
+    expect_any(accounts_get_account, name);
     will_return(accounts_get_account, NULL);
 
     expect_string(cons_show, output, "No such account.");
@@ -108,7 +108,7 @@ void cmd_account_show_shows_message_when_account_exists(void **state)
     gchar *args[] = { "show", "account_name", NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
 
-    expect_string(accounts_get_account, name, "account_name");
+    expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
     expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
@@ -344,8 +344,8 @@ void cmd_account_rename_shows_message_when_renamed(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "rename", "original_name", "new_name", NULL };
 
-    expect_string(accounts_rename, account_name, "original_name");
-    expect_string(accounts_rename, new_name, "new_name");
+    expect_any(accounts_rename, account_name);
+    expect_any(accounts_rename, new_name);
     will_return(accounts_rename, TRUE);
 
     expect_string(cons_show, output, "Account renamed.");
@@ -362,8 +362,8 @@ void cmd_account_rename_shows_message_when_not_renamed(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "rename", "original_name", "new_name", NULL };
 
-    expect_string(accounts_rename, account_name, "original_name");
-    expect_string(accounts_rename, new_name, "new_name");
+    expect_any(accounts_rename, account_name);
+    expect_any(accounts_rename, new_name);
     will_return(accounts_rename, FALSE);
 
     expect_string(cons_show, output, "Either account original_name doesn't exist, or account new_name already exists.");
