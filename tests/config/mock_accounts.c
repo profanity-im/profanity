@@ -41,7 +41,11 @@ char * accounts_find_enabled(char *prefix)
 
 void accounts_reset_all_search(void) {}
 void accounts_reset_enabled_search(void) {}
-void accounts_add(const char *jid, const char *altdomain) {}
+
+void accounts_add(const char *jid, const char *altdomain)
+{
+    check_expected(jid);
+}
 
 gchar** accounts_get_list(void)
 {
@@ -50,35 +54,55 @@ gchar** accounts_get_list(void)
 
 ProfAccount* accounts_get_account(const char * const name)
 {
+    check_expected(name);
     return (ProfAccount *)mock();
 }
 
-void accounts_free_account(ProfAccount *account) {}
+void accounts_free_account(ProfAccount *account)
+{
+    check_expected(account);
+}
 
 gboolean accounts_enable(const char * const name)
 {
+    check_expected(name);
     return (gboolean)mock();
 }
 
 gboolean accounts_disable(const char * const name)
 {
+    check_expected(name);
     return (gboolean)mock();
 }
 
 gboolean accounts_rename(const char * const account_name,
     const char * const new_name)
 {
+    check_expected(account_name);
+    check_expected(new_name);
     return (gboolean)mock();
 }
 
 gboolean accounts_account_exists(const char * const account_name)
 {
+    check_expected(account_name);
     return (gboolean)mock();
 }
 
-void accounts_set_jid(const char * const account_name, const char * const value) {}
+void accounts_set_jid(const char * const account_name, const char * const value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
 void accounts_set_server(const char * const account_name, const char * const value) {}
-void accounts_set_resource(const char * const account_name, const char * const value) {}
+
+void accounts_set_resource(const char * const account_name, const char * const value) 
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
 void accounts_set_password(const char * const account_name, const char * const value) {}
 void accounts_set_muc_service(const char * const account_name, const char * const value) {}
 void accounts_set_muc_nick(const char * const account_name, const char * const value) {}
@@ -109,4 +133,9 @@ gint accounts_get_priority_for_presence_type(const char * const account_name,
 }
 
 void accounts_clear_password(const char * const account_name) {}
+
+char * accounts_create_full_jid(ProfAccount *account)
+{
+    return (char *)mock();
+}
 

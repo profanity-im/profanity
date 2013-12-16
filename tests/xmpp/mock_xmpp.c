@@ -32,11 +32,15 @@ void jabber_init(const int disable_tls) {}
 jabber_conn_status_t jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
+    check_expected(jid);
+    check_expected(passwd);
+    check_expected(altdomain);
     return (jabber_conn_status_t)mock();
 }
 
 jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const account)
 {
+    check_expected(account);
     return (jabber_conn_status_t)mock();
 }
 

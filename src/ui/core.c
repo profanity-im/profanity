@@ -1330,6 +1330,19 @@ ui_win_unread(int index)
     }
 }
 
+char *
+ui_ask_password(void)
+{
+  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
+  status_bar_get_password();
+  status_bar_refresh();
+  inp_block();
+  inp_get_password(passwd);
+  inp_non_block();
+
+  return passwd;
+}
+
 static void
 _ui_draw_win_title(void)
 {

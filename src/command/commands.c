@@ -45,7 +45,6 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
-static char * _ask_password(void);
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
@@ -74,19 +73,15 @@ cmd_connect(gchar **args, struct cmd_help_t help)
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
-            if (account->resource != NULL) {
-                jid = create_fulljid(account->jid, account->resource);
-            } else {
-                jid = strdup(account->jid);
-            }
-
+            jid = accounts_create_full_jid(account);
             if (account->password == NULL) {
-                account->password = _ask_password();
+                account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
             conn_status = jabber_connect_with_account(account);
+            accounts_free_account(account);
         } else {
-            char *passwd = _ask_password();
+            char *passwd = ui_ask_password();
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain);
@@ -99,7 +94,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             log_debug("Connection attempt for %s failed", jid);
         }
 
-        accounts_free_account(account);
         free(jid);
 
         result = TRUE;
@@ -2265,20 +2259,6 @@ cmd_otr(gchar **args, struct cmd_help_t help)
     cons_show("This version of Profanity has not been build with OTR support enabled");
     return TRUE;
 #endif
-}
-
-
-// helper function that asks the user for a password and saves it in passwd
-static char *
-_ask_password(void) {
-  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
-  status_bar_get_password();
-  status_bar_refresh();
-  inp_block();
-  inp_get_password(passwd);
-  inp_non_block();
-
-  return passwd;
 }
 
 // helper function for status change commands
