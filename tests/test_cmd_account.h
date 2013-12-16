@@ -15,3 +15,8 @@ void cmd_account_disable_shows_usage_when_no_arg(void **state);
 void cmd_account_disable_disables_account(void **state);
 void cmd_account_disable_shows_message_when_disabled(void **state);
 void cmd_account_disable_shows_message_when_account_doesnt_exist(void **state);
+void cmd_account_rename_shows_usage_when_no_args(void **state);
+void cmd_account_rename_shows_usage_when_one_arg(void **state);
+void cmd_account_rename_renames_account(void **state);
+void cmd_account_rename_shows_message_when_renamed(void **state);
+void cmd_account_rename_shows_message_when_not_renamed(void **state);

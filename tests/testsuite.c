@@ -45,6 +45,11 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_disable_disables_account),
         unit_test(cmd_account_disable_shows_message_when_disabled),
         unit_test(cmd_account_disable_shows_message_when_account_doesnt_exist),
+        unit_test(cmd_account_rename_shows_usage_when_no_args),
+        unit_test(cmd_account_rename_shows_usage_when_one_arg),
+        unit_test(cmd_account_rename_renames_account),
+        unit_test(cmd_account_rename_shows_message_when_renamed),
+        unit_test(cmd_account_rename_shows_message_when_not_renamed),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),

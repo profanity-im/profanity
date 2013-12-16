@@ -78,6 +78,8 @@ gboolean accounts_disable(const char * const name)
 gboolean accounts_rename(const char * const account_name,
     const char * const new_name)
 {
+    check_expected(account_name);
+    check_expected(new_name);
     return (gboolean)mock();
 }
 
