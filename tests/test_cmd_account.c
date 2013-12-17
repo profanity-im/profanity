@@ -420,7 +420,6 @@ void cmd_account_set_shows_usage_when_two_args(void **state)
 void cmd_account_set_checks_account_exists(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
     expect_string(accounts_account_exists, account_name, "a_account");
@@ -437,7 +436,6 @@ void cmd_account_set_checks_account_exists(void **state)
 void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -455,7 +453,6 @@ void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
 void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "jid", "@malformed", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -472,7 +469,6 @@ void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
 void cmd_account_set_jid_sets_barejid(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -498,7 +494,6 @@ void cmd_account_set_jid_sets_barejid(void **state)
 void cmd_account_set_jid_sets_resource(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -524,7 +519,6 @@ void cmd_account_set_jid_sets_resource(void **state)
 void cmd_account_set_server_sets_server(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -544,7 +538,6 @@ void cmd_account_set_server_sets_server(void **state)
 void cmd_account_set_server_shows_message(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -565,7 +558,6 @@ void cmd_account_set_server_shows_message(void **state)
 void cmd_account_set_resource_sets_resource(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -585,7 +577,6 @@ void cmd_account_set_resource_sets_resource(void **state)
 void cmd_account_set_resource_shows_message(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -606,7 +597,6 @@ void cmd_account_set_resource_shows_message(void **state)
 void cmd_account_set_password_sets_password(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -626,7 +616,6 @@ void cmd_account_set_password_sets_password(void **state)
 void cmd_account_set_password_shows_message(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -647,7 +636,6 @@ void cmd_account_set_password_shows_message(void **state)
 void cmd_account_set_muc_sets_muc(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -667,7 +655,6 @@ void cmd_account_set_muc_sets_muc(void **state)
 void cmd_account_set_muc_shows_message(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -688,7 +675,6 @@ void cmd_account_set_muc_shows_message(void **state)
 void cmd_account_set_nick_sets_nick(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -708,7 +694,6 @@ void cmd_account_set_nick_sets_nick(void **state)
 void cmd_account_set_nick_shows_message(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
 
     expect_any(accounts_account_exists, account_name);
