@@ -143,11 +143,36 @@ resource_presence_t accounts_get_last_presence(const char * const account_name)
     return (resource_presence_t)mock();
 }
 
-void accounts_set_priority_online(const char * const account_name, const gint value) {}
-void accounts_set_priority_chat(const char * const account_name, const gint value) {}
-void accounts_set_priority_away(const char * const account_name, const gint value) {}
-void accounts_set_priority_xa(const char * const account_name, const gint value) {}
-void accounts_set_priority_dnd(const char * const account_name, const gint value) {}
+void accounts_set_priority_online(const char * const account_name, const gint value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
+void accounts_set_priority_chat(const char * const account_name, const gint value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
+void accounts_set_priority_away(const char * const account_name, const gint value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
+void accounts_set_priority_xa(const char * const account_name, const gint value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
+void accounts_set_priority_dnd(const char * const account_name, const gint value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
 void accounts_set_priority_all(const char * const account_name, const gint value) {}
 
 gint accounts_get_priority_for_presence_type(const char * const account_name,

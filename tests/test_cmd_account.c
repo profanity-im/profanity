@@ -528,7 +528,7 @@ void cmd_account_set_server_sets_server(void **state)
     expect_string(accounts_set_server, value, "a_server");
 
     expect_any_count(cons_show, output, 2);
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -548,7 +548,7 @@ void cmd_account_set_server_shows_message(void **state)
 
     expect_string(cons_show, output, "Updated server for account a_account: a_server");
     expect_string(cons_show, output, "");
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -567,7 +567,7 @@ void cmd_account_set_resource_sets_resource(void **state)
     expect_string(accounts_set_resource, value, "a_resource");
 
     expect_any_count(cons_show, output, 2);
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -587,7 +587,7 @@ void cmd_account_set_resource_shows_message(void **state)
 
     expect_string(cons_show, output, "Updated resource for account a_account: a_resource");
     expect_string(cons_show, output, "");
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -606,7 +606,7 @@ void cmd_account_set_password_sets_password(void **state)
     expect_string(accounts_set_password, value, "a_password");
 
     expect_any_count(cons_show, output, 2);
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -626,7 +626,7 @@ void cmd_account_set_password_shows_message(void **state)
 
     expect_string(cons_show, output, "Updated password for account a_account");
     expect_string(cons_show, output, "");
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -645,7 +645,7 @@ void cmd_account_set_muc_sets_muc(void **state)
     expect_string(accounts_set_muc_service, value, "a_muc");
 
     expect_any_count(cons_show, output, 2);
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -665,7 +665,7 @@ void cmd_account_set_muc_shows_message(void **state)
 
     expect_string(cons_show, output, "Updated muc service for account a_account: a_muc");
     expect_string(cons_show, output, "");
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -684,7 +684,7 @@ void cmd_account_set_nick_sets_nick(void **state)
     expect_string(accounts_set_muc_nick, value, "a_nick");
 
     expect_any_count(cons_show, output, 2);
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -704,7 +704,7 @@ void cmd_account_set_nick_shows_message(void **state)
 
     expect_string(cons_show, output, "Updated muc nick for account a_account: a_nick");
     expect_string(cons_show, output, "");
-    
+
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -839,3 +839,114 @@ void cmd_account_set_last_priority_shows_message(void **state)
 
     free(help);
 }
+
+void cmd_account_set_online_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "online", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_online, account_name, "a_account");
+    expect_value(accounts_set_priority_online, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_chat_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "chat", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_chat, account_name, "a_account");
+    expect_value(accounts_set_priority_chat, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_away_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "away", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_away, account_name, "a_account");
+    expect_value(accounts_set_priority_away, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_xa_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "xa", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_xa, account_name, "a_account");
+    expect_value(accounts_set_priority_xa, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_dnd_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "dnd", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_dnd, account_name, "a_account");
+    expect_value(accounts_set_priority_dnd, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+// test message shown when set
+// test invalid priority low
+// test invalid priority high
+// test presence updated when connected as account and current presence equals setting
+

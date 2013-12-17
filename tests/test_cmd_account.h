@@ -45,3 +45,8 @@ void cmd_account_set_status_shows_message_when_set_valid(void **state);
 void cmd_account_set_status_shows_message_when_set_last(void **state);
 void cmd_account_set_invalid_presence_string_priority_shows_message(void **state);
 void cmd_account_set_last_priority_shows_message(void **state);
+void cmd_account_set_online_priority_sets_preference(void **state);
+void cmd_account_set_chat_priority_sets_preference(void **state);
+void cmd_account_set_away_priority_sets_preference(void **state);
+void cmd_account_set_xa_priority_sets_preference(void **state);
+void cmd_account_set_dnd_priority_sets_preference(void **state);
