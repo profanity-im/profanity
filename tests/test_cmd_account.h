@@ -32,3 +32,5 @@ void cmd_account_set_server_sets_server(void **state);
 void cmd_account_set_server_shows_message(void **state);
 void cmd_account_set_resource_sets_resource(void **state);
 void cmd_account_set_resource_shows_message(void **state);
+void cmd_account_set_password_sets_password(void **state);
+void cmd_account_set_password_shows_message(void **state);

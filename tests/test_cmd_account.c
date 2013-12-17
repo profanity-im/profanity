@@ -602,3 +602,44 @@ void cmd_account_set_resource_shows_message(void **state)
 
     free(help);
 }
+
+void cmd_account_set_password_sets_password(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_password, account_name, "a_account");
+    expect_string(accounts_set_password, value, "a_password");
+
+    expect_any_count(cons_show, output, 2);
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_password_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_password, account_name);
+    expect_any(accounts_set_password, value);
+
+    expect_string(cons_show, output, "Updated password for account a_account");
+    expect_string(cons_show, output, "");
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
