@@ -38,3 +38,8 @@ void cmd_account_set_muc_sets_muc(void **state);
 void cmd_account_set_muc_shows_message(void **state);
 void cmd_account_set_nick_sets_nick(void **state);
 void cmd_account_set_nick_shows_message(void **state);
+void cmd_account_set_status_shows_message_when_invalid_status(void **state);
+void cmd_account_set_status_sets_status_when_valid(void **state);
+void cmd_account_set_status_sets_status_when_last(void **state);
+void cmd_account_set_status_shows_message_when_set_valid(void **state);
+void cmd_account_set_status_shows_message_when_set_last(void **state);

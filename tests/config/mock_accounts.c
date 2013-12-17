@@ -126,7 +126,12 @@ void accounts_set_muc_nick(const char * const account_name, const char * const v
 }
 
 void accounts_set_last_presence(const char * const account_name, const char * const value) {}
-void accounts_set_login_presence(const char * const account_name, const char * const value) {}
+
+void accounts_set_login_presence(const char * const account_name, const char * const value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
 
 resource_presence_t accounts_get_login_presence(const char * const account_name)
 {

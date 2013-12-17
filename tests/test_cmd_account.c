@@ -710,3 +710,98 @@ void cmd_account_set_nick_shows_message(void **state)
 
     free(help);
 }
+
+void cmd_account_set_status_shows_message_when_invalid_status(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "bad_status", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(cons_show, output, "Invalid status: bad_status");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_sets_status_when_valid(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "away", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_login_presence, account_name, "a_account");
+    expect_string(accounts_set_login_presence, value, "away");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_sets_status_when_last(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "last", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_login_presence, account_name, "a_account");
+    expect_string(accounts_set_login_presence, value, "last");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_shows_message_when_set_valid(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "away", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_login_presence, account_name);
+    expect_any(accounts_set_login_presence, value);
+
+    expect_string(cons_show, output, "Updated login status for account a_account: away");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_shows_message_when_set_last(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "last", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_login_presence, account_name);
+    expect_any(accounts_set_login_presence, value);
+
+    expect_string(cons_show, output, "Updated login status for account a_account: last");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}

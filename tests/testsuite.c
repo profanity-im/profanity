@@ -229,6 +229,11 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_muc_shows_message),
         unit_test(cmd_account_set_nick_sets_nick),
         unit_test(cmd_account_set_nick_shows_message),
+        unit_test(cmd_account_set_status_shows_message_when_invalid_status),
+        unit_test(cmd_account_set_status_sets_status_when_valid),
+        unit_test(cmd_account_set_status_sets_status_when_last),
+        unit_test(cmd_account_set_status_shows_message_when_set_valid),
+        unit_test(cmd_account_set_status_shows_message_when_set_last),
     };
     return run_tests(tests);
 }
