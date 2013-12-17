@@ -561,3 +561,44 @@ void cmd_account_set_server_shows_message(void **state)
 
     free(help);
 }
+
+void cmd_account_set_resource_sets_resource(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_resource, account_name, "a_account");
+    expect_string(accounts_set_resource, value, "a_resource");
+
+    expect_any_count(cons_show, output, 2);
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_resource_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_resource, account_name);
+    expect_any(accounts_set_resource, value);
+
+    expect_string(cons_show, output, "Updated resource for account a_account: a_resource");
+    expect_string(cons_show, output, "");
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}

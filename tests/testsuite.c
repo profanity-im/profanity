@@ -213,6 +213,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_jid_sets_resource),
         unit_test(cmd_account_set_server_sets_server),
         unit_test(cmd_account_set_server_shows_message),
+        unit_test(cmd_account_set_resource_sets_resource),
+        unit_test(cmd_account_set_resource_shows_message),
     };
     return run_tests(tests);
 }
