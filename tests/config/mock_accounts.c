@@ -95,7 +95,11 @@ void accounts_set_jid(const char * const account_name, const char * const value)
     check_expected(value);
 }
 
-void accounts_set_server(const char * const account_name, const char * const value) {}
+void accounts_set_server(const char * const account_name, const char * const value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
 
 void accounts_set_resource(const char * const account_name, const char * const value) 
 {

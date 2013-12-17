@@ -520,3 +520,44 @@ void cmd_account_set_jid_sets_resource(void **state)
 
     free(help);
 }
+
+void cmd_account_set_server_sets_server(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_server, account_name, "a_account");
+    expect_string(accounts_set_server, value, "a_server");
+
+    expect_any_count(cons_show, output, 2);
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_server_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_server, account_name);
+    expect_any(accounts_set_server, value);
+
+    expect_string(cons_show, output, "Updated server for account a_account: a_server");
+    expect_string(cons_show, output, "");
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}

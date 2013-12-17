@@ -28,3 +28,5 @@ void cmd_account_set_shows_message_when_account_doesnt_exist(void **state);
 void cmd_account_set_jid_shows_message_for_malformed_jid(void **state);
 void cmd_account_set_jid_sets_barejid(void **state);
 void cmd_account_set_jid_sets_resource(void **state);
+void cmd_account_set_server_sets_server(void **state);
+void cmd_account_set_server_shows_message(void **state);
