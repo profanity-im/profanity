@@ -43,3 +43,5 @@ void cmd_account_set_status_sets_status_when_valid(void **state);
 void cmd_account_set_status_sets_status_when_last(void **state);
 void cmd_account_set_status_shows_message_when_set_valid(void **state);
 void cmd_account_set_status_shows_message_when_set_last(void **state);
+void cmd_account_set_invalid_presence_string_priority_shows_message(void **state);
+void cmd_account_set_last_priority_shows_message(void **state);

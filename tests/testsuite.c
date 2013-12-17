@@ -234,6 +234,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_status_sets_status_when_last),
         unit_test(cmd_account_set_status_shows_message_when_set_valid),
         unit_test(cmd_account_set_status_shows_message_when_set_last),
+        unit_test(cmd_account_set_invalid_presence_string_priority_shows_message),
+        unit_test(cmd_account_set_last_priority_shows_message),
     };
     return run_tests(tests);
 }
