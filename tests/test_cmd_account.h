@@ -34,3 +34,7 @@ void cmd_account_set_resource_sets_resource(void **state);
 void cmd_account_set_resource_shows_message(void **state);
 void cmd_account_set_password_sets_password(void **state);
 void cmd_account_set_password_shows_message(void **state);
+void cmd_account_set_muc_sets_muc(void **state);
+void cmd_account_set_muc_shows_message(void **state);
+void cmd_account_set_nick_sets_nick(void **state);
+void cmd_account_set_nick_shows_message(void **state);

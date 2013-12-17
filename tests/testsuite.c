@@ -217,6 +217,10 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_resource_shows_message),
         unit_test(cmd_account_set_password_sets_password),
         unit_test(cmd_account_set_password_shows_message),
+        unit_test(cmd_account_set_muc_sets_muc),
+        unit_test(cmd_account_set_muc_shows_message),
+        unit_test(cmd_account_set_nick_sets_nick),
+        unit_test(cmd_account_set_nick_shows_message),
     };
     return run_tests(tests);
 }

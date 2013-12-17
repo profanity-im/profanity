@@ -643,3 +643,85 @@ void cmd_account_set_password_shows_message(void **state)
 
     free(help);
 }
+
+void cmd_account_set_muc_sets_muc(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_muc_service, account_name, "a_account");
+    expect_string(accounts_set_muc_service, value, "a_muc");
+
+    expect_any_count(cons_show, output, 2);
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_muc_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_muc_service, account_name);
+    expect_any(accounts_set_muc_service, value);
+
+    expect_string(cons_show, output, "Updated muc service for account a_account: a_muc");
+    expect_string(cons_show, output, "");
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_nick_sets_nick(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_muc_nick, account_name, "a_account");
+    expect_string(accounts_set_muc_nick, value, "a_nick");
+
+    expect_any_count(cons_show, output, 2);
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_nick_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_muc_nick, account_name);
+    expect_any(accounts_set_muc_nick, value);
+
+    expect_string(cons_show, output, "Updated muc nick for account a_account: a_nick");
+    expect_string(cons_show, output, "");
+    
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
