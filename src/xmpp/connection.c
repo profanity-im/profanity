@@ -91,8 +91,8 @@ void _connection_free_saved_account(void);
 void _connection_free_saved_details(void);
 void _connection_free_session_data(void);
 
-void
-jabber_init(const int disable_tls)
+static void
+_jabber_init(const int disable_tls)
 {
     log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
@@ -107,9 +107,10 @@ jabber_init(const int disable_tls)
         (GDestroyNotify)resource_destroy);
     xmpp_initialize();
 }
+void (*jabber_init)(const int) = _jabber_init;
 
-jabber_conn_status_t
-jabber_connect_with_account(const ProfAccount * const account)
+static jabber_conn_status_t
+_jabber_connect_with_account(const ProfAccount * const account)
 {
     assert(account != NULL);
 
@@ -127,9 +128,10 @@ jabber_connect_with_account(const ProfAccount * const account)
 
     return result;
 }
+jabber_conn_status_t (*jabber_connect_with_account)(const ProfAccount * const) = _jabber_connect_with_account;
 
-jabber_conn_status_t
-jabber_connect_with_details(const char * const jid,
+static jabber_conn_status_t
+_jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
     assert(jid != NULL);
@@ -159,9 +161,11 @@ jabber_connect_with_details(const char * const jid,
     log_info("Connecting without account, JID: %s", saved_details.jid);
     return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain);
 }
+jabber_conn_status_t (*jabber_connect_with_details)(const char * const,
+    const char * const, const char * const) = _jabber_connect_with_details;
 
-void
-jabber_disconnect(void)
+static void
+_jabber_disconnect(void)
 {
     // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
@@ -189,15 +193,17 @@ jabber_disconnect(void)
     FREE_SET_NULL(jabber_conn.presence_message);
     FREE_SET_NULL(jabber_conn.domain);
 }
+void (*jabber_disconnect)(void) = _jabber_disconnect;
 
-void
-jabber_shutdown(void)
+static void
+_jabber_shutdown(void)
 {
     xmpp_shutdown();
 }
+void (*jabber_shutdown)(void) = _jabber_shutdown;
 
-void
-jabber_process_events(void)
+static void
+_jabber_process_events(void)
 {
     // run xmpp event loop if connected, connecting or disconnecting
     if (jabber_conn.conn_status == JABBER_CONNECTED
@@ -216,9 +222,10 @@ jabber_process_events(void)
     }
 
 }
+void (*jabber_process_events)(void) = _jabber_process_events;
 
-void
-jabber_set_autoping(const int seconds)
+static void
+_jabber_set_autoping(const int seconds)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         xmpp_timed_handler_delete(jabber_conn.conn, _ping_timed_handler);
@@ -230,18 +237,21 @@ jabber_set_autoping(const int seconds)
         }
     }
 }
+void (*jabber_set_autoping)(const int) = _jabber_set_autoping;
 
-GList *
-jabber_get_available_resources(void)
+static GList *
+_jabber_get_available_resources(void)
 {
     return g_hash_table_get_values(available_resources);
 }
+GList * (*jabber_get_available_resources)(void) = _jabber_get_available_resources;
 
-jabber_conn_status_t
-jabber_get_connection_status(void)
+static jabber_conn_status_t
+_jabber_get_connection_status(void)
 {
     return (jabber_conn.conn_status);
 }
+jabber_conn_status_t (*jabber_get_connection_status)(void) = _jabber_get_connection_status;
 
 xmpp_conn_t *
 connection_get_conn(void)
@@ -255,29 +265,33 @@ connection_get_ctx(void)
     return jabber_conn.ctx;
 }
 
-const char *
-jabber_get_fulljid(void)
+static const char *
+_jabber_get_fulljid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
+const char * (*jabber_get_fulljid)(void) = _jabber_get_fulljid;
 
-const char *
-jabber_get_domain(void)
+static const char *
+_jabber_get_domain(void)
 {
     return jabber_conn.domain;
 }
+const char * (*jabber_get_domain)(void) = _jabber_get_domain;
 
-char *
-jabber_get_presence_message(void)
+static char *
+_jabber_get_presence_message(void)
 {
     return jabber_conn.presence_message;
 }
+char * (*jabber_get_presence_message)(void) = _jabber_get_presence_message;
 
-char *
-jabber_get_account_name(void)
+static char *
+_jabber_get_account_name(void)
 {
     return saved_account.name;
 }
+char * (*jabber_get_account_name)(void) = _jabber_get_account_name;
 
 void
 connection_set_presence_message(const char * const message)

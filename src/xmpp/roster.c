@@ -81,8 +81,8 @@ roster_request(void)
     xmpp_stanza_release(iq);
 }
 
-void
-roster_add_new(const char * const barejid, const char * const name)
+static void
+_roster_add_new(const char * const barejid, const char * const name)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -90,9 +90,10 @@ roster_add_new(const char * const barejid, const char * const name)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+void (*roster_add_new)(const char * const, const char * const) = _roster_add_new;
 
-void
-roster_send_remove(const char * const barejid)
+static void
+_roster_send_remove(const char * const barejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -100,9 +101,10 @@ roster_send_remove(const char * const barejid)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+void (*roster_send_remove)(const char * const) = _roster_send_remove;
 
-void
-roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups)
+static void
+_roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -111,9 +113,11 @@ roster_send_name_change(const char * const barejid, const char * const new_name,
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+void (*roster_send_name_change)(const char * const, const char * const,
+    GSList *) = _roster_send_name_change;
 
-void
-roster_send_add_to_group(const char * const group, PContact contact)
+static void
+_roster_send_add_to_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
@@ -142,6 +146,7 @@ roster_send_add_to_group(const char * const group, PContact contact)
     xmpp_stanza_release(iq);
     free(unique_id);
 }
+void (*roster_send_add_to_group)(const char * const, PContact) = _roster_send_add_to_group;
 
 static int
 _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
@@ -157,8 +162,8 @@ _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     return 0;
 }
 
-void
-roster_send_remove_from_group(const char * const group, PContact contact)
+static void
+_roster_send_remove_from_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
@@ -189,6 +194,7 @@ roster_send_remove_from_group(const char * const group, PContact contact)
     xmpp_stanza_release(iq);
     free(unique_id);
 }
+void (*roster_send_remove_from_group)(const char * const, PContact) = _roster_send_remove_from_group;
 
 static int
 _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,

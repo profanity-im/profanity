@@ -75,8 +75,8 @@ iq_add_handlers(void)
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
 }
 
-void
-iq_room_list_request(gchar *conferencejid)
+static void
+_iq_room_list_request(gchar *conferencejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -84,9 +84,10 @@ iq_room_list_request(gchar *conferencejid)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+void (*iq_room_list_request)(gchar *) = _iq_room_list_request;
 
-void
-iq_disco_info_request(gchar *jid)
+static void
+_iq_disco_info_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -94,9 +95,10 @@ iq_disco_info_request(gchar *jid)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+void (*iq_disco_info_request)(gchar *) = _iq_disco_info_request;
 
-void
-iq_disco_items_request(gchar *jid)
+static void
+_iq_disco_items_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -104,9 +106,10 @@ iq_disco_items_request(gchar *jid)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+void (*iq_disco_items_request)(gchar *) = _iq_disco_items_request;
 
-void
-iq_send_software_version(const char * const fulljid)
+static void
+_iq_send_software_version(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -114,6 +117,7 @@ iq_send_software_version(const char * const fulljid)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
+void (*iq_send_software_version)(const char * const) = _iq_send_software_version;
 
 static int
 _iq_handle_error(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,

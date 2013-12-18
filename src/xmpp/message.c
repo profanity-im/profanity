@@ -57,8 +57,8 @@ message_add_handlers(void)
     HANDLE(NULL, NULL,                   _conference_message_handler);
 }
 
-void
-message_send(const char * const msg, const char * const recipient)
+static void
+_message_send(const char * const msg, const char * const recipient)
 {
     const char * jid = NULL;
 
@@ -89,9 +89,10 @@ message_send(const char * const msg, const char * const recipient)
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
 }
+void (*message_send)(const char * const, const char * const) = _message_send;
 
-void
-message_send_groupchat(const char * const msg, const char * const recipient)
+static void
+_message_send_groupchat(const char * const msg, const char * const recipient)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -101,9 +102,10 @@ message_send_groupchat(const char * const msg, const char * const recipient)
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
 }
+void (*message_send_groupchat)(const char * const, const char * const) = _message_send_groupchat;
 
-void
-message_send_duck(const char * const query)
+static void
+_message_send_duck(const char * const query)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -113,9 +115,10 @@ message_send_duck(const char * const query)
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
 }
+void (*message_send_duck)(const char * const) = _message_send_duck;
 
-void
-message_send_invite(const char * const room, const char * const contact,
+static void
+_message_send_invite(const char * const room, const char * const contact,
     const char * const reason)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -125,9 +128,11 @@ message_send_invite(const char * const room, const char * const contact,
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
 }
+void (*message_send_invite)(const char * const, const char * const,
+    const char * const) = _message_send_invite;
 
-void
-message_send_composing(const char * const recipient)
+static void
+_message_send_composing(const char * const recipient)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -138,9 +143,10 @@ message_send_composing(const char * const recipient)
     xmpp_stanza_release(stanza);
     chat_session_set_sent(recipient);
 }
+void (*message_send_composing)(const char * const) = _message_send_composing;
 
-void
-message_send_paused(const char * const recipient)
+static void
+_message_send_paused(const char * const recipient)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -151,9 +157,10 @@ message_send_paused(const char * const recipient)
     xmpp_stanza_release(stanza);
     chat_session_set_sent(recipient);
 }
+void (*message_send_paused)(const char * const) = _message_send_paused;
 
-void
-message_send_inactive(const char * const recipient)
+static void
+_message_send_inactive(const char * const recipient)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -164,9 +171,10 @@ message_send_inactive(const char * const recipient)
     xmpp_stanza_release(stanza);
     chat_session_set_sent(recipient);
 }
+void (*message_send_inactive)(const char * const) = _message_send_inactive;
 
-void
-message_send_gone(const char * const recipient)
+static void
+_message_send_gone(const char * const recipient)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -177,6 +185,7 @@ message_send_gone(const char * const recipient)
     xmpp_stanza_release(stanza);
     chat_session_set_sent(recipient);
 }
+void (*message_send_gone)(const char * const) = _message_send_gone;
 
 static int
 _conference_message_handler(xmpp_conn_t * const conn,
