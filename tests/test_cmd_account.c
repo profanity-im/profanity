@@ -420,7 +420,6 @@ void cmd_account_set_shows_usage_when_two_args(void **state)
 void cmd_account_set_checks_account_exists(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
     expect_string(accounts_account_exists, account_name, "a_account");
@@ -437,7 +436,6 @@ void cmd_account_set_checks_account_exists(void **state)
 void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -455,7 +453,6 @@ void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
 void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "jid", "@malformed", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -472,7 +469,6 @@ void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
 void cmd_account_set_jid_sets_barejid(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -498,7 +494,6 @@ void cmd_account_set_jid_sets_barejid(void **state)
 void cmd_account_set_jid_sets_resource(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
     expect_any(accounts_account_exists, account_name);
@@ -520,3 +515,438 @@ void cmd_account_set_jid_sets_resource(void **state)
 
     free(help);
 }
+
+void cmd_account_set_server_sets_server(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_server, account_name, "a_account");
+    expect_string(accounts_set_server, value, "a_server");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_server_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_server, account_name);
+    expect_any(accounts_set_server, value);
+
+    expect_string(cons_show, output, "Updated server for account a_account: a_server");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_resource_sets_resource(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_resource, account_name, "a_account");
+    expect_string(accounts_set_resource, value, "a_resource");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_resource_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_resource, account_name);
+    expect_any(accounts_set_resource, value);
+
+    expect_string(cons_show, output, "Updated resource for account a_account: a_resource");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_password_sets_password(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_password, account_name, "a_account");
+    expect_string(accounts_set_password, value, "a_password");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_password_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_password, account_name);
+    expect_any(accounts_set_password, value);
+
+    expect_string(cons_show, output, "Updated password for account a_account");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_muc_sets_muc(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_muc_service, account_name, "a_account");
+    expect_string(accounts_set_muc_service, value, "a_muc");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_muc_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_muc_service, account_name);
+    expect_any(accounts_set_muc_service, value);
+
+    expect_string(cons_show, output, "Updated muc service for account a_account: a_muc");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_nick_sets_nick(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_muc_nick, account_name, "a_account");
+    expect_string(accounts_set_muc_nick, value, "a_nick");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_nick_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_muc_nick, account_name);
+    expect_any(accounts_set_muc_nick, value);
+
+    expect_string(cons_show, output, "Updated muc nick for account a_account: a_nick");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_shows_message_when_invalid_status(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "bad_status", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(cons_show, output, "Invalid status: bad_status");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_sets_status_when_valid(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "away", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_login_presence, account_name, "a_account");
+    expect_string(accounts_set_login_presence, value, "away");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_sets_status_when_last(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "last", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_login_presence, account_name, "a_account");
+    expect_string(accounts_set_login_presence, value, "last");
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_shows_message_when_set_valid(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "away", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_login_presence, account_name);
+    expect_any(accounts_set_login_presence, value);
+
+    expect_string(cons_show, output, "Updated login status for account a_account: away");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_status_shows_message_when_set_last(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "status", "last", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_any(accounts_set_login_presence, account_name);
+    expect_any(accounts_set_login_presence, value);
+
+    expect_string(cons_show, output, "Updated login status for account a_account: last");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_invalid_presence_string_priority_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "blah", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(cons_show, output, "Invalid property: blah");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_last_priority_shows_message(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "last", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(cons_show, output, "Invalid property: last");
+    expect_string(cons_show, output, "");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_online_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "online", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_online, account_name, "a_account");
+    expect_value(accounts_set_priority_online, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_chat_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "chat", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_chat, account_name, "a_account");
+    expect_value(accounts_set_priority_chat, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_away_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "away", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_away, account_name, "a_account");
+    expect_value(accounts_set_priority_away, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_xa_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "xa", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_xa, account_name, "a_account");
+    expect_value(accounts_set_priority_xa, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_dnd_priority_sets_preference(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "dnd", "10", NULL };
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_set_priority_dnd, account_name, "a_account");
+    expect_value(accounts_set_priority_dnd, value, 10);
+
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+
+    expect_any_count(cons_show, output, 2);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+// test message shown when set
+// test invalid priority low
+// test invalid priority high
+// test presence updated when connected as account and current presence equals setting
+

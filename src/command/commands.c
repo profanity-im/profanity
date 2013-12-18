@@ -260,10 +260,15 @@ cmd_account(gchar **args, struct cmd_help_t help)
                                     accounts_set_priority_dnd(account_name, intval);
                                     break;
                             }
+
                             jabber_conn_status_t conn_status = jabber_get_connection_status();
-                            resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
-                            if (conn_status == JABBER_CONNECTED && presence_type == last_presence) {
-                                presence_update(last_presence, jabber_get_presence_message(), 0);
+                            if (conn_status == JABBER_CONNECTED) {
+                                char *connected_account = jabber_get_account_name();
+                                resource_presence_t last_presence = accounts_get_last_presence(connected_account);
+
+                                if (presence_type == last_presence) {
+                                    presence_update(last_presence, jabber_get_presence_message(), 0);
+                                }
                             }
                             cons_show("Updated %s priority for account %s: %s", property, account_name, value);
                             cons_show("");

@@ -424,3 +424,43 @@ void next_available_24_first_big_gap(void **state)
 
     assert_int_equal(24, result);
 }
+
+void test_online_is_valid_resource_presence_string(void **state)
+{
+    assert_true(valid_resource_presence_string("online"));
+}
+
+void test_chat_is_valid_resource_presence_string(void **state)
+{
+    assert_true(valid_resource_presence_string("chat"));
+}
+
+void test_away_is_valid_resource_presence_string(void **state)
+{
+    assert_true(valid_resource_presence_string("away"));
+}
+
+void test_xa_is_valid_resource_presence_string(void **state)
+{
+    assert_true(valid_resource_presence_string("xa"));
+}
+
+void test_dnd_is_valid_resource_presence_string(void **state)
+{
+    assert_true(valid_resource_presence_string("dnd"));
+}
+
+void test_available_is_not_valid_resource_presence_string(void **state)
+{
+    assert_false(valid_resource_presence_string("available"));
+}
+
+void test_unavailable_is_not_valid_resource_presence_string(void **state)
+{
+    assert_false(valid_resource_presence_string("unavailable"));
+}
+
+void test_blah_is_not_valid_resource_presence_string(void **state)
+{
+    assert_false(valid_resource_presence_string("blah"));
+}
