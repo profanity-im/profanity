@@ -8,12 +8,13 @@
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
 #include "command/commands.h"
+#include "common_mocks.h"
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
 
-    will_return(jabber_get_connection_status, status);
+    mock_connection_status(status);
     expect_string(cons_show, output, "You are not currently connected.");
 
     gboolean result = cmd_rooms(NULL, *help);
@@ -54,11 +55,13 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     account->muc_service = "default_conf_server";
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    will_return(jabber_get_account_name, "account_name");
+    mock_connection_status(JABBER_CONNECTED);
+    mock_connection_account_name("account_name");
+
     expect_string(accounts_get_account, name, "account_name");
     will_return(accounts_get_account, account);
-    expect_string(iq_room_list_request, conferencejid, "default_conf_server");
+
+    expect_room_list_request("default_conf_server");
 
     gboolean result = cmd_rooms(args, *help);
 
@@ -73,8 +76,9 @@ void cmd_rooms_arg_used_when_passed(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "conf_server_arg" };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-    expect_string(iq_room_list_request, conferencejid, "conf_server_arg");
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_room_list_request("conf_server_arg");
 
     gboolean result = cmd_rooms(args, *help);
 

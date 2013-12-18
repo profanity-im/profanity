@@ -27,133 +27,198 @@
 #include "xmpp/xmpp.h"
 
 // connection functions
-void jabber_init(const int disable_tls) {}
+static void _jabber_init(const int disable_tls) {}
+void (*jabber_init)(const int disable_tls) = _jabber_init;
 
-jabber_conn_status_t jabber_connect_with_details(const char * const jid,
+static jabber_conn_status_t _jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
-    check_expected(jid);
-    check_expected(passwd);
-    check_expected(altdomain);
-    return (jabber_conn_status_t)mock();
+    return JABBER_DISCONNECTED;
 }
+jabber_conn_status_t (*jabber_connect_with_details)(const char * const,
+    const char * const, const char * const) = _jabber_connect_with_details;
 
-jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const account)
+static jabber_conn_status_t _jabber_connect_with_account(const ProfAccount * const account)
 {
-    check_expected(account);
-    return (jabber_conn_status_t)mock();
+    return JABBER_DISCONNECTED;
 }
+jabber_conn_status_t (*jabber_connect_with_account)(const ProfAccount * const) = _jabber_connect_with_account;
 
-void jabber_disconnect(void) {}
-void jabber_shutdown(void) {}
-void jabber_process_events(void) {}
-const char * jabber_get_fulljid(void)
-{
-    return (const char *)mock();
-}
-const char * jabber_get_domain(void)
-{
-    return (const char *)mock();
-}
+static void _jabber_disconnect(void) {}
+void (*jabber_disconnect)(void) = _jabber_disconnect;
 
-jabber_conn_status_t jabber_get_connection_status(void)
-{
-    return (jabber_conn_status_t)mock();
-}
+static void _jabber_shutdown(void) {}
+void (*jabber_shutdown)(void) = _jabber_shutdown;
 
-char * jabber_get_presence_message(void)
-{
-    return (char *)mock();
-}
-void jabber_set_autoping(int seconds) {}
+static void _jabber_process_events(void) {}
+void (*jabber_process_events)(void) = _jabber_process_events;
 
-char* jabber_get_account_name(void)
+static const char * _jabber_get_fulljid(void)
 {
-    return (char *)mock();
+    return NULL;
 }
+const char * (*jabber_get_fulljid)(void) = _jabber_get_fulljid;
 
-GList * jabber_get_available_resources(void)
+static const char * _jabber_get_domain(void)
 {
-    return (GList *)mock();
+    return NULL;
 }
+const char * (*jabber_get_domain)(void) = _jabber_get_domain;
+
+static jabber_conn_status_t _jabber_get_connection_status(void)
+{
+    return JABBER_DISCONNECTED;
+}
+jabber_conn_status_t (*jabber_get_connection_status)(void) = _jabber_get_connection_status;
+
+static char * _jabber_get_presence_message(void)
+{
+    return NULL;
+}
+char * (*jabber_get_presence_message)(void) = _jabber_get_presence_message;
+
+static void _jabber_set_autoping(int seconds) {}
+void (*jabber_set_autoping)(int) = _jabber_set_autoping;
+
+static char * _jabber_get_account_name(void)
+{
+    return NULL;
+}
+char * (*jabber_get_account_name)(void) = _jabber_get_account_name;
+
+static GList * _jabber_get_available_resources(void)
+{
+    return NULL;
+}
+GList * (*jabber_get_available_resources)(void) = _jabber_get_available_resources;
 
 // message functions
-void message_send(const char * const msg, const char * const recipient) {}
-void message_send_groupchat(const char * const msg, const char * const recipient) {}
-void message_send_inactive(const char * const recipient) {}
-void message_send_composing(const char * const recipient) {}
-void message_send_paused(const char * const recipient) {}
-void message_send_gone(const char * const recipient) {}
-void message_send_invite(const char * const room, const char * const contact,
+static void _message_send(const char * const msg, const char * const recipient) {}
+void (*message_send)(const char * const, const char * const) = _message_send;
+
+static void _message_send_groupchat(const char * const msg, const char * const recipient) {}
+void (*message_send_groupchat)(const char * const, const char * const) = _message_send_groupchat;
+
+static void _message_send_inactive(const char * const recipient) {}
+void (*message_send_inactive)(const char * const) = _message_send_inactive;
+
+static void _message_send_composing(const char * const recipient) {}
+void (*message_send_composing)(const char * const) = _message_send_composing;
+
+static void _message_send_paused(const char * const recipient) {}
+void (*message_send_paused)(const char * const) = _message_send_paused;
+
+static void _message_send_gone(const char * const recipient) {}
+void (*message_send_gone)(const char * const) = _message_send_gone;
+
+static void _message_send_invite(const char * const room, const char * const contact,
     const char * const reason) {}
-void message_send_duck(const char * const query) {}
+void (*message_send_invite)(const char * const, const char * const,
+    const char * const) = _message_send_invite;
+
+static void _message_send_duck(const char * const query) {}
+void (*message_send_duck)(const char * const) = _message_send_duck;
 
 // presence functions
-void presence_subscription(const char * const jid, const jabber_subscr_t action) {}
+static void _presence_subscription(const char * const jid, const jabber_subscr_t action) {}
+void (*presence_subscription)(const char * const, const jabber_subscr_t) = _presence_subscription;
 
-GSList* presence_get_subscription_requests(void)
+static GSList* _presence_get_subscription_requests(void)
 {
-    return (GSList *)mock();
+    return NULL;
 }
+GSList* (*presence_get_subscription_requests)(void) = _presence_get_subscription_requests;
 
-gint presence_sub_request_count(void)
+static gint _presence_sub_request_count(void)
 {
-    return (gint)mock();
+    return 0;
 }
+gint (*presence_sub_request_count)(void) = _presence_sub_request_count;
 
-void presence_reset_sub_request_search(void) {}
+static void _presence_reset_sub_request_search(void) {}
+void (*presence_reset_sub_request_search)(void) = _presence_reset_sub_request_search;
 
-char * presence_sub_request_find(char * search_str)
+static char * _presence_sub_request_find(char * search_str)
 {
-    return (char *)mock();
+    return NULL;
 }
+char * (*presence_sub_request_find)(char *) = _presence_sub_request_find;
 
-void presence_join_room(Jid *jid) {}
-void presence_change_room_nick(const char * const room, const char * const nick) {}
-void presence_leave_chat_room(const char * const room_jid) {}
-void presence_update(resource_presence_t status, const char * const msg,
+static void _presence_join_room(Jid *jid) {}
+void (*presence_join_room)(Jid *) = _presence_join_room;
+
+static void _presence_change_room_nick(const char * const room, const char * const nick) {}
+void (*presence_change_room_nick)(const char * const, const char * const) = _presence_change_room_nick;
+
+static void _presence_leave_chat_room(const char * const room_jid) {}
+void (*presence_leave_chat_room)(const char * const) = _presence_leave_chat_room;
+
+static void _presence_update(resource_presence_t status, const char * const msg,
     int idle) {}
-gboolean presence_sub_request_exists(const char * const bare_jid)
+void (*presence_update)(resource_presence_t, const char * const,
+    int) = _presence_update;
+
+static gboolean _presence_sub_request_exists(const char * const bare_jid)
 {
-    return (gboolean)mock();
+    return FALSE;
 }
+gboolean (*presence_sub_request_exists)(const char * const bare_jid) = _presence_sub_request_exists;
 
 // iq functions
-void iq_send_software_version(const char * const fulljid) {}
+static void _iq_send_software_version(const char * const fulljid) {}
+void (*iq_send_software_version)(const char * const) = _iq_send_software_version;
 
-void iq_room_list_request(gchar *conferencejid)
-{
-    check_expected(conferencejid);
-}
+static void _iq_room_list_request(gchar *conferencejid) {}
+void (*iq_room_list_request)(gchar *) = _iq_room_list_request;
 
-void iq_disco_info_request(gchar *jid) {}
-void iq_disco_items_request(gchar *jid) {}
+static void _iq_disco_info_request(gchar *jid) {}
+void (*iq_disco_info_request)(gchar *) = _iq_disco_info_request;
+
+static void _iq_disco_items_request(gchar *jid) {}
+void (*iq_disco_items_request)(gchar *) = _iq_disco_items_request;
 
 // caps functions
-Capabilities* caps_get(const char * const caps_str)
+static Capabilities* _caps_get(const char * const caps_str)
 {
-    return (Capabilities *)mock();
+    return NULL;
 }
+Capabilities* (*caps_get)(const char * const) = _caps_get;
 
-void caps_close(void) {}
+static void _caps_close(void) {}
+void (*caps_close)(void) = _caps_close;
 
-void bookmark_add(const char *jid, const char *nick, gboolean autojoin) {}
-void bookmark_remove(const char *jid, gboolean autojoin) {}
+static void _bookmark_add(const char *jid, const char *nick, gboolean autojoin) {}
+void (*bookmark_add)(const char *, const char *, gboolean) = _bookmark_add;
 
-const GList *bookmark_get_list(void)
+static void _bookmark_remove(const char *jid, gboolean autojoin) {}
+void (*bookmark_remove)(const char *, gboolean) = _bookmark_remove;
+
+static const GList* _bookmark_get_list(void) 
 {
-    return (const GList *)mock();
+    return NULL;
 }
+const GList* (*bookmark_get_list)(void) = _bookmark_get_list;
 
-char *bookmark_find(char *search_str)
+static char* _bookmark_find(char *search_str)
 {
-    return (char *)mock();
+    return NULL;
 }
+char* (*bookmark_find)(char *) = _bookmark_find;
 
-void bookmark_autocomplete_reset(void) {}
+static void _bookmark_autocomplete_reset(void) {}
+void (*bookmark_autocomplete_reset)(void) = _bookmark_autocomplete_reset;
 
-void roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups) {}
-void roster_send_add_to_group(const char * const group, PContact contact) {}
-void roster_send_remove_from_group(const char * const group, PContact contact) {}
-void roster_add_new(const char * const barejid, const char * const name) {}
-void roster_send_remove(const char * const barejid) {}
+static void _roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups) {}
+void (*roster_send_name_change)(const char * const, const char * const, GSList *) = _roster_send_name_change;
+
+static void _roster_send_add_to_group(const char * const group, PContact contact) {}
+void (*roster_send_add_to_group)(const char * const, PContact) = _roster_send_add_to_group;
+
+static void _roster_send_remove_from_group(const char * const group, PContact contact) {}
+void (*roster_send_remove_from_group)(const char * const, PContact) = _roster_send_remove_from_group;
+
+static void _roster_add_new(const char * const barejid, const char * const name) {}
+void (*roster_add_new)(const char * const, const char * const) = _roster_add_new;
+
+static void _roster_send_remove(const char * const barejid) {}
+void (*roster_send_remove)(const char * const) = _roster_send_remove;

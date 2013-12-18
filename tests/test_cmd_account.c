@@ -9,6 +9,7 @@
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
 #include "command/commands.h"
+#include "common_mocks.h"
 
 void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
 {
@@ -16,7 +17,7 @@ void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
     help->usage = "some usage";
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
     expect_string(cons_show, output, "Usage: some usage");
 
@@ -32,9 +33,8 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
     ProfAccount *account = malloc(sizeof(ProfAccount));
     gchar *args[] = { NULL };
 
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-
-    will_return(jabber_get_account_name, "account_name");
+    mock_connection_status(JABBER_CONNECTED);
+    mock_connection_account_name("account_name");
 
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
@@ -851,7 +851,7 @@ void cmd_account_set_online_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_online, account_name, "a_account");
     expect_value(accounts_set_priority_online, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
     expect_any_count(cons_show, output, 2);
 
@@ -872,7 +872,7 @@ void cmd_account_set_chat_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_chat, account_name, "a_account");
     expect_value(accounts_set_priority_chat, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
     expect_any_count(cons_show, output, 2);
 
@@ -893,7 +893,7 @@ void cmd_account_set_away_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_away, account_name, "a_account");
     expect_value(accounts_set_priority_away, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
     expect_any_count(cons_show, output, 2);
 
@@ -914,7 +914,7 @@ void cmd_account_set_xa_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_xa, account_name, "a_account");
     expect_value(accounts_set_priority_xa, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
     expect_any_count(cons_show, output, 2);
 
@@ -935,7 +935,7 @@ void cmd_account_set_dnd_priority_sets_preference(void **state)
     expect_string(accounts_set_priority_dnd, account_name, "a_account");
     expect_value(accounts_set_priority_dnd, value, 10);
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
     expect_any_count(cons_show, output, 2);
 
