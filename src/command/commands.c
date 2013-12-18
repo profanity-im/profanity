@@ -45,7 +45,6 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
-static char * _ask_password(void);
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
@@ -74,19 +73,15 @@ cmd_connect(gchar **args, struct cmd_help_t help)
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
-            if (account->resource != NULL) {
-                jid = create_fulljid(account->jid, account->resource);
-            } else {
-                jid = strdup(account->jid);
-            }
-
+            jid = accounts_create_full_jid(account);
             if (account->password == NULL) {
-                account->password = _ask_password();
+                account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
             conn_status = jabber_connect_with_account(account);
+            accounts_free_account(account);
         } else {
-            char *passwd = _ask_password();
+            char *passwd = ui_ask_password();
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain);
@@ -99,7 +94,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             log_debug("Connection attempt for %s failed", jid);
         }
 
-        accounts_free_account(account);
         free(jid);
 
         result = TRUE;
@@ -266,10 +260,15 @@ cmd_account(gchar **args, struct cmd_help_t help)
                                     accounts_set_priority_dnd(account_name, intval);
                                     break;
                             }
+
                             jabber_conn_status_t conn_status = jabber_get_connection_status();
-                            resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
-                            if (conn_status == JABBER_CONNECTED && presence_type == last_presence) {
-                                presence_update(last_presence, jabber_get_presence_message(), 0);
+                            if (conn_status == JABBER_CONNECTED) {
+                                char *connected_account = jabber_get_account_name();
+                                resource_presence_t last_presence = accounts_get_last_presence(connected_account);
+
+                                if (presence_type == last_presence) {
+                                    presence_update(last_presence, jabber_get_presence_message(), 0);
+                                }
                             }
                             cons_show("Updated %s priority for account %s: %s", property, account_name, value);
                             cons_show("");
@@ -2263,19 +2262,6 @@ cmd_plugins(gchar **args, struct cmd_help_t help)
     }
     g_slist_free(curr);
     return TRUE;
-}
-
-// helper function that asks the user for a password and saves it in passwd
-static char *
-_ask_password(void) {
-  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
-  status_bar_get_password();
-  status_bar_refresh();
-  inp_block();
-  inp_get_password(passwd);
-  inp_non_block();
-
-  return passwd;
 }
 
 // helper function for status change commands

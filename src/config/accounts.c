@@ -292,6 +292,16 @@ accounts_get_account(const char * const name)
     }
 }
 
+char *
+accounts_create_full_jid(ProfAccount *account)
+{
+    if (account->resource != NULL) {
+        return create_fulljid(account->jid, account->resource);
+    } else {
+        return strdup(account->jid);
+    }
+}
+
 void
 accounts_free_account(ProfAccount *account)
 {

@@ -80,6 +80,7 @@ char * ui_recipient(int index);
 void ui_close_win(int index);
 gboolean ui_win_exists(int index);
 int ui_win_unread(int index);
+char * ui_ask_password(void);
 
 // ui events
 void ui_contact_typing(const char * const from);

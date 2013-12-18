@@ -5,7 +5,9 @@
 
 #include "test_autocomplete.h"
 #include "test_common.h"
-#include "test_command.h"
+#include "test_cmd_connect.h"
+#include "test_cmd_account.h"
+#include "test_cmd_rooms.h"
 #include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
@@ -13,14 +15,6 @@
 
 int main(int argc, char* argv[]) {
     const UnitTest tests[] = {
-        unit_test(cmd_rooms_shows_message_when_disconnected),
-        unit_test(cmd_rooms_shows_message_when_disconnecting),
-        unit_test(cmd_rooms_shows_message_when_connecting),
-        unit_test(cmd_rooms_shows_message_when_started),
-        unit_test(cmd_rooms_shows_message_when_undefined),
-        unit_test(cmd_rooms_uses_account_default_when_no_arg),
-        unit_test(cmd_arg_used_when_passed),
- 
         unit_test(replace_one_substr),
         unit_test(replace_one_substr_beginning),
         unit_test(replace_one_substr_end),
@@ -53,6 +47,14 @@ int main(int argc, char* argv[]) {
         unit_test(next_available_0_in_first_gap),
         unit_test(next_available_11_in_first_gap),
         unit_test(next_available_24_first_big_gap),
+        unit_test(test_online_is_valid_resource_presence_string),
+        unit_test(test_chat_is_valid_resource_presence_string),
+        unit_test(test_away_is_valid_resource_presence_string),
+        unit_test(test_xa_is_valid_resource_presence_string),
+        unit_test(test_dnd_is_valid_resource_presence_string),
+        unit_test(test_available_is_not_valid_resource_presence_string),
+        unit_test(test_unavailable_is_not_valid_resource_presence_string),
+        unit_test(test_blah_is_not_valid_resource_presence_string),
 
         unit_test(clear_empty),
         unit_test(reset_after_create),
@@ -165,6 +167,80 @@ int main(int argc, char* argv[]) {
         unit_test(find_twice_returns_second_when_two_match),
         unit_test(find_five_times_finds_fifth),
         unit_test(find_twice_returns_first_when_two_match_and_reset),
+
+        unit_test(cmd_connect_shows_message_when_disconnecting),
+        unit_test(cmd_connect_shows_message_when_connecting),
+        unit_test(cmd_connect_shows_message_when_connected),
+        unit_test(cmd_connect_shows_message_when_undefined),
+        unit_test(cmd_connect_when_no_account),
+        unit_test(cmd_connect_with_altdomain_when_provided),
+        unit_test(cmd_connect_fail_message),
+        unit_test(cmd_connect_lowercases_argument),
+        unit_test(cmd_connect_asks_password_when_not_in_account),
+        unit_test(cmd_connect_shows_message_when_connecting_with_account),
+        unit_test(cmd_connect_connects_with_account),
+        unit_test(cmd_connect_frees_account_after_connecting),
+
+        unit_test(cmd_rooms_shows_message_when_disconnected),
+        unit_test(cmd_rooms_shows_message_when_disconnecting),
+        unit_test(cmd_rooms_shows_message_when_connecting),
+        unit_test(cmd_rooms_shows_message_when_started),
+        unit_test(cmd_rooms_shows_message_when_undefined),
+        unit_test(cmd_rooms_uses_account_default_when_no_arg),
+        unit_test(cmd_rooms_arg_used_when_passed),
+
+        unit_test(cmd_account_shows_usage_when_not_connected_and_no_args),
+        unit_test(cmd_account_shows_account_when_connected_and_no_args),
+        unit_test(cmd_account_list_shows_accounts),
+        unit_test(cmd_account_show_shows_usage_when_no_arg),
+        unit_test(cmd_account_show_shows_message_when_account_does_not_exist),
+        unit_test(cmd_account_show_shows_message_when_account_exists),
+        unit_test(cmd_account_add_shows_usage_when_no_arg),
+        unit_test(cmd_account_add_adds_account),
+        unit_test(cmd_account_add_shows_message),
+        unit_test(cmd_account_enable_shows_usage_when_no_arg),
+        unit_test(cmd_account_enable_enables_account),
+        unit_test(cmd_account_enable_shows_message_when_enabled),
+        unit_test(cmd_account_enable_shows_message_when_account_doesnt_exist),
+        unit_test(cmd_account_disable_shows_usage_when_no_arg),
+        unit_test(cmd_account_disable_disables_account),
+        unit_test(cmd_account_disable_shows_message_when_disabled),
+        unit_test(cmd_account_disable_shows_message_when_account_doesnt_exist),
+        unit_test(cmd_account_rename_shows_usage_when_no_args),
+        unit_test(cmd_account_rename_shows_usage_when_one_arg),
+        unit_test(cmd_account_rename_renames_account),
+        unit_test(cmd_account_rename_shows_message_when_renamed),
+        unit_test(cmd_account_rename_shows_message_when_not_renamed),
+        unit_test(cmd_account_set_shows_usage_when_no_args),
+        unit_test(cmd_account_set_shows_usage_when_one_arg),
+        unit_test(cmd_account_set_shows_usage_when_two_args),
+        unit_test(cmd_account_set_checks_account_exists),
+        unit_test(cmd_account_set_shows_message_when_account_doesnt_exist),
+        unit_test(cmd_account_set_jid_shows_message_for_malformed_jid),
+        unit_test(cmd_account_set_jid_sets_barejid),
+        unit_test(cmd_account_set_jid_sets_resource),
+        unit_test(cmd_account_set_server_sets_server),
+        unit_test(cmd_account_set_server_shows_message),
+        unit_test(cmd_account_set_resource_sets_resource),
+        unit_test(cmd_account_set_resource_shows_message),
+        unit_test(cmd_account_set_password_sets_password),
+        unit_test(cmd_account_set_password_shows_message),
+        unit_test(cmd_account_set_muc_sets_muc),
+        unit_test(cmd_account_set_muc_shows_message),
+        unit_test(cmd_account_set_nick_sets_nick),
+        unit_test(cmd_account_set_nick_shows_message),
+        unit_test(cmd_account_set_status_shows_message_when_invalid_status),
+        unit_test(cmd_account_set_status_sets_status_when_valid),
+        unit_test(cmd_account_set_status_sets_status_when_last),
+        unit_test(cmd_account_set_status_shows_message_when_set_valid),
+        unit_test(cmd_account_set_status_shows_message_when_set_last),
+        unit_test(cmd_account_set_invalid_presence_string_priority_shows_message),
+        unit_test(cmd_account_set_last_priority_shows_message),
+        unit_test(cmd_account_set_online_priority_sets_preference),
+        unit_test(cmd_account_set_chat_priority_sets_preference),
+        unit_test(cmd_account_set_away_priority_sets_preference),
+        unit_test(cmd_account_set_xa_priority_sets_preference),
+        unit_test(cmd_account_set_dnd_priority_sets_preference),
     };
     return run_tests(tests);
 }
