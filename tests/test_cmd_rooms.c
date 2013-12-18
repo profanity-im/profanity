@@ -6,9 +6,11 @@
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
+#include "xmpp/mock_xmpp.h"
+
 #include "ui/ui.h"
+
 #include "command/commands.h"
-#include "common_mocks.h"
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {

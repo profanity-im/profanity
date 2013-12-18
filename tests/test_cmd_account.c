@@ -7,9 +7,11 @@
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
+#include "xmpp/mock_xmpp.h"
+
 #include "ui/ui.h"
+
 #include "command/commands.h"
-#include "common_mocks.h"
 
 void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
 {
