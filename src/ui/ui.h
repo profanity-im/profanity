@@ -149,7 +149,7 @@ void title_bar_set_typing(gboolean is_typing);
 void title_bar_draw(void);
 
 // console window actions
-void cons_show(const char * const msg, ...);
+void (*cons_show)(const char * const msg, ...);
 void cons_about(void);
 void cons_help(void);
 void cons_basic_help(void);

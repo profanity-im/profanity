@@ -9,15 +9,17 @@
 #include "xmpp/mock_xmpp.h"
 
 #include "ui/ui.h"
+#include "ui/mock_ui.h"
 
 #include "command/commands.h"
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
 
     mock_connection_status(status);
-    expect_string(cons_show, output, "You are not currently connected.");
+    expect_cons_show("You are not currently connected.");
 
     gboolean result = cmd_rooms(NULL, *help);
     assert_true(result);

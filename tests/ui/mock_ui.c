@@ -1,5 +1,5 @@
 /*
- * mock_ui.h
+ * mock_ui.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -27,6 +27,46 @@
 #include "ui/ui.h"
 
 char output[256];
+
+static
+void _mock_cons_show(const char * const msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    vsnprintf(output, sizeof(output), msg, args);
+    check_expected(output);
+    va_end(args);
+}
+
+static
+void _stub_cons_show(const char * const msg, ...)
+{
+}
+
+void
+mock_cons_show(void)
+{
+    cons_show = _mock_cons_show;
+    
+}
+
+void
+stub_cons_show(void)
+{
+    cons_show = _stub_cons_show;
+}
+
+void
+expect_cons_show(char *output)
+{
+    expect_string(_mock_cons_show, output, output);
+}
+
+void
+expect_cons_show_calls(int n)
+{
+    expect_any_count(_mock_cons_show, output, n);
+}
 
 // ui startup and control
 void ui_init(void) {}
@@ -196,15 +236,6 @@ void title_bar_set_typing(gboolean is_typing) {}
 void title_bar_draw(void) {}
 
 // console window actions
-void cons_show(const char * const msg, ...)
-{
-    va_list args;
-    va_start(args, msg);
-    vsnprintf(output, sizeof(output), msg, args);
-    check_expected(output);
-    va_end(args);
-}
-
 void cons_about(void) {}
 void cons_help(void) {}
 void cons_basic_help(void) {}

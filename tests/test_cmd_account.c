@@ -10,18 +10,20 @@
 #include "xmpp/mock_xmpp.h"
 
 #include "ui/ui.h"
+#include "ui/mock_ui.h"
 
 #include "command/commands.h"
 
 void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { NULL };
 
     mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -75,11 +77,12 @@ void cmd_account_list_shows_accounts(void **state)
 
 void cmd_account_show_shows_usage_when_no_arg(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "show", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -89,14 +92,15 @@ void cmd_account_show_shows_usage_when_no_arg(void **state)
 
 void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
 
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, NULL);
 
-    expect_string(cons_show, output, "No such account.");
-    expect_string(cons_show, output, "");
+    expect_cons_show("No such account.");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -104,7 +108,7 @@ void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
     free(help);
 }
 
-void cmd_account_show_shows_message_when_account_exists(void **state)
+void cmd_account_show_shows_account_when_exists(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
@@ -125,11 +129,12 @@ void cmd_account_show_shows_message_when_account_exists(void **state)
 
 void cmd_account_add_shows_usage_when_no_arg(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "add", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -139,12 +144,11 @@ void cmd_account_add_shows_usage_when_no_arg(void **state)
 
 void cmd_account_add_adds_account(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", "new_account", NULL };
 
     expect_string(accounts_add, jid, "new_account");
-
-    expect_any_count(cons_show, output, 2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -154,13 +158,14 @@ void cmd_account_add_adds_account(void **state)
 
 void cmd_account_add_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", "new_account", NULL };
 
     expect_any(accounts_add, jid);
 
-    expect_string(cons_show, output, "Account created.");;
-    expect_string(cons_show, output, "");
+    expect_cons_show("Account created.");;
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -170,11 +175,12 @@ void cmd_account_add_shows_message(void **state)
 
 void cmd_account_enable_shows_usage_when_no_arg(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "enable", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -184,13 +190,12 @@ void cmd_account_enable_shows_usage_when_no_arg(void **state)
 
 void cmd_account_enable_enables_account(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "enable", "account_name", NULL };
 
     expect_string(accounts_enable, name, "account_name");
     will_return(accounts_enable, TRUE);
-
-    expect_any_count(cons_show, output, 2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -200,14 +205,15 @@ void cmd_account_enable_enables_account(void **state)
 
 void cmd_account_enable_shows_message_when_enabled(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "enable", "account_name", NULL };
 
     expect_any(accounts_enable, name);
     will_return(accounts_enable, TRUE);
 
-    expect_string(cons_show, output, "Account enabled.");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Account enabled.");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -217,14 +223,15 @@ void cmd_account_enable_shows_message_when_enabled(void **state)
 
 void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "enable", "account_name", NULL };
 
     expect_any(accounts_enable, name);
     will_return(accounts_enable, FALSE);
 
-    expect_string(cons_show, output, "No such account: account_name");
-    expect_string(cons_show, output, "");
+    expect_cons_show("No such account: account_name");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -234,11 +241,12 @@ void cmd_account_enable_shows_message_when_account_doesnt_exist(void **state)
 
 void cmd_account_disable_shows_usage_when_no_arg(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "disable", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -248,13 +256,12 @@ void cmd_account_disable_shows_usage_when_no_arg(void **state)
 
 void cmd_account_disable_disables_account(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "disable", "account_name", NULL };
 
     expect_string(accounts_disable, name, "account_name");
     will_return(accounts_disable, TRUE);
-
-    expect_any_count(cons_show, output, 2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -264,14 +271,15 @@ void cmd_account_disable_disables_account(void **state)
 
 void cmd_account_disable_shows_message_when_disabled(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "disable", "account_name", NULL };
 
     expect_any(accounts_disable, name);
     will_return(accounts_disable, TRUE);
 
-    expect_string(cons_show, output, "Account disabled.");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Account disabled.");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -281,14 +289,15 @@ void cmd_account_disable_shows_message_when_disabled(void **state)
 
 void cmd_account_disable_shows_message_when_account_doesnt_exist(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "disable", "account_name", NULL };
 
     expect_any(accounts_disable, name);
     will_return(accounts_disable, FALSE);
 
-    expect_string(cons_show, output, "No such account: account_name");
-    expect_string(cons_show, output, "");
+    expect_cons_show("No such account: account_name");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -298,11 +307,12 @@ void cmd_account_disable_shows_message_when_account_doesnt_exist(void **state)
 
 void cmd_account_rename_shows_usage_when_no_args(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "rename", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -312,11 +322,12 @@ void cmd_account_rename_shows_usage_when_no_args(void **state)
 
 void cmd_account_rename_shows_usage_when_one_arg(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "rename", "original_name", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -326,14 +337,13 @@ void cmd_account_rename_shows_usage_when_one_arg(void **state)
 
 void cmd_account_rename_renames_account(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "rename", "original_name", "new_name", NULL };
 
     expect_string(accounts_rename, account_name, "original_name");
     expect_string(accounts_rename, new_name, "new_name");
     will_return(accounts_rename, TRUE);
-
-    expect_any_count(cons_show, output, 2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -343,6 +353,7 @@ void cmd_account_rename_renames_account(void **state)
 
 void cmd_account_rename_shows_message_when_renamed(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "rename", "original_name", "new_name", NULL };
 
@@ -350,8 +361,8 @@ void cmd_account_rename_shows_message_when_renamed(void **state)
     expect_any(accounts_rename, new_name);
     will_return(accounts_rename, TRUE);
 
-    expect_string(cons_show, output, "Account renamed.");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Account renamed.");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -361,6 +372,7 @@ void cmd_account_rename_shows_message_when_renamed(void **state)
 
 void cmd_account_rename_shows_message_when_not_renamed(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "rename", "original_name", "new_name", NULL };
 
@@ -368,8 +380,8 @@ void cmd_account_rename_shows_message_when_not_renamed(void **state)
     expect_any(accounts_rename, new_name);
     will_return(accounts_rename, FALSE);
 
-    expect_string(cons_show, output, "Either account original_name doesn't exist, or account new_name already exists.");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Either account original_name doesn't exist, or account new_name already exists.");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -379,11 +391,12 @@ void cmd_account_rename_shows_message_when_not_renamed(void **state)
 
 void cmd_account_set_shows_usage_when_no_args(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "set", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -393,11 +406,12 @@ void cmd_account_set_shows_usage_when_no_args(void **state)
 
 void cmd_account_set_shows_usage_when_one_arg(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "set", "a_account", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -407,11 +421,12 @@ void cmd_account_set_shows_usage_when_one_arg(void **state)
 
 void cmd_account_set_shows_usage_when_two_args(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "set", "a_account", "a_property", NULL };
 
-    expect_string(cons_show, output, "Usage: some usage");
+    expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -421,13 +436,12 @@ void cmd_account_set_shows_usage_when_two_args(void **state)
 
 void cmd_account_set_checks_account_exists(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
     expect_string(accounts_account_exists, account_name, "a_account");
     will_return(accounts_account_exists, FALSE);
-
-    expect_any_count(cons_show, output, 2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -437,14 +451,15 @@ void cmd_account_set_checks_account_exists(void **state)
 
 void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, FALSE);
 
-    expect_string(cons_show, output, "Account a_account doesn't exist");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Account a_account doesn't exist");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -454,13 +469,14 @@ void cmd_account_set_shows_message_when_account_doesnt_exist(void **state)
 
 void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "jid", "@malformed", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
 
-    expect_string(cons_show, output, "Malformed jid: @malformed");
+    expect_cons_show("Malformed jid: @malformed");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -470,6 +486,7 @@ void cmd_account_set_jid_shows_message_for_malformed_jid(void **state)
 
 void cmd_account_set_jid_sets_barejid(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
@@ -479,13 +496,12 @@ void cmd_account_set_jid_sets_barejid(void **state)
     expect_string(accounts_set_jid, account_name, "a_account");
     expect_string(accounts_set_jid, value, "a_local@a_domain");
 
-    expect_string(cons_show, output, "Updated jid for account a_account: a_local@a_domain");
+    expect_cons_show("Updated jid for account a_account: a_local@a_domain");
 
     expect_any(accounts_set_resource, account_name);
     expect_any(accounts_set_resource, value);
 
-    expect_any(cons_show, output);
-    expect_string(cons_show, output, "");
+    expect_cons_show_calls(2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -495,6 +511,7 @@ void cmd_account_set_jid_sets_barejid(void **state)
 
 void cmd_account_set_jid_sets_resource(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
@@ -504,13 +521,13 @@ void cmd_account_set_jid_sets_resource(void **state)
     expect_any(accounts_set_jid, account_name);
     expect_any(accounts_set_jid, value);
 
-    expect_any(cons_show, output);
+    expect_cons_show_calls(1);
 
     expect_string(accounts_set_resource, account_name, "a_account");
     expect_string(accounts_set_resource, value, "a_resource");
 
-    expect_string(cons_show, output, "Updated resource for account a_account: a_resource");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated resource for account a_account: a_resource");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -520,6 +537,7 @@ void cmd_account_set_jid_sets_resource(void **state)
 
 void cmd_account_set_server_sets_server(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
 
@@ -529,8 +547,6 @@ void cmd_account_set_server_sets_server(void **state)
     expect_string(accounts_set_server, account_name, "a_account");
     expect_string(accounts_set_server, value, "a_server");
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -539,6 +555,7 @@ void cmd_account_set_server_sets_server(void **state)
 
 void cmd_account_set_server_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "server", "a_server", NULL };
 
@@ -548,8 +565,8 @@ void cmd_account_set_server_shows_message(void **state)
     expect_any(accounts_set_server, account_name);
     expect_any(accounts_set_server, value);
 
-    expect_string(cons_show, output, "Updated server for account a_account: a_server");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated server for account a_account: a_server");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -559,6 +576,7 @@ void cmd_account_set_server_shows_message(void **state)
 
 void cmd_account_set_resource_sets_resource(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
@@ -568,8 +586,6 @@ void cmd_account_set_resource_sets_resource(void **state)
     expect_string(accounts_set_resource, account_name, "a_account");
     expect_string(accounts_set_resource, value, "a_resource");
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -578,6 +594,7 @@ void cmd_account_set_resource_sets_resource(void **state)
 
 void cmd_account_set_resource_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
@@ -587,8 +604,8 @@ void cmd_account_set_resource_shows_message(void **state)
     expect_any(accounts_set_resource, account_name);
     expect_any(accounts_set_resource, value);
 
-    expect_string(cons_show, output, "Updated resource for account a_account: a_resource");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated resource for account a_account: a_resource");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -598,6 +615,7 @@ void cmd_account_set_resource_shows_message(void **state)
 
 void cmd_account_set_password_sets_password(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
 
@@ -607,8 +625,6 @@ void cmd_account_set_password_sets_password(void **state)
     expect_string(accounts_set_password, account_name, "a_account");
     expect_string(accounts_set_password, value, "a_password");
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -617,6 +633,7 @@ void cmd_account_set_password_sets_password(void **state)
 
 void cmd_account_set_password_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
 
@@ -626,8 +643,8 @@ void cmd_account_set_password_shows_message(void **state)
     expect_any(accounts_set_password, account_name);
     expect_any(accounts_set_password, value);
 
-    expect_string(cons_show, output, "Updated password for account a_account");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated password for account a_account");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -637,6 +654,7 @@ void cmd_account_set_password_shows_message(void **state)
 
 void cmd_account_set_muc_sets_muc(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
 
@@ -646,8 +664,6 @@ void cmd_account_set_muc_sets_muc(void **state)
     expect_string(accounts_set_muc_service, account_name, "a_account");
     expect_string(accounts_set_muc_service, value, "a_muc");
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -656,6 +672,7 @@ void cmd_account_set_muc_sets_muc(void **state)
 
 void cmd_account_set_muc_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "muc", "a_muc", NULL };
 
@@ -665,8 +682,8 @@ void cmd_account_set_muc_shows_message(void **state)
     expect_any(accounts_set_muc_service, account_name);
     expect_any(accounts_set_muc_service, value);
 
-    expect_string(cons_show, output, "Updated muc service for account a_account: a_muc");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated muc service for account a_account: a_muc");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -676,6 +693,7 @@ void cmd_account_set_muc_shows_message(void **state)
 
 void cmd_account_set_nick_sets_nick(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
 
@@ -685,8 +703,6 @@ void cmd_account_set_nick_sets_nick(void **state)
     expect_string(accounts_set_muc_nick, account_name, "a_account");
     expect_string(accounts_set_muc_nick, value, "a_nick");
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -695,6 +711,7 @@ void cmd_account_set_nick_sets_nick(void **state)
 
 void cmd_account_set_nick_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "nick", "a_nick", NULL };
 
@@ -704,8 +721,8 @@ void cmd_account_set_nick_shows_message(void **state)
     expect_any(accounts_set_muc_nick, account_name);
     expect_any(accounts_set_muc_nick, value);
 
-    expect_string(cons_show, output, "Updated muc nick for account a_account: a_nick");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated muc nick for account a_account: a_nick");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -715,14 +732,15 @@ void cmd_account_set_nick_shows_message(void **state)
 
 void cmd_account_set_status_shows_message_when_invalid_status(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "status", "bad_status", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
 
-    expect_string(cons_show, output, "Invalid status: bad_status");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Invalid status: bad_status");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -732,6 +750,7 @@ void cmd_account_set_status_shows_message_when_invalid_status(void **state)
 
 void cmd_account_set_status_sets_status_when_valid(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "status", "away", NULL };
 
@@ -741,8 +760,6 @@ void cmd_account_set_status_sets_status_when_valid(void **state)
     expect_string(accounts_set_login_presence, account_name, "a_account");
     expect_string(accounts_set_login_presence, value, "away");
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -751,6 +768,7 @@ void cmd_account_set_status_sets_status_when_valid(void **state)
 
 void cmd_account_set_status_sets_status_when_last(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "status", "last", NULL };
 
@@ -760,8 +778,6 @@ void cmd_account_set_status_sets_status_when_last(void **state)
     expect_string(accounts_set_login_presence, account_name, "a_account");
     expect_string(accounts_set_login_presence, value, "last");
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -770,6 +786,7 @@ void cmd_account_set_status_sets_status_when_last(void **state)
 
 void cmd_account_set_status_shows_message_when_set_valid(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "status", "away", NULL };
 
@@ -779,8 +796,8 @@ void cmd_account_set_status_shows_message_when_set_valid(void **state)
     expect_any(accounts_set_login_presence, account_name);
     expect_any(accounts_set_login_presence, value);
 
-    expect_string(cons_show, output, "Updated login status for account a_account: away");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated login status for account a_account: away");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -790,6 +807,7 @@ void cmd_account_set_status_shows_message_when_set_valid(void **state)
 
 void cmd_account_set_status_shows_message_when_set_last(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "status", "last", NULL };
 
@@ -799,8 +817,8 @@ void cmd_account_set_status_shows_message_when_set_last(void **state)
     expect_any(accounts_set_login_presence, account_name);
     expect_any(accounts_set_login_presence, value);
 
-    expect_string(cons_show, output, "Updated login status for account a_account: last");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Updated login status for account a_account: last");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -810,14 +828,15 @@ void cmd_account_set_status_shows_message_when_set_last(void **state)
 
 void cmd_account_set_invalid_presence_string_priority_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "blah", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
 
-    expect_string(cons_show, output, "Invalid property: blah");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Invalid property: blah");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -827,14 +846,15 @@ void cmd_account_set_invalid_presence_string_priority_shows_message(void **state
 
 void cmd_account_set_last_priority_shows_message(void **state)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "last", "10", NULL };
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
 
-    expect_string(cons_show, output, "Invalid property: last");
-    expect_string(cons_show, output, "");
+    expect_cons_show("Invalid property: last");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -844,6 +864,7 @@ void cmd_account_set_last_priority_shows_message(void **state)
 
 void cmd_account_set_online_priority_sets_preference(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "online", "10", NULL };
 
@@ -855,8 +876,6 @@ void cmd_account_set_online_priority_sets_preference(void **state)
 
     mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -865,6 +884,7 @@ void cmd_account_set_online_priority_sets_preference(void **state)
 
 void cmd_account_set_chat_priority_sets_preference(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "chat", "10", NULL };
 
@@ -876,8 +896,6 @@ void cmd_account_set_chat_priority_sets_preference(void **state)
 
     mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -886,6 +904,7 @@ void cmd_account_set_chat_priority_sets_preference(void **state)
 
 void cmd_account_set_away_priority_sets_preference(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "away", "10", NULL };
 
@@ -897,8 +916,6 @@ void cmd_account_set_away_priority_sets_preference(void **state)
 
     mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -907,6 +924,7 @@ void cmd_account_set_away_priority_sets_preference(void **state)
 
 void cmd_account_set_xa_priority_sets_preference(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "xa", "10", NULL };
 
@@ -918,8 +936,6 @@ void cmd_account_set_xa_priority_sets_preference(void **state)
 
     mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any_count(cons_show, output, 2);
-
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
@@ -928,6 +944,7 @@ void cmd_account_set_xa_priority_sets_preference(void **state)
 
 void cmd_account_set_dnd_priority_sets_preference(void **state)
 {
+    stub_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "dnd", "10", NULL };
 
@@ -938,8 +955,6 @@ void cmd_account_set_dnd_priority_sets_preference(void **state)
     expect_value(accounts_set_priority_dnd, value, 10);
 
     mock_connection_status(JABBER_DISCONNECTED);
-
-    expect_any_count(cons_show, output, 2);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);

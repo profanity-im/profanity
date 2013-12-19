@@ -85,8 +85,8 @@ cons_debug(const char * const msg, ...)
     }
 }
 
-void
-cons_show(const char * const msg, ...)
+static void
+_cons_show(const char * const msg, ...)
 {
     ProfWin *console = wins_get_console();
     va_list arg;
@@ -99,6 +99,7 @@ cons_show(const char * const msg, ...)
     va_end(arg);
     wins_refresh_console();
 }
+void (*cons_show)(const char * const, ...) = _cons_show;
 
 void
 cons_show_error(const char * const msg, ...)

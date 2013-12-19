@@ -61,7 +61,7 @@ test_sources = \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
-    tests/ui/mock_ui.c \
+    tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/log/mock_log.c \
     tests/config/mock_accounts.c \
     tests/test_autocomplete.c \
