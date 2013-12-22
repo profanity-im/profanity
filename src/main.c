@@ -45,6 +45,7 @@ _init_modules(void)
     iq_init_module();
     message_init_module();
     presence_init_module();
+    roster_init_module();
 }
 
 int

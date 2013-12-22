@@ -90,7 +90,6 @@ _roster_add_new(const char * const barejid, const char * const name)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
-void (*roster_add_new)(const char * const, const char * const) = _roster_add_new;
 
 static void
 _roster_send_remove(const char * const barejid)
@@ -101,7 +100,6 @@ _roster_send_remove(const char * const barejid)
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
-void (*roster_send_remove)(const char * const) = _roster_send_remove;
 
 static void
 _roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups)
@@ -113,8 +111,6 @@ _roster_send_name_change(const char * const barejid, const char * const new_name
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
-void (*roster_send_name_change)(const char * const, const char * const,
-    GSList *) = _roster_send_name_change;
 
 static void
 _roster_send_add_to_group(const char * const group, PContact contact)
@@ -146,7 +142,6 @@ _roster_send_add_to_group(const char * const group, PContact contact)
     xmpp_stanza_release(iq);
     free(unique_id);
 }
-void (*roster_send_add_to_group)(const char * const, PContact) = _roster_send_add_to_group;
 
 static int
 _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
@@ -194,7 +189,6 @@ _roster_send_remove_from_group(const char * const group, PContact contact)
     xmpp_stanza_release(iq);
     free(unique_id);
 }
-void (*roster_send_remove_from_group)(const char * const, PContact) = _roster_send_remove_from_group;
 
 static int
 _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
@@ -328,4 +322,15 @@ _get_groups_from_item(xmpp_stanza_t *item)
     }
 
     return groups;
+}
+
+void
+roster_init_module(void)
+{
+    roster_add_new = _roster_add_new;
+    roster_send_remove = _roster_send_remove;
+    roster_send_name_change = _roster_send_name_change;
+    roster_send_add_to_group = _roster_send_add_to_group;
+    roster_send_remove_from_group = _roster_send_remove_from_group;
+
 }

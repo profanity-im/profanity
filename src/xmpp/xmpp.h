@@ -80,6 +80,7 @@ void capabilities_init_module(void);
 void iq_init_module(void);
 void message_init_module(void);
 void presence_init_module(void);
+void roster_init_module(void);
 
 // connection functions
 void (*jabber_init)(const int disable_tls);
