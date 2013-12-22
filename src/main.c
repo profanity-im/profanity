@@ -40,6 +40,7 @@ static void
 _init_modules(void)
 {
     jabber_init_module();
+    bookmark_init_module();
 }
 
 int

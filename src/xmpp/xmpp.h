@@ -75,6 +75,7 @@ typedef struct disco_identity_t {
 } DiscoIdentity;
 
 void jabber_init_module(void);
+void bookmark_init_module(void);
 
 // connection functions
 void (*jabber_init)(const int disable_tls);
