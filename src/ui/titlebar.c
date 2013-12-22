@@ -37,8 +37,8 @@ static contact_presence_t current_status;
 static void _title_bar_draw_title(void);
 static void _title_bar_draw_status(void);
 
-void
-create_title_bar(void)
+static void
+_create_title_bar(void)
 {
     int cols = getmaxx(stdscr);
 
@@ -48,9 +48,10 @@ create_title_bar(void)
     title_bar_set_status(CONTACT_OFFLINE);
     dirty = TRUE;
 }
+void (*create_title_bar)(void) = _create_title_bar;
 
-void
-title_bar_title(void)
+static void
+_title_bar_title(void)
 {
     werase(title_bar);
     recipient = NULL;
@@ -59,9 +60,10 @@ title_bar_title(void)
     _title_bar_draw_status();
     dirty = TRUE;
 }
+void (*title_bar_title)(void) = _title_bar_title;
 
-void
-title_bar_resize(void)
+static void
+_title_bar_resize(void)
 {
     int cols = getmaxx(stdscr);
 
@@ -72,9 +74,10 @@ title_bar_resize(void)
     _title_bar_draw_status();
     dirty = TRUE;
 }
+void (*title_bar_resize)(void) = _title_bar_resize;
 
-void
-title_bar_refresh(void)
+static void
+_title_bar_refresh(void)
 {
     if (recipient != NULL) {
 
@@ -106,9 +109,10 @@ title_bar_refresh(void)
         dirty = FALSE;
     }
 }
+void (*title_bar_refresh)(void) = _title_bar_refresh;
 
-void
-title_bar_show(const char * const title)
+static void
+_title_bar_show(const char * const title)
 {
     if (current_title != NULL)
         free(current_title);
@@ -117,16 +121,18 @@ title_bar_show(const char * const title)
     strcpy(current_title, title);
     _title_bar_draw_title();
 }
+void (*title_bar_show)(const char * const) = _title_bar_show;
 
-void
-title_bar_set_status(contact_presence_t status)
+static void
+_title_bar_set_status(contact_presence_t status)
 {
     current_status = status;
     _title_bar_draw_status();
 }
+void (*title_bar_set_status)(contact_presence_t) = _title_bar_set_status;
 
-void
-title_bar_set_recipient(const char * const from)
+static void
+_title_bar_set_recipient(const char * const from)
 {
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
@@ -143,9 +149,10 @@ title_bar_set_recipient(const char * const from)
 
     dirty = TRUE;
 }
+void (*title_bar_set_recipient)(const char * const) = _title_bar_set_recipient;
 
-void
-title_bar_set_typing(gboolean is_typing)
+static void
+_title_bar_set_typing(gboolean is_typing)
 {
     if (is_typing) {
         if (typing_elapsed != NULL) {
@@ -169,14 +176,16 @@ title_bar_set_typing(gboolean is_typing)
 
     dirty = TRUE;
 }
+void (*title_bar_set_typing)(gboolean) = _title_bar_set_typing;
 
-void
-title_bar_draw(void)
+static void
+_title_bar_draw(void)
 {
     werase(title_bar);
     _title_bar_draw_status();
     _title_bar_draw_title();
 }
+void (*title_bar_draw)(void) = _title_bar_draw;
 
 static void
 _title_bar_draw_status(void)

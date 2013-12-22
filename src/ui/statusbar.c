@@ -54,8 +54,8 @@ static void _mark_new(int num);
 static void _mark_active(int num);
 static void _mark_inactive(int num);
 
-void
-create_status_bar(void)
+static void
+_create_status_bar(void)
 {
     int rows, cols, i;
     getmaxyx(stdscr, rows, cols);
@@ -83,9 +83,10 @@ create_status_bar(void)
 
     dirty = TRUE;
 }
+void (*create_status_bar)(void) = _create_status_bar;
 
-void
-status_bar_refresh(void)
+static void
+_status_bar_refresh(void)
 {
     GDateTime *now_time = g_date_time_new_now_local();
     GTimeSpan elapsed = g_date_time_difference(now_time, last_time);
@@ -107,9 +108,10 @@ status_bar_refresh(void)
 
     g_date_time_unref(now_time);
 }
+void (*status_bar_refresh)(void) = _status_bar_refresh;
 
-void
-status_bar_resize(void)
+static void
+_status_bar_resize(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -133,9 +135,10 @@ status_bar_resize(void)
     last_time = g_date_time_new_now_local();
     dirty = TRUE;
 }
+void (*status_bar_resize)(void) = _status_bar_resize;
 
-void
-status_bar_set_all_inactive(void)
+static void
+_status_bar_set_all_inactive(void)
 {
     int i = 0;
     for (i = 0; i < 12; i++) {
@@ -147,9 +150,10 @@ status_bar_set_all_inactive(void)
     g_hash_table_remove_all(remaining_active);
     g_hash_table_remove_all(remaining_new);
 }
+void (*status_bar_set_all_inactive)(void) = _status_bar_set_all_inactive;
 
-void
-status_bar_current(int i)
+static void
+_status_bar_current(int i)
 {
     if (i == 0) {
         current = 10;
@@ -164,9 +168,10 @@ status_bar_current(int i)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 }
+void (*status_bar_current)(int) = _status_bar_current;
 
-void
-status_bar_inactive(const int win)
+static void
+_status_bar_inactive(const int win)
 {
     int true_win = win;
     if (true_win == 0) {
@@ -204,9 +209,10 @@ status_bar_inactive(const int win)
         _mark_inactive(true_win);
     }
 }
+void (*status_bar_inactive)(const int) = _status_bar_inactive;
 
-void
-status_bar_active(const int win)
+static void
+_status_bar_active(const int win)
 {
     int true_win = win;
     if (true_win == 0) {
@@ -238,9 +244,10 @@ status_bar_active(const int win)
         _mark_active(true_win);
     }
 }
+void (*status_bar_active)(const int) = _status_bar_active;
 
-void
-status_bar_new(const int win)
+static void
+_status_bar_new(const int win)
 {
     int true_win = win;
     if (true_win == 0) {
@@ -261,16 +268,18 @@ status_bar_new(const int win)
         _mark_new(true_win);
     }
 }
+void (*status_bar_new)(const int) = _status_bar_new;
 
-void
-status_bar_get_password(void)
+static void
+_status_bar_get_password(void)
 {
     status_bar_print_message("Enter password:");
     dirty = TRUE;
 }
+void (*status_bar_get_password)(void) = _status_bar_get_password;
 
-void
-status_bar_print_message(const char * const msg)
+static void
+_status_bar_print_message(const char * const msg)
 {
     werase(status_bar);
 
@@ -291,9 +300,10 @@ status_bar_print_message(const char * const msg)
     _update_win_statuses();
     dirty = TRUE;
 }
+void (*status_bar_print_message)(const char * const) = _status_bar_print_message;
 
-void
-status_bar_clear(void)
+static void
+_status_bar_clear(void)
 {
     if (message != NULL) {
         free(message);
@@ -319,9 +329,10 @@ status_bar_clear(void)
 
     dirty = TRUE;
 }
+void (*status_bar_clear)(void) = _status_bar_clear;
 
-void
-status_bar_clear_message(void)
+static void
+_status_bar_clear_message(void)
 {
     if (message != NULL) {
         free(message);
@@ -340,6 +351,7 @@ status_bar_clear_message(void)
     _update_win_statuses();
     dirty = TRUE;
 }
+void (*status_bar_clear_message)(void) = _status_bar_clear_message;
 
 static void
 _status_bar_update_time(void)

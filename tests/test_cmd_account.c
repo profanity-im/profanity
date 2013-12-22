@@ -33,6 +33,7 @@ void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
 
 void cmd_account_shows_account_when_connected_and_no_args(void **state)
 {
+    mock_cons_show_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     ProfAccount *account = malloc(sizeof(ProfAccount));
     gchar *args[] = { NULL };
@@ -43,7 +44,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
-    expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
+    expect_cons_show_account(account);
 
     expect_any(accounts_free_account, account);
 
@@ -56,6 +57,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 
 void cmd_account_list_shows_accounts(void **state)
 {
+    mock_cons_show_account_list();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "list", NULL };
 
@@ -67,7 +69,7 @@ void cmd_account_list_shows_accounts(void **state)
 
     will_return(accounts_get_list, accounts);
 
-    expect_memory(cons_show_account_list, accounts, accounts, sizeof(accounts));
+    expect_cons_show_account_list(accounts);
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -110,6 +112,7 @@ void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
 
 void cmd_account_show_shows_account_when_exists(void **state)
 {
+    mock_cons_show_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
@@ -117,7 +120,7 @@ void cmd_account_show_shows_account_when_exists(void **state)
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
-    expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
+    expect_cons_show_account(account);
 
     expect_any(accounts_free_account, account);
 

@@ -58,8 +58,8 @@ static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
 
-void
-create_input_window(void)
+static void
+_create_input_window(void)
 {
 #ifdef NCURSES_REENTRANT
     set_escdelay(25);
@@ -73,9 +73,10 @@ create_input_window(void)
     wmove(inp_win, 0, 0);
     _inp_win_refresh();
 }
+void (*create_input_window)(void) = _create_input_window;
 
-void
-inp_win_resize(const char * const input, const int size)
+static void
+_inp_win_resize(const char * const input, const int size)
 {
     int inp_x;
     getmaxyx(stdscr, rows, cols);
@@ -91,21 +92,24 @@ inp_win_resize(const char * const input, const int size)
 
     _inp_win_refresh();
 }
+void (*inp_win_resize)(const char * const, const int) = _inp_win_resize;
 
-void
-inp_non_block(void)
+static void
+_inp_non_block(void)
 {
     wtimeout(inp_win, 20);
 }
+void (*inp_non_block)(void) = _inp_non_block;
 
-void
-inp_block(void)
+static void
+_inp_block(void)
 {
     wtimeout(inp_win, -1);
 }
+void (*inp_block)(void) = _inp_block;
 
-wint_t
-inp_get_char(char *input, int *size)
+static wint_t
+_inp_get_char(char *input, int *size)
 {
     int inp_x = 0;
     int i;
@@ -202,9 +206,10 @@ inp_get_char(char *input, int *size)
 
     return ch;
 }
+wint_t (*inp_get_char)(char*, int*) = _inp_get_char;
 
-void
-inp_get_password(char *passwd)
+static void
+_inp_get_password(char *passwd)
 {
     _clear_input();
     _inp_win_refresh();
@@ -214,15 +219,17 @@ inp_get_password(char *passwd)
     echo();
     status_bar_clear();
 }
+void (*inp_get_password)(char*) = _inp_get_password;
 
-void
-inp_put_back(void)
+static void
+_inp_put_back(void)
 {
     _inp_win_refresh();
 }
+void (*inp_put_back)(void) = _inp_put_back;
 
-void
-inp_replace_input(char *input, const char * const new_input, int *size)
+static void
+_inp_replace_input(char *input, const char * const new_input, int *size)
 {
     int display_size;
     strcpy(input, new_input);
@@ -233,14 +240,16 @@ inp_replace_input(char *input, const char * const new_input, int *size)
     waddstr(inp_win, input);
     _go_to_end(display_size);
 }
+void (*inp_replace_input)(char*, const char * const, int*) = _inp_replace_input;
 
-void
-inp_win_reset(void)
+static void
+_inp_win_reset(void)
 {
     _clear_input();
     pad_start = 0;
     _inp_win_refresh();
 }
+void (*inp_win_reset)(void) = _inp_win_reset;
 
 static void
 _clear_input(void)
