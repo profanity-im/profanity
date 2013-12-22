@@ -44,6 +44,7 @@ _init_modules(void)
     capabilities_init_module();
     iq_init_module();
     message_init_module();
+    presence_init_module();
 }
 
 int
