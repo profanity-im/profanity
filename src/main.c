@@ -41,6 +41,7 @@ _init_modules(void)
 {
     jabber_init_module();
     bookmark_init_module();
+    capabilities_init_module();
 }
 
 int

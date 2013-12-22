@@ -112,7 +112,6 @@ _caps_get(const char * const caps_str)
 {
     return g_hash_table_lookup(capabilities, caps_str);
 }
-Capabilities * (*caps_get)(const char * const) = _caps_get;
 
 char *
 caps_create_sha1_str(xmpp_stanza_t * const query)
@@ -309,7 +308,6 @@ _caps_close(void)
 {
     g_hash_table_destroy(capabilities);
 }
-void (*caps_close)(void) = _caps_close;
 
 static void
 _caps_destroy(Capabilities *caps)
@@ -327,4 +325,11 @@ _caps_destroy(Capabilities *caps)
         }
         free(caps);
     }
+}
+
+void
+capabilities_init_module(void)
+{
+    caps_get = _caps_get;
+    caps_close = _caps_close;
 }
