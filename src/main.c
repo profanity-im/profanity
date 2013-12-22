@@ -29,10 +29,18 @@
 
 #include "profanity.h"
 
+#include "xmpp/xmpp.h"
+
 static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
 static char *log = "INFO";
 static char *account_name = NULL;
+
+static void
+_init_modules(void)
+{
+    jabber_init_module();
+}
 
 int
 main(int argc, char **argv)
@@ -79,6 +87,7 @@ main(int argc, char **argv)
         return 0;
     }
 
+    _init_modules();
     prof_run(disable_tls, log, account_name);
 
     return 0;

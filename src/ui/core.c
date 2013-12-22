@@ -125,6 +125,7 @@ _ui_get_idle_time(void)
     unsigned long ms_elapsed = seconds_elapsed * 1000.0;
     return ms_elapsed;
 }
+//unsigned long (*ui_get_idle_time)(void) = _ui_get_idle_time;
 unsigned long (*ui_get_idle_time)(void) = _ui_get_idle_time;
 
 static void

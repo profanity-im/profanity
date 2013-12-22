@@ -74,6 +74,8 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
+void jabber_init_module(void);
+
 // connection functions
 void (*jabber_init)(const int disable_tls);
 jabber_conn_status_t (*jabber_connect_with_details)(const char * const jid,
