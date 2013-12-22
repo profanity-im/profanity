@@ -43,6 +43,7 @@ _init_modules(void)
     bookmark_init_module();
     capabilities_init_module();
     iq_init_module();
+    message_init_module();
 }
 
 int
