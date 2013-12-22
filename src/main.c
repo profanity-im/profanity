@@ -30,6 +30,7 @@
 #include "profanity.h"
 
 #include "xmpp/xmpp.h"
+#include "ui/ui.h"
 
 static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
@@ -46,6 +47,8 @@ _init_modules(void)
     message_init_module();
     presence_init_module();
     roster_init_module();
+
+    ui_init_module();
 }
 
 int
