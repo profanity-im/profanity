@@ -49,6 +49,7 @@ _init_modules(void)
     roster_init_module();
 
     ui_init_module();
+    console_init_module();
 }
 
 int
