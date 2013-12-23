@@ -46,7 +46,6 @@ _notifier_init(void)
     notify_init("Profanity");
 #endif
 }
-void (*notifier_init)(void) = _notifier_init;
 
 static void
 _notifier_uninit(void)
@@ -57,7 +56,6 @@ _notifier_uninit(void)
     }
 #endif
 }
-void (*notifier_uninit)(void) = _notifier_uninit;
 
 static void
 _notify_typing(const char * const handle)
@@ -67,7 +65,6 @@ _notify_typing(const char * const handle)
 
     _notify(message, 10000, "Incoming message");
 }
-void (*notify_typing)(const char * const) = _notify_typing;
 
 static void
 _notify_invite(const char * const from, const char * const room,
@@ -85,8 +82,6 @@ _notify_invite(const char * const from, const char * const room,
 
     g_string_free(message, TRUE);
 }
-void (*notify_invite)(const char * const, const char * const,
-    const char * const) = _notify_invite;
 
 static void
 _notify_message(const char * const handle, int win)
@@ -96,7 +91,6 @@ _notify_message(const char * const handle, int win)
 
     _notify(message, 10000, "incoming message");
 }
-void (*notify_message)(const char * const, int) = _notify_message;
 
 static void
 _notify_room_message(const char * const handle, const char * const room, int win)
@@ -110,8 +104,6 @@ _notify_room_message(const char * const handle, const char * const room, int win
 
     g_string_free(text, TRUE);
 }
-void (*notify_room_message)(const char * const, const char * const,
-    int) = _notify_room_message;
 
 static void
 _notify_subscription(const char * const from)
@@ -121,7 +113,6 @@ _notify_subscription(const char * const from)
     _notify(message->str, 10000, "Incomming message");
     g_string_free(message, TRUE);
 }
-void (*notify_subscription)(const char * const) = _notify_subscription;
 
 static void
 _notify_remind(void)
@@ -167,7 +158,6 @@ _notify_remind(void)
 
     g_string_free(text, TRUE);
 }
-void (*notify_remind)(void) = _notify_remind;
 
 static void
 _notify(const char * const message, int timeout,
@@ -216,3 +206,17 @@ _notify(const char * const message, int timeout,
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
 }
+
+void
+notifier_init_module(void)
+{
+    notifier_init = _notifier_init;
+    notifier_uninit = _notifier_uninit;
+    notify_typing = _notify_typing;
+    notify_invite = _notify_invite;
+    notify_message = _notify_message;
+    notify_room_message =  _notify_room_message;
+    notify_subscription = _notify_subscription;
+    notify_remind = _notify_remind;
+}
+

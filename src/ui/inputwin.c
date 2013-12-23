@@ -73,7 +73,6 @@ _create_input_window(void)
     wmove(inp_win, 0, 0);
     _inp_win_refresh();
 }
-void (*create_input_window)(void) = _create_input_window;
 
 static void
 _inp_win_resize(const char * const input, const int size)
@@ -92,21 +91,18 @@ _inp_win_resize(const char * const input, const int size)
 
     _inp_win_refresh();
 }
-void (*inp_win_resize)(const char * const, const int) = _inp_win_resize;
 
 static void
 _inp_non_block(void)
 {
     wtimeout(inp_win, 20);
 }
-void (*inp_non_block)(void) = _inp_non_block;
 
 static void
 _inp_block(void)
 {
     wtimeout(inp_win, -1);
 }
-void (*inp_block)(void) = _inp_block;
 
 static wint_t
 _inp_get_char(char *input, int *size)
@@ -206,7 +202,6 @@ _inp_get_char(char *input, int *size)
 
     return ch;
 }
-wint_t (*inp_get_char)(char*, int*) = _inp_get_char;
 
 static void
 _inp_get_password(char *passwd)
@@ -219,14 +214,12 @@ _inp_get_password(char *passwd)
     echo();
     status_bar_clear();
 }
-void (*inp_get_password)(char*) = _inp_get_password;
 
 static void
 _inp_put_back(void)
 {
     _inp_win_refresh();
 }
-void (*inp_put_back)(void) = _inp_put_back;
 
 static void
 _inp_replace_input(char *input, const char * const new_input, int *size)
@@ -240,7 +233,6 @@ _inp_replace_input(char *input, const char * const new_input, int *size)
     waddstr(inp_win, input);
     _go_to_end(display_size);
 }
-void (*inp_replace_input)(char*, const char * const, int*) = _inp_replace_input;
 
 static void
 _inp_win_reset(void)
@@ -249,7 +241,6 @@ _inp_win_reset(void)
     pad_start = 0;
     _inp_win_refresh();
 }
-void (*inp_win_reset)(void) = _inp_win_reset;
 
 static void
 _clear_input(void)
@@ -711,4 +702,18 @@ _printable(const wint_t ch)
     bytes[utf_len] = '\0';
     gunichar unichar = g_utf8_get_char(bytes);
     return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
+}
+
+void
+inputwin_init_module(void)
+{
+    create_input_window = _create_input_window;
+    inp_win_resize = _inp_win_resize;
+    inp_non_block = _inp_non_block;
+    inp_block = _inp_block;
+    inp_get_char = _inp_get_char;
+    inp_get_password = _inp_get_password;
+    inp_put_back = _inp_put_back;
+    inp_replace_input = _inp_replace_input;
+    inp_win_reset = _inp_win_reset;
 }

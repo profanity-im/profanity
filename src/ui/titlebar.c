@@ -48,7 +48,6 @@ _create_title_bar(void)
     title_bar_set_status(CONTACT_OFFLINE);
     dirty = TRUE;
 }
-void (*create_title_bar)(void) = _create_title_bar;
 
 static void
 _title_bar_title(void)
@@ -60,7 +59,6 @@ _title_bar_title(void)
     _title_bar_draw_status();
     dirty = TRUE;
 }
-void (*title_bar_title)(void) = _title_bar_title;
 
 static void
 _title_bar_resize(void)
@@ -74,7 +72,6 @@ _title_bar_resize(void)
     _title_bar_draw_status();
     dirty = TRUE;
 }
-void (*title_bar_resize)(void) = _title_bar_resize;
 
 static void
 _title_bar_refresh(void)
@@ -109,7 +106,6 @@ _title_bar_refresh(void)
         dirty = FALSE;
     }
 }
-void (*title_bar_refresh)(void) = _title_bar_refresh;
 
 static void
 _title_bar_show(const char * const title)
@@ -121,7 +117,6 @@ _title_bar_show(const char * const title)
     strcpy(current_title, title);
     _title_bar_draw_title();
 }
-void (*title_bar_show)(const char * const) = _title_bar_show;
 
 static void
 _title_bar_set_status(contact_presence_t status)
@@ -129,7 +124,6 @@ _title_bar_set_status(contact_presence_t status)
     current_status = status;
     _title_bar_draw_status();
 }
-void (*title_bar_set_status)(contact_presence_t) = _title_bar_set_status;
 
 static void
 _title_bar_set_recipient(const char * const from)
@@ -149,7 +143,6 @@ _title_bar_set_recipient(const char * const from)
 
     dirty = TRUE;
 }
-void (*title_bar_set_recipient)(const char * const) = _title_bar_set_recipient;
 
 static void
 _title_bar_set_typing(gboolean is_typing)
@@ -176,7 +169,6 @@ _title_bar_set_typing(gboolean is_typing)
 
     dirty = TRUE;
 }
-void (*title_bar_set_typing)(gboolean) = _title_bar_set_typing;
 
 static void
 _title_bar_draw(void)
@@ -185,7 +177,6 @@ _title_bar_draw(void)
     _title_bar_draw_status();
     _title_bar_draw_title();
 }
-void (*title_bar_draw)(void) = _title_bar_draw;
 
 static void
 _title_bar_draw_status(void)
@@ -235,4 +226,18 @@ _title_bar_draw_title(void)
     mvwprintw(title_bar, 0, 0, " %s", current_title);
 
     dirty = TRUE;
+}
+
+void
+titlebar_init_module(void)
+{
+    create_title_bar = _create_title_bar;
+    title_bar_title = _title_bar_title;
+    title_bar_resize = _title_bar_resize;
+    title_bar_refresh = _title_bar_refresh;
+    title_bar_show = _title_bar_show;
+    title_bar_set_status = _title_bar_set_status;
+    title_bar_set_recipient = _title_bar_set_recipient;
+    title_bar_set_typing = _title_bar_set_typing;
+    title_bar_draw = _title_bar_draw;
 }

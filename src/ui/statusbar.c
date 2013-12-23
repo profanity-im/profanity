@@ -83,7 +83,6 @@ _create_status_bar(void)
 
     dirty = TRUE;
 }
-void (*create_status_bar)(void) = _create_status_bar;
 
 static void
 _status_bar_refresh(void)
@@ -108,7 +107,6 @@ _status_bar_refresh(void)
 
     g_date_time_unref(now_time);
 }
-void (*status_bar_refresh)(void) = _status_bar_refresh;
 
 static void
 _status_bar_resize(void)
@@ -135,7 +133,6 @@ _status_bar_resize(void)
     last_time = g_date_time_new_now_local();
     dirty = TRUE;
 }
-void (*status_bar_resize)(void) = _status_bar_resize;
 
 static void
 _status_bar_set_all_inactive(void)
@@ -150,7 +147,6 @@ _status_bar_set_all_inactive(void)
     g_hash_table_remove_all(remaining_active);
     g_hash_table_remove_all(remaining_new);
 }
-void (*status_bar_set_all_inactive)(void) = _status_bar_set_all_inactive;
 
 static void
 _status_bar_current(int i)
@@ -168,7 +164,6 @@ _status_bar_current(int i)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 }
-void (*status_bar_current)(int) = _status_bar_current;
 
 static void
 _status_bar_inactive(const int win)
@@ -209,7 +204,6 @@ _status_bar_inactive(const int win)
         _mark_inactive(true_win);
     }
 }
-void (*status_bar_inactive)(const int) = _status_bar_inactive;
 
 static void
 _status_bar_active(const int win)
@@ -244,7 +238,6 @@ _status_bar_active(const int win)
         _mark_active(true_win);
     }
 }
-void (*status_bar_active)(const int) = _status_bar_active;
 
 static void
 _status_bar_new(const int win)
@@ -268,7 +261,6 @@ _status_bar_new(const int win)
         _mark_new(true_win);
     }
 }
-void (*status_bar_new)(const int) = _status_bar_new;
 
 static void
 _status_bar_get_password(void)
@@ -276,7 +268,6 @@ _status_bar_get_password(void)
     status_bar_print_message("Enter password:");
     dirty = TRUE;
 }
-void (*status_bar_get_password)(void) = _status_bar_get_password;
 
 static void
 _status_bar_print_message(const char * const msg)
@@ -300,7 +291,6 @@ _status_bar_print_message(const char * const msg)
     _update_win_statuses();
     dirty = TRUE;
 }
-void (*status_bar_print_message)(const char * const) = _status_bar_print_message;
 
 static void
 _status_bar_clear(void)
@@ -329,7 +319,6 @@ _status_bar_clear(void)
 
     dirty = TRUE;
 }
-void (*status_bar_clear)(void) = _status_bar_clear;
 
 static void
 _status_bar_clear_message(void)
@@ -351,7 +340,6 @@ _status_bar_clear_message(void)
     _update_win_statuses();
     dirty = TRUE;
 }
-void (*status_bar_clear_message)(void) = _status_bar_clear_message;
 
 static void
 _status_bar_update_time(void)
@@ -432,4 +420,21 @@ _mark_inactive(int num)
     int cols = getmaxx(stdscr);
     mvwaddch(status_bar, 0, cols - 34 + active_pos, ' ');
     dirty = TRUE;
+}
+
+void
+statusbar_init_module(void)
+{
+    create_status_bar = _create_status_bar;
+    status_bar_refresh = _status_bar_refresh;
+    status_bar_resize = _status_bar_resize;
+    status_bar_set_all_inactive = _status_bar_set_all_inactive;
+    status_bar_current = _status_bar_current;
+    status_bar_inactive = _status_bar_inactive;
+    status_bar_active = _status_bar_active;
+    status_bar_new = _status_bar_new;
+    status_bar_get_password = _status_bar_get_password;
+    status_bar_print_message = _status_bar_print_message;
+    status_bar_clear = _status_bar_clear;
+    status_bar_clear_message = _status_bar_clear_message;
 }

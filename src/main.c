@@ -50,6 +50,10 @@ _init_modules(void)
 
     ui_init_module();
     console_init_module();
+    inputwin_init_module();
+    notifier_init_module();
+    statusbar_init_module();
+    titlebar_init_module();
 }
 
 int
