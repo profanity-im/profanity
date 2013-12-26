@@ -50,3 +50,4 @@ void cmd_account_set_chat_priority_sets_preference(void **state);
 void cmd_account_set_away_priority_sets_preference(void **state);
 void cmd_account_set_xa_priority_sets_preference(void **state);
 void cmd_account_set_dnd_priority_sets_preference(void **state);
+void cmd_account_set_online_priority_shows_message(void **state);

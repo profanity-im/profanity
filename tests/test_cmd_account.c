@@ -947,7 +947,27 @@ void cmd_account_set_dnd_priority_sets_preference(void **state)
     free(help);
 }
 
-// test message shown when set
+void cmd_account_set_online_priority_shows_message(void **state)
+{
+    mock_cons_show();
+    mock_accounts_account_exists();
+    stub_accounts_set_priorities();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "online", "10", NULL };
+
+    accounts_account_exists_return(TRUE);
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Updated online priority for account a_account: 10");
+    expect_cons_show("");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+
+}
 // test invalid priority low
 // test invalid priority high
 // test presence updated when connected as account and current presence equals setting

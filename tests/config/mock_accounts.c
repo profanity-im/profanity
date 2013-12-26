@@ -189,10 +189,22 @@ _mock_accounts_set_priority_online(const char * const account_name, const gint v
 }
 
 static void
+_stub_accounts_set_priority_online(const char * const account_name, const gint value)
+{
+    // do nothing
+}
+
+static void
 _mock_accounts_set_priority_chat(const char * const account_name, const gint value)
 {
     check_expected(account_name);
     check_expected(value);
+}
+
+static void
+_stub_accounts_set_priority_chat(const char * const account_name, const gint value)
+{
+    // do nothing
 }
 
 static void
@@ -203,10 +215,22 @@ _mock_accounts_set_priority_away(const char * const account_name, const gint val
 }
 
 static void
+_stub_accounts_set_priority_away(const char * const account_name, const gint value)
+{
+    // do nothing
+}
+
+static void
 _mock_accounts_set_priority_xa(const char * const account_name, const gint value)
 {
     check_expected(account_name);
     check_expected(value);
+}
+
+static void
+_stub_accounts_set_priority_xa(const char * const account_name, const gint value)
+{
+    // do nothing
 }
 
 static void
@@ -216,6 +240,11 @@ _mock_accounts_set_priority_dnd(const char * const account_name, const gint valu
     check_expected(value);
 }
 
+static void
+_stub_accounts_set_priority_dnd(const char * const account_name, const gint value)
+{
+    // do nothing
+}
 
 static void
 _mock_accounts_set_login_presence(const char * const account_name, const char * const value)
@@ -377,6 +406,16 @@ mock_accounts_set_priorities(void)
     accounts_set_priority_away = _mock_accounts_set_priority_away;
     accounts_set_priority_xa = _mock_accounts_set_priority_xa;
     accounts_set_priority_dnd = _mock_accounts_set_priority_dnd;
+}
+
+void
+stub_accounts_set_priorities(void)
+{
+    accounts_set_priority_online = _stub_accounts_set_priority_online;
+    accounts_set_priority_chat = _stub_accounts_set_priority_chat;
+    accounts_set_priority_away = _stub_accounts_set_priority_away;
+    accounts_set_priority_xa = _stub_accounts_set_priority_xa;
+    accounts_set_priority_dnd = _stub_accounts_set_priority_dnd;
 }
 
 void

@@ -79,6 +79,7 @@ void stub_accounts_set_muc_nick(void);
 void accounts_set_muc_nick_expect(char *account_name, char *nick);
 
 void mock_accounts_set_priorities(void);
+void stub_accounts_set_priorities(void);
 void accounts_set_priority_online_expect(char *account_name, gint priority);
 void accounts_set_priority_chat_expect(char *account_name, gint priority);
 void accounts_set_priority_away_expect(char *account_name, gint priority);
