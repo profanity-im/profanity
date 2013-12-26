@@ -54,6 +54,8 @@ _init_modules(void)
     notifier_init_module();
     statusbar_init_module();
     titlebar_init_module();
+
+    accounts_init_module();
 }
 
 int

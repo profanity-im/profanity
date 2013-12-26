@@ -55,8 +55,8 @@ static void _fix_legacy_accounts(const char * const account_name);
 static void _save_accounts(void);
 static gchar * _get_accounts_file(void);
 
-void
-accounts_load(void)
+static void
+_accounts_load(void)
 {
     log_info("Loading accounts");
     all_ac = autocomplete_new();
@@ -85,40 +85,40 @@ accounts_load(void)
     g_strfreev(account_names);
 }
 
-void
-accounts_close(void)
+static void
+_accounts_close(void)
 {
     autocomplete_free(all_ac);
     autocomplete_free(enabled_ac);
     g_key_file_free(accounts);
 }
 
-char *
-accounts_find_enabled(char *prefix)
+static char *
+_accounts_find_enabled(char *prefix)
 {
     return autocomplete_complete(enabled_ac, prefix);
 }
 
-char *
-accounts_find_all(char *prefix)
+static char *
+_accounts_find_all(char *prefix)
 {
     return autocomplete_complete(all_ac, prefix);
 }
 
-void
-accounts_reset_all_search(void)
+static void
+_accounts_reset_all_search(void)
 {
     autocomplete_reset(all_ac);
 }
 
-void
-accounts_reset_enabled_search(void)
+static void
+_accounts_reset_enabled_search(void)
 {
     autocomplete_reset(enabled_ac);
 }
 
-void
-accounts_add(const char *account_name, const char *altdomain)
+static void
+_accounts_add(const char *account_name, const char *altdomain)
 {
     // set account name and resource
     const char *barejid = account_name;
@@ -168,14 +168,14 @@ accounts_add(const char *account_name, const char *altdomain)
     jid_destroy(jid);
 }
 
-gchar**
-accounts_get_list(void)
+static gchar**
+_accounts_get_list(void)
 {
     return g_key_file_get_groups(accounts, NULL);
 }
 
-ProfAccount*
-accounts_get_account(const char * const name)
+static ProfAccount*
+_accounts_get_account(const char * const name)
 {
     if (!g_key_file_has_group(accounts, name)) {
         return NULL;
@@ -292,8 +292,8 @@ accounts_get_account(const char * const name)
     }
 }
 
-char *
-accounts_create_full_jid(ProfAccount *account)
+static char *
+_accounts_create_full_jid(ProfAccount *account)
 {
     if (account->resource != NULL) {
         return create_fulljid(account->jid, account->resource);
@@ -302,8 +302,8 @@ accounts_create_full_jid(ProfAccount *account)
     }
 }
 
-void
-accounts_free_account(ProfAccount *account)
+static void
+_accounts_free_account(ProfAccount *account)
 {
     if (account != NULL) {
         free(account->name);
@@ -319,8 +319,8 @@ accounts_free_account(ProfAccount *account)
     }
 }
 
-gboolean
-accounts_enable(const char * const name)
+static gboolean
+_accounts_enable(const char * const name)
 {
     if (g_key_file_has_group(accounts, name)) {
         g_key_file_set_boolean(accounts, name, "enabled", TRUE);
@@ -332,8 +332,8 @@ accounts_enable(const char * const name)
     }
 }
 
-gboolean
-accounts_disable(const char * const name)
+static gboolean
+_accounts_disable(const char * const name)
 {
     if (g_key_file_has_group(accounts, name)) {
         g_key_file_set_boolean(accounts, name, "enabled", FALSE);
@@ -345,8 +345,8 @@ accounts_disable(const char * const name)
     }
 }
 
-gboolean
-accounts_rename(const char * const account_name, const char * const new_name)
+static gboolean
+_accounts_rename(const char * const account_name, const char * const new_name)
 {
     if (g_key_file_has_group(accounts, new_name)) {
         return FALSE;
@@ -393,15 +393,15 @@ accounts_rename(const char * const account_name, const char * const new_name)
     return TRUE;
 }
 
-gboolean
-accounts_account_exists(const char * const account_name)
+static gboolean
+_accounts_account_exists(const char * const account_name)
 {
     return g_key_file_has_group(accounts, account_name);
 
 }
 
-void
-accounts_set_jid(const char * const account_name, const char * const value)
+static void
+_accounts_set_jid(const char * const account_name, const char * const value)
 {
     Jid *jid = jid_create(value);
     if (jid != NULL) {
@@ -426,8 +426,8 @@ accounts_set_jid(const char * const account_name, const char * const value)
     }
 }
 
-void
-accounts_set_server(const char * const account_name, const char * const value)
+static void
+_accounts_set_server(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "server", value);
@@ -435,8 +435,8 @@ accounts_set_server(const char * const account_name, const char * const value)
     }
 }
 
-void
-accounts_set_resource(const char * const account_name, const char * const value)
+static void
+_accounts_set_resource(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "resource", value);
@@ -444,8 +444,8 @@ accounts_set_resource(const char * const account_name, const char * const value)
     }
 }
 
-void
-accounts_set_password(const char * const account_name, const char * const value)
+static void
+_accounts_set_password(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "password", value);
@@ -453,8 +453,8 @@ accounts_set_password(const char * const account_name, const char * const value)
     }
 }
 
-void
-accounts_clear_password(const char * const account_name)
+static void
+_accounts_clear_password(const char * const account_name)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_remove_key(accounts, account_name, "password", NULL);
@@ -462,8 +462,8 @@ accounts_clear_password(const char * const account_name)
     }
 }
 
-void
-accounts_set_muc_service(const char * const account_name, const char * const value)
+static void
+_accounts_set_muc_service(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "muc.service", value);
@@ -471,8 +471,8 @@ accounts_set_muc_service(const char * const account_name, const char * const val
     }
 }
 
-void
-accounts_set_muc_nick(const char * const account_name, const char * const value)
+static void
+_accounts_set_muc_nick(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "muc.nick", value);
@@ -480,8 +480,8 @@ accounts_set_muc_nick(const char * const account_name, const char * const value)
     }
 }
 
-void
-accounts_set_priority_online(const char * const account_name, const gint value)
+static void
+_accounts_set_priority_online(const char * const account_name, const gint value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_integer(accounts, account_name, "priority.online", value);
@@ -489,8 +489,8 @@ accounts_set_priority_online(const char * const account_name, const gint value)
     }
 }
 
-void
-accounts_set_priority_chat(const char * const account_name, const gint value)
+static void
+_accounts_set_priority_chat(const char * const account_name, const gint value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_integer(accounts, account_name, "priority.chat", value);
@@ -498,8 +498,8 @@ accounts_set_priority_chat(const char * const account_name, const gint value)
     }
 }
 
-void
-accounts_set_priority_away(const char * const account_name, const gint value)
+static void
+_accounts_set_priority_away(const char * const account_name, const gint value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_integer(accounts, account_name, "priority.away", value);
@@ -507,8 +507,8 @@ accounts_set_priority_away(const char * const account_name, const gint value)
     }
 }
 
-void
-accounts_set_priority_xa(const char * const account_name, const gint value)
+static void
+_accounts_set_priority_xa(const char * const account_name, const gint value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_integer(accounts, account_name, "priority.xa", value);
@@ -516,8 +516,8 @@ accounts_set_priority_xa(const char * const account_name, const gint value)
     }
 }
 
-void
-accounts_set_priority_dnd(const char * const account_name, const gint value)
+static void
+_accounts_set_priority_dnd(const char * const account_name, const gint value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_integer(accounts, account_name, "priority.dnd", value);
@@ -525,8 +525,8 @@ accounts_set_priority_dnd(const char * const account_name, const gint value)
     }
 }
 
-void
-accounts_set_priority_all(const char * const account_name, const gint value)
+static void
+_accounts_set_priority_all(const char * const account_name, const gint value)
 {
     if (accounts_account_exists(account_name)) {
         accounts_set_priority_online(account_name, value);
@@ -538,8 +538,8 @@ accounts_set_priority_all(const char * const account_name, const gint value)
     }
 }
 
-gint
-accounts_get_priority_for_presence_type(const char * const account_name,
+static gint
+_accounts_get_priority_for_presence_type(const char * const account_name,
     resource_presence_t presence_type)
 {
     gint result;
@@ -569,8 +569,8 @@ accounts_get_priority_for_presence_type(const char * const account_name,
     return result;
 }
 
-void
-accounts_set_last_presence(const char * const account_name, const char * const value)
+static void
+_accounts_set_last_presence(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "presence.last", value);
@@ -578,8 +578,8 @@ accounts_set_last_presence(const char * const account_name, const char * const v
     }
 }
 
-void
-accounts_set_login_presence(const char * const account_name, const char * const value)
+static void
+_accounts_set_login_presence(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "presence.login", value);
@@ -587,8 +587,8 @@ accounts_set_login_presence(const char * const account_name, const char * const 
     }
 }
 
-resource_presence_t
-accounts_get_last_presence(const char * const account_name)
+static resource_presence_t
+_accounts_get_last_presence(const char * const account_name)
 {
     resource_presence_t result;
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
@@ -615,8 +615,8 @@ accounts_get_last_presence(const char * const account_name)
     return result;
 }
 
-resource_presence_t
-accounts_get_login_presence(const char * const account_name)
+static resource_presence_t
+_accounts_get_login_presence(const char * const account_name)
 {
     resource_presence_t result;
     gchar *setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
@@ -715,5 +715,43 @@ _get_accounts_file(void)
     g_string_free(logfile, TRUE);
 
     return result;
+}
+
+void
+accounts_init_module(void)
+{
+    accounts_load = _accounts_load;
+    accounts_close = _accounts_close;
+    accounts_find_all = _accounts_find_all;
+    accounts_find_enabled = _accounts_find_enabled;
+    accounts_reset_all_search = _accounts_reset_all_search;
+    accounts_reset_enabled_search = _accounts_reset_enabled_search;
+    accounts_add = _accounts_add;
+    accounts_get_list = _accounts_get_list;
+    accounts_get_account = _accounts_get_account;
+    accounts_free_account = _accounts_free_account;
+    accounts_enable = _accounts_enable;
+    accounts_disable = _accounts_disable;
+    accounts_rename = _accounts_rename;
+    accounts_account_exists = _accounts_account_exists;
+    accounts_set_jid = _accounts_set_jid;
+    accounts_set_server = _accounts_set_server;
+    accounts_set_resource = _accounts_set_resource;
+    accounts_set_password = _accounts_set_password;
+    accounts_set_muc_service = _accounts_set_muc_service;
+    accounts_set_muc_nick = _accounts_set_muc_nick;
+    accounts_set_last_presence = _accounts_set_last_presence;
+    accounts_set_login_presence = _accounts_set_login_presence;
+    accounts_get_last_presence = _accounts_get_last_presence;
+    accounts_get_login_presence = _accounts_get_login_presence;
+    accounts_set_priority_online = _accounts_set_priority_online;
+    accounts_set_priority_chat = _accounts_set_priority_chat;
+    accounts_set_priority_away = _accounts_set_priority_away;
+    accounts_set_priority_xa = _accounts_set_priority_xa;
+    accounts_set_priority_dnd = _accounts_set_priority_dnd;
+    accounts_set_priority_all = _accounts_set_priority_all;
+    accounts_get_priority_for_presence_type = _accounts_get_priority_for_presence_type;
+    accounts_clear_password = _accounts_clear_password;
+    accounts_create_full_jid = _accounts_create_full_jid;
 }
 

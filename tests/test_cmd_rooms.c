@@ -11,6 +11,9 @@
 #include "ui/ui.h"
 #include "ui/mock_ui.h"
 
+#include "config/accounts.h"
+#include "config/mock_accounts.h"
+
 #include "command/commands.h"
 
 static void test_with_connection_status(jabber_conn_status_t status)
@@ -54,6 +57,7 @@ void cmd_rooms_shows_message_when_undefined(void **state)
 
 void cmd_rooms_uses_account_default_when_no_arg(void **state)
 {
+    mock_accounts_get_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     ProfAccount *account = malloc(sizeof(ProfAccount));
     account->muc_service = "default_conf_server";
@@ -62,8 +66,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     mock_connection_status(JABBER_CONNECTED);
     mock_connection_account_name("account_name");
 
-    expect_string(accounts_get_account, name, "account_name");
-    will_return(accounts_get_account, account);
+    accounts_get_account_return(account);
 
     expect_room_list_request("default_conf_server");
 

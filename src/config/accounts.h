@@ -46,41 +46,43 @@ typedef struct prof_account_t {
     GSList *room_history;
 } ProfAccount;
 
-void accounts_load(void);
-void accounts_close(void);
+void accounts_init_module(void);
 
-char * accounts_find_all(char *prefix);
-char * accounts_find_enabled(char *prefix);
-void accounts_reset_all_search(void);
-void accounts_reset_enabled_search(void);
-void accounts_add(const char *jid, const char *altdomain);
-gchar** accounts_get_list(void);
-ProfAccount* accounts_get_account(const char * const name);
-void accounts_free_account(ProfAccount *account);
-gboolean accounts_enable(const char * const name);
-gboolean accounts_disable(const char * const name);
-gboolean accounts_rename(const char * const account_name,
+void (*accounts_load)(void);
+void (*accounts_close)(void);
+
+char * (*accounts_find_all)(char *prefix);
+char * (*accounts_find_enabled)(char *prefix);
+void (*accounts_reset_all_search)(void);
+void (*accounts_reset_enabled_search)(void);
+void (*accounts_add)(const char *jid, const char *altdomain);
+gchar** (*accounts_get_list)(void);
+ProfAccount* (*accounts_get_account)(const char * const name);
+void (*accounts_free_account)(ProfAccount *account);
+gboolean (*accounts_enable)(const char * const name);
+gboolean (*accounts_disable)(const char * const name);
+gboolean (*accounts_rename)(const char * const account_name,
     const char * const new_name);
-gboolean accounts_account_exists(const char * const account_name);
-void accounts_set_jid(const char * const account_name, const char * const value);
-void accounts_set_server(const char * const account_name, const char * const value);
-void accounts_set_resource(const char * const account_name, const char * const value);
-void accounts_set_password(const char * const account_name, const char * const value);
-void accounts_set_muc_service(const char * const account_name, const char * const value);
-void accounts_set_muc_nick(const char * const account_name, const char * const value);
-void accounts_set_last_presence(const char * const account_name, const char * const value);
-void accounts_set_login_presence(const char * const account_name, const char * const value);
-resource_presence_t accounts_get_login_presence(const char * const account_name);
-resource_presence_t accounts_get_last_presence(const char * const account_name);
-void accounts_set_priority_online(const char * const account_name, const gint value);
-void accounts_set_priority_chat(const char * const account_name, const gint value);
-void accounts_set_priority_away(const char * const account_name, const gint value);
-void accounts_set_priority_xa(const char * const account_name, const gint value);
-void accounts_set_priority_dnd(const char * const account_name, const gint value);
-void accounts_set_priority_all(const char * const account_name, const gint value);
-gint accounts_get_priority_for_presence_type(const char * const account_name,
+gboolean (*accounts_account_exists)(const char * const account_name);
+void (*accounts_set_jid)(const char * const account_name, const char * const value);
+void (*accounts_set_server)(const char * const account_name, const char * const value);
+void (*accounts_set_resource)(const char * const account_name, const char * const value);
+void (*accounts_set_password)(const char * const account_name, const char * const value);
+void (*accounts_set_muc_service)(const char * const account_name, const char * const value);
+void (*accounts_set_muc_nick)(const char * const account_name, const char * const value);
+void (*accounts_set_last_presence)(const char * const account_name, const char * const value);
+void (*accounts_set_login_presence)(const char * const account_name, const char * const value);
+resource_presence_t (*accounts_get_login_presence)(const char * const account_name);
+resource_presence_t (*accounts_get_last_presence)(const char * const account_name);
+void (*accounts_set_priority_online)(const char * const account_name, const gint value);
+void (*accounts_set_priority_chat)(const char * const account_name, const gint value);
+void (*accounts_set_priority_away)(const char * const account_name, const gint value);
+void (*accounts_set_priority_xa)(const char * const account_name, const gint value);
+void (*accounts_set_priority_dnd)(const char * const account_name, const gint value);
+void (*accounts_set_priority_all)(const char * const account_name, const gint value);
+gint (*accounts_get_priority_for_presence_type)(const char * const account_name,
     resource_presence_t presence_type);
-void accounts_clear_password(const char * const account_name);
-char * accounts_create_full_jid(ProfAccount *account);
+void (*accounts_clear_password)(const char * const account_name);
+char * (*accounts_create_full_jid)(ProfAccount *account);
 
 #endif
