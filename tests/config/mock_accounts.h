@@ -89,3 +89,6 @@ void accounts_set_priority_dnd_expect(char *account_name, gint priority);
 void mock_accounts_set_login_presence(void);
 void stub_accounts_set_login_presence(void);
 void accounts_set_login_presence_expect(char *account_name, char *presence);
+
+void mock_accounts_get_last_presence(void);
+void accounts_get_last_presence_return(resource_presence_t presence);

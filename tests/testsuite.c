@@ -246,6 +246,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_priority_too_high_shows_message),
         unit_test(cmd_account_set_priority_when_not_number_shows_message),
         unit_test(cmd_account_set_priority_when_empty_shows_message),
+        unit_test(cmd_account_set_priority_updates_presence_when_account_connected_with_presence),
     };
     return run_tests(tests);
 }

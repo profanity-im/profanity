@@ -256,6 +256,14 @@ _mock_accounts_set_login_presence(const char * const account_name, const char * 
 static void
 _stub_accounts_set_login_presence(const char * const account_name, const char * const value)
 {
+    // do nothing
+}
+
+static resource_presence_t
+_mock_accounts_get_last_presence(const char * const account_name)
+{
+    check_expected(account_name);
+    return (resource_presence_t)mock();
 }
 
 // set up functions
@@ -428,6 +436,12 @@ void
 stub_accounts_set_login_presence(void)
 {
     accounts_set_login_presence = _stub_accounts_set_login_presence;
+}
+
+void
+mock_accounts_get_last_presence(void)
+{
+    accounts_get_last_presence = _mock_accounts_get_last_presence;
 }
 
 // mock behaviours
@@ -616,4 +630,11 @@ accounts_set_login_presence_expect(char *account_name, char *presence)
 {
     expect_string(_mock_accounts_set_login_presence, account_name, account_name);
     expect_string(_mock_accounts_set_login_presence, value, presence);
+}
+
+void
+accounts_get_last_presence_return(resource_presence_t presence)
+{
+    expect_any(_mock_accounts_get_last_presence, account_name);
+    will_return(_mock_accounts_get_last_presence, presence);
 }

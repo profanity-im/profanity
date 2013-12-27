@@ -1032,5 +1032,28 @@ void cmd_account_set_priority_when_empty_shows_message(void **state)
     free(help);
 }
 
-// test presence updated when connected as account and current presence equals setting
+void cmd_account_set_priority_updates_presence_when_account_connected_with_presence(void **state)
+{
+    stub_cons_show();
+    stub_accounts_set_priorities();
+    mock_accounts_get_last_presence();
+    mock_presence_update();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "online", "10", NULL };
 
+    accounts_account_exists_return(TRUE);
+
+    mock_connection_status(JABBER_CONNECTED);
+    mock_connection_account_name("a_account");
+
+    accounts_get_last_presence_return(RESOURCE_ONLINE);
+
+    mock_connection_presence_message("Free to chat");
+
+    presence_update_expect(RESOURCE_ONLINE, "Free to chat", 0);
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}

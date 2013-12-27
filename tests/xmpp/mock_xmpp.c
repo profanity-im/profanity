@@ -43,6 +43,20 @@ _mock_jabber_connect_with_account(const ProfAccount * const account)
     return (jabber_conn_status_t)mock();
 }
 
+static char *
+_mock_jabber_get_presence_message(void)
+{
+    return (char *)mock();
+}
+
+static void
+_mock_presence_update(resource_presence_t status, const char * const msg, int idle)
+{
+    check_expected(status);
+    check_expected(msg);
+    check_expected(idle);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -53,6 +67,12 @@ void
 mock_jabber_connect_with_account(void)
 {
     jabber_connect_with_account = _mock_jabber_connect_with_account;
+}
+
+void
+mock_presence_update(void)
+{
+    presence_update = _mock_presence_update;
 }
 
 void
@@ -67,6 +87,13 @@ mock_connection_account_name(char *name)
 {
     jabber_get_account_name = _mock_jabber_get_account_name;
     will_return(_mock_jabber_get_account_name, name);
+}
+
+void
+mock_connection_presence_message(char *message)
+{
+    jabber_get_presence_message = _mock_jabber_get_presence_message;
+    will_return(_mock_jabber_get_presence_message, message);
 }
 
 void
@@ -119,4 +146,12 @@ jabber_connect_with_account_return(ProfAccount *account,
 {
     expect_any(_mock_jabber_connect_with_account, account);
     will_return(_mock_jabber_connect_with_account, result);
+}
+
+void
+presence_update_expect(resource_presence_t presence, char *msg, int idle)
+{
+    expect_value(_mock_presence_update, status, presence);
+    expect_string(_mock_presence_update, msg, msg);
+    expect_value(_mock_presence_update, idle, idle);
 }
