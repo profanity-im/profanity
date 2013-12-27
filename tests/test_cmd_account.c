@@ -1057,3 +1057,85 @@ void cmd_account_set_priority_updates_presence_when_account_connected_with_prese
 
     free(help);
 }
+
+void cmd_account_clear_shows_usage_when_no_args(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "clear", NULL };
+
+    expect_cons_show("Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_clear_shows_usage_when_one_arg(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "clear", "a_account", NULL };
+
+    expect_cons_show("Usage: some usage");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_clear_checks_account_exists(void **state)
+{
+    stub_cons_show();
+    mock_accounts_account_exists();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "clear", "a_account", "a_property", NULL };
+
+    accounts_account_exists_expect("a_account");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_clear_shows_message_when_account_doesnt_exist(void **state)
+{
+    mock_cons_show();
+    mock_accounts_account_exists();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "clear", "a_account", "a_property", NULL };
+
+    accounts_account_exists_return(FALSE);
+
+    expect_cons_show("Account a_account doesn't exist");
+    expect_cons_show("");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_clear_shows_message_when_invalid_property(void **state)
+{
+    mock_cons_show();
+    mock_accounts_account_exists();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "clear", "a_account", "badproperty", NULL };
+
+    accounts_account_exists_return(TRUE);
+
+    expect_cons_show("Invalid property: badproperty");
+    expect_cons_show("");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+    
+}

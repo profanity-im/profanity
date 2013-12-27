@@ -56,3 +56,8 @@ void cmd_account_set_priority_too_high_shows_message(void **state);
 void cmd_account_set_priority_when_not_number_shows_message(void **state);
 void cmd_account_set_priority_when_empty_shows_message(void **state);
 void cmd_account_set_priority_updates_presence_when_account_connected_with_presence(void **state);
+void cmd_account_clear_shows_usage_when_no_args(void **state);
+void cmd_account_clear_shows_usage_when_one_arg(void **state);
+void cmd_account_clear_checks_account_exists(void **state);
+void cmd_account_clear_shows_message_when_account_doesnt_exist(void **state);
+void cmd_account_clear_shows_message_when_invalid_property(void **state);
