@@ -1137,5 +1137,5 @@ void cmd_account_clear_shows_message_when_invalid_property(void **state)
     assert_true(result);
 
     free(help);
-    
+
 }
