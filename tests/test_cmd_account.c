@@ -966,10 +966,9 @@ void cmd_account_set_online_priority_shows_message(void **state)
     assert_true(result);
 
     free(help);
-
 }
 
-void cmd_account_does_not_set_priority_when_too_low(void **state)
+void cmd_account_set_priority_too_low_shows_message(void **state)
 {
     mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -977,17 +976,15 @@ void cmd_account_does_not_set_priority_when_too_low(void **state)
 
     accounts_account_exists_return(TRUE);
 
-    expect_cons_show("Value out of range. Must be in -128..127.");
+    expect_cons_show("Value -150 out of range. Must be in -128..127.");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
     free(help);
-
-
 }
 
-void cmd_account_does_not_set_priority_when_too_high(void **state)
+void cmd_account_set_priority_too_high_shows_message(void **state)
 {
     mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -995,14 +992,44 @@ void cmd_account_does_not_set_priority_when_too_high(void **state)
 
     accounts_account_exists_return(TRUE);
 
-    expect_cons_show("Value out of range. Must be in -128..127.");
+    expect_cons_show("Value 150 out of range. Must be in -128..127.");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
 
     free(help);
+}
 
+void cmd_account_set_priority_when_not_number_shows_message(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "online", "abc", NULL };
 
+    accounts_account_exists_return(TRUE);
+
+    expect_cons_show("Could not convert \"abc\" to a number.");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_priority_when_empty_shows_message(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "online", "", NULL };
+
+    accounts_account_exists_return(TRUE);
+
+    expect_cons_show("Could not convert \"\" to a number.");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
 }
 
 // test presence updated when connected as account and current presence equals setting

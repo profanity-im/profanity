@@ -2310,11 +2310,11 @@ _strtoi(char *str, int *saveptr, int min, int max)
 
     errno = 0;
     val = (int)strtol(str, &ptr, 0);
-    if (*str == '\0' || *ptr != '\0') {
-        cons_show("Illegal character. Must be a number.");
+    if (errno != 0 || *str == '\0' || *ptr != '\0') {
+        cons_show("Could not convert \"%s\" to a number.", str);
         return -1;
-    } else if (errno == ERANGE || val < min || val > max) {
-        cons_show("Value out of range. Must be in %d..%d.", min, max);
+    } else if (val < min || val > max) {
+        cons_show("Value %s out of range. Must be in %d..%d.", str, min, max);
         return -1;
     }
 
