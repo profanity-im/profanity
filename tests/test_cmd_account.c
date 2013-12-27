@@ -986,7 +986,24 @@ void cmd_account_does_not_set_priority_when_too_low(void **state)
 
 
 }
-// test invalid priority low
-// test invalid priority high
+
+void cmd_account_does_not_set_priority_when_too_high(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "online", "150", NULL };
+
+    accounts_account_exists_return(TRUE);
+
+    expect_cons_show("Value out of range. Must be in -128..127.");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+
+
+}
+
 // test presence updated when connected as account and current presence equals setting
 

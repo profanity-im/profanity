@@ -52,3 +52,4 @@ void cmd_account_set_xa_priority_sets_preference(void **state);
 void cmd_account_set_dnd_priority_sets_preference(void **state);
 void cmd_account_set_online_priority_shows_message(void **state);
 void cmd_account_does_not_set_priority_when_too_low(void **state);
+void cmd_account_does_not_set_priority_when_too_high(void **state);
