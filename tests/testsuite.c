@@ -8,6 +8,7 @@
 #include "test_cmd_connect.h"
 #include "test_cmd_account.h"
 #include "test_cmd_rooms.h"
+#include "test_cmd_sub.h"
 #include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
@@ -252,6 +253,9 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_clear_checks_account_exists),
         unit_test(cmd_account_clear_shows_message_when_account_doesnt_exist),
         unit_test(cmd_account_clear_shows_message_when_invalid_property),
+
+        unit_test(cmd_sub_shows_message_when_not_connected),
+
     };
     return run_tests(tests);
 }

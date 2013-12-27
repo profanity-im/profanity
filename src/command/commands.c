@@ -311,7 +311,6 @@ gboolean
 cmd_sub(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    win_type_t win_type = ui_current_win_type();
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are currently not connected.");
@@ -337,6 +336,7 @@ cmd_sub(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    win_type_t win_type = ui_current_win_type();
     if ((win_type != WIN_CHAT) && (jid == NULL)) {
         cons_show("You must specify a contact.");
         return TRUE;
