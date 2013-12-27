@@ -548,7 +548,6 @@ _cons_show_received_subs(void)
         g_slist_free_full(received, g_free);
     }
 
-    wins_refresh_console();
     cons_alert();
 }
 
@@ -570,7 +569,6 @@ _cons_show_sent_subs(void)
         cons_show("No pending requests sent.");
     }
 
-    wins_refresh_console();
     cons_alert();
 }
 
