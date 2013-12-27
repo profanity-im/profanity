@@ -242,6 +242,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_xa_priority_sets_preference),
         unit_test(cmd_account_set_dnd_priority_sets_preference),
         unit_test(cmd_account_set_online_priority_shows_message),
+        unit_test(cmd_account_does_not_set_priority_when_too_low),
     };
     return run_tests(tests);
 }
