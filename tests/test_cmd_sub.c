@@ -29,3 +29,20 @@ void cmd_sub_shows_message_when_not_connected(void **state)
 
     free(help);
 }
+
+void cmd_sub_shows_usage_when_no_arg(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "Some usage";
+    gchar *args[] = { NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_cons_show("Usage: Some usage");
+
+    gboolean result = cmd_sub(args, *help);
+    assert_true(result);
+
+    free(help);
+}

@@ -255,6 +255,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_clear_shows_message_when_invalid_property),
 
         unit_test(cmd_sub_shows_message_when_not_connected),
+        unit_test(cmd_sub_shows_usage_when_no_arg),
 
     };
     return run_tests(tests);
