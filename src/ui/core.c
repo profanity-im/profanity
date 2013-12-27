@@ -954,8 +954,8 @@ _ui_outgoing_msg(const char * const from, const char * const to,
 
         if (contact != NULL) {
             if (strcmp(p_contact_presence(contact), "offline") == 0) {
-                const char const *show = p_contact_presence(contact);
-                const char const *status = p_contact_status(contact);
+                const char *show = p_contact_presence(contact);
+                const char *status = p_contact_status(contact);
                 win_show_status_string(window, to, show, status, NULL, "--", "offline");
             }
         }
@@ -1026,8 +1026,8 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
 
         while (roster != NULL) {
             PContact member = roster->data;
-            const char const *nick = p_contact_barejid(member);
-            const char const *show = p_contact_presence(member);
+            const char *nick = p_contact_barejid(member);
+            const char *show = p_contact_presence(member);
 
             win_presence_colour_on(window, show);
             wprintw(window->win, "%s", nick);
