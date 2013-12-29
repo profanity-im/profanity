@@ -297,7 +297,7 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             item = xmpp_stanza_get_next(item);
         }
 
-        contact_presence_t conn_presence =
+        resource_presence_t conn_presence =
             accounts_get_login_presence(jabber_get_account_name());
         presence_update(conn_presence, NULL, 0);
     }

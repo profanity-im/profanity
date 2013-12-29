@@ -261,7 +261,7 @@ _presence_join_room(Jid *jid)
     log_debug("Sending room join presence to: %s", jid->fulljid);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    contact_presence_t presence_type =
+    resource_presence_t presence_type =
         accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
@@ -289,7 +289,7 @@ _presence_change_room_nick(const char * const room, const char * const nick)
     log_debug("Sending room nickname change to: %s, nick: %s", room, nick);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    contact_presence_t presence_type =
+    resource_presence_t presence_type =
         accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
