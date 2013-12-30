@@ -5,7 +5,7 @@ AC_PREREQ([2.65])
 AC_INIT([profanity], [0.4.0], [boothj5web@gmail.com])
 PACKAGE_STATUS="development"
 
-## get git branch and revision if in development
+### Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then
     AM_CONDITIONAL([INCLUDE_GIT_VERSION], [true])
     AC_DEFINE([HAVE_GIT_VERSION], [1], [Include git info])
@@ -19,15 +19,15 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
-# Checks for programs.
+### Checks for programs.
 AC_PROG_CC
 
-# get canonical host
+### Get canonical host
 AC_CANONICAL_HOST
 AS_IF([test "x$host_os" = xcygwin],
     [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
 
-# Options
+### Options
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
 AC_ARG_WITH([libxml2],
@@ -59,15 +59,41 @@ AC_CHECK_LIB([strophe], [main], [],
     [AC_MSG_ERROR([libstrophe is required for profanity])])
 PKG_CHECK_MODULES([openssl], [openssl], [],
     [AC_MSG_ERROR([openssl is required for profanity])])
+
+# TODO: autodetect of XML parser libstrophe linked with
+
 PKG_CHECK_MODULES([glib], [glib-2.0], [],
     [AC_MSG_ERROR([glib is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
+
+### Check for ncurses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
-    [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"],
+    [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; NCURSES="ncursesw"],
     [PKG_CHECK_MODULES([ncurses], [ncurses],
-        [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"],
+        [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"; NCURSES="ncurses"],
         [AC_MSG_ERROR([ncurses is required for profanity])])])
+AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
+LIBS="$LIBS $NCURSES_LIBS"
+
+### Check wide characters support in ncurses library
+CFLAGS_RESTORE="$CFLAGS"
+CFLAGS="$CFLAGS $NCURSES_CFLAGS"
+AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
+    [AC_LINK_IFELSE([AC_LANG_SOURCE([
+        #include <ncurses.h>
+        int main() {
+            (void)wget_wch(NULL, NULL);
+            return 0;
+        }
+        ])],
+        [ncurses_cv_wget_wch=yes],
+        [ncurses_cv_wget_wch=no])
+    ])
+CFLAGS="$CFLAGS_RESTORE"
+
+AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
+    [AC_MSG_ERROR([ncurses does not support wide characters])])
 
 AS_IF([test "x$enable_notifications" != xno],
     [PKG_CHECK_MODULES([libnotify], [libnotify],
@@ -89,28 +115,28 @@ elif test "x$with_xscreensaver" = x; then
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
 fi
 
+### cmocka is required only for tests, profanity shouldn't be linked with it
+### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
     [AC_MSG_NOTICE([cmocka is not found, will not be able to run tests])])
 
-# Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
+### Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
 AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
 
-# Default parameters
+### Default parameters
 AM_CFLAGS="-Wall"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
-AM_CPPFLAGS="$openssl_CFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
-AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS $NCURSES_CFLAGS"
+AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS $glib_CFLAGS $curl_CFLAGS"
+AM_CPPFLAGS="$AM_CPPFLAGS $libnotify_CFLAGS $PARSER_CFLAGS"
 LIBS="$LIBS $openssl_LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
-LIBS="$LIBS $PARSER_LIBS $NCURSES_LIBS"
+LIBS="$LIBS $PARSER_LIBS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
-# Checks for typedefs, structures, and compiler characteristics.
-
-# Checks for library functions.
+### Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([atexit memset strdup strstr])
 
