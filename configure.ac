@@ -62,8 +62,8 @@ PKG_CHECK_MODULES([openssl], [openssl], [],
 
 # TODO: autodetect of XML parser libstrophe linked with
 
-PKG_CHECK_MODULES([glib], [glib-2.0], [],
-    [AC_MSG_ERROR([glib is required for profanity])])
+PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
+    [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 
