@@ -1,7 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.65])
 AC_INIT([profanity], [0.4.0], [boothj5web@gmail.com])
 PACKAGE_STATUS="development"
 
