@@ -1,6 +1,6 @@
 #!/bin/sh
 
-STATUS=release
+STATUS=development
 
 debian_prepare()
 {
