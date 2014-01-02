@@ -156,7 +156,7 @@ static struct cmd_t command_defs[] =
 {
     { "/help",
         _cmd_help, parse_args, 0, 1, NULL,
-        { "/help [area|command]", "Get help on using Profanity",
+        { "/help [area|command]", "Get help on using Profanity.",
         { "/help [area|command]",
           "-------------------------",
           "Use with no arguments to get a help summary.",
