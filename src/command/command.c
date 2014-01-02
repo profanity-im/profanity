@@ -172,7 +172,7 @@ static struct cmd_t command_defs[] =
 
     { "/about",
         _cmd_about, parse_args, 0, 0, NULL,
-        { "/about", "About Profanity",
+        { "/about", "About Profanity.",
         { "/about",
           "------",
           "Show versioning and license information.",
