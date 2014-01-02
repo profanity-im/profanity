@@ -75,8 +75,8 @@ iq_add_handlers(void)
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
 }
 
-void
-iq_room_list_request(gchar *conferencejid)
+static void
+_iq_room_list_request(gchar *conferencejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -85,8 +85,8 @@ iq_room_list_request(gchar *conferencejid)
     xmpp_stanza_release(iq);
 }
 
-void
-iq_disco_info_request(gchar *jid)
+static void
+_iq_disco_info_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -95,8 +95,8 @@ iq_disco_info_request(gchar *jid)
     xmpp_stanza_release(iq);
 }
 
-void
-iq_disco_items_request(gchar *jid)
+static void
+_iq_disco_items_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -105,8 +105,8 @@ iq_disco_items_request(gchar *jid)
     xmpp_stanza_release(iq);
 }
 
-void
-iq_send_software_version(const char * const fulljid)
+static void
+_iq_send_software_version(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -566,4 +566,13 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
 
     return 1;
+}
+
+void
+iq_init_module(void)
+{
+    iq_room_list_request = _iq_room_list_request;
+    iq_disco_info_request = _iq_disco_info_request;
+    iq_disco_items_request = _iq_disco_items_request;
+    iq_send_software_version = _iq_send_software_version;
 }

@@ -75,7 +75,7 @@ static struct cmd_t command_defs[] =
 {
     { "/help",
         cmd_help, parse_args, 0, 1, NULL,
-        { "/help [area|command]", "Get help on using Profanity",
+        { "/help [area|command]", "Get help on using Profanity.",
         { "/help [area|command]",
           "-------------------------",
           "Use with no arguments to get a help summary.",
@@ -91,7 +91,7 @@ static struct cmd_t command_defs[] =
 
     { "/about",
         cmd_about, parse_args, 0, 0, NULL,
-        { "/about", "About Profanity",
+        { "/about", "About Profanity.",
         { "/about",
           "------",
           "Show versioning and license information.",
@@ -436,7 +436,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/beep",
-        cmd_beep, parse_args, 1, 1, cons_beep_setting,
+        cmd_beep, parse_args, 1, 1, &cons_beep_setting,
         { "/beep on|off", "Terminal beep on new messages.",
         { "/beep on|off",
           "------------",
@@ -446,7 +446,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/notify",
-        cmd_notify, parse_args, 2, 2, cons_notify_setting,
+        cmd_notify, parse_args, 2, 2, &cons_notify_setting,
         { "/notify type value", "Control various desktop noficiations.",
         { "/notify type value",
           "------------------",
@@ -471,7 +471,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/flash",
-        cmd_flash, parse_args, 1, 1, cons_flash_setting,
+        cmd_flash, parse_args, 1, 1, &cons_flash_setting,
         { "/flash on|off", "Terminal flash on new messages.",
         { "/flash on|off",
           "-------------",
@@ -481,7 +481,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/intype",
-        cmd_intype, parse_args, 1, 1, cons_intype_setting,
+        cmd_intype, parse_args, 1, 1, &cons_intype_setting,
         { "/intype on|off", "Show when contact is typing.",
         { "/intype on|off",
           "--------------",
@@ -489,7 +489,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/splash",
-        cmd_splash, parse_args, 1, 1, cons_splash_setting,
+        cmd_splash, parse_args, 1, 1, &cons_splash_setting,
         { "/splash on|off", "Splash logo on startup and /about command.",
         { "/splash on|off",
           "--------------",
@@ -497,7 +497,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/autoconnect",
-        cmd_autoconnect, parse_args, 1, 2, cons_autoconnect_setting,
+        cmd_autoconnect, parse_args, 1, 2, &cons_autoconnect_setting,
         { "/autoconnect set|off [account]", "Set account to autoconnect with.",
         { "/autoconnect set|off [account]",
           "------------------------------",
@@ -518,7 +518,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/titlebar",
-        cmd_titlebar, parse_args, 2, 2, cons_titlebar_setting,
+        cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
         { "/titlebar property on|off", "Show various properties in the window title bar.",
         { "/titlebar property on|off",
           "-------------------------",
@@ -527,7 +527,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/mouse",
-        cmd_mouse, parse_args, 1, 1, cons_mouse_setting,
+        cmd_mouse, parse_args, 1, 1, &cons_mouse_setting,
         { "/mouse on|off", "Use profanity mouse handling.",
         { "/mouse on|off",
           "-------------",
@@ -540,8 +540,8 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/chlog",
-        cmd_chlog, parse_args, 1, 1, cons_chlog_setting,
-        { "/chlog on|off", "Chat logging to file",
+        cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
+        { "/chlog on|off", "Chat logging to file.",
         { "/chlog on|off",
           "-------------",
           "Switch chat logging on or off.",
@@ -551,8 +551,8 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/grlog",
-        cmd_grlog, parse_args, 1, 1, cons_grlog_setting,
-        { "/grlog on|off", "Chat logging of chat rooms to file",
+        cmd_grlog, parse_args, 1, 1, &cons_grlog_setting,
+        { "/grlog on|off", "Chat logging of chat rooms to file.",
         { "/grlog on|off",
           "-------------",
           "Switch chat room logging on or off.",
@@ -560,7 +560,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/states",
-        cmd_states, parse_args, 1, 1, cons_states_setting,
+        cmd_states, parse_args, 1, 1, &cons_states_setting,
         { "/states on|off", "Send chat states during a chat session.",
         { "/states on|off",
           "--------------",
@@ -577,7 +577,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/outtype",
-        cmd_outtype, parse_args, 1, 1, cons_outtype_setting,
+        cmd_outtype, parse_args, 1, 1, &cons_outtype_setting,
         { "/outtype on|off", "Send typing notification to recipient.",
         { "/outtype on|off",
           "---------------",
@@ -586,7 +586,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/gone",
-        cmd_gone, parse_args, 1, 1, cons_gone_setting,
+        cmd_gone, parse_args, 1, 1, &cons_gone_setting,
         { "/gone minutes", "Send 'gone' state to recipient after a period.",
         { "/gone minutes",
           "-------------",
@@ -597,7 +597,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/history",
-        cmd_history, parse_args, 1, 1, cons_history_setting,
+        cmd_history, parse_args, 1, 1, &cons_history_setting,
         { "/history on|off", "Chat history in message windows.",
         { "/history on|off",
           "---------------",
@@ -606,7 +606,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/log",
-        cmd_log, parse_args, 2, 2, cons_log_setting,
+        cmd_log, parse_args, 2, 2, &cons_log_setting,
         { "/log maxsize value", "Manage system logging settings.",
         { "/log maxsize value",
           "------------------",
@@ -615,7 +615,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/reconnect",
-        cmd_reconnect, parse_args, 1, 1, cons_reconnect_setting,
+        cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
         { "/reconnect seconds", "Set reconnect interval.",
         { "/reconnect seconds",
           "------------------",
@@ -624,7 +624,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/autoping",
-        cmd_autoping, parse_args, 1, 1, cons_autoping_setting,
+        cmd_autoping, parse_args, 1, 1, &cons_autoping_setting,
         { "/autoping seconds", "Server ping interval.",
         { "/autoping seconds",
           "-----------------",
@@ -633,7 +633,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/autoaway",
-        cmd_autoaway, parse_args_with_freetext, 2, 2, cons_autoaway_setting,
+        cmd_autoaway, parse_args_with_freetext, 2, 2, &cons_autoaway_setting,
         { "/autoaway setting value", "Set auto idle/away properties.",
         { "/autoaway setting value",
           "-----------------------",
@@ -654,7 +654,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/priority",
-        cmd_priority, parse_args, 1, 1, cons_priority_setting,
+        cmd_priority, parse_args, 1, 1, &cons_priority_setting,
         { "/priority value", "Set priority for the current account.",
         { "/priority value",
           "---------------",
@@ -723,7 +723,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/theme",
-        cmd_theme, parse_args, 1, 2, cons_theme_setting,
+        cmd_theme, parse_args, 1, 2, &cons_theme_setting,
         { "/theme command [theme-name]", "Change colour theme.",
         { "/theme command [theme-name]",
           "---------------------------",
@@ -739,7 +739,7 @@ static struct cmd_t command_defs[] =
 
 
     { "/statuses",
-        cmd_statuses, parse_args, 1, 1, cons_statuses_setting,
+        cmd_statuses, parse_args, 1, 1, &cons_statuses_setting,
         { "/statuses on|off", "Set notifications for status messages.",
         { "/statuses on|off",
           "----------------",
@@ -1095,7 +1095,7 @@ cmd_execute(const char * const command, const char * const inp)
         gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args);
         if ((args == NULL) && (cmd->setting_func != NULL)) {
             cons_show("");
-            cmd->setting_func();
+            (*cmd->setting_func)();
             cons_show("Usage: %s", cmd->help.usage);
             return TRUE;
         } else if (args == NULL) {

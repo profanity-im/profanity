@@ -107,8 +107,8 @@ caps_contains(const char * const caps_str)
     return (g_hash_table_lookup(capabilities, caps_str) != NULL);
 }
 
-Capabilities *
-caps_get(const char * const caps_str)
+static Capabilities *
+_caps_get(const char * const caps_str)
 {
     return g_hash_table_lookup(capabilities, caps_str);
 }
@@ -303,8 +303,8 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     return query;
 }
 
-void
-caps_close(void)
+static void
+_caps_close(void)
 {
     g_hash_table_destroy(capabilities);
 }
@@ -325,4 +325,11 @@ _caps_destroy(Capabilities *caps)
         }
         free(caps);
     }
+}
+
+void
+capabilities_init_module(void)
+{
+    caps_get = _caps_get;
+    caps_close = _caps_close;
 }

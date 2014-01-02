@@ -62,15 +62,16 @@ test_sources = \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
 	src/otr.c src/otr.h \
-    tests/ui/mock_ui.c \
-    tests/xmpp/mock_xmpp.c \
+    tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
+    tests/ui/mock_ui.h tests/ui/mock_ui.c \
+    tests/config/mock_accounts.h tests/config/mock_accounts.c \
     tests/log/mock_log.c \
-    tests/config/mock_accounts.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
 	tests/test_cmd_connect.c \
 	tests/test_cmd_account.c \
 	tests/test_cmd_rooms.c \
+	tests/test_cmd_sub.c \
 	tests/test_history.c \
 	tests/test_jid.c \
 	tests/test_parser.c \

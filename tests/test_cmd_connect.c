@@ -7,15 +7,24 @@
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
+#include "xmpp/mock_xmpp.h"
+
 #include "ui/ui.h"
+#include "ui/mock_ui.h"
+
 #include "command/commands.h"
+
+#include "config/accounts.h"
+#include "config/mock_accounts.h"
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
 
-    will_return(jabber_get_connection_status, status);
-    expect_string(cons_show, output, "You are either connected already, or a login is in process.");
+    mock_connection_status(status);
+
+    expect_cons_show("You are either connected already, or a login is in process.");
 
     gboolean result = cmd_connect(NULL, *help);
     assert_true(result);
@@ -45,22 +54,22 @@ void cmd_connect_shows_message_when_undefined(void **state)
 
 void cmd_connect_when_no_account(void **state)
 {
+    mock_cons_show();
+    mock_accounts_get_account();
+    mock_ui_ask_password();
+    mock_jabber_connect_with_details();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "user@server.org", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_string(accounts_get_account, name, "user@server.org");
-    will_return(accounts_get_account, NULL);
+    accounts_get_account_expect_and_return("user@server.org", NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    mock_ui_ask_password_returns("password");
 
-    expect_string(cons_show, output, "Connecting as user@server.org");
+    expect_cons_show("Connecting as user@server.org");
 
-    expect_string(jabber_connect_with_details, jid, "user@server.org");
-    expect_string(jabber_connect_with_details, passwd, "password");
-    expect_any(jabber_connect_with_details, altdomain);
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    jabber_connect_with_username_password_expect_and_return("user@server.org", "password", JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -70,22 +79,18 @@ void cmd_connect_when_no_account(void **state)
 
 void cmd_connect_with_altdomain_when_provided(void **state)
 {
+    stub_ui_ask_password();
+    stub_cons_show();
+    mock_accounts_get_account();
+    mock_jabber_connect_with_details();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "user@server.org", "altdomain" };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any(accounts_get_account, name);
-    will_return(accounts_get_account, NULL);
+    accounts_get_account_return(NULL);
 
-    will_return(ui_ask_password, strdup("password"));
-
-    expect_any(cons_show, output);
-
-    expect_any(jabber_connect_with_details, jid);
-    expect_any(jabber_connect_with_details, passwd);
-    expect_string(jabber_connect_with_details, altdomain, "altdomain");
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    jabber_connect_with_altdomain_expect_and_return("altdomain", JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -95,24 +100,21 @@ void cmd_connect_with_altdomain_when_provided(void **state)
 
 void cmd_connect_fail_message(void **state)
 {
+    stub_cons_show();
+    mock_cons_show_error();
+    stub_ui_ask_password();
+    mock_accounts_get_account();
+    mock_jabber_connect_with_details();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "user@server.org", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any(accounts_get_account, name);
-    will_return(accounts_get_account, NULL);
+    accounts_get_account_return(NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    jabber_connect_with_details_return(JABBER_DISCONNECTED);
 
-    expect_any(cons_show, output);
-
-    expect_any(jabber_connect_with_details, jid);
-    expect_any(jabber_connect_with_details, passwd);
-    expect_any(jabber_connect_with_details, altdomain);
-    will_return(jabber_connect_with_details, JABBER_DISCONNECTED);
-
-    expect_string(cons_show_error, output, "Connection attempt for user@server.org failed.");
+    expect_cons_show_error("Connection attempt for user@server.org failed.");
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -122,22 +124,18 @@ void cmd_connect_fail_message(void **state)
 
 void cmd_connect_lowercases_argument(void **state)
 {
+    stub_cons_show();
+    stub_ui_ask_password();
+    mock_accounts_get_account();
+    mock_jabber_connect_with_details();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "USER@server.ORG", NULL };
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_string(accounts_get_account, name, "user@server.org");
-    will_return(accounts_get_account, NULL);
+    accounts_get_account_expect_and_return("user@server.org", NULL);
 
-    will_return(ui_ask_password, strdup("password"));
-
-    expect_any(cons_show, output);
-
-    expect_any(jabber_connect_with_details, jid);
-    expect_any(jabber_connect_with_details, passwd);
-    expect_any(jabber_connect_with_details, altdomain);
-    will_return(jabber_connect_with_details, JABBER_CONNECTING);
+    jabber_connect_with_details_return(JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -147,26 +145,24 @@ void cmd_connect_lowercases_argument(void **state)
 
 void cmd_connect_asks_password_when_not_in_account(void **state)
 {
+    stub_cons_show();
+    stub_ui_ask_password();
+    mock_accounts_get_account();
+    mock_accounts_create_full_jid();
+    mock_jabber_connect_with_account();
+    stub_accounts_free_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "jabber_org", NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
     account->password = NULL;
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any(accounts_get_account, name);
-    will_return(accounts_get_account, account);
+    accounts_get_account_return(account);
 
-    will_return(accounts_create_full_jid, strdup("user@jabber.org"));
+    accounts_create_full_jid_return("user@jabber.org");
 
-    will_return(ui_ask_password, strdup("password"));
-
-    expect_any(cons_show, output);
-
-    expect_any(jabber_connect_with_account, account);
-    will_return(jabber_connect_with_account, JABBER_CONNECTING);
-
-    expect_any(accounts_free_account, account);
+    jabber_connect_with_account_return(JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -177,25 +173,26 @@ void cmd_connect_asks_password_when_not_in_account(void **state)
 
 void cmd_connect_shows_message_when_connecting_with_account(void **state)
 {
+    mock_cons_show();
+    mock_accounts_get_account();
+    mock_accounts_create_full_jid();
+    mock_jabber_connect_with_account();
+    stub_accounts_free_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "jabber_org", NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
     account->password = "password";
     account->name = "jabber_org";
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any(accounts_get_account, name);
-    will_return(accounts_get_account, account);
+    accounts_get_account_return(account);
 
-    will_return(accounts_create_full_jid, strdup("user@jabber.org/laptop"));
+    accounts_create_full_jid_return("user@jabber.org/laptop");
 
-    expect_string(cons_show, output, "Connecting with account jabber_org as user@jabber.org/laptop");
+    expect_cons_show("Connecting with account jabber_org as user@jabber.org/laptop");
 
-    expect_any(jabber_connect_with_account, account);
-    will_return(jabber_connect_with_account, JABBER_CONNECTING);
-
-    expect_any(accounts_free_account, account);
+    jabber_connect_with_account_return(JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -206,25 +203,24 @@ void cmd_connect_shows_message_when_connecting_with_account(void **state)
 
 void cmd_connect_connects_with_account(void **state)
 {
+    stub_cons_show();
+    mock_accounts_get_account();
+    mock_accounts_create_full_jid();
+    mock_jabber_connect_with_account();
+    stub_accounts_free_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "jabber_org", NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
     account->password = "password";
     account->name = "jabber_org";
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any(accounts_get_account, name);
-    will_return(accounts_get_account, account);
+    accounts_get_account_return(account);
 
-    will_return(accounts_create_full_jid, strdup("user@jabber.org/laptop"));
+    accounts_create_full_jid_return("user@jabber.org/laptop");
 
-    expect_any(cons_show, output);
-
-    expect_memory(jabber_connect_with_account, account, account, sizeof(ProfAccount));
-    will_return(jabber_connect_with_account, JABBER_CONNECTING);
-
-    expect_any(accounts_free_account, account);
+    jabber_connect_with_account_expect_and_return(account, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);
@@ -235,23 +231,24 @@ void cmd_connect_connects_with_account(void **state)
 
 void cmd_connect_frees_account_after_connecting(void **state)
 {
+    stub_cons_show();
+    mock_accounts_get_account();
+    mock_accounts_create_full_jid();
+    mock_jabber_connect_with_account();
+    mock_accounts_free_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "jabber_org", NULL };
     ProfAccount *account = malloc(sizeof(ProfAccount));
 
-    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
+    mock_connection_status(JABBER_DISCONNECTED);
 
-    expect_any(accounts_get_account, name);
-    will_return(accounts_get_account, account);
+    accounts_get_account_return(account);
 
-    will_return(accounts_create_full_jid, strdup("user@jabber.org/laptop"));
+    accounts_create_full_jid_return("user@jabber.org/laptop");
 
-    expect_any(cons_show, output);
+    jabber_connect_with_account_return(JABBER_CONNECTING);
 
-    expect_any(jabber_connect_with_account, account);
-    will_return(jabber_connect_with_account, JABBER_CONNECTING);
-
-    expect_memory(accounts_free_account, account, account, sizeof(ProfAccount));
+    accounts_free_account_expect(account);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);

@@ -61,8 +61,8 @@ bookmark_request(void)
     xmpp_stanza_release(iq);
 }
 
-void
-bookmark_add(const char *jid, const char *nick, gboolean autojoin)
+static void
+_bookmark_add(const char *jid, const char *nick, gboolean autojoin)
 {
     /* TODO: send request */
     /* TODO: manage bookmark_list */
@@ -72,8 +72,8 @@ bookmark_add(const char *jid, const char *nick, gboolean autojoin)
     autocomplete_add(bookmark_ac, jid);
 }
 
-void
-bookmark_remove(const char *jid, gboolean autojoin)
+static void
+_bookmark_remove(const char *jid, gboolean autojoin)
 {
     /* TODO: manage bookmark_list */
     if (autojoin) {
@@ -84,20 +84,20 @@ bookmark_remove(const char *jid, gboolean autojoin)
     }
 }
 
-const GList *
-bookmark_get_list(void)
+static const GList *
+_bookmark_get_list(void)
 {
     return bookmark_list;
 }
 
-char *
-bookmark_find(char *search_str)
+static char *
+_bookmark_find(char *search_str)
 {
     return autocomplete_complete(bookmark_ac, search_str);
 }
 
-void
-bookmark_autocomplete_reset(void)
+static void
+_bookmark_autocomplete_reset(void)
 {
     if (bookmark_ac != NULL) {
         autocomplete_reset(bookmark_ac);
@@ -242,4 +242,14 @@ _bookmark_item_destroy(gpointer item)
     free(p->jid);
     free(p->nick);
     free(p);
+}
+
+void
+bookmark_init_module(void)
+{
+    bookmark_add = _bookmark_add;
+    bookmark_remove = _bookmark_remove;
+    bookmark_get_list = _bookmark_get_list;
+    bookmark_find = _bookmark_find;
+    bookmark_autocomplete_reset = _bookmark_autocomplete_reset;
 }
