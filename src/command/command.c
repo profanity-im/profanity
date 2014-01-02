@@ -540,7 +540,7 @@ static struct cmd_t command_defs[] =
 
     { "/chlog",
         cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
-        { "/chlog on|off", "Chat logging to file",
+        { "/chlog on|off", "Chat logging to file.",
         { "/chlog on|off",
           "-------------",
           "Switch chat logging on or off.",
