@@ -267,7 +267,8 @@ cmd_account(gchar **args, struct cmd_help_t help)
                                 resource_presence_t last_presence = accounts_get_last_presence(connected_account);
 
                                 if (presence_type == last_presence) {
-                                    presence_update(last_presence, jabber_get_presence_message(), 0);
+                                    char *message = jabber_get_presence_message();
+                                    presence_update(last_presence, message, 0);
                                 }
                             }
                             cons_show("Updated %s priority for account %s: %s", property, account_name, value);
@@ -311,7 +312,6 @@ gboolean
 cmd_sub(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    win_type_t win_type = ui_current_win_type();
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are currently not connected.");
@@ -337,6 +337,7 @@ cmd_sub(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    win_type_t win_type = ui_current_win_type();
     if ((win_type != WIN_CHAT) && (jid == NULL)) {
         cons_show("You must specify a contact.");
         return TRUE;
@@ -2332,11 +2333,11 @@ _strtoi(char *str, int *saveptr, int min, int max)
 
     errno = 0;
     val = (int)strtol(str, &ptr, 0);
-    if (*str == '\0' || *ptr != '\0') {
-        cons_show("Illegal character. Must be a number.");
+    if (errno != 0 || *str == '\0' || *ptr != '\0') {
+        cons_show("Could not convert \"%s\" to a number.", str);
         return -1;
-    } else if (errno == ERANGE || val < min || val > max) {
-        cons_show("Value out of range. Must be in %d..%d.", min, max);
+    } else if (val < min || val > max) {
+        cons_show("Value %s out of range. Must be in %d..%d.", str, min, max);
         return -1;
     }
 

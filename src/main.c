@@ -29,10 +29,34 @@
 
 #include "profanity.h"
 
+#include "xmpp/xmpp.h"
+#include "ui/ui.h"
+
 static gboolean disable_tls = FALSE;
 static gboolean version = FALSE;
 static char *log = "INFO";
 static char *account_name = NULL;
+
+static void
+_init_modules(void)
+{
+    jabber_init_module();
+    bookmark_init_module();
+    capabilities_init_module();
+    iq_init_module();
+    message_init_module();
+    presence_init_module();
+    roster_init_module();
+
+    ui_init_module();
+    console_init_module();
+    inputwin_init_module();
+    notifier_init_module();
+    statusbar_init_module();
+    titlebar_init_module();
+
+    accounts_init_module();
+}
 
 int
 main(int argc, char **argv)
@@ -78,6 +102,7 @@ main(int argc, char **argv)
         return 0;
     }
 
+    _init_modules();
     prof_run(disable_tls, log, account_name);
 
     return 0;

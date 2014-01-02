@@ -1,35 +1,33 @@
-/*
- * mock_xmpp.c
- *
- * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
- *
- * This file is part of Profanity.
- *
- * Profanity is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Profanity is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
-
-#include <glib.h>
+#include <stdarg.h>
+#include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <stdlib.h>
+#include <string.h>
+#include <glib.h>
 
 #include "xmpp/xmpp.h"
 
-// connection functions
-void jabber_init(const int disable_tls) {}
+static jabber_conn_status_t
+_mock_jabber_get_connection_status(void)
+{
+    return (jabber_conn_status_t)mock();
+}
 
-jabber_conn_status_t jabber_connect_with_details(const char * const jid,
+static char *
+_mock_jabber_get_account_name(void)
+{
+    return (char *)mock();
+}
+
+static void
+_mock_iq_room_list_request(gchar *conf_server)
+{
+    check_expected(conf_server);
+}
+
+static jabber_conn_status_t
+_mock_jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
     check_expected(jid);
@@ -38,122 +36,122 @@ jabber_conn_status_t jabber_connect_with_details(const char * const jid,
     return (jabber_conn_status_t)mock();
 }
 
-jabber_conn_status_t jabber_connect_with_account(const ProfAccount * const account)
+static jabber_conn_status_t
+_mock_jabber_connect_with_account(const ProfAccount * const account)
 {
     check_expected(account);
     return (jabber_conn_status_t)mock();
 }
 
-void jabber_disconnect(void) {}
-void jabber_shutdown(void) {}
-void jabber_process_events(void) {}
-const char * jabber_get_fulljid(void)
-{
-    return (const char *)mock();
-}
-const char * jabber_get_domain(void)
-{
-    return (const char *)mock();
-}
-
-jabber_conn_status_t jabber_get_connection_status(void)
-{
-    return (jabber_conn_status_t)mock();
-}
-
-char * jabber_get_presence_message(void)
-{
-    return (char *)mock();
-}
-void jabber_set_autoping(int seconds) {}
-
-char* jabber_get_account_name(void)
+static char *
+_mock_jabber_get_presence_message(void)
 {
     return (char *)mock();
 }
 
-GList * jabber_get_available_resources(void)
+static void
+_mock_presence_update(resource_presence_t status, const char * const msg, int idle)
 {
-    return (GList *)mock();
+    check_expected(status);
+    check_expected(msg);
+    check_expected(idle);
 }
 
-// message functions
-void message_send(const char * const msg, const char * const recipient) {}
-void message_send_groupchat(const char * const msg, const char * const recipient) {}
-void message_send_inactive(const char * const recipient) {}
-void message_send_composing(const char * const recipient) {}
-void message_send_paused(const char * const recipient) {}
-void message_send_gone(const char * const recipient) {}
-void message_send_invite(const char * const room, const char * const contact,
-    const char * const reason) {}
-void message_send_duck(const char * const query) {}
-
-// presence functions
-void presence_subscription(const char * const jid, const jabber_subscr_t action) {}
-
-GSList* presence_get_subscription_requests(void)
+void
+mock_jabber_connect_with_details(void)
 {
-    return (GSList *)mock();
+    jabber_connect_with_details = _mock_jabber_connect_with_details;
 }
 
-gint presence_sub_request_count(void)
+void
+mock_jabber_connect_with_account(void)
 {
-    return (gint)mock();
+    jabber_connect_with_account = _mock_jabber_connect_with_account;
 }
 
-void presence_reset_sub_request_search(void) {}
-
-char * presence_sub_request_find(char * search_str)
+void
+mock_presence_update(void)
 {
-    return (char *)mock();
+    presence_update = _mock_presence_update;
 }
 
-void presence_join_room(Jid *jid) {}
-void presence_change_room_nick(const char * const room, const char * const nick) {}
-void presence_leave_chat_room(const char * const room_jid) {}
-void presence_update(resource_presence_t status, const char * const msg,
-    int idle) {}
-gboolean presence_sub_request_exists(const char * const bare_jid)
+void
+mock_connection_status(jabber_conn_status_t status)
 {
-    return (gboolean)mock();
+    jabber_get_connection_status = _mock_jabber_get_connection_status;
+    will_return(_mock_jabber_get_connection_status, status);
 }
 
-// iq functions
-void iq_send_software_version(const char * const fulljid) {}
-
-void iq_room_list_request(gchar *conferencejid)
+void
+mock_connection_account_name(char *name)
 {
-    check_expected(conferencejid);
+    jabber_get_account_name = _mock_jabber_get_account_name;
+    will_return(_mock_jabber_get_account_name, name);
 }
 
-void iq_disco_info_request(gchar *jid) {}
-void iq_disco_items_request(gchar *jid) {}
-
-// caps functions
-Capabilities* caps_get(const char * const caps_str)
+void
+mock_connection_presence_message(char *message)
 {
-    return (Capabilities *)mock();
+    jabber_get_presence_message = _mock_jabber_get_presence_message;
+    will_return(_mock_jabber_get_presence_message, message);
 }
 
-void caps_close(void) {}
-
-void bookmark_add(const char *jid, const char *nick, gboolean autojoin) {}
-void bookmark_remove(const char *jid, gboolean autojoin) {}
-
-const GList *bookmark_get_list(void)
+void
+expect_room_list_request(char *conf_server)
 {
-    return (const GList *)mock();
+    iq_room_list_request = _mock_iq_room_list_request;
+    expect_string(_mock_iq_room_list_request, conf_server, conf_server);
 }
 
-char *bookmark_find(char *search_str)
+void
+jabber_connect_with_username_password_expect_and_return(char *jid,
+    char *password, jabber_conn_status_t result)
 {
-    return (char *)mock();
+    expect_string(_mock_jabber_connect_with_details, jid, jid);
+    expect_string(_mock_jabber_connect_with_details, passwd, password);
+    expect_any(_mock_jabber_connect_with_details, altdomain);
+    will_return(_mock_jabber_connect_with_details, result);
 }
 
-void bookmark_autocomplete_reset(void) {}
+void
+jabber_connect_with_altdomain_expect_and_return(char *altdomain,
+    jabber_conn_status_t result)
+{
+    expect_any(_mock_jabber_connect_with_details, jid);
+    expect_any(_mock_jabber_connect_with_details, passwd);
+    expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
+    will_return(_mock_jabber_connect_with_details, result);
+}
 
-void roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups) {}
-void roster_send_add_to_group(const char * const group, PContact contact) {}
-void roster_send_remove_from_group(const char * const group, PContact contact) {}
-void roster_add_new(const char * const barejid, const char * const name) {}
-void roster_send_remove(const char * const barejid) {}
+void
+jabber_connect_with_details_return(jabber_conn_status_t result)
+{
+    expect_any(_mock_jabber_connect_with_details, jid);
+    expect_any(_mock_jabber_connect_with_details, passwd);
+    expect_any(_mock_jabber_connect_with_details, altdomain);
+    will_return(_mock_jabber_connect_with_details, result);
+}
+
+void
+jabber_connect_with_account_expect_and_return(ProfAccount *account,
+    jabber_conn_status_t result)
+{
+    expect_memory(_mock_jabber_connect_with_account, account, account, sizeof(ProfAccount));
+    will_return(_mock_jabber_connect_with_account, result);
+}
+
+void
+jabber_connect_with_account_return(ProfAccount *account,
+    jabber_conn_status_t result)
+{
+    expect_any(_mock_jabber_connect_with_account, account);
+    will_return(_mock_jabber_connect_with_account, result);
+}
+
+void
+presence_update_expect(resource_presence_t presence, char *msg, int idle)
+{
+    expect_value(_mock_presence_update, status, presence);
+    expect_string(_mock_presence_update, msg, msg);
+    expect_value(_mock_presence_update, idle, idle);
+}

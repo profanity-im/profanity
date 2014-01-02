@@ -36,16 +36,16 @@
 #include "muc.h"
 #include "ui/ui.h"
 
-void
-notifier_init(void)
+static void
+_notifier_init(void)
 {
 #ifdef PROF_HAVE_LIBNOTIFY
     notify_init("Profanity");
 #endif
 }
 
-void
-notifier_uninit(void)
+static void
+_notifier_uninit(void)
 {
 #ifdef PROF_HAVE_LIBNOTIFY
     if (notify_is_initted()) {
@@ -54,8 +54,8 @@ notifier_uninit(void)
 #endif
 }
 
-void
-notify_typing(const char * const handle)
+static void
+_notify_typing(const char * const handle)
 {
     char message[strlen(handle) + 1 + 11];
     sprintf(message, "%s: typing...", handle);
@@ -63,8 +63,8 @@ notify_typing(const char * const handle)
     notify(message, 10000, "Incoming message");
 }
 
-void
-notify_invite(const char * const from, const char * const room,
+static void
+_notify_invite(const char * const from, const char * const room,
     const char * const reason)
 {
     GString *message = g_string_new("Room invite\nfrom: ");
@@ -80,8 +80,8 @@ notify_invite(const char * const from, const char * const room,
     g_string_free(message, TRUE);
 }
 
-void
-notify_message(const char * const handle, int win)
+static void
+_notify_message(const char * const handle, int win)
 {
     char message[strlen(handle) + 1 + 14];
     sprintf(message, "%s: message (%d).", handle, win);
@@ -89,8 +89,8 @@ notify_message(const char * const handle, int win)
     notify(message, 10000, "incoming message");
 }
 
-void
-notify_room_message(const char * const handle, const char * const room, int win)
+static void
+_notify_room_message(const char * const handle, const char * const room, int win)
 {
     GString *text = g_string_new("");
 
@@ -102,8 +102,8 @@ notify_room_message(const char * const handle, const char * const room, int win)
     g_string_free(text, TRUE);
 }
 
-void
-notify_subscription(const char * const from)
+static void
+_notify_subscription(const char * const from)
 {
     GString *message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
@@ -111,8 +111,8 @@ notify_subscription(const char * const from)
     g_string_free(message, TRUE);
 }
 
-void
-notify_remind(void)
+static void
+_notify_remind(void)
 {
     gint unread = ui_unread();
     gint open = muc_invite_count();
@@ -156,8 +156,8 @@ notify_remind(void)
     g_string_free(text, TRUE);
 }
 
-void
-notify(const char * const message, int timeout,
+static void
+_notify(const char * const message, int timeout,
     const char * const category)
 {
 #ifdef PROF_HAVE_LIBNOTIFY
@@ -203,3 +203,18 @@ notify(const char * const message, int timeout,
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
 }
+
+void
+notifier_init_module(void)
+{
+    notifier_init = _notifier_init;
+    notifier_uninit = _notifier_uninit;
+    notify_typing = _notify_typing;
+    notify_invite = _notify_invite;
+    notify_message = _notify_message;
+    notify_room_message =  _notify_room_message;
+    notify_subscription = _notify_subscription;
+    notify_remind = _notify_remind;
+    notify = _notify;
+}
+

@@ -92,8 +92,8 @@ void _connection_free_saved_account(void);
 void _connection_free_saved_details(void);
 void _connection_free_session_data(void);
 
-void
-jabber_init(const int disable_tls)
+static void
+_jabber_init(const int disable_tls)
 {
     log_info("Initialising XMPP");
     jabber_conn.conn_status = JABBER_STARTED;
@@ -109,8 +109,8 @@ jabber_init(const int disable_tls)
     xmpp_initialize();
 }
 
-jabber_conn_status_t
-jabber_connect_with_account(const ProfAccount * const account)
+static jabber_conn_status_t
+_jabber_connect_with_account(const ProfAccount * const account)
 {
     assert(account != NULL);
 
@@ -129,8 +129,8 @@ jabber_connect_with_account(const ProfAccount * const account)
     return result;
 }
 
-jabber_conn_status_t
-jabber_connect_with_details(const char * const jid,
+static jabber_conn_status_t
+_jabber_connect_with_details(const char * const jid,
     const char * const passwd, const char * const altdomain)
 {
     assert(jid != NULL);
@@ -161,8 +161,8 @@ jabber_connect_with_details(const char * const jid,
     return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain);
 }
 
-void
-jabber_disconnect(void)
+static void
+_jabber_disconnect(void)
 {
     // if connected, send end stream and wait for response
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
@@ -194,14 +194,14 @@ jabber_disconnect(void)
     FREE_SET_NULL(jabber_conn.domain);
 }
 
-void
-jabber_shutdown(void)
+static void
+_jabber_shutdown(void)
 {
     xmpp_shutdown();
 }
 
-void
-jabber_process_events(void)
+static void
+_jabber_process_events(void)
 {
     // run xmpp event loop if connected, connecting or disconnecting
     if (jabber_conn.conn_status == JABBER_CONNECTED
@@ -221,8 +221,8 @@ jabber_process_events(void)
 
 }
 
-void
-jabber_set_autoping(const int seconds)
+static void
+_jabber_set_autoping(const int seconds)
 {
     if (jabber_conn.conn_status == JABBER_CONNECTED) {
         xmpp_timed_handler_delete(jabber_conn.conn, _ping_timed_handler);
@@ -235,14 +235,14 @@ jabber_set_autoping(const int seconds)
     }
 }
 
-GList *
-jabber_get_available_resources(void)
+static GList *
+_jabber_get_available_resources(void)
 {
     return g_hash_table_get_values(available_resources);
 }
 
-jabber_conn_status_t
-jabber_get_connection_status(void)
+static jabber_conn_status_t
+_jabber_get_connection_status(void)
 {
     return (jabber_conn.conn_status);
 }
@@ -259,26 +259,26 @@ connection_get_ctx(void)
     return jabber_conn.ctx;
 }
 
-const char *
-jabber_get_fulljid(void)
+static const char *
+_jabber_get_fulljid(void)
 {
     return xmpp_conn_get_jid(jabber_conn.conn);
 }
 
-const char *
-jabber_get_domain(void)
+static const char *
+_jabber_get_domain(void)
 {
     return jabber_conn.domain;
 }
 
-char *
-jabber_get_presence_message(void)
+static char *
+_jabber_get_presence_message(void)
 {
     return jabber_conn.presence_message;
 }
 
-char *
-jabber_get_account_name(void)
+static char *
+_jabber_get_account_name(void)
 {
     return saved_account.name;
 }
@@ -622,3 +622,20 @@ _xmpp_get_file_logger()
     return file_log;
 }
 
+void
+jabber_init_module(void)
+{
+    jabber_init = _jabber_init;
+    jabber_connect_with_account = _jabber_connect_with_account;
+    jabber_connect_with_details = _jabber_connect_with_details;
+    jabber_disconnect = _jabber_disconnect;
+    jabber_shutdown = _jabber_shutdown;
+    jabber_process_events = _jabber_process_events;
+    jabber_set_autoping = _jabber_set_autoping;
+    jabber_get_available_resources = _jabber_get_available_resources;
+    jabber_get_connection_status = _jabber_get_connection_status;
+    jabber_get_fulljid = _jabber_get_fulljid;
+    jabber_get_domain = _jabber_get_domain;
+    jabber_get_presence_message = _jabber_get_presence_message;
+    jabber_get_account_name = _jabber_get_account_name;
+}

@@ -37,8 +37,8 @@ static contact_presence_t current_status;
 static void _title_bar_draw_title(void);
 static void _title_bar_draw_status(void);
 
-void
-create_title_bar(void)
+static void
+_create_title_bar(void)
 {
     int cols = getmaxx(stdscr);
 
@@ -49,8 +49,8 @@ create_title_bar(void)
     dirty = TRUE;
 }
 
-void
-title_bar_title(void)
+static void
+_title_bar_title(void)
 {
     werase(title_bar);
     recipient = NULL;
@@ -60,8 +60,8 @@ title_bar_title(void)
     dirty = TRUE;
 }
 
-void
-title_bar_resize(void)
+static void
+_title_bar_resize(void)
 {
     int cols = getmaxx(stdscr);
 
@@ -73,8 +73,8 @@ title_bar_resize(void)
     dirty = TRUE;
 }
 
-void
-title_bar_refresh(void)
+static void
+_title_bar_refresh(void)
 {
     if (recipient != NULL) {
 
@@ -107,8 +107,8 @@ title_bar_refresh(void)
     }
 }
 
-void
-title_bar_show(const char * const title)
+static void
+_title_bar_show(const char * const title)
 {
     if (current_title != NULL)
         free(current_title);
@@ -118,15 +118,15 @@ title_bar_show(const char * const title)
     _title_bar_draw_title();
 }
 
-void
-title_bar_set_status(contact_presence_t status)
+static void
+_title_bar_set_status(contact_presence_t status)
 {
     current_status = status;
     _title_bar_draw_status();
 }
 
-void
-title_bar_set_recipient(const char * const from)
+static void
+_title_bar_set_recipient(const char * const from)
 {
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
@@ -144,8 +144,8 @@ title_bar_set_recipient(const char * const from)
     dirty = TRUE;
 }
 
-void
-title_bar_set_typing(gboolean is_typing)
+static void
+_title_bar_set_typing(gboolean is_typing)
 {
     if (is_typing) {
         if (typing_elapsed != NULL) {
@@ -170,8 +170,8 @@ title_bar_set_typing(gboolean is_typing)
     dirty = TRUE;
 }
 
-void
-title_bar_draw(void)
+static void
+_title_bar_draw(void)
 {
     werase(title_bar);
     _title_bar_draw_status();
@@ -226,4 +226,18 @@ _title_bar_draw_title(void)
     mvwprintw(title_bar, 0, 0, " %s", current_title);
 
     dirty = TRUE;
+}
+
+void
+titlebar_init_module(void)
+{
+    create_title_bar = _create_title_bar;
+    title_bar_title = _title_bar_title;
+    title_bar_resize = _title_bar_resize;
+    title_bar_refresh = _title_bar_refresh;
+    title_bar_show = _title_bar_show;
+    title_bar_set_status = _title_bar_set_status;
+    title_bar_set_recipient = _title_bar_set_recipient;
+    title_bar_set_typing = _title_bar_set_typing;
+    title_bar_draw = _title_bar_draw;
 }

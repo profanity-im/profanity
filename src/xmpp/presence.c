@@ -80,8 +80,8 @@ presence_add_handlers(void)
     HANDLE(NULL,               NULL,                     _available_handler);
 }
 
-void
-presence_subscription(const char * const jid, const jabber_subscr_t action)
+static void
+_presence_subscription(const char * const jid, const jabber_subscr_t action)
 {
     assert(jid != NULL);
 
@@ -122,14 +122,14 @@ presence_subscription(const char * const jid, const jabber_subscr_t action)
     jid_destroy(jidp);
 }
 
-GSList *
-presence_get_subscription_requests(void)
+static GSList *
+_presence_get_subscription_requests(void)
 {
     return autocomplete_get_list(sub_requests_ac);
 }
 
-gint
-presence_sub_request_count(void)
+static gint
+_presence_sub_request_count(void)
 {
     return autocomplete_length(sub_requests_ac);
 }
@@ -146,14 +146,14 @@ presence_clear_sub_requests(void)
     autocomplete_clear(sub_requests_ac);
 }
 
-char *
-presence_sub_request_find(char * search_str)
+static char *
+_presence_sub_request_find(char * search_str)
 {
     return autocomplete_complete(sub_requests_ac, search_str);
 }
 
-gboolean
-presence_sub_request_exists(const char * const bare_jid)
+static gboolean
+_presence_sub_request_exists(const char * const bare_jid)
 {
     gboolean result = FALSE;
     GSList *requests_p = autocomplete_get_list(sub_requests_ac);
@@ -174,14 +174,14 @@ presence_sub_request_exists(const char * const bare_jid)
     return result;
 }
 
-void
-presence_reset_sub_request_search(void)
+static void
+_presence_reset_sub_request_search(void)
 {
     autocomplete_reset(sub_requests_ac);
 }
 
-void
-presence_update(const resource_presence_t presence_type, const char * const msg,
+static void
+_presence_update(const resource_presence_t presence_type, const char * const msg,
     const int idle)
 {
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
@@ -252,8 +252,8 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
     }
 }
 
-void
-presence_join_room(Jid *jid)
+static void
+_presence_join_room(Jid *jid)
 {
     assert(jid != NULL);
     assert(jid->fulljid != NULL);
@@ -261,7 +261,7 @@ presence_join_room(Jid *jid)
     log_debug("Sending room join presence to: %s", jid->fulljid);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    contact_presence_t presence_type =
+    resource_presence_t presence_type =
         accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
@@ -280,8 +280,8 @@ presence_join_room(Jid *jid)
     muc_join_room(jid->barejid, jid->resourcepart);
 }
 
-void
-presence_change_room_nick(const char * const room, const char * const nick)
+static void
+_presence_change_room_nick(const char * const room, const char * const nick)
 {
     assert(room != NULL);
     assert(nick != NULL);
@@ -289,7 +289,7 @@ presence_change_room_nick(const char * const room, const char * const nick)
     log_debug("Sending room nickname change to: %s, nick: %s", room, nick);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    contact_presence_t presence_type =
+    resource_presence_t presence_type =
         accounts_get_last_presence(jabber_get_account_name());
     const char *show = stanza_get_presence_string_from_type(presence_type);
     char *status = jabber_get_presence_message();
@@ -310,8 +310,8 @@ presence_change_room_nick(const char * const room, const char * const nick)
     free(full_room_jid);
 }
 
-void
-presence_leave_chat_room(const char * const room_jid)
+static void
+_presence_leave_chat_room(const char * const room_jid)
 {
     assert(room_jid != NULL);
 
@@ -685,4 +685,19 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     jid_destroy(from_jid);
 
     return 1;
+}
+
+void
+presence_init_module(void)
+{
+    presence_subscription = _presence_subscription;
+    presence_get_subscription_requests = _presence_get_subscription_requests;
+    presence_sub_request_count = _presence_sub_request_count;
+    presence_sub_request_find = _presence_sub_request_find;
+    presence_sub_request_exists = _presence_sub_request_exists;
+    presence_reset_sub_request_search = _presence_reset_sub_request_search;
+    presence_update = _presence_update;
+    presence_join_room = _presence_join_room;
+    presence_change_room_nick = _presence_change_room_nick;
+    presence_leave_chat_room = _presence_leave_chat_room;
 }

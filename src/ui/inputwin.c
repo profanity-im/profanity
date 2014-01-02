@@ -58,8 +58,8 @@ static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
 
-void
-create_input_window(void)
+static void
+_create_input_window(void)
 {
 #ifdef NCURSES_REENTRANT
     set_escdelay(25);
@@ -74,8 +74,8 @@ create_input_window(void)
     _inp_win_refresh();
 }
 
-void
-inp_win_resize(const char * const input, const int size)
+static void
+_inp_win_resize(const char * const input, const int size)
 {
     int inp_x;
     getmaxyx(stdscr, rows, cols);
@@ -92,20 +92,20 @@ inp_win_resize(const char * const input, const int size)
     _inp_win_refresh();
 }
 
-void
-inp_non_block(void)
+static void
+_inp_non_block(void)
 {
     wtimeout(inp_win, 20);
 }
 
-void
-inp_block(void)
+static void
+_inp_block(void)
 {
     wtimeout(inp_win, -1);
 }
 
-wint_t
-inp_get_char(char *input, int *size)
+static wint_t
+_inp_get_char(char *input, int *size)
 {
     int inp_x = 0;
     int i;
@@ -203,8 +203,8 @@ inp_get_char(char *input, int *size)
     return ch;
 }
 
-void
-inp_get_password(char *passwd)
+static void
+_inp_get_password(char *passwd)
 {
     _clear_input();
     _inp_win_refresh();
@@ -215,14 +215,14 @@ inp_get_password(char *passwd)
     status_bar_clear();
 }
 
-void
-inp_put_back(void)
+static void
+_inp_put_back(void)
 {
     _inp_win_refresh();
 }
 
-void
-inp_replace_input(char *input, const char * const new_input, int *size)
+static void
+_inp_replace_input(char *input, const char * const new_input, int *size)
 {
     int display_size;
     strcpy(input, new_input);
@@ -234,8 +234,8 @@ inp_replace_input(char *input, const char * const new_input, int *size)
     _go_to_end(display_size);
 }
 
-void
-inp_win_reset(void)
+static void
+_inp_win_reset(void)
 {
     _clear_input();
     pad_start = 0;
@@ -702,4 +702,18 @@ _printable(const wint_t ch)
     bytes[utf_len] = '\0';
     gunichar unichar = g_utf8_get_char(bytes);
     return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
+}
+
+void
+inputwin_init_module(void)
+{
+    create_input_window = _create_input_window;
+    inp_win_resize = _inp_win_resize;
+    inp_non_block = _inp_non_block;
+    inp_block = _inp_block;
+    inp_get_char = _inp_get_char;
+    inp_get_password = _inp_get_password;
+    inp_put_back = _inp_put_back;
+    inp_replace_input = _inp_replace_input;
+    inp_win_reset = _inp_win_reset;
 }

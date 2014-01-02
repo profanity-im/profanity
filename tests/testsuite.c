@@ -8,6 +8,7 @@
 #include "test_cmd_connect.h"
 #include "test_cmd_account.h"
 #include "test_cmd_rooms.h"
+#include "test_cmd_sub.h"
 #include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
@@ -194,7 +195,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_list_shows_accounts),
         unit_test(cmd_account_show_shows_usage_when_no_arg),
         unit_test(cmd_account_show_shows_message_when_account_does_not_exist),
-        unit_test(cmd_account_show_shows_message_when_account_exists),
+        unit_test(cmd_account_show_shows_account_when_exists),
         unit_test(cmd_account_add_shows_usage_when_no_arg),
         unit_test(cmd_account_add_adds_account),
         unit_test(cmd_account_add_shows_message),
@@ -241,6 +242,21 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_away_priority_sets_preference),
         unit_test(cmd_account_set_xa_priority_sets_preference),
         unit_test(cmd_account_set_dnd_priority_sets_preference),
+        unit_test(cmd_account_set_online_priority_shows_message),
+        unit_test(cmd_account_set_priority_too_low_shows_message),
+        unit_test(cmd_account_set_priority_too_high_shows_message),
+        unit_test(cmd_account_set_priority_when_not_number_shows_message),
+        unit_test(cmd_account_set_priority_when_empty_shows_message),
+        unit_test(cmd_account_set_priority_updates_presence_when_account_connected_with_presence),
+        unit_test(cmd_account_clear_shows_usage_when_no_args),
+        unit_test(cmd_account_clear_shows_usage_when_one_arg),
+        unit_test(cmd_account_clear_checks_account_exists),
+        unit_test(cmd_account_clear_shows_message_when_account_doesnt_exist),
+        unit_test(cmd_account_clear_shows_message_when_invalid_property),
+
+        unit_test(cmd_sub_shows_message_when_not_connected),
+        unit_test(cmd_sub_shows_usage_when_no_arg),
+
     };
     return run_tests(tests);
 }

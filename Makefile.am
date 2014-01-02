@@ -54,7 +54,9 @@ test_sources = \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h \
-	src/ui/ui.h \
+	src/ui/ui.h src/ui/window.c src/ui/window.h \
+    src/ui/windows.c src/ui/windows.h \
+    src/ui/muc_window.c src/ui/muc_window.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
@@ -65,15 +67,21 @@ test_sources = \
 	src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-    tests/ui/mock_ui.c \
-    tests/xmpp/mock_xmpp.c \
+    src/plugins/plugins.h src/plugins/plugins.c \
+    src/plugins/api.h src/plugins/api.c \
+    src/plugins/callbacks.h src/plugins/callbacks.c \
+    src/plugins/c_plugins.h src/plugins/c_plugins.c \
+    src/plugins/c_api.h src/plugins/c_api.c \
+    tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
+    tests/ui/mock_ui.h tests/ui/mock_ui.c \
+    tests/config/mock_accounts.h tests/config/mock_accounts.c \
     tests/log/mock_log.c \
-    tests/config/mock_accounts.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
 	tests/test_cmd_connect.c \
 	tests/test_cmd_account.c \
 	tests/test_cmd_rooms.c \
+	tests/test_cmd_sub.c \
 	tests/test_history.c \
 	tests/test_jid.c \
 	tests/test_parser.c \
@@ -99,28 +107,34 @@ git_sources = \
 
 if BUILD_PYTHON_API
 with_python_sources = $(core_sources) $(python_sources)
+tests_with_python_sources = $(test_sources) $(python_sources)
 else
 with_python_sources = $(core_sources)
+tests_with_python_sources = $(test_sources)
 endif
 
 if BUILD_RUBY_API
 with_ruby_sources = $(with_python_sources) $(ruby_sources)
+tests_with_ruby_sources = $(tests_with_python_sources) $(ruby_sources)
 else
 with_ruby_sources = $(with_python_sources)
+tests_with_ruby_sources = $(tests_with_python_sources)
 endif
 
 if BUILD_LUA_API
 with_lua_sources = $(with_ruby_sources) $(lua_sources)
+tests_with_lua_sources = $(tests_with_ruby_sources) $(lua_sources)
 else
 with_lua_sources = $(with_ruby_sources)
+test_with_lua_sources = $(tests_with_ruby_sources)
 endif
 
 if INCLUDE_GIT_VERSION
 with_git_sources = $(git_sources) $(with_lua_sources)
-tests_with_git_sources = $(git_sources) $(test_sources)
+tests_with_git_sources = $(git_sources) $(tests_with_lua_sources)
 else
 with_git_sources = $(with_lua_sources)
-tests_with_git_sources = $(test_sources)
+tests_with_git_sources = $(tests_with_lua_sources)
 endif
 
 bin_PROGRAMS = profanity

@@ -82,8 +82,8 @@ roster_request(void)
     xmpp_stanza_release(iq);
 }
 
-void
-roster_add_new(const char * const barejid, const char * const name)
+static void
+_roster_add_new(const char * const barejid, const char * const name)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -92,8 +92,8 @@ roster_add_new(const char * const barejid, const char * const name)
     xmpp_stanza_release(iq);
 }
 
-void
-roster_send_remove(const char * const barejid)
+static void
+_roster_send_remove(const char * const barejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -102,8 +102,8 @@ roster_send_remove(const char * const barejid)
     xmpp_stanza_release(iq);
 }
 
-void
-roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups)
+static void
+_roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -113,8 +113,8 @@ roster_send_name_change(const char * const barejid, const char * const new_name,
     xmpp_stanza_release(iq);
 }
 
-void
-roster_send_add_to_group(const char * const group, PContact contact)
+static void
+_roster_send_add_to_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
@@ -158,8 +158,8 @@ _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     return 0;
 }
 
-void
-roster_send_remove_from_group(const char * const group, PContact contact)
+static void
+_roster_send_remove_from_group(const char * const group, PContact contact)
 {
     GSList *groups = p_contact_groups(contact);
     GSList *new_groups = NULL;
@@ -301,7 +301,7 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         char *account_name = jabber_get_account_name();
         const char *fulljid = jabber_get_fulljid();
 
-        contact_presence_t conn_presence =
+        resource_presence_t conn_presence =
             accounts_get_login_presence(account_name);
         presence_update(conn_presence, NULL, 0);
 
@@ -328,4 +328,15 @@ _get_groups_from_item(xmpp_stanza_t *item)
     }
 
     return groups;
+}
+
+void
+roster_init_module(void)
+{
+    roster_add_new = _roster_add_new;
+    roster_send_remove = _roster_send_remove;
+    roster_send_name_change = _roster_send_name_change;
+    roster_send_add_to_group = _roster_send_add_to_group;
+    roster_send_remove_from_group = _roster_send_remove_from_group;
+
 }
