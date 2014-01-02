@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.65])
 AC_INIT([profanity], [0.3.1], [boothj5web@gmail.com])
-PACKAGE_STATUS="development"
+PACKAGE_STATUS="release"
 AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
