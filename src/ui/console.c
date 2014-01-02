@@ -1280,7 +1280,7 @@ _cons_help(void)
     cons_show("/help groupchat  - List groupchat commands.");
     cons_show("/help presence   - List commands to change presence.");
     cons_show("/help roster     - List commands for manipulating your roster.");
-    cons_show("/help service    - List service discovery commands");
+    cons_show("/help service    - List service discovery commands.");
     cons_show("/help settings   - List commands for changing settings.");
     cons_show("/help other      - Other commands.");
     cons_show("/help navigation - How to navigate around Profanity.");
