@@ -551,7 +551,7 @@ static struct cmd_t command_defs[] =
 
     { "/grlog",
         cmd_grlog, parse_args, 1, 1, &cons_grlog_setting,
-        { "/grlog on|off", "Chat logging of chat rooms to file",
+        { "/grlog on|off", "Chat logging of chat rooms to file.",
         { "/grlog on|off",
           "-------------",
           "Switch chat room logging on or off.",
