@@ -20,7 +20,6 @@ autom4te.cache/
 src/config.h
 src/config.h.in
 config.status
-configure
 configure.scan
 stamp-h1
 *~
