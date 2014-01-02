@@ -34,12 +34,17 @@ AC_ARG_WITH([libxml2],
 AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 
+### Select first existing xml library among expat and libxml2
 PARSER=""
+PARSER_LIBS=""
+PARSER_CFLAGS=""
 AS_IF([test "x$with_libxml2" != xyes],
     [PKG_CHECK_MODULES([expat], [expat],
         [PARSER_CFLAGS="$expat_CFLAGS"; PARSER_LIBS="$expat_LIBS"; PARSER="expat"],
-        AS_IF([test "x$with_libxml2" = xno],
-            [AC_MSG_ERROR([expat is required but does not exist])]))
+        [AC_CHECK_LIB([expat], [XML_ParserCreate],
+            [PARSER_LIBS="-lexpat"; PARSER="expat"],
+            AS_IF([test "x$with_libxml2" = xno],
+                [AC_MSG_ERROR([expat is required but does not exist])]))])
     ])
 
 AS_IF([test "x$PARSER" = x -a "x$with_libxml2" != xno],
@@ -51,20 +56,23 @@ AS_IF([test "x$PARSER" = x -a "x$with_libxml2" != xno],
 
 AS_IF([test "x$PARSER" = x],
     [AC_MSG_ERROR([either expat or libxml2 is required for profanity])])
+AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
+LIBS="$LIBS $PARSER_LIBS"
 
+### Check for libstrophe dependencies
 AC_CHECK_LIB([resolv], [__res_query], [],
     [AC_MSG_ERROR([libresolv is required for profanity])])
-AC_CHECK_LIB([strophe], [main], [],
-    [AC_MSG_ERROR([libstrophe is required for profanity])])
 PKG_CHECK_MODULES([openssl], [openssl], [],
     [AC_MSG_ERROR([openssl is required for profanity])])
+AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
+LIBS="$LIBS $openssl_LIBS"
 
 # TODO: autodetect of XML parser libstrophe linked with
-
-PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
-    [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
-PKG_CHECK_MODULES([curl], [libcurl], [],
-    [AC_MSG_ERROR([libcurl is required for profanity])])
+CFLAGS_RESTORE="$CFLAGS"
+CFLAGS="$CFLAGS $AM_CPPFLAGS"
+AC_CHECK_LIB([strophe], [parser_new], [],
+    [AC_MSG_ERROR([libstrophe linked with $PARSER is required for profanity])])
+CFLAGS="$CFLAGS_RESTORE"
 
 ### Check for ncurses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
@@ -94,6 +102,11 @@ CFLAGS="$CFLAGS_RESTORE"
 AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
     [AC_MSG_ERROR([ncurses does not support wide characters])])
 
+### Check for other profanity dependencies
+PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
+    [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
+PKG_CHECK_MODULES([curl], [libcurl], [],
+    [AC_MSG_ERROR([libcurl is required for profanity])])
 AS_IF([test "x$enable_notifications" != xno],
     [PKG_CHECK_MODULES([libnotify], [libnotify],
         [AC_DEFINE([HAVE_LIBNOTIFY], [1], [libnotify module])],
@@ -127,10 +140,8 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
-AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS $glib_CFLAGS $curl_CFLAGS"
-AM_CPPFLAGS="$AM_CPPFLAGS $libnotify_CFLAGS $PARSER_CFLAGS"
-LIBS="$LIBS $openssl_LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
-LIBS="$LIBS $PARSER_LIBS"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
+LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
