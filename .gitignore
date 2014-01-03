@@ -31,3 +31,10 @@ bugs/
 TODO
 plugins/
 src/gitversion.c
+TAGS
+.libs/
+_configs.sed
+libprofanity.la
+libtool
+runvalgrind.sh
+src/prof_config.h
