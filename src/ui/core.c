@@ -255,7 +255,7 @@ _ui_incoming_msg(const char * const from, const char * const message,
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        window->print_incoming_message(window, tv_stamp, display_from, message);
+        window->print_incoming_message(window, tv_stamp, display_from, new_message);
         title_bar_set_typing(FALSE);
         title_bar_draw();
         status_bar_active(num);
@@ -281,7 +281,7 @@ _ui_incoming_msg(const char * const from, const char * const message,
             }
         }
 
-        window->print_incoming_message(window, tv_stamp, display_from, message);
+        window->print_incoming_message(window, tv_stamp, display_from, new_message);
     }
 
     int ui_index = num;
