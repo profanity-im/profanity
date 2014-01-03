@@ -1,14 +1,13 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.65])
 AC_INIT([profanity], [0.4.0], [boothj5web@gmail.com])
 PACKAGE_STATUS="development"
 
-## get git branch and revision if in development
+### Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then
     AM_CONDITIONAL([INCLUDE_GIT_VERSION], [true])
-    AC_DEFINE_UNQUOTED([HAVE_GIT_VERSION], [1], [Include git info])
+    AC_DEFINE([HAVE_GIT_VERSION], [1], [Include git info])
 else
     AM_CONDITIONAL([INCLUDE_GIT_VERSION], [false])
 fi
@@ -19,55 +18,118 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
-# Checks for programs.
+### Checks for programs.
 AC_PROG_CC
 
-# get canonical host
+### Get canonical host
 AC_CANONICAL_HOST
-if test "$host_os" == "cygwin"; then
-    AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])
-fi
+AS_IF([test "x$host_os" = xcygwin],
+    [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
 
-# Options
+### Options
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
+AC_ARG_ENABLE([otr],
+    [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
-    [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine indle time])])
-AC_ARG_WITH([otr],
-    [AS_HELP_STRING([--with-libotr], [enable otr entryption using libtr library])])
+    [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 
-# Checks for libraries.
-if test "x$with_libxml2" = xyes; then
-    AC_CHECK_LIB([xml2], [main], [],
-        [AC_MSG_ERROR([libxml2 is required for profanity])])
-else
-    AC_CHECK_LIB([expat], [main], [],
-        [AC_MSG_ERROR([expat is required for profanity])])
-fi
+### Select first existing xml library among expat and libxml2
+PARSER=""
+PARSER_LIBS=""
+PARSER_CFLAGS=""
+AS_IF([test "x$with_libxml2" != xyes],
+    [PKG_CHECK_MODULES([expat], [expat],
+        [PARSER_CFLAGS="$expat_CFLAGS"; PARSER_LIBS="$expat_LIBS"; PARSER="expat"],
+        [AC_CHECK_LIB([expat], [XML_ParserCreate],
+            [PARSER_LIBS="-lexpat"; PARSER="expat"],
+            AS_IF([test "x$with_libxml2" = xno],
+                [AC_MSG_ERROR([expat is required but does not exist])]))])
+    ])
 
-if test "x$enable_notifications" = xyes; then
-    AC_CHECK_LIB([notify], [main], [],
-        [AC_MSG_ERROR([libnotify is required for desktop notifications])])
-elif test "x$enable_notifications" = x; then
-    AC_CHECK_LIB([notify], [main], [],
-        [AC_MSG_NOTICE([libnotify not found, desktop notifications not supported])])
-fi
+AS_IF([test "x$PARSER" = x -a "x$with_libxml2" != xno],
+    [PKG_CHECK_MODULES([libxml2], [libxml-2.0],
+        [PARSER_CFLAGS="$libxml2_CFLAGS"; PARSER_LIBS="$libxml2_LIBS"; PARSER="libxml2"],
+        AS_IF([test "x$with_libxml2" = xyes],
+            [AC_MSG_ERROR([libxml2 is required but does not exist])]))
+    ])
 
+AS_IF([test "x$PARSER" = x],
+    [AC_MSG_ERROR([either expat or libxml2 is required for profanity])])
+AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
+LIBS="$LIBS $PARSER_LIBS"
+
+### Check for libstrophe dependencies
+AC_CHECK_LIB([resolv], [__res_query], [],
+    [AC_MSG_ERROR([libresolv is required for profanity])])
+PKG_CHECK_MODULES([openssl], [openssl], [],
+    [AC_MSG_ERROR([openssl is required for profanity])])
+AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
+LIBS="$LIBS $openssl_LIBS"
+
+# TODO: autodetect of XML parser libstrophe linked with
+CFLAGS_RESTORE="$CFLAGS"
+CFLAGS="$CFLAGS $AM_CPPFLAGS"
+AC_CHECK_LIB([strophe], [parser_new], [],
+    [AC_MSG_ERROR([libstrophe linked with $PARSER is required for profanity])])
+CFLAGS="$CFLAGS_RESTORE"
+
+### Check for ncurses library
+PKG_CHECK_MODULES([ncursesw], [ncursesw],
+    [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; NCURSES="ncursesw"],
+    [PKG_CHECK_MODULES([ncurses], [ncurses],
+        [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"; NCURSES="ncurses"],
+        [AC_MSG_ERROR([ncurses is required for profanity])])])
+AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
+LIBS="$LIBS $NCURSES_LIBS"
+
+### Check wide characters support in ncurses library
+CFLAGS_RESTORE="$CFLAGS"
+CFLAGS="$CFLAGS $NCURSES_CFLAGS"
+AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
+    [AC_LINK_IFELSE([AC_LANG_SOURCE([
+        #include <ncurses.h>
+        int main() {
+            (void)wget_wch(NULL, NULL);
+            return 0;
+        }
+        ])],
+        [ncurses_cv_wget_wch=yes],
+        [ncurses_cv_wget_wch=no])
+    ])
+CFLAGS="$CFLAGS_RESTORE"
+
+AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
+    [AC_MSG_ERROR([ncurses does not support wide characters])])
+
+### Check for other profanity dependencies
+PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
+    [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
+PKG_CHECK_MODULES([curl], [libcurl], [],
+    [AC_MSG_ERROR([libcurl is required for profanity])])
+AS_IF([test "x$enable_notifications" != xno],
+    [PKG_CHECK_MODULES([libnotify], [libnotify],
+        [AC_DEFINE([HAVE_LIBNOTIFY], [1], [libnotify module])],
+        [AS_IF([test "x$enable_notifications" = xyes],
+            [AC_MSG_ERROR([libnotify is required but does not exist])],
+            [AC_MSG_NOTICE([libnotify support will be disabled])])])])
+
+# TODO: rewrite this
 if test "x$with_xscreensaver" = xyes; then
     AC_CHECK_LIB([Xss], [main], [],
         [AC_MSG_ERROR([libXss is required for x autoaway support])])
-    AC_CHECK_LIB([X11], [main], [], 
-        [AC_MSG_NOTICE([libX11 is required for x autoaway support])])
+    AC_CHECK_LIB([X11], [main], [],
+        [AC_MSG_ERROR([libX11 is required for x autoaway support])])
 elif test "x$with_xscreensaver" = x; then
     AC_CHECK_LIB([Xss], [main], [],
         [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
-    AC_CHECK_LIB([X11], [main], [], 
+    AC_CHECK_LIB([X11], [main], [],
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
 fi
 
-if test "x$with_otr" = xyes; then
+if test "x$enable_otr" = xyes; then
     AC_CHECK_LIB([otr], [main], [],
         [AC_MSG_ERROR([libotr is required for otr encryption support])])
 elif test "x$enable_otr" = x; then
@@ -75,60 +137,37 @@ elif test "x$enable_otr" = x; then
         [AC_MSG_NOTICE([libotr not found, otr entryption support no enabled])])
 fi
 
-AC_CHECK_LIB([resolv], [main], [],
-    [AC_MSG_ERROR([libresolv is required for profanity])])
-AC_CHECK_LIB([ssl], [main], [],
-    [AC_MSG_ERROR([openssl is required for profanity])])
-AC_CHECK_LIB([strophe], [main], [],
-    [AC_MSG_ERROR([libstrophe is required for profanity])])
-AC_CHECK_LIB([ncursesw], [wget_wch], [],
-    [AC_CHECK_LIB([ncurses],[wget_wch],
-	    [AC_MSG_NOTICE([ncursesw not found but trying with ncurses instead])],
-	    [AC_MSG_ERROR([ncurses wide character support is required for profanity])])])
-AC_CHECK_LIB([glib-2.0], [main], [],
-    [AC_MSG_ERROR([glib-2.0 is required for profanity])])
-AC_CHECK_LIB([curl], [main], [],
-    [AC_MSG_ERROR([libcurl is required for profanity])])
-AC_CHECK_LIB([cmocka], [main], [],
-    [AC_MSG_NOTICE([cmocka not found, will not be able to run tests])])
+### cmocka is required only for tests, profanity shouldn't be linked with it
+### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
+PKG_CHECK_MODULES([cmocka], [cmocka], [],
+    [AC_MSG_NOTICE([cmocka is not found, will not be able to run tests])])
 
-# Checks for header files.
-AC_CHECK_HEADERS([stdlib.h string.h])
-
-# Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
+### Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
 AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
 
-# Checks for pkgconfig modules
-PKG_CHECK_MODULES([DEPS], [openssl glib-2.0 libcurl])
-
-if test "x$enable_notifications" != xno; then
-    PKG_CHECK_MODULES([NOTIFY], [libnotify], [],
-        [AC_MSG_NOTICE([libnotify module not found])])
-fi
-
-if test "x$with_otr" != xno; then
-    PKG_CHECK_MODULES([OTR], [libotr], [],
-        [AC_MSG_NOTICE([libotr module not found])])
-fi
-
-# Default parameters
+### Default parameters
 AM_CFLAGS="-Wall"
-if test "x$PACKAGE_STATUS" = xdevelopment; then
-    AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"
-fi
-LIBS="$LIBS $DEPS_LIBS $NOTIFY_LIBS $OTR_LIBS"
-
-AM_CPPFLAGS="$DEPS_CFLAGS $NOTIFY_CFLAGS $OTR_CLAGS"
+AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
+    [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
+LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
-# Checks for typedefs, structures, and compiler characteristics.
-
-# Checks for library functions.
+### Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([atexit memset strdup strstr])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
+
+echo ""
+echo "PACKAGE_STATUS : $PACKAGE_STATUS"
+echo "AM_CFLAGS      : $AM_CFLAGS"
+echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
+echo "LIBS           : $LIBS"
+echo "XML Parser     : $PARSER"
+echo ""
+echo "Now you can run \`make' to build profanity"
