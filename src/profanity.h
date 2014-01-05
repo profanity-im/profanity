@@ -31,7 +31,5 @@ void prof_run(const int disable_tls, char *log_level, char *account_name);
 void prof_handle_idle(void);
 void prof_handle_activity(void);
 void prof_handle_roster_add(const char * const barejid, const char * const name);
-void prof_handle_already_in_group(const char * const contact, const char * const group);
-void prof_handle_not_in_group(const char * const contact, const char * const group);
 
 #endif
