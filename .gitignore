@@ -35,3 +35,10 @@ plugins/
 src/gitversion.c
 *_key.txt
 *_fingerprints.txt
+TAGS
+.libs/
+_configs.sed
+libprofanity.la
+libtool
+runvalgrind.sh
+src/prof_config.h

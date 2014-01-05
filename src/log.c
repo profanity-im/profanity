@@ -131,13 +131,15 @@ void
 log_close(void)
 {
     g_time_zone_unref(tz);
-    fclose(logp);
+    if (logp != NULL) {
+        fclose(logp);
+    }
 }
 
 void
 log_msg(log_level_t level, const char * const area, const char * const msg)
 {
-    if (level >= level_filter) {
+    if (level >= level_filter && logp != NULL) {
         long result;
         dt = g_date_time_new_now(tz);
 
@@ -238,24 +240,25 @@ chat_log_chat(const gchar * const login, gchar *other,
     date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
     FILE *logp = fopen(dated_log->filename, "a");
-
-    if (direction == PROF_IN_LOG) {
-        if (strncmp(msg, "/me ", 4) == 0) {
-            fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
+    if (logp != NULL) {
+        if (direction == PROF_IN_LOG) {
+            if (strncmp(msg, "/me ", 4) == 0) {
+                fprintf(logp, "%s - *%s %s\n", date_fmt, other, msg + 4);
+            } else {
+                fprintf(logp, "%s - %s: %s\n", date_fmt, other, msg);
+            }
         } else {
-            fprintf(logp, "%s - %s: %s\n", date_fmt, other, msg);
+            if (strncmp(msg, "/me ", 4) == 0) {
+                fprintf(logp, "%s - *me %s\n", date_fmt, msg + 4);
+            } else {
+                fprintf(logp, "%s - me: %s\n", date_fmt, msg);
+            }
         }
-    } else {
-        if (strncmp(msg, "/me ", 4) == 0) {
-            fprintf(logp, "%s - *me %s\n", date_fmt, msg + 4);
-        } else {
-            fprintf(logp, "%s - me: %s\n", date_fmt, msg);
+        fflush(logp);
+        int result = fclose(logp);
+        if (result == EOF) {
+            log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
         }
-    }
-    fflush(logp);
-    int result = fclose(logp);
-    if (result == EOF) {
-        log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
     }
 
     g_free(date_fmt);
@@ -285,17 +288,18 @@ groupchat_log_chat(const gchar * const login, const gchar * const room,
     gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
     FILE *logp = fopen(dated_log->filename, "a");
+    if (logp != NULL) {
+        if (strncmp(msg, "/me ", 4) == 0) {
+            fprintf(logp, "%s - *%s %s\n", date_fmt, nick, msg + 4);
+        } else {
+            fprintf(logp, "%s - %s: %s\n", date_fmt, nick, msg);
+        }
 
-    if (strncmp(msg, "/me ", 4) == 0) {
-        fprintf(logp, "%s - *%s %s\n", date_fmt, nick, msg + 4);
-    } else {
-        fprintf(logp, "%s - %s: %s\n", date_fmt, nick, msg);
-    }
-
-    fflush(logp);
-    int result = fclose(logp);
-    if (result == EOF) {
-        log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
+        fflush(logp);
+        int result = fclose(logp);
+        if (result == EOF) {
+            log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
+        }
     }
 
     g_free(date_fmt);
