@@ -5,6 +5,7 @@
 
 #include "test_autocomplete.h"
 #include "test_common.h"
+#include "test_contact.h"
 #include "test_cmd_connect.h"
 #include "test_cmd_account.h"
 #include "test_cmd_rooms.h"
@@ -256,6 +257,31 @@ int main(int argc, char* argv[]) {
 
         unit_test(cmd_sub_shows_message_when_not_connected),
         unit_test(cmd_sub_shows_usage_when_no_arg),
+
+        unit_test(contact_in_group),
+        unit_test(contact_not_in_group),
+        unit_test(contact_name_when_name_exists),
+        unit_test(contact_jid_when_name_not_exists),
+        unit_test(contact_string_when_name_exists),
+        unit_test(contact_string_when_name_not_exists),
+        unit_test(contact_string_when_default_resource),
+        unit_test(contact_presence_offline),
+        unit_test(contact_presence_uses_highest_priority),
+        unit_test(contact_presence_chat_when_same_prioroty),
+        unit_test(contact_presence_online_when_same_prioroty),
+        unit_test(contact_presence_away_when_same_prioroty),
+        unit_test(contact_presence_xa_when_same_prioroty),
+        unit_test(contact_presence_dnd),
+        unit_test(contact_subscribed_when_to),
+        unit_test(contact_subscribed_when_both),
+        unit_test(contact_not_subscribed_when_from),
+        unit_test(contact_not_subscribed_when_no_subscription_value),
+        unit_test(contact_not_available),
+        unit_test(contact_not_available_when_highest_priority_away),
+        unit_test(contact_not_available_when_highest_priority_xa),
+        unit_test(contact_not_available_when_highest_priority_dnd),
+        unit_test(contact_available_when_highest_priority_online),
+        unit_test(contact_available_when_highest_priority_chat),
 
     };
     return run_tests(tests);

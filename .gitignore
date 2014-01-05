@@ -44,3 +44,10 @@ m4/
 *.so
 *.lo
 src/gitversion.c
+TAGS
+.libs/
+_configs.sed
+libprofanity.la
+libtool
+runvalgrind.sh
+src/prof_config.h
