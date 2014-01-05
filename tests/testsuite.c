@@ -5,6 +5,7 @@
 
 #include "test_autocomplete.h"
 #include "test_common.h"
+#include "test_contact.h"
 #include "test_cmd_connect.h"
 #include "test_cmd_account.h"
 #include "test_cmd_rooms.h"
@@ -257,6 +258,13 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_sub_shows_message_when_not_connected),
         unit_test(cmd_sub_shows_usage_when_no_arg),
 
+        unit_test(contact_in_group),
+        unit_test(contact_not_in_group),
+        unit_test(contact_name_when_name_exists),
+        unit_test(contact_jid_when_name_not_exists),
+        unit_test(contact_string_when_name_exists),
+        unit_test(contact_string_when_name_not_exists),
+        unit_test(contact_string_when_default_resource),
     };
     return run_tests(tests);
 }
