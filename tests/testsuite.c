@@ -159,8 +159,6 @@ int main(int argc, char* argv[]) {
         unit_test(add_twice_at_beginning_adds_once),
         unit_test(add_twice_in_middle_adds_once),
         unit_test(add_twice_at_end_adds_once),
-        unit_test(test_show_online_when_no_value),
-        unit_test(test_status_when_no_value),
         unit_test(find_first_exists),
         unit_test(find_second_exists),
         unit_test(find_third_exists),
