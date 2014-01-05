@@ -250,25 +250,6 @@ prof_handle_gone(const char * const from)
 }
 
 void
-prof_handle_failed_login(void)
-{
-    cons_show_error("Login failed.");
-    log_info("Login failed");
-    ui_current_page_off();
-}
-
-void
-prof_handle_lost_connection(void)
-{
-    cons_show_error("Lost connection.");
-    roster_clear();
-    muc_clear_invites();
-    chat_sessions_clear();
-    ui_disconnected();
-    ui_current_page_off();
-}
-
-void
 prof_handle_disconnect(const char * const jid)
 {
     cons_show("%s logged out successfully.", jid);

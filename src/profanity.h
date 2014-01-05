@@ -29,10 +29,7 @@
 void prof_run(const int disable_tls, char *log_level, char *account_name);
 
 void prof_handle_login_success(const char *jid, const char *altdomain);
-void prof_handle_login_account_success(char *account_name);
-void prof_handle_lost_connection(void);
 void prof_handle_disconnect(const char * const jid);
-void prof_handle_failed_login(void);
 void prof_handle_typing(char *from);
 void prof_handle_contact_online(char *contact, Resource *resource,
     GDateTime *last_activity);
@@ -40,7 +37,6 @@ void prof_handle_contact_offline(char *contact, char *show, char *status);
 void prof_handle_incoming_message(char *from, char *message, gboolean priv);
 void prof_handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     gboolean priv);
-void prof_handle_error_message(const char *from, const char *err_msg);
 void prof_handle_subscription(const char *from, jabber_subscr_t type);
 void prof_handle_roster(GSList *roster);
 void prof_handle_gone(const char * const from);

@@ -20,8 +20,10 @@
  *
  */
 
+#include "chat_session.h"
 #include "log.h"
 #include "muc.h"
+#include "roster_list.h"
 #include "ui/ui.h"
 
 void
@@ -53,5 +55,24 @@ handle_login_account_success(char *account_name)
     status_bar_refresh();
 
     accounts_free_account(account);
+}
+
+void
+handle_lost_connection(void)
+{
+    cons_show_error("Lost connection.");
+    roster_clear();
+    muc_clear_invites();
+    chat_sessions_clear();
+    ui_disconnected();
+    ui_current_page_off();
+}
+
+void
+handle_failed_login(void)
+{
+    cons_show_error("Login failed.");
+    log_info("Login failed");
+    ui_current_page_off();
 }
 

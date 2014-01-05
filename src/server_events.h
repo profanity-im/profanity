@@ -25,5 +25,7 @@
 
 void handle_error_message(const char *from, const char *err_msg);
 void handle_login_account_success(char *account_name);
+void handle_lost_connection(void);
+void handle_failed_login(void);
 
 #endif

@@ -512,7 +512,7 @@ _connection_handler(xmpp_conn_t * const conn,
         // lost connection for unkown reason
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
             log_debug("Connection handler: Lost connection for unknown reason");
-            prof_handle_lost_connection();
+            handle_lost_connection();
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
@@ -529,7 +529,7 @@ _connection_handler(xmpp_conn_t * const conn,
             log_debug("Connection handler: Login failed");
             if (reconnect_timer == NULL) {
                 log_debug("Connection handler: No reconnect timer");
-                prof_handle_failed_login();
+                handle_failed_login();
                 _connection_free_saved_account();
                 _connection_free_saved_details();
                 _connection_free_session_data();
