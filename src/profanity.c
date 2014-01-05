@@ -118,13 +118,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 }
 
 void
-prof_handle_roster_add(const char * const barejid, const char * const name)
-{
-    ui_roster_add(barejid, name);
-    ui_current_page_off();
-}
-
-void
 prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();

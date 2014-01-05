@@ -255,7 +255,15 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         GSList *groups = _get_groups_from_item(item);
 
         // update the local roster
-        roster_update(barejid, name, groups, sub, pending_out);
+        PContact contact = roster_get_contact(barejid);
+        if (contact == NULL) {
+            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
+            if (added) {
+                handle_roster_add(barejid, name);
+            }
+        } else {
+            roster_update(barejid, name, groups, sub, pending_out);
+        }
     }
 
     return 1;
@@ -289,7 +297,7 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             GSList *groups = _get_groups_from_item(item);
 
-            gboolean added = roster_add(barejid, name, groups, sub, pending_out, TRUE);
+            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", barejid);

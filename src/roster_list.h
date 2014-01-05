@@ -42,7 +42,7 @@ void roster_remove(const char * const name, const char * const barejid);
 void roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out);
 gboolean roster_add(const char * const barejid, const char * const name, GSList *groups,
-    const char * const subscription, gboolean pending_out, gboolean from_initial);
+    const char * const subscription, gboolean pending_out);
 char * roster_barejid_from_name(const char * const name);
 GSList * roster_get_contacts(void);
 gboolean roster_has_pending_subscriptions(void);
