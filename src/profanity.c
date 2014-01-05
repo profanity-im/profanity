@@ -141,18 +141,6 @@ prof_handle_roster_add(const char * const barejid, const char * const name)
 }
 
 void
-prof_handle_disconnect(const char * const jid)
-{
-    cons_show("%s logged out successfully.", jid);
-    jabber_disconnect();
-    roster_clear();
-    muc_clear_invites();
-    chat_sessions_clear();
-    ui_disconnected();
-    ui_current_page_off();
-}
-
-void
 prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();

@@ -401,7 +401,13 @@ cmd_disconnect(gchar **args, struct cmd_help_t help)
 {
     if (jabber_get_connection_status() == JABBER_CONNECTED) {
         char *jid = strdup(jabber_get_fulljid());
-        prof_handle_disconnect(jid);
+        cons_show("%s logged out successfully.", jid);
+        jabber_disconnect();
+        roster_clear();
+        muc_clear_invites();
+        chat_sessions_clear();
+        ui_disconnected();
+        ui_current_page_off();
         free(jid);
     } else {
         cons_show("You are not currently connected.");
