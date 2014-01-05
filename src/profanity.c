@@ -197,21 +197,6 @@ prof_handle_group_remove(const char * const contact,
 }
 
 void
-prof_handle_error_message(const char *from, const char *err_msg)
-{
-    ui_handle_error_message(from, err_msg);
-
-    if (g_strcmp0(err_msg, "conflict") == 0) {
-        // remove the room from muc
-        Jid *room_jid = jid_create(from);
-        if (!muc_get_roster_received(room_jid->barejid)) {
-            muc_leave_room(room_jid->barejid);
-        }
-        jid_destroy(room_jid);
-    }
-}
-
-void
 prof_handle_subscription(const char *from, jabber_subscr_t type)
 {
     switch (type) {

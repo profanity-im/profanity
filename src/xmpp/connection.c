@@ -33,6 +33,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "xmpp/bookmark.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
@@ -349,7 +350,7 @@ connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if (text_stanza != NULL) {
             err_msg = xmpp_stanza_get_text(text_stanza);
             if (err_msg != NULL) {
-                prof_handle_error_message(from, err_msg);
+                handle_error_message(from, err_msg);
                 xmpp_free(ctx, err_msg);
             }
 
@@ -364,7 +365,7 @@ connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             } else {
                 err_msg = xmpp_stanza_get_name(err_cond);
-                prof_handle_error_message(from, err_msg);
+                handle_error_message(from, err_msg);
 
                 // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
             }

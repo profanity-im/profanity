@@ -25,6 +25,7 @@ core_sources = \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
+    src/server_events.c src/server_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c \
