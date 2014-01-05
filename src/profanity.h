@@ -28,7 +28,6 @@
 
 void prof_run(const int disable_tls, char *log_level, char *account_name);
 
-void prof_handle_login_success(const char *jid, const char *altdomain);
 void prof_handle_disconnect(const char * const jid);
 void prof_handle_roster(GSList *roster);
 void prof_handle_idle(void);
