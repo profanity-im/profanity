@@ -1110,7 +1110,10 @@ cmd_roster(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        roster_change_name(jid, name);
+        const char *barejid = p_contact_barejid(contact);
+        roster_change_name(contact, name);
+        GSList *groups = p_contact_groups(contact);
+        roster_send_name_change(barejid, name, groups);
 
         if (name == NULL) {
             cons_show("Nickname for %s removed.", jid);
