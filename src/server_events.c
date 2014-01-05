@@ -76,3 +76,10 @@ handle_failed_login(void)
     ui_current_page_off();
 }
 
+void
+handle_software_version_result(const char * const jid, const char * const  presence,
+    const char * const name, const char * const version, const char * const os)
+{
+    cons_show_software_version(jid, presence, name, version, os);
+    ui_current_page_off();
+}

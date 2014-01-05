@@ -27,5 +27,7 @@ void handle_error_message(const char *from, const char *err_msg);
 void handle_login_account_success(char *account_name);
 void handle_lost_connection(void);
 void handle_failed_login(void);
+void handle_software_version_result(const char * const jid, const char * const  presence,
+    const char * const name, const char * const version, const char * const os);
 
 #endif

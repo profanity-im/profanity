@@ -35,6 +35,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
@@ -173,7 +174,7 @@ _iq_handle_version_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
 
     Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
     const char *presence = string_from_resource_presence(resource->presence);
-    prof_handle_version_result(jid, presence, name_str, version_str, os_str);
+    handle_software_version_result(jid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
 

@@ -67,9 +67,6 @@ void prof_handle_room_invite(jabber_invite_t invite_type,
     const char * const reason);
 void prof_handle_idle(void);
 void prof_handle_activity(void);
-void prof_handle_version_result(const char * const jid,
-    const char * const presence, const char * const name,
-    const char * const version, const char * const os);
 void prof_handle_room_list(GSList *rooms, const char *conference_node);
 void prof_handle_disco_items(GSList *items, const char *jid);
 void prof_handle_disco_info(const char *from, GSList *identities,
