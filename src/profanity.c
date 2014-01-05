@@ -459,20 +459,6 @@ prof_handle_activity(void)
     }
 }
 
-void
-prof_handle_room_list(GSList *rooms, const char *conference_node)
-{
-    cons_show_room_list(rooms, conference_node);
-    ui_current_page_off();
-}
-
-void
-prof_handle_disco_items(GSList *items, const char *jid)
-{
-    cons_show_disco_items(items, jid);
-    ui_current_page_off();
-}
-
 /*
  * Take a line of input and process it, return TRUE if profanity is to
  * continue, FALSE otherwise

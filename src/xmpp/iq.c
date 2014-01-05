@@ -559,9 +559,9 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     }
 
     if (g_strcmp0(id, "confreq") == 0) {
-        prof_handle_room_list(items, from);
+        handle_room_list(items, from);
     } else if (g_strcmp0(id, "discoitemsreq") == 0) {
-        prof_handle_disco_items(items, from);
+        handle_disco_items(items, from);
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);

@@ -90,3 +90,17 @@ handle_disco_info(const char *from, GSList *identities, GSList *features)
     cons_show_disco_info(from, identities, features);
     ui_current_page_off();
 }
+
+void
+handle_room_list(GSList *rooms, const char *conference_node)
+{
+    cons_show_room_list(rooms, conference_node);
+    ui_current_page_off();
+}
+
+void
+handle_disco_items(GSList *items, const char *jid)
+{
+    cons_show_disco_items(items, jid);
+    ui_current_page_off();
+}
