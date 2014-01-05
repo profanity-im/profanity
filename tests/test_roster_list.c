@@ -149,28 +149,6 @@ void add_twice_at_end_adds_once(void **state)
     roster_free();
 }
 
-void test_show_online_when_no_value(void **state)
-{
-    roster_init();
-    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
-    GSList *list = roster_get_contacts();
-    PContact james = list->data;
-
-    assert_string_equal("offline", p_contact_presence(james));
-    roster_free();
-}
-
-void test_status_when_no_value(void **state)
-{
-    roster_init();
-    roster_add("James", NULL, NULL, NULL, FALSE, TRUE);
-    GSList *list = roster_get_contacts();
-    PContact james = list->data;
-
-    assert_null(p_contact_status(james));
-    roster_free();
-}
-
 void find_first_exists(void **state)
 {
     roster_init();

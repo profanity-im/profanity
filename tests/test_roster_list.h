@@ -8,8 +8,6 @@ void first_three_elements_correct(void **state);
 void add_twice_at_beginning_adds_once(void **state);
 void add_twice_in_middle_adds_once(void **state);
 void add_twice_at_end_adds_once(void **state);
-void test_show_online_when_no_value(void **state);
-void test_status_when_no_value(void **state);
 void find_first_exists(void **state);
 void find_second_exists(void **state);
 void find_third_exists(void **state);
