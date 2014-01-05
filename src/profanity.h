@@ -28,7 +28,6 @@
 
 void prof_run(const int disable_tls, char *log_level, char *account_name);
 
-void prof_handle_roster(GSList *roster);
 void prof_handle_idle(void);
 void prof_handle_activity(void);
 void prof_handle_duck_help(const char * const result);
