@@ -26,7 +26,4 @@
 void roster_add_handlers(void);
 void roster_request(void);
 
-void roster_update(const char * const barejid, const char * const name,
-    GSList *groups, const char * const subscription, gboolean pending_out);
-
 #endif

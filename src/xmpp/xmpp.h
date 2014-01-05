@@ -141,7 +141,7 @@ void (*bookmark_autocomplete_reset)(void);
 void (*roster_send_name_change)(const char * const barejid, const char * const new_name, GSList *groups);
 void (*roster_send_add_to_group)(const char * const group, PContact contact);
 void (*roster_send_remove_from_group)(const char * const group, PContact contact);
-void (*roster_add_new)(const char * const barejid, const char * const name);
+void (*roster_send_add_new)(const char * const barejid, const char * const name);
 void (*roster_send_remove)(const char * const barejid);
 
 #endif

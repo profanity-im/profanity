@@ -1066,7 +1066,7 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         char *jid = args[1];
         char *name = args[2];
 
-        roster_add_new(jid, name);
+        roster_send_add_new(jid, name);
 
         return TRUE;
     }

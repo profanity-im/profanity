@@ -82,7 +82,7 @@ roster_request(void)
 }
 
 static void
-_roster_add_new(const char * const barejid, const char * const name)
+_roster_send_add_new(const char * const barejid, const char * const name)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -327,7 +327,7 @@ _get_groups_from_item(xmpp_stanza_t *item)
 void
 roster_init_module(void)
 {
-    roster_add_new = _roster_add_new;
+    roster_send_add_new = _roster_send_add_new;
     roster_send_remove = _roster_send_remove;
     roster_send_name_change = _roster_send_name_change;
     roster_send_add_to_group = _roster_send_add_to_group;
