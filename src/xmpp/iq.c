@@ -35,6 +35,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
@@ -173,7 +174,7 @@ _iq_handle_version_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
 
     Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
     const char *presence = string_from_resource_presence(resource->presence);
-    prof_handle_version_result(jid, presence, name_str, version_str, os_str);
+    handle_software_version_result(jid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
 
@@ -402,7 +403,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
                 child = xmpp_stanza_get_next(child);
             }
 
-            prof_handle_disco_info(from, identities, features);
+            handle_disco_info(from, identities, features);
             g_slist_free_full(features, free);
             g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
         }
@@ -558,9 +559,9 @@ _iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     }
 
     if (g_strcmp0(id, "confreq") == 0) {
-        prof_handle_room_list(items, from);
+        handle_room_list(items, from);
     } else if (g_strcmp0(id, "discoitemsreq") == 0) {
-        prof_handle_disco_items(items, from);
+        handle_disco_items(items, from);
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);

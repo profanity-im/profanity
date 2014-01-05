@@ -402,7 +402,13 @@ cmd_disconnect(gchar **args, struct cmd_help_t help)
 {
     if (jabber_get_connection_status() == JABBER_CONNECTED) {
         char *jid = strdup(jabber_get_fulljid());
-        prof_handle_disconnect(jid);
+        cons_show("%s logged out successfully.", jid);
+        jabber_disconnect();
+        roster_clear();
+        muc_clear_invites();
+        chat_sessions_clear();
+        ui_disconnected();
+        ui_current_page_off();
         free(jid);
     } else {
         cons_show("You are not currently connected.");
@@ -1004,7 +1010,13 @@ cmd_group(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        roster_add_to_group(group, barejid);
+        if (p_contact_in_group(pcontact, group)) {
+            const char *display_name = p_contact_name_or_jid(pcontact);
+            ui_contact_already_in_group(display_name, group);
+            ui_current_page_off();
+        } else {
+            roster_send_add_to_group(group, pcontact);
+        }
 
         return TRUE;
     }
@@ -1030,7 +1042,13 @@ cmd_group(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        roster_remove_from_group(group, barejid);
+        if (!p_contact_in_group(pcontact, group)) {
+            const char *display_name = p_contact_name_or_jid(pcontact);
+            ui_contact_not_in_group(display_name, group);
+            ui_current_page_off();
+        } else {
+            roster_send_remove_from_group(group, pcontact);
+        }
 
         return TRUE;
     }
@@ -1067,7 +1085,7 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         char *jid = args[1];
         char *name = args[2];
 
-        roster_add_new(jid, name);
+        roster_send_add_new(jid, name);
 
         return TRUE;
     }
@@ -1105,7 +1123,10 @@ cmd_roster(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        roster_change_name(jid, name);
+        const char *barejid = p_contact_barejid(contact);
+        roster_change_name(contact, name);
+        GSList *groups = p_contact_groups(contact);
+        roster_send_name_change(barejid, name, groups);
 
         if (name == NULL) {
             cons_show("Nickname for %s removed.", jid);
