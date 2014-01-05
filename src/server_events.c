@@ -23,6 +23,7 @@
 #include "chat_session.h"
 #include "log.h"
 #include "muc.h"
+#include "config/preferences.h"
 #include "roster_list.h"
 #include "ui/ui.h"
 
@@ -102,5 +103,110 @@ void
 handle_disco_items(GSList *items, const char *jid)
 {
     cons_show_disco_items(items, jid);
+    ui_current_page_off();
+}
+
+void
+handle_room_invite(jabber_invite_t invite_type,
+    const char * const invitor, const char * const room,
+    const char * const reason)
+{
+    Jid *room_jid = jid_create(room);
+    if (!muc_room_is_active(room_jid) && !muc_invites_include(room)) {
+        cons_show_room_invite(invitor, room, reason);
+        muc_add_invite(room);
+        ui_current_page_off();
+    }
+    jid_destroy(room_jid);
+}
+
+void
+handle_room_broadcast(const char *const room_jid,
+    const char * const message)
+{
+    ui_room_broadcast(room_jid, message);
+    ui_current_page_off();
+}
+
+void
+handle_room_subject(const char * const room_jid, const char * const subject)
+{
+    ui_room_subject(room_jid, subject);
+    ui_current_page_off();
+}
+
+void
+handle_room_history(const char * const room_jid, const char * const nick,
+    GTimeVal tv_stamp, const char * const message)
+{
+    ui_room_history(room_jid, nick, tv_stamp, message);
+    ui_current_page_off();
+}
+
+void
+handle_room_message(const char * const room_jid, const char * const nick,
+    const char * const message)
+{
+    ui_room_message(room_jid, nick, message);
+    ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_GRLOG)) {
+        Jid *jid = jid_create(jabber_get_fulljid());
+        groupchat_log_chat(jid->barejid, room_jid, nick, message);
+        jid_destroy(jid);
+    }
+}
+
+void
+handle_duck_result(const char * const result)
+{
+    ui_duck_result(result);
+    ui_current_page_off();
+}
+
+void
+handle_incoming_message(char *from, char *message, gboolean priv)
+{
+    ui_incoming_msg(from, message, NULL, priv);
+    ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
+}
+
+void
+handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
+    gboolean priv)
+{
+    ui_incoming_msg(from, message, &tv_stamp, priv);
+    ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, &tv_stamp);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
+}
+
+void
+handle_typing(char *from)
+{
+    ui_contact_typing(from);
+    ui_current_page_off();
+}
+
+void
+handle_gone(const char * const from)
+{
+    ui_recipient_gone(from);
     ui_current_page_off();
 }

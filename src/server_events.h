@@ -32,5 +32,21 @@ void handle_software_version_result(const char * const jid, const char * const  
 void handle_disco_info(const char *from, GSList *identities, GSList *features);
 void handle_room_list(GSList *rooms, const char *conference_node);
 void handle_disco_items(GSList *items, const char *jid);
+void handle_room_invite(jabber_invite_t invite_type,
+    const char * const invitor, const char * const room,
+    const char * const reason);
+void handle_room_broadcast(const char *const room_jid,
+    const char * const message);
+void handle_room_subject(const char * const room_jid, const char * const subject);
+void handle_room_history(const char * const room_jid, const char * const nick,
+    GTimeVal tv_stamp, const char * const message);
+void handle_room_message(const char * const room_jid, const char * const nick,
+    const char * const message);
+void handle_duck_result(const char * const result);
+void handle_incoming_message(char *from, char *message, gboolean priv);
+void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
+    gboolean priv);
+void handle_typing(char *from);
+void handle_gone(const char * const from);
 
 #endif

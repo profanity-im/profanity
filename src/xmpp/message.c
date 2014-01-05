@@ -30,6 +30,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "xmpp/connection.h"
 #include "xmpp/message.h"
 #include "xmpp/roster.h"
@@ -222,7 +223,7 @@ _conference_message_handler(xmpp_conn_t * const conn,
             reason = xmpp_stanza_get_text(reason_st);
         }
 
-        prof_handle_room_invite(INVITE_MEDIATED, invitor, room, reason);
+        handle_room_invite(INVITE_MEDIATED, invitor, room, reason);
         jid_destroy(jidp);
         if (reason != NULL) {
             xmpp_free(ctx, reason);
@@ -243,7 +244,7 @@ _conference_message_handler(xmpp_conn_t * const conn,
 
         reason = xmpp_stanza_get_attribute(x_groupchat, STANZA_ATTR_REASON);
 
-        prof_handle_room_invite(INVITE_DIRECT, invitor, room, reason);
+        handle_room_invite(INVITE_DIRECT, invitor, room, reason);
 
         jid_destroy(jidp);
 
@@ -253,7 +254,7 @@ _conference_message_handler(xmpp_conn_t * const conn,
         if (body != NULL) {
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
-                prof_handle_room_broadcast(from, message);
+                handle_room_broadcast(from, message);
                 xmpp_free(ctx, message);
             }
         }
@@ -279,7 +280,7 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
         if (subject != NULL) {
             message = xmpp_stanza_get_text(subject);
             if (message != NULL) {
-                prof_handle_room_subject(jid->barejid, message);
+                handle_room_subject(jid->barejid, message);
                 xmpp_free(ctx, message);
             }
 
@@ -292,7 +293,7 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
             if (body != NULL) {
                 message = xmpp_stanza_get_text(body);
                 if (message != NULL) {
-                    prof_handle_room_broadcast(room_jid, message);
+                    handle_room_broadcast(room_jid, message);
                     xmpp_free(ctx, message);
                 }
             }
@@ -326,9 +327,9 @@ _groupchat_message_handler(xmpp_conn_t * const conn,
         message = xmpp_stanza_get_text(body);
         if (message != NULL) {
             if (delayed) {
-                prof_handle_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
+                handle_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
             } else {
-                prof_handle_room_message(jid->barejid, jid->resourcepart, message);
+                handle_room_message(jid->barejid, jid->resourcepart, message);
             }
             xmpp_free(ctx, message);
         }
@@ -353,7 +354,7 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if (body != NULL) {
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
-                prof_handle_duck_result(message);
+                handle_duck_result(message);
                 xmpp_free(ctx, message);
             }
         }
@@ -373,9 +374,9 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
                 if (delayed) {
-                    prof_handle_delayed_message(jid->str, message, tv_stamp, TRUE);
+                    handle_delayed_message(jid->str, message, tv_stamp, TRUE);
                 } else {
-                    prof_handle_incoming_message(jid->str, message, TRUE);
+                    handle_incoming_message(jid->str, message, TRUE);
                 }
                 xmpp_free(ctx, message);
             }
@@ -407,10 +408,10 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if (recipient_supports && (!delayed)) {
             if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
                 if (prefs_get_boolean(PREF_NOTIFY_TYPING) || prefs_get_boolean(PREF_INTYPE)) {
-                    prof_handle_typing(jid->barejid);
+                    handle_typing(jid->barejid);
                 }
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
-                prof_handle_gone(jid->barejid);
+                handle_gone(jid->barejid);
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) {
                 // do something
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
@@ -426,9 +427,9 @@ _chat_message_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
                 if (delayed) {
-                    prof_handle_delayed_message(jid->barejid, message, tv_stamp, FALSE);
+                    handle_delayed_message(jid->barejid, message, tv_stamp, FALSE);
                 } else {
-                    prof_handle_incoming_message(jid->barejid, message, FALSE);
+                    handle_incoming_message(jid->barejid, message, FALSE);
                 }
                 xmpp_free(ctx, message);
             }
