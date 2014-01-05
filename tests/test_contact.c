@@ -100,3 +100,16 @@ void contact_string_when_default_resource(void **state)
     p_contact_free(contact);
     free(str);
 }
+
+void contact_presence_offline(void **state)
+{
+    PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
+        "is offline", FALSE);
+
+    const char *presence = p_contact_presence(contact);
+
+    assert_string_equal("offline", presence);
+
+    p_contact_free(contact);
+
+}

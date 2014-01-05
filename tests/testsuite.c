@@ -265,6 +265,7 @@ int main(int argc, char* argv[]) {
         unit_test(contact_string_when_name_exists),
         unit_test(contact_string_when_name_not_exists),
         unit_test(contact_string_when_default_resource),
+        unit_test(contact_presence_offline),
     };
     return run_tests(tests);
 }

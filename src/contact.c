@@ -171,9 +171,9 @@ p_contact_create_display_string(const PContact contact, const char * const resou
 {
     GString *result_str = g_string_new("");
 
-    // use nickname if exists                                                         
-    const char *display_name = p_contact_name_or_jid(contact);                   
-    g_string_append(result_str, display_name);   
+    // use nickname if exists
+    const char *display_name = p_contact_name_or_jid(contact);
+    g_string_append(result_str, display_name);
 
     // add resource if not default provided by profanity
     if (strcmp(resource, "__prof_default") != 0) {

@@ -5,3 +5,4 @@ void contact_jid_when_name_not_exists(void **state);
 void contact_string_when_name_exists(void **state);
 void contact_string_when_name_not_exists(void **state);
 void contact_string_when_default_resource(void **state);
+void contact_presence_offline(void **state);
