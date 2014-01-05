@@ -66,5 +66,10 @@ void handle_room_member_offline(const char * const room, const char * const nick
     const char * const show, const char * const status);
 void handle_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick);
+void handle_group_add(const char * const contact,
+    const char * const group);
+void handle_group_remove(const char * const contact,
+    const char * const group);
+void handle_roster_remove(const char * const barejid);
 
 #endif

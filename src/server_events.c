@@ -343,3 +343,26 @@ handle_room_member_nick_change(const char * const room,
     ui_room_member_nick_change(room, old_nick, nick);
     ui_current_page_off();
 }
+
+void
+handle_group_add(const char * const contact,
+    const char * const group)
+{
+    ui_group_added(contact, group);
+    ui_current_page_off();
+}
+
+void
+handle_group_remove(const char * const contact,
+    const char * const group)
+{
+    ui_group_removed(contact, group);
+    ui_current_page_off();
+}
+
+void
+handle_roster_remove(const char * const barejid)
+{
+    ui_roster_remove(barejid);
+    ui_current_page_off();
+}

@@ -134,32 +134,9 @@ prof_handle_not_in_group(const char * const contact,
 }
 
 void
-prof_handle_group_add(const char * const contact,
-    const char * const group)
-{
-    ui_group_added(contact, group);
-    ui_current_page_off();
-}
-
-void
-prof_handle_group_remove(const char * const contact,
-    const char * const group)
-{
-    ui_group_removed(contact, group);
-    ui_current_page_off();
-}
-
-void
 prof_handle_roster_add(const char * const barejid, const char * const name)
 {
     ui_roster_add(barejid, name);
-    ui_current_page_off();
-}
-
-void
-prof_handle_roster_remove(const char * const barejid)
-{
-    ui_roster_remove(barejid);
     ui_current_page_off();
 }
 

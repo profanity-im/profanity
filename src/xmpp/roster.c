@@ -29,6 +29,7 @@
 
 #include "log.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "tools/autocomplete.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
@@ -149,7 +150,7 @@ _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     if (userdata != NULL) {
         GroupData *data = userdata;
-        prof_handle_group_add(data->name, data->group);
+        handle_group_add(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -196,7 +197,7 @@ _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     if (userdata != NULL) {
         GroupData *data = userdata;
-        prof_handle_group_remove(data->name, data->group);
+        handle_group_remove(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -240,7 +241,7 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         roster_remove(name, barejid);
 
-        prof_handle_roster_remove(barejid);
+        handle_roster_remove(barejid);
 
     // otherwise update local roster
     } else {
