@@ -243,22 +243,6 @@ prof_handle_roster_remove(const char * const barejid)
 }
 
 void
-prof_handle_login_account_success(char *account_name)
-{
-    ProfAccount *account = accounts_get_account(account_name);
-    resource_presence_t resource_presence = accounts_get_login_presence(account->name);
-    contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
-    cons_show_login_success(account);
-    title_bar_set_status(contact_presence);
-    log_info("%s logged in successfully", account->jid);
-    ui_current_page_off();
-    status_bar_print_message(account->jid);
-    status_bar_refresh();
-
-    accounts_free_account(account);
-}
-
-void
 prof_handle_gone(const char * const from)
 {
     ui_recipient_gone(from);

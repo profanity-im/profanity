@@ -463,7 +463,7 @@ _connection_handler(xmpp_conn_t * const conn,
         // logged in with account
         if (saved_account.name != NULL) {
             log_debug("Connection handler: logged in with account name: %s", saved_account.name);
-            prof_handle_login_account_success(saved_account.name);
+            handle_login_account_success(saved_account.name);
 
         // logged in without account, use details to create new account
         } else {
@@ -471,7 +471,7 @@ _connection_handler(xmpp_conn_t * const conn,
             accounts_add(saved_details.name, saved_details.altdomain);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
-            prof_handle_login_account_success(saved_details.name);
+            handle_login_account_success(saved_details.name);
             saved_account.name = strdup(saved_details.name);
             saved_account.passwd = strdup(saved_details.passwd);
 
