@@ -20,6 +20,8 @@
  *
  */
 
+#include <string.h>
+
 #include "chat_session.h"
 #include "log.h"
 #include "muc.h"
@@ -208,5 +210,136 @@ void
 handle_gone(const char * const from)
 {
     ui_recipient_gone(from);
+    ui_current_page_off();
+}
+
+void
+handle_subscription(const char *from, jabber_subscr_t type)
+{
+    switch (type) {
+    case PRESENCE_SUBSCRIBE:
+        /* TODO: auto-subscribe if needed */
+        cons_show("Received authorization request from %s", from);
+        log_info("Received authorization request from %s", from);
+        ui_print_system_msg_from_recipient(from, "Authorization request, type '/sub allow' to accept or '/sub deny' to reject");
+        ui_current_page_off();
+        if (prefs_get_boolean(PREF_NOTIFY_SUB)) {
+            notify_subscription(from);
+        }
+        break;
+    case PRESENCE_SUBSCRIBED:
+        cons_show("Subscription received from %s", from);
+        log_info("Subscription received from %s", from);
+        ui_print_system_msg_from_recipient(from, "Subscribed");
+        ui_current_page_off();
+        break;
+    case PRESENCE_UNSUBSCRIBED:
+        cons_show("%s deleted subscription", from);
+        log_info("%s deleted subscription", from);
+        ui_print_system_msg_from_recipient(from, "Unsubscribed");
+        ui_current_page_off();
+        break;
+    default:
+        /* unknown type */
+        break;
+    }
+}
+
+void
+handle_contact_offline(char *contact, char *resource, char *status)
+{
+    gboolean updated = roster_contact_offline(contact, resource, status);
+
+    if (resource != NULL && updated && prefs_get_boolean(PREF_STATUSES)) {
+        Jid *jid = jid_create_from_bare_and_resource(contact, resource);
+        PContact result = roster_get_contact(contact);
+        if (p_contact_subscription(result) != NULL) {
+            if (strcmp(p_contact_subscription(result), "none") != 0) {
+                ui_contact_offline(jid->fulljid, "offline", status);
+                ui_current_page_off();
+            }
+        }
+        jid_destroy(jid);
+    }
+}
+
+void
+handle_contact_online(char *contact, Resource *resource,
+    GDateTime *last_activity)
+{
+    gboolean updated = roster_update_presence(contact, resource, last_activity);
+
+    if (updated && prefs_get_boolean(PREF_STATUSES)) {
+        PContact result = roster_get_contact(contact);
+        if (p_contact_subscription(result) != NULL) {
+            if (strcmp(p_contact_subscription(result), "none") != 0) {
+                const char *show = string_from_resource_presence(resource->presence);
+                ui_contact_online(contact, resource->name, show, resource->status, last_activity);
+                ui_current_page_off();
+            }
+        }
+    }
+}
+
+void
+handle_leave_room(const char * const room)
+{
+    muc_leave_room(room);
+}
+
+void
+handle_room_nick_change(const char * const room,
+    const char * const nick)
+{
+    ui_room_nick_change(room, nick);
+    ui_current_page_off();
+}
+
+void
+handle_room_roster_complete(const char * const room)
+{
+    muc_set_roster_received(room);
+    GList *roster = muc_get_roster(room);
+    ui_room_roster(room, roster, NULL);
+    ui_current_page_off();
+}
+
+void
+handle_room_member_presence(const char * const room,
+    const char * const nick, const char * const show,
+    const char * const status, const char * const caps_str)
+{
+    gboolean updated = muc_add_to_roster(room, nick, show, status, caps_str);
+
+    if (updated) {
+        ui_room_member_presence(room, nick, show, status);
+        ui_current_page_off();
+    }
+}
+
+void
+handle_room_member_online(const char * const room, const char * const nick,
+    const char * const show, const char * const status,
+    const char * const caps_str)
+{
+    muc_add_to_roster(room, nick, show, status, caps_str);
+    ui_room_member_online(room, nick, show, status);
+    ui_current_page_off();
+}
+
+void
+handle_room_member_offline(const char * const room, const char * const nick,
+    const char * const show, const char * const status)
+{
+    muc_remove_from_roster(room, nick);
+    ui_room_member_offline(room, nick);
+    ui_current_page_off();
+}
+
+void
+handle_room_member_nick_change(const char * const room,
+    const char * const old_nick, const char * const nick)
+{
+    ui_room_member_nick_change(room, old_nick, nick);
     ui_current_page_off();
 }

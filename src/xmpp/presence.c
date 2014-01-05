@@ -32,6 +32,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
@@ -336,7 +337,7 @@ _unsubscribed_handler(xmpp_conn_t * const conn,
     Jid *from_jid = jid_create(from);
     log_debug("Unsubscribed presence handler fired for %s", from);
 
-    prof_handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
+    handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -352,7 +353,7 @@ _subscribed_handler(xmpp_conn_t * const conn,
     Jid *from_jid = jid_create(from);
     log_debug("Subscribed presence handler fired for %s", from);
 
-    prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
+    handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -372,7 +373,7 @@ _subscribe_handler(xmpp_conn_t * const conn,
         return 1;
     }
 
-    prof_handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
+    handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
     autocomplete_add(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -400,11 +401,11 @@ _unavailable_handler(xmpp_conn_t * const conn,
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
         if (from_jid->resourcepart != NULL) {
-            prof_handle_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
+            handle_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
 
         // hack for servers that do not send full jid with unavailable presence
         } else {
-            prof_handle_contact_offline(from_jid->barejid, "__prof_default", status_str);
+            handle_contact_offline(from_jid->barejid, "__prof_default", status_str);
         }
     } else {
         if (from_jid->resourcepart != NULL) {
@@ -499,7 +500,7 @@ _available_handler(xmpp_conn_t * const conn,
 
     // contact presence
     } else {
-        prof_handle_contact_online(from_jid->barejid, resource,
+        handle_contact_online(from_jid->barejid, resource,
             last_activity);
     }
 
@@ -615,17 +616,17 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             if (new_nick != NULL) {
                 muc_set_room_pending_nick_change(room, new_nick);
             } else {
-                prof_handle_leave_room(room);
+                handle_leave_room(room);
             }
 
         // handle self nick change
         } else if (muc_is_room_pending_nick_change(room)) {
             muc_complete_room_nick_change(room, nick);
-            prof_handle_room_nick_change(room, nick);
+            handle_room_nick_change(room, nick);
 
         // handle roster complete
         } else if (!muc_get_roster_received(room)) {
-            prof_handle_room_roster_complete(room);
+            handle_room_roster_complete(room);
 
         }
 
@@ -653,7 +654,7 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                     free(new_nick);
                 }
             } else {
-                prof_handle_room_member_offline(room, nick, "offline", status_str);
+                handle_room_member_offline(room, nick, "offline", status_str);
             }
         } else {
             char *show_str = stanza_get_show(stanza, "online");
@@ -664,13 +665,13 @@ _room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
                 if (old_nick != NULL) {
                     muc_add_to_roster(room, nick, show_str, status_str, caps_key);
-                    prof_handle_room_member_nick_change(room, old_nick, nick);
+                    handle_room_member_nick_change(room, old_nick, nick);
                     free(old_nick);
                 } else {
                     if (!muc_nick_in_roster(room, nick)) {
-                        prof_handle_room_member_online(room, nick, show_str, status_str, caps_key);
+                        handle_room_member_online(room, nick, show_str, status_str, caps_key);
                     } else {
-                        prof_handle_room_member_presence(room, nick, show_str, status_str, caps_key);
+                        handle_room_member_presence(room, nick, show_str, status_str, caps_key);
                     }
                 }
             }

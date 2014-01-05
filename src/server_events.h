@@ -48,5 +48,23 @@ void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     gboolean priv);
 void handle_typing(char *from);
 void handle_gone(const char * const from);
+void handle_subscription(const char *from, jabber_subscr_t type);
+void handle_contact_offline(char *contact, char *resource, char *status);
+void handle_contact_online(char *contact, Resource *resource,
+    GDateTime *last_activity);
+void handle_leave_room(const char * const room);
+void handle_room_nick_change(const char * const room,
+    const char * const nick);
+void handle_room_roster_complete(const char * const room);
+void handle_room_member_presence(const char * const room,
+    const char * const nick, const char * const show,
+    const char * const status, const char * const caps_str);
+void handle_room_member_online(const char * const room, const char * const nick,
+    const char * const show, const char * const status,
+    const char * const caps_str);
+void handle_room_member_offline(const char * const room, const char * const nick,
+    const char * const show, const char * const status);
+void handle_room_member_nick_change(const char * const room,
+    const char * const old_nick, const char * const nick);
 
 #endif

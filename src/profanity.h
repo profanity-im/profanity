@@ -30,25 +30,7 @@ void prof_run(const int disable_tls, char *log_level, char *account_name);
 
 void prof_handle_login_success(const char *jid, const char *altdomain);
 void prof_handle_disconnect(const char * const jid);
-void prof_handle_contact_online(char *contact, Resource *resource,
-    GDateTime *last_activity);
-void prof_handle_contact_offline(char *contact, char *show, char *status);
-void prof_handle_subscription(const char *from, jabber_subscr_t type);
 void prof_handle_roster(GSList *roster);
-void prof_handle_room_roster_complete(const char * const room);
-void prof_handle_room_member_online(const char * const room,
-    const char * const nick, const char * const show, const char * const status,
-    const char * const caps_str);
-void prof_handle_room_member_offline(const char * const room,
-    const char * const nick, const char * const show, const char * const status);
-void prof_handle_room_member_presence(const char * const room,
-    const char * const nick, const char * const show,
-    const char * const status, const char * const caps_str);
-void prof_handle_leave_room(const char * const room);
-void prof_handle_room_member_nick_change(const char * const room,
-    const char * const old_nick, const char * const nick);
-void prof_handle_room_nick_change(const char * const room,
-    const char * const nick);
 void prof_handle_idle(void);
 void prof_handle_activity(void);
 void prof_handle_duck_help(const char * const result);
