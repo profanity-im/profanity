@@ -403,7 +403,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
                 child = xmpp_stanza_get_next(child);
             }
 
-            prof_handle_disco_info(from, identities, features);
+            handle_disco_info(from, identities, features);
             g_slist_free_full(features, free);
             g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
         }

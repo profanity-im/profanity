@@ -83,3 +83,10 @@ handle_software_version_result(const char * const jid, const char * const  prese
     cons_show_software_version(jid, presence, name, version, os);
     ui_current_page_off();
 }
+
+void
+handle_disco_info(const char *from, GSList *identities, GSList *features)
+{
+    cons_show_disco_info(from, identities, features);
+    ui_current_page_off();
+}

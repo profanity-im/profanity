@@ -473,13 +473,6 @@ prof_handle_disco_items(GSList *items, const char *jid)
     ui_current_page_off();
 }
 
-void
-prof_handle_disco_info(const char *from, GSList *identities, GSList *features)
-{
-    cons_show_disco_info(from, identities, features);
-    ui_current_page_off();
-}
-
 /*
  * Take a line of input and process it, return TRUE if profanity is to
  * continue, FALSE otherwise
