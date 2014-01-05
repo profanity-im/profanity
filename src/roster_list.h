@@ -50,8 +50,8 @@ char * roster_find_contact(char *search_str);
 char * roster_find_resource(char *search_str);
 GSList * roster_get_group(const char * const group);
 GSList * roster_get_groups(void);
-void roster_add_to_group(const char * const group, const char * const barejid);
-void roster_remove_from_group(const char * const group, const char * const barejid);
+void roster_add_to_group(const char * const group, PContact contact);
+void roster_remove_from_group(const char * const group, PContact contact);
 char * roster_find_group(char *search_str);
 char * roster_find_jid(char *search_str);
 

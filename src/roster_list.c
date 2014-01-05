@@ -31,7 +31,6 @@
 #include "jid.h"
 #include "tools/autocomplete.h"
 #include "profanity.h"
-#include "xmpp/xmpp.h"
 
 // nicknames
 static Autocomplete name_ac;
@@ -336,41 +335,32 @@ roster_get_group(const char * const group)
 }
 
 void
-roster_add_to_group(const char * const group, const char * const barejid)
+roster_add_to_group(const char * const group, PContact contact)
 {
-    PContact contact = g_hash_table_lookup(contacts, barejid);
+    assert(contact != NULL);
 
-    if (contact != NULL) {
-        if (p_contact_in_group(contact, group)) {
-            if (p_contact_name(contact) != NULL) {
-                prof_handle_already_in_group(p_contact_name(contact), group);
-            } else {
-                prof_handle_already_in_group(p_contact_barejid(contact), group);
-            }
-            return;
+    if (p_contact_in_group(contact, group)) {
+        if (p_contact_name(contact) != NULL) {
+            prof_handle_already_in_group(p_contact_name(contact), group);
+        } else {
+            prof_handle_already_in_group(p_contact_barejid(contact), group);
         }
-
-        roster_send_add_to_group(group, contact);
-
+        return;
     }
 }
 
 void
-roster_remove_from_group(const char * const group, const char * const barejid)
+roster_remove_from_group(const char * const group, PContact contact)
 {
-    PContact contact = g_hash_table_lookup(contacts, barejid);
+    assert(contact != NULL);
 
-    if (contact != NULL) {
-        if (!p_contact_in_group(contact, group)) {
-            if (p_contact_name(contact) != NULL) {
-                prof_handle_not_in_group(p_contact_name(contact), group);
-            } else {
-                prof_handle_not_in_group(p_contact_barejid(contact), group);
-            }
-            return;
+    if (!p_contact_in_group(contact, group)) {
+        if (p_contact_name(contact) != NULL) {
+            prof_handle_not_in_group(p_contact_name(contact), group);
+        } else {
+            prof_handle_not_in_group(p_contact_barejid(contact), group);
         }
-
-        roster_send_remove_from_group(group, contact);
+        return;
     }
 }
 

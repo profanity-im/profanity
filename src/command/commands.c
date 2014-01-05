@@ -1009,7 +1009,8 @@ cmd_group(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        roster_add_to_group(group, barejid);
+        roster_add_to_group(group, pcontact);
+        roster_send_add_to_group(group, pcontact);
 
         return TRUE;
     }
@@ -1035,7 +1036,8 @@ cmd_group(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        roster_remove_from_group(group, barejid);
+        roster_remove_from_group(group, pcontact);
+        roster_send_remove_from_group(group, pcontact);
 
         return TRUE;
     }
