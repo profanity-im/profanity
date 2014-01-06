@@ -34,6 +34,7 @@
 #include "muc.h"
 #include "plugins/plugins.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "xmpp/bookmark.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
@@ -353,7 +354,7 @@ connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if (text_stanza != NULL) {
             err_msg = xmpp_stanza_get_text(text_stanza);
             if (err_msg != NULL) {
-                prof_handle_error_message(from, err_msg);
+                handle_error_message(from, err_msg);
                 xmpp_free(ctx, err_msg);
             }
 
@@ -368,7 +369,7 @@ connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             } else {
                 err_msg = xmpp_stanza_get_name(err_cond);
-                prof_handle_error_message(from, err_msg);
+                handle_error_message(from, err_msg);
 
                 // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
             }
@@ -466,7 +467,7 @@ _connection_handler(xmpp_conn_t * const conn,
         // logged in with account
         if (saved_account.name != NULL) {
             log_debug("Connection handler: logged in with account name: %s", saved_account.name);
-            prof_handle_login_account_success(saved_account.name);
+            handle_login_account_success(saved_account.name);
 
         // logged in without account, use details to create new account
         } else {
@@ -474,7 +475,7 @@ _connection_handler(xmpp_conn_t * const conn,
             accounts_add(saved_details.name, saved_details.altdomain);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
-            prof_handle_login_account_success(saved_details.name);
+            handle_login_account_success(saved_details.name);
             saved_account.name = strdup(saved_details.name);
             saved_account.passwd = strdup(saved_details.passwd);
 
@@ -518,7 +519,7 @@ _connection_handler(xmpp_conn_t * const conn,
             char *account_name = jabber_get_account_name();
             const char *fulljid = jabber_get_fulljid();
             plugins_on_disconnect(account_name, fulljid);
-            prof_handle_lost_connection();
+            handle_lost_connection();
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
@@ -535,7 +536,7 @@ _connection_handler(xmpp_conn_t * const conn,
             log_debug("Connection handler: Login failed");
             if (reconnect_timer == NULL) {
                 log_debug("Connection handler: No reconnect timer");
-                prof_handle_failed_login();
+                handle_failed_login();
                 _connection_free_saved_account();
                 _connection_free_saved_details();
                 _connection_free_session_data();

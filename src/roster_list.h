@@ -37,12 +37,12 @@ gboolean roster_contact_offline(const char * const barejid,
 void roster_reset_search_attempts(void);
 void roster_init(void);
 void roster_free(void);
-void roster_change_name(const char * const barejid, const char * const new_name);
+void roster_change_name(PContact contact, const char * const new_name);
 void roster_remove(const char * const name, const char * const barejid);
 void roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out);
 gboolean roster_add(const char * const barejid, const char * const name, GSList *groups,
-    const char * const subscription, gboolean pending_out, gboolean from_initial);
+    const char * const subscription, gboolean pending_out);
 char * roster_barejid_from_name(const char * const name);
 GSList * roster_get_contacts(void);
 gboolean roster_has_pending_subscriptions(void);
@@ -50,8 +50,6 @@ char * roster_find_contact(char *search_str);
 char * roster_find_resource(char *search_str);
 GSList * roster_get_group(const char * const group);
 GSList * roster_get_groups(void);
-void roster_add_to_group(const char * const group, const char * const barejid);
-void roster_remove_from_group(const char * const group, const char * const barejid);
 char * roster_find_group(char *search_str);
 char * roster_find_jid(char *search_str);
 

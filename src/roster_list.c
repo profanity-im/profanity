@@ -30,8 +30,6 @@
 #include "contact.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
-#include "xmpp/xmpp.h"
-#include "profanity.h"
 
 // nicknames
 static Autocomplete name_ac;
@@ -157,21 +155,19 @@ roster_free(void)
 }
 
 void
-roster_change_name(const char * const barejid, const char * const new_name)
+roster_change_name(PContact contact, const char * const new_name)
 {
-    PContact contact = g_hash_table_lookup(contacts, barejid);
-    const char * current_name = NULL;
+    assert(contact != NULL);
+
+    const char *current_name = NULL;
+    const char *barejid = p_contact_barejid(contact);
+
     if (p_contact_name(contact) != NULL) {
         current_name = strdup(p_contact_name(contact));
     }
 
-    if (contact != NULL) {
-        p_contact_set_name(contact, new_name);
-        _replace_name(current_name, new_name, barejid);
-
-        GSList *groups = p_contact_groups(contact);
-        roster_send_name_change(barejid, new_name, groups);
-    }
+    p_contact_set_name(contact, new_name);
+    _replace_name(current_name, new_name, barejid);
 }
 
 void
@@ -204,60 +200,51 @@ roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out)
 {
     PContact contact = g_hash_table_lookup(contacts, barejid);
+    assert(contact != NULL);
 
-    if (contact == NULL) {
-        roster_add(barejid, name, groups, subscription, pending_out, FALSE);
-    } else {
-        p_contact_set_subscription(contact, subscription);
-        p_contact_set_pending_out(contact, pending_out);
+    p_contact_set_subscription(contact, subscription);
+    p_contact_set_pending_out(contact, pending_out);
 
-        const char * const new_name = name;
-        const char * current_name = NULL;
-        if (p_contact_name(contact) != NULL) {
-            current_name = strdup(p_contact_name(contact));
-        }
+    const char * const new_name = name;
+    const char * current_name = NULL;
+    if (p_contact_name(contact) != NULL) {
+        current_name = strdup(p_contact_name(contact));
+    }
 
-        p_contact_set_name(contact, new_name);
-        p_contact_set_groups(contact, groups);
-        _replace_name(current_name, new_name, barejid);
+    p_contact_set_name(contact, new_name);
+    p_contact_set_groups(contact, groups);
+    _replace_name(current_name, new_name, barejid);
 
-        // add groups
-        while (groups != NULL) {
-            autocomplete_add(groups_ac, groups->data);
-            groups = g_slist_next(groups);
-        }
+    // add groups
+    while (groups != NULL) {
+        autocomplete_add(groups_ac, groups->data);
+        groups = g_slist_next(groups);
     }
 }
 
 gboolean
 roster_add(const char * const barejid, const char * const name, GSList *groups,
-    const char * const subscription, gboolean pending_out, gboolean from_initial)
+    const char * const subscription, gboolean pending_out)
 {
-    gboolean added = FALSE;
     PContact contact = g_hash_table_lookup(contacts, barejid);
-
-    if (contact == NULL) {
-        contact = p_contact_new(barejid, name, groups, subscription, NULL,
-            pending_out);
-
-        // add groups
-        while (groups != NULL) {
-            autocomplete_add(groups_ac, groups->data);
-            groups = g_slist_next(groups);
-        }
-
-        g_hash_table_insert(contacts, strdup(barejid), contact);
-        autocomplete_add(barejid_ac, barejid);
-        _add_name_and_barejid(name, barejid);
-
-        if (!from_initial) {
-            prof_handle_roster_add(barejid, name);
-        }
-
-        added = TRUE;
+    if (contact != NULL) {
+        return FALSE;
     }
 
-    return added;
+    contact = p_contact_new(barejid, name, groups, subscription, NULL,
+        pending_out);
+
+    // add groups
+    while (groups != NULL) {
+        autocomplete_add(groups_ac, groups->data);
+        groups = g_slist_next(groups);
+    }
+
+    g_hash_table_insert(contacts, strdup(barejid), contact);
+    autocomplete_add(barejid_ac, barejid);
+    _add_name_and_barejid(name, barejid);
+
+    return TRUE;
 }
 
 char *
@@ -335,45 +322,6 @@ roster_get_group(const char * const group)
 
     // resturn all contact structs
     return result;
-}
-
-void
-roster_add_to_group(const char * const group, const char * const barejid)
-{
-    PContact contact = g_hash_table_lookup(contacts, barejid);
-
-    if (contact != NULL) {
-        if (p_contact_in_group(contact, group)) {
-            if (p_contact_name(contact) != NULL) {
-                prof_handle_already_in_group(p_contact_name(contact), group);
-            } else {
-                prof_handle_already_in_group(p_contact_barejid(contact), group);
-            }
-            return;
-        }
-
-        roster_send_add_to_group(group, contact);
-
-    }
-}
-
-void
-roster_remove_from_group(const char * const group, const char * const barejid)
-{
-    PContact contact = g_hash_table_lookup(contacts, barejid);
-
-    if (contact != NULL) {
-        if (!p_contact_in_group(contact, group)) {
-            if (p_contact_name(contact) != NULL) {
-                prof_handle_not_in_group(p_contact_name(contact), group);
-            } else {
-                prof_handle_not_in_group(p_contact_barejid(contact), group);
-            }
-            return;
-        }
-
-        roster_send_remove_from_group(group, contact);
-    }
 }
 
 GSList *

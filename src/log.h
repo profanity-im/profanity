@@ -23,6 +23,8 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include "glib.h"
+
 // log levels
 typedef enum {
     PROF_LEVEL_DEBUG,

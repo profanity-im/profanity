@@ -30,6 +30,7 @@
 #include "log.h"
 #include "plugins/plugins.h"
 #include "profanity.h"
+#include "server_events.h"
 #include "tools/autocomplete.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
@@ -83,7 +84,7 @@ roster_request(void)
 }
 
 static void
-_roster_add_new(const char * const barejid, const char * const name)
+_roster_send_add_new(const char * const barejid, const char * const name)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -150,7 +151,7 @@ _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     if (userdata != NULL) {
         GroupData *data = userdata;
-        prof_handle_group_add(data->name, data->group);
+        handle_group_add(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -197,7 +198,7 @@ _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     if (userdata != NULL) {
         GroupData *data = userdata;
-        prof_handle_group_remove(data->name, data->group);
+        handle_group_remove(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -241,7 +242,7 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         roster_remove(name, barejid);
 
-        prof_handle_roster_remove(barejid);
+        handle_roster_remove(barejid);
 
     // otherwise update local roster
     } else {
@@ -255,7 +256,15 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         GSList *groups = _get_groups_from_item(item);
 
         // update the local roster
-        roster_update(barejid, name, groups, sub, pending_out);
+        PContact contact = roster_get_contact(barejid);
+        if (contact == NULL) {
+            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
+            if (added) {
+                handle_roster_add(barejid, name);
+            }
+        } else {
+            roster_update(barejid, name, groups, sub, pending_out);
+        }
     }
 
     return 1;
@@ -289,7 +298,7 @@ _roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             GSList *groups = _get_groups_from_item(item);
 
-            gboolean added = roster_add(barejid, name, groups, sub, pending_out, TRUE);
+            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
 
             if (!added) {
                 log_warning("Attempt to add contact twice: %s", barejid);
@@ -333,7 +342,7 @@ _get_groups_from_item(xmpp_stanza_t *item)
 void
 roster_init_module(void)
 {
-    roster_add_new = _roster_add_new;
+    roster_send_add_new = _roster_send_add_new;
     roster_send_remove = _roster_send_remove;
     roster_send_name_change = _roster_send_name_change;
     roster_send_add_to_group = _roster_send_add_to_group;
