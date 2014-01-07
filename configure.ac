@@ -34,6 +34,8 @@ AC_ARG_ENABLE([ruby-plugins],
     [AS_HELP_STRING([--enable-ruby-plugins], [enable Ruby plugins])])
 AC_ARG_ENABLE([python-plugins],
     [AS_HELP_STRING([--enable-python-plugins], [enable Python plugins])])
+AC_ARG_ENABLE([lua-plugins],
+    [AS_HELP_STRING([--enable-lua-plugins], [enable Lua plugins])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
@@ -92,14 +94,18 @@ else
 fi
 
 # lua
-# TODO get the following macros working
-#AX_PROG_LUA
-#AX_LUA_HEADERS
-#AX_LUA_LIBS
-LUA_INCLUDE="-I/usr/include/lua5.1"
-LUA_LIB="-llua5.1"
-AM_CONDITIONAL([BUILD_LUA_API], [true])
-AC_DEFINE([HAVE_LUA], [1], [Lua support])
+if test "x$enable_lua_plugins" != xno; then
+    # TODO get the following macros working
+    #AX_PROG_LUA
+    #AX_LUA_HEADERS
+    #AX_LUA_LIBS
+    LUA_INCLUDE="-I/usr/include/lua5.1"
+    LUA_LIB="-llua5.1"
+    AM_CONDITIONAL([BUILD_LUA_API], [true])
+    AC_DEFINE([HAVE_LUA], [1], [Lua support])
+else
+    AM_CONDITIONAL([BUILD_LUA_API], [false])
+fi
 
 # c
 LT_INIT
