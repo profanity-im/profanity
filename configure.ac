@@ -30,6 +30,8 @@ AS_IF([test "x$host_os" = xcygwin],
 ### Options
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
+AC_ARG_ENABLE([ruby-plugins],
+    [AS_HELP_STRING([--enable-ruby-plugins], [enable ruby plugins])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
@@ -37,23 +39,35 @@ AC_ARG_WITH([xscreensaver],
 
 ### plugins
 # ruby
-AC_CHECK_PROG(RUBY_CMD_EXISTS, ruby, yes, no)
-if test "$RUBY_CMD_EXISTS" == "yes"; then
-    ac_mkmf_result=`ruby -rmkmf -e ";" 2>&1`
-    if test -z "$ac_mkmf_result"; then
-        AC_DEFUN([AX_WITH_RUBY],[
-            AX_WITH_PROG(RUBY,ruby,$1,$2)
-        ])
-        AX_RUBY_DEVEL
-        AM_CONDITIONAL([BUILD_RUBY_API], [true])
-        AC_DEFINE([HAVE_RUBY], [1], [Ruby support])
+if test "x$enable_ruby_plugins" != xno; then
+    AC_CHECK_PROG(RUBY_CMD_EXISTS, ruby, yes, no)
+    if test "$RUBY_CMD_EXISTS" == "yes"; then
+        ac_mkmf_result=`ruby -rmkmf -e ";" 2>&1`
+        if test -z "$ac_mkmf_result"; then
+            AC_DEFUN([AX_WITH_RUBY],[
+                AX_WITH_PROG(RUBY,ruby,$1,$2)
+            ])
+            AX_RUBY_DEVEL
+            AM_CONDITIONAL([BUILD_RUBY_API], [true])
+            AC_DEFINE([HAVE_RUBY], [1], [Ruby support])
+        else
+            if test "x$enable_ruby_plugins" = xyes; then
+                AC_MSG_ERROR([Ruby not found, cannot enable Ruby plugins.])
+            else
+                AM_CONDITIONAL([BUILD_RUBY_API], [false])
+                AC_MSG_NOTICE([Ruby development package not found, Ruby plugin support disabled.])
+            fi
+        fi
     else
-        AM_CONDITIONAL([BUILD_RUBY_API], [false])
-        AC_MSG_NOTICE([Ruby development package not found, Ruby plugin support disabled.])
+        if test "x$enable_ruby_plugins" = xyes; then
+            AC_MSG_ERROR([Ruby not found, cannot enable Ruby plugins.])
+        else
+            AM_CONDITIONAL([BUILD_RUBY_API], [false])
+            AC_MSG_NOTICE([Ruby not installed, Ruby plugin support disabled.])
+        fi
     fi
 else
     AM_CONDITIONAL([BUILD_RUBY_API], [false])
-    AC_MSG_NOTICE([Ruby not installed, Ruby plugin support disabled.])
 fi
 
 # python
@@ -207,6 +221,7 @@ echo ""
 echo "PACKAGE_STATUS : $PACKAGE_STATUS"
 echo "AM_CFLAGS      : $AM_CFLAGS"
 echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
+echo "AM_LDFLAGS     : $AM_LDFLAGS"
 echo "LIBS           : $LIBS"
 echo "XML Parser     : $PARSER"
 echo ""
