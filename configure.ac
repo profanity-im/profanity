@@ -3,7 +3,6 @@
 
 AC_INIT([profanity], [0.4.0], [boothj5web@gmail.com])
 AC_CONFIG_AUX_DIR([build-aux])
-LT_INIT
 PACKAGE_STATUS="development"
 
 ### Get git branch and revision if in development
@@ -37,6 +36,7 @@ AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 
 ### plugins
+# ruby
 AC_CHECK_PROG(RUBY_CMD_EXISTS, ruby, yes, no)
 if test "$RUBY_CMD_EXISTS" == "yes"; then
     ac_mkmf_result=`ruby -rmkmf -e ";" 2>&1`
@@ -56,6 +56,7 @@ else
     AC_MSG_NOTICE([Ruby not installed, Ruby plugin support disabled.])
 fi
 
+# python
 AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
 if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
     AX_PYTHON_DEVEL
@@ -66,6 +67,7 @@ else
     AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
 fi
 
+# lua
 # TODO get the following macros working
 #AX_PROG_LUA
 #AX_LUA_HEADERS
@@ -74,6 +76,11 @@ LUA_INCLUDE="-I/usr/include/lua5.1"
 LUA_LIB="-llua5.1"
 AM_CONDITIONAL([BUILD_LUA_API], [true])
 AC_DEFINE([HAVE_LUA], [1], [Lua support])
+
+# c
+LT_INIT
+AC_CHECK_LIB([dl], [main], [],
+    [AC_MSG_ERROR([dl library needed to run C plugins])])
 
 ### Select first existing xml library among expat and libxml2
 PARSER=""
@@ -167,9 +174,6 @@ elif test "x$with_xscreensaver" = x; then
     AC_CHECK_LIB([X11], [main], [],
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
 fi
-
-AC_CHECK_LIB([dl], [main], [],
-    [AC_MSG_ERROR([dl library needed to run C plugins])])
 
 ### cmocka is required only for tests, profanity shouldn't be linked with it
 ### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
