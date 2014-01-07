@@ -36,6 +36,8 @@ AC_ARG_ENABLE([python-plugins],
     [AS_HELP_STRING([--enable-python-plugins], [enable Python plugins])])
 AC_ARG_ENABLE([lua-plugins],
     [AS_HELP_STRING([--enable-lua-plugins], [enable Lua plugins])])
+AC_ARG_ENABLE([c-plugins],
+    [AS_HELP_STRING([--enable-c-plugins], [enable C plugins])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
@@ -109,8 +111,17 @@ fi
 
 # c
 LT_INIT
-AC_CHECK_LIB([dl], [main], [],
-    [AC_MSG_ERROR([dl library needed to run C plugins])])
+if test "x$enable_c_plugins" != xno; then
+    AC_CHECK_LIB([dl], [main],
+        [AM_CONDITIONAL([BUILD_C_API], [true]) AC_DEFINE([HAVE_C], [1], [C support])],
+        [AS_IF(
+            [test "x$enable_c_plugins" = xyes],
+                [AC_MSG_ERROR([dl library needed to run C plugins])],
+            [AM_CONDITIONAL([BUILD_C_API], [false])])
+        ])
+else
+    AM_CONDITIONAL([BUILD_C_API], [false])
+fi
 
 ### Select first existing xml library among expat and libxml2
 PARSER=""

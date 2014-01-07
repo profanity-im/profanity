@@ -45,8 +45,11 @@
 #include "plugins/lua_api.h"
 #endif
 
+#ifdef PROF_HAVE_C
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
+
+#endif
 #include "ui/ui.h"
 
 static GSList* plugins;
@@ -65,7 +68,9 @@ plugins_init(void)
 #ifdef PROF_HAVE_LUA
     lua_env_init();
 #endif
+#ifdef PROF_HAVE_C
     c_env_init();
+#endif
 
     // load plugins
     gchar **plugins_load = prefs_get_plugins();
@@ -102,6 +107,7 @@ plugins_init(void)
                 }
             }
 #endif
+#ifdef PROF_HAVE_C
             if (g_str_has_suffix(filename, ".so")) {
                 ProfPlugin *plugin = c_plugin_create(filename);
                 if (plugin != NULL) {
@@ -109,6 +115,7 @@ plugins_init(void)
                     loaded = TRUE;
                 }
             }
+#endif
             if (loaded == TRUE) {
                 log_info("Loaded plugin: %s", filename);
             }
@@ -356,25 +363,26 @@ plugins_shutdown(void)
     GSList *curr = plugins;
 
     while (curr != NULL) {
-        ProfPlugin *plugin = curr->data;
 #ifdef PROF_HAVE_PYTHON
-        if (plugin->lang == LANG_PYTHON) {
-            python_plugin_destroy(plugin);
+        if (((ProfPlugin *)curr->data)->lang == LANG_PYTHON) {
+            python_plugin_destroy(curr->data);
         }
 #endif
 #ifdef PROF_HAVE_RUBY
-        if (plugin->lang == LANG_RUBY) {
-            ruby_plugin_destroy(plugin);
+        if (((ProfPlugin *)curr->data)->lang == LANG_RUBY) {
+            ruby_plugin_destroy(curr->data);
         }
 #endif
 #ifdef PROF_HAVE_LUA
-        if (plugin->lang == LANG_LUA) {
-            lua_plugin_destroy(plugin);
+        if (((ProfPlugin *)curr->data)->lang == LANG_LUA) {
+            lua_plugin_destroy(curr->data);
         }
 #endif
-        if (plugin->lang == LANG_C) {
-            c_plugin_destroy(plugin);
+#ifdef PROF_HAVE_C
+        if (((ProfPlugin *)curr->data)->lang == LANG_C) {
+            c_plugin_destroy(curr->data);
         }
+#endif
 
         curr = g_slist_next(curr);
     }
@@ -387,7 +395,9 @@ plugins_shutdown(void)
 #ifdef PROF_HAVE_LUA
     lua_shutdown();
 #endif
+#ifdef PROF_HAVE_C
     c_shutdown();
+#endif
 }
 
 gchar *

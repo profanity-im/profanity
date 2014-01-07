@@ -43,9 +43,7 @@ core_sources = \
 	src/config/theme.c src/config/theme.h \
     src/plugins/plugins.h src/plugins/plugins.c \
     src/plugins/api.h src/plugins/api.c \
-    src/plugins/callbacks.h src/plugins/callbacks.c \
-    src/plugins/c_plugins.h src/plugins/c_plugins.c \
-    src/plugins/c_api.h src/plugins/c_api.c
+    src/plugins/callbacks.h src/plugins/callbacks.c
 
 test_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -71,8 +69,6 @@ test_sources = \
     src/plugins/plugins.h src/plugins/plugins.c \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c \
-    src/plugins/c_plugins.h src/plugins/c_plugins.c \
-    src/plugins/c_api.h src/plugins/c_api.c \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
@@ -104,6 +100,10 @@ lua_sources = \
     src/plugins/lua_plugins.h src/plugins/lua_plugins.c \
     src/plugins/lua_api.h src/plugins/lua_api.c
 
+c_sources = \
+    src/plugins/c_plugins.h src/plugins/c_plugins.c \
+    src/plugins/c_api.h src/plugins/c_api.c
+
 git_sources = \
     src/gitversion.c
 
@@ -131,23 +131,33 @@ with_lua_sources = $(with_ruby_sources)
 test_with_lua_sources = $(tests_with_ruby_sources)
 endif
 
-if INCLUDE_GIT_VERSION
-with_git_sources = $(git_sources) $(with_lua_sources)
-tests_with_git_sources = $(git_sources) $(tests_with_lua_sources)
+if BUILD_C_API
+with_c_sources = $(with_lua_sources) $(c_sources)
+tests_with_c_sources = $(tests_with_lua_sources) $(c_sources)
 else
-with_git_sources = $(with_lua_sources)
-tests_with_git_sources = $(tests_with_lua_sources)
+with_c_sources = $(with_lua_sources)
+test_with_c_sources = $(tests_with_lua_sources)
+endif
+
+if INCLUDE_GIT_VERSION
+with_git_sources = $(git_sources) $(with_c_sources)
+tests_with_git_sources = $(git_sources) $(tests_with_c_sources)
+else
+with_git_sources = $(with_c_sources)
+tests_with_git_sources = $(tests_with_c_sources)
 endif
 
 bin_PROGRAMS = profanity
 profanity_SOURCES = $(with_git_sources) $(main_source)
 
+if BUILD_C_API
 lib_LTLIBRARIES = libprofanity.la
 libprofanity_la_LDFLAGS=-module -avoid-version -shared
 libprofanity_la_SOURCES = src/plugins/profapi.c
 
 library_includedir=$(includedir)
 library_include_HEADERS = src/plugins/profapi.h
+endif
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
