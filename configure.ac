@@ -20,6 +20,23 @@ AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 
+### Checks for programs.
+AC_PROG_CC
+
+### Get canonical host
+AC_CANONICAL_HOST
+AS_IF([test "x$host_os" = xcygwin],
+    [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
+
+### Options
+AC_ARG_ENABLE([notifications],
+    [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
+AC_ARG_WITH([libxml2],
+    [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
+AC_ARG_WITH([xscreensaver],
+    [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
+
+### plugins
 AC_CHECK_PROG(RUBY_CMD_EXISTS, ruby, yes, no)
 if test "$RUBY_CMD_EXISTS" == "yes"; then
     ac_mkmf_result=`ruby -rmkmf -e ";" 2>&1`
@@ -57,22 +74,6 @@ LUA_INCLUDE="-I/usr/include/lua5.1"
 LUA_LIB="-llua5.1"
 AM_CONDITIONAL([BUILD_LUA_API], [true])
 AC_DEFINE([HAVE_LUA], [1], [Lua support])
-
-### Checks for programs.
-AC_PROG_CC
-
-### Get canonical host
-AC_CANONICAL_HOST
-AS_IF([test "x$host_os" = xcygwin],
-    [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
-
-### Options
-AC_ARG_ENABLE([notifications],
-    [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
-AC_ARG_WITH([libxml2],
-    [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
-AC_ARG_WITH([xscreensaver],
-    [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 
 ### Select first existing xml library among expat and libxml2
 PARSER=""
