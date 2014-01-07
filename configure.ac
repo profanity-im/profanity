@@ -31,7 +31,9 @@ AS_IF([test "x$host_os" = xcygwin],
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
 AC_ARG_ENABLE([ruby-plugins],
-    [AS_HELP_STRING([--enable-ruby-plugins], [enable ruby plugins])])
+    [AS_HELP_STRING([--enable-ruby-plugins], [enable Ruby plugins])])
+AC_ARG_ENABLE([python-plugins],
+    [AS_HELP_STRING([--enable-python-plugins], [enable Python plugins])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
@@ -71,14 +73,22 @@ else
 fi
 
 # python
-AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
-if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
-    AX_PYTHON_DEVEL
-    AM_CONDITIONAL([BUILD_PYTHON_API], [true])
-    AC_DEFINE([HAVE_PYTHON], [1], [Python support])
+if test "x$enable_python_plugins" != xno; then
+    AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
+    if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
+        AX_PYTHON_DEVEL
+        AM_CONDITIONAL([BUILD_PYTHON_API], [true])
+        AC_DEFINE([HAVE_PYTHON], [1], [Python support])
+    else
+        if test "x$enable_python_plugins" = xyes; then
+            AC_MSG_ERROR([Python not found, cannot enable Python plugins.])
+        else
+            AM_CONDITIONAL([BUILD_PYTHON_API], [false])
+            AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
+        fi
+    fi
 else
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
-    AC_MSG_NOTICE([Python development package not found, Python plugin support disabled.])
 fi
 
 # lua
