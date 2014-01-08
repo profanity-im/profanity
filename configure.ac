@@ -38,6 +38,8 @@ AC_ARG_ENABLE([lua-plugins],
     [AS_HELP_STRING([--enable-lua-plugins], [enable Lua plugins])])
 AC_ARG_ENABLE([c-plugins],
     [AS_HELP_STRING([--enable-c-plugins], [enable C plugins])])
+AC_ARG_ENABLE([plugins],
+    [AS_HELP_STRING([--enable-plugins], [enable plugins])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
@@ -45,7 +47,9 @@ AC_ARG_WITH([xscreensaver],
 
 ### plugins
 # ruby
-if test "x$enable_ruby_plugins" != xno; then
+if test "x$enable_plugins" = xno; then
+    AM_CONDITIONAL([BUILD_RUBY_API], [false])
+elif test "x$enable_ruby_plugins" != xno; then
     AC_CHECK_PROG(RUBY_CMD_EXISTS, ruby, yes, no)
     if test "$RUBY_CMD_EXISTS" == "yes"; then
         ac_mkmf_result=`ruby -rmkmf -e ";" 2>&1`
@@ -77,7 +81,9 @@ else
 fi
 
 # python
-if test "x$enable_python_plugins" != xno; then
+if test "x$enable_plugins" = xno; then
+    AM_CONDITIONAL([BUILD_PYTHON_API], [false])
+elif test "x$enable_python_plugins" != xno; then
     AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
     if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
         AX_PYTHON_DEVEL
@@ -96,7 +102,9 @@ else
 fi
 
 # lua
-if test "x$enable_lua_plugins" != xno; then
+if test "x$enable_plugins" = xno; then
+    AM_CONDITIONAL([BUILD_LUA_API], [false])
+elif test "x$enable_lua_plugins" != xno; then
     # TODO get the following macros working
     #AX_PROG_LUA
     #AX_LUA_HEADERS
@@ -111,7 +119,9 @@ fi
 
 # c
 LT_INIT
-if test "x$enable_c_plugins" != xno; then
+if test "x$enable_plugins" = xno; then
+    AM_CONDITIONAL([BUILD_C_API], [false])
+elif test "x$enable_c_plugins" != xno; then
     AC_CHECK_LIB([dl], [main],
         [AM_CONDITIONAL([BUILD_C_API], [true]) AC_DEFINE([HAVE_C], [1], [C support])],
         [AS_IF(
