@@ -54,8 +54,6 @@ typedef struct prof_win_t {
     int history_shown;
     gboolean (*handle_error_message)(struct prof_win_t *self,
         const char * const from, const char * const err_msg);
-    void (*print_incoming_message)(struct prof_win_t *self, GTimeVal *tv_stamp,
-        const char * const from, const char * const message);
 } ProfWin;
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
@@ -72,5 +70,7 @@ void win_show_status_string(ProfWin *window, const char * const from,
     const char * const show, const char * const status,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show);
+void win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
+    const char * const from, const char * const message);
 
 #endif

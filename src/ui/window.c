@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 #ifdef HAVE_NCURSESW_NCURSES_H
@@ -38,7 +39,7 @@
 
 static gboolean _default_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg);
-static void _print_incoming_message(ProfWin *self, GTimeVal *tv_stamp,
+static void _win_chat_print_incoming_message(ProfWin *self, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
 
 ProfWin*
@@ -58,27 +59,21 @@ win_create(const char * const title, int cols, win_type_t type)
     {
         case WIN_CONSOLE:
             new_win->handle_error_message = _default_handle_error_message;
-            new_win->print_incoming_message = NULL;
             break;
         case WIN_CHAT:
             new_win->handle_error_message = _default_handle_error_message;
-            new_win->print_incoming_message = _print_incoming_message;
             break;
         case WIN_MUC:
             new_win->handle_error_message = muc_handle_error_message;
-            new_win->print_incoming_message = NULL;
             break;
         case WIN_PRIVATE:
             new_win->handle_error_message = _default_handle_error_message;
-            new_win->print_incoming_message = _print_incoming_message;
             break;
         case WIN_DUCK:
             new_win->handle_error_message = _default_handle_error_message;
-            new_win->print_incoming_message = NULL;
             break;
         default:
             new_win->handle_error_message = _default_handle_error_message;
-            new_win->print_incoming_message = NULL;
             break;
     }
 
@@ -314,6 +309,25 @@ win_show_status_string(ProfWin *window, const char * const from,
     }
 }
 
+void
+win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
+    const char * const from, const char * const message)
+{
+    switch (window->type)
+    {
+        case WIN_CHAT:
+        case WIN_PRIVATE:
+            _win_chat_print_incoming_message(window, tv_stamp, from, message);
+            break;
+        case WIN_DUCK:
+        case WIN_CONSOLE:
+        case WIN_MUC:
+        default:
+            assert(FALSE);
+            break;
+    }
+}
+
 static gboolean
 _default_handle_error_message(ProfWin *self, const char * const from,
     const char * const err_msg)
@@ -322,7 +336,7 @@ _default_handle_error_message(ProfWin *self, const char * const from,
 }
 
 static void
-_print_incoming_message(ProfWin *self, GTimeVal *tv_stamp,
+_win_chat_print_incoming_message(ProfWin *self, GTimeVal *tv_stamp,
     const char * const from, const char * const message)
 {
     if (tv_stamp == NULL) {
