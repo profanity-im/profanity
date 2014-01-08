@@ -314,8 +314,10 @@ win_handle_error_message(ProfWin *window, const char * const from,
         case WIN_DUCK:
         case WIN_CONSOLE:
             handled =  FALSE;
+            break;
         case WIN_MUC:
             handled = _muc_handle_error_message(window, from, err_msg);
+            break;
         default:
             assert(FALSE);
             break;
