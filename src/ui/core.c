@@ -341,7 +341,7 @@ _ui_handle_error_message(const char * const from, const char * const err_msg)
         cons_show_error("Unknown error received from service.");
     } else {
         ProfWin *current = wins_get_current();
-        gboolean handled = current->handle_error_message(current, from, err_msg);
+        gboolean handled = win_handle_error_message(current, from, err_msg);
         if (handled != TRUE) {
             cons_show_error("Error received from server: %s", err_msg);
         }

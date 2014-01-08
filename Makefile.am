@@ -30,7 +30,6 @@ core_sources = \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c \
     src/ui/windows.c src/ui/windows.h \
-    src/ui/muc_window.c src/ui/muc_window.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \

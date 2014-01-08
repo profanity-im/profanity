@@ -52,8 +52,6 @@ typedef struct prof_win_t {
     int paged;
     int unread;
     int history_shown;
-    gboolean (*handle_error_message)(struct prof_win_t *self,
-        const char * const from, const char * const err_msg);
 } ProfWin;
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
@@ -72,5 +70,8 @@ void win_show_status_string(ProfWin *window, const char * const from,
     const char * const default_show);
 void win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
+gboolean
+win_handle_error_message(ProfWin *window, const char * const from,
+    const char * const err_msg);
 
 #endif
