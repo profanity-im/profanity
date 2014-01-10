@@ -916,6 +916,24 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             usr_jid = usr;
         }
         if (msg != NULL) {
+#ifdef HAVE_LIBOTR
+            char *encrypted = otr_encrypt_message(usr_jid, msg);
+            if (encrypted != NULL) {
+                message_send(encrypted, usr_jid);
+                otr_free_message(encrypted);
+                ui_outgoing_msg("me", usr_jid, msg);
+
+                if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
+                    const char *jid = jabber_get_fulljid();
+                    Jid *jidp = jid_create(jid);
+                    chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
+                    jid_destroy(jidp);
+                }
+            } else {
+                cons_show_error("Failed to send message,");
+            }
+
+#else
             message_send(msg, usr_jid);
             ui_outgoing_msg("me", usr_jid, msg);
 
@@ -924,7 +942,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                 Jid *jidp = jid_create(jid);
                 chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
                 jid_destroy(jidp);
-            }
+#endif
 
             return TRUE;
         } else {

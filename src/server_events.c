@@ -28,6 +28,7 @@
 #include "config/preferences.h"
 #include "roster_list.h"
 #include "ui/ui.h"
+#include "otr.h"
 
 void
 handle_error_message(const char *from, const char *err_msg)
@@ -169,17 +170,30 @@ handle_duck_result(const char * const result)
 void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
-    ui_incoming_msg(from, message, NULL, priv);
+    char *newmessage;
+    if (!priv) {
+        newmessage = otr_decrypt_message(from, message);
+        if (newmessage == NULL) {
+            return;
+        }
+    } else {
+        newmessage = message;
+    }
+
+    ui_incoming_msg(from, newmessage, NULL, priv);
     ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, NULL);
+        chat_log_chat(jidp->barejid, from_jid->barejid, newmessage, PROF_IN_LOG, NULL);
         jid_destroy(jidp);
         jid_destroy(from_jid);
     }
+
+    if (!priv)
+        otr_free_message(newmessage);
 }
 
 void
