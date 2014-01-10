@@ -28,8 +28,10 @@
 void otr_init(void);
 void otr_account_load(ProfAccount *account);
 char * otr_get_fingerprint(void);
+
 char * otr_encrypt_message(const char * const to, const char * const message);
 char * otr_decrypt_message(const char * const from, const char * const message);
+
 void otr_free_message(char *message);
 
 #endif

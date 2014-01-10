@@ -37,7 +37,7 @@ static OtrlPolicy
 cb_policy(void *opdata, ConnContext *context)
 {
 //    cons_debug("cb_policy");
-    return OTRL_POLICY_DEFAULT;
+    return OTRL_POLICY_DEFAULT ;
 }
 
 static void
@@ -45,20 +45,6 @@ cb_create_privkey(void *opdata, const char *accountname,
     const char *protocol)
 {
 //    cons_debug("cb_create_privkey accountname: %s, protocol: %s", accountname, protocol);
-//    GString *key_filename = g_string_new("./");
-//    g_string_append(key_filename, accountname);
-//    g_string_append(key_filename, "_key.txt");
-
-//    gcry_error_t err = 0;
-
-//    err = otrl_privkey_generate(user_state, key_filename->str, accountname, protocol);
-//    if (!err == GPG_ERR_NO_ERROR) {
-//        cons_debug("Failed to generate private key");
-//        g_string_free(key_filename, TRUE);
-//        return;
-//    }
-//    otrl_privkey_read(user_state, key_filename->str);
-//    cons_debug("Generated private key");
 }
 
 static int
@@ -76,8 +62,7 @@ cb_inject_message(void *opdata, const char *accountname,
 {
 //    cons_debug("cb_inject_message: account: %s, protocol, %s, recipient: %s, message: %s",
 //        accountname, protocol, recipient, message);
-  char *msg_decrypt = NULL;
-  otrl_message_receiving(user_state, &ops, NULL, recipient, protocol, accountname, message, &msg_decrypt, 0, NULL, NULL);
+    message_send(message, recipient);
 }
 
 static void
@@ -272,7 +257,7 @@ otr_get_fingerprint(void)
 char *
 otr_encrypt_message(const char * const to, const char * const message)
 {
-//    cons_debug("otr_encrypt_message, account: %s, recipient: %s, message: %s", jid, to, message);
+    cons_debug("Encrypting message: %s", message);
     gcry_error_t err;
     char *newmessage = NULL;
 
@@ -292,7 +277,7 @@ otr_encrypt_message(const char * const to, const char * const message)
 //        cons_debug("Error encrypting, result: %s", newmessage);
         return NULL;
     } else {
-        cons_debug("Encrypted, result: %s", newmessage);
+        cons_debug("Encrypted message: %s", newmessage);
         return newmessage;
     }
 }
@@ -300,10 +285,11 @@ otr_encrypt_message(const char * const to, const char * const message)
 char *
 otr_decrypt_message(const char * const from, const char * const message)
 {
-//    cons_debug("otr_decrypt_message, account: %s, from: %s, message: %s", jid, from, message);
+    cons_debug("Decrypting message: %s", message);
     char *decrypted = NULL;
     int ignore_mesage = otrl_message_receiving(user_state, &ops, NULL, jid, "xmpp", from, message, &decrypted, 0, NULL, NULL);
     if (!ignore_mesage) {
+        cons_debug("Decrypted message: %s", decrypted);
         return decrypted;
     } else {
         return NULL;
