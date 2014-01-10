@@ -249,6 +249,10 @@ otr_account_load(ProfAccount *account)
     }
     cons_debug("Loaded fingerprints");
 
+    char fingerprint[45];
+    otrl_privkey_fingerprint(user_state, fingerprint, jid, "xmpp");
+    cons_debug("Your fingerprint: %s", fingerprint);
+
     g_string_free(basedir, TRUE);
     g_string_free(keysfilename, TRUE);
     g_string_free(fpsfilename, TRUE);
