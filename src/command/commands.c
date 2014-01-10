@@ -2287,15 +2287,19 @@ gboolean
 cmd_otr(gchar **args, struct cmd_help_t help)
 {
 #ifdef HAVE_LIBOTR
+    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to load OTR information.");
+        return TRUE;
+    }
+
     if (strcmp(args[0], "gen") == 0) {
-        if (jabber_get_connection_status() != JABBER_CONNECTED) {
-            cons_show("You must be connected with an account to load OTR information.");
-            return TRUE;
-        } else {
-            ProfAccount *account = accounts_get_account(jabber_get_account_name());
-            otr_account_load(account);
-            return TRUE;
-        }
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        otr_account_load(account);
+        return TRUE;
+    } else if (strcmp(args[0], "fp") == 0) {
+        char *fingerprint = otr_get_fingerprint();
+        cons_show("Your fingerprint: %s", fingerprint);
+        return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);
         return TRUE;

@@ -260,6 +260,16 @@ otr_account_load(ProfAccount *account)
 }
 
 char *
+otr_get_fingerprint(void)
+{
+    char fingerprint[45];
+    otrl_privkey_fingerprint(user_state, fingerprint, jid, "xmpp");
+    char *result = strdup(fingerprint);
+
+    return result;
+}
+
+char *
 otr_encrypt_message(const char * const to, const char * const message)
 {
 //    cons_debug("otr_encrypt_message, account: %s, recipient: %s, message: %s", jid, to, message);
