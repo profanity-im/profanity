@@ -301,6 +301,7 @@ otr_keygen(ProfAccount *account)
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to load private key");
+        data_loaded = FALSE;
         return;
     }
 
@@ -309,13 +310,22 @@ otr_keygen(ProfAccount *account)
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to load fingerprints");
+        data_loaded = FALSE;
         return;
     }
+
+    data_loaded = TRUE;
 
     g_string_free(basedir, TRUE);
     g_string_free(keysfilename, TRUE);
     g_string_free(fpsfilename, TRUE);
     return;
+}
+
+gboolean
+otr_key_loaded(void)
+{
+    return data_loaded;
 }
 
 char *
@@ -361,12 +371,20 @@ otr_decrypt_message(const char * const from, const char * const message)
 {
     cons_debug("Decrypting message: %s", message);
     char *decrypted = NULL;
-    int ignore_mesage = otrl_message_receiving(user_state, &ops, NULL, jid, "xmpp", from, message, &decrypted, 0, NULL, NULL);
-    if (!ignore_mesage) {
+    int result = otrl_message_receiving(user_state, &ops, NULL, jid, "xmpp", from, message, &decrypted, 0, NULL, NULL);
+
+    // internal libotr message, ignore
+    if (result == 1) {
+        return NULL;
+
+    // message was decrypted, return to user
+    } else if (decrypted != NULL) {
         cons_debug("Decrypted message: %s", decrypted);
         return decrypted;
+
+    // normal non OTR message
     } else {
-        return NULL;
+        return strdup(message);
     }
 }
 

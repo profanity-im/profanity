@@ -77,6 +77,8 @@ void (*ui_close_current)(void);
 void (*ui_clear_current)(void);
 win_type_t (*ui_current_win_type)(void);
 int (*ui_current_win_index)(void);
+gboolean (*ui_current_win_is_otr)(void);
+void (*ui_current_set_otr)(gboolean value);
 char* (*ui_current_recipient)(void);
 void (*ui_current_print_line)(const char * const msg, ...);
 void (*ui_current_error_line)(const char * const msg);

@@ -1140,10 +1140,24 @@ cmd_execute_default(const char * const inp)
                 ui_current_print_line("You are not currently connected.");
             } else {
 #ifdef HAVE_LIBOTR
-                char *encrypted = otr_encrypt_message(recipient, inp);
-                if (encrypted != NULL) {
-                    message_send(encrypted, recipient);
-                    otr_free_message(encrypted);
+                if (ui_current_win_is_otr()) {
+                    char *encrypted = otr_encrypt_message(recipient, inp);
+                    if (encrypted != NULL) {
+                        message_send(encrypted, recipient);
+                        otr_free_message(encrypted);
+                        if (prefs_get_boolean(PREF_CHLOG)) {
+                            const char *jid = jabber_get_fulljid();
+                            Jid *jidp = jid_create(jid);
+                            chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                            jid_destroy(jidp);
+                        }
+
+                        ui_outgoing_msg("me", recipient, inp);
+                    } else {
+                        cons_show_error("Failed to send message.");
+                    }
+                } else {
+                    message_send(inp, recipient);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -1152,8 +1166,6 @@ cmd_execute_default(const char * const inp)
                     }
 
                     ui_outgoing_msg("me", recipient, inp);
-                } else {
-                    cons_show_error("Failed to send message.");
                 }
 #else
                 message_send(inp, recipient);
@@ -1166,7 +1178,6 @@ cmd_execute_default(const char * const inp)
 
                 ui_outgoing_msg("me", recipient, inp);
 #endif
-
             }
             break;
 

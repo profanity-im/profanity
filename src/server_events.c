@@ -171,6 +171,7 @@ handle_duck_result(const char * const result)
 void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
+#ifdef HAVE_LIBOTR
     char *newmessage;
     if (!priv) {
         newmessage = otr_decrypt_message(from, message);
@@ -195,6 +196,19 @@ handle_incoming_message(char *from, char *message, gboolean priv)
 
     if (!priv)
         otr_free_message(newmessage);
+#else
+    ui_incoming_msg(from, message, NULL, priv);
+    ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, message, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
+#endif
 }
 
 void

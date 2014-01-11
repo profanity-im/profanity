@@ -693,6 +693,20 @@ _ui_current_win_type(void)
     return current->type;
 }
 
+static gboolean
+_ui_current_win_is_otr(void)
+{
+    ProfWin *current = wins_get_current();
+    return current->is_otr;
+}
+
+static void
+_ui_current_set_otr(gboolean value)
+{
+    ProfWin *current = wins_get_current();
+    current->is_otr = value;
+}
+
 static int
 _ui_current_win_index(void)
 {
@@ -1609,4 +1623,6 @@ ui_init_module(void)
     ui_unread = _ui_unread;
     ui_win_unread = _ui_win_unread;
     ui_ask_password = _ui_ask_password;
+    ui_current_win_is_otr = _ui_current_win_is_otr;
+    ui_current_set_otr = _ui_current_set_otr;
 }
