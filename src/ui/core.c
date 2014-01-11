@@ -501,6 +501,24 @@ _ui_close_read_wins(void)
     return count;
 }
 
+GString *
+_get_recipient_string(ProfWin *window)
+{
+    GString *result = g_string_new("");
+    PContact contact = roster_get_contact(window->from);
+    if (contact != NULL) {
+        if (p_contact_name(contact) != NULL) {
+            g_string_append(result, p_contact_name(contact));
+        } else {
+            g_string_append(result, window->from);
+        }
+    } else {
+        g_string_append(result, window->from);
+    }
+
+    return result;
+}
+
 static void
 _ui_switch_win(const int i)
 {
@@ -517,16 +535,9 @@ _ui_switch_win(const int i)
             status_bar_current(1);
             status_bar_active(1);
         } else {
-            PContact contact = roster_get_contact(new_current->from);
-            if (contact != NULL) {
-                if (p_contact_name(contact) != NULL) {
-                    title_bar_set_recipient(p_contact_name(contact));
-                } else {
-                    title_bar_set_recipient(new_current->from);
-                }
-            } else {
-                title_bar_set_recipient(new_current->from);
-            }
+            GString *recipient_str = _get_recipient_string(new_current);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
             title_bar_draw();
             status_bar_current(i);
             status_bar_active(i);
@@ -551,16 +562,9 @@ _ui_next_win(void)
         status_bar_current(1);
         status_bar_active(1);
     } else {
-        PContact contact = roster_get_contact(new_current->from);
-        if (contact != NULL) {
-            if (p_contact_name(contact) != NULL) {
-                title_bar_set_recipient(p_contact_name(contact));
-            } else {
-                title_bar_set_recipient(new_current->from);
-            }
-        } else {
-            title_bar_set_recipient(new_current->from);
-        }
+        GString *recipient_str = _get_recipient_string(new_current);
+        title_bar_set_recipient(recipient_str->str);
+        g_string_free(recipient_str, TRUE);
         title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
@@ -584,16 +588,9 @@ _ui_previous_win(void)
         status_bar_current(1);
         status_bar_active(1);
     } else {
-        PContact contact = roster_get_contact(new_current->from);
-        if (contact != NULL) {
-            if (p_contact_name(contact) != NULL) {
-                title_bar_set_recipient(p_contact_name(contact));
-            } else {
-                title_bar_set_recipient(new_current->from);
-            }
-        } else {
-            title_bar_set_recipient(new_current->from);
-        }
+        GString *recipient_str = _get_recipient_string(new_current);
+        title_bar_set_recipient(recipient_str->str);
+        g_string_free(recipient_str, TRUE);
         title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
