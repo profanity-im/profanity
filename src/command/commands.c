@@ -919,7 +919,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
         if (msg != NULL) {
 #ifdef HAVE_LIBOTR
-            if (ui_current_win_is_otr()) {
+            if (otr_is_secure(usr_jid)) {
                 char *encrypted = otr_encrypt_message(usr_jid, msg);
                 if (encrypted != NULL) {
                     message_send(encrypted, usr_jid);
@@ -2341,12 +2341,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             if (!otr_key_loaded()) {
                 ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
             } else {
-                ui_current_print_line("Starting OTR session");
                 char *recipient = ui_current_recipient();
                 message_send("?OTR?", recipient);
-                ui_current_set_otr(TRUE);
-                // refresh to show OTR in titlebar
-                ui_switch_win(ui_current_win_index());
             }
         }
         return TRUE;

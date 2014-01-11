@@ -120,6 +120,7 @@ static void
 cb_gone_secure(void *opdata, ConnContext *context)
 {
 //    cons_debug("cb_gone_secure");
+    ui_gone_secure(context->username);
 }
 
 static void
@@ -332,6 +333,23 @@ otr_key_loaded(void)
     return data_loaded;
 }
 
+gboolean
+otr_is_secure(const char * const recipient)
+{
+    ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
+        0, NULL, NULL, NULL);
+
+    if (context == NULL) {
+        return FALSE;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+
 char *
 otr_get_my_fingerprint(void)
 {
@@ -343,7 +361,7 @@ otr_get_my_fingerprint(void)
 }
 
 char *
-otr_get_their_fingerprint(char *recipient)
+otr_get_their_fingerprint(const char * const recipient)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
         0, NULL, NULL, NULL);

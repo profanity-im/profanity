@@ -61,6 +61,7 @@ void (*ui_handle_special_keys)(const wint_t * const ch, const char * const inp,
 void (*ui_switch_win)(const int i);
 void (*ui_next_win)(void);
 void (*ui_previous_win)(void);
+void (*ui_gone_secure)(char *recipient);
 unsigned long (*ui_get_idle_time)(void);
 void (*ui_reset_idle_time)(void);
 void (*ui_new_chat_win)(const char * const to);

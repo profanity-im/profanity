@@ -48,6 +48,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "otr.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/windows.h"
@@ -245,6 +246,11 @@ _ui_incoming_msg(const char * const from, const char * const message,
     ProfWin *window = wins_get_by_recipient(from);
     if (window == NULL) {
         window = wins_new(from, win_type);
+#ifdef HAVE_LIBOTR
+        if (otr_is_secure(from)) {
+            window->is_otr = TRUE;
+        }
+#endif
         win_created = TRUE;
     }
 
@@ -579,6 +585,23 @@ _ui_next_win(void)
         status_bar_active(i);
     }
     wins_refresh_current();
+}
+
+static void
+_ui_gone_secure(char *recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = TRUE;
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
 }
 
 static void
@@ -966,6 +989,11 @@ _ui_outgoing_msg(const char * const from, const char * const to,
             window = wins_new(to, WIN_PRIVATE);
         } else {
             window = wins_new(to, WIN_CHAT);
+#ifdef HAVE_LIBOTR
+            if (otr_is_secure(to)) {
+                window->is_otr = TRUE;
+            }
+#endif
         }
 
         jid_destroy(jid);
@@ -1634,4 +1662,5 @@ ui_init_module(void)
     ui_ask_password = _ui_ask_password;
     ui_current_win_is_otr = _ui_current_win_is_otr;
     ui_current_set_otr = _ui_current_set_otr;
+    ui_gone_secure = _ui_gone_secure;
 }
