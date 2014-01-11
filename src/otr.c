@@ -27,6 +27,8 @@
 
 #include "otr.h"
 #include "log.h"
+#include "roster_list.h"
+#include "contact.h"
 #include "ui/ui.h"
 
 static OtrlUserState user_state;
@@ -53,9 +55,14 @@ static int
 cb_is_logged_in(void *opdata, const char *accountname,
     const char *protocol, const char *recipient)
 {
+    PContact contact = roster_get_contact(recipient);
+    if (g_strcmp0(p_contact_presence(contact), "offline") == 0) {
+        return 0;
+    } else {
+        return 1;
+    }
 //    cons_debug("cb_is_logged_in: account: %s, protocol: %s, recipient: %s",
 //        accountname, protocol, recipient);
-    return -1;
 }
 
 static void
@@ -350,6 +357,17 @@ otr_is_secure(const char * const recipient)
     }
 }
 
+void
+otr_end_session(const char * const recipient)
+{
+    ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
+        0, NULL, NULL, NULL);
+
+    if (context != NULL) {
+        otrl_message_disconnect(user_state, &ops, NULL, jid, "xmpp", recipient);
+    }
+}
+
 char *
 otr_get_my_fingerprint(void)
 {
@@ -409,11 +427,23 @@ otr_decrypt_message(const char * const from, const char * const message)
 {
     cons_debug("Decrypting message: %s", message);
     char *decrypted = NULL;
-    int result = otrl_message_receiving(user_state, &ops, NULL, jid, "xmpp", from, message, &decrypted, 0, NULL, NULL);
+    OtrlTLV *tlvs = NULL;
+    OtrlTLV *tlv = NULL;
+    int result = otrl_message_receiving(user_state, &ops, NULL, jid, "xmpp", from, message, &decrypted, &tlvs, NULL, NULL);
 
     // internal libotr message, ignore
     if (result == 1) {
         cons_debug("Internal message.");
+        tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
+        if (tlv) {
+            ConnContext *context = otrl_context_find(user_state, from, jid, "xmpp",
+                0, NULL, NULL, NULL);
+
+            if (context != NULL) {
+                otrl_context_force_plaintext(context);
+                ui_gone_insecure(from);
+            }
+        }
         return NULL;
 
     // message was decrypted, return to user

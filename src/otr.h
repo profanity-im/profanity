@@ -32,6 +32,8 @@ void otr_keygen(ProfAccount *account);
 gboolean otr_key_loaded(void);
 gboolean otr_is_secure(const char * const recipient);
 
+void otr_end_session(const char * const recipient);
+
 char * otr_get_my_fingerprint(void);
 char * otr_get_their_fingerprint(const char * const recipient);
 

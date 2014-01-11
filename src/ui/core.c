@@ -439,7 +439,13 @@ _ui_close_connected_win(int index)
         char *room_jid = ui_recipient(index);
         presence_leave_chat_room(room_jid);
     } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
-
+#ifdef HAVE_LIBOTR
+        ProfWin *window = wins_get_by_num(index);
+        if (window->is_otr) {
+            cons_debug("Ending OTR session");
+            otr_end_session(window->from);
+        }
+#endif
         if (prefs_get_boolean(PREF_STATES)) {
             char *recipient = ui_recipient(index);
 
@@ -588,11 +594,28 @@ _ui_next_win(void)
 }
 
 static void
-_ui_gone_secure(char *recipient)
+_ui_gone_secure(const char * const recipient)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
         window->is_otr = TRUE;
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
+}
+
+static void
+_ui_gone_insecure(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = FALSE;
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -1663,4 +1686,5 @@ ui_init_module(void)
     ui_current_win_is_otr = _ui_current_win_is_otr;
     ui_current_set_otr = _ui_current_set_otr;
     ui_gone_secure = _ui_gone_secure;
+    ui_gone_insecure = _ui_gone_insecure;
 }
