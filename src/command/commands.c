@@ -2330,6 +2330,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 char *recipient = ui_current_recipient();
                 message_send("?OTR?", recipient);
                 ui_current_set_otr(TRUE);
+                // refresh to show OTR in titlebar
+                ui_switch_win(ui_current_win_index());
             }
         }
         return TRUE;

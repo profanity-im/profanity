@@ -55,6 +55,7 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->history_shown = 0;
     new_win->type = type;
     new_win->is_otr = FALSE;
+    new_win->is_trusted = FALSE;
     scrollok(new_win->win, TRUE);
 
     return new_win;

@@ -516,6 +516,15 @@ _get_recipient_string(ProfWin *window)
         g_string_append(result, window->from);
     }
 
+    if (window->is_otr) {
+        g_string_append(result, " [OTR]");
+        if (window->is_trusted) {
+            g_string_append(result, " (trusted)");
+        } else {
+            g_string_append(result, " (untrusted)");
+        }
+    }
+
     return result;
 }
 

@@ -228,6 +228,10 @@ otr_on_connect(ProfAccount *account)
         }
     }
 
+    if (data_loaded) {
+        cons_show("Loaded OTR private key for %s", jid);
+    }
+
     g_string_free(basedir, TRUE);
     g_string_free(keysfilename, TRUE);
     g_string_free(fpsfilename, TRUE);

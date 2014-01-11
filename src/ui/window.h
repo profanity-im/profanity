@@ -49,6 +49,7 @@ typedef struct prof_win_t {
     WINDOW *win;
     win_type_t type;
     gboolean is_otr;
+    gboolean is_trusted;
     int y_pos;
     int paged;
     int unread;
