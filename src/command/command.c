@@ -570,11 +570,12 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|fp", "Off The Record encryption commands.",
-        { "/otr gen|fp",
-          "-----------",
-          "gen - Load or create private key and fingerprints.",
-          "fp - Show your fingerprint.",
+        { "/otr gen|myfp|start", "Off The Record encryption commands.",
+        { "/otr gen|myfp|start",
+          "-------------------",
+          "gen - Generate your private key.",
+          "myfp - Show your fingerprint.",
+          "start - Start an OTR session with the current recipient.",
           NULL } } },
 
     { "/outtype",
