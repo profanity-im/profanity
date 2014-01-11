@@ -2294,7 +2294,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
 
     if (strcmp(args[0], "gen") == 0) {
         ProfAccount *account = accounts_get_account(jabber_get_account_name());
-        otr_account_load(account);
+        otr_keygen(account);
         return TRUE;
     } else if (strcmp(args[0], "fp") == 0) {
         char *fingerprint = otr_get_fingerprint();

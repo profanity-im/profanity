@@ -26,7 +26,9 @@
 #include "config/accounts.h"
 
 void otr_init(void);
-void otr_account_load(ProfAccount *account);
+void otr_on_connect(ProfAccount *account);
+void otr_keygen(ProfAccount *account);
+
 char * otr_get_fingerprint(void);
 
 char * otr_encrypt_message(const char * const to, const char * const message);

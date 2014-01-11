@@ -26,11 +26,13 @@
 #include <glib.h>
 
 #include "otr.h"
+#include "log.h"
 #include "ui/ui.h"
 
 static OtrlUserState user_state;
 static OtrlMessageAppOps ops;
 static char *jid;
+static gboolean data_loaded;
 
 // ops callbacks
 static OtrlPolicy
@@ -141,7 +143,7 @@ cb_log_message(void *opdata, const char *message)
 void
 otr_init(void)
 {
-    cons_debug("otr_init()");
+    log_info("Initialising OTR");
     OTRL_INIT;
 
     ops.policy = cb_policy;
@@ -159,12 +161,89 @@ otr_init(void)
     ops.gone_insecure = cb_gone_insecure;
     ops.still_secure = cb_still_secure;
     ops.log_message = cb_log_message;
+
+    data_loaded = FALSE;
 }
 
 void
-otr_account_load(ProfAccount *account)
+otr_on_connect(ProfAccount *account)
 {
-    cons_debug("otr_account_load()");
+    jid = strdup(account->jid);
+    log_info("Loading OTR key for %s", jid);
+
+    gchar *data_home = xdg_get_data_home();
+    gchar *account_dir = str_replace(jid, "@", "_at_");
+
+    GString *basedir = g_string_new(data_home);
+    g_string_append(basedir, "/profanity/otr/");
+    g_string_append(basedir, account_dir);
+    g_string_append(basedir, "/");
+
+    if (!mkdir_recursive(basedir->str)) {
+        g_string_free(basedir, TRUE);
+        log_error("Could not create %s for account %s.", basedir->str, jid);
+        cons_show_error("Could not create %s for account %s.", basedir->str, jid);
+        return;
+    }
+
+    user_state = otrl_userstate_create();
+
+    gcry_error_t err = 0;
+
+    GString *keysfilename = g_string_new(basedir->str);
+    g_string_append(keysfilename, "keys.txt");
+    if (!g_file_test(keysfilename->str, G_FILE_TEST_IS_REGULAR)) {
+        log_info("No private key file found %s", keysfilename->str);
+        data_loaded = FALSE;
+    } else {
+        log_info("Loading OTR private key %s", keysfilename->str);
+        err = otrl_privkey_read(user_state, keysfilename->str);
+        if (!err == GPG_ERR_NO_ERROR) {
+            g_string_free(basedir, TRUE);
+            g_string_free(keysfilename, TRUE);
+            log_error("Failed to load private key");
+            return;
+        } else {
+            log_info("Loaded private key");
+            data_loaded = TRUE;
+        }
+    }
+
+    GString *fpsfilename = g_string_new(basedir->str);
+    g_string_append(fpsfilename, "fingerprints.txt");
+    if (!g_file_test(fpsfilename->str, G_FILE_TEST_IS_REGULAR)) {
+        log_info("No fingerprints file found %s", fpsfilename->str);
+        data_loaded = FALSE;
+    } else {
+        log_info("Loading fingerprints %s", fpsfilename->str);
+        err = otrl_privkey_read_fingerprints(user_state, fpsfilename->str, NULL, NULL);
+        if (!err == GPG_ERR_NO_ERROR) {
+            g_string_free(basedir, TRUE);
+            g_string_free(keysfilename, TRUE);
+            log_error("Failed to load fingerprints");
+            return;
+        } else {
+            log_info("Loaded fingerprints");
+            data_loaded = TRUE;
+        }
+    }
+
+    g_string_free(basedir, TRUE);
+    g_string_free(keysfilename, TRUE);
+    g_string_free(fpsfilename, TRUE);
+    return;
+}
+
+void
+otr_keygen(ProfAccount *account)
+{
+    if (data_loaded) {
+        cons_show("OTR key already generated.");
+        return;
+    }
+
+    jid = strdup(account->jid);
+    log_info("Generating OTR key for %s", jid);
 
     jid = strdup(account->jid);
 
@@ -178,65 +257,60 @@ otr_account_load(ProfAccount *account)
 
     if (!mkdir_recursive(basedir->str)) {
         g_string_free(basedir, TRUE);
-        cons_show_error("Could not create otr directory for account %s.", jid);
+        log_error("Could not create %s for account %s.", basedir->str, jid);
+        cons_show_error("Could not create %s for account %s.", basedir->str, jid);
         return;
     }
-
-    user_state = otrl_userstate_create();
 
     gcry_error_t err = 0;
 
     GString *keysfilename = g_string_new(basedir->str);
     g_string_append(keysfilename, "keys.txt");
-    if (!g_file_test(keysfilename->str, G_FILE_TEST_IS_REGULAR)) {
-        cons_debug("Private key not found, generating one");
-        err = otrl_privkey_generate(user_state, keysfilename->str, account->jid, "xmpp");
-        if (!err == GPG_ERR_NO_ERROR) {
-            g_string_free(basedir, TRUE);
-            g_string_free(keysfilename, TRUE);
-            cons_debug("Failed to generate private key");
-            return;
-        }
-        cons_debug("Generated private key");
+    log_debug("Generating private key file %s for %s", keysfilename->str, jid);
+    cons_show("Generating private key, this may take some time.");
+    cons_show("Moving the mouse randomly around the screen may speed up the process!");
+    ui_current_page_off();
+    ui_refresh();
+    err = otrl_privkey_generate(user_state, keysfilename->str, account->jid, "xmpp");
+    if (!err == GPG_ERR_NO_ERROR) {
+        g_string_free(basedir, TRUE);
+        g_string_free(keysfilename, TRUE);
+        log_error("Failed to generate private key");
+        cons_show_error("Failed to generate private key");
+        return;
     }
+    log_info("Private key generated");
+    cons_show("");
+    cons_show("Private key generation complete.");
 
     GString *fpsfilename = g_string_new(basedir->str);
     g_string_append(fpsfilename, "fingerprints.txt");
-    if (!g_file_test(fpsfilename->str, G_FILE_TEST_IS_REGULAR)) {
-        cons_debug("Fingerprints not found, creating file");
-        err = otrl_privkey_write_fingerprints(user_state, fpsfilename->str);
-        if (!err == GPG_ERR_NO_ERROR) {
-            g_string_free(basedir, TRUE);
-            g_string_free(keysfilename, TRUE);
-            cons_debug("Failed to create fingerprints file");
-            return;
-        }
-        cons_debug("Created fingerprints file");
+    log_debug("Generating fingerprints file %s for %s", fpsfilename->str, jid);
+    err = otrl_privkey_write_fingerprints(user_state, fpsfilename->str);
+    if (!err == GPG_ERR_NO_ERROR) {
+        g_string_free(basedir, TRUE);
+        g_string_free(keysfilename, TRUE);
+        log_error("Failed to create fingerprints file");
+        cons_show_error("Failed to create fingerprints file");
+        return;
     }
+    log_info("Fingerprints file created");
 
-    cons_debug("Loading private key");
     err = otrl_privkey_read(user_state, keysfilename->str);
     if (!err == GPG_ERR_NO_ERROR) {
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
-        cons_debug("Failed to load private key");
+        log_error("Failed to load private key");
         return;
     }
-    cons_debug("Loaded private key");
 
-    cons_debug("Loading fingerprints");
     err = otrl_privkey_read_fingerprints(user_state, fpsfilename->str, NULL, NULL);
     if (!err == GPG_ERR_NO_ERROR) {
         g_string_free(basedir, TRUE);
         g_string_free(keysfilename, TRUE);
-        cons_debug("Failed to load fingerprints");
+        log_error("Failed to load fingerprints");
         return;
     }
-    cons_debug("Loaded fingerprints");
-
-    char fingerprint[45];
-    otrl_privkey_fingerprint(user_state, fingerprint, jid, "xmpp");
-    cons_debug("Your fingerprint: %s", fingerprint);
 
     g_string_free(basedir, TRUE);
     g_string_free(keysfilename, TRUE);
