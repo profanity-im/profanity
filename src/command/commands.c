@@ -2346,6 +2346,20 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
         }
         return TRUE;
+    } else if (strcmp(args[0], "end") == 0) {
+        win_type_t win_type = ui_current_win_type();
+
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in a regular chat window to use OTR.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_line("You are not currently in an OTR session.");
+        } else {
+            char *recipient = ui_current_recipient();
+            ui_gone_insecure(recipient);
+            otr_end_session(recipient);
+        }
+        return TRUE;
+
     } else {
         cons_show("Usage: %s", help.usage);
         return TRUE;

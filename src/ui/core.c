@@ -442,7 +442,6 @@ _ui_close_connected_win(int index)
 #ifdef HAVE_LIBOTR
         ProfWin *window = wins_get_by_num(index);
         if (window->is_otr) {
-            cons_debug("Ending OTR session");
             otr_end_session(window->from);
         }
 #endif
@@ -599,6 +598,7 @@ _ui_gone_secure(const char * const recipient)
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
         window->is_otr = TRUE;
+        win_vprint_line(window, '!', 0, "OTR session started.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -616,6 +616,7 @@ _ui_gone_insecure(const char * const recipient)
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
         window->is_otr = FALSE;
+        win_vprint_line(window, '!', 0, "OTR session ended.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
