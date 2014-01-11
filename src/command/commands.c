@@ -2312,8 +2312,23 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         otr_keygen(account);
         return TRUE;
     } else if (strcmp(args[0], "myfp") == 0) {
-        char *fingerprint = otr_get_fingerprint();
+        char *fingerprint = otr_get_my_fingerprint();
         cons_show("Your fingerprint: %s", fingerprint);
+        free(fingerprint);
+        return TRUE;
+    } else if (strcmp(args[0], "theirfp") == 0) {
+        win_type_t win_type = ui_current_win_type();
+
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_line("You not currently in an OTR session with this recipient.");
+        } else {
+            char *recipient = ui_current_recipient();
+            char *fingerprint = otr_get_their_fingerprint(recipient);
+            ui_current_print_line("OTR fingerprint for %s: %s", recipient, fingerprint);
+            free(fingerprint);
+        }
         return TRUE;
     } else if (strcmp(args[0], "start") == 0) {
         win_type_t win_type = ui_current_win_type();

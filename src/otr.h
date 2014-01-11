@@ -31,7 +31,8 @@ void otr_keygen(ProfAccount *account);
 
 gboolean otr_key_loaded(void);
 
-char * otr_get_fingerprint(void);
+char * otr_get_my_fingerprint(void);
+char * otr_get_their_fingerprint(char *recipient);
 
 char * otr_encrypt_message(const char * const to, const char * const message);
 char * otr_decrypt_message(const char * const from, const char * const message);

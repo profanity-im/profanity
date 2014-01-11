@@ -131,7 +131,7 @@ _cons_show_typing(const char * const barejid)
         display_usr = barejid;
     }
 
-    win_print_line(console, '-', COLOUR_TYPING, "!! %s is typing a message...", display_usr);
+    win_vprint_line(console, '-', COLOUR_TYPING, "!! %s is typing a message...", display_usr);
 
     wins_refresh_console();
     cons_alert();

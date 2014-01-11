@@ -333,13 +333,20 @@ otr_key_loaded(void)
 }
 
 char *
-otr_get_fingerprint(void)
+otr_get_my_fingerprint(void)
 {
     char fingerprint[45];
     otrl_privkey_fingerprint(user_state, fingerprint, jid, "xmpp");
     char *result = strdup(fingerprint);
 
     return result;
+}
+
+char *
+otr_get_their_fingerprint(char *recipient)
+{
+    char *fingerprint = "1234 5678";
+    return strdup(fingerprint);
 }
 
 char *

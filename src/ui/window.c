@@ -84,6 +84,16 @@ win_print_time(ProfWin* window, char show_char)
 
 void
 win_print_line(ProfWin *window, const char show_char, int attrs,
+    const char * const msg)
+{
+    win_print_time(window, show_char);
+    wattron(window->win, attrs);
+    wprintw(window->win, "%s\n", msg);
+    wattroff(window->win, attrs);
+}
+
+void
+win_vprint_line(ProfWin *window, const char show_char, int attrs,
     const char * const msg, ...)
 {
     va_list arg;

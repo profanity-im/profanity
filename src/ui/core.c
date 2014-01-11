@@ -746,8 +746,11 @@ _ui_current_print_line(const char * const msg, ...)
     ProfWin *current = wins_get_current();
     va_list arg;
     va_start(arg, msg);
-    win_print_line(current, '-', 0, msg, arg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    win_print_line(current, '-', 0, fmt_msg->str);
     va_end(arg);
+    g_string_free(fmt_msg, TRUE);
     win_refresh(current);
 }
 
@@ -775,7 +778,7 @@ _ui_print_error_from_recipient(const char * const from, const char *err_msg)
 
     ProfWin *window = wins_get_by_recipient(from);
     if (window != NULL) {
-        win_print_line(window, '-', COLOUR_ERROR, "%s", err_msg);
+        win_vprint_line(window, '-', COLOUR_ERROR, "%s", err_msg);
         if (wins_is_current(window)) {
             wins_refresh_current();
         }
@@ -833,7 +836,7 @@ _ui_recipient_gone(const char * const barejid)
 
     ProfWin *window = wins_get_by_recipient(barejid);
     if (window != NULL) {
-        win_print_line(window, '!', COLOUR_GONE, "<- %s has left the conversation.", display_usr);
+        win_vprint_line(window, '!', COLOUR_GONE, "<- %s has left the conversation.", display_usr);
         if (wins_is_current(window)) {
             wins_refresh_current();
         }
@@ -1329,7 +1332,7 @@ _ui_status_room(const char * const contact)
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
     } else {
-        win_print_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
+        win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
     }
 }
 
