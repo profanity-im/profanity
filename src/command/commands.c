@@ -2313,7 +2313,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else if (strcmp(args[0], "myfp") == 0) {
         char *fingerprint = otr_get_my_fingerprint();
-        cons_show("Your fingerprint: %s", fingerprint);
+        ui_current_print_line("Your OTR fingerprint: %s", fingerprint);
         free(fingerprint);
         return TRUE;
     } else if (strcmp(args[0], "theirfp") == 0) {

@@ -345,8 +345,17 @@ otr_get_my_fingerprint(void)
 char *
 otr_get_their_fingerprint(char *recipient)
 {
-    char *fingerprint = "1234 5678";
-    return strdup(fingerprint);
+    ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
+        0, NULL, NULL, NULL);
+
+    if (context != NULL) {
+        Fingerprint *fingerprint = context->active_fingerprint;
+        char readable[45];
+        otrl_privkey_hash_to_human(readable, fingerprint->fingerprint);
+        return strdup(readable);
+    } else {
+        return NULL;
+    }
 }
 
 char *
@@ -386,6 +395,7 @@ otr_decrypt_message(const char * const from, const char * const message)
 
     // internal libotr message, ignore
     if (result == 1) {
+        cons_debug("Internal message.");
         return NULL;
 
     // message was decrypted, return to user
@@ -395,6 +405,7 @@ otr_decrypt_message(const char * const from, const char * const message)
 
     // normal non OTR message
     } else {
+        cons_debug("Non OTR message.");
         return strdup(message);
     }
 }
