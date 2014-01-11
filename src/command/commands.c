@@ -2327,6 +2327,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
             } else {
                 ui_current_print_line("Starting OTR session");
+                char *recipient = ui_current_recipient();
+                message_send("?OTR?", recipient);
                 ui_current_set_otr(TRUE);
             }
         }
