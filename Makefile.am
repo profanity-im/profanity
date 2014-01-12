@@ -39,8 +39,7 @@ core_sources = \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
-	src/config/theme.c src/config/theme.h \
-	src/otr.c src/otr.h
+	src/config/theme.c src/config/theme.h
 
 test_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -61,7 +60,6 @@ test_sources = \
 	src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-	src/otr.c src/otr.h \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
@@ -84,6 +82,9 @@ main_source = src/main.c
 git_sources = \
     src/gitversion.c
 
+otr_sources = \
+    src/otr.c src/otr.h
+
 if INCLUDE_GIT_VERSION
 with_git_sources = $(git_sources) $(core_sources)
 tests_with_git_sources = $(git_sources) $(test_sources)
@@ -92,12 +93,20 @@ with_git_sources = $(core_sources)
 tests_with_git_sources = $(test_sources)
 endif
 
+if BUILD_OTR
+with_otr_sources = $(with_git_sources) $(otr_sources)
+tests_with_otr_sources = $(tests_with_git_sources) $(otr_sources)
+else
+with_otr_sources = $(with_git_sources)
+tests_with_otr_sources = $(tests_with_git_sources)
+endif
+
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(with_git_sources) $(main_source)
+profanity_SOURCES = $(with_otr_sources) $(main_source)
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(tests_with_git_sources)
+tests_testsuite_SOURCES = $(tests_with_otr_sources)
 tests_testsuite_LDADD = -lcmocka
 
 man_MANS = docs/profanity.1

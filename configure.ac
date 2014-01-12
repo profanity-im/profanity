@@ -130,12 +130,13 @@ elif test "x$with_xscreensaver" = x; then
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
 fi
 
+AM_CONDITIONAL([BUILD_OTR], [true])
 if test "x$enable_otr" = xyes; then
     AC_CHECK_LIB([otr], [main], [],
         [AC_MSG_ERROR([libotr is required for otr encryption support])])
 elif test "x$enable_otr" = x; then
     AC_CHECK_LIB([otr], [main], [],
-        [AC_MSG_NOTICE([libotr not found, otr entryption support no enabled])])
+        [AM_CONDITIONAL([BUILD_OTR], [false]) AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
 fi
 
 ### cmocka is required only for tests, profanity shouldn't be linked with it

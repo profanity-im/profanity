@@ -2391,7 +2391,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 #else
-    cons_show("This version of Profanity has not been build with OTR support enabled");
+    cons_show("This version of Profanity has not been built with OTR support enabled");
     return TRUE;
 #endif
 }

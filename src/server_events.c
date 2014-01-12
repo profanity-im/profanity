@@ -28,7 +28,9 @@
 #include "config/preferences.h"
 #include "roster_list.h"
 #include "ui/ui.h"
+#ifdef HAVE_LIBOTR
 #include "otr.h"
+#endif
 
 void
 handle_error_message(const char *from, const char *err_msg)
@@ -49,7 +51,9 @@ void
 handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
+#ifdef HAVE_LIBOTR
     otr_on_connect(account);
+#endif
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account);

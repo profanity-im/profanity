@@ -44,7 +44,9 @@
 #include "roster_list.h"
 #include "log.h"
 #include "muc.h"
+#ifdef HAVE_LIBOTR
 #include "otr.h"
+#endif
 #include "resource.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
