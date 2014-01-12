@@ -30,6 +30,9 @@
 #include "roster_list.h"
 #include "ui/ui.h"
 #include "plugins/plugins.h"
+#ifdef PROF_HAVE_LIBOTR
+#include "otr.h"
+#endif
 
 void
 handle_error_message(const char *from, const char *err_msg)
@@ -50,6 +53,9 @@ void
 handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
+#ifdef PROF_HAVE_LIBOTR
+    otr_on_connect(account);
+#endif
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account);
@@ -180,31 +186,68 @@ handle_duck_result(const char * const result)
 void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
-    char *new_message = NULL;
+    char *plugin_message = NULL;
+
+#ifdef PROF_HAVE_LIBOTR
+    char *decrypted;
+    if (!priv) {
+        decrypted = otr_decrypt_message(from, message);
+        if (decrypted == NULL) {
+            return;
+        }
+    } else {
+        decrypted = message;
+    }
 
     if (priv) {
         Jid *jid = jid_create(from);
         char *room = jid->barejid;
         char *nick = jid->resourcepart;
-        new_message = plugins_on_private_message_received(room, nick, message);
+        plugin_message = plugins_on_private_message_received(room, nick, decrypted);
         jid_destroy(jid);
     } else {
-        new_message = plugins_on_message_received(from, message);
+        plugin_message = plugins_on_message_received(from, decrypted);
     }
 
-    ui_incoming_msg(from, new_message, NULL, priv);
+    ui_incoming_msg(from, plugin_message, NULL, priv);
     ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, new_message, PROF_IN_LOG, NULL);
+        chat_log_chat(jidp->barejid, from_jid->barejid, plugin_message, PROF_IN_LOG, NULL);
         jid_destroy(jidp);
         jid_destroy(from_jid);
     }
 
-    free(new_message);
+    if (!priv)
+        otr_free_message(decrypted);
+#else
+    if (priv) {
+        Jid *jid = jid_create(from);
+        char *room = jid->barejid;
+        char *nick = jid->resourcepart;
+        plugin_message = plugins_on_private_message_received(room, nick, message);
+        jid_destroy(jid);
+    } else {
+        plugin_message = plugins_on_message_received(from, message);
+    }
+
+    ui_incoming_msg(from, plugin_message, NULL, priv);
+    ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, plugin_message, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
+
+#endif
+    free(plugin_message);
 }
 
 void

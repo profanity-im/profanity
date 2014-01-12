@@ -86,6 +86,7 @@ gboolean cmd_msg(gchar **args, struct cmd_help_t help);
 gboolean cmd_nick(gchar **args, struct cmd_help_t help);
 gboolean cmd_notify(gchar **args, struct cmd_help_t help);
 gboolean cmd_online(gchar **args, struct cmd_help_t help);
+gboolean cmd_otr(gchar **args, struct cmd_help_t help);
 gboolean cmd_outtype(gchar **args, struct cmd_help_t help);
 gboolean cmd_plugins(gchar **args, struct cmd_help_t help);
 gboolean cmd_prefs(gchar **args, struct cmd_help_t help);

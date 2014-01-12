@@ -35,8 +35,6 @@ bugs/
 TODO
 _configs.sed
 gource.sh
-*_fingerprints.txt
-*_key.txt
 .libs/
 libprofanity.la
 libtool
@@ -45,10 +43,6 @@ m4/
 *.lo
 src/gitversion.c
 TAGS
-.libs/
-_configs.sed
-libprofanity.la
-libtool
 runvalgrind.sh
 src/prof_config.h
 clean.sh

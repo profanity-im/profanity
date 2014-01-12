@@ -106,6 +106,9 @@ c_sources = \
 git_sources = \
     src/gitversion.c
 
+otr_sources = \
+    src/otr.c src/otr.h
+
 if BUILD_PYTHON_API
 with_python_sources = $(core_sources) $(python_sources)
 tests_with_python_sources = $(test_sources) $(python_sources)
@@ -146,8 +149,16 @@ with_git_sources = $(with_c_sources)
 tests_with_git_sources = $(tests_with_c_sources)
 endif
 
+if BUILD_OTR
+with_otr_sources = $(with_git_sources) $(otr_sources)
+tests_with_otr_sources = $(tests_with_git_sources) $(otr_sources)
+else
+with_otr_sources = $(with_git_sources)
+tests_with_otr_sources = $(tests_with_git_sources)
+endif
+
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(with_git_sources) $(main_source)
+profanity_SOURCES = $(with_otr_sources) $(main_source)
 
 if BUILD_C_API
 lib_LTLIBRARIES = libprofanity.la
@@ -160,7 +171,7 @@ endif
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(tests_with_git_sources)
+tests_testsuite_SOURCES = $(tests_with_otr_sources)
 tests_testsuite_LDADD = -lcmocka
 
 man_MANS = docs/profanity.1

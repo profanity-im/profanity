@@ -40,6 +40,8 @@ AC_ARG_ENABLE([c-plugins],
     [AS_HELP_STRING([--enable-c-plugins], [enable C plugins])])
 AC_ARG_ENABLE([plugins],
     [AS_HELP_STRING([--enable-plugins], [enable plugins])])
+AC_ARG_ENABLE([otr],
+    [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
@@ -159,8 +161,9 @@ AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
 LIBS="$LIBS $PARSER_LIBS"
 
 ### Check for libstrophe dependencies
-AC_CHECK_LIB([resolv], [__res_query], [],
-    [AC_MSG_ERROR([libresolv is required for profanity])])
+AC_CHECK_LIB([resolv], [res_query], [],
+    [AC_CHECK_LIB([resolv], [__res_query], [],
+        [AC_MSG_ERROR([libresolv is required for profanity])])])
 PKG_CHECK_MODULES([openssl], [openssl], [],
     [AC_MSG_ERROR([openssl is required for profanity])])
 AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
@@ -224,6 +227,15 @@ elif test "x$with_xscreensaver" = x; then
         [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
     AC_CHECK_LIB([X11], [main], [],
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
+fi
+
+AM_CONDITIONAL([BUILD_OTR], [true])
+if test "x$enable_otr" = xyes; then
+    AC_CHECK_LIB([otr], [main], [],
+        [AC_MSG_ERROR([libotr is required for otr encryption support])])
+elif test "x$enable_otr" = x; then
+    AC_CHECK_LIB([otr], [main], [],
+        [AM_CONDITIONAL([BUILD_OTR], [false]) AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
 fi
 
 ### cmocka is required only for tests, profanity shouldn't be linked with it
