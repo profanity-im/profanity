@@ -120,7 +120,25 @@ cb_update_context_list(void *opdata)
 static void
 cb_write_fingerprints(void *opdata)
 {
-//    cons_debug("cb_write_fingerprints");
+    cons_debug("cb_write_fingerprints");
+    gcry_error_t err = 0;
+    gchar *data_home = xdg_get_data_home();
+    gchar *account_dir = str_replace(jid, "@", "_at_");
+
+    GString *basedir = g_string_new(data_home);
+    g_string_append(basedir, "/profanity/otr/");
+    g_string_append(basedir, account_dir);
+    g_string_append(basedir, "/");
+
+    GString *fpsfilename = g_string_new(basedir->str);
+    g_string_append(fpsfilename, "fingerprints.txt");
+    err = otrl_privkey_write_fingerprints(user_state, fpsfilename->str);
+    if (!err == GPG_ERR_NO_ERROR) {
+        log_error("Failed to write fingerprints file");
+        cons_show_error("Failed to create fingerprints file");
+    }
+    g_string_free(basedir, TRUE);
+    g_string_free(fpsfilename, TRUE);
 }
 
 static void
@@ -228,6 +246,7 @@ otr_on_connect(ProfAccount *account)
         if (!err == GPG_ERR_NO_ERROR) {
             g_string_free(basedir, TRUE);
             g_string_free(keysfilename, TRUE);
+            g_string_free(fpsfilename, TRUE);
             log_error("Failed to load fingerprints");
             return;
         } else {
