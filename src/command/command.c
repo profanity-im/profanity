@@ -570,14 +570,16 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end",
-          "-------------------------------",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust",
+          "---------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
           "start - Start an OTR session with the current recipient.",
           "end - End the current OTR session,",
+          "trust - Indicate that you have verified the contact's fingerprint.",
+          "untrust - Indicate the the contact's fingerprint is not verified,",
           NULL } } },
 
     { "/outtype",
@@ -989,6 +991,8 @@ cmd_init(void)
     autocomplete_add(otr_ac, "end");
     autocomplete_add(otr_ac, "myfp");
     autocomplete_add(otr_ac, "theirfp");
+    autocomplete_add(otr_ac, "trust");
+    autocomplete_add(otr_ac, "untrust");
 
     cmd_history_init();
 }

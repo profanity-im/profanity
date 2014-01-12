@@ -593,11 +593,12 @@ _ui_next_win(void)
 }
 
 static void
-_ui_gone_secure(const char * const recipient)
+_ui_gone_secure(const char * const recipient, gboolean trusted)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
         window->is_otr = TRUE;
+        window->is_trusted = trusted;
         win_vprint_line(window, '!', 0, "OTR session started.");
 
         if (wins_is_current(window)) {
@@ -616,7 +617,44 @@ _ui_gone_insecure(const char * const recipient)
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
         window->is_otr = FALSE;
+        window->is_trusted = FALSE;
         win_vprint_line(window, '!', 0, "OTR session ended.");
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
+}
+
+static void
+_ui_trust(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = TRUE;
+        window->is_trusted = TRUE;
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
+}
+
+static void
+_ui_untrust(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = TRUE;
+        window->is_trusted = FALSE;
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -1688,4 +1726,6 @@ ui_init_module(void)
     ui_current_set_otr = _ui_current_set_otr;
     ui_gone_secure = _ui_gone_secure;
     ui_gone_insecure = _ui_gone_insecure;
+    ui_trust = _ui_trust;
+    ui_untrust = _ui_untrust;
 }

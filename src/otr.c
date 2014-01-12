@@ -145,7 +145,7 @@ static void
 cb_gone_secure(void *opdata, ConnContext *context)
 {
 //    cons_debug("cb_gone_secure");
-    ui_gone_secure(context->username);
+    ui_gone_secure(context->username, otr_is_trusted(context->username));
 }
 
 static void
@@ -374,6 +374,72 @@ otr_is_secure(const char * const recipient)
     } else {
         return TRUE;
     }
+}
+
+gboolean
+otr_is_trusted(const char * const recipient)
+{
+    ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
+        0, NULL, NULL, NULL);
+
+    if (context == NULL) {
+        return FALSE;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return TRUE;
+    }
+
+    if (context->active_fingerprint &&
+                g_strcmp0(context->active_fingerprint->trust, "trusted") == 0) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+void
+otr_trust(const char * const recipient)
+{
+    ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
+        0, NULL, NULL, NULL);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    if (context->active_fingerprint) {
+        context->active_fingerprint->trust = "trusted";
+        cb_write_fingerprints(NULL);
+    }
+
+    return;
+}
+
+void
+otr_untrust(const char * const recipient)
+{
+    ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
+        0, NULL, NULL, NULL);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    if (context->active_fingerprint) {
+        context->active_fingerprint->trust = NULL;
+        cb_write_fingerprints(NULL);
+    }
+
+    return;
 }
 
 void
