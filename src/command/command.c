@@ -1180,49 +1180,49 @@ cmd_execute_default(const char * const inp)
                     recipient_jid = recipient;
                 }
 
-                char *new_message = plugins_on_message_send(recipient_jid, inp);
+                char *plugin_message = plugins_on_message_send(recipient_jid, inp);
 
 #ifdef PROF_HAVE_LIBOTR
                 if (otr_is_secure(recipient)) {
-                    char *encrypted = otr_encrypt_message(recipient, new_message);
+                    char *encrypted = otr_encrypt_message(recipient, plugin_message);
                     if (encrypted != NULL) {
                         message_send(encrypted, recipient);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
                             Jid *jidp = jid_create(jid);
-                            chat_log_chat(jidp->barejid, recipient, new_message, PROF_OUT_LOG, NULL);
+                            chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_msg("me", recipient, new_message);
+                        ui_outgoing_msg("me", recipient, plugin_message);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send(new_message, recipient);
+                    message_send(plugin_message, recipient);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
-                        chat_log_chat(jidp->barejid, recipient, new_message, PROF_OUT_LOG, NULL);
+                        chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_msg("me", recipient, new_message);
+                    ui_outgoing_msg("me", recipient, plugin_message);
                 }
 #else
-                message_send(new_message, recipient);
+                message_send(plugin_message, recipient);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, recipient, new_message, PROF_OUT_LOG, NULL);
+                    chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_msg("me", recipient, new_message);
+                ui_outgoing_msg("me", recipient, plugin_message);
 
 #endif
-                free(new_message);
+                free(plugin_message);
             }
             break;
 
