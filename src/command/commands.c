@@ -494,7 +494,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
         _cmd_show_filtered_help("Basic commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "chatting") == 0) {
-        gchar *filter[] = { "/chlog", "/duck", "/gone", "/history",
+        gchar *filter[] = { "/chlog", "/otr", "/duck", "/gone", "/history",
             "/info", "/intype", "/msg", "/notify", "/outtype", "/status",
             "/close", "/clear", "/tiny" };
         _cmd_show_filtered_help("Chat commands", filter, ARRAY_SIZE(filter));
