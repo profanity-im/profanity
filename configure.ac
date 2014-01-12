@@ -62,8 +62,9 @@ AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
 LIBS="$LIBS $PARSER_LIBS"
 
 ### Check for libstrophe dependencies
-AC_CHECK_LIB([resolv], [__res_query], [],
-    [AC_MSG_ERROR([libresolv is required for profanity])])
+AC_CHECK_LIB([resolv], [res_query], [],
+    [AC_CHECK_LIB([resolv], [__res_query], [],
+        [AC_MSG_ERROR([libresolv is required for profanity])])])
 PKG_CHECK_MODULES([openssl], [openssl], [],
     [AC_MSG_ERROR([openssl is required for profanity])])
 AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
