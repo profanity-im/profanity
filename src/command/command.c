@@ -570,12 +570,14 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|start", "Off The Record encryption commands.",
-        { "/otr gen|myfp|start",
-          "-------------------",
+        { "/otr gen|myfp|theirfp|start|end", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end",
+          "-------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
+          "theirfp - Show contacts fingerprint.",
           "start - Start an OTR session with the current recipient.",
+          "end - End the current OTR session,",
           NULL } } },
 
     { "/outtype",
@@ -828,6 +830,7 @@ static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
+static Autocomplete otr_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -980,6 +983,13 @@ cmd_init(void)
     autocomplete_add(bookmark_ac, "list");
     autocomplete_add(bookmark_ac, "remove");
 
+    otr_ac = autocomplete_new();
+    autocomplete_add(otr_ac, "gen");
+    autocomplete_add(otr_ac, "start");
+    autocomplete_add(otr_ac, "end");
+    autocomplete_add(otr_ac, "myfp");
+    autocomplete_add(otr_ac, "theirfp");
+
     cmd_history_init();
 }
 
@@ -1010,6 +1020,7 @@ cmd_uninit(void)
     autocomplete_free(roster_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
+    autocomplete_free(otr_ac);
 }
 
 // Command autocompletion functions
@@ -1083,6 +1094,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(roster_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(bookmark_ac);
+    autocomplete_reset(otr_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1307,8 +1319,8 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins", "/otr" };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, otr_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
