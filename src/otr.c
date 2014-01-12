@@ -40,7 +40,6 @@ static gboolean data_loaded;
 static OtrlPolicy
 cb_policy(void *opdata, ConnContext *context)
 {
-//    cons_debug("cb_policy");
     return OTRL_POLICY_DEFAULT ;
 }
 
@@ -48,7 +47,6 @@ static void
 cb_create_privkey(void *opdata, const char *accountname,
     const char *protocol)
 {
-//    cons_debug("cb_create_privkey accountname: %s, protocol: %s", accountname, protocol);
 }
 
 static int
@@ -61,16 +59,12 @@ cb_is_logged_in(void *opdata, const char *accountname,
     } else {
         return 1;
     }
-//    cons_debug("cb_is_logged_in: account: %s, protocol: %s, recipient: %s",
-//        accountname, protocol, recipient);
 }
 
 static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-//    cons_debug("cb_inject_message: account: %s, protocol, %s, recipient: %s, message: %s",
-//        accountname, protocol, recipient, message);
     message_send(message, recipient);
 }
 
@@ -79,7 +73,6 @@ cb_notify(void *opdata, OtrlNotifyLevel level,
     const char *accountname, const char *protocol, const char *username,
     const char *title, const char *primary, const char *secondary)
 {
-//    cons_debug("cb_notify");
 }
 
 static int
@@ -93,7 +86,6 @@ cb_display_otr_message(void *opdata, const char *accountname,
 static const char *
 cb_protocol_name(void *opdata, const char *protocol)
 {
-//    cons_debug("cb_protocol_name: %s", protocol);
     return "xmpp";
 }
 
@@ -101,26 +93,21 @@ static void
 cb_new_fingerprint(void *opdata, OtrlUserState us, const char *accountname,
     const char *protocol, const char *username, unsigned char fingerprint[20])
 {
-//    cons_debug("cb_new_fingerprint: account: %s, protocol: %s, username: %s",
-//        accountname, protocol, username);
 }
 
 static void
 cb_protocol_name_free(void *opdata, const char *protocol_name)
 {
-//    cons_debug("cb_protocol_name_free: %s", protocol_name);
 }
 
 static void
 cb_update_context_list(void *opdata)
 {
-//    cons_debug("cb_update_context_list");
 }
 
 static void
 cb_write_fingerprints(void *opdata)
 {
-    cons_debug("cb_write_fingerprints");
     gcry_error_t err = 0;
     gchar *data_home = xdg_get_data_home();
     gchar *account_dir = str_replace(jid, "@", "_at_");
@@ -144,26 +131,22 @@ cb_write_fingerprints(void *opdata)
 static void
 cb_gone_secure(void *opdata, ConnContext *context)
 {
-//    cons_debug("cb_gone_secure");
     ui_gone_secure(context->username, otr_is_trusted(context->username));
 }
 
 static void
 cb_gone_insecure(void *opdata, ConnContext *context)
 {
-//    cons_debug("cb_gone_insecure");
 }
 
 static void
 cb_still_secure(void *opdata, ConnContext *context, int is_reply)
 {
-//    cons_debug("cb_still_secure: is_reply = %d", is_reply);
 }
 
 static void
 cb_log_message(void *opdata, const char *message)
 {
-//    cons_debug("cb_log_message: %s", message);
 }
 
 void
@@ -482,7 +465,6 @@ otr_get_their_fingerprint(const char * const recipient)
 char *
 otr_encrypt_message(const char * const to, const char * const message)
 {
-    cons_debug("Encrypting message: %s", message);
     gcry_error_t err;
     char *newmessage = NULL;
 
@@ -499,10 +481,8 @@ otr_encrypt_message(const char * const to, const char * const message)
         NULL,
         NULL);
     if (!err == GPG_ERR_NO_ERROR) {
-//        cons_debug("Error encrypting, result: %s", newmessage);
         return NULL;
     } else {
-        cons_debug("Encrypted message: %s", newmessage);
         return newmessage;
     }
 }
@@ -510,7 +490,6 @@ otr_encrypt_message(const char * const to, const char * const message)
 char *
 otr_decrypt_message(const char * const from, const char * const message)
 {
-    cons_debug("Decrypting message: %s", message);
     char *decrypted = NULL;
     OtrlTLV *tlvs = NULL;
     OtrlTLV *tlv = NULL;
@@ -518,7 +497,6 @@ otr_decrypt_message(const char * const from, const char * const message)
 
     // internal libotr message, ignore
     if (result == 1) {
-        cons_debug("Internal message.");
         tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
             ConnContext *context = otrl_context_find(user_state, from, jid, "xmpp",
@@ -533,12 +511,10 @@ otr_decrypt_message(const char * const from, const char * const message)
 
     // message was decrypted, return to user
     } else if (decrypted != NULL) {
-        cons_debug("Decrypted message: %s", decrypted);
         return decrypted;
 
     // normal non OTR message
     } else {
-        cons_debug("Non OTR message.");
         return strdup(message);
     }
 }
