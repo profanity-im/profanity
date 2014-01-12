@@ -54,6 +54,8 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->unread = 0;
     new_win->history_shown = 0;
     new_win->type = type;
+    new_win->is_otr = FALSE;
+    new_win->is_trusted = FALSE;
     scrollok(new_win->win, TRUE);
 
     return new_win;
@@ -82,6 +84,16 @@ win_print_time(ProfWin* window, char show_char)
 
 void
 win_print_line(ProfWin *window, const char show_char, int attrs,
+    const char * const msg)
+{
+    win_print_time(window, show_char);
+    wattron(window->win, attrs);
+    wprintw(window->win, "%s\n", msg);
+    wattroff(window->win, attrs);
+}
+
+void
+win_vprint_line(ProfWin *window, const char show_char, int attrs,
     const char * const msg, ...)
 {
     va_list arg;

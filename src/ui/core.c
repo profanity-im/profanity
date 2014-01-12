@@ -48,6 +48,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "otr.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/windows.h"
@@ -245,6 +246,11 @@ _ui_incoming_msg(const char * const from, const char * const message,
     ProfWin *window = wins_get_by_recipient(from);
     if (window == NULL) {
         window = wins_new(from, win_type);
+#ifdef HAVE_LIBOTR
+        if (otr_is_secure(from)) {
+            window->is_otr = TRUE;
+        }
+#endif
         win_created = TRUE;
     }
 
@@ -433,7 +439,12 @@ _ui_close_connected_win(int index)
         char *room_jid = ui_recipient(index);
         presence_leave_chat_room(room_jid);
     } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
-
+#ifdef HAVE_LIBOTR
+        ProfWin *window = wins_get_by_num(index);
+        if (window->is_otr) {
+            otr_end_session(window->from);
+        }
+#endif
         if (prefs_get_boolean(PREF_STATES)) {
             char *recipient = ui_recipient(index);
 
@@ -501,6 +512,33 @@ _ui_close_read_wins(void)
     return count;
 }
 
+GString *
+_get_recipient_string(ProfWin *window)
+{
+    GString *result = g_string_new("");
+    PContact contact = roster_get_contact(window->from);
+    if (contact != NULL) {
+        if (p_contact_name(contact) != NULL) {
+            g_string_append(result, p_contact_name(contact));
+        } else {
+            g_string_append(result, window->from);
+        }
+    } else {
+        g_string_append(result, window->from);
+    }
+
+    if (window->is_otr) {
+        g_string_append(result, " [OTR]");
+        if (window->is_trusted) {
+            g_string_append(result, " (trusted)");
+        } else {
+            g_string_append(result, " (untrusted)");
+        }
+    }
+
+    return result;
+}
+
 static void
 _ui_switch_win(const int i)
 {
@@ -517,16 +555,9 @@ _ui_switch_win(const int i)
             status_bar_current(1);
             status_bar_active(1);
         } else {
-            PContact contact = roster_get_contact(new_current->from);
-            if (contact != NULL) {
-                if (p_contact_name(contact) != NULL) {
-                    title_bar_set_recipient(p_contact_name(contact));
-                } else {
-                    title_bar_set_recipient(new_current->from);
-                }
-            } else {
-                title_bar_set_recipient(new_current->from);
-            }
+            GString *recipient_str = _get_recipient_string(new_current);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
             title_bar_draw();
             status_bar_current(i);
             status_bar_active(i);
@@ -551,21 +582,88 @@ _ui_next_win(void)
         status_bar_current(1);
         status_bar_active(1);
     } else {
-        PContact contact = roster_get_contact(new_current->from);
-        if (contact != NULL) {
-            if (p_contact_name(contact) != NULL) {
-                title_bar_set_recipient(p_contact_name(contact));
-            } else {
-                title_bar_set_recipient(new_current->from);
-            }
-        } else {
-            title_bar_set_recipient(new_current->from);
-        }
+        GString *recipient_str = _get_recipient_string(new_current);
+        title_bar_set_recipient(recipient_str->str);
+        g_string_free(recipient_str, TRUE);
         title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
     }
     wins_refresh_current();
+}
+
+static void
+_ui_gone_secure(const char * const recipient, gboolean trusted)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = TRUE;
+        window->is_trusted = trusted;
+        win_vprint_line(window, '!', 0, "OTR session started.");
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
+}
+
+static void
+_ui_gone_insecure(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = FALSE;
+        window->is_trusted = FALSE;
+        win_vprint_line(window, '!', 0, "OTR session ended.");
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
+}
+
+static void
+_ui_trust(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = TRUE;
+        window->is_trusted = TRUE;
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
+}
+
+static void
+_ui_untrust(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window != NULL) {
+        window->is_otr = TRUE;
+        window->is_trusted = FALSE;
+
+        if (wins_is_current(window)) {
+            GString *recipient_str = _get_recipient_string(window);
+            title_bar_set_recipient(recipient_str->str);
+            g_string_free(recipient_str, TRUE);
+            title_bar_draw();
+            wins_refresh_current();
+        }
+    }
 }
 
 static void
@@ -584,16 +682,9 @@ _ui_previous_win(void)
         status_bar_current(1);
         status_bar_active(1);
     } else {
-        PContact contact = roster_get_contact(new_current->from);
-        if (contact != NULL) {
-            if (p_contact_name(contact) != NULL) {
-                title_bar_set_recipient(p_contact_name(contact));
-            } else {
-                title_bar_set_recipient(new_current->from);
-            }
-        } else {
-            title_bar_set_recipient(new_current->from);
-        }
+        GString *recipient_str = _get_recipient_string(new_current);
+        title_bar_set_recipient(recipient_str->str);
+        g_string_free(recipient_str, TRUE);
         title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
@@ -693,6 +784,20 @@ _ui_current_win_type(void)
     return current->type;
 }
 
+static gboolean
+_ui_current_win_is_otr(void)
+{
+    ProfWin *current = wins_get_current();
+    return current->is_otr;
+}
+
+static void
+_ui_current_set_otr(gboolean value)
+{
+    ProfWin *current = wins_get_current();
+    current->is_otr = value;
+}
+
 static int
 _ui_current_win_index(void)
 {
@@ -726,8 +831,11 @@ _ui_current_print_line(const char * const msg, ...)
     ProfWin *current = wins_get_current();
     va_list arg;
     va_start(arg, msg);
-    win_print_line(current, '-', 0, msg, arg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    win_print_line(current, '-', 0, fmt_msg->str);
     va_end(arg);
+    g_string_free(fmt_msg, TRUE);
     win_refresh(current);
 }
 
@@ -755,7 +863,7 @@ _ui_print_error_from_recipient(const char * const from, const char *err_msg)
 
     ProfWin *window = wins_get_by_recipient(from);
     if (window != NULL) {
-        win_print_line(window, '-', COLOUR_ERROR, "%s", err_msg);
+        win_vprint_line(window, '-', COLOUR_ERROR, "%s", err_msg);
         if (wins_is_current(window)) {
             wins_refresh_current();
         }
@@ -813,7 +921,7 @@ _ui_recipient_gone(const char * const barejid)
 
     ProfWin *window = wins_get_by_recipient(barejid);
     if (window != NULL) {
-        win_print_line(window, '!', COLOUR_GONE, "<- %s has left the conversation.", display_usr);
+        win_vprint_line(window, '!', COLOUR_GONE, "<- %s has left the conversation.", display_usr);
         if (wins_is_current(window)) {
             wins_refresh_current();
         }
@@ -943,6 +1051,11 @@ _ui_outgoing_msg(const char * const from, const char * const to,
             window = wins_new(to, WIN_PRIVATE);
         } else {
             window = wins_new(to, WIN_CHAT);
+#ifdef HAVE_LIBOTR
+            if (otr_is_secure(to)) {
+                window->is_otr = TRUE;
+            }
+#endif
         }
 
         jid_destroy(jid);
@@ -1309,7 +1422,7 @@ _ui_status_room(const char * const contact)
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
     } else {
-        win_print_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
+        win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
     }
 }
 
@@ -1609,4 +1722,10 @@ ui_init_module(void)
     ui_unread = _ui_unread;
     ui_win_unread = _ui_win_unread;
     ui_ask_password = _ui_ask_password;
+    ui_current_win_is_otr = _ui_current_win_is_otr;
+    ui_current_set_otr = _ui_current_set_otr;
+    ui_gone_secure = _ui_gone_secure;
+    ui_gone_insecure = _ui_gone_insecure;
+    ui_trust = _ui_trust;
+    ui_untrust = _ui_untrust;
 }

@@ -28,6 +28,9 @@
 #include "config/preferences.h"
 #include "roster_list.h"
 #include "ui/ui.h"
+#ifdef HAVE_LIBOTR
+#include "otr.h"
+#endif
 
 void
 handle_error_message(const char *from, const char *err_msg)
@@ -48,6 +51,9 @@ void
 handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
+#ifdef HAVE_LIBOTR
+    otr_on_connect(account);
+#endif
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account);
@@ -169,6 +175,32 @@ handle_duck_result(const char * const result)
 void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
+#ifdef HAVE_LIBOTR
+    char *newmessage;
+    if (!priv) {
+        newmessage = otr_decrypt_message(from, message);
+        if (newmessage == NULL) {
+            return;
+        }
+    } else {
+        newmessage = message;
+    }
+
+    ui_incoming_msg(from, newmessage, NULL, priv);
+    ui_current_page_off();
+
+    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
+        Jid *from_jid = jid_create(from);
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        chat_log_chat(jidp->barejid, from_jid->barejid, newmessage, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+        jid_destroy(from_jid);
+    }
+
+    if (!priv)
+        otr_free_message(newmessage);
+#else
     ui_incoming_msg(from, message, NULL, priv);
     ui_current_page_off();
 
@@ -180,6 +212,7 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         jid_destroy(jidp);
         jid_destroy(from_jid);
     }
+#endif
 }
 
 void

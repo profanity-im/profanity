@@ -36,11 +36,14 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "otr.h"
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
 #include "ui/ui.h"
+#include "ui/window.h"
+#include "ui/windows.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 
@@ -915,6 +918,36 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             usr_jid = usr;
         }
         if (msg != NULL) {
+#ifdef HAVE_LIBOTR
+            if (otr_is_secure(usr_jid)) {
+                char *encrypted = otr_encrypt_message(usr_jid, msg);
+                if (encrypted != NULL) {
+                    message_send(encrypted, usr_jid);
+                    otr_free_message(encrypted);
+                    ui_outgoing_msg("me", usr_jid, msg);
+
+                    if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
+                        const char *jid = jabber_get_fulljid();
+                        Jid *jidp = jid_create(jid);
+                        chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
+                        jid_destroy(jidp);
+                    }
+                } else {
+                    cons_show_error("Failed to encrypt and send message,");
+                }
+            } else {
+                message_send(msg, usr_jid);
+                ui_outgoing_msg("me", usr_jid, msg);
+
+                if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
+                    const char *jid = jabber_get_fulljid();
+                    Jid *jidp = jid_create(jid);
+                    chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
+                    jid_destroy(jidp);
+                }
+            }
+            return TRUE;
+#else
             message_send(msg, usr_jid);
             ui_outgoing_msg("me", usr_jid, msg);
 
@@ -924,8 +957,9 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                 chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
                 jid_destroy(jidp);
             }
-
             return TRUE;
+#endif
+
         } else {
             const char * jid = NULL;
 
@@ -2262,6 +2296,104 @@ cmd_xa(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_XA, "xa", args);
     return TRUE;
+}
+
+gboolean
+cmd_otr(gchar **args, struct cmd_help_t help)
+{
+#ifdef HAVE_LIBOTR
+    if (jabber_get_connection_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to load OTR information.");
+        return TRUE;
+    }
+
+    if (strcmp(args[0], "gen") == 0) {
+        ProfAccount *account = accounts_get_account(jabber_get_account_name());
+        otr_keygen(account);
+        return TRUE;
+    } else if (strcmp(args[0], "myfp") == 0) {
+        char *fingerprint = otr_get_my_fingerprint();
+        ui_current_print_line("Your OTR fingerprint: %s", fingerprint);
+        free(fingerprint);
+        return TRUE;
+    } else if (strcmp(args[0], "theirfp") == 0) {
+        win_type_t win_type = ui_current_win_type();
+
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_line("You not currently in an OTR session with this recipient.");
+        } else {
+            char *recipient = ui_current_recipient();
+            char *fingerprint = otr_get_their_fingerprint(recipient);
+            ui_current_print_line("OTR fingerprint for %s: %s", recipient, fingerprint);
+            free(fingerprint);
+        }
+        return TRUE;
+    } else if (strcmp(args[0], "start") == 0) {
+        win_type_t win_type = ui_current_win_type();
+
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in a regular chat window to start an OTR session.");
+        } else if (ui_current_win_is_otr()) {
+            ui_current_print_line("You are already in an OTR session.");
+        } else {
+            if (!otr_key_loaded()) {
+                ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+            } else {
+                char *recipient = ui_current_recipient();
+                message_send("?OTR?", recipient);
+            }
+        }
+        return TRUE;
+    } else if (strcmp(args[0], "end") == 0) {
+        win_type_t win_type = ui_current_win_type();
+
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in a regular chat window to use OTR.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_line("You are not currently in an OTR session.");
+        } else {
+            char *recipient = ui_current_recipient();
+            ui_gone_insecure(recipient);
+            otr_end_session(recipient);
+        }
+        return TRUE;
+    } else if (strcmp(args[0], "trust") == 0) {
+        win_type_t win_type = ui_current_win_type();
+
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in an OTR session to trust a recipient.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_line("You are not currently in an OTR session.");
+        } else {
+            char *recipient = ui_current_recipient();
+            ui_trust(recipient);
+            otr_trust(recipient);
+        }
+        return TRUE;
+    } else if (strcmp(args[0], "untrust") == 0) {
+        win_type_t win_type = ui_current_win_type();
+
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in an OTR session to untrust a recipient.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_line("You are not currently in an OTR session.");
+        } else {
+            char *recipient = ui_current_recipient();
+            ui_untrust(recipient);
+            otr_untrust(recipient);
+        }
+        return TRUE;
+
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+#else
+    cons_show("This version of Profanity has not been built with OTR support enabled");
+    return TRUE;
+#endif
 }
 
 // helper function for status change commands

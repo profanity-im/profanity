@@ -19,7 +19,6 @@
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 #include "config.h"
 
 #ifdef HAVE_GIT_VERSION
@@ -45,6 +44,9 @@
 #include "roster_list.h"
 #include "log.h"
 #include "muc.h"
+#ifdef HAVE_LIBOTR
+#include "otr.h"
+#endif
 #include "resource.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
@@ -300,6 +302,9 @@ _init(const int disable_tls, char *log_level)
     log_info("Initialising contact list");
     roster_init();
     muc_init();
+#ifdef HAVE_LIBOTR
+    otr_init();
+#endif
     atexit(_shutdown);
 }
 

@@ -48,6 +48,8 @@ typedef struct prof_win_t {
     char *from;
     WINDOW *win;
     win_type_t type;
+    gboolean is_otr;
+    gboolean is_trusted;
     int y_pos;
     int paged;
     int unread;
@@ -56,8 +58,10 @@ typedef struct prof_win_t {
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
 void win_free(ProfWin *window);
-void win_print_line(ProfWin *self, const char show_char, int attrs,
+void win_vprint_line(ProfWin *self, const char show_char, int attrs,
     const char * const msg, ...);
+void win_print_line(ProfWin *self, const char show_char, int attrs,
+    const char * const msg);
 void win_refresh(ProfWin *window);
 void win_page_off(ProfWin *window);
 void win_print_time(ProfWin *window, char show_char);

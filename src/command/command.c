@@ -41,6 +41,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#include "otr.h"
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -567,6 +568,20 @@ static struct cmd_t command_defs[] =
           "Such as whether you have become inactive, or have closed the chat window.",
           NULL } } },
 
+    { "/otr",
+        cmd_otr, parse_args, 1, 2, NULL,
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust",
+          "---------------------------------------------",
+          "gen - Generate your private key.",
+          "myfp - Show your fingerprint.",
+          "theirfp - Show contacts fingerprint.",
+          "start - Start an OTR session with the current recipient.",
+          "end - End the current OTR session,",
+          "trust - Indicate that you have verified the contact's fingerprint.",
+          "untrust - Indicate the the contact's fingerprint is not verified,",
+          NULL } } },
+
     { "/outtype",
         cmd_outtype, parse_args, 1, 1, &cons_outtype_setting,
         { "/outtype on|off", "Send typing notification to recipient.",
@@ -817,6 +832,7 @@ static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
+static Autocomplete otr_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -969,6 +985,15 @@ cmd_init(void)
     autocomplete_add(bookmark_ac, "list");
     autocomplete_add(bookmark_ac, "remove");
 
+    otr_ac = autocomplete_new();
+    autocomplete_add(otr_ac, "gen");
+    autocomplete_add(otr_ac, "start");
+    autocomplete_add(otr_ac, "end");
+    autocomplete_add(otr_ac, "myfp");
+    autocomplete_add(otr_ac, "theirfp");
+    autocomplete_add(otr_ac, "trust");
+    autocomplete_add(otr_ac, "untrust");
+
     cmd_history_init();
 }
 
@@ -999,6 +1024,7 @@ cmd_uninit(void)
     autocomplete_free(roster_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
+    autocomplete_free(otr_ac);
 }
 
 // Command autocompletion functions
@@ -1072,6 +1098,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(roster_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(bookmark_ac);
+    autocomplete_reset(otr_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1129,8 +1156,36 @@ cmd_execute_default(const char * const inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                message_send(inp, recipient);
+#ifdef HAVE_LIBOTR
+                if (otr_is_secure(recipient)) {
+                    char *encrypted = otr_encrypt_message(recipient, inp);
+                    if (encrypted != NULL) {
+                        message_send(encrypted, recipient);
+                        otr_free_message(encrypted);
+                        if (prefs_get_boolean(PREF_CHLOG)) {
+                            const char *jid = jabber_get_fulljid();
+                            Jid *jidp = jid_create(jid);
+                            chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                            jid_destroy(jidp);
+                        }
 
+                        ui_outgoing_msg("me", recipient, inp);
+                    } else {
+                        cons_show_error("Failed to send message.");
+                    }
+                } else {
+                    message_send(inp, recipient);
+                    if (prefs_get_boolean(PREF_CHLOG)) {
+                        const char *jid = jabber_get_fulljid();
+                        Jid *jidp = jid_create(jid);
+                        chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                        jid_destroy(jidp);
+                    }
+
+                    ui_outgoing_msg("me", recipient, inp);
+                }
+#else
+                message_send(inp, recipient);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -1139,6 +1194,7 @@ cmd_execute_default(const char * const inp)
                 }
 
                 ui_outgoing_msg("me", recipient, inp);
+#endif
             }
             break;
 
@@ -1267,8 +1323,8 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins", "/otr" };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, otr_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
