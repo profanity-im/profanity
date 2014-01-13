@@ -2345,6 +2345,17 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
 
             ui_new_chat_win(barejid);
+
+            if (ui_current_win_is_otr()) {
+                ui_current_print_line("You are already in an OTR session.");
+            } else {
+                if (!otr_key_loaded()) {
+                    ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+                } else {
+                    char *recipient = ui_current_recipient();
+                    message_send("?OTR?", recipient);
+                }
+            }
         } else {
             win_type_t win_type = ui_current_win_type();
 
