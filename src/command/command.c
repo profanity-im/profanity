@@ -1564,6 +1564,11 @@ _otr_autocomplete(char *input, int *size)
 {
     char *result = NULL;
 
+    result = autocomplete_param_with_func(input, size, "/otr start", roster_find_contact);
+    if (result != NULL) {
+        return result;
+    }
+
     result = autocomplete_param_with_ac(input, size, "/otr", otr_ac);
     if (result != NULL) {
         return result;
