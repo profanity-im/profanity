@@ -43,12 +43,6 @@ cb_policy(void *opdata, ConnContext *context)
     return OTRL_POLICY_DEFAULT ;
 }
 
-static void
-cb_create_privkey(void *opdata, const char *accountname,
-    const char *protocol)
-{
-}
-
 static int
 cb_is_logged_in(void *opdata, const char *accountname,
     const char *protocol, const char *recipient)
@@ -68,41 +62,12 @@ cb_inject_message(void *opdata, const char *accountname,
     message_send(message, recipient);
 }
 
-static void
-cb_notify(void *opdata, OtrlNotifyLevel level,
-    const char *accountname, const char *protocol, const char *username,
-    const char *title, const char *primary, const char *secondary)
-{
-}
-
 static int
 cb_display_otr_message(void *opdata, const char *accountname,
     const char *protocol, const char *username, const char *msg)
 {
     cons_show_error("%s", msg);
     return 0;
-}
-
-static const char *
-cb_protocol_name(void *opdata, const char *protocol)
-{
-    return "xmpp";
-}
-
-static void
-cb_new_fingerprint(void *opdata, OtrlUserState us, const char *accountname,
-    const char *protocol, const char *username, unsigned char fingerprint[20])
-{
-}
-
-static void
-cb_protocol_name_free(void *opdata, const char *protocol_name)
-{
-}
-
-static void
-cb_update_context_list(void *opdata)
-{
 }
 
 static void
@@ -134,21 +99,6 @@ cb_gone_secure(void *opdata, ConnContext *context)
     ui_gone_secure(context->username, otr_is_trusted(context->username));
 }
 
-static void
-cb_gone_insecure(void *opdata, ConnContext *context)
-{
-}
-
-static void
-cb_still_secure(void *opdata, ConnContext *context, int is_reply)
-{
-}
-
-static void
-cb_log_message(void *opdata, const char *message)
-{
-}
-
 void
 otr_init(void)
 {
@@ -156,20 +106,11 @@ otr_init(void)
     OTRL_INIT;
 
     ops.policy = cb_policy;
-    ops.create_privkey = cb_create_privkey;
     ops.is_logged_in = cb_is_logged_in;
     ops.inject_message = cb_inject_message;
-    ops.notify = cb_notify;
     ops.display_otr_message = cb_display_otr_message;
-    ops.update_context_list = cb_update_context_list;
-    ops.protocol_name = cb_protocol_name;
-    ops.protocol_name_free = cb_protocol_name_free;
-    ops.new_fingerprint = cb_new_fingerprint;
     ops.write_fingerprints = cb_write_fingerprints;
     ops.gone_secure = cb_gone_secure;
-    ops.gone_insecure = cb_gone_insecure;
-    ops.still_secure = cb_still_secure;
-    ops.log_message = cb_log_message;
 
     data_loaded = FALSE;
 }
