@@ -176,9 +176,12 @@ void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
 #ifdef HAVE_LIBOTR
+    gboolean was_decrypted = FALSE;
     char *newmessage;
     if (!priv) {
-        newmessage = otr_decrypt_message(from, message);
+        newmessage = otr_decrypt_message(from, message, &was_decrypted);
+
+        // internal OTR message
         if (newmessage == NULL) {
             return;
         }
@@ -193,7 +196,13 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, newmessage, PROF_IN_LOG, NULL);
+
+        if (!was_decrypted || (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0)) {
+            chat_log_chat(jidp->barejid, from_jid->barejid, newmessage, PROF_IN_LOG, NULL);
+        } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+            chat_log_chat(jidp->barejid, from_jid->barejid, "[redacted]", PROF_IN_LOG, NULL);
+        }
+
         jid_destroy(jidp);
         jid_destroy(from_jid);
     }

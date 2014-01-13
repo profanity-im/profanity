@@ -429,14 +429,14 @@ otr_encrypt_message(const char * const to, const char * const message)
 }
 
 char *
-otr_decrypt_message(const char * const from, const char * const message)
+otr_decrypt_message(const char * const from, const char * const message, gboolean *was_decrypted)
 {
     char *decrypted = NULL;
     OtrlTLV *tlvs = NULL;
     OtrlTLV *tlv = NULL;
     int result = otrl_message_receiving(user_state, &ops, NULL, jid, "xmpp", from, message, &decrypted, &tlvs, NULL, NULL);
 
-    // internal libotr message, ignore
+    // internal libotr message
     if (result == 1) {
         tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
@@ -452,10 +452,12 @@ otr_decrypt_message(const char * const from, const char * const message)
 
     // message was decrypted, return to user
     } else if (decrypted != NULL) {
+        *was_decrypted = TRUE;
         return decrypted;
 
     // normal non OTR message
     } else {
+        *was_decrypted = FALSE;
         return strdup(message);
     }
 }

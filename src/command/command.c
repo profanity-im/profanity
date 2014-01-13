@@ -1176,7 +1176,11 @@ cmd_execute_default(const char * const inp)
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
                             Jid *jidp = jid_create(jid);
-                            chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                            if (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0) {
+                                chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                            } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+                                chat_log_chat(jidp->barejid, recipient, "[redacted]", PROF_OUT_LOG, NULL);
+                            }
                             jid_destroy(jidp);
                         }
 
