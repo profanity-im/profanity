@@ -2331,18 +2331,34 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         }
         return TRUE;
     } else if (strcmp(args[0], "start") == 0) {
-        win_type_t win_type = ui_current_win_type();
+        if (args[1] != NULL) {
+            char *contact = args[1];
+            char *barejid = roster_barejid_from_name(contact);
+            if (barejid == NULL) {
+                barejid = contact;
+            }
 
-        if (win_type != WIN_CHAT) {
-            ui_current_print_line("You must be in a regular chat window to start an OTR session.");
-        } else if (ui_current_win_is_otr()) {
-            ui_current_print_line("You are already in an OTR session.");
+            if (prefs_get_boolean(PREF_STATES)) {
+                if (!chat_session_exists(barejid)) {
+                    chat_session_start(barejid, TRUE);
+                }
+            }
+
+            ui_new_chat_win(barejid);
         } else {
-            if (!otr_key_loaded()) {
-                ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+            win_type_t win_type = ui_current_win_type();
+
+            if (win_type != WIN_CHAT) {
+                ui_current_print_line("You must be in a regular chat window to start an OTR session.");
+            } else if (ui_current_win_is_otr()) {
+                ui_current_print_line("You are already in an OTR session.");
             } else {
-                char *recipient = ui_current_recipient();
-                message_send("?OTR?", recipient);
+                if (!otr_key_loaded()) {
+                    ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+                } else {
+                    char *recipient = ui_current_recipient();
+                    message_send("?OTR?", recipient);
+                }
             }
         }
         return TRUE;
