@@ -304,6 +304,7 @@ _get_group(preference_t pref)
             return "notifications";
         case PREF_CHLOG:
         case PREF_GRLOG:
+        case PREF_OTR_LOG:
             return "logging";
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
@@ -365,6 +366,8 @@ _get_key(preference_t pref)
             return "autoaway.message";
         case PREF_CONNECT_ACCOUNT:
             return "account";
+        case PREF_OTR_LOG:
+            return "otr";
         default:
             return NULL;
     }
@@ -390,6 +393,8 @@ _get_default_string(preference_t pref)
     {
         case PREF_AUTOAWAY_MODE:
             return "off";
+        case PREF_OTR_LOG:
+            return "redact";
         default:
             return NULL;
     }

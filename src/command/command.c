@@ -571,9 +571,9 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust",
-          "---------------------------------------------",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log",
+          "-------------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
@@ -581,6 +581,7 @@ static struct cmd_t command_defs[] =
           "end - End the current OTR session,",
           "trust - Indicate that you have verified the contact's fingerprint.",
           "untrust - Indicate the the contact's fingerprint is not verified,",
+          "log - How to log OTR messages, options are 'on', 'off' and 'redact', with redaction being the default.",
           NULL } } },
 
     { "/outtype",
@@ -834,6 +835,7 @@ static Autocomplete roster_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
+static Autocomplete otr_log_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -994,6 +996,12 @@ cmd_init(void)
     autocomplete_add(otr_ac, "theirfp");
     autocomplete_add(otr_ac, "trust");
     autocomplete_add(otr_ac, "untrust");
+    autocomplete_add(otr_ac, "log");
+
+    otr_log_ac = autocomplete_new();
+    autocomplete_add(otr_log_ac, "on");
+    autocomplete_add(otr_log_ac, "off");
+    autocomplete_add(otr_log_ac, "redact");
 
     cmd_history_init();
 }
@@ -1026,6 +1034,7 @@ cmd_uninit(void)
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(otr_ac);
+    autocomplete_free(otr_log_ac);
 }
 
 // Command autocompletion functions
@@ -1100,6 +1109,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(group_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(otr_ac);
+    autocomplete_reset(otr_log_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1325,7 +1335,7 @@ _cmd_complete_parameters(char *input, int *size)
     }
 
     gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, otr_ac };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac  };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
@@ -1565,6 +1575,11 @@ _otr_autocomplete(char *input, int *size)
     char *result = NULL;
 
     result = autocomplete_param_with_func(input, size, "/otr start", roster_find_contact);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/otr log", otr_log_ac);
     if (result != NULL) {
         return result;
     }

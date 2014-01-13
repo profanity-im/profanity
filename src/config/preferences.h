@@ -57,7 +57,8 @@ typedef enum {
     PREF_AUTOAWAY_CHECK,
     PREF_AUTOAWAY_MODE,
     PREF_AUTOAWAY_MESSAGE,
-    PREF_CONNECT_ACCOUNT
+    PREF_CONNECT_ACCOUNT,
+    PREF_OTR_LOG
 } preference_t;
 
 void prefs_load(void);

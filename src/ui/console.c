@@ -1134,6 +1134,20 @@ _cons_grlog_setting(void)
 }
 
 static void
+_cons_otr_log_setting(void)
+{
+    char *value = prefs_get_string(PREF_OTR_LOG);
+
+    if (strcmp(value, "on") == 0) {
+        cons_show("OTR logging (/otr log)      : ON");
+    } else if (strcmp(value, "off") == 0) {
+        cons_show("OTR logging (/otr log)      : OFF");
+    } else {
+        cons_show("OTR logging (/otr log)      : Redacted");
+    }
+}
+
+static void
 _cons_show_log_prefs(void)
 {
     cons_show("Logging preferences:");
@@ -1141,6 +1155,7 @@ _cons_show_log_prefs(void)
     cons_log_setting();
     cons_chlog_setting();
     cons_grlog_setting();
+    cons_otr_log_setting();
 
     wins_refresh_console();
     cons_alert();
@@ -1548,6 +1563,7 @@ console_init_module(void)
     cons_log_setting = _cons_log_setting;
     cons_chlog_setting = _cons_chlog_setting;
     cons_grlog_setting = _cons_grlog_setting;
+    cons_otr_log_setting = _cons_otr_log_setting;
     cons_show_log_prefs = _cons_show_log_prefs;
     cons_autoaway_setting = _cons_autoaway_setting;
     cons_show_presence_prefs = _cons_show_presence_prefs;

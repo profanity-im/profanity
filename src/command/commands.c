@@ -2302,6 +2302,29 @@ gboolean
 cmd_otr(gchar **args, struct cmd_help_t help)
 {
 #ifdef HAVE_LIBOTR
+    if (strcmp(args[0], "log") == 0) {
+        char *choice = args[1];
+        if (g_strcmp0(choice, "on") == 0) {
+            prefs_set_string(PREF_OTR_LOG, "on");
+            cons_show("OTR messages will be logged as plaintext.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else if (g_strcmp0(choice, "off") == 0) {
+            prefs_set_string(PREF_OTR_LOG, "off");
+            cons_show("OTR message logging disabled.");
+        } else if (g_strcmp0(choice, "redact") == 0) {
+            prefs_set_string(PREF_OTR_LOG, "redact");
+            cons_show("OTR messages will be logged as '[redacted]'.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+        return TRUE;
+    }
+
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
         cons_show("You must be connected with an account to load OTR information.");
         return TRUE;
