@@ -65,6 +65,7 @@ static char * _who_autocomplete(char *input, int *size);
 static char * _roster_autocomplete(char *input, int *size);
 static char * _group_autocomplete(char *input, int *size);
 static char * _bookmark_autocomplete(char *input, int *size);
+static char * _otr_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -576,7 +577,7 @@ static struct cmd_t command_defs[] =
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
-          "start - Start an OTR session with the current recipient.",
+          "start <contact> - Start an OTR session with the contact, or the current recipient if in a chat window and no argument supplied.",
           "end - End the current OTR session,",
           "trust - Indicate that you have verified the contact's fingerprint.",
           "untrust - Indicate the the contact's fingerprint is not verified,",
@@ -1323,7 +1324,7 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins", "/otr" };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, otr_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
@@ -1338,7 +1339,7 @@ _cmd_complete_parameters(char *input, int *size)
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
-        _bookmark_autocomplete, _autoconnect_autocomplete };
+        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1551,6 +1552,19 @@ _autoconnect_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/autoconnect", autoconnect_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_otr_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, size, "/otr", otr_ac);
     if (result != NULL) {
         return result;
     }
