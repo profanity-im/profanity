@@ -130,9 +130,9 @@ otr_on_connect(ProfAccount *account)
     g_string_append(basedir, "/");
 
     if (!mkdir_recursive(basedir->str)) {
-        g_string_free(basedir, TRUE);
         log_error("Could not create %s for account %s.", basedir->str, jid);
         cons_show_error("Could not create %s for account %s.", basedir->str, jid);
+        g_string_free(basedir, TRUE);
         return;
     }
 
@@ -211,9 +211,9 @@ otr_keygen(ProfAccount *account)
     g_string_append(basedir, "/");
 
     if (!mkdir_recursive(basedir->str)) {
-        g_string_free(basedir, TRUE);
         log_error("Could not create %s for account %s.", basedir->str, jid);
         cons_show_error("Could not create %s for account %s.", basedir->str, jid);
+        g_string_free(basedir, TRUE);
         return;
     }
 
