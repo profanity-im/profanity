@@ -2351,9 +2351,10 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             } else {
                 if (!otr_key_loaded()) {
                     ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+                } else if (!otr_is_secure(barejid)) {
+                    message_send("?OTR?", barejid);
                 } else {
-                    char *recipient = ui_current_recipient();
-                    message_send("?OTR?", recipient);
+                    ui_gone_secure(barejid, otr_is_trusted(barejid));
                 }
             }
         } else {
