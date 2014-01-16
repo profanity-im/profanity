@@ -414,7 +414,7 @@ static void
 _ui_disconnected(void)
 {
     wins_lost_connection();
-    title_bar_set_status(CONTACT_OFFLINE);
+    title_bar_set_presence(CONTACT_OFFLINE);
     status_bar_clear_message();
     status_bar_refresh();
 }

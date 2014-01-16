@@ -2470,7 +2470,7 @@ _update_presence(const resource_presence_t resource_presence,
         presence_update(resource_presence, msg, 0);
 
         contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
-        title_bar_set_status(contact_presence);
+        title_bar_set_presence(contact_presence);
 
         gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
         if (msg != NULL) {

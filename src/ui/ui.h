@@ -156,7 +156,7 @@ void (*title_bar_refresh)(void);
 void (*title_bar_resize)(void);
 void (*title_bar_show)(const char * const title);
 void (*title_bar_console)(void);
-void (*title_bar_set_status)(contact_presence_t status);
+void (*title_bar_set_presence)(contact_presence_t status);
 void (*title_bar_set_recipient)(const char * const from);
 void (*title_bar_set_typing)(gboolean is_typing);
 void (*title_bar_draw)(void);

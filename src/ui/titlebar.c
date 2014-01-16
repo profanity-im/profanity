@@ -30,7 +30,9 @@
 static WINDOW *win;
 static char *current_title = NULL;
 static char *recipient = NULL;
+
 static GTimer *typing_elapsed;
+
 static contact_presence_t current_status;
 
 static void _title_bar_draw_title(void);
@@ -44,7 +46,7 @@ _create_title_bar(void)
     win = newwin(1, cols, 0, 0);
     wbkgd(win, COLOUR_TITLE_TEXT);
     title_bar_console();
-    title_bar_set_status(CONTACT_OFFLINE);
+    title_bar_set_presence(CONTACT_OFFLINE);
     wrefresh(win);
     inp_put_back();
 }
@@ -116,7 +118,7 @@ _title_bar_show(const char * const title)
 }
 
 static void
-_title_bar_set_status(contact_presence_t status)
+_title_bar_set_presence(contact_presence_t status)
 {
     current_status = status;
     _title_bar_draw_status();
@@ -238,7 +240,7 @@ titlebar_init_module(void)
     title_bar_resize = _title_bar_resize;
     title_bar_refresh = _title_bar_refresh;
     title_bar_show = _title_bar_show;
-    title_bar_set_status = _title_bar_set_status;
+    title_bar_set_presence = _title_bar_set_presence;
     title_bar_set_recipient = _title_bar_set_recipient;
     title_bar_set_typing = _title_bar_set_typing;
     title_bar_draw = _title_bar_draw;

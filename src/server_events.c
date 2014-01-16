@@ -57,7 +57,7 @@ handle_login_account_success(char *account_name)
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account);
-    title_bar_set_status(contact_presence);
+    title_bar_set_presence(contact_presence);
     log_info("%s logged in successfully", account->jid);
     ui_current_page_off();
     status_bar_print_message(account->jid);
