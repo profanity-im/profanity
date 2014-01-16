@@ -86,13 +86,10 @@ _title_bar_refresh(void)
                 free(current_title);
                 current_title = strdup(current_recipient);
 
-                title_bar_draw();
-
                 g_timer_destroy(typing_elapsed);
                 typing_elapsed = NULL;
 
-                wrefresh(win);
-                inp_put_back();
+                title_bar_draw();
             }
         }
     }
