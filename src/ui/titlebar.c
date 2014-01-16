@@ -43,14 +43,14 @@ _create_title_bar(void)
 
     title_bar = newwin(1, cols, 0, 0);
     wbkgd(title_bar, COLOUR_TITLE_TEXT);
-    title_bar_title();
+    title_bar_console();
     title_bar_set_status(CONTACT_OFFLINE);
     wrefresh(title_bar);
     inp_put_back();
 }
 
 static void
-_title_bar_title(void)
+_title_bar_console(void)
 {
     werase(title_bar);
     recipient = NULL;
@@ -234,7 +234,7 @@ void
 titlebar_init_module(void)
 {
     create_title_bar = _create_title_bar;
-    title_bar_title = _title_bar_title;
+    title_bar_console = _title_bar_console;
     title_bar_resize = _title_bar_resize;
     title_bar_refresh = _title_bar_refresh;
     title_bar_show = _title_bar_show;

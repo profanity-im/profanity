@@ -551,7 +551,7 @@ _ui_switch_win(const int i)
         new_current->unread = 0;
 
         if (i == 1) {
-            title_bar_title();
+            title_bar_console();
             status_bar_current(1);
             status_bar_active(1);
         } else {
@@ -578,7 +578,7 @@ _ui_next_win(void)
     new_current->unread = 0;
 
     if (i == 1) {
-        title_bar_title();
+        title_bar_console();
         status_bar_current(1);
         status_bar_active(1);
     } else {
@@ -678,7 +678,7 @@ _ui_previous_win(void)
     new_current->unread = 0;
 
     if (i == 1) {
-        title_bar_title();
+        title_bar_console();
         status_bar_current(1);
         status_bar_active(1);
     } else {
@@ -704,18 +704,18 @@ _ui_close_current(void)
     int current_index = wins_get_current_num();
     status_bar_inactive(current_index);
     wins_close_current();
+    title_bar_console();
     status_bar_current(1);
     status_bar_active(1);
-    title_bar_title();
 }
 
 static void
 _ui_close_win(int index)
 {
     wins_close_by_num(index);
+    title_bar_console();
     status_bar_current(1);
     status_bar_active(1);
-    title_bar_title();
 
     wins_refresh_current();
 }
