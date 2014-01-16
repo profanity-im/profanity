@@ -134,6 +134,8 @@ AM_CONDITIONAL([BUILD_OTR], [true])
 if test "x$enable_otr" = xyes; then
     AC_CHECK_LIB([otr], [main], [],
         [AC_MSG_ERROR([libotr is required for otr encryption support])])
+elif test "x$enable_otr" = xno; then
+    AM_CONDITIONAL([BUILD_OTR], [false])
 elif test "x$enable_otr" = x; then
     AC_CHECK_LIB([otr], [main], [],
         [AM_CONDITIONAL([BUILD_OTR], [false]) AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
