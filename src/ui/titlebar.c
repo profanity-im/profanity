@@ -29,7 +29,7 @@
 
 static WINDOW *win;
 static char *current_title = NULL;
-static char *recipient = NULL;
+static char *current_recipient = NULL;
 
 static GTimer *typing_elapsed;
 
@@ -52,7 +52,7 @@ static void
 _title_bar_console(void)
 {
     werase(win);
-    recipient = NULL;
+    current_recipient = NULL;
     typing_elapsed = NULL;
 
     if (current_title != NULL)
@@ -76,7 +76,7 @@ _title_bar_resize(void)
 static void
 _title_bar_refresh(void)
 {
-    if (recipient != NULL) {
+    if (current_recipient != NULL) {
 
         if (typing_elapsed != NULL) {
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
@@ -87,8 +87,8 @@ _title_bar_refresh(void)
                     free(current_title);
                 }
 
-                current_title = (char *) malloc(strlen(recipient) + 1);
-                strcpy(current_title, recipient);
+                current_title = (char *) malloc(strlen(current_recipient) + 1);
+                strcpy(current_title, current_recipient);
 
                 title_bar_draw();
 
@@ -117,8 +117,8 @@ _title_bar_set_recipient(const char * const from)
         g_timer_destroy(typing_elapsed);
         typing_elapsed = NULL;
     }
-    free(recipient);
-    recipient = strdup(from);
+    free(current_recipient);
+    current_recipient = strdup(from);
 
     if (current_title != NULL) {
         free(current_title);
@@ -147,11 +147,11 @@ _title_bar_set_typing(gboolean is_typing)
     }
 
     if (is_typing) {
-        current_title = (char *) malloc(strlen(recipient) + 13);
-        sprintf(current_title, "%s (typing...)", recipient);
+        current_title = (char *) malloc(strlen(current_recipient) + 13);
+        sprintf(current_title, "%s (typing...)", current_recipient);
     } else {
-        current_title = (char *) malloc(strlen(recipient) + 1);
-        strcpy(current_title, recipient);
+        current_title = (char *) malloc(strlen(current_recipient) + 1);
+        strcpy(current_title, current_recipient);
     }
 
     wrefresh(win);
