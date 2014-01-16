@@ -115,6 +115,7 @@ static void
 _title_bar_set_presence(contact_presence_t presence)
 {
     current_presence = presence;
+    _title_bar_draw_title();
     _title_bar_draw_presence();
 }
 
@@ -170,8 +171,8 @@ static void
 _title_bar_draw(void)
 {
     werase(win);
-    _title_bar_draw_presence();
     _title_bar_draw_title();
+    _title_bar_draw_presence();
 }
 
 static void
