@@ -27,6 +27,8 @@
 #include "config/theme.h"
 #include "ui/ui.h"
 
+#define CONSOLE_TITLE "Profanity. Type /help for help information."
+
 static WINDOW *win;
 static char *current_title = NULL;
 static char *current_recipient = NULL;
@@ -55,7 +57,7 @@ _title_bar_console(void)
     typing_elapsed = NULL;
 
     free(current_title);
-    current_title = strdup("Profanity. Type /help for help information.");
+    current_title = strdup(CONSOLE_TITLE);
 
     title_bar_draw();
 }
