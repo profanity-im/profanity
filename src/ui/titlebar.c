@@ -27,7 +27,7 @@
 #include "config/theme.h"
 #include "ui/ui.h"
 
-static WINDOW *title_bar;
+static WINDOW *win;
 static char *current_title = NULL;
 static char *recipient = NULL;
 static GTimer *typing_elapsed;
@@ -41,23 +41,23 @@ _create_title_bar(void)
 {
     int cols = getmaxx(stdscr);
 
-    title_bar = newwin(1, cols, 0, 0);
-    wbkgd(title_bar, COLOUR_TITLE_TEXT);
+    win = newwin(1, cols, 0, 0);
+    wbkgd(win, COLOUR_TITLE_TEXT);
     title_bar_console();
     title_bar_set_status(CONTACT_OFFLINE);
-    wrefresh(title_bar);
+    wrefresh(win);
     inp_put_back();
 }
 
 static void
 _title_bar_console(void)
 {
-    werase(title_bar);
+    werase(win);
     recipient = NULL;
     typing_elapsed = NULL;
     title_bar_show("Profanity. Type /help for help information.");
     _title_bar_draw_status();
-    wrefresh(title_bar);
+    wrefresh(win);
     inp_put_back();
 }
 
@@ -66,12 +66,12 @@ _title_bar_resize(void)
 {
     int cols = getmaxx(stdscr);
 
-    wresize(title_bar, 1, cols);
-    wbkgd(title_bar, COLOUR_TITLE_TEXT);
-    werase(title_bar);
+    wresize(win, 1, cols);
+    wbkgd(win, COLOUR_TITLE_TEXT);
+    werase(win);
     _title_bar_draw_title();
     _title_bar_draw_status();
-    wrefresh(title_bar);
+    wrefresh(win);
     inp_put_back();
 }
 
@@ -97,7 +97,7 @@ _title_bar_refresh(void)
                 g_timer_destroy(typing_elapsed);
                 typing_elapsed = NULL;
 
-                wrefresh(title_bar);
+                wrefresh(win);
                 inp_put_back();
             }
         }
@@ -139,7 +139,7 @@ _title_bar_set_recipient(const char * const from)
     current_title = (char *) malloc(strlen(from) + 1);
     strcpy(current_title, from);
 
-    wrefresh(title_bar);
+    wrefresh(win);
     inp_put_back();
 }
 
@@ -166,14 +166,14 @@ _title_bar_set_typing(gboolean is_typing)
         strcpy(current_title, recipient);
     }
 
-    wrefresh(title_bar);
+    wrefresh(win);
     inp_put_back();
 }
 
 static void
 _title_bar_draw(void)
 {
-    werase(title_bar);
+    werase(win);
     _title_bar_draw_status();
     _title_bar_draw_title();
 }
@@ -183,50 +183,50 @@ _title_bar_draw_status(void)
 {
     int cols = getmaxx(stdscr);
 
-    wattron(title_bar, COLOUR_TITLE_BRACKET);
-    mvwaddch(title_bar, 0, cols - 14, '[');
-    wattroff(title_bar, COLOUR_TITLE_BRACKET);
+    wattron(win, COLOUR_TITLE_BRACKET);
+    mvwaddch(win, 0, cols - 14, '[');
+    wattroff(win, COLOUR_TITLE_BRACKET);
 
     switch (current_status)
     {
         case CONTACT_ONLINE:
-            mvwprintw(title_bar, 0, cols - 13, " ...online ");
+            mvwprintw(win, 0, cols - 13, " ...online ");
             break;
         case CONTACT_AWAY:
-            mvwprintw(title_bar, 0, cols - 13, " .....away ");
+            mvwprintw(win, 0, cols - 13, " .....away ");
             break;
         case CONTACT_DND:
-            mvwprintw(title_bar, 0, cols - 13, " ......dnd ");
+            mvwprintw(win, 0, cols - 13, " ......dnd ");
             break;
         case CONTACT_CHAT:
-            mvwprintw(title_bar, 0, cols - 13, " .....chat ");
+            mvwprintw(win, 0, cols - 13, " .....chat ");
             break;
         case CONTACT_XA:
-            mvwprintw(title_bar, 0, cols - 13, " .......xa ");
+            mvwprintw(win, 0, cols - 13, " .......xa ");
             break;
         case CONTACT_OFFLINE:
-            mvwprintw(title_bar, 0, cols - 13, " ..offline ");
+            mvwprintw(win, 0, cols - 13, " ..offline ");
             break;
     }
 
-    wattron(title_bar, COLOUR_TITLE_BRACKET);
-    mvwaddch(title_bar, 0, cols - 2, ']');
-    wattroff(title_bar, COLOUR_TITLE_BRACKET);
+    wattron(win, COLOUR_TITLE_BRACKET);
+    mvwaddch(win, 0, cols - 2, ']');
+    wattroff(win, COLOUR_TITLE_BRACKET);
 
-    wrefresh(title_bar);
+    wrefresh(win);
     inp_put_back();
 }
 
 static void
 _title_bar_draw_title(void)
 {
-    wmove(title_bar, 0, 0);
+    wmove(win, 0, 0);
     int i;
     for (i = 0; i < 45; i++)
-        waddch(title_bar, ' ');
-    mvwprintw(title_bar, 0, 0, " %s", current_title);
+        waddch(win, ' ');
+    mvwprintw(win, 0, 0, " %s", current_title);
 
-    wrefresh(title_bar);
+    wrefresh(win);
     inp_put_back();
 }
 
