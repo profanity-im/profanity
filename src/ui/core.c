@@ -622,6 +622,7 @@ _ui_trust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = TRUE;
+        win_vprint_line(window, '!', 0, "OTR session trusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -639,6 +640,7 @@ _ui_untrust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = FALSE;
+        win_vprint_line(window, '!', 0, "OTR session untrusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -816,6 +818,20 @@ _ui_current_print_line(const char * const msg, ...)
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
     win_print_line(current, '-', 0, fmt_msg->str);
+    va_end(arg);
+    g_string_free(fmt_msg, TRUE);
+    win_refresh(current);
+}
+
+static void
+_ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...)
+{
+    ProfWin *current = wins_get_current();
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    win_print_line(current, show_char, attrs, fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
     win_refresh(current);
@@ -1676,6 +1692,7 @@ ui_init_module(void)
     ui_recipient = _ui_recipient;
     ui_current_recipient = _ui_current_recipient;
     ui_current_print_line = _ui_current_print_line;
+    ui_current_print_formatted_line = _ui_current_print_formatted_line;
     ui_current_error_line = _ui_current_error_line;
     ui_current_page_off = _ui_current_page_off;
     ui_print_error_from_recipient = _ui_print_error_from_recipient;

@@ -2346,7 +2346,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else if (strcmp(args[0], "myfp") == 0) {
         char *fingerprint = otr_get_my_fingerprint();
-        ui_current_print_line("Your OTR fingerprint: %s", fingerprint);
+        ui_current_print_formatted_line('!', 0, "Your OTR fingerprint: %s", fingerprint);
         free(fingerprint);
         return TRUE;
     } else if (strcmp(args[0], "theirfp") == 0) {
@@ -2355,11 +2355,11 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You not currently in an OTR session with this recipient.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             char *fingerprint = otr_get_their_fingerprint(recipient);
-            ui_current_print_line("OTR fingerprint for %s: %s", recipient, fingerprint);
+            ui_current_print_formatted_line('!', 0, "%s's OTR fingerprint: %s", recipient, fingerprint);
             free(fingerprint);
         }
         return TRUE;
@@ -2380,10 +2380,10 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             ui_new_chat_win(barejid);
 
             if (ui_current_win_is_otr()) {
-                ui_current_print_line("You are already in an OTR session.");
+                ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
             } else {
                 if (!otr_key_loaded()) {
-                    ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+                    ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else if (!otr_is_secure(barejid)) {
                     message_send("?OTR?", barejid);
                 } else {
@@ -2396,10 +2396,10 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             if (win_type != WIN_CHAT) {
                 ui_current_print_line("You must be in a regular chat window to start an OTR session.");
             } else if (ui_current_win_is_otr()) {
-                ui_current_print_line("You are already in an OTR session.");
+                ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
             } else {
                 if (!otr_key_loaded()) {
-                    ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+                    ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else {
                     char *recipient = ui_current_recipient();
                     message_send("?OTR?", recipient);
@@ -2413,7 +2413,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in a regular chat window to use OTR.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You are not currently in an OTR session.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             ui_gone_insecure(recipient);
@@ -2426,7 +2426,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to trust a recipient.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You are not currently in an OTR session.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             ui_trust(recipient);
@@ -2439,7 +2439,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to untrust a recipient.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You are not currently in an OTR session.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             ui_untrust(recipient);
