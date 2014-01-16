@@ -35,7 +35,6 @@ static GTimer *typing_elapsed;
 
 static contact_presence_t current_presence;
 
-static void _title_bar_show(const char * const title);
 static void _title_bar_draw_title(void);
 static void _title_bar_draw_presence(void);
 
@@ -58,7 +57,12 @@ _title_bar_console(void)
     werase(win);
     recipient = NULL;
     typing_elapsed = NULL;
-    _title_bar_show("Profanity. Type /help for help information.");
+
+    if (current_title != NULL)
+        free(current_title);
+    current_title = strdup("Profanity. Type /help for help information.");
+
+    _title_bar_draw_title();
     _title_bar_draw_presence();
     wrefresh(win);
     inp_put_back();
@@ -105,17 +109,6 @@ _title_bar_refresh(void)
             }
         }
     }
-}
-
-static void
-_title_bar_show(const char * const title)
-{
-    if (current_title != NULL)
-        free(current_title);
-
-    current_title = (char *) malloc(strlen(title) + 1);
-    strcpy(current_title, title);
-    _title_bar_draw_title();
 }
 
 static void
