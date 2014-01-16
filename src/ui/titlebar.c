@@ -25,7 +25,10 @@
 
 #include "common.h"
 #include "config/theme.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
+#include "ui/window.h"
 
 #define CONSOLE_TITLE "Profanity. Type /help for help information."
 
@@ -150,6 +153,68 @@ _title_bar_draw(void)
     for (i = 0; i < 45; i++)
         waddch(win, ' ');
     mvwprintw(win, 0, 0, " %s", current_title);
+
+
+#ifdef HAVE_LIBOTR
+    // show privacy
+    if (current_recipient != NULL) {
+        ProfWin *current = wins_get_by_recipient(current_recipient);
+        if (current != NULL) {
+            if (current->type == WIN_CHAT) {
+                if (!current->is_otr) {
+                    if (prefs_get_boolean(PREF_OTR_WARN)) {
+                        wprintw(win, " ");
+                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wprintw(win, "[");
+                        wattroff(win, COLOUR_TITLE_BRACKET);
+                        wattron(win, COLOUR_TITLE_UNENCRYPTED);
+                        wprintw(win, "unencrypted");
+                        wattroff(win, COLOUR_TITLE_UNENCRYPTED);
+                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wprintw(win, "]");
+                        wattroff(win, COLOUR_TITLE_BRACKET);
+                    }
+                } else {
+                    wprintw(win, " ");
+                    wattron(win, COLOUR_TITLE_BRACKET);
+                    wprintw(win, "[");
+                    wattroff(win, COLOUR_TITLE_BRACKET);
+                    wattron(win, COLOUR_TITLE_ENCRYPTED);
+                    wprintw(win, "OTR");
+                    wattroff(win, COLOUR_TITLE_ENCRYPTED);
+                    wattron(win, COLOUR_TITLE_BRACKET);
+                    wprintw(win, "]");
+                    wattroff(win, COLOUR_TITLE_BRACKET);
+                    if (current->is_trusted) {
+                        wprintw(win, " ");
+                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wprintw(win, "[");
+                        wattroff(win, COLOUR_TITLE_BRACKET);
+                        wattron(win, COLOUR_TITLE_TRUSTED);
+                        wprintw(win, "trusted");
+                        wattroff(win, COLOUR_TITLE_TRUSTED);
+                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wprintw(win, "]");
+                        wattroff(win, COLOUR_TITLE_BRACKET);
+                    } else {
+                        wprintw(win, " ");
+                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wprintw(win, "[");
+                        wattroff(win, COLOUR_TITLE_BRACKET);
+                        wattron(win, COLOUR_TITLE_UNTRUSTED);
+                        wprintw(win, "untrusted");
+                        wattroff(win, COLOUR_TITLE_UNTRUSTED);
+                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wprintw(win, "]");
+                        wattroff(win, COLOUR_TITLE_BRACKET);
+                    }
+                }
+            }
+        }
+    }
+#endif
+
+    // show contact typing
     if (typing) {
         wprintw(win, " (typing...)");
     }

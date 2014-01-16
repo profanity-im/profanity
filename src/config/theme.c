@@ -64,6 +64,10 @@ static struct colours_t {
         NCURSES_COLOR_T statusbar;
         NCURSES_COLOR_T titlebartext;
         NCURSES_COLOR_T titlebarbrackets;
+        NCURSES_COLOR_T titlebarunencrypted;
+        NCURSES_COLOR_T titlebarencrypted;
+        NCURSES_COLOR_T titlebaruntrusted;
+        NCURSES_COLOR_T titlebartrusted;
         NCURSES_COLOR_T statusbartext;
         NCURSES_COLOR_T statusbarbrackets;
         NCURSES_COLOR_T statusbaractive;
@@ -197,6 +201,10 @@ theme_init_colours(void)
     // title bar
     init_pair(10, colour_prefs.titlebartext, colour_prefs.titlebar);
     init_pair(11, colour_prefs.titlebarbrackets, colour_prefs.titlebar);
+    init_pair(12, colour_prefs.titlebarunencrypted, colour_prefs.titlebar);
+    init_pair(13, colour_prefs.titlebarencrypted, colour_prefs.titlebar);
+    init_pair(14, colour_prefs.titlebaruntrusted, colour_prefs.titlebar);
+    init_pair(15, colour_prefs.titlebartrusted, colour_prefs.titlebar);
 
     // status bar
     init_pair(20, colour_prefs.statusbartext, colour_prefs.statusbar);
@@ -279,6 +287,22 @@ _load_colours(void)
     gchar *titlebarbrackets_val = g_key_file_get_string(theme, "colours", "titlebar.brackets", NULL);
     _set_colour(titlebarbrackets_val, &colour_prefs.titlebarbrackets, COLOR_CYAN);
     g_free(titlebarbrackets_val);
+
+    gchar *titlebarunencrypted_val = g_key_file_get_string(theme, "colours", "titlebar.unencrypted", NULL);
+    _set_colour(titlebarunencrypted_val, &colour_prefs.titlebarunencrypted, COLOR_RED);
+    g_free(titlebarunencrypted_val);
+
+    gchar *titlebarencrypted_val = g_key_file_get_string(theme, "colours", "titlebar.encrypted", NULL);
+    _set_colour(titlebarencrypted_val, &colour_prefs.titlebarencrypted, COLOR_WHITE);
+    g_free(titlebarencrypted_val);
+
+    gchar *titlebaruntrusted_val = g_key_file_get_string(theme, "colours", "titlebar.untrusted", NULL);
+    _set_colour(titlebaruntrusted_val, &colour_prefs.titlebaruntrusted, COLOR_RED);
+    g_free(titlebaruntrusted_val);
+
+    gchar *titlebartrusted_val = g_key_file_get_string(theme, "colours", "titlebar.trusted", NULL);
+    _set_colour(titlebartrusted_val, &colour_prefs.titlebartrusted, COLOR_WHITE);
+    g_free(titlebartrusted_val);
 
     gchar *statusbartext_val = g_key_file_get_string(theme, "colours", "statusbar.text", NULL);
     _set_colour(statusbartext_val, &colour_prefs.statusbartext, COLOR_WHITE);

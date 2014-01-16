@@ -293,6 +293,7 @@ _get_group(preference_t pref)
         case PREF_HISTORY:
         case PREF_MOUSE:
         case PREF_STATUSES:
+        case PREF_OTR_WARN:
             return "ui";
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -368,6 +369,8 @@ _get_key(preference_t pref)
             return "account";
         case PREF_OTR_LOG:
             return "otr";
+        case PREF_OTR_WARN:
+            return "otr.warn";
         default:
             return NULL;
     }
@@ -380,6 +383,7 @@ _get_default_boolean(preference_t pref)
     {
         case PREF_STATUSES:
         case PREF_AUTOAWAY_CHECK:
+        case PREF_OTR_WARN:
             return TRUE;
         default:
             return FALSE;

@@ -60,6 +60,8 @@ test_sources = \
 	src/config/accounts.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
+    src/ui/windows.c src/ui/windows.h \
+    src/ui/window.c src/ui/window.h \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \

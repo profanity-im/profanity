@@ -571,9 +571,9 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log",
-          "-------------------------------------------------",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn",
+          "------------------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
@@ -582,6 +582,7 @@ static struct cmd_t command_defs[] =
           "trust - Indicate that you have verified the contact's fingerprint.",
           "untrust - Indicate the the contact's fingerprint is not verified,",
           "log - How to log OTR messages, options are 'on', 'off' and 'redact', with redaction being the default.",
+          "warn - Show when unencrypted messaging is being used in the title bar, options are 'on' and 'off' with 'on' being the default.",
           NULL } } },
 
     { "/outtype",
@@ -997,6 +998,7 @@ cmd_init(void)
     autocomplete_add(otr_ac, "trust");
     autocomplete_add(otr_ac, "untrust");
     autocomplete_add(otr_ac, "log");
+    autocomplete_add(otr_ac, "warn");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
@@ -1584,6 +1586,12 @@ _otr_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/otr log", otr_log_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/otr warn",
+        prefs_autocomplete_boolean_choice);
     if (result != NULL) {
         return result;
     }

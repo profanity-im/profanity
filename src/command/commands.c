@@ -2327,6 +2327,12 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
         }
         return TRUE;
+    } else if (strcmp(args[0], "warn") == 0) {
+        gboolean result =  _cmd_set_boolean_preference(args[1], help,
+            "OTR warning message", PREF_OTR_WARN);
+        // update the current window
+        ui_switch_win(wins_get_current_num());
+        return result;
     }
 
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
@@ -2493,7 +2499,11 @@ _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     GString *disabled = g_string_new(display);
     g_string_append(disabled, " disabled.");
 
-    if (strcmp(arg, "on") == 0) {
+    if (arg == NULL) {
+        char usage[strlen(help.usage) + 8];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
+    } else if (strcmp(arg, "on") == 0) {
         cons_show(enabled->str);
         prefs_set_boolean(pref, TRUE);
     } else if (strcmp(arg, "off") == 0) {

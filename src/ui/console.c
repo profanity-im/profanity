@@ -984,6 +984,16 @@ _cons_titlebar_setting(void)
 }
 
 static void
+_cons_otrwarn_setting(void)
+{
+    if (prefs_get_boolean(PREF_OTR_WARN)) {
+        cons_show("Warn non-OTR (/otr warn)     : ON");
+    } else {
+        cons_show("Warn non-OTR (/otr warn)     : OFF");
+    }
+}
+
+static void
 _cons_show_ui_prefs(void)
 {
     cons_show("UI preferences:");
@@ -996,6 +1006,7 @@ _cons_show_ui_prefs(void)
     cons_mouse_setting();
     cons_statuses_setting();
     cons_titlebar_setting();
+    cons_otrwarn_setting();
 
     wins_refresh_console();
     cons_alert();
@@ -1564,6 +1575,7 @@ console_init_module(void)
     cons_chlog_setting = _cons_chlog_setting;
     cons_grlog_setting = _cons_grlog_setting;
     cons_otr_log_setting = _cons_otr_log_setting;
+    cons_otrwarn_setting = _cons_otrwarn_setting;
     cons_show_log_prefs = _cons_show_log_prefs;
     cons_autoaway_setting = _cons_autoaway_setting;
     cons_show_presence_prefs = _cons_show_presence_prefs;

@@ -221,6 +221,7 @@ void (*cons_log_setting)(void);
 void (*cons_chlog_setting)(void);
 void (*cons_grlog_setting)(void);
 void (*cons_otr_log_setting)(void);
+void (*cons_otrwarn_setting)(void);
 void (*cons_autoaway_setting)(void);
 void (*cons_reconnect_setting)(void);
 void (*cons_autoping_setting)(void);
