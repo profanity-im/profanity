@@ -191,7 +191,6 @@ _ui_contact_typing(const char * const barejid)
         // in chat window with user
         } else {
             title_bar_set_typing(TRUE);
-            title_bar_draw();
 
             int num = wins_get_num(window);
             status_bar_active(num);
@@ -260,7 +259,6 @@ _ui_incoming_msg(const char * const from, const char * const message,
     if (wins_is_current(window)) {
         win_print_incoming_message(window, tv_stamp, display_from, message);
         title_bar_set_typing(FALSE);
-        title_bar_draw();
         status_bar_active(num);
         wins_refresh_current();
 
@@ -558,7 +556,6 @@ _ui_switch_win(const int i)
             GString *recipient_str = _get_recipient_string(new_current);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             status_bar_current(i);
             status_bar_active(i);
         }
@@ -585,7 +582,6 @@ _ui_next_win(void)
         GString *recipient_str = _get_recipient_string(new_current);
         title_bar_set_recipient(recipient_str->str);
         g_string_free(recipient_str, TRUE);
-        title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
     }
@@ -605,7 +601,6 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -624,7 +619,6 @@ _ui_gone_insecure(const char * const recipient)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -642,7 +636,6 @@ _ui_trust(const char * const recipient)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -660,7 +653,6 @@ _ui_untrust(const char * const recipient)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -685,7 +677,6 @@ _ui_previous_win(void)
         GString *recipient_str = _get_recipient_string(new_current);
         title_bar_set_recipient(recipient_str->str);
         g_string_free(recipient_str, TRUE);
-        title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
     }

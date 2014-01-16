@@ -36,6 +36,8 @@ static contact_presence_t current_presence;
 
 static GTimer *typing_elapsed;
 
+static void _title_bar_draw(void);
+
 static void
 _create_title_bar(void)
 {
@@ -59,7 +61,7 @@ _title_bar_console(void)
     free(current_title);
     current_title = strdup(CONSOLE_TITLE);
 
-    title_bar_draw();
+    _title_bar_draw();
 }
 
 static void
@@ -70,7 +72,7 @@ _title_bar_resize(void)
     wresize(win, 1, cols);
     wbkgd(win, COLOUR_TITLE_TEXT);
 
-    title_bar_draw();
+    _title_bar_draw();
 }
 
 static void
@@ -89,7 +91,7 @@ _title_bar_refresh(void)
                 g_timer_destroy(typing_elapsed);
                 typing_elapsed = NULL;
 
-                title_bar_draw();
+                _title_bar_draw();
             }
         }
     }
@@ -99,7 +101,7 @@ static void
 _title_bar_set_presence(contact_presence_t presence)
 {
     current_presence = presence;
-    title_bar_draw();
+    _title_bar_draw();
 }
 
 static void
@@ -116,8 +118,7 @@ _title_bar_set_recipient(const char * const recipient)
     free(current_title);
     current_title = strdup(recipient);
 
-    wrefresh(win);
-    inp_put_back();
+    _title_bar_draw();
 }
 
 static void
@@ -139,8 +140,7 @@ _title_bar_set_typing(gboolean is_typing)
     current_title = strdup(new_title->str);
     g_string_free(new_title, TRUE);
 
-    wrefresh(win);
-    inp_put_back();
+    _title_bar_draw();
 }
 
 static void
@@ -202,5 +202,4 @@ titlebar_init_module(void)
     title_bar_set_presence = _title_bar_set_presence;
     title_bar_set_recipient = _title_bar_set_recipient;
     title_bar_set_typing = _title_bar_set_typing;
-    title_bar_draw = _title_bar_draw;
 }

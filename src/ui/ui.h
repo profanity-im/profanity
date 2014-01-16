@@ -158,7 +158,6 @@ void (*title_bar_console)(void);
 void (*title_bar_set_presence)(contact_presence_t presence);
 void (*title_bar_set_recipient)(const char * const from);
 void (*title_bar_set_typing)(gboolean is_typing);
-void (*title_bar_draw)(void);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);
