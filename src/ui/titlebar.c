@@ -31,7 +31,6 @@ static WINDOW *title_bar;
 static char *current_title = NULL;
 static char *recipient = NULL;
 static GTimer *typing_elapsed;
-static int dirty;
 static contact_presence_t current_status;
 
 static void _title_bar_draw_title(void);
@@ -46,7 +45,8 @@ _create_title_bar(void)
     wbkgd(title_bar, COLOUR_TITLE_TEXT);
     title_bar_title();
     title_bar_set_status(CONTACT_OFFLINE);
-    dirty = TRUE;
+    wrefresh(title_bar);
+    inp_put_back();
 }
 
 static void
@@ -57,7 +57,8 @@ _title_bar_title(void)
     typing_elapsed = NULL;
     title_bar_show("Profanity. Type /help for help information.");
     _title_bar_draw_status();
-    dirty = TRUE;
+    wrefresh(title_bar);
+    inp_put_back();
 }
 
 static void
@@ -70,7 +71,8 @@ _title_bar_resize(void)
     werase(title_bar);
     _title_bar_draw_title();
     _title_bar_draw_status();
-    dirty = TRUE;
+    wrefresh(title_bar);
+    inp_put_back();
 }
 
 static void
@@ -95,15 +97,10 @@ _title_bar_refresh(void)
                 g_timer_destroy(typing_elapsed);
                 typing_elapsed = NULL;
 
-                dirty = TRUE;
+                wrefresh(title_bar);
+                inp_put_back();
             }
         }
-    }
-
-    if (dirty) {
-        wrefresh(title_bar);
-        inp_put_back();
-        dirty = FALSE;
     }
 }
 
@@ -142,7 +139,8 @@ _title_bar_set_recipient(const char * const from)
     current_title = (char *) malloc(strlen(from) + 1);
     strcpy(current_title, from);
 
-    dirty = TRUE;
+    wrefresh(title_bar);
+    inp_put_back();
 }
 
 static void
@@ -168,7 +166,8 @@ _title_bar_set_typing(gboolean is_typing)
         strcpy(current_title, recipient);
     }
 
-    dirty = TRUE;
+    wrefresh(title_bar);
+    inp_put_back();
 }
 
 static void
@@ -214,7 +213,8 @@ _title_bar_draw_status(void)
     mvwaddch(title_bar, 0, cols - 2, ']');
     wattroff(title_bar, COLOUR_TITLE_BRACKET);
 
-    dirty = TRUE;
+    wrefresh(title_bar);
+    inp_put_back();
 }
 
 static void
@@ -226,7 +226,8 @@ _title_bar_draw_title(void)
         waddch(title_bar, ' ');
     mvwprintw(title_bar, 0, 0, " %s", current_title);
 
-    dirty = TRUE;
+    wrefresh(title_bar);
+    inp_put_back();
 }
 
 void
