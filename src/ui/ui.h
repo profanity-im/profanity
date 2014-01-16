@@ -154,7 +154,6 @@ void (*create_input_window)(void);
 // title bar actions
 void (*title_bar_refresh)(void);
 void (*title_bar_resize)(void);
-void (*title_bar_show)(const char * const title);
 void (*title_bar_console)(void);
 void (*title_bar_set_presence)(contact_presence_t presence);
 void (*title_bar_set_recipient)(const char * const from);
