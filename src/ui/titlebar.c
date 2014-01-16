@@ -62,6 +62,7 @@ _title_bar_console(void)
         free(current_title);
     current_title = strdup("Profanity. Type /help for help information.");
 
+    werase(win);
     _title_bar_draw_title();
     _title_bar_draw_presence();
     wrefresh(win);
@@ -75,6 +76,7 @@ _title_bar_resize(void)
 
     wresize(win, 1, cols);
     wbkgd(win, COLOUR_TITLE_TEXT);
+
     werase(win);
     _title_bar_draw_title();
     _title_bar_draw_presence();
@@ -115,8 +117,12 @@ static void
 _title_bar_set_presence(contact_presence_t presence)
 {
     current_presence = presence;
+
+    werase(win);
     _title_bar_draw_title();
     _title_bar_draw_presence();
+    wrefresh(win);
+    inp_put_back();
 }
 
 static void
@@ -173,6 +179,8 @@ _title_bar_draw(void)
     werase(win);
     _title_bar_draw_title();
     _title_bar_draw_presence();
+    wrefresh(win);
+    inp_put_back();
 }
 
 static void
