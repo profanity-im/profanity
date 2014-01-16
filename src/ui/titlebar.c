@@ -30,10 +30,9 @@
 static WINDOW *win;
 static char *current_title = NULL;
 static char *current_recipient = NULL;
+static contact_presence_t current_presence;
 
 static GTimer *typing_elapsed;
-
-static contact_presence_t current_presence;
 
 static void
 _create_title_bar(void)
@@ -55,8 +54,7 @@ _title_bar_console(void)
     current_recipient = NULL;
     typing_elapsed = NULL;
 
-    if (current_title != NULL)
-        free(current_title);
+    free(current_title);
     current_title = strdup("Profanity. Type /help for help information.");
 
     title_bar_draw();
@@ -83,12 +81,8 @@ _title_bar_refresh(void)
 
             if (seconds >= 10) {
 
-                if (current_title != NULL) {
-                    free(current_title);
-                }
-
-                current_title = (char *) malloc(strlen(current_recipient) + 1);
-                strcpy(current_title, current_recipient);
+                free(current_title);
+                current_title = strdup(current_recipient);
 
                 title_bar_draw();
 
@@ -106,26 +100,22 @@ static void
 _title_bar_set_presence(contact_presence_t presence)
 {
     current_presence = presence;
-
     title_bar_draw();
 }
 
 static void
-_title_bar_set_recipient(const char * const from)
+_title_bar_set_recipient(const char * const recipient)
 {
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
         typing_elapsed = NULL;
     }
+
     free(current_recipient);
-    current_recipient = strdup(from);
+    current_recipient = strdup(recipient);
 
-    if (current_title != NULL) {
-        free(current_title);
-    }
-
-    current_title = (char *) malloc(strlen(from) + 1);
-    strcpy(current_title, from);
+    free(current_title);
+    current_title = strdup(recipient);
 
     wrefresh(win);
     inp_put_back();
@@ -142,17 +132,13 @@ _title_bar_set_typing(gboolean is_typing)
         }
     }
 
-    if (current_title != NULL) {
-        free(current_title);
-    }
-
+    free(current_title);
+    GString *new_title = g_string_new(current_recipient);
     if (is_typing) {
-        current_title = (char *) malloc(strlen(current_recipient) + 13);
-        sprintf(current_title, "%s (typing...)", current_recipient);
-    } else {
-        current_title = (char *) malloc(strlen(current_recipient) + 1);
-        strcpy(current_title, current_recipient);
+        g_string_append(new_title, " (typing...)");
     }
+    current_title = strdup(new_title->str);
+    g_string_free(new_title, TRUE);
 
     wrefresh(win);
     inp_put_back();
