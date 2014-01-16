@@ -35,9 +35,6 @@ static GTimer *typing_elapsed;
 
 static contact_presence_t current_presence;
 
-static void _title_bar_draw_title(void);
-static void _title_bar_draw_presence(void);
-
 static void
 _create_title_bar(void)
 {
@@ -165,15 +162,15 @@ static void
 _title_bar_draw(void)
 {
     werase(win);
-    _title_bar_draw_title();
-    _title_bar_draw_presence();
-    wrefresh(win);
-    inp_put_back();
-}
 
-static void
-_title_bar_draw_presence(void)
-{
+    // show title
+    wmove(win, 0, 0);
+    int i;
+    for (i = 0; i < 45; i++)
+        waddch(win, ' ');
+    mvwprintw(win, 0, 0, " %s", current_title);
+
+    // show presence
     int cols = getmaxx(stdscr);
 
     wattron(win, COLOUR_TITLE_BRACKET);
@@ -205,19 +202,6 @@ _title_bar_draw_presence(void)
     wattron(win, COLOUR_TITLE_BRACKET);
     mvwaddch(win, 0, cols - 2, ']');
     wattroff(win, COLOUR_TITLE_BRACKET);
-
-    wrefresh(win);
-    inp_put_back();
-}
-
-static void
-_title_bar_draw_title(void)
-{
-    wmove(win, 0, 0);
-    int i;
-    for (i = 0; i < 45; i++)
-        waddch(win, ' ');
-    mvwprintw(win, 0, 0, " %s", current_title);
 
     wrefresh(win);
     inp_put_back();
