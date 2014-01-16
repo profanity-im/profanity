@@ -33,10 +33,10 @@ static char *recipient = NULL;
 
 static GTimer *typing_elapsed;
 
-static contact_presence_t current_status;
+static contact_presence_t current_presence;
 
 static void _title_bar_draw_title(void);
-static void _title_bar_draw_status(void);
+static void _title_bar_draw_presence(void);
 
 static void
 _create_title_bar(void)
@@ -58,7 +58,7 @@ _title_bar_console(void)
     recipient = NULL;
     typing_elapsed = NULL;
     title_bar_show("Profanity. Type /help for help information.");
-    _title_bar_draw_status();
+    _title_bar_draw_presence();
     wrefresh(win);
     inp_put_back();
 }
@@ -72,7 +72,7 @@ _title_bar_resize(void)
     wbkgd(win, COLOUR_TITLE_TEXT);
     werase(win);
     _title_bar_draw_title();
-    _title_bar_draw_status();
+    _title_bar_draw_presence();
     wrefresh(win);
     inp_put_back();
 }
@@ -118,10 +118,10 @@ _title_bar_show(const char * const title)
 }
 
 static void
-_title_bar_set_presence(contact_presence_t status)
+_title_bar_set_presence(contact_presence_t presence)
 {
-    current_status = status;
-    _title_bar_draw_status();
+    current_presence = presence;
+    _title_bar_draw_presence();
 }
 
 static void
@@ -176,12 +176,12 @@ static void
 _title_bar_draw(void)
 {
     werase(win);
-    _title_bar_draw_status();
+    _title_bar_draw_presence();
     _title_bar_draw_title();
 }
 
 static void
-_title_bar_draw_status(void)
+_title_bar_draw_presence(void)
 {
     int cols = getmaxx(stdscr);
 
@@ -189,7 +189,7 @@ _title_bar_draw_status(void)
     mvwaddch(win, 0, cols - 14, '[');
     wattroff(win, COLOUR_TITLE_BRACKET);
 
-    switch (current_status)
+    switch (current_presence)
     {
         case CONTACT_ONLINE:
             mvwprintw(win, 0, cols - 13, " ...online ");
