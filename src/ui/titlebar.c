@@ -34,6 +34,7 @@ static char *current_title = NULL;
 static char *current_recipient = NULL;
 static contact_presence_t current_presence;
 
+static gboolean typing;
 static GTimer *typing_elapsed;
 
 static void _title_bar_draw(void);
@@ -56,6 +57,7 @@ _title_bar_console(void)
 {
     werase(win);
     current_recipient = NULL;
+    typing = FALSE;
     typing_elapsed = NULL;
 
     free(current_title);
@@ -84,9 +86,7 @@ _title_bar_refresh(void)
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
 
             if (seconds >= 10) {
-
-                free(current_title);
-                current_title = strdup(current_recipient);
+                typing = FALSE;
 
                 g_timer_destroy(typing_elapsed);
                 typing_elapsed = NULL;
@@ -110,6 +110,7 @@ _title_bar_set_recipient(const char * const recipient)
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
         typing_elapsed = NULL;
+        typing = FALSE;
     }
 
     free(current_recipient);
@@ -132,13 +133,8 @@ _title_bar_set_typing(gboolean is_typing)
         }
     }
 
-    free(current_title);
-    GString *new_title = g_string_new(current_recipient);
-    if (is_typing) {
-        g_string_append(new_title, " (typing...)");
-    }
-    current_title = strdup(new_title->str);
-    g_string_free(new_title, TRUE);
+    typing = is_typing;
+
 
     _title_bar_draw();
 }
@@ -154,6 +150,9 @@ _title_bar_draw(void)
     for (i = 0; i < 45; i++)
         waddch(win, ' ');
     mvwprintw(win, 0, 0, " %s", current_title);
+    if (typing) {
+        wprintw(win, " (typing...)");
+    }
 
     // show presence
     int cols = getmaxx(stdscr);
