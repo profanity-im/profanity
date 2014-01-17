@@ -586,7 +586,11 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = trusted;
-        win_vprint_line(window, '!', 0, "OTR session started.");
+        if (trusted) {
+            win_vprint_line(window, '!', COLOUR_OTR_STARTED_TRUSTED, "OTR session started (trusted).");
+        } else {
+            win_vprint_line(window, '!', COLOUR_OTR_STARTED_UNTRUSTED, "OTR session started (untrusted).");
+        }
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -604,7 +608,7 @@ _ui_gone_insecure(const char * const recipient)
     if (window != NULL) {
         window->is_otr = FALSE;
         window->is_trusted = FALSE;
-        win_vprint_line(window, '!', 0, "OTR session ended.");
+        win_vprint_line(window, '!', COLOUR_OTR_ENDED, "OTR session ended.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -622,7 +626,7 @@ _ui_trust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = TRUE;
-        win_vprint_line(window, '!', 0, "OTR session trusted.");
+        win_vprint_line(window, '!', COLOUR_OTR_TRUSTED, "OTR session trusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -640,7 +644,7 @@ _ui_untrust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = FALSE;
-        win_vprint_line(window, '!', 0, "OTR session untrusted.");
+        win_vprint_line(window, '!', COLOUR_OTR_UNTRUSTED, "OTR session untrusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
