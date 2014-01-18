@@ -85,6 +85,7 @@ gboolean (*ui_current_win_is_otr)(void);
 void (*ui_current_set_otr)(gboolean value);
 char* (*ui_current_recipient)(void);
 void (*ui_current_print_line)(const char * const msg, ...);
+void (*ui_current_print_formatted_line)(const char show_chat, int attrs, const char * const msg, ...);
 void (*ui_current_error_line)(const char * const msg);
 void (*ui_current_page_off)(void);
 
@@ -154,12 +155,10 @@ void (*create_input_window)(void);
 // title bar actions
 void (*title_bar_refresh)(void);
 void (*title_bar_resize)(void);
-void (*title_bar_show)(const char * const title);
-void (*title_bar_title)(void);
-void (*title_bar_set_status)(contact_presence_t status);
+void (*title_bar_console)(void);
+void (*title_bar_set_presence)(contact_presence_t presence);
 void (*title_bar_set_recipient)(const char * const from);
 void (*title_bar_set_typing)(gboolean is_typing);
-void (*title_bar_draw)(void);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);
@@ -222,6 +221,8 @@ void (*cons_history_setting)(void);
 void (*cons_log_setting)(void);
 void (*cons_chlog_setting)(void);
 void (*cons_grlog_setting)(void);
+void (*cons_otr_log_setting)(void);
+void (*cons_otrwarn_setting)(void);
 void (*cons_autoaway_setting)(void);
 void (*cons_reconnect_setting)(void);
 void (*cons_autoping_setting)(void);

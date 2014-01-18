@@ -64,6 +64,7 @@ static char * _who_autocomplete(char *input, int *size);
 static char * _roster_autocomplete(char *input, int *size);
 static char * _group_autocomplete(char *input, int *size);
 static char * _bookmark_autocomplete(char *input, int *size);
+static char * _otr_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -569,16 +570,18 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust",
-          "---------------------------------------------",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn",
+          "------------------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
-          "start - Start an OTR session with the current recipient.",
+          "start <contact> - Start an OTR session with the contact, or the current recipient if in a chat window and no argument supplied.",
           "end - End the current OTR session,",
           "trust - Indicate that you have verified the contact's fingerprint.",
           "untrust - Indicate the the contact's fingerprint is not verified,",
+          "log - How to log OTR messages, options are 'on', 'off' and 'redact', with redaction being the default.",
+          "warn - Show when unencrypted messaging is being used in the title bar, options are 'on' and 'off' with 'on' being the default.",
           NULL } } },
 
     { "/outtype",
@@ -840,6 +843,7 @@ static Autocomplete roster_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
+static Autocomplete otr_log_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1000,6 +1004,13 @@ cmd_init(void)
     autocomplete_add(otr_ac, "theirfp");
     autocomplete_add(otr_ac, "trust");
     autocomplete_add(otr_ac, "untrust");
+    autocomplete_add(otr_ac, "log");
+    autocomplete_add(otr_ac, "warn");
+
+    otr_log_ac = autocomplete_new();
+    autocomplete_add(otr_log_ac, "on");
+    autocomplete_add(otr_log_ac, "off");
+    autocomplete_add(otr_log_ac, "redact");
 
     cmd_history_init();
 }
@@ -1038,6 +1049,7 @@ cmd_uninit(void)
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(otr_ac);
+    autocomplete_free(otr_log_ac);
 }
 
 // Command autocompletion functions
@@ -1112,6 +1124,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(group_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(otr_ac);
+    autocomplete_reset(otr_log_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1191,7 +1204,11 @@ cmd_execute_default(const char * const inp)
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
                             Jid *jidp = jid_create(jid);
-                            chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
+                            if (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0) {
+                                chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
+                            } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+                                chat_log_chat(jidp->barejid, recipient, "[redacted]", PROF_OUT_LOG, NULL);
+                            }
                             jid_destroy(jidp);
                         }
 
@@ -1361,8 +1378,8 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins", "/otr" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, otr_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac  };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
@@ -1376,7 +1393,7 @@ _cmd_complete_parameters(char *input, int *size)
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
-        _bookmark_autocomplete, _autoconnect_autocomplete };
+        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1565,6 +1582,35 @@ _sub_autocomplete(char *input, int *size)
         return result;
     }
     result = autocomplete_param_with_ac(input, size, "/sub", sub_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_otr_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, size, "/otr start", roster_find_contact);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/otr log", otr_log_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/otr warn",
+        prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/otr", otr_ac);
     if (result != NULL) {
         return result;
     }

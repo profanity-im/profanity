@@ -495,7 +495,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
         _cmd_show_filtered_help("Basic commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "chatting") == 0) {
-        gchar *filter[] = { "/chlog", "/duck", "/gone", "/history",
+        gchar *filter[] = { "/chlog", "/otr", "/duck", "/gone", "/history",
             "/info", "/intype", "/msg", "/notify", "/outtype", "/status",
             "/close", "/clear", "/tiny" };
         _cmd_show_filtered_help("Chat commands", filter, ARRAY_SIZE(filter));
@@ -931,7 +931,11 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
-                        chat_log_chat(jidp->barejid, usr_jid, plugin_message, PROF_OUT_LOG, NULL);
+                        if (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0) {
+                            chat_log_chat(jidp->barejid, usr_jid, plugin_message, PROF_OUT_LOG, NULL);
+                        } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+                            chat_log_chat(jidp->barejid, usr_jid, "[redacted]", PROF_OUT_LOG, NULL);
+                        }
                         jid_destroy(jidp);
                     }
                 } else {
@@ -2326,6 +2330,35 @@ gboolean
 cmd_otr(gchar **args, struct cmd_help_t help)
 {
 #ifdef PROF_HAVE_LIBOTR
+    if (strcmp(args[0], "log") == 0) {
+        char *choice = args[1];
+        if (g_strcmp0(choice, "on") == 0) {
+            prefs_set_string(PREF_OTR_LOG, "on");
+            cons_show("OTR messages will be logged as plaintext.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else if (g_strcmp0(choice, "off") == 0) {
+            prefs_set_string(PREF_OTR_LOG, "off");
+            cons_show("OTR message logging disabled.");
+        } else if (g_strcmp0(choice, "redact") == 0) {
+            prefs_set_string(PREF_OTR_LOG, "redact");
+            cons_show("OTR messages will be logged as '[redacted]'.");
+            if (!prefs_get_boolean(PREF_CHLOG)) {
+                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+        return TRUE;
+    } else if (strcmp(args[0], "warn") == 0) {
+        gboolean result =  _cmd_set_boolean_preference(args[1], help,
+            "OTR warning message", PREF_OTR_WARN);
+        // update the current window
+        ui_switch_win(wins_get_current_num());
+        return result;
+    }
+
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
         cons_show("You must be connected with an account to load OTR information.");
         return TRUE;
@@ -2337,7 +2370,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         return TRUE;
     } else if (strcmp(args[0], "myfp") == 0) {
         char *fingerprint = otr_get_my_fingerprint();
-        ui_current_print_line("Your OTR fingerprint: %s", fingerprint);
+        ui_current_print_formatted_line('!', 0, "Your OTR fingerprint: %s", fingerprint);
         free(fingerprint);
         return TRUE;
     } else if (strcmp(args[0], "theirfp") == 0) {
@@ -2346,27 +2379,55 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in a regular chat window to view a recipient's fingerprint.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You not currently in an OTR session with this recipient.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             char *fingerprint = otr_get_their_fingerprint(recipient);
-            ui_current_print_line("OTR fingerprint for %s: %s", recipient, fingerprint);
+            ui_current_print_formatted_line('!', 0, "%s's OTR fingerprint: %s", recipient, fingerprint);
             free(fingerprint);
         }
         return TRUE;
     } else if (strcmp(args[0], "start") == 0) {
-        win_type_t win_type = ui_current_win_type();
+        if (args[1] != NULL) {
+            char *contact = args[1];
+            char *barejid = roster_barejid_from_name(contact);
+            if (barejid == NULL) {
+                barejid = contact;
+            }
 
-        if (win_type != WIN_CHAT) {
-            ui_current_print_line("You must be in a regular chat window to start an OTR session.");
-        } else if (ui_current_win_is_otr()) {
-            ui_current_print_line("You are already in an OTR session.");
-        } else {
-            if (!otr_key_loaded()) {
-                ui_current_print_line("You have not generated or loaded a private key, use '/otr gen'");
+            if (prefs_get_boolean(PREF_STATES)) {
+                if (!chat_session_exists(barejid)) {
+                    chat_session_start(barejid, TRUE);
+                }
+            }
+
+            ui_new_chat_win(barejid);
+
+            if (ui_current_win_is_otr()) {
+                ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
             } else {
-                char *recipient = ui_current_recipient();
-                message_send("?OTR?", recipient);
+                if (!otr_key_loaded()) {
+                    ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+                } else if (!otr_is_secure(barejid)) {
+                    message_send("?OTR?", barejid);
+                } else {
+                    ui_gone_secure(barejid, otr_is_trusted(barejid));
+                }
+            }
+        } else {
+            win_type_t win_type = ui_current_win_type();
+
+            if (win_type != WIN_CHAT) {
+                ui_current_print_line("You must be in a regular chat window to start an OTR session.");
+            } else if (ui_current_win_is_otr()) {
+                ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
+            } else {
+                if (!otr_key_loaded()) {
+                    ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+                } else {
+                    char *recipient = ui_current_recipient();
+                    message_send("?OTR?", recipient);
+                }
             }
         }
         return TRUE;
@@ -2376,7 +2437,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in a regular chat window to use OTR.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You are not currently in an OTR session.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             ui_gone_insecure(recipient);
@@ -2389,7 +2450,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to trust a recipient.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You are not currently in an OTR session.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             ui_trust(recipient);
@@ -2402,7 +2463,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (win_type != WIN_CHAT) {
             ui_current_print_line("You must be in an OTR session to untrust a recipient.");
         } else if (!ui_current_win_is_otr()) {
-            ui_current_print_line("You are not currently in an OTR session.");
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
             char *recipient = ui_current_recipient();
             ui_untrust(recipient);
@@ -2439,7 +2500,7 @@ _update_presence(const resource_presence_t resource_presence,
         presence_update(resource_presence, msg, 0);
 
         contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
-        title_bar_set_status(contact_presence);
+        title_bar_set_presence(contact_presence);
 
         gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
         if (msg != NULL) {
@@ -2462,7 +2523,11 @@ _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     GString *disabled = g_string_new(display);
     g_string_append(disabled, " disabled.");
 
-    if (strcmp(arg, "on") == 0) {
+    if (arg == NULL) {
+        char usage[strlen(help.usage) + 8];
+        sprintf(usage, "Usage: %s", help.usage);
+        cons_show(usage);
+    } else if (strcmp(arg, "on") == 0) {
         cons_show(enabled->str);
         prefs_set_boolean(pref, TRUE);
     } else if (strcmp(arg, "off") == 0) {

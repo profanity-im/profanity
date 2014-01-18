@@ -306,6 +306,7 @@ _get_group(preference_t pref)
         case PREF_HISTORY:
         case PREF_MOUSE:
         case PREF_STATUSES:
+        case PREF_OTR_WARN:
             return "ui";
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -317,6 +318,7 @@ _get_group(preference_t pref)
             return "notifications";
         case PREF_CHLOG:
         case PREF_GRLOG:
+        case PREF_OTR_LOG:
             return "logging";
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
@@ -378,6 +380,10 @@ _get_key(preference_t pref)
             return "autoaway.message";
         case PREF_CONNECT_ACCOUNT:
             return "account";
+        case PREF_OTR_LOG:
+            return "otr";
+        case PREF_OTR_WARN:
+            return "otr.warn";
         default:
             return NULL;
     }
@@ -390,6 +396,7 @@ _get_default_boolean(preference_t pref)
     {
         case PREF_STATUSES:
         case PREF_AUTOAWAY_CHECK:
+        case PREF_OTR_WARN:
             return TRUE;
         default:
             return FALSE;
@@ -403,6 +410,8 @@ _get_default_string(preference_t pref)
     {
         case PREF_AUTOAWAY_MODE:
             return "off";
+        case PREF_OTR_LOG:
+            return "redact";
         default:
             return NULL;
     }

@@ -192,7 +192,6 @@ _ui_contact_typing(const char * const barejid)
         // in chat window with user
         } else {
             title_bar_set_typing(TRUE);
-            title_bar_draw();
 
             int num = wins_get_num(window);
             status_bar_active(num);
@@ -263,7 +262,6 @@ _ui_incoming_msg(const char * const from, const char * const message,
     if (wins_is_current(window)) {
         win_print_incoming_message(window, tv_stamp, display_from, new_message);
         title_bar_set_typing(FALSE);
-        title_bar_draw();
         status_bar_active(num);
         wins_refresh_current();
 
@@ -417,7 +415,7 @@ static void
 _ui_disconnected(void)
 {
     wins_lost_connection();
-    title_bar_set_status(CONTACT_OFFLINE);
+    title_bar_set_presence(CONTACT_OFFLINE);
     status_bar_clear_message();
     status_bar_refresh();
 }
@@ -530,15 +528,6 @@ _get_recipient_string(ProfWin *window)
         g_string_append(result, window->from);
     }
 
-    if (window->is_otr) {
-        g_string_append(result, " [OTR]");
-        if (window->is_trusted) {
-            g_string_append(result, " (trusted)");
-        } else {
-            g_string_append(result, " (untrusted)");
-        }
-    }
-
     return result;
 }
 
@@ -554,14 +543,13 @@ _ui_switch_win(const int i)
         new_current->unread = 0;
 
         if (i == 1) {
-            title_bar_title();
+            title_bar_console();
             status_bar_current(1);
             status_bar_active(1);
         } else {
             GString *recipient_str = _get_recipient_string(new_current);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             status_bar_current(i);
             status_bar_active(i);
         }
@@ -581,14 +569,13 @@ _ui_next_win(void)
     new_current->unread = 0;
 
     if (i == 1) {
-        title_bar_title();
+        title_bar_console();
         status_bar_current(1);
         status_bar_active(1);
     } else {
         GString *recipient_str = _get_recipient_string(new_current);
         title_bar_set_recipient(recipient_str->str);
         g_string_free(recipient_str, TRUE);
-        title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
     }
@@ -602,13 +589,16 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = trusted;
-        win_vprint_line(window, '!', 0, "OTR session started.");
+        if (trusted) {
+            win_vprint_line(window, '!', COLOUR_OTR_STARTED_TRUSTED, "OTR session started (trusted).");
+        } else {
+            win_vprint_line(window, '!', COLOUR_OTR_STARTED_UNTRUSTED, "OTR session started (untrusted).");
+        }
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -621,13 +611,12 @@ _ui_gone_insecure(const char * const recipient)
     if (window != NULL) {
         window->is_otr = FALSE;
         window->is_trusted = FALSE;
-        win_vprint_line(window, '!', 0, "OTR session ended.");
+        win_vprint_line(window, '!', COLOUR_OTR_ENDED, "OTR session ended.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -640,12 +629,12 @@ _ui_trust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = TRUE;
+        win_vprint_line(window, '!', COLOUR_OTR_TRUSTED, "OTR session trusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -658,12 +647,12 @@ _ui_untrust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = FALSE;
+        win_vprint_line(window, '!', COLOUR_OTR_UNTRUSTED, "OTR session untrusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            title_bar_draw();
             wins_refresh_current();
         }
     }
@@ -681,14 +670,13 @@ _ui_previous_win(void)
     new_current->unread = 0;
 
     if (i == 1) {
-        title_bar_title();
+        title_bar_console();
         status_bar_current(1);
         status_bar_active(1);
     } else {
         GString *recipient_str = _get_recipient_string(new_current);
         title_bar_set_recipient(recipient_str->str);
         g_string_free(recipient_str, TRUE);
-        title_bar_draw();
         status_bar_current(i);
         status_bar_active(i);
     }
@@ -707,18 +695,18 @@ _ui_close_current(void)
     int current_index = wins_get_current_num();
     status_bar_inactive(current_index);
     wins_close_current();
+    title_bar_console();
     status_bar_current(1);
     status_bar_active(1);
-    title_bar_title();
 }
 
 static void
 _ui_close_win(int index)
 {
     wins_close_by_num(index);
+    title_bar_console();
     status_bar_current(1);
     status_bar_active(1);
-    title_bar_title();
 
     wins_refresh_current();
 }
@@ -837,6 +825,20 @@ _ui_current_print_line(const char * const msg, ...)
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
     win_print_line(current, '-', 0, fmt_msg->str);
+    va_end(arg);
+    g_string_free(fmt_msg, TRUE);
+    win_refresh(current);
+}
+
+static void
+_ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...)
+{
+    ProfWin *current = wins_get_current();
+    va_list arg;
+    va_start(arg, msg);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, msg, arg);
+    win_print_line(current, show_char, attrs, fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
     win_refresh(current);
@@ -1699,6 +1701,7 @@ ui_init_module(void)
     ui_recipient = _ui_recipient;
     ui_current_recipient = _ui_current_recipient;
     ui_current_print_line = _ui_current_print_line;
+    ui_current_print_formatted_line = _ui_current_print_formatted_line;
     ui_current_error_line = _ui_current_error_line;
     ui_current_page_off = _ui_current_page_off;
     ui_print_error_from_recipient = _ui_print_error_from_recipient;

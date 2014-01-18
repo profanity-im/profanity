@@ -59,7 +59,7 @@ handle_login_account_success(char *account_name)
     resource_presence_t resource_presence = accounts_get_login_presence(account->name);
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account);
-    title_bar_set_status(contact_presence);
+    title_bar_set_presence(contact_presence);
     log_info("%s logged in successfully", account->jid);
     ui_current_page_off();
     status_bar_print_message(account->jid);
@@ -189,9 +189,11 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     char *plugin_message = NULL;
 
 #ifdef PROF_HAVE_LIBOTR
+    gboolean was_decrypted = FALSE;
     char *decrypted;
     if (!priv) {
-        decrypted = otr_decrypt_message(from, message);
+        decrypted = otr_decrypt_message(from, message, &was_decrypted);
+        // internal OTR message
         if (decrypted == NULL) {
             return;
         }
@@ -216,7 +218,13 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         Jid *from_jid = jid_create(from);
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, plugin_message, PROF_IN_LOG, NULL);
+
+        if (!was_decrypted || (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0)) {
+            chat_log_chat(jidp->barejid, from_jid->barejid, plugin_message, PROF_IN_LOG, NULL);
+        } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+            chat_log_chat(jidp->barejid, from_jid->barejid, "[redacted]", PROF_IN_LOG, NULL);
+        }
+
         jid_destroy(jidp);
         jid_destroy(from_jid);
     }
