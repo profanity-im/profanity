@@ -21,3 +21,4 @@ void cmd_connect_shows_message_when_port_contains_chars(void **state);
 void cmd_connect_with_server_when_provided(void **state);
 void cmd_connect_with_port_when_provided(void **state);
 void cmd_connect_with_server_and_port_when_provided(void **state);
+void cmd_connect_shows_usage_when_server_provided_twice(void **state);

@@ -79,7 +79,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         // parse options
         char *altdomain = NULL;
         int port = 0;
-        gboolean altdomain_set = FALSE;
+        gboolean server_set = FALSE;
         gboolean port_set = FALSE;
         if (opt1 != NULL) {
             if (opt1val == NULL) {
@@ -89,7 +89,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             }
             if (strcmp(opt1, "server") == 0) {
                 altdomain = opt1val;
-                altdomain_set = TRUE;
+                server_set = TRUE;
             } else if (strcmp(opt1, "port") == 0) {
                 if (_strtoi(opt1val, &port, 1, 65535) != 0) {
                     port = 0;
@@ -105,18 +105,23 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             }
 
             if (opt2 != NULL) {
+                if (server_set && strcmp("server", opt2) == 0) {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
                 if (opt2val == NULL) {
                     cons_show("Usage: %s", help.usage);
                     cons_show("");
                     return TRUE;
                 }
                 if (strcmp(opt2, "server") == 0) {
-                    if (altdomain_set) {
+                    if (server_set) {
                         cons_show("Usage: %s", help.usage);
                         return TRUE;
                     }
                     altdomain = opt2val;
-                    altdomain_set = TRUE;
+                    server_set = TRUE;
                 } else if (strcmp(opt2, "port") == 0) {
                     if (port_set) {
                         cons_show("Usage: %s", help.usage);
