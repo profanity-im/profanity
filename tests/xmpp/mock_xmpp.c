@@ -111,6 +111,7 @@ jabber_connect_with_username_password_expect_and_return(char *jid,
     expect_string(_mock_jabber_connect_with_details, jid, jid);
     expect_string(_mock_jabber_connect_with_details, passwd, password);
     expect_any(_mock_jabber_connect_with_details, altdomain);
+    expect_any(_mock_jabber_connect_with_details, port);
     will_return(_mock_jabber_connect_with_details, result);
 }
 
@@ -121,6 +122,7 @@ jabber_connect_with_altdomain_expect_and_return(char *altdomain,
     expect_any(_mock_jabber_connect_with_details, jid);
     expect_any(_mock_jabber_connect_with_details, passwd);
     expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
+    expect_any(_mock_jabber_connect_with_details, port);
     will_return(_mock_jabber_connect_with_details, result);
 }
 
@@ -130,6 +132,7 @@ jabber_connect_with_details_return(jabber_conn_status_t result)
     expect_any(_mock_jabber_connect_with_details, jid);
     expect_any(_mock_jabber_connect_with_details, passwd);
     expect_any(_mock_jabber_connect_with_details, altdomain);
+    expect_any(_mock_jabber_connect_with_details, port);
     will_return(_mock_jabber_connect_with_details, result);
 }
 

@@ -84,7 +84,7 @@ void cmd_connect_with_altdomain_when_provided(void **state)
     mock_accounts_get_account();
     mock_jabber_connect_with_details();
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "user@server.org", "altdomain" };
+    gchar *args[] = { "user@server.org", "server", "altdomain", NULL };
 
     mock_connection_status(JABBER_DISCONNECTED);
 
