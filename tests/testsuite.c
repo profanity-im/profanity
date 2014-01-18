@@ -173,7 +173,6 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_shows_message_when_connected),
         unit_test(cmd_connect_shows_message_when_undefined),
         unit_test(cmd_connect_when_no_account),
-        unit_test(cmd_connect_with_altdomain_when_provided),
         unit_test(cmd_connect_fail_message),
         unit_test(cmd_connect_lowercases_argument),
         unit_test(cmd_connect_asks_password_when_not_in_account),
@@ -188,6 +187,9 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_shows_message_when_port_minus1),
         unit_test(cmd_connect_shows_message_when_port_65536),
         unit_test(cmd_connect_shows_message_when_port_contains_chars),
+        unit_test(cmd_connect_with_server_when_provided),
+        unit_test(cmd_connect_with_port_when_provided),
+        unit_test(cmd_connect_with_server_and_port_when_provided),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),

@@ -18,3 +18,6 @@ void cmd_connect_shows_message_when_port_0(void **state);
 void cmd_connect_shows_message_when_port_minus1(void **state);
 void cmd_connect_shows_message_when_port_65536(void **state);
 void cmd_connect_shows_message_when_port_contains_chars(void **state);
+void cmd_connect_with_server_when_provided(void **state);
+void cmd_connect_with_port_when_provided(void **state);
+void cmd_connect_with_server_and_port_when_provided(void **state);

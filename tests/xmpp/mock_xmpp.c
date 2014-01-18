@@ -105,24 +105,17 @@ expect_room_list_request(char *conf_server)
 }
 
 void
-jabber_connect_with_username_password_expect_and_return(char *jid,
-    char *password, jabber_conn_status_t result)
+jabber_connect_with_details_expect_and_return(char *jid,
+    char *password, char *altdomain, int port, jabber_conn_status_t result)
 {
     expect_string(_mock_jabber_connect_with_details, jid, jid);
     expect_string(_mock_jabber_connect_with_details, passwd, password);
-    expect_any(_mock_jabber_connect_with_details, altdomain);
-    expect_any(_mock_jabber_connect_with_details, port);
-    will_return(_mock_jabber_connect_with_details, result);
-}
-
-void
-jabber_connect_with_altdomain_expect_and_return(char *altdomain,
-    jabber_conn_status_t result)
-{
-    expect_any(_mock_jabber_connect_with_details, jid);
-    expect_any(_mock_jabber_connect_with_details, passwd);
-    expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
-    expect_any(_mock_jabber_connect_with_details, port);
+    if (altdomain == NULL) {
+        expect_any(_mock_jabber_connect_with_details, altdomain);
+    } else {
+        expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
+    }
+    expect_value(_mock_jabber_connect_with_details, port, port);
     will_return(_mock_jabber_connect_with_details, result);
 }
 

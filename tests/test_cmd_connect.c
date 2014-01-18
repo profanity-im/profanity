@@ -52,31 +52,6 @@ void cmd_connect_shows_message_when_undefined(void **state)
     test_with_connection_status(JABBER_UNDEFINED);
 }
 
-void cmd_connect_when_no_account(void **state)
-{
-    mock_cons_show();
-    mock_accounts_get_account();
-    mock_ui_ask_password();
-    mock_jabber_connect_with_details();
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "user@server.org", NULL };
-
-    mock_connection_status(JABBER_DISCONNECTED);
-
-    accounts_get_account_expect_and_return("user@server.org", NULL);
-
-    mock_ui_ask_password_returns("password");
-
-    expect_cons_show("Connecting as user@server.org");
-
-    jabber_connect_with_username_password_expect_and_return("user@server.org", "password", JABBER_CONNECTING);
-
-    gboolean result = cmd_connect(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
 void cmd_connect_shows_usage_when_no_server_value(void **state)
 {
     stub_ui_ask_password();
@@ -225,20 +200,93 @@ void cmd_connect_shows_message_when_port_contains_chars(void **state)
     free(help);
 }
 
-void cmd_connect_with_altdomain_when_provided(void **state)
+void cmd_connect_when_no_account(void **state)
 {
-    stub_ui_ask_password();
+    mock_cons_show();
+    mock_accounts_get_account();
+    mock_ui_ask_password();
+    mock_jabber_connect_with_details();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "user@server.org", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    accounts_get_account_expect_and_return("user@server.org", NULL);
+
+    mock_ui_ask_password_returns("password");
+
+    expect_cons_show("Connecting as user@server.org");
+
+    jabber_connect_with_details_expect_and_return("user@server.org", "password", NULL, 0, JABBER_CONNECTING);
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_with_server_when_provided(void **state)
+{
+    mock_ui_ask_password();
     stub_cons_show();
     mock_accounts_get_account();
     mock_jabber_connect_with_details();
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "user@server.org", "server", "altdomain", NULL };
+    gchar *args[] = { "user@server.org", "server", "aserver", NULL };
 
     mock_connection_status(JABBER_DISCONNECTED);
 
     accounts_get_account_return(NULL);
 
-    jabber_connect_with_altdomain_expect_and_return("altdomain", JABBER_CONNECTING);
+    mock_ui_ask_password_returns("password");
+
+    jabber_connect_with_details_expect_and_return("user@server.org", "password", "aserver", 0, JABBER_CONNECTING);
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_with_port_when_provided(void **state)
+{
+    mock_ui_ask_password();
+    stub_cons_show();
+    mock_accounts_get_account();
+    mock_jabber_connect_with_details();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "user@server.org", "port", "5432", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    accounts_get_account_return(NULL);
+
+    mock_ui_ask_password_returns("password");
+
+    jabber_connect_with_details_expect_and_return("user@server.org", "password", NULL, 5432, JABBER_CONNECTING);
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_with_server_and_port_when_provided(void **state)
+{
+    mock_ui_ask_password();
+    stub_cons_show();
+    mock_accounts_get_account();
+    mock_jabber_connect_with_details();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "user@server.org", "port", "5432", "server", "aserver", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    accounts_get_account_return(NULL);
+
+    mock_ui_ask_password_returns("password");
+
+    jabber_connect_with_details_expect_and_return("user@server.org", "password", "aserver", 5432, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(args, *help);
     assert_true(result);

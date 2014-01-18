@@ -9,10 +9,8 @@ void mock_connection_presence_message(char *message);
 void expect_room_list_request(char *conf_server);
 
 void mock_jabber_connect_with_details(void);
-void jabber_connect_with_username_password_expect_and_return(char *jid,
-    char *password, jabber_conn_status_t result);
-void jabber_connect_with_altdomain_expect_and_return(char *altdomain,
-    jabber_conn_status_t result);
+void jabber_connect_with_details_expect_and_return(char *jid,
+    char *password, char *altdomain, int port, jabber_conn_status_t result);
 void jabber_connect_with_details_return(jabber_conn_status_t result);
 
 void mock_jabber_connect_with_account(void);
