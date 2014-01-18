@@ -1639,18 +1639,24 @@ _connect_autocomplete(char *input, int *size)
 {
     char *result = NULL;
 
-//    input[*size] = '\0';
-//    gchar **args = parse_args(input, 3, 3);
+    input[*size] = '\0';
+    gchar **args = parse_args(input, 2, 4);
 
-//    if ((strncmp(input, "/account set", 12) == 0) && (args != NULL)) {
-//        GString *beginning = g_string_new("/account set ");
-//        g_string_append(beginning, args[1]);
-//        result = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
-//        g_string_free(beginning, TRUE);
-//        if (result != NULL) {
-//            return result;
-//        }
-//    }
+    if ((strncmp(input, "/connect", 8) == 0) && (args != NULL)) {
+        GString *beginning = g_string_new("/connect ");
+        g_string_append(beginning, args[0]);
+        if (args[1] != NULL && args[2] != NULL) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+        }
+        result = autocomplete_param_with_ac(input, size, beginning->str, connect_property_ac);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
 
     result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
     if (result != NULL) {
