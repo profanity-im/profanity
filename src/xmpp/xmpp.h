@@ -85,7 +85,7 @@ void roster_init_module(void);
 // connection functions
 void (*jabber_init)(const int disable_tls);
 jabber_conn_status_t (*jabber_connect_with_details)(const char * const jid,
-    const char * const passwd, const char * const altdomain);
+    const char * const passwd, const char * const altdomain, int port);
 jabber_conn_status_t (*jabber_connect_with_account)(const ProfAccount * const account);
 void (*jabber_disconnect)(void);
 void (*jabber_shutdown)(void);

@@ -69,9 +69,71 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         result = TRUE;
     } else {
         char *user = args[0];
-        char *altdomain = args[1];
+        char *opt1 = args[1];
+        char *opt1val = args[2];
+        char *opt2 = args[3];
+        char *opt2val = args[4];
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
+
+        // parse options
+        char *altdomain = NULL;
+        int port = 0;
+        gboolean altdomain_set = FALSE;
+        gboolean port_set = FALSE;
+        if (opt1 != NULL) {
+            if (opt1val == NULL) {
+                cons_show("Usage: %s", help.usage);
+                cons_show("");
+                return TRUE;
+            }
+            if (strcmp(opt1, "server") == 0) {
+                altdomain = opt1val;
+                altdomain_set = TRUE;
+            } else if (strcmp(opt1, "port") == 0) {
+                if (_strtoi(opt1val, &port, 1, 65536) != 0) {
+                    port = 0;
+                    cons_show("Port must be in the range 1 to 65535.");
+                } else {
+                    port_set = TRUE;
+                }
+            } else {
+                cons_show("Usage: %s", help.usage);
+                cons_show("");
+                return TRUE;
+            }
+
+            if (opt2 != NULL) {
+                if (opt2val == NULL) {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
+                if (strcmp(opt2, "server") == 0) {
+                    if (altdomain_set) {
+                        cons_show("Usage: %s", help.usage);
+                        return TRUE;
+                    }
+                    altdomain = opt2val;
+                    altdomain_set = TRUE;
+                } else if (strcmp(opt2, "port") == 0) {
+                    if (port_set) {
+                        cons_show("Usage: %s", help.usage);
+                        return TRUE;
+                    }
+                    if (_strtoi(opt2val, &port, 1, 65536) != 0) {
+                        port = 0;
+                        cons_show("Port must be in the range 1 to 65535.");
+                    } else {
+                        port_set = TRUE;
+                    }
+                } else {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
+            }
+        }
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
@@ -86,7 +148,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             char *passwd = ui_ask_password();
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
-            conn_status = jabber_connect_with_details(jid, passwd, altdomain);
+            conn_status = jabber_connect_with_details(jid, passwd, altdomain, port);
             free(passwd);
         }
         g_free(lower);
@@ -140,7 +202,7 @@ cmd_account(gchar **args, struct cmd_help_t help)
         if (account_name == NULL) {
             cons_show("Usage: %s", help.usage);
         } else {
-            accounts_add(account_name, NULL);
+            accounts_add(account_name, NULL, 0);
             cons_show("Account created.");
             cons_show("");
         }

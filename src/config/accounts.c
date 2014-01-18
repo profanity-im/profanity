@@ -43,6 +43,7 @@ static Autocomplete enabled_ac;
 static gchar *string_keys[] = {
     "jid",
     "server",
+    "port",
     "resource",
     "password",
     "presence.last",
@@ -118,7 +119,7 @@ _accounts_reset_enabled_search(void)
 }
 
 static void
-_accounts_add(const char *account_name, const char *altdomain)
+_accounts_add(const char *account_name, const char *altdomain, int port)
 {
     // set account name and resource
     const char *barejid = account_name;
@@ -138,6 +139,9 @@ _accounts_add(const char *account_name, const char *altdomain)
         g_key_file_set_string(accounts, account_name, "resource", resource);
         if (altdomain != NULL) {
             g_key_file_set_string(accounts, account_name, "server", altdomain);
+        }
+        if (port != 0) {
+            g_key_file_set_integer(accounts, account_name, "port", port);
         }
 
         Jid *jidp = jid_create(barejid);
@@ -210,6 +214,9 @@ _accounts_get_account(const char * const name)
         } else {
             account->server = NULL;
         }
+
+        int port = g_key_file_get_integer(accounts, name, "port", NULL);
+        account->port = port;
 
         gchar *resource = g_key_file_get_string(accounts, name, "resource", NULL);
         if (resource != NULL) {
@@ -431,6 +438,15 @@ _accounts_set_server(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "server", value);
+        _save_accounts();
+    }
+}
+
+static void
+_accounts_set_port(const char * const account_name, const int value)
+{
+    if (value != 0) {
+        g_key_file_set_integer(accounts, account_name, "port", value);
         _save_accounts();
     }
 }
@@ -736,6 +752,7 @@ accounts_init_module(void)
     accounts_account_exists = _accounts_account_exists;
     accounts_set_jid = _accounts_set_jid;
     accounts_set_server = _accounts_set_server;
+    accounts_set_port = _accounts_set_port;
     accounts_set_resource = _accounts_set_resource;
     accounts_set_password = _accounts_set_password;
     accounts_set_muc_service = _accounts_set_muc_service;

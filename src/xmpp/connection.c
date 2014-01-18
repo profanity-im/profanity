@@ -68,6 +68,7 @@ static struct {
     char *jid;
     char *passwd;
     char *altdomain;
+    int port;
 } saved_details;
 
 static GTimer *reconnect_timer;
@@ -80,7 +81,7 @@ static void _xmpp_file_logger(void * const userdata,
 static xmpp_log_t * _xmpp_get_file_logger();
 
 static jabber_conn_status_t _jabber_connect(const char * const fulljid,
-    const char * const passwd, const char * const altdomain);
+    const char * const passwd, const char * const altdomain, int port);
 static void _jabber_reconnect(void);
 
 static void _connection_handler(xmpp_conn_t * const conn,
@@ -123,7 +124,7 @@ _jabber_connect_with_account(const ProfAccount * const account)
     // connect with fulljid
     Jid *jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
     jabber_conn_status_t result =
-      _jabber_connect(jidp->fulljid, account->password, account->server);
+      _jabber_connect(jidp->fulljid, account->password, account->server, account->port);
     jid_destroy(jidp);
 
     return result;
@@ -131,7 +132,7 @@ _jabber_connect_with_account(const ProfAccount * const account)
 
 static jabber_conn_status_t
 _jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain)
+    const char * const passwd, const char * const altdomain, int port)
 {
     assert(jid != NULL);
     assert(passwd != NULL);
@@ -143,6 +144,11 @@ _jabber_connect_with_details(const char * const jid,
         saved_details.altdomain = strdup(altdomain);
     } else {
         saved_details.altdomain = NULL;
+    }
+    if (port != 0) {
+        saved_details.port = port;
+    } else {
+        saved_details.port = 0;
     }
 
     // use 'profanity' when no resourcepart in provided jid
@@ -158,7 +164,7 @@ _jabber_connect_with_details(const char * const jid,
 
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
-    return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain);
+    return _jabber_connect(saved_details.jid, passwd, saved_details.altdomain, saved_details.port);
 }
 
 static void
@@ -377,7 +383,7 @@ connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
 static jabber_conn_status_t
 _jabber_connect(const char * const fulljid, const char * const passwd,
-    const char * const altdomain)
+    const char * const altdomain, int port)
 {
     assert(fulljid != NULL);
     assert(passwd != NULL);
@@ -421,7 +427,7 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
         xmpp_conn_disable_tls(jabber_conn.conn);
     }
 
-    int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, 0,
+    int connect_status = xmpp_connect_client(jabber_conn.conn, altdomain, port,
         _connection_handler, jabber_conn.ctx);
 
     if (connect_status == 0)
@@ -443,7 +449,7 @@ _jabber_reconnect(void)
     } else {
         char *fulljid = create_fulljid(account->jid, account->resource);
         log_debug("Attempting reconnect with account %s", account->name);
-        _jabber_connect(fulljid, saved_account.passwd, account->server);
+        _jabber_connect(fulljid, saved_account.passwd, account->server, account->port);
         free(fulljid);
         g_timer_start(reconnect_timer);
     }
@@ -468,7 +474,7 @@ _connection_handler(xmpp_conn_t * const conn,
         // logged in without account, use details to create new account
         } else {
             log_debug("Connection handler: logged in with jid: %s", saved_details.name);
-            accounts_add(saved_details.name, saved_details.altdomain);
+            accounts_add(saved_details.name, saved_details.altdomain, saved_details.port);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
             handle_login_account_success(saved_details.name);

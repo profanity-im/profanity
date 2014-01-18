@@ -99,7 +99,7 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/connect",
-        cmd_connect, parse_args, 1, 2, NULL,
+        cmd_connect, parse_args, 1, 5, NULL,
         { "/connect account [server]", "Login to a chat service.",
         { "/connect account [server]",
           "-------------------------",
