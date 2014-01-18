@@ -28,11 +28,12 @@ _mock_iq_room_list_request(gchar *conf_server)
 
 static jabber_conn_status_t
 _mock_jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain)
+    const char * const passwd, const char * const altdomain, const int port)
 {
     check_expected(jid);
     check_expected(passwd);
     check_expected(altdomain);
+    check_expected(port);
     return (jabber_conn_status_t)mock();
 }
 

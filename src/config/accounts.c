@@ -119,7 +119,7 @@ _accounts_reset_enabled_search(void)
 }
 
 static void
-_accounts_add(const char *account_name, const char *altdomain, int port)
+_accounts_add(const char *account_name, const char *altdomain, const int port)
 {
     // set account name and resource
     const char *barejid = account_name;

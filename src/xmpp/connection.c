@@ -132,7 +132,7 @@ _jabber_connect_with_account(const ProfAccount * const account)
 
 static jabber_conn_status_t
 _jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain, int port)
+    const char * const passwd, const char * const altdomain, const int port)
 {
     assert(jid != NULL);
     assert(passwd != NULL);

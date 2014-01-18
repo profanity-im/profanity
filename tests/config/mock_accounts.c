@@ -62,14 +62,14 @@ _mock_accounts_get_list(void)
 }
 
 void
-_mock_accounts_add(const char *account_name, const char *altdomain)
+_mock_accounts_add(const char *account_name, const char *altdomain, const int port)
 {
     check_expected(account_name);
     check_expected(altdomain);    
 }
 
 void
-_stub_accounts_add(const char *account_name, const char *altdomain)
+_stub_accounts_add(const char *account_name, const char *altdomain, const int port)
 {
     // do nothing
 }
