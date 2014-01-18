@@ -77,6 +77,154 @@ void cmd_connect_when_no_account(void **state)
     free(help);
 }
 
+void cmd_connect_shows_usage_when_no_server_value(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "user@server.org", "server", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Usage: some usage");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_usage_when_server_no_port_value(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "user@server.org", "server", "aserver", "port", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Usage: some usage");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_usage_when_no_port_value(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "user@server.org", "port", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Usage: some usage");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_usage_when_port_no_server_value(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "user@server.org", "port", "5678", "server", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Usage: some usage");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_message_when_port_0(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "user@server.org", "port", "0", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Value 0 out of range. Must be in 1..65535.");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_message_when_port_minus1(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "user@server.org", "port", "-1", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Value -1 out of range. Must be in 1..65535.");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_message_when_port_65536(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "user@server.org", "port", "65536", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Value 65536 out of range. Must be in 1..65535.");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_message_when_port_contains_chars(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "user@server.org", "port", "52f66", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Could not convert \"52f66\" to a number.");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_connect_with_altdomain_when_provided(void **state)
 {
     stub_ui_ask_password();

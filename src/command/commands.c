@@ -91,9 +91,10 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 altdomain = opt1val;
                 altdomain_set = TRUE;
             } else if (strcmp(opt1, "port") == 0) {
-                if (_strtoi(opt1val, &port, 1, 65536) != 0) {
+                if (_strtoi(opt1val, &port, 1, 65535) != 0) {
                     port = 0;
-                    cons_show("Port must be in the range 1 to 65535.");
+                    cons_show("");
+                    return TRUE;
                 } else {
                     port_set = TRUE;
                 }
@@ -121,9 +122,10 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                         cons_show("Usage: %s", help.usage);
                         return TRUE;
                     }
-                    if (_strtoi(opt2val, &port, 1, 65536) != 0) {
+                    if (_strtoi(opt2val, &port, 1, 65535) != 0) {
                         port = 0;
-                        cons_show("Port must be in the range 1 to 65535.");
+                        cons_show("");
+                        return TRUE;
                     } else {
                         port_set = TRUE;
                     }
