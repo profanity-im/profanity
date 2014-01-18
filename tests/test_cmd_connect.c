@@ -238,6 +238,44 @@ void cmd_connect_shows_usage_when_port_provided_twice(void **state)
     free(help);
 }
 
+void cmd_connect_shows_usage_when_invalid_first_property(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "user@server.org", "wrong", "server", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Usage: some usage");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_connect_shows_usage_when_invalid_second_property(void **state)
+{
+    stub_ui_ask_password();
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "user@server.org", "server", "aserver", "wrong", "1234", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+
+    expect_cons_show("Usage: some usage");
+    expect_cons_show("");
+
+    gboolean result = cmd_connect(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_connect_when_no_account(void **state)
 {
     mock_cons_show();

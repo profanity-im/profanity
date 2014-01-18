@@ -192,6 +192,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_with_server_and_port_when_provided),
         unit_test(cmd_connect_shows_usage_when_server_provided_twice),
         unit_test(cmd_connect_shows_usage_when_port_provided_twice),
+        unit_test(cmd_connect_shows_usage_when_invalid_first_property),
+        unit_test(cmd_connect_shows_usage_when_invalid_second_property),
 
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
