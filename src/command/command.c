@@ -66,6 +66,7 @@ static char * _roster_autocomplete(char *input, int *size);
 static char * _group_autocomplete(char *input, int *size);
 static char * _bookmark_autocomplete(char *input, int *size);
 static char * _otr_autocomplete(char *input, int *size);
+static char * _connect_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -837,6 +838,7 @@ static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
+static Autocomplete connect_property_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1005,6 +1007,10 @@ cmd_init(void)
     autocomplete_add(otr_log_ac, "off");
     autocomplete_add(otr_log_ac, "redact");
 
+    connect_property_ac = autocomplete_new();
+    autocomplete_add(connect_property_ac, "server");
+    autocomplete_add(connect_property_ac, "port");
+
     cmd_history_init();
 }
 
@@ -1037,6 +1043,7 @@ cmd_uninit(void)
     autocomplete_free(bookmark_ac);
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
+    autocomplete_free(connect_property_ac);
 }
 
 // Command autocompletion functions
@@ -1112,6 +1119,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
+    autocomplete_reset(connect_property_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1333,13 +1341,6 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-
     gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac  };
 
@@ -1355,7 +1356,8 @@ _cmd_complete_parameters(char *input, int *size)
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
-        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete };
+        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
+        _connect_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1625,6 +1627,32 @@ _theme_autocomplete(char *input, int *size)
         }
     }
     result = autocomplete_param_with_ac(input, size, "/theme", theme_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_connect_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+//    input[*size] = '\0';
+//    gchar **args = parse_args(input, 3, 3);
+
+//    if ((strncmp(input, "/account set", 12) == 0) && (args != NULL)) {
+//        GString *beginning = g_string_new("/account set ");
+//        g_string_append(beginning, args[1]);
+//        result = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
+//        g_string_free(beginning, TRUE);
+//        if (result != NULL) {
+//            return result;
+//        }
+//    }
+
+    result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
     if (result != NULL) {
         return result;
     }
