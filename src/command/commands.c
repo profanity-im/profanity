@@ -110,6 +110,11 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                     cons_show("");
                     return TRUE;
                 }
+                if (port_set && strcmp("port", opt2) == 0) {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
                 if (opt2val == NULL) {
                     cons_show("Usage: %s", help.usage);
                     cons_show("");
