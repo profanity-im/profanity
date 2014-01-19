@@ -289,6 +289,16 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_set_server(account_name, value);
                     cons_show("Updated server for account %s: %s", account_name, value);
                     cons_show("");
+                } else if (strcmp(property, "port") == 0) {
+                    int port;
+                    if (_strtoi(value, &port, 1, 65535) != 0) {
+                        cons_show("");
+                        return TRUE;
+                    } else {
+                        accounts_set_port(account_name, port);
+                        cons_show("Updated port for account %s: %s", account_name, value);
+                        cons_show("");
+                    }
                 } else if (strcmp(property, "resource") == 0) {
                     accounts_set_resource(account_name, value);
                     cons_show("Updated resource for account %s: %s", account_name, value);

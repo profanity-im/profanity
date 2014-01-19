@@ -106,7 +106,7 @@ static struct cmd_t command_defs[] =
           "--------------------------------------------",
           "Connect to an XMPP service using the specified account.",
           "Use the server property to specify a server if required.",
-          "Change the default port with the port property.",
+          "Change the default port (5222, or 5223 for SSL) with the port property.",
           "An account is automatically created if one does not exist.",
           "See the /account command for more details.",
           "",
@@ -697,6 +697,7 @@ static struct cmd_t command_defs[] =
           "The set command may use one of the following for 'property'.",
           "jid              : The Jabber ID of the account, the account name will be used if this property is not set.",
           "server           : The chat server, if different to the domainpart of the JID.",
+          "port             : The port used for connecting if not the default (5222, or 5223 for SSL).",
           "status           : The presence status to use on login, use 'last' to use whatever your last status was.",
           "online|chat|away",
           "|xa|dnd          : Priority for the specified presence.",
@@ -709,8 +710,9 @@ static struct cmd_t command_defs[] =
           "password         : Clears the password for the account.",
           "",
           "Example : /account add work",
-          "        : /account set work jid myuser@mycompany.com",
-          "        : /account set work server talk.google.com",
+          "        : /account set work jid me@chatty",
+          "        : /account set work server talk.chat.com",
+          "        : /account set work port 5111",
           "        : /account set work resource desktop",
           "        : /account set work muc chatservice.mycompany.com",
           "        : /account set work nick dennis",
@@ -945,6 +947,7 @@ cmd_init(void)
     account_set_ac = autocomplete_new();
     autocomplete_add(account_set_ac, "jid");
     autocomplete_add(account_set_ac, "server");
+    autocomplete_add(account_set_ac, "port");
     autocomplete_add(account_set_ac, "status");
     autocomplete_add(account_set_ac, "online");
     autocomplete_add(account_set_ac, "chat");
