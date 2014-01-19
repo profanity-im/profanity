@@ -19,6 +19,7 @@
 #include "test_jid.h"
 #include "test_parser.h"
 #include "test_roster_list.h"
+#include "test_preferences.h"
 
 #define PROF_RUN_TESTS(name) fprintf(stderr, "\n-> Running %s\n", #name); \
     fflush(stderr); \
@@ -356,6 +357,18 @@ int main(int argc, char* argv[]) {
             delete_config_dir),
     };
 
+    const UnitTest preferences_tests[] = {
+        unit_test_setup_teardown(statuses_console_defaults_to_all,
+            create_config_dir,
+            delete_config_dir),
+        unit_test_setup_teardown(statuses_chat_defaults_to_all,
+            create_config_dir,
+            delete_config_dir),
+        unit_test_setup_teardown(statuses_muc_defaults_to_on,
+            create_config_dir,
+            delete_config_dir),
+    };
+
     int bak, new;
     fflush(stdout);
     bak = dup(1);
@@ -377,6 +390,7 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(cmd_sub_tests);
     PROF_RUN_TESTS(contact_tests);
     PROF_RUN_TESTS(cmd_statuses_tests);
+    PROF_RUN_TESTS(preferences_tests);
 
     fflush(stdout);
     dup2(bak, 1);
