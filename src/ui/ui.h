@@ -128,6 +128,8 @@ void (*ui_contact_already_in_group)(const char * const contact, const char * con
 void (*ui_contact_not_in_group)(const char * const contact, const char * const group);
 void (*ui_group_added)(const char * const contact, const char * const group);
 void (*ui_group_removed)(const char * const contact, const char * const group);
+void (*ui_chat_win_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
+void (*ui_chat_win_contact_offline)(PContact contact, char *resource, char *status);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);
@@ -224,6 +226,8 @@ void (*cons_reconnect_setting)(void);
 void (*cons_autoping_setting)(void);
 void (*cons_priority_setting)(void);
 void (*cons_autoconnect_setting)(void);
+void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
+void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
 
 // status bar actions
 void (*status_bar_refresh)(void);

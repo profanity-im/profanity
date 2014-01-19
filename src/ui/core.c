@@ -1405,6 +1405,47 @@ _ui_ask_password(void)
 }
 
 static void
+_ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
+{
+    const char *show = string_from_resource_presence(resource->presence);
+    char *display_str = p_contact_create_display_string(contact, resource->name);
+    const char *barejid = p_contact_barejid(contact);
+
+    ProfWin *window = wins_get_by_recipient(barejid);
+    if (window != NULL) {
+        win_show_status_string(window, display_str, show, resource->status,
+            last_activity, "++", "online");
+
+        if (wins_is_current(window)) {
+            wins_refresh_current();
+            ui_current_page_off();
+        }
+    }
+
+    free(display_str);
+}
+
+static void
+_ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
+{
+    char *display_str = p_contact_create_display_string(contact, resource);
+    const char *barejid = p_contact_barejid(contact);
+
+    ProfWin *window = wins_get_by_recipient(barejid);
+    if (window != NULL) {
+        win_show_status_string(window, display_str, "offline", status, NULL, "--",
+            "offline");
+
+        if (wins_is_current(window)) {
+            wins_refresh_current();
+            ui_current_page_off();
+        }
+    }
+
+    free(display_str);
+}
+
+static void
 _ui_draw_win_title(void)
 {
     char new_win_title[100];
@@ -1675,4 +1716,6 @@ ui_init_module(void)
     ui_gone_insecure = _ui_gone_insecure;
     ui_trust = _ui_trust;
     ui_untrust = _ui_untrust;
+    ui_chat_win_contact_online = _ui_chat_win_contact_online;
+    ui_chat_win_contact_offline = _ui_chat_win_contact_offline;
 }

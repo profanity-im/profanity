@@ -301,27 +301,8 @@ handle_contact_offline(char *barejid, char *resource, char *status)
         PContact contact = roster_get_contact(barejid);
         if (p_contact_subscription(contact) != NULL) {
             if (strcmp(p_contact_subscription(contact), "none") != 0) {
-                char *display_str = p_contact_create_display_string(contact, jid->resourcepart);
-
-                ProfWin *console = wins_get_console();
-                win_show_status_string(console, display_str, "offline", status, NULL, "--",
-                    "offline");
-
-                ProfWin *window = wins_get_by_recipient(barejid);
-                if (window != NULL) {
-                    win_show_status_string(window, display_str, "offline", status, NULL, "--",
-                        "offline");
-                }
-
-                free(display_str);
-
-                if (wins_is_current(console)) {
-                    wins_refresh_current();
-                } else if ((window != NULL) && (wins_is_current(window))) {
-                    wins_refresh_current();
-                }
-
-                ui_current_page_off();
+                cons_show_contact_offline(contact, resource, status);
+                ui_chat_win_contact_offline(contact, resource, status);
             }
         }
         jid_destroy(jid);
@@ -338,28 +319,8 @@ handle_contact_online(char *barejid, Resource *resource,
         PContact contact = roster_get_contact(barejid);
         if (p_contact_subscription(contact) != NULL) {
             if (strcmp(p_contact_subscription(contact), "none") != 0) {
-                const char *show = string_from_resource_presence(resource->presence);
-                char *display_str = p_contact_create_display_string(contact, resource->name);
-
-                ProfWin *console = wins_get_console();
-                win_show_status_string(console, display_str, show, resource->status, last_activity,
-                    "++", "online");
-
-                ProfWin *window = wins_get_by_recipient(barejid);
-                if (window != NULL) {
-                    win_show_status_string(window, display_str, show, resource->status,
-                        last_activity, "++", "online");
-                }
-
-                free(display_str);
-
-                if (wins_is_current(console)) {
-                    wins_refresh_current();
-                } else if ((window != NULL) && (wins_is_current(window))) {
-                    wins_refresh_current();
-                }
-
-                ui_current_page_off();
+                cons_show_contact_online(contact, resource, last_activity);
+                ui_chat_win_contact_online(contact, resource, last_activity);
             }
         }
     }

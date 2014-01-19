@@ -1370,6 +1370,40 @@ _cons_show_roster(GSList *list)
 }
 
 static void
+_cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
+{
+    const char *show = string_from_resource_presence(resource->presence);
+    char *display_str = p_contact_create_display_string(contact, resource->name);
+
+    ProfWin *console = wins_get_console();
+    win_show_status_string(console, display_str, show, resource->status, last_activity,
+        "++", "online");
+
+    free(display_str);
+
+    if (wins_is_current(console)) {
+        ui_current_page_off();
+    }
+    wins_refresh_console();
+}
+
+static void
+_cons_show_contact_offline(PContact contact, char *resource, char *status)
+{
+    char *display_str = p_contact_create_display_string(contact, resource);
+
+    ProfWin *console = wins_get_console();
+    win_show_status_string(console, display_str, "offline", status, NULL, "--",
+        "offline");
+    free(display_str);
+
+    if (wins_is_current(console)) {
+        ui_current_page_off();
+    }
+    wins_refresh_console();
+}
+
+static void
 _cons_show_contacts(GSList *list)
 {
     ProfWin *console = wins_get_console();
@@ -1594,4 +1628,6 @@ console_init_module(void)
     cons_show_roster = _cons_show_roster;
     cons_show_contacts = _cons_show_contacts;
     cons_alert = _cons_alert;
+    cons_show_contact_online = _cons_show_contact_online;
+    cons_show_contact_offline = _cons_show_contact_offline;
 }
