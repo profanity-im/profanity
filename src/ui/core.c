@@ -355,60 +355,6 @@ _ui_handle_error_message(const char * const from, const char * const err_msg)
 }
 
 static void
-_ui_contact_online(const char * const barejid, const char * const resource,
-    const char * const show, const char * const status, GDateTime *last_activity)
-{
-    PContact contact = roster_get_contact(barejid);
-    char *display_str = p_contact_create_display_string(contact, resource);
-
-    ProfWin *console = wins_get_console();
-    win_show_status_string(console, display_str, show, status, last_activity,
-        "++", "online");
-
-    ProfWin *window = wins_get_by_recipient(barejid);
-    if (window != NULL) {
-        win_show_status_string(window, display_str, show, status,
-            last_activity, "++", "online");
-    }
-
-    free(display_str);
-
-    if (wins_is_current(console)) {
-        wins_refresh_current();
-    } else if ((window != NULL) && (wins_is_current(window))) {
-        wins_refresh_current();
-    }
-}
-
-static void
-_ui_contact_offline(const char * const from, const char * const show,
-    const char * const status)
-{
-    Jid *jidp = jid_create(from);
-    PContact contact = roster_get_contact(jidp->barejid);
-    char *display_str = p_contact_create_display_string(contact, jidp->resourcepart);
-
-    ProfWin *console = wins_get_console();
-    win_show_status_string(console, display_str, show, status, NULL, "--",
-        "offline");
-
-    ProfWin *window = wins_get_by_recipient(jidp->barejid);
-    if (window != NULL) {
-        win_show_status_string(window, display_str, show, status, NULL, "--",
-            "offline");
-    }
-
-    jid_destroy(jidp);
-    free(display_str);
-
-    if (wins_is_current(console)) {
-        wins_refresh_current();
-    } else if ((window != NULL) && (wins_is_current(window))) {
-        wins_refresh_current();
-    }
-}
-
-static void
 _ui_disconnected(void)
 {
     wins_lost_connection();
@@ -1675,8 +1621,6 @@ ui_init_module(void)
     ui_group_added = _ui_group_added;
     ui_group_removed = _ui_group_removed;
     ui_handle_error_message = _ui_handle_error_message;
-    ui_contact_online = _ui_contact_online;
-    ui_contact_offline = _ui_contact_offline;
     ui_disconnected = _ui_disconnected;
     ui_handle_special_keys = _ui_handle_special_keys;
     ui_close_connected_win = _ui_close_connected_win;

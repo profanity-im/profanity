@@ -100,10 +100,6 @@ char * (*ui_ask_password)(void);
 void (*ui_contact_typing)(const char * const from);
 void (*ui_incoming_msg)(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv);
-void (*ui_contact_online)(const char * const barejid, const char * const resource,
-    const char * const show, const char * const status, GDateTime *last_activity);
-void (*ui_contact_offline)(const char * const from, const char * const show,
-    const char * const status);
 void (*ui_disconnected)(void);
 void (*ui_recipient_gone)(const char * const barejid);
 void (*ui_outgoing_msg)(const char * const from, const char * const to,

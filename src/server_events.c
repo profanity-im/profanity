@@ -21,6 +21,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "chat_session.h"
 #include "log.h"
@@ -28,6 +29,9 @@
 #include "config/preferences.h"
 #include "roster_list.h"
 #include "ui/ui.h"
+
+#include "ui/windows.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr.h"
 #endif
@@ -288,16 +292,35 @@ handle_subscription(const char *from, jabber_subscr_t type)
 }
 
 void
-handle_contact_offline(char *contact, char *resource, char *status)
+handle_contact_offline(char *barejid, char *resource, char *status)
 {
-    gboolean updated = roster_contact_offline(contact, resource, status);
+    gboolean updated = roster_contact_offline(barejid, resource, status);
 
     if (resource != NULL && updated && prefs_get_boolean(PREF_STATUSES)) {
-        Jid *jid = jid_create_from_bare_and_resource(contact, resource);
-        PContact result = roster_get_contact(contact);
-        if (p_contact_subscription(result) != NULL) {
-            if (strcmp(p_contact_subscription(result), "none") != 0) {
-                ui_contact_offline(jid->fulljid, "offline", status);
+        Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
+        PContact contact = roster_get_contact(barejid);
+        if (p_contact_subscription(contact) != NULL) {
+            if (strcmp(p_contact_subscription(contact), "none") != 0) {
+                char *display_str = p_contact_create_display_string(contact, jid->resourcepart);
+
+                ProfWin *console = wins_get_console();
+                win_show_status_string(console, display_str, "offline", status, NULL, "--",
+                    "offline");
+
+                ProfWin *window = wins_get_by_recipient(barejid);
+                if (window != NULL) {
+                    win_show_status_string(window, display_str, "offline", status, NULL, "--",
+                        "offline");
+                }
+
+                free(display_str);
+
+                if (wins_is_current(console)) {
+                    wins_refresh_current();
+                } else if ((window != NULL) && (wins_is_current(window))) {
+                    wins_refresh_current();
+                }
+
                 ui_current_page_off();
             }
         }
@@ -306,17 +329,36 @@ handle_contact_offline(char *contact, char *resource, char *status)
 }
 
 void
-handle_contact_online(char *contact, Resource *resource,
+handle_contact_online(char *barejid, Resource *resource,
     GDateTime *last_activity)
 {
-    gboolean updated = roster_update_presence(contact, resource, last_activity);
+    gboolean updated = roster_update_presence(barejid, resource, last_activity);
 
     if (updated && prefs_get_boolean(PREF_STATUSES)) {
-        PContact result = roster_get_contact(contact);
-        if (p_contact_subscription(result) != NULL) {
-            if (strcmp(p_contact_subscription(result), "none") != 0) {
+        PContact contact = roster_get_contact(barejid);
+        if (p_contact_subscription(contact) != NULL) {
+            if (strcmp(p_contact_subscription(contact), "none") != 0) {
                 const char *show = string_from_resource_presence(resource->presence);
-                ui_contact_online(contact, resource->name, show, resource->status, last_activity);
+                char *display_str = p_contact_create_display_string(contact, resource->name);
+
+                ProfWin *console = wins_get_console();
+                win_show_status_string(console, display_str, show, resource->status, last_activity,
+                    "++", "online");
+
+                ProfWin *window = wins_get_by_recipient(barejid);
+                if (window != NULL) {
+                    win_show_status_string(window, display_str, show, resource->status,
+                        last_activity, "++", "online");
+                }
+
+                free(display_str);
+
+                if (wins_is_current(console)) {
+                    wins_refresh_current();
+                } else if ((window != NULL) && (wins_is_current(window))) {
+                    wins_refresh_current();
+                }
+
                 ui_current_page_off();
             }
         }
