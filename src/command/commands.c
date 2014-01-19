@@ -2253,8 +2253,27 @@ cmd_priority(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_statuses(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help,
-        "Status notifications", PREF_STATUSES);
+    if (strcmp(args[0], "console") != 0 &&
+            strcmp(args[0], "chat") != 0 &&
+            strcmp(args[0], "muc") != 0) {
+        cons_show("Usage: %s", help.usage);
+    }
+
+    if (strcmp(args[0], "console") == 0 || strcmp(args[0], "chat") == 0) {
+        if (strcmp(args[1], "all") != 0 &&
+                strcmp(args[1], "online") != 0 &&
+                strcmp(args[1], "none") != 0) {
+            cons_show("Usage: %s", help.usage);
+        }
+
+    }
+
+    if (strcmp(args[0], "muc") == 0) {
+        if (strcmp(args[1], "on") != 0 && strcmp(args[1], "off") != 0) {
+            cons_show("Usage: %s", help.usage);
+        }
+    }
+    return TRUE;
 }
 
 gboolean

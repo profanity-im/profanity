@@ -10,6 +10,7 @@
 #include "test_cmd_account.h"
 #include "test_cmd_rooms.h"
 #include "test_cmd_sub.h"
+#include "test_cmd_statuses.h"
 #include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
@@ -294,6 +295,11 @@ int main(int argc, char* argv[]) {
         unit_test(contact_not_available_when_highest_priority_dnd),
         unit_test(contact_available_when_highest_priority_online),
         unit_test(contact_available_when_highest_priority_chat),
+
+        unit_test(cmd_statuses_shows_usage_when_bad_subcmd),
+        unit_test(cmd_statuses_shows_usage_when_bad_console_setting),
+        unit_test(cmd_statuses_shows_usage_when_bad_chat_setting),
+        unit_test(cmd_statuses_shows_usage_when_bad_muc_setting),
 
     };
     return run_tests(tests);
