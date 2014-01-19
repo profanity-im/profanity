@@ -6,6 +6,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include "config/helpers.h"
 #include "test_autocomplete.h"
 #include "test_common.h"
 #include "test_contact.h"

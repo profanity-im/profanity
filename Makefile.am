@@ -65,6 +65,7 @@ test_sources = \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
+    tests/config/helpers.c tests/config/helpers.h \
     tests/log/mock_log.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
