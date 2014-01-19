@@ -293,6 +293,9 @@ _get_group(preference_t pref)
         case PREF_HISTORY:
         case PREF_MOUSE:
         case PREF_STATUSES:
+        case PREF_STATUSES_CONSOLE:
+        case PREF_STATUSES_CHAT:
+        case PREF_STATUSES_MUC:
         case PREF_OTR_WARN:
             return "ui";
         case PREF_STATES:
@@ -343,6 +346,12 @@ _get_key(preference_t pref)
             return "mouse";
         case PREF_STATUSES:
             return "statuses";
+        case PREF_STATUSES_CONSOLE:
+            return "statuses.console";
+        case PREF_STATUSES_CHAT:
+            return "statuses.chat";
+        case PREF_STATUSES_MUC:
+            return "statuses.muc";
         case PREF_STATES:
             return "enabled";
         case PREF_OUTTYPE:

@@ -2264,6 +2264,7 @@ cmd_statuses(gchar **args, struct cmd_help_t help)
                 strcmp(args[1], "online") != 0 &&
                 strcmp(args[1], "none") != 0) {
             cons_show("Usage: %s", help.usage);
+            return TRUE;
         }
 
     }
@@ -2271,7 +2272,35 @@ cmd_statuses(gchar **args, struct cmd_help_t help)
     if (strcmp(args[0], "muc") == 0) {
         if (strcmp(args[1], "on") != 0 && strcmp(args[1], "off") != 0) {
             cons_show("Usage: %s", help.usage);
+            return TRUE;
         }
+    }
+
+    if (strcmp(args[0], "console") == 0) {
+        prefs_set_string(PREF_STATUSES_CONSOLE, args[1]);
+        if (strcmp(args[1], "all") == 0) {
+            cons_show("All presence updates will appear in the console.");
+        } else if (strcmp(args[1], "online") == 0) {
+            cons_show("Only online/offline presence updates will appear in the console.");
+        } else {
+            cons_show("Presence updates will not appear in the console.");
+        }
+    }
+
+    if (strcmp(args[0], "chat") == 0) {
+        prefs_set_string(PREF_STATUSES_CHAT, args[1]);
+        if (strcmp(args[1], "all") == 0) {
+            cons_show("All presence updates will appear in chat windows.");
+        } else if (strcmp(args[1], "online") == 0) {
+            cons_show("Only online/offline presence updates will appear in chat windows.");
+        } else {
+            cons_show("Presence updates will not appear in chat windows.");
+        }
+    }
+
+    if (strcmp(args[0], "muc") == 0) {
+        _cmd_set_boolean_preference(args[1], help,
+            "Chat room presence updates", PREF_STATUSES_MUC);
     }
     return TRUE;
 }
