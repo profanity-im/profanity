@@ -44,7 +44,7 @@ void add_one_and_complete(void **state)
     autocomplete_add(ac, "Hello");
     char *result = autocomplete_complete(ac, "Hel");
 
-    assert_string_equal("Hello aaaa", result);
+    assert_string_equal("Hello", result);
 
     autocomplete_clear(ac);
 }

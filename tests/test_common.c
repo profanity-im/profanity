@@ -46,7 +46,7 @@ void replace_two_substr(void **state)
 
     char *result = str_replace(string, sub, new);
 
-    assert_string_equal("it was a was string ssss", result);
+    assert_string_equal("it was a was string", result);
 }
 
 void replace_char(void **state)
