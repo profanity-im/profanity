@@ -70,9 +70,83 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         result = TRUE;
     } else {
         char *user = args[0];
-        char *altdomain = args[1];
+        char *opt1 = args[1];
+        char *opt1val = args[2];
+        char *opt2 = args[3];
+        char *opt2val = args[4];
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
+
+        // parse options
+        char *altdomain = NULL;
+        int port = 0;
+        gboolean server_set = FALSE;
+        gboolean port_set = FALSE;
+        if (opt1 != NULL) {
+            if (opt1val == NULL) {
+                cons_show("Usage: %s", help.usage);
+                cons_show("");
+                return TRUE;
+            }
+            if (strcmp(opt1, "server") == 0) {
+                altdomain = opt1val;
+                server_set = TRUE;
+            } else if (strcmp(opt1, "port") == 0) {
+                if (_strtoi(opt1val, &port, 1, 65535) != 0) {
+                    port = 0;
+                    cons_show("");
+                    return TRUE;
+                } else {
+                    port_set = TRUE;
+                }
+            } else {
+                cons_show("Usage: %s", help.usage);
+                cons_show("");
+                return TRUE;
+            }
+
+            if (opt2 != NULL) {
+                if (server_set && strcmp("server", opt2) == 0) {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
+                if (port_set && strcmp("port", opt2) == 0) {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
+                if (opt2val == NULL) {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
+                if (strcmp(opt2, "server") == 0) {
+                    if (server_set) {
+                        cons_show("Usage: %s", help.usage);
+                        return TRUE;
+                    }
+                    altdomain = opt2val;
+                    server_set = TRUE;
+                } else if (strcmp(opt2, "port") == 0) {
+                    if (port_set) {
+                        cons_show("Usage: %s", help.usage);
+                        return TRUE;
+                    }
+                    if (_strtoi(opt2val, &port, 1, 65535) != 0) {
+                        port = 0;
+                        cons_show("");
+                        return TRUE;
+                    } else {
+                        port_set = TRUE;
+                    }
+                } else {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
+            }
+        }
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
@@ -87,7 +161,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             char *passwd = ui_ask_password();
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
-            conn_status = jabber_connect_with_details(jid, passwd, altdomain);
+            conn_status = jabber_connect_with_details(jid, passwd, altdomain, port);
             free(passwd);
         }
         g_free(lower);
@@ -141,7 +215,7 @@ cmd_account(gchar **args, struct cmd_help_t help)
         if (account_name == NULL) {
             cons_show("Usage: %s", help.usage);
         } else {
-            accounts_add(account_name, NULL);
+            accounts_add(account_name, NULL, 0);
             cons_show("Account created.");
             cons_show("");
         }
@@ -216,6 +290,16 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_set_server(account_name, value);
                     cons_show("Updated server for account %s: %s", account_name, value);
                     cons_show("");
+                } else if (strcmp(property, "port") == 0) {
+                    int port;
+                    if (_strtoi(value, &port, 1, 65535) != 0) {
+                        cons_show("");
+                        return TRUE;
+                    } else {
+                        accounts_set_port(account_name, port);
+                        cons_show("Updated port for account %s: %s", account_name, value);
+                        cons_show("");
+                    }
                 } else if (strcmp(property, "resource") == 0) {
                     accounts_set_resource(account_name, value);
                     cons_show("Updated resource for account %s: %s", account_name, value);

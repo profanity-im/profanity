@@ -28,11 +28,12 @@ _mock_iq_room_list_request(gchar *conf_server)
 
 static jabber_conn_status_t
 _mock_jabber_connect_with_details(const char * const jid,
-    const char * const passwd, const char * const altdomain)
+    const char * const passwd, const char * const altdomain, const int port)
 {
     check_expected(jid);
     check_expected(passwd);
     check_expected(altdomain);
+    check_expected(port);
     return (jabber_conn_status_t)mock();
 }
 
@@ -104,22 +105,17 @@ expect_room_list_request(char *conf_server)
 }
 
 void
-jabber_connect_with_username_password_expect_and_return(char *jid,
-    char *password, jabber_conn_status_t result)
+jabber_connect_with_details_expect_and_return(char *jid,
+    char *password, char *altdomain, int port, jabber_conn_status_t result)
 {
     expect_string(_mock_jabber_connect_with_details, jid, jid);
     expect_string(_mock_jabber_connect_with_details, passwd, password);
-    expect_any(_mock_jabber_connect_with_details, altdomain);
-    will_return(_mock_jabber_connect_with_details, result);
-}
-
-void
-jabber_connect_with_altdomain_expect_and_return(char *altdomain,
-    jabber_conn_status_t result)
-{
-    expect_any(_mock_jabber_connect_with_details, jid);
-    expect_any(_mock_jabber_connect_with_details, passwd);
-    expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
+    if (altdomain == NULL) {
+        expect_any(_mock_jabber_connect_with_details, altdomain);
+    } else {
+        expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
+    }
+    expect_value(_mock_jabber_connect_with_details, port, port);
     will_return(_mock_jabber_connect_with_details, result);
 }
 
@@ -129,6 +125,7 @@ jabber_connect_with_details_return(jabber_conn_status_t result)
     expect_any(_mock_jabber_connect_with_details, jid);
     expect_any(_mock_jabber_connect_with_details, passwd);
     expect_any(_mock_jabber_connect_with_details, altdomain);
+    expect_any(_mock_jabber_connect_with_details, port);
     will_return(_mock_jabber_connect_with_details, result);
 }
 

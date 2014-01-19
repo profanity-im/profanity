@@ -33,6 +33,7 @@ typedef struct prof_account_t {
     gchar *password;
     gchar *resource;
     gchar *server;
+    int port;
     gchar *last_presence;
     gchar *login_presence;
     gint priority_online;
@@ -55,7 +56,7 @@ char * (*accounts_find_all)(char *prefix);
 char * (*accounts_find_enabled)(char *prefix);
 void (*accounts_reset_all_search)(void);
 void (*accounts_reset_enabled_search)(void);
-void (*accounts_add)(const char *jid, const char *altdomain);
+void (*accounts_add)(const char *jid, const char *altdomain, const int port);
 gchar** (*accounts_get_list)(void);
 ProfAccount* (*accounts_get_account)(const char * const name);
 void (*accounts_free_account)(ProfAccount *account);
@@ -66,6 +67,7 @@ gboolean (*accounts_rename)(const char * const account_name,
 gboolean (*accounts_account_exists)(const char * const account_name);
 void (*accounts_set_jid)(const char * const account_name, const char * const value);
 void (*accounts_set_server)(const char * const account_name, const char * const value);
+void (*accounts_set_port)(const char * const account_name, const int value);
 void (*accounts_set_resource)(const char * const account_name, const char * const value);
 void (*accounts_set_password)(const char * const account_name, const char * const value);
 void (*accounts_set_muc_service)(const char * const account_name, const char * const value);

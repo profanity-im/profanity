@@ -797,6 +797,9 @@ _cons_show_account(ProfAccount *account)
     if (account->server != NULL) {
         cons_show   ("server         : %s", account->server);
     }
+    if (account->port != 0) {
+        cons_show   ("port           : %d", account->port);
+    }
     if (account->muc_service != NULL) {
         cons_show   ("muc service    : %s", account->muc_service);
     }

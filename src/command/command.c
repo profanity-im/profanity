@@ -65,6 +65,7 @@ static char * _roster_autocomplete(char *input, int *size);
 static char * _group_autocomplete(char *input, int *size);
 static char * _bookmark_autocomplete(char *input, int *size);
 static char * _otr_autocomplete(char *input, int *size);
+static char * _connect_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -98,16 +99,20 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/connect",
-        cmd_connect, parse_args, 1, 2, NULL,
-        { "/connect account [server]", "Login to a chat service.",
-        { "/connect account [server]",
-          "-------------------------",
+        cmd_connect, parse_args, 1, 5, NULL,
+        { "/connect account [server value] [port value]", "Login to a chat service.",
+        { "/connect account [server value] [port value]",
+          "--------------------------------------------",
           "Connect to an XMPP service using the specified account.",
-          "Use the server argument for chat services hosted at a different domain to the 'domainpart' of the Jabber ID.",
-          "An account is automatically created if one does not exist.  See the /account command for more details.",
+          "Use the server property to specify a server if required.",
+          "Change the default port (5222, or 5223 for SSL) with the port property.",
+          "An account is automatically created if one does not exist.",
+          "See the /account command for more details.",
           "",
           "Example: /connect myuser@gmail.com",
-          "Example: /connect myuser@mycompany.com talk.google.com",
+          "Example: /connect myuser@mycompany.com server talk.google.com",
+          "Example: /connect bob@someplace port 5678",
+          "Example: /connect me@chatty server chatty.com port 5443",
           NULL  } } },
 
     { "/disconnect",
@@ -691,6 +696,7 @@ static struct cmd_t command_defs[] =
           "The set command may use one of the following for 'property'.",
           "jid              : The Jabber ID of the account, the account name will be used if this property is not set.",
           "server           : The chat server, if different to the domainpart of the JID.",
+          "port             : The port used for connecting if not the default (5222, or 5223 for SSL).",
           "status           : The presence status to use on login, use 'last' to use whatever your last status was.",
           "online|chat|away",
           "|xa|dnd          : Priority for the specified presence.",
@@ -703,8 +709,9 @@ static struct cmd_t command_defs[] =
           "password         : Clears the password for the account.",
           "",
           "Example : /account add work",
-          "        : /account set work jid myuser@mycompany.com",
-          "        : /account set work server talk.google.com",
+          "        : /account set work jid me@chatty",
+          "        : /account set work server talk.chat.com",
+          "        : /account set work port 5111",
           "        : /account set work resource desktop",
           "        : /account set work muc chatservice.mycompany.com",
           "        : /account set work nick dennis",
@@ -844,6 +851,7 @@ static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
+static Autocomplete connect_property_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -946,6 +954,7 @@ cmd_init(void)
     account_set_ac = autocomplete_new();
     autocomplete_add(account_set_ac, "jid");
     autocomplete_add(account_set_ac, "server");
+    autocomplete_add(account_set_ac, "port");
     autocomplete_add(account_set_ac, "status");
     autocomplete_add(account_set_ac, "online");
     autocomplete_add(account_set_ac, "chat");
@@ -1012,6 +1021,10 @@ cmd_init(void)
     autocomplete_add(otr_log_ac, "off");
     autocomplete_add(otr_log_ac, "redact");
 
+    connect_property_ac = autocomplete_new();
+    autocomplete_add(connect_property_ac, "server");
+    autocomplete_add(connect_property_ac, "port");
+
     cmd_history_init();
 }
 
@@ -1050,6 +1063,7 @@ cmd_uninit(void)
     autocomplete_free(bookmark_ac);
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
+    autocomplete_free(connect_property_ac);
 }
 
 // Command autocompletion functions
@@ -1125,6 +1139,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
+    autocomplete_reset(connect_property_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1371,13 +1386,6 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-
     gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac  };
 
@@ -1393,7 +1401,8 @@ _cmd_complete_parameters(char *input, int *size)
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
-        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete };
+        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
+        _connect_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1663,6 +1672,38 @@ _theme_autocomplete(char *input, int *size)
         }
     }
     result = autocomplete_param_with_ac(input, size, "/theme", theme_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_connect_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    input[*size] = '\0';
+    gchar **args = parse_args(input, 2, 4);
+
+    if ((strncmp(input, "/connect", 8) == 0) && (args != NULL)) {
+        GString *beginning = g_string_new("/connect ");
+        g_string_append(beginning, args[0]);
+        if (args[1] != NULL && args[2] != NULL) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+        }
+        result = autocomplete_param_with_ac(input, size, beginning->str, connect_property_ac);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
     if (result != NULL) {
         return result;
     }
