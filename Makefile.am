@@ -62,6 +62,7 @@ test_sources = \
 	src/config/theme.c src/config/theme.h \
     src/ui/windows.c src/ui/windows.h \
     src/ui/window.c src/ui/window.h \
+    src/server_events.c src/server_events.h \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
@@ -80,6 +81,7 @@ test_sources = \
 	tests/test_parser.c \
 	tests/test_roster_list.c \
 	tests/test_preferences.c \
+	tests/test_server_events.c \
     tests/testsuite.c
 
 main_source = src/main.c

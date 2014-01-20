@@ -23,6 +23,8 @@
 #ifndef SERVER_EVENTS_H
 #define SERVER_EVENTS_H
 
+#include "xmpp/xmpp.h"
+
 void handle_error_message(const char *from, const char *err_msg);
 void handle_login_account_success(char *account_name);
 void handle_lost_connection(void);

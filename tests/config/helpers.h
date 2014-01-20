@@ -1,2 +1,2 @@
-void create_config_dir(void **state);
-void delete_config_dir(void **state);
+void create_config_file(void **state);
+void delete_config_file(void **state);

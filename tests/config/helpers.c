@@ -1,30 +1,16 @@
-#define _XOPEN_SOURCE 600
-#include <glib.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <ftw.h>
 #include <stdlib.h>
 #include <cmocka.h>
+#include <glib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include "common.h"
+#include "config/preferences.h"
 
-static int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
-{
-    int rv = remove(fpath);
-
-    if (rv)
-        perror(fpath);
-
-    return rv;
-}
-
-static int rmrf(char *path)
-{
-    return nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
-}
-
-void create_config_dir(void **state)
+void create_config_file(void **state)
 {
     setenv("XDG_CONFIG_HOME", "./tests/files/xdg_config_home", 1);
     gchar *xdg_config = xdg_get_config_home();
@@ -37,10 +23,18 @@ void create_config_dir(void **state)
     }
     g_string_free(profanity_dir, TRUE);
 
+    fopen("./tests/files/xdg_config_home/profanity/profrc", "ab+");
+
     g_free(xdg_config);
+
+    prefs_load();
 }
 
-void delete_config_dir(void **state)
+void delete_config_file(void **state)
 {
-   rmrf("./tests/files");
+    prefs_close();
+    remove("./tests/files/xdg_config_home/profanity/profrc");
+    rmdir("./tests/files/xdg_config_home/profanity");
+    rmdir("./tests/files/xdg_config_home");
+    rmdir("./tests/files");
 }

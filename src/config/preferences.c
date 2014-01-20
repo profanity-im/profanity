@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <glib.h>
@@ -86,6 +87,7 @@ prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
     g_key_file_free(prefs);
+    prefs = NULL;
 }
 
 char *

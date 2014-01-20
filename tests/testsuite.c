@@ -20,6 +20,7 @@
 #include "test_parser.h"
 #include "test_roster_list.h"
 #include "test_preferences.h"
+#include "test_server_events.h"
 
 #define PROF_RUN_TESTS(name) fprintf(stderr, "\n-> Running %s\n", #name); \
     fflush(stderr); \
@@ -332,50 +333,72 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_statuses_shows_usage_when_bad_chat_setting),
         unit_test(cmd_statuses_shows_usage_when_bad_muc_setting),
         unit_test_setup_teardown(cmd_statuses_console_sets_all,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_statuses_console_sets_online,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_statuses_console_sets_none,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_statuses_chat_sets_all,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_statuses_chat_sets_online,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_statuses_chat_sets_none,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_statuses_muc_sets_on,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_statuses_muc_sets_off,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
     };
 
     const UnitTest preferences_tests[] = {
         unit_test_setup_teardown(statuses_console_defaults_to_all,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(statuses_chat_defaults_to_all,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(statuses_muc_defaults_to_on,
-            create_config_dir,
-            delete_config_dir),
+            create_config_file,
+            delete_config_file),
     };
 
+    const UnitTest server_events_tests[] = {
+        unit_test_setup_teardown(console_doesnt_show_online_presence_when_set_none,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(console_shows_online_presence_when_set_online,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(console_shows_online_presence_when_set_all,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(console_doesnt_show_dnd_presence_when_set_none,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(console_doesnt_show_dnd_presence_when_set_online,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
+            create_config_file,
+            delete_config_file),
+    };
+
+/*
     int bak, new;
     fflush(stdout);
     bak = dup(1);
     new = open("/dev/null", O_WRONLY);
     dup2(new, 1);
     close(new);
-
+*/
     int result = 0;
 
     PROF_RUN_TESTS(common_tests);
@@ -391,11 +414,12 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(contact_tests);
     PROF_RUN_TESTS(cmd_statuses_tests);
     PROF_RUN_TESTS(preferences_tests);
-
+    PROF_RUN_TESTS(server_events_tests);
+/*
     fflush(stdout);
     dup2(bak, 1);
     close(bak);
-
+*/
     if (result > 0) {
         return 1;
     } else {

@@ -11,6 +11,10 @@ void mock_cons_show(void);
 void expect_cons_show(char *output);
 void expect_cons_show_calls(int n);
 
+void mock_cons_show_contact_online(void);
+void expect_cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity);
+void stub_ui_chat_win_contact_online(void);
+
 void mock_cons_show_error(void);
 void expect_cons_show_error(char *output);
 

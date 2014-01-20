@@ -315,11 +315,17 @@ handle_contact_online(char *barejid, Resource *resource,
 {
     gboolean updated = roster_update_presence(barejid, resource, last_activity);
 
-    if (updated && prefs_get_boolean(PREF_STATUSES)) {
+    if (updated) {
+        char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
         PContact contact = roster_get_contact(barejid);
         if (p_contact_subscription(contact) != NULL) {
             if (strcmp(p_contact_subscription(contact), "none") != 0) {
-                cons_show_contact_online(contact, resource, last_activity);
+                if (g_strcmp0(show_console, "all") == 0) {
+                    cons_show_contact_online(contact, resource, last_activity);
+                } else if (g_strcmp0(show_console, "online") == 0 &&
+                        resource->presence == RESOURCE_ONLINE) {
+                    cons_show_contact_online(contact, resource, last_activity);
+                }
                 ui_chat_win_contact_online(contact, resource, last_activity);
             }
         }

@@ -81,17 +81,13 @@ void cmd_statuses_console_sets_all(void **state)
 
     expect_cons_show("All presence updates will appear in the console.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     char *setting = prefs_get_string(PREF_STATUSES_CONSOLE);
     assert_non_null(setting);
     assert_string_equal("all", setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
 
@@ -103,17 +99,13 @@ void cmd_statuses_console_sets_online(void **state)
 
     expect_cons_show("Only online/offline presence updates will appear in the console.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     char *setting = prefs_get_string(PREF_STATUSES_CONSOLE);
     assert_non_null(setting);
     assert_string_equal("online", setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
 
@@ -125,17 +117,13 @@ void cmd_statuses_console_sets_none(void **state)
 
     expect_cons_show("Presence updates will not appear in the console.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     char *setting = prefs_get_string(PREF_STATUSES_CONSOLE);
     assert_non_null(setting);
     assert_string_equal("none", setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
 
@@ -147,17 +135,13 @@ void cmd_statuses_chat_sets_all(void **state)
 
     expect_cons_show("All presence updates will appear in chat windows.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     char *setting = prefs_get_string(PREF_STATUSES_CHAT);
     assert_non_null(setting);
     assert_string_equal("all", setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
 
@@ -169,17 +153,13 @@ void cmd_statuses_chat_sets_online(void **state)
 
     expect_cons_show("Only online/offline presence updates will appear in chat windows.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     char *setting = prefs_get_string(PREF_STATUSES_CHAT);
     assert_non_null(setting);
     assert_string_equal("online", setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
 
@@ -191,17 +171,13 @@ void cmd_statuses_chat_sets_none(void **state)
 
     expect_cons_show("Presence updates will not appear in chat windows.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     char *setting = prefs_get_string(PREF_STATUSES_CHAT);
     assert_non_null(setting);
     assert_string_equal("none", setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
 
@@ -213,17 +189,13 @@ void cmd_statuses_muc_sets_on(void **state)
 
     expect_cons_show("Chat room presence updates enabled.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     gboolean setting = prefs_get_boolean(PREF_STATUSES_MUC);
     assert_non_null(setting);
     assert_true(setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
 
@@ -235,15 +207,11 @@ void cmd_statuses_muc_sets_off(void **state)
 
     expect_cons_show("Chat room presence updates disabled.");
 
-    prefs_load();
     gboolean result = cmd_statuses(args, *help);
-    prefs_close();
-    prefs_load();
 
     gboolean setting = prefs_get_boolean(PREF_STATUSES_MUC);
     assert_false(setting);
     assert_true(result);
 
-    prefs_close();
     free(help);
 }
