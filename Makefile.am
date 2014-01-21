@@ -67,9 +67,11 @@ test_sources = \
     src/plugins/plugins.h src/plugins/plugins.c \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c \
+    src/server_events.c src/server_events.h \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
+    tests/config/helpers.c tests/config/helpers.h \
     tests/log/mock_log.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
@@ -78,10 +80,13 @@ test_sources = \
 	tests/test_cmd_account.c \
 	tests/test_cmd_rooms.c \
 	tests/test_cmd_sub.c \
+	tests/test_cmd_statuses.c \
 	tests/test_history.c \
 	tests/test_jid.c \
 	tests/test_parser.c \
 	tests/test_roster_list.c \
+	tests/test_preferences.c \
+	tests/test_server_events.c \
     tests/testsuite.c
 
 main_source = src/main.c

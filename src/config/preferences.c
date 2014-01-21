@@ -23,6 +23,7 @@
 #include "prof_config.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <glib.h>
@@ -86,6 +87,7 @@ prefs_close(void)
 {
     autocomplete_free(boolean_choice_ac);
     g_key_file_free(prefs);
+    prefs = NULL;
 }
 
 char *
@@ -306,6 +308,9 @@ _get_group(preference_t pref)
         case PREF_HISTORY:
         case PREF_MOUSE:
         case PREF_STATUSES:
+        case PREF_STATUSES_CONSOLE:
+        case PREF_STATUSES_CHAT:
+        case PREF_STATUSES_MUC:
         case PREF_OTR_WARN:
             return "ui";
         case PREF_STATES:
@@ -356,6 +361,12 @@ _get_key(preference_t pref)
             return "mouse";
         case PREF_STATUSES:
             return "statuses";
+        case PREF_STATUSES_CONSOLE:
+            return "statuses.console";
+        case PREF_STATUSES_CHAT:
+            return "statuses.chat";
+        case PREF_STATUSES_MUC:
+            return "statuses.muc";
         case PREF_STATES:
             return "enabled";
         case PREF_OUTTYPE:
@@ -397,6 +408,7 @@ _get_default_boolean(preference_t pref)
         case PREF_STATUSES:
         case PREF_AUTOAWAY_CHECK:
         case PREF_OTR_WARN:
+        case PREF_STATUSES_MUC:
             return TRUE;
         default:
             return FALSE;
@@ -412,6 +424,9 @@ _get_default_string(preference_t pref)
             return "off";
         case PREF_OTR_LOG:
             return "redact";
+        case PREF_STATUSES_CONSOLE:
+        case PREF_STATUSES_CHAT:
+            return "all";
         default:
             return NULL;
     }

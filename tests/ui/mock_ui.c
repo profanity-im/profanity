@@ -45,6 +45,14 @@ void _stub_cons_show(const char * const msg, ...)
 }
 
 static
+void _mock_cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
+{
+    check_expected(contact);
+    check_expected(resource);
+    check_expected(last_activity);
+}
+
+static
 void _mock_cons_show_error(const char * const msg, ...)
 {
     va_list args;
@@ -78,11 +86,28 @@ char * _stub_ui_ask_password(void)
     return NULL;
 }
 
+static
+void _stub_ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
+{
+}
+
 void
 mock_cons_show(void)
 {
     cons_show = _mock_cons_show;
     
+}
+
+void
+mock_cons_show_contact_online(void)
+{
+    cons_show_contact_online = _mock_cons_show_contact_online;
+}
+
+void
+stub_ui_chat_win_contact_online(void)
+{
+    ui_chat_win_contact_online = _stub_ui_chat_win_contact_online;
 }
 
 void
@@ -150,6 +175,18 @@ void
 expect_cons_show_account_list(gchar **accounts)
 {
     expect_memory(_mock_cons_show_account_list, accounts, accounts, sizeof(accounts));
+}
+
+void
+expect_cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
+{
+    expect_memory(_mock_cons_show_contact_online, contact, contact, sizeof(contact));
+    expect_memory(_mock_cons_show_contact_online, resource, resource, sizeof(Resource));
+    if (last_activity == NULL) {
+        expect_any(_mock_cons_show_contact_online, last_activity);
+    } else {
+        expect_memory(_mock_cons_show_contact_online, last_activity, last_activity, sizeof(last_activity));
+    }
 }
 
 void

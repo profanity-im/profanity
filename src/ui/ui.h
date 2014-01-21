@@ -100,10 +100,6 @@ char * (*ui_ask_password)(void);
 void (*ui_contact_typing)(const char * const from);
 void (*ui_incoming_msg)(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv);
-void (*ui_contact_online)(const char * const barejid, const char * const resource,
-    const char * const show, const char * const status, GDateTime *last_activity);
-void (*ui_contact_offline)(const char * const from, const char * const show,
-    const char * const status);
 void (*ui_disconnected)(void);
 void (*ui_recipient_gone)(const char * const barejid);
 void (*ui_outgoing_msg)(const char * const from, const char * const to,
@@ -132,6 +128,8 @@ void (*ui_contact_already_in_group)(const char * const contact, const char * con
 void (*ui_contact_not_in_group)(const char * const contact, const char * const group);
 void (*ui_group_added)(const char * const contact, const char * const group);
 void (*ui_group_removed)(const char * const contact, const char * const group);
+void (*ui_chat_win_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
+void (*ui_chat_win_contact_offline)(PContact contact, char *resource, char *status);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);
@@ -228,6 +226,8 @@ void (*cons_reconnect_setting)(void);
 void (*cons_autoping_setting)(void);
 void (*cons_priority_setting)(void);
 void (*cons_autoconnect_setting)(void);
+void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
+void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
 
 // status bar actions
 void (*status_bar_refresh)(void);
