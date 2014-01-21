@@ -81,6 +81,7 @@ cb_write_fingerprints(void *opdata)
     g_string_append(basedir, "/profanity/otr/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
+    free(account_dir);
 
     GString *fpsfilename = g_string_new(basedir->str);
     g_string_append(fpsfilename, "fingerprints.txt");
@@ -128,6 +129,7 @@ otr_on_connect(ProfAccount *account)
     g_string_append(basedir, "/profanity/otr/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
+    free(account_dir);
 
     if (!mkdir_recursive(basedir->str)) {
         log_error("Could not create %s for account %s.", basedir->str, jid);
@@ -209,6 +211,7 @@ otr_keygen(ProfAccount *account)
     g_string_append(basedir, "/profanity/otr/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
+    free(account_dir);
 
     if (!mkdir_recursive(basedir->str)) {
         log_error("Could not create %s for account %s.", basedir->str, jid);
