@@ -29,6 +29,7 @@
 #include "ui/ui.h"
 #include "ui/windows.h"
 #include "ui/window.h"
+#include "roster_list.h"
 
 #define CONSOLE_TITLE "Profanity. Type /help for help information."
 
@@ -158,7 +159,8 @@ _title_bar_draw(void)
 #ifdef HAVE_LIBOTR
     // show privacy
     if (current_recipient != NULL) {
-        ProfWin *current = wins_get_by_recipient(current_recipient);
+        char *recipient_jid = roster_barejid_from_name(current_recipient);
+        ProfWin *current = wins_get_by_recipient(recipient_jid);
         if (current != NULL) {
             if (current->type == WIN_CHAT) {
                 if (!current->is_otr) {
