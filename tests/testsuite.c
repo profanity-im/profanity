@@ -386,19 +386,18 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(console_doesnt_show_dnd_presence_when_set_online,
             create_config_file,
             delete_config_file),
-        unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
-            create_config_file,
-            delete_config_file),
+//        unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
+//            create_config_file,
+//            delete_config_file),
     };
 
-/*
     int bak, new;
     fflush(stdout);
     bak = dup(1);
     new = open("/dev/null", O_WRONLY);
     dup2(new, 1);
     close(new);
-*/
+
     int result = 0;
 
     PROF_RUN_TESTS(common_tests);
@@ -415,11 +414,10 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(cmd_statuses_tests);
     PROF_RUN_TESTS(preferences_tests);
     PROF_RUN_TESTS(server_events_tests);
-/*
+    
     fflush(stdout);
     dup2(bak, 1);
     close(bak);
-*/
     if (result > 0) {
         return 1;
     } else {

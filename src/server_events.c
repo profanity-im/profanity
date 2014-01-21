@@ -296,13 +296,31 @@ handle_contact_offline(char *barejid, char *resource, char *status)
 {
     gboolean updated = roster_contact_offline(barejid, resource, status);
 
-    if (resource != NULL && updated && prefs_get_boolean(PREF_STATUSES)) {
+    if (resource != NULL && updated) {
+        char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+        char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
         Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
         PContact contact = roster_get_contact(barejid);
         if (p_contact_subscription(contact) != NULL) {
             if (strcmp(p_contact_subscription(contact), "none") != 0) {
-                cons_show_contact_offline(contact, resource, status);
-                ui_chat_win_contact_offline(contact, resource, status);
+
+                // show in console if "all"
+                if (g_strcmp0(show_console, "all") == 0) {
+                    cons_show_contact_offline(contact, resource, status);
+
+                // show in console of "online"
+                } else if (g_strcmp0(show_console, "online") == 0) {
+                    cons_show_contact_offline(contact, resource, status);
+                }
+                
+                // show in chat win if "all"
+                if (g_strcmp0(show_chat_win, "all") == 0) {
+                    ui_chat_win_contact_offline(contact, resource, status);
+
+                // show in char win if "online" and presence online
+                } else if (g_strcmp0(show_chat_win, "online") == 0) {
+                    ui_chat_win_contact_offline(contact, resource, status);
+                }
             }
         }
         jid_destroy(jid);
@@ -317,16 +335,31 @@ handle_contact_online(char *barejid, Resource *resource,
 
     if (updated) {
         char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+        char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
         PContact contact = roster_get_contact(barejid);
         if (p_contact_subscription(contact) != NULL) {
             if (strcmp(p_contact_subscription(contact), "none") != 0) {
+
+                // show in console if "all"
                 if (g_strcmp0(show_console, "all") == 0) {
                     cons_show_contact_online(contact, resource, last_activity);
+
+                // show in console of "online" and presence online
                 } else if (g_strcmp0(show_console, "online") == 0 &&
                         resource->presence == RESOURCE_ONLINE) {
                     cons_show_contact_online(contact, resource, last_activity);
+
                 }
-                ui_chat_win_contact_online(contact, resource, last_activity);
+
+                // show in chat win if "all"
+                if (g_strcmp0(show_chat_win, "all") == 0) {
+                    ui_chat_win_contact_online(contact, resource, last_activity);
+
+                // show in char win if "online" and presence online
+                } else if (g_strcmp0(show_chat_win, "online") == 0 &&
+                        resource->presence == RESOURCE_ONLINE) {
+                    ui_chat_win_contact_online(contact, resource, last_activity);
+                }
             }
         }
     }
@@ -363,8 +396,11 @@ handle_room_member_presence(const char * const room,
     gboolean updated = muc_add_to_roster(room, nick, show, status, caps_str);
 
     if (updated) {
-        ui_room_member_presence(room, nick, show, status);
-        ui_current_page_off();
+        gboolean show_muc = prefs_get_boolean(PREF_STATUSES_MUC);
+        if (show_muc) {
+            ui_room_member_presence(room, nick, show, status);
+            ui_current_page_off();
+        }
     }
 }
 
