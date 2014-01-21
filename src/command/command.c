@@ -67,6 +67,7 @@ static char * _group_autocomplete(char *input, int *size);
 static char * _bookmark_autocomplete(char *input, int *size);
 static char * _otr_autocomplete(char *input, int *size);
 static char * _connect_autocomplete(char *input, int *size);
+static char * _statuses_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -858,6 +859,8 @@ static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete connect_property_ac;
+static Autocomplete statuses_ac;
+static Autocomplete statuses_cons_chat_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1031,6 +1034,16 @@ cmd_init(void)
     autocomplete_add(connect_property_ac, "server");
     autocomplete_add(connect_property_ac, "port");
 
+    statuses_ac = autocomplete_new();
+    autocomplete_add(statuses_ac, "console");
+    autocomplete_add(statuses_ac, "chat");
+    autocomplete_add(statuses_ac, "muc");
+
+    statuses_cons_chat_ac = autocomplete_new();
+    autocomplete_add(statuses_cons_chat_ac, "all");
+    autocomplete_add(statuses_cons_chat_ac, "online");
+    autocomplete_add(statuses_cons_chat_ac, "none");
+
     cmd_history_init();
 }
 
@@ -1064,6 +1077,8 @@ cmd_uninit(void)
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(connect_property_ac);
+    autocomplete_free(statuses_ac);
+    autocomplete_free(statuses_cons_chat_ac);
 }
 
 // Command autocompletion functions
@@ -1140,6 +1155,8 @@ cmd_reset_autocomplete()
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(connect_property_ac);
+    autocomplete_reset(statuses_ac);
+    autocomplete_reset(statuses_cons_chat_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1281,7 +1298,7 @@ _cmd_complete_parameters(char *input, int *size)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/statuses" };
+        "/vercheck" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],
@@ -1377,7 +1394,7 @@ _cmd_complete_parameters(char *input, int *size)
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
         _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
-        _connect_autocomplete };
+        _connect_autocomplete, _statuses_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1647,6 +1664,34 @@ _theme_autocomplete(char *input, int *size)
         }
     }
     result = autocomplete_param_with_ac(input, size, "/theme", theme_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_statuses_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, size, "/statuses console", statuses_cons_chat_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/statuses chat", statuses_cons_chat_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/statuses muc", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/statuses", statuses_ac);
     if (result != NULL) {
         return result;
     }
