@@ -14,6 +14,8 @@ void replace_one_substr(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("it was a string", result);
+
+    free(result);
 }
 
 void replace_one_substr_beginning(void **state)
@@ -25,6 +27,8 @@ void replace_one_substr_beginning(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("that is a string", result);
+
+    free(result);
 }
 
 void replace_one_substr_end(void **state)
@@ -36,6 +40,8 @@ void replace_one_substr_end(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("it is a thing", result);
+
+    free(result);
 }
 
 void replace_two_substr(void **state)
@@ -47,6 +53,8 @@ void replace_two_substr(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("it was a was string", result);
+
+    free(result);
 }
 
 void replace_char(void **state)
@@ -58,6 +66,8 @@ void replace_char(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("some &amp; a thing &amp; something else", result);
+
+    free(result);
 }
 
 void replace_when_none(void **state)
@@ -69,6 +79,8 @@ void replace_when_none(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("its another string", result);
+
+    free(result);
 }
 
 void replace_when_match(void **state)
@@ -80,6 +92,8 @@ void replace_when_match(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("goodbye", result);
+
+    free(result);
 }
 
 void replace_when_string_empty(void **state)
@@ -91,6 +105,8 @@ void replace_when_string_empty(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("", result);
+
+    free(result);
 }
 
 void replace_when_string_null(void **state)
@@ -113,6 +129,8 @@ void replace_when_sub_empty(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("hello", result);
+
+    free(result);
 }
 
 void replace_when_sub_null(void **state)
@@ -124,6 +142,8 @@ void replace_when_sub_null(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("hello", result);
+
+    free(result);
 }
 
 void replace_when_new_empty(void **state)
@@ -135,6 +155,8 @@ void replace_when_new_empty(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("", result);
+
+    free(result);
 }
 
 void replace_when_new_null(void **state)
@@ -146,6 +168,8 @@ void replace_when_new_null(void **state)
     char *result = str_replace(string, sub, new);
 
     assert_string_equal("hello", result);
+
+    free(result);
 }
 
 void compare_win_nums_less(void **state)

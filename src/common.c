@@ -168,19 +168,6 @@ str_contains(char str[], int size, char ch)
 }
 
 char *
-encode_xml(const char * const xml)
-{
-    char *coded_msg = str_replace(xml, "&", "&amp;");
-    char *coded_msg2 = str_replace(coded_msg, "<", "&lt;");
-    char *coded_msg3 = str_replace(coded_msg2, ">", "&gt;");
-
-    free(coded_msg);
-    free(coded_msg2);
-
-    return coded_msg3;
-}
-
-char *
 prof_getline(FILE *stream)
 {
     char *buf;
