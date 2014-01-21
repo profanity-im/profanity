@@ -414,7 +414,7 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(cmd_statuses_tests);
     PROF_RUN_TESTS(preferences_tests);
     PROF_RUN_TESTS(server_events_tests);
-    
+
     fflush(stdout);
     dup2(bak, 1);
     close(bak);

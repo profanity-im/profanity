@@ -907,9 +907,9 @@ _cons_theme_setting(void)
 {
     gchar *theme = prefs_get_string(PREF_THEME);
     if (theme == NULL) {
-        cons_show("Theme (/theme)               : default");
+        cons_show("Theme (/theme)                : default");
     } else {
-        cons_show("Theme (/theme)               : %s", theme);
+        cons_show("Theme (/theme)                : %s", theme);
     }
 }
 
@@ -917,27 +917,27 @@ static void
 _cons_beep_setting(void)
 {
     if (prefs_get_boolean(PREF_BEEP))
-        cons_show("Terminal beep (/beep)        : ON");
+        cons_show("Terminal beep (/beep)         : ON");
     else
-        cons_show("Terminal beep (/beep)        : OFF");
+        cons_show("Terminal beep (/beep)         : OFF");
 }
 
 static void
 _cons_flash_setting(void)
 {
     if (prefs_get_boolean(PREF_FLASH))
-        cons_show("Terminal flash (/flash)      : ON");
+        cons_show("Terminal flash (/flash)       : ON");
     else
-        cons_show("Terminal flash (/flash)      : OFF");
+        cons_show("Terminal flash (/flash)       : OFF");
 }
 
 static void
 _cons_splash_setting(void)
 {
     if (prefs_get_boolean(PREF_SPLASH))
-        cons_show("Splash screen (/splash)      : ON");
+        cons_show("Splash screen (/splash)       : ON");
     else
-        cons_show("Splash screen (/splash)      : OFF");
+        cons_show("Splash screen (/splash)       : OFF");
 }
 
 static void
@@ -953,36 +953,44 @@ static void
 _cons_vercheck_setting(void)
 {
     if (prefs_get_boolean(PREF_VERCHECK))
-        cons_show("Version checking (/vercheck) : ON");
+        cons_show("Version checking (/vercheck)  : ON");
     else
-        cons_show("Version checking (/vercheck) : OFF");
+        cons_show("Version checking (/vercheck)  : OFF");
 }
 
 static void
 _cons_mouse_setting(void)
 {
     if (prefs_get_boolean(PREF_MOUSE))
-        cons_show("Mouse handling (/mouse)      : ON");
+        cons_show("Mouse handling (/mouse)       : ON");
     else
-        cons_show("Mouse handling (/mouse)      : OFF");
+        cons_show("Mouse handling (/mouse)       : OFF");
 }
 
 static void
 _cons_statuses_setting(void)
 {
-    if (prefs_get_boolean(PREF_STATUSES))
-        cons_show("Status (/statuses)           : ON");
-    else
-        cons_show("Status (/statuses)           : OFF");
+    char *console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    char *chat = prefs_get_string(PREF_STATUSES_CHAT);
+    gboolean muc = prefs_get_boolean(PREF_STATUSES_MUC);
+
+    cons_show("Console statuses (/statuses)  : %s", console);
+    cons_show("Chat win statuses (/statuses) : %s", chat);
+
+    if (muc) {
+        cons_show("MUC statuses (/statuses)      : ON");
+    } else {
+        cons_show("MUC statuses (/statuses)      : OFF");
+    }
 }
 
 static void
 _cons_titlebar_setting(void)
 {
     if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
-        cons_show("Titlebar display (/titlebar) : version");
+        cons_show("Titlebar display (/titlebar)  : version");
     } else {
-        cons_show("Titlebar display (/titlebar) : NONE");
+        cons_show("Titlebar display (/titlebar)  : NONE");
     }
 }
 
@@ -990,9 +998,9 @@ static void
 _cons_otrwarn_setting(void)
 {
     if (prefs_get_boolean(PREF_OTR_WARN)) {
-        cons_show("Warn non-OTR (/otr warn)     : ON");
+        cons_show("Warn non-OTR (/otr warn)      : ON");
     } else {
-        cons_show("Warn non-OTR (/otr warn)     : OFF");
+        cons_show("Warn non-OTR (/otr warn)      : OFF");
     }
 }
 

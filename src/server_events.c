@@ -312,7 +312,7 @@ handle_contact_offline(char *barejid, char *resource, char *status)
                 } else if (g_strcmp0(show_console, "online") == 0) {
                     cons_show_contact_offline(contact, resource, status);
                 }
-                
+
                 // show in chat win if "all"
                 if (g_strcmp0(show_chat_win, "all") == 0) {
                     ui_chat_win_contact_offline(contact, resource, status);
