@@ -38,9 +38,9 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 {
     mock_cons_show_account();
     mock_accounts_get_account();
-    stub_accounts_free_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    ProfAccount *account = malloc(sizeof(ProfAccount));
+    ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL,
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL);
     gchar *args[] = { NULL };
 
     mock_connection_status(JABBER_CONNECTED);
@@ -54,7 +54,6 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
     assert_true(result);
 
     free(help);
-    free(account);
 }
 
 void cmd_account_list_shows_accounts(void **state)
@@ -117,10 +116,10 @@ void cmd_account_show_shows_account_when_exists(void **state)
 {
     mock_cons_show_account();
     mock_accounts_get_account();
-    stub_accounts_free_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
-    ProfAccount *account = malloc(sizeof(ProfAccount));
+    ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL,
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL);
 
     accounts_get_account_return(account);
 

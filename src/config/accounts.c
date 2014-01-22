@@ -28,6 +28,7 @@
 #include "accounts.h"
 
 #include "common.h"
+#include "config/account.h"
 #include "jid.h"
 #include "log.h"
 #include "tools/autocomplete.h"
@@ -184,145 +185,48 @@ _accounts_get_account(const char * const name)
     if (!g_key_file_has_group(accounts, name)) {
         return NULL;
     } else {
-        ProfAccount *account = malloc(sizeof(ProfAccount));
-        account->name = strdup(name);
-
         gchar *jid = g_key_file_get_string(accounts, name, "jid", NULL);
-        if (jid != NULL) {
-            account->jid = strdup(jid);
-            g_free(jid);
-        } else {
-            account->jid = strdup(name);
+
+        // fix accounts that have no jid property by setting to name
+        if (jid == NULL) {
             g_key_file_set_string(accounts, name, "jid", name);
             _save_accounts();
         }
 
         gchar *password = g_key_file_get_string(accounts, name, "password", NULL);
-        if (password != NULL) {
-            account->password = strdup(password);
-            g_free(password);
-        } else {
-            account->password = NULL;
-        }
-
-        account->enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
+        gboolean enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
 
         gchar *server = g_key_file_get_string(accounts, name, "server", NULL);
-        if (server != NULL) {
-            account->server = strdup(server);
-            g_free(server);
-        } else {
-            account->server = NULL;
-        }
-
-        int port = g_key_file_get_integer(accounts, name, "port", NULL);
-        account->port = port;
-
         gchar *resource = g_key_file_get_string(accounts, name, "resource", NULL);
-        if (resource != NULL) {
-            account->resource = strdup(resource);
-            g_free(resource);
-        } else {
-            account->resource = NULL;
-        }
+        int port = g_key_file_get_integer(accounts, name, "port", NULL);
 
-        gchar *presence = g_key_file_get_string(accounts, name, "presence.last", NULL);
-        if (presence == NULL || (!valid_resource_presence_string(presence))) {
-            account->last_presence = strdup("online");
-        } else {
-            account->last_presence = strdup(presence);
-        }
+        gchar *last_presence = g_key_file_get_string(accounts, name, "presence.last", NULL);
+        gchar *login_presence = g_key_file_get_string(accounts, name, "presence.login", NULL);
 
-        if (presence != NULL) {
-            g_free(presence);
-        }
-
-        presence = g_key_file_get_string(accounts, name, "presence.login", NULL);
-        if (presence == NULL) {
-            account->login_presence = strdup("online");
-        } else if (strcmp(presence, "last") == 0) {
-            account->login_presence = strdup("last");
-        } else if (!valid_resource_presence_string(presence)) {
-            account->login_presence = strdup("online");
-        } else {
-            account->login_presence = strdup(presence);
-        }
-
-        if (presence != NULL) {
-            g_free(presence);
-        }
-
-        account->priority_online = g_key_file_get_integer(accounts, name, "priority.online", NULL);
-        account->priority_chat = g_key_file_get_integer(accounts, name, "priority.chat", NULL);
-        account->priority_away = g_key_file_get_integer(accounts, name, "priority.away", NULL);
-        account->priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
-        account->priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
+        int priority_online = g_key_file_get_integer(accounts, name, "priority.online", NULL);
+        int priority_chat = g_key_file_get_integer(accounts, name, "priority.chat", NULL);
+        int priority_away = g_key_file_get_integer(accounts, name, "priority.away", NULL);
+        int priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
+        int priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
 
         gchar *muc_service = g_key_file_get_string(accounts, name, "muc.service", NULL);
-        if (muc_service == NULL) {
-            GString *g_muc_service = g_string_new("conference.");
-            Jid *jidp = jid_create(account->jid);
-            g_string_append(g_muc_service, jidp->domainpart);
-            account->muc_service = strdup(g_muc_service->str);
-            g_string_free(g_muc_service, TRUE);
-            jid_destroy(jidp);
-        } else {
-            account->muc_service = muc_service;
-        }
-
         gchar *muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
-        if (muc_nick == NULL) {
-            Jid *jidp = jid_create(account->jid);
-            account->muc_nick = strdup(jidp->localpart);
-            jid_destroy(jidp);
-        } else {
-            account->muc_nick = muc_nick;
-        }
 
-        // get room history
-        account->room_history = NULL;
-        gsize history_size = 0;
-        gchar **room_history_values = g_key_file_get_string_list(accounts, name,
-            "rooms.history", &history_size, NULL);
+        ProfAccount *new_account = account_new(name, jid, password, enabled,
+            server, port, resource, last_presence, login_presence,
+            priority_online, priority_chat, priority_away, priority_xa,
+            priority_dnd, muc_service, muc_nick);
 
-        if (room_history_values != NULL) {
-            int i = 0;
-            for (i = 0; i < history_size; i++) {
-                account->room_history = g_slist_append(account->room_history,
-                    strdup(room_history_values[i]));
-            }
+        g_free(jid);
+        g_free(password);
+        g_free(server);
+        g_free(resource);
+        g_free(last_presence);
+        g_free(login_presence);
+        g_free(muc_service);
+        g_free(muc_nick);
 
-            g_strfreev(room_history_values);
-        }
-
-        return account;
-    }
-}
-
-static char *
-_accounts_create_full_jid(ProfAccount *account)
-{
-    if (account->resource != NULL) {
-        return create_fulljid(account->jid, account->resource);
-    } else {
-        return strdup(account->jid);
-    }
-}
-
-static void
-_accounts_free_account(ProfAccount *account)
-{
-    if (account != NULL) {
-        free(account->name);
-        free(account->jid);
-        free(account->password);
-        free(account->resource);
-        free(account->server);
-        free(account->last_presence);
-        free(account->login_presence);
-        free(account->muc_service);
-        free(account->muc_nick);
-        free(account);
+        return new_account;
     }
 }
 
@@ -745,7 +649,6 @@ accounts_init_module(void)
     accounts_add = _accounts_add;
     accounts_get_list = _accounts_get_list;
     accounts_get_account = _accounts_get_account;
-    accounts_free_account = _accounts_free_account;
     accounts_enable = _accounts_enable;
     accounts_disable = _accounts_disable;
     accounts_rename = _accounts_rename;
@@ -769,6 +672,5 @@ accounts_init_module(void)
     accounts_set_priority_all = _accounts_set_priority_all;
     accounts_get_priority_for_presence_type = _accounts_get_priority_for_presence_type;
     accounts_clear_password = _accounts_clear_password;
-    accounts_create_full_jid = _accounts_create_full_jid;
 }
 

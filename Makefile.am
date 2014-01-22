@@ -38,6 +38,7 @@ core_sources = \
 	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
+	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
     src/plugins/plugins.h src/plugins/plugins.c \
@@ -62,6 +63,7 @@ test_sources = \
 	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.h \
+	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
     src/plugins/plugins.h src/plugins/plugins.c \

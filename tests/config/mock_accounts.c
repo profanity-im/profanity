@@ -36,25 +36,6 @@ _mock_accounts_get_account(const char * const name)
     return (ProfAccount *)mock();
 }
 
-static char *
-_mock_accounts_create_full_jid(ProfAccount *account)
-{
-    check_expected(account);
-    return (char *)mock();
-}
-
-void
-_stub_accounts_free_account(ProfAccount *account)
-{
-    // do nothing
-}
-
-void
-_mock_accounts_free_account(ProfAccount *account)
-{
-    check_expected(account);
-}
-
 gchar **
 _mock_accounts_get_list(void)
 {
@@ -275,24 +256,6 @@ mock_accounts_get_account(void)
 }
 
 void
-mock_accounts_create_full_jid(void)
-{
-    accounts_create_full_jid = _mock_accounts_create_full_jid;
-}
-
-void
-stub_accounts_free_account(void)
-{
-    accounts_free_account = _stub_accounts_free_account;
-}
-
-void
-mock_accounts_free_account(void)
-{
-    accounts_free_account = _mock_accounts_free_account;
-}
-
-void
 mock_accounts_get_list(void)
 {
     accounts_get_list = _mock_accounts_get_list;
@@ -458,23 +421,6 @@ accounts_get_account_return(ProfAccount *account)
 {
     expect_any(_mock_accounts_get_account, name);
     will_return(_mock_accounts_get_account, account);
-}
-
-void
-accounts_create_full_jid_return(char *fulljid)
-{
-    expect_any(_mock_accounts_create_full_jid, account);
-    if (fulljid != NULL) {
-        will_return(_mock_accounts_create_full_jid, strdup(fulljid));
-    } else {
-        will_return(_mock_accounts_create_full_jid, NULL);
-    }
-}
-
-void
-accounts_free_account_expect(ProfAccount *account)
-{
-    expect_memory(_mock_accounts_free_account, account, account, sizeof(ProfAccount));
 }
 
 void

@@ -27,6 +27,7 @@
 #include "log.h"
 #include "muc.h"
 #include "config/preferences.h"
+#include "config/account.h"
 #include "roster_list.h"
 #include "ui/ui.h"
 #include "plugins/plugins.h"
@@ -68,7 +69,7 @@ handle_login_account_success(char *account_name)
     status_bar_print_message(account->jid);
     status_bar_refresh();
 
-    accounts_free_account(account);
+    account_free(account);
 }
 
 void

@@ -201,7 +201,6 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_asks_password_when_not_in_account),
         unit_test(cmd_connect_shows_message_when_connecting_with_account),
         unit_test(cmd_connect_connects_with_account),
-        unit_test(cmd_connect_frees_account_after_connecting),
         unit_test(cmd_connect_shows_usage_when_no_server_value),
         unit_test(cmd_connect_shows_usage_when_server_no_port_value),
         unit_test(cmd_connect_shows_usage_when_no_port_value),

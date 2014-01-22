@@ -29,6 +29,7 @@
 #include "command/commands.h"
 #include "common.h"
 #include "config/accounts.h"
+#include "config/account.h"
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "contact.h"
@@ -150,13 +151,13 @@ cmd_connect(gchar **args, struct cmd_help_t help)
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
-            jid = accounts_create_full_jid(account);
+            jid = account_create_full_jid(account);
             if (account->password == NULL) {
                 account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
             conn_status = jabber_connect_with_account(account);
-            accounts_free_account(account);
+            account_free(account);
         } else {
             char *passwd = ui_ask_password();
             jid = strdup(lower);
@@ -190,7 +191,7 @@ cmd_account(gchar **args, struct cmd_help_t help)
         } else {
             ProfAccount *account = accounts_get_account(jabber_get_account_name());
             cons_show_account(account);
-            accounts_free_account(account);
+            account_free(account);
         }
     } else if (strcmp(command, "list") == 0) {
         gchar **accounts = accounts_get_list();
@@ -207,7 +208,7 @@ cmd_account(gchar **args, struct cmd_help_t help)
                 cons_show("");
             } else {
                 cons_show_account(account);
-                accounts_free_account(account);
+                account_free(account);
             }
         }
     } else if (strcmp(command, "add") == 0) {
@@ -1626,7 +1627,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     jid_destroy(room_jid);
     jid_destroy(my_jid);
     g_string_free(room_str, TRUE);
-    accounts_free_account(account);
+    account_free(account);
 
     return TRUE;
 }
