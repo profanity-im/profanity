@@ -24,13 +24,6 @@ void mock_accounts_get_account(void);
 void accounts_get_account_expect_and_return(const char * const name, ProfAccount *account);
 void accounts_get_account_return(ProfAccount *account);
 
-void mock_accounts_create_full_jid(void);
-void accounts_create_full_jid_return(char *fulljid);
-
-void mock_accounts_free_account(void);
-void stub_accounts_free_account(void);
-void accounts_free_account_expect(ProfAccount *account);
-
 void mock_accounts_get_list(void);
 void accounts_get_list_return(gchar **accounts);
 

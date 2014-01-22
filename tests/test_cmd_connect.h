@@ -9,7 +9,6 @@ void cmd_connect_lowercases_argument(void **state);
 void cmd_connect_asks_password_when_not_in_account(void **state);
 void cmd_connect_shows_message_when_connecting_with_account(void **state);
 void cmd_connect_connects_with_account(void **state);
-void cmd_connect_frees_account_after_connecting(void **state);
 void cmd_connect_shows_usage_when_no_server_value(void **state);
 void cmd_connect_shows_usage_when_server_no_port_value(void **state);
 void cmd_connect_shows_usage_when_no_port_value(void **state);

@@ -26,26 +26,7 @@
 #define MAX_PASSWORD_SIZE 64
 
 #include "common.h"
-
-typedef struct prof_account_t {
-    gchar *name;
-    gchar *jid;
-    gchar *password;
-    gchar *resource;
-    gchar *server;
-    int port;
-    gchar *last_presence;
-    gchar *login_presence;
-    gint priority_online;
-    gint priority_chat;
-    gint priority_away;
-    gint priority_xa;
-    gint priority_dnd;
-    gchar *muc_service;
-    gchar *muc_nick;
-    gboolean enabled;
-    GSList *room_history;
-} ProfAccount;
+#include "config/account.h"
 
 void accounts_init_module(void);
 
@@ -59,7 +40,6 @@ void (*accounts_reset_enabled_search)(void);
 void (*accounts_add)(const char *jid, const char *altdomain, const int port);
 gchar** (*accounts_get_list)(void);
 ProfAccount* (*accounts_get_account)(const char * const name);
-void (*accounts_free_account)(ProfAccount *account);
 gboolean (*accounts_enable)(const char * const name);
 gboolean (*accounts_disable)(const char * const name);
 gboolean (*accounts_rename)(const char * const account_name,
@@ -85,6 +65,5 @@ void (*accounts_set_priority_all)(const char * const account_name, const gint va
 gint (*accounts_get_priority_for_presence_type)(const char * const account_name,
     resource_presence_t presence_type);
 void (*accounts_clear_password)(const char * const account_name);
-char * (*accounts_create_full_jid)(ProfAccount *account);
 
 #endif
