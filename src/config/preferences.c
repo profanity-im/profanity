@@ -44,6 +44,7 @@
 #define PREF_GROUP_NOTIFICATIONS "notifications"
 #define PREF_GROUP_PRESENCE "presence"
 #define PREF_GROUP_CONNECTION "connection"
+#define PREF_GROUP_ALIAS "alias"
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;
@@ -259,6 +260,82 @@ prefs_set_autoaway_time(gint value)
     _save_prefs();
 }
 
+void
+prefs_add_alias(const char * const name, const char * const value)
+{
+    g_key_file_set_string(prefs, PREF_GROUP_ALIAS, name, value);
+    _save_prefs();
+}
+
+char *
+prefs_get_alias(const char * const name)
+{
+    return g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
+
+}
+
+gboolean
+prefs_remove_alias(const char * const name)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
+        return FALSE;
+    } else {
+        g_key_file_remove_key(prefs, PREF_GROUP_ALIAS, name, NULL);
+        _save_prefs();
+        return TRUE;
+    }
+}
+
+static gint
+_alias_cmp(gconstpointer *p1, gconstpointer *p2)
+{
+    ProfAlias *alias1 = (ProfAlias*)p1;
+    ProfAlias *alias2 = (ProfAlias*)p2;
+
+    return strcmp(alias1->name, alias2->name);
+}
+
+GList *
+prefs_get_aliases(void)
+{
+    if (!g_key_file_has_group(prefs, PREF_GROUP_ALIAS)) {
+        return NULL;
+    } else {
+        GList *result = NULL;
+        gsize len;
+        gchar **keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
+        int i;
+        for (i = 0; i < len; i++) {
+            char *name = keys[i];
+            char *value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
+
+            ProfAlias *alias = malloc(sizeof(struct prof_alias_t));
+            alias->name = strdup(name);
+            alias->value = strdup(value);
+
+            result = g_list_insert_sorted(result, alias, (GCompareFunc)_alias_cmp);
+        }
+
+        g_strfreev(keys);
+
+        return result;
+    }
+}
+
+void
+_free_alias(ProfAlias *alias)
+{
+    FREE_SET_NULL(alias->name);
+    FREE_SET_NULL(alias->value);
+    FREE_SET_NULL(alias);
+}
+
+void
+prefs_free_aliases(GList *aliases)
+{
+    g_list_free_full(aliases, (GDestroyNotify)_free_alias);
+}
+
 static void
 _save_prefs(void)
 {
@@ -299,25 +376,25 @@ _get_group(preference_t pref)
         case PREF_STATUSES_CHAT:
         case PREF_STATUSES_MUC:
         case PREF_OTR_WARN:
-            return "ui";
+            return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
-            return "chatstates";
+            return PREF_GROUP_CHATSTATES;
         case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_MESSAGE:
         case PREF_NOTIFY_INVITE:
         case PREF_NOTIFY_SUB:
-            return "notifications";
+            return PREF_GROUP_NOTIFICATIONS;
         case PREF_CHLOG:
         case PREF_GRLOG:
         case PREF_OTR_LOG:
-            return "logging";
+            return PREF_GROUP_LOGGING;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
-            return "presence";
+            return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
-            return "connection";
+            return PREF_GROUP_CONNECTION;
         default:
             return NULL;
     }

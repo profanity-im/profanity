@@ -183,6 +183,7 @@ void (*cons_show_status)(const char * const barejid);
 void (*cons_show_info)(PContact pcontact);
 void (*cons_show_caps)(const char * const contact, Resource *resource);
 void (*cons_show_themes)(GSList *themes);
+void (*cons_show_aliases)(GList *aliases);
 void (*cons_show_login_success)(ProfAccount *account);
 void (*cons_show_software_version)(const char * const jid,
     const char * const presence, const char * const name,

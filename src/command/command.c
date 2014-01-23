@@ -547,7 +547,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/alias",
-        cmd_alias, parse_args, 1, 3, &cons_alias_setting,
+        cmd_alias, parse_args_with_freetext, 1, 3, &cons_alias_setting,
         { "/alias add|remove|list [name value]", "Add your own command aliases.",
         { "/alias add|remove|list [name value]",
           "-----------------------------------",

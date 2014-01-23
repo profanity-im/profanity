@@ -69,6 +69,12 @@ void _mock_cons_show_account(ProfAccount *account)
 }
 
 static
+void _mock_cons_show_aliases(GList *aliases)
+{
+    check_expected(aliases);
+}
+
+static
 void _mock_cons_show_account_list(gchar **accounts)
 {
     check_expected(accounts);
@@ -120,6 +126,12 @@ void
 mock_cons_show_account(void)
 {
     cons_show_account = _mock_cons_show_account;
+}
+
+void
+mock_cons_show_aliases(void)
+{
+    cons_show_aliases = _mock_cons_show_aliases;
 }
 
 void
@@ -187,6 +199,13 @@ expect_cons_show_contact_online(PContact contact, Resource *resource, GDateTime 
     } else {
         expect_memory(_mock_cons_show_contact_online, last_activity, last_activity, sizeof(last_activity));
     }
+}
+
+void
+expect_cons_show_aliases()
+{
+    // write a custom checker for the list
+    expect_any(_mock_cons_show_aliases, aliases);
 }
 
 void

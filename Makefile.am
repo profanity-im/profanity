@@ -77,6 +77,7 @@ test_sources = \
 	tests/test_cmd_account.c \
 	tests/test_cmd_rooms.c \
 	tests/test_cmd_sub.c \
+	tests/test_cmd_alias.c \
 	tests/test_cmd_statuses.c \
 	tests/test_history.c \
 	tests/test_jid.c \

@@ -1821,8 +1821,47 @@ cmd_nick(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_alias(gchar **args, struct cmd_help_t help)
 {
-    cons_show("Alias command TODO");
-    return TRUE;
+    char *subcmd = args[0];
+
+    if (strcmp(subcmd, "add") == 0) {
+        char *alias = args[1];
+        if (alias == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            char *value = args[2];
+            if (value == NULL) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            } else {
+                prefs_add_alias(alias, value);
+                cons_show("Command alias added /%s -> %s", alias, value);
+                return TRUE;
+            }
+        }
+    } else if (strcmp(subcmd, "remove") == 0) {
+        char *alias = args[1];
+        if (alias == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            gboolean removed = prefs_remove_alias(alias);
+            if (!removed) {
+                cons_show("No such command alias /%s", alias);
+            } else {
+                cons_show("Command alias removed -> /%s", alias);
+            }
+            return TRUE;
+        }
+    } else if (strcmp(subcmd, "list") == 0) {
+        GList *aliases = prefs_get_aliases();
+        cons_show_aliases(aliases);
+        prefs_free_aliases(aliases);
+        return TRUE;
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
 }
 
 gboolean

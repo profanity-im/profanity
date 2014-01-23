@@ -21,6 +21,7 @@
 #include "test_roster_list.h"
 #include "test_preferences.h"
 #include "test_server_events.h"
+#include "test_cmd_alias.h"
 
 #define PROF_RUN_TESTS(name) fprintf(stderr, "\n-> Running %s\n", #name); \
     fflush(stderr); \
@@ -390,6 +391,26 @@ int main(int argc, char* argv[]) {
 //            delete_config_file),
     };
 
+    const UnitTest cmd_alias_tests[] = {
+        unit_test(cmd_alias_add_shows_usage_when_no_args),
+        unit_test(cmd_alias_add_shows_usage_when_no_value),
+        unit_test(cmd_alias_remove_shows_usage_when_no_args),
+        unit_test(cmd_alias_show_usage_when_invalid_subcmd),
+        unit_test_setup_teardown(cmd_alias_add_adds_alias,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(cmd_alias_remove_removes_alias,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(cmd_alias_remove_shows_message_when_no_alias,
+            create_config_file,
+            delete_config_file),
+        unit_test_setup_teardown(cmd_alias_list_shows_all_aliases,
+            create_config_file,
+            delete_config_file),
+    };
+
+
     int bak, new;
     fflush(stdout);
     bak = dup(1);
@@ -413,6 +434,7 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(cmd_statuses_tests);
     PROF_RUN_TESTS(preferences_tests);
     PROF_RUN_TESTS(server_events_tests);
+    PROF_RUN_TESTS(cmd_alias_tests);
 
     fflush(stdout);
     dup2(bak, 1);
