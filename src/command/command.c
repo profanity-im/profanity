@@ -1199,6 +1199,7 @@ cmd_execute_default(const char * const inp)
     win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
     char *recipient = ui_current_recipient();
+    cons_debug("Recipient: %s", recipient);
 
     switch (win_type)
     {

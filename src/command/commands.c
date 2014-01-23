@@ -1838,8 +1838,40 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
         if (tiny != NULL) {
             if (win_type == WIN_CHAT) {
                 char *recipient = ui_current_recipient();
-                message_send(tiny, recipient);
+#ifdef HAVE_LIBOTR
+                if (otr_is_secure(recipient)) {
+                    char *encrypted = otr_encrypt_message(recipient, tiny);
+                    if (encrypted != NULL) {
+                        message_send(encrypted, recipient);
+                        otr_free_message(encrypted);
+                        if (prefs_get_boolean(PREF_CHLOG)) {
+                            const char *jid = jabber_get_fulljid();
+                            Jid *jidp = jid_create(jid);
+                            if (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0) {
+                                chat_log_chat(jidp->barejid, recipient, tiny, PROF_OUT_LOG, NULL);
+                            } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+                                chat_log_chat(jidp->barejid, recipient, "[redacted]", PROF_OUT_LOG, NULL);
+                            }
+                            jid_destroy(jidp);
+                        }
 
+                        ui_outgoing_msg("me", recipient, tiny);
+                    } else {
+                        cons_show_error("Failed to send message.");
+                    }
+                } else {
+                    message_send(tiny, recipient);
+                    if (prefs_get_boolean(PREF_CHLOG)) {
+                        const char *jid = jabber_get_fulljid();
+                        Jid *jidp = jid_create(jid);
+                        chat_log_chat(jidp->barejid, recipient, tiny, PROF_OUT_LOG, NULL);
+                        jid_destroy(jidp);
+                    }
+
+                    ui_outgoing_msg("me", recipient, tiny);
+                }
+#else
+                message_send(tiny, recipient);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -1848,6 +1880,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                 }
 
                 ui_outgoing_msg("me", recipient, tiny);
+#endif
             } else if (win_type == WIN_PRIVATE) {
                 char *recipient = ui_current_recipient();
                 message_send(tiny, recipient);
