@@ -31,4 +31,6 @@ void prof_run(const int disable_tls, char *log_level, char *account_name);
 void prof_handle_idle(void);
 void prof_handle_activity(void);
 
+gboolean process_input(char *inp);
+
 #endif

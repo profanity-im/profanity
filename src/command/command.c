@@ -1205,7 +1205,33 @@ cmd_execute(const char * const command, const char * const inp)
             return result;
         }
     } else {
-        return cmd_execute_default(inp);
+        gboolean ran_alias = FALSE;
+        gboolean alias_result = cmd_execute_alias(inp, &ran_alias);
+        if (!ran_alias) {
+            return cmd_execute_default(inp);
+        } else {
+            return alias_result;
+        }
+    }
+}
+
+gboolean
+cmd_execute_alias(const char * const inp, gboolean *ran)
+{
+    if (inp[0] != '/') {
+        ran = FALSE;
+        return TRUE;
+    } else {
+        char *alias = strdup(inp+1);
+        char *value = prefs_get_alias(alias);
+        free(alias);
+        if (value != NULL) {
+            *ran = TRUE;
+            return process_input(value);
+        } else {
+            *ran = FALSE;
+            return TRUE;
+        }
     }
 }
 

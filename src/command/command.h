@@ -34,6 +34,7 @@ void cmd_autocomplete(char *input, int *size);
 void cmd_reset_autocomplete(void);
 
 gboolean cmd_execute(const char * const command, const char * const inp);
+gboolean cmd_execute_alias(const char * const inp, gboolean *ran);
 gboolean cmd_execute_default(const char * const inp);
 
 GSList * cmd_get_basic_help(void);

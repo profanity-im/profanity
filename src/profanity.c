@@ -51,7 +51,6 @@
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
-static gboolean _process_input(char *inp);
 static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
@@ -77,11 +76,11 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     if (account_name != NULL) {
       char *cmd = "/connect";
       snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
-      _process_input(inp);
+      process_input(inp);
     } else if (prefs_get_string(PREF_CONNECT_ACCOUNT) != NULL) {
       char *cmd = "/connect";
       snprintf(inp, sizeof(inp), "%s %s", cmd, prefs_get_string(PREF_CONNECT_ACCOUNT));
-      _process_input(inp);
+      process_input(inp);
     }
 
     while(cmd_result == TRUE) {
@@ -113,7 +112,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         }
 
         inp[size++] = '\0';
-        cmd_result = _process_input(inp);
+        cmd_result = process_input(inp);
     }
 
     g_timer_destroy(timer);
@@ -172,8 +171,8 @@ prof_handle_activity(void)
  * Take a line of input and process it, return TRUE if profanity is to
  * continue, FALSE otherwise
  */
-static gboolean
-_process_input(char *inp)
+gboolean
+process_input(char *inp)
 {
     log_debug("Input recieved: %s", inp);
     gboolean result = FALSE;
