@@ -94,6 +94,22 @@ void cmd_alias_add_adds_alias(void **state)
     free(help);
 }
 
+void cmd_alias_add_shows_message_when_exists(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", "hc", "/help commands", NULL };
+
+    prefs_add_alias("hc", "/help commands");
+
+    expect_cons_show("Command alias /hc already exists.");
+
+    gboolean result = cmd_alias(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_alias_remove_removes_alias(void **state)
 {
     mock_cons_show();

@@ -97,7 +97,7 @@ void prefs_set_autoaway_time(gint value);
 
 void prefs_add_login(const char *jid);
 
-void prefs_add_alias(const char * const name, const char * const value);
+gboolean prefs_add_alias(const char * const name, const char * const value);
 gboolean prefs_remove_alias(const char * const name);
 char* prefs_get_alias(const char * const name);
 GList* prefs_get_aliases(void);

@@ -1834,8 +1834,11 @@ cmd_alias(gchar **args, struct cmd_help_t help)
                 cons_show("Usage: %s", help.usage);
                 return TRUE;
             } else {
-                prefs_add_alias(alias, value);
-                cons_show("Command alias added /%s -> %s", alias, value);
+                if (prefs_add_alias(alias, value) == TRUE) {
+                    cons_show("Command alias added /%s -> %s", alias, value);
+                } else {
+                    cons_show("Command alias /%s already exists.", alias);
+                }
                 return TRUE;
             }
         }

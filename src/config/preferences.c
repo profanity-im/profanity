@@ -260,11 +260,16 @@ prefs_set_autoaway_time(gint value)
     _save_prefs();
 }
 
-void
+gboolean
 prefs_add_alias(const char * const name, const char * const value)
 {
-    g_key_file_set_string(prefs, PREF_GROUP_ALIAS, name, value);
-    _save_prefs();
+    if (g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
+        return FALSE;
+    } else {
+        g_key_file_set_string(prefs, PREF_GROUP_ALIAS, name, value);
+        _save_prefs();
+        return TRUE;
+    }
 }
 
 char *
