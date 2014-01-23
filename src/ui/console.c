@@ -903,6 +903,12 @@ _cons_show_account(ProfAccount *account)
 }
 
 static void
+_cons_alias_setting(void)
+{
+    cons_show("Alias setting TODO");
+}
+
+static void
 _cons_theme_setting(void)
 {
     gchar *theme = prefs_get_string(PREF_THEME);
@@ -1607,6 +1613,7 @@ console_init_module(void)
     cons_mouse_setting = _cons_mouse_setting;
     cons_statuses_setting = _cons_statuses_setting;
     cons_titlebar_setting = _cons_titlebar_setting;
+    cons_alias_setting = _cons_alias_setting;
     cons_show_ui_prefs = _cons_show_ui_prefs;
     cons_notify_setting = _cons_notify_setting;
     cons_show_desktop_prefs = _cons_show_desktop_prefs;

@@ -1819,6 +1819,13 @@ cmd_nick(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_alias(gchar **args, struct cmd_help_t help)
+{
+    cons_show("Alias command TODO");
+    return TRUE;
+}
+
+gboolean
 cmd_tiny(gchar **args, struct cmd_help_t help)
 {
     char *url = args[0];

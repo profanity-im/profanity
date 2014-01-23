@@ -546,6 +546,14 @@ static struct cmd_t command_defs[] =
           "The default is 'off'.",
           NULL } } },
 
+    { "/alias",
+        cmd_alias, parse_args, 1, 3, &cons_alias_setting,
+        { "/alias add|remove|list [name value]", "Add your own command aliases.",
+        { "/alias add|remove|list [name value]",
+          "-----------------------------------",
+          "Add, remove or show command aliases.",
+          NULL } } },
+
     { "/chlog",
         cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
         { "/chlog on|off", "Chat logging to file.",
@@ -861,6 +869,7 @@ static Autocomplete otr_log_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete statuses_ac;
 static Autocomplete statuses_cons_chat_ac;
+static Autocomplete alias_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1044,6 +1053,11 @@ cmd_init(void)
     autocomplete_add(statuses_cons_chat_ac, "online");
     autocomplete_add(statuses_cons_chat_ac, "none");
 
+    alias_ac = autocomplete_new();
+    autocomplete_add(alias_ac, "add");
+    autocomplete_add(alias_ac, "remove");
+    autocomplete_add(alias_ac, "list");
+
     cmd_history_init();
 }
 
@@ -1079,6 +1093,7 @@ cmd_uninit(void)
     autocomplete_free(connect_property_ac);
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_cons_chat_ac);
+    autocomplete_free(alias_ac);
 }
 
 // Command autocompletion functions
@@ -1157,6 +1172,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(statuses_ac);
     autocomplete_reset(statuses_cons_chat_ac);
+    autocomplete_reset(alias_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1378,8 +1394,8 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac  };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins", "/alias" };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, alias_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
