@@ -14,6 +14,7 @@
 
 #include "config/preferences.h"
 
+#include "command/command.h"
 #include "command/commands.h"
 
 void cmd_alias_add_shows_usage_when_no_args(void **state)

@@ -27,6 +27,7 @@
 
 #include "chat_session.h"
 #include "command/commands.h"
+#include "command/command.h"
 #include "common.h"
 #include "config/accounts.h"
 #include "config/account.h"
@@ -1835,6 +1836,10 @@ cmd_alias(gchar **args, struct cmd_help_t help)
                 return TRUE;
             } else {
                 if (prefs_add_alias(alias, value) == TRUE) {
+                    GString *ac_value = g_string_new("/");
+                    g_string_append(ac_value, alias);
+                    cmd_autocomplete_add(ac_value->str);
+                    g_string_free(ac_value, TRUE);
                     cons_show("Command alias added /%s -> %s", alias, value);
                 } else {
                     cons_show("Command alias /%s already exists.", alias);
@@ -1852,6 +1857,10 @@ cmd_alias(gchar **args, struct cmd_help_t help)
             if (!removed) {
                 cons_show("No such command alias /%s", alias);
             } else {
+                GString *ac_value = g_string_new("/");
+                g_string_append(ac_value, alias);
+                cmd_autocomplete_remove(ac_value->str);
+                g_string_free(ac_value, TRUE);
                 cons_show("Command alias removed -> /%s", alias);
             }
             return TRUE;

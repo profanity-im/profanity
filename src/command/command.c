@@ -547,7 +547,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/alias",
-        cmd_alias, parse_args_with_freetext, 1, 3, &cons_alias_setting,
+        cmd_alias, parse_args_with_freetext, 1, 3, NULL,
         { "/alias add|remove|list [name value]", "Add your own command aliases.",
         { "/alias add|remove|list [name value]",
           "-----------------------------------",
@@ -907,6 +907,18 @@ cmd_init(void)
         autocomplete_add(help_ac, pcmd->cmd+1);
     }
 
+    // load aliases
+    GList *aliases = prefs_get_aliases();
+    GList *curr = aliases;
+    while (curr != NULL) {
+        ProfAlias *alias = curr->data;
+        GString *ac_alias = g_string_new("/");
+        g_string_append(ac_alias, alias->name);
+        autocomplete_add(commands_ac, ac_alias->str);
+        g_string_free(ac_alias, TRUE);
+        curr = g_list_next(curr);
+    }
+
     prefs_ac = autocomplete_new();
     autocomplete_add(prefs_ac, "ui");
     autocomplete_add(prefs_ac, "desktop");
@@ -1094,6 +1106,22 @@ cmd_uninit(void)
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_cons_chat_ac);
     autocomplete_free(alias_ac);
+}
+
+void
+cmd_autocomplete_add(char *value)
+{
+    if (commands_ac != NULL) {
+        autocomplete_add(commands_ac, value);
+    }
+}
+
+void
+cmd_autocomplete_remove(char *value)
+{
+    if (commands_ac != NULL) {
+        autocomplete_remove(commands_ac, value);
+    }
 }
 
 // Command autocompletion functions
