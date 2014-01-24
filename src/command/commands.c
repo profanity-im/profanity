@@ -27,6 +27,7 @@
 
 #include "chat_session.h"
 #include "command/commands.h"
+#include "command/command.h"
 #include "common.h"
 #include "config/accounts.h"
 #include "config/account.h"
@@ -1819,6 +1820,63 @@ cmd_nick(gchar **args, struct cmd_help_t help)
     presence_change_room_nick(room, nick);
 
     return TRUE;
+}
+
+gboolean
+cmd_alias(gchar **args, struct cmd_help_t help)
+{
+    char *subcmd = args[0];
+
+    if (strcmp(subcmd, "add") == 0) {
+        char *alias = args[1];
+        if (alias == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            char *value = args[2];
+            if (value == NULL) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            } else {
+                if (prefs_add_alias(alias, value) == TRUE) {
+                    GString *ac_value = g_string_new("/");
+                    g_string_append(ac_value, alias);
+                    cmd_autocomplete_add(ac_value->str);
+                    g_string_free(ac_value, TRUE);
+                    cons_show("Command alias added /%s -> %s", alias, value);
+                } else {
+                    cons_show("Command alias /%s already exists.", alias);
+                }
+                return TRUE;
+            }
+        }
+    } else if (strcmp(subcmd, "remove") == 0) {
+        char *alias = args[1];
+        if (alias == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            gboolean removed = prefs_remove_alias(alias);
+            if (!removed) {
+                cons_show("No such command alias /%s", alias);
+            } else {
+                GString *ac_value = g_string_new("/");
+                g_string_append(ac_value, alias);
+                cmd_autocomplete_remove(ac_value->str);
+                g_string_free(ac_value, TRUE);
+                cons_show("Command alias removed -> /%s", alias);
+            }
+            return TRUE;
+        }
+    } else if (strcmp(subcmd, "list") == 0) {
+        GList *aliases = prefs_get_aliases();
+        cons_show_aliases(aliases);
+        prefs_free_aliases(aliases);
+        return TRUE;
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
 }
 
 gboolean

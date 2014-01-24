@@ -21,6 +21,9 @@ void expect_cons_show_error(char *output);
 void mock_cons_show_account(void);
 void expect_cons_show_account(ProfAccount *account);
 
+void mock_cons_show_aliases(void);
+void expect_cons_show_aliases(void);
+
 void mock_cons_show_account_list(void);
 void expect_cons_show_account_list(gchar **accounts);
 

@@ -903,6 +903,21 @@ _cons_show_account(ProfAccount *account)
 }
 
 static void
+_cons_show_aliases(GList *aliases)
+{
+    GList *curr = aliases;
+    if (curr != NULL) {
+        cons_show("Command aliases:");
+    }
+    while (curr != NULL) {
+        ProfAlias *alias = curr->data;
+        cons_show("  /%s -> %s", alias->name, alias->value);
+        curr = g_list_next(curr);
+    }
+    cons_show("");
+}
+
+static void
 _cons_theme_setting(void)
 {
     gchar *theme = prefs_get_string(PREF_THEME);
@@ -1638,4 +1653,5 @@ console_init_module(void)
     cons_alert = _cons_alert;
     cons_show_contact_online = _cons_show_contact_online;
     cons_show_contact_offline = _cons_show_contact_offline;
+    cons_show_aliases = _cons_show_aliases;
 }

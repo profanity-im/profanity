@@ -32,8 +32,11 @@ void cmd_uninit(void);
 
 void cmd_autocomplete(char *input, int *size);
 void cmd_reset_autocomplete(void);
+void cmd_autocomplete_add(const char * const value);
+void cmd_autocomplete_remove(const char * const value);
 
 gboolean cmd_execute(const char * const command, const char * const inp);
+gboolean cmd_execute_alias(const char * const inp, gboolean *ran);
 gboolean cmd_execute_default(const char * const inp);
 
 GSList * cmd_get_basic_help(void);
@@ -43,7 +46,5 @@ GSList * cmd_get_presence_help(void);
 void cmd_history_append(char *inp);
 char *cmd_history_previous(char *inp, int *size);
 char *cmd_history_next(char *inp, int *size);
-
-void cmd_autocomplete_add(const char * const command);
 
 #endif

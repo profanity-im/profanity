@@ -545,6 +545,14 @@ static struct cmd_t command_defs[] =
           "The default is 'off'.",
           NULL } } },
 
+    { "/alias",
+        cmd_alias, parse_args_with_freetext, 1, 3, NULL,
+        { "/alias add|remove|list [name value]", "Add your own command aliases.",
+        { "/alias add|remove|list [name value]",
+          "-----------------------------------",
+          "Add, remove or show command aliases.",
+          NULL } } },
+
     { "/chlog",
         cmd_chlog, parse_args, 1, 1, &cons_chlog_setting,
         { "/chlog on|off", "Chat logging to file.",
@@ -868,6 +876,7 @@ static Autocomplete otr_log_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete statuses_ac;
 static Autocomplete statuses_cons_chat_ac;
+static Autocomplete alias_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -903,6 +912,18 @@ cmd_init(void)
         // add to commands and help autocompleters
         autocomplete_add(commands_ac, pcmd->cmd);
         autocomplete_add(help_ac, pcmd->cmd+1);
+    }
+
+    // load aliases
+    GList *aliases = prefs_get_aliases();
+    GList *curr = aliases;
+    while (curr != NULL) {
+        ProfAlias *alias = curr->data;
+        GString *ac_alias = g_string_new("/");
+        g_string_append(ac_alias, alias->name);
+        autocomplete_add(commands_ac, ac_alias->str);
+        g_string_free(ac_alias, TRUE);
+        curr = g_list_next(curr);
     }
 
     prefs_ac = autocomplete_new();
@@ -1051,13 +1072,12 @@ cmd_init(void)
     autocomplete_add(statuses_cons_chat_ac, "online");
     autocomplete_add(statuses_cons_chat_ac, "none");
 
-    cmd_history_init();
-}
+    alias_ac = autocomplete_new();
+    autocomplete_add(alias_ac, "add");
+    autocomplete_add(alias_ac, "remove");
+    autocomplete_add(alias_ac, "list");
 
-void
-cmd_autocomplete_add(const char * const command)
-{
-    autocomplete_add(commands_ac, strdup(command));
+    cmd_history_init();
 }
 
 void
@@ -1092,6 +1112,23 @@ cmd_uninit(void)
     autocomplete_free(connect_property_ac);
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_cons_chat_ac);
+    autocomplete_free(alias_ac);
+}
+
+void
+cmd_autocomplete_add(const char * const value)
+{
+    if (commands_ac != NULL) {
+        autocomplete_add(commands_ac, value);
+    }
+}
+
+void
+cmd_autocomplete_remove(const char * const value)
+{
+    if (commands_ac != NULL) {
+        autocomplete_remove(commands_ac, value);
+    }
 }
 
 // Command autocompletion functions
@@ -1170,6 +1207,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(statuses_ac);
     autocomplete_reset(statuses_cons_chat_ac);
+    autocomplete_reset(alias_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1204,7 +1242,33 @@ cmd_execute(const char * const command, const char * const inp)
     } else if (plugins_run_command(inp)) {
         return TRUE;
     } else {
-        return cmd_execute_default(inp);
+        gboolean ran_alias = FALSE;
+        gboolean alias_result = cmd_execute_alias(inp, &ran_alias);
+        if (!ran_alias) {
+            return cmd_execute_default(inp);
+        } else {
+            return alias_result;
+        }
+    }
+}
+
+gboolean
+cmd_execute_alias(const char * const inp, gboolean *ran)
+{
+    if (inp[0] != '/') {
+        ran = FALSE;
+        return TRUE;
+    } else {
+        char *alias = strdup(inp+1);
+        char *value = prefs_get_alias(alias);
+        free(alias);
+        if (value != NULL) {
+            *ran = TRUE;
+            return prof_process_input(value);
+        } else {
+            *ran = FALSE;
+            return TRUE;
+        }
     }
 }
 
@@ -1416,8 +1480,8 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac  };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins", "/alias" };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, alias_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);

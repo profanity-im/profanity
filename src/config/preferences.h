@@ -65,6 +65,11 @@ typedef enum {
     PREF_OTR_WARN
 } preference_t;
 
+typedef struct prof_alias_t {
+    gchar *name;
+    gchar *value;
+} ProfAlias;
+
 void prefs_load(void);
 void prefs_close(void);
 
@@ -93,6 +98,12 @@ void prefs_set_autoaway_time(gint value);
 gchar** prefs_get_plugins(void);
 
 void prefs_add_login(const char *jid);
+
+gboolean prefs_add_alias(const char * const name, const char * const value);
+gboolean prefs_remove_alias(const char * const name);
+char* prefs_get_alias(const char * const name);
+GList* prefs_get_aliases(void);
+void prefs_free_aliases(GList *aliases);
 
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
