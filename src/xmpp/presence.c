@@ -53,8 +53,7 @@ static int _unsubscribed_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-
-static int _room_presence_handler(xmpp_conn_t * const conn,
+static int _muc_user_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 
 static char* _get_caps_key(xmpp_stanza_t * const stanza);
@@ -73,7 +72,7 @@ presence_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(STANZA_NS_MUC_USER, NULL,                     _room_presence_handler);
+    HANDLE(STANZA_NS_MUC_USER, NULL,                     _muc_user_handler);
     HANDLE(NULL,               STANZA_TYPE_UNAVAILABLE,  _unavailable_handler);
     HANDLE(NULL,               STANZA_TYPE_SUBSCRIBE,    _subscribe_handler);
     HANDLE(NULL,               STANZA_TYPE_SUBSCRIBED,   _subscribed_handler);
@@ -588,7 +587,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
 }
 
 static int
-_room_presence_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     // handler still fires if error
