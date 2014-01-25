@@ -1120,6 +1120,16 @@ cmd_uninit(void)
     autocomplete_free(aliases_ac);
 }
 
+gboolean
+cmd_exists(char *cmd)
+{
+    if (commands_ac == NULL) {
+        return FALSE;
+    } else {
+        return autocomplete_contains(commands_ac, cmd);
+    }
+}
+
 void
 cmd_autocomplete_add(char *value)
 {
