@@ -68,6 +68,7 @@ roster_add_handlers(void)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
+
     HANDLE(STANZA_TYPE_SET,    _roster_set_handler);
     HANDLE(STANZA_TYPE_RESULT, _roster_result_handler);
 }
