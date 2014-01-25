@@ -1833,21 +1833,24 @@ cmd_alias(gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
             return TRUE;
         } else {
+            GString *ac_value = g_string_new("/");
+            g_string_append(ac_value, alias);
+
             char *value = args[2];
             if (value == NULL) {
                 cons_show("Usage: %s", help.usage);
+                g_string_free(ac_value, TRUE);
+                return TRUE;
+            } else if (cmd_exists(ac_value->str)) {
+                cons_show("Command or alias '%s' already exists.");
+                g_string_free(ac_value, TRUE);
                 return TRUE;
             } else {
-                if (prefs_add_alias(alias, value) == TRUE) {
-                    GString *ac_value = g_string_new("/");
-                    g_string_append(ac_value, alias);
-                    cmd_autocomplete_add(ac_value->str);
-                    cmd_alias_add(alias);
-                    g_string_free(ac_value, TRUE);
-                    cons_show("Command alias added /%s -> %s", alias, value);
-                } else {
-                    cons_show("Command alias /%s already exists.", alias);
-                }
+                prefs_add_alias(alias, value);
+                cmd_autocomplete_add(ac_value->str);
+                cmd_alias_add(alias);
+                cons_show("Command alias added /%s -> %s", alias, value);
+                g_string_free(ac_value, TRUE);
                 return TRUE;
             }
         }

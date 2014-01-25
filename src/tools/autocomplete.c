@@ -132,6 +132,21 @@ autocomplete_get_list(Autocomplete ac)
     return copy;
 }
 
+gboolean
+autocomplete_contains(Autocomplete ac, char *value)
+{
+    GSList *curr = ac->items;
+
+    while(curr) {
+        if (strcmp(curr->data, value) == 0) {
+            return TRUE;
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return FALSE;
+}
+
 gchar *
 autocomplete_complete(Autocomplete ac, gchar *search_str)
 {
