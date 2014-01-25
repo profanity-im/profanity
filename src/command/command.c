@@ -552,6 +552,13 @@ static struct cmd_t command_defs[] =
         { "/alias add|remove|list [name value]",
           "-----------------------------------",
           "Add, remove or show command aliases.",
+          "The alias will be available as a command",
+          "Example : /alias add friends /who online friends",
+          "Example : /alias add q /quit",
+          "Example : /alias a /away \"I'm in a meeting.\"",
+          "Example : /alias remove q",
+          "Example : /alias list",
+          "The above aliases will be available as /friends and /a",
           NULL } } },
 
     { "/chlog",
