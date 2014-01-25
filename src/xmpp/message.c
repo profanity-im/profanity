@@ -184,9 +184,9 @@ _conference_message_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
-    xmpp_stanza_t *x_muc = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
-    xmpp_stanza_t *x_groupchat = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
-    xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
+    xmpp_stanza_t *xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    xmpp_stanza_t *xns_conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
+    xmpp_stanza_t *xns_captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *room = NULL;
     char *invitor = NULL;
@@ -198,10 +198,10 @@ _conference_message_handler(xmpp_conn_t * const conn,
     }
 
     // XEP-0045
-    if (x_muc != NULL) {
+    if (xns_muc_user != NULL) {
         room = from;
 
-        xmpp_stanza_t *invite = xmpp_stanza_get_child_by_name(x_muc, STANZA_NAME_INVITE);
+        xmpp_stanza_t *invite = xmpp_stanza_get_child_by_name(xns_muc_user, STANZA_NAME_INVITE);
         if (invite == NULL) {
             return 1;
         }
@@ -230,8 +230,8 @@ _conference_message_handler(xmpp_conn_t * const conn,
         }
 
     // XEP-0429
-    } else if (x_groupchat != NULL) {
-        room = xmpp_stanza_get_attribute(x_groupchat, STANZA_ATTR_JID);
+    } else if (xns_conference != NULL) {
+        room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
         if (room == NULL) {
             return 1;
         }
@@ -242,14 +242,14 @@ _conference_message_handler(xmpp_conn_t * const conn,
         }
         invitor = jidp->barejid;
 
-        reason = xmpp_stanza_get_attribute(x_groupchat, STANZA_ATTR_REASON);
+        reason = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_REASON);
 
         handle_room_invite(INVITE_DIRECT, invitor, room, reason);
 
         jid_destroy(jidp);
 
     // XEP-0158
-    } else if (captcha != NULL) {
+    } else if (xns_captcha != NULL) {
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
         if (body != NULL) {
             char *message = xmpp_stanza_get_text(body);
