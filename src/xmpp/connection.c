@@ -345,8 +345,17 @@ connection_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     gchar *err_msg = NULL;
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
-        xmpp_stanza_t *text_stanza =
-            xmpp_stanza_get_child_by_name(error_stanza, STANZA_NAME_TEXT);
+    xmpp_stanza_t *text_stanza = xmpp_stanza_get_child_by_name(error_stanza, STANZA_NAME_TEXT);
+
+    // handle specific errors by ID
+    char *id = xmpp_stanza_get_id(stanza);
+    if (id != NULL) {
+
+        // ignore if server doesn't support bookmarks
+        if (strcmp("bookmark_init_request", id) == 0) {
+            return 1;
+        }
+    }
 
     if (error_stanza == NULL) {
         log_debug("error message without <error/> received");

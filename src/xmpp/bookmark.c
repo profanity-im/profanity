@@ -37,10 +37,7 @@ bookmark_request(void)
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *iq;
 
-    id = get_unique_id();
-    if (!id) {
-        return;
-    }
+    id = strdup("bookmark_init_request");
 
     autojoin_count = 0;
     if (bookmark_ac != NULL) {
