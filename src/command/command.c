@@ -67,6 +67,7 @@ static char * _bookmark_autocomplete(char *input, int *size);
 static char * _otr_autocomplete(char *input, int *size);
 static char * _connect_autocomplete(char *input, int *size);
 static char * _statuses_autocomplete(char *input, int *size);
+static char * _alias_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -551,6 +552,13 @@ static struct cmd_t command_defs[] =
         { "/alias add|remove|list [name value]",
           "-----------------------------------",
           "Add, remove or show command aliases.",
+          "The alias will be available as a command",
+          "Example : /alias add friends /who online friends",
+          "Example : /alias add q /quit",
+          "Example : /alias a /away \"I'm in a meeting.\"",
+          "Example : /alias remove q",
+          "Example : /alias list",
+          "The above aliases will be available as /friends and /a",
           NULL } } },
 
     { "/chlog",
@@ -877,6 +885,7 @@ static Autocomplete connect_property_ac;
 static Autocomplete statuses_ac;
 static Autocomplete statuses_cons_chat_ac;
 static Autocomplete alias_ac;
+static Autocomplete aliases_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -887,6 +896,7 @@ cmd_init(void)
     log_info("Initialising commands");
 
     commands_ac = autocomplete_new();
+    aliases_ac = autocomplete_new();
 
     help_ac = autocomplete_new();
     autocomplete_add(help_ac, "commands");
@@ -922,6 +932,7 @@ cmd_init(void)
         GString *ac_alias = g_string_new("/");
         g_string_append(ac_alias, alias->name);
         autocomplete_add(commands_ac, ac_alias->str);
+        autocomplete_add(aliases_ac, alias->name);
         g_string_free(ac_alias, TRUE);
         curr = g_list_next(curr);
     }
@@ -1113,6 +1124,7 @@ cmd_uninit(void)
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_cons_chat_ac);
     autocomplete_free(alias_ac);
+    autocomplete_free(aliases_ac);
 }
 
 void
@@ -1128,6 +1140,22 @@ cmd_autocomplete_remove(const char * const value)
 {
     if (commands_ac != NULL) {
         autocomplete_remove(commands_ac, value);
+    }
+}
+
+void
+cmd_alias_add(char *value)
+{
+    if (aliases_ac != NULL) {
+        autocomplete_add(aliases_ac, value);
+    }
+}
+
+void
+cmd_alias_remove(char *value)
+{
+    if (aliases_ac != NULL) {
+        autocomplete_remove(aliases_ac, value);
     }
 }
 
@@ -1208,6 +1236,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(statuses_ac);
     autocomplete_reset(statuses_cons_chat_ac);
     autocomplete_reset(alias_ac);
+    autocomplete_reset(aliases_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1480,8 +1509,8 @@ _cmd_complete_parameters(char *input, int *size)
         return;
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins", "/alias" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac, alias_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
+    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
@@ -1496,7 +1525,7 @@ _cmd_complete_parameters(char *input, int *size)
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
         _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
-        _connect_autocomplete, _statuses_autocomplete };
+        _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1794,6 +1823,24 @@ _statuses_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/statuses", statuses_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_alias_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, size, "/alias remove", aliases_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/alias", alias_ac);
     if (result != NULL) {
         return result;
     }

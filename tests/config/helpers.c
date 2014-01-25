@@ -23,11 +23,11 @@ void create_config_file(void **state)
     }
     g_string_free(profanity_dir, TRUE);
 
-    fopen("./tests/files/xdg_config_home/profanity/profrc", "ab+");
-
-    g_free(xdg_config);
-
-    prefs_load();
+    FILE *f = fopen("./tests/files/xdg_config_home/profanity/profrc", "ab+");
+    if (f) {
+        g_free(xdg_config);
+        prefs_load();
+    }
 }
 
 void delete_config_file(void **state)
