@@ -1839,6 +1839,7 @@ cmd_alias(gchar **args, struct cmd_help_t help)
                     GString *ac_value = g_string_new("/");
                     g_string_append(ac_value, alias);
                     cmd_autocomplete_add(ac_value->str);
+                    cmd_alias_add(alias);
                     g_string_free(ac_value, TRUE);
                     cons_show("Command alias added /%s -> %s", alias, value);
                 } else {
@@ -1860,6 +1861,7 @@ cmd_alias(gchar **args, struct cmd_help_t help)
                 GString *ac_value = g_string_new("/");
                 g_string_append(ac_value, alias);
                 cmd_autocomplete_remove(ac_value->str);
+                cmd_alias_remove(alias);
                 g_string_free(ac_value, TRUE);
                 cons_show("Command alias removed -> /%s", alias);
             }
