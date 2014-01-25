@@ -44,21 +44,21 @@
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 
-static int _iq_handle_error(xmpp_conn_t * const conn,
+static int _error_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_ping_get(xmpp_conn_t * const conn,
+static int _ping_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_version_get(xmpp_conn_t * const conn,
+static int _version_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_discoinfo_get(xmpp_conn_t * const conn,
+static int _disco_info_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_discoinfo_result(xmpp_conn_t * const conn,
+static int _disco_info_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_version_result(xmpp_conn_t * const conn,
+static int _version_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_discoitems_result(xmpp_conn_t * const conn,
+static int _disco_items_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _iq_handle_discoitems_get(xmpp_conn_t * const conn,
+static int _disco_items_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 
 void
@@ -66,14 +66,19 @@ iq_add_handlers(void)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    HANDLE(NULL,                STANZA_TYPE_ERROR,  _iq_handle_error);
-    HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _iq_handle_discoinfo_get);
-    HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_RESULT, _iq_handle_discoinfo_result);
-    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _iq_handle_discoitems_result);
-    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_GET,    _iq_handle_discoitems_get);
-    HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _iq_handle_version_get);
-    HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _iq_handle_version_result);
-    HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _iq_handle_ping_get);
+
+    HANDLE(NULL,                STANZA_TYPE_ERROR,  _error_handler);
+
+    HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _disco_info_get_handler);
+    HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_RESULT, _disco_info_result_handler);
+
+    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_GET,    _disco_items_get_handler);
+    HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _disco_items_result_handler);
+
+    HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_GET,    _version_get_handler);
+    HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _version_result_handler);
+
+    HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _ping_get_handler);
 }
 
 static void
@@ -117,7 +122,7 @@ _iq_send_software_version(const char * const fulljid)
 }
 
 static int
-_iq_handle_error(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
@@ -132,7 +137,7 @@ _iq_handle_error(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_iq_handle_version_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     const char *jid = xmpp_stanza_get_attribute(stanza, "from");
@@ -182,7 +187,7 @@ _iq_handle_version_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
 }
 
 static int
-_iq_handle_ping_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_ping_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
@@ -211,7 +216,7 @@ _iq_handle_ping_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_version_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
@@ -273,7 +278,7 @@ _iq_handle_version_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_iq_handle_discoitems_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_disco_items_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
@@ -299,7 +304,7 @@ _iq_handle_discoitems_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
 
 
 static int
-_iq_handle_discoinfo_get(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
@@ -350,7 +355,7 @@ _item_destroy(DiscoItem *item)
 }
 
 static int
-_iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     log_debug("Recieved diso#info response");
@@ -518,7 +523,7 @@ _iq_handle_discoinfo_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 }
 
 static int
-_iq_handle_discoitems_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
 

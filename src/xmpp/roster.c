@@ -48,9 +48,9 @@ typedef struct _group_data {
 } GroupData;
 
 // event handlers
-static int _roster_handle_push(xmpp_conn_t * const conn,
+static int _roster_set_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _roster_handle_result(xmpp_conn_t * const conn,
+static int _roster_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 
 // id handlers
@@ -69,8 +69,9 @@ roster_add_handlers(void)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    HANDLE(STANZA_TYPE_SET,    _roster_handle_push);
-    HANDLE(STANZA_TYPE_RESULT, _roster_handle_result);
+
+    HANDLE(STANZA_TYPE_SET,    _roster_set_handler);
+    HANDLE(STANZA_TYPE_RESULT, _roster_result_handler);
 }
 
 void
@@ -126,7 +127,7 @@ _roster_send_add_to_group(const char * const group, PContact contact)
 
     new_groups = g_slist_append(new_groups, strdup(group));
     // add an id handler to handle the response
-    char *unique_id = get_unique_id();
+    char *unique_id = generate_unique_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
     if (p_contact_name(contact) != NULL) {
@@ -175,7 +176,7 @@ _roster_send_remove_from_group(const char * const group, PContact contact)
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     // add an id handler to handle the response
-    char *unique_id = get_unique_id();
+    char *unique_id = generate_unique_id(NULL);
     GroupData *data = malloc(sizeof(GroupData));
     data->group = strdup(group);
     if (p_contact_name(contact) != NULL) {
@@ -207,7 +208,7 @@ _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_stanza_t *query =
@@ -271,7 +272,7 @@ _roster_handle_push(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_roster_handle_result(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);

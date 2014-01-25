@@ -372,14 +372,18 @@ xdg_get_data_home(void)
 }
 
 char *
-get_unique_id(void)
+generate_unique_id(char *prefix)
 {
     static unsigned long unique_id;
     char *result = NULL;
     GString *result_str = g_string_new("");
 
     unique_id++;
-    g_string_printf(result_str, "prof%lu", unique_id);
+    if (prefix != NULL) {
+        g_string_printf(result_str, "prof_%s_%lu", prefix, unique_id);
+    } else {
+        g_string_printf(result_str, "prof_%lu", unique_id);
+    }
     result = result_str->str;
     g_string_free(result_str, FALSE);
 
