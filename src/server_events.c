@@ -508,3 +508,11 @@ handle_roster_add(const char * const barejid, const char * const name)
     ui_roster_add(barejid, name);
     ui_current_page_off();
 }
+
+void
+handle_autoping_cancel(void)
+{
+    prefs_set_autoping(0);
+    cons_show_error("Server ping not supported, autoping disabled.");
+    ui_current_page_off();
+}

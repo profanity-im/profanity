@@ -74,5 +74,6 @@ void handle_group_remove(const char * const contact,
     const char * const group);
 void handle_roster_remove(const char * const barejid);
 void handle_roster_add(const char * const barejid, const char * const name);
+void handle_autoping_cancel(void);
 
 #endif

@@ -394,7 +394,8 @@ stanza_create_ping_iq(xmpp_ctx_t *ctx)
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
-    xmpp_stanza_set_id(iq, "c2s1");
+    char *id = generate_unique_id("ping");
+    xmpp_stanza_set_id(iq, id);
 
     xmpp_stanza_t *ping = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(ping, STANZA_NAME_PING);
