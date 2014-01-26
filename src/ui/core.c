@@ -355,14 +355,14 @@ _ui_handle_error_message(const char * const from, const char * const err_msg)
 }
 
 static void
-_ui_handle_recipient_not_found(const char * const from)
+_ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
 {
-    ProfWin *win = wins_get_by_recipient(from);
+    ProfWin *win = wins_get_by_recipient(recipient);
     GString *msg = g_string_new("");
 
     // no window for intended recipient, show message in current and console
     if (win == NULL) {
-        g_string_printf(msg, "Recipient %s not found at server.", from);
+        g_string_printf(msg, "Recipient %s not found: %s", recipient, err_msg);
         cons_show_error(msg->str);
         win = wins_get_current();
         if (win->type != WIN_CONSOLE) {
@@ -371,16 +371,13 @@ _ui_handle_recipient_not_found(const char * const from)
 
     // intended recipient was invalid chat room
     } else if (win->type == WIN_MUC) {
-        g_string_printf(msg, "You have not joined %s.", from);
+        g_string_printf(msg, "Room %s not found: %s", recipient, err_msg);
         cons_show_error(msg->str);
         win_print_line(win, '!', COLOUR_ERROR, msg->str);
 
     // unknown chat recipient
     } else {
-        if (prefs_get_boolean(PREF_STATES) && chat_session_exists(from)) {
-            chat_session_set_recipient_supports(from, FALSE);
-        }
-        g_string_printf(msg, "Recipient %s not found at server.", from);
+        g_string_printf(msg, "Recipient %s not found: %s", recipient, err_msg);
         cons_show_error(msg->str);
         win_print_line(win, '!', COLOUR_ERROR, msg->str);
     }
