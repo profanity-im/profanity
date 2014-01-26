@@ -54,12 +54,11 @@ handle_error_message(const char *from, const char *err_msg)
 }
 
 void
-handle_recipient_not_found(const char *from)
+handle_recipient_not_found(const char * const recipient, const char * const err_msg)
 {
-    log_info("Removing chat session for %s", from);
-    ui_handle_recipient_not_found(from);
-    if (prefs_get_boolean(PREF_STATES)) {
-        chat_session_set_recipient_supports(from, FALSE);
+    ui_handle_recipient_not_found(recipient, err_msg);
+    if (prefs_get_boolean(PREF_STATES) && chat_session_exists(recipient)) {
+        chat_session_set_recipient_supports(recipient, FALSE);
     }
 }
 

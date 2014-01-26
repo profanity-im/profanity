@@ -194,15 +194,28 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     // log message, function never returns NULL
-    char *err_msg = stanza_get_error_message(stanza);
     char *id = xmpp_stanza_get_id(stanza);
-    if (id != NULL) {
-        log_info("Error recieved (id=%s): %s", id, err_msg);
-    } else {
-        log_info("Error received: %s", err_msg);
-    }
-
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *err_msg = stanza_get_error_message(stanza);
+
+    GString *log_msg = g_string_new("Error receievd");
+    if (id != NULL) {
+        g_string_append(log_msg, " (id:");
+        g_string_append(log_msg, id);
+        g_string_append(log_msg, ")");
+    }
+    if (from != NULL) {
+        g_string_append(log_msg, " (from:");
+        g_string_append(log_msg, from);
+        g_string_append(log_msg, ")");
+    }
+    g_string_append(log_msg, ", error: ");
+    g_string_append(log_msg, err_msg);
+    
+    log_info(log_msg->str);
+
+    g_string_free(log_msg, TRUE);
+
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     char *type = NULL;
     if (error_stanza != NULL) {
@@ -211,8 +224,8 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     // handle recipient not found
     if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
-        log_info("Recipient %s not found.", from);
-        handle_recipient_not_found(from);
+        char *cpy = strdup(from);
+        handle_recipient_not_found(cpy, err_msg);
     }
 
     return 1;
