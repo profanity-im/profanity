@@ -88,10 +88,10 @@ _message_send(const char * const msg, const char * const recipient)
     if (prefs_get_boolean(PREF_STATES) && chat_session_get_recipient_supports(jid)) {
         chat_session_set_active(jid);
         message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT,
-            msg, STANZA_NAME_ACTIVE, NULL);
+            msg, STANZA_NAME_ACTIVE);
     } else {
         message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT,
-            msg, NULL, NULL);
+            msg, NULL);
     }
 
     xmpp_send(conn, message);
@@ -104,7 +104,7 @@ _message_send_groupchat(const char * const msg, const char * const recipient)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *message = stanza_create_message(ctx, recipient,
-        STANZA_TYPE_GROUPCHAT, msg, NULL, NULL);
+        STANZA_TYPE_GROUPCHAT, msg, NULL);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
@@ -116,7 +116,7 @@ _message_send_duck(const char * const query)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *message = stanza_create_message(ctx, "im@ddg.gg",
-        STANZA_TYPE_CHAT, query, NULL, NULL);
+        STANZA_TYPE_CHAT, query, NULL);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
