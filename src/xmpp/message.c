@@ -37,6 +37,7 @@
 #include "roster_list.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#include "ui/ui.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 
@@ -50,6 +51,8 @@ static int _conference_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _captcha_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _message_error_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 message_add_handlers(void)
@@ -57,7 +60,7 @@ message_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(NULL,                 STANZA_TYPE_ERROR,      connection_error_handler);
+    HANDLE(NULL,                 STANZA_TYPE_ERROR,      _message_error_handler);
     HANDLE(NULL,                 STANZA_TYPE_GROUPCHAT,  _groupchat_handler);
     HANDLE(NULL,                 STANZA_TYPE_CHAT,       _chat_handler);
     HANDLE(STANZA_NS_MUC_USER,   NULL,                   _muc_user_handler);
@@ -184,6 +187,35 @@ _message_send_gone(const char * const recipient)
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
     chat_session_set_sent(recipient);
+}
+
+static int
+_message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    // log message, function never returns NULL
+    char *err_msg = stanza_get_error_message(stanza);
+    char *id = xmpp_stanza_get_id(stanza);
+    if (id != NULL) {
+        log_info("Error recieved (id=%s): %s", id, err_msg);
+    } else {
+        log_info("Error received: %s", err_msg);
+    }
+
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+    char *type = NULL;
+    if (error_stanza != NULL) {
+        type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
+    }
+
+    // handle recipient not found
+    if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
+        log_info("Recipient %s not found.", from);
+        handle_recipient_not_found(from);
+    }
+
+    return 1;
 }
 
 static int

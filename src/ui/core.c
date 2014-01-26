@@ -355,6 +355,32 @@ _ui_handle_error_message(const char * const from, const char * const err_msg)
 }
 
 static void
+_ui_handle_recipient_not_found(const char * const from)
+{
+    ProfWin *win = wins_get_by_recipient(from);
+    GString *msg = g_string_new("");
+
+    // Message sent to chat room which hasn't been entered yet
+    if (win->type == WIN_MUC) {
+        g_string_printf(msg, "You have not joined %s.", from);
+
+    // unknown chat recipient
+    } else {
+        if (prefs_get_boolean(PREF_STATES)) {
+            chat_session_set_recipient_supports(from, FALSE);
+        }
+        g_string_printf(msg, "Recipient %s not found at server.", from);
+    }
+
+    cons_show_error(msg->str);
+    win_print_line(win, '!', COLOUR_ERROR, msg->str);
+
+    wins_refresh_current();
+
+    g_string_free(msg, TRUE);
+}
+
+static void
 _ui_disconnected(void)
 {
     wins_lost_connection();
@@ -1718,4 +1744,5 @@ ui_init_module(void)
     ui_untrust = _ui_untrust;
     ui_chat_win_contact_online = _ui_chat_win_contact_online;
     ui_chat_win_contact_offline = _ui_chat_win_contact_offline;
+    ui_handle_recipient_not_found = _ui_handle_recipient_not_found;
 }

@@ -53,6 +53,16 @@ handle_error_message(const char *from, const char *err_msg)
 }
 
 void
+handle_recipient_not_found(const char *from)
+{
+    log_info("Removing chat session for %s", from);
+    ui_handle_recipient_not_found(from);
+    if (prefs_get_boolean(PREF_STATES)) {
+        chat_session_set_recipient_supports(from, FALSE);
+    }
+}
+
+void
 handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);

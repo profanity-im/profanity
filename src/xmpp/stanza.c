@@ -821,6 +821,71 @@ stanza_get_caps_str(xmpp_stanza_t * const stanza)
     return  caps_str;
 }
 
+char *
+stanza_get_error_message(xmpp_stanza_t *stanza)
+{
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+
+    // return nothing if no error stanza
+    if (error_stanza == NULL) {
+        return strdup("unknown");
+    } else {
+        xmpp_stanza_t *text_stanza = xmpp_stanza_get_child_by_name(error_stanza, STANZA_NAME_TEXT);
+
+        // check for text
+        if (text_stanza != NULL) {
+            gchar *err_msg = xmpp_stanza_get_text(text_stanza);
+            if (err_msg != NULL) {
+                char *result =  strdup(err_msg);
+                xmpp_free(ctx, err_msg);
+                return result;
+            }
+
+        // otherwise check each defined-condition RFC-6120 8.3.3
+        } else {
+            xmpp_stanza_t *cond_stanza = NULL;
+
+            gchar *defined_conditions[] = {
+                STANZA_NAME_BAD_REQUEST,
+                STANZA_NAME_CONFLICT,
+                STANZA_NAME_FEATURE_NOT_IMPLEMENTED,
+                STANZA_NAME_FORBIDDEN,
+                STANZA_NAME_GONE,
+                STANZA_NAME_INTERNAL_SERVER_ERROR,
+                STANZA_NAME_ITEM_NOT_FOUND,
+                STANZA_NAME_JID_MALFORMED,
+                STANZA_NAME_NOT_ACCEPTABLE,
+                STANZA_NAME_NOT_ALLOWED,
+                STANZA_NAME_NOT_AUTHORISED,
+                STANZA_NAME_POLICY_VIOLATION,
+                STANZA_NAME_RECIPIENT_UNAVAILABLE,
+                STANZA_NAME_REDIRECT,
+                STANZA_NAME_REGISTRATION_REQUIRED,
+                STANZA_NAME_REMOTE_SERVER_NOT_FOUND,
+                STANZA_NAME_REMOTE_SERVER_TIMEOUT,
+                STANZA_NAME_RESOURCE_CONSTRAINT,
+                STANZA_NAME_SERVICE_UNAVAILABLE,
+                STANZA_NAME_SUBSCRIPTION_REQUIRED,
+                STANZA_NAME_UNEXPECTED_REQUEST
+            };
+
+            int i;
+            for (i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
+                cond_stanza = xmpp_stanza_get_child_by_name(error_stanza, defined_conditions[i]);
+                if (cond_stanza != NULL) {
+                    char *result = strdup(xmpp_stanza_get_name(cond_stanza));
+                    return result;
+                }
+            }
+
+        }
+    }
+
+    // if undefined-condition or no condition, return nothing
+    return strdup("unknown");
+}
+
 DataForm *
 stanza_create_form(xmpp_stanza_t * const stanza)
 {

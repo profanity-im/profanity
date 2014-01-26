@@ -128,18 +128,20 @@ prof_handle_idle(void)
 
         while (curr != NULL) {
             char *recipient = curr->data;
-            chat_session_no_activity(recipient);
+            if (chat_session_get_recipient_supports(recipient)) {
+                chat_session_no_activity(recipient);
 
-            if (chat_session_is_gone(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                message_send_gone(recipient);
-            } else if (chat_session_is_inactive(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                message_send_inactive(recipient);
-            } else if (prefs_get_boolean(PREF_OUTTYPE) &&
-                    chat_session_is_paused(recipient) &&
-                    !chat_session_get_sent(recipient)) {
-                message_send_paused(recipient);
+                if (chat_session_is_gone(recipient) &&
+                        !chat_session_get_sent(recipient)) {
+                    message_send_gone(recipient);
+                } else if (chat_session_is_inactive(recipient) &&
+                        !chat_session_get_sent(recipient)) {
+                    message_send_inactive(recipient);
+                } else if (prefs_get_boolean(PREF_OUTTYPE) &&
+                        chat_session_is_paused(recipient) &&
+                        !chat_session_get_sent(recipient)) {
+                    message_send_paused(recipient);
+                }
             }
 
             curr = g_slist_next(curr);
@@ -159,10 +161,12 @@ prof_handle_activity(void)
 
     if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
         char *recipient = ui_current_recipient();
-        chat_session_set_composing(recipient);
-        if (!chat_session_get_sent(recipient) ||
-                chat_session_is_paused(recipient)) {
-            message_send_composing(recipient);
+        if (chat_session_get_recipient_supports(recipient)) {
+            chat_session_set_composing(recipient);
+            if (!chat_session_get_sent(recipient) ||
+                    chat_session_is_paused(recipient)) {
+                message_send_composing(recipient);
+            }
         }
     }
 }
