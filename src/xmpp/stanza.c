@@ -102,6 +102,8 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, STANZA_TYPE_CHAT);
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
+    char *id = generate_unique_id(NULL);
+    xmpp_stanza_set_id(msg, id);
 
     chat_state = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(chat_state, state);
