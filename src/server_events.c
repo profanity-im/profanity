@@ -57,7 +57,7 @@ handle_recipient_not_found(const char *from)
 {
     log_info("Removing chat session for %s", from);
     ui_handle_recipient_not_found(from);
-    if (prefs_get_boolean(PREF_STATES)) {
+    if (prefs_get_boolean(PREF_STATES) && chat_session_exists(from)) {
         chat_session_set_recipient_supports(from, FALSE);
     }
 }

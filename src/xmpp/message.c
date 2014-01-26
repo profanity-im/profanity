@@ -211,8 +211,9 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     // handle recipient not found
     if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
-        log_info("Recipient %s not found.", from);
-        handle_recipient_not_found(from);
+        char *cpy = strdup(from);
+        log_info("Recipient %s not found.", cpy);
+        handle_recipient_not_found(cpy);
     }
 
     return 1;
