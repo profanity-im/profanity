@@ -226,6 +226,8 @@ stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     message = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_attribute(message, STANZA_ATTR_TO, contact);
+    char *id = generate_unique_id(NULL);
+    xmpp_stanza_set_id(message, id);
 
     x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
