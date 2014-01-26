@@ -2257,7 +2257,7 @@ cmd_autoping(gchar **args, struct cmd_help_t help)
 
     if (_strtoi(value, &intval, 0, INT_MAX) == 0) {
         prefs_set_autoping(intval);
-        jabber_set_autoping(intval);
+        iq_set_autoping(intval);
         if (intval == 0) {
             cons_show("Autoping disabled.", intval);
         } else {

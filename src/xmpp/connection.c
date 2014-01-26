@@ -87,7 +87,6 @@ static void _jabber_reconnect(void);
 static void _connection_handler(xmpp_conn_t * const conn,
     const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t * const stream_error, void * const userdata);
-static int _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata);
 
 void _connection_free_saved_account(void);
 void _connection_free_saved_details(void);
@@ -222,20 +221,6 @@ _jabber_process_events(void)
         }
     }
 
-}
-
-static void
-_jabber_set_autoping(const int seconds)
-{
-    if (jabber_conn.conn_status == JABBER_CONNECTED) {
-        xmpp_timed_handler_delete(jabber_conn.conn, _ping_timed_handler);
-
-        if (seconds != 0) {
-            int millis = seconds * 1000;
-            xmpp_timed_handler_add(jabber_conn.conn, _ping_timed_handler, millis,
-                jabber_conn.ctx);
-        }
-    }
 }
 
 static GList *
@@ -459,8 +444,6 @@ _connection_handler(xmpp_conn_t * const conn,
     const xmpp_conn_event_t status, const int error,
     xmpp_stream_error_t * const stream_error, void * const userdata)
 {
-    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
-
     // login success
     if (status == XMPP_CONN_CONNECT) {
         log_debug("Connection handler: XMPP_CONN_CONNECT");
@@ -493,11 +476,6 @@ _connection_handler(xmpp_conn_t * const conn,
         message_add_handlers();
         presence_add_handlers();
         iq_add_handlers();
-
-        if (prefs_get_autoping() != 0) {
-            int millis = prefs_get_autoping() * 1000;
-            xmpp_timed_handler_add(conn, _ping_timed_handler, millis, ctx);
-        }
 
         roster_request();
         bookmark_request();
@@ -554,20 +532,6 @@ _connection_handler(xmpp_conn_t * const conn,
     } else {
         log_error("Connection handler: Unknown status");
     }
-}
-
-static int
-_ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
-{
-    if (jabber_conn.conn_status == JABBER_CONNECTED) {
-        xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
-
-        xmpp_stanza_t *iq = stanza_create_ping_iq(ctx);
-        xmpp_send(conn, iq);
-        xmpp_stanza_release(iq);
-    }
-
-    return 1;
 }
 
 static log_level_t
@@ -629,7 +593,6 @@ jabber_init_module(void)
     jabber_disconnect = _jabber_disconnect;
     jabber_shutdown = _jabber_shutdown;
     jabber_process_events = _jabber_process_events;
-    jabber_set_autoping = _jabber_set_autoping;
     jabber_get_available_resources = _jabber_get_available_resources;
     jabber_get_connection_status = _jabber_get_connection_status;
     jabber_get_fulljid = _jabber_get_fulljid;

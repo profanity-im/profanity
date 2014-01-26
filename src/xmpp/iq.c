@@ -35,6 +35,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "config/preferences.h"
 #include "server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
@@ -60,6 +61,8 @@ static int _disco_items_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _ping_timed_handler(xmpp_conn_t * const conn,
+    void * const userdata);
 
 void
 iq_add_handlers(void)
@@ -79,6 +82,28 @@ iq_add_handlers(void)
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _version_result_handler);
 
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _ping_get_handler);
+
+    if (prefs_get_autoping() != 0) {
+        int millis = prefs_get_autoping() * 1000;
+        xmpp_timed_handler_add(conn, _ping_timed_handler, millis, ctx);
+    }
+}
+
+static void
+_iq_set_autoping(const int seconds)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+
+    if (jabber_get_connection_status() == JABBER_CONNECTED) {
+        xmpp_timed_handler_delete(conn, _ping_timed_handler);
+
+        if (seconds != 0) {
+            int millis = seconds * 1000;
+            xmpp_timed_handler_add(conn, _ping_timed_handler, millis,
+                ctx);
+        }
+    }
 }
 
 static void
@@ -131,6 +156,21 @@ _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         log_error("IQ error received, id: %s.", id);
     } else {
         log_error("IQ error recieved.");
+    }
+
+    return 1;
+}
+
+static int
+_ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
+{
+    xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
+
+    if (jabber_get_connection_status() == JABBER_CONNECTED) {
+
+        xmpp_stanza_t *iq = stanza_create_ping_iq(ctx);
+        xmpp_send(conn, iq);
+        xmpp_stanza_release(iq);
     }
 
     return 1;
@@ -581,4 +621,5 @@ iq_init_module(void)
     iq_disco_info_request = _iq_disco_info_request;
     iq_disco_items_request = _iq_disco_items_request;
     iq_send_software_version = _iq_send_software_version;
+    iq_set_autoping = _iq_set_autoping;
 }

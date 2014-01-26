@@ -94,7 +94,6 @@ const char * (*jabber_get_fulljid)(void);
 const char * (*jabber_get_domain)(void);
 jabber_conn_status_t (*jabber_get_connection_status)(void);
 char * (*jabber_get_presence_message)(void);
-void (*jabber_set_autoping)(int seconds);
 char* (*jabber_get_account_name)(void);
 GList * (*jabber_get_available_resources)(void);
 
@@ -127,6 +126,7 @@ void (*iq_send_software_version)(const char * const fulljid);
 void (*iq_room_list_request)(gchar *conferencejid);
 void (*iq_disco_info_request)(gchar *jid);
 void (*iq_disco_items_request)(gchar *jid);
+void (*iq_set_autoping)(int seconds);
 
 // caps functions
 Capabilities* (*caps_get)(const char * const caps_str);
