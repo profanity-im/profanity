@@ -222,10 +222,9 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
     }
 
-    // handle recipient not found
+    // handle recipient not found ('from' contains a value and type is 'cancel'
     if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
-        char *cpy = strdup(from);
-        handle_recipient_not_found(cpy, err_msg);
+        handle_recipient_not_found(from, err_msg);
     }
 
     return 1;
