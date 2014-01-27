@@ -55,6 +55,8 @@ static int _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _muc_user_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _presence_error_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 static char* _get_caps_key(xmpp_stanza_t * const stanza);
 static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
@@ -72,7 +74,7 @@ presence_add_handlers(void)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    HANDLE(NULL,               STANZA_TYPE_ERROR,        connection_error_handler);
+    HANDLE(NULL,               STANZA_TYPE_ERROR,        _presence_error_handler);
     HANDLE(STANZA_NS_MUC_USER, NULL,                     _muc_user_handler);
     HANDLE(NULL,               STANZA_TYPE_UNAVAILABLE,  _unavailable_handler);
     HANDLE(NULL,               STANZA_TYPE_SUBSCRIBE,    _subscribe_handler);
@@ -328,6 +330,50 @@ _presence_leave_chat_room(const char * const room_jid)
         xmpp_stanza_release(presence);
     }
 }
+
+static int
+_presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    gchar *err_msg = NULL;
+    gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+    xmpp_stanza_t *text_stanza = xmpp_stanza_get_child_by_name(error_stanza, STANZA_NAME_TEXT);
+
+    if (error_stanza == NULL) {
+        log_debug("error message without <error/> received");
+    } else {
+
+        // check for text
+        if (text_stanza != NULL) {
+            err_msg = xmpp_stanza_get_text(text_stanza);
+            if (err_msg != NULL) {
+                handle_error_message(from, err_msg);
+                xmpp_free(ctx, err_msg);
+            }
+
+            // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
+
+        // otherwise show defined-condition
+        } else {
+            xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error_stanza);
+
+            if (err_cond == NULL) {
+                log_debug("error message without <defined-condition/> or <text/> received");
+
+            } else {
+                err_msg = xmpp_stanza_get_name(err_cond);
+                handle_error_message(from, err_msg);
+
+                // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
+            }
+        }
+    }
+
+    return 1;
+}
+
 
 static int
 _unsubscribed_handler(xmpp_conn_t * const conn,

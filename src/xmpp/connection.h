@@ -29,8 +29,6 @@
 
 xmpp_conn_t *connection_get_conn(void);
 xmpp_ctx_t *connection_get_ctx(void);
-int connection_error_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
 void connection_set_priority(int priority);
 void connection_set_presence_message(const char * const message);
 void connection_add_available_resource(Resource *resource);

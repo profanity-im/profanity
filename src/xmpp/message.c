@@ -193,9 +193,10 @@ static int
 _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    // log message, function never returns NULL
     char *id = xmpp_stanza_get_id(stanza);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    // stanza_get_error never returns NULL
     char *err_msg = stanza_get_error_message(stanza);
 
     GString *log_msg = g_string_new("Error receievd");
@@ -211,7 +212,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     }
     g_string_append(log_msg, ", error: ");
     g_string_append(log_msg, err_msg);
-    
+
     log_info(log_msg->str);
 
     g_string_free(log_msg, TRUE);
@@ -222,10 +223,17 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
     }
 
-    // handle recipient not found
+    // handle recipient not found ('from' contains a value and type is 'cancel')
     if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
-        char *cpy = strdup(from);
-        handle_recipient_not_found(cpy, err_msg);
+        handle_recipient_not_found(from, err_msg);
+
+    // handle any other error from recipient
+    } else if (from != NULL) {
+        handle_recipient_error(from, err_msg);
+
+    // handle errors from no recipient
+    } else {
+        handle_error(err_msg);
     }
 
     return 1;
