@@ -335,41 +335,40 @@ static int
 _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    xmpp_ctx_t *ctx = connection_get_ctx();
-    gchar *err_msg = NULL;
-    gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *id = xmpp_stanza_get_id(stanza);
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
-    xmpp_stanza_t *text_stanza = xmpp_stanza_get_child_by_name(error_stanza, STANZA_NAME_TEXT);
-
-    if (error_stanza == NULL) {
-        log_debug("error message without <error/> received");
-    } else {
-
-        // check for text
-        if (text_stanza != NULL) {
-            err_msg = xmpp_stanza_get_text(text_stanza);
-            if (err_msg != NULL) {
-                handle_error_message(from, err_msg);
-                xmpp_free(ctx, err_msg);
-            }
-
-            // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
-
-        // otherwise show defined-condition
-        } else {
-            xmpp_stanza_t *err_cond = xmpp_stanza_get_children(error_stanza);
-
-            if (err_cond == NULL) {
-                log_debug("error message without <defined-condition/> or <text/> received");
-
-            } else {
-                err_msg = xmpp_stanza_get_name(err_cond);
-                handle_error_message(from, err_msg);
-
-                // TODO : process 'type' attribute from <error/> [RFC6120, 8.3.2]
-            }
-        }
+    char *type = NULL;
+    if (error_stanza != NULL) {
+        type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
     }
+
+    // stanza_get_error never returns NULL
+    char *err_msg = stanza_get_error_message(stanza);
+
+    GString *log_msg = g_string_new("presence stanza error received");
+    if (id != NULL) {
+        g_string_append(log_msg, " id=");
+        g_string_append(log_msg, id);
+    }
+    if (from != NULL) {
+        g_string_append(log_msg, " from=");
+        g_string_append(log_msg, from);
+    }
+    if (type != NULL) {
+        g_string_append(log_msg, " type=");
+        g_string_append(log_msg, type);
+    }
+    g_string_append(log_msg, " error=");
+    g_string_append(log_msg, err_msg);
+
+    log_info(log_msg->str);
+
+    g_string_free(log_msg, TRUE);
+
+    handle_error_message(from, err_msg);
+
+    free(err_msg);
 
     return 1;
 }

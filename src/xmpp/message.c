@@ -195,33 +195,34 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     char *id = xmpp_stanza_get_id(stanza);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-
-    // stanza_get_error never returns NULL
-    char *err_msg = stanza_get_error_message(stanza);
-
-    GString *log_msg = g_string_new("Error receievd");
-    if (id != NULL) {
-        g_string_append(log_msg, " (id:");
-        g_string_append(log_msg, id);
-        g_string_append(log_msg, ")");
-    }
-    if (from != NULL) {
-        g_string_append(log_msg, " (from:");
-        g_string_append(log_msg, from);
-        g_string_append(log_msg, ")");
-    }
-    g_string_append(log_msg, ", error: ");
-    g_string_append(log_msg, err_msg);
-
-    log_info(log_msg->str);
-
-    g_string_free(log_msg, TRUE);
-
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     char *type = NULL;
     if (error_stanza != NULL) {
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
     }
+
+    // stanza_get_error never returns NULL
+    char *err_msg = stanza_get_error_message(stanza);
+
+    GString *log_msg = g_string_new("message stanza error received");
+    if (id != NULL) {
+        g_string_append(log_msg, " id=");
+        g_string_append(log_msg, id);
+    }
+    if (from != NULL) {
+        g_string_append(log_msg, " from=");
+        g_string_append(log_msg, from);
+    }
+    if (type != NULL) {
+        g_string_append(log_msg, " type=");
+        g_string_append(log_msg, type);
+    }
+    g_string_append(log_msg, " error=");
+    g_string_append(log_msg, err_msg);
+
+    log_info(log_msg->str);
+
+    g_string_free(log_msg, TRUE);
 
     // handle recipient not found ('from' contains a value and type is 'cancel')
     if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
@@ -235,6 +236,8 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     } else {
         handle_error(err_msg);
     }
+
+    free(err_msg);
 
     return 1;
 }
