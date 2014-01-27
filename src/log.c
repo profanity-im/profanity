@@ -62,6 +62,7 @@ static char * _get_groupchat_log_filename(const char * const room,
 static gchar * _get_chatlog_dir(void);
 static gchar * _get_log_file(void);
 static void _rotate_log_file(void);
+static char* _log_string_from_level(log_level_t level);
 
 void
 log_debug(const char * const msg, ...)
@@ -143,8 +144,11 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
         long result;
         dt = g_date_time_new_now(tz);
 
+        char *level_str = _log_string_from_level(level);
+
         gchar *date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
-        fprintf(logp, "%s: %s: %s\n", date_fmt, area, msg);
+
+        fprintf(logp, "%s: %s: %s: %s\n", date_fmt, area, level_str, msg);
         g_date_time_unref(dt);
 
         fflush(logp);
@@ -522,4 +526,22 @@ _get_log_file(void)
     g_string_free(logfile, TRUE);
 
     return result;
+}
+
+static char*
+_log_string_from_level(log_level_t level)
+{
+    switch (level)
+    {
+        case PROF_LEVEL_ERROR:
+            return "ERR";
+        case PROF_LEVEL_WARN:
+            return "WRN";
+        case PROF_LEVEL_INFO:
+            return "INF";
+        case PROF_LEVEL_DEBUG:
+            return "DBG";
+        default:
+            return "LOG";
+    }
 }
