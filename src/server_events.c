@@ -62,6 +62,18 @@ handle_recipient_not_found(const char * const recipient, const char * const err_
 }
 
 void
+handle_recipient_error(const char * const recipient, const char * const err_msg)
+{
+    ui_handle_recipient_error(recipient, err_msg);
+}
+
+void
+handle_error(const char * const err_msg)
+{
+    ui_handle_error(err_msg);
+}
+
+void
 handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);

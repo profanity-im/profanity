@@ -388,6 +388,39 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
 }
 
 static void
+_ui_handle_recipient_error(const char * const recipient, const char * const err_msg)
+{
+    ProfWin *win = wins_get_by_recipient(recipient);
+    GString *msg = g_string_new("");
+    g_string_printf(msg, "Error from %s: %s", recipient, err_msg);
+
+    // always show in console
+    cons_show_error(msg->str);
+
+    // show in window if exists for recipient
+    if (win != NULL)  {
+        win_print_line(win, '!', COLOUR_ERROR, msg->str);
+    }
+
+    wins_refresh_current();
+
+    g_string_free(msg, TRUE);
+}
+
+static void
+_ui_handle_error(const char * const err_msg)
+{
+    GString *msg = g_string_new("");
+    g_string_printf(msg, "Error %s", err_msg);
+
+    cons_show_error(msg->str);
+
+    wins_refresh_current();
+
+    g_string_free(msg, TRUE);
+}
+
+static void
 _ui_disconnected(void)
 {
     wins_lost_connection();
@@ -1752,4 +1785,6 @@ ui_init_module(void)
     ui_chat_win_contact_online = _ui_chat_win_contact_online;
     ui_chat_win_contact_offline = _ui_chat_win_contact_offline;
     ui_handle_recipient_not_found = _ui_handle_recipient_not_found;
+    ui_handle_recipient_error = _ui_handle_recipient_error;
+    ui_handle_error = _ui_handle_error;
 }
