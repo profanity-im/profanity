@@ -169,7 +169,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
 
         if (conn_status == JABBER_DISCONNECTED) {
             cons_show_error("Connection attempt for %s failed.", jid);
-            log_debug("Connection attempt for %s failed", jid);
+            log_info("Connection attempt for %s failed", jid);
         }
 
         free(jid);
