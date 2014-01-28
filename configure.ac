@@ -137,8 +137,10 @@ if test "x$enable_otr" = xyes; then
 elif test "x$enable_otr" = xno; then
     AM_CONDITIONAL([BUILD_OTR], [false])
 elif test "x$enable_otr" = x; then
-    AC_CHECK_LIB([otr], [main], [],
-        [AM_CONDITIONAL([BUILD_OTR], [false]) AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
+    AM_CONDITIONAL([BUILD_OTR], [false])
+### Add the following back in once libotr 4.0.0 support is enabled
+###    AC_CHECK_LIB([otr], [main], [],
+###        [AM_CONDITIONAL([BUILD_OTR], [false]) AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
 fi
 
 ### cmocka is required only for tests, profanity shouldn't be linked with it
