@@ -389,7 +389,14 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
             init_preferences,
             close_preferences),
-        unit_test(handle_message_stanza_error_when_no_from)
+        unit_test(handle_message_stanza_error_when_no_from),
+        unit_test_setup_teardown(handle_message_stanza_error_from_cancel,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(handle_message_stanza_error_from_cancel_disables_chat_session,
+            init_preferences,
+            close_preferences),
+        unit_test(handle_message_stanza_error_from_no_type),
     };
 
     const UnitTest cmd_alias_tests[] = {
@@ -436,8 +443,8 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(contact_tests);
     PROF_RUN_TESTS(cmd_statuses_tests);
     PROF_RUN_TESTS(preferences_tests);
-    PROF_RUN_TESTS(server_events_tests);
     PROF_RUN_TESTS(cmd_alias_tests);
+    PROF_RUN_TESTS(server_events_tests);
 
     fflush(stdout);
     dup2(bak, 1);

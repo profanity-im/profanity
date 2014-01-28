@@ -29,6 +29,8 @@
 
 char output[256];
 
+// Mocks and stubs
+
 static
 void _mock_cons_show(const char * const msg, ...)
 {
@@ -99,9 +101,32 @@ void _mock_ui_handle_error(const char * const err_msg)
 }
 
 static
+void _mock_ui_handle_recipient_error(const char * const recipient,
+    const char * const err_msg)
+{
+    check_expected(recipient);
+    check_expected(err_msg);
+}
+
+static
+void _mock_ui_handle_recipient_not_found(const char * const recipient,
+    const char * const err_msg)
+{
+    check_expected(recipient);
+    check_expected(err_msg);
+}
+
+static
 void _stub_ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
 {
 }
+
+static
+void _stub_ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
+{
+}
+
+// bind mocks and stubs
 
 void
 mock_cons_show(void)
@@ -146,7 +171,6 @@ mock_cons_show_account_list(void)
     cons_show_account_list = _mock_cons_show_account_list;
 }
 
-
 void
 mock_ui_ask_password(void)
 {
@@ -166,10 +190,12 @@ stub_cons_show(void)
 }
 
 void
-mock_ui_handle_error(void)
+stub_ui_handle_recipient_not_found(void)
 {
-    ui_handle_error = _mock_ui_handle_error;
+    ui_handle_recipient_not_found = _stub_ui_handle_recipient_not_found;
 }
+
+// expectations
 
 void
 expect_cons_show(char *output)
@@ -229,5 +255,22 @@ mock_ui_ask_password_returns(char *password)
 void
 expect_ui_handle_error(char *err_msg)
 {
+    ui_handle_error = _mock_ui_handle_error;
     expect_string(_mock_ui_handle_error, err_msg, err_msg);
+}
+
+void
+expect_ui_handle_recipient_error(char *recipient, char *err_msg)
+{
+    ui_handle_recipient_error = _mock_ui_handle_recipient_error;
+    expect_string(_mock_ui_handle_recipient_error, recipient, recipient);
+    expect_string(_mock_ui_handle_recipient_error, err_msg, err_msg);
+}
+
+void
+expect_ui_handle_recipient_not_found(char *recipient, char *err_msg)
+{
+    ui_handle_recipient_not_found = _mock_ui_handle_recipient_not_found;
+    expect_string(_mock_ui_handle_recipient_not_found, recipient, recipient);
+    expect_string(_mock_ui_handle_recipient_not_found, err_msg, err_msg);
 }
