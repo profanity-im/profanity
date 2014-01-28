@@ -37,6 +37,7 @@
 #include "otr.h"
 #endif
 
+// TODO - replace with stanza error handlers
 void
 handle_error_message(const char *from, const char *err_msg)
 {
@@ -52,25 +53,26 @@ handle_error_message(const char *from, const char *err_msg)
     }
 }
 
+// handle message stanza errors
 void
-handle_recipient_not_found(const char * const recipient, const char * const err_msg)
+handle_message_error(const char * const from, const char * const type,
+    const char * const err_msg)
 {
-    ui_handle_recipient_not_found(recipient, err_msg);
-    if (prefs_get_boolean(PREF_STATES) && chat_session_exists(recipient)) {
-        chat_session_set_recipient_supports(recipient, FALSE);
+    // handle recipient not found ('from' contains a value and type is 'cancel')
+    if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
+        ui_handle_recipient_not_found(from, err_msg);
+        if (prefs_get_boolean(PREF_STATES) && chat_session_exists(from)) {
+            chat_session_set_recipient_supports(from, FALSE);
+        }
+
+    // handle any other error from recipient
+    } else if (from != NULL) {
+        ui_handle_recipient_error(from, err_msg);
+
+    // handle errors from no recipient
+    } else {
+        ui_handle_error(err_msg);
     }
-}
-
-void
-handle_recipient_error(const char * const recipient, const char * const err_msg)
-{
-    ui_handle_recipient_error(recipient, err_msg);
-}
-
-void
-handle_error(const char * const err_msg)
-{
-    ui_handle_error(err_msg);
 }
 
 void

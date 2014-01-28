@@ -104,3 +104,12 @@ void console_shows_dnd_presence_when_set_all(void **state)
 
     roster_clear();
 }
+
+void handle_message_stanza_error_when_no_from(void **state)
+{
+    char *err_msg = "Some error.";
+    mock_ui_handle_error();
+    expect_ui_handle_error(err_msg);
+
+    handle_message_error(NULL, "cancel", err_msg);
+}

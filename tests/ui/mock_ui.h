@@ -18,6 +18,9 @@ void stub_ui_chat_win_contact_online(void);
 void mock_cons_show_error(void);
 void expect_cons_show_error(char *output);
 
+void mock_ui_handle_error(void);
+void expect_ui_handle_error(char *err_msg);
+
 void mock_cons_show_account(void);
 void expect_cons_show_account(ProfAccount *account);
 

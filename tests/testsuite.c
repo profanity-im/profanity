@@ -389,6 +389,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
             init_preferences,
             close_preferences),
+        unit_test(handle_message_stanza_error_when_no_from)
     };
 
     const UnitTest cmd_alias_tests[] = {
