@@ -27,6 +27,7 @@
 #include <strophe.h>
 
 #include "common.h"
+#include "log.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/capabilities.h"
@@ -253,6 +254,8 @@ stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
+    char *id = generate_unique_id("join");
+    xmpp_stanza_set_id(presence, id);
 
     xmpp_stanza_t *x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
@@ -268,6 +271,8 @@ stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
     const char * const full_room_jid)
 {
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
+    char *id = generate_unique_id("sub");
+    xmpp_stanza_set_id(presence, id);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
 
@@ -286,6 +291,8 @@ stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char * const room,
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, STANZA_TYPE_UNAVAILABLE);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_jid->str);
+    char *id = generate_unique_id("leave");
+    xmpp_stanza_set_id(presence, id);
 
     g_string_free(full_jid, TRUE);
 
