@@ -1,2 +1,2 @@
-void create_config_file(void **state);
-void delete_config_file(void **state);
+void init_preferences(void **state);
+void close_preferences(void **state);
