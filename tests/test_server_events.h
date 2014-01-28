@@ -5,3 +5,6 @@ void console_doesnt_show_dnd_presence_when_set_none(void **state);
 void console_doesnt_show_dnd_presence_when_set_online(void **state);
 void console_shows_dnd_presence_when_set_all(void **state);
 void handle_message_stanza_error_when_no_from(void **state);
+void handle_message_stanza_error_from_cancel(void **stanza);
+void handle_message_stanza_error_from_cancel_disables_chat_session(void **stanza);
+void handle_message_stanza_error_from_no_type(void **state);

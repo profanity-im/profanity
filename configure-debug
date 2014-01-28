@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./configure CFLAGS='-g -O0' CXXFLAGS='-g -O0'
+./configure --enable-otr CFLAGS='-g -O0' CXXFLAGS='-g -O0'
