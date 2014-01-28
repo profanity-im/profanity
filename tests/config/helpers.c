@@ -10,7 +10,7 @@
 #include "common.h"
 #include "config/preferences.h"
 
-void create_config_file(void **state)
+void init_preferences(void **state)
 {
     setenv("XDG_CONFIG_HOME", "./tests/files/xdg_config_home", 1);
     gchar *xdg_config = xdg_get_config_home();
@@ -30,7 +30,7 @@ void create_config_file(void **state)
     }
 }
 
-void delete_config_file(void **state)
+void close_preferences(void **state)
 {
     prefs_close();
     remove("./tests/files/xdg_config_home/profanity/profrc");

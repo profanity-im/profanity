@@ -93,6 +93,12 @@ char * _stub_ui_ask_password(void)
 }
 
 static
+void _mock_ui_handle_error(const char * const err_msg)
+{
+    check_expected(err_msg);
+}
+
+static
 void _stub_ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
 {
 }
@@ -160,6 +166,12 @@ stub_cons_show(void)
 }
 
 void
+mock_ui_handle_error(void)
+{
+    ui_handle_error = _mock_ui_handle_error;
+}
+
+void
 expect_cons_show(char *output)
 {
     expect_string(_mock_cons_show, output, output);
@@ -212,4 +224,10 @@ void
 mock_ui_ask_password_returns(char *password)
 {
     will_return(_mock_ui_ask_password, strdup(password));
+}
+
+void
+expect_ui_handle_error(char *err_msg)
+{
+    expect_string(_mock_ui_handle_error, err_msg, err_msg);
 }

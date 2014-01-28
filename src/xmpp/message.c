@@ -224,18 +224,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    // handle recipient not found ('from' contains a value and type is 'cancel')
-    if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
-        handle_recipient_not_found(from, err_msg);
-
-    // handle any other error from recipient
-    } else if (from != NULL) {
-        handle_recipient_error(from, err_msg);
-
-    // handle errors from no recipient
-    } else {
-        handle_error(err_msg);
-    }
+    handle_message_error(from, type, err_msg);
 
     free(err_msg);
 
