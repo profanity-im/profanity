@@ -20,7 +20,7 @@ void contact_in_group(void **state)
     assert_true(result);
 
     p_contact_free(contact);
-    g_slist_free(groups);
+//    g_slist_free(groups);
 }
 
 void contact_not_in_group(void **state)
@@ -35,7 +35,7 @@ void contact_not_in_group(void **state)
     assert_false(result);
 
     p_contact_free(contact);
-    g_slist_free(groups);
+//    g_slist_free(groups);
 }
 
 void contact_name_when_name_exists(void **state)

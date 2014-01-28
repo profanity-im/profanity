@@ -386,9 +386,9 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(console_doesnt_show_dnd_presence_when_set_online,
             create_config_file,
             delete_config_file),
-//        unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
-//            create_config_file,
-//            delete_config_file),
+        unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
+            create_config_file,
+            delete_config_file),
     };
 
     const UnitTest cmd_alias_tests[] = {
@@ -399,9 +399,9 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_alias_add_adds_alias,
             create_config_file,
             delete_config_file),
-//        unit_test_setup_teardown(cmd_alias_add_shows_message_when_exists,
-//            create_config_file,
-//            delete_config_file),
+        unit_test_setup_teardown(cmd_alias_add_shows_message_when_exists,
+            create_config_file,
+            delete_config_file),
         unit_test_setup_teardown(cmd_alias_remove_removes_alias,
             create_config_file,
             delete_config_file),
@@ -412,7 +412,6 @@ int main(int argc, char* argv[]) {
             create_config_file,
             delete_config_file),
     };
-
 
     int bak, new;
     fflush(stdout);
@@ -442,6 +441,7 @@ int main(int argc, char* argv[]) {
     fflush(stdout);
     dup2(bak, 1);
     close(bak);
+
     if (result > 0) {
         return 1;
     } else {
