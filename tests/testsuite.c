@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <sys/stat.h>
 
 #include "config/helpers.h"
 #include "test_autocomplete.h"
@@ -421,11 +422,16 @@ int main(int argc, char* argv[]) {
             close_preferences),
     };
 
-    int bak, new;
+    int bak, bak2, new;
     fflush(stdout);
+    fflush(stderr);
     bak = dup(1);
-    new = open("/dev/null", O_WRONLY);
+    bak2 = dup(2);
+    remove("./testsuite.out");
+    new = open("./testsuite.out", O_WRONLY | O_CREAT);
+    chmod("./testsuite.out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
     dup2(new, 1);
+    dup2(new, 2);
     close(new);
 
     int result = 0;
@@ -448,11 +454,15 @@ int main(int argc, char* argv[]) {
 
     fflush(stdout);
     dup2(bak, 1);
+    dup2(bak2, 2);
     close(bak);
+    close(bak2);
 
     if (result > 0) {
+        printf("\n\nFAILED TESTS, see ./testsuite.out\n\n");
         return 1;
     } else {
+        printf("\n\nAll tests passed\n\n");
         return 0;
     }
 }
