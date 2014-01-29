@@ -44,3 +44,4 @@ runvalgrind.sh
 src/prof_config.h
 clean.sh
 valgrind.out.old
+testsuite.out
