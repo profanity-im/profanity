@@ -339,22 +339,6 @@ _ui_group_removed(const char * const contact, const char * const group)
 }
 
 static void
-_ui_handle_error_message(const char * const from, const char * const err_msg)
-{
-    if (err_msg == NULL) {
-        cons_show_error("Unknown error received from service.");
-    } else {
-        ProfWin *current = wins_get_current();
-        gboolean handled = win_handle_error_message(current, from, err_msg);
-        if (handled != TRUE) {
-            cons_show_error("Error received from server: %s", err_msg);
-        }
-    }
-
-    ui_print_error_from_recipient(from, err_msg);
-}
-
-static void
 _ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
 {
     ProfWin *win = wins_get_by_recipient(recipient);
@@ -390,6 +374,7 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
 static void
 _ui_handle_recipient_error(const char * const recipient, const char * const err_msg)
 {
+    cons_debug("RECIPIENT = %s", recipient);
     ProfWin *win = wins_get_by_recipient(recipient);
     GString *msg = g_string_new("");
     g_string_printf(msg, "Error from %s: %s", recipient, err_msg);
@@ -867,21 +852,6 @@ _ui_current_page_off(void)
     ProfWin *current = wins_get_current();
     win_page_off(current);
     win_refresh(current);
-}
-
-static void
-_ui_print_error_from_recipient(const char * const from, const char *err_msg)
-{
-    if (from == NULL || err_msg == NULL)
-        return;
-
-    ProfWin *window = wins_get_by_recipient(from);
-    if (window != NULL) {
-        win_vprint_line(window, '-', COLOUR_ERROR, "%s", err_msg);
-        if (wins_is_current(window)) {
-            wins_refresh_current();
-        }
-    }
 }
 
 static void
@@ -1727,7 +1697,6 @@ ui_init_module(void)
     ui_contact_not_in_group = _ui_contact_not_in_group;
     ui_group_added = _ui_group_added;
     ui_group_removed = _ui_group_removed;
-    ui_handle_error_message = _ui_handle_error_message;
     ui_disconnected = _ui_disconnected;
     ui_handle_special_keys = _ui_handle_special_keys;
     ui_close_connected_win = _ui_close_connected_win;
@@ -1750,7 +1719,6 @@ ui_init_module(void)
     ui_current_print_formatted_line = _ui_current_print_formatted_line;
     ui_current_error_line = _ui_current_error_line;
     ui_current_page_off = _ui_current_page_off;
-    ui_print_error_from_recipient = _ui_print_error_from_recipient;
     ui_print_system_msg_from_recipient = _ui_print_system_msg_from_recipient;
     ui_recipient_gone = _ui_recipient_gone;
     ui_new_chat_win = _ui_new_chat_win;

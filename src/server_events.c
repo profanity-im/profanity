@@ -39,17 +39,26 @@
 
 // handle presence stanza errors
 void
-handle_presence_error(const char *from, const char *err_msg)
+handle_presence_error(const char *from, const char * const type,
+    const char *err_msg)
 {
-    ui_handle_error_message(from, err_msg);
-
+    // handle nickname conflict on entering room
     if (g_strcmp0(err_msg, "conflict") == 0) {
         // remove the room from muc
         Jid *room_jid = jid_create(from);
         if (!muc_get_roster_received(room_jid->barejid)) {
             muc_leave_room(room_jid->barejid);
+            ui_handle_recipient_error(room_jid->barejid, err_msg);
         }
         jid_destroy(room_jid);
+
+    // handle any other error from recipient
+    } else if (from != NULL) {
+        ui_handle_recipient_error(from, err_msg);
+
+    // handle errors from no recipient
+    } else {
+        ui_handle_error(err_msg);
     }
 }
 

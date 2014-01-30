@@ -38,9 +38,6 @@
 
 static void _win_chat_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
-static gboolean
-_muc_handle_error_message(ProfWin *window, const char * const from,
-    const char * const err_msg);
 
 ProfWin*
 win_create(const char * const title, int cols, win_type_t type)
@@ -312,44 +309,6 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
             assert(FALSE);
             break;
     }
-}
-
-gboolean
-win_handle_error_message(ProfWin *window, const char * const from,
-    const char * const err_msg)
-{
-    gboolean handled = FALSE;
-    switch (window->type)
-    {
-        case WIN_CHAT:
-        case WIN_PRIVATE:
-        case WIN_DUCK:
-        case WIN_CONSOLE:
-            handled =  FALSE;
-            break;
-        case WIN_MUC:
-            handled = _muc_handle_error_message(window, from, err_msg);
-            break;
-        default:
-            assert(FALSE);
-            break;
-    }
-
-    return handled;
-}
-
-static gboolean
-_muc_handle_error_message(ProfWin *window, const char * const from,
-    const char * const err_msg)
-{
-    gboolean handled = FALSE;
-    if (g_strcmp0(err_msg, "conflict") == 0) {
-        win_print_line(window, '-', 0, "Nickname already in use.");
-        win_refresh(window);
-        handled = TRUE;
-    }
-
-    return handled;
 }
 
 static void
