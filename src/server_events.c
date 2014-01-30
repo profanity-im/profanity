@@ -37,9 +37,9 @@
 #include "otr.h"
 #endif
 
-// TODO - replace with stanza error handlers
+// handle presence stanza errors
 void
-handle_error_message(const char *from, const char *err_msg)
+handle_presence_error(const char *from, const char *err_msg)
 {
     ui_handle_error_message(from, err_msg);
 
