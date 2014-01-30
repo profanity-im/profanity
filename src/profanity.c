@@ -319,6 +319,7 @@ _init(const int disable_tls, char *log_level)
 static void
 _shutdown(void)
 {
+    ui_close_all_wins();
     jabber_disconnect();
     jabber_shutdown();
     plugins_on_shutdown();
