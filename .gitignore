@@ -45,3 +45,4 @@ src/prof_config.h
 clean.sh
 valgrind.out.old
 testsuite.out
+push-all.sh
