@@ -23,6 +23,7 @@
 #include "test_preferences.h"
 #include "test_server_events.h"
 #include "test_cmd_alias.h"
+#include "test_muc.h"
 
 #define PROF_RUN_TESTS(name) fprintf(stderr, "\n-> Running %s\n", #name); \
     fflush(stderr); \
@@ -427,6 +428,13 @@ int main(int argc, char* argv[]) {
             close_preferences),
     };
 
+    const UnitTest muc_tests[] = {
+        unit_test_setup_teardown(test_muc_add_invite, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_remove_invite, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_invite_count_0, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_invite_count_5, muc_before_test, muc_after_test),
+    };
+
     int bak, bak2, new;
     fflush(stdout);
     fflush(stderr);
@@ -456,6 +464,7 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(preferences_tests);
     PROF_RUN_TESTS(cmd_alias_tests);
     PROF_RUN_TESTS(server_events_tests);
+    PROF_RUN_TESTS(muc_tests);
 
     fflush(stdout);
     dup2(bak, 1);
