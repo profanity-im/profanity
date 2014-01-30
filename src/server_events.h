@@ -25,7 +25,6 @@
 
 #include "xmpp/xmpp.h"
 
-void handle_error_message(const char *from, const char *err_msg);
 void handle_login_account_success(char *account_name);
 void handle_lost_connection(void);
 void handle_failed_login(void);
@@ -77,5 +76,7 @@ void handle_roster_add(const char * const barejid, const char * const name);
 void handle_autoping_cancel(void);
 void handle_message_error(const char * const from, const char * const type,
     const char * const err_msg);
+void handle_presence_error(const char *from, const char * const type,
+    const char *err_msg);
 
 #endif

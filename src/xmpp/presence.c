@@ -370,7 +370,7 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    handle_error_message(from, err_msg);
+    handle_presence_error(from, type, err_msg);
 
     free(err_msg);
 
