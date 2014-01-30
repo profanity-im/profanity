@@ -30,6 +30,7 @@
 #include "tools/autocomplete.h"
 
 void muc_init(void);
+void muc_close(void);
 void muc_join_room(const char * const room, const char * const nick);
 void muc_leave_room(const char * const room);
 gboolean muc_room_is_active(Jid *jid);

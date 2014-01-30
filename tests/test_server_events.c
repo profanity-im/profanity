@@ -12,6 +12,7 @@
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/mock_ui.h"
+#include "muc.h"
 
 void console_doesnt_show_online_presence_when_set_none(void **state)
 {
@@ -106,49 +107,129 @@ void console_shows_dnd_presence_when_set_all(void **state)
     roster_clear();
 }
 
-void handle_message_stanza_error_when_no_from(void **state)
+void handle_message_error_when_no_recipient(void **state)
 {
     char *err_msg = "Some error.";
+    char *from = NULL;
+    char *type = "cancel";
 
     expect_ui_handle_error(err_msg);
 
-    handle_message_error(NULL, "cancel", err_msg);
+    handle_message_error(from, type, err_msg);
 }
 
-void handle_message_stanza_error_from_cancel(void **state)
+void handle_message_error_when_recipient_cancel(void **state)
 {
     char *err_msg = "Some error.";
     char *from = "bob@server.com";
+    char *type = "cancel";
+
     prefs_set_boolean(PREF_STATES, FALSE);
     chat_sessions_init();
 
     expect_ui_handle_recipient_not_found(from, err_msg);
 
-    handle_message_error(from, "cancel", err_msg);
+    handle_message_error(from, type, err_msg);
 }
 
-void handle_message_stanza_error_from_cancel_disables_chat_session(void **state)
+void handle_message_error_when_recipient_cancel_disables_chat_session(void **state)
 {
     char *err_msg = "Some error.";
     char *from = "bob@server.com";
+    char *type = "cancel";
+
     stub_ui_handle_recipient_not_found();
     prefs_set_boolean(PREF_STATES, TRUE);
     chat_sessions_init();
     chat_session_start(from, TRUE);
 
-    handle_message_error(from, "cancel", err_msg);
+    handle_message_error(from, type, err_msg);
     gboolean chat_session_supported = chat_session_get_recipient_supports(from);
 
     assert_false(chat_session_supported);
     chat_sessions_clear();
 }
 
-void handle_message_stanza_error_from_no_type(void **state)
+void handle_message_error_when_recipient_and_no_type(void **state)
 {
     char *err_msg = "Some error.";
     char *from = "bob@server.com";
+    char *type = NULL;
 
     expect_ui_handle_recipient_error(from, err_msg);
 
-    handle_message_error(from, NULL, err_msg);
+    handle_message_error(from, type, err_msg);
+}
+
+void handle_presence_error_when_no_recipient(void **state)
+{
+    char *err_msg = "Some error.";
+    char *from = NULL;
+    char *type = NULL;
+
+    expect_ui_handle_error(err_msg);
+
+    handle_presence_error(from, type, err_msg);
+}
+
+void handle_presence_error_when_no_recipient_and_conflict(void **state)
+{
+    char *err_msg = "conflict";
+    char *from = NULL;
+    char *type = NULL;
+
+    expect_ui_handle_error(err_msg);
+
+    handle_presence_error(from, type, err_msg);
+}
+
+void handle_presence_error_when_nick_conflict_shows_recipient_error(void **state)
+{
+    char *err_msg = "conflict";
+    char *from = "room@rooms.org/nick";
+    char *barejid = "room@rooms.org";
+    char *nick = "nick";
+    char *type = NULL;
+
+    muc_init();
+    muc_join_room(barejid, nick);
+
+    expect_ui_handle_recipient_error(barejid, err_msg);
+
+    handle_presence_error(from, type, err_msg);
+
+    muc_close();
+}
+
+void handle_presence_error_when_nick_conflict_does_not_join_room(void **state)
+{
+    char *err_msg = "conflict";
+    char *from = "room@rooms.org/nick";
+    char *barejid = "room@rooms.org";
+    char *nick = "nick";
+    char *type = NULL;
+    Jid *jidp = jid_create(from);
+    stub_ui_handle_recipient_error();
+
+    muc_init();
+    muc_join_room(barejid, nick);
+
+    handle_presence_error(from, type, err_msg);
+
+    gboolean room_is_active = muc_room_is_active(jidp);
+    assert_false(room_is_active);
+
+    muc_close();
+    jid_destroy(jidp);
+}
+
+void handle_presence_error_when_from_recipient_not_conflict(void **state)
+{
+    char *err_msg = "Some error.";
+    char *from = "bob@server.com";
+    char *type = NULL;
+
+    expect_ui_handle_recipient_error(from, err_msg);
+
+    handle_presence_error(from, type, err_msg);
 }

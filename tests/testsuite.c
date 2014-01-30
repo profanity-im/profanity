@@ -390,14 +390,19 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(console_shows_dnd_presence_when_set_all,
             init_preferences,
             close_preferences),
-        unit_test(handle_message_stanza_error_when_no_from),
-        unit_test_setup_teardown(handle_message_stanza_error_from_cancel,
+        unit_test(handle_message_error_when_no_recipient),
+        unit_test_setup_teardown(handle_message_error_when_recipient_cancel,
             init_preferences,
             close_preferences),
-        unit_test_setup_teardown(handle_message_stanza_error_from_cancel_disables_chat_session,
+        unit_test_setup_teardown(handle_message_error_when_recipient_cancel_disables_chat_session,
             init_preferences,
             close_preferences),
-        unit_test(handle_message_stanza_error_from_no_type),
+        unit_test(handle_message_error_when_recipient_and_no_type),
+        unit_test(handle_presence_error_when_no_recipient),
+        unit_test(handle_presence_error_when_no_recipient_and_conflict),
+        unit_test(handle_presence_error_when_nick_conflict_shows_recipient_error),
+        unit_test(handle_presence_error_when_nick_conflict_does_not_join_room),
+        unit_test(handle_presence_error_when_from_recipient_not_conflict),
     };
 
     const UnitTest cmd_alias_tests[] = {

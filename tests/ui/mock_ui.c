@@ -109,6 +109,12 @@ void _mock_ui_handle_recipient_error(const char * const recipient,
 }
 
 static
+void _stub_ui_handle_recipient_error(const char * const recipient,
+    const char * const err_msg)
+{
+}
+
+static
 void _mock_ui_handle_recipient_not_found(const char * const recipient,
     const char * const err_msg)
 {
@@ -193,6 +199,12 @@ void
 stub_ui_handle_recipient_not_found(void)
 {
     ui_handle_recipient_not_found = _stub_ui_handle_recipient_not_found;
+}
+
+void
+stub_ui_handle_recipient_error(void)
+{
+    ui_handle_recipient_error = _stub_ui_handle_recipient_error;
 }
 
 // expectations
