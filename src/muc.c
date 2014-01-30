@@ -55,6 +55,16 @@ muc_init(void)
 }
 
 void
+muc_close(void)
+{
+    autocomplete_free(invite_ac);
+    if (rooms != NULL) {
+        g_hash_table_destroy(rooms);
+        rooms = NULL;
+    }
+}
+
+void
 muc_add_invite(char *room)
 {
     autocomplete_add(invite_ac, room);

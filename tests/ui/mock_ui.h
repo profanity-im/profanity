@@ -19,6 +19,7 @@ void mock_cons_show_error(void);
 void expect_cons_show_error(char *output);
 
 void stub_ui_handle_recipient_not_found(void);
+void stub_ui_handle_recipient_error(void);
 void expect_ui_handle_error(char *err_msg);
 void expect_ui_handle_recipient_error(char *recipient, char *err_msg);
 void expect_ui_handle_recipient_not_found(char *recipient, char *err_msg);

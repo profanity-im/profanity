@@ -318,6 +318,7 @@ _shutdown(void)
     jabber_disconnect();
     jabber_shutdown();
     roster_free();
+    muc_close();
     caps_close();
     ui_close();
     chat_log_close();

@@ -43,7 +43,7 @@ handle_presence_error(const char *from, const char * const type,
     const char *err_msg)
 {
     // handle nickname conflict on entering room
-    if (g_strcmp0(err_msg, "conflict") == 0) {
+    if ((from != NULL) && g_strcmp0(err_msg, "conflict") == 0) {
         // remove the room from muc
         Jid *room_jid = jid_create(from);
         if (!muc_get_roster_received(room_jid->barejid)) {
@@ -67,20 +67,20 @@ void
 handle_message_error(const char * const from, const char * const type,
     const char * const err_msg)
 {
+    // handle errors from no recipient
+    if (from == NULL) {
+        ui_handle_error(err_msg);
+
     // handle recipient not found ('from' contains a value and type is 'cancel')
-    if ((from != NULL) && ((type != NULL && (strcmp(type, "cancel") == 0)))) {
+    } else if (type != NULL && (strcmp(type, "cancel") == 0)) {
         ui_handle_recipient_not_found(from, err_msg);
         if (prefs_get_boolean(PREF_STATES) && chat_session_exists(from)) {
             chat_session_set_recipient_supports(from, FALSE);
         }
 
     // handle any other error from recipient
-    } else if (from != NULL) {
-        ui_handle_recipient_error(from, err_msg);
-
-    // handle errors from no recipient
     } else {
-        ui_handle_error(err_msg);
+        ui_handle_recipient_error(from, err_msg);
     }
 }
 
