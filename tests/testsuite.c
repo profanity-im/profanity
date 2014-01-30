@@ -430,6 +430,7 @@ int main(int argc, char* argv[]) {
 
     const UnitTest muc_tests[] = {
         unit_test(test_muc_add_invite),
+        unit_test(test_muc_remove_invite),
     };
 
     int bak, bak2, new;
