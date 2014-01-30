@@ -431,6 +431,8 @@ int main(int argc, char* argv[]) {
     const UnitTest muc_tests[] = {
         unit_test_setup_teardown(test_muc_add_invite, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_remove_invite, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_invite_count_0, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_invite_count_5, muc_before_test, muc_after_test),
     };
 
     int bak, bak2, new;
