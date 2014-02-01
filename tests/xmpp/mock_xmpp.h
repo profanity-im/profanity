@@ -21,4 +21,6 @@ void jabber_connect_with_account_return(jabber_conn_status_t result);
 void mock_presence_update(void);
 void presence_update_expect(resource_presence_t presence, char *msg, int idle);
 
+void bookmark_get_list_returns(GList *bookmarks);
+
 #endif

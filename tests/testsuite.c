@@ -445,6 +445,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_shows_message_when_started),
         unit_test(cmd_bookmark_shows_message_when_undefined),
         unit_test(cmd_bookmark_shows_usage_when_no_args),
+        unit_test(cmd_bookmark_list_shows_bookmarks),
     };
 
 

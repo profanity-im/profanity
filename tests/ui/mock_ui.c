@@ -26,6 +26,9 @@
 #include <string.h>
 
 #include "ui/ui.h"
+#include "tests/helpers.h"
+
+#include "xmpp/bookmark.h"
 
 char output[256];
 
@@ -68,6 +71,12 @@ static
 void _mock_cons_show_account(ProfAccount *account)
 {
     check_expected(account);
+}
+
+static
+void _mock_cons_show_bookmarks(const GList *list)
+{
+    check_expected(list);
 }
 
 static
@@ -166,6 +175,12 @@ mock_cons_show_account(void)
 }
 
 void
+mock_cons_show_bookmarks(void)
+{
+    cons_show_bookmarks = _mock_cons_show_bookmarks;
+}
+
+void
 mock_cons_show_aliases(void)
 {
     cons_show_aliases = _mock_cons_show_aliases;
@@ -231,6 +246,30 @@ void
 expect_cons_show_account(ProfAccount *account)
 {
     expect_memory(_mock_cons_show_account, account, account, sizeof(ProfAccount));
+}
+
+static gboolean
+_cmp_bookmark(Bookmark *bm1, Bookmark *bm2)
+{
+    if (strcmp(bm1->jid, bm2->jid) != 0) {
+        return FALSE;
+    }
+    if (strcmp(bm1->nick, bm2->nick) != 0) {
+        return FALSE;
+    }
+    if (bm1->autojoin != bm2->autojoin) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+void
+expect_cons_show_bookmarks(GList *bookmarks)
+{
+    glist_set_cmp((GCompareFunc)_cmp_bookmark);
+    expect_any(_mock_cons_show_bookmarks, list);
+//    expect_check(_mock_cons_show_bookmarks, list, (CheckParameterValue)glist_contents_equal, bookmarks);
 }
 
 void

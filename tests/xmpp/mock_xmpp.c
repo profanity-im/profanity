@@ -58,6 +58,12 @@ _mock_presence_update(resource_presence_t status, const char * const msg, int id
     check_expected(idle);
 }
 
+static const GList *
+_mock_bookmark_get_list(void)
+{
+    return (GList *)mock();
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -81,6 +87,13 @@ mock_connection_status(jabber_conn_status_t status)
 {
     jabber_get_connection_status = _mock_jabber_get_connection_status;
     will_return(_mock_jabber_get_connection_status, status);
+}
+
+void
+bookmark_get_list_returns(GList *bookmarks)
+{
+    bookmark_get_list = _mock_bookmark_get_list;
+    will_return(_mock_bookmark_get_list, bookmarks);
 }
 
 void

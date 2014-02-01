@@ -5,6 +5,9 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include "config/account.h"
+#include "contact.h"
+
 void stub_cons_show(void);
 
 void mock_cons_show(void);
@@ -26,6 +29,9 @@ void expect_ui_handle_recipient_not_found(char *recipient, char *err_msg);
 
 void mock_cons_show_account(void);
 void expect_cons_show_account(ProfAccount *account);
+
+void mock_cons_show_bookmarks(void);
+void expect_cons_show_bookmarks(GList *bookmarks);
 
 void mock_cons_show_aliases(void);
 void expect_cons_show_aliases(void);
