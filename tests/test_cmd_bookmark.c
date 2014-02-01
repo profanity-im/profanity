@@ -7,8 +7,11 @@
 #include <glib.h>
 
 #include "ui/mock_ui.h"
+#include "ui/window.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/mock_xmpp.h"
+
+#include "muc.h"
 
 #include "command/commands.h"
 
@@ -120,4 +123,141 @@ void cmd_bookmark_list_shows_bookmarks(void **state)
 
     free(help);
     g_list_free_full(bookmarks, (GDestroyNotify)_free_bookmark);
+}
+
+void cmd_bookmark_add_shows_usage_when_no_args_not_muc(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "add", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CONSOLE);
+    expect_cons_show("Usage: some usage");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_bookmark_remove_shows_message_when_no_args_not_muc(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "remove", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CONSOLE);
+    expect_cons_show("Usage: some usage");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
+{
+    mock_bookmark_add();
+    char *jid = "room@conf.server";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", jid, NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_bookmark_add(jid, NULL, FALSE);
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
+{
+    mock_bookmark_add();
+    char *jid = "room@conf.server";
+    char *nick = "bob";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", jid, nick, NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_bookmark_add(jid, nick, FALSE);
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
+{
+    mock_bookmark_add();
+    char *jid = "room@conf.server";
+    char *nick = "bob";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", jid, nick, "autojoin", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_bookmark_add(jid, nick, TRUE);
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_bookmark_add_adds_bookmark_with_room_details(void **state)
+{
+    mock_bookmark_add();
+    mock_ui_current_recipient();
+    char *jid = "room@conf.server";
+    char *nick = "bob";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", NULL };
+
+    muc_init();
+    muc_join_room(jid, nick);
+
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_MUC);
+    ui_current_recipient_returns(jid);
+
+    expect_bookmark_add(jid, nick, FALSE);
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+    muc_close();
+}
+
+void cmd_bookmark_add_adds_bookmark_with_room_details_autojoin(void **state)
+{
+    mock_bookmark_add();
+    mock_ui_current_recipient();
+    char *jid = "room@conf.server";
+    char *nick = "bob";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", "autojoin", NULL };
+
+    muc_init();
+    muc_join_room(jid, nick);
+
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_MUC);
+    ui_current_recipient_returns(jid);
+
+    expect_bookmark_add(jid, nick, TRUE);
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+    muc_close();
 }

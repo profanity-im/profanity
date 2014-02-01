@@ -446,6 +446,13 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_shows_message_when_undefined),
         unit_test(cmd_bookmark_shows_usage_when_no_args),
         unit_test(cmd_bookmark_list_shows_bookmarks),
+        unit_test(cmd_bookmark_add_shows_usage_when_no_args_not_muc),
+        unit_test(cmd_bookmark_remove_shows_message_when_no_args_not_muc),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_jid),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_room_details),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_room_details_autojoin),
     };
 
 

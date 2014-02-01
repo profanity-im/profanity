@@ -1725,7 +1725,7 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
 
     /* TODO: /bookmark list room@server */
 
-    if (cmd == NULL || strcmp(cmd, "list") == 0) {
+    if (strcmp(cmd, "list") == 0) {
         const GList *bookmarks = bookmark_get_list();
         cons_show_bookmarks(bookmarks);
     } else {
