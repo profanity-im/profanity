@@ -439,6 +439,11 @@ int main(int argc, char* argv[]) {
     };
 
     const UnitTest cmd_bookmark_tests[] = {
+        unit_test(cmd_bookmark_shows_message_when_disconnected),
+        unit_test(cmd_bookmark_shows_message_when_disconnecting),
+        unit_test(cmd_bookmark_shows_message_when_connecting),
+        unit_test(cmd_bookmark_shows_message_when_started),
+        unit_test(cmd_bookmark_shows_message_when_undefined),
         unit_test(cmd_bookmark_shows_usage_when_no_args),
     };
 
