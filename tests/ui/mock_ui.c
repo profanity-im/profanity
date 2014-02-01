@@ -225,9 +225,9 @@ stub_ui_handle_recipient_error(void)
 // expectations
 
 void
-expect_cons_show(char *output)
+expect_cons_show(char *expected)
 {
-    expect_string(_mock_cons_show, output, output);
+    expect_string(_mock_cons_show, output, expected);
 }
 
 void
@@ -237,9 +237,9 @@ expect_cons_show_calls(int n)
 }
 
 void
-expect_cons_show_error(char *output)
+expect_cons_show_error(char *expected)
 {
-    expect_string(_mock_cons_show_error, output, output);
+    expect_string(_mock_cons_show_error, output, expected);
 }
 
 void
