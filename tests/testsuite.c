@@ -7,7 +7,7 @@
 #include <cmocka.h>
 #include <sys/stat.h>
 
-#include "config/helpers.h"
+#include "helpers.h"
 #include "test_autocomplete.h"
 #include "test_common.h"
 #include "test_contact.h"
