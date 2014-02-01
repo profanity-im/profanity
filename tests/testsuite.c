@@ -23,6 +23,7 @@
 #include "test_preferences.h"
 #include "test_server_events.h"
 #include "test_cmd_alias.h"
+#include "test_cmd_bookmark.h"
 #include "test_muc.h"
 
 #define PROF_RUN_TESTS(name) fprintf(stderr, "\n-> Running %s\n", #name); \
@@ -437,6 +438,11 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(test_muc_room_is_active, muc_before_test, muc_after_test),
     };
 
+    const UnitTest cmd_bookmark_tests[] = {
+        unit_test(cmd_bookmark_shows_usage_when_no_args),
+    };
+
+
     int bak, bak2, new;
     fflush(stdout);
     fflush(stderr);
@@ -467,6 +473,7 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(cmd_alias_tests);
     PROF_RUN_TESTS(server_events_tests);
     PROF_RUN_TESTS(muc_tests);
+    PROF_RUN_TESTS(cmd_bookmark_tests);
 
     fflush(stdout);
     dup2(bak, 1);

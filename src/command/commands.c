@@ -1713,6 +1713,11 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     gchar *cmd = args[0];
 
+    if (cmd == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currenlty connect.");
         return TRUE;
