@@ -82,7 +82,8 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
     [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; NCURSES="ncursesw"],
     [PKG_CHECK_MODULES([ncurses], [ncurses],
         [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"; NCURSES="ncurses"],
-        [AC_MSG_ERROR([ncurses is required for profanity])])])
+        [AC_CHECK_LIB([ncurses], [main], [],
+            [AC_MSG_ERROR([ncurses is required for profanity])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$LIBS $NCURSES_LIBS"
 
