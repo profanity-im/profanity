@@ -36,7 +36,6 @@
 
 static int _field_compare(FormField *f1, FormField *f2);
 
-#if 0
 xmpp_stanza_t *
 stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
 {
@@ -63,8 +62,8 @@ stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
 
     return iq;
 }
-#endif
 
+#if 0
 xmpp_stanza_t *
 stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
 {
@@ -92,6 +91,7 @@ stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
 
     return iq;
 }
+#endif
 
 xmpp_stanza_t *
 stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
