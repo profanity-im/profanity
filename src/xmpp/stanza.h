@@ -46,6 +46,7 @@
 #define STANZA_NAME_TEXT "text"
 #define STANZA_NAME_SUBJECT "subject"
 #define STANZA_NAME_ITEM "item"
+#define STANZA_NAME_ITEMS "items"
 #define STANZA_NAME_C "c"
 #define STANZA_NAME_IDENTITY "identity"
 #define STANZA_NAME_FEATURE "feature"
@@ -53,8 +54,13 @@
 #define STANZA_NAME_REASON "reason"
 #define STANZA_NAME_GROUP "group"
 #define STANZA_NAME_PUBSUB "pubsub"
+#define STANZA_NAME_PUBLISH "publish"
+#define STANZA_NAME_PUBLISH_OPTIONS "publish-options"
+#define STANZA_NAME_FIELD "field"
 #define STANZA_NAME_STORAGE "storage"
+#define STANZA_NAME_NICK "nick"
 #define STANZA_NAME_CONFERENCE "conference"
+#define STANZA_NAME_VALUE "value"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -110,6 +116,7 @@
 #define STANZA_ATTR_HASH "hash"
 #define STANZA_ATTR_CATEGORY "category"
 #define STANZA_ATTR_REASON "reason"
+#define STANZA_ATTR_AUTOJOIN "autojoin"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
