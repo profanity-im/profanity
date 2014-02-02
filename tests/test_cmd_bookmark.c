@@ -162,6 +162,7 @@ void cmd_bookmark_remove_shows_message_when_no_args_not_muc(void **state)
 void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 {
     mock_bookmark_add();
+    mock_cons_show();
     char *jid = "room@conf.server";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", jid, NULL };
@@ -169,6 +170,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
     mock_connection_status(JABBER_CONNECTED);
 
     expect_bookmark_add(jid, NULL, FALSE);
+    expect_cons_show("Bookmark added for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
@@ -179,6 +181,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
 {
     mock_bookmark_add();
+    mock_cons_show();
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -187,6 +190,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
     mock_connection_status(JABBER_CONNECTED);
 
     expect_bookmark_add(jid, nick, FALSE);
+    expect_cons_show("Bookmark added for room@conf.server, nickname: bob.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
@@ -197,6 +201,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
 void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
 {
     mock_bookmark_add();
+    mock_cons_show();
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -205,6 +210,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
     mock_connection_status(JABBER_CONNECTED);
 
     expect_bookmark_add(jid, nick, TRUE);
+    expect_cons_show("Bookmark added for room@conf.server, nickname: bob, autojoin enabled.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
@@ -216,6 +222,7 @@ void cmd_bookmark_add_adds_bookmark_with_room_details(void **state)
 {
     mock_bookmark_add();
     mock_ui_current_recipient();
+    mock_cons_show();
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -229,6 +236,7 @@ void cmd_bookmark_add_adds_bookmark_with_room_details(void **state)
     ui_current_recipient_returns(jid);
 
     expect_bookmark_add(jid, nick, FALSE);
+    expect_cons_show("Bookmark added for room@conf.server, nickname: bob.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
@@ -241,6 +249,7 @@ void cmd_bookmark_add_adds_bookmark_with_room_details_autojoin(void **state)
 {
     mock_bookmark_add();
     mock_ui_current_recipient();
+    mock_cons_show();
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -254,6 +263,7 @@ void cmd_bookmark_add_adds_bookmark_with_room_details_autojoin(void **state)
     ui_current_recipient_returns(jid);
 
     expect_bookmark_add(jid, nick, TRUE);
+    expect_cons_show("Bookmark added for room@conf.server, nickname: bob, autojoin enabled.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
