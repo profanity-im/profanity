@@ -104,6 +104,7 @@ _ui_refresh(void)
     title_bar_refresh();
     status_bar_refresh();
     inp_put_back();
+    doupdate();
 }
 
 static unsigned long

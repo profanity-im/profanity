@@ -110,7 +110,7 @@ win_refresh(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    prefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
+    pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
 void

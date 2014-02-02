@@ -100,7 +100,7 @@ _status_bar_refresh(void)
     if (dirty) {
         _status_bar_update_time();
         _update_win_statuses();
-        wrefresh(status_bar);
+        wnoutrefresh(status_bar);
         inp_put_back();
         dirty = FALSE;
     }
