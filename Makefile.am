@@ -73,7 +73,7 @@ test_sources = \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
-    tests/config/helpers.c tests/config/helpers.h \
+    tests/helpers.c tests/helpers.h \
     tests/log/mock_log.c \
     tests/test_autocomplete.c \
     tests/test_common.c \
@@ -84,6 +84,7 @@ test_sources = \
 	tests/test_cmd_sub.c \
 	tests/test_cmd_alias.c \
 	tests/test_cmd_statuses.c \
+	tests/test_cmd_bookmark.c \
 	tests/test_history.c \
 	tests/test_jid.c \
 	tests/test_parser.c \

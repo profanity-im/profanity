@@ -5,6 +5,10 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+#include "config/account.h"
+#include "contact.h"
+#include "ui/window.h"
+
 void stub_cons_show(void);
 
 void mock_cons_show(void);
@@ -27,6 +31,9 @@ void expect_ui_handle_recipient_not_found(char *recipient, char *err_msg);
 void mock_cons_show_account(void);
 void expect_cons_show_account(ProfAccount *account);
 
+void mock_cons_show_bookmarks(void);
+void expect_cons_show_bookmarks(GList *bookmarks);
+
 void mock_cons_show_aliases(void);
 void expect_cons_show_aliases(void);
 
@@ -36,5 +43,10 @@ void expect_cons_show_account_list(gchar **accounts);
 void stub_ui_ask_password(void);
 void mock_ui_ask_password(void);
 void mock_ui_ask_password_returns(char *password);
+
+void mock_current_win_type(win_type_t type);
+
+void mock_ui_current_recipient(void);
+void ui_current_recipient_returns(char *jid);
 
 #endif

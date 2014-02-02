@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "helpers.h"
 #include "config/preferences.h"
 
 void init_preferences(void **state)
@@ -37,4 +38,48 @@ void close_preferences(void **state)
     rmdir("./tests/files/xdg_config_home/profanity");
     rmdir("./tests/files/xdg_config_home");
     rmdir("./tests/files");
+}
+
+static GCompareFunc cmp_func;
+
+void
+glist_set_cmp(GCompareFunc func)
+{
+    cmp_func = func;
+}
+
+int
+glist_contents_equal(const void *actual, const void *expected)
+{
+    GList *ac = (GList *)actual;
+    GList *ex = (GList *)expected;
+
+    GList *p = ex;
+    printf("\nExpected\n");
+    while(ex) {
+        printf("\n\n%s\n", (char*)p->data);
+        ex = g_list_next(ex);
+    }
+    printf("\n\n");
+    p = ac;
+    printf("\nActual\n");
+    while(ac) {
+        printf("\n\n%s\n", (char *)p->data);
+        ac = g_list_next(ac);
+    }
+    printf("\n\n");
+
+    if (g_list_length(ex) != g_list_length(ac)) {
+        return 0;
+    }
+
+    GList *ex_curr = ex;
+    while (ex_curr != NULL) {
+        if (g_list_find_custom(ac, ex_curr->data, cmp_func) == NULL) {
+            return 0;
+        }
+        ex_curr = g_list_next(ex_curr);
+    }
+
+    return 1;
 }

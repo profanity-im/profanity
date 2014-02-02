@@ -58,6 +58,20 @@ _mock_presence_update(resource_presence_t status, const char * const msg, int id
     check_expected(idle);
 }
 
+static const GList *
+_mock_bookmark_get_list(void)
+{
+    return (GList *)mock();
+}
+
+static void
+_mock_bookmark_add(const char *jid, const char *nick, gboolean autojoin)
+{
+    check_expected(jid);
+    check_expected(nick);
+    check_expected(autojoin);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -81,6 +95,19 @@ mock_connection_status(jabber_conn_status_t status)
 {
     jabber_get_connection_status = _mock_jabber_get_connection_status;
     will_return(_mock_jabber_get_connection_status, status);
+}
+
+void
+mock_bookmark_add(void)
+{
+    bookmark_add = _mock_bookmark_add;
+}
+
+void
+bookmark_get_list_returns(GList *bookmarks)
+{
+    bookmark_get_list = _mock_bookmark_get_list;
+    will_return(_mock_bookmark_get_list, bookmarks);
 }
 
 void
@@ -151,4 +178,16 @@ presence_update_expect(resource_presence_t presence, char *msg, int idle)
     expect_value(_mock_presence_update, status, presence);
     expect_string(_mock_presence_update, msg, msg);
     expect_value(_mock_presence_update, idle, idle);
+}
+
+void
+expect_bookmark_add(char *expected_jid, char *expected_nick, gboolean expected_autojoin)
+{
+    expect_string(_mock_bookmark_add, jid, expected_jid);
+    if (expected_nick != NULL) {
+        expect_string(_mock_bookmark_add, nick, expected_nick);
+    } else {
+        expect_any(_mock_bookmark_add, nick);
+    }
+    expect_value(_mock_bookmark_add, autojoin, expected_autojoin);
 }

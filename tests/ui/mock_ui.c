@@ -26,6 +26,10 @@
 #include <string.h>
 
 #include "ui/ui.h"
+#include "ui/window.h"
+#include "tests/helpers.h"
+
+#include "xmpp/bookmark.h"
 
 char output[256];
 
@@ -71,6 +75,12 @@ void _mock_cons_show_account(ProfAccount *account)
 }
 
 static
+void _mock_cons_show_bookmarks(const GList *list)
+{
+    check_expected(list);
+}
+
+static
 void _mock_cons_show_aliases(GList *aliases)
 {
     check_expected(aliases);
@@ -92,6 +102,18 @@ static
 char * _stub_ui_ask_password(void)
 {
     return NULL;
+}
+
+static
+win_type_t _mock_ui_current_win_type(void)
+{
+    return (win_type_t)mock();
+}
+
+static
+char * _mock_ui_current_recipeint(void)
+{
+    return (char *)mock();
 }
 
 static
@@ -166,6 +188,12 @@ mock_cons_show_account(void)
 }
 
 void
+mock_cons_show_bookmarks(void)
+{
+    cons_show_bookmarks = _mock_cons_show_bookmarks;
+}
+
+void
 mock_cons_show_aliases(void)
 {
     cons_show_aliases = _mock_cons_show_aliases;
@@ -181,6 +209,12 @@ void
 mock_ui_ask_password(void)
 {
     ui_ask_password = _mock_ui_ask_password;
+}
+
+void
+mock_ui_current_recipient(void)
+{
+    ui_current_recipient = _mock_ui_current_recipeint;
 }
 
 void
@@ -210,9 +244,9 @@ stub_ui_handle_recipient_error(void)
 // expectations
 
 void
-expect_cons_show(char *output)
+expect_cons_show(char *expected)
 {
-    expect_string(_mock_cons_show, output, output);
+    expect_string(_mock_cons_show, output, expected);
 }
 
 void
@@ -222,15 +256,39 @@ expect_cons_show_calls(int n)
 }
 
 void
-expect_cons_show_error(char *output)
+expect_cons_show_error(char *expected)
 {
-    expect_string(_mock_cons_show_error, output, output);
+    expect_string(_mock_cons_show_error, output, expected);
 }
 
 void
 expect_cons_show_account(ProfAccount *account)
 {
     expect_memory(_mock_cons_show_account, account, account, sizeof(ProfAccount));
+}
+
+static gboolean
+_cmp_bookmark(Bookmark *bm1, Bookmark *bm2)
+{
+    if (strcmp(bm1->jid, bm2->jid) != 0) {
+        return FALSE;
+    }
+    if (strcmp(bm1->nick, bm2->nick) != 0) {
+        return FALSE;
+    }
+    if (bm1->autojoin != bm2->autojoin) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+void
+expect_cons_show_bookmarks(GList *bookmarks)
+{
+    glist_set_cmp((GCompareFunc)_cmp_bookmark);
+    expect_any(_mock_cons_show_bookmarks, list);
+//    expect_check(_mock_cons_show_bookmarks, list, (CheckParameterValue)glist_contents_equal, bookmarks);
 }
 
 void
@@ -285,4 +343,17 @@ expect_ui_handle_recipient_not_found(char *recipient, char *err_msg)
     ui_handle_recipient_not_found = _mock_ui_handle_recipient_not_found;
     expect_string(_mock_ui_handle_recipient_not_found, recipient, recipient);
     expect_string(_mock_ui_handle_recipient_not_found, err_msg, err_msg);
+}
+
+void
+mock_current_win_type(win_type_t type)
+{
+    ui_current_win_type = _mock_ui_current_win_type;
+    will_return(_mock_ui_current_win_type, type);
+}
+
+void
+ui_current_recipient_returns(char *jid)
+{
+    will_return(_mock_ui_current_recipeint, jid);
 }

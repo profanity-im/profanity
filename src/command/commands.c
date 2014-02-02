@@ -1714,17 +1714,23 @@ gboolean
 cmd_bookmark(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    gchar *cmd = args[0];
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currenlty connect.");
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    gchar *cmd = args[0];
+    if (cmd == NULL) {
+        cons_show("Usage: %s", help.usage);
         return TRUE;
     }
 
     /* TODO: /bookmark list room@server */
 
-    if (cmd == NULL || strcmp(cmd, "list") == 0) {
-        cons_show_bookmarks(bookmark_get_list());
+    if (strcmp(cmd, "list") == 0) {
+        const GList *bookmarks = bookmark_get_list();
+        cons_show_bookmarks(bookmarks);
     } else {
         gboolean autojoin = FALSE;
         gchar *jid = NULL;
@@ -1761,6 +1767,18 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
 
         if (strcmp(cmd, "add") == 0) {
             bookmark_add(jid, nick, autojoin);
+            GString *msg = g_string_new("Bookmark added for ");
+            g_string_append(msg, jid);
+            if (nick != NULL) {
+                g_string_append(msg, ", nickname: ");
+                g_string_append(msg, nick);
+            }
+            if (autojoin) {
+                g_string_append(msg, ", autojoin enabled");
+            }
+            g_string_append(msg, ".");
+            cons_show(msg->str);
+            g_string_free(msg, TRUE);
         } else if (strcmp(cmd, "remove") == 0) {
             bookmark_remove(jid, autojoin);
         } else {

@@ -7,7 +7,7 @@
 #include <cmocka.h>
 #include <sys/stat.h>
 
-#include "config/helpers.h"
+#include "helpers.h"
 #include "test_autocomplete.h"
 #include "test_common.h"
 #include "test_contact.h"
@@ -23,6 +23,7 @@
 #include "test_preferences.h"
 #include "test_server_events.h"
 #include "test_cmd_alias.h"
+#include "test_cmd_bookmark.h"
 #include "test_muc.h"
 
 #define PROF_RUN_TESTS(name) fprintf(stderr, "\n-> Running %s\n", #name); \
@@ -437,6 +438,24 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(test_muc_room_is_active, muc_before_test, muc_after_test),
     };
 
+    const UnitTest cmd_bookmark_tests[] = {
+        unit_test(cmd_bookmark_shows_message_when_disconnected),
+        unit_test(cmd_bookmark_shows_message_when_disconnecting),
+        unit_test(cmd_bookmark_shows_message_when_connecting),
+        unit_test(cmd_bookmark_shows_message_when_started),
+        unit_test(cmd_bookmark_shows_message_when_undefined),
+        unit_test(cmd_bookmark_shows_usage_when_no_args),
+        unit_test(cmd_bookmark_list_shows_bookmarks),
+        unit_test(cmd_bookmark_add_shows_usage_when_no_args_not_muc),
+        unit_test(cmd_bookmark_remove_shows_message_when_no_args_not_muc),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_jid),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_room_details),
+        unit_test(cmd_bookmark_add_adds_bookmark_with_room_details_autojoin),
+    };
+
+
     int bak, bak2, new;
     fflush(stdout);
     fflush(stderr);
@@ -467,6 +486,7 @@ int main(int argc, char* argv[]) {
     PROF_RUN_TESTS(cmd_alias_tests);
     PROF_RUN_TESTS(server_events_tests);
     PROF_RUN_TESTS(muc_tests);
+    PROF_RUN_TESTS(cmd_bookmark_tests);
 
     fflush(stdout);
     dup2(bak, 1);
