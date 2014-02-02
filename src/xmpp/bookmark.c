@@ -61,6 +61,10 @@ bookmark_request(void)
 static gboolean
 _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
 {
+    gboolean added = TRUE;
+    if (autocomplete_contains(bookmark_ac, jid)) {
+        added = FALSE;
+    }
     /* TODO: send request */
     /* TODO: manage bookmark_list */
 
@@ -68,12 +72,16 @@ _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
     autocomplete_remove(bookmark_ac, jid);
     autocomplete_add(bookmark_ac, jid);
 
-    return FALSE;
+    return added;
 }
 
 static gboolean
 _bookmark_remove(const char *jid, gboolean autojoin)
 {
+    gboolean removed = FALSE;
+    if (autocomplete_contains(bookmark_ac, jid)) {
+        removed = TRUE;
+    }
     /* TODO: manage bookmark_list */
     if (autojoin) {
         /* TODO: just set autojoin=0 */
@@ -82,7 +90,7 @@ _bookmark_remove(const char *jid, gboolean autojoin)
         autocomplete_remove(bookmark_ac, jid);
     }
 
-    return FALSE;
+    return removed;
 }
 
 static const GList *

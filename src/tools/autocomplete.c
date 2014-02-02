@@ -133,7 +133,7 @@ autocomplete_get_list(Autocomplete ac)
 }
 
 gboolean
-autocomplete_contains(Autocomplete ac, char *value)
+autocomplete_contains(Autocomplete ac, const char *value)
 {
     GSList *curr = ac->items;
 

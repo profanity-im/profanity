@@ -366,3 +366,22 @@ void cmd_bookmark_remove_shows_message_when_no_bookmark(void **state)
 
     free(help);
 }
+
+void cmd_bookmark_remove_autojoin_shows_message_when_no_bookmark(void **state)
+{
+    mock_bookmark_remove();
+    mock_cons_show();
+    char *jid = "room@conf.server";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "remove", jid, "autojoin", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_and_return_bookmark_remove(jid, TRUE, FALSE);
+    expect_cons_show("No bookmark exists for room@conf.server.");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
