@@ -31,7 +31,7 @@
     result += run_tests(name);
 
 int main(int argc, char* argv[]) {
-    const UnitTest common_tests[] = {
+    const UnitTest all_tests[] = {
         unit_test(replace_one_substr),
         unit_test(replace_one_substr_beginning),
         unit_test(replace_one_substr_end),
@@ -72,9 +72,7 @@ int main(int argc, char* argv[]) {
         unit_test(test_available_is_not_valid_resource_presence_string),
         unit_test(test_unavailable_is_not_valid_resource_presence_string),
         unit_test(test_blah_is_not_valid_resource_presence_string),
-    };
 
-    const UnitTest autocomplete_tests[] = {
         unit_test(clear_empty),
         unit_test(reset_after_create),
         unit_test(find_after_create),
@@ -85,9 +83,7 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
         unit_test(add_two_same_updates),
-    };
 
-    const UnitTest history_tests[] = {
         unit_test(previous_on_empty_returns_null),
         unit_test(next_on_empty_returns_null),
         unit_test(previous_once_returns_last),
@@ -101,9 +97,7 @@ int main(int argc, char* argv[]) {
         unit_test(edit_item_mid_history),
         unit_test(edit_previous_and_append),
         unit_test(start_session_add_new_submit_previous),
-    };
 
-    const UnitTest jid_tests[] = {
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),
         unit_test(create_jid_from_full_returns_full),
@@ -127,9 +121,7 @@ int main(int argc, char* argv[]) {
         unit_test(create_with_at_in_resource),
         unit_test(create_with_at_and_slash_in_resource),
         unit_test(create_full_with_trailing_slash),
-    };
 
-    const UnitTest parser_tests[] = {
         unit_test(parse_null_returns_null),
         unit_test(parse_empty_returns_null),
         unit_test(parse_space_returns_null),
@@ -171,9 +163,7 @@ int main(int argc, char* argv[]) {
         unit_test(get_first_two_of_three_first_quoted),
         unit_test(get_first_two_of_three_second_quoted),
         unit_test(get_first_two_of_three_first_and_second_quoted),
-    };
 
-    const UnitTest roster_list_tests[] = {
         unit_test(empty_list_when_none_added),
         unit_test(contains_one_element),
         unit_test(first_element_correct),
@@ -192,9 +182,7 @@ int main(int argc, char* argv[]) {
         unit_test(find_twice_returns_second_when_two_match),
         unit_test(find_five_times_finds_fifth),
         unit_test(find_twice_returns_first_when_two_match_and_reset),
-    };
 
-    const UnitTest cmd_connect_tests[] = {
         unit_test(cmd_connect_shows_message_when_disconnecting),
         unit_test(cmd_connect_shows_message_when_connecting),
         unit_test(cmd_connect_shows_message_when_connected),
@@ -220,9 +208,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_shows_usage_when_port_provided_twice),
         unit_test(cmd_connect_shows_usage_when_invalid_first_property),
         unit_test(cmd_connect_shows_usage_when_invalid_second_property),
-    };
 
-    const UnitTest cmd_rooms_tests[] = {
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
         unit_test(cmd_rooms_shows_message_when_connecting),
@@ -230,9 +216,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_rooms_shows_message_when_undefined),
         unit_test(cmd_rooms_uses_account_default_when_no_arg),
         unit_test(cmd_rooms_arg_used_when_passed),
-    };
 
-    const UnitTest cmd_account_tests[] = {
         unit_test(cmd_account_shows_usage_when_not_connected_and_no_args),
         unit_test(cmd_account_shows_account_when_connected_and_no_args),
         unit_test(cmd_account_list_shows_accounts),
@@ -296,14 +280,10 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_clear_checks_account_exists),
         unit_test(cmd_account_clear_shows_message_when_account_doesnt_exist),
         unit_test(cmd_account_clear_shows_message_when_invalid_property),
-    };
 
-    const UnitTest cmd_sub_tests[] = {
         unit_test(cmd_sub_shows_message_when_not_connected),
         unit_test(cmd_sub_shows_usage_when_no_arg),
-    };
 
-    const UnitTest contact_tests[] = {
         unit_test(contact_in_group),
         unit_test(contact_not_in_group),
         unit_test(contact_name_when_name_exists),
@@ -328,9 +308,7 @@ int main(int argc, char* argv[]) {
         unit_test(contact_not_available_when_highest_priority_dnd),
         unit_test(contact_available_when_highest_priority_online),
         unit_test(contact_available_when_highest_priority_chat),
-    };
 
-    const UnitTest cmd_statuses_tests[] = {
         unit_test(cmd_statuses_shows_usage_when_bad_subcmd),
         unit_test(cmd_statuses_shows_usage_when_bad_console_setting),
         unit_test(cmd_statuses_shows_usage_when_bad_chat_setting),
@@ -359,9 +337,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_statuses_muc_sets_off,
             init_preferences,
             close_preferences),
-    };
 
-    const UnitTest preferences_tests[] = {
         unit_test_setup_teardown(statuses_console_defaults_to_all,
             init_preferences,
             close_preferences),
@@ -371,9 +347,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(statuses_muc_defaults_to_on,
             init_preferences,
             close_preferences),
-    };
 
-    const UnitTest server_events_tests[] = {
         unit_test_setup_teardown(console_doesnt_show_online_presence_when_set_none,
             init_preferences,
             close_preferences),
@@ -405,9 +379,7 @@ int main(int argc, char* argv[]) {
         unit_test(handle_presence_error_when_nick_conflict_shows_recipient_error),
         unit_test(handle_presence_error_when_nick_conflict_does_not_join_room),
         unit_test(handle_presence_error_when_from_recipient_not_conflict),
-    };
 
-    const UnitTest cmd_alias_tests[] = {
         unit_test(cmd_alias_add_shows_usage_when_no_args),
         unit_test(cmd_alias_add_shows_usage_when_no_value),
         unit_test(cmd_alias_remove_shows_usage_when_no_args),
@@ -427,18 +399,14 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_alias_list_shows_all_aliases,
             init_preferences,
             close_preferences),
-    };
 
-    const UnitTest muc_tests[] = {
         unit_test_setup_teardown(test_muc_add_invite, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_remove_invite, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_invite_count_0, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_invite_count_5, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_room_is_not_active, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_room_is_active, muc_before_test, muc_after_test),
-    };
 
-    const UnitTest cmd_bookmark_tests[] = {
         unit_test(cmd_bookmark_shows_message_when_disconnected),
         unit_test(cmd_bookmark_shows_message_when_disconnecting),
         unit_test(cmd_bookmark_shows_message_when_connecting),
@@ -476,23 +444,7 @@ int main(int argc, char* argv[]) {
 
     int result = 0;
 
-    PROF_RUN_TESTS(common_tests);
-    PROF_RUN_TESTS(autocomplete_tests);
-    PROF_RUN_TESTS(history_tests);
-    PROF_RUN_TESTS(jid_tests);
-    PROF_RUN_TESTS(parser_tests);
-    PROF_RUN_TESTS(roster_list_tests);
-    PROF_RUN_TESTS(cmd_connect_tests);
-    PROF_RUN_TESTS(cmd_rooms_tests);
-    PROF_RUN_TESTS(cmd_account_tests);
-    PROF_RUN_TESTS(cmd_sub_tests);
-    PROF_RUN_TESTS(contact_tests);
-    PROF_RUN_TESTS(cmd_statuses_tests);
-    PROF_RUN_TESTS(preferences_tests);
-    PROF_RUN_TESTS(cmd_alias_tests);
-    PROF_RUN_TESTS(server_events_tests);
-    PROF_RUN_TESTS(muc_tests);
-    PROF_RUN_TESTS(cmd_bookmark_tests);
+    PROF_RUN_TESTS(all_tests);
 
     fflush(stdout);
     dup2(bak, 1);
