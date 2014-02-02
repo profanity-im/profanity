@@ -198,6 +198,25 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
     free(help);
 }
 
+void cmd_bookmark_add_adds_bookmark_with_jid_autojoin(void **state)
+{
+    mock_bookmark_add();
+    mock_cons_show();
+    char *jid = "room@conf.server";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", jid, "autojoin", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_bookmark_add(jid, NULL, TRUE);
+    expect_cons_show("Bookmark added for room@conf.server, autojoin enabled.");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
 {
     mock_bookmark_add();
