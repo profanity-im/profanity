@@ -24,6 +24,11 @@ void presence_update_expect(resource_presence_t presence, char *msg, int idle);
 void bookmark_get_list_returns(GList *bookmarks);
 
 void mock_bookmark_add(void);
-void expect_bookmark_add(char *expected_jid, char *expected_nick, gboolean expected_autojoin);
+void expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
+    gboolean expected_autojoin, gboolean added);
+
+void mock_bookmark_remove(void);
+void expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_autojoin,
+    gboolean removed);
 
 #endif

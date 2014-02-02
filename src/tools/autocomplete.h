@@ -57,5 +57,5 @@ char * autocomplete_param_no_with_func(char *input, int *size, char *command,
 
 void autocomplete_reset(Autocomplete ac);
 
-gboolean autocomplete_contains(Autocomplete ac, char *value);
+gboolean autocomplete_contains(Autocomplete ac, const char *value);
 #endif

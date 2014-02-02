@@ -58,20 +58,30 @@ bookmark_request(void)
     xmpp_stanza_release(iq);
 }
 
-static void
+static gboolean
 _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
 {
+    gboolean added = TRUE;
+    if (autocomplete_contains(bookmark_ac, jid)) {
+        added = FALSE;
+    }
     /* TODO: send request */
     /* TODO: manage bookmark_list */
 
     /* this may be command for modifying */
     autocomplete_remove(bookmark_ac, jid);
     autocomplete_add(bookmark_ac, jid);
+
+    return added;
 }
 
-static void
+static gboolean
 _bookmark_remove(const char *jid, gboolean autojoin)
 {
+    gboolean removed = FALSE;
+    if (autocomplete_contains(bookmark_ac, jid)) {
+        removed = TRUE;
+    }
     /* TODO: manage bookmark_list */
     if (autojoin) {
         /* TODO: just set autojoin=0 */
@@ -79,6 +89,8 @@ _bookmark_remove(const char *jid, gboolean autojoin)
         /* TODO: send request */
         autocomplete_remove(bookmark_ac, jid);
     }
+
+    return removed;
 }
 
 static const GList *

@@ -95,7 +95,7 @@ void _mock_cons_show_account_list(gchar **accounts)
 static
 char * _mock_ui_ask_password(void)
 {
-    return (char *)mock();    
+    return (char *)mock();
 }
 
 static
@@ -160,7 +160,7 @@ void
 mock_cons_show(void)
 {
     cons_show = _mock_cons_show;
-    
+
 }
 
 void
