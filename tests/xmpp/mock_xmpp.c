@@ -72,6 +72,13 @@ _mock_bookmark_add(const char *jid, const char *nick, gboolean autojoin)
     check_expected(autojoin);
 }
 
+static void
+_mock_bookmark_remove(const char *jid, gboolean autojoin)
+{
+    check_expected(jid);
+    check_expected(autojoin);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -101,6 +108,12 @@ void
 mock_bookmark_add(void)
 {
     bookmark_add = _mock_bookmark_add;
+}
+
+void
+mock_bookmark_remove(void)
+{
+    bookmark_remove = _mock_bookmark_remove;
 }
 
 void
@@ -190,4 +203,11 @@ expect_bookmark_add(char *expected_jid, char *expected_nick, gboolean expected_a
         expect_any(_mock_bookmark_add, nick);
     }
     expect_value(_mock_bookmark_add, autojoin, expected_autojoin);
+}
+
+void
+expect_bookmark_remove(char *expected_jid, gboolean expected_autojoin)
+{
+    expect_string(_mock_bookmark_remove, jid, expected_jid);
+    expect_value(_mock_bookmark_remove, autojoin, expected_autojoin);
 }

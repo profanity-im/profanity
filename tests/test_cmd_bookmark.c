@@ -290,3 +290,41 @@ void cmd_bookmark_add_adds_bookmark_with_room_details_autojoin(void **state)
     free(help);
     muc_close();
 }
+
+void cmd_bookmark_remove_removes_bookmark(void **state)
+{
+    mock_bookmark_remove();
+    mock_cons_show();
+    char *jid = "room@conf.server";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "remove", jid, NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_bookmark_remove(jid, FALSE);
+    expect_cons_show("Bookmark removed for room@conf.server.");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_bookmark_remove_removes_autojoin(void **state)
+{
+    mock_bookmark_remove();
+    mock_cons_show();
+    char *jid = "room@conf.server";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "remove", jid, "autojoin", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_bookmark_remove(jid, TRUE);
+    expect_cons_show("Autojoin disabled for room@conf.server.");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}

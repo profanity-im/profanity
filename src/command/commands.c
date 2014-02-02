@@ -1778,6 +1778,11 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
             g_string_free(msg, TRUE);
         } else if (strcmp(cmd, "remove") == 0) {
             bookmark_remove(jid, autojoin);
+            if (autojoin) {
+                cons_show("Autojoin disabled for %s.", jid);
+            } else {
+                cons_show("Bookmark removed for %s.", jid);
+            }
         } else {
             cons_show("Usage: %s", help.usage);
         }
