@@ -1763,19 +1763,23 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
         }
 
         if (strcmp(cmd, "add") == 0) {
-            bookmark_add(jid, nick, autojoin);
-            GString *msg = g_string_new("Bookmark added for ");
-            g_string_append(msg, jid);
-            if (nick != NULL) {
-                g_string_append(msg, ", nickname: ");
-                g_string_append(msg, nick);
+            gboolean added = bookmark_add(jid, nick, autojoin);
+            if (added) {
+                GString *msg = g_string_new("Bookmark added for ");
+                g_string_append(msg, jid);
+                if (nick != NULL) {
+                    g_string_append(msg, ", nickname: ");
+                    g_string_append(msg, nick);
+                }
+                if (autojoin) {
+                    g_string_append(msg, ", autojoin enabled");
+                }
+                g_string_append(msg, ".");
+                cons_show(msg->str);
+                g_string_free(msg, TRUE);
+            } else {
+                cons_show("Bookmark updated for %s.", jid);
             }
-            if (autojoin) {
-                g_string_append(msg, ", autojoin enabled");
-            }
-            g_string_append(msg, ".");
-            cons_show(msg->str);
-            g_string_free(msg, TRUE);
         } else if (strcmp(cmd, "remove") == 0) {
             bookmark_remove(jid, autojoin);
             if (autojoin) {

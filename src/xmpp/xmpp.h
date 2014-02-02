@@ -132,7 +132,7 @@ void (*iq_set_autoping)(int seconds);
 Capabilities* (*caps_get)(const char * const caps_str);
 void (*caps_close)(void);
 
-void (*bookmark_add)(const char *jid, const char *nick, gboolean autojoin);
+gboolean (*bookmark_add)(const char *jid, const char *nick, gboolean autojoin);
 void (*bookmark_remove)(const char *jid, gboolean autojoin);
 const GList * (*bookmark_get_list)(void);
 char * (*bookmark_find)(char *search_str);

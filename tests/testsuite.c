@@ -456,6 +456,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_add_adds_bookmark_with_room_details_autojoin),
         unit_test(cmd_bookmark_remove_removes_bookmark),
         unit_test(cmd_bookmark_remove_removes_autojoin),
+        unit_test(cmd_bookmark_add_shows_message_when_upated),
     };
 
 

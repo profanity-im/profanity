@@ -58,7 +58,7 @@ bookmark_request(void)
     xmpp_stanza_release(iq);
 }
 
-static void
+static gboolean
 _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
 {
     /* TODO: send request */
@@ -67,6 +67,8 @@ _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
     /* this may be command for modifying */
     autocomplete_remove(bookmark_ac, jid);
     autocomplete_add(bookmark_ac, jid);
+
+    return FALSE;
 }
 
 static void

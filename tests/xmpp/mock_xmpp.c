@@ -64,12 +64,13 @@ _mock_bookmark_get_list(void)
     return (GList *)mock();
 }
 
-static void
+static gboolean
 _mock_bookmark_add(const char *jid, const char *nick, gboolean autojoin)
 {
     check_expected(jid);
     check_expected(nick);
     check_expected(autojoin);
+    return (gboolean)mock();
 }
 
 static void
@@ -194,7 +195,8 @@ presence_update_expect(resource_presence_t presence, char *msg, int idle)
 }
 
 void
-expect_bookmark_add(char *expected_jid, char *expected_nick, gboolean expected_autojoin)
+expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
+    gboolean expected_autojoin, gboolean added)
 {
     expect_string(_mock_bookmark_add, jid, expected_jid);
     if (expected_nick != NULL) {
@@ -203,6 +205,8 @@ expect_bookmark_add(char *expected_jid, char *expected_nick, gboolean expected_a
         expect_any(_mock_bookmark_add, nick);
     }
     expect_value(_mock_bookmark_add, autojoin, expected_autojoin);
+
+    will_return(_mock_bookmark_add, added);
 }
 
 void
