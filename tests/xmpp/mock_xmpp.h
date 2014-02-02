@@ -28,6 +28,7 @@ void expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
     gboolean expected_autojoin, gboolean added);
 
 void mock_bookmark_remove(void);
-void expect_bookmark_remove(char *expected_jid, gboolean expected_autojoin);
+void expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_autojoin,
+    gboolean removed);
 
 #endif

@@ -1781,11 +1781,15 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
                 cons_show("Bookmark updated for %s.", jid);
             }
         } else if (strcmp(cmd, "remove") == 0) {
-            bookmark_remove(jid, autojoin);
-            if (autojoin) {
-                cons_show("Autojoin disabled for %s.", jid);
+            gboolean removed = bookmark_remove(jid, autojoin);
+            if (removed) {
+                if (autojoin) {
+                    cons_show("Autojoin disabled for %s.", jid);
+                } else {
+                    cons_show("Bookmark removed for %s.", jid);
+                }
             } else {
-                cons_show("Bookmark removed for %s.", jid);
+                cons_show("No bookmark exists for %s.", jid);
             }
         } else {
             cons_show("Usage: %s", help.usage);

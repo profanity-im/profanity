@@ -46,7 +46,7 @@ void
 _mock_accounts_add(const char *account_name, const char *altdomain, const int port)
 {
     check_expected(account_name);
-    check_expected(altdomain);    
+    check_expected(altdomain);
 }
 
 void
@@ -252,7 +252,7 @@ _mock_accounts_get_last_presence(const char * const account_name)
 void
 mock_accounts_get_account(void)
 {
-   accounts_get_account = _mock_accounts_get_account; 
+   accounts_get_account = _mock_accounts_get_account;
 }
 
 void

@@ -73,11 +73,12 @@ _mock_bookmark_add(const char *jid, const char *nick, gboolean autojoin)
     return (gboolean)mock();
 }
 
-static void
+static gboolean
 _mock_bookmark_remove(const char *jid, gboolean autojoin)
 {
     check_expected(jid);
     check_expected(autojoin);
+    return (gboolean)mock();
 }
 
 void
@@ -210,8 +211,11 @@ expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
 }
 
 void
-expect_bookmark_remove(char *expected_jid, gboolean expected_autojoin)
+expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_autojoin,
+    gboolean removed)
 {
     expect_string(_mock_bookmark_remove, jid, expected_jid);
     expect_value(_mock_bookmark_remove, autojoin, expected_autojoin);
+
+    will_return(_mock_bookmark_remove, removed);
 }

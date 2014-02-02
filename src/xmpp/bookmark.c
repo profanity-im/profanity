@@ -71,7 +71,7 @@ _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
     return FALSE;
 }
 
-static void
+static gboolean
 _bookmark_remove(const char *jid, gboolean autojoin)
 {
     /* TODO: manage bookmark_list */
@@ -81,6 +81,8 @@ _bookmark_remove(const char *jid, gboolean autojoin)
         /* TODO: send request */
         autocomplete_remove(bookmark_ac, jid);
     }
+
+    return FALSE;
 }
 
 static const GList *

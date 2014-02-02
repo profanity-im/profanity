@@ -301,7 +301,7 @@ void cmd_bookmark_remove_removes_bookmark(void **state)
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_bookmark_remove(jid, FALSE);
+    expect_and_return_bookmark_remove(jid, FALSE, TRUE);
     expect_cons_show("Bookmark removed for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
@@ -320,7 +320,7 @@ void cmd_bookmark_remove_removes_autojoin(void **state)
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_bookmark_remove(jid, TRUE);
+    expect_and_return_bookmark_remove(jid, TRUE, TRUE);
     expect_cons_show("Autojoin disabled for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
@@ -341,6 +341,25 @@ void cmd_bookmark_add_shows_message_when_upated(void **state)
 
     expect_and_return_bookmark_add(jid, NULL, FALSE, FALSE);
     expect_cons_show("Bookmark updated for room@conf.server.");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_bookmark_remove_shows_message_when_no_bookmark(void **state)
+{
+    mock_bookmark_remove();
+    mock_cons_show();
+    char *jid = "room@conf.server";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "remove", jid, NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_and_return_bookmark_remove(jid, FALSE, FALSE);
+    expect_cons_show("No bookmark exists for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
