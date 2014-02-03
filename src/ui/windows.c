@@ -279,7 +279,7 @@ wins_resize_all(void)
 
     ProfWin *current_win = wins_get_current();
 
-    prefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
+    pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
 void

@@ -52,7 +52,7 @@ _create_title_bar(void)
     wbkgd(win, COLOUR_TITLE_TEXT);
     title_bar_console();
     title_bar_set_presence(CONTACT_OFFLINE);
-    wrefresh(win);
+    wnoutrefresh(win);
     inp_put_back();
 }
 
@@ -254,7 +254,7 @@ _title_bar_draw(void)
     mvwaddch(win, 0, cols - 2, ']');
     wattroff(win, COLOUR_TITLE_BRACKET);
 
-    wrefresh(win);
+    wnoutrefresh(win);
     inp_put_back();
 }
 

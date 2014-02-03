@@ -201,7 +201,7 @@ _cons_about(void)
         cons_check_version(FALSE);
     }
 
-    prefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
+    pnoutrefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
 
     wins_refresh_console();
     cons_alert();

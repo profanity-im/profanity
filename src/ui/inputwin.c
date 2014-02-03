@@ -45,7 +45,7 @@
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
 
-#define _inp_win_refresh() prefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
+#define _inp_win_refresh() pnoutrefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
 
 static WINDOW *inp_win;
 static int pad_start = 0;
@@ -208,6 +208,7 @@ _inp_get_password(char *passwd)
 {
     _clear_input();
     _inp_win_refresh();
+    doupdate();
     noecho();
     mvwgetnstr(inp_win, 0, 1, passwd, MAX_PASSWORD_SIZE);
     wmove(inp_win, 0, 0);
