@@ -133,12 +133,12 @@ fi
 
 AM_CONDITIONAL([BUILD_OTR3], [false])
 if test "x$enable_otr" = xyes; then
-    AC_CHECK_LIB([otr], [main],
-        [AM_CONDITIONAL([BUILD_OTR3], [true])],
+    AC_SEARCH_LIBS([otrl_init], [otr],
+        [AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
         [AC_MSG_ERROR([libotr is required for otr encryption support])])
 elif test "x$enable_otr" = x; then
-    AC_CHECK_LIB([otr], [main],
-        [AM_CONDITIONAL([BUILD_OTR3], [true])],
+    AC_SEARCH_LIBS([otrl_init], [otr],
+        [AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
         [AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
 fi
 
