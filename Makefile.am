@@ -105,7 +105,7 @@ with_git_sources = $(core_sources)
 tests_with_git_sources = $(test_sources)
 endif
 
-if BUILD_OTR
+if BUILD_OTR3
 with_otr_sources = $(with_git_sources) $(otr_sources)
 tests_with_otr_sources = $(tests_with_git_sources) $(otr_sources)
 else
