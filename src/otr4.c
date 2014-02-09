@@ -62,12 +62,37 @@ cb_inject_message(void *opdata, const char *accountname,
     message_send(message, recipient);
 }
 
-static int
-cb_display_otr_message(void *opdata, const char *accountname,
-    const char *protocol, const char *username, const char *msg)
+static const char*
+cb_otr_error_message(void *opdata, ConnContext *context,
+    OtrlErrorCode err_code)
 {
-    cons_show_error("%s", msg);
-    return 0;
+    switch(err_code)
+    {
+        case OTRL_ERRCODE_ENCRYPTION_ERROR:
+            return strdup("OTR Error: occured while encrypting a message");
+        case OTRL_ERRCODE_MSG_NOT_IN_PRIVATE:
+            return strdup("OTR Error: Sent encrypted message to somebody who is not in a mutual OTR session");
+        case OTRL_ERRCODE_MSG_UNREADABLE:
+            return strdup("OTR Error: sent an unreadable encrypted message");
+        case OTRL_ERRCODE_MSG_MALFORMED:
+            return strdup("OTR Error: message sent is malformed");
+        default:
+            return strdup("OTR Error: unknown");
+    }
+}
+
+static void
+cb_otr_error_message_free(void *opdata, const char *err_msg)
+{
+    free(err_msg);
+}
+
+static void
+cb_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
+    ConnContext *context, const char *message,
+    gcry_error_t err)
+{
+    cons_show_error("%s", message);
 }
 
 static void
@@ -109,6 +134,9 @@ otr_init(void)
     ops.policy = cb_policy;
     ops.is_logged_in = cb_is_logged_in;
     ops.inject_message = cb_inject_message;
+    ops.otr_error_message = cb_otr_error_message;
+    ops.otr_error_message_free = cb_otr_error_message_free;
+    ops.handle_msg_event = cb_handle_msg_event;
     ops.display_otr_message = cb_display_otr_message;
     ops.write_fingerprints = cb_write_fingerprints;
     ops.gone_secure = cb_gone_secure;
