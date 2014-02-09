@@ -94,8 +94,11 @@ main_source = src/main.c
 git_sources = \
     src/gitversion.c
 
-otr_sources = \
-    src/otr.c src/otr.h
+otr3_sources = \
+    src/otr3.c src/otr.h
+
+otr4_sources = \
+    src/otr4.c src/otr.h
 
 if INCLUDE_GIT_VERSION
 with_git_sources = $(git_sources) $(core_sources)
@@ -105,9 +108,15 @@ with_git_sources = $(core_sources)
 tests_with_git_sources = $(test_sources)
 endif
 
+if BUILD_OTR
 if BUILD_OTR3
-with_otr_sources = $(with_git_sources) $(otr_sources)
-tests_with_otr_sources = $(tests_with_git_sources) $(otr_sources)
+with_otr_sources = $(with_git_sources) $(otr3_sources)
+tests_with_otr_sources = $(tests_with_git_sources) $(otr3_sources)
+endif
+if BUILD_OTR4
+with_otr_sources = $(with_git_sources) $(otr4_sources)
+tests_with_otr_sources = $(tests_with_git_sources) $(otr4_sources)
+endif
 else
 with_otr_sources = $(with_git_sources)
 tests_with_otr_sources = $(tests_with_git_sources)
