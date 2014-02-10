@@ -40,7 +40,7 @@ static gboolean data_loaded;
 static OtrlPolicy
 cb_policy(void *opdata, ConnContext *context)
 {
-    return OTRL_POLICY_DEFAULT ;
+    return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2 ;
 }
 
 static int
