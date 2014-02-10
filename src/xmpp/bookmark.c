@@ -89,7 +89,6 @@ _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
 
     xmpp_stanza_t *item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
-    xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, "current");
     xmpp_stanza_add_child(publish, item);
 
     xmpp_stanza_t *storage = xmpp_stanza_new(ctx);
