@@ -2593,6 +2593,10 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         // update the current window
         ui_switch_win(wins_get_current_num());
         return result;
+    } else if (strcmp(args[0], "libver") == 0) {
+        char *version = otr_libotr_version();
+        cons_show("Using libotr version %s", version);
+        return TRUE;
     }
 
     if (jabber_get_connection_status() != JABBER_CONNECTED) {

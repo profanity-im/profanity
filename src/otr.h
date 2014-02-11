@@ -26,6 +26,7 @@
 #include "config/accounts.h"
 
 void otr_init(void);
+char* otr_libotr_version(void);
 void otr_on_connect(ProfAccount *account);
 void otr_keygen(ProfAccount *account);
 

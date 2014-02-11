@@ -593,9 +593,9 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn",
-          "------------------------------------------------------",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver",
+          "-------------------------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
@@ -605,6 +605,7 @@ static struct cmd_t command_defs[] =
           "untrust - Indicate the the contact's fingerprint is not verified,",
           "log - How to log OTR messages, options are 'on', 'off' and 'redact', with redaction being the default.",
           "warn - Show when unencrypted messaging is being used in the title bar, options are 'on' and 'off' with 'on' being the default.",
+          "libver - Show which version of the libotr library is being used.",
           NULL } } },
 
     { "/outtype",
@@ -1056,6 +1057,7 @@ cmd_init(void)
     autocomplete_add(otr_ac, "untrust");
     autocomplete_add(otr_ac, "log");
     autocomplete_add(otr_ac, "warn");
+    autocomplete_add(otr_ac, "libver");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");

@@ -100,6 +100,12 @@ cb_gone_secure(void *opdata, ConnContext *context)
     ui_gone_secure(context->username, otr_is_trusted(context->username));
 }
 
+char *
+otr_libotr_version(void)
+{
+    return OTRL_VERSION;
+}
+
 void
 otr_init(void)
 {
