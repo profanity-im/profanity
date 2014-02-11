@@ -115,8 +115,11 @@ c_sources = \
 git_sources = \
     src/gitversion.c
 
-otr_sources = \
-    src/otr.c src/otr.h
+otr3_sources = \
+    src/otr3.c src/otr.h
+
+otr4_sources = \
+    src/otr4.c src/otr.h
 
 if BUILD_PYTHON_API
 with_python_sources = $(core_sources) $(python_sources)
@@ -159,8 +162,14 @@ tests_with_git_sources = $(tests_with_c_sources)
 endif
 
 if BUILD_OTR
-with_otr_sources = $(with_git_sources) $(otr_sources)
-tests_with_otr_sources = $(tests_with_git_sources) $(otr_sources)
+if BUILD_OTR3
+with_otr_sources = $(with_git_sources) $(otr3_sources)
+tests_with_otr_sources = $(tests_with_git_sources) $(otr3_sources)
+endif
+if BUILD_OTR4
+with_otr_sources = $(with_git_sources) $(otr4_sources)
+tests_with_otr_sources = $(tests_with_git_sources) $(otr4_sources)
+endif
 else
 with_otr_sources = $(with_git_sources)
 tests_with_otr_sources = $(tests_with_git_sources)

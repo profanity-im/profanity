@@ -230,17 +230,39 @@ elif test "x$with_xscreensaver" = x; then
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
 fi
 
-AM_CONDITIONAL([BUILD_OTR], [true])
+AM_CONDITIONAL([BUILD_OTR], [false])
+AM_CONDITIONAL([BUILD_OTR3], [false])
+AM_CONDITIONAL([BUILD_OTR4], [false])
 if test "x$enable_otr" = xyes; then
-    AC_CHECK_LIB([otr], [main], [],
+    AC_SEARCH_LIBS([otrl_init], [otr],
+        [AC_COMPILE_IFELSE(
+            [AC_LANG_PROGRAM([[
+            #include <libotr/version.h>
+            ]],[[
+            #if OTRL_VERSION_MAJOR == 4
+            // OK
+            #else
+            # assume version 3
+            #endif
+            ]])],
+            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR4], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
+            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
         [AC_MSG_ERROR([libotr is required for otr encryption support])])
-elif test "x$enable_otr" = xno; then
-    AM_CONDITIONAL([BUILD_OTR], [false])
 elif test "x$enable_otr" = x; then
-    AM_CONDITIONAL([BUILD_OTR], [false])
-### Add the following back in once libotr 4.0.0 support is enabled
-###    AC_CHECK_LIB([otr], [main], [],
-###        [AM_CONDITIONAL([BUILD_OTR], [false]) AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
+    AC_SEARCH_LIBS([otrl_init], [otr],
+        [AC_COMPILE_IFELSE(
+            [AC_LANG_PROGRAM([[
+            #include <libotr/version.h>
+            ]],[[
+            #if OTRL_VERSION_MAJOR == 4
+            // OK
+            #else
+            # assume version 3
+            #endif
+            ]])],
+            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR4], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
+            [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
+        [AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
 fi
 
 ### cmocka is required only for tests, profanity shouldn't be linked with it

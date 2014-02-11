@@ -1,5 +1,5 @@
 /*
- * otr.c
+ * otr3.c
  *
  * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
  *
@@ -98,6 +98,12 @@ static void
 cb_gone_secure(void *opdata, ConnContext *context)
 {
     ui_gone_secure(context->username, otr_is_trusted(context->username));
+}
+
+char *
+otr_libotr_version(void)
+{
+    return OTRL_VERSION;
 }
 
 void
