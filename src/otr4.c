@@ -321,7 +321,7 @@ gboolean
 otr_is_secure(const char * const recipient)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
-        OTRL_INSTAG_BEST, 0, NULL, NULL, NULL);
+        OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
     if (context == NULL) {
         return FALSE;
@@ -338,7 +338,7 @@ gboolean
 otr_is_trusted(const char * const recipient)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
-        OTRL_INSTAG_BEST, 0, NULL, NULL, NULL);
+        OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
     if (context == NULL) {
         return FALSE;
@@ -360,7 +360,7 @@ void
 otr_trust(const char * const recipient)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
-        OTRL_INSTAG_BEST, 0, NULL, NULL, NULL);
+        OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
     if (context == NULL) {
         return;
@@ -382,7 +382,7 @@ void
 otr_untrust(const char * const recipient)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
-        OTRL_INSTAG_BEST, 0, NULL, NULL, NULL);
+        OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
     if (context == NULL) {
         return;
@@ -404,7 +404,7 @@ void
 otr_end_session(const char * const recipient)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
-        OTRL_INSTAG_BEST, 0, NULL, NULL, NULL);
+        OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
     if (context != NULL) {
         otrl_message_disconnect(user_state, &ops, NULL, jid, "xmpp", recipient, 0);
@@ -425,7 +425,7 @@ char *
 otr_get_their_fingerprint(const char * const recipient)
 {
     ConnContext *context = otrl_context_find(user_state, recipient, jid, "xmpp",
-        OTRL_INSTAG_BEST, 0, NULL, NULL, NULL);
+        OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
     if (context != NULL) {
         Fingerprint *fingerprint = context->active_fingerprint;
@@ -450,11 +450,11 @@ otr_encrypt_message(const char * const to, const char * const message)
         jid,
         "xmpp",
         to,
-        OTRL_INSTAG_BEST,
+        OTRL_INSTAG_MASTER,
         message,
         0,
         &newmessage,
-        OTRL_FRAGMENT_SEND_ALL,
+        OTRL_FRAGMENT_SEND_SKIP,
         NULL,
         NULL,
         NULL);
@@ -491,7 +491,7 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
         tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
             ConnContext *context = otrl_context_find(user_state, from, jid, "xmpp",
-                OTRL_INSTAG_BEST, 0, NULL, NULL, NULL);
+                OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 
             if (context != NULL) {
                 otrl_context_force_plaintext(context);
