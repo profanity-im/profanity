@@ -46,3 +46,4 @@ clean.sh
 valgrind.out.old
 tests/testsuite.trs
 push-all.sh
+.DS_Store
