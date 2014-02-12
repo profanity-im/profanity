@@ -26,10 +26,6 @@
 #include "test_cmd_bookmark.h"
 #include "test_muc.h"
 
-#define PROF_RUN_TESTS(name) fprintf(stderr, "\n-> Running %s\n", #name); \
-    fflush(stderr); \
-    result += run_tests(name);
-
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
         unit_test(replace_one_substr),
@@ -429,34 +425,5 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_remove_autojoin_shows_message_when_no_bookmark),
     };
 
-
-    int bak, bak2, new;
-    fflush(stdout);
-    fflush(stderr);
-    bak = dup(1);
-    bak2 = dup(2);
-    remove("./testsuite.out");
-    new = open("./testsuite.out", O_WRONLY | O_CREAT);
-    chmod("./testsuite.out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-    dup2(new, 1);
-    dup2(new, 2);
-    close(new);
-
-    int result = 0;
-
-    PROF_RUN_TESTS(all_tests);
-
-    fflush(stdout);
-    dup2(bak, 1);
-    dup2(bak2, 2);
-    close(bak);
-    close(bak2);
-
-    if (result > 0) {
-        printf("\n\nFAILED TESTS, see ./testsuite.out\n\n");
-        return 1;
-    } else {
-        printf("\n\nAll tests passed\n\n");
-        return 0;
-    }
+    return run_tests(all_tests);
 }
