@@ -45,7 +45,7 @@
 #include "log.h"
 #include "muc.h"
 #ifdef HAVE_LIBOTR
-#include "otr.h"
+#include "otr/otr.h"
 #endif
 #include "resource.h"
 #include "ui/ui.h"

@@ -38,7 +38,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#include "otr.h"
+#include "otr/otr.h"
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
