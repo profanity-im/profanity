@@ -95,10 +95,10 @@ git_sources = \
     src/gitversion.c
 
 otr3_sources = \
-    src/otr/otr3.c src/otr/otr.h
+    src/otr/otrlinv3.c src/otr/otr.h
 
 otr4_sources = \
-    src/otr/otr4.c src/otr/otr.h
+    src/otr/otrlibv4.c src/otr/otr.h
 
 if INCLUDE_GIT_VERSION
 with_git_sources = $(git_sources) $(core_sources)
