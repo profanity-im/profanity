@@ -176,7 +176,7 @@ AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
 
 ### Default parameters
-AM_CFLAGS="-Wall"
+AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
