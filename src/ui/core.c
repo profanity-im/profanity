@@ -48,7 +48,7 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
-#include "otr.h"
+#include "otr/otr.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/windows.h"

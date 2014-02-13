@@ -116,10 +116,10 @@ git_sources = \
     src/gitversion.c
 
 otr3_sources = \
-    src/otr3.c src/otr.h
+    src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
 
 otr4_sources = \
-    src/otr4.c src/otr.h
+    src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
 if BUILD_PYTHON_API
 with_python_sources = $(core_sources) $(python_sources)

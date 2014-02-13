@@ -35,7 +35,7 @@
 #include "ui/windows.h"
 
 #ifdef PROF_HAVE_LIBOTR
-#include "otr.h"
+#include "otr/otr.h"
 #endif
 
 // handle presence stanza errors

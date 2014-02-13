@@ -46,7 +46,7 @@
 #include "muc.h"
 #include "plugins/plugins.h"
 #ifdef PROF_HAVE_LIBOTR
-#include "otr.h"
+#include "otr/otr.h"
 #endif
 #include "resource.h"
 #include "ui/ui.h"
