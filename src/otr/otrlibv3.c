@@ -100,9 +100,3 @@ otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
         NULL,
         NULL);
 }
-
-void
-otr_free_message(char *message)
-{
-    otrl_message_free(message);
-}
