@@ -62,10 +62,12 @@ cb_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
     ConnContext *context, const char *message,
     gcry_error_t err)
 {
-    if (message != NULL) {
-        cons_show_error("%s", message);
-    } else {
-        cons_show_error("OTR error event with no message.");
+    if (err != 0) {
+        if (message != NULL) {
+            cons_show_error("%s", message);
+        } else {
+            cons_show_error("OTR error event with no message.");
+        }
     }
 }
 
