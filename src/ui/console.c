@@ -905,6 +905,11 @@ _cons_show_account(ProfAccount *account)
 static void
 _cons_show_aliases(GList *aliases)
 {
+    if (aliases == NULL) {
+        cons_show("No aliases configured.");
+        return;
+    }
+
     GList *curr = aliases;
     if (curr != NULL) {
         cons_show("Command aliases:");
