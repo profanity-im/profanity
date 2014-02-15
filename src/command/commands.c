@@ -1870,7 +1870,7 @@ cmd_alias(gchar **args, struct cmd_help_t help)
                 g_string_free(ac_value, TRUE);
                 return TRUE;
             } else if (cmd_exists(ac_value->str)) {
-                cons_show("Command or alias '%s' already exists.");
+                cons_show("Command or alias '%s' already exists.", ac_value->str);
                 g_string_free(ac_value, TRUE);
                 return TRUE;
             } else {
