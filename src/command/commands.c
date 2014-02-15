@@ -1935,7 +1935,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
         if (tiny != NULL) {
             if (win_type == WIN_CHAT) {
                 char *recipient = ui_current_recipient();
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
                 if (otr_is_secure(recipient)) {
                     char *encrypted = otr_encrypt_message(recipient, tiny);
                     if (encrypted != NULL) {
