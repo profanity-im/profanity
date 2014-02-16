@@ -429,6 +429,24 @@ int main(int argc, char* argv[]) {
 
 #ifdef HAVE_LIBOTR
         unit_test(cmd_otr_shows_usage_when_no_args),
+        unit_test(cmd_otr_shows_usage_when_invalid_subcommand),
+        unit_test(cmd_otr_log_shows_usage_when_no_args),
+        unit_test(cmd_otr_log_shows_usage_when_invalid_subcommand),
+        unit_test_setup_teardown(cmd_otr_log_on_enables_logging,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_log_off_disables_logging,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_redact_redacts_logging,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_log_on_shows_warning_when_chlog_disabled,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_log_redact_shows_warning_when_chlog_disabled,
+            init_preferences,
+            close_preferences),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif
