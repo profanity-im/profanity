@@ -93,14 +93,14 @@ cb_gone_secure(void *opdata, ConnContext *context)
     ui_gone_secure(context->username, otr_is_trusted(context->username));
 }
 
-char *
-otr_libotr_version(void)
+static char *
+_otr_libotr_version(void)
 {
     return OTRL_VERSION;
 }
 
-void
-otr_init(void)
+static void
+_otr_init(void)
 {
     log_info("Initialising OTR");
     OTRL_INIT;
@@ -116,8 +116,8 @@ otr_init(void)
     data_loaded = FALSE;
 }
 
-void
-otr_on_connect(ProfAccount *account)
+static void
+_otr_on_connect(ProfAccount *account)
 {
     jid = strdup(account->jid);
     log_info("Loading OTR key for %s", jid);
@@ -191,8 +191,8 @@ otr_on_connect(ProfAccount *account)
     return;
 }
 
-void
-otr_keygen(ProfAccount *account)
+static void
+_otr_keygen(ProfAccount *account)
 {
     if (data_loaded) {
         cons_show("OTR key already generated.");
@@ -280,14 +280,14 @@ otr_keygen(ProfAccount *account)
     return;
 }
 
-gboolean
-otr_key_loaded(void)
+static gboolean
+_otr_key_loaded(void)
 {
     return data_loaded;
 }
 
-gboolean
-otr_is_secure(const char * const recipient)
+static gboolean
+_otr_is_secure(const char * const recipient)
 {
     ConnContext *context = otrlib_context_find(user_state, recipient, jid);
 
@@ -302,8 +302,8 @@ otr_is_secure(const char * const recipient)
     }
 }
 
-gboolean
-otr_is_trusted(const char * const recipient)
+static gboolean
+_otr_is_trusted(const char * const recipient)
 {
     ConnContext *context = otrlib_context_find(user_state, recipient, jid);
 
@@ -323,8 +323,8 @@ otr_is_trusted(const char * const recipient)
     return FALSE;
 }
 
-void
-otr_trust(const char * const recipient)
+static void
+_otr_trust(const char * const recipient)
 {
     ConnContext *context = otrlib_context_find(user_state, recipient, jid);
 
@@ -344,8 +344,8 @@ otr_trust(const char * const recipient)
     return;
 }
 
-void
-otr_untrust(const char * const recipient)
+static void
+_otr_untrust(const char * const recipient)
 {
     ConnContext *context = otrlib_context_find(user_state, recipient, jid);
 
@@ -365,14 +365,14 @@ otr_untrust(const char * const recipient)
     return;
 }
 
-void
-otr_end_session(const char * const recipient)
+static void
+_otr_end_session(const char * const recipient)
 {
     otrlib_end_session(user_state, recipient, jid, &ops);
 }
 
-char *
-otr_get_my_fingerprint(void)
+static char *
+_otr_get_my_fingerprint(void)
 {
     char fingerprint[45];
     otrl_privkey_fingerprint(user_state, fingerprint, jid, "xmpp");
@@ -381,8 +381,8 @@ otr_get_my_fingerprint(void)
     return result;
 }
 
-char *
-otr_get_their_fingerprint(const char * const recipient)
+static char *
+_otr_get_their_fingerprint(const char * const recipient)
 {
     ConnContext *context = otrlib_context_find(user_state, recipient, jid);
 
@@ -396,8 +396,8 @@ otr_get_their_fingerprint(const char * const recipient)
     }
 }
 
-char *
-otr_encrypt_message(const char * const to, const char * const message)
+static char *
+_otr_encrypt_message(const char * const to, const char * const message)
 {
     char *newmessage = NULL;
     gcry_error_t err = otrlib_encrypt_message(user_state, &ops, jid, to, message, &newmessage);
@@ -409,8 +409,8 @@ otr_encrypt_message(const char * const to, const char * const message)
     }
 }
 
-char *
-otr_decrypt_message(const char * const from, const char * const message, gboolean *was_decrypted)
+static char *
+_otr_decrypt_message(const char * const from, const char * const message, gboolean *was_decrypted)
 {
     char *decrypted = NULL;
     OtrlTLV *tlvs = NULL;
@@ -443,8 +443,28 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
     }
 }
 
-void
-otr_free_message(char *message)
+static void
+_otr_free_message(char *message)
 {
     otrl_message_free(message);
+}
+
+void
+otr_init_module(void)
+{
+    otr_init = _otr_init;
+    otr_libotr_version = _otr_libotr_version;
+    otr_on_connect = _otr_on_connect;
+    otr_keygen = _otr_keygen;
+    otr_key_loaded = _otr_key_loaded;
+    otr_is_secure = _otr_is_secure;
+    otr_is_trusted = _otr_is_trusted;
+    otr_trust = _otr_trust;
+    otr_untrust = _otr_untrust;
+    otr_end_session = _otr_end_session;
+    otr_get_my_fingerprint = _otr_get_my_fingerprint;
+    otr_get_their_fingerprint = _otr_get_their_fingerprint;
+    otr_encrypt_message = _otr_encrypt_message;
+    otr_decrypt_message = _otr_decrypt_message;
+    otr_free_message = _otr_free_message;
 }

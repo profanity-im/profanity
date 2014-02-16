@@ -1,5 +1,5 @@
-#ifndef COMMON_MOCKS_H
-#define COMMON_MOCKS_H
+#ifndef MOCK_XMPP_H
+#define MOCK_XMPP_H
 
 #include "xmpp/xmpp.h"
 

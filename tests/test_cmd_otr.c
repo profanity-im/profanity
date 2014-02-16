@@ -10,6 +10,8 @@
 
 #ifdef HAVE_LIBOTR
 #include <libotr/proto.h>
+#include "otr/otr.h"
+#include "otr/mock_otr.h"
 #endif
 
 #include "config/preferences.h"
@@ -248,10 +250,11 @@ void cmd_otr_libver_shows_libotr_version(void **state)
     mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "libver", NULL };
-
-    char *version = OTRL_VERSION;
+    char *version = "9.9.9";
     GString *message = g_string_new("Using libotr version ");
     g_string_append(message, version);
+    mock_otr_libotr_version();
+    otr_libotr_version_returns(version);
 
     expect_cons_show(message->str);
     gboolean result = cmd_otr(args, *help);
