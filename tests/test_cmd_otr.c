@@ -8,7 +8,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 #include <libotr/proto.h>
 #include "otr/otr.h"
 #include "otr/mock_otr.h"
@@ -23,7 +23,7 @@
 #include "command/command.h"
 #include "command/commands.h"
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 void cmd_otr_shows_usage_when_no_args(void **state)
 {
     mock_cons_show();

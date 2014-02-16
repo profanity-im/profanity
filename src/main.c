@@ -29,7 +29,7 @@
 
 #include "profanity.h"
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 #include "xmpp/xmpp.h"
@@ -59,7 +59,7 @@ _init_modules(void)
     titlebar_init_module();
 
     accounts_init_module();
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     otr_init_module();
 #endif
 }
