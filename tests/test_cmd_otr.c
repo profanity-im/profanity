@@ -5,9 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <libotr/proto.h>
 
 #include "config.h"
+
+#ifdef HAVE_LIBOTR
+#include <libotr/proto.h>
+#endif
+
 #include "config/preferences.h"
 
 #include "ui/mock_ui.h"
