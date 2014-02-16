@@ -20,6 +20,9 @@
  *
  */
 
+#ifndef MOCK_ACCOUNTS_H
+#define MOCK_ACCOUNTS_H
+
 void mock_accounts_get_account(void);
 void accounts_get_account_expect_and_return(const char * const name, ProfAccount *account);
 void accounts_get_account_return(ProfAccount *account);
@@ -85,3 +88,5 @@ void accounts_set_login_presence_expect(char *account_name, char *presence);
 
 void mock_accounts_get_last_presence(void);
 void accounts_get_last_presence_return(resource_presence_t presence);
+
+#endif

@@ -25,27 +25,29 @@
 
 #include "config/accounts.h"
 
-void otr_init(void);
-char* otr_libotr_version(void);
-void otr_on_connect(ProfAccount *account);
-void otr_keygen(ProfAccount *account);
+void otr_init_module(void);
 
-gboolean otr_key_loaded(void);
-gboolean otr_is_secure(const char * const recipient);
+void (*otr_init)(void);
+char* (*otr_libotr_version)(void);
+void (*otr_on_connect)(ProfAccount *account);
+void (*otr_keygen)(ProfAccount *account);
 
-gboolean otr_is_trusted(const char * const recipient);
-void otr_trust(const char * const recipient);
-void otr_untrust(const char * const recipient);
+gboolean (*otr_key_loaded)(void);
+gboolean (*otr_is_secure)(const char * const recipient);
 
-void otr_end_session(const char * const recipient);
+gboolean (*otr_is_trusted)(const char * const recipient);
+void (*otr_trust)(const char * const recipient);
+void (*otr_untrust)(const char * const recipient);
 
-char * otr_get_my_fingerprint(void);
-char * otr_get_their_fingerprint(const char * const recipient);
+void (*otr_end_session)(const char * const recipient);
 
-char * otr_encrypt_message(const char * const to, const char * const message);
-char * otr_decrypt_message(const char * const from, const char * const message,
+char * (*otr_get_my_fingerprint)(void);
+char * (*otr_get_their_fingerprint)(const char * const recipient);
+
+char * (*otr_encrypt_message)(const char * const to, const char * const message);
+char * (*otr_decrypt_message)(const char * const from, const char * const message,
     gboolean *was_decrypted);
 
-void otr_free_message(char *message);
+void (*otr_free_message)(char *message);
 
 #endif

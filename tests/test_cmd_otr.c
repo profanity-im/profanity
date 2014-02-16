@@ -7,10 +7,18 @@
 #include <glib.h>
 
 #include "config.h"
+
+#ifdef HAVE_LIBOTR
+#include <libotr/proto.h>
+#include "otr/otr.h"
+#include "otr/mock_otr.h"
+#endif
+
 #include "config/preferences.h"
 
 #include "ui/mock_ui.h"
 #include "xmpp/mock_xmpp.h"
+#include "config/mock_accounts.h"
 
 #include "command/command.h"
 #include "command/commands.h"
@@ -236,6 +244,127 @@ void cmd_otr_warn_off_disables_unencrypted_warning(void **state)
     assert_false(otr_warn_enabled);
 
     free(help);
+}
+
+void cmd_otr_libver_shows_libotr_version(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "libver", NULL };
+    char *version = "9.9.9";
+    GString *message = g_string_new("Using libotr version ");
+    g_string_append(message, version);
+    mock_otr_libotr_version();
+    otr_libotr_version_returns(version);
+
+    expect_cons_show(message->str);
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    g_string_free(message, TRUE);
+    free(help);
+}
+
+void cmd_otr_gen_shows_message_when_not_connected(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "gen", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+    expect_cons_show("You must be connected with an account to load OTR information.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+static void test_with_command_and_connection_status(char *command, jabber_conn_status_t status)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { command, NULL };
+
+    mock_connection_status(status);
+    expect_cons_show("You must be connected with an account to load OTR information.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_otr_gen_shows_message_when_disconnected(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_DISCONNECTED);
+}
+
+void cmd_otr_gen_shows_message_when_undefined(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_UNDEFINED);
+}
+
+void cmd_otr_gen_shows_message_when_started(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_STARTED);
+}
+
+void cmd_otr_gen_shows_message_when_connecting(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_CONNECTING);
+}
+
+void cmd_otr_gen_shows_message_when_disconnecting(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_DISCONNECTING);
+}
+
+void cmd_otr_gen_generates_key_for_connected_account(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "gen", NULL };
+    char *account_name = "myaccount";
+    ProfAccount *account = account_new(account_name, "me@jabber.org", NULL,
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL);
+
+    stub_cons_show();
+    mock_connection_status(JABBER_CONNECTED);
+    mock_accounts_get_account();
+    mock_connection_account_name(account_name);
+    accounts_get_account_expect_and_return(account_name, account);
+
+    otr_keygen_expect(account);
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_otr_myfp_shows_message_when_disconnected(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_DISCONNECTED);
+}
+
+void cmd_otr_myfp_shows_message_when_undefined(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_UNDEFINED);
+}
+
+void cmd_otr_myfp_shows_message_when_started(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_STARTED);
+}
+
+void cmd_otr_myfp_shows_message_when_connecting(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_CONNECTING);
+}
+
+void cmd_otr_myfp_shows_message_when_disconnecting(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_DISCONNECTING);
 }
 
 #else

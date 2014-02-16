@@ -71,6 +71,7 @@ test_sources = \
     src/plugins/callbacks.h src/plugins/callbacks.c \
     src/server_events.c src/server_events.h \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
+    tests/otr/mock_otr.h tests/otr/mock_otr.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
     tests/helpers.c tests/helpers.h \
