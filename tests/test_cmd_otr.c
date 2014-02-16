@@ -280,6 +280,46 @@ void cmd_otr_gen_shows_message_when_not_connected(void **state)
     free(help);
 }
 
+static void test_with_command_and_connection_status(char *command, jabber_conn_status_t status)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { command, NULL };
+
+    mock_connection_status(status);
+    expect_cons_show("You are not currently connected.");
+
+    gboolean result = cmd_rooms(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_otr_gen_shows_message_when_disconnected(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_DISCONNECTED);
+}
+
+void cmd_otr_gen_shows_message_when_undefined(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_UNDEFINED);
+}
+
+void cmd_otr_gen_shows_message_when_started(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_STARTED);
+}
+
+void cmd_otr_gen_shows_message_when_connecting(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_CONNECTING);
+}
+
+void cmd_otr_gen_shows_message_when_disconnecting(void **state)
+{
+    test_with_command_and_connection_status("gen", JABBER_DISCONNECTING);
+}
+
 void cmd_otr_gen_generates_key_for_connected_account(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
