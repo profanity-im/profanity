@@ -1,6 +1,6 @@
 #include "glib.h"
 
-void init_preferences(void **state);
+void load_preferences(void **state);
 void close_preferences(void **state);
 
 void glist_set_cmp(GCompareFunc func);

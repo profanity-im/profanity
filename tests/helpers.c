@@ -11,7 +11,7 @@
 #include "helpers.h"
 #include "config/preferences.h"
 
-void init_preferences(void **state)
+void create_config_dir(void **state)
 {
     setenv("XDG_CONFIG_HOME", "./tests/files/xdg_config_home", 1);
     gchar *xdg_config = xdg_get_config_home();
@@ -22,11 +22,44 @@ void init_preferences(void **state)
     if (!mkdir_recursive(profanity_dir->str)) {
         assert_true(FALSE);
     }
-    g_string_free(profanity_dir, TRUE);
 
+    g_free(xdg_config);
+    g_string_free(profanity_dir, TRUE);
+}
+
+void remove_config_dir(void **state)
+{
+    rmdir("./tests/files/xdg_config_home/profanity");
+    rmdir("./tests/files/xdg_config_home");
+}
+
+void create_data_dir(void **state)
+{
+    setenv("XDG_DATA_HOME", "./tests/files/xdg_data_home", 1);
+    gchar *xdg_data = xdg_get_data_home();
+
+    GString *profanity_dir = g_string_new(xdg_data);
+    g_string_append(profanity_dir, "/profanity");
+
+    if (!mkdir_recursive(profanity_dir->str)) {
+        assert_true(FALSE);
+    }
+
+    g_free(xdg_data);
+    g_string_free(profanity_dir, TRUE);
+}
+
+void remove_data_dir(void **state)
+{
+    rmdir("./tests/files/xdg_data_home/profanity");
+    rmdir("./tests/files/xdg_data_home");
+}
+
+void load_preferences(void **state)
+{
+    create_config_dir(state);
     FILE *f = fopen("./tests/files/xdg_config_home/profanity/profrc", "ab+");
     if (f) {
-        g_free(xdg_config);
         prefs_load();
     }
 }
@@ -35,8 +68,7 @@ void close_preferences(void **state)
 {
     prefs_close();
     remove("./tests/files/xdg_config_home/profanity/profrc");
-    rmdir("./tests/files/xdg_config_home/profanity");
-    rmdir("./tests/files/xdg_config_home");
+    remove_config_dir(state);
     rmdir("./tests/files");
 }
 
