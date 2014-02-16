@@ -2566,6 +2566,11 @@ gboolean
 cmd_otr(gchar **args, struct cmd_help_t help)
 {
 #ifdef HAVE_LIBOTR
+    if (args[0] == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
     if (strcmp(args[0], "log") == 0) {
         char *choice = args[1];
         if (g_strcmp0(choice, "on") == 0) {

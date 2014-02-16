@@ -7,6 +7,8 @@
 #include <cmocka.h>
 #include <sys/stat.h>
 
+#include "config.h"
+
 #include "helpers.h"
 #include "test_autocomplete.h"
 #include "test_common.h"
@@ -16,6 +18,7 @@
 #include "test_cmd_rooms.h"
 #include "test_cmd_sub.h"
 #include "test_cmd_statuses.h"
+#include "test_cmd_otr.h"
 #include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
@@ -423,6 +426,12 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_add_shows_message_when_upated),
         unit_test(cmd_bookmark_remove_shows_message_when_no_bookmark),
         unit_test(cmd_bookmark_remove_autojoin_shows_message_when_no_bookmark),
+
+#ifdef HAVE_LIBOTR
+        unit_test(cmd_otr_shows_usage_when_no_args),
+#else
+        unit_test(cmd_otr_shows_message_when_otr_unsupported),
+#endif
     };
 
     return run_tests(all_tests);

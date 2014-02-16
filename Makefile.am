@@ -80,6 +80,7 @@ test_sources = \
 	tests/test_cmd_alias.c \
 	tests/test_cmd_statuses.c \
 	tests/test_cmd_bookmark.c \
+	tests/test_cmd_otr.c \
 	tests/test_history.c \
 	tests/test_jid.c \
 	tests/test_parser.c \
