@@ -6,7 +6,7 @@
 #include <string.h>
 #include <glib.h>
 
-#include "config.h"
+#include "prof_config.h"
 
 #ifdef PROF_HAVE_LIBOTR
 #include <libotr/proto.h>
