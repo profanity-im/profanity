@@ -287,9 +287,9 @@ static void test_with_command_and_connection_status(char *command, jabber_conn_s
     gchar *args[] = { command, NULL };
 
     mock_connection_status(status);
-    expect_cons_show("You are not currently connected.");
+    expect_cons_show("You must be connected with an account to load OTR information.");
 
-    gboolean result = cmd_rooms(args, *help);
+    gboolean result = cmd_otr(args, *help);
     assert_true(result);
 
     free(help);
