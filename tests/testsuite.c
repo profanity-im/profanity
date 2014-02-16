@@ -463,6 +463,11 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_gen_shows_message_when_started),
         unit_test(cmd_otr_gen_shows_message_when_connecting),
         unit_test(cmd_otr_gen_shows_message_when_disconnecting),
+        unit_test(cmd_otr_myfp_shows_message_when_disconnected),
+        unit_test(cmd_otr_myfp_shows_message_when_undefined),
+        unit_test(cmd_otr_myfp_shows_message_when_started),
+        unit_test(cmd_otr_myfp_shows_message_when_connecting),
+        unit_test(cmd_otr_myfp_shows_message_when_disconnecting),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif

@@ -341,6 +341,32 @@ void cmd_otr_gen_generates_key_for_connected_account(void **state)
 
     free(help);
 }
+
+void cmd_otr_myfp_shows_message_when_disconnected(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_DISCONNECTED);
+}
+
+void cmd_otr_myfp_shows_message_when_undefined(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_UNDEFINED);
+}
+
+void cmd_otr_myfp_shows_message_when_started(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_STARTED);
+}
+
+void cmd_otr_myfp_shows_message_when_connecting(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_CONNECTING);
+}
+
+void cmd_otr_myfp_shows_message_when_disconnecting(void **state)
+{
+    test_with_command_and_connection_status("myfp", JABBER_DISCONNECTING);
+}
+
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {

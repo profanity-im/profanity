@@ -22,6 +22,11 @@ void cmd_otr_gen_shows_message_when_undefined(void **state);
 void cmd_otr_gen_shows_message_when_started(void **state);
 void cmd_otr_gen_shows_message_when_connecting(void **state);
 void cmd_otr_gen_shows_message_when_disconnecting(void **state);
+void cmd_otr_myfp_shows_message_when_disconnected(void **state);
+void cmd_otr_myfp_shows_message_when_undefined(void **state);
+void cmd_otr_myfp_shows_message_when_started(void **state);
+void cmd_otr_myfp_shows_message_when_connecting(void **state);
+void cmd_otr_myfp_shows_message_when_disconnecting(void **state);
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state);
 #endif
