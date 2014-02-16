@@ -3,7 +3,6 @@
 
 #include "config/account.h"
 
-void mock_otr_keygen(void);
 void otr_keygen_expect(ProfAccount *account);
 
 void mock_otr_libotr_version(void);

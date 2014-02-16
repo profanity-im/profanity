@@ -18,6 +18,7 @@
 
 #include "ui/mock_ui.h"
 #include "xmpp/mock_xmpp.h"
+#include "config/mock_accounts.h"
 
 #include "command/command.h"
 #include "command/commands.h"
@@ -272,6 +273,28 @@ void cmd_otr_gen_shows_message_when_not_connected(void **state)
 
     mock_connection_status(JABBER_DISCONNECTED);
     expect_cons_show("You must be connected with an account to load OTR information.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_otr_gen_generates_key_for_connected_account(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "gen", NULL };
+    char *account_name = "myaccount";
+    ProfAccount *account = account_new(account_name, "me@jabber.org", NULL,
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL);
+
+    stub_cons_show();
+    mock_connection_status(JABBER_CONNECTED);
+    mock_accounts_get_account();
+    mock_connection_account_name(account_name);
+    accounts_get_account_expect_and_return(account_name, account);
+
+    otr_keygen_expect(account);
 
     gboolean result = cmd_otr(args, *help);
     assert_true(result);

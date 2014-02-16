@@ -22,12 +22,6 @@ _mock_otr_libotr_version(void)
 }
 
 void
-mock_otr_keygen(void)
-{
-    otr_keygen = _mock_otr_keygen;
-}
-
-void
 mock_otr_libotr_version(void)
 {
     otr_libotr_version = _mock_otr_libotr_version;
@@ -36,6 +30,7 @@ mock_otr_libotr_version(void)
 void
 otr_keygen_expect(ProfAccount *account)
 {
+    otr_keygen = _mock_otr_keygen;
     expect_memory(_mock_otr_keygen, account, account, sizeof(ProfAccount));
 }
 
