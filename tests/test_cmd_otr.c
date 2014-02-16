@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+#include <libotr/proto.h>
 
 #include "config.h"
 #include "config/preferences.h"
@@ -238,6 +239,23 @@ void cmd_otr_warn_off_disables_unencrypted_warning(void **state)
     free(help);
 }
 
+void cmd_otr_libver_shows_libotr_version(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "libver", NULL };
+
+    char *version = OTRL_VERSION;
+    GString *message = g_string_new("Using libotr version ");
+    g_string_append(message, version);
+
+    expect_cons_show(message->str);
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    g_string_free(message, TRUE);
+    free(help);
+}
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {
