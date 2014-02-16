@@ -456,6 +456,7 @@ int main(int argc, char* argv[]) {
             load_preferences,
             close_preferences),
         unit_test(cmd_otr_libver_shows_libotr_version),
+        unit_test(cmd_otr_gen_shows_message_when_not_connected),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif

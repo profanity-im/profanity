@@ -263,6 +263,21 @@ void cmd_otr_libver_shows_libotr_version(void **state)
     g_string_free(message, TRUE);
     free(help);
 }
+
+void cmd_otr_gen_shows_message_when_not_connected(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "gen", NULL };
+
+    mock_connection_status(JABBER_DISCONNECTED);
+    expect_cons_show("You must be connected with an account to load OTR information.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {

@@ -15,6 +15,7 @@ void cmd_otr_warn_shows_usage_when_invalid_arg(void **state);
 void cmd_otr_warn_on_enables_unencrypted_warning(void **state);
 void cmd_otr_warn_off_disables_unencrypted_warning(void **state);
 void cmd_otr_libver_shows_libotr_version(void **state);
+void cmd_otr_gen_shows_message_when_not_connected(void **state);
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state);
 #endif
