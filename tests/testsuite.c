@@ -7,6 +7,8 @@
 #include <cmocka.h>
 #include <sys/stat.h>
 
+#include "config.h"
+
 #include "helpers.h"
 #include "test_autocomplete.h"
 #include "test_common.h"
@@ -16,6 +18,7 @@
 #include "test_cmd_rooms.h"
 #include "test_cmd_sub.h"
 #include "test_cmd_statuses.h"
+#include "test_cmd_otr.h"
 #include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
@@ -423,6 +426,38 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_add_shows_message_when_upated),
         unit_test(cmd_bookmark_remove_shows_message_when_no_bookmark),
         unit_test(cmd_bookmark_remove_autojoin_shows_message_when_no_bookmark),
+
+#ifdef HAVE_LIBOTR
+        unit_test(cmd_otr_shows_usage_when_no_args),
+        unit_test(cmd_otr_shows_usage_when_invalid_subcommand),
+        unit_test(cmd_otr_log_shows_usage_when_no_args),
+        unit_test(cmd_otr_log_shows_usage_when_invalid_subcommand),
+        unit_test_setup_teardown(cmd_otr_log_on_enables_logging,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_log_off_disables_logging,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_redact_redacts_logging,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_log_on_shows_warning_when_chlog_disabled,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_log_redact_shows_warning_when_chlog_disabled,
+            init_preferences,
+            close_preferences),
+        unit_test(cmd_otr_warn_shows_usage_when_no_args),
+        unit_test(cmd_otr_warn_shows_usage_when_invalid_arg),
+        unit_test_setup_teardown(cmd_otr_warn_on_enables_unencrypted_warning,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_warn_off_disables_unencrypted_warning,
+            init_preferences,
+            close_preferences),
+#else
+        unit_test(cmd_otr_shows_message_when_otr_unsupported),
+#endif
     };
 
     return run_tests(all_tests);

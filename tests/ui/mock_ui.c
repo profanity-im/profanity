@@ -154,6 +154,11 @@ void _stub_ui_handle_recipient_not_found(const char * const recipient, const cha
 {
 }
 
+static
+void _stub_ui_current_refresh(void)
+{
+}
+
 // bind mocks and stubs
 
 void
@@ -239,6 +244,12 @@ void
 stub_ui_handle_recipient_error(void)
 {
     ui_handle_recipient_error = _stub_ui_handle_recipient_error;
+}
+
+void
+stub_ui_current_refresh(void)
+{
+    ui_current_refresh = _stub_ui_current_refresh;
 }
 
 // expectations

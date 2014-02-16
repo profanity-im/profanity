@@ -49,4 +49,6 @@ void mock_current_win_type(win_type_t type);
 void mock_ui_current_recipient(void);
 void ui_current_recipient_returns(char *jid);
 
+void stub_ui_current_refresh(void);
+
 #endif
