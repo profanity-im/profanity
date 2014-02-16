@@ -447,6 +447,14 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_otr_log_redact_shows_warning_when_chlog_disabled,
             init_preferences,
             close_preferences),
+        unit_test(cmd_otr_warn_shows_usage_when_no_args),
+        unit_test(cmd_otr_warn_shows_usage_when_invalid_arg),
+        unit_test_setup_teardown(cmd_otr_warn_on_enables_unencrypted_warning,
+            init_preferences,
+            close_preferences),
+        unit_test_setup_teardown(cmd_otr_warn_off_disables_unencrypted_warning,
+            init_preferences,
+            close_preferences),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif

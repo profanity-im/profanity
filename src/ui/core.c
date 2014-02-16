@@ -553,6 +553,12 @@ _ui_switch_win(const int i)
 }
 
 static void
+_ui_current_refresh(void)
+{
+    ui_switch_win(wins_get_current_num());
+}
+
+static void
 _ui_next_win(void)
 {
     ui_current_page_off();
@@ -1756,4 +1762,5 @@ ui_init_module(void)
     ui_handle_recipient_not_found = _ui_handle_recipient_not_found;
     ui_handle_recipient_error = _ui_handle_recipient_error;
     ui_handle_error = _ui_handle_error;
+    ui_current_refresh = _ui_current_refresh;
 }

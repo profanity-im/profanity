@@ -2595,8 +2595,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "warn") == 0) {
         gboolean result =  _cmd_set_boolean_preference(args[1], help,
             "OTR warning message", PREF_OTR_WARN);
-        // update the current window
-        ui_switch_win(wins_get_current_num());
+        ui_current_refresh();
         return result;
     } else if (strcmp(args[0], "libver") == 0) {
         char *version = otr_libotr_version();
