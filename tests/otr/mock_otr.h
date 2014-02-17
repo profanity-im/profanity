@@ -5,7 +5,8 @@
 
 void otr_keygen_expect(ProfAccount *account);
 
-void mock_otr_libotr_version(void);
 void otr_libotr_version_returns(char *version);
+
+void otr_get_my_fingerprint_returns(char *fingerprint);
 
 #endif

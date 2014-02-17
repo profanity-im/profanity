@@ -254,7 +254,6 @@ void cmd_otr_libver_shows_libotr_version(void **state)
     char *version = "9.9.9";
     GString *message = g_string_new("Using libotr version ");
     g_string_append(message, version);
-    mock_otr_libotr_version();
     otr_libotr_version_returns(version);
 
     expect_cons_show(message->str);
@@ -365,6 +364,27 @@ void cmd_otr_myfp_shows_message_when_connecting(void **state)
 void cmd_otr_myfp_shows_message_when_disconnecting(void **state)
 {
     test_with_command_and_connection_status("myfp", JABBER_DISCONNECTING);
+}
+
+void cmd_otr_myfp_shows_my_fingerprint(void **state)
+{
+    char *fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "myfp", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    otr_get_my_fingerprint_returns(strdup(fingerprint));
+    mock_ui_current_print_formatted_line();
+
+    GString *message = g_string_new("Your OTR fingerprint: ");
+    g_string_append(message, fingerprint);
+
+    ui_current_print_formatted_line_expect('!', 0, message->str);
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    g_string_free(message, TRUE);
+    free(help);
 }
 
 #else

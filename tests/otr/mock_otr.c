@@ -21,10 +21,10 @@ _mock_otr_libotr_version(void)
     return (char *)mock();
 }
 
-void
-mock_otr_libotr_version(void)
+static char *
+_mock_otr_get_my_fingerprint(void)
 {
-    otr_libotr_version = _mock_otr_libotr_version;
+    return (char *)mock();
 }
 
 void
@@ -37,5 +37,13 @@ otr_keygen_expect(ProfAccount *account)
 void
 otr_libotr_version_returns(char *version)
 {
+    otr_libotr_version = _mock_otr_libotr_version;
     will_return(_mock_otr_libotr_version, version);
+}
+
+void
+otr_get_my_fingerprint_returns(char *fingerprint)
+{
+    otr_get_my_fingerprint = _mock_otr_get_my_fingerprint;
+    will_return(_mock_otr_get_my_fingerprint, fingerprint);
 }

@@ -159,6 +159,18 @@ void _stub_ui_current_refresh(void)
 {
 }
 
+static
+void _mock_ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...)
+{
+    check_expected(show_char);
+    check_expected(attrs);
+    va_list args;
+    va_start(args, msg);
+    vsnprintf(output, sizeof(output), msg, args);
+    check_expected(output);
+    va_end(args);
+}
+
 // bind mocks and stubs
 
 void
@@ -250,6 +262,12 @@ void
 stub_ui_current_refresh(void)
 {
     ui_current_refresh = _stub_ui_current_refresh;
+}
+
+void
+mock_ui_current_print_formatted_line(void)
+{
+    ui_current_print_formatted_line = _mock_ui_current_print_formatted_line;
 }
 
 // expectations
@@ -367,4 +385,12 @@ void
 ui_current_recipient_returns(char *jid)
 {
     will_return(_mock_ui_current_recipeint, jid);
+}
+
+void
+ui_current_print_formatted_line_expect(char show_char, int attrs, char *message)
+{
+    expect_value(_mock_ui_current_print_formatted_line, show_char, show_char);
+    expect_value(_mock_ui_current_print_formatted_line, attrs, attrs);
+    expect_string(_mock_ui_current_print_formatted_line, output, message);
 }
