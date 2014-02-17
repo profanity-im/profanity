@@ -181,6 +181,12 @@ void _mock_ui_current_print_line(const char * const msg, ...)
     va_end(args);
 }
 
+static
+gboolean _mock_ui_current_win_is_otr(void)
+{
+    return (gboolean)mock();
+}
+
 // bind mocks and stubs
 
 void
@@ -415,4 +421,11 @@ void
 ui_current_print_line_expect(char *message)
 {
     expect_string(_mock_ui_current_print_line, output, message);
+}
+
+void
+ui_current_win_is_otr_returns(gboolean result)
+{
+    ui_current_win_is_otr = _mock_ui_current_win_is_otr;
+    will_return(_mock_ui_current_win_is_otr, result);
 }

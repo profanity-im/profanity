@@ -424,6 +424,23 @@ void cmd_otr_theirfp_shows_message_when_in_duck(void **state)
     test_cmd_otr_theirfp_from_wintype(WIN_DUCK);
 }
 
+void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "theirfp", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CHAT);
+    ui_current_win_is_otr_returns(FALSE);
+    mock_ui_current_print_formatted_line();
+
+    ui_current_print_formatted_line_expect('!', 0, "You are not currently in an OTR session.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {
