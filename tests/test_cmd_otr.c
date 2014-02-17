@@ -387,6 +387,22 @@ void cmd_otr_myfp_shows_my_fingerprint(void **state)
     free(help);
 }
 
+void cmd_otr_theirfp_shows_message_when_in_console(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "theirfp", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CONSOLE);
+    mock_ui_current_print_line();
+
+    ui_current_print_line_expect("You must be in a regular chat window to view a recipient's fingerprint.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {

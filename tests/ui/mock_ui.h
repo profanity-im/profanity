@@ -54,4 +54,7 @@ void stub_ui_current_refresh(void);
 void mock_ui_current_print_formatted_line(void);
 void ui_current_print_formatted_line_expect(char show_char, int attrs, char *message);
 
+void mock_ui_current_print_line(void);
+void ui_current_print_line_expect(char *message);
+
 #endif

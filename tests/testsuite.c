@@ -469,6 +469,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_myfp_shows_message_when_connecting),
         unit_test(cmd_otr_myfp_shows_message_when_disconnecting),
         unit_test(cmd_otr_myfp_shows_my_fingerprint),
+        unit_test(cmd_otr_theirfp_shows_message_when_in_console),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif

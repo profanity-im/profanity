@@ -28,6 +28,7 @@ void cmd_otr_myfp_shows_message_when_started(void **state);
 void cmd_otr_myfp_shows_message_when_connecting(void **state);
 void cmd_otr_myfp_shows_message_when_disconnecting(void **state);
 void cmd_otr_myfp_shows_my_fingerprint(void **state);
+void cmd_otr_theirfp_shows_message_when_in_console(void **state);
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state);
 #endif
