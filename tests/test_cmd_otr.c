@@ -387,12 +387,13 @@ void cmd_otr_myfp_shows_my_fingerprint(void **state)
     free(help);
 }
 
-void cmd_otr_theirfp_shows_message_when_in_console(void **state)
+static void
+test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "theirfp", NULL };
     mock_connection_status(JABBER_CONNECTED);
-    mock_current_win_type(WIN_CONSOLE);
+    mock_current_win_type(wintype);
     mock_ui_current_print_line();
 
     ui_current_print_line_expect("You must be in a regular chat window to view a recipient's fingerprint.");
@@ -401,6 +402,26 @@ void cmd_otr_theirfp_shows_message_when_in_console(void **state)
     assert_true(result);
 
     free(help);
+}
+
+void cmd_otr_theirfp_shows_message_when_in_console(void **state)
+{
+    test_cmd_otr_theirfp_from_wintype(WIN_CONSOLE);
+}
+
+void cmd_otr_theirfp_shows_message_when_in_muc(void **state)
+{
+    test_cmd_otr_theirfp_from_wintype(WIN_MUC);
+}
+
+void cmd_otr_theirfp_shows_message_when_in_private(void **state)
+{
+    test_cmd_otr_theirfp_from_wintype(WIN_PRIVATE);
+}
+
+void cmd_otr_theirfp_shows_message_when_in_duck(void **state)
+{
+    test_cmd_otr_theirfp_from_wintype(WIN_DUCK);
 }
 
 #else
