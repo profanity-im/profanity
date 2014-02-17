@@ -27,6 +27,13 @@ void cmd_otr_myfp_shows_message_when_undefined(void **state);
 void cmd_otr_myfp_shows_message_when_started(void **state);
 void cmd_otr_myfp_shows_message_when_connecting(void **state);
 void cmd_otr_myfp_shows_message_when_disconnecting(void **state);
+void cmd_otr_myfp_shows_my_fingerprint(void **state);
+void cmd_otr_theirfp_shows_message_when_in_console(void **state);
+void cmd_otr_theirfp_shows_message_when_in_muc(void **state);
+void cmd_otr_theirfp_shows_message_when_in_private(void **state);
+void cmd_otr_theirfp_shows_message_when_in_duck(void **state);
+void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state);
+void cmd_otr_theirfp_shows_fingerprint(void **state);
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state);
 #endif
