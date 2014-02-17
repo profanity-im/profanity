@@ -441,6 +441,33 @@ void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
     free(help);
 }
 
+void cmd_otr_theirfp_shows_fingerprint(void **state)
+{
+    char *recipient = "someone@chat.com";
+    char *fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "theirfp", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CHAT);
+    ui_current_win_is_otr_returns(TRUE);
+    mock_ui_current_recipient();
+    ui_current_recipient_returns(recipient);
+    mock_ui_current_print_formatted_line();
+
+    GString *message = g_string_new(recipient);
+    g_string_append(message, "'s OTR fingerprint: ");
+    g_string_append(message, fingerprint);
+
+    otr_get_their_fingerprint_expect_and_return(recipient, strdup(fingerprint));
+    ui_current_print_formatted_line_expect('!', 0, message->str);
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    g_string_free(message, TRUE);
+    free(help);
+}
+
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {
