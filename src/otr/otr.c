@@ -99,6 +99,12 @@ _otr_libotr_version(void)
     return OTRL_VERSION;
 }
 
+static char *
+_otr_start_query(void)
+{
+    return otrlib_start_query();
+}
+
 static void
 _otr_init(void)
 {
@@ -454,6 +460,7 @@ otr_init_module(void)
 {
     otr_init = _otr_init;
     otr_libotr_version = _otr_libotr_version;
+    otr_start_query = _otr_start_query;
     otr_on_connect = _otr_on_connect;
     otr_keygen = _otr_keygen;
     otr_key_loaded = _otr_key_loaded;

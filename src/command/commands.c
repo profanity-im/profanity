@@ -2653,7 +2653,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 if (!otr_key_loaded()) {
                     ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else if (!otr_is_secure(barejid)) {
-                    message_send("?OTR?", barejid);
+                    char *otr_query_message = otr_start_query();
+                    message_send(otr_query_message, barejid);
                 } else {
                     ui_gone_secure(barejid, otr_is_trusted(barejid));
                 }
@@ -2670,7 +2671,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                     ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else {
                     char *recipient = ui_current_recipient();
-                    message_send("?OTR?", recipient);
+                    char *otr_query_message = otr_start_query();
+                    message_send(otr_query_message, recipient);
                 }
             }
         }
