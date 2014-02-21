@@ -27,6 +27,14 @@ fedora_prepare()
     sudo yum -y install gcc git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH libXScrnSaver-devel.$ARCH libotr3-devel.$ARCH
 }
 
+opensuse_prepare()
+{
+ echo
+ echo Profanity installer...installing dependencies
+ echo
+ sudo zypper -n in gcc git automake autoconf libgnutls-openssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel
+}
+
 cygwin_prepare()
 {
     echo
@@ -138,6 +146,8 @@ if [ "${OS}" = "Linux" ]; then
         DIST=fedora
     elif [ -f /etc/debian_version ]; then
         DIST=debian
+    elif [ -f /etc/os-release ]; then
+        DIST=opensuse
     fi
 else
     echo $OS | grep -i cygwin
@@ -156,6 +166,10 @@ fedora)     fedora_prepare
             install_profanity
             ;;
 debian)     debian_prepare
+            install_lib_strophe
+            install_profanity
+            ;;
+opensuse)   opensuse_prepare
             install_lib_strophe
             install_profanity
             ;;
