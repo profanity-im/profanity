@@ -31,6 +31,12 @@ otrlib_policy(void)
     return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2 ;
 }
 
+char *
+otrlib_start_query(void)
+{
+    return "?OTR?v2?";
+}
+
 static int
 cb_display_otr_message(void *opdata, const char *accountname,
     const char *protocol, const char *username, const char *msg)

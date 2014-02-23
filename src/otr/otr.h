@@ -29,6 +29,7 @@ void otr_init_module(void);
 
 void (*otr_init)(void);
 char* (*otr_libotr_version)(void);
+char* (*otr_start_query)(void);
 void (*otr_on_connect)(ProfAccount *account);
 void (*otr_keygen)(ProfAccount *account);
 

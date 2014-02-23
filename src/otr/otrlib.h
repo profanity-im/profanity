@@ -25,6 +25,8 @@
 
 OtrlPolicy otrlib_policy(void);
 
+char* otrlib_start_query(void);
+
 void otrlib_init_ops(OtrlMessageAppOps *ops);
 
 ConnContext * otrlib_context_find(OtrlUserState user_state, const char * const recipient, char *jid);

@@ -32,6 +32,12 @@ otrlib_policy(void)
     return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2 | OTRL_POLICY_ALLOW_V3;
 }
 
+char *
+otrlib_start_query(void)
+{
+    return "?OTR?v23?";
+}
+
 static const char*
 cb_otr_error_message(void *opdata, ConnContext *context,
     OtrlErrorCode err_code)
