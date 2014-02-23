@@ -375,7 +375,6 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
 static void
 _ui_handle_recipient_error(const char * const recipient, const char * const err_msg)
 {
-    cons_debug("RECIPIENT = %s", recipient);
     ProfWin *win = wins_get_by_recipient(recipient);
     GString *msg = g_string_new("");
     g_string_printf(msg, "Error from %s: %s", recipient, err_msg);
