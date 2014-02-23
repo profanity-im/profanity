@@ -479,6 +479,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_start_shows_message_when_in_muc),
         unit_test(cmd_otr_start_shows_message_when_in_private),
         unit_test(cmd_otr_start_shows_message_when_in_duck),
+        unit_test(cmd_otr_start_shows_message_when_already_started),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif
