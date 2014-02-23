@@ -366,12 +366,29 @@ void cmd_otr_myfp_shows_message_when_disconnecting(void **state)
     test_with_command_and_connection_status("myfp", JABBER_DISCONNECTING);
 }
 
+void cmd_otr_myfp_shows_message_when_no_key(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "myfp", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    otr_key_loaded_returns(FALSE);
+    mock_ui_current_print_formatted_line();
+
+    ui_current_print_formatted_line_expect('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_otr_myfp_shows_my_fingerprint(void **state)
 {
     char *fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "myfp", NULL };
     mock_connection_status(JABBER_CONNECTED);
+    otr_key_loaded_returns(TRUE);
     otr_get_my_fingerprint_returns(strdup(fingerprint));
     mock_ui_current_print_formatted_line();
 

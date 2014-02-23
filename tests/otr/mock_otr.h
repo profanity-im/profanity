@@ -4,6 +4,7 @@
 #include "config/account.h"
 
 void otr_keygen_expect(ProfAccount *account);
+void otr_key_loaded_returns(gboolean loaded);
 
 void otr_libotr_version_returns(char *version);
 

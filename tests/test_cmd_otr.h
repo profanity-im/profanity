@@ -27,6 +27,7 @@ void cmd_otr_myfp_shows_message_when_undefined(void **state);
 void cmd_otr_myfp_shows_message_when_started(void **state);
 void cmd_otr_myfp_shows_message_when_connecting(void **state);
 void cmd_otr_myfp_shows_message_when_disconnecting(void **state);
+void cmd_otr_myfp_shows_message_when_no_key(void **state);
 void cmd_otr_myfp_shows_my_fingerprint(void **state);
 void cmd_otr_theirfp_shows_message_when_in_console(void **state);
 void cmd_otr_theirfp_shows_message_when_in_muc(void **state);

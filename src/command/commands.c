@@ -2618,9 +2618,13 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         otr_keygen(account);
         return TRUE;
     } else if (strcmp(args[0], "myfp") == 0) {
-        char *fingerprint = otr_get_my_fingerprint();
-        ui_current_print_formatted_line('!', 0, "Your OTR fingerprint: %s", fingerprint);
-        free(fingerprint);
+        if (!otr_key_loaded()) {
+            ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+        } else {
+            char *fingerprint = otr_get_my_fingerprint();
+            ui_current_print_formatted_line('!', 0, "Your OTR fingerprint: %s", fingerprint);
+            free(fingerprint);
+        }
         return TRUE;
     } else if (strcmp(args[0], "theirfp") == 0) {
         win_type_t win_type = ui_current_win_type();
