@@ -557,6 +557,28 @@ void cmd_otr_start_shows_message_when_no_key(void **state)
     free(help);
 }
 
+void
+cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
+{
+    char *recipient = "buddy@chat.com";
+    char *query_message = "?OTR?";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "start", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CHAT);
+    ui_current_win_is_otr_returns(FALSE);
+    otr_key_loaded_returns(TRUE);
+    ui_current_recipient_returns(recipient);
+    otr_start_query_returns(query_message);
+
+    message_send_expect(query_message, recipient);
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {

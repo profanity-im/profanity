@@ -482,6 +482,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_start_shows_message_when_in_duck),
         unit_test(cmd_otr_start_shows_message_when_already_started),
         unit_test(cmd_otr_start_shows_message_when_no_key),
+        unit_test(cmd_otr_start_sends_otr_query_message_to_current_recipeint),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif

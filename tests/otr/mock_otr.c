@@ -40,6 +40,12 @@ _mock_otr_key_loaded(void)
     return (gboolean)mock();
 }
 
+static char *
+_mock_otr_start_query(void)
+{
+    return (char *)mock();
+}
+
 void
 otr_keygen_expect(ProfAccount *account)
 {
@@ -74,4 +80,11 @@ otr_key_loaded_returns(gboolean loaded)
 {
     otr_key_loaded = _mock_otr_key_loaded;
     will_return(_mock_otr_key_loaded, loaded);
+}
+
+void
+otr_start_query_returns(char *query)
+{
+    otr_start_query = _mock_otr_start_query;
+    will_return(_mock_otr_start_query, query);
 }
