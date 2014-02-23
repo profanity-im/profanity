@@ -1,2 +1,14 @@
 language: c
-install: ./bootstrap.sh
+install:
+    - sudo apt-get update
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev
+    - ./bootstrap.sh
+    - git clone git://github.com/strophe/libstrophe.git
+    - cd libstrophe
+    - ./bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+    - rm -rf libstrophe
+    - ./bootstrap.sh
