@@ -12,3 +12,4 @@ install:
     - cd ..
     - rm -rf libstrophe
     - ./bootstrap.sh
+script: ./configure && make && make check
