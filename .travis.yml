@@ -1,0 +1,26 @@
+language: c
+install:
+    - sudo apt-get update
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev
+    - sudo apt-get -y install python-dev ruby1.8-dev liblualib50
+    - ./bootstrap.sh
+    - git clone git://github.com/strophe/libstrophe.git
+    - cd libstrophe
+    - ./bootstrap.sh
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+    - rm -rf libstrophe
+    - wget https://open.cryptomilk.org/attachments/download/34/cmocka-0.3.2.tar.xz
+    - tar -xvf cmocka-0.3.2.tar.xz
+    - cd cmocka-0.3.2
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug ..
+    - make
+    - sudo make install
+    - cd ../..
+    - rm -rf cmocka-0.3.2
+    - ./bootstrap.sh
+script: ./configure && make && make check
