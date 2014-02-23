@@ -27,7 +27,7 @@ void cmd_alias_add_shows_usage_when_no_args(void **state)
     expect_cons_show("Usage: some usage");
 
     gboolean result = cmd_alias(args, *help);
-    assert_true(result);
+    assert_false(result);
 
     free(help);
 }
