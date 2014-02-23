@@ -475,6 +475,10 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_theirfp_shows_message_when_in_duck),
         unit_test(cmd_otr_theirfp_shows_message_when_non_otr_chat_window),
         unit_test(cmd_otr_theirfp_shows_fingerprint),
+        unit_test(cmd_otr_start_shows_message_when_in_console),
+        unit_test(cmd_otr_start_shows_message_when_in_muc),
+        unit_test(cmd_otr_start_shows_message_when_in_private),
+        unit_test(cmd_otr_start_shows_message_when_in_duck),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif

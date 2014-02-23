@@ -468,6 +468,43 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     free(help);
 }
 
+static void
+test_cmd_otr_start_from_wintype(win_type_t wintype)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "start", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(wintype);
+    mock_ui_current_print_line();
+
+    ui_current_print_line_expect("You must be in a regular chat window to start an OTR session.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_otr_start_shows_message_when_in_console(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_CONSOLE);
+}
+
+void cmd_otr_start_shows_message_when_in_muc(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_MUC);
+}
+
+void cmd_otr_start_shows_message_when_in_private(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_PRIVATE);
+}
+
+void cmd_otr_start_shows_message_when_in_duck(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_DUCK);
+}
+
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state)
 {
