@@ -34,6 +34,18 @@ _mock_otr_get_their_fingerprint(const char * const recipient)
     return (char *)mock();
 }
 
+static gboolean
+_mock_otr_key_loaded(void)
+{
+    return (gboolean)mock();
+}
+
+static char *
+_mock_otr_start_query(void)
+{
+    return (char *)mock();
+}
+
 void
 otr_keygen_expect(ProfAccount *account)
 {
@@ -61,4 +73,18 @@ otr_get_their_fingerprint_expect_and_return(char *recipient, char *fingerprint)
     otr_get_their_fingerprint = _mock_otr_get_their_fingerprint;
     expect_string(_mock_otr_get_their_fingerprint, recipient, recipient);
     will_return(_mock_otr_get_their_fingerprint, fingerprint);
+}
+
+void
+otr_key_loaded_returns(gboolean loaded)
+{
+    otr_key_loaded = _mock_otr_key_loaded;
+    will_return(_mock_otr_key_loaded, loaded);
+}
+
+void
+otr_start_query_returns(char *query)
+{
+    otr_start_query = _mock_otr_start_query;
+    will_return(_mock_otr_start_query, query);
 }

@@ -31,4 +31,6 @@ void mock_bookmark_remove(void);
 void expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_autojoin,
     gboolean removed);
 
+void message_send_expect(char *message, char *recipient);
+
 #endif

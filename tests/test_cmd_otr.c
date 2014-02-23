@@ -366,12 +366,29 @@ void cmd_otr_myfp_shows_message_when_disconnecting(void **state)
     test_with_command_and_connection_status("myfp", JABBER_DISCONNECTING);
 }
 
+void cmd_otr_myfp_shows_message_when_no_key(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "myfp", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    otr_key_loaded_returns(FALSE);
+    mock_ui_current_print_formatted_line();
+
+    ui_current_print_formatted_line_expect('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_otr_myfp_shows_my_fingerprint(void **state)
 {
     char *fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "myfp", NULL };
     mock_connection_status(JABBER_CONNECTED);
+    otr_key_loaded_returns(TRUE);
     otr_get_my_fingerprint_returns(strdup(fingerprint));
     mock_ui_current_print_formatted_line();
 
@@ -465,6 +482,100 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     assert_true(result);
 
     g_string_free(message, TRUE);
+    free(help);
+}
+
+static void
+test_cmd_otr_start_from_wintype(win_type_t wintype)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "start", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(wintype);
+    mock_ui_current_print_line();
+
+    ui_current_print_line_expect("You must be in a regular chat window to start an OTR session.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_otr_start_shows_message_when_in_console(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_CONSOLE);
+}
+
+void cmd_otr_start_shows_message_when_in_muc(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_MUC);
+}
+
+void cmd_otr_start_shows_message_when_in_private(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_PRIVATE);
+}
+
+void cmd_otr_start_shows_message_when_in_duck(void **state)
+{
+    test_cmd_otr_start_from_wintype(WIN_DUCK);
+}
+
+void cmd_otr_start_shows_message_when_already_started(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "start", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CHAT);
+    ui_current_win_is_otr_returns(TRUE);
+    mock_ui_current_print_formatted_line();
+
+    ui_current_print_formatted_line_expect('!', 0, "You are already in an OTR session.");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_otr_start_shows_message_when_no_key(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "start", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CHAT);
+    ui_current_win_is_otr_returns(FALSE);
+    otr_key_loaded_returns(FALSE);
+    mock_ui_current_print_formatted_line();
+
+    ui_current_print_formatted_line_expect('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void
+cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
+{
+    char *recipient = "buddy@chat.com";
+    char *query_message = "?OTR?";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "start", NULL };
+    mock_connection_status(JABBER_CONNECTED);
+    mock_current_win_type(WIN_CHAT);
+    ui_current_win_is_otr_returns(FALSE);
+    otr_key_loaded_returns(TRUE);
+    ui_current_recipient_returns(recipient);
+    otr_start_query_returns(query_message);
+
+    message_send_expect(query_message, recipient);
+
+    gboolean result = cmd_otr(args, *help);
+    assert_true(result);
+
     free(help);
 }
 
