@@ -1069,6 +1069,11 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             }
 
             ui_new_chat_win(usr_jid);
+#ifdef PROF_HAVE_LIBOTR
+            if (otr_is_secure(jid)) {
+                ui_gone_secure(jid, otr_is_trusted(jid));
+            }
+#endif
             return TRUE;
         }
     }
