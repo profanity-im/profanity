@@ -40,6 +40,7 @@ void cmd_otr_start_shows_message_when_in_muc(void **state);
 void cmd_otr_start_shows_message_when_in_private(void **state);
 void cmd_otr_start_shows_message_when_in_duck(void **state);
 void cmd_otr_start_shows_message_when_already_started(void **state);
+void cmd_otr_start_shows_message_when_no_key(void **state);
 #else
 void cmd_otr_shows_message_when_otr_unsupported(void **state);
 #endif
