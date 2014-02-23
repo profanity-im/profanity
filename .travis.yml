@@ -4,7 +4,7 @@ install:
     - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev
     - sudo dpkg --get-selections | grep ruby
     - sudo apt-get remove ruby1.9.1 ruby1.9.3 libruby1.9.1 ruby
-    - sudo apt-get -y install autoconf-archive python-dev ruby1.8-dev libruby1.8 liblualib50 liblua50 lua5.1 liblua5.1-0
+    - sudo apt-get -y install autoconf-archive python-dev ruby1.8-dev libruby1.8 lua5.1 liblua5.1-0
     - sudo dpkg --get-selections | grep ruby
     - sudo dpkg --get-selections | grep lua
     - ./bootstrap.sh
