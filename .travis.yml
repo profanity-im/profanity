@@ -7,7 +7,6 @@ install:
     - sudo apt-get -y install autoconf-archive python-dev ruby1.8-dev libruby1.8 lua5.1 liblua5.1-0
     - sudo dpkg --get-selections | grep ruby
     - sudo dpkg --get-selections | grep lua
-    - ./bootstrap.sh
     - git clone git://github.com/strophe/libstrophe.git
     - cd libstrophe
     - ./bootstrap.sh
