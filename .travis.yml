@@ -26,4 +26,4 @@ install:
     - cd ../..
     - rm -rf cmocka-0.3.2
     - ./bootstrap.sh
-script: ./configure && make && make check
+script: ./configure --disable-ruby-plugins && make && make check
