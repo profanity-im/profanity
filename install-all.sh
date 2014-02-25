@@ -1,6 +1,18 @@
-#!/bin/sh
+#!/bin/bash
+
+set -o errtrace
 
 STATUS=development
+
+error_handler()
+{
+        ERR_CODE=$?
+        echo "Error $ERR_CODE with command '$BASH_COMMAND' on line ${BASH_LINENO[0]}. Exiting."
+        exit $ERR_CODE
+
+}
+
+trap error_handler ERR
 
 debian_prepare()
 {
@@ -23,7 +35,7 @@ fedora_prepare()
     echo
 
     ARCH=`arch`
-    
+
     sudo yum -y install gcc git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH libXScrnSaver-devel.$ARCH libotr3-devel.$ARCH
 }
 
