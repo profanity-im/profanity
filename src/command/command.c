@@ -235,9 +235,9 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/join",
-        cmd_join, parse_args_with_freetext, 1, 2, NULL,
-        { "/join room[@server] [nick]", "Join a chat room.",
-        { "/join room[@server] [nick]",
+        cmd_join, parse_args_with_freetext, 1, 3, NULL,
+        { "/join room[@server] [nick] [password]", "Join a chat room.",
+        { "/join room[@server] [nick] [password]",
           "--------------------------",
           "Join a chat room at the conference server.",
           "If nick is specified you will join with this nickname.",
@@ -247,6 +247,7 @@ static struct cmd_t command_defs[] =
           "",
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org mynick",
+          "Example : /join private@conference.jabber.org mynick mypassword",
           "Example : /join jdev (as user@jabber.org will join jdev@conference.jabber.org)",
           NULL } } },
 
