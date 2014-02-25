@@ -25,11 +25,11 @@ core_sources = \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
-    src/server_events.c src/server_events.h \
+	src/server_events.c src/server_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c \
-    src/ui/windows.c src/ui/windows.h \
+	src/ui/windows.c src/ui/windows.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
@@ -62,18 +62,18 @@ test_sources = \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-    src/ui/windows.c src/ui/windows.h \
-    src/ui/window.c src/ui/window.h \
-    src/server_events.c src/server_events.h \
-    tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
-    tests/otr/mock_otr.h tests/otr/mock_otr.c \
-    tests/ui/mock_ui.h tests/ui/mock_ui.c \
-    tests/config/mock_accounts.h tests/config/mock_accounts.c \
-    tests/helpers.c tests/helpers.h \
-    tests/log/mock_log.c \
-    tests/test_autocomplete.c \
-    tests/test_common.c \
-    tests/test_contact.c \
+	src/ui/windows.c src/ui/windows.h \
+	src/ui/window.c src/ui/window.h \
+	src/server_events.c src/server_events.h \
+	tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
+	tests/otr/mock_otr.h tests/otr/mock_otr.c \
+	tests/ui/mock_ui.h tests/ui/mock_ui.c \
+	tests/config/mock_accounts.h tests/config/mock_accounts.c \
+	tests/helpers.c tests/helpers.h \
+	tests/log/mock_log.c \
+	tests/test_autocomplete.c \
+	tests/test_common.c \
+	tests/test_contact.c \
 	tests/test_cmd_connect.c \
 	tests/test_cmd_account.c \
 	tests/test_cmd_rooms.c \
@@ -89,18 +89,18 @@ test_sources = \
 	tests/test_preferences.c \
 	tests/test_server_events.c \
 	tests/test_muc.c \
-    tests/testsuite.c
+	tests/testsuite.c
 
 main_source = src/main.c
 
 git_sources = \
-    src/gitversion.c
+	src/gitversion.c
 
 otr3_sources = \
-    src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
+	src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
 
 otr4_sources = \
-    src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
+	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
 if INCLUDE_GIT_VERSION
 with_git_sources = $(git_sources) $(core_sources)
