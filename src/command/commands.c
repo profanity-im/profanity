@@ -1594,6 +1594,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     int num_args = g_strv_length(args);
     char *room = NULL;
     char *nick = NULL;
+    char *passwd = NULL;
     GString *room_str = g_string_new("");
     Jid *my_jid = jid_create(jabber_get_fulljid());
 
@@ -1610,7 +1611,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     }
 
     // nick supplied
-    if (num_args == 2) {
+    if (num_args > 1) {
         nick = args[1];
 
     // otherwise use account preference
@@ -1618,10 +1619,15 @@ cmd_join(gchar **args, struct cmd_help_t help)
         nick = account->muc_nick;
     }
 
+    // pass supplied
+    if (num_args == 3) {
+        passwd = args[2];
+    }
+
     Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
 
     if (!muc_room_is_active(room_jid)) {
-        presence_join_room(room_jid);
+        presence_join_room(room_jid, passwd);
     }
     ui_room_join(room_jid);
     muc_remove_invite(room);

@@ -114,7 +114,7 @@ GSList* (*presence_get_subscription_requests)(void);
 gint (*presence_sub_request_count)(void);
 void (*presence_reset_sub_request_search)(void);
 char * (*presence_sub_request_find)(char * search_str);
-void (*presence_join_room)(Jid *jid);
+void (*presence_join_room)(Jid *jid, char * passwd);
 void (*presence_change_room_nick)(const char * const room, const char * const nick);
 void (*presence_leave_chat_room)(const char * const room_jid);
 void (*presence_update)(resource_presence_t status, const char * const msg,
