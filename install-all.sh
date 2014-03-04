@@ -57,8 +57,6 @@ cygwin_prepare()
 
     fi
 
-    ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
-
     export LIBRARY_PATH=/usr/local/lib/
 }
 
