@@ -223,7 +223,11 @@ _notify(const char * const message, int timeout,
         g_string_append(notify_command, app_id);
     }
 
-    system(notify_command->str);
+    int res = system(notify_command->str);
+    if (res == -1) {
+        log_error("Could not send desktop notificaion.");
+    }
+
     g_string_free(notify_command, TRUE);
 }
 
