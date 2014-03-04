@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <glib.h>
 #ifdef HAVE_LIBNOTIFY
@@ -205,6 +206,25 @@ _notify(const char * const message, int timeout,
 
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
+    GString *notify_command = g_string_new("terminal-notifier -title 'Profanity' -message '");
+    g_string_append(notify_command, message);
+    g_string_append(notify_command, "'");
+
+    char *term_name = getenv("TERM_PROGRAM");
+    char *app_id = NULL;
+    if (g_strcmp0(term_name, "Apple_Terminal") == 0) {
+        app_id = "com.apple.Terminal";
+    } else if (g_strcmp0(term_name, "iTerm.app") == 0) {
+        app_id = "com.googlecode.iterm2";
+    }
+
+    if (app_id != NULL) {
+        g_string_append(notify_command, " -sender ");
+        g_string_append(notify_command, app_id);
+    }
+
+    system(notify_command->str);
+    g_string_free(notify_command, TRUE);
 }
 
 void
