@@ -260,7 +260,7 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
 }
 
 static void
-_presence_join_room(Jid *jid)
+_presence_join_room(Jid *jid, char * passwd)
 {
     assert(jid != NULL);
     assert(jid->fulljid != NULL);
@@ -275,7 +275,7 @@ _presence_join_room(Jid *jid)
     int pri = accounts_get_priority_for_presence_type(jabber_get_account_name(),
         presence_type);
 
-    xmpp_stanza_t *presence = stanza_create_room_join_presence(ctx, jid->fulljid);
+    xmpp_stanza_t *presence = stanza_create_room_join_presence(ctx, jid->fulljid, passwd);
     stanza_attach_show(ctx, presence, show);
     stanza_attach_status(ctx, presence, status);
     stanza_attach_priority(ctx, presence, pri);

@@ -249,7 +249,7 @@ stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
 
 xmpp_stanza_t *
 stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
-    const char * const full_room_jid)
+    const char * const full_room_jid, const char * const passwd)
 {
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
@@ -260,6 +260,19 @@ stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     xmpp_stanza_t *x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
     xmpp_stanza_set_ns(x, STANZA_NS_MUC);
+
+    // if a password was given
+    if (passwd != NULL) {
+        xmpp_stanza_t *pass = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(pass, "password");
+        xmpp_stanza_t *text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(text, strdup(passwd));
+        xmpp_stanza_add_child(pass, text);
+        xmpp_stanza_add_child(x, pass);
+        xmpp_stanza_release(text);
+        xmpp_stanza_release(pass);
+    }
+
     xmpp_stanza_add_child(presence, x);
     xmpp_stanza_release(x);
 
