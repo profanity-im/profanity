@@ -23,7 +23,13 @@ AC_PROG_CC
 
 ### Get canonical host
 AC_CANONICAL_HOST
-AS_IF([test "x$host_os" = xcygwin],
+PLATFORM="unknown"
+AS_CASE([$host_os],
+    [darwin*], [PLATFORM="osx"],
+    [cygwin], [PLATFORM="cygwin"],
+    [PLATFORM="nix"])
+
+AS_IF([test "x$PLATFORM" = xcygwin],
     [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
 
 ### Options
@@ -112,12 +118,28 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
-AS_IF([test "x$enable_notifications" != xno],
-    [PKG_CHECK_MODULES([libnotify], [libnotify],
-        [AC_DEFINE([HAVE_LIBNOTIFY], [1], [libnotify module])],
-        [AS_IF([test "x$enable_notifications" = xyes],
-            [AC_MSG_ERROR([libnotify is required but does not exist])],
-            [AC_MSG_NOTICE([libnotify support will be disabled])])])])
+
+### Check for desktop notification support
+### Linux requires libnotify
+### Windows uses native OS calls
+### OSX requires terminal-notifier
+
+AS_IF([test "x$PLATFORM" = xosx],
+        [AS_IF([test "x$enable_notifications" != xno],
+            [NOTIFIER_PATH="no"
+            AC_PATH_PROG(NOTIFIER_PATH, terminal-notifier, no)
+            AS_IF([test "x$NOTIFIER_PATH" = xno],
+                [AS_IF([test "x$enable_notifications" = xyes],
+                    [AC_MSG_ERROR([terminal-notifier not found, required for desktop notifications.])],
+                    [AC_MSG_NOTICE([Desktop notifications not supported.])])],
+                [AC_DEFINE([HAVE_OSXNOTIFY], [1], [terminal notifier])])])],
+    [test "x$PLATFORM" = xnix],
+        [AS_IF([test "x$enable_notifications" != xno],
+            [PKG_CHECK_MODULES([libnotify], [libnotify],
+                [AC_DEFINE([HAVE_LIBNOTIFY], [1], [libnotify module])],
+                [AS_IF([test "x$enable_notifications" = xyes],
+                    [AC_MSG_ERROR([libnotify is required but does not exist])],
+                    [AC_MSG_NOTICE([libnotify support will be disabled])])])])])
 
 # TODO: rewrite this
 if test "x$with_xscreensaver" = xyes; then
@@ -164,7 +186,7 @@ elif test "x$enable_otr" = x; then
             ]])],
             [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR4], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
             [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
-        [AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
+        [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])
 fi
 
 ### cmocka is required only for tests, profanity shouldn't be linked with it
@@ -194,6 +216,7 @@ AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 echo ""
+echo "PLATFORM       : $host_os"
 echo "PACKAGE_STATUS : $PACKAGE_STATUS"
 echo "AM_CFLAGS      : $AM_CFLAGS"
 echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
