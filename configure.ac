@@ -163,7 +163,7 @@ elif test "x$enable_otr" = x; then
             ]])],
             [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR4], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
             [AM_CONDITIONAL([BUILD_OTR], [true]) AM_CONDITIONAL([BUILD_OTR3], [true]) AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])],
-        [AC_MSG_NOTICE([libotr not found, otr entryption support not enabled])])
+        [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])
 fi
 
 ### cmocka is required only for tests, profanity shouldn't be linked with it
