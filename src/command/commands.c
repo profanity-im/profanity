@@ -1643,7 +1643,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
                 }
             }
         }
-        nick = args[1];
+
     // otherwise use account preference
     } else {
         nick = account->muc_nick;
