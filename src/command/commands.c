@@ -1643,9 +1643,10 @@ cmd_join(gchar **args, struct cmd_help_t help)
                 }
             }
         }
+    }
 
-    // otherwise use account preference
-    } else {
+    // In the case that a nick wasn't provided by the optional args...
+    if (nick == NULL) {
         nick = account->muc_nick;
     }
 
