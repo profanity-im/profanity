@@ -69,6 +69,7 @@ static char * _otr_autocomplete(char *input, int *size);
 static char * _connect_autocomplete(char *input, int *size);
 static char * _statuses_autocomplete(char *input, int *size);
 static char * _alias_autocomplete(char *input, int *size);
+static char * _join_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -881,6 +882,7 @@ static Autocomplete statuses_ac;
 static Autocomplete statuses_cons_chat_ac;
 static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
+static Autocomplete join_property_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1069,6 +1071,10 @@ cmd_init(void)
     autocomplete_add(connect_property_ac, "server");
     autocomplete_add(connect_property_ac, "port");
 
+    join_property_ac = autocomplete_new();
+    autocomplete_add(join_property_ac, "nick");
+    autocomplete_add(join_property_ac, "passwd");
+
     statuses_ac = autocomplete_new();
     autocomplete_add(statuses_ac, "console");
     autocomplete_add(statuses_ac, "chat");
@@ -1121,6 +1127,7 @@ cmd_uninit(void)
     autocomplete_free(statuses_cons_chat_ac);
     autocomplete_free(alias_ac);
     autocomplete_free(aliases_ac);
+    autocomplete_free(join_property_ac);
 }
 
 gboolean
@@ -1243,6 +1250,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(statuses_cons_chat_ac);
     autocomplete_reset(alias_ac);
     autocomplete_reset(aliases_ac);
+    autocomplete_reset(join_property_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1483,13 +1491,6 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    result = autocomplete_param_with_func(input, size, "/join", bookmark_find);
-    if (result != NULL) {
-        inp_replace_input(input, result, size);
-        g_free(result);
-        return;
-    }
-
     gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
     Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
 
@@ -1506,7 +1507,8 @@ _cmd_complete_parameters(char *input, int *size)
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
         _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
-        _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete };
+        _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete,
+        _join_autocomplete };
 
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
@@ -1856,6 +1858,33 @@ _connect_autocomplete(char *input, int *size)
     result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
     if (result != NULL) {
         return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_join_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    input[*size] = '\0';
+    gchar **args = parse_args(input, 2, 4);
+
+    if ((strncmp(input, "/join", 5) == 0) && (args != NULL)) {
+        GString *beginning = g_string_new("/join ");
+        g_string_append(beginning, args[0]);
+        if (args[1] != NULL && args[2] != NULL) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+        }
+        result = autocomplete_param_with_ac(input, size, beginning->str, join_property_ac);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
     }
 
     return NULL;
