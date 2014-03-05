@@ -1610,18 +1610,43 @@ cmd_join(gchar **args, struct cmd_help_t help)
         room = room_str->str;
     }
 
-    // nick supplied
+    // Additional args supplied
     if (num_args > 1) {
+        char *opt1 = args[1];
+        char *opt1val = args[2];
+        char *opt2 = args[3];
+        char *opt2val = args[4];
+        if (opt1 != NULL) {
+            if (opt1val == NULL) {
+                cons_show("Usage: %s", help.usage);
+                cons_show("");
+                return TRUE;
+            }
+            if (strcmp(opt1, "nick") == 0) {
+                nick = strdup(opt1val);
+            } else if (strcmp(opt1, "passwd") == 0) {
+                passwd = strdup(opt1val);
+            } else {
+                cons_show("Usage: %s", help.usage);
+                cons_show("");
+                return TRUE;
+            }
+            if (opt2 != NULL) {
+                if (strcmp(opt2, "nick") == 0) {
+                    nick = strdup(opt2val);
+                } else if (strcmp(opt2, "passwd") == 0) {
+                    passwd = strdup(opt2val);
+                } else {
+                    cons_show("Usage: %s", help.usage);
+                    cons_show("");
+                    return TRUE;
+                }
+            }
+        }
         nick = args[1];
-
     // otherwise use account preference
     } else {
         nick = account->muc_nick;
-    }
-
-    // pass supplied
-    if (num_args == 3) {
-        passwd = args[2];
     }
 
     Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
