@@ -24,7 +24,7 @@
 
 #include "config.h"
 #ifdef HAVE_GIT_VERSION
-#include "gitversion.c"
+#include "gitversion.h"
 #endif
 
 #include "profanity.h"
