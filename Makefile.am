@@ -27,9 +27,9 @@ core_sources = \
 	src/config/account.c src/config/account.h \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h \
-    src/plugins/plugins.h src/plugins/plugins.c \
-    src/plugins/api.h src/plugins/api.c \
-    src/plugins/callbacks.h src/plugins/callbacks.c
+	src/plugins/plugins.h src/plugins/plugins.c \
+	src/plugins/api.h src/plugins/api.c \
+	src/plugins/callbacks.h src/plugins/callbacks.c
 
 tests_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -40,7 +40,7 @@ tests_sources = \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h \
-    src/ui/windows.c src/ui/windows.h \
+	src/ui/windows.c src/ui/windows.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
@@ -85,20 +85,20 @@ tests_sources = \
 main_source = src/main.c
 
 python_sources = \
-    src/plugins/python_plugins.h src/plugins/python_plugins.c \
-    src/plugins/python_api.h src/plugins/python_api.c
+	src/plugins/python_plugins.h src/plugins/python_plugins.c \
+	src/plugins/python_api.h src/plugins/python_api.c
 
 ruby_sources = \
-    src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
-    src/plugins/ruby_api.h src/plugins/ruby_api.c
+	src/plugins/ruby_plugins.h src/plugins/ruby_plugins.c \
+	src/plugins/ruby_api.h src/plugins/ruby_api.c
 
 lua_sources = \
-    src/plugins/lua_plugins.h src/plugins/lua_plugins.c \
-    src/plugins/lua_api.h src/plugins/lua_api.c
+	src/plugins/lua_plugins.h src/plugins/lua_plugins.c \
+	src/plugins/lua_api.h src/plugins/lua_api.c
 
 c_sources = \
-    src/plugins/c_plugins.h src/plugins/c_plugins.c \
-    src/plugins/c_api.h src/plugins/c_api.c
+	src/plugins/c_plugins.h src/plugins/c_plugins.c \
+	src/plugins/c_api.h src/plugins/c_api.c
 
 git_include = src/gitversion.h
 

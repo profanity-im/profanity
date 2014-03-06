@@ -203,7 +203,7 @@ _notify(const char * const message, int timeout,
 
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
-#ifdef HAVE_OSXNOTIFY
+#ifdef PROF_HAVE_OSXNOTIFY
     GString *notify_command = g_string_new("terminal-notifier -title 'Profanity' -message '");
     g_string_append(notify_command, message);
     g_string_append(notify_command, "'");
