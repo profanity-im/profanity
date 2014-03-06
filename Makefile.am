@@ -1,17 +1,3 @@
-if INCLUDE_GIT_VERSION
-src/gitversion.c: .git/HEAD .git/index
-	rm -f src/gitversion.c src/gitversion.o
-	echo "#ifndef PROF_GIT_BRANCH" >> $@
-	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
-	echo "#endif" >> $@
-	echo "#ifndef PROF_GIT_REVISION" >> $@
-	echo "#define PROF_GIT_REVISION \"$(shell git log --pretty=format:'%h' -n 1)\"" >> $@
-	echo "#endif" >> $@
-
-clean-local:
-	rm -f src/gitversion.c src/gitversion.o
-endif
-
 core_sources = \
 	src/contact.c src/contact.h src/log.c src/common.c \
 	src/log.h src/profanity.c src/common.h \
@@ -42,7 +28,7 @@ core_sources = \
 	src/config/preferences.c src/config/preferences.h \
 	src/config/theme.c src/config/theme.h
 
-test_sources = \
+tests_sources = \
 	src/contact.c src/contact.h src/common.c \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/chat_session.c \
@@ -93,8 +79,7 @@ test_sources = \
 
 main_source = src/main.c
 
-git_sources = \
-	src/gitversion.c
+git_include = src/gitversion.h
 
 otr3_sources = \
 	src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
@@ -102,34 +87,48 @@ otr3_sources = \
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
-if INCLUDE_GIT_VERSION
-with_git_sources = $(git_sources) $(core_sources)
-tests_with_git_sources = $(git_sources) $(test_sources)
-else
-with_git_sources = $(core_sources)
-tests_with_git_sources = $(test_sources)
-endif
-
 if BUILD_OTR
 if BUILD_OTR3
-with_otr_sources = $(with_git_sources) $(otr3_sources)
-tests_with_otr_sources = $(tests_with_git_sources) $(otr3_sources)
+core_sources += $(otr3_sources)
+tests_sources += $(otr3_sources)
 endif
 if BUILD_OTR4
-with_otr_sources = $(with_git_sources) $(otr4_sources)
-tests_with_otr_sources = $(tests_with_git_sources) $(otr4_sources)
+core_sources += $(otr4_sources)
+tests_sources += $(otr4_sources)
 endif
-else
-with_otr_sources = $(with_git_sources)
-tests_with_otr_sources = $(tests_with_git_sources)
 endif
 
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(with_otr_sources) $(main_source)
+profanity_SOURCES = $(core_sources) $(main_source)
+if INCLUDE_GIT_VERSION
+BUILT_SOURCES = $(git_include)
+endif
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(tests_with_otr_sources)
+tests_testsuite_SOURCES = $(tests_sources)
 tests_testsuite_LDADD = -lcmocka
 
 man_MANS = docs/profanity.1
+
+if INCLUDE_GIT_VERSION
+$(git_include).in: .git/HEAD .git/index
+	rm -f $@
+	echo "#ifndef PROF_GIT_BRANCH" >> $@
+	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
+	echo "#endif" >> $@
+	echo "#ifndef PROF_GIT_REVISION" >> $@
+	echo "#define PROF_GIT_REVISION \"$(shell git log --pretty=format:'%h' -n 1)\"" >> $@
+	echo "#endif" >> $@
+
+#
+# Create $(git_include) atomically to catch possible race. The race can occur
+# when $(git_include) is generated in parallel with building of src/profanity.c.
+# So this hack allows to find and fix the problem earlier.
+#
+$(git_include): $(git_include).in
+	cp $< $@
+
+clean-local:
+	rm -f $(git_include) $(git_include).in
+endif
