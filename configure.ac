@@ -90,8 +90,10 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
     [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; NCURSES="ncursesw"],
     [PKG_CHECK_MODULES([ncurses], [ncurses],
         [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"; NCURSES="ncurses"],
-        [AC_CHECK_LIB([ncursesw], [main], [],
+        [AC_CHECK_LIB([ncursesw], [main],
+            [LIBS="-lncursesw $LIBS" AC_DEFINE([HAVE_LIBNCURSESW], [1], [have ncursesw]) NCURSES_CFLAGS="$ncursesw_CFLAGS" NCURSES_LIBS="$ncursesw_LIBS" NCURSES="ncursesw"],
             [AC_CHECK_LIB([ncurses], [main], [],
+                [LIBS="-lncurses $LIBS" AC_DEFINE([HAVE_LIBNCURSES], [1], [have ncurses]) NCURSES_CFLAGS="$ncurses_CFLAGS" NCURSES_LIBS="$ncurses_LIBS" NCURSES="ncurses"],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$LIBS $NCURSES_LIBS"
