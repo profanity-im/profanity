@@ -32,7 +32,8 @@ TODO
 plugins/
 *_key.txt
 *_fingerprints.txt
-src/gitversion.c
+src/gitversion.h
+src/gitversion.h.in
 *_key.txt
 *_fingerprints.txt
 TAGS
