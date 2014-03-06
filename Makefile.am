@@ -1,17 +1,3 @@
-if INCLUDE_GIT_VERSION
-src/gitversion.c: .git/HEAD .git/index
-	rm -f src/gitversion.c src/gitversion.o
-	echo "#ifndef PROF_GIT_BRANCH" >> $@
-	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
-	echo "#endif" >> $@
-	echo "#ifndef PROF_GIT_REVISION" >> $@
-	echo "#define PROF_GIT_REVISION \"$(shell git log --pretty=format:'%h' -n 1)\"" >> $@
-	echo "#endif" >> $@
-
-clean-local:
-	rm -f src/gitversion.c src/gitversion.o
-endif
-
 core_sources = \
 	src/contact.c src/contact.h src/log.c src/common.c \
 	src/log.h src/profanity.c src/common.h \
@@ -25,11 +11,11 @@ core_sources = \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
-    src/server_events.c src/server_events.h \
+	src/server_events.c src/server_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/console.c src/ui/notifier.c \
-    src/ui/windows.c src/ui/windows.h \
+	src/ui/windows.c src/ui/windows.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
@@ -45,7 +31,7 @@ core_sources = \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c
 
-test_sources = \
+tests_sources = \
 	src/contact.c src/contact.h src/common.c \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/chat_session.c \
@@ -94,7 +80,7 @@ test_sources = \
 	tests/test_preferences.c \
 	tests/test_server_events.c \
 	tests/test_muc.c \
-    tests/testsuite.c
+	tests/testsuite.c
 
 main_source = src/main.c
 
@@ -114,71 +100,50 @@ c_sources = \
     src/plugins/c_plugins.h src/plugins/c_plugins.c \
     src/plugins/c_api.h src/plugins/c_api.c
 
-git_sources = \
-    src/gitversion.c
+git_include = src/gitversion.h
 
 otr3_sources = \
-    src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
+	src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
 
 otr4_sources = \
     src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
 if BUILD_PYTHON_API
-with_python_sources = $(core_sources) $(python_sources)
-tests_with_python_sources = $(test_sources) $(python_sources)
-else
-with_python_sources = $(core_sources)
-tests_with_python_sources = $(test_sources)
+core_sources += $(python_sources)
+tests_sources += $(python_sources)
 endif
 
 if BUILD_RUBY_API
-with_ruby_sources = $(with_python_sources) $(ruby_sources)
-tests_with_ruby_sources = $(tests_with_python_sources) $(ruby_sources)
-else
-with_ruby_sources = $(with_python_sources)
-tests_with_ruby_sources = $(tests_with_python_sources)
+core_sources += $(ruby_sources)
+tests_sources += $(ruby_sources)
 endif
 
 if BUILD_LUA_API
-with_lua_sources = $(with_ruby_sources) $(lua_sources)
-tests_with_lua_sources = $(tests_with_ruby_sources) $(lua_sources)
-else
-with_lua_sources = $(with_ruby_sources)
-test_with_lua_sources = $(tests_with_ruby_sources)
+core_sources += $(lua_sources)
+tests_sources += $(lua_sources)
 endif
 
 if BUILD_C_API
-with_c_sources = $(with_lua_sources) $(c_sources)
-tests_with_c_sources = $(tests_with_lua_sources) $(c_sources)
-else
-with_c_sources = $(with_lua_sources)
-test_with_c_sources = $(tests_with_lua_sources)
-endif
-
-if INCLUDE_GIT_VERSION
-with_git_sources = $(git_sources) $(with_c_sources)
-tests_with_git_sources = $(git_sources) $(tests_with_c_sources)
-else
-with_git_sources = $(with_c_sources)
-tests_with_git_sources = $(tests_with_c_sources)
+core_sources += $(c_sources)
+tests_sources += $(c_sources)
 endif
 
 if BUILD_OTR
 if BUILD_OTR3
-with_otr_sources = $(with_git_sources) $(otr3_sources)
-tests_with_otr_sources = $(tests_with_git_sources) $(otr3_sources)
+core_sources += $(otr3_sources)
+tests_sources += $(otr3_sources)
 endif
 if BUILD_OTR4
-with_otr_sources = $(with_git_sources) $(otr4_sources)
-tests_with_otr_sources = $(tests_with_git_sources) $(otr4_sources)
+core_sources += $(otr4_sources)
+tests_sources += $(otr4_sources)
 endif
-else
-with_otr_sources = $(with_git_sources)
-tests_with_otr_sources = $(tests_with_git_sources)
 endif
 
 bin_PROGRAMS = profanity
-profanity_SOURCES = $(with_otr_sources) $(main_source)
+profanity_SOURCES = $(core_sources) $(main_source)
+if INCLUDE_GIT_VERSION
+BUILT_SOURCES = $(git_include)
+endif
 
 if BUILD_C_API
 lib_LTLIBRARIES = libprofanity.la
@@ -191,7 +156,29 @@ endif
 
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
-tests_testsuite_SOURCES = $(tests_with_otr_sources)
+tests_testsuite_SOURCES = $(tests_sources)
 tests_testsuite_LDADD = -lcmocka
 
 man_MANS = docs/profanity.1
+
+if INCLUDE_GIT_VERSION
+$(git_include).in: .git/HEAD .git/index
+	rm -f $@
+	echo "#ifndef PROF_GIT_BRANCH" >> $@
+	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
+	echo "#endif" >> $@
+	echo "#ifndef PROF_GIT_REVISION" >> $@
+	echo "#define PROF_GIT_REVISION \"$(shell git log --pretty=format:'%h' -n 1)\"" >> $@
+	echo "#endif" >> $@
+
+#
+# Create $(git_include) atomically to catch possible race. The race can occur
+# when $(git_include) is generated in parallel with building of src/profanity.c.
+# So this hack allows to find and fix the problem earlier.
+#
+$(git_include): $(git_include).in
+	cp $< $@
+
+clean-local:
+	rm -f $(git_include) $(git_include).in
+endif

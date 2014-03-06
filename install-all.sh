@@ -1,6 +1,18 @@
-#!/bin/sh
+#!/bin/bash
+
+set -o errtrace
 
 STATUS=development
+
+error_handler()
+{
+        ERR_CODE=$?
+        echo "Error $ERR_CODE with command '$BASH_COMMAND' on line ${BASH_LINENO[0]}. Exiting."
+        exit $ERR_CODE
+
+}
+
+trap error_handler ERR
 
 debian_prepare()
 {
@@ -23,7 +35,7 @@ fedora_prepare()
     echo
 
     ARCH=`arch`
-    
+
     sudo yum -y install gcc git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH libXScrnSaver-devel.$ARCH libotr3-devel.$ARCH
 }
 
@@ -39,13 +51,11 @@ cygwin_prepare()
     mv apt-cyg /usr/local/bin/
 
     if [ -n "$CYG_MIRROR" ]; then
-        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel
     else
-        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel
 
     fi
-
-    ln -s /usr/bin/gcc-3.exe /usr/bin/gcc.exe
 
     export LIBRARY_PATH=/usr/local/lib/
 }

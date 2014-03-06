@@ -468,6 +468,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_myfp_shows_message_when_started),
         unit_test(cmd_otr_myfp_shows_message_when_connecting),
         unit_test(cmd_otr_myfp_shows_message_when_disconnecting),
+        unit_test(cmd_otr_myfp_shows_message_when_no_key),
         unit_test(cmd_otr_myfp_shows_my_fingerprint),
         unit_test(cmd_otr_theirfp_shows_message_when_in_console),
         unit_test(cmd_otr_theirfp_shows_message_when_in_muc),
@@ -475,6 +476,13 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_otr_theirfp_shows_message_when_in_duck),
         unit_test(cmd_otr_theirfp_shows_message_when_non_otr_chat_window),
         unit_test(cmd_otr_theirfp_shows_fingerprint),
+        unit_test(cmd_otr_start_shows_message_when_in_console),
+        unit_test(cmd_otr_start_shows_message_when_in_muc),
+        unit_test(cmd_otr_start_shows_message_when_in_private),
+        unit_test(cmd_otr_start_shows_message_when_in_duck),
+        unit_test(cmd_otr_start_shows_message_when_already_started),
+        unit_test(cmd_otr_start_shows_message_when_no_key),
+        unit_test(cmd_otr_start_sends_otr_query_message_to_current_recipeint),
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif

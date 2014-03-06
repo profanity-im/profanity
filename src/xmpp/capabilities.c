@@ -23,7 +23,7 @@
 #include "prof_config.h"
 
 #ifdef PROF_HAVE_GIT_VERSION
-#include "gitversion.c"
+#include "gitversion.h"
 #endif
 
 #include <stdlib.h>

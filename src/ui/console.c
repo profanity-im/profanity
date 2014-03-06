@@ -41,7 +41,7 @@
 #include "xmpp/bookmark.h"
 
 #ifdef PROF_HAVE_GIT_VERSION
-#include "gitversion.c"
+#include "gitversion.h"
 #endif
 
 static void _cons_splash_logo(void);

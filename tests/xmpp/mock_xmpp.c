@@ -81,6 +81,13 @@ _mock_bookmark_remove(const char *jid, gboolean autojoin)
     return (gboolean)mock();
 }
 
+static void
+_mock_message_send(const char * const msg, const char * const recipient)
+{
+    check_expected(msg);
+    check_expected(recipient);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -218,4 +225,12 @@ expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_autojoin
     expect_value(_mock_bookmark_remove, autojoin, expected_autojoin);
 
     will_return(_mock_bookmark_remove, removed);
+}
+
+void
+message_send_expect(char *message, char *recipient)
+{
+    message_send = _mock_message_send;
+    expect_string(_mock_message_send, msg, message);
+    expect_string(_mock_message_send, recipient, recipient);
 }
