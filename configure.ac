@@ -92,7 +92,7 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
         [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"; NCURSES="ncurses"],
         [AC_CHECK_LIB([ncursesw], [main],
             [LIBS="-lncursesw $LIBS" AC_DEFINE([HAVE_LIBNCURSESW], [1], [have ncursesw]) NCURSES_CFLAGS="$ncursesw_CFLAGS" NCURSES_LIBS="$ncursesw_LIBS" NCURSES="ncursesw"],
-            [AC_CHECK_LIB([ncurses], [main],
+            [AC_CHECK_LIB([ncurses], [main], [],
                 [LIBS="-lncurses $LIBS" AC_DEFINE([HAVE_LIBNCURSES], [1], [have ncurses]) NCURSES_CFLAGS="$ncurses_CFLAGS" NCURSES_LIBS="$ncurses_LIBS" NCURSES="ncurses"],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
@@ -112,20 +112,6 @@ AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
         [ncurses_cv_wget_wch=yes],
         [ncurses_cv_wget_wch=no])
     ])
-
-AS_IF([test "x$ncurses_cv_wget_wch" = xno], [
-    AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
-        [AC_LINK_IFELSE([AC_LANG_SOURCE([
-            #include <ncursesw/ncurses.h>
-            int main() {
-                (void)wget_wch(NULL, NULL);
-                return 0;
-            }
-            ])],
-            [ncurses_cv_wget_wch=yes],
-            [ncurses_cv_wget_wch=no])
-        ])])
-
 CFLAGS="$CFLAGS_RESTORE"
 
 AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
