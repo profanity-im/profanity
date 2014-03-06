@@ -18,7 +18,8 @@ AS_CASE([$host_os],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
 
-PACKAGE_STATUS="development"
+AS_IF([test "x$PLATFORM" = xosx], [PACKAGE_STATUS="brew"],
+    [PACKAGE_STATUS="development"])
 
 ### Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then
