@@ -1578,8 +1578,6 @@ gboolean
 cmd_join(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    ProfAccount *account = accounts_get_account(jabber_get_account_name());
-
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
         return TRUE;
@@ -1597,6 +1595,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     char *passwd = NULL;
     GString *room_str = g_string_new("");
     Jid *my_jid = jid_create(jabber_get_fulljid());
+    ProfAccount *account = accounts_get_account(jabber_get_account_name());
 
     // full room jid supplied (room@server)
     if (room_arg->localpart != NULL) {

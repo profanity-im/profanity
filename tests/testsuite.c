@@ -27,6 +27,7 @@
 #include "test_server_events.h"
 #include "test_cmd_alias.h"
 #include "test_cmd_bookmark.h"
+#include "test_cmd_join.h"
 #include "test_muc.h"
 
 int main(int argc, char* argv[]) {
@@ -486,6 +487,10 @@ int main(int argc, char* argv[]) {
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif
+        unit_test(cmd_join_shows_message_when_disconnecting),
+        unit_test(cmd_join_shows_message_when_connecting),
+        unit_test(cmd_join_shows_message_when_disconnected),
+        unit_test(cmd_join_shows_message_when_undefined),
     };
 
     return run_tests(all_tests);
