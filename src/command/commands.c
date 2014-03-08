@@ -1591,7 +1591,8 @@ cmd_join(gchar **args, struct cmd_help_t help)
 
     Jid *room_arg = jid_create(args[0]);
     if (room_arg == NULL) {
-        cons_show_error("Specified room has incorrect format");
+        cons_show_error("Specified room has incorrect format.");
+        cons_show("");
         return TRUE;
     }
 

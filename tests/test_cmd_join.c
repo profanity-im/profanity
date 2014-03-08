@@ -67,6 +67,23 @@ void cmd_join_shows_usage_when_no_args(void **state)
     free(help);
 }
 
+void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
+{
+    mock_cons_show_error();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "//@@/", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_cons_show_error("Specified room has incorrect format.");
+    expect_cons_show("");
+
+    gboolean result = cmd_join(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 /*
 void cmd_connect_shows_usage_when_no_server_value(void **state)
 {

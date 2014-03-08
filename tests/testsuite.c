@@ -492,6 +492,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_join_shows_message_when_disconnected),
         unit_test(cmd_join_shows_message_when_undefined),
         unit_test(cmd_join_shows_usage_when_no_args),
+        unit_test(cmd_join_shows_error_message_when_invalid_room_jid),
     };
 
     return run_tests(all_tests);
