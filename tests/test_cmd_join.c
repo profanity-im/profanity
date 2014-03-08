@@ -88,6 +88,35 @@ void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
     free(help);
 }
 
+void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
+{
+    char *account_name = "an_account";
+    char *room = "room";
+    char *nick = "bob";
+    char *account_service = "conference.server.org";
+    char *expected_room = "room@conference.server.org";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { room, "nick", nick, NULL };
+    ProfAccount *account = account_new(account_name, "user@server.org", NULL,
+        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL);
+
+    muc_init();
+
+    mock_connection_status(JABBER_CONNECTED);
+    mock_connection_account_name(account_name);
+    mock_accounts_get_account();
+    accounts_get_account_expect_and_return(account_name, account);
+
+    mock_presence_join_room();
+    presence_join_room_expect(expected_room, nick, NULL);
+    ui_room_join_expect(expected_room);
+
+    gboolean result = cmd_join(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_join_uses_supplied_nick(void **state)
 {
     char *account_name = "an_account";
@@ -108,7 +137,7 @@ void cmd_join_uses_supplied_nick(void **state)
     mock_presence_join_room();
     presence_join_room_expect(room, nick, NULL);
     ui_room_join_expect(room);
-    
+
     gboolean result = cmd_join(args, *help);
     assert_true(result);
 
