@@ -1601,8 +1601,6 @@ cmd_join(gchar **args, struct cmd_help_t help)
     char *nick = NULL;
     char *passwd = NULL;
     GString *room_str = g_string_new("");
-    const char *full_jid = jabber_get_fulljid();
-    Jid *my_jid = jid_create(full_jid);
     char *account_name = jabber_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
 
@@ -1668,7 +1666,6 @@ cmd_join(gchar **args, struct cmd_help_t help)
 
     jid_destroy(room_arg);
     jid_destroy(room_jid);
-    jid_destroy(my_jid);
     g_string_free(room_str, TRUE);
     account_free(account);
 
