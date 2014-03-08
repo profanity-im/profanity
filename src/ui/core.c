@@ -933,7 +933,7 @@ _ui_new_chat_win(const char * const to)
     if (window == NULL) {
         Jid *jid = jid_create(to);
 
-        if (muc_room_is_active(jid)) {
+        if (muc_room_is_active(jid->barejid)) {
             window = wins_new(to, WIN_PRIVATE);
         } else {
             window = wins_new(to, WIN_CHAT);
@@ -1042,7 +1042,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
     if (window == NULL) {
         Jid *jid = jid_create(to);
 
-        if (muc_room_is_active(jid)) {
+        if (muc_room_is_active(jid->barejid)) {
             window = wins_new(to, WIN_PRIVATE);
         } else {
             window = wins_new(to, WIN_CHAT);
@@ -1088,14 +1088,14 @@ _ui_outgoing_msg(const char * const from, const char * const to,
 }
 
 static void
-_ui_room_join(Jid *jid)
+_ui_room_join(char *room)
 {
-    ProfWin *window = wins_get_by_recipient(jid->barejid);
+    ProfWin *window = wins_get_by_recipient(room);
     int num = 0;
 
     // create new window
     if (window == NULL) {
-        window = wins_new(jid->barejid, WIN_MUC);
+        window = wins_new(room, WIN_MUC);
     }
 
     num = wins_get_num(window);

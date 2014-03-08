@@ -597,7 +597,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (from != NULL) {
         Jid *jidp = jid_create(from);
-        if (muc_room_is_active(jidp)) {
+        if (muc_room_is_active(jidp->barejid)) {
             char *nick = muc_get_room_nick(jidp->barejid);
             if (g_strcmp0(jidp->resourcepart, nick) == 0) {
                 return TRUE;

@@ -216,7 +216,7 @@ void handle_presence_error_when_nick_conflict_does_not_join_room(void **state)
 
     handle_presence_error(from, type, err_msg);
 
-    gboolean room_is_active = muc_room_is_active(jidp);
+    gboolean room_is_active = muc_room_is_active(jidp->barejid);
     assert_false(room_is_active);
 
     muc_close();

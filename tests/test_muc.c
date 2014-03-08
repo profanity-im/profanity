@@ -59,23 +59,20 @@ void test_muc_invite_count_5(void **state)
 
 void test_muc_room_is_not_active(void **state)
 {
-    Jid *jidp = jid_create("room@server.org/bob");
+    char *room = "room@server.org";
 
-    gboolean room_is_active = muc_room_is_active(jidp);
+    gboolean room_is_active = muc_room_is_active(room);
 
     assert_false(room_is_active);
-
-    jid_destroy(jidp);
 }
 
 void test_muc_room_is_active(void **state)
 {
-    Jid *jidp = jid_create("room@server.org/bob");
-    muc_join_room(jidp->barejid, jidp->resourcepart);
+    char *room = "room@server.org";
+    char *nick = "bob";
+    muc_join_room(room, nick);
 
-    gboolean room_is_active = muc_room_is_active(jidp);
+    gboolean room_is_active = muc_room_is_active(room);
 
     assert_true(room_is_active);
-
-    jid_destroy(jidp);
 }

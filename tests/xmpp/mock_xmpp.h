@@ -33,4 +33,7 @@ void expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_aut
 
 void message_send_expect(char *message, char *recipient);
 
+void mock_presence_join_room(void);
+void presence_join_room_expect(char *room, char *nick, char *passwd);
+
 #endif
