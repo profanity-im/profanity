@@ -59,4 +59,6 @@ void ui_current_print_line_expect(char *message);
 
 void ui_current_win_is_otr_returns(gboolean result);
 
+void ui_room_join_expect(char *room);
+
 #endif

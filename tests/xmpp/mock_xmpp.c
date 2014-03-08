@@ -88,6 +88,14 @@ _mock_message_send(const char * const msg, const char * const recipient)
     check_expected(recipient);
 }
 
+static void
+_mock_presence_join_room(char *room, char*nick, char *passwd)
+{
+    check_expected(room);
+    check_expected(nick);
+    check_expected(passwd);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -123,6 +131,12 @@ void
 mock_bookmark_remove(void)
 {
     bookmark_remove = _mock_bookmark_remove;
+}
+
+void
+mock_presence_join_room(void)
+{
+    presence_join_room = _mock_presence_join_room;
 }
 
 void
@@ -233,4 +247,16 @@ message_send_expect(char *message, char *recipient)
     message_send = _mock_message_send;
     expect_string(_mock_message_send, msg, message);
     expect_string(_mock_message_send, recipient, recipient);
+}
+
+void
+presence_join_room_expect(char *room, char *nick, char *passwd)
+{
+    expect_string(_mock_presence_join_room, room, room);
+    expect_string(_mock_presence_join_room, nick, nick);
+    if (passwd == NULL) {
+        expect_any(_mock_presence_join_room, passwd);
+    } else {
+        expect_string(_mock_presence_join_room, passwd, passwd);
+    }
 }

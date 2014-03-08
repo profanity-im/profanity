@@ -260,10 +260,9 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
 }
 
 static void
-_presence_join_room(Jid *jid, char * passwd)
+_presence_join_room(char *room, char *nick, char * passwd)
 {
-    assert(jid != NULL);
-    assert(jid->fulljid != NULL);
+    Jid *jid = jid_create_from_bare_and_resource(room, nick);
 
     log_debug("Sending room join presence to: %s", jid->fulljid);
     xmpp_ctx_t *ctx = connection_get_ctx();
@@ -285,6 +284,7 @@ _presence_join_room(Jid *jid, char * passwd)
     xmpp_stanza_release(presence);
 
     muc_join_room(jid->barejid, jid->resourcepart);
+    jid_destroy(jid);
 }
 
 static void

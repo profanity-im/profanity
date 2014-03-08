@@ -187,6 +187,12 @@ gboolean _mock_ui_current_win_is_otr(void)
     return (gboolean)mock();
 }
 
+static
+void _mock_ui_room_join(char *room)
+{
+    check_expected(room);
+}
+
 // bind mocks and stubs
 
 void
@@ -428,4 +434,11 @@ ui_current_win_is_otr_returns(gboolean result)
 {
     ui_current_win_is_otr = _mock_ui_current_win_is_otr;
     will_return(_mock_ui_current_win_is_otr, result);
+}
+
+void
+ui_room_join_expect(char *room)
+{
+    ui_room_join = _mock_ui_room_join;
+    expect_string(_mock_ui_room_join, room, room);
 }

@@ -1659,9 +1659,9 @@ cmd_join(gchar **args, struct cmd_help_t help)
     Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
 
     if (!muc_room_is_active(room_jid)) {
-        presence_join_room(room_jid, passwd);
+        presence_join_room(room, nick, passwd);
     }
-    ui_room_join(room_jid);
+    ui_room_join(room);
     muc_remove_invite(room);
 
     jid_destroy(room_arg);
