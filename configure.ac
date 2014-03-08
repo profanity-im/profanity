@@ -94,22 +94,23 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$LIBS $NCURSES_LIBS"
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lncurses -lcurl"])
 
 ### Check wide characters support in ncurses library
-###CFLAGS_RESTORE="$CFLAGS"
-###CFLAGS="$CFLAGS $NCURSES_CFLAGS"
-###AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
-###   [AC_LINK_IFELSE([AC_LANG_SOURCE([
-###       #include <ncurses.h>
-###       int main() {
-###           (void)wget_wch(NULL, NULL);
-###           return 0;
-###       }
-###       ])],
-###       [ncurses_cv_wget_wch=yes],
-###       [ncurses_cv_wget_wch=no])
-###   ])
-###CFLAGS="$CFLAGS_RESTORE"
+CFLAGS_RESTORE="$CFLAGS"
+CFLAGS="$CFLAGS $NCURSES_CFLAGS"
+AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
+   [AC_LINK_IFELSE([AC_LANG_SOURCE([
+       #include <ncurses.h>
+       int main() {
+           (void)wget_wch(NULL, NULL);
+           return 0;
+       }
+       ])],
+       [ncurses_cv_wget_wch=yes],
+       [ncurses_cv_wget_wch=no])
+   ])
+CFLAGS="$CFLAGS_RESTORE"
 
 ###AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
 ###    [AC_MSG_ERROR([ncurses does not support wide characters])])
@@ -205,8 +206,6 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
 LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
-
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lncurses -lcurl"])
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
