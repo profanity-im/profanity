@@ -7,3 +7,4 @@ void cmd_join_shows_error_message_when_invalid_room_jid(void **state);
 void cmd_join_uses_account_mucservice_when_no_service_specified(void **state);
 void cmd_join_uses_supplied_nick(void **state);
 void cmd_join_uses_account_nick_when_not_supplied(void **state);
+void cmd_join_uses_password_when_supplied(void **state);
