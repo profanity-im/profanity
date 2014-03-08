@@ -206,11 +206,13 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
 LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
 
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lncurses -lcurl"])
+
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
 ### Checks for library functions.
-AC_FUNC_MALLOC
+AS_IF([test "x$PLATFORM" != xosx], [AC_FUNC_MALLOC])
 AC_CHECK_FUNCS([atexit memset strdup strstr])
 
 AC_CONFIG_FILES([Makefile])
