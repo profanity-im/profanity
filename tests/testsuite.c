@@ -494,6 +494,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_join_shows_usage_when_no_args),
         unit_test(cmd_join_shows_error_message_when_invalid_room_jid),
         unit_test(cmd_join_uses_supplied_nick),
+        unit_test(cmd_join_uses_account_nick_when_not_supplied),
     };
 
     return run_tests(all_tests);

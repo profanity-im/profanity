@@ -114,3 +114,30 @@ void cmd_join_uses_supplied_nick(void **state)
 
     free(help);
 }
+
+void cmd_join_uses_account_nick_when_not_supplied(void **state)
+{
+    char *account_name = "an_account";
+    char *room = "room@conf.server.org";
+    char *account_nick = "a_nick";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { room, NULL };
+    ProfAccount *account = account_new(account_name, "user@server.org", NULL,
+        TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick);
+
+    muc_init();
+
+    mock_connection_status(JABBER_CONNECTED);
+    mock_connection_account_name(account_name);
+    mock_accounts_get_account();
+    accounts_get_account_expect_and_return(account_name, account);
+
+    mock_presence_join_room();
+    presence_join_room_expect(room, account_nick, NULL);
+    ui_room_join_expect(room);
+
+    gboolean result = cmd_join(args, *help);
+    assert_true(result);
+
+    free(help);
+}
