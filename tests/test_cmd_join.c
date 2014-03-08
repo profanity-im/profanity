@@ -48,6 +48,25 @@ void cmd_join_shows_message_when_undefined(void **state)
 {
     test_with_connection_status(JABBER_UNDEFINED);
 }
+
+void cmd_join_shows_usage_when_no_args(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_cons_show("Usage: some usage");
+    expect_cons_show("");
+
+    gboolean result = cmd_join(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 /*
 void cmd_connect_shows_usage_when_no_server_value(void **state)
 {

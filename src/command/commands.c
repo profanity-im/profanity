@@ -1583,6 +1583,12 @@ cmd_join(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    if (args[0] == NULL) {
+        cons_show("Usage: %s", help.usage);
+        cons_show("");
+        return TRUE;
+    }
+
     Jid *room_arg = jid_create(args[0]);
     if (room_arg == NULL) {
         cons_show_error("Specified room has incorrect format");
@@ -1594,8 +1600,10 @@ cmd_join(gchar **args, struct cmd_help_t help)
     char *nick = NULL;
     char *passwd = NULL;
     GString *room_str = g_string_new("");
-    Jid *my_jid = jid_create(jabber_get_fulljid());
-    ProfAccount *account = accounts_get_account(jabber_get_account_name());
+    const char *full_jid = jabber_get_fulljid();
+    Jid *my_jid = jid_create(full_jid);
+    char *account_name = jabber_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
 
     // full room jid supplied (room@server)
     if (room_arg->localpart != NULL) {
