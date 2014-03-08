@@ -113,7 +113,7 @@ tests_testsuite_LDADD = -lcmocka
 man_MANS = docs/profanity.1
 
 if INCLUDE_GIT_VERSION
-$(git_include).in: $(srcdir)/.git/HEAD $(srcdir)/.git/index
+$(git_include).in: .git/HEAD .git/index
 	rm -f $@
 	echo "#ifndef PROF_GIT_BRANCH" >> $@
 	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
