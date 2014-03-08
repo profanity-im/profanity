@@ -1656,16 +1656,13 @@ cmd_join(gchar **args, struct cmd_help_t help)
         nick = account->muc_nick;
     }
 
-    Jid *room_jid = jid_create_from_bare_and_resource(room, nick);
-
-    if (!muc_room_is_active(room_jid)) {
+    if (!muc_room_is_active(room)) {
         presence_join_room(room, nick, passwd);
     }
     ui_room_join(room);
     muc_remove_invite(room);
 
     jid_destroy(room_arg);
-    jid_destroy(room_jid);
     g_string_free(room_str, TRUE);
     account_free(account);
 

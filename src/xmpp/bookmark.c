@@ -300,7 +300,7 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
 
                 log_debug("Autojoin %s with nick=%s", jid, name);
                 room_jid = jid_create_from_bare_and_resource(jid, name);
-                if (!muc_room_is_active(room_jid)) {
+                if (!muc_room_is_active(room_jid->barejid)) {
                     presence_join_room(jid, name, NULL);
                     /* TODO: this should be removed after fixing #195 */
                     ui_room_join(jid);

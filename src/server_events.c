@@ -156,13 +156,11 @@ handle_room_invite(jabber_invite_t invite_type,
     const char * const invitor, const char * const room,
     const char * const reason)
 {
-    Jid *room_jid = jid_create(room);
-    if (!muc_room_is_active(room_jid) && !muc_invites_include(room)) {
+    if (!muc_room_is_active(room) && !muc_invites_include(room)) {
         cons_show_room_invite(invitor, room, reason);
         muc_add_invite(room);
         ui_current_page_off();
     }
-    jid_destroy(room_jid);
 }
 
 void

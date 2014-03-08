@@ -164,10 +164,10 @@ muc_leave_room(const char * const room)
  * Returns TRUE if the user is currently in the room
  */
 gboolean
-muc_room_is_active(Jid *jid)
+muc_room_is_active(const char * const room)
 {
     if (rooms != NULL) {
-        ChatRoom *chat_room = g_hash_table_lookup(rooms, jid->barejid);
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
         if (chat_room != NULL) {
             return TRUE;
