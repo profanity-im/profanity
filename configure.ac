@@ -193,21 +193,22 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$LIBS $NCURSES_LIBS"
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lncurses"])
 
 ### Check wide characters support in ncurses library
 CFLAGS_RESTORE="$CFLAGS"
 CFLAGS="$CFLAGS $NCURSES_CFLAGS"
 AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
-    [AC_LINK_IFELSE([AC_LANG_SOURCE([
-        #include <ncurses.h>
-        int main() {
-            (void)wget_wch(NULL, NULL);
-            return 0;
-        }
-        ])],
-        [ncurses_cv_wget_wch=yes],
-        [ncurses_cv_wget_wch=no])
-    ])
+   [AC_LINK_IFELSE([AC_LANG_SOURCE([
+       #include <ncurses.h>
+       int main() {
+           (void)wget_wch(NULL, NULL);
+           return 0;
+       }
+       ])],
+       [ncurses_cv_wget_wch=yes],
+       [ncurses_cv_wget_wch=no])
+   ])
 CFLAGS="$CFLAGS_RESTORE"
 
 AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
@@ -218,6 +219,7 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lcurl"])
 
 ### Check for desktop notification support
 ### Linux requires libnotify
@@ -311,7 +313,7 @@ AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
 ### Checks for library functions.
-AC_FUNC_MALLOC
+AS_IF([test "x$PLATFORM" != xosx], [AC_FUNC_MALLOC])
 AC_CHECK_FUNCS([atexit memset strdup strstr])
 
 AC_CONFIG_FILES([Makefile])
