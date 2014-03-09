@@ -1,7 +1,7 @@
 /*
  * console.c
  *
- * Copyright (C) 2012, 2013 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -180,7 +180,7 @@ _cons_about(void)
     }
 
     win_print_time(console, '-');
-    wprintw(console->win, "Copyright (C) 2012, 2013 James Booth <%s>.\n", PACKAGE_BUGREPORT);
+    wprintw(console->win, "Copyright (C) 2012 - 2014 James Booth <%s>.\n", PACKAGE_BUGREPORT);
     win_print_time(console, '-');
     wprintw(console->win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
     win_print_time(console, '-');
