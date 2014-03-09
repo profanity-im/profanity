@@ -94,6 +94,7 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$LIBS $NCURSES_LIBS"
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lncurses"])
 
 ### Check wide characters support in ncurses library
 CFLAGS_RESTORE="$CFLAGS"
@@ -119,6 +120,7 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lcurl"])
 
 ### Check for desktop notification support
 ### Linux requires libnotify
@@ -205,8 +207,6 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
 LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
-
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lncurses -lcurl"])
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
