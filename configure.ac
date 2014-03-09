@@ -112,8 +112,8 @@ AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
    ])
 CFLAGS="$CFLAGS_RESTORE"
 
-###AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
-###    [AC_MSG_ERROR([ncurses does not support wide characters])])
+AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
+    [AC_MSG_ERROR([ncurses does not support wide characters])])
 
 ### Check for other profanity dependencies
 PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
