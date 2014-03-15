@@ -477,8 +477,6 @@ _get_default_boolean(preference_t pref)
         case PREF_STATUSES:
         case PREF_AUTOAWAY_CHECK:
         case PREF_OTR_WARN:
-        case PREF_STATUSES_MUC:
-            return TRUE;
         default:
             return FALSE;
     }
@@ -495,6 +493,7 @@ _get_default_string(preference_t pref)
             return "redact";
         case PREF_STATUSES_CONSOLE:
         case PREF_STATUSES_CHAT:
+        case PREF_STATUSES_MUC:
             return "all";
         default:
             return NULL;

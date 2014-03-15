@@ -24,9 +24,10 @@ void statuses_chat_defaults_to_all(void **state)
     assert_string_equal("all", setting);
 }
 
-void statuses_muc_defaults_to_on(void **state)
+void statuses_muc_defaults_to_all(void **state)
 {
-    gboolean setting = prefs_get_boolean(PREF_STATUSES_MUC);
+    char *setting = prefs_get_string(PREF_STATUSES_MUC);
 
-    assert_true(setting);
+    assert_non_null(setting);
+    assert_string_equal("all", setting);
 }

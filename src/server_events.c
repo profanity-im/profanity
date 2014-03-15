@@ -427,8 +427,8 @@ handle_room_member_presence(const char * const room,
     gboolean updated = muc_add_to_roster(room, nick, show, status, caps_str);
 
     if (updated) {
-        gboolean show_muc = prefs_get_boolean(PREF_STATUSES_MUC);
-        if (show_muc) {
+        char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+        if (g_strcmp0(muc_status_pref, "all") == 0) {
             ui_room_member_presence(room, nick, show, status);
             ui_current_page_off();
         }
@@ -441,8 +441,12 @@ handle_room_member_online(const char * const room, const char * const nick,
     const char * const caps_str)
 {
     muc_add_to_roster(room, nick, show, status, caps_str);
-    ui_room_member_online(room, nick, show, status);
-    ui_current_page_off();
+
+    char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+    if (g_strcmp0(muc_status_pref, "none") != 0) {
+        ui_room_member_online(room, nick, show, status);
+        ui_current_page_off();
+    }
 }
 
 void
@@ -450,8 +454,12 @@ handle_room_member_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     muc_remove_from_roster(room, nick);
-    ui_room_member_offline(room, nick);
-    ui_current_page_off();
+
+    char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+    if (g_strcmp0(muc_status_pref, "none") != 0) {
+        ui_room_member_offline(room, nick);
+        ui_current_page_off();
+    }
 }
 
 void
