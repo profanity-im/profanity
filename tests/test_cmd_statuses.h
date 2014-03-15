@@ -8,5 +8,6 @@ void cmd_statuses_console_sets_none(void **state);
 void cmd_statuses_chat_sets_all(void **state);
 void cmd_statuses_chat_sets_online(void **state);
 void cmd_statuses_chat_sets_none(void **state);
-void cmd_statuses_muc_sets_on(void **state);
-void cmd_statuses_muc_sets_off(void **state);
+void cmd_statuses_muc_sets_all(void **state);
+void cmd_statuses_muc_sets_online(void **state);
+void cmd_statuses_muc_sets_none(void **state);

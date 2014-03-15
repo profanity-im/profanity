@@ -992,16 +992,11 @@ _cons_statuses_setting(void)
 {
     char *console = prefs_get_string(PREF_STATUSES_CONSOLE);
     char *chat = prefs_get_string(PREF_STATUSES_CHAT);
-    gboolean muc = prefs_get_boolean(PREF_STATUSES_MUC);
+    char *muc = prefs_get_string(PREF_STATUSES_MUC);
 
-    cons_show("Console statuses (/statuses)  : %s", console);
-    cons_show("Chat win statuses (/statuses) : %s", chat);
-
-    if (muc) {
-        cons_show("MUC statuses (/statuses)      : ON");
-    } else {
-        cons_show("MUC statuses (/statuses)      : OFF");
-    }
+    cons_show("Console statuses (/statuses)   : %s", console);
+    cons_show("Chat win statuses (/statuses)  : %s", chat);
+    cons_show("Chat room statuses (/statuses) : %s", muc);
 }
 
 static void

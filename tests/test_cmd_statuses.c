@@ -181,36 +181,55 @@ void cmd_statuses_chat_sets_none(void **state)
     free(help);
 }
 
-void cmd_statuses_muc_sets_on(void **state)
+void cmd_statuses_muc_sets_all(void **state)
 {
     mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "muc", "on", NULL };
+    gchar *args[] = { "muc", "all", NULL };
 
-    expect_cons_show("Chat room presence updates enabled.");
+    expect_cons_show("All presence updates will appear in chat room windows.");
 
     gboolean result = cmd_statuses(args, *help);
 
-    gboolean setting = prefs_get_boolean(PREF_STATUSES_MUC);
+    char *setting = prefs_get_string(PREF_STATUSES_MUC);
     assert_non_null(setting);
-    assert_true(setting);
+    assert_string_equal("all", setting);
     assert_true(result);
 
     free(help);
 }
 
-void cmd_statuses_muc_sets_off(void **state)
+void cmd_statuses_muc_sets_online(void **state)
 {
     mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "muc", "off", NULL };
+    gchar *args[] = { "muc", "online", NULL };
 
-    expect_cons_show("Chat room presence updates disabled.");
+    expect_cons_show("Only join/leave presence updates will appear in chat room windows.");
 
     gboolean result = cmd_statuses(args, *help);
 
-    gboolean setting = prefs_get_boolean(PREF_STATUSES_MUC);
-    assert_false(setting);
+    char *setting = prefs_get_string(PREF_STATUSES_MUC);
+    assert_non_null(setting);
+    assert_string_equal("online", setting);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_statuses_muc_sets_none(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "muc", "none", NULL };
+
+    expect_cons_show("Presence updates will not appear in chat room windows.");
+
+    gboolean result = cmd_statuses(args, *help);
+
+    char *setting = prefs_get_string(PREF_STATUSES_MUC);
+    assert_non_null(setting);
+    assert_string_equal("none", setting);
     assert_true(result);
 
     free(help);

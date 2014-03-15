@@ -787,21 +787,11 @@ static struct cmd_t command_defs[] =
         { "/statuses console|chat|muc setting",
           "----------------------------------",
           "Configure how presence changes are displayed in various windows.",
-          "Settings for the console:",
-          "  all - Show all presence changes in the console",
-          "  online - Show only when contacts log in/out.",
-          "  none - Don't show any presence changes in the console.",
-          "Settings for chat windows:",
-          "  all - Show all presence changes in the contact's chat window if one is open.",
-          "  online - Show only when contacts log in/out.",
-          "  none - Don't show any presence changes in the chat windows.",
-          "Settings for chat room windows:",
-          "  on - Show presence changes in chat rooms.",
-          "  off - Do not show presence changes in chat rooms.",
-          "The defaults are:",
-          "  console - all",
-          "  chat - all",
-          "  muc - on",
+          "Settings:",
+          "  all - Show all presence changes.",
+          "  online - Show only online/offline changes.",
+          "  none - Don't show any presence changes.",
+          "The default is 'all' for all windows.",
           NULL } } },
 
     { "/away",
@@ -886,7 +876,7 @@ static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete statuses_ac;
-static Autocomplete statuses_cons_chat_ac;
+static Autocomplete statuses_setting_ac;
 static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
@@ -1087,10 +1077,10 @@ cmd_init(void)
     autocomplete_add(statuses_ac, "chat");
     autocomplete_add(statuses_ac, "muc");
 
-    statuses_cons_chat_ac = autocomplete_new();
-    autocomplete_add(statuses_cons_chat_ac, "all");
-    autocomplete_add(statuses_cons_chat_ac, "online");
-    autocomplete_add(statuses_cons_chat_ac, "none");
+    statuses_setting_ac = autocomplete_new();
+    autocomplete_add(statuses_setting_ac, "all");
+    autocomplete_add(statuses_setting_ac, "online");
+    autocomplete_add(statuses_setting_ac, "none");
 
     alias_ac = autocomplete_new();
     autocomplete_add(alias_ac, "add");
@@ -1131,7 +1121,7 @@ cmd_uninit(void)
     autocomplete_free(otr_log_ac);
     autocomplete_free(connect_property_ac);
     autocomplete_free(statuses_ac);
-    autocomplete_free(statuses_cons_chat_ac);
+    autocomplete_free(statuses_setting_ac);
     autocomplete_free(alias_ac);
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
@@ -1254,7 +1244,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(statuses_ac);
-    autocomplete_reset(statuses_cons_chat_ac);
+    autocomplete_reset(statuses_setting_ac);
     autocomplete_reset(alias_ac);
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
@@ -1822,17 +1812,17 @@ _statuses_autocomplete(char *input, int *size)
 {
     char *result = NULL;
 
-    result = autocomplete_param_with_ac(input, size, "/statuses console", statuses_cons_chat_ac);
+    result = autocomplete_param_with_ac(input, size, "/statuses console", statuses_setting_ac);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/statuses chat", statuses_cons_chat_ac);
+    result = autocomplete_param_with_ac(input, size, "/statuses chat", statuses_setting_ac);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_with_func(input, size, "/statuses muc", prefs_autocomplete_boolean_choice);
+    result = autocomplete_param_with_ac(input, size, "/statuses muc", statuses_setting_ac);
     if (result != NULL) {
         return result;
     }
