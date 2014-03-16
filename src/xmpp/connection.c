@@ -435,7 +435,7 @@ _connection_handler(xmpp_conn_t * const conn,
         iq_add_handlers();
 
         roster_request();
-        bookmark_request();
+//        bookmark_request();
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {
