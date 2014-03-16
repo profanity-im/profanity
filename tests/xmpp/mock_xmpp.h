@@ -36,4 +36,7 @@ void message_send_expect(char *message, char *recipient);
 void mock_presence_join_room(void);
 void presence_join_room_expect(char *room, char *nick, char *passwd);
 
+void mock_roster_send_add_new(void);
+void roster_send_add_new_expect(char *jid, char *nick);
+
 #endif

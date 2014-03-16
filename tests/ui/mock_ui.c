@@ -171,6 +171,12 @@ void _mock_ui_room_join(char *room)
     check_expected(room);
 }
 
+static
+void _mock_cons_show_roster(GSList *list)
+{
+    check_expected(list);
+}
+
 // bind mocks and stubs
 
 void
@@ -274,6 +280,12 @@ void
 mock_ui_current_print_line(void)
 {
     ui_current_print_line = _mock_ui_current_print_line;
+}
+
+void
+mock_cons_show_roster(void)
+{
+    cons_show_roster = _mock_cons_show_roster;
 }
 
 // expectations
@@ -419,4 +431,10 @@ ui_room_join_expect(char *room)
 {
     ui_room_join = _mock_ui_room_join;
     expect_string(_mock_ui_room_join, room, room);
+}
+
+void
+cons_show_roster_expect(GSList *list)
+{
+    expect_any(_mock_cons_show_roster, list);
 }

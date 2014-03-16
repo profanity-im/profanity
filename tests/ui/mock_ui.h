@@ -61,4 +61,7 @@ void ui_current_win_is_otr_returns(gboolean result);
 
 void ui_room_join_expect(char *room);
 
+void mock_cons_show_roster(void);
+void cons_show_roster_expect(GSList *list);
+
 #endif

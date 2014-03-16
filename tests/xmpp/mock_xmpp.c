@@ -96,6 +96,13 @@ _mock_presence_join_room(char *room, char*nick, char *passwd)
     check_expected(passwd);
 }
 
+static void
+_mock_roster_send_add_new(const char *const barejid, const char * const name)
+{
+    check_expected(barejid);
+    check_expected(name);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -137,6 +144,12 @@ void
 mock_presence_join_room(void)
 {
     presence_join_room = _mock_presence_join_room;
+}
+
+void
+mock_roster_send_add_new(void)
+{
+    roster_send_add_new = _mock_roster_send_add_new;
 }
 
 void
@@ -259,4 +272,11 @@ presence_join_room_expect(char *room, char *nick, char *passwd)
     } else {
         expect_string(_mock_presence_join_room, passwd, passwd);
     }
+}
+
+void
+roster_send_add_new_expect(char *jid, char *nick)
+{
+    expect_string(_mock_roster_send_add_new, barejid, jid);
+    expect_string(_mock_roster_send_add_new, name, nick);
 }

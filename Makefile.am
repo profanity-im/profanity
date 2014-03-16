@@ -81,6 +81,7 @@ tests_sources = \
 	tests/test_preferences.c \
 	tests/test_server_events.c \
 	tests/test_muc.c \
+    tests/test_cmd_roster.c \
 	tests/testsuite.c
 
 main_source = src/main.c
