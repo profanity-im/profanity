@@ -85,7 +85,7 @@ static struct cmd_t command_defs[] =
           "-------------------------",
           "Use with no arguments to get a help summary.",
           "Supply an area to see help for commands related to specific features.",
-          "Supply a command (without the leading slash) to see help on that command.",
+          "Supply a command (without the leading slash) to see help for that command.",
           "",
           "Example : /help commands",
           "Example : /help presence",
@@ -99,7 +99,7 @@ static struct cmd_t command_defs[] =
         { "/about", "About Profanity.",
         { "/about",
           "------",
-          "Show versioning and license information.",
+          "Show version and license information.",
           NULL  } } },
 
     { "/connect",
