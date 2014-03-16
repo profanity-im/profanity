@@ -214,7 +214,7 @@ jabber_connect_with_details_expect_and_return(char *jid,
     expect_string(_mock_jabber_connect_with_details, jid, jid);
     expect_string(_mock_jabber_connect_with_details, passwd, password);
     if (altdomain == NULL) {
-        expect_any(_mock_jabber_connect_with_details, altdomain);
+        expect_value(_mock_jabber_connect_with_details, altdomain, NULL);
     } else {
         expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
     }
@@ -264,7 +264,7 @@ expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
     if (expected_nick != NULL) {
         expect_string(_mock_bookmark_add, nick, expected_nick);
     } else {
-        expect_any(_mock_bookmark_add, nick);
+        expect_value(_mock_bookmark_add, nick, NULL);
     }
     expect_value(_mock_bookmark_add, autojoin, expected_autojoin);
 
@@ -295,7 +295,7 @@ presence_join_room_expect(char *room, char *nick, char *passwd)
     expect_string(_mock_presence_join_room, room, room);
     expect_string(_mock_presence_join_room, nick, nick);
     if (passwd == NULL) {
-        expect_any(_mock_presence_join_room, passwd);
+        expect_value(_mock_presence_join_room, passwd, NULL);
     } else {
         expect_string(_mock_presence_join_room, passwd, passwd);
     }
