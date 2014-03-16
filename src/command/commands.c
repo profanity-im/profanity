@@ -1642,7 +1642,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
             }
             if (strcmp(opt1, "nick") == 0) {
                 nick = opt1val;
-            } else if (strcmp(opt1, "passwd") == 0) {
+            } else if (strcmp(opt1, "password") == 0) {
                 passwd = opt1val;
             } else {
                 cons_show("Usage: %s", help.usage);
@@ -1652,7 +1652,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
             if (opt2 != NULL) {
                 if (strcmp(opt2, "nick") == 0) {
                     nick = opt2val;
-                } else if (strcmp(opt2, "passwd") == 0) {
+                } else if (strcmp(opt2, "password") == 0) {
                     passwd = opt2val;
                 } else {
                     cons_show("Usage: %s", help.usage);

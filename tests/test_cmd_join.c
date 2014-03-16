@@ -180,7 +180,7 @@ void cmd_join_uses_password_when_supplied(void **state)
     char *account_service = "a_service";
     char *expected_room = "room@a_service";
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { room, "passwd", password, NULL };
+    gchar *args[] = { room, "password", password, NULL };
     ProfAccount *account = account_new(account_name, "user@server.org", NULL,
         TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, account_nick);
 
