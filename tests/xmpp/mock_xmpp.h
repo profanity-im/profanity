@@ -42,4 +42,7 @@ void roster_send_add_new_expect(char *jid, char *nick);
 void mock_roster_send_remove(void);
 void roster_send_remove_expect(char *jid);
 
+void mock_roster_send_name_change(void);
+void roster_send_name_change_expect(char *jid, char *name, GSList *groups);
+
 #endif

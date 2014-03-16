@@ -1200,49 +1200,41 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         GSList *list = roster_get_contacts();
         cons_show_roster(list);
         return TRUE;
-    }
 
     // add contact
-    if (strcmp(args[0], "add") == 0) {
-
-        if (args[1] == NULL) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
+    } else if (strcmp(args[0], "add") == 0) {
         char *jid = args[1];
-        char *name = args[2];
-
-        roster_send_add_new(jid, name);
-
+        if (jid == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            char *name = args[2];
+            roster_send_add_new(jid, name);
+        }
         return TRUE;
-    }
 
     // remove contact
-    if (strcmp(args[0], "remove") == 0) {
-
-        if (args[1] == NULL) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
+    } else if (strcmp(args[0], "remove") == 0) {
         char *jid = args[1];
-
-        roster_send_remove(jid);
-
+        if (jid == NULL) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            roster_send_remove(jid);
+        }
         return TRUE;
-    }
 
     // change nickname
-    if (strcmp(args[0], "nick") == 0) {
-
-        if (args[1] == NULL) {
+    } else if (strcmp(args[0], "nick") == 0) {
+        char *jid = args[1];
+        if (jid == NULL) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
         }
 
-        char *jid = args[1];
         char *name = args[2];
+        if (name == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
 
         // contact does not exist
         PContact contact = roster_get_contact(jid);
@@ -1256,17 +1248,37 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         GSList *groups = p_contact_groups(contact);
         roster_send_name_change(barejid, name, groups);
 
-        if (name == NULL) {
-            cons_show("Nickname for %s removed.", jid);
-        } else {
-            cons_show("Nickname for %s set to: %s.", jid, name);
-        }
+        cons_show("Nickname for %s set to: %s.", jid, name);
 
         return TRUE;
-    }
 
-    cons_show("Usage: %s", help.usage);
-    return TRUE;
+    // remove nickname
+    } else if (strcmp(args[0], "clearnick") == 0) {
+        char *jid = args[1];
+        if (jid == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        // contact does not exist
+        PContact contact = roster_get_contact(jid);
+        if (contact == NULL) {
+            cons_show("Contact not found in roster: %s", jid);
+            return TRUE;
+        }
+
+        const char *barejid = p_contact_barejid(contact);
+        roster_change_name(contact, NULL);
+        GSList *groups = p_contact_groups(contact);
+        roster_send_name_change(barejid, NULL, groups);
+
+        cons_show("Nickname for %s removed.", jid);
+
+        return TRUE;
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
 }
 
 gboolean

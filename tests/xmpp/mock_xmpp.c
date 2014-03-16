@@ -109,6 +109,15 @@ _mock_roster_send_remove(const char * const barejid)
     check_expected(barejid);
 }
 
+static void
+_mock_roster_send_name_change(const char * const barejid, const char * const new_name,
+    GSList *groups)
+{
+    check_expected(barejid);
+    check_expected(new_name);
+    check_expected(groups);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -162,6 +171,12 @@ void
 mock_roster_send_remove(void)
 {
     roster_send_remove = _mock_roster_send_remove;
+}
+
+void
+mock_roster_send_name_change(void)
+{
+    roster_send_name_change = _mock_roster_send_name_change;
 }
 
 void
@@ -297,4 +312,16 @@ void
 roster_send_remove_expect(char *jid)
 {
     expect_string(_mock_roster_send_remove, barejid, jid);
+}
+
+void
+roster_send_name_change_expect(char *jid, char *nick, GSList *groups)
+{
+    expect_string(_mock_roster_send_name_change, barejid, jid);
+    if (nick == NULL) {
+        expect_value(_mock_roster_send_name_change, new_name, NULL);
+    } else {
+        expect_string(_mock_roster_send_name_change, new_name, nick);
+    }
+    expect_memory(_mock_roster_send_name_change, groups, groups, sizeof(GSList));
 }

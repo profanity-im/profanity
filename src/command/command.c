@@ -1015,6 +1015,7 @@ cmd_init(void)
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, "add");
     autocomplete_add(roster_ac, "nick");
+    autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
 
     group_ac = autocomplete_new();
@@ -1561,6 +1562,10 @@ _roster_autocomplete(char *input, int *size)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, size, "/roster nick", roster_find_jid);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, size, "/roster clearnick", roster_find_jid);
     if (result != NULL) {
         return result;
     }
