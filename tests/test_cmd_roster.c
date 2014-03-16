@@ -68,3 +68,36 @@ void cmd_roster_shows_roster_when_no_args(void **state)
     free(help);
     roster_free();
 }
+
+void cmd_roster_add_shows_message_when_no_jid(void)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "add", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+    expect_cons_show("Usage: some usage");
+
+    gboolean result = cmd_roster(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_roster_add_sends_roster_add_request(void)
+{
+    char *jid = "bob@server.org";
+    char *nick = "bob";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", jid, nick, NULL };
+
+    mock_roster_send_add_new();
+    mock_connection_status(JABBER_CONNECTED);
+    roster_send_add_new_expect(jid, nick);
+
+    gboolean result = cmd_roster(args, *help);
+    assert_true(result);
+
+    free(help);
+}

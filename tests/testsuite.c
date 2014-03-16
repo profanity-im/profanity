@@ -507,6 +507,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_roster_shows_message_when_disconnected),
         unit_test(cmd_roster_shows_message_when_undefined),
         unit_test(cmd_roster_shows_roster_when_no_args),
+        unit_test(cmd_roster_add_shows_message_when_no_jid),
+        unit_test(cmd_roster_add_sends_roster_add_request),
     };
 
     return run_tests(all_tests);
