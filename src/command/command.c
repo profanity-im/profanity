@@ -236,18 +236,18 @@ static struct cmd_t command_defs[] =
 
     { "/join",
         cmd_join, parse_args, 1, 5, NULL,
-        { "/join room[@server] [nick value] [passwd value]", "Join a chat room.",
-        { "/join room[@server] [nick value] [passwd value]",
-          "--------------------------",
+        { "/join room[@server] [nick value] [password value]", "Join a chat room.",
+        { "/join room[@server] [nick value] [password value]",
+          "-------------------------------------------------",
           "Join a chat room at the conference server.",
           "If nick is specified you will join with this nickname.",
-          "Otherwise the account preference 'muc.nick' will be used which is the localpart of your JID (before the @).",
+          "Otherwise the account preference 'muc.nick' will be used which by default is the localpart of your JID (before the @).",
           "If no server is supplied, the account preference 'muc.service' is used, which is 'conference.<domain-part>' by default.",
           "If the room doesn't exist, and the server allows it, a new one will be created.",
           "",
           "Example : /join jdev@conference.jabber.org",
           "Example : /join jdev@conference.jabber.org nick mynick",
-          "Example : /join private@conference.jabber.org nick mynick passwd mypassword",
+          "Example : /join private@conference.jabber.org nick mynick password mypassword",
           "Example : /join jdev (as user@jabber.org will join jdev@conference.jabber.org)",
           NULL } } },
 
@@ -1071,7 +1071,7 @@ cmd_init(void)
 
     join_property_ac = autocomplete_new();
     autocomplete_add(join_property_ac, "nick");
-    autocomplete_add(join_property_ac, "passwd");
+    autocomplete_add(join_property_ac, "password");
 
     statuses_ac = autocomplete_new();
     autocomplete_add(statuses_ac, "console");
