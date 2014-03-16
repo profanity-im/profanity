@@ -39,4 +39,7 @@ void presence_join_room_expect(char *room, char *nick, char *passwd);
 void mock_roster_send_add_new(void);
 void roster_send_add_new_expect(char *jid, char *nick);
 
+void mock_roster_send_remove(void);
+void roster_send_remove_expect(char *jid);
+
 #endif

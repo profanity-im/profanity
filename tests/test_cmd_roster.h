@@ -5,3 +5,5 @@ void cmd_roster_shows_message_when_undefined(void **state);
 void cmd_roster_shows_roster_when_no_args(void **state);
 void cmd_roster_add_shows_message_when_no_jid(void **state);
 void cmd_roster_add_sends_roster_add_request(void **state);
+void cmd_roster_remove_shows_message_when_no_jid(void **state);
+void cmd_roster_remove_sends_roster_remove_request(void **state);

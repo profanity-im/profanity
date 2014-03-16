@@ -69,7 +69,7 @@ void cmd_roster_shows_roster_when_no_args(void **state)
     roster_free();
 }
 
-void cmd_roster_add_shows_message_when_no_jid(void)
+void cmd_roster_add_shows_message_when_no_jid(void **state)
 {
     mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -85,7 +85,7 @@ void cmd_roster_add_shows_message_when_no_jid(void)
     free(help);
 }
 
-void cmd_roster_add_sends_roster_add_request(void)
+void cmd_roster_add_sends_roster_add_request(void **state)
 {
     char *jid = "bob@server.org";
     char *nick = "bob";
@@ -95,6 +95,38 @@ void cmd_roster_add_sends_roster_add_request(void)
     mock_roster_send_add_new();
     mock_connection_status(JABBER_CONNECTED);
     roster_send_add_new_expect(jid, nick);
+
+    gboolean result = cmd_roster(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_roster_remove_shows_message_when_no_jid(void **state)
+{
+    mock_cons_show();
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    help->usage = "some usage";
+    gchar *args[] = { "remove", NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+    expect_cons_show("Usage: some usage");
+
+    gboolean result = cmd_roster(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_roster_remove_sends_roster_remove_request(void)
+{
+    char *jid = "bob@server.org";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "remove", jid, NULL };
+
+    mock_roster_send_remove();
+    mock_connection_status(JABBER_CONNECTED);
+    roster_send_remove_expect(jid);
 
     gboolean result = cmd_roster(args, *help);
     assert_true(result);

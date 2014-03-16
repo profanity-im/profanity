@@ -103,6 +103,12 @@ _mock_roster_send_add_new(const char *const barejid, const char * const name)
     check_expected(name);
 }
 
+static void
+_mock_roster_send_remove(const char * const barejid)
+{
+    check_expected(barejid);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -150,6 +156,12 @@ void
 mock_roster_send_add_new(void)
 {
     roster_send_add_new = _mock_roster_send_add_new;
+}
+
+void
+mock_roster_send_remove(void)
+{
+    roster_send_remove = _mock_roster_send_remove;
 }
 
 void
@@ -279,4 +291,10 @@ roster_send_add_new_expect(char *jid, char *nick)
 {
     expect_string(_mock_roster_send_add_new, barejid, jid);
     expect_string(_mock_roster_send_add_new, name, nick);
+}
+
+void
+roster_send_remove_expect(char *jid)
+{
+    expect_string(_mock_roster_send_remove, barejid, jid);
 }
