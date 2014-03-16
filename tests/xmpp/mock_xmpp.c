@@ -103,6 +103,21 @@ _mock_roster_send_add_new(const char *const barejid, const char * const name)
     check_expected(name);
 }
 
+static void
+_mock_roster_send_remove(const char * const barejid)
+{
+    check_expected(barejid);
+}
+
+static void
+_mock_roster_send_name_change(const char * const barejid, const char * const new_name,
+    GSList *groups)
+{
+    check_expected(barejid);
+    check_expected(new_name);
+    check_expected(groups);
+}
+
 void
 mock_jabber_connect_with_details(void)
 {
@@ -153,6 +168,18 @@ mock_roster_send_add_new(void)
 }
 
 void
+mock_roster_send_remove(void)
+{
+    roster_send_remove = _mock_roster_send_remove;
+}
+
+void
+mock_roster_send_name_change(void)
+{
+    roster_send_name_change = _mock_roster_send_name_change;
+}
+
+void
 bookmark_get_list_returns(GList *bookmarks)
 {
     bookmark_get_list = _mock_bookmark_get_list;
@@ -187,7 +214,7 @@ jabber_connect_with_details_expect_and_return(char *jid,
     expect_string(_mock_jabber_connect_with_details, jid, jid);
     expect_string(_mock_jabber_connect_with_details, passwd, password);
     if (altdomain == NULL) {
-        expect_any(_mock_jabber_connect_with_details, altdomain);
+        expect_value(_mock_jabber_connect_with_details, altdomain, NULL);
     } else {
         expect_string(_mock_jabber_connect_with_details, altdomain, altdomain);
     }
@@ -237,7 +264,7 @@ expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
     if (expected_nick != NULL) {
         expect_string(_mock_bookmark_add, nick, expected_nick);
     } else {
-        expect_any(_mock_bookmark_add, nick);
+        expect_value(_mock_bookmark_add, nick, NULL);
     }
     expect_value(_mock_bookmark_add, autojoin, expected_autojoin);
 
@@ -268,7 +295,7 @@ presence_join_room_expect(char *room, char *nick, char *passwd)
     expect_string(_mock_presence_join_room, room, room);
     expect_string(_mock_presence_join_room, nick, nick);
     if (passwd == NULL) {
-        expect_any(_mock_presence_join_room, passwd);
+        expect_value(_mock_presence_join_room, passwd, NULL);
     } else {
         expect_string(_mock_presence_join_room, passwd, passwd);
     }
@@ -279,4 +306,22 @@ roster_send_add_new_expect(char *jid, char *nick)
 {
     expect_string(_mock_roster_send_add_new, barejid, jid);
     expect_string(_mock_roster_send_add_new, name, nick);
+}
+
+void
+roster_send_remove_expect(char *jid)
+{
+    expect_string(_mock_roster_send_remove, barejid, jid);
+}
+
+void
+roster_send_name_change_expect(char *jid, char *nick, GSList *groups)
+{
+    expect_string(_mock_roster_send_name_change, barejid, jid);
+    if (nick == NULL) {
+        expect_value(_mock_roster_send_name_change, new_name, NULL);
+    } else {
+        expect_string(_mock_roster_send_name_change, new_name, nick);
+    }
+    expect_memory(_mock_roster_send_name_change, groups, groups, sizeof(GSList));
 }

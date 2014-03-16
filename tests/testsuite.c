@@ -509,6 +509,15 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_roster_shows_roster_when_no_args),
         unit_test(cmd_roster_add_shows_message_when_no_jid),
         unit_test(cmd_roster_add_sends_roster_add_request),
+        unit_test(cmd_roster_remove_shows_message_when_no_jid),
+        unit_test(cmd_roster_remove_sends_roster_remove_request),
+        unit_test(cmd_roster_nick_shows_message_when_no_jid),
+        unit_test(cmd_roster_nick_shows_message_when_no_nick),
+        unit_test(cmd_roster_nick_shows_message_when_no_contact_exists),
+        unit_test(cmd_roster_nick_sends_name_change_request),
+        unit_test(cmd_roster_clearnick_shows_message_when_no_jid),
+        unit_test(cmd_roster_clearnick_shows_message_when_no_contact_exists),
+        unit_test(cmd_roster_clearnick_sends_name_change_request_with_empty_nick),
     };
 
     return run_tests(all_tests);

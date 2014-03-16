@@ -143,22 +143,22 @@ static struct cmd_t command_defs[] =
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        { "/roster [add|remove|nick] [jid] [handle]", "Manage your roster.",
-        { "/roster [add|remove|nick] [jid] [handle]",
-          "----------------------------------------",
+        { "/roster [add|remove|nick|clearnick] [jid] [nickname]", "Manage your roster.",
+        { "/roster [add|remove|nick|clearnick] [jid] [nickname]",
+          "----------------------------------------------------",
           "View, add to, and remove from your roster.",
           "Passing no arguments lists all contacts in your roster.",
-          "The 'add' command will add a new item, the jid is required, the handle is an optional nickname",
-          "The 'remove' command removes a contact, the jid is required.",
-          "The 'nick' command changes a contacts nickname, the jid is required,",
-          "if no handle is supplied, the current one is removed.",
+          "The 'add' command will add a new item, jid is required, nickname is optional.",
+          "The 'remove' command removes a contact, jid is required.",
+          "The 'nick' command changes a contacts nickname, both jid and nickname are required,",
+          "The 'clearnick' command removes the current nickname, jid is required.",
           "",
           "Example : /roster (show your roster)",
           "Example : /roster add someone@contacts.org (add the contact)",
           "Example : /roster add someone@contacts.org Buddy (add the contact with nickname 'Buddy')",
           "Example : /roster remove someone@contacts.org (remove the contact)",
           "Example : /roster nick myfriend@chat.org My Friend",
-          "Example : /roster nick kai@server.com (clears handle)",
+          "Example : /roster clearnick kai@server.com (clears nickname)",
           NULL } } },
 
     { "/group",
@@ -1022,6 +1022,7 @@ cmd_init(void)
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, "add");
     autocomplete_add(roster_ac, "nick");
+    autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
 
     group_ac = autocomplete_new();
@@ -1549,6 +1550,10 @@ _roster_autocomplete(char *input, int *size)
 {
     char *result = NULL;
     result = autocomplete_param_with_func(input, size, "/roster nick", roster_find_jid);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, size, "/roster clearnick", roster_find_jid);
     if (result != NULL) {
         return result;
     }

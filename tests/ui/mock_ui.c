@@ -350,7 +350,7 @@ expect_cons_show_contact_online(PContact contact, Resource *resource, GDateTime 
     expect_memory(_mock_cons_show_contact_online, contact, contact, sizeof(contact));
     expect_memory(_mock_cons_show_contact_online, resource, resource, sizeof(Resource));
     if (last_activity == NULL) {
-        expect_any(_mock_cons_show_contact_online, last_activity);
+        expect_value(_mock_cons_show_contact_online, last_activity, NULL);
     } else {
         expect_memory(_mock_cons_show_contact_online, last_activity, last_activity, sizeof(last_activity));
     }
