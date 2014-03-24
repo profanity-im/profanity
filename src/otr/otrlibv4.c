@@ -29,13 +29,13 @@
 OtrlPolicy
 otrlib_policy(void)
 {
-    return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2 | OTRL_POLICY_ALLOW_V3;
+    return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2;
 }
 
 char *
 otrlib_start_query(void)
 {
-    return "?OTR?v23?";
+    return "?OTR?v2?";
 }
 
 static const char*
