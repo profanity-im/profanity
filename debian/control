@@ -3,9 +3,9 @@ Maintainer:        Florent Peterschmitt <florent@peterschmitt.fr>
 Section:           misc
 Priority:          optional
 Standards-Version: 3.9.2
-Build-Depends:     debhelper (>=8), libexpat1-dev, libexpat1, libssl-dev, libncursesw5-dev, libglib2.0-dev, libglib2.0-0, libcurl4-openssl-dev
+Build-Depends:     debhelper (>=8), libexpat1-dev, libexpat1, libssl-dev, libncursesw5-dev, libglib2.0-dev, libglib2.0-0, libcurl4-openssl-dev, libotr-dev
 
 Package:           profanity
-Depends:           ${shlibs:Depends}, ${misc:Depends}, libexpat1, libssl1.0.0, libncursesw5, libglib2.0-0, curl
+Depends:           ${shlibs:Depends}, ${misc:Depends}, libexpat1, libssl1.0.0, libncursesw5, libglib2.0-0, curl, libotr
 Description:       Console XMPP client
 Architecture:      all
