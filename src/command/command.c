@@ -64,7 +64,7 @@ static char * _account_autocomplete(char *input, int *size);
 static char * _who_autocomplete(char *input, int *size);
 static char * _roster_autocomplete(char *input, int *size);
 static char * _group_autocomplete(char *input, int *size);
-//static char * _bookmark_autocomplete(char *input, int *size);
+static char * _bookmark_autocomplete(char *input, int *size);
 static char * _otr_autocomplete(char *input, int *size);
 static char * _connect_autocomplete(char *input, int *size);
 static char * _statuses_autocomplete(char *input, int *size);
@@ -298,7 +298,7 @@ static struct cmd_t command_defs[] =
           "Example : /rooms conference.jabber.org",
           "Example : /rooms (if logged in as me@server.org, is equivalent to /rooms conference.server.org)",
           NULL } } },
-/*
+
     { "/bookmark",
         cmd_bookmark, parse_args, 0, 4, NULL,
         { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
@@ -307,7 +307,7 @@ static struct cmd_t command_defs[] =
           "---------------------------------------------------------------------------",
           "Manage bookmarks.",
           NULL } } },
-*/
+
     { "/disco",
         cmd_disco, parse_args, 1, 2, NULL,
         { "/disco command entity", "Service discovery.",
@@ -864,7 +864,7 @@ static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete group_ac;
-//static Autocomplete bookmark_ac;
+static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete connect_property_ac;
@@ -1035,12 +1035,12 @@ cmd_init(void)
     autocomplete_add(who_ac, "available");
     autocomplete_add(who_ac, "unavailable");
     autocomplete_add(who_ac, "any");
-/*
+
     bookmark_ac = autocomplete_new();
     autocomplete_add(bookmark_ac, "add");
     autocomplete_add(bookmark_ac, "list");
     autocomplete_add(bookmark_ac, "remove");
-*/
+
     otr_ac = autocomplete_new();
     autocomplete_add(otr_ac, "gen");
     autocomplete_add(otr_ac, "start");
@@ -1110,7 +1110,7 @@ cmd_uninit(void)
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
     autocomplete_free(group_ac);
-//    autocomplete_free(bookmark_ac);
+    autocomplete_free(bookmark_ac);
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(connect_property_ac);
@@ -1233,7 +1233,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
     autocomplete_reset(group_ac);
-//    autocomplete_reset(bookmark_ac);
+    autocomplete_reset(bookmark_ac);
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(connect_property_ac);
@@ -1242,7 +1242,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(alias_ac);
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
-//    bookmark_autocomplete_reset();
+    bookmark_autocomplete_reset();
 }
 
 // Command execution
@@ -1497,8 +1497,7 @@ _cmd_complete_parameters(char *input, int *size)
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
         _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
-//        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
-        _autoconnect_autocomplete, _otr_autocomplete,
+        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
         _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete,
         _join_autocomplete };
 
@@ -1614,7 +1613,7 @@ _group_autocomplete(char *input, int *size)
 
     return NULL;
 }
-/*
+
 static char *
 _bookmark_autocomplete(char *input, int *size)
 {
@@ -1642,7 +1641,6 @@ _bookmark_autocomplete(char *input, int *size)
 
     return result;
 }
-*/
 
 static char *
 _notify_autocomplete(char *input, int *size)
