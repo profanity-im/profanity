@@ -297,6 +297,8 @@ _ui_incoming_msg(const char * const from, const char * const message,
         notify_message(display_from, ui_index);
 
     free(display_from);
+
+    ui_current_page_off();
 }
 
 static void

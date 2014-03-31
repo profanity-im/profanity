@@ -225,7 +225,6 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     }
 
     ui_incoming_msg(from, newmessage, NULL, priv);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
@@ -246,7 +245,6 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         otr_free_message(newmessage);
 #else
     ui_incoming_msg(from, message, NULL, priv);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
@@ -264,7 +262,6 @@ handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     gboolean priv)
 {
     ui_incoming_msg(from, message, &tv_stamp, priv);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
