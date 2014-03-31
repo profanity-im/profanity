@@ -298,7 +298,11 @@ _ui_incoming_msg(const char * const from, const char * const message,
 
     free(display_from);
 
-    ui_current_page_off();
+    ProfWin *current = wins_get_current();
+    if (!current->paged) {
+        win_move_to_end(current);
+        win_refresh(current);
+    }
 }
 
 static void
@@ -858,7 +862,7 @@ static void
 _ui_current_page_off(void)
 {
     ProfWin *current = wins_get_current();
-    win_page_off(current);
+    win_move_to_end(current);
     win_refresh(current);
 }
 
@@ -1662,6 +1666,11 @@ _win_handle_page(const wint_t * const ch)
 
         current->paged = 1;
         wins_refresh_current();
+    }
+
+    // switch off page if last line visible
+    if ((y-1) - *page_start == page_space) {
+        current->paged = 0;
     }
 }
 

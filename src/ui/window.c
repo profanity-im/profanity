@@ -114,7 +114,7 @@ win_refresh(ProfWin *window)
 }
 
 void
-win_page_off(ProfWin *window)
+win_move_to_end(ProfWin *window)
 {
     window->paged = 0;
 

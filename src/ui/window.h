@@ -63,7 +63,7 @@ void win_vprint_line(ProfWin *self, const char show_char, int attrs,
 void win_print_line(ProfWin *self, const char show_char, int attrs,
     const char * const msg);
 void win_refresh(ProfWin *window);
-void win_page_off(ProfWin *window);
+void win_move_to_end(ProfWin *window);
 void win_print_time(ProfWin *window, char show_char);
 void win_presence_colour_on(ProfWin *window, const char * const presence);
 void win_presence_colour_off(ProfWin *window, const char * const presence);
