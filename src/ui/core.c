@@ -1331,6 +1331,12 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             jid_destroy(jidp);
         }
     }
+
+    ProfWin *current = wins_get_current();
+    if (!current->paged) {
+        win_move_to_end(current);
+        win_refresh(current);
+    }
 }
 
 static void

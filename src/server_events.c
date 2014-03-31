@@ -191,7 +191,6 @@ handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
     ui_room_message(room_jid, nick, message);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(jabber_get_fulljid());
