@@ -133,7 +133,7 @@ void _stub_ui_handle_recipient_not_found(const char * const recipient, const cha
 }
 
 static
-void _stub_ui_current_refresh(void)
+void _stub_ui_current_update_virtual(void)
 {
 }
 
@@ -265,9 +265,9 @@ stub_ui_handle_recipient_error(void)
 }
 
 void
-stub_ui_current_refresh(void)
+stub_ui_current_update_virtual(void)
 {
-    ui_current_refresh = _stub_ui_current_refresh;
+    ui_current_update_virtual = _stub_ui_current_update_virtual;
 }
 
 void

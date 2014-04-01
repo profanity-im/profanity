@@ -51,7 +51,7 @@ void titlebar_init_module(void);
 // ui startup and control
 void (*ui_init)(void);
 void (*ui_load_colours)(void);
-void (*ui_refresh)(void);
+void (*ui_update_screen)(void);
 void (*ui_close)(void);
 void (*ui_resize)(const int ch, const char * const input,
     const int size);
@@ -86,7 +86,7 @@ void (*ui_current_print_line)(const char * const msg, ...);
 void (*ui_current_print_formatted_line)(const char show_char, int attrs, const char * const msg, ...);
 void (*ui_current_error_line)(const char * const msg);
 void (*ui_current_page_off)(void);
-void (*ui_current_refresh)(void);
+void (*ui_current_update_virtual)(void);
 
 win_type_t (*ui_win_type)(int index);
 char * (*ui_recipient)(int index);
@@ -153,7 +153,7 @@ void (*create_status_bar)(void);
 void (*create_input_window)(void);
 
 // title bar actions
-void (*title_bar_refresh)(void);
+void (*title_bar_update_virtual)(void);
 void (*title_bar_resize)(void);
 void (*title_bar_console)(void);
 void (*title_bar_set_presence)(contact_presence_t presence);
@@ -233,7 +233,7 @@ void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime
 void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
 
 // status bar actions
-void (*status_bar_refresh)(void);
+void (*status_bar_update_virtual)(void);
 void (*status_bar_resize)(void);
 void (*status_bar_clear)(void);
 void (*status_bar_clear_message)(void);

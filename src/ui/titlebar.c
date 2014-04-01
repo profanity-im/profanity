@@ -82,7 +82,7 @@ _title_bar_resize(void)
 }
 
 static void
-_title_bar_refresh(void)
+_title_bar_update_virtual(void)
 {
     if (current_recipient != NULL) {
 
@@ -264,7 +264,7 @@ titlebar_init_module(void)
     create_title_bar = _create_title_bar;
     title_bar_console = _title_bar_console;
     title_bar_resize = _title_bar_resize;
-    title_bar_refresh = _title_bar_refresh;
+    title_bar_update_virtual = _title_bar_update_virtual;
     title_bar_set_presence = _title_bar_set_presence;
     title_bar_set_recipient = _title_bar_set_recipient;
     title_bar_set_typing = _title_bar_set_typing;

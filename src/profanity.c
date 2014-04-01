@@ -70,7 +70,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     char inp[INP_WIN_MAX];
     int size = 0;
 
-    ui_refresh();
+    ui_update_screen();
 
     if (account_name != NULL) {
       char *cmd = "/connect";
@@ -101,7 +101,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             }
 
             ui_handle_special_keys(&ch, inp, size);
-            ui_refresh();
+            ui_update_screen();
             jabber_process_events();
 
             ch = inp_get_char(inp, &size);

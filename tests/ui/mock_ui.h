@@ -49,7 +49,7 @@ void mock_current_win_type(win_type_t type);
 void mock_ui_current_recipient(void);
 void ui_current_recipient_returns(char *jid);
 
-void stub_ui_current_refresh(void);
+void stub_ui_current_update_virtual(void);
 
 void mock_ui_current_print_formatted_line(void);
 void ui_current_print_formatted_line_expect(char show_char, int attrs, char *message);
