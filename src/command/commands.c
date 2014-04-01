@@ -530,12 +530,10 @@ gboolean
 cmd_win(gchar **args, struct cmd_help_t help)
 {
     int num = atoi(args[0]);
-    if (ui_win_exists(num)) {
-        ui_switch_win(num);
-    } else {
+    gboolean switched = ui_switch_win(num);
+    if (switched == FALSE) {
         cons_show("Window %d does not exist.", num);
     }
-
     return TRUE;
 }
 

@@ -178,16 +178,10 @@ void _mock_cons_show_roster(GSList *list)
 }
 
 static
-gboolean _mock_ui_win_exists(int index)
-{
-    check_expected(index);
-    return (gboolean)mock();
-}
-
-static
-void _mock_ui_switch_win(const int i)
+gboolean _mock_ui_switch_win(const int i)
 {
     check_expected(i);
+    return (gboolean)mock();
 }
 
 // bind mocks and stubs
@@ -298,12 +292,6 @@ void
 mock_cons_show_roster(void)
 {
     cons_show_roster = _mock_cons_show_roster;
-}
-
-void
-mock_ui_win_exists(void)
-{
-    ui_win_exists = _mock_ui_win_exists;
 }
 
 // expectations
@@ -458,15 +446,9 @@ cons_show_roster_expect(GSList *list)
 }
 
 void
-ui_win_exists_expect_and_return(int given_index, gboolean result)
-{
-    expect_value(_mock_ui_win_exists, index, given_index);
-    will_return(_mock_ui_win_exists, result);
-}
-
-void
-ui_switch_win_expect(int given_i)
+ui_switch_win_expect_and_return(int given_i, gboolean result)
 {
     ui_switch_win = _mock_ui_switch_win;
     expect_value(_mock_ui_switch_win, i, given_i);
+    will_return(_mock_ui_switch_win, result);
 }

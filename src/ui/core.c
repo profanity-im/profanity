@@ -531,12 +531,12 @@ _get_recipient_string(ProfWin *window)
     return result;
 }
 
-static void
+static gboolean
 _ui_switch_win(const int i)
 {
-    ui_current_page_off();
-    ProfWin *new_current = wins_get_by_num(i);
-    if (new_current != NULL) {
+    if (ui_win_exists(i)) {
+        ui_current_page_off();
+        ProfWin *new_current = wins_get_by_num(i);
         wins_set_current_by_num(i);
         ui_current_page_off();
 
@@ -554,6 +554,9 @@ _ui_switch_win(const int i)
             status_bar_active(i);
         }
         wins_update_virtual_current();
+        return TRUE;
+    } else {
+        return FALSE;
     }
 }
 
