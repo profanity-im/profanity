@@ -99,7 +99,7 @@ handle_login_account_success(char *account_name)
     log_info("%s logged in successfully", account->jid);
     ui_current_page_off();
     status_bar_print_message(account->jid);
-    status_bar_refresh();
+    status_bar_update_virtual();
 
     account_free(account);
 }
@@ -199,7 +199,6 @@ handle_room_message(const char * const room_jid, const char * const nick,
     }
 
     ui_room_message(room_jid, nick, new_message);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(jabber_get_fulljid());
@@ -246,7 +245,6 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     }
 
     ui_incoming_msg(from, plugin_message, NULL, priv);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
@@ -277,7 +275,6 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     }
 
     ui_incoming_msg(from, plugin_message, NULL, priv);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
@@ -309,7 +306,6 @@ handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     }
 
     ui_incoming_msg(from, new_message, &tv_stamp, priv);
-    ui_current_page_off();
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);

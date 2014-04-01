@@ -49,7 +49,7 @@ void mock_current_win_type(win_type_t type);
 void mock_ui_current_recipient(void);
 void ui_current_recipient_returns(char *jid);
 
-void stub_ui_current_refresh(void);
+void stub_ui_current_update_virtual(void);
 
 void mock_ui_current_print_formatted_line(void);
 void ui_current_print_formatted_line_expect(char show_char, int attrs, char *message);
@@ -63,5 +63,7 @@ void ui_room_join_expect(char *room);
 
 void mock_cons_show_roster(void);
 void cons_show_roster_expect(GSList *list);
+
+void ui_switch_win_expect_and_return(int given_i, gboolean result);
 
 #endif

@@ -85,7 +85,7 @@ _create_status_bar(void)
 }
 
 static void
-_status_bar_refresh(void)
+_status_bar_update_virtual(void)
 {
     GDateTime *now_time = g_date_time_new_now_local();
     GTimeSpan elapsed = g_date_time_difference(now_time, last_time);
@@ -426,7 +426,7 @@ void
 statusbar_init_module(void)
 {
     create_status_bar = _create_status_bar;
-    status_bar_refresh = _status_bar_refresh;
+    status_bar_update_virtual = _status_bar_update_virtual;
     status_bar_resize = _status_bar_resize;
     status_bar_set_all_inactive = _status_bar_set_all_inactive;
     status_bar_current = _status_bar_current;

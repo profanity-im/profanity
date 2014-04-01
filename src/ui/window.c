@@ -106,7 +106,7 @@ win_vprint_line(ProfWin *window, const char show_char, int attrs,
 }
 
 void
-win_refresh(ProfWin *window)
+win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -114,7 +114,7 @@ win_refresh(ProfWin *window)
 }
 
 void
-win_page_off(ProfWin *window)
+win_move_to_end(ProfWin *window)
 {
     window->paged = 0;
 

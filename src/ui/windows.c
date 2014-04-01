@@ -197,7 +197,7 @@ wins_close_by_num(int i)
     if (i != 1) {
         if (i == current) {
             current = 1;
-            wins_refresh_current();
+            wins_update_virtual_current();
         }
         g_hash_table_remove(windows, GINT_TO_POINTER(i));
         status_bar_inactive(i);
@@ -205,10 +205,10 @@ wins_close_by_num(int i)
 }
 
 void
-wins_refresh_current(void)
+wins_update_virtual_current(void)
 {
     ProfWin *window = wins_get_current();
-    win_refresh(window);
+    win_update_virtual(window);
 }
 
 void
@@ -216,7 +216,7 @@ wins_clear_current(void)
 {
     ProfWin *window = wins_get_current();
     werase(window->win);
-    wins_refresh_current();
+    wins_update_virtual_current();
 }
 
 gboolean
@@ -283,10 +283,10 @@ wins_resize_all(void)
 }
 
 void
-wins_refresh_console(void)
+wins_update_virtual_console(void)
 {
     if (current == 0) {
-        wins_refresh_current();
+        wins_update_virtual_current();
     }
 }
 
@@ -356,7 +356,7 @@ wins_lost_connection(void)
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
-                wins_refresh_current();
+                wins_update_virtual_current();
             }
         }
         curr = g_list_next(curr);

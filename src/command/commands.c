@@ -531,12 +531,10 @@ gboolean
 cmd_win(gchar **args, struct cmd_help_t help)
 {
     int num = atoi(args[0]);
-    if (ui_win_exists(num)) {
-        ui_switch_win(num);
-    } else {
+    gboolean switched = ui_switch_win(num);
+    if (switched == FALSE) {
         cons_show("Window %d does not exist.", num);
     }
-
     return TRUE;
 }
 
@@ -2668,7 +2666,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "warn") == 0) {
         gboolean result =  _cmd_set_boolean_preference(args[1], help,
             "OTR warning message", PREF_OTR_WARN);
-        ui_current_refresh();
+        ui_current_update_virtual();
         return result;
     } else if (strcmp(args[0], "libver") == 0) {
         char *version = otr_libotr_version();

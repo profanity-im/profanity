@@ -45,7 +45,7 @@
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
 
-#define _inp_win_refresh() pnoutrefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
+#define _inp_win_update_virtual() pnoutrefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
 
 static WINDOW *inp_win;
 static int pad_start = 0;
@@ -71,7 +71,7 @@ _create_input_window(void)
     wbkgd(inp_win, COLOUR_INPUT_TEXT);
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
-    _inp_win_refresh();
+    _inp_win_update_virtual();
 }
 
 static void
@@ -89,7 +89,7 @@ _inp_win_resize(const char * const input, const int size)
         }
     }
 
-    _inp_win_refresh();
+    _inp_win_update_virtual();
 }
 
 static void
@@ -165,7 +165,7 @@ _inp_get_char(char *input, int *size)
 
                 if (inp_x - pad_start > cols-3) {
                     pad_start++;
-                    _inp_win_refresh();
+                    _inp_win_update_virtual();
                 }
 
             // otherwise just append
@@ -189,7 +189,7 @@ _inp_get_char(char *input, int *size)
                     getmaxyx(stdscr, rows, cols);
                     if (display_size - pad_start > cols-2) {
                         pad_start++;
-                        _inp_win_refresh();
+                        _inp_win_update_virtual();
                     }
                 }
             }
@@ -207,7 +207,7 @@ static void
 _inp_get_password(char *passwd)
 {
     _clear_input();
-    _inp_win_refresh();
+    _inp_win_update_virtual();
     doupdate();
     noecho();
     mvwgetnstr(inp_win, 0, 1, passwd, MAX_PASSWORD_SIZE);
@@ -219,7 +219,7 @@ _inp_get_password(char *passwd)
 static void
 _inp_put_back(void)
 {
-    _inp_win_refresh();
+    _inp_win_update_virtual();
 }
 
 static void
@@ -240,7 +240,7 @@ _inp_win_reset(void)
 {
     _clear_input();
     pad_start = 0;
-    _inp_win_refresh();
+    _inp_win_update_virtual();
 }
 
 static void
@@ -316,7 +316,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 pad_start = 0;
             }
 
-            _inp_win_refresh();
+            _inp_win_update_virtual();
         }
         return 1;
 
@@ -358,7 +358,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
         // if gone off screen to right, jump right (half a screen worth)
         if (inp_x > pad_start + cols) {
             pad_start = pad_start + (cols / 2);
-            _inp_win_refresh();
+            _inp_win_update_virtual();
         }
 
         return 1;
@@ -444,7 +444,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 // current position off screen to left
                 if (inp_x - 1 < pad_start) {
                     pad_start--;
-                    _inp_win_refresh();
+                    _inp_win_update_virtual();
                 }
             }
             return 1;
@@ -459,7 +459,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 // current position off screen to right
                 if ((inp_x + 1 - pad_start) >= cols) {
                     pad_start++;
-                    _inp_win_refresh();
+                    _inp_win_update_virtual();
                 }
             }
             return 1;
@@ -494,7 +494,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             }
             wmove(inp_win, 0, 0);
             pad_start = 0;
-            _inp_win_refresh();
+            _inp_win_update_virtual();
             return 1;
 
         case KEY_END:
@@ -562,7 +562,7 @@ _handle_backspace(int display_size, int inp_x, int *size, char *input)
                 pad_start = 0;
             }
 
-            _inp_win_refresh();
+            _inp_win_update_virtual();
         }
     }
 
@@ -674,7 +674,7 @@ _handle_alt_key(char *input, int *size, int key)
                     pad_start = 0;
                 }
 
-                _inp_win_refresh();
+                _inp_win_update_virtual();
             }
 
             return 1;
@@ -691,7 +691,7 @@ _go_to_end(int display_size)
     wmove(inp_win, 0, display_size);
     if (display_size > cols-2) {
         pad_start = display_size - cols + 1;
-        _inp_win_refresh();
+        _inp_win_update_virtual();
     }
 }
 

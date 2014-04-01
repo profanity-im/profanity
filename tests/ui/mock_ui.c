@@ -133,7 +133,7 @@ void _stub_ui_handle_recipient_not_found(const char * const recipient, const cha
 }
 
 static
-void _stub_ui_current_refresh(void)
+void _stub_ui_current_update_virtual(void)
 {
 }
 
@@ -177,13 +177,19 @@ void _mock_cons_show_roster(GSList *list)
     check_expected(list);
 }
 
+static
+gboolean _mock_ui_switch_win(const int i)
+{
+    check_expected(i);
+    return (gboolean)mock();
+}
+
 // bind mocks and stubs
 
 void
 mock_cons_show(void)
 {
     cons_show = _mock_cons_show;
-
 }
 
 void
@@ -265,9 +271,9 @@ stub_ui_handle_recipient_error(void)
 }
 
 void
-stub_ui_current_refresh(void)
+stub_ui_current_update_virtual(void)
 {
-    ui_current_refresh = _stub_ui_current_refresh;
+    ui_current_update_virtual = _stub_ui_current_update_virtual;
 }
 
 void
@@ -437,4 +443,12 @@ void
 cons_show_roster_expect(GSList *list)
 {
     expect_any(_mock_cons_show_roster, list);
+}
+
+void
+ui_switch_win_expect_and_return(int given_i, gboolean result)
+{
+    ui_switch_win = _mock_ui_switch_win;
+    expect_value(_mock_ui_switch_win, i, given_i);
+    will_return(_mock_ui_switch_win, result);
 }
