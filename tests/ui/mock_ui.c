@@ -177,6 +177,13 @@ void _mock_cons_show_roster(GSList *list)
     check_expected(list);
 }
 
+static
+gboolean _mock_ui_win_exists(int index)
+{
+    check_expected(index);
+    return (gboolean)mock();
+}
+
 // bind mocks and stubs
 
 void
@@ -286,6 +293,12 @@ void
 mock_cons_show_roster(void)
 {
     cons_show_roster = _mock_cons_show_roster;
+}
+
+void
+mock_ui_win_exists(void)
+{
+    ui_win_exists = _mock_ui_win_exists;
 }
 
 // expectations
@@ -437,4 +450,11 @@ void
 cons_show_roster_expect(GSList *list)
 {
     expect_any(_mock_cons_show_roster, list);
+}
+
+void
+ui_win_exists_expect_and_return(int given_index, gboolean result)
+{
+    expect_value(_mock_ui_win_exists, index, given_index);
+    will_return(_mock_ui_win_exists, result);
 }

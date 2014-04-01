@@ -64,4 +64,7 @@ void ui_room_join_expect(char *room);
 void mock_cons_show_roster(void);
 void cons_show_roster_expect(GSList *list);
 
+void mock_ui_win_exists(void);
+void ui_win_exists_expect_and_return(int given_index, gboolean result);
+
 #endif
