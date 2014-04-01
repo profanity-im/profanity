@@ -42,7 +42,7 @@ api_cons_show(const char * const message)
     if (message != NULL) {
         cons_show("%s", message);
         ui_current_page_off();
-        ui_refresh();
+        ui_update_screen();
     }
 }
 
