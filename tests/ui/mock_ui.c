@@ -184,13 +184,18 @@ gboolean _mock_ui_win_exists(int index)
     return (gboolean)mock();
 }
 
+static
+void _mock_ui_switch_win(const int i)
+{
+    check_expected(i);
+}
+
 // bind mocks and stubs
 
 void
 mock_cons_show(void)
 {
     cons_show = _mock_cons_show;
-
 }
 
 void
@@ -457,4 +462,11 @@ ui_win_exists_expect_and_return(int given_index, gboolean result)
 {
     expect_value(_mock_ui_win_exists, index, given_index);
     will_return(_mock_ui_win_exists, result);
+}
+
+void
+ui_switch_win_expect(int given_i)
+{
+    ui_switch_win = _mock_ui_switch_win;
+    expect_value(_mock_ui_switch_win, i, given_i);
 }

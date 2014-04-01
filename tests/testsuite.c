@@ -521,6 +521,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_roster_clearnick_sends_name_change_request_with_empty_nick),
 
         unit_test(cmd_win_shows_message_when_win_doesnt_exist),
+        unit_test(cmd_win_switches_to_given_win_when_exists),
     };
 
     return run_tests(all_tests);
