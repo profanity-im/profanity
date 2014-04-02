@@ -355,10 +355,6 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
     if (win == NULL) {
         g_string_printf(msg, "Recipient %s not found: %s", recipient, err_msg);
         cons_show_error(msg->str);
-        win = wins_get_current();
-        if (win->type != WIN_CONSOLE) {
-            win_print_line(win, '!', COLOUR_ERROR, msg->str);
-        }
 
     // intended recipient was invalid chat room
     } else if (win->type == WIN_MUC) {
