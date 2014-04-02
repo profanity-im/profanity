@@ -192,10 +192,10 @@ process_input(char *inp)
 
     // habdle command if input starts with a '/'
     } else if (inp[0] == '/') {
-        char inp_cpy[strlen(inp) + 1];
-        strcpy(inp_cpy, inp);
+        char *inp_cpy = strdup(inp);
         char *command = strtok(inp_cpy, " ");
         result = cmd_execute(command, inp);
+        free(inp_cpy);
 
     // call a default handler if input didn't start with '/'
     } else {

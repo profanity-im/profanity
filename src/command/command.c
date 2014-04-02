@@ -1169,7 +1169,6 @@ cmd_autocomplete(char *input, int *size)
 {
     int i = 0;
     char *found = NULL;
-    char *auto_msg = NULL;
     char inp_cpy[*size];
 
     // autocomplete command
@@ -1180,8 +1179,7 @@ cmd_autocomplete(char *input, int *size)
         inp_cpy[i] = '\0';
         found = autocomplete_complete(commands_ac, inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc(strlen(found) + 1);
-            strcpy(auto_msg, found);
+            char *auto_msg = strdup(found);
             inp_replace_input(input, auto_msg, size);
             free(auto_msg);
             free(found);

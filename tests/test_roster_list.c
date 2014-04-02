@@ -156,8 +156,7 @@ void find_first_exists(void **state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char *search = (char *) malloc(2 * sizeof(char));
-    strcpy(search, "B");
+    char *search = strdup("B");
 
     char *result = roster_find_contact(search);
     assert_string_equal("Bob", result);

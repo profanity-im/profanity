@@ -193,14 +193,14 @@ _notify(const char * const message, int timeout,
     nid.uVersion = NOTIFYICON_VERSION;
     //nid.uCallbackMessage = WM_MYMESSAGE;
     nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    strcpy(nid.szTip, "Tray Icon");
+    strncpy(nid.szTip, "Tray Icon", 10);
     nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     Shell_NotifyIcon(NIM_ADD, &nid);
 
     // For a Ballon Tip
     nid.uFlags = NIF_INFO;
-    strcpy(nid.szInfoTitle, "Profanity"); // Title
-    strcpy(nid.szInfo, message); // Copy Tip
+    strncpy(nid.szInfoTitle, "Profanity", 10); // Title
+    strncpy(nid.szInfo, message, 256); // Copy Tip
     nid.uTimeout = timeout;  // 3 Seconds
     nid.dwInfoFlags = NIIF_INFO;
 

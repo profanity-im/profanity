@@ -277,8 +277,7 @@ _status_bar_print_message(const char * const msg)
     if (message != NULL) {
         free(message);
     }
-    message = (char *) malloc(strlen(msg) + 1);
-    strcpy(message, msg);
+    message = strdup(msg);
     mvwprintw(status_bar, 0, 10, message);
 
     int cols = getmaxx(stdscr);

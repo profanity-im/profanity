@@ -226,7 +226,7 @@ static void
 _inp_replace_input(char *input, const char * const new_input, int *size)
 {
     int display_size;
-    strcpy(input, new_input);
+    strncpy(input, new_input, INP_WIN_MAX);
     *size = strlen(input);
     display_size = g_utf8_strlen(input, *size);
     inp_win_reset();
