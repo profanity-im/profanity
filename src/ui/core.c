@@ -358,10 +358,6 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
     if (win == NULL) {
         g_string_printf(msg, "Recipient %s not found: %s", recipient, err_msg);
         cons_show_error(msg->str);
-        win = wins_get_current();
-        if (win->type != WIN_CONSOLE) {
-            win_print_line(win, '!', COLOUR_ERROR, msg->str);
-        }
 
     // intended recipient was invalid chat room
     } else if (win->type == WIN_MUC) {
@@ -876,18 +872,15 @@ static void
 _ui_print_system_msg_from_recipient(const char * const from, const char *message)
 {
     int num = 0;
-    char from_cpy[strlen(from) + 1];
-    char *bare_jid;
 
     if (from == NULL || message == NULL)
         return;
 
-    strcpy(from_cpy, from);
-    bare_jid = strtok(from_cpy, "/");
+    Jid *jid = jid_create(from);
 
-    ProfWin *window = wins_get_by_recipient(bare_jid);
+    ProfWin *window = wins_get_by_recipient(jid->barejid);
     if (window == NULL) {
-        window = wins_new(bare_jid, WIN_CHAT);
+        window = wins_new(jid->barejid, WIN_CHAT);
         if (window != NULL) {
             num = wins_get_num(window);
             status_bar_active(num);
@@ -899,12 +892,14 @@ _ui_print_system_msg_from_recipient(const char * const from, const char *message
     }
 
     win_print_time(window, '-');
-    wprintw(window->win, "*%s %s\n", bare_jid, message);
+    wprintw(window->win, "*%s %s\n", jid->barejid, message);
 
     // this is the current window
     if (wins_is_current(window)) {
         wins_update_virtual_current();
     }
+
+    jid_destroy(jid);
 }
 
 static void

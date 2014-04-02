@@ -158,10 +158,7 @@ autocomplete_complete(Autocomplete ac, gchar *search_str)
 
     // first search attempt
     if (ac->last_found == NULL) {
-        ac->search_str =
-            (gchar *) malloc((strlen(search_str) + 1) * sizeof(gchar));
-        strcpy(ac->search_str, search_str);
-
+        ac->search_str = strdup(search_str);
         found = _search_from(ac, ac->items);
         return found;
 
@@ -188,12 +185,14 @@ autocomplete_param_with_func(char *input, int *size, char *command,
     autocomplete_func func)
 {
     char *found = NULL;
-    char *auto_msg = NULL;
+    GString *auto_msg = NULL;
+    char *result = NULL;
     char inp_cpy[*size];
     int i;
     char command_cpy[strlen(command) + 2];
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
+
     if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
         for(i = len; i < *size; i++) {
             inp_cpy[i-len] = input[i];
@@ -201,14 +200,15 @@ autocomplete_param_with_func(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
         found = func(inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc(len + strlen(found) + 1);
-            strcpy(auto_msg, command_cpy);
-            strcat(auto_msg, found);
+            auto_msg = g_string_new(command_cpy);
+            g_string_append(auto_msg, found);
             free(found);
+            result = auto_msg->str;
+            g_string_free(auto_msg, FALSE);
         }
     }
 
-    return auto_msg;
+    return result;
 }
 
 char *
@@ -216,7 +216,8 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
     Autocomplete ac)
 {
     char *found = NULL;
-    char *auto_msg = NULL;
+    GString *auto_msg = NULL;
+    char *result = NULL;
     char inp_cpy[*size];
     int i;
     char *command_cpy = malloc(strlen(command) + 2);
@@ -229,15 +230,16 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
         found = autocomplete_complete(ac, inp_cpy);
         if (found != NULL) {
-            auto_msg = (char *) malloc(len + strlen(found) + 1);
-            strcpy(auto_msg, command_cpy);
-            strcat(auto_msg, found);
+            auto_msg = g_string_new(command_cpy);
+            g_string_append(auto_msg, found);
             free(found);
+            result = auto_msg->str;
+            g_string_free(auto_msg, FALSE);
         }
     }
     free(command_cpy);
 
-    return auto_msg;
+    return result;
 }
 
 char *

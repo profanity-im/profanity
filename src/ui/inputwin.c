@@ -142,6 +142,10 @@ _inp_get_char(char *input, int *size)
     // if it wasn't an arrow key etc
     if (!_handle_edit(result, ch, input, size)) {
         if (_printable(ch) && result != KEY_CODE_YES) {
+            if (*size >= INP_WIN_MAX) {
+                return ERR;
+            }
+
             inp_x = getcurx(inp_win);
 
             // handle insert if not at end of input
@@ -226,7 +230,7 @@ static void
 _inp_replace_input(char *input, const char * const new_input, int *size)
 {
     int display_size;
-    strcpy(input, new_input);
+    strncpy(input, new_input, INP_WIN_MAX);
     *size = strlen(input);
     display_size = g_utf8_strlen(input, *size);
     inp_win_reset();
