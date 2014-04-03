@@ -371,7 +371,7 @@ _get_group(preference_t pref)
         case PREF_BEEP:
         case PREF_THEME:
         case PREF_VERCHECK:
-        case PREF_TITLEBARVERSION:
+        case PREF_TITLEBAR:
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:
@@ -418,8 +418,8 @@ _get_key(preference_t pref)
             return "theme";
         case PREF_VERCHECK:
             return "vercheck";
-        case PREF_TITLEBARVERSION:
-            return "titlebar.version";
+        case PREF_TITLEBAR:
+            return "titlebar";
         case PREF_FLASH:
             return "flash";
         case PREF_INTYPE:
@@ -474,9 +474,10 @@ _get_default_boolean(preference_t pref)
 {
     switch (pref)
     {
-        case PREF_STATUSES:
-        case PREF_AUTOAWAY_CHECK:
+        case PREF_TITLEBAR:
         case PREF_OTR_WARN:
+        case PREF_AUTOAWAY_CHECK:
+            return TRUE;
         default:
             return FALSE;
     }

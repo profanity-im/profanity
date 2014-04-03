@@ -56,7 +56,6 @@ static void _cmd_complete_parameters(char *input, int *size);
 
 static char * _sub_autocomplete(char *input, int *size);
 static char * _notify_autocomplete(char *input, int *size);
-static char * _titlebar_autocomplete(char *input, int *size);
 static char * _theme_autocomplete(char *input, int *size);
 static char * _autoaway_autocomplete(char *input, int *size);
 static char * _autoconnect_autocomplete(char *input, int *size);
@@ -528,12 +527,11 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/titlebar",
-        cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
-        { "/titlebar property on|off", "Show various properties in the window title bar.",
-        { "/titlebar property on|off",
-          "-------------------------",
-          "Show various properties in the window title bar.",
-          "Currently The only supported property is 'version'.",
+        cmd_titlebar, parse_args, 1, 1, &cons_titlebar_setting,
+        { "/titlebar on|off", "Show information in the window title bar.",
+        { "/titlebar on|off",
+          "----------------",
+          "Show information in the window title bar.",
           NULL  } } },
 
     { "/mouse",
@@ -1406,7 +1404,7 @@ _cmd_complete_parameters(char *input, int *size)
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
-        "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
+        "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history", "/titlebar",
         "/vercheck" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
@@ -1493,7 +1491,7 @@ _cmd_complete_parameters(char *input, int *size)
     }
 
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
-        _autoaway_autocomplete, _titlebar_autocomplete, _theme_autocomplete,
+        _autoaway_autocomplete, _theme_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
         _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
         _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete,
@@ -1657,23 +1655,6 @@ _notify_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/notify", notify_ac);
-    if (result != NULL) {
-        return result;
-    }
-
-    return NULL;
-}
-
-static char *
-_titlebar_autocomplete(char *input, int *size)
-{
-    char *result = NULL;
-    result = autocomplete_param_with_func(input, size, "/titlebar version",
-        prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
-        return result;
-    }
-    result = autocomplete_param_with_ac(input, size, "/titlebar", titlebar_ac);
     if (result != NULL) {
         return result;
     }
