@@ -132,6 +132,7 @@ void (*ui_chat_win_contact_offline)(PContact contact, char *resource, char *stat
 void (*ui_handle_recipient_not_found)(const char * const recipient, const char * const err_msg);
 void (*ui_handle_recipient_error)(const char * const recipient, const char * const err_msg);
 void (*ui_handle_error)(const char * const err_msg);
+void (*ui_clear_win_title)(void);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);

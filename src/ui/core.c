@@ -1498,6 +1498,12 @@ _ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
 }
 
 static void
+_ui_clear_win_title(void)
+{
+    printf("\033]0;\007");
+}
+
+static void
 _ui_draw_win_title(void)
 {
     char new_win_title[100];
@@ -1777,4 +1783,5 @@ ui_init_module(void)
     ui_handle_recipient_error = _ui_handle_recipient_error;
     ui_handle_error = _ui_handle_error;
     ui_current_update_virtual = _ui_current_update_virtual;
+    ui_clear_win_title = _ui_clear_win_title;
 }
