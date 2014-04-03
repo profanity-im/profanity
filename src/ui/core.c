@@ -101,7 +101,9 @@ _ui_init(void)
 static void
 _ui_update_screen(void)
 {
-    _ui_draw_win_title();
+    if (prefs_get_boolean(PREF_TITLEBAR)) {
+        _ui_draw_win_title();
+    }
     title_bar_update_virtual();
     status_bar_update_virtual();
     inp_put_back();
@@ -1503,27 +1505,15 @@ _ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
 }
 
 static void
+_ui_clear_win_title(void)
+{
+    printf("%c]0;%c", '\033', '\007');
+}
+
+static void
 _ui_draw_win_title(void)
 {
     char new_win_title[100];
-
-    GString *version_str = g_string_new("");
-
-    if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
-        g_string_append(version_str, " ");
-        g_string_append(version_str, PROF_PACKAGE_VERSION);
-        if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
-#ifdef PROF_HAVE_GIT_VERSION
-            g_string_append(version_str, "dev.");
-            g_string_append(version_str, PROF_GIT_BRANCH);
-            g_string_append(version_str, ".");
-            g_string_append(version_str, PROF_GIT_REVISION);
-#else
-            g_string_append(version_str, "dev");
-#endif
-        }
-    }
-
     jabber_conn_status_t status = jabber_get_connection_status();
 
     if (status == JABBER_CONNECTED) {
@@ -1532,19 +1522,17 @@ _ui_draw_win_title(void)
 
         if (unread != 0) {
             snprintf(new_win_title, sizeof(new_win_title),
-                "%c]0;%s%s (%d) - %s%c", '\033', "Profanity", version_str->str,
+                "%c]0;%s (%d) - %s%c", '\033', "Profanity",
                 unread, jid, '\007');
         } else {
             snprintf(new_win_title, sizeof(new_win_title),
-                "%c]0;%s%s - %s%c", '\033', "Profanity", version_str->str, jid,
+                "%c]0;%s - %s%c", '\033', "Profanity", jid,
                 '\007');
         }
     } else {
-        snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%s%c", '\033',
-            "Profanity", version_str->str, '\007');
+        snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%c", '\033',
+            "Profanity", '\007');
     }
-
-    g_string_free(version_str, TRUE);
 
     if (g_strcmp0(win_title, new_win_title) != 0) {
         // print to x-window title bar
@@ -1782,4 +1770,5 @@ ui_init_module(void)
     ui_handle_recipient_error = _ui_handle_recipient_error;
     ui_handle_error = _ui_handle_error;
     ui_current_update_virtual = _ui_current_update_virtual;
+    ui_clear_win_title = _ui_clear_win_title;
 }

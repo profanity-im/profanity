@@ -2165,13 +2165,10 @@ cmd_states(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_titlebar(gchar **args, struct cmd_help_t help)
 {
-    if (strcmp(args[0], "version") != 0) {
-        cons_show("Usage: %s", help.usage);
-        return TRUE;
-    } else {
-        return _cmd_set_boolean_preference(args[1], help,
-        "Show version in window title", PREF_TITLEBARVERSION);
+    if (g_strcmp0(args[0], "off") == 0) {
+        ui_clear_win_title();
     }
+    return _cmd_set_boolean_preference(args[0], help, "Titlebar", PREF_TITLEBAR);
 }
 
 gboolean

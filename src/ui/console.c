@@ -1002,10 +1002,10 @@ _cons_statuses_setting(void)
 static void
 _cons_titlebar_setting(void)
 {
-    if (prefs_get_boolean(PREF_TITLEBARVERSION)) {
-        cons_show("Titlebar display (/titlebar)  : version");
+    if (prefs_get_boolean(PREF_TITLEBAR)) {
+        cons_show("Titlebar display (/titlebar)  : ON");
     } else {
-        cons_show("Titlebar display (/titlebar)  : NONE");
+        cons_show("Titlebar display (/titlebar)  : OFF");
     }
 }
 
