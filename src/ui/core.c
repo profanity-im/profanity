@@ -68,7 +68,7 @@ static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
-static void _ui_draw_win_title(void);
+static void _ui_draw_term_title(void);
 
 static void
 _ui_init(void)
@@ -101,7 +101,7 @@ static void
 _ui_update_screen(void)
 {
     if (prefs_get_boolean(PREF_TITLEBAR)) {
-        _ui_draw_win_title();
+        _ui_draw_term_title();
     }
     title_bar_update_virtual();
     status_bar_update_virtual();
@@ -1506,7 +1506,7 @@ _ui_clear_win_title(void)
 }
 
 static void
-_ui_draw_win_title(void)
+_ui_draw_term_title(void)
 {
     char new_win_title[100];
     jabber_conn_status_t status = jabber_get_connection_status();
