@@ -35,6 +35,8 @@
 #include "config/theme.h"
 #include "ui/ui.h"
 
+#define TIME_CHECK 60000000
+
 static WINDOW *status_bar;
 static char *message = NULL;
 //                          1  2  3  4  5  6  7  8  9  0  >
@@ -44,15 +46,14 @@ static int is_active[12];
 static GHashTable *remaining_active;
 static int is_new[12];
 static GHashTable *remaining_new;
-static int dirty;
 static GDateTime *last_time;
 static int current;
 
-static void _status_bar_update_time(void);
 static void _update_win_statuses(void);
 static void _mark_new(int num);
 static void _mark_active(int num);
 static void _mark_inactive(int num);
+static void _status_bar_draw(void);
 
 static void
 _create_status_bar(void)
@@ -77,11 +78,12 @@ _create_status_bar(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    if (last_time != NULL)
+    if (last_time != NULL) {
         g_date_time_unref(last_time);
+    }
     last_time = g_date_time_new_now_local();
 
-    dirty = TRUE;
+    _status_bar_draw();
 }
 
 static void
@@ -90,19 +92,8 @@ _status_bar_update_virtual(void)
     GDateTime *now_time = g_date_time_new_now_local();
     GTimeSpan elapsed = g_date_time_difference(now_time, last_time);
 
-    if (elapsed >= 60000000) {
-        dirty = TRUE;
-        if (last_time != NULL)
-            g_date_time_unref(last_time);
-        last_time = g_date_time_new_now_local();
-    }
-
-    if (dirty) {
-        _status_bar_update_time();
-        _update_win_statuses();
-        wnoutrefresh(status_bar);
-        inp_put_back();
-        dirty = FALSE;
+    if (elapsed >= TIME_CHECK) {
+        _status_bar_draw();
     }
 
     g_date_time_unref(now_time);
@@ -123,15 +114,15 @@ _status_bar_resize(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    _update_win_statuses();
-
-    if (message != NULL)
+    if (message != NULL) {
         mvwprintw(status_bar, 0, 10, message);
-
-    if (last_time != NULL)
+    }
+    if (last_time != NULL) {
         g_date_time_unref(last_time);
+    }
     last_time = g_date_time_new_now_local();
-    dirty = TRUE;
+
+    _status_bar_draw();
 }
 
 static void
@@ -146,6 +137,8 @@ _status_bar_set_all_inactive(void)
 
     g_hash_table_remove_all(remaining_active);
     g_hash_table_remove_all(remaining_new);
+
+    _status_bar_draw();
 }
 
 static void
@@ -163,6 +156,8 @@ _status_bar_current(int i)
     mvwprintw(status_bar, 0, cols - 34, _active);
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
+
+    _status_bar_draw();
 }
 
 static void
@@ -203,6 +198,8 @@ _status_bar_inactive(const int win)
         is_new[true_win] = FALSE;
         _mark_inactive(true_win);
     }
+
+    _status_bar_draw();
 }
 
 static void
@@ -237,6 +234,8 @@ _status_bar_active(const int win)
         is_new[true_win] = FALSE;
         _mark_active(true_win);
     }
+
+    _status_bar_draw();
 }
 
 static void
@@ -260,13 +259,16 @@ _status_bar_new(const int win)
         is_new[true_win] = TRUE;
         _mark_new(true_win);
     }
+
+    _status_bar_draw();
 }
 
 static void
 _status_bar_get_password(void)
 {
     status_bar_print_message("Enter password:");
-    dirty = TRUE;
+
+    _status_bar_draw();
 }
 
 static void
@@ -287,8 +289,7 @@ _status_bar_print_message(const char * const msg)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    _update_win_statuses();
-    dirty = TRUE;
+    _status_bar_draw();
 }
 
 static void
@@ -316,7 +317,7 @@ _status_bar_clear(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    dirty = TRUE;
+    _status_bar_draw();
 }
 
 static void
@@ -336,27 +337,7 @@ _status_bar_clear_message(void)
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
-    _update_win_statuses();
-    dirty = TRUE;
-}
-
-static void
-_status_bar_update_time(void)
-{
-    gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
-    assert(date_fmt != NULL);
-
-    wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwaddch(status_bar, 0, 1, '[');
-    wattroff(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, 2, date_fmt);
-    wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwaddch(status_bar, 0, 7, ']');
-    wattroff(status_bar, COLOUR_STATUS_BRACKET);
-
-    g_free(date_fmt);
-
-    dirty = TRUE;
+    _status_bar_draw();
 }
 
 static void
@@ -392,7 +373,6 @@ _mark_new(int num)
     }
     wattroff(status_bar, COLOUR_STATUS_NEW);
     wattroff(status_bar, A_BLINK);
-    dirty = TRUE;
 }
 
 static void
@@ -409,7 +389,6 @@ _mark_active(int num)
         mvwprintw(status_bar, 0, cols - 34 + active_pos, "%d", num);
     }
     wattroff(status_bar, COLOUR_STATUS_ACTIVE);
-    dirty = TRUE;
 }
 
 static void
@@ -418,7 +397,30 @@ _mark_inactive(int num)
     int active_pos = 1 + ((num-1) * 3);
     int cols = getmaxx(stdscr);
     mvwaddch(status_bar, 0, cols - 34 + active_pos, ' ');
-    dirty = TRUE;
+}
+
+static void
+_status_bar_draw(void)
+{
+    if (last_time != NULL) {
+        g_date_time_unref(last_time);
+    }
+    last_time = g_date_time_new_now_local();
+    gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
+    assert(date_fmt != NULL);
+
+    wattron(status_bar, COLOUR_STATUS_BRACKET);
+    mvwaddch(status_bar, 0, 1, '[');
+    wattroff(status_bar, COLOUR_STATUS_BRACKET);
+    mvwprintw(status_bar, 0, 2, date_fmt);
+    wattron(status_bar, COLOUR_STATUS_BRACKET);
+    mvwaddch(status_bar, 0, 7, ']');
+    wattroff(status_bar, COLOUR_STATUS_BRACKET);
+    g_free(date_fmt);
+
+    _update_win_statuses();
+    wnoutrefresh(status_bar);
+    inp_put_back();
 }
 
 void

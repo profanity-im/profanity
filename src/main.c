@@ -33,6 +33,7 @@
 #include "otr/otr.h"
 #endif
 #include "xmpp/xmpp.h"
+
 #include "ui/ui.h"
 
 static gboolean disable_tls = FALSE;

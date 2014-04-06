@@ -194,21 +194,19 @@ wins_close_current(void)
 void
 wins_close_by_num(int i)
 {
+    // console cannot be closed
     if (i != 1) {
+
+        // go to console if closing current window
         if (i == current) {
             current = 1;
-            wins_update_virtual_current();
+            ProfWin *window = wins_get_current();
+            win_update_virtual(window);
         }
+
         g_hash_table_remove(windows, GINT_TO_POINTER(i));
         status_bar_inactive(i);
     }
-}
-
-void
-wins_update_virtual_current(void)
-{
-    ProfWin *window = wins_get_current();
-    win_update_virtual(window);
 }
 
 void
@@ -216,7 +214,7 @@ wins_clear_current(void)
 {
     ProfWin *window = wins_get_current();
     werase(window->win);
-    wins_update_virtual_current();
+    win_update_virtual(window);
 }
 
 gboolean
@@ -280,14 +278,6 @@ wins_resize_all(void)
     ProfWin *current_win = wins_get_current();
 
     pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
-}
-
-void
-wins_update_virtual_console(void)
-{
-    if (current == 0) {
-        wins_update_virtual_current();
-    }
 }
 
 gboolean
@@ -356,7 +346,7 @@ wins_lost_connection(void)
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
-                wins_update_virtual_current();
+                win_update_virtual(window);
             }
         }
         curr = g_list_next(curr);

@@ -30,7 +30,7 @@
 #include "common.h"
 #include "log.h"
 #include "muc.h"
-#include "ui/ui.h"
+#include "server_events.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
@@ -324,7 +324,7 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
                 if (!muc_room_is_active(room_jid->barejid)) {
                     presence_join_room(jid, name, NULL);
                     /* TODO: this should be removed after fixing #195 */
-                    ui_room_join(jid);
+                    handle_bookmark_autojoin(jid);
                 }
                 jid_destroy(room_jid);
             } else {
