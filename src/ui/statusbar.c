@@ -48,7 +48,6 @@ static int dirty;
 static GDateTime *last_time;
 static int current;
 
-static void _status_bar_update_time(void);
 static void _update_win_statuses(void);
 static void _mark_new(int num);
 static void _mark_active(int num);
@@ -98,7 +97,18 @@ _status_bar_update_virtual(void)
     }
 
     if (dirty) {
-        _status_bar_update_time();
+        gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
+        assert(date_fmt != NULL);
+
+        wattron(status_bar, COLOUR_STATUS_BRACKET);
+        mvwaddch(status_bar, 0, 1, '[');
+        wattroff(status_bar, COLOUR_STATUS_BRACKET);
+        mvwprintw(status_bar, 0, 2, date_fmt);
+        wattron(status_bar, COLOUR_STATUS_BRACKET);
+        mvwaddch(status_bar, 0, 7, ']');
+        wattroff(status_bar, COLOUR_STATUS_BRACKET);
+        g_free(date_fmt);
+
         _update_win_statuses();
         wnoutrefresh(status_bar);
         inp_put_back();
@@ -337,25 +347,6 @@ _status_bar_clear_message(void)
     wattroff(status_bar, COLOUR_STATUS_BRACKET);
 
     _update_win_statuses();
-    dirty = TRUE;
-}
-
-static void
-_status_bar_update_time(void)
-{
-    gchar *date_fmt = g_date_time_format(last_time, "%H:%M");
-    assert(date_fmt != NULL);
-
-    wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwaddch(status_bar, 0, 1, '[');
-    wattroff(status_bar, COLOUR_STATUS_BRACKET);
-    mvwprintw(status_bar, 0, 2, date_fmt);
-    wattron(status_bar, COLOUR_STATUS_BRACKET);
-    mvwaddch(status_bar, 0, 7, ']');
-    wattroff(status_bar, COLOUR_STATUS_BRACKET);
-
-    g_free(date_fmt);
-
     dirty = TRUE;
 }
 
