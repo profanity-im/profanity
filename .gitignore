@@ -48,3 +48,7 @@ valgrind.out.old
 tests/testsuite.trs
 push-all.sh
 .DS_Store
+.codelite/
+Profanity.project
+Profanity.workspace
+pageing.txt
