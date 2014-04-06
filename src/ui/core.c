@@ -94,7 +94,8 @@ _ui_init(void)
     display = XOpenDisplay(0);
 #endif
     ui_idle_time = g_timer_new();
-    wins_update_virtual_current();
+    ProfWin *window = wins_get_current();
+    win_update_virtual(window);
 }
 
 static void
@@ -150,7 +151,8 @@ _ui_resize(const int ch, const char * const input, const int size)
     status_bar_resize();
     wins_resize_all();
     inp_win_resize(input, size);
-    wins_update_virtual_current();
+    ProfWin *window = wins_get_current();
+    win_update_virtual(window);
 }
 
 static void
@@ -180,6 +182,7 @@ static void
 _ui_contact_typing(const char * const barejid)
 {
     ProfWin *window = wins_get_by_recipient(barejid);
+    ProfWin *current = wins_get_current();
 
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
@@ -189,7 +192,7 @@ _ui_contact_typing(const char * const barejid)
         // have chat window but not currently in it
         } else if (!wins_is_current(window)) {
             cons_show_typing(barejid);
-            wins_update_virtual_current();
+            win_update_virtual(current);
 
         // in chat window with user
         } else {
@@ -197,7 +200,7 @@ _ui_contact_typing(const char * const barejid)
 
             int num = wins_get_num(window);
             status_bar_active(num);
-            wins_update_virtual_current();
+            win_update_virtual(current);
        }
     }
 
@@ -263,7 +266,7 @@ _ui_incoming_msg(const char * const from, const char * const message,
         win_print_incoming_message(window, tv_stamp, display_from, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
-        wins_update_virtual_current();
+        win_update_virtual(window);
 
     // not currently viewing chat window with sender
     } else {
@@ -371,7 +374,8 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
         win_print_line(win, '!', COLOUR_ERROR, msg->str);
     }
 
-    wins_update_virtual_current();
+    ProfWin *current = wins_get_current();
+    win_update_virtual(current);
 
     g_string_free(msg, TRUE);
 }
@@ -391,7 +395,8 @@ _ui_handle_recipient_error(const char * const recipient, const char * const err_
         win_print_line(win, '!', COLOUR_ERROR, msg->str);
     }
 
-    wins_update_virtual_current();
+    ProfWin *current = wins_get_current();
+    win_update_virtual(current);
 
     g_string_free(msg, TRUE);
 }
@@ -404,7 +409,8 @@ _ui_handle_error(const char * const err_msg)
 
     cons_show_error(msg->str);
 
-    wins_update_virtual_current();
+    ProfWin *current = wins_get_current();
+    win_update_virtual(current);
 
     g_string_free(msg, TRUE);
 }
@@ -551,7 +557,7 @@ _ui_switch_win(const int i)
             status_bar_current(i);
             status_bar_active(i);
         }
-        wins_update_virtual_current();
+        win_update_virtual(new_current);
         return TRUE;
     } else {
         return FALSE;
@@ -586,7 +592,7 @@ _ui_next_win(void)
         status_bar_current(i);
         status_bar_active(i);
     }
-    wins_update_virtual_current();
+    win_update_virtual(new_current);
 }
 
 static void
@@ -606,7 +612,7 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            wins_update_virtual_current();
+            win_update_virtual(window);
         }
     }
 }
@@ -624,7 +630,7 @@ _ui_gone_insecure(const char * const recipient)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            wins_update_virtual_current();
+            win_update_virtual(window);
         }
     }
 }
@@ -642,7 +648,7 @@ _ui_trust(const char * const recipient)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            wins_update_virtual_current();
+            win_update_virtual(window);
         }
     }
 }
@@ -660,7 +666,7 @@ _ui_untrust(const char * const recipient)
             GString *recipient_str = _get_recipient_string(window);
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
-            wins_update_virtual_current();
+            win_update_virtual(window);
         }
     }
 }
@@ -687,7 +693,7 @@ _ui_previous_win(void)
         status_bar_current(i);
         status_bar_active(i);
     }
-    wins_update_virtual_current();
+    win_update_virtual(new_current);
 }
 
 static void
@@ -715,7 +721,8 @@ _ui_close_win(int index)
     status_bar_current(1);
     status_bar_active(1);
 
-    wins_update_virtual_current();
+    ProfWin *current = wins_get_current();
+    win_update_virtual(current);
 }
 
 static void
@@ -895,7 +902,7 @@ _ui_print_system_msg_from_recipient(const char * const from, const char *message
 
     // this is the current window
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 
     jid_destroy(jid);
@@ -919,7 +926,7 @@ _ui_recipient_gone(const char * const barejid)
     if (window != NULL) {
         win_vprint_line(window, '!', COLOUR_GONE, "<- %s has left the conversation.", display_usr);
         if (wins_is_current(window)) {
-            wins_update_virtual_current();
+            win_update_virtual(window);
         }
     }
 }
@@ -1154,7 +1161,7 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
     }
 
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 }
 
@@ -1169,7 +1176,7 @@ _ui_room_member_offline(const char * const room, const char * const nick)
     wattroff(window->win, COLOUR_OFFLINE);
 
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 }
 
@@ -1185,7 +1192,7 @@ _ui_room_member_online(const char * const room, const char * const nick,
     wattroff(window->win, COLOUR_ONLINE);
 
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 }
 
@@ -1200,7 +1207,7 @@ _ui_room_member_presence(const char * const room, const char * const nick,
     }
 
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 }
 
@@ -1216,7 +1223,7 @@ _ui_room_member_nick_change(const char * const room,
     wattroff(window->win, COLOUR_THEM);
 
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 }
 
@@ -1231,7 +1238,7 @@ _ui_room_nick_change(const char * const room, const char * const nick)
     wattroff(window->win, COLOUR_ME);
 
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 }
 
@@ -1257,7 +1264,7 @@ _ui_room_history(const char * const room_jid, const char * const nick,
     }
 
     if (wins_is_current(window)) {
-        wins_update_virtual_current();
+        win_update_virtual(window);
     }
 }
 
@@ -1297,14 +1304,15 @@ _ui_room_message(const char * const room_jid, const char * const nick,
     // currently in groupchat window
     if (wins_is_current(window)) {
         status_bar_active(num);
-        wins_update_virtual_current();
+        win_update_virtual(window);
 
     // not currenlty on groupchat window
     } else {
         status_bar_new(num);
         cons_show_incoming_message(nick, num);
         if (wins_get_current_num() == 0) {
-            wins_update_virtual_current();
+            ProfWin *current = wins_get_current();
+            win_update_virtual(current);
         }
 
         if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
@@ -1354,7 +1362,7 @@ _ui_room_subject(const char * const room_jid, const char * const subject)
     // currently in groupchat window
     if (wins_is_current(window)) {
         status_bar_active(num);
-        wins_update_virtual_current();
+        win_update_virtual(window);
 
     // not currenlty on groupchat window
     } else {
@@ -1377,7 +1385,7 @@ _ui_room_broadcast(const char * const room_jid, const char * const message)
     // currently in groupchat window
     if (wins_is_current(window)) {
         status_bar_active(num);
-        wins_update_virtual_current();
+        win_update_virtual(window);
 
     // not currenlty on groupchat window
     } else {
@@ -1471,7 +1479,7 @@ _ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *las
             last_activity, "++", "online");
 
         if (wins_is_current(window)) {
-            wins_update_virtual_current();
+            win_update_virtual(window);
             ui_current_page_off();
         }
     }
@@ -1491,7 +1499,7 @@ _ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
             "offline");
 
         if (wins_is_current(window)) {
-            wins_update_virtual_current();
+            win_update_virtual(window);
             ui_current_page_off();
         }
     }
@@ -1618,7 +1626,7 @@ _win_handle_page(const wint_t * const ch)
                         *page_start = y - page_space;
 
                     current->paged = 1;
-                    wins_update_virtual_current();
+                    win_update_virtual(current);
                 } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
                     *page_start -= 4;
 
@@ -1627,7 +1635,7 @@ _win_handle_page(const wint_t * const ch)
                         *page_start = 0;
 
                     current->paged = 1;
-                    wins_update_virtual_current();
+                    win_update_virtual(current);
                 }
             }
         }
@@ -1642,7 +1650,7 @@ _win_handle_page(const wint_t * const ch)
             *page_start = 0;
 
         current->paged = 1;
-        wins_update_virtual_current();
+        win_update_virtual(current);
 
     // page down
     } else if (*ch == KEY_NPAGE) {
@@ -1657,7 +1665,7 @@ _win_handle_page(const wint_t * const ch)
             *page_start = y - page_space;
 
         current->paged = 1;
-        wins_update_virtual_current();
+        win_update_virtual(current);
     }
 
     // switch off page if last line visible
