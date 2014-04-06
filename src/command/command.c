@@ -46,9 +46,9 @@
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
-#include "ui/ui.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
+#include "ui/ui.h"
 
 typedef char*(*autocompleter)(char*, int*);
 

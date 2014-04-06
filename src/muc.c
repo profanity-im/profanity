@@ -29,8 +29,6 @@
 #include "jid.h"
 #include "tools/autocomplete.h"
 
-#include "ui/ui.h"
-
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
     char *nick; // e.g. Some User

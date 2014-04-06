@@ -47,8 +47,8 @@
 #include "otr/otr.h"
 #endif
 #include "resource.h"
-#include "ui/ui.h"
 #include "xmpp/xmpp.h"
+#include "ui/ui.h"
 
 static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);

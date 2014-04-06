@@ -29,13 +29,12 @@
 #include "config/preferences.h"
 #include "config/account.h"
 #include "roster_list.h"
-#include "ui/ui.h"
-
-#include "ui/windows.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+
+#include "ui/ui.h"
 
 // handle presence stanza errors
 void
@@ -502,4 +501,10 @@ handle_autoping_cancel(void)
     prefs_set_autoping(0);
     cons_show_error("Server ping not supported, autoping disabled.");
     ui_current_page_off();
+}
+
+void
+handle_bookmark_autojoin(char *jid)
+{
+    ui_room_join(jid);
 }

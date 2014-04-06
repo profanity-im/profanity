@@ -24,8 +24,6 @@
 #include <libotr/privkey.h>
 #include <libotr/message.h>
 
-#include "ui/ui.h"
-
 OtrlPolicy
 otrlib_policy(void)
 {

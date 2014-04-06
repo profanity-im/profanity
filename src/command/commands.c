@@ -43,11 +43,9 @@
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/tinyurl.h"
-#include "ui/ui.h"
-#include "ui/window.h"
-#include "ui/windows.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
+#include "ui/ui.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
