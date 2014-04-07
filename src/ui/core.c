@@ -51,6 +51,7 @@
 #include "otr/otr.h"
 #include "ui/ui.h"
 #include "ui/titlebar.h"
+#include "ui/statusbar.h"
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
@@ -109,6 +110,16 @@ _ui_update_screen(void)
     status_bar_update_virtual();
     inp_put_back();
     doupdate();
+}
+
+static void
+_ui_about(void)
+{
+    cons_show("");
+    cons_about();
+    if (ui_current_win_type() != WIN_CONSOLE) {
+        status_bar_new(1);
+    }
 }
 
 static unsigned long
@@ -1579,6 +1590,12 @@ _ui_clear_win_title(void)
 }
 
 static void
+_ui_statusbar_new(const int win)
+{
+    status_bar_new(win);
+}
+
+static void
 _ui_draw_term_title(void)
 {
     char new_win_title[100];
@@ -1844,4 +1861,6 @@ ui_init_module(void)
     ui_titlebar_presence = _ui_titlebar_presence;
     ui_handle_login_account_success = _ui_handle_login_account_success;
     ui_update_presence =_ui_update_presence;
+    ui_about = _ui_about;
+    ui_statusbar_new = _ui_statusbar_new;
 }

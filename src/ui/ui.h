@@ -45,7 +45,6 @@ void ui_init_module(void);
 void console_init_module(void);
 void inputwin_init_module(void);
 void notifier_init_module(void);
-void statusbar_init_module(void);
 
 // ui startup and control
 void (*ui_init)(void);
@@ -153,9 +152,10 @@ void (*ui_titlebar_presence)(contact_presence_t presence);
 void (*ui_handle_login_account_success)(ProfAccount *account);
 void (*ui_update_presence)(const resource_presence_t resource_presence,
     const char * const message, const char * const show);
+void (*ui_about)(void);
+void (*ui_statusbar_new)(const int win);
 
 // create windows
-void (*create_status_bar)(void);
 void (*create_input_window)(void);
 
 // console window actions
@@ -229,19 +229,6 @@ void (*cons_priority_setting)(void);
 void (*cons_autoconnect_setting)(void);
 void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
 void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
-
-// status bar actions
-void (*status_bar_update_virtual)(void);
-void (*status_bar_resize)(void);
-void (*status_bar_clear)(void);
-void (*status_bar_clear_message)(void);
-void (*status_bar_get_password)(void);
-void (*status_bar_print_message)(const char * const msg);
-void (*status_bar_inactive)(const int win);
-void (*status_bar_active)(const int win);
-void (*status_bar_new)(const int win);
-void (*status_bar_set_all_inactive)(void);
-void (*status_bar_current)(int i);
 
 // input window actions
 wint_t (*inp_get_char)(char *input, int *size);

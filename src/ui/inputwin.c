@@ -42,6 +42,7 @@
 #include "profanity.h"
 #include "roster_list.h"
 #include "ui/ui.h"
+#include "ui/statusbar.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
 

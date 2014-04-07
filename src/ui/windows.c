@@ -36,6 +36,7 @@
 #include "roster_list.h"
 #include "config/theme.h"
 #include "ui/ui.h"
+#include "ui/statusbar.h"
 #include "ui/window.h"
 #include "ui/windows.h"
 

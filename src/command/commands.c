@@ -647,11 +647,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_about(gchar **args, struct cmd_help_t help)
 {
-    cons_show("");
-    cons_about();
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(1);
-    }
+    ui_about();
     return TRUE;
 }
 
@@ -952,7 +948,7 @@ cmd_who(gchar **args, struct cmd_help_t help)
     }
 
     if (win_type != WIN_CONSOLE && win_type != WIN_MUC) {
-        status_bar_new(1);
+        ui_statusbar_new(1);
     }
 
     return TRUE;
