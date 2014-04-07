@@ -149,7 +149,6 @@ void (*ui_tidy_wins)(void);
 void (*ui_prune_wins)(void);
 
 // create windows
-void (*create_title_bar)(void);
 void (*create_status_bar)(void);
 void (*create_input_window)(void);
 

@@ -27,6 +27,7 @@
 #include "config/theme.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
+#include "ui/titlebar.h"
 #include "ui/windows.h"
 #include "ui/window.h"
 #include "roster_list.h"
@@ -43,8 +44,8 @@ static GTimer *typing_elapsed;
 
 static void _title_bar_draw(void);
 
-static void
-_create_title_bar(void)
+void
+create_title_bar(void)
 {
     int cols = getmaxx(stdscr);
 
@@ -261,7 +262,6 @@ _title_bar_draw(void)
 void
 titlebar_init_module(void)
 {
-    create_title_bar = _create_title_bar;
     title_bar_console = _title_bar_console;
     title_bar_resize = _title_bar_resize;
     title_bar_update_virtual = _title_bar_update_virtual;

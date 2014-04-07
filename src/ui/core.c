@@ -50,6 +50,7 @@
 #include "muc.h"
 #include "otr/otr.h"
 #include "ui/ui.h"
+#include "ui/titlebar.h"
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
