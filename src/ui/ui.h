@@ -43,7 +43,6 @@
 
 void ui_init_module(void);
 void console_init_module(void);
-void inputwin_init_module(void);
 void notifier_init_module(void);
 
 // ui startup and control
