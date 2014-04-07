@@ -35,6 +35,7 @@
 #include "config/theme.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
+#include "ui/inputwin.h"
 
 #define TIME_CHECK 60000000
 

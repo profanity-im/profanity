@@ -155,8 +155,10 @@ void (*ui_update_presence)(const resource_presence_t resource_presence,
 void (*ui_about)(void);
 void (*ui_statusbar_new)(const int win);
 
-// create windows
-void (*create_input_window)(void);
+wint_t (*ui_get_char)(char *input, int *size);
+void (*ui_input_clear)(void);
+void (*ui_input_nonblocking)(void);
+void (*ui_replace_input)(char *input, const char * const new_input, int *size);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);
@@ -229,16 +231,6 @@ void (*cons_priority_setting)(void);
 void (*cons_autoconnect_setting)(void);
 void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
 void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
-
-// input window actions
-wint_t (*inp_get_char)(char *input, int *size);
-void (*inp_win_reset)(void);
-void (*inp_win_resize)(const char * input, const int size);
-void (*inp_put_back)(void);
-void (*inp_non_block)(void);
-void (*inp_block)(void);
-void (*inp_get_password)(char *passwd);
-void (*inp_replace_input)(char *input, const char * const new_input, int *size);
 
 // desktop notifier actions
 void (*notifier_init)(void);

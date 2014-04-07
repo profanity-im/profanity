@@ -52,6 +52,7 @@
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/statusbar.h"
+#include "ui/inputwin.h"
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
@@ -153,6 +154,34 @@ _ui_close(void)
     notifier_uninit();
     wins_destroy();
     endwin();
+}
+
+static wint_t
+_ui_get_char(char *input, int *size)
+{
+    wint_t ch = inp_get_char(input, size);
+    if (ch != ERR) {
+        ui_reset_idle_time();
+    }
+    return ch;
+}
+
+static void
+_ui_input_clear(void)
+{
+    inp_win_reset();
+}
+
+static void
+_ui_replace_input(char *input, const char * const new_input, int *size)
+{
+    inp_replace_input(input, new_input, size);
+}
+
+static void
+_ui_input_nonblocking(void)
+{
+    inp_non_block();
 }
 
 static void
@@ -1863,4 +1892,8 @@ ui_init_module(void)
     ui_update_presence =_ui_update_presence;
     ui_about = _ui_about;
     ui_statusbar_new = _ui_statusbar_new;
+    ui_get_char = _ui_get_char;
+    ui_input_clear = _ui_input_clear;
+    ui_input_nonblocking = _ui_input_nonblocking;
+    ui_replace_input = _ui_replace_input;
 }

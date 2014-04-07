@@ -28,6 +28,7 @@
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/titlebar.h"
+#include "ui/inputwin.h"
 #include "ui/windows.h"
 #include "ui/window.h"
 #include "roster_list.h"

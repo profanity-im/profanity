@@ -62,7 +62,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 {
     _init(disable_tls, log_level);
     log_info("Starting main event loop");
-    inp_non_block();
+    ui_input_nonblocking();
     GTimer *timer = g_timer_new();
     gboolean cmd_result = TRUE;
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -104,10 +104,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             ui_update_screen();
             jabber_process_events();
 
-            ch = inp_get_char(inp, &size);
-            if (ch != ERR) {
-                ui_reset_idle_time();
-            }
+            ch = ui_get_char(inp, &size);
         }
 
         inp[size++] = '\0';
@@ -202,7 +199,7 @@ process_input(char *inp)
         result = cmd_execute_default(inp);
     }
 
-    inp_win_reset();
+    ui_input_clear();
     roster_reset_search_attempts();
     ui_current_page_off();
 
