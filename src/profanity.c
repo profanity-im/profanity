@@ -187,7 +187,7 @@ process_input(char *inp)
     if (strlen(inp) == 0) {
         result = TRUE;
 
-    // habdle command if input starts with a '/'
+    // handle command if input starts with a '/'
     } else if (inp[0] == '/') {
         char *inp_cpy = strdup(inp);
         char *command = strtok(inp_cpy, " ");
