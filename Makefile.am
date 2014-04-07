@@ -90,6 +90,16 @@ otr3_sources = \
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
+themes_sources = \
+	themes/aqua \
+	themes/boothj5 \
+	themes/hacker \
+	themes/headache \
+	themes/original \
+	themes/redsplash \
+	themes/whiteness \
+	themes/yellowsplash
+
 if BUILD_OTR
 if BUILD_OTR3
 core_sources += $(otr3_sources)
@@ -103,6 +113,10 @@ endif
 
 bin_PROGRAMS = profanity
 profanity_SOURCES = $(core_sources) $(main_source)
+if THEMES_INSTALL
+profanity_themesdir = @THEMES_PATH@
+profanity_themes_DATA = $(themes_sources)
+endif
 if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
 endif
