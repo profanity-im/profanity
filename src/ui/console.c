@@ -37,6 +37,7 @@
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "ui/ui.h"
+#include "ui/statusbar.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 

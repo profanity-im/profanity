@@ -50,6 +50,9 @@
 #include "muc.h"
 #include "otr/otr.h"
 #include "ui/ui.h"
+#include "ui/titlebar.h"
+#include "ui/statusbar.h"
+#include "ui/inputwin.h"
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
@@ -111,6 +114,16 @@ _ui_update_screen(void)
     doupdate();
 }
 
+static void
+_ui_about(void)
+{
+    cons_show("");
+    cons_about();
+    if (ui_current_win_type() != WIN_CONSOLE) {
+        status_bar_new(1);
+    }
+}
+
 static unsigned long
 _ui_get_idle_time(void)
 {
@@ -142,6 +155,34 @@ _ui_close(void)
     notifier_uninit();
     wins_destroy();
     endwin();
+}
+
+static wint_t
+_ui_get_char(char *input, int *size)
+{
+    wint_t ch = inp_get_char(input, size);
+    if (ch != ERR) {
+        ui_reset_idle_time();
+    }
+    return ch;
+}
+
+static void
+_ui_input_clear(void)
+{
+    inp_win_reset();
+}
+
+static void
+_ui_replace_input(char *input, const char * const new_input, int *size)
+{
+    inp_replace_input(input, new_input, size);
+}
+
+static void
+_ui_input_nonblocking(void)
+{
+    inp_non_block();
 }
 
 static void
@@ -351,6 +392,70 @@ static void
 _ui_group_removed(const char * const contact, const char * const group)
 {
     cons_show("%s removed from group %s", contact, group);
+}
+
+static void
+_ui_auto_away(void)
+{
+    if (prefs_get_string(PREF_AUTOAWAY_MESSAGE) != NULL) {
+        int pri =
+            accounts_get_priority_for_presence_type(jabber_get_account_name(),
+                RESOURCE_AWAY);
+        cons_show("Idle for %d minutes, status set to away (priority %d), \"%s\".",
+            prefs_get_autoaway_time(), pri, prefs_get_string(PREF_AUTOAWAY_MESSAGE));
+        title_bar_set_presence(CONTACT_AWAY);
+        ui_current_page_off();
+    } else {
+        int pri =
+            accounts_get_priority_for_presence_type(jabber_get_account_name(),
+                RESOURCE_AWAY);
+        cons_show("Idle for %d minutes, status set to away (priority %d).",
+            prefs_get_autoaway_time(), pri);
+        title_bar_set_presence(CONTACT_AWAY);
+        ui_current_page_off();
+    }
+}
+
+static void
+_ui_end_auto_away(void)
+{
+    int pri =
+        accounts_get_priority_for_presence_type(jabber_get_account_name(), RESOURCE_ONLINE);
+    cons_show("No longer idle, status set to online (priority %d).", pri);
+    title_bar_set_presence(CONTACT_ONLINE);
+    ui_current_page_off();
+}
+
+static void
+_ui_titlebar_presence(contact_presence_t presence)
+{
+    title_bar_set_presence(presence);
+}
+
+static void
+_ui_handle_login_account_success(ProfAccount *account)
+{
+    resource_presence_t resource_presence = accounts_get_login_presence(account->name);
+    contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
+    cons_show_login_success(account);
+    title_bar_set_presence(contact_presence);
+    ui_current_page_off();
+    status_bar_print_message(account->jid);
+    status_bar_update_virtual();
+}
+
+static void
+_ui_update_presence(const resource_presence_t resource_presence,
+    const char * const message, const char * const show)
+{
+    contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
+    title_bar_set_presence(contact_presence);
+    gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
+    if (message != NULL) {
+        cons_show("Status set to %s (priority %d), \"%s\".", show, priority, message);
+    } else {
+        cons_show("Status set to %s (priority %d).", show, priority);
+    }
 }
 
 static void
@@ -1519,6 +1624,12 @@ _ui_clear_win_title(void)
 }
 
 static void
+_ui_statusbar_new(const int win)
+{
+    status_bar_new(win);
+}
+
+static void
 _ui_draw_term_title(void)
 {
     char new_win_title[100];
@@ -1779,4 +1890,15 @@ ui_init_module(void)
     ui_handle_error = _ui_handle_error;
     ui_current_update_virtual = _ui_current_update_virtual;
     ui_clear_win_title = _ui_clear_win_title;
+    ui_auto_away = _ui_auto_away;
+    ui_end_auto_away = _ui_end_auto_away;
+    ui_titlebar_presence = _ui_titlebar_presence;
+    ui_handle_login_account_success = _ui_handle_login_account_success;
+    ui_update_presence =_ui_update_presence;
+    ui_about = _ui_about;
+    ui_statusbar_new = _ui_statusbar_new;
+    ui_get_char = _ui_get_char;
+    ui_input_clear = _ui_input_clear;
+    ui_input_nonblocking = _ui_input_nonblocking;
+    ui_replace_input = _ui_replace_input;
 }

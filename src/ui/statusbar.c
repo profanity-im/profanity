@@ -34,6 +34,8 @@
 
 #include "config/theme.h"
 #include "ui/ui.h"
+#include "ui/statusbar.h"
+#include "ui/inputwin.h"
 
 #define TIME_CHECK 60000000
 
@@ -55,8 +57,8 @@ static void _mark_active(int num);
 static void _mark_inactive(int num);
 static void _status_bar_draw(void);
 
-static void
-_create_status_bar(void)
+void
+create_status_bar(void)
 {
     int rows, cols, i;
     getmaxyx(stdscr, rows, cols);
@@ -86,8 +88,8 @@ _create_status_bar(void)
     _status_bar_draw();
 }
 
-static void
-_status_bar_update_virtual(void)
+void
+status_bar_update_virtual(void)
 {
     GDateTime *now_time = g_date_time_new_now_local();
     GTimeSpan elapsed = g_date_time_difference(now_time, last_time);
@@ -99,8 +101,8 @@ _status_bar_update_virtual(void)
     g_date_time_unref(now_time);
 }
 
-static void
-_status_bar_resize(void)
+void
+status_bar_resize(void)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
@@ -125,8 +127,8 @@ _status_bar_resize(void)
     _status_bar_draw();
 }
 
-static void
-_status_bar_set_all_inactive(void)
+void
+status_bar_set_all_inactive(void)
 {
     int i = 0;
     for (i = 0; i < 12; i++) {
@@ -141,8 +143,8 @@ _status_bar_set_all_inactive(void)
     _status_bar_draw();
 }
 
-static void
-_status_bar_current(int i)
+void
+status_bar_current(int i)
 {
     if (i == 0) {
         current = 10;
@@ -160,8 +162,8 @@ _status_bar_current(int i)
     _status_bar_draw();
 }
 
-static void
-_status_bar_inactive(const int win)
+void
+status_bar_inactive(const int win)
 {
     int true_win = win;
     if (true_win == 0) {
@@ -202,8 +204,8 @@ _status_bar_inactive(const int win)
     _status_bar_draw();
 }
 
-static void
-_status_bar_active(const int win)
+void
+status_bar_active(const int win)
 {
     int true_win = win;
     if (true_win == 0) {
@@ -238,8 +240,8 @@ _status_bar_active(const int win)
     _status_bar_draw();
 }
 
-static void
-_status_bar_new(const int win)
+void
+status_bar_new(const int win)
 {
     int true_win = win;
     if (true_win == 0) {
@@ -263,16 +265,16 @@ _status_bar_new(const int win)
     _status_bar_draw();
 }
 
-static void
-_status_bar_get_password(void)
+void
+status_bar_get_password(void)
 {
     status_bar_print_message("Enter password:");
 
     _status_bar_draw();
 }
 
-static void
-_status_bar_print_message(const char * const msg)
+void
+status_bar_print_message(const char * const msg)
 {
     werase(status_bar);
 
@@ -292,8 +294,8 @@ _status_bar_print_message(const char * const msg)
     _status_bar_draw();
 }
 
-static void
-_status_bar_clear(void)
+void
+status_bar_clear(void)
 {
     if (message != NULL) {
         free(message);
@@ -320,8 +322,8 @@ _status_bar_clear(void)
     _status_bar_draw();
 }
 
-static void
-_status_bar_clear_message(void)
+void
+status_bar_clear_message(void)
 {
     if (message != NULL) {
         free(message);
@@ -421,21 +423,4 @@ _status_bar_draw(void)
     _update_win_statuses();
     wnoutrefresh(status_bar);
     inp_put_back();
-}
-
-void
-statusbar_init_module(void)
-{
-    create_status_bar = _create_status_bar;
-    status_bar_update_virtual = _status_bar_update_virtual;
-    status_bar_resize = _status_bar_resize;
-    status_bar_set_all_inactive = _status_bar_set_all_inactive;
-    status_bar_current = _status_bar_current;
-    status_bar_inactive = _status_bar_inactive;
-    status_bar_active = _status_bar_active;
-    status_bar_new = _status_bar_new;
-    status_bar_get_password = _status_bar_get_password;
-    status_bar_print_message = _status_bar_print_message;
-    status_bar_clear = _status_bar_clear;
-    status_bar_clear_message = _status_bar_clear_message;
 }

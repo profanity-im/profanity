@@ -14,6 +14,7 @@ core_sources = \
 	src/server_events.c src/server_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
+	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/windows.c src/ui/windows.h \
 	src/command/command.h src/command/command.c src/command/history.c \
@@ -59,6 +60,8 @@ tests_sources = \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/otr/mock_otr.h tests/otr/mock_otr.c \
     tests/ui/mock_ui.h tests/ui/mock_ui.c \
+	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
+	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
     tests/helpers.c tests/helpers.h \
     tests/log/mock_log.c \

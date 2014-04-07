@@ -648,11 +648,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_about(gchar **args, struct cmd_help_t help)
 {
-    cons_show("");
-    cons_about();
-    if (ui_current_win_type() != WIN_CONSOLE) {
-        status_bar_new(1);
-    }
+    ui_about();
     return TRUE;
 }
 
@@ -953,7 +949,7 @@ cmd_who(gchar **args, struct cmd_help_t help)
     }
 
     if (win_type != WIN_CONSOLE && win_type != WIN_MUC) {
-        status_bar_new(1);
+        ui_statusbar_new(1);
     }
 
     return TRUE;
@@ -2814,18 +2810,8 @@ _update_presence(const resource_presence_t resource_presence,
         cons_show("You are not currently connected.");
     } else {
         presence_update(resource_presence, msg, 0);
-
-        contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
-        title_bar_set_presence(contact_presence);
-
-        gint priority = accounts_get_priority_for_presence_type(jabber_get_account_name(), resource_presence);
-        if (msg != NULL) {
-            cons_show("Status set to %s (priority %d), \"%s\".", show, priority, msg);
-        } else {
-            cons_show("Status set to %s (priority %d).", show, priority);
-        }
+        ui_update_presence(resource_presence, msg, show);
     }
-
 }
 
 // helper function for boolean preference commands

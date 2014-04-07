@@ -1185,7 +1185,7 @@ cmd_autocomplete(char *input, int *size)
         found = autocomplete_complete(commands_ac, inp_cpy);
         if (found != NULL) {
             char *auto_msg = strdup(found);
-            inp_replace_input(input, auto_msg, size);
+            ui_replace_input(input, auto_msg, size);
             free(auto_msg);
             free(found);
         }
@@ -1443,7 +1443,7 @@ _cmd_complete_parameters(char *input, int *size)
         result = autocomplete_param_with_func(input, size, boolean_choices[i],
             prefs_autocomplete_boolean_choice);
         if (result != NULL) {
-            inp_replace_input(input, result, size);
+            ui_replace_input(input, result, size);
             g_free(result);
             return;
         }
@@ -1460,7 +1460,7 @@ _cmd_complete_parameters(char *input, int *size)
                 result = autocomplete_param_with_ac(input, size, nick_choices[i],
                     nick_ac);
                 if (result != NULL) {
-                    inp_replace_input(input, result, size);
+                    ui_replace_input(input, result, size);
                     g_free(result);
                     return;
                 }
@@ -1474,7 +1474,7 @@ _cmd_complete_parameters(char *input, int *size)
             result = autocomplete_param_with_func(input, size, contact_choices[i],
                 roster_find_contact);
             if (result != NULL) {
-                inp_replace_input(input, result, size);
+                ui_replace_input(input, result, size);
                 g_free(result);
                 return;
             }
@@ -1485,7 +1485,7 @@ _cmd_complete_parameters(char *input, int *size)
             result = autocomplete_param_with_func(input, size, resource_choices[i],
                 roster_find_resource);
             if (result != NULL) {
-                inp_replace_input(input, result, size);
+                ui_replace_input(input, result, size);
                 g_free(result);
                 return;
             }
@@ -1494,7 +1494,7 @@ _cmd_complete_parameters(char *input, int *size)
 
     result = autocomplete_param_with_func(input, size, "/invite", roster_find_contact);
     if (result != NULL) {
-        inp_replace_input(input, result, size);
+        ui_replace_input(input, result, size);
         g_free(result);
         return;
     }
@@ -1504,7 +1504,7 @@ _cmd_complete_parameters(char *input, int *size)
         result = autocomplete_param_with_func(input, size, invite_choices[i],
             muc_find_invite);
         if (result != NULL) {
-            inp_replace_input(input, result, size);
+            ui_replace_input(input, result, size);
             g_free(result);
             return;
         }
@@ -1516,7 +1516,7 @@ _cmd_complete_parameters(char *input, int *size)
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
         if (result != NULL) {
-            inp_replace_input(input, result, size);
+            ui_replace_input(input, result, size);
             g_free(result);
             return;
         }
@@ -1532,7 +1532,7 @@ _cmd_complete_parameters(char *input, int *size)
     for (i = 0; i < ARRAY_SIZE(acs); i++) {
         result = acs[i](input, size);
         if (result != NULL) {
-            inp_replace_input(input, result, size);
+            ui_replace_input(input, result, size);
             g_free(result);
             return;
         }
