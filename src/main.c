@@ -57,7 +57,6 @@ _init_modules(void)
     inputwin_init_module();
     notifier_init_module();
     statusbar_init_module();
-    titlebar_init_module();
 
     accounts_init_module();
 #ifdef HAVE_LIBOTR

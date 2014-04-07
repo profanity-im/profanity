@@ -224,28 +224,11 @@ _handle_idle_time()
                 // handle away mode
                 if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
                     presence_update(RESOURCE_AWAY, prefs_get_string(PREF_AUTOAWAY_MESSAGE), 0);
-                    if (prefs_get_string(PREF_AUTOAWAY_MESSAGE) != NULL) {
-                        int pri =
-                            accounts_get_priority_for_presence_type(jabber_get_account_name(),
-                                RESOURCE_AWAY);
-                        cons_show("Idle for %d minutes, status set to away (priority %d), \"%s\".",
-                            prefs_get_autoaway_time(), pri, prefs_get_string(PREF_AUTOAWAY_MESSAGE));
-                        title_bar_set_presence(CONTACT_AWAY);
-                        ui_current_page_off();
-                    } else {
-                        int pri =
-                            accounts_get_priority_for_presence_type(jabber_get_account_name(),
-                                RESOURCE_AWAY);
-                        cons_show("Idle for %d minutes, status set to away (priority %d).",
-                            prefs_get_autoaway_time(), pri);
-                        title_bar_set_presence(CONTACT_AWAY);
-                        ui_current_page_off();
-                    }
+                    ui_auto_away();
 
                 // handle idle mode
                 } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
-                    presence_update(RESOURCE_ONLINE,
-                        prefs_get_string(PREF_AUTOAWAY_MESSAGE), idle_ms / 1000);
+                    presence_update(RESOURCE_ONLINE, prefs_get_string(PREF_AUTOAWAY_MESSAGE), idle_ms / 1000);
                 }
             }
         }
@@ -258,15 +241,10 @@ _handle_idle_time()
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
                 if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
                     presence_update(RESOURCE_ONLINE, NULL, 0);
-                    int pri =
-                        accounts_get_priority_for_presence_type(jabber_get_account_name(),
-                            RESOURCE_ONLINE);
-                    cons_show("No longer idle, status set to online (priority %d).", pri);
-                    title_bar_set_presence(CONTACT_ONLINE);
-                    ui_current_page_off();
+                    ui_end_auto_away();
                 } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
                     presence_update(RESOURCE_ONLINE, NULL, 0);
-                    title_bar_set_presence(CONTACT_ONLINE);
+                    ui_titlebar_presence(CONTACT_ONLINE);
                 }
             }
         }

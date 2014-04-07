@@ -87,18 +87,14 @@ void
 handle_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
+
 #ifdef HAVE_LIBOTR
     otr_on_connect(account);
 #endif
-    resource_presence_t resource_presence = accounts_get_login_presence(account->name);
-    contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
-    cons_show_login_success(account);
-    title_bar_set_presence(contact_presence);
-    log_info("%s logged in successfully", account->jid);
-    ui_current_page_off();
-    status_bar_print_message(account->jid);
-    status_bar_update_virtual();
 
+    ui_handle_login_account_success(account);
+
+    log_info("%s logged in successfully", account->jid);
     account_free(account);
 }
 

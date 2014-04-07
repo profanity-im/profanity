@@ -46,7 +46,6 @@ void console_init_module(void);
 void inputwin_init_module(void);
 void notifier_init_module(void);
 void statusbar_init_module(void);
-void titlebar_init_module(void);
 
 // ui startup and control
 void (*ui_init)(void);
@@ -148,17 +147,16 @@ gboolean (*ui_duck_exists)(void);
 void (*ui_tidy_wins)(void);
 void (*ui_prune_wins)(void);
 
+void (*ui_auto_away)(void);
+void (*ui_end_auto_away)(void);
+void (*ui_titlebar_presence)(contact_presence_t presence);
+void (*ui_handle_login_account_success)(ProfAccount *account);
+void (*ui_update_presence)(const resource_presence_t resource_presence,
+    const char * const message, const char * const show);
+
 // create windows
 void (*create_status_bar)(void);
 void (*create_input_window)(void);
-
-// title bar actions
-void (*title_bar_update_virtual)(void);
-void (*title_bar_resize)(void);
-void (*title_bar_console)(void);
-void (*title_bar_set_presence)(contact_presence_t presence);
-void (*title_bar_set_recipient)(const char * const from);
-void (*title_bar_set_typing)(gboolean is_typing);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);

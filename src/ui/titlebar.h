@@ -21,3 +21,9 @@
  */
 
 void create_title_bar(void);
+void title_bar_update_virtual(void);
+void title_bar_resize(void);
+void title_bar_console(void);
+void title_bar_set_presence(contact_presence_t presence);
+void title_bar_set_recipient(const char * const from);
+void title_bar_set_typing(gboolean is_typing);

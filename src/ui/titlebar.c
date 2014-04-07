@@ -57,33 +57,8 @@ create_title_bar(void)
     inp_put_back();
 }
 
-static void
-_title_bar_console(void)
-{
-    werase(win);
-    current_recipient = NULL;
-    typing = FALSE;
-    typing_elapsed = NULL;
-
-    free(current_title);
-    current_title = strdup(CONSOLE_TITLE);
-
-    _title_bar_draw();
-}
-
-static void
-_title_bar_resize(void)
-{
-    int cols = getmaxx(stdscr);
-
-    wresize(win, 1, cols);
-    wbkgd(win, COLOUR_TITLE_TEXT);
-
-    _title_bar_draw();
-}
-
-static void
-_title_bar_update_virtual(void)
+void
+title_bar_update_virtual(void)
 {
     if (current_recipient != NULL) {
 
@@ -102,15 +77,40 @@ _title_bar_update_virtual(void)
     }
 }
 
-static void
-_title_bar_set_presence(contact_presence_t presence)
+void
+title_bar_resize(void)
+{
+    int cols = getmaxx(stdscr);
+
+    wresize(win, 1, cols);
+    wbkgd(win, COLOUR_TITLE_TEXT);
+
+    _title_bar_draw();
+}
+
+void
+title_bar_console(void)
+{
+    werase(win);
+    current_recipient = NULL;
+    typing = FALSE;
+    typing_elapsed = NULL;
+
+    free(current_title);
+    current_title = strdup(CONSOLE_TITLE);
+
+    _title_bar_draw();
+}
+
+void
+title_bar_set_presence(contact_presence_t presence)
 {
     current_presence = presence;
     _title_bar_draw();
 }
 
-static void
-_title_bar_set_recipient(const char * const recipient)
+void
+title_bar_set_recipient(const char * const recipient)
 {
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
@@ -127,8 +127,8 @@ _title_bar_set_recipient(const char * const recipient)
     _title_bar_draw();
 }
 
-static void
-_title_bar_set_typing(gboolean is_typing)
+void
+title_bar_set_typing(gboolean is_typing)
 {
     if (is_typing) {
         if (typing_elapsed != NULL) {
@@ -257,15 +257,4 @@ _title_bar_draw(void)
 
     wnoutrefresh(win);
     inp_put_back();
-}
-
-void
-titlebar_init_module(void)
-{
-    title_bar_console = _title_bar_console;
-    title_bar_resize = _title_bar_resize;
-    title_bar_update_virtual = _title_bar_update_virtual;
-    title_bar_set_presence = _title_bar_set_presence;
-    title_bar_set_recipient = _title_bar_set_recipient;
-    title_bar_set_typing = _title_bar_set_typing;
 }
