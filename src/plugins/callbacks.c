@@ -76,15 +76,10 @@ plugins_run_command(const char * const input)
     while (p_command != NULL) {
         PluginCommand *command = p_command->data;
         if (g_strcmp0(split[0], command->command_name) == 0) {
-            gchar **args = parse_args(input, command->min_args, command->max_args);
-            if (args == NULL) {
-                cons_show("");
-                cons_show("Usage: %s", command->usage);
-                if (ui_current_win_type() == WIN_CHAT) {
-                    char usage[strlen(command->usage) + 8];
-                    sprintf(usage, "Usage: %s", command->usage);
-                    ui_current_print_line(usage);
-                }
+            gboolean result;
+            gchar **args = parse_args(input, command->min_args, command->max_args, &result);
+            if (result == FALSE) {
+                ui_invalid_command_usage(command->usage, NULL);
                 return TRUE;
             } else {
                 command->callback_func(command, args);

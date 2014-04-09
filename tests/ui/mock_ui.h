@@ -66,4 +66,6 @@ void cons_show_roster_expect(GSList *list);
 
 void ui_switch_win_expect_and_return(int given_i, gboolean result);
 
+void stub_ui_already_connected(void);
+
 #endif

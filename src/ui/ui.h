@@ -159,6 +159,10 @@ void (*ui_input_clear)(void);
 void (*ui_input_nonblocking)(void);
 void (*ui_replace_input)(char *input, const char * const new_input, int *size);
 
+void (*ui_invalid_command_usage)(const char * const usage, void (**setting_func)(void));
+void (*ui_unknown_command)(const char * const input);
+void (*ui_already_connected)(void);
+
 // console window actions
 void (*cons_show)(const char * const msg, ...);
 void (*cons_about)(void);
