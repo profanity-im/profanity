@@ -43,7 +43,7 @@ typedef struct cmd_help_t {
 typedef struct cmd_t {
     gchar *cmd;
     gboolean (*func)(gchar **args, struct cmd_help_t help);
-    gchar** (*parser)(const char * const inp, int min, int max);
+    gchar** (*parser)(const char * const inp, int min, int max, gboolean *result);
     int min_args;
     int max_args;
     void (**setting_func)(void);

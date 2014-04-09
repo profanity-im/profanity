@@ -1247,15 +1247,16 @@ gboolean
 cmd_execute(const char * const command, const char * const inp)
 {
     Command *cmd = g_hash_table_lookup(commands, command);
+    gboolean result = FALSE;
 
     if (cmd != NULL) {
-        gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args);
-        if ((args == NULL) && (cmd->setting_func != NULL)) {
+        gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
+        if ((result == FALSE) && (cmd->setting_func != NULL)) {
             cons_show("");
             (*cmd->setting_func)();
             cons_show("Usage: %s", cmd->help.usage);
             return TRUE;
-        } else if (args == NULL) {
+        } else if (result == FALSE) {
             cons_show("");
             cons_show("Usage: %s", cmd->help.usage);
             if (ui_current_win_type() == WIN_CHAT) {
@@ -1808,12 +1809,13 @@ _alias_autocomplete(char *input, int *size)
 static char *
 _connect_autocomplete(char *input, int *size)
 {
-    char *result = NULL;
+    char *found = NULL;
+    gboolean result = FALSE;
 
     input[*size] = '\0';
-    gchar **args = parse_args(input, 2, 4);
+    gchar **args = parse_args(input, 2, 4, &result);
 
-    if ((strncmp(input, "/connect", 8) == 0) && (args != NULL)) {
+    if ((strncmp(input, "/connect", 8) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/connect ");
         g_string_append(beginning, args[0]);
         if (args[1] != NULL && args[2] != NULL) {
@@ -1822,16 +1824,16 @@ _connect_autocomplete(char *input, int *size)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
         }
-        result = autocomplete_param_with_ac(input, size, beginning->str, connect_property_ac);
+        found = autocomplete_param_with_ac(input, size, beginning->str, connect_property_ac);
         g_string_free(beginning, TRUE);
-        if (result != NULL) {
-            return result;
+        if (found != NULL) {
+            return found;
         }
     }
 
-    result = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
+    if (found != NULL) {
+        return found;
     }
 
     return NULL;
@@ -1840,12 +1842,13 @@ _connect_autocomplete(char *input, int *size)
 static char *
 _join_autocomplete(char *input, int *size)
 {
-    char *result = NULL;
+    char *found = NULL;
+    gboolean result = FALSE;
 
     input[*size] = '\0';
-    gchar **args = parse_args(input, 2, 4);
+    gchar **args = parse_args(input, 2, 4, &result);
 
-    if ((strncmp(input, "/join", 5) == 0) && (args != NULL)) {
+    if ((strncmp(input, "/join", 5) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/join ");
         g_string_append(beginning, args[0]);
         if (args[1] != NULL && args[2] != NULL) {
@@ -1854,10 +1857,10 @@ _join_autocomplete(char *input, int *size)
             g_string_append(beginning, " ");
             g_string_append(beginning, args[2]);
         }
-        result = autocomplete_param_with_ac(input, size, beginning->str, join_property_ac);
+        found = autocomplete_param_with_ac(input, size, beginning->str, join_property_ac);
         g_string_free(beginning, TRUE);
-        if (result != NULL) {
-            return result;
+        if (found != NULL) {
+            return found;
         }
     }
 
@@ -1867,28 +1870,29 @@ _join_autocomplete(char *input, int *size)
 static char *
 _account_autocomplete(char *input, int *size)
 {
-    char *result = NULL;
+    char *found = NULL;
+    gboolean result = FALSE;
 
     input[*size] = '\0';
-    gchar **args = parse_args(input, 3, 3);
+    gchar **args = parse_args(input, 3, 3, &result);
 
-    if ((strncmp(input, "/account set", 12) == 0) && (args != NULL)) {
+    if ((strncmp(input, "/account set", 12) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/account set ");
         g_string_append(beginning, args[1]);
-        result = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
+        found = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
         g_string_free(beginning, TRUE);
-        if (result != NULL) {
-            return result;
+        if (found != NULL) {
+            return found;
         }
     }
 
-    if ((strncmp(input, "/account clear", 14) == 0) && (args != NULL)) {
+    if ((strncmp(input, "/account clear", 14) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/account clear ");
         g_string_append(beginning, args[1]);
-        result = autocomplete_param_with_ac(input, size, beginning->str, account_clear_ac);
+        found = autocomplete_param_with_ac(input, size, beginning->str, account_clear_ac);
         g_string_free(beginning, TRUE);
-        if (result != NULL) {
-            return result;
+        if (found != NULL) {
+            return found;
         }
     }
 
@@ -1899,18 +1903,13 @@ _account_autocomplete(char *input, int *size)
         "/account disable", "/account rename", "/account clear" };
 
     for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
-        result = autocomplete_param_with_func(input, size, account_choice[i],
+        found = autocomplete_param_with_func(input, size, account_choice[i],
             accounts_find_all);
-        if (result != NULL) {
-            return result;
+        if (found != NULL) {
+            return found;
         }
     }
 
-    result = autocomplete_param_with_ac(input, size, "/account", account_ac);
-    if (result != NULL) {
-        return result;
-    }
-
-    return NULL;
+    found = autocomplete_param_with_ac(input, size, "/account", account_ac);
+    return found;
 }
-

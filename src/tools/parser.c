@@ -48,9 +48,10 @@
  *
  */
 gchar **
-parse_args(const char * const inp, int min, int max)
+parse_args(const char * const inp, int min, int max, gboolean *result)
 {
     if (inp == NULL) {
+        *result = FALSE;
         return NULL;
     }
 
@@ -122,6 +123,7 @@ parse_args(const char * const inp, int min, int max)
     if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
         g_free(copy);
+        *result = FALSE;
         return NULL;
 
     // if min allowed is 0 and 0 found, return empty char* array
@@ -130,6 +132,7 @@ parse_args(const char * const inp, int min, int max)
         gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         g_free(copy);
+        *result = TRUE;
         return args;
 
     // otherwise return args array
@@ -147,7 +150,7 @@ parse_args(const char * const inp, int min, int max)
         args[arg_count] = NULL;
         g_slist_free_full(tokens, free);
         g_free(copy);
-
+        *result = TRUE;
         return args;
     }
 }
@@ -179,9 +182,10 @@ parse_args(const char * const inp, int min, int max)
  *
  */
 gchar **
-parse_args_with_freetext(const char * const inp, int min, int max)
+parse_args_with_freetext(const char * const inp, int min, int max, gboolean *result)
 {
     if (inp == NULL) {
+        *result = FALSE;
         return NULL;
     }
 
@@ -267,12 +271,14 @@ parse_args_with_freetext(const char * const inp, int min, int max)
     // if num args not valid return NULL
     if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
+        *result = FALSE;
         return NULL;
 
     // if min allowed is 0 and 0 found, return empty char* array
     } else if (min == 0 && num == 0) {
         gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
+        *result = TRUE;
         return args;
 
     // otherwise return args array
@@ -289,7 +295,7 @@ parse_args_with_freetext(const char * const inp, int min, int max)
 
         args[arg_count] = NULL;
         g_slist_free_full(tokens, free);
-
+        *result = TRUE;
         return args;
     }
 }
