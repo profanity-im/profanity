@@ -83,6 +83,11 @@ char * _stub_ui_ask_password(void)
 }
 
 static
+void _stub_ui_already_connected(void)
+{
+}
+
+static
 win_type_t _mock_ui_current_win_type(void)
 {
     return (win_type_t)mock();
@@ -256,6 +261,12 @@ void
 stub_cons_show(void)
 {
     cons_show = _stub_cons_show;
+}
+
+void
+stub_ui_already_connected(void)
+{
+    ui_already_connected = _stub_ui_already_connected;
 }
 
 void
