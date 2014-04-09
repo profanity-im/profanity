@@ -539,6 +539,12 @@ _ui_invalid_command_usage(const char * const usage, void (**setting_func)(void))
 }
 
 static void
+_ui_unknown_command(const char * const input)
+{
+    cons_show("Unknown command: %s", input);
+}
+
+static void
 _ui_disconnected(void)
 {
     wins_lost_connection();
@@ -1915,4 +1921,5 @@ ui_init_module(void)
     ui_input_nonblocking = _ui_input_nonblocking;
     ui_replace_input = _ui_replace_input;
     ui_invalid_command_usage = _ui_invalid_command_usage;
+    ui_unknown_command = _ui_unknown_command;
 }
