@@ -521,6 +521,24 @@ _ui_handle_error(const char * const err_msg)
 }
 
 static void
+_ui_invalid_command_usage(const char * const usage, void (**setting_func)(void))
+{
+    if (setting_func != NULL) {
+        cons_show("");
+        (*setting_func)();
+        cons_show("Usage: %s", usage);
+    } else {
+        cons_show("");
+        cons_show("Usage: %s", usage);
+        if (ui_current_win_type() == WIN_CHAT) {
+            char usage_cpy[strlen(usage) + 8];
+            sprintf(usage_cpy, "Usage: %s", usage);
+            ui_current_print_line(usage_cpy);
+        }
+    }
+}
+
+static void
 _ui_disconnected(void)
 {
     wins_lost_connection();
@@ -1896,4 +1914,5 @@ ui_init_module(void)
     ui_input_clear = _ui_input_clear;
     ui_input_nonblocking = _ui_input_nonblocking;
     ui_replace_input = _ui_replace_input;
+    ui_invalid_command_usage = _ui_invalid_command_usage;
 }

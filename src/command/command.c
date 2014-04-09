@@ -1252,19 +1252,7 @@ cmd_execute(const char * const command, const char * const inp)
     if (cmd != NULL) {
         gchar **args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
         if (result == FALSE) {
-            if (cmd->setting_func != NULL) {
-                cons_show("");
-                (*cmd->setting_func)();
-                cons_show("Usage: %s", cmd->help.usage);
-            } else {
-                cons_show("");
-                cons_show("Usage: %s", cmd->help.usage);
-                if (ui_current_win_type() == WIN_CHAT) {
-                    char usage[strlen(cmd->help.usage) + 8];
-                    sprintf(usage, "Usage: %s", cmd->help.usage);
-                    ui_current_print_line(usage);
-                }
-            }
+            ui_invalid_command_usage(cmd->help.usage, cmd->setting_func);
             return TRUE;
         } else {
             gboolean result = cmd->func(args, cmd->help);
