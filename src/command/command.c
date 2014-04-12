@@ -1395,7 +1395,7 @@ cmd_execute_default(const char * const inp)
             break;
 
         case WIN_CONSOLE:
-            ui_unknown_command(inp);
+            cons_show("Unknown command: %s", inp);
             break;
 
         case WIN_DUCK:
