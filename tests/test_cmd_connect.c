@@ -19,10 +19,12 @@
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    stub_ui_already_connected();
+    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
 
     mock_connection_status(status);
+
+    expect_cons_show("You are either connected already, or a login is in process.");
 
     gboolean result = cmd_connect(NULL, *help);
     assert_true(result);

@@ -65,7 +65,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
-        ui_already_connected();
+        cons_show("You are either connected already, or a login is in process.");
         result = TRUE;
     } else {
         char *user = args[0];
