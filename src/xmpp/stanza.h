@@ -148,7 +148,7 @@ typedef struct data_form_t {
     GSList *fields;
 } DataForm;
 
-xmpp_stanza_t* stanza_create_storage_bookmarks(xmpp_ctx_t *ctx);
+xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const recipient, const char * const state);

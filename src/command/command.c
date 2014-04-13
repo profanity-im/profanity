@@ -299,10 +299,10 @@ static struct cmd_t command_defs[] =
 
     { "/bookmark",
         cmd_bookmark, parse_args, 0, 4, NULL,
-        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
+        { "/bookmark [add|list|remove] [room@server] [autojoin] [nick]",
           "Manage bookmarks.",
-        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
-          "---------------------------------------------------------------------------",
+        { "/bookmark [add|list|remove] [room@server] [autojoin] [nick]",
+          "-----------------------------------------------------------",
           "Manage bookmarks.",
           NULL } } },
 
@@ -1867,6 +1867,12 @@ _join_autocomplete(char *input, int *size)
     gboolean result = FALSE;
 
     input[*size] = '\0';
+
+    found = autocomplete_param_with_func(input, size, "/join", bookmark_find);
+    if (found != NULL) {
+        return found;
+    }
+
     gchar **args = parse_args(input, 2, 4, &result);
 
     if ((strncmp(input, "/join", 5) == 0) && (result == TRUE)) {
