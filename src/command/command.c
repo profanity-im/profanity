@@ -300,10 +300,10 @@ static struct cmd_t command_defs[] =
 
     { "/bookmark",
         cmd_bookmark, parse_args, 0, 4, NULL,
-        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
+        { "/bookmark [add|list|remove] [room@server] [autojoin] [nick]",
           "Manage bookmarks.",
-        { "/bookmark [add|list|remove] [room@server] [autojoin on|off] [nick nickname]",
-          "---------------------------------------------------------------------------",
+        { "/bookmark [add|list|remove] [room@server] [autojoin] [nick]",
+          "-----------------------------------------------------------",
           "Manage bookmarks.",
           NULL } } },
 

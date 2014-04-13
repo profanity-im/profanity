@@ -38,7 +38,7 @@ static int _field_compare(FormField *f1, FormField *f2);
 
 #if 0
 xmpp_stanza_t *
-stanza_create_pubsub_bookmarks(xmpp_ctx_t *ctx)
+stanza_create_bookmarks_pubsub_request(xmpp_ctx_t *ctx)
 {
     xmpp_stanza_t *iq, *pubsub, *items;
 
@@ -66,7 +66,7 @@ stanza_create_pubsub_bookmarks(xmpp_ctx_t *ctx)
 #endif
 
 xmpp_stanza_t *
-stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
+stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx)
 {
     xmpp_stanza_t *iq, *query, *storage;
 
@@ -92,6 +92,99 @@ stanza_create_storage_bookmarks(xmpp_ctx_t *ctx)
 
     return iq;
 }
+
+#if 0
+xmpp_stanza_t *
+stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char * const jid,
+    const gboolean autojoin, const char * const nick)
+{
+    xmpp_stanza_t *stanza = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(stanza, STANZA_NAME_IQ);
+    char *id = generate_unique_id("bookmark_add");
+    xmpp_stanza_set_id(stanza, id);
+    xmpp_stanza_set_type(stanza, STANZA_TYPE_SET);
+
+    xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+    xmpp_stanza_add_child(stanza, pubsub);
+
+    xmpp_stanza_t *publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, "storage:bookmarks");
+    xmpp_stanza_add_child(pubsub, publish);
+
+    xmpp_stanza_t *item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    xmpp_stanza_add_child(publish, item);
+
+    xmpp_stanza_t *conference = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(conference, STANZA_NAME_CONFERENCE);
+    xmpp_stanza_set_ns(conference, "storage:bookmarks");
+    xmpp_stanza_set_attribute(conference, STANZA_ATTR_JID, jid);
+
+    if (autojoin) {
+        xmpp_stanza_set_attribute(conference, STANZA_ATTR_AUTOJOIN, "true");
+    } else {
+        xmpp_stanza_set_attribute(conference, STANZA_ATTR_AUTOJOIN, "false");
+    }
+
+    if (nick != NULL) {
+        xmpp_stanza_t *nick_st = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(nick_st, STANZA_NAME_NICK);
+        xmpp_stanza_set_text(nick_st, nick);
+        xmpp_stanza_add_child(conference, nick_st);
+    }
+
+    xmpp_stanza_add_child(item, conference);
+
+    xmpp_stanza_t *publish_options = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish_options, STANZA_NAME_PUBLISH_OPTIONS);
+    xmpp_stanza_add_child(pubsub, publish_options);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x, STANZA_NS_DATA);
+    xmpp_stanza_set_attribute(x, STANZA_ATTR_TYPE, "submit");
+    xmpp_stanza_add_child(publish_options, x);
+
+    xmpp_stanza_t *form_type = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(form_type, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(form_type, STANZA_ATTR_VAR, "FORM_TYPE");
+    xmpp_stanza_set_attribute(form_type, STANZA_ATTR_TYPE, "hidden");
+    xmpp_stanza_t *form_type_value = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(form_type_value, STANZA_NAME_VALUE);
+    xmpp_stanza_t *form_type_value_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(form_type_value_text, "http://jabber.org/protocol/pubsub#publish-options");
+    xmpp_stanza_add_child(form_type_value, form_type_value_text);
+    xmpp_stanza_add_child(form_type, form_type_value);
+    xmpp_stanza_add_child(x, form_type);
+
+    xmpp_stanza_t *persist_items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(persist_items, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(persist_items, STANZA_ATTR_VAR, "pubsub#persist_items");
+    xmpp_stanza_t *persist_items_value = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(persist_items_value, STANZA_NAME_VALUE);
+    xmpp_stanza_t *persist_items_value_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(persist_items_value_text, "true");
+    xmpp_stanza_add_child(persist_items_value, persist_items_value_text);
+    xmpp_stanza_add_child(persist_items, persist_items_value);
+    xmpp_stanza_add_child(x, persist_items);
+
+    xmpp_stanza_t *access_model = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(access_model, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(access_model, STANZA_ATTR_VAR, "pubsub#access_model");
+    xmpp_stanza_t *access_model_value = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(access_model_value, STANZA_NAME_VALUE);
+    xmpp_stanza_t *access_model_value_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(access_model_value_text, "whitelist");
+    xmpp_stanza_add_child(access_model_value, access_model_value_text);
+    xmpp_stanza_add_child(access_model, access_model_value);
+    xmpp_stanza_add_child(x, access_model);
+
+    return stanza;
+}
+#endif
 
 xmpp_stanza_t *
 stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
