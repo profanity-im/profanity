@@ -1223,6 +1223,10 @@ static void
 _cons_log_setting(void)
 {
     cons_show("Max log size (/log maxsize) : %d bytes", prefs_get_max_log_size());
+    if (prefs_get_boolean(PREF_LOG_ROTATE))
+        cons_show("Log rotation (/log rotate)  : ON");
+    else
+        cons_show("Log rotation (/log rotate)  : OFF");
 }
 
 static void

@@ -256,6 +256,7 @@ _init(const int disable_tls, char *log_level)
     signal(SIGPIPE, SIG_IGN);
     _create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
+    prefs_load();
     log_init(prof_log_level);
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
@@ -268,7 +269,6 @@ _init(const int disable_tls, char *log_level)
     }
     chat_log_init();
     groupchat_log_init();
-    prefs_load();
     accounts_load();
     gchar *theme = prefs_get_string(PREF_THEME);
     theme_init(theme);

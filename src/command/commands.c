@@ -2291,9 +2291,20 @@ cmd_log(gchar **args, struct cmd_help_t help)
             prefs_set_max_log_size(intval);
             cons_show("Log maxinum size set to %d bytes", intval);
         }
-    } else {
-        cons_show("Usage: %s", help.usage);
+        return TRUE;
     }
+
+    if (strcmp(subcmd, "rotate") == 0) {
+        if (value == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            return _cmd_set_boolean_preference(value, help,
+                "Log rotate", PREF_LOG_ROTATE);
+        }
+    }
+
+    cons_show("Usage: %s", help.usage);
 
     /* TODO: make 'level' subcommand for debug level */
 

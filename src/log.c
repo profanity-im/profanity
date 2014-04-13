@@ -154,9 +154,11 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
         fflush(logp);
         g_free(date_fmt);
 
-        result = ftell(logp);
-        if (result != -1 && result >= prefs_get_max_log_size()) {
-            _rotate_log_file();
+        if (prefs_get_boolean(PREF_LOG_ROTATE)) {
+            result = ftell(logp);
+            if (result != -1 && result >= prefs_get_max_log_size()) {
+                _rotate_log_file();
+            }
         }
     }
 }

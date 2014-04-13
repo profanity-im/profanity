@@ -69,6 +69,7 @@ static char * _connect_autocomplete(char *input, int *size);
 static char * _statuses_autocomplete(char *input, int *size);
 static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
+static char * _log_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -639,11 +640,12 @@ static struct cmd_t command_defs[] =
 
     { "/log",
         cmd_log, parse_args, 2, 2, &cons_log_setting,
-        { "/log maxsize value", "Manage system logging settings.",
-        { "/log maxsize value",
-          "------------------",
-          "maxsize : When log file size exceeds this value it will be automatically",
-          "          rotated (file will be renamed). Default value is 1048580 (1MB)",
+        { "/log [property] [value]", "Manage system logging settings.",
+        { "/log [property] [value]",
+          "-----------------------",
+          "Property may be one of:",
+          "rotate  : 'on' or 'off', determines whether the log will be rotated, defaults to 'on'",
+          "maxsize : When log file size exceeds this value and rotate is enabled, it will be automatically be rotated, defaults to 1048580 (1MB)",
           NULL } } },
 
     { "/reconnect",
@@ -950,6 +952,7 @@ cmd_init(void)
 
     log_ac = autocomplete_new();
     autocomplete_add(log_ac, "maxsize");
+    autocomplete_add(log_ac, "rotate");
 
     autoaway_ac = autocomplete_new();
     autocomplete_add(autoaway_ac, "mode");
@@ -1468,8 +1471,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/log", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, log_ac, disco_ac, close_ac, wins_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i]);
@@ -1481,7 +1484,7 @@ _cmd_complete_parameters(char *input, int *size)
     }
 
     autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
-        _autoaway_autocomplete, _theme_autocomplete,
+        _autoaway_autocomplete, _theme_autocomplete, _log_autocomplete,
         _account_autocomplete, _roster_autocomplete, _group_autocomplete,
         _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
         _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete,
@@ -1667,6 +1670,24 @@ _autoaway_autocomplete(char *input, int *size)
         return result;
     }
     result = autocomplete_param_with_ac(input, size, "/autoaway", autoaway_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_log_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, size, "/log rotate",
+        prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/log", log_ac);
     if (result != NULL) {
         return result;
     }
