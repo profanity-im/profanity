@@ -39,6 +39,10 @@ void log_warning(const char * const msg, ...) {}
 void log_error(const char * const msg, ...) {}
 void log_msg(log_level_t level, const char * const area,
     const char * const msg) {}
+char * get_log_file_location(void)
+{
+    return (char *)mock();
+}
 
 log_level_t log_level_from_string(char *log_level)
 {
