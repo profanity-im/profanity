@@ -1219,7 +1219,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
 }
 
 static void
-_ui_room_join(char *room)
+_ui_room_join(char *room, gboolean focus)
 {
     ProfWin *window = wins_get_by_recipient(room);
     int num = 0;
@@ -1230,7 +1230,12 @@ _ui_room_join(char *room)
     }
 
     num = wins_get_num(window);
-    ui_switch_win(num);
+
+    if (focus) {
+        ui_switch_win(num);
+    } else {
+        status_bar_active(num);
+    }
 }
 
 static void

@@ -59,7 +59,7 @@ void ui_current_print_line_expect(char *message);
 
 void ui_current_win_is_otr_returns(gboolean result);
 
-void ui_room_join_expect(char *room);
+void ui_room_join_expect(char *room, gboolean focus);
 
 void mock_cons_show_roster(void);
 void cons_show_roster_expect(GSList *list);

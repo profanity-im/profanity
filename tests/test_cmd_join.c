@@ -109,7 +109,7 @@ void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(expected_room, nick, NULL);
-    ui_room_join_expect(expected_room);
+    ui_room_join_expect(expected_room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -136,7 +136,7 @@ void cmd_join_uses_supplied_nick(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(room, nick, NULL);
-    ui_room_join_expect(room);
+    ui_room_join_expect(room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -163,7 +163,7 @@ void cmd_join_uses_account_nick_when_not_supplied(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(room, account_nick, NULL);
-    ui_room_join_expect(room);
+    ui_room_join_expect(room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -193,7 +193,7 @@ void cmd_join_uses_password_when_supplied(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(expected_room, account_nick, password);
-    ui_room_join_expect(expected_room);
+    ui_room_join_expect(expected_room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);

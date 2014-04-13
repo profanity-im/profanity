@@ -1663,7 +1663,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     if (!muc_room_is_active(room)) {
         presence_join_room(room, nick, passwd);
     }
-    ui_room_join(room);
+    ui_room_join(room, TRUE);
     muc_remove_invite(room);
 
     jid_destroy(room_arg);
