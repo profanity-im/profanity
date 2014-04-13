@@ -37,6 +37,7 @@
 #define PROF "prof"
 
 static FILE *logp;
+GString *mainlogfile;
 
 static GTimeZone *tz;
 static GDateTime *dt;
@@ -120,6 +121,7 @@ log_init(log_level_t filter)
     tz = g_time_zone_new_local();
     gchar *log_file = _get_main_log_file();
     logp = fopen(log_file, "a");
+    mainlogfile = g_string_new(log_file);
     free(log_file);
 }
 
@@ -128,6 +130,12 @@ log_reinit(void)
 {
     log_close();
     log_init(level_filter);
+}
+
+char *
+get_log_file_location(void)
+{
+    return mainlogfile->str;
 }
 
 log_level_t
@@ -139,6 +147,7 @@ log_get_filter(void)
 void
 log_close(void)
 {
+    g_string_free(mainlogfile, TRUE);
     g_time_zone_unref(tz);
     if (logp != NULL) {
         fclose(logp);

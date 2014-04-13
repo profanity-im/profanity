@@ -639,10 +639,11 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/log",
-        cmd_log, parse_args, 2, 2, &cons_log_setting,
+        cmd_log, parse_args, 1, 2, &cons_log_setting,
         { "/log [property] [value]", "Manage system logging settings.",
         { "/log [property] [value]",
           "-----------------------",
+          "where   : Show the current log file location.",
           "Property may be one of:",
           "rotate  : Rotate log, accepts 'on' or 'off', defaults to 'on'.",
           "maxsize : With rotate enabled, specifies the max log size, defaults to 1048580 (1MB).",
@@ -955,6 +956,7 @@ cmd_init(void)
     autocomplete_add(log_ac, "maxsize");
     autocomplete_add(log_ac, "rotate");
     autocomplete_add(log_ac, "shared");
+    autocomplete_add(log_ac, "where");
 
     autoaway_ac = autocomplete_new();
     autocomplete_add(autoaway_ac, "mode");

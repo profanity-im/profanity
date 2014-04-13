@@ -31,6 +31,7 @@
 
 #include "command/command.h"
 #include "common.h"
+#include "log.h"
 #include "roster_list.h"
 #include "config/preferences.h"
 #include "config/theme.h"
@@ -1222,6 +1223,7 @@ _cons_show_chat_prefs(void)
 static void
 _cons_log_setting(void)
 {
+    cons_show("Log file location           : %s", get_log_file_location());
     cons_show("Max log size (/log maxsize) : %d bytes", prefs_get_max_log_size());
 
     if (prefs_get_boolean(PREF_LOG_ROTATE))
