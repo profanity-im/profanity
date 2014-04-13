@@ -346,37 +346,33 @@ _groupchat_handler(xmpp_conn_t * const conn,
     char *room_jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     Jid *jid = jid_create(room_jid);
 
-    // handle room broadcasts
-    if (jid->resourcepart == NULL) {
-        xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
-
-        // handle subject
-        if (subject != NULL) {
-            message = xmpp_stanza_get_text(subject);
-            if (message != NULL) {
-                handle_room_subject(jid->barejid, message);
-                xmpp_free(ctx, message);
-            }
-
-            jid_destroy(jid);
-            return 1;
-
-        // handle other room broadcasts
-        } else {
-            xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-            if (body != NULL) {
-                message = xmpp_stanza_get_text(body);
-                if (message != NULL) {
-                    handle_room_broadcast(room_jid, message);
-                    xmpp_free(ctx, message);
-                }
-            }
-
-            jid_destroy(jid);
-            return 1;
+    // handle room subject
+    xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
+    if (subject != NULL) {
+        message = xmpp_stanza_get_text(subject);
+        if (message != NULL) {
+            handle_room_subject(jid->barejid, message);
+            xmpp_free(ctx, message);
         }
+
+        jid_destroy(jid);
+        return 1;
     }
 
+    // handle room broadcasts
+    if (jid->resourcepart == NULL) {
+        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+        if (body != NULL) {
+            message = xmpp_stanza_get_text(body);
+            if (message != NULL) {
+                handle_room_broadcast(room_jid, message);
+                xmpp_free(ctx, message);
+            }
+        }
+
+        jid_destroy(jid);
+        return 1;
+    }
 
     if (!jid_is_valid_room_form(jid)) {
         log_error("Invalid room JID: %s", jid->str);
