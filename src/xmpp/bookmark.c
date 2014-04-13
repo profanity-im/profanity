@@ -133,7 +133,6 @@ _bookmark_remove(const char *jid, gboolean autojoin)
         if (autojoin) {
             Bookmark *bookmark = found->data;
             bookmark->autojoin = FALSE;
-            g_list_free(found);
 
         // remove bookmark
         } else {
