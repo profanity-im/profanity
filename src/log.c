@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "glib.h"
 
@@ -60,7 +61,7 @@ static char * _get_log_filename(const char * const other, const char * const log
 static char * _get_groupchat_log_filename(const char * const room,
     const char * const login, GDateTime *dt, gboolean create);
 static gchar * _get_chatlog_dir(void);
-static gchar * _get_log_file(void);
+static gchar * _get_main_log_file(void);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
 
@@ -117,9 +118,16 @@ log_init(log_level_t filter)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
-    gchar *log_file = _get_log_file();
+    gchar *log_file = _get_main_log_file();
     logp = fopen(log_file, "a");
     free(log_file);
+}
+
+void
+log_reinit(void)
+{
+    log_close();
+    log_init(level_filter);
 }
 
 log_level_t
@@ -183,7 +191,7 @@ log_level_from_string(char *log_level)
 static void
 _rotate_log_file(void)
 {
-    gchar *log_file = _get_log_file();
+    gchar *log_file = _get_main_log_file();
     size_t len = strlen(log_file);
     char *log_file_new = malloc(len + 3);
 
@@ -518,11 +526,15 @@ _get_chatlog_dir(void)
 }
 
 static gchar *
-_get_log_file(void)
+_get_main_log_file(void)
 {
     gchar *xdg_data = xdg_get_data_home();
     GString *logfile = g_string_new(xdg_data);
-    g_string_append(logfile, "/profanity/logs/profanity.log");
+    g_string_append(logfile, "/profanity/logs/profanity");
+    if (!prefs_get_boolean(PREF_LOG_SHARED)) {
+        g_string_append_printf(logfile, "%d", getpid());
+    }
+    g_string_append(logfile, ".log");
     gchar *result = strdup(logfile->str);
     free(xdg_data);
     g_string_free(logfile, TRUE);

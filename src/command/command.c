@@ -644,8 +644,9 @@ static struct cmd_t command_defs[] =
         { "/log [property] [value]",
           "-----------------------",
           "Property may be one of:",
-          "rotate  : 'on' or 'off', determines whether the log will be rotated, defaults to 'on'",
-          "maxsize : When log file size exceeds this value and rotate is enabled, it will be automatically be rotated, defaults to 1048580 (1MB)",
+          "rotate  : Rotate log, accepts 'on' or 'off', defaults to 'on'.",
+          "maxsize : With rotate enabled, specifies the max log size, defaults to 1048580 (1MB).",
+          "shared  : Share logs between all instances, accepts 'on' or 'off', defaults to 'on'.",
           NULL } } },
 
     { "/reconnect",
@@ -953,6 +954,7 @@ cmd_init(void)
     log_ac = autocomplete_new();
     autocomplete_add(log_ac, "maxsize");
     autocomplete_add(log_ac, "rotate");
+    autocomplete_add(log_ac, "shared");
 
     autoaway_ac = autocomplete_new();
     autocomplete_add(autoaway_ac, "mode");
@@ -1683,6 +1685,11 @@ _log_autocomplete(char *input, int *size)
     char *result = NULL;
 
     result = autocomplete_param_with_func(input, size, "/log rotate",
+        prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, size, "/log shared",
         prefs_autocomplete_boolean_choice);
     if (result != NULL) {
         return result;

@@ -2304,6 +2304,18 @@ cmd_log(gchar **args, struct cmd_help_t help)
         }
     }
 
+    if (strcmp(subcmd, "shared") == 0) {
+        if (value == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            gboolean result = _cmd_set_boolean_preference(value, help,
+                "Shared log", PREF_LOG_SHARED);
+            log_reinit();
+            return result;
+        }
+    }
+
     cons_show("Usage: %s", help.usage);
 
     /* TODO: make 'level' subcommand for debug level */

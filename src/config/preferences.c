@@ -394,6 +394,7 @@ _get_group(preference_t pref)
         case PREF_GRLOG:
         case PREF_OTR_LOG:
         case PREF_LOG_ROTATE:
+        case PREF_LOG_SHARED:
             return PREF_GROUP_LOGGING;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
@@ -467,6 +468,8 @@ _get_key(preference_t pref)
             return "otr.warn";
         case PREF_LOG_ROTATE:
             return "rotate";
+        case PREF_LOG_SHARED:
+            return "shared";
         default:
             return NULL;
     }
@@ -481,6 +484,7 @@ _get_default_boolean(preference_t pref)
         case PREF_OTR_WARN:
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
+        case PREF_LOG_SHARED:
             return TRUE;
         default:
             return FALSE;
