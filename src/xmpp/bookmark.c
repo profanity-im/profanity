@@ -114,6 +114,8 @@ _bookmark_add(const char *jid, const char *nick, gboolean autojoin)
     GList *found = g_list_find_custom(bookmark_list, item, _match_bookmark_by_jid);
     if (found != NULL) {
         bookmark_list = g_list_remove_link(bookmark_list, found);
+        _bookmark_item_destroy(found->data);
+        g_list_free(found);
     }
     bookmark_list = g_list_append(bookmark_list, item);
 
