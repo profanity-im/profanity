@@ -550,5 +550,6 @@ handle_autoping_cancel(void)
 void
 handle_bookmark_autojoin(char *jid)
 {
-    ui_room_join(jid);
+    ui_room_join(jid, FALSE);
+    muc_remove_invite(jid);
 }

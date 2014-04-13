@@ -166,9 +166,10 @@ gboolean _mock_ui_current_win_is_otr(void)
 }
 
 static
-void _mock_ui_room_join(char *room)
+void _mock_ui_room_join(char *room, gboolean focus)
 {
     check_expected(room);
+    check_expected(focus);
 }
 
 static
@@ -433,10 +434,11 @@ ui_current_win_is_otr_returns(gboolean result)
 }
 
 void
-ui_room_join_expect(char *room)
+ui_room_join_expect(char *room, gboolean focus)
 {
     ui_room_join = _mock_ui_room_join;
     expect_string(_mock_ui_room_join, room, room);
+    expect_value(_mock_ui_room_join, focus, focus);
 }
 
 void

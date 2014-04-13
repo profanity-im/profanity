@@ -644,27 +644,32 @@ _cons_show_bookmarks(const GList *list)
     ProfWin *console = wins_get_console();
     Bookmark *item;
 
-    cons_show("");
-    cons_show("Bookmarks:");
+    if (list == NULL) {
+        cons_show("");
+        cons_show("No bookmarks found.");
+    } else {
+        cons_show("");
+        cons_show("Bookmarks:");
 
-    /* TODO: show status (connected or not) and window number */
-    while (list != NULL) {
-        item = list->data;
+        /* TODO: show status (connected or not) and window number */
+        while (list != NULL) {
+            item = list->data;
 
-        win_print_time(console, '-');
-        wprintw(console->win, "  %s", item->jid);
-        if (item->nick != NULL) {
-            wprintw(console->win, "/%s", item->nick);
+            win_print_time(console, '-');
+            wprintw(console->win, "  %s", item->jid);
+            if (item->nick != NULL) {
+                wprintw(console->win, "/%s", item->nick);
+            }
+            if (item->autojoin) {
+                wprintw(console->win, " (autojoin)");
+            }
+            wprintw(console->win, "\n");
+            list = g_list_next(list);
         }
-        if (item->autojoin) {
-            wprintw(console->win, " (autojoin)");
-        }
-        wprintw(console->win, "\n");
-        list = g_list_next(list);
-    }
 
-    if (wins_is_current(console)) {
-        win_update_virtual(console);
+        if (wins_is_current(console)) {
+            win_update_virtual(console);
+        }
     }
     cons_alert();
 }
