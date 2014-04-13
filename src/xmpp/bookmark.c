@@ -128,25 +128,22 @@ _bookmark_remove(const char *jid, gboolean autojoin)
     _bookmark_item_destroy(item);
     gboolean removed = found != NULL;
 
-    // set autojoin FALSE
-    if (autojoin) {
-        if (found != NULL) {
+    if (removed) {
+        // set autojoin FALSE
+        if (autojoin) {
             Bookmark *bookmark = found->data;
             bookmark->autojoin = FALSE;
-            g_list_free(found);
-        }
 
-    // remove bookmark
-    } else {
-        if (found != NULL) {
+        // remove bookmark
+        } else {
             bookmark_list = g_list_remove_link(bookmark_list, found);
             _bookmark_item_destroy(found->data);
             g_list_free(found);
+            autocomplete_remove(bookmark_ac, jid);
         }
-        autocomplete_remove(bookmark_ac, jid);
-    }
 
-    _send_bookmarks();
+        _send_bookmarks();
+    }
 
     return removed;
 }
