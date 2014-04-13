@@ -2290,13 +2290,42 @@ cmd_log(gchar **args, struct cmd_help_t help)
     int intval;
 
     if (strcmp(subcmd, "maxsize") == 0) {
+        if (value == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
         if (_strtoi(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX) == 0) {
             prefs_set_max_log_size(intval);
             cons_show("Log maxinum size set to %d bytes", intval);
         }
-    } else {
-        cons_show("Usage: %s", help.usage);
+        return TRUE;
     }
+
+    if (strcmp(subcmd, "rotate") == 0) {
+        if (value == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+        return _cmd_set_boolean_preference(value, help, "Log rotate", PREF_LOG_ROTATE);
+    }
+
+    if (strcmp(subcmd, "shared") == 0) {
+        if (value == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+        gboolean result = _cmd_set_boolean_preference(value, help, "Shared log", PREF_LOG_SHARED);
+        log_reinit();
+        return result;
+    }
+
+    if (strcmp(subcmd, "where") == 0) {
+        char *logfile = get_log_file_location();
+        cons_show("Log file: %s", logfile);
+        return TRUE;
+    }
+
+    cons_show("Usage: %s", help.usage);
 
     /* TODO: make 'level' subcommand for debug level */
 

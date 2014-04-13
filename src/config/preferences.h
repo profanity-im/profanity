@@ -62,7 +62,9 @@ typedef enum {
     PREF_AUTOAWAY_MESSAGE,
     PREF_CONNECT_ACCOUNT,
     PREF_OTR_LOG,
-    PREF_OTR_WARN
+    PREF_OTR_WARN,
+    PREF_LOG_ROTATE,
+    PREF_LOG_SHARED
 } preference_t;
 
 typedef struct prof_alias_t {

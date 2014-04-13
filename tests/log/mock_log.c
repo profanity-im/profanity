@@ -31,6 +31,7 @@ log_level_t log_get_filter(void)
 {
     return (log_level_t)mock();
 }
+void log_reinit(void) {}
 void log_close(void) {}
 void log_debug(const char * const msg, ...) {}
 void log_info(const char * const msg, ...) {}
