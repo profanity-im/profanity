@@ -47,3 +47,4 @@ void parse_options_when_two_returns_map(void **state);
 void parse_options_when_opt3_no_val_sets_error(void **state);
 void parse_options_when_three_returns_map(void **state);
 void parse_options_when_unknown_opt_sets_error(void **state);
+void parse_options_with_duplicated_option_sets_error(void **state);

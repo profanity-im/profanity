@@ -173,6 +173,7 @@ int main(int argc, char* argv[]) {
         unit_test(parse_options_when_opt3_no_val_sets_error),
         unit_test(parse_options_when_three_returns_map),
         unit_test(parse_options_when_unknown_opt_sets_error),
+        unit_test(parse_options_with_duplicated_option_sets_error),
 
         unit_test(empty_list_when_none_added),
         unit_test(contains_one_element),

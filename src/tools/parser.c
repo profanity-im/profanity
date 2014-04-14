@@ -385,14 +385,31 @@ parse_options(gchar **args, int start, GList *keys, gboolean *res)
         return options;
     }
 
-    // check each option is valid and has value, failure if not
+    // validate options
     int curr;
+    GList *found_keys = NULL;
     for (curr = start; curr < g_strv_length(args); curr+= 2) {
-        if ((g_list_find(keys, args[curr]) == NULL) || (args[curr+1] == NULL)) {
+        // check if option valid
+        if (g_list_find(keys, args[curr]) == NULL) {
             *res = FALSE;
             return options;
         }
+
+        // check if duplicate
+        if (g_list_find(found_keys, args[curr]) != NULL) {
+            *res = FALSE;
+            return options;
+        }
+
+        // check value given
+        if (args[curr+1] == NULL) {
+            *res = FALSE;
+            return options;
+        }
+
+        found_keys = g_list_append(found_keys, args[curr]);
     }
+    g_list_free(found_keys);
 
     // create map
     options = g_hash_table_new(g_str_hash, g_str_equal);

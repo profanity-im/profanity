@@ -668,3 +668,23 @@ parse_options_when_unknown_opt_sets_error(void **state)
 
     options_destroy(options);
 }
+
+void
+parse_options_with_duplicated_option_sets_error(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", "opt1", "val3", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+    keys = g_list_append(keys, "opt2");
+    keys = g_list_append(keys, "opt3");
+
+    gboolean res = TRUE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_null(options);
+    assert_false(res);
+
+    options_destroy(options);
+}
