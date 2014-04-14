@@ -1235,6 +1235,9 @@ _ui_room_join(char *room, gboolean focus)
         ui_switch_win(num);
     } else {
         status_bar_active(num);
+        ProfWin *console = wins_get_console();
+        win_vprint_line(console, '!', COLOUR_ONLINE, "-> Autojoined %s (%d).", room, num);
+        win_update_virtual(console);
     }
 }
 
