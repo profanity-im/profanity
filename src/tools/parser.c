@@ -390,13 +390,13 @@ parse_options(gchar **args, int start, GList *keys, gboolean *res)
     GList *found_keys = NULL;
     for (curr = start; curr < g_strv_length(args); curr+= 2) {
         // check if option valid
-        if (g_list_find(keys, args[curr]) == NULL) {
+        if (g_list_find_custom(keys, args[curr], (GCompareFunc)g_strcmp0) == NULL) {
             *res = FALSE;
             return options;
         }
 
         // check if duplicate
-        if (g_list_find(found_keys, args[curr]) != NULL) {
+        if (g_list_find_custom(found_keys, args[curr], (GCompareFunc)g_strcmp0) != NULL) {
             *res = FALSE;
             return options;
         }

@@ -1551,7 +1551,6 @@ cmd_join(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    int num_args = g_strv_length(args);
     char *room = NULL;
     char *nick = NULL;
     char *passwd = NULL;
@@ -1572,39 +1571,22 @@ cmd_join(gchar **args, struct cmd_help_t help)
     }
 
     // Additional args supplied
-    if (num_args > 1) {
-        char *opt1 = args[1];
-        char *opt1val = args[2];
-        char *opt2 = args[3];
-        char *opt2val = args[4];
-        if (opt1 != NULL) {
-            if (opt1val == NULL) {
-                cons_show("Usage: %s", help.usage);
-                cons_show("");
-                return TRUE;
-            }
-            if (strcmp(opt1, "nick") == 0) {
-                nick = opt1val;
-            } else if (strcmp(opt1, "password") == 0) {
-                passwd = opt1val;
-            } else {
-                cons_show("Usage: %s", help.usage);
-                cons_show("");
-                return TRUE;
-            }
-            if (opt2 != NULL) {
-                if (strcmp(opt2, "nick") == 0) {
-                    nick = opt2val;
-                } else if (strcmp(opt2, "password") == 0) {
-                    passwd = opt2val;
-                } else {
-                    cons_show("Usage: %s", help.usage);
-                    cons_show("");
-                    return TRUE;
-                }
-            }
-        }
+    GList *opt_keys = NULL;
+    opt_keys = g_list_append(opt_keys, "nick");
+    opt_keys = g_list_append(opt_keys, "password");
+    gboolean parsed;
+
+    GHashTable *options = parse_options(args, 1, opt_keys, &parsed);
+    if (!parsed) {
+        cons_show("Usage: %s", help.usage);
+        cons_show("");
+        return TRUE;
     }
+
+    nick = g_hash_table_lookup(options, "nick");
+    passwd = g_hash_table_lookup(options, "password");
+
+    options_destroy(options);
 
     // In the case that a nick wasn't provided by the optional args...
     if (nick == NULL) {
