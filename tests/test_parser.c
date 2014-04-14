@@ -512,7 +512,7 @@ parse_options_when_none_returns_empty_hasmap(void **state)
 
     gboolean res = FALSE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_true(options != NULL);
     assert_int_equal(0, g_hash_table_size(options));
@@ -529,7 +529,7 @@ parse_options_when_opt1_no_val_sets_error(void **state)
 
     gboolean res = TRUE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_null(options);
     assert_false(res);
@@ -545,7 +545,7 @@ parse_options_when_one_returns_map(void **state)
 
     gboolean res = FALSE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_int_equal(1, g_hash_table_size(options));
     assert_true(g_hash_table_contains(options, "opt1"));
@@ -563,7 +563,7 @@ parse_options_when_opt2_no_val_sets_error(void **state)
 
     gboolean res = TRUE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_null(options);
     assert_false(res);
@@ -579,7 +579,7 @@ parse_options_when_two_returns_map(void **state)
 
     gboolean res = FALSE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_int_equal(2, g_hash_table_size(options));
     assert_true(g_hash_table_contains(options, "opt1"));
@@ -599,7 +599,7 @@ parse_options_when_opt3_no_val_sets_error(void **state)
 
     gboolean res = TRUE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_null(options);
     assert_false(res);
@@ -615,7 +615,7 @@ parse_options_when_three_returns_map(void **state)
 
     gboolean res = FALSE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_int_equal(3, g_hash_table_size(options));
     assert_true(g_hash_table_contains(options, "opt1"));
@@ -637,7 +637,7 @@ parse_options_when_unknown_opt_sets_error(void **state)
 
     gboolean res = TRUE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_null(options);
     assert_false(res);
@@ -653,7 +653,7 @@ parse_options_with_duplicated_option_sets_error(void **state)
 
     gboolean res = TRUE;
 
-    GHashTable *options = parse_options(args, 2, keys, &res);
+    GHashTable *options = parse_options(&args[2], keys, &res);
 
     assert_null(options);
     assert_false(res);

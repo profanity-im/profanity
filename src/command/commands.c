@@ -71,7 +71,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         gchar *opt_keys[] = { "server", "port", NULL };
         gboolean parsed;
 
-        GHashTable *options = parse_options(args, 1, opt_keys, &parsed);
+        GHashTable *options = parse_options(&args[1], opt_keys, &parsed);
         if (!parsed) {
             cons_show("Usage: %s", help.usage);
             cons_show("");
@@ -1572,7 +1572,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     gchar *opt_keys[] = { "nick", "password", NULL };
     gboolean parsed;
 
-    GHashTable *options = parse_options(args, 1, opt_keys, &parsed);
+    GHashTable *options = parse_options(&args[1], opt_keys, &parsed);
     if (!parsed) {
         cons_show("Usage: %s", help.usage);
         cons_show("");
