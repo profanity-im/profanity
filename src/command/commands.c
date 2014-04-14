@@ -69,84 +69,36 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         cons_show("You are either connected already, or a login is in process.");
         result = TRUE;
     } else {
-        char *user = args[0];
-        char *opt1 = args[1];
-        char *opt1val = args[2];
-        char *opt2 = args[3];
-        char *opt2val = args[4];
-        char *lower = g_utf8_strdown(user, -1);
-        char *jid;
+        GList *opt_keys = NULL;
+        opt_keys = g_list_append(opt_keys, "server");
+        opt_keys = g_list_append(opt_keys, "port");
+        gboolean parsed;
 
-        // parse options
-        char *altdomain = NULL;
+        GHashTable *options = parse_options(args, 1, opt_keys, &parsed);
+        if (!parsed) {
+            cons_show("Usage: %s", help.usage);
+            cons_show("");
+            return TRUE;
+        }
+
+        char *altdomain = g_hash_table_lookup(options, "server");
+
         int port = 0;
-        gboolean server_set = FALSE;
-        gboolean port_set = FALSE;
-        if (opt1 != NULL) {
-            if (opt1val == NULL) {
-                cons_show("Usage: %s", help.usage);
+        if (g_hash_table_contains(options, "port")) {
+            char *port_str = g_hash_table_lookup(options, "port");
+            if (_strtoi(port_str, &port, 1, 65535) != 0) {
+                port = 0;
                 cons_show("");
                 return TRUE;
-            }
-            if (strcmp(opt1, "server") == 0) {
-                altdomain = opt1val;
-                server_set = TRUE;
-            } else if (strcmp(opt1, "port") == 0) {
-                if (_strtoi(opt1val, &port, 1, 65535) != 0) {
-                    port = 0;
-                    cons_show("");
-                    return TRUE;
-                } else {
-                    port_set = TRUE;
-                }
-            } else {
-                cons_show("Usage: %s", help.usage);
-                cons_show("");
-                return TRUE;
-            }
-
-            if (opt2 != NULL) {
-                if (server_set && strcmp("server", opt2) == 0) {
-                    cons_show("Usage: %s", help.usage);
-                    cons_show("");
-                    return TRUE;
-                }
-                if (port_set && strcmp("port", opt2) == 0) {
-                    cons_show("Usage: %s", help.usage);
-                    cons_show("");
-                    return TRUE;
-                }
-                if (opt2val == NULL) {
-                    cons_show("Usage: %s", help.usage);
-                    cons_show("");
-                    return TRUE;
-                }
-                if (strcmp(opt2, "server") == 0) {
-                    if (server_set) {
-                        cons_show("Usage: %s", help.usage);
-                        return TRUE;
-                    }
-                    altdomain = opt2val;
-                    server_set = TRUE;
-                } else if (strcmp(opt2, "port") == 0) {
-                    if (port_set) {
-                        cons_show("Usage: %s", help.usage);
-                        return TRUE;
-                    }
-                    if (_strtoi(opt2val, &port, 1, 65535) != 0) {
-                        port = 0;
-                        cons_show("");
-                        return TRUE;
-                    } else {
-                        port_set = TRUE;
-                    }
-                } else {
-                    cons_show("Usage: %s", help.usage);
-                    cons_show("");
-                    return TRUE;
-                }
             }
         }
+
+        options_destroy(options);
+        g_list_free(opt_keys);
+
+        char *user = args[0];
+        char *lower = g_utf8_strdown(user, -1);
+        char *jid;
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
@@ -1603,7 +1555,6 @@ cmd_join(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    int num_args = g_strv_length(args);
     char *room = NULL;
     char *nick = NULL;
     char *passwd = NULL;
@@ -1624,39 +1575,23 @@ cmd_join(gchar **args, struct cmd_help_t help)
     }
 
     // Additional args supplied
-    if (num_args > 1) {
-        char *opt1 = args[1];
-        char *opt1val = args[2];
-        char *opt2 = args[3];
-        char *opt2val = args[4];
-        if (opt1 != NULL) {
-            if (opt1val == NULL) {
-                cons_show("Usage: %s", help.usage);
-                cons_show("");
-                return TRUE;
-            }
-            if (strcmp(opt1, "nick") == 0) {
-                nick = opt1val;
-            } else if (strcmp(opt1, "password") == 0) {
-                passwd = opt1val;
-            } else {
-                cons_show("Usage: %s", help.usage);
-                cons_show("");
-                return TRUE;
-            }
-            if (opt2 != NULL) {
-                if (strcmp(opt2, "nick") == 0) {
-                    nick = opt2val;
-                } else if (strcmp(opt2, "password") == 0) {
-                    passwd = opt2val;
-                } else {
-                    cons_show("Usage: %s", help.usage);
-                    cons_show("");
-                    return TRUE;
-                }
-            }
-        }
+    GList *opt_keys = NULL;
+    opt_keys = g_list_append(opt_keys, "nick");
+    opt_keys = g_list_append(opt_keys, "password");
+    gboolean parsed;
+
+    GHashTable *options = parse_options(args, 1, opt_keys, &parsed);
+    if (!parsed) {
+        cons_show("Usage: %s", help.usage);
+        cons_show("");
+        return TRUE;
     }
+
+    nick = g_hash_table_lookup(options, "nick");
+    passwd = g_hash_table_lookup(options, "password");
+
+    options_destroy(options);
+    g_list_free(opt_keys);
 
     // In the case that a nick wasn't provided by the optional args...
     if (nick == NULL) {

@@ -503,3 +503,197 @@ get_first_two_of_three_first_and_second_quoted(void **state)
 
     assert_string_equal("\"one\" \"two\" ", result);
 }
+
+void
+parse_options_when_none_returns_empty_hasmap(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+
+    gboolean res = FALSE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_true(options != NULL);
+    assert_int_equal(0, g_hash_table_size(options));
+    assert_true(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_when_opt1_no_val_sets_error(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+
+    gboolean res = TRUE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_null(options);
+    assert_false(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_when_one_returns_map(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+
+    gboolean res = FALSE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_int_equal(1, g_hash_table_size(options));
+    assert_true(g_hash_table_contains(options, "opt1"));
+    assert_string_equal("val1", g_hash_table_lookup(options, "opt1"));
+    assert_true(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_when_opt2_no_val_sets_error(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+    keys = g_list_append(keys, "opt2");
+
+    gboolean res = TRUE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_null(options);
+    assert_false(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_when_two_returns_map(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+    keys = g_list_append(keys, "opt2");
+
+    gboolean res = FALSE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_int_equal(2, g_hash_table_size(options));
+    assert_true(g_hash_table_contains(options, "opt1"));
+    assert_true(g_hash_table_contains(options, "opt2"));
+    assert_string_equal("val1", g_hash_table_lookup(options, "opt1"));
+    assert_string_equal("val2", g_hash_table_lookup(options, "opt2"));
+    assert_true(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_when_opt3_no_val_sets_error(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", "opt3", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+    keys = g_list_append(keys, "opt2");
+    keys = g_list_append(keys, "opt3");
+
+    gboolean res = TRUE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_null(options);
+    assert_false(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_when_three_returns_map(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", "opt3", "val3", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+    keys = g_list_append(keys, "opt2");
+    keys = g_list_append(keys, "opt3");
+
+    gboolean res = FALSE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_int_equal(3, g_hash_table_size(options));
+    assert_true(g_hash_table_contains(options, "opt1"));
+    assert_true(g_hash_table_contains(options, "opt2"));
+    assert_true(g_hash_table_contains(options, "opt3"));
+    assert_string_equal("val1", g_hash_table_lookup(options, "opt1"));
+    assert_string_equal("val2", g_hash_table_lookup(options, "opt2"));
+    assert_string_equal("val3", g_hash_table_lookup(options, "opt3"));
+    assert_true(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_when_unknown_opt_sets_error(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", "oops", "val2", "opt3", "val3", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+    keys = g_list_append(keys, "opt2");
+    keys = g_list_append(keys, "opt3");
+
+    gboolean res = TRUE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_null(options);
+    assert_false(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
+
+void
+parse_options_with_duplicated_option_sets_error(void **state)
+{
+    gchar *args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", "opt1", "val3", NULL };
+
+    GList *keys = NULL;
+    keys = g_list_append(keys, "opt1");
+    keys = g_list_append(keys, "opt2");
+    keys = g_list_append(keys, "opt3");
+
+    gboolean res = TRUE;
+
+    GHashTable *options = parse_options(args, 2, keys, &res);
+
+    assert_null(options);
+    assert_false(res);
+
+    options_destroy(options);
+    g_list_free(keys);
+}
