@@ -69,12 +69,10 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         cons_show("You are either connected already, or a login is in process.");
         result = TRUE;
     } else {
-        GList *opt_keys = NULL;
-        opt_keys = g_list_append(opt_keys, "server");
-        opt_keys = g_list_append(opt_keys, "port");
+        gchar *opt_keys[] = { "server", "port", NULL };
         gboolean parsed;
 
-        GHashTable *options = parse_options(args, 1, opt_keys, &parsed);
+        GHashTable *options = parse_options(&args[1], opt_keys, &parsed);
         if (!parsed) {
             cons_show("Usage: %s", help.usage);
             cons_show("");
@@ -94,7 +92,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         }
 
         options_destroy(options);
-        g_list_free(opt_keys);
 
         char *user = args[0];
         char *lower = g_utf8_strdown(user, -1);
@@ -1575,12 +1572,10 @@ cmd_join(gchar **args, struct cmd_help_t help)
     }
 
     // Additional args supplied
-    GList *opt_keys = NULL;
-    opt_keys = g_list_append(opt_keys, "nick");
-    opt_keys = g_list_append(opt_keys, "password");
+    gchar *opt_keys[] = { "nick", "password", NULL };
     gboolean parsed;
 
-    GHashTable *options = parse_options(args, 1, opt_keys, &parsed);
+    GHashTable *options = parse_options(&args[1], opt_keys, &parsed);
     if (!parsed) {
         cons_show("Usage: %s", help.usage);
         cons_show("");
@@ -1591,7 +1586,6 @@ cmd_join(gchar **args, struct cmd_help_t help)
     passwd = g_hash_table_lookup(options, "password");
 
     options_destroy(options);
-    g_list_free(opt_keys);
 
     // In the case that a nick wasn't provided by the optional args...
     if (nick == NULL) {
