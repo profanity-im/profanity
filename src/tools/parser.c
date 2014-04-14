@@ -374,14 +374,21 @@ get_start(char *string, int tokens)
 }
 
 GHashTable *
-parse_options(gchar **args, int start, GList *keys, gboolean *res)
+parse_options(gchar **args, int start, gchar **opt_keys, gboolean *res)
 {
+    GList *keys = NULL;
+    int i;
+    for (i = 0; i < g_strv_length(opt_keys); i++) {
+        keys = g_list_append(keys, opt_keys[i]);
+    }
+
     GHashTable *options = NULL;
 
     // no options found, success
     if (args[start] == NULL) {
         options = g_hash_table_new(g_str_hash, g_str_equal);
         *res = TRUE;
+        g_list_free(keys);
         return options;
     }
 
@@ -392,24 +399,28 @@ parse_options(gchar **args, int start, GList *keys, gboolean *res)
         // check if option valid
         if (g_list_find_custom(keys, args[curr], (GCompareFunc)g_strcmp0) == NULL) {
             *res = FALSE;
+            g_list_free(keys);
             return options;
         }
 
         // check if duplicate
         if (g_list_find_custom(found_keys, args[curr], (GCompareFunc)g_strcmp0) != NULL) {
             *res = FALSE;
+            g_list_free(keys);
             return options;
         }
 
         // check value given
         if (args[curr+1] == NULL) {
             *res = FALSE;
+            g_list_free(keys);
             return options;
         }
 
         found_keys = g_list_append(found_keys, args[curr]);
     }
     g_list_free(found_keys);
+    g_list_free(keys);
 
     // create map
     options = g_hash_table_new(g_str_hash, g_str_equal);
