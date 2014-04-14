@@ -29,5 +29,7 @@ gchar** parse_args(const char * const inp, int min, int max, gboolean *result);
 gchar** parse_args_with_freetext(const char * const inp, int min, int max, gboolean *result);
 int count_tokens(char *string);
 char* get_start(char *string, int tokens);
+GHashTable* parse_options(gchar **args, int start, GList *keys, gboolean *res);
+void options_destroy(GHashTable *options);
 
 #endif
