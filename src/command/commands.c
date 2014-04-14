@@ -93,6 +93,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         }
 
         options_destroy(options);
+        g_list_free(opt_keys);
 
         char *user = args[0];
         char *lower = g_utf8_strdown(user, -1);
@@ -1587,6 +1588,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
     passwd = g_hash_table_lookup(options, "password");
 
     options_destroy(options);
+    g_list_free(opt_keys);
 
     // In the case that a nick wasn't provided by the optional args...
     if (nick == NULL) {
