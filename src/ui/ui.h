@@ -92,6 +92,8 @@ gboolean (*ui_win_exists)(int index);
 int (*ui_win_unread)(int index);
 char * (*ui_ask_password)(void);
 
+void (*ui_handle_stanza)(const char * const msg);
+
 // ui events
 void (*ui_contact_typing)(const char * const from);
 void (*ui_incoming_msg)(const char * const from, const char * const message,
@@ -160,6 +162,10 @@ void (*ui_input_nonblocking)(void);
 void (*ui_replace_input)(char *input, const char * const new_input, int *size);
 
 void (*ui_invalid_command_usage)(const char * const usage, void (**setting_func)(void));
+
+void (*ui_create_xmlconsole_win)(void);
+gboolean (*ui_xmlconsole_exists)(void);
+void (*ui_open_xmlconsole_win)(void);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);

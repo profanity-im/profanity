@@ -50,5 +50,7 @@ gboolean wins_tidy(void);
 GSList * wins_create_summary(void);
 void wins_destroy(void);
 GList * wins_get_nums(void);
+gboolean wins_xmlconsole_exists(void);
+ProfWin * wins_get_xmlconsole(void);
 
 #endif

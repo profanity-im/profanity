@@ -90,6 +90,14 @@ win_print_line(ProfWin *window, const char show_char, int attrs,
 }
 
 void
+win_print_line_no_time(ProfWin *window, int attrs, const char * const msg)
+{
+    wattron(window->win, attrs);
+    wprintw(window->win, "%s\n", msg);
+    wattroff(window->win, attrs);
+}
+
+void
 win_vprint_line(ProfWin *window, const char show_char, int attrs,
     const char * const msg, ...)
 {

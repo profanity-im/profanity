@@ -796,6 +796,14 @@ static struct cmd_t command_defs[] =
           "The default is 'all' for all windows.",
           NULL } } },
 
+    { "/xmlconsole",
+        cmd_xmlconsole, parse_args, 0, 0, NULL,
+        { "/xmlconsole", "Open the XML console",
+        { "/xmlconsole",
+          "-----------",
+          "Open the XML console to view incoming and outgoing XMPP traffic.",
+          NULL } } },
+
     { "/away",
         cmd_away, parse_args_with_freetext, 0, 1, NULL,
         { "/away [msg]", "Set status to away.",
@@ -1402,6 +1410,7 @@ cmd_execute_default(const char * const inp)
             break;
 
         case WIN_CONSOLE:
+        case WIN_XML:
             cons_show("Unknown command: %s", inp);
             break;
 

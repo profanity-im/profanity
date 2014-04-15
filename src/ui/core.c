@@ -220,6 +220,35 @@ _ui_duck_exists(void)
     return wins_duck_exists();
 }
 
+static gboolean
+_ui_xmlconsole_exists(void)
+{
+    return wins_xmlconsole_exists();
+}
+
+static void
+_ui_handle_stanza(const char * const msg)
+{
+    if (ui_xmlconsole_exists()) {
+        ProfWin *xmlconsole = wins_get_xmlconsole();
+
+        if (g_str_has_prefix(msg, "SENT:")) {
+            win_print_line_no_time(xmlconsole, 0, "SENT:");
+            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, &msg[6]);
+            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, "");
+        } else if (g_str_has_prefix(msg, "RECV:")) {
+            win_print_line_no_time(xmlconsole, 0, "RECV:");
+            win_print_line_no_time(xmlconsole, COLOUR_AWAY, &msg[6]);
+            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, "");
+        }
+
+        if (wins_is_current(xmlconsole)) {
+            win_update_virtual(xmlconsole);
+            ui_current_page_off();
+        }
+    }
+}
+
 static void
 _ui_contact_typing(const char * const barejid)
 {
@@ -1106,6 +1135,14 @@ _ui_create_duck_win(void)
 }
 
 static void
+_ui_create_xmlconsole_win(void)
+{
+    ProfWin *window = wins_new("XML Console", WIN_XML);
+    int num = wins_get_num(window);
+    ui_switch_win(num);
+}
+
+static void
 _ui_open_duck_win(void)
 {
     ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
@@ -1928,4 +1965,7 @@ ui_init_module(void)
     ui_input_nonblocking = _ui_input_nonblocking;
     ui_replace_input = _ui_replace_input;
     ui_invalid_command_usage = _ui_invalid_command_usage;
+    ui_handle_stanza = _ui_handle_stanza;
+    ui_create_xmlconsole_win = _ui_create_xmlconsole_win;
+    ui_xmlconsole_exists = _ui_xmlconsole_exists;
 }
