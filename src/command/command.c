@@ -1382,6 +1382,7 @@ cmd_execute_default(const char * const inp)
             break;
 
         case WIN_CONSOLE:
+        case WIN_XML:
             cons_show("Unknown command: %s", inp);
             break;
 

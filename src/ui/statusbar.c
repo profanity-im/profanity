@@ -302,14 +302,6 @@ status_bar_clear(void)
         message = NULL;
     }
 
-    int i;
-    is_active[1] = TRUE;
-    is_new[1] = FALSE;
-    for (i = 2; i < 12; i++) {
-        is_active[i] = FALSE;
-        is_new[i] = FALSE;
-    }
-
     werase(status_bar);
 
     int cols = getmaxx(stdscr);

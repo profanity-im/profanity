@@ -63,6 +63,7 @@ void win_vprint_line(ProfWin *self, const char show_char, int attrs,
     const char * const msg, ...);
 void win_print_line(ProfWin *self, const char show_char, int attrs,
     const char * const msg);
+void win_print_line_no_time(ProfWin *window, int attrs, const char * const msg);
 void win_update_virtual(ProfWin *window);
 void win_move_to_end(ProfWin *window);
 void win_print_time(ProfWin *window, char show_char);

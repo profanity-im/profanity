@@ -230,17 +230,21 @@ _ui_handle_stanza(const char * const msg)
 {
     if (ui_xmlconsole_exists()) {
         ProfWin *xmlconsole = wins_get_xmlconsole();
-	    
-        if (g_str_has_prefix(msg, "SENT:")) {
-	    win_vprint_line(xmlconsole, '!', COLOUR_ONLINE, "<- %s", &msg[6]);
-	} else if (g_str_has_prefix(msg, "RECV:")) {
-	    win_vprint_line(xmlconsole, '!', COLOUR_AWAY, "-> %s", &msg[6]);
-	}
 
-	win_update_virtual(xmlconsole);
-	if (wins_is_current(xmlconsole)) {
-	    ui_current_page_off();
-	}
+        if (g_str_has_prefix(msg, "SENT:")) {
+            win_print_line_no_time(xmlconsole, 0, "SENT:");
+            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, &msg[6]);
+            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, "");
+        } else if (g_str_has_prefix(msg, "RECV:")) {
+            win_print_line_no_time(xmlconsole, 0, "RECV:");
+            win_print_line_no_time(xmlconsole, COLOUR_AWAY, &msg[6]);
+            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, "");
+        }
+
+        if (wins_is_current(xmlconsole)) {
+            win_update_virtual(xmlconsole);
+            ui_current_page_off();
+        }
     }
 }
 
