@@ -220,6 +220,21 @@ _ui_duck_exists(void)
 }
 
 static void
+_ui_handle_stanza(const char * const msg)
+{
+    ProfWin *console = wins_get_console();
+    if (g_str_has_prefix(msg, "SENT:")) {
+        win_vprint_line(console, '!', COLOUR_ONLINE, "<- %s", &msg[6]);
+    } else if (g_str_has_prefix(msg, "RECV:")) {
+        win_vprint_line(console, '!', COLOUR_AWAY, "-> %s", &msg[6]);
+    }
+    win_update_virtual(console);
+    if (wins_is_current(console)) {
+        ui_current_page_off();
+    }
+}
+
+static void
 _ui_contact_typing(const char * const barejid)
 {
     ProfWin *window = wins_get_by_recipient(barejid);
@@ -1923,4 +1938,5 @@ ui_init_module(void)
     ui_input_nonblocking = _ui_input_nonblocking;
     ui_replace_input = _ui_replace_input;
     ui_invalid_command_usage = _ui_invalid_command_usage;
+    ui_handle_stanza = _ui_handle_stanza;
 }

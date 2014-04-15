@@ -527,6 +527,9 @@ _xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
 {
     log_level_t prof_level = _get_log_level(level);
     log_msg(prof_level, area, msg);
+    if ((g_strcmp0(area, "xmpp") == 0) || (g_strcmp0(area, "conn")) == 0) {
+        handle_xmpp_stanza(msg);
+    }
 }
 
 static xmpp_log_t *
