@@ -41,7 +41,8 @@ typedef enum {
     WIN_CHAT,
     WIN_MUC,
     WIN_PRIVATE,
-    WIN_DUCK
+    WIN_DUCK,
+    WIN_XML
 } win_type_t;
 
 typedef struct prof_win_t {

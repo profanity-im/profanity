@@ -163,6 +163,10 @@ void (*ui_replace_input)(char *input, const char * const new_input, int *size);
 
 void (*ui_invalid_command_usage)(const char * const usage, void (**setting_func)(void));
 
+void (*ui_create_xmlconsole_win)(void);
+gboolean (*ui_xmlconsole_exists)(void);
+void (*ui_open_xmlconsole_win)(void);
+
 // console window actions
 void (*cons_show)(const char * const msg, ...);
 void (*cons_about)(void);

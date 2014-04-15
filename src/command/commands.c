@@ -2444,6 +2444,18 @@ cmd_vercheck(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_xmlconsole(gchar **args, struct cmd_help_t help)
+{
+    if (!ui_xmlconsole_exists()) {
+        ui_create_xmlconsole_win();
+    } else {
+        ui_open_xmlconsole_win();
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_flash(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help,
