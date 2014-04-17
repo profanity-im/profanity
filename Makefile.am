@@ -90,15 +90,9 @@ otr3_sources = \
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
-themes_sources = \
-	themes/aqua \
-	themes/boothj5 \
-	themes/hacker \
-	themes/headache \
-	themes/original \
-	themes/redsplash \
-	themes/whiteness \
-	themes/yellowsplash
+themes_sources = themes/*
+
+man_sources = docs/profanity.1
 
 if BUILD_OTR
 if BUILD_OTR3
@@ -126,9 +120,13 @@ check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = $(tests_sources)
 tests_testsuite_LDADD = -lcmocka
 
-man_MANS = docs/profanity.1
+man_MANS = $(man_sources)
+
+EXTRA_DIST = $(man_sources) $(themes_sources)
 
 if INCLUDE_GIT_VERSION
+EXTRA_DIST += .git/HEAD .git/index
+
 $(git_include).in: .git/HEAD .git/index
 	rm -f $@
 	echo "#ifndef PROF_GIT_BRANCH" >> $@
