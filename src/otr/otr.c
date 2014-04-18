@@ -53,10 +53,18 @@ cb_is_logged_in(void *opdata, const char *accountname,
     const char *protocol, const char *recipient)
 {
     PContact contact = roster_get_contact(recipient);
+
+    // not in roster
     if (contact == NULL) {
         return PRESENCE_ONLINE;
     }
 
+    // no subsribed
+    if (p_contact_subscribed(contact) == FALSE) {
+        return PRESENCE_ONLINE;
+    }
+
+    // subscribed
     if (g_strcmp0(p_contact_presence(contact), "offline") == 0) {
         return PRESENCE_OFFLINE;
     } else {
