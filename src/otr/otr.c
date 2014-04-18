@@ -59,7 +59,7 @@ cb_is_logged_in(void *opdata, const char *accountname,
         return PRESENCE_ONLINE;
     }
 
-    // no subsribed
+    // not subscribed
     if (p_contact_subscribed(contact) == FALSE) {
         return PRESENCE_ONLINE;
     }

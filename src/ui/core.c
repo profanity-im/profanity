@@ -771,6 +771,17 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
     } else {
         int num = wins_get_num(window);
         status_bar_new(num);
+
+        int ui_index = num;
+        if (ui_index == 10) {
+            ui_index = 0;
+        }
+        cons_show("%s started an OTR session (%d).", recipient, ui_index);
+        ProfWin *console = wins_get_console();
+        if (wins_is_current(console)) {
+            ui_current_page_off();
+        }
+        cons_alert();
     }
 }
 
