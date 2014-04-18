@@ -32,6 +32,10 @@
 #include "contact.h"
 #include "ui/ui.h"
 
+#define PRESENCE_ONLINE 1
+#define PRESENCE_OFFLINE 0
+#define PRESENCE_UNKNOWN -1
+
 static OtrlUserState user_state;
 static OtrlMessageAppOps ops;
 static char *jid;
@@ -49,10 +53,14 @@ cb_is_logged_in(void *opdata, const char *accountname,
     const char *protocol, const char *recipient)
 {
     PContact contact = roster_get_contact(recipient);
+    if (contact == NULL) {
+        return PRESENCE_ONLINE;
+    }
+
     if (g_strcmp0(p_contact_presence(contact), "offline") == 0) {
-        return 0;
+        return PRESENCE_OFFLINE;
     } else {
-        return 1;
+        return PRESENCE_ONLINE;
     }
 }
 
