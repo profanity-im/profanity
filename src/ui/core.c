@@ -751,21 +751,26 @@ static void
 _ui_gone_secure(const char * const recipient, gboolean trusted)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
-    if (window != NULL) {
-        window->is_otr = TRUE;
-        window->is_trusted = trusted;
-        if (trusted) {
-            win_vprint_line(window, '!', COLOUR_OTR_STARTED_TRUSTED, "OTR session started (trusted).");
-        } else {
-            win_vprint_line(window, '!', COLOUR_OTR_STARTED_UNTRUSTED, "OTR session started (untrusted).");
-        }
+    if (window == NULL) {
+        window = wins_new(recipient, WIN_CHAT);
+    }
 
-        if (wins_is_current(window)) {
-            GString *recipient_str = _get_recipient_string(window);
-            title_bar_set_recipient(recipient_str->str);
-            g_string_free(recipient_str, TRUE);
-            win_update_virtual(window);
-        }
+    window->is_otr = TRUE;
+    window->is_trusted = trusted;
+    if (trusted) {
+        win_vprint_line(window, '!', COLOUR_OTR_STARTED_TRUSTED, "OTR session started (trusted).");
+    } else {
+        win_vprint_line(window, '!', COLOUR_OTR_STARTED_UNTRUSTED, "OTR session started (untrusted).");
+    }
+
+    if (wins_is_current(window)) {
+        GString *recipient_str = _get_recipient_string(window);
+        title_bar_set_recipient(recipient_str->str);
+        g_string_free(recipient_str, TRUE);
+        win_update_virtual(window);
+    } else {
+        int num = wins_get_num(window);
+        status_bar_new(num);
     }
 }
 
