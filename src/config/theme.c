@@ -103,44 +103,14 @@ static void _set_colour(gchar *val, NCURSES_COLOR_T *pref,
     NCURSES_COLOR_T def);
 static void _load_colours(void);
 static gchar * _get_themes_dir(void);
+void _theme_list_dir(const gchar * const dir, GSList **result);
+static GString * _theme_find(const char * const theme_name);
 
 void
 theme_init(const char * const theme_name)
 {
-    log_info("Loading theme");
-    theme = g_key_file_new();
-
-    if (theme_name != NULL) {
-        gchar *themes_dir = _get_themes_dir();
-        theme_loc = g_string_new(themes_dir);
-        g_free(themes_dir);
-        g_string_append(theme_loc, "/");
-        g_string_append(theme_loc, theme_name);
-        g_key_file_load_from_file(theme, theme_loc->str, G_KEY_FILE_KEEP_COMMENTS,
-            NULL);
-    }
-
-    _load_colours();
-}
-
-GSList *
-theme_list(void)
-{
-    GSList *result = NULL;
-    gchar *themes_dir = _get_themes_dir();
-    GDir *themes = g_dir_open(themes_dir, 0, NULL);
-    if (themes != NULL) {
-        const gchar *theme = g_dir_read_name(themes);
-        while (theme != NULL) {
-            result = g_slist_append(result, strdup(theme));
-            theme = g_dir_read_name(themes);
-        }
-
-        g_dir_close(themes);
-        return result;
-
-    } else {
-        return NULL;
+    if (!theme_load(theme_name) && !theme_load("default")) {
+        log_error("Theme initialisation failed");
     }
 }
 
@@ -148,45 +118,54 @@ gboolean
 theme_load(const char * const theme_name)
 {
     // use default theme
-    if (strcmp(theme_name, "default") == 0) {
-        g_key_file_free(theme);
-        theme = g_key_file_new();
-        _load_colours();
-        return TRUE;
-    } else {
-        gchar *themes_dir = _get_themes_dir();
-        GString *new_theme_file = g_string_new(themes_dir);
-        g_free(themes_dir);
-        g_string_append(new_theme_file, "/");
-        g_string_append(new_theme_file, theme_name);
-
-        // no theme file found
-        if (!g_file_test(new_theme_file->str, G_FILE_TEST_EXISTS)) {
-            log_info("Theme does not exist \"%s\"", theme_name);
-            g_string_free(new_theme_file, TRUE);
-            return FALSE;
-
-        // load from theme file
-        } else {
-            if (theme_loc != NULL) {
-                g_string_free(theme_loc, TRUE);
-            }
-            theme_loc = new_theme_file;
-            log_info("Changing theme to \"%s\"", theme_name);
+    if (theme_name == NULL || strcmp(theme_name, "default") == 0) {
+        if (theme != NULL) {
             g_key_file_free(theme);
-            theme = g_key_file_new();
-            g_key_file_load_from_file(theme, theme_loc->str, G_KEY_FILE_KEEP_COMMENTS,
-                NULL);
-            _load_colours();
-            return TRUE;
         }
+        theme = g_key_file_new();
+
+    // load theme from file
+    } else {
+        GString *new_theme_file = _theme_find(theme_name);
+        if (new_theme_file == NULL) {
+            log_info("Theme does not exist \"%s\"", theme_name);
+            return FALSE;
+        }
+
+        if (theme_loc != NULL) {
+            g_string_free(theme_loc, TRUE);
+        }
+        theme_loc = new_theme_file;
+        log_info("Loading theme \"%s\"", theme_name);
+        if (theme != NULL) {
+            g_key_file_free(theme);
+        }
+        theme = g_key_file_new();
+        g_key_file_load_from_file(theme, theme_loc->str, G_KEY_FILE_KEEP_COMMENTS,
+            NULL);
     }
+
+    _load_colours();
+    return TRUE;
+}
+
+GSList *
+theme_list(void)
+{
+    GSList *result = NULL;
+    _theme_list_dir(_get_themes_dir(), &result);
+#ifdef THEMES_PATH
+    _theme_list_dir(THEMES_PATH, &result);
+#endif
+    return result;
 }
 
 void
 theme_close(void)
 {
-    g_key_file_free(theme);
+    if (theme != NULL) {
+        g_key_file_free(theme);
+    }
     if (theme_loc != NULL) {
         g_string_free(theme_loc, TRUE);
     }
@@ -434,10 +413,53 @@ _get_themes_dir(void)
 {
     gchar *xdg_config = xdg_get_config_home();
     GString *themes_dir = g_string_new(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    gchar *result = strdup(themes_dir->str);
     g_free(xdg_config);
-    g_string_free(themes_dir, TRUE);
+    g_string_append(themes_dir, "/profanity/themes");
+    return g_string_free(themes_dir, FALSE);
+}
 
-    return result;
+void
+_theme_list_dir(const gchar * const dir, GSList **result)
+{
+    GDir *themes = g_dir_open(dir, 0, NULL);
+    if (themes != NULL) {
+        const gchar *theme = g_dir_read_name(themes);
+        while (theme != NULL) {
+            *result = g_slist_append(*result, strdup(theme));
+            theme = g_dir_read_name(themes);
+        }
+        g_dir_close(themes);
+    }
+}
+
+static GString *
+_theme_find(const char * const theme_name)
+{
+    GString *path = NULL;
+    gchar *themes_dir = _get_themes_dir();
+
+    if (themes_dir != NULL) {
+        path = g_string_new(themes_dir);
+        g_free(themes_dir);
+        g_string_append(path, "/");
+        g_string_append(path, theme_name);
+        if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
+            g_string_free(path, true);
+            path = NULL;
+        }
+    }
+
+#ifdef THEMES_PATH
+    if (path == NULL) {
+        path = g_string_new(THEMES_PATH);
+        g_string_append(path, "/");
+        g_string_append(path, theme_name);
+        if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
+            g_string_free(path, true);
+            path = NULL;
+        }
+    }
+#endif /* THEMES_PATH */
+
+    return path;
 }
