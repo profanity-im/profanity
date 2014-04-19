@@ -2610,11 +2610,28 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         cons_show("Using libotr version %s", version);
         return TRUE;
     } else if (strcmp(args[0], "policy") == 0) {
+	if (args[1] == NULL) {
+		char *policy	=	prefs_get_string(PREF_OTR_POLICY);
+		cons_show("OTR policy is now set to: %s", policy);
+		return TRUE;
+	}
+		
 	char *choice	=	args[1];
 	if (g_strcmp0(choice, "manual") == 0) {
 		prefs_set_string(PREF_OTR_POLICY, "manual");
 		cons_show("OTR policy is now set to: manual");
-		}
+		} else
+        if (g_strcmp0(choice, "opportunistic") == 0) {
+                prefs_set_string(PREF_OTR_POLICY, "opportunistic");
+                cons_show("OTR policy is now set to: opportunistic");
+                } else
+        if (g_strcmp0(choice, "always") == 0) {
+                prefs_set_string(PREF_OTR_POLICY, "always");
+                cons_show("OTR policy is now set to: always");
+                } else
+	{
+		cons_show("OTR policy can be set to: manual, opportunistic or always.");
+	}
 	return TRUE;
     }
 
