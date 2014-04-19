@@ -2609,6 +2609,13 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         char *version = otr_libotr_version();
         cons_show("Using libotr version %s", version);
         return TRUE;
+    } else if (strcmp(args[0], "policy") == 0) {
+	char *choice	=	args[1];
+	if (g_strcmp0(choice, "manual") == 0) {
+		prefs_set_string(PREF_OTR_POLICY, "manual");
+		cons_show("OTR policy is now set to: manual");
+		}
+	return TRUE;
     }
 
     if (jabber_get_connection_status() != JABBER_CONNECTED) {

@@ -594,8 +594,8 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy",
           "-------------------------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
@@ -607,6 +607,7 @@ static struct cmd_t command_defs[] =
           "log - How to log OTR messages, options are 'on', 'off' and 'redact', with redaction being the default.",
           "warn - Show when unencrypted messaging is being used in the title bar, options are 'on' and 'off' with 'on' being the default.",
           "libver - Show which version of the libotr library is being used.",
+	  "policy - manual, opportunistic or always.",
           NULL } } },
 
     { "/outtype",

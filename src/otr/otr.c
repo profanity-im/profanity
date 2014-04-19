@@ -421,6 +421,7 @@ _otr_get_their_fingerprint(const char * const recipient)
 static char *
 _otr_encrypt_message(const char * const to, const char * const message)
 {
+	return NULL;
     char *newmessage = NULL;
     gcry_error_t err = otrlib_encrypt_message(user_state, &ops, jid, to, message, &newmessage);
 

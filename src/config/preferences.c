@@ -466,6 +466,8 @@ _get_key(preference_t pref)
             return "otr";
         case PREF_OTR_WARN:
             return "otr.warn";
+	case PREF_OTR_POLICY:
+	    return "otr.policy";
         case PREF_LOG_ROTATE:
             return "rotate";
         case PREF_LOG_SHARED:
@@ -500,6 +502,8 @@ _get_default_string(preference_t pref)
             return "off";
         case PREF_OTR_LOG:
             return "redact";
+	case PREF_OTR_POLICY:
+	    return "manual";
         case PREF_STATUSES_CONSOLE:
         case PREF_STATUSES_CHAT:
         case PREF_STATUSES_MUC:
