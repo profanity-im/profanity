@@ -1328,6 +1328,10 @@ cmd_execute_default(const char * const inp)
                 ui_current_print_line("You are not currently connected.");
             } else {
 #ifdef HAVE_LIBOTR
+	if ((strcmp(prefs_get_string(PREF_OTR_POLICY), "always") == 0) && !otr_is_secure(recipient)) {
+		cons_show_error("Failed to send message. Please check OTR policy");
+		return TRUE;
+		}
                 if (otr_is_secure(recipient)) {
                     char *encrypted = otr_encrypt_message(recipient, inp);
                     if (encrypted != NULL) {

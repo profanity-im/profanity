@@ -946,6 +946,10 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
         if (msg != NULL) {
 #ifdef HAVE_LIBOTR
+        if ((strcmp(prefs_get_string(PREF_OTR_POLICY), "always") == 0) && !otr_is_secure(usr_jid)) {
+                cons_show_error("Failed to send message. Please check OTR policy");
+                return TRUE;
+                }
             if (otr_is_secure(usr_jid)) {
                 char *encrypted = otr_encrypt_message(usr_jid, msg);
                 if (encrypted != NULL) {
