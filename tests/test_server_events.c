@@ -192,7 +192,7 @@ void handle_presence_error_when_nick_conflict_shows_recipient_error(void **state
     char *type = NULL;
 
     muc_init();
-    muc_join_room(barejid, nick);
+    muc_join_room(barejid, nick, NULL);
 
     expect_ui_handle_recipient_error(barejid, err_msg);
 
@@ -212,7 +212,7 @@ void handle_presence_error_when_nick_conflict_does_not_join_room(void **state)
     stub_ui_handle_recipient_error();
 
     muc_init();
-    muc_join_room(barejid, nick);
+    muc_join_room(barejid, nick, NULL);
 
     handle_presence_error(from, type, err_msg);
 

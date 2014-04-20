@@ -283,7 +283,7 @@ _presence_join_room(char *room, char *nick, char * passwd)
     xmpp_send(conn, presence);
     xmpp_stanza_release(presence);
 
-    muc_join_room(jid->barejid, jid->resourcepart);
+    muc_join_room(jid->barejid, jid->resourcepart, passwd);
     jid_destroy(jid);
 }
 

@@ -32,6 +32,7 @@
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
     char *nick; // e.g. Some User
+    char *password;
     char *subject;
     gboolean pending_nick_change;
     GHashTable *roster;
@@ -125,7 +126,7 @@ muc_clear_invites(void)
  * Join the chat room with the specified nickname
  */
 void
-muc_join_room(const char * const room, const char * const nick)
+muc_join_room(const char * const room, const char * const nick, const char * const password)
 {
     if (rooms == NULL) {
         rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
@@ -135,6 +136,11 @@ muc_join_room(const char * const room, const char * const nick)
     ChatRoom *new_room = malloc(sizeof(ChatRoom));
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
+    if (password != NULL) {
+        new_room->password = strdup(password);
+    } else {
+        new_room->password = NULL;
+    }
     new_room->subject = NULL;
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
@@ -469,6 +475,7 @@ _free_room(ChatRoom *room)
         free(room->room);
         free(room->nick);
         free(room->subject);
+        free(room->password);
         if (room->roster != NULL) {
             g_hash_table_remove_all(room->roster);
         }
