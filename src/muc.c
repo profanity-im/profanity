@@ -34,6 +34,7 @@ typedef struct _muc_room_t {
     char *nick; // e.g. Some User
     char *password;
     char *subject;
+    gboolean autojoin;
     gboolean pending_nick_change;
     GHashTable *roster;
     Autocomplete nick_ac;
@@ -126,7 +127,8 @@ muc_clear_invites(void)
  * Join the chat room with the specified nickname
  */
 void
-muc_join_room(const char * const room, const char * const nick, const char * const password)
+muc_join_room(const char * const room, const char * const nick,
+    const char * const password, gboolean autojoin)
 {
     if (rooms == NULL) {
         rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
@@ -149,6 +151,7 @@ muc_join_room(const char * const room, const char * const nick, const char * con
         g_free, g_free);
     new_room->roster_received = FALSE;
     new_room->pending_nick_change = FALSE;
+    new_room->autojoin = autojoin;
 
     g_hash_table_insert(rooms, strdup(room), new_room);
 }
@@ -175,6 +178,22 @@ muc_room_is_active(const char * const room)
 
         if (chat_room != NULL) {
             return TRUE;
+        } else {
+            return FALSE;
+        }
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+muc_room_is_autojoin(const char * const room)
+{
+    if (rooms != NULL) {
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+        if (chat_room != NULL) {
+            return chat_room->autojoin;
         } else {
             return FALSE;
         }

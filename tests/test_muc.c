@@ -70,7 +70,7 @@ void test_muc_room_is_active(void **state)
 {
     char *room = "room@server.org";
     char *nick = "bob";
-    muc_join_room(room, nick, NULL);
+    muc_join_room(room, nick, NULL, FALSE);
 
     gboolean room_is_active = muc_room_is_active(room);
 

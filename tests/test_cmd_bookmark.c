@@ -248,7 +248,7 @@ void cmd_bookmark_add_adds_bookmark_with_room_details(void **state)
     gchar *args[] = { "add", NULL };
 
     muc_init();
-    muc_join_room(jid, nick, NULL);
+    muc_join_room(jid, nick, NULL, TRUE);
 
     mock_connection_status(JABBER_CONNECTED);
     mock_current_win_type(WIN_MUC);
@@ -275,7 +275,7 @@ void cmd_bookmark_add_adds_bookmark_with_room_details_autojoin(void **state)
     gchar *args[] = { "add", "autojoin", NULL };
 
     muc_init();
-    muc_join_room(jid, nick, NULL);
+    muc_join_room(jid, nick, NULL, TRUE);
 
     mock_connection_status(JABBER_CONNECTED);
     mock_current_win_type(WIN_MUC);

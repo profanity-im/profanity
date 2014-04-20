@@ -283,7 +283,6 @@ _presence_join_room(char *room, char *nick, char * passwd)
     xmpp_send(conn, presence);
     xmpp_stanza_release(presence);
 
-    muc_join_room(jid->barejid, jid->resourcepart, passwd);
     jid_destroy(jid);
 }
 
@@ -342,9 +341,29 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *id = xmpp_stanza_get_id(stanza);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+    char *xmlns = xmpp_stanza_get_ns(x);
     char *type = NULL;
     if (error_stanza != NULL) {
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
+    }
+
+    // handle MUC join errors
+    if (g_strcmp0(xmlns, STANZA_NS_MUC) == 0) {
+        Jid *fulljid = jid_create(from);
+
+        char *error_cond = NULL;
+        xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_ns(error_stanza, STANZA_NS_STANZAS);
+        if (reason_st != NULL) {
+            error_cond = xmpp_stanza_get_name(reason_st);
+        }
+        if (error_cond == NULL) {
+            error_cond = "unknown";
+        }
+
+        log_info("Error joining room: %s, reason: %s", fulljid->barejid, error_cond);
+        handle_room_join_error(fulljid->barejid, error_cond);
+        return 1;
     }
 
     // stanza_get_error never returns NULL
@@ -676,7 +695,6 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         // handle roster complete
         } else if (!muc_get_roster_received(room)) {
             handle_room_roster_complete(room);
-
         }
 
     // handle presence from room members

@@ -1272,7 +1272,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
 }
 
 static void
-_ui_room_join(char *room, gboolean focus)
+_ui_room_join(const char * const room, gboolean focus)
 {
     ProfWin *window = wins_get_by_recipient(room);
     int num = 0;
@@ -1289,7 +1289,8 @@ _ui_room_join(char *room, gboolean focus)
     } else {
         status_bar_active(num);
         ProfWin *console = wins_get_console();
-        win_vprint_line(console, '!', COLOUR_ONLINE, "-> Autojoined %s (%d).", room, num);
+        char *nick = muc_get_room_nick(room);
+        win_vprint_line(console, '!', COLOUR_TYPING, "-> Autojoined %s as %s (%d).", room, nick, num);
         win_update_virtual(console);
     }
 }
@@ -1347,6 +1348,12 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
     if (wins_is_current(window)) {
         win_update_virtual(window);
     }
+}
+
+static void
+_ui_handle_room_join_error(const char * const room, const char * const err)
+{
+    cons_show_error("Error joining room %s, reason: %s", room, err);
 }
 
 static void
@@ -1979,4 +1986,5 @@ ui_init_module(void)
     ui_handle_stanza = _ui_handle_stanza;
     ui_create_xmlconsole_win = _ui_create_xmlconsole_win;
     ui_xmlconsole_exists = _ui_xmlconsole_exists;
+    ui_handle_room_join_error = _ui_handle_room_join_error;
 }

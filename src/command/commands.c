@@ -1591,9 +1591,10 @@ cmd_join(gchar **args, struct cmd_help_t help)
 
     if (!muc_room_is_active(room)) {
         presence_join_room(room, nick, passwd);
+        muc_join_room(room, nick, passwd, FALSE);
+    } else if (muc_get_roster_received(room)) {
+        ui_room_join(room, TRUE);
     }
-    ui_room_join(room, TRUE);
-    muc_remove_invite(room);
 
     jid_destroy(room_arg);
     g_string_free(room_str, TRUE);

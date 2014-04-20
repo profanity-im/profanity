@@ -31,9 +31,11 @@
 
 void muc_init(void);
 void muc_close(void);
-void muc_join_room(const char * const room, const char * const nick, const char * const password);
+void muc_join_room(const char * const room, const char * const nick,
+    const char * const password, gboolean autojoin);
 void muc_leave_room(const char * const room);
 gboolean muc_room_is_active(const char * const room);
+gboolean muc_room_is_autojoin(const char * const room);
 GList* muc_get_active_room_list(void);
 char * muc_get_room_nick(const char * const room);
 
