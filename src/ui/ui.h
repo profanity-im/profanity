@@ -102,7 +102,7 @@ void (*ui_disconnected)(void);
 void (*ui_recipient_gone)(const char * const barejid);
 void (*ui_outgoing_msg)(const char * const from, const char * const to,
     const char * const message);
-void (*ui_room_join)(char *room, gboolean focus);
+void (*ui_room_join)(const char * const room, gboolean focus);
 void (*ui_room_roster)(const char * const room, GList *roster, const char * const presence);
 void (*ui_room_history)(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
@@ -132,6 +132,7 @@ void (*ui_handle_recipient_not_found)(const char * const recipient, const char *
 void (*ui_handle_recipient_error)(const char * const recipient, const char * const err_msg);
 void (*ui_handle_error)(const char * const err_msg);
 void (*ui_clear_win_title)(void);
+void (*ui_handle_room_join_error)(const char * const room, const char * const err);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);

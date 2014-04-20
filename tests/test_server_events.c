@@ -172,58 +172,7 @@ void handle_presence_error_when_no_recipient(void **state)
     handle_presence_error(from, type, err_msg);
 }
 
-void handle_presence_error_when_no_recipient_and_conflict(void **state)
-{
-    char *err_msg = "conflict";
-    char *from = NULL;
-    char *type = NULL;
-
-    expect_ui_handle_error(err_msg);
-
-    handle_presence_error(from, type, err_msg);
-}
-
-void handle_presence_error_when_nick_conflict_shows_recipient_error(void **state)
-{
-    char *err_msg = "conflict";
-    char *from = "room@rooms.org/nick";
-    char *barejid = "room@rooms.org";
-    char *nick = "nick";
-    char *type = NULL;
-
-    muc_init();
-    muc_join_room(barejid, nick);
-
-    expect_ui_handle_recipient_error(barejid, err_msg);
-
-    handle_presence_error(from, type, err_msg);
-
-    muc_close();
-}
-
-void handle_presence_error_when_nick_conflict_does_not_join_room(void **state)
-{
-    char *err_msg = "conflict";
-    char *from = "room@rooms.org/nick";
-    char *barejid = "room@rooms.org";
-    char *nick = "nick";
-    char *type = NULL;
-    Jid *jidp = jid_create(from);
-    stub_ui_handle_recipient_error();
-
-    muc_init();
-    muc_join_room(barejid, nick);
-
-    handle_presence_error(from, type, err_msg);
-
-    gboolean room_is_active = muc_room_is_active(jidp->barejid);
-    assert_false(room_is_active);
-
-    muc_close();
-    jid_destroy(jidp);
-}
-
-void handle_presence_error_when_from_recipient_not_conflict(void **state)
+void handle_presence_error_when_from_recipient(void **state)
 {
     char *err_msg = "Some error.";
     char *from = "bob@server.com";

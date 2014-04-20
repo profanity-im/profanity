@@ -754,21 +754,37 @@ static void
 _ui_gone_secure(const char * const recipient, gboolean trusted)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
-    if (window != NULL) {
-        window->is_otr = TRUE;
-        window->is_trusted = trusted;
-        if (trusted) {
-            win_vprint_line(window, '!', COLOUR_OTR_STARTED_TRUSTED, "OTR session started (trusted).");
-        } else {
-            win_vprint_line(window, '!', COLOUR_OTR_STARTED_UNTRUSTED, "OTR session started (untrusted).");
-        }
+    if (window == NULL) {
+        window = wins_new(recipient, WIN_CHAT);
+    }
 
-        if (wins_is_current(window)) {
-            GString *recipient_str = _get_recipient_string(window);
-            title_bar_set_recipient(recipient_str->str);
-            g_string_free(recipient_str, TRUE);
-            win_update_virtual(window);
+    window->is_otr = TRUE;
+    window->is_trusted = trusted;
+    if (trusted) {
+        win_vprint_line(window, '!', COLOUR_OTR_STARTED_TRUSTED, "OTR session started (trusted).");
+    } else {
+        win_vprint_line(window, '!', COLOUR_OTR_STARTED_UNTRUSTED, "OTR session started (untrusted).");
+    }
+
+    if (wins_is_current(window)) {
+        GString *recipient_str = _get_recipient_string(window);
+        title_bar_set_recipient(recipient_str->str);
+        g_string_free(recipient_str, TRUE);
+        win_update_virtual(window);
+    } else {
+        int num = wins_get_num(window);
+        status_bar_new(num);
+
+        int ui_index = num;
+        if (ui_index == 10) {
+            ui_index = 0;
         }
+        cons_show("%s started an OTR session (%d).", recipient, ui_index);
+        ProfWin *console = wins_get_console();
+        if (wins_is_current(console)) {
+            ui_current_page_off();
+        }
+        cons_alert();
     }
 }
 
@@ -1261,7 +1277,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
 }
 
 static void
-_ui_room_join(char *room, gboolean focus)
+_ui_room_join(const char * const room, gboolean focus)
 {
     ProfWin *window = wins_get_by_recipient(room);
     int num = 0;
@@ -1278,7 +1294,8 @@ _ui_room_join(char *room, gboolean focus)
     } else {
         status_bar_active(num);
         ProfWin *console = wins_get_console();
-        win_vprint_line(console, '!', COLOUR_ONLINE, "-> Autojoined %s (%d).", room, num);
+        char *nick = muc_get_room_nick(room);
+        win_vprint_line(console, '!', COLOUR_TYPING, "-> Autojoined %s as %s (%d).", room, nick, num);
         win_update_virtual(console);
     }
 }
@@ -1336,6 +1353,12 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
     if (wins_is_current(window)) {
         win_update_virtual(window);
     }
+}
+
+static void
+_ui_handle_room_join_error(const char * const room, const char * const err)
+{
+    cons_show_error("Error joining room %s, reason: %s", room, err);
 }
 
 static void
@@ -1968,4 +1991,5 @@ ui_init_module(void)
     ui_handle_stanza = _ui_handle_stanza;
     ui_create_xmlconsole_win = _ui_create_xmlconsole_win;
     ui_xmlconsole_exists = _ui_xmlconsole_exists;
+    ui_handle_room_join_error = _ui_handle_room_join_error;
 }

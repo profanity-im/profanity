@@ -39,23 +39,22 @@
 
 #include "ui/ui.h"
 
+void
+handle_room_join_error(const char * const room, const char * const err)
+{
+    if (muc_room_is_active(room)) {
+        muc_leave_room(room);
+    }
+    ui_handle_room_join_error(room, err);
+}
+
 // handle presence stanza errors
 void
 handle_presence_error(const char *from, const char * const type,
     const char *err_msg)
 {
-    // handle nickname conflict on entering room
-    if ((from != NULL) && g_strcmp0(err_msg, "conflict") == 0) {
-        // remove the room from muc
-        Jid *room_jid = jid_create(from);
-        if (!muc_get_roster_received(room_jid->barejid)) {
-            muc_leave_room(room_jid->barejid);
-            ui_handle_recipient_error(room_jid->barejid, err_msg);
-        }
-        jid_destroy(room_jid);
-
-    // handle any other error from recipient
-    } else if (from != NULL) {
+    // handle error from recipient
+    if (from != NULL) {
         ui_handle_recipient_error(from, err_msg);
 
     // handle errors from no recipient
@@ -452,6 +451,12 @@ handle_room_nick_change(const char * const room,
 void
 handle_room_roster_complete(const char * const room)
 {
+    if (muc_room_is_autojoin(room)) {
+        ui_room_join(room, FALSE);
+    } else {
+        ui_room_join(room, TRUE);
+    }
+    muc_remove_invite(room);
     muc_set_roster_received(room);
     GList *roster = muc_get_roster(room);
     ui_room_roster(room, roster, NULL);
@@ -545,13 +550,6 @@ handle_autoping_cancel(void)
     prefs_set_autoping(0);
     cons_show_error("Server ping not supported, autoping disabled.");
     ui_current_page_off();
-}
-
-void
-handle_bookmark_autojoin(char *jid)
-{
-    ui_room_join(jid, FALSE);
-    muc_remove_invite(jid);
 }
 
 void

@@ -389,10 +389,7 @@ int main(int argc, char* argv[]) {
             close_preferences),
         unit_test(handle_message_error_when_recipient_and_no_type),
         unit_test(handle_presence_error_when_no_recipient),
-        unit_test(handle_presence_error_when_no_recipient_and_conflict),
-        unit_test(handle_presence_error_when_nick_conflict_shows_recipient_error),
-        unit_test(handle_presence_error_when_nick_conflict_does_not_join_room),
-        unit_test(handle_presence_error_when_from_recipient_not_conflict),
+        unit_test(handle_presence_error_when_from_recipient),
 
         unit_test(cmd_alias_add_shows_usage_when_no_args),
         unit_test(cmd_alias_add_shows_usage_when_no_value),

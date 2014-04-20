@@ -124,6 +124,7 @@
 #define STANZA_TEXT_XA "xa"
 #define STANZA_TEXT_ONLINE "online"
 
+#define STANZA_NS_STANZAS "urn:ietf:params:xml:ns:xmpp-stanzas"
 #define STANZA_NS_CHATSTATES "http://jabber.org/protocol/chatstates"
 #define STANZA_NS_MUC "http://jabber.org/protocol/muc"
 #define STANZA_NS_MUC_USER "http://jabber.org/protocol/muc#user"

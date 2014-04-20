@@ -43,6 +43,7 @@ void handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message);
+void handle_room_join_error(const char * const room, const char * const err);
 void handle_duck_result(const char * const result);
 void handle_incoming_message(char *from, char *message, gboolean priv);
 void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
@@ -78,7 +79,6 @@ void handle_message_error(const char * const from, const char * const type,
     const char * const err_msg);
 void handle_presence_error(const char *from, const char * const type,
     const char *err_msg);
-void handle_bookmark_autojoin(char *jid);
 void handle_xmpp_stanza(const char * const msg);
 
 #endif

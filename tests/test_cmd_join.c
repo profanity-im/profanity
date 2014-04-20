@@ -109,7 +109,6 @@ void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(expected_room, nick, NULL);
-    ui_room_join_expect(expected_room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -136,7 +135,6 @@ void cmd_join_uses_supplied_nick(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(room, nick, NULL);
-    ui_room_join_expect(room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -147,7 +145,7 @@ void cmd_join_uses_supplied_nick(void **state)
 void cmd_join_uses_account_nick_when_not_supplied(void **state)
 {
     char *account_name = "an_account";
-    char *room = "room@conf.server.org";
+    char *room = "room2@conf.server.org";
     char *account_nick = "a_nick";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { room, NULL };
@@ -163,7 +161,6 @@ void cmd_join_uses_account_nick_when_not_supplied(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(room, account_nick, NULL);
-    ui_room_join_expect(room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -193,7 +190,6 @@ void cmd_join_uses_password_when_supplied(void **state)
 
     mock_presence_join_room();
     presence_join_room_expect(expected_room, account_nick, password);
-    ui_room_join_expect(expected_room, TRUE);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);

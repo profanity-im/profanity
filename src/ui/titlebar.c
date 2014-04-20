@@ -157,11 +157,15 @@ _title_bar_draw(void)
         waddch(win, ' ');
     mvwprintw(win, 0, 0, " %s", current_title);
 
-
 #ifdef PROF_HAVE_LIBOTR
     // show privacy
     if (current_recipient != NULL) {
-        char *recipient_jid = roster_barejid_from_name(current_recipient);
+        char *recipient_jid = NULL;
+        if (roster_find_contact(current_recipient) != NULL) {
+            recipient_jid = roster_barejid_from_name(current_recipient);
+        } else {
+            recipient_jid = current_recipient;
+        }
         ProfWin *current = wins_get_by_recipient(recipient_jid);
         if (current != NULL) {
             if (current->type == WIN_CHAT) {

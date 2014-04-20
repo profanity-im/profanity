@@ -65,27 +65,27 @@ tests_sources = \
     tests/config/mock_accounts.h tests/config/mock_accounts.c \
     tests/helpers.c tests/helpers.h \
     tests/log/mock_log.c \
-    tests/test_autocomplete.c \
-    tests/test_common.c \
-    tests/test_contact.c \
-	tests/test_cmd_connect.c \
-	tests/test_cmd_account.c \
-	tests/test_cmd_rooms.c \
-	tests/test_cmd_sub.c \
-	tests/test_cmd_alias.c \
-	tests/test_cmd_statuses.c \
-	tests/test_cmd_bookmark.c \
-	tests/test_cmd_otr.c \
-	tests/test_cmd_join.c \
-	tests/test_history.c \
-	tests/test_jid.c \
-	tests/test_parser.c \
-	tests/test_roster_list.c \
-	tests/test_preferences.c \
-	tests/test_server_events.c \
-	tests/test_muc.c \
-    tests/test_cmd_roster.c \
-    tests/test_cmd_win.c \
+	tests/test_autocomplete.c tests/test_autocomplete.h \
+	tests/test_common.c tests/test_common.h \
+	tests/test_contact.c tests/test_contact.h \
+	tests/test_cmd_connect.c tests/test_cmd_connect.h \
+	tests/test_cmd_account.c tests/test_cmd_account.h \
+	tests/test_cmd_rooms.c tests/test_cmd_rooms.h \
+	tests/test_cmd_sub.c tests/test_cmd_sub.h \
+	tests/test_cmd_alias.c tests/test_cmd_alias.h \
+	tests/test_cmd_statuses.c tests/test_cmd_statuses.h \
+	tests/test_cmd_bookmark.c tests/test_cmd_bookmark.h \
+	tests/test_cmd_otr.c tests/test_cmd_otr.h \
+	tests/test_cmd_join.c tests/test_cmd_join.h \
+	tests/test_history.c tests/test_history.h \
+	tests/test_jid.c tests/test_jid.h \
+	tests/test_parser.c tests/test_parser.h \
+	tests/test_roster_list.c tests/test_roster_list.h \
+	tests/test_preferences.c tests/test_preferences.h \
+	tests/test_server_events.c tests/test_server_events.h \
+	tests/test_muc.c tests/test_muc.h \
+	tests/test_cmd_roster.c tests/test_cmd_roster.h \
+	tests/test_cmd_win.c tests/test_cmd_win.h \
 	tests/testsuite.c
 
 main_source = src/main.c
@@ -134,6 +134,10 @@ core_sources += $(c_sources)
 tests_sources += $(c_sources)
 endif
 
+themes_sources = themes/*
+
+man_sources = docs/profanity.1
+
 if BUILD_OTR
 if BUILD_OTR3
 core_sources += $(otr3_sources)
@@ -147,6 +151,10 @@ endif
 
 bin_PROGRAMS = profanity
 profanity_SOURCES = $(core_sources) $(main_source)
+if THEMES_INSTALL
+profanity_themesdir = @THEMES_PATH@
+profanity_themes_DATA = $(themes_sources)
+endif
 if INCLUDE_GIT_VERSION
 BUILT_SOURCES = $(git_include)
 endif
@@ -165,9 +173,13 @@ check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = $(tests_sources)
 tests_testsuite_LDADD = -lcmocka
 
-man_MANS = docs/profanity.1
+man_MANS = $(man_sources)
+
+EXTRA_DIST = $(man_sources) $(themes_sources)
 
 if INCLUDE_GIT_VERSION
+EXTRA_DIST += .git/HEAD .git/index
+
 $(git_include).in: .git/HEAD .git/index
 	rm -f $@
 	echo "#ifndef PROF_GIT_BRANCH" >> $@

@@ -166,7 +166,7 @@ gboolean _mock_ui_current_win_is_otr(void)
 }
 
 static
-void _mock_ui_room_join(char *room, gboolean focus)
+void _mock_ui_room_join(const char * const room, gboolean focus)
 {
     check_expected(room);
     check_expected(focus);

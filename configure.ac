@@ -53,6 +53,8 @@ AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
+AC_ARG_WITH([themes],
+    [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 
 ### plugins
 # ruby
@@ -291,6 +293,15 @@ elif test "x$enable_otr" = x; then
         [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])
 fi
 
+AS_IF([test "x$with_themes" = xno],
+    [THEMES_INSTALL="false"],
+    [THEMES_INSTALL="true"])
+AS_IF([test "x$with_themes" = xno -o "x$with_themes" = xyes -o "x$with_themes" = x],
+    [THEMES_PATH='${pkgdatadir}/themes'],
+    [THEMES_PATH="$with_themes"])
+AC_SUBST(THEMES_PATH)
+AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
+
 ### cmocka is required only for tests, profanity shouldn't be linked with it
 ### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
@@ -306,6 +317,7 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS $RUBY_LDFLAGS $LUA_LIB"
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS $RUBY_CPPFLAGS $LUA_INCLUDE"
+AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
 LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
 
 AC_SUBST(AM_LDFLAGS)
@@ -327,5 +339,7 @@ echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
 echo "AM_LDFLAGS     : $AM_LDFLAGS"
 echo "LIBS           : $LIBS"
 echo "XML Parser     : $PARSER"
+echo "Install themes : $THEMES_INSTALL"
+echo "Themes path    : $THEMES_PATH"
 echo ""
 echo "Now you can run \`make' to build profanity"
