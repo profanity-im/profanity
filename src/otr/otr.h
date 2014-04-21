@@ -23,6 +23,8 @@
 #ifndef OTR_H
 #define OTR_H
 
+#define OTRL_TAG " \t  \t\t\t\t \t \t \t  "
+
 #include "config/accounts.h"
 
 void otr_init_module(void);

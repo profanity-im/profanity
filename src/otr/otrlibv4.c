@@ -108,6 +108,8 @@ otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
 {
     gcry_error_t err;
 
+    ops.policy = OTRL_POLICY_SEND_WHITESPACE_TAG;
+
     err = otrl_message_sending(
         user_state,
         ops,

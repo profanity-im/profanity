@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <glib.h>
+#include <libotr/proto.h>
 
 #include "chat_session.h"
 #include "command/commands.h"
@@ -946,10 +947,6 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
         if (msg != NULL) {
 #ifdef HAVE_LIBOTR
-        if ((strcmp(prefs_get_string(PREF_OTR_POLICY), "always") == 0) && !otr_is_secure(usr_jid)) {
-                cons_show_error("Failed to send message. Please check OTR policy");
-                return TRUE;
-                }
             if (otr_is_secure(usr_jid)) {
                 char *encrypted = otr_encrypt_message(usr_jid, msg);
                 if (encrypted != NULL) {
@@ -971,7 +968,25 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     cons_show_error("Failed to encrypt and send message,");
                 }
             } else {
+		char *policy = prefs_get_string(PREF_OTR_POLICY);
+
+		if (strcmp(policy, "always") == 0)
+			{
+			cons_show_error("Failed to send message. Please check OTR policy");
+			return TRUE;
+		} else if (strcmp(policy, "opportunistic") == 0) {
+			char	*otr_base_tag = OTRL_MESSAGE_TAG_BASE;
+			char	*otr_v2_tag = OTRL_MESSAGE_TAG_V2;
+			int 	N = strlen(otr_base_tag) + strlen(otr_v2_tag) + strlen(msg) + 1;
+			char	*temp = (char *) malloc( (unsigned) N*sizeof(char *) );
+			strcpy( temp , msg );
+  			strcat( temp , otr_base_tag);
+			strcat( temp, otr_v2_tag);
+			message_send(temp, usr_jid);
+			free(temp);
+		} else {
                 message_send(msg, usr_jid);
+		}
                 ui_outgoing_msg("me", usr_jid, msg);
 
                 if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
