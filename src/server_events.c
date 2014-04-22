@@ -209,11 +209,13 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     gboolean was_decrypted = FALSE;
     char *newmessage;
 
+    char *policy = prefs_get_string(PREF_OTR_POLICY);
+    char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
+
+
    if (!priv) {
 //check for OTR whitespace (opportunistic or always)
-    char *policy = prefs_get_string(PREF_OTR_POLICY);
     if (strcmp(policy, "opportunistic") == 0 || strcmp(policy, "always") == 0) {
-	char *whitespace_base	=	strstr(message,OTRL_MESSAGE_TAG_BASE);
 	if (whitespace_base) {
 		if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
 			// Remove whitespace pattern for proper display in UI
@@ -236,11 +238,10 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     } else {
         newmessage = message;
     }
-    char *policy = prefs_get_string(PREF_OTR_POLICY);
-    if (strcmp(policy, "always") == 0 && !was_decrypted)
+    if (strcmp(policy, "always") == 0 && !was_decrypted && !whitespace_base)
                 {
                         char *otr_query_message = otr_start_query();
-                        cons_show("Attempting to start OTR session..");
+                        cons_show("Attempting to start OTR session...");
                         message_send(otr_query_message, from);
                 }
 
