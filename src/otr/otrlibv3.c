@@ -34,7 +34,7 @@ otrlib_policy(void)
 char *
 otrlib_start_query(void)
 {
-    return "?OTR?v2?";
+ return "?OTR?v2? This user has requested an Off-the-Record private conversation. However, you do not have a plugin to support that. See http://otr.cypherpunks.ca/ for more information.";
 }
 
 static int
