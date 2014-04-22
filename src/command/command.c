@@ -878,6 +878,7 @@ static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
+static Autocomplete otr_policy_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete statuses_ac;
 static Autocomplete statuses_setting_ac;
@@ -1066,11 +1067,17 @@ cmd_init(void)
     autocomplete_add(otr_ac, "log");
     autocomplete_add(otr_ac, "warn");
     autocomplete_add(otr_ac, "libver");
+    autocomplete_add(otr_ac, "policy");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
     autocomplete_add(otr_log_ac, "off");
     autocomplete_add(otr_log_ac, "redact");
+
+    otr_policy_ac = autocomplete_new();
+    autocomplete_add(otr_policy_ac, "manual");
+    autocomplete_add(otr_policy_ac, "opportunistic");
+    autocomplete_add(otr_policy_ac, "always");
 
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
@@ -1127,6 +1134,7 @@ cmd_uninit(void)
     autocomplete_free(bookmark_ac);
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
+    autocomplete_free(otr_policy_ac);
     autocomplete_free(connect_property_ac);
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_setting_ac);
@@ -1248,6 +1256,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
+    autocomplete_reset(otr_policy_ac);
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(statuses_ac);
     autocomplete_reset(statuses_setting_ac);
@@ -1747,6 +1756,11 @@ _otr_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/otr log", otr_log_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/otr policy", otr_policy_ac);
     if (result != NULL) {
         return result;
     }
