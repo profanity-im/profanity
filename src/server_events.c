@@ -221,7 +221,6 @@ handle_incoming_message(char *from, char *message, gboolean priv)
 			int tag_length	=	24;
 			if (strstr(message, OTRL_MESSAGE_TAG_V2) && strstr(message, OTRL_MESSAGE_TAG_V1)) tag_length = 32;
 			memmove(whitespace_base, whitespace_base+tag_length, tag_length);
-			log_debug("<%s>", message);
         		char *otr_query_message = otr_start_query();
 			cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
         		message_send(otr_query_message, from);
@@ -237,6 +236,13 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     } else {
         newmessage = message;
     }
+    char *policy = prefs_get_string(PREF_OTR_POLICY);
+    if (strcmp(policy, "always") == 0 && !was_decrypted)
+                {
+                        char *otr_query_message = otr_start_query();
+                        cons_show("Attempting to start OTR session..");
+                        message_send(otr_query_message, from);
+                }
 
     ui_incoming_msg(from, newmessage, NULL, priv);
 
