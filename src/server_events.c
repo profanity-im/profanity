@@ -32,6 +32,7 @@
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
+#include <libotr/proto.h>
 #endif
 
 #include "ui/ui.h"
@@ -205,6 +206,17 @@ void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
 #ifdef HAVE_LIBOTR
+//check for OTR whitespace (opportunistic)
+    char *policy = prefs_get_string(PREF_OTR_POLICY);
+    if (strcmp(policy, "opportunistic") == 0) {
+	if (strstr(message,OTRL_MESSAGE_TAG_BASE)) {
+		if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
+        		char *otr_query_message = otr_start_query();
+			cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...", message);
+        		message_send(otr_query_message, from);
+			}
+		}
+	}
     gboolean was_decrypted = FALSE;
     char *newmessage;
     if (!priv) {
