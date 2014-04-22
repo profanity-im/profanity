@@ -522,4 +522,3 @@ message_init_module(void)
     message_send_inactive = _message_send_inactive;
     message_send_gone = _message_send_gone;
 }
-
