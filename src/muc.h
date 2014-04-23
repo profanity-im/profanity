@@ -37,7 +37,8 @@ void muc_leave_room(const char * const room);
 gboolean muc_room_is_active(const char * const room);
 gboolean muc_room_is_autojoin(const char * const room);
 GList* muc_get_active_room_list(void);
-char * muc_get_room_nick(const char * const room);
+char* muc_get_room_nick(const char * const room);
+char* muc_get_room_password(const char * const room);
 
 void muc_set_room_pending_nick_change(const char * const room, const char * const new_nick);
 gboolean muc_is_room_pending_nick_change(const char * const room);

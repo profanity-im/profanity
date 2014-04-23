@@ -45,6 +45,7 @@
 #define PREF_GROUP_PRESENCE "presence"
 #define PREF_GROUP_CONNECTION "connection"
 #define PREF_GROUP_ALIAS "alias"
+#define PREF_GROUP_OTR_POLICY "policy"
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;
@@ -409,6 +410,8 @@ _get_group(preference_t pref)
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
             return PREF_GROUP_LOGGING;
+        case PREF_OTR_POLICY:
+            return PREF_GROUP_OTR_POLICY;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
@@ -479,6 +482,8 @@ _get_key(preference_t pref)
             return "otr";
         case PREF_OTR_WARN:
             return "otr.warn";
+        case PREF_OTR_POLICY:
+            return "otr.policy";
         case PREF_LOG_ROTATE:
             return "rotate";
         case PREF_LOG_SHARED:
@@ -513,6 +518,8 @@ _get_default_string(preference_t pref)
             return "off";
         case PREF_OTR_LOG:
             return "redact";
+        case PREF_OTR_POLICY:
+            return "manual";
         case PREF_STATUSES_CONSOLE:
         case PREF_STATUSES_CHAT:
         case PREF_STATUSES_MUC:

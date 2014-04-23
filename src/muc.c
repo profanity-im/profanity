@@ -298,6 +298,26 @@ muc_get_room_nick(const char * const room)
 }
 
 /*
+ * Return password for the specified room
+ * The password is owned by the chat room and should not be modified or freed
+ */
+char *
+muc_get_room_password(const char * const room)
+{
+    if (rooms != NULL) {
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+        if (chat_room != NULL) {
+            return chat_room->password;
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
+}
+
+/*
  * Returns TRUE if the specified nick exists in the room's roster
  */
 gboolean

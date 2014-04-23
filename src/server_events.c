@@ -35,6 +35,7 @@
 
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
+#include <libotr/proto.h>
 #endif
 
 #include "ui/ui.h"
@@ -94,6 +95,18 @@ handle_login_account_success(char *account_name)
 #endif
 
     ui_handle_login_account_success(account);
+
+    // attempt to rejoin rooms with passwords
+    GList *curr = muc_get_active_room_list();
+    while (curr != NULL) {
+        char *password = muc_get_room_password(curr->data);
+        if (password != NULL) {
+            char *nick = muc_get_room_nick(curr->data);
+            presence_join_room(curr->data, nick, password);
+        }
+        curr = g_list_next(curr);
+    }
+    g_list_free(curr);
 
     log_info("%s logged in successfully", account->jid);
     account_free(account);
@@ -218,25 +231,52 @@ handle_incoming_message(char *from, char *message, gboolean priv)
 
 #ifdef PROF_HAVE_LIBOTR
     gboolean was_decrypted = FALSE;
-    char *decrypted;
+    char *newmessage;
+
+    char *policy = prefs_get_string(PREF_OTR_POLICY);
+    char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
+
     if (!priv) {
-        decrypted = otr_decrypt_message(from, message, &was_decrypted);
+        //check for OTR whitespace (opportunistic or always)
+        if (strcmp(policy, "opportunistic") == 0 || strcmp(policy, "always") == 0) {
+            if (whitespace_base) {
+                if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
+                    // Remove whitespace pattern for proper display in UI
+                    // Handle both BASE+TAGV1/2(16+8) and BASE+TAGV1+TAGV2(16+8+8)
+                    int tag_length	=	24;
+                    if (strstr(message, OTRL_MESSAGE_TAG_V2) && strstr(message, OTRL_MESSAGE_TAG_V1)) {
+                        tag_length = 32;
+                    }
+                    memmove(whitespace_base, whitespace_base+tag_length, tag_length);
+                    char *otr_query_message = otr_start_query();
+                    cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
+                    message_send(otr_query_message, from);
+                }
+            }
+        }
+        newmessage = otr_decrypt_message(from, message, &was_decrypted);
+
         // internal OTR message
-        if (decrypted == NULL) {
+        if (newmessage == NULL) {
             return;
         }
     } else {
-        decrypted = message;
+        newmessage = message;
     }
 
     if (priv) {
         Jid *jid = jid_create(from);
         char *room = jid->barejid;
         char *nick = jid->resourcepart;
-        plugin_message = plugins_on_private_message_received(room, nick, decrypted);
+        plugin_message = plugins_on_private_message_received(room, nick, newmessage);
         jid_destroy(jid);
     } else {
-        plugin_message = plugins_on_message_received(from, decrypted);
+        plugin_message = plugins_on_message_received(from, newmessage);
+    }
+    if (strcmp(policy, "always") == 0 && !was_decrypted && !whitespace_base) {
+        char *otr_query_message = otr_start_query();
+        cons_show("Attempting to start OTR session...");
+        message_send(otr_query_message, from);
     }
 
     ui_incoming_msg(from, plugin_message, NULL, priv);
@@ -257,7 +297,7 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     }
 
     if (!priv)
-        otr_free_message(decrypted);
+        otr_free_message(newmessage);
 #else
     if (priv) {
         Jid *jid = jid_create(from);

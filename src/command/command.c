@@ -593,9 +593,9 @@ static struct cmd_t command_defs[] =
 
     { "/otr",
         cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver",
-          "-------------------------------------------------------------",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy",
+          "--------------------------------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
@@ -606,6 +606,7 @@ static struct cmd_t command_defs[] =
           "log - How to log OTR messages, options are 'on', 'off' and 'redact', with redaction being the default.",
           "warn - Show when unencrypted messaging is being used in the title bar, options are 'on' and 'off' with 'on' being the default.",
           "libver - Show which version of the libotr library is being used.",
+          "policy - manual, opportunistic or always.",
           NULL } } },
 
     { "/outtype",
@@ -884,6 +885,7 @@ static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
+static Autocomplete otr_policy_ac;
 static Autocomplete connect_property_ac;
 static Autocomplete statuses_ac;
 static Autocomplete statuses_setting_ac;
@@ -1072,11 +1074,17 @@ cmd_init(void)
     autocomplete_add(otr_ac, "log");
     autocomplete_add(otr_ac, "warn");
     autocomplete_add(otr_ac, "libver");
+    autocomplete_add(otr_ac, "policy");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
     autocomplete_add(otr_log_ac, "off");
     autocomplete_add(otr_log_ac, "redact");
+
+    otr_policy_ac = autocomplete_new();
+    autocomplete_add(otr_policy_ac, "manual");
+    autocomplete_add(otr_policy_ac, "opportunistic");
+    autocomplete_add(otr_policy_ac, "always");
 
     connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "server");
@@ -1133,6 +1141,7 @@ cmd_uninit(void)
     autocomplete_free(bookmark_ac);
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
+    autocomplete_free(otr_policy_ac);
     autocomplete_free(connect_property_ac);
     autocomplete_free(statuses_ac);
     autocomplete_free(statuses_setting_ac);
@@ -1254,6 +1263,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
+    autocomplete_reset(otr_policy_ac);
     autocomplete_reset(connect_property_ac);
     autocomplete_reset(statuses_ac);
     autocomplete_reset(statuses_setting_ac);
@@ -1347,6 +1357,11 @@ cmd_execute_default(const char * const inp)
                 char *plugin_message = plugins_on_message_send(recipient_jid, inp);
 
 #ifdef PROF_HAVE_LIBOTR
+                if ((strcmp(prefs_get_string(PREF_OTR_POLICY), "always") == 0) && !otr_is_secure(recipient)) {
+                    cons_show_error("Failed to send message. Please check OTR policy");
+                    return TRUE;
+                }
+
                 if (otr_is_secure(recipient)) {
                     char *encrypted = otr_encrypt_message(recipient, plugin_message);
                     if (encrypted != NULL) {
@@ -1750,6 +1765,11 @@ _otr_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/otr log", otr_log_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/otr policy", otr_policy_ac);
     if (result != NULL) {
         return result;
     }
