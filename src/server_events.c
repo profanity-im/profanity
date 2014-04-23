@@ -94,6 +94,18 @@ handle_login_account_success(char *account_name)
 
     ui_handle_login_account_success(account);
 
+    // attempt to rejoin rooms with passwords
+    GList *curr = muc_get_active_room_list();
+    while (curr != NULL) {
+        char *password = muc_get_room_password(curr->data);
+        if (password != NULL) {
+            char *nick = muc_get_room_nick(curr->data);
+            presence_join_room(curr->data, nick, password);
+        }
+        curr = g_list_next(curr);
+    }
+    g_list_free(curr);
+
     log_info("%s logged in successfully", account->jid);
     account_free(account);
 }
