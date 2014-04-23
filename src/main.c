@@ -69,7 +69,7 @@ main(int argc, char **argv)
     {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "disable-tls", 'd', 0, G_OPTION_ARG_NONE, &disable_tls, "Disable TLS", NULL },
-        { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on start-up" },
+        { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup" },
         { "log",'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO (default), WARN, ERROR", "LEVEL" },
         { NULL }
     };
