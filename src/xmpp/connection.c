@@ -205,22 +205,28 @@ _jabber_shutdown(void)
 static void
 _jabber_process_events(void)
 {
-    // run xmpp event loop if connected, connecting or disconnecting
-    if (jabber_conn.conn_status == JABBER_CONNECTED
-            || jabber_conn.conn_status == JABBER_CONNECTING
-            || jabber_conn.conn_status == JABBER_DISCONNECTING) {
-        xmpp_run_once(jabber_conn.ctx, 10);
+    int reconnect_sec;
+    int elapsed_sec;
 
-    // check timer and reconnect if disconnected and timer set
-    } else if (prefs_get_reconnect() != 0) {
-        if ((jabber_conn.conn_status == JABBER_DISCONNECTED) &&
-            (reconnect_timer != NULL)) {
-            if (g_timer_elapsed(reconnect_timer, NULL) > prefs_get_reconnect()) {
-                _jabber_reconnect();
+    switch (jabber_conn.conn_status)
+    {
+        case JABBER_CONNECTED:
+        case JABBER_CONNECTING:
+        case JABBER_DISCONNECTING:
+            xmpp_run_once(jabber_conn.ctx, 10);
+            break;
+        case JABBER_DISCONNECTED:
+            reconnect_sec = prefs_get_reconnect();
+            if ((reconnect_sec != 0) && (reconnect_timer != NULL)) {
+                elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
+                if (elapsed_sec > reconnect_sec) {
+                    _jabber_reconnect();
+                }
             }
-        }
+            break;
+        default:
+            break;
     }
-
 }
 
 static GList *
