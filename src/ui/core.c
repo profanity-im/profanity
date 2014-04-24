@@ -1161,6 +1161,16 @@ _ui_create_xmlconsole_win(void)
 }
 
 static void
+_ui_open_xmlconsole_win(void)
+{
+    ProfWin *window = wins_get_by_recipient("XML Console");
+    if (window != NULL) {
+        int num = wins_get_num(window);
+        ui_switch_win(num);
+    }
+}
+
+static void
 _ui_open_duck_win(void)
 {
     ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
@@ -1991,6 +2001,7 @@ ui_init_module(void)
     ui_handle_stanza = _ui_handle_stanza;
     ui_create_xmlconsole_win = _ui_create_xmlconsole_win;
     ui_xmlconsole_exists = _ui_xmlconsole_exists;
+    ui_open_xmlconsole_win = _ui_open_xmlconsole_win;
     ui_handle_room_join_error = _ui_handle_room_join_error;
     ui_swap_wins = _ui_swap_wins;
 }
