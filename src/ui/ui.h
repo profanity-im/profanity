@@ -147,6 +147,7 @@ gboolean (*ui_duck_exists)(void);
 
 void (*ui_tidy_wins)(void);
 void (*ui_prune_wins)(void);
+gboolean (*ui_swap_wins)(int source_win, int target_win);
 
 void (*ui_auto_away)(void);
 void (*ui_end_auto_away)(void);

@@ -694,7 +694,6 @@ static gboolean
 _ui_switch_win(const int i)
 {
     if (ui_win_exists(i)) {
-        ui_current_page_off();
         ProfWin *new_current = wins_get_by_num(i);
         wins_set_current_by_num(i);
         ui_current_page_off();
@@ -951,6 +950,12 @@ _ui_prune_wins(void)
     } else {
         cons_show("No prune needed.");
     }
+}
+
+static gboolean
+_ui_swap_wins(int source_win, int target_win)
+{
+    return wins_swap(source_win, target_win);
 }
 
 static win_type_t
@@ -1992,4 +1997,5 @@ ui_init_module(void)
     ui_create_xmlconsole_win = _ui_create_xmlconsole_win;
     ui_xmlconsole_exists = _ui_xmlconsole_exists;
     ui_handle_room_join_error = _ui_handle_room_join_error;
+    ui_swap_wins = _ui_swap_wins;
 }

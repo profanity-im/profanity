@@ -52,5 +52,6 @@ void wins_destroy(void);
 GList * wins_get_nums(void);
 gboolean wins_xmlconsole_exists(void);
 ProfWin * wins_get_xmlconsole(void);
+gboolean wins_swap(int source_win, int target_win);
 
 #endif

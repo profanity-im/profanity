@@ -346,13 +346,14 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/wins",
-        cmd_wins, parse_args, 0, 1, NULL,
-        { "/wins [tidy|prune]", "List or tidy active windows.",
-        { "/wins [tidy|prune]",
-          "------------------",
+        cmd_wins, parse_args, 0, 3, NULL,
+        { "/wins [tidy|prune|swap] [source] [target]", "List or tidy active windows.",
+        { "/wins [tidy|prune|swap] [source] [target]",
+          "-----------------------------------------",
           "Passing no argument will list all currently active windows and information about their usage.",
-          "tidy  : Shuffle windows so there are no gaps.",
-          "prune : Close all windows with no unread messages, and then tidy as above.",
+          "tidy               : Shuffle windows so there are no gaps.",
+          "prune              : Close all windows with no unread messages, and then tidy as above.",
+          "swap source target : Swap windows, target may be an empty position.",
           NULL } } },
 
     { "/sub",
@@ -1033,6 +1034,7 @@ cmd_init(void)
     wins_ac = autocomplete_new();
     autocomplete_add(wins_ac, "prune");
     autocomplete_add(wins_ac, "tidy");
+    autocomplete_add(wins_ac, "swap");
 
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, "add");
