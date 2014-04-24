@@ -478,6 +478,8 @@ cmd_wins(gchar **args, struct cmd_help_t help)
             int target_win = atoi(args[2]);
             if ((source_win == 1) || (target_win == 1)) {
                 cons_show("Cannot move console window.");
+            } else if (source_win == 10 || target_win == 10) {
+                cons_show("Window 10 does not exist");
             } else if (source_win != target_win) {
                 gboolean swapped = ui_swap_wins(source_win, target_win);
                 if (swapped) {

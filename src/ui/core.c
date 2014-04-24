@@ -691,7 +691,6 @@ static gboolean
 _ui_switch_win(const int i)
 {
     if (ui_win_exists(i)) {
-        ui_current_page_off();
         ProfWin *new_current = wins_get_by_num(i);
         wins_set_current_by_num(i);
         ui_current_page_off();
