@@ -387,6 +387,35 @@ wins_lost_connection(void)
 }
 
 gboolean
+wins_swap(int source_win, int target_win)
+{
+    ProfWin *source = g_hash_table_lookup(windows, GINT_TO_POINTER(source_win));
+
+    if (source != NULL) {
+        ProfWin *target = g_hash_table_lookup(windows, GINT_TO_POINTER(target_win));
+
+        if (target == NULL) {
+            g_hash_table_steal(windows, GINT_TO_POINTER(source_win));
+            status_bar_inactive(source_win);
+            g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
+            if (source->unread > 0) {
+                status_bar_new(target_win);
+            } else {
+                status_bar_active(target_win);
+            }
+            if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
+                ui_switch_win(1);
+            }
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
 wins_tidy(void)
 {
     gboolean tidy_required = FALSE;

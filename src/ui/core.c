@@ -950,6 +950,12 @@ _ui_prune_wins(void)
     }
 }
 
+static gboolean
+_ui_swap_wins(int source_win, int target_win)
+{
+    return wins_swap(source_win, target_win);
+}
+
 static win_type_t
 _ui_current_win_type(void)
 {
@@ -1987,4 +1993,5 @@ ui_init_module(void)
     ui_create_xmlconsole_win = _ui_create_xmlconsole_win;
     ui_xmlconsole_exists = _ui_xmlconsole_exists;
     ui_handle_room_join_error = _ui_handle_room_join_error;
+    ui_swap_wins = _ui_swap_wins;
 }

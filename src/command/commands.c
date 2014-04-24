@@ -470,7 +470,27 @@ cmd_wins(gchar **args, struct cmd_help_t help)
         ui_tidy_wins();
     } else if (strcmp(args[0], "prune") == 0) {
         ui_prune_wins();
+    } else if (strcmp(args[0], "swap") == 0) {
+        if ((args[1] == NULL) || (args[2] == NULL)) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            int source_win = atoi(args[1]);
+            int target_win = atoi(args[2]);
+            if ((source_win == 1) || (target_win == 1)) {
+                cons_show("Cannot move console window.");
+            } else if (source_win != target_win) {
+                gboolean swapped = ui_swap_wins(source_win, target_win);
+                if (swapped) {
+                    cons_show("Swapped windows %d <-> %d", source_win, target_win);
+                } else {
+                    cons_show("Window %d does not exist", source_win);
+                }
+            } else {
+                cons_show("Same source and target window supplied.");
+            }
+        }
     }
+
     return TRUE;
 }
 
