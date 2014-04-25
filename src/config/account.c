@@ -138,7 +138,6 @@ account_free(ProfAccount *account)
         free(account->muc_service);
         free(account->muc_nick);
         free(account);
-        account = NULL;
     }
 }
 

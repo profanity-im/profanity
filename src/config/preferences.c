@@ -209,13 +209,6 @@ prefs_get_priority(void)
     return g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "priority", NULL);
 }
 
-void
-prefs_set_priority(gint value)
-{
-    g_key_file_set_integer(prefs, PREF_GROUP_PRESENCE, "priority", value);
-    _save_prefs();
-}
-
 gint
 prefs_get_reconnect(void)
 {

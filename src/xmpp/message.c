@@ -237,8 +237,6 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     char *room = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    char *invitor = NULL;
-    char *reason = NULL;
 
     if (room == NULL) {
         log_warning("Message received with no from attribute, ignoring");
@@ -258,8 +256,9 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if (jidp == NULL) {
             return 1;
         }
-        invitor = jidp->barejid;
+        char *invitor = jidp->barejid;
 
+        char *reason = NULL;
         xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(invite, STANZA_NAME_REASON);
         if (reason_st != NULL) {
             reason = xmpp_stanza_get_text(reason_st);

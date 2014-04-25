@@ -206,7 +206,6 @@ static void
 _jabber_process_events(void)
 {
     int reconnect_sec;
-    int elapsed_sec;
 
     switch (jabber_conn.conn_status)
     {
@@ -218,7 +217,7 @@ _jabber_process_events(void)
         case JABBER_DISCONNECTED:
             reconnect_sec = prefs_get_reconnect();
             if ((reconnect_sec != 0) && (reconnect_timer != NULL)) {
-                elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
+                int elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
                 if (elapsed_sec > reconnect_sec) {
                     _jabber_reconnect();
                 }

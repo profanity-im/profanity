@@ -116,7 +116,6 @@ str_replace(const char *string, const char *substr,
 {
     char *tok = NULL;
     char *newstr = NULL;
-    char *oldstr = NULL;
     char *head = NULL;
 
     if (string == NULL)
@@ -131,7 +130,7 @@ str_replace(const char *string, const char *substr,
     head = newstr;
 
     while ( (tok = strstr ( head, substr ))) {
-        oldstr = newstr;
+        char *oldstr = newstr;
         newstr = malloc ( strlen ( oldstr ) - strlen ( substr ) +
             strlen ( replacement ) + 1 );
 
@@ -171,7 +170,6 @@ char *
 prof_getline(FILE *stream)
 {
     char *buf;
-    size_t buf_size;
     char *result;
     char *s = NULL;
     size_t s_size = 1;
@@ -183,7 +181,7 @@ prof_getline(FILE *stream)
         result = fgets(buf, READ_BUF_SIZE, stream);
         if (result == NULL)
             break;
-        buf_size = strlen(buf);
+        size_t buf_size = strlen(buf);
         if (buf[buf_size - 1] == '\n') {
             buf_size--;
             buf[buf_size] = '\0';
@@ -416,12 +414,12 @@ cmp_win_num(gconstpointer a, gconstpointer b)
 int
 get_next_available_win_num(GList *used)
 {
-    int result = 0;
     used = g_list_sort(used, cmp_win_num);
     // only console used
     if (g_list_length(used) == 1) {
         return 2;
     } else {
+        int result = 0;
         int last_num = 1;
         GList *curr = used;
         // skip console

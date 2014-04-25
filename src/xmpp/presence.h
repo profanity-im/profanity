@@ -25,7 +25,6 @@
 
 void presence_sub_requests_init(void);
 void presence_add_handlers(void);
-void presence_free_sub_requests(void);
 void presence_clear_sub_requests(void);
 
 #endif

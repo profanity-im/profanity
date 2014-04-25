@@ -64,7 +64,6 @@ win_free(ProfWin* window)
     delwin(window->win);
     free(window->from);
     free(window);
-    window = NULL;
 }
 
 void

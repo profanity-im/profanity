@@ -181,18 +181,6 @@ chat_session_is_inactive(const char * const recipient)
     }
 }
 
-gboolean
-chat_session_is_active(const char * const recipient)
-{
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
-
-    if (session == NULL) {
-        return FALSE;
-    } else {
-        return (session->state == CHAT_STATE_ACTIVE);
-    }
-}
-
 void
 chat_session_set_active(const char * const recipient)
 {

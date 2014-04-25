@@ -109,8 +109,6 @@ inp_block(void)
 wint_t
 inp_get_char(char *input, int *size)
 {
-    int inp_x = 0;
-    int i;
     wint_t ch;
     int display_size = 0;
 
@@ -148,7 +146,7 @@ inp_get_char(char *input, int *size)
                 return ERR;
             }
 
-            inp_x = getcurx(inp_win);
+            int inp_x = getcurx(inp_win);
 
             // handle insert if not at end of input
             if (inp_x < display_size) {
@@ -160,6 +158,7 @@ inp_get_char(char *input, int *size)
                 for (offset = &input[*size - 1]; offset >= next_ch; offset--) {
                     *(offset + utf_len) = *offset;
                 }
+                int i;
                 for (i = 0; i < utf_len; i++) {
                      *(next_ch + i) = bytes[i];
                 }
@@ -181,6 +180,7 @@ inp_get_char(char *input, int *size)
 
                 // wcrtomb can return (size_t) -1
                 if (utf_len < MB_CUR_MAX) {
+                    int i;
                     for (i = 0 ; i < utf_len; i++) {
                         input[(*size)++] = bytes[i];
                     }

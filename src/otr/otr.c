@@ -436,13 +436,12 @@ _otr_decrypt_message(const char * const from, const char * const message, gboole
 {
     char *decrypted = NULL;
     OtrlTLV *tlvs = NULL;
-    OtrlTLV *tlv = NULL;
 
     int result = otrlib_decrypt_message(user_state, &ops, jid, from, message, &decrypted, &tlvs);
 
     // internal libotr message
     if (result == 1) {
-        tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
+        OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
             ConnContext *context = otrlib_context_find(user_state, from, jid);
 
