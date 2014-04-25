@@ -140,12 +140,6 @@ _presence_sub_request_count(void)
 }
 
 void
-presence_free_sub_requests(void)
-{
-    autocomplete_free(sub_requests_ac);
-}
-
-void
 presence_clear_sub_requests(void)
 {
     autocomplete_clear(sub_requests_ac);
@@ -625,7 +619,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
     if ((hash_type != NULL) && (strcmp(hash_type, "sha-1") == 0)) {
         log_debug("Hash type %s supported.", hash_type);
         caps_key = strdup(node);
-        char *id = generate_unique_id("caps");
+        id = generate_unique_id("caps");
 
         _send_caps_request(node, caps_key, id, from);
 

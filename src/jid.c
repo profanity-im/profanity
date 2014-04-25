@@ -125,36 +125,6 @@ jid_is_valid_room_form(Jid *jid)
 }
 
 /*
- * Given a full room JID of the form
- * room@server/nick
- * Will create two new strings and point room and nick to them e.g.
- * *room = "room@server", *nick = "nick"
- * The strings must be freed by the caller
- * Returns TRUE if the JID was parsed successfully, FALSE otherwise
- */
-gboolean
-parse_room_jid(const char * const full_room_jid, char **room, char **nick)
-{
-    Jid *jid = jid_create(full_room_jid);
-
-    if (jid == NULL) {
-        return FALSE;
-    }
-
-    if (jid->resourcepart == NULL) {
-        jid_destroy(jid);
-        return FALSE;
-    }
-
-    *room = strdup(jid->barejid);
-    *nick = strdup(jid->resourcepart);
-
-    jid_destroy(jid);
-
-    return TRUE;
-}
-
-/*
  * Given a barejid, and resourcepart, create and return a full JID of the form
  * barejid/resourcepart
  * Will return a newly created string that must be freed by the caller
@@ -171,28 +141,6 @@ create_fulljid(const char * const barejid, const char * const resource)
     g_string_free(full_jid, TRUE);
 
     return result;
-}
-
-/*
- * Get the room name part of the full JID, e.g.
- * Full JID = "test@conference.server/person"
- * returns "test@conference.server"
- */
-char *
-get_room_from_full_jid(const char * const full_room_jid)
-{
-    char **tokens = g_strsplit(full_room_jid, "/", 0);
-    char *room_part = NULL;
-
-    if (tokens != NULL) {
-        if (tokens[0] != NULL) {
-            room_part = strdup(tokens[0]);
-        }
-
-        g_strfreev(tokens);
-    }
-
-    return room_part;
 }
 
 /*

@@ -184,21 +184,21 @@ char *
 autocomplete_param_with_func(char *input, int *size, char *command,
     autocomplete_func func)
 {
-    char *found = NULL;
     GString *auto_msg = NULL;
     char *result = NULL;
-    char inp_cpy[*size];
-    int i;
     char command_cpy[strlen(command) + 2];
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
 
     if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        int i;
+        char inp_cpy[*size];
         for(i = len; i < *size; i++) {
             inp_cpy[i-len] = input[i];
         }
         inp_cpy[(*size) - len] = '\0';
-        found = func(inp_cpy);
+
+        char *found = func(inp_cpy);
         if (found != NULL) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -215,20 +215,20 @@ char *
 autocomplete_param_with_ac(char *input, int *size, char *command,
     Autocomplete ac)
 {
-    char *found = NULL;
     GString *auto_msg = NULL;
     char *result = NULL;
-    char inp_cpy[*size];
-    int i;
     char *command_cpy = malloc(strlen(command) + 2);
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
     if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+        int i;
+        char inp_cpy[*size];
         for(i = len; i < *size; i++) {
             inp_cpy[i-len] = input[i];
         }
         inp_cpy[(*size) - len] = '\0';
-        found = autocomplete_complete(ac, inp_cpy);
+
+        char *found = autocomplete_complete(ac, inp_cpy);
         if (found != NULL) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -246,10 +246,8 @@ char *
 autocomplete_param_no_with_func(char *input, int *size, char *command,
     int arg_number, autocomplete_func func)
 {
-    char *result = NULL;
     if (strncmp(input, command, strlen(command)) == 0 && (*size > strlen(command))) {
         int i = 0;
-        char *found = NULL;
         GString *result_str = NULL;
 
         // copy and null terminate input
@@ -270,12 +268,12 @@ autocomplete_param_no_with_func(char *input, int *size, char *command,
 
             // autocomplete param
             if (comp_str != NULL) {
-                found = func(comp_str);
+                char *found = func(comp_str);
                 if (found != NULL) {
                     result_str = g_string_new("");
                     g_string_append(result_str, start_str);
                     g_string_append(result_str, found);
-                    result = result_str->str;
+                    char *result = result_str->str;
                     g_string_free(result_str, FALSE);
                     return result;
                 }

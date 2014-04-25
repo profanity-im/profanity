@@ -1198,12 +1198,11 @@ cmd_alias_remove(char *value)
 void
 cmd_autocomplete(char *input, int *size)
 {
-    int i = 0;
-    char *found = NULL;
-    char inp_cpy[*size];
-
     // autocomplete command
     if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, *size, ' '))) {
+        int i = 0;
+        char *found = NULL;
+        char inp_cpy[*size];
         for(i = 0; i < *size; i++) {
             inp_cpy[i] = input[i];
         }

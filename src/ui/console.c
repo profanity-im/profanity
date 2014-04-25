@@ -643,7 +643,6 @@ static void
 _cons_show_bookmarks(const GList *list)
 {
     ProfWin *console = wins_get_console();
-    Bookmark *item;
 
     if (list == NULL) {
         cons_show("");
@@ -654,7 +653,7 @@ _cons_show_bookmarks(const GList *list)
 
         /* TODO: show status (connected or not) and window number */
         while (list != NULL) {
-            item = list->data;
+            Bookmark *item = list->data;
 
             win_print_time(console, '-');
             wprintw(console->win, "  %s", item->jid);

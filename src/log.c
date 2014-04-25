@@ -158,7 +158,6 @@ void
 log_msg(log_level_t level, const char * const area, const char * const msg)
 {
     if (level >= level_filter && logp != NULL) {
-        long result;
         dt = g_date_time_new_now(tz);
 
         char *level_str = _log_string_from_level(level);
@@ -172,7 +171,7 @@ log_msg(log_level_t level, const char * const area, const char * const msg)
         g_free(date_fmt);
 
         if (prefs_get_boolean(PREF_LOG_ROTATE)) {
-            result = ftell(logp);
+            long result = ftell(logp);
             if (result != -1 && result >= prefs_get_max_log_size()) {
                 _rotate_log_file();
             }
@@ -348,7 +347,6 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
         char *filename = _get_log_filename(recipient, login, log_date, FALSE);
 
         FILE *logp = fopen(filename, "r");
-        char *line;
         if (logp != NULL) {
             GString *gs_header = g_string_new("");
             g_string_append_printf(gs_header, "%d/%d/%d:",
@@ -359,6 +357,7 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient,
             history = g_slist_append(history, header);
             g_string_free(gs_header, TRUE);
 
+            char *line;
             while ((line = prof_getline(logp)) != NULL) {
                 history = g_slist_append(history, line);
             }

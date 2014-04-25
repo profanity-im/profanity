@@ -1053,8 +1053,6 @@ _ui_current_page_off(void)
 static void
 _ui_print_system_msg_from_recipient(const char * const from, const char *message)
 {
-    int num = 0;
-
     if (from == NULL || message == NULL)
         return;
 
@@ -1062,6 +1060,7 @@ _ui_print_system_msg_from_recipient(const char * const from, const char *message
 
     ProfWin *window = wins_get_by_recipient(jid->barejid);
     if (window == NULL) {
+        int num = 0;
         window = wins_new(jid->barejid, WIN_CHAT);
         if (window != NULL) {
             num = wins_get_num(window);

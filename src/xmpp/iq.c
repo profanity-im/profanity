@@ -439,13 +439,13 @@ _disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (g_strcmp0(id, "discoinforeq") == 0) {
-        GSList *identities = NULL;
-        GSList *features = NULL;
 
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
         if (query != NULL) {
             xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+            GSList *identities = NULL;
+            GSList *features = NULL;
             while (child != NULL) {
                 const char *stanza_name = xmpp_stanza_get_name(child);
                 if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
@@ -606,9 +606,6 @@ _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     log_debug("Recieved diso#items response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    const char *stanza_name = NULL;
-    const char *item_jid = NULL;
-    const char *item_name = NULL;
     GSList *items = NULL;
 
     if ((g_strcmp0(id, "confreq") == 0) || (g_strcmp0(id, "discoitemsreq") == 0)) {
@@ -618,13 +615,13 @@ _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         if (query != NULL) {
             xmpp_stanza_t *child = xmpp_stanza_get_children(query);
             while (child != NULL) {
-                stanza_name = xmpp_stanza_get_name(child);
+                const char *stanza_name = xmpp_stanza_get_name(child);
                 if ((stanza_name != NULL) && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
-                    item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+                    const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
                     if (item_jid != NULL) {
                         DiscoItem *item = malloc(sizeof(struct disco_item_t));
                         item->jid = strdup(item_jid);
-                        item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                        const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
                         if (item_name != NULL) {
                             item->name = strdup(item_name);
                         } else {

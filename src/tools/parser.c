@@ -437,6 +437,5 @@ options_destroy(GHashTable *options)
 {
     if (options != NULL) {
         g_hash_table_destroy(options);
-        options = NULL;
     }
 }

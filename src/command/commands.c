@@ -1303,7 +1303,6 @@ gboolean
 cmd_status(gchar **args, struct cmd_help_t help)
 {
     char *usr = args[0];
-    char *usr_jid = NULL;
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
@@ -1338,7 +1337,7 @@ cmd_status(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CONSOLE:
             if (usr != NULL) {
-                usr_jid = roster_barejid_from_name(usr);
+                char *usr_jid = roster_barejid_from_name(usr);
                 if (usr_jid == NULL) {
                     usr_jid = usr;
                 }
@@ -1358,7 +1357,6 @@ gboolean
 cmd_info(gchar **args, struct cmd_help_t help)
 {
     char *usr = args[0];
-    char *usr_jid = NULL;
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
@@ -1414,7 +1412,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CONSOLE:
             if (usr != NULL) {
-                usr_jid = roster_barejid_from_name(usr);
+                char *usr_jid = roster_barejid_from_name(usr);
                 if (usr_jid == NULL) {
                     usr_jid = usr;
                 }
