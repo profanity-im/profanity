@@ -52,3 +52,4 @@ push-all.sh
 Profanity.project
 Profanity.workspace
 pageing.txt
+cppcheck.out
