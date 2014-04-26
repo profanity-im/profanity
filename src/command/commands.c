@@ -2788,7 +2788,23 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             otr_untrust(recipient);
         }
         return TRUE;
-
+    } else if (strcmp(args[0], "secret") == 0) {
+        win_type_t win_type = ui_current_win_type();
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in an OTR session to trust a recipient.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        } else {
+            char *secret = args[1];
+            if (secret == NULL) {
+                cons_show("Usage: %s", help.usage);
+            } else {
+                char *recipient = ui_current_recipient();
+                otr_smp_init_secret(recipient, secret);
+                ui_current_print_formatted_line('!', 0, "OTR secret entered", secret);
+            }
+        }
+        return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);
         return TRUE;

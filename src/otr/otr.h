@@ -40,6 +40,8 @@ gboolean (*otr_is_trusted)(const char * const recipient);
 void (*otr_trust)(const char * const recipient);
 void (*otr_untrust)(const char * const recipient);
 
+void (*otr_smp_init_secret)(const char * const recipient, const char *secret);
+
 void (*otr_end_session)(const char * const recipient);
 
 char * (*otr_get_my_fingerprint)(void);

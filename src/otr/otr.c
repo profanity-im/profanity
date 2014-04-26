@@ -23,6 +23,7 @@
 #include <libotr/proto.h>
 #include <libotr/privkey.h>
 #include <libotr/message.h>
+#include <libotr/sm.h>
 #include <glib.h>
 
 #include "otr/otr.h"
@@ -388,6 +389,22 @@ _otr_untrust(const char * const recipient)
 }
 
 static void
+_otr_smp_init_secret(const char * const recipient, const char *secret)
+{
+    ConnContext *context = otrlib_context_find(user_state, recipient, jid);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
+}
+
+static void
 _otr_end_session(const char * const recipient)
 {
     otrlib_end_session(user_state, recipient, jid, &ops);
@@ -441,15 +458,21 @@ _otr_decrypt_message(const char * const from, const char * const message, gboole
 
     // internal libotr message
     if (result == 1) {
+        ConnContext *context = otrlib_context_find(user_state, from, jid);
+
+        // common tlv handling
         OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
-            ConnContext *context = otrlib_context_find(user_state, from, jid);
 
             if (context != NULL) {
                 otrl_context_force_plaintext(context);
                 ui_gone_insecure(from);
             }
         }
+
+        // library version specific tlv handling
+        otrlib_handle_tlvs(user_state, &ops, context, tlvs);
+
         return NULL;
 
     // message was decrypted, return to user
@@ -489,4 +512,5 @@ otr_init_module(void)
     otr_encrypt_message = _otr_encrypt_message;
     otr_decrypt_message = _otr_decrypt_message;
     otr_free_message = _otr_free_message;
+    otr_smp_init_secret = _otr_smp_init_secret;
 }

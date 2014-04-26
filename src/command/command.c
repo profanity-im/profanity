@@ -1066,6 +1066,7 @@ cmd_init(void)
     autocomplete_add(otr_ac, "theirfp");
     autocomplete_add(otr_ac, "trust");
     autocomplete_add(otr_ac, "untrust");
+    autocomplete_add(otr_ac, "secret");
     autocomplete_add(otr_ac, "log");
     autocomplete_add(otr_ac, "warn");
     autocomplete_add(otr_ac, "libver");

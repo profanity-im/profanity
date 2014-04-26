@@ -106,3 +106,54 @@ otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
         NULL,
         NULL);
 }
+
+void
+otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs)
+{
+    NextExpectedSMP nextMsg = context->smstate->nextExpected;
+    OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT1) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            cons_debug("%s initiated SMP", context->username);
+            // [get secret from user and continue SMP];
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP2);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT2) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            // If we received TLV2, we will send TLV3 and expect TLV4
+            context->smstate->nextExpected = OTRL_SMP_EXPECT4;
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP3);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT3) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            // If we received TLV3, we will send TLV4
+            // We will not expect more messages, so prepare for next SMP
+            context->smstate->nextExpected = OTRL_SMP_EXPECT1;
+            // Report result to user
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP4);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT4) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            // We will not expect more messages, so prepare for next SMP
+            context->smstate->nextExpected = OTRL_SMP_EXPECT1;
+            // Report result to user
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP_ABORT);
+    if (tlv) {
+        // The message we are waiting for will not arrive, so reset
+        // and prepare for the next SMP
+        context->smstate->nextExpected = OTRL_SMP_EXPECT1;
+    }
+}
