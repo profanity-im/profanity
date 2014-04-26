@@ -117,7 +117,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
             // [get secret from user and continue SMP];
-            cons_debug("%s initiated SMP with secret", context->username);
+            ui_smp_recipient_initiated(context->username);
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
         }
     }
@@ -140,9 +140,9 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             // Report result to user
             if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
-                cons_debug("SMP SUCCESSFUL");
+                ui_smp_successful_sender(context->username);
             } else {
-                cons_debug("SMP UNSUCCESSFUL");
+                ui_smp_unsuccessful_sender(context->username);
             }
         }
     }
@@ -155,9 +155,9 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             // Report result to user
             if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
-                cons_debug("SMP SUCCESSFUL");
+                ui_smp_successful_receiver(context->username);
             } else {
-                cons_debug("SMP UNSUCCESSFUL");
+                ui_smp_unsuccessful_receiver(context->username);
             }
         }
     }
@@ -166,6 +166,6 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         // The message we are waiting for will not arrive, so reset
         // and prepare for the next SMP
         context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-        cons_debug("SMP ABORTED");
+        ui_smp_aborted(context->username);
     }
 }

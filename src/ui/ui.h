@@ -58,10 +58,18 @@ void (*ui_handle_special_keys)(const wint_t * const ch, const char * const inp,
 gboolean (*ui_switch_win)(const int i);
 void (*ui_next_win)(void);
 void (*ui_previous_win)(void);
+
 void (*ui_gone_secure)(const char * const recipient, gboolean trusted);
 void (*ui_gone_insecure)(const char * const recipient);
 void (*ui_trust)(const char * const recipient);
 void (*ui_untrust)(const char * const recipient);
+void (*ui_smp_recipient_initiated)(const char * const recipient);
+void (*ui_smp_successful_sender)(const char * const recipient);
+void (*ui_smp_unsuccessful_sender)(const char * const recipient);
+void (*ui_smp_successful_receiver)(const char * const recipient);
+void (*ui_smp_unsuccessful_receiver)(const char * const recipient);
+void (*ui_smp_aborted)(const char * const recipient);
+
 unsigned long (*ui_get_idle_time)(void);
 void (*ui_reset_idle_time)(void);
 void (*ui_new_chat_win)(const char * const to);
