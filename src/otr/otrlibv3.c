@@ -108,7 +108,7 @@ otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
 }
 
 void
-otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs)
+otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs, GHashTable *smp_initiators)
 {
     NextExpectedSMP nextMsg = context->smstate->nextExpected;
     OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1);
@@ -116,8 +116,9 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         if (nextMsg != OTRL_SMP_EXPECT1) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            cons_debug("%s initiated SMP", context->username);
             // [get secret from user and continue SMP];
+            cons_debug("%s initiated SMP with secret", context->username);
+            g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
         }
     }
     tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP2);
@@ -138,6 +139,11 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             // We will not expect more messages, so prepare for next SMP
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             // Report result to user
+            if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                cons_debug("SMP SUCCESSFUL");
+            } else {
+                cons_debug("SMP UNSUCCESSFUL");
+            }
         }
     }
     tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP4);
@@ -148,6 +154,11 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             // We will not expect more messages, so prepare for next SMP
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             // Report result to user
+            if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                cons_debug("SMP SUCCESSFUL");
+            } else {
+                cons_debug("SMP UNSUCCESSFUL");
+            }
         }
     }
     tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP_ABORT);
@@ -155,5 +166,6 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         // The message we are waiting for will not arrive, so reset
         // and prepare for the next SMP
         context->smstate->nextExpected = OTRL_SMP_EXPECT1;
+        cons_debug("SMP ABORTED");
     }
 }

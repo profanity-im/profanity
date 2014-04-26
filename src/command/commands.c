@@ -2800,8 +2800,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 cons_show("Usage: %s", help.usage);
             } else {
                 char *recipient = ui_current_recipient();
-                otr_smp_init_secret(recipient, secret);
-                ui_current_print_formatted_line('!', 0, "OTR secret entered", secret);
+                otr_smp_secret(recipient, secret);
+                ui_current_print_formatted_line('!', 0, "OTR secret entered");
             }
         }
         return TRUE;

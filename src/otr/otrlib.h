@@ -39,6 +39,6 @@ gcry_error_t otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps 
 int otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char * const from,
     const char * const message, char **decrypted, OtrlTLV **tlvs);
 
-void otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs);
+void otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs, GHashTable *smp_initiators);
 
 #endif

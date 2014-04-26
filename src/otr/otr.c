@@ -41,6 +41,7 @@ static OtrlUserState user_state;
 static OtrlMessageAppOps ops;
 static char *jid;
 static gboolean data_loaded;
+static GHashTable *smp_initiators;
 
 // ops callbacks
 static OtrlPolicy
@@ -135,6 +136,8 @@ _otr_init(void)
     ops.gone_secure = cb_gone_secure;
 
     otrlib_init_ops(&ops);
+
+    smp_initiators = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 
     data_loaded = FALSE;
 }
@@ -389,7 +392,7 @@ _otr_untrust(const char * const recipient)
 }
 
 static void
-_otr_smp_init_secret(const char * const recipient, const char *secret)
+_otr_smp_secret(const char * const recipient, const char *secret)
 {
     ConnContext *context = otrlib_context_find(user_state, recipient, jid);
 
@@ -401,7 +404,12 @@ _otr_smp_init_secret(const char * const recipient, const char *secret)
         return;
     }
 
-    otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
+    // if recipient initiated SMP, send response, else initialise
+    if (g_hash_table_contains(smp_initiators, recipient)) {
+        otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
+    } else {
+        otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
+    }
 }
 
 static void
@@ -471,7 +479,7 @@ _otr_decrypt_message(const char * const from, const char * const message, gboole
         }
 
         // library version specific tlv handling
-        otrlib_handle_tlvs(user_state, &ops, context, tlvs);
+        otrlib_handle_tlvs(user_state, &ops, context, tlvs, smp_initiators);
 
         return NULL;
 
@@ -512,5 +520,5 @@ otr_init_module(void)
     otr_encrypt_message = _otr_encrypt_message;
     otr_decrypt_message = _otr_decrypt_message;
     otr_free_message = _otr_free_message;
-    otr_smp_init_secret = _otr_smp_init_secret;
+    otr_smp_secret = _otr_smp_secret;
 }
