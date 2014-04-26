@@ -407,6 +407,7 @@ _otr_smp_secret(const char * const recipient, const char *secret)
     // if recipient initiated SMP, send response, else initialise
     if (g_hash_table_contains(smp_initiators, recipient)) {
         otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
+        g_hash_table_remove(smp_initiators, context->username);
     } else {
         otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
     }

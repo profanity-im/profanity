@@ -24,6 +24,8 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
+#include "otr/otr.h"
+#include "otr/otrlib.h"
 
 OtrlPolicy
 otrlib_policy(void)
@@ -116,7 +118,6 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         if (nextMsg != OTRL_SMP_EXPECT1) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            // [get secret from user and continue SMP];
             ui_smp_recipient_initiated(context->username);
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
         }
@@ -126,7 +127,6 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         if (nextMsg != OTRL_SMP_EXPECT2) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            // If we received TLV2, we will send TLV3 and expect TLV4
             context->smstate->nextExpected = OTRL_SMP_EXPECT4;
         }
     }
@@ -135,14 +135,14 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         if (nextMsg != OTRL_SMP_EXPECT3) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            // If we received TLV3, we will send TLV4
-            // We will not expect more messages, so prepare for next SMP
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-            // Report result to user
             if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
-                ui_smp_successful_sender(context->username);
+                ui_trust(context->username);
+                otr_trust(context->username);
             } else {
                 ui_smp_unsuccessful_sender(context->username);
+                ui_untrust(context->username);
+                otr_untrust(context->username);
             }
         }
     }
@@ -151,21 +151,22 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         if (nextMsg != OTRL_SMP_EXPECT4) {
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
-            // We will not expect more messages, so prepare for next SMP
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-            // Report result to user
             if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
-                ui_smp_successful_receiver(context->username);
+                ui_trust(context->username);
+                otr_trust(context->username);
             } else {
                 ui_smp_unsuccessful_receiver(context->username);
+                ui_untrust(context->username);
+                otr_untrust(context->username);
             }
         }
     }
     tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP_ABORT);
     if (tlv) {
-        // The message we are waiting for will not arrive, so reset
-        // and prepare for the next SMP
         context->smstate->nextExpected = OTRL_SMP_EXPECT1;
         ui_smp_aborted(context->username);
+        ui_untrust(context->username);
+        otr_untrust(context->username);
     }
 }

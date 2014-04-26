@@ -791,19 +791,7 @@ _ui_smp_recipient_initiated(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "%s initiated SMP with secret, use '/otr secret <secret>' to start a trusted session.", recipient);
-        win_update_virtual(window);
-    }
-}
-
-static void
-_ui_smp_successful_sender(const char * const recipient)
-{
-    ProfWin *window = wins_get_by_recipient(recipient);
-    if (window == NULL) {
-        return;
-    } else {
-        win_vprint_line(window, '!', 0, "SMP session started.");
+        win_vprint_line(window, '!', 0, "%s wants to authenticate your identity, use '/otr secret <secret>'.", recipient);
         win_update_virtual(window);
     }
 }
@@ -815,19 +803,7 @@ _ui_smp_unsuccessful_sender(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "SMP session failed, the secret you entered does not match the secret entered by %s.", recipient);
-        win_update_virtual(window);
-    }
-}
-
-static void
-_ui_smp_successful_receiver(const char * const recipient)
-{
-    ProfWin *window = wins_get_by_recipient(recipient);
-    if (window == NULL) {
-        return;
-    } else {
-        win_vprint_line(window, '!', 0, "SMP session started.");
+        win_vprint_line(window, '!', 0, "Authentication failed, the secret you entered does not match the secret entered by %s.", recipient);
         win_update_virtual(window);
     }
 }
@@ -839,7 +815,7 @@ _ui_smp_unsuccessful_receiver(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "SMP session failed, the secret %s entered does not match the secret you entered.", recipient);
+        win_vprint_line(window, '!', 0, "Authentication failed, the secret entered by %s does not match yours.", recipient);
         win_update_virtual(window);
     }
 }
@@ -2051,9 +2027,7 @@ ui_init_module(void)
     ui_trust = _ui_trust;
     ui_untrust = _ui_untrust;
     ui_smp_recipient_initiated = _ui_smp_recipient_initiated;
-    ui_smp_successful_sender = _ui_smp_successful_sender;
     ui_smp_unsuccessful_sender = _ui_smp_unsuccessful_sender;
-    ui_smp_successful_receiver = _ui_smp_successful_receiver;
     ui_smp_unsuccessful_receiver = _ui_smp_unsuccessful_receiver;
     ui_smp_aborted = _ui_smp_aborted;
     ui_chat_win_contact_online = _ui_chat_win_contact_online;

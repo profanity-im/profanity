@@ -64,9 +64,7 @@ void (*ui_gone_insecure)(const char * const recipient);
 void (*ui_trust)(const char * const recipient);
 void (*ui_untrust)(const char * const recipient);
 void (*ui_smp_recipient_initiated)(const char * const recipient);
-void (*ui_smp_successful_sender)(const char * const recipient);
 void (*ui_smp_unsuccessful_sender)(const char * const recipient);
-void (*ui_smp_successful_receiver)(const char * const recipient);
 void (*ui_smp_unsuccessful_receiver)(const char * const recipient);
 void (*ui_smp_aborted)(const char * const recipient);
 
