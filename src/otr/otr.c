@@ -43,6 +43,24 @@ static char *jid;
 static gboolean data_loaded;
 static GHashTable *smp_initiators;
 
+OtrlUserState
+otr_userstate(void)
+{
+    return user_state;
+}
+
+OtrlMessageAppOps *
+otr_messageops(void)
+{
+    return &ops;
+}
+
+GHashTable *
+otr_smpinitators(void)
+{
+    return smp_initiators;
+}
+
 // ops callbacks
 static OtrlPolicy
 cb_policy(void *opdata, ConnContext *context)

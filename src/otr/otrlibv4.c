@@ -25,6 +25,8 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
+#include "otr/otr.h"
+#include "otr/otrlib.h"
 
 OtrlPolicy
 otrlib_policy(void)
@@ -77,12 +79,84 @@ cb_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
     }
 }
 
+static void
+cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
+    ConnContext *context, unsigned short progress_percent,
+    char *question)
+{
+    NextExpectedSMP nextMsg = context->smstate->nextExpected;
+    OtrlUserState user_state = otr_userstate();
+    OtrlMessageAppOps *ops = otr_messageops();
+    GHashTable *smp_initiators = otr_smpinitators();
+
+    switch(smp_event)
+    {
+        case OTRL_SMPEVENT_ASK_FOR_SECRET:
+            ui_current_print_line("OTRL_SMPEVENT_ASK_FOR_SECRET");
+            ui_smp_recipient_initiated(context->username);
+            g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
+            break;
+
+        case OTRL_SMPEVENT_SUCCESS:
+            ui_current_print_line("OTRL_SMPEVENT_SUCCESS");
+            ui_smp_successful(context->username);
+            ui_trust(context->username);
+            otr_trust(context->username);
+            break;
+            
+        case OTRL_SMPEVENT_FAILURE:
+            if (nextMsg == OTRL_SMP_EXPECT3) {
+                ui_current_print_line("OTRL_SMPEVENT_FAILURE: OTRL_SMP_EXPECT3");
+                ui_smp_unsuccessful_sender(context->username);
+                ui_untrust(context->username);
+                otr_untrust(context->username);
+            } else if (nextMsg == OTRL_SMP_EXPECT4) {
+                ui_current_print_line("OTRL_SMPEVENT_FAILURE: OTRL_SMP_EXPECT4");
+                ui_smp_unsuccessful_receiver(context->username);
+                ui_untrust(context->username);
+                otr_untrust(context->username);
+            } else {
+                ui_current_print_line("OTRL_SMPEVENT_FAILURE");
+            }
+            break;
+
+        case OTRL_SMPEVENT_ERROR:
+            ui_current_print_line("OTRL_SMPEVENT_ERROR");
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+            break;
+
+        case OTRL_SMPEVENT_CHEATED:
+            ui_current_print_line("OTRL_SMPEVENT_CHEATED");
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+            break;
+
+        case OTRL_SMPEVENT_ABORT:
+            ui_current_print_line("OTRL_SMPEVENT_ABORT");
+            ui_smp_aborted(context->username);
+            ui_untrust(context->username);
+            otr_untrust(context->username);
+            break;
+
+        case OTRL_SMPEVENT_ASK_FOR_ANSWER:
+            ui_current_print_line("OTRL_SMPEVENT_ASK_FOR_ANSWER");
+            break;
+
+        case OTRL_SMPEVENT_IN_PROGRESS:
+            ui_current_print_line("OTRL_SMPEVENT_IN_PROGRESS: %d", progress_percent);
+            break;
+
+        default:
+            break;
+    }
+}
+
 void
 otrlib_init_ops(OtrlMessageAppOps *ops)
 {
     ops->otr_error_message = cb_otr_error_message;
     ops->otr_error_message_free = cb_otr_error_message_free;
     ops->handle_msg_event = cb_handle_msg_event;
+    ops->handle_smp_event = cb_handle_smp_event;
 }
 
 ConnContext *
@@ -144,4 +218,9 @@ otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
         NULL,
         NULL,
         NULL);
+}
+
+void
+otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs, GHashTable *smp_initiators)
+{
 }

@@ -23,9 +23,16 @@
 #ifndef OTR_H
 #define OTR_H
 
+#include <libotr/proto.h>
+#include <libotr/message.h>
+
 #include "config/accounts.h"
 
 void otr_init_module(void);
+
+OtrlUserState otr_userstate(void);
+OtrlMessageAppOps* otr_messageops(void);
+GHashTable* otr_smpinitators(void);
 
 void (*otr_init)(void);
 char* (*otr_libotr_version)(void);
