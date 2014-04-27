@@ -363,7 +363,7 @@ _otr_trust(const char * const recipient)
     }
 
     if (context->active_fingerprint) {
-        context->active_fingerprint->trust = "trusted";
+        context->active_fingerprint->trust = strdup("trusted");
         cb_write_fingerprints(NULL);
     }
 
