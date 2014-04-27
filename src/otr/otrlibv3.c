@@ -137,6 +137,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                ui_smp_successful(context->username);
                 ui_trust(context->username);
                 otr_trust(context->username);
             } else {
@@ -153,6 +154,7 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
             if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                ui_smp_successful(context->username);
                 ui_trust(context->username);
                 otr_trust(context->username);
             } else {

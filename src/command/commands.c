@@ -2801,7 +2801,6 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             } else {
                 char *recipient = ui_current_recipient();
                 otr_smp_secret(recipient, secret);
-                ui_current_print_formatted_line('!', 0, "OTR secret entered");
             }
         }
         return TRUE;

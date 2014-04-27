@@ -767,6 +767,7 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
         title_bar_set_recipient(recipient_str->str);
         g_string_free(recipient_str, TRUE);
         win_update_virtual(window);
+        ui_current_page_off();
     } else {
         int num = wins_get_num(window);
         status_bar_new(num);
@@ -793,6 +794,9 @@ _ui_smp_recipient_initiated(const char * const recipient)
     } else {
         win_vprint_line(window, '!', 0, "%s wants to authenticate your identity, use '/otr secret <secret>'.", recipient);
         win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
     }
 }
 
@@ -805,6 +809,9 @@ _ui_smp_unsuccessful_sender(const char * const recipient)
     } else {
         win_vprint_line(window, '!', 0, "Authentication failed, the secret you entered does not match the secret entered by %s.", recipient);
         win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
     }
 }
 
@@ -817,6 +824,9 @@ _ui_smp_unsuccessful_receiver(const char * const recipient)
     } else {
         win_vprint_line(window, '!', 0, "Authentication failed, the secret entered by %s does not match yours.", recipient);
         win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
     }
 }
 
@@ -829,6 +839,24 @@ _ui_smp_aborted(const char * const recipient)
     } else {
         win_vprint_line(window, '!', 0, "SMP session aborted.");
         win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
+    }
+}
+
+static void
+_ui_smp_successful(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window == NULL) {
+        return;
+    } else {
+        win_vprint_line(window, '!', 0, "Authentication successful.");
+        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
     }
 }
 
@@ -846,6 +874,7 @@ _ui_gone_insecure(const char * const recipient)
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
             win_update_virtual(window);
+            ui_current_page_off();
         }
     }
 }
@@ -864,6 +893,7 @@ _ui_trust(const char * const recipient)
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
             win_update_virtual(window);
+            ui_current_page_off();
         }
     }
 }
@@ -882,6 +912,7 @@ _ui_untrust(const char * const recipient)
             title_bar_set_recipient(recipient_str->str);
             g_string_free(recipient_str, TRUE);
             win_update_virtual(window);
+            ui_current_page_off();
         }
     }
 }
@@ -2027,6 +2058,7 @@ ui_init_module(void)
     ui_trust = _ui_trust;
     ui_untrust = _ui_untrust;
     ui_smp_recipient_initiated = _ui_smp_recipient_initiated;
+    ui_smp_successful = _ui_smp_successful;
     ui_smp_unsuccessful_sender = _ui_smp_unsuccessful_sender;
     ui_smp_unsuccessful_receiver = _ui_smp_unsuccessful_receiver;
     ui_smp_aborted = _ui_smp_aborted;
