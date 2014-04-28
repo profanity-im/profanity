@@ -29,6 +29,9 @@ char* otrlib_start_query(void);
 
 void otrlib_init_ops(OtrlMessageAppOps *ops);
 
+void otrlib_init_timer(void);
+void otrlib_poll(void);
+
 ConnContext * otrlib_context_find(OtrlUserState user_state, const char * const recipient, char *jid);
 
 void otrlib_end_session(OtrlUserState user_state, const char * const recipient, char *jid, OtrlMessageAppOps *ops);

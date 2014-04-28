@@ -155,9 +155,17 @@ _otr_init(void)
 
     otrlib_init_ops(&ops);
 
+    otrlib_init_timer();
+
     smp_initiators = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 
     data_loaded = FALSE;
+}
+
+void
+_otr_poll(void)
+{
+    otrlib_poll();
 }
 
 static void
@@ -359,9 +367,14 @@ _otr_is_trusted(const char * const recipient)
         return TRUE;
     }
 
-    if (context->active_fingerprint &&
-                g_strcmp0(context->active_fingerprint->trust, "trusted") == 0) {
-        return TRUE;
+    if (context->active_fingerprint) {
+        if (context->active_fingerprint->trust == NULL) {
+            return FALSE;
+        } else if (context->active_fingerprint->trust[0] == '\0') {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -381,6 +394,9 @@ _otr_trust(const char * const recipient)
     }
 
     if (context->active_fingerprint) {
+        if (context->active_fingerprint->trust != NULL) {
+            free(context->active_fingerprint->trust);
+        }
         context->active_fingerprint->trust = strdup("trusted");
         cb_write_fingerprints(NULL);
     }
@@ -402,6 +418,9 @@ _otr_untrust(const char * const recipient)
     }
 
     if (context->active_fingerprint) {
+        if (context->active_fingerprint->trust != NULL) {
+            free(context->active_fingerprint->trust);
+        }
         context->active_fingerprint->trust = NULL;
         cb_write_fingerprints(NULL);
     }
@@ -530,6 +549,7 @@ otr_init_module(void)
     otr_init = _otr_init;
     otr_libotr_version = _otr_libotr_version;
     otr_start_query = _otr_start_query;
+    otr_poll = _otr_poll;
     otr_on_connect = _otr_on_connect;
     otr_keygen = _otr_keygen;
     otr_key_loaded = _otr_key_loaded;

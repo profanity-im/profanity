@@ -33,6 +33,16 @@ otrlib_policy(void)
     return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2 ;
 }
 
+void
+otrlib_init_timer(void)
+{
+}
+
+void
+otrlib_poll(void)
+{
+}
+
 char *
 otrlib_start_query(void)
 {
