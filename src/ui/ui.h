@@ -92,6 +92,9 @@ void (*ui_current_error_line)(const char * const msg);
 void (*ui_current_page_off)(void);
 void (*ui_current_update_virtual)(void);
 
+void (*ui_otr_authenticating)(const char * const recipient);
+void (*ui_otr_authetication_waiting)(const char * const recipient);
+
 win_type_t (*ui_win_type)(int index);
 char * (*ui_recipient)(int index);
 void (*ui_close_win)(int index);

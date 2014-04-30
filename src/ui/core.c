@@ -1055,6 +1055,36 @@ _ui_current_set_otr(gboolean value)
     current->is_otr = value;
 }
 
+static void
+_ui_otr_authenticating(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window == NULL) {
+        return;
+    } else {
+        win_vprint_line(window, '!', 0, "Authenticating %s...", recipient);
+        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
+    }
+}
+
+static void
+_ui_otr_authetication_waiting(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window == NULL) {
+        return;
+    } else {
+        win_vprint_line(window, '!', 0, "Awaiting authentication from %s...", recipient);
+        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
+    }
+}
+
 static int
 _ui_current_win_index(void)
 {
@@ -2053,6 +2083,8 @@ ui_init_module(void)
     ui_ask_password = _ui_ask_password;
     ui_current_win_is_otr = _ui_current_win_is_otr;
     ui_current_set_otr = _ui_current_set_otr;
+    ui_otr_authenticating = _ui_otr_authenticating;
+    ui_otr_authetication_waiting = _ui_otr_authetication_waiting;
     ui_gone_secure = _ui_gone_secure;
     ui_gone_insecure = _ui_gone_insecure;
     ui_trust = _ui_trust;
