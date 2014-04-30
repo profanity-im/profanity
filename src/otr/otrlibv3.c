@@ -132,6 +132,18 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
         }
     }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1Q);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT1) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            char *question = (char *)tlv->data;
+            char *eoq = memchr(question, '\0', tlv->len);
+            if (eoq) {
+                ui_smp_recipient_initiated_q(context->username, question);
+            }
+        }
+    }
     tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP2);
     if (tlv) {
         if (nextMsg != OTRL_SMP_EXPECT2) {
@@ -146,14 +158,16 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             otrl_message_abort_smp(user_state, ops, NULL, context);
         } else {
             context->smstate->nextExpected = OTRL_SMP_EXPECT1;
-            if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
-                ui_smp_successful(context->username);
-                ui_trust(context->username);
-                otr_trust(context->username);
-            } else {
-                ui_smp_unsuccessful_sender(context->username);
-                ui_untrust(context->username);
-                otr_untrust(context->username);
+            if (context->smstate->received_question == 0) {
+                if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                    ui_smp_successful(context->username);
+                    ui_trust(context->username);
+                    otr_trust(context->username);
+                } else {
+                    ui_smp_unsuccessful_sender(context->username);
+                    ui_untrust(context->username);
+                    otr_untrust(context->username);
+                }
             }
         }
     }

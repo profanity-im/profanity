@@ -801,6 +801,23 @@ _ui_smp_recipient_initiated(const char * const recipient)
 }
 
 static void
+_ui_smp_recipient_initiated_q(const char * const recipient, const char *question)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window == NULL) {
+        return;
+    } else {
+        win_vprint_line(window, '!', 0, "%s wants to authenticate your identity with the following question:", recipient);
+        win_vprint_line(window, '!', 0, "  %s", question);
+        win_vprint_line(window, '!', 0, "use '/otr answer <answer>'.");
+        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
+    }
+}
+
+static void
 _ui_smp_unsuccessful_sender(const char * const recipient)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
@@ -2090,6 +2107,7 @@ ui_init_module(void)
     ui_trust = _ui_trust;
     ui_untrust = _ui_untrust;
     ui_smp_recipient_initiated = _ui_smp_recipient_initiated;
+    ui_smp_recipient_initiated_q = _ui_smp_recipient_initiated_q;
     ui_smp_successful = _ui_smp_successful;
     ui_smp_unsuccessful_sender = _ui_smp_unsuccessful_sender;
     ui_smp_unsuccessful_receiver = _ui_smp_unsuccessful_receiver;

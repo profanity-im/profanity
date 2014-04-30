@@ -451,6 +451,40 @@ _otr_smp_secret(const char * const recipient, const char *secret)
 }
 
 static void
+_otr_smp_question(const char * const recipient, const char *question, const char *answer)
+{
+    ConnContext *context = otrlib_context_find(user_state, recipient, jid);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    otrl_message_initiate_smp_q(user_state, &ops, NULL, context, question, (const unsigned char*)answer, strlen(answer));
+    ui_otr_authetication_waiting(recipient);
+}
+
+static void
+_otr_smp_answer(const char * const recipient, const char *answer)
+{
+    ConnContext *context = otrlib_context_find(user_state, recipient, jid);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    // if recipient initiated SMP, send response, else initialise
+    otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)answer, strlen(answer));
+}
+
+static void
 _otr_end_session(const char * const recipient)
 {
     otrlib_end_session(user_state, recipient, jid, &ops);
@@ -560,4 +594,6 @@ otr_init_module(void)
     otr_decrypt_message = _otr_decrypt_message;
     otr_free_message = _otr_free_message;
     otr_smp_secret = _otr_smp_secret;
+    otr_smp_question = _otr_smp_question;
+    otr_smp_answer = _otr_smp_answer;
 }

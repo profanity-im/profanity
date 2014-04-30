@@ -49,6 +49,8 @@ void (*otr_trust)(const char * const recipient);
 void (*otr_untrust)(const char * const recipient);
 
 void (*otr_smp_secret)(const char * const recipient, const char *secret);
+void (*otr_smp_question)(const char * const recipient, const char *question, const char *answer);
+void (*otr_smp_answer)(const char * const recipient, const char *answer);
 
 void (*otr_end_session)(const char * const recipient);
 

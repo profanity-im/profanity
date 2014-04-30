@@ -594,7 +594,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/otr",
-        cmd_otr, parse_args, 1, 2, NULL,
+        cmd_otr, parse_args, 1, 3, NULL,
         { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy", "Off The Record encryption commands.",
         { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy",
           "--------------------------------------------------------------------",
@@ -1071,6 +1071,8 @@ cmd_init(void)
     autocomplete_add(otr_ac, "warn");
     autocomplete_add(otr_ac, "libver");
     autocomplete_add(otr_ac, "policy");
+    autocomplete_add(otr_ac, "question");
+    autocomplete_add(otr_ac, "answer");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");

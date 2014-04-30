@@ -2804,6 +2804,41 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
         }
         return TRUE;
+    } else if (strcmp(args[0], "question") == 0) {
+        char *question = args[1];
+        char *answer = args[2];
+
+        if (question == NULL || answer == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            win_type_t win_type = ui_current_win_type();
+            if (win_type != WIN_CHAT) {
+                ui_current_print_line("You must be in an OTR session to trust a recipient.");
+            } else if (!ui_current_win_is_otr()) {
+                ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+            } else {
+                char *recipient = ui_current_recipient();
+                otr_smp_question(recipient, question, answer);
+            }
+            return TRUE;
+        }
+    } else if (strcmp(args[0], "answer") == 0) {
+        win_type_t win_type = ui_current_win_type();
+        if (win_type != WIN_CHAT) {
+            ui_current_print_line("You must be in an OTR session to trust a recipient.");
+        } else if (!ui_current_win_is_otr()) {
+            ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
+        } else {
+            char *answer = args[1];
+            if (answer == NULL) {
+                cons_show("Usage: %s", help.usage);
+            } else {
+                char *recipient = ui_current_recipient();
+                otr_smp_answer(recipient, answer);
+            }
+        }
+        return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);
         return TRUE;
