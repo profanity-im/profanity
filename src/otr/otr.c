@@ -154,9 +154,7 @@ _otr_init(void)
     ops.gone_secure = cb_gone_secure;
 
     otrlib_init_ops(&ops);
-
     otrlib_init_timer();
-
     smp_initiators = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 
     data_loaded = FALSE;
@@ -491,7 +489,7 @@ _otr_encrypt_message(const char * const to, const char * const message)
     char *newmessage = NULL;
     gcry_error_t err = otrlib_encrypt_message(user_state, &ops, jid, to, message, &newmessage);
 
-    if (!err == GPG_ERR_NO_ERROR) {
+    if (err != 0) {
         return NULL;
     } else {
         return newmessage;

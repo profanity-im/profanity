@@ -25,6 +25,7 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
+#include "log.h"
 #include "otr/otr.h"
 #include "otr/otrlib.h"
 
@@ -100,59 +101,12 @@ cb_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
     ConnContext *context, const char *message,
     gcry_error_t err)
 {
-    switch(msg_event)
-    {
-        case OTRL_MSGEVENT_ENCRYPTION_REQUIRED:
-            cons_show_error("Our policy requires encryption but we are trying to send an unencrypted message out.");
-            break;
-        case OTRL_MSGEVENT_ENCRYPTION_ERROR:
-            cons_show_error("An error occured while encrypting a message and the message was not sent.");
-            break;
-        case OTRL_MSGEVENT_CONNECTION_ENDED:
-            cons_show_error("Message has not been sent because our buddy has ended the private conversation. We should either close the connection, or refresh it.");
-            break;
-        case OTRL_MSGEVENT_SETUP_ERROR:
-            cons_show_error("A private conversation could not be set up. A gcry_error_t will be passed.");
-            break;
-        case OTRL_MSGEVENT_MSG_REFLECTED:
-            cons_show_error("Received our own OTR messages.");
-            break;
-        case OTRL_MSGEVENT_MSG_RESENT:
-            cons_show_error("The previous message was resent.");
-            break;
-        case OTRL_MSGEVENT_RCVDMSG_NOT_IN_PRIVATE:
-            cons_show_error("Received an encrypted message but cannot read it because no private connection is established yet.");
-            break;
-        case OTRL_MSGEVENT_RCVDMSG_UNREADABLE:
-            cons_show_error("Cannot read the received message.");
-            break;
-        case OTRL_MSGEVENT_RCVDMSG_MALFORMED:
-            cons_show_error("The message received contains malformed data.");
-            break;
-        case OTRL_MSGEVENT_LOG_HEARTBEAT_RCVD:
-            cons_show_error("Received a heartbeat.");
-            break;
-        case OTRL_MSGEVENT_LOG_HEARTBEAT_SENT:
-            cons_show_error("Sent a heartbeat.");
-            break;
-        case OTRL_MSGEVENT_RCVDMSG_GENERAL_ERR:
-            cons_show_error("Received a general OTR error. The argument 'message' will also be passed and it will contain the OTR error message.");
-            break;
-        case OTRL_MSGEVENT_RCVDMSG_UNENCRYPTED:
-            cons_show_error("Received an unencrypted message. The argument 'smessage' will also be passed and it will contain the plaintext message.");
-            break;
-        case OTRL_MSGEVENT_RCVDMSG_UNRECOGNIZED:
-            cons_show_error("Cannot recognize the type of OTR message received.");
-            break;
-        case OTRL_MSGEVENT_RCVDMSG_FOR_OTHER_INSTANCE:
-            cons_show_error("Received and discarded a message intended for another instance.");
-            break;
-        default:
-            break;
-    }
-
-    if (message != NULL) {
-        cons_show_error("Message: %s", message);
+    if (err != 0) {
+        if (message != NULL) {
+            cons_show_error("%s", message);
+        } else {
+            cons_show_error("OTR error event with no message.");
+        }
     }
 }
 
@@ -162,7 +116,6 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
     char *question)
 {
     NextExpectedSMP nextMsg = context->smstate->nextExpected;
-    context->smstate->sm_prog_state = OTRL_SMP_PROG_OK;
     OtrlUserState user_state = otr_userstate();
     OtrlMessageAppOps *ops = otr_messageops();
     GHashTable *smp_initiators = otr_smpinitators();
@@ -177,18 +130,15 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
         case OTRL_SMPEVENT_SUCCESS:
             ui_smp_successful(context->username);
             ui_trust(context->username);
-//            otr_trust(context->username);
             break;
             
         case OTRL_SMPEVENT_FAILURE:
             if (nextMsg == OTRL_SMP_EXPECT3) {
                 ui_smp_unsuccessful_sender(context->username);
                 ui_untrust(context->username);
-//                otr_untrust(context->username);
             } else if (nextMsg == OTRL_SMP_EXPECT4) {
                 ui_smp_unsuccessful_receiver(context->username);
                 ui_untrust(context->username);
-//                otr_untrust(context->username);
             }
             break;
 
@@ -203,14 +153,12 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
         case OTRL_SMPEVENT_ABORT:
             ui_smp_aborted(context->username);
             ui_untrust(context->username);
-//            otr_untrust(context->username);
             break;
 
         case OTRL_SMPEVENT_ASK_FOR_ANSWER:
             break;
 
         case OTRL_SMPEVENT_IN_PROGRESS:
-            ui_current_print_line("OTRL_SMPEVENT_IN_PROGRESS: %d", progress_percent);
             break;
 
         default:
