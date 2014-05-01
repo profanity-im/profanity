@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include <glib.h>
+#include <gnutls/gnutls.h>
 
 #include "profanity.h"
 #include "chat_session.h"
@@ -254,6 +255,7 @@ _init(const int disable_tls, char *log_level)
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
+    gnutls_global_init();
     _create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();
@@ -302,6 +304,7 @@ _shutdown(void)
     accounts_close();
     cmd_uninit();
     log_close();
+    gnutls_global_deinit();
 }
 
 static void
