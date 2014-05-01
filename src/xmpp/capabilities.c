@@ -30,7 +30,6 @@
 #include <string.h>
 
 #include <glib.h>
-#include <openssl/evp.h>
 #include <strophe.h>
 
 #include "common.h"
@@ -203,20 +202,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
         curr = g_slist_next(curr);
     }
 
-    EVP_MD_CTX mdctx;
-    const EVP_MD *md;
-
-    unsigned char md_value[EVP_MAX_MD_SIZE];
-    unsigned int md_len;
-    OpenSSL_add_all_digests();
-    md = EVP_get_digestbyname("SHA1");
-    EVP_MD_CTX_init(&mdctx);
-    EVP_DigestInit_ex(&mdctx, md, NULL);
-    EVP_DigestUpdate(&mdctx, s->str, strlen(s->str));
-    EVP_DigestFinal_ex(&mdctx, md_value, &md_len);
-    EVP_MD_CTX_cleanup(&mdctx);
-
-    char *result = g_base64_encode(md_value, md_len);
+    char *result = sha1_hash(s->str);
 
     g_string_free(s, TRUE);
     g_slist_free_full(identities, g_free);
