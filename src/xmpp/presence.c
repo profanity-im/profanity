@@ -336,7 +336,10 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
-    char *xmlns = xmpp_stanza_get_ns(x);
+    char *xmlns = NULL;
+    if (x != NULL) {
+        xmlns = xmpp_stanza_get_ns(x);
+    }
     char *type = NULL;
     if (error_stanza != NULL) {
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
