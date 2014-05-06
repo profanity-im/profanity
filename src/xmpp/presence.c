@@ -667,8 +667,8 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         return 1;
     }
 
-    char *room = from_jid->barejid;
-    char *nick = from_jid->resourcepart;
+    char *from_room = from_jid->barejid;
+    char *from_nick = from_jid->resourcepart;
 
     // handle self presence
     if (stanza_is_muc_self_presence(stanza, jabber_get_fulljid())) {
@@ -679,19 +679,19 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             // leave room if not self nick change
             if (new_nick != NULL) {
-                muc_set_room_pending_nick_change(room, new_nick);
+                muc_set_room_pending_nick_change(from_room, new_nick);
             } else {
-                handle_leave_room(room);
+                handle_leave_room(from_room);
             }
 
         // handle self nick change
-        } else if (muc_is_room_pending_nick_change(room)) {
-            muc_complete_room_nick_change(room, nick);
-            handle_room_nick_change(room, nick);
+        } else if (muc_is_room_pending_nick_change(from_room)) {
+            muc_complete_room_nick_change(from_room, from_nick);
+            handle_room_nick_change(from_room, from_nick);
 
         // handle roster complete
-        } else if (!muc_get_roster_received(room)) {
-            handle_room_roster_complete(room);
+        } else if (!muc_get_roster_received(from_room)) {
+            handle_room_roster_complete(from_room);
         }
 
     // handle presence from room members
@@ -714,28 +714,28 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             if (stanza_is_room_nick_change(stanza)) {
                 char *new_nick = stanza_get_new_nick(stanza);
                 if (new_nick != NULL) {
-                    muc_set_roster_pending_nick_change(room, new_nick, nick);
+                    muc_set_roster_pending_nick_change(from_room, new_nick, from_nick);
                     free(new_nick);
                 }
             } else {
-                handle_room_member_offline(room, nick, "offline", status_str);
+                handle_room_member_offline(from_room, from_nick, "offline", status_str);
             }
         } else {
             char *show_str = stanza_get_show(stanza, "online");
-            if (!muc_get_roster_received(room)) {
-                muc_add_to_roster(room, nick, show_str, status_str, caps_key);
+            if (!muc_get_roster_received(from_room)) {
+                muc_add_to_roster(from_room, from_nick, show_str, status_str, caps_key);
             } else {
-                char *old_nick = muc_complete_roster_nick_change(room, nick);
+                char *old_nick = muc_complete_roster_nick_change(from_room, from_nick);
 
                 if (old_nick != NULL) {
-                    muc_add_to_roster(room, nick, show_str, status_str, caps_key);
-                    handle_room_member_nick_change(room, old_nick, nick);
+                    muc_add_to_roster(from_room, from_nick, show_str, status_str, caps_key);
+                    handle_room_member_nick_change(from_room, old_nick, from_nick);
                     free(old_nick);
                 } else {
-                    if (!muc_nick_in_roster(room, nick)) {
-                        handle_room_member_online(room, nick, show_str, status_str, caps_key);
+                    if (!muc_nick_in_roster(from_room, from_nick)) {
+                        handle_room_member_online(from_room, from_nick, show_str, status_str, caps_key);
                     } else {
-                        handle_room_member_presence(room, nick, show_str, status_str, caps_key);
+                        handle_room_member_presence(from_room, from_nick, show_str, status_str, caps_key);
                     }
                 }
             }

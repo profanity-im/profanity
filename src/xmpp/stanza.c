@@ -634,127 +634,92 @@ gboolean
 stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     const char * const self_jid)
 {
-    if (stanza == NULL) {
-        return FALSE;
-    }
-    if (strcmp(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
-        return FALSE;
-    }
-
-    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
-
-    if (x == NULL) {
+    // no stanza, or not presence stanza
+    if ((stanza == NULL) || (g_strcmp0(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0)) {
         return FALSE;
     }
 
-    char *ns = xmpp_stanza_get_ns(x);
-    if (ns == NULL) {
-        return FALSE;
-    }
-    if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
-        return FALSE;
-    }
+    // muc user namespaced x element
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    if (x != NULL) {
 
-    xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
-    if (x_children == NULL) {
-        return FALSE;
-    }
-
-    while (x_children != NULL) {
-        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
-            char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
-            if (strcmp(code, "110") == 0) {
-                return TRUE;
+        // check for status child element with 110 code
+        xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
+        while (x_children != NULL) {
+            if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
+                char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+                if (g_strcmp0(code, "110") == 0) {
+                    return TRUE;
+                }
             }
+            x_children = xmpp_stanza_get_next(x_children);
         }
-        x_children = xmpp_stanza_get_next(x_children);
-    }
 
-    // for older server that don't send status 110
-    x_children = xmpp_stanza_get_children(x);
-    while (x_children != NULL) {
-        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
-            char *jid = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_JID);
+        // check for item child element with jid property
+        xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
+        if (item != NULL) {
+            char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
             if (jid != NULL) {
-                if (g_str_has_prefix(jid, self_jid)) {
+                if (g_str_has_prefix(self_jid, jid)) {
                     return TRUE;
                 }
             }
         }
-        x_children = xmpp_stanza_get_next(x_children);
-    }
 
-    // for servers that don't send status 110 or Jid property
-
-    // first check if 'from' attribute identifies this user
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    if (from != NULL) {
-        Jid *jidp = jid_create(from);
-        if (muc_room_is_active(jidp->barejid)) {
-            char *nick = muc_get_room_nick(jidp->barejid);
-            if (g_strcmp0(jidp->resourcepart, nick) == 0) {
-                return TRUE;
-            }
-        }
-        jid_destroy(jidp);
-    }
-
-    // secondly check if the new nickname maps to a pending nick change for this user
-    if (from != NULL) {
-        Jid *jidp = jid_create(from);
-        if (muc_is_room_pending_nick_change(jidp->barejid)) {
-            char *new_nick = jidp->resourcepart;
-            if (new_nick != NULL) {
-                char *nick = muc_get_room_nick(jidp->barejid);
-                char *old_nick = muc_get_old_nick(jidp->barejid, new_nick);
-                if (g_strcmp0(old_nick, nick) == 0) {
+        // check if 'from' attribute identifies this user
+        char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+        if (from != NULL) {
+            Jid *from_jid = jid_create(from);
+            if (muc_room_is_active(from_jid->barejid)) {
+                char *nick = muc_get_room_nick(from_jid->barejid);
+                if (g_strcmp0(from_jid->resourcepart, nick) == 0) {
                     return TRUE;
                 }
             }
+
+            // check if a new nickname maps to a pending nick change for this user
+            if (muc_is_room_pending_nick_change(from_jid->barejid)) {
+                char *new_nick = from_jid->resourcepart;
+                if (new_nick != NULL) {
+                    char *nick = muc_get_room_nick(from_jid->barejid);
+                    char *old_nick = muc_get_old_nick(from_jid->barejid, new_nick);
+                    if (g_strcmp0(old_nick, nick) == 0) {
+                        return TRUE;
+                    }
+                }
+            }
+
+            jid_destroy(from_jid);
         }
-        jid_destroy(jidp);
     }
 
+    // self presence not found
     return FALSE;
 }
 
 gboolean
 stanza_is_room_nick_change(xmpp_stanza_t * const stanza)
 {
-    if (stanza == NULL) {
-        return FALSE;
-    }
-    if (strcmp(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
-        return FALSE;
-    }
-
-    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
-
-    if (x == NULL) {
+    // no stanza, or not presence stanza
+    if ((stanza == NULL) || (g_strcmp0(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0)) {
         return FALSE;
     }
 
-    char *ns = xmpp_stanza_get_ns(x);
-    if (ns == NULL) {
-        return FALSE;
-    }
-    if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
-        return FALSE;
-    }
+    // muc user namespaced x element
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    if (x != NULL) {
 
-    xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
-    if (x_children == NULL) {
-        return FALSE;
-    }
-
-    while (x_children != NULL) {
-        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
-            char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
-            if (strcmp(code, "303") == 0) {
-                return TRUE;
+        // check for status child element with 303 code
+        xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
+        while (x_children != NULL) {
+            if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
+                char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+                if (g_strcmp0(code, "303") == 0) {
+                    return TRUE;
+                }
             }
+            x_children = xmpp_stanza_get_next(x_children);
         }
-        x_children = xmpp_stanza_get_next(x_children);
     }
 
     return FALSE;
