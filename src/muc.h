@@ -71,4 +71,9 @@ void muc_reset_invites_ac(void);
 char* muc_find_invite(char *search_str);
 void muc_clear_invites(void);
 
+void muc_set_subject(const char * const room, const char * const subject);
+char * muc_get_subject(const char * const room);
+void muc_add_pending_broadcast(const char * const room, const char * const message);
+GList * muc_get_pending_broadcasts(const char * const room);
+
 #endif

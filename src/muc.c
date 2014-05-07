@@ -34,6 +34,7 @@ typedef struct _muc_room_t {
     char *nick; // e.g. Some User
     char *password;
     char *subject;
+    GList *pending_broadcasts;
     gboolean autojoin;
     gboolean pending_nick_change;
     GHashTable *roster;
@@ -144,6 +145,7 @@ muc_join_room(const char * const room, const char * const nick,
         new_room->password = NULL;
     }
     new_room->subject = NULL;
+    new_room->pending_broadcasts = NULL;
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
     new_room->nick_ac = autocomplete_new();
@@ -199,6 +201,65 @@ muc_room_is_autojoin(const char * const room)
         }
     } else {
         return FALSE;
+    }
+}
+
+void
+muc_set_subject(const char * const room, const char * const subject)
+{
+    if (rooms != NULL) {
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+        if (chat_room != NULL) {
+            if (chat_room->subject != NULL) {
+                free(chat_room->subject);
+            }
+            chat_room->subject = strdup(subject);
+        }
+    }
+}
+
+char *
+muc_get_subject(const char * const room)
+{
+    if (rooms != NULL) {
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+        if (chat_room != NULL) {
+            return chat_room->subject;
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
+}
+
+void
+muc_add_pending_broadcast(const char * const room, const char * const message)
+{
+    if (rooms != NULL) {
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+        if (chat_room != NULL) {
+            chat_room->pending_broadcasts = g_list_append(chat_room->pending_broadcasts, strdup(message));
+        }
+    }
+}
+
+GList *
+muc_get_pending_broadcasts(const char * const room)
+{
+    if (rooms != NULL) {
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+        if (chat_room != NULL) {
+            return chat_room->pending_broadcasts;
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
     }
 }
 
@@ -523,6 +584,9 @@ _free_room(ChatRoom *room)
             g_hash_table_remove_all(room->nick_changes);
         }
         free(room);
+        if (room->pending_broadcasts != NULL) {
+            g_list_free_full(room->pending_broadcasts, free);
+        }
     }
 }
 

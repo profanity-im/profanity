@@ -174,15 +174,22 @@ void
 handle_room_broadcast(const char *const room_jid,
     const char * const message)
 {
-    ui_room_broadcast(room_jid, message);
-    ui_current_page_off();
+    if (muc_get_roster_received(room_jid)) {
+        ui_room_broadcast(room_jid, message);
+        ui_current_page_off();
+    } else {
+        muc_add_pending_broadcast(room_jid, message);
+    }
 }
 
 void
 handle_room_subject(const char * const room_jid, const char * const subject)
 {
-    ui_room_subject(room_jid, subject);
-    ui_current_page_off();
+    muc_set_subject(room_jid, subject);
+    if (muc_get_roster_received(room_jid)) {
+        ui_room_subject(room_jid, subject);
+        ui_current_page_off();
+    }
 }
 
 void
@@ -451,7 +458,22 @@ handle_room_roster_complete(const char * const room)
     muc_set_roster_received(room);
     GList *roster = muc_get_roster(room);
     ui_room_roster(room, roster, NULL);
-    ui_current_page_off();
+
+    char *subject = muc_get_subject(room);
+    if (subject != NULL) {
+        ui_room_subject(room, subject);
+        ui_current_page_off();
+    }
+
+    GList *pending_broadcasts = muc_get_pending_broadcasts(room);
+    if (pending_broadcasts != NULL) {
+        GList *curr = pending_broadcasts;
+        while (curr != NULL) {
+            ui_room_broadcast(room, curr->data);
+            curr = g_list_next(curr);
+        }
+        ui_current_page_off();
+    }
 }
 
 void
