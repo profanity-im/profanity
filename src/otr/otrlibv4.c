@@ -127,18 +127,29 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
             g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
             break;
 
+        case OTRL_SMPEVENT_ASK_FOR_ANSWER:
+            ui_smp_recipient_initiated_q(context->username, question);
+            break;
+
         case OTRL_SMPEVENT_SUCCESS:
-            ui_smp_successful(context->username);
-            ui_trust(context->username);
+            if (context->smstate->received_question == 0) {
+                ui_smp_successful(context->username);
+                ui_trust(context->username);
+            } else {
+                ui_smp_answer_success(context->username);
+            }
             break;
             
         case OTRL_SMPEVENT_FAILURE:
-            if (nextMsg == OTRL_SMP_EXPECT3) {
-                ui_smp_unsuccessful_sender(context->username);
+            if (context->smstate->received_question == 0) {
+                if (nextMsg == OTRL_SMP_EXPECT3) {
+                    ui_smp_unsuccessful_sender(context->username);
+                } else if (nextMsg == OTRL_SMP_EXPECT4) {
+                    ui_smp_unsuccessful_receiver(context->username);
+                }
                 ui_untrust(context->username);
-            } else if (nextMsg == OTRL_SMP_EXPECT4) {
-                ui_smp_unsuccessful_receiver(context->username);
-                ui_untrust(context->username);
+            } else {
+                ui_smp_answer_failure(context->username);
             }
             break;
 
@@ -153,9 +164,6 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
         case OTRL_SMPEVENT_ABORT:
             ui_smp_aborted(context->username);
             ui_untrust(context->username);
-            break;
-
-        case OTRL_SMPEVENT_ASK_FOR_ANSWER:
             break;
 
         case OTRL_SMPEVENT_IN_PROGRESS:
