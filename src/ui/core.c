@@ -878,6 +878,36 @@ _ui_smp_successful(const char * const recipient)
 }
 
 static void
+_ui_smp_answer_success(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window == NULL) {
+        return;
+    } else {
+        win_vprint_line(window, '!', 0, "%s successfully authenticated you.", recipient);
+        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
+    }
+}
+
+static void
+_ui_smp_answer_failure(const char * const recipient)
+{
+    ProfWin *window = wins_get_by_recipient(recipient);
+    if (window == NULL) {
+        return;
+    } else {
+        win_vprint_line(window, '!', 0, "%s failed to authenticated you.", recipient);
+        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            ui_current_page_off();
+        }
+    }
+}
+
+static void
 _ui_gone_insecure(const char * const recipient)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
@@ -2112,6 +2142,8 @@ ui_init_module(void)
     ui_smp_unsuccessful_sender = _ui_smp_unsuccessful_sender;
     ui_smp_unsuccessful_receiver = _ui_smp_unsuccessful_receiver;
     ui_smp_aborted = _ui_smp_aborted;
+    ui_smp_answer_success = _ui_smp_answer_success;
+    ui_smp_answer_failure = _ui_smp_answer_failure;
     ui_chat_win_contact_online = _ui_chat_win_contact_online;
     ui_chat_win_contact_offline = _ui_chat_win_contact_offline;
     ui_handle_recipient_not_found = _ui_handle_recipient_not_found;

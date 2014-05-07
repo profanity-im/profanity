@@ -71,6 +71,9 @@ void (*ui_smp_unsuccessful_sender)(const char * const recipient);
 void (*ui_smp_unsuccessful_receiver)(const char * const recipient);
 void (*ui_smp_aborted)(const char * const recipient);
 
+void (*ui_smp_answer_success)(const char * const recipient);
+void (*ui_smp_answer_failure)(const char * const recipient);
+
 unsigned long (*ui_get_idle_time)(void);
 void (*ui_reset_idle_time)(void);
 void (*ui_new_chat_win)(const char * const to);

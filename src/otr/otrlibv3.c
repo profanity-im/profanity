@@ -162,11 +162,15 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
                 if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
                     ui_smp_successful(context->username);
                     ui_trust(context->username);
-                    otr_trust(context->username);
                 } else {
                     ui_smp_unsuccessful_sender(context->username);
                     ui_untrust(context->username);
-                    otr_untrust(context->username);
+                }
+            } else {
+                if (context->smstate->sm_prog_state == OTRL_SMP_PROG_SUCCEEDED) {
+                    ui_smp_answer_success(context->username);
+                } else {
+                    ui_smp_answer_failure(context->username);
                 }
             }
         }
@@ -180,11 +184,9 @@ otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext
             if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
                 ui_smp_successful(context->username);
                 ui_trust(context->username);
-                otr_trust(context->username);
             } else {
                 ui_smp_unsuccessful_receiver(context->username);
                 ui_untrust(context->username);
-                otr_untrust(context->username);
             }
         }
     }
