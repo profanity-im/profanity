@@ -152,6 +152,10 @@ autocomplete_complete(Autocomplete ac, gchar *search_str)
 {
     gchar *found = NULL;
 
+    // no autocomplete to search
+    if (ac == NULL)
+        return NULL;
+
     // no items to search
     if (!ac->items)
         return NULL;
