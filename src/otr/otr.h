@@ -23,13 +23,21 @@
 #ifndef OTR_H
 #define OTR_H
 
+#include <libotr/proto.h>
+#include <libotr/message.h>
+
 #include "config/accounts.h"
 
 void otr_init_module(void);
 
+OtrlUserState otr_userstate(void);
+OtrlMessageAppOps* otr_messageops(void);
+GHashTable* otr_smpinitators(void);
+
 void (*otr_init)(void);
 char* (*otr_libotr_version)(void);
 char* (*otr_start_query)(void);
+void (*otr_poll)(void);
 void (*otr_on_connect)(ProfAccount *account);
 void (*otr_keygen)(ProfAccount *account);
 
@@ -39,6 +47,10 @@ gboolean (*otr_is_secure)(const char * const recipient);
 gboolean (*otr_is_trusted)(const char * const recipient);
 void (*otr_trust)(const char * const recipient);
 void (*otr_untrust)(const char * const recipient);
+
+void (*otr_smp_secret)(const char * const recipient, const char *secret);
+void (*otr_smp_question)(const char * const recipient, const char *question, const char *answer);
+void (*otr_smp_answer)(const char * const recipient, const char *answer);
 
 void (*otr_end_session)(const char * const recipient);
 

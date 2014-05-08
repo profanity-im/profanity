@@ -24,11 +24,23 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
+#include "otr/otr.h"
+#include "otr/otrlib.h"
 
 OtrlPolicy
 otrlib_policy(void)
 {
     return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2 ;
+}
+
+void
+otrlib_init_timer(void)
+{
+}
+
+void
+otrlib_poll(void)
+{
 }
 
 char *
@@ -105,4 +117,84 @@ otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
         tlvs,
         NULL,
         NULL);
+}
+
+void
+otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs, GHashTable *smp_initiators)
+{
+    NextExpectedSMP nextMsg = context->smstate->nextExpected;
+    OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT1) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            ui_smp_recipient_initiated(context->username);
+            g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP1Q);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT1) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            char *question = (char *)tlv->data;
+            char *eoq = memchr(question, '\0', tlv->len);
+            if (eoq) {
+                ui_smp_recipient_initiated_q(context->username, question);
+            }
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP2);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT2) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            context->smstate->nextExpected = OTRL_SMP_EXPECT4;
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP3);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT3) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            context->smstate->nextExpected = OTRL_SMP_EXPECT1;
+            if (context->smstate->received_question == 0) {
+                if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                    ui_smp_successful(context->username);
+                    ui_trust(context->username);
+                } else {
+                    ui_smp_unsuccessful_sender(context->username);
+                    ui_untrust(context->username);
+                }
+            } else {
+                if (context->smstate->sm_prog_state == OTRL_SMP_PROG_SUCCEEDED) {
+                    ui_smp_answer_success(context->username);
+                } else {
+                    ui_smp_answer_failure(context->username);
+                }
+            }
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP4);
+    if (tlv) {
+        if (nextMsg != OTRL_SMP_EXPECT4) {
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+        } else {
+            context->smstate->nextExpected = OTRL_SMP_EXPECT1;
+            if ((context->active_fingerprint->trust != NULL) && (context->active_fingerprint->trust[0] != '\0')) {
+                ui_smp_successful(context->username);
+                ui_trust(context->username);
+            } else {
+                ui_smp_unsuccessful_receiver(context->username);
+                ui_untrust(context->username);
+            }
+        }
+    }
+    tlv = otrl_tlv_find(tlvs, OTRL_TLV_SMP_ABORT);
+    if (tlv) {
+        context->smstate->nextExpected = OTRL_SMP_EXPECT1;
+        ui_smp_aborted(context->username);
+        ui_untrust(context->username);
+        otr_untrust(context->username);
+    }
 }

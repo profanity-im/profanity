@@ -29,6 +29,9 @@ char* otrlib_start_query(void);
 
 void otrlib_init_ops(OtrlMessageAppOps *ops);
 
+void otrlib_init_timer(void);
+void otrlib_poll(void);
+
 ConnContext * otrlib_context_find(OtrlUserState user_state, const char * const recipient, char *jid);
 
 void otrlib_end_session(OtrlUserState user_state, const char * const recipient, char *jid, OtrlMessageAppOps *ops);
@@ -38,5 +41,7 @@ gcry_error_t otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps 
 
 int otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *jid, const char * const from,
     const char * const message, char **decrypted, OtrlTLV **tlvs);
+
+void otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs, GHashTable *smp_initiators);
 
 #endif

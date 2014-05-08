@@ -24,7 +24,7 @@ debian_prepare()
     echo
     echo Profanity installer... installing dependencies
     echo
-    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev libgnutls-dev
+    sudo apt-get -y install git automake autoconf libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr5-dev libgnutls-dev
 
 }
 
@@ -73,7 +73,9 @@ install_lib_strophe()
     echo
     echo Profanity installer... installing libstrophe
     echo
-    git clone git://github.com/strophe/libstrophe.git
+    #clone fork so as to not pick up any breaking changes
+    #git clone git://github.com/strophe/libstrophe.git
+    git clone git://github.com/boothj5/libstrophe.git
     cd libstrophe
     ./bootstrap.sh
     ./configure

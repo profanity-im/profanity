@@ -58,10 +58,22 @@ void (*ui_handle_special_keys)(const wint_t * const ch, const char * const inp,
 gboolean (*ui_switch_win)(const int i);
 void (*ui_next_win)(void);
 void (*ui_previous_win)(void);
+
 void (*ui_gone_secure)(const char * const recipient, gboolean trusted);
 void (*ui_gone_insecure)(const char * const recipient);
 void (*ui_trust)(const char * const recipient);
 void (*ui_untrust)(const char * const recipient);
+void (*ui_smp_recipient_initiated)(const char * const recipient);
+void (*ui_smp_recipient_initiated_q)(const char * const recipient, const char *question);
+
+void (*ui_smp_successful)(const char * const recipient);
+void (*ui_smp_unsuccessful_sender)(const char * const recipient);
+void (*ui_smp_unsuccessful_receiver)(const char * const recipient);
+void (*ui_smp_aborted)(const char * const recipient);
+
+void (*ui_smp_answer_success)(const char * const recipient);
+void (*ui_smp_answer_failure)(const char * const recipient);
+
 unsigned long (*ui_get_idle_time)(void);
 void (*ui_reset_idle_time)(void);
 void (*ui_new_chat_win)(const char * const to);
@@ -84,6 +96,9 @@ void (*ui_current_print_formatted_line)(const char show_char, int attrs, const c
 void (*ui_current_error_line)(const char * const msg);
 void (*ui_current_page_off)(void);
 void (*ui_current_update_virtual)(void);
+
+void (*ui_otr_authenticating)(const char * const recipient);
+void (*ui_otr_authetication_waiting)(const char * const recipient);
 
 win_type_t (*ui_win_type)(int index);
 char * (*ui_recipient)(int index);

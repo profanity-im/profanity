@@ -593,14 +593,14 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/otr",
-        cmd_otr, parse_args, 1, 2, NULL,
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy", "Off The Record encryption commands.",
-        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy",
-          "--------------------------------------------------------------------",
+        cmd_otr, parse_args, 1, 3, NULL,
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy|secret|question|answer", "Off The Record encryption commands.",
+        { "/otr gen|myfp|theirfp|start|end|trust|untrust|log|warn|libver|policy|secret|question|answer",
+          "-------------------------------------------------------------------------------------------",
           "gen - Generate your private key.",
           "myfp - Show your fingerprint.",
           "theirfp - Show contacts fingerprint.",
-          "start <contact> - Start an OTR session with the contact, or the current recipient if in a chat window and no argument supplied.",
+          "start [contact] - Start an OTR session with the contact, or the current recipient if in a chat window and no argument supplied.",
           "end - End the current OTR session,",
           "trust - Indicate that you have verified the contact's fingerprint.",
           "untrust - Indicate the the contact's fingerprint is not verified,",
@@ -608,6 +608,9 @@ static struct cmd_t command_defs[] =
           "warn - Show when unencrypted messaging is being used in the title bar, options are 'on' and 'off' with 'on' being the default.",
           "libver - Show which version of the libotr library is being used.",
           "policy - manual, opportunistic or always.",
+          "secret [secret]- Verify a contacts identity using a shared secret.",
+          "question [question] [answer] - Verify a contacts identity using a question and expected anwser, if the question has spaces, surround with double quotes.",
+          "answer [anwser] - Respond to a question answer verification request with your answer.",
           NULL } } },
 
     { "/outtype",
@@ -1073,10 +1076,13 @@ cmd_init(void)
     autocomplete_add(otr_ac, "theirfp");
     autocomplete_add(otr_ac, "trust");
     autocomplete_add(otr_ac, "untrust");
+    autocomplete_add(otr_ac, "secret");
     autocomplete_add(otr_ac, "log");
     autocomplete_add(otr_ac, "warn");
     autocomplete_add(otr_ac, "libver");
     autocomplete_add(otr_ac, "policy");
+    autocomplete_add(otr_ac, "question");
+    autocomplete_add(otr_ac, "answer");
 
     otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");

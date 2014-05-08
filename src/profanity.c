@@ -107,6 +107,9 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
             ui_handle_special_keys(&ch, inp, size);
             ui_update_screen();
+#ifdef HAVE_LIBOTR
+            otr_poll();
+#endif
             jabber_process_events();
 
             ch = ui_get_char(inp, &size);

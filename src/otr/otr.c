@@ -23,6 +23,7 @@
 #include <libotr/proto.h>
 #include <libotr/privkey.h>
 #include <libotr/message.h>
+#include <libotr/sm.h>
 #include <glib.h>
 
 #include "otr/otr.h"
@@ -40,6 +41,25 @@ static OtrlUserState user_state;
 static OtrlMessageAppOps ops;
 static char *jid;
 static gboolean data_loaded;
+static GHashTable *smp_initiators;
+
+OtrlUserState
+otr_userstate(void)
+{
+    return user_state;
+}
+
+OtrlMessageAppOps *
+otr_messageops(void)
+{
+    return &ops;
+}
+
+GHashTable *
+otr_smpinitators(void)
+{
+    return smp_initiators;
+}
 
 // ops callbacks
 static OtrlPolicy
@@ -134,8 +154,16 @@ _otr_init(void)
     ops.gone_secure = cb_gone_secure;
 
     otrlib_init_ops(&ops);
+    otrlib_init_timer();
+    smp_initiators = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 
     data_loaded = FALSE;
+}
+
+void
+_otr_poll(void)
+{
+    otrlib_poll();
 }
 
 static void
@@ -337,9 +365,14 @@ _otr_is_trusted(const char * const recipient)
         return TRUE;
     }
 
-    if (context->active_fingerprint &&
-                g_strcmp0(context->active_fingerprint->trust, "trusted") == 0) {
-        return TRUE;
+    if (context->active_fingerprint) {
+        if (context->active_fingerprint->trust == NULL) {
+            return FALSE;
+        } else if (context->active_fingerprint->trust[0] == '\0') {
+            return FALSE;
+        } else {
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -359,7 +392,10 @@ _otr_trust(const char * const recipient)
     }
 
     if (context->active_fingerprint) {
-        context->active_fingerprint->trust = "trusted";
+        if (context->active_fingerprint->trust != NULL) {
+            free(context->active_fingerprint->trust);
+        }
+        context->active_fingerprint->trust = strdup("trusted");
         cb_write_fingerprints(NULL);
     }
 
@@ -380,11 +416,72 @@ _otr_untrust(const char * const recipient)
     }
 
     if (context->active_fingerprint) {
+        if (context->active_fingerprint->trust != NULL) {
+            free(context->active_fingerprint->trust);
+        }
         context->active_fingerprint->trust = NULL;
         cb_write_fingerprints(NULL);
     }
 
     return;
+}
+
+static void
+_otr_smp_secret(const char * const recipient, const char *secret)
+{
+    ConnContext *context = otrlib_context_find(user_state, recipient, jid);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    // if recipient initiated SMP, send response, else initialise
+    if (g_hash_table_contains(smp_initiators, recipient)) {
+        otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
+        ui_otr_authenticating(recipient);
+        g_hash_table_remove(smp_initiators, context->username);
+    } else {
+        otrl_message_initiate_smp(user_state, &ops, NULL, context, (const unsigned char*)secret, strlen(secret));
+        ui_otr_authetication_waiting(recipient);
+    }
+}
+
+static void
+_otr_smp_question(const char * const recipient, const char *question, const char *answer)
+{
+    ConnContext *context = otrlib_context_find(user_state, recipient, jid);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    otrl_message_initiate_smp_q(user_state, &ops, NULL, context, question, (const unsigned char*)answer, strlen(answer));
+    ui_otr_authetication_waiting(recipient);
+}
+
+static void
+_otr_smp_answer(const char * const recipient, const char *answer)
+{
+    ConnContext *context = otrlib_context_find(user_state, recipient, jid);
+
+    if (context == NULL) {
+        return;
+    }
+
+    if (context->msgstate != OTRL_MSGSTATE_ENCRYPTED) {
+        return;
+    }
+
+    // if recipient initiated SMP, send response, else initialise
+    otrl_message_respond_smp(user_state, &ops, NULL, context, (const unsigned char*)answer, strlen(answer));
 }
 
 static void
@@ -424,7 +521,7 @@ _otr_encrypt_message(const char * const to, const char * const message)
     char *newmessage = NULL;
     gcry_error_t err = otrlib_encrypt_message(user_state, &ops, jid, to, message, &newmessage);
 
-    if (!err == GPG_ERR_NO_ERROR) {
+    if (err != 0) {
         return NULL;
     } else {
         return newmessage;
@@ -441,15 +538,21 @@ _otr_decrypt_message(const char * const from, const char * const message, gboole
 
     // internal libotr message
     if (result == 1) {
+        ConnContext *context = otrlib_context_find(user_state, from, jid);
+
+        // common tlv handling
         OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
-            ConnContext *context = otrlib_context_find(user_state, from, jid);
 
             if (context != NULL) {
                 otrl_context_force_plaintext(context);
                 ui_gone_insecure(from);
             }
         }
+
+        // library version specific tlv handling
+        otrlib_handle_tlvs(user_state, &ops, context, tlvs, smp_initiators);
+
         return NULL;
 
     // message was decrypted, return to user
@@ -476,6 +579,7 @@ otr_init_module(void)
     otr_init = _otr_init;
     otr_libotr_version = _otr_libotr_version;
     otr_start_query = _otr_start_query;
+    otr_poll = _otr_poll;
     otr_on_connect = _otr_on_connect;
     otr_keygen = _otr_keygen;
     otr_key_loaded = _otr_key_loaded;
@@ -489,4 +593,7 @@ otr_init_module(void)
     otr_encrypt_message = _otr_encrypt_message;
     otr_decrypt_message = _otr_decrypt_message;
     otr_free_message = _otr_free_message;
+    otr_smp_secret = _otr_smp_secret;
+    otr_smp_question = _otr_smp_question;
+    otr_smp_answer = _otr_smp_answer;
 }

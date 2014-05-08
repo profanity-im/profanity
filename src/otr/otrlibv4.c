@@ -25,11 +25,38 @@
 #include <libotr/message.h>
 
 #include "ui/ui.h"
+#include "log.h"
+#include "otr/otr.h"
+#include "otr/otrlib.h"
+
+static GTimer *timer;
+static unsigned int current_interval;
 
 OtrlPolicy
 otrlib_policy(void)
 {
     return OTRL_POLICY_ALLOW_V1 | OTRL_POLICY_ALLOW_V2;
+}
+
+void
+otrlib_init_timer(void)
+{
+    OtrlUserState user_state = otr_userstate();
+    timer = g_timer_new();
+    current_interval = otrl_message_poll_get_default_interval(user_state);
+}
+
+void
+otrlib_poll(void)
+{
+    gdouble elapsed = g_timer_elapsed(timer, NULL);
+
+    if (current_interval != 0 && elapsed > current_interval) {
+        OtrlUserState user_state = otr_userstate();
+        OtrlMessageAppOps *ops = otr_messageops();
+        otrl_message_poll(user_state, ops, NULL);
+        g_timer_start(timer);
+    }
 }
 
 char *
@@ -64,6 +91,12 @@ cb_otr_error_message_free(void *opdata, const char *err_msg)
 }
 
 static void
+cb_timer_control(void *opdata, unsigned int interval)
+{
+    current_interval = interval; 
+}
+
+static void
 cb_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
     ConnContext *context, const char *message,
     gcry_error_t err)
@@ -77,12 +110,78 @@ cb_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
     }
 }
 
+static void
+cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
+    ConnContext *context, unsigned short progress_percent,
+    char *question)
+{
+    NextExpectedSMP nextMsg = context->smstate->nextExpected;
+    OtrlUserState user_state = otr_userstate();
+    OtrlMessageAppOps *ops = otr_messageops();
+    GHashTable *smp_initiators = otr_smpinitators();
+
+    switch(smp_event)
+    {
+        case OTRL_SMPEVENT_ASK_FOR_SECRET:
+            ui_smp_recipient_initiated(context->username);
+            g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
+            break;
+
+        case OTRL_SMPEVENT_ASK_FOR_ANSWER:
+            ui_smp_recipient_initiated_q(context->username, question);
+            break;
+
+        case OTRL_SMPEVENT_SUCCESS:
+            if (context->smstate->received_question == 0) {
+                ui_smp_successful(context->username);
+                ui_trust(context->username);
+            } else {
+                ui_smp_answer_success(context->username);
+            }
+            break;
+            
+        case OTRL_SMPEVENT_FAILURE:
+            if (context->smstate->received_question == 0) {
+                if (nextMsg == OTRL_SMP_EXPECT3) {
+                    ui_smp_unsuccessful_sender(context->username);
+                } else if (nextMsg == OTRL_SMP_EXPECT4) {
+                    ui_smp_unsuccessful_receiver(context->username);
+                }
+                ui_untrust(context->username);
+            } else {
+                ui_smp_answer_failure(context->username);
+            }
+            break;
+
+        case OTRL_SMPEVENT_ERROR:
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+            break;
+
+        case OTRL_SMPEVENT_CHEATED:
+            otrl_message_abort_smp(user_state, ops, NULL, context);
+            break;
+
+        case OTRL_SMPEVENT_ABORT:
+            ui_smp_aborted(context->username);
+            ui_untrust(context->username);
+            break;
+
+        case OTRL_SMPEVENT_IN_PROGRESS:
+            break;
+
+        default:
+            break;
+    }
+}
+
 void
 otrlib_init_ops(OtrlMessageAppOps *ops)
 {
     ops->otr_error_message = cb_otr_error_message;
     ops->otr_error_message_free = cb_otr_error_message_free;
     ops->handle_msg_event = cb_handle_msg_event;
+    ops->handle_smp_event = cb_handle_smp_event;
+    ops->timer_control = cb_timer_control;
 }
 
 ConnContext *
@@ -144,4 +243,9 @@ otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps *ops, char *j
         NULL,
         NULL,
         NULL);
+}
+
+void
+otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps *ops, ConnContext *context, OtrlTLV *tlvs, GHashTable *smp_initiators)
+{
 }
