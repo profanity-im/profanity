@@ -132,8 +132,10 @@ void (*iq_set_autoping)(int seconds);
 Capabilities* (*caps_get)(const char * const caps_str);
 void (*caps_close)(void);
 
-gboolean (*bookmark_add)(const char *jid, const char *nick, gboolean autojoin);
-gboolean (*bookmark_remove)(const char *jid, gboolean autojoin);
+gboolean (*bookmark_add)(const char *jid, const char *nick, const char *password, const char *autojoin_str);
+gboolean (*bookmark_update)(const char *jid, const char *nick, const char *password, const char *autojoin_str);
+gboolean (*bookmark_remove)(const char *jid);
+gboolean (*bookmark_join)(const char *jid);
 const GList * (*bookmark_get_list)(void);
 char * (*bookmark_find)(char *search_str);
 void (*bookmark_autocomplete_reset)(void);

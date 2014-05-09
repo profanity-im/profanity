@@ -25,11 +25,10 @@ void bookmark_get_list_returns(GList *bookmarks);
 
 void mock_bookmark_add(void);
 void expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
-    gboolean expected_autojoin, gboolean added);
+    char *expected_password, char *expected_autojoin_str, gboolean added);
 
 void mock_bookmark_remove(void);
-void expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_autojoin,
-    gboolean removed);
+void expect_and_return_bookmark_remove(char *expected_jid, gboolean removed);
 
 void message_send_expect(char *message, char *recipient);
 

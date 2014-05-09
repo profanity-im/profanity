@@ -300,12 +300,19 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/bookmark",
-        cmd_bookmark, parse_args, 0, 4, NULL,
-        { "/bookmark [add|list|remove] [room@server] [autojoin] [nick]",
-          "Manage bookmarks.",
-        { "/bookmark [add|list|remove] [room@server] [autojoin] [nick]",
+        cmd_bookmark, parse_args, 1, 8, NULL,
+        { "/bookmark list|add|update|remove|join [room@server] [nick value] [password value] [autojoin on|off]", "Manage bookmarks.",
+        { "/bookmark list|add|update|remove|join [room@server] [nick value] [password value] [autojoin on|off]",
           "-----------------------------------------------------------",
           "Manage bookmarks.",
+          "list: List all bookmarks.",
+          "add: Add a bookmark for room@server with the following optional properties:",
+          "  nick: Nickname used in the chat room",
+          "  password: Password for private rooms, note this may be stored in plaintext on your server",
+          "  autojoin: Whether to join the room automatically on login \"on\" or \"off\".",
+          "update: Update any of the above properties associated with the bookmark.",
+          "remove: Remove the bookmark for room@server.",
+          "join: Join room@server using the properties associated with the bookmark.",
           NULL } } },
 
     { "/disco",
@@ -1057,9 +1064,11 @@ cmd_init(void)
     autocomplete_add(who_ac, "any");
 
     bookmark_ac = autocomplete_new();
-    autocomplete_add(bookmark_ac, "add");
     autocomplete_add(bookmark_ac, "list");
+    autocomplete_add(bookmark_ac, "add");
+    autocomplete_add(bookmark_ac, "update");
     autocomplete_add(bookmark_ac, "remove");
+    autocomplete_add(bookmark_ac, "join");
 
     otr_ac = autocomplete_new();
     autocomplete_add(otr_ac, "gen");
@@ -1651,11 +1660,15 @@ _bookmark_autocomplete(char *input, int *size)
         return result;
     }
 
-    result = autocomplete_param_with_func(input, size, "/bookmark list", bookmark_find);
+    result = autocomplete_param_with_func(input, size, "/bookmark remove", bookmark_find);
     if (result != NULL) {
         return result;
     }
-    result = autocomplete_param_with_func(input, size, "/bookmark remove", bookmark_find);
+    result = autocomplete_param_with_func(input, size, "/bookmark join", bookmark_find);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_func(input, size, "/bookmark update", bookmark_find);
     if (result != NULL) {
         return result;
     }

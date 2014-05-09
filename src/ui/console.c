@@ -663,6 +663,9 @@ _cons_show_bookmarks(const GList *list)
             if (item->autojoin) {
                 wprintw(console->win, " (autojoin)");
             }
+            if (item->password != NULL) {
+                wprintw(console->win, " (private)");
+            }
             wprintw(console->win, "\n");
             list = g_list_next(list);
         }
