@@ -28,6 +28,7 @@
 struct bookmark_t {
     char *jid;
     char *nick;
+    char *password;
     gboolean autojoin;
 };
 

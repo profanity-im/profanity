@@ -65,19 +65,19 @@ _mock_bookmark_get_list(void)
 }
 
 static gboolean
-_mock_bookmark_add(const char *jid, const char *nick, gboolean autojoin)
+_mock_bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
     check_expected(jid);
     check_expected(nick);
-    check_expected(autojoin);
+    check_expected(password);
+    check_expected(autojoin_str);
     return (gboolean)mock();
 }
 
 static gboolean
-_mock_bookmark_remove(const char *jid, gboolean autojoin)
+_mock_bookmark_remove(const char *jid)
 {
     check_expected(jid);
-    check_expected(autojoin);
     return (gboolean)mock();
 }
 
@@ -258,7 +258,7 @@ presence_update_expect(resource_presence_t presence, char *msg, int idle)
 
 void
 expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
-    gboolean expected_autojoin, gboolean added)
+    const char *expected_password, const char *expected_autojoin_str, gboolean added)
 {
     expect_string(_mock_bookmark_add, jid, expected_jid);
     if (expected_nick != NULL) {
@@ -266,17 +266,24 @@ expect_and_return_bookmark_add(char *expected_jid, char *expected_nick,
     } else {
         expect_value(_mock_bookmark_add, nick, NULL);
     }
-    expect_value(_mock_bookmark_add, autojoin, expected_autojoin);
+    if (expected_password != NULL) {
+        expect_string(_mock_bookmark_add, password, expected_password);
+    } else {
+        expect_value(_mock_bookmark_add, password, NULL);
+    }
+    if (expected_autojoin_str != NULL) {
+        expect_string(_mock_bookmark_add, autojoin_str, expected_autojoin_str);
+    } else {
+        expect_value(_mock_bookmark_add, autojoin_str, NULL);
+    }
 
     will_return(_mock_bookmark_add, added);
 }
 
 void
-expect_and_return_bookmark_remove(char *expected_jid, gboolean expected_autojoin,
-    gboolean removed)
+expect_and_return_bookmark_remove(char *expected_jid, gboolean removed)
 {
     expect_string(_mock_bookmark_remove, jid, expected_jid);
-    expect_value(_mock_bookmark_remove, autojoin, expected_autojoin);
 
     will_return(_mock_bookmark_remove, removed);
 }

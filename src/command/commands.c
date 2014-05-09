@@ -1737,77 +1737,76 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    /* TODO: /bookmark list room@server */
-
     if (strcmp(cmd, "list") == 0) {
         const GList *bookmarks = bookmark_get_list();
         cons_show_bookmarks(bookmarks);
     } else {
-        gboolean autojoin = FALSE;
-        gchar *jid = NULL;
-        gchar *nick = NULL;
-        int idx = 1;
-
-        while (args[idx] != NULL) {
-            gchar *opt = args[idx];
-
-            if (strcmp(opt, "autojoin") == 0) {
-                autojoin = TRUE;
-            } else if (jid == NULL) {
-                jid = opt;
-            } else if (nick == NULL) {
-                nick = opt;
-            } else {
-                cons_show("Usage: %s", help.usage);
-            }
-
-            ++idx;
+        char *jid = args[1];
+        if (jid == NULL) {
+            cons_show("Usage: %s", help.usage);
+            cons_show("");
+            return TRUE;
         }
 
-        if (jid == NULL) {
-            win_type_t win_type = ui_current_win_type();
-
-            if (win_type == WIN_MUC) {
-                jid = ui_current_recipient();
-                nick = muc_get_room_nick(jid);
+        if (strcmp(cmd, "remove") == 0) {
+            gboolean removed = bookmark_remove(jid);
+            if (removed) {
+                cons_show("Bookmark removed for %s.", jid);
             } else {
+                cons_show("No bookmark exists for %s.", jid);
+            }
+            return TRUE;
+        }
+
+        if (strcmp(cmd, "join") == 0) {
+            gboolean joined = bookmark_join(jid);
+            if (!joined) {
+                cons_show("No bookmark exists for %s.", jid);
+            }
+            return TRUE;
+        }
+
+        gchar *opt_keys[] = { "autojoin", "nick", "password", NULL };
+        gboolean parsed;
+
+        GHashTable *options = parse_options(&args[2], opt_keys, &parsed);
+        if (!parsed) {
+            cons_show("Usage: %s", help.usage);
+            cons_show("");
+            return TRUE;
+        }
+
+        char *nick = g_hash_table_lookup(options, "nick");
+        char *password = g_hash_table_lookup(options, "password");
+        char *autojoin = g_hash_table_lookup(options, "autojoin");
+
+        if (autojoin != NULL) {
+            if ((strcmp(autojoin, "on") != 0) && (strcmp(autojoin, "off") != 0)) {
                 cons_show("Usage: %s", help.usage);
+                cons_show("");
                 return TRUE;
             }
         }
 
         if (strcmp(cmd, "add") == 0) {
-            gboolean added = bookmark_add(jid, nick, autojoin);
+            gboolean added = bookmark_add(jid, nick, password, autojoin);
             if (added) {
-                GString *msg = g_string_new("Bookmark added for ");
-                g_string_append(msg, jid);
-                if (nick != NULL) {
-                    g_string_append(msg, ", nickname: ");
-                    g_string_append(msg, nick);
-                }
-                if (autojoin) {
-                    g_string_append(msg, ", autojoin enabled");
-                }
-                g_string_append(msg, ".");
-                cons_show(msg->str);
-                g_string_free(msg, TRUE);
+                cons_show("Bookmark added for %s.", jid);
             } else {
-                cons_show("Bookmark updated for %s.", jid);
+                cons_show("Bookmark already exists, use /bookmark update to edit.");
             }
-        } else if (strcmp(cmd, "remove") == 0) {
-            gboolean removed = bookmark_remove(jid, autojoin);
-            if (removed) {
-                if (autojoin) {
-                    cons_show("Autojoin disabled for %s.", jid);
-                } else {
-                    cons_show("Bookmark removed for %s.", jid);
-                }
+        } else if (strcmp(cmd, "update") == 0) {
+            gboolean updated = bookmark_update(jid, nick, password, autojoin);
+            if (updated) {
+                cons_show("Bookmark updated.");
             } else {
                 cons_show("No bookmark exists for %s.", jid);
             }
         } else {
             cons_show("Usage: %s", help.usage);
         }
+
+        options_destroy(options);
     }
 
     return TRUE;

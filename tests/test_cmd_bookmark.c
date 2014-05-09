@@ -125,40 +125,6 @@ void cmd_bookmark_list_shows_bookmarks(void **state)
     g_list_free_full(bookmarks, (GDestroyNotify)_free_bookmark);
 }
 
-void cmd_bookmark_add_shows_usage_when_no_args_not_muc(void **state)
-{
-    mock_cons_show();
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
-    gchar *args[] = { "add", NULL };
-
-    mock_connection_status(JABBER_CONNECTED);
-    mock_current_win_type(WIN_CONSOLE);
-    expect_cons_show("Usage: some usage");
-
-    gboolean result = cmd_bookmark(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_bookmark_remove_shows_message_when_no_args_not_muc(void **state)
-{
-    mock_cons_show();
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
-    gchar *args[] = { "remove", NULL };
-
-    mock_connection_status(JABBER_CONNECTED);
-    mock_current_win_type(WIN_CONSOLE);
-    expect_cons_show("Usage: some usage");
-
-    gboolean result = cmd_bookmark(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
 void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 {
     mock_bookmark_add();
@@ -169,7 +135,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_and_return_bookmark_add(jid, NULL, FALSE, TRUE);
+    expect_and_return_bookmark_add(jid, NULL, NULL, NULL, TRUE);
     expect_cons_show("Bookmark added for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
@@ -185,12 +151,12 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "add", jid, nick, NULL };
+    gchar *args[] = { "add", jid, "nick", nick, NULL };
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_and_return_bookmark_add(jid, nick, FALSE, TRUE);
-    expect_cons_show("Bookmark added for room@conf.server, nickname: bob.");
+    expect_and_return_bookmark_add(jid, nick, NULL, NULL, TRUE);
+    expect_cons_show("Bookmark added for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
@@ -204,12 +170,12 @@ void cmd_bookmark_add_adds_bookmark_with_jid_autojoin(void **state)
     mock_cons_show();
     char *jid = "room@conf.server";
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "add", jid, "autojoin", NULL };
+    gchar *args[] = { "add", jid, "autojoin", "on", NULL };
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_and_return_bookmark_add(jid, NULL, TRUE, TRUE);
-    expect_cons_show("Bookmark added for room@conf.server, autojoin enabled.");
+    expect_and_return_bookmark_add(jid, NULL, NULL, "on", TRUE);
+    expect_cons_show("Bookmark added for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
@@ -224,71 +190,17 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "add", jid, nick, "autojoin", NULL };
+    gchar *args[] = { "add", jid, "nick", nick, "autojoin", "on", NULL };
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_and_return_bookmark_add(jid, nick, TRUE, TRUE);
-    expect_cons_show("Bookmark added for room@conf.server, nickname: bob, autojoin enabled.");
+    expect_and_return_bookmark_add(jid, nick, NULL, "on", TRUE);
+    expect_cons_show("Bookmark added for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
 
     free(help);
-}
-
-void cmd_bookmark_add_adds_bookmark_with_room_details(void **state)
-{
-    mock_bookmark_add();
-    mock_ui_current_recipient();
-    mock_cons_show();
-    char *jid = "room@conf.server";
-    char *nick = "bob";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "add", NULL };
-
-    muc_init();
-    muc_join_room(jid, nick, NULL, TRUE);
-
-    mock_connection_status(JABBER_CONNECTED);
-    mock_current_win_type(WIN_MUC);
-    ui_current_recipient_returns(jid);
-
-    expect_and_return_bookmark_add(jid, nick, FALSE, TRUE);
-    expect_cons_show("Bookmark added for room@conf.server, nickname: bob.");
-
-    gboolean result = cmd_bookmark(args, *help);
-    assert_true(result);
-
-    free(help);
-    muc_close();
-}
-
-void cmd_bookmark_add_adds_bookmark_with_room_details_autojoin(void **state)
-{
-    mock_bookmark_add();
-    mock_ui_current_recipient();
-    mock_cons_show();
-    char *jid = "room@conf.server";
-    char *nick = "bob";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "add", "autojoin", NULL };
-
-    muc_init();
-    muc_join_room(jid, nick, NULL, TRUE);
-
-    mock_connection_status(JABBER_CONNECTED);
-    mock_current_win_type(WIN_MUC);
-    ui_current_recipient_returns(jid);
-
-    expect_and_return_bookmark_add(jid, nick, TRUE, TRUE);
-    expect_cons_show("Bookmark added for room@conf.server, nickname: bob, autojoin enabled.");
-
-    gboolean result = cmd_bookmark(args, *help);
-    assert_true(result);
-
-    free(help);
-    muc_close();
 }
 
 void cmd_bookmark_remove_removes_bookmark(void **state)
@@ -301,46 +213,8 @@ void cmd_bookmark_remove_removes_bookmark(void **state)
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_and_return_bookmark_remove(jid, FALSE, TRUE);
+    expect_and_return_bookmark_remove(jid, TRUE);
     expect_cons_show("Bookmark removed for room@conf.server.");
-
-    gboolean result = cmd_bookmark(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_bookmark_remove_removes_autojoin(void **state)
-{
-    mock_bookmark_remove();
-    mock_cons_show();
-    char *jid = "room@conf.server";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "remove", jid, "autojoin", NULL };
-
-    mock_connection_status(JABBER_CONNECTED);
-
-    expect_and_return_bookmark_remove(jid, TRUE, TRUE);
-    expect_cons_show("Autojoin disabled for room@conf.server.");
-
-    gboolean result = cmd_bookmark(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_bookmark_add_shows_message_when_upated(void **state)
-{
-    mock_bookmark_add();
-    mock_cons_show();
-    char *jid = "room@conf.server";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "add", jid, NULL };
-
-    mock_connection_status(JABBER_CONNECTED);
-
-    expect_and_return_bookmark_add(jid, NULL, FALSE, FALSE);
-    expect_cons_show("Bookmark updated for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);
     assert_true(result);
@@ -358,26 +232,7 @@ void cmd_bookmark_remove_shows_message_when_no_bookmark(void **state)
 
     mock_connection_status(JABBER_CONNECTED);
 
-    expect_and_return_bookmark_remove(jid, FALSE, FALSE);
-    expect_cons_show("No bookmark exists for room@conf.server.");
-
-    gboolean result = cmd_bookmark(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_bookmark_remove_autojoin_shows_message_when_no_bookmark(void **state)
-{
-    mock_bookmark_remove();
-    mock_cons_show();
-    char *jid = "room@conf.server";
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "remove", jid, "autojoin", NULL };
-
-    mock_connection_status(JABBER_CONNECTED);
-
-    expect_and_return_bookmark_remove(jid, TRUE, FALSE);
+    expect_and_return_bookmark_remove(jid, FALSE);
     expect_cons_show("No bookmark exists for room@conf.server.");
 
     gboolean result = cmd_bookmark(args, *help);

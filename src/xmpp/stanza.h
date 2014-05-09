@@ -59,6 +59,7 @@
 #define STANZA_NAME_FIELD "field"
 #define STANZA_NAME_STORAGE "storage"
 #define STANZA_NAME_NICK "nick"
+#define STANZA_NAME_PASSWORD "password"
 #define STANZA_NAME_CONFERENCE "conference"
 #define STANZA_NAME_VALUE "value"
 
