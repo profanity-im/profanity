@@ -894,6 +894,7 @@ static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
+static Autocomplete bookmark_property_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
@@ -1077,6 +1078,11 @@ cmd_init(void)
     autocomplete_add(bookmark_ac, "remove");
     autocomplete_add(bookmark_ac, "join");
 
+    bookmark_property_ac = autocomplete_new();
+    autocomplete_add(bookmark_property_ac, "nick");
+    autocomplete_add(bookmark_property_ac, "password");
+    autocomplete_add(bookmark_property_ac, "autojoin");
+
     otr_ac = autocomplete_new();
     autocomplete_add(otr_ac, "gen");
     autocomplete_add(otr_ac, "start");
@@ -1156,6 +1162,7 @@ cmd_uninit(void)
     autocomplete_free(roster_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
+    autocomplete_free(bookmark_property_ac);
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
@@ -1277,6 +1284,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(roster_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(bookmark_ac);
+    autocomplete_reset(bookmark_property_ac);
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
@@ -1638,33 +1646,56 @@ _group_autocomplete(char *input, int *size)
 static char *
 _bookmark_autocomplete(char *input, int *size)
 {
-    char *result = NULL;
+    char *found = NULL;
 
-    if (strcmp(input, "/bookmark add ") == 0) {
-        GString *str = g_string_new(input);
+    gboolean result;
+    gchar **args = parse_args(input, 3, 7, &result);
 
-        str = g_string_append(str, "autojoin");
-        result = str->str;
-        g_string_free(str, FALSE);
-        return result;
+    if (result && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
+        GString *beginning = g_string_new("/bookmark ");
+
+        if (g_strv_length(args) > 2) {
+            g_string_append(beginning, args[0]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+
+            if (g_strv_length(args) > 4) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[2]);
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[3]);
+
+                if (g_strv_length(args) > 6) {
+                    g_string_append(beginning, " ");
+                    g_string_append(beginning, args[4]);
+                    g_string_append(beginning, " ");
+                    g_string_append(beginning, args[5]);
+                }
+            }
+
+            found = autocomplete_param_with_ac(input, size, beginning->str, bookmark_property_ac);
+            g_string_free(beginning, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+        }
     }
 
-    result = autocomplete_param_with_func(input, size, "/bookmark remove", bookmark_find);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_func(input, size, "/bookmark remove", bookmark_find);
+    if (found != NULL) {
+        return found;
     }
-    result = autocomplete_param_with_func(input, size, "/bookmark join", bookmark_find);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_func(input, size, "/bookmark join", bookmark_find);
+    if (found != NULL) {
+        return found;
     }
-    result = autocomplete_param_with_func(input, size, "/bookmark update", bookmark_find);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_func(input, size, "/bookmark update", bookmark_find);
+    if (found != NULL) {
+        return found;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/bookmark", bookmark_ac);
-
-    return result;
+    found = autocomplete_param_with_ac(input, size, "/bookmark", bookmark_ac);
+    return found;
 }
 
 static char *
