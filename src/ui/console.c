@@ -32,6 +32,7 @@
 #include "command/command.h"
 #include "common.h"
 #include "log.h"
+#include "muc.h"
 #include "roster_list.h"
 #include "config/preferences.h"
 #include "config/theme.h"
@@ -651,11 +652,14 @@ _cons_show_bookmarks(const GList *list)
         cons_show("");
         cons_show("Bookmarks:");
 
-        /* TODO: show status (connected or not) and window number */
         while (list != NULL) {
             Bookmark *item = list->data;
 
             win_print_time(console, '-');
+
+            if (muc_room_is_active(item->jid)) {
+                wattron(console->win, COLOUR_ONLINE);
+            }
             wprintw(console->win, "  %s", item->jid);
             if (item->nick != NULL) {
                 wprintw(console->win, "/%s", item->nick);
@@ -665,6 +669,16 @@ _cons_show_bookmarks(const GList *list)
             }
             if (item->password != NULL) {
                 wprintw(console->win, " (private)");
+            }
+            if (muc_room_is_active(item->jid)) {
+                ProfWin *roomwin = wins_get_by_recipient(item->jid);
+                if (roomwin != NULL) {
+                    int num = wins_get_num(roomwin);
+                    wprintw(console->win, " (");
+                    wprintw(console->win, "%d", num);
+                    wprintw(console->win, ")");
+                }
+                wattroff(console->win, COLOUR_ONLINE);
             }
             wprintw(console->win, "\n");
             list = g_list_next(list);
