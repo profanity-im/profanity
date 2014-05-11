@@ -1803,32 +1803,48 @@ _autoconnect_autocomplete(char *input, int *size)
 static char *
 _otr_autocomplete(char *input, int *size)
 {
-    char *result = NULL;
+    char *found = NULL;
 
-    result = autocomplete_param_with_func(input, size, "/otr start", roster_find_contact);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_func(input, size, "/otr start", roster_find_contact);
+    if (found != NULL) {
+        return found;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/otr log", otr_log_ac);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_ac(input, size, "/otr log", otr_log_ac);
+    if (found != NULL) {
+        return found;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/otr policy", otr_policy_ac);
-    if (result != NULL) {
-        return result;
+    // /otr policy always user@server.com
+    gboolean result;
+    gchar **args = parse_args(input, 3, 3, &result);
+    if (result && (strcmp(args[0], "policy") == 0)) {
+        GString *beginning = g_string_new("/otr ");
+        g_string_append(beginning, args[0]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[1]);
+
+        found = autocomplete_param_with_func(input, size, beginning->str, roster_find_contact);
+        g_string_free(beginning, TRUE);
+        if (found != NULL) {
+            return found;
+        }
     }
 
-    result = autocomplete_param_with_func(input, size, "/otr warn",
+    found = autocomplete_param_with_ac(input, size, "/otr policy", otr_policy_ac);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, size, "/otr warn",
         prefs_autocomplete_boolean_choice);
-    if (result != NULL) {
-        return result;
+    if (found != NULL) {
+        return found;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/otr", otr_ac);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_ac(input, size, "/otr", otr_ac);
+    if (found != NULL) {
+        return found;
     }
 
     return NULL;
