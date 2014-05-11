@@ -220,10 +220,42 @@ _accounts_get_account(const char * const name)
             otr_policy = g_key_file_get_string(accounts, name, "otr.policy", NULL);
         }
 
+        gsize length;
+        GList *otr_manual = NULL;
+        gchar **manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
+        if (manual != NULL) {
+            int i = 0;
+            for (i = 0; i < length; i++) {
+                otr_manual = g_list_append(otr_manual, strdup(manual[i]));
+            }
+            g_strfreev(manual);
+        }
+
+        GList *otr_opportunistic = NULL;
+        gchar **opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
+        if (opportunistic != NULL) {
+            int i = 0;
+            for (i = 0; i < length; i++) {
+                otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
+            }
+            g_strfreev(opportunistic);
+        }
+
+        GList *otr_always = NULL;
+        gchar **always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
+        if (always != NULL) {
+            int i = 0;
+            for (i = 0; i < length; i++) {
+                otr_always = g_list_append(otr_always, strdup(always[i]));
+            }
+            g_strfreev(always);
+        }
+
         ProfAccount *new_account = account_new(name, jid, password, enabled,
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
-            priority_dnd, muc_service, muc_nick, otr_policy);
+            priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
+            otr_opportunistic, otr_always);
 
         g_free(jid);
         g_free(password);

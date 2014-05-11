@@ -2689,6 +2689,10 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             cons_show("OTR policy is now set to: %s", choice);
             return TRUE;
         } else {
+            if (jabber_get_connection_status() != JABBER_CONNECTED) {
+                cons_show("You must be connected to set the OTR policy for a contact.");
+                return TRUE;
+            }
             char *contact_jid = roster_barejid_from_name(contact);
             if (contact_jid == NULL) {
                 contact_jid = contact;

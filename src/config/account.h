@@ -43,6 +43,9 @@ typedef struct prof_account_t {
     gchar *muc_nick;
     gboolean enabled;
     gchar *otr_policy;
+    GList *otr_manual;
+    GList *otr_opportunistic;
+    GList *otr_always;
 } ProfAccount;
 
 ProfAccount* account_new(const gchar * const name, const gchar * const jid,
@@ -50,7 +53,9 @@ ProfAccount* account_new(const gchar * const name, const gchar * const jid,
     int port, const gchar * const resource, const gchar * const last_presence,
     const gchar * const login_presence, int priority_online, int priority_chat,
     int priority_away, int priority_xa, int priority_dnd,
-    const gchar * const muc_service, const gchar * const muc_nick, const gchar * const otr_policy);
+    const gchar * const muc_service, const gchar * const muc_nick,
+    const gchar * const otr_policy, GList *otr_manual, GList *otr_opportunistic,
+    GList *otr_always);
 
 char* account_create_full_jid(ProfAccount *account);
 

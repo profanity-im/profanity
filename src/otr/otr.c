@@ -519,15 +519,44 @@ _otr_get_their_fingerprint(const char * const recipient)
 static char *
 _otr_get_policy(const char * const recipient)
 {
-    // check account setting
     ProfAccount *account = accounts_get_account(jabber_get_account_name());
-    if (account->otr_policy != NULL) {
+    // check contact specific setting
+    if (g_list_find_custom(account->otr_manual, recipient, (GCompareFunc)g_strcmp0)) {
+        cons_debug("Using contact setting manual");
         account_free(account);
-        return account->otr_policy;
+        return "manual";
+    }
+    if (g_list_find_custom(account->otr_opportunistic, recipient, (GCompareFunc)g_strcmp0)) {
+        cons_debug("Using contact setting opportunistic");
+        account_free(account);
+        return "opportunistic";
+    }
+    if (g_list_find_custom(account->otr_always, recipient, (GCompareFunc)g_strcmp0)) {
+        cons_debug("Using contact setting always");
+        account_free(account);
+        return "always";
+    }
+
+    // check default account setting
+    if (account->otr_policy != NULL) {
+        cons_debug("Using account setting %s", account->otr_policy);
+        char *result;
+        if (g_strcmp0(account->otr_policy, "manual") == 0) {
+            result = "manual";
+        }
+        if (g_strcmp0(account->otr_policy, "opportunistic") == 0) {
+            result = "opportunistic";
+        }
+        if (g_strcmp0(account->otr_policy, "always") == 0) {
+            result = "always";
+        }
+        account_free(account);
+        return result;
     }
     account_free(account);
 
     // check global setting
+    cons_debug("Using global setting %s", prefs_get_string(PREF_OTR_POLICY));
     return prefs_get_string(PREF_OTR_POLICY);
 }
 
