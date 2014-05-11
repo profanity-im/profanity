@@ -227,7 +227,7 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     gboolean was_decrypted = FALSE;
     char *newmessage;
 
-    char *policy = prefs_get_string(PREF_OTR_POLICY);
+    char *policy = otr_get_policy(from);
     char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
 
     if (!priv) {

@@ -1004,7 +1004,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     cons_show_error("Failed to encrypt and send message,");
                 }
             } else {
-                char *policy = prefs_get_string(PREF_OTR_POLICY);
+                char *policy = otr_get_policy(usr_jid);
 
                 if (strcmp(policy, "always") == 0) {
                     cons_show_error("Failed to send message. Please check OTR policy");
