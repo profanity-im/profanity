@@ -519,11 +519,35 @@ _otr_get_their_fingerprint(const char * const recipient)
 static char *
 _otr_get_policy(const char * const recipient)
 {
-    // check account setting
     ProfAccount *account = accounts_get_account(jabber_get_account_name());
-    if (account->otr_policy != NULL) {
+    // check contact specific setting
+    if (g_list_find_custom(account->otr_manual, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);
-        return account->otr_policy;
+        return "manual";
+    }
+    if (g_list_find_custom(account->otr_opportunistic, recipient, (GCompareFunc)g_strcmp0)) {
+        account_free(account);
+        return "opportunistic";
+    }
+    if (g_list_find_custom(account->otr_always, recipient, (GCompareFunc)g_strcmp0)) {
+        account_free(account);
+        return "always";
+    }
+
+    // check default account setting
+    if (account->otr_policy != NULL) {
+        char *result;
+        if (g_strcmp0(account->otr_policy, "manual") == 0) {
+            result = "manual";
+        }
+        if (g_strcmp0(account->otr_policy, "opportunistic") == 0) {
+            result = "opportunistic";
+        }
+        if (g_strcmp0(account->otr_policy, "always") == 0) {
+            result = "always";
+        }
+        account_free(account);
+        return result;
     }
     account_free(account);
 

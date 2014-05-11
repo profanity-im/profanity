@@ -2680,15 +2680,18 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
         }
         return TRUE;
+
     } else if (strcmp(args[0], "warn") == 0) {
         gboolean result =  _cmd_set_boolean_preference(args[1], help,
             "OTR warning message", PREF_OTR_WARN);
         ui_current_update_virtual();
         return result;
+
     } else if (strcmp(args[0], "libver") == 0) {
         char *version = otr_libotr_version();
         cons_show("Using libotr version %s", version);
         return TRUE;
+
     } else if (strcmp(args[0], "policy") == 0) {
         if (args[1] == NULL) {
             char *policy = prefs_get_string(PREF_OTR_POLICY);
@@ -2697,19 +2700,31 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         }
 
         char *choice = args[1];
-        if (g_strcmp0(choice, "manual") == 0) {
-            prefs_set_string(PREF_OTR_POLICY, "manual");
-            cons_show("OTR policy is now set to: manual");
-        } else if (g_strcmp0(choice, "opportunistic") == 0) {
-            prefs_set_string(PREF_OTR_POLICY, "opportunistic");
-            cons_show("OTR policy is now set to: opportunistic");
-        } else if (g_strcmp0(choice, "always") == 0) {
-            prefs_set_string(PREF_OTR_POLICY, "always");
-            cons_show("OTR policy is now set to: always");
-        } else {
+        if ((g_strcmp0(choice, "manual") != 0) &&
+                (g_strcmp0(choice, "opportunistic") != 0) &&
+                (g_strcmp0(choice, "always") != 0)) {
             cons_show("OTR policy can be set to: manual, opportunistic or always.");
+            return TRUE;
         }
-        return TRUE;
+
+        char *contact = args[2];
+        if (contact == NULL) {
+            prefs_set_string(PREF_OTR_POLICY, choice);
+            cons_show("OTR policy is now set to: %s", choice);
+            return TRUE;
+        } else {
+            if (jabber_get_connection_status() != JABBER_CONNECTED) {
+                cons_show("You must be connected to set the OTR policy for a contact.");
+                return TRUE;
+            }
+            char *contact_jid = roster_barejid_from_name(contact);
+            if (contact_jid == NULL) {
+                contact_jid = contact;
+            }
+            accounts_add_otr_policy(jabber_get_account_name(), contact_jid, choice);
+            cons_show("OTR policy for %s set to: %s", contact_jid, choice);
+            return TRUE;
+        }
     }
 
     if (jabber_get_connection_status() != JABBER_CONNECTED) {
@@ -2721,6 +2736,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         ProfAccount *account = accounts_get_account(jabber_get_account_name());
         otr_keygen(account);
         return TRUE;
+
     } else if (strcmp(args[0], "myfp") == 0) {
         if (!otr_key_loaded()) {
             ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
@@ -2730,6 +2746,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             free(fingerprint);
         }
         return TRUE;
+
     } else if (strcmp(args[0], "theirfp") == 0) {
         win_type_t win_type = ui_current_win_type();
 
@@ -2744,6 +2761,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             free(fingerprint);
         }
         return TRUE;
+
     } else if (strcmp(args[0], "start") == 0) {
         if (args[1] != NULL) {
             char *contact = args[1];
@@ -2790,6 +2808,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
         }
         return TRUE;
+
     } else if (strcmp(args[0], "end") == 0) {
         win_type_t win_type = ui_current_win_type();
 
@@ -2803,6 +2822,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             otr_end_session(recipient);
         }
         return TRUE;
+
     } else if (strcmp(args[0], "trust") == 0) {
         win_type_t win_type = ui_current_win_type();
 
@@ -2816,6 +2836,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             otr_trust(recipient);
         }
         return TRUE;
+
     } else if (strcmp(args[0], "untrust") == 0) {
         win_type_t win_type = ui_current_win_type();
 
@@ -2829,6 +2850,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             otr_untrust(recipient);
         }
         return TRUE;
+
     } else if (strcmp(args[0], "secret") == 0) {
         win_type_t win_type = ui_current_win_type();
         if (win_type != WIN_CHAT) {
@@ -2845,6 +2867,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
         }
         return TRUE;
+
     } else if (strcmp(args[0], "question") == 0) {
         char *question = args[1];
         char *answer = args[2];
@@ -2864,6 +2887,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
             return TRUE;
         }
+
     } else if (strcmp(args[0], "answer") == 0) {
         win_type_t win_type = ui_current_win_type();
         if (win_type != WIN_CHAT) {
@@ -2880,6 +2904,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
         }
         return TRUE;
+
     } else {
         cons_show("Usage: %s", help.usage);
         return TRUE;
