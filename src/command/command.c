@@ -739,6 +739,7 @@ static struct cmd_t command_defs[] =
           "password         : Password for the account, note this is currently stored in plaintext if set.",
           "muc              : The default MUC chat service to use.",
           "nick             : The default nickname to use when joining chat rooms.",
+          "otr              : Override global OTR policy for this account: manual, opportunistic or always.",
           "",
           "The clear command may use one of the following for 'property'.",
           "password         : Clears the password for the account.",
