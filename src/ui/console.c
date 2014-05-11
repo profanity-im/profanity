@@ -885,6 +885,9 @@ _cons_show_account(ProfAccount *account)
     if (account->muc_nick != NULL) {
         cons_show   ("muc nick       : %s", account->muc_nick);
     }
+    if (account->otr_policy != NULL) {
+        cons_show   ("OTR policy     : %s", account->otr_policy);
+    }
     if (account->last_presence != NULL) {
         cons_show   ("Last presence  : %s", account->last_presence);
     }

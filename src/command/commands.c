@@ -269,8 +269,9 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     if ((g_strcmp0(value, "manual") != 0)
                             && (g_strcmp0(value, "opportunistic") != 0)
                             && (g_strcmp0(value, "always") != 0)) {
-                        cons_show("Invalid setting.");
+                        cons_show("OTR policy must be one of: manual, opportunistic or always.");
                     } else {
+                        accounts_set_otr_policy(account_name, value);
                         cons_show("Updated OTR policy for account %s: %s", account_name, value);
                         cons_show("");
                     }
