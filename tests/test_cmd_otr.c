@@ -325,7 +325,7 @@ void cmd_otr_gen_generates_key_for_connected_account(void **state)
     gchar *args[] = { "gen", NULL };
     char *account_name = "myaccount";
     ProfAccount *account = account_new(account_name, "me@jabber.org", NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
     stub_cons_show();
     mock_connection_status(JABBER_CONNECTED);

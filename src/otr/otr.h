@@ -63,4 +63,6 @@ char * (*otr_decrypt_message)(const char * const from, const char * const messag
 
 void (*otr_free_message)(char *message);
 
+char * (*otr_get_policy)(const char * const recipient);
+
 #endif

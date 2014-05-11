@@ -738,6 +738,7 @@ static struct cmd_t command_defs[] =
           "password         : Password for the account, note this is currently stored in plaintext if set.",
           "muc              : The default MUC chat service to use.",
           "nick             : The default nickname to use when joining chat rooms.",
+          "otr              : Override global OTR policy for this account: manual, opportunistic or always.",
           "",
           "The clear command may use one of the following for 'property'.",
           "password         : Clears the password for the account.",
@@ -962,6 +963,7 @@ cmd_init(void)
     autocomplete_add(prefs_ac, "log");
     autocomplete_add(prefs_ac, "conn");
     autocomplete_add(prefs_ac, "presence");
+    autocomplete_add(prefs_ac, "otr");
 
     notify_ac = autocomplete_new();
     autocomplete_add(notify_ac, "message");
@@ -1034,9 +1036,11 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "password");
     autocomplete_add(account_set_ac, "muc");
     autocomplete_add(account_set_ac, "nick");
+    autocomplete_add(account_set_ac, "otr");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
+    autocomplete_add(account_clear_ac, "otr");
 
     close_ac = autocomplete_new();
     autocomplete_add(close_ac, "read");
@@ -1381,7 +1385,7 @@ cmd_execute_default(const char * const inp)
                 char *plugin_message = plugins_on_message_send(recipient_jid, inp);
 
 #ifdef PROF_HAVE_LIBOTR
-                if ((strcmp(prefs_get_string(PREF_OTR_POLICY), "always") == 0) && !otr_is_secure(recipient)) {
+                if ((strcmp(otr_get_policy(recipient), "always") == 0) && !otr_is_secure(recipient)) {
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
                 }
@@ -2011,15 +2015,25 @@ _account_autocomplete(char *input, int *size)
     gboolean result = FALSE;
 
     input[*size] = '\0';
-    gchar **args = parse_args(input, 3, 3, &result);
+    gchar **args = parse_args(input, 3, 4, &result);
 
     if ((strncmp(input, "/account set", 12) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/account set ");
         g_string_append(beginning, args[1]);
-        found = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
-        g_string_free(beginning, TRUE);
-        if (found != NULL) {
-            return found;
+        if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "otr")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_ac(input, size, beginning->str, otr_policy_ac);
+            g_string_free(beginning, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+        } else {
+            found = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
+            g_string_free(beginning, TRUE);
+            if (found != NULL) {
+                return found;
+            }
         }
     }
 

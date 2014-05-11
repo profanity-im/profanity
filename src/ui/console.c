@@ -885,6 +885,9 @@ _cons_show_account(ProfAccount *account)
     if (account->muc_nick != NULL) {
         cons_show   ("muc nick       : %s", account->muc_nick);
     }
+    if (account->otr_policy != NULL) {
+        cons_show   ("OTR policy     : %s", account->otr_policy);
+    }
     if (account->last_presence != NULL) {
         cons_show   ("Last presence  : %s", account->last_presence);
     }
@@ -1075,9 +1078,9 @@ _cons_statuses_setting(void)
     char *chat = prefs_get_string(PREF_STATUSES_CHAT);
     char *muc = prefs_get_string(PREF_STATUSES_MUC);
 
-    cons_show("Console statuses (/statuses)   : %s", console);
-    cons_show("Chat win statuses (/statuses)  : %s", chat);
-    cons_show("Chat room statuses (/statuses) : %s", muc);
+    cons_show("Console statuses (/statuses)  : %s", console);
+    cons_show("Chat statuses (/statuses)     : %s", chat);
+    cons_show("MUC statuses (/statuses)      : %s", muc);
 }
 
 static void
@@ -1087,16 +1090,6 @@ _cons_titlebar_setting(void)
         cons_show("Titlebar display (/titlebar)  : ON");
     } else {
         cons_show("Titlebar display (/titlebar)  : OFF");
-    }
-}
-
-static void
-_cons_otrwarn_setting(void)
-{
-    if (prefs_get_boolean(PREF_OTR_WARN)) {
-        cons_show("Warn non-OTR (/otr warn)      : ON");
-    } else {
-        cons_show("Warn non-OTR (/otr warn)      : OFF");
     }
 }
 
@@ -1114,7 +1107,6 @@ _cons_show_ui_prefs(void)
     cons_mouse_setting();
     cons_statuses_setting();
     cons_titlebar_setting();
-    cons_otrwarn_setting();
 
     if (wins_is_current(console)) {
         win_update_virtual(console);
@@ -1272,20 +1264,6 @@ _cons_grlog_setting(void)
 }
 
 static void
-_cons_otr_log_setting(void)
-{
-    char *value = prefs_get_string(PREF_OTR_LOG);
-
-    if (strcmp(value, "on") == 0) {
-        cons_show("OTR logging (/otr log)      : ON");
-    } else if (strcmp(value, "off") == 0) {
-        cons_show("OTR logging (/otr log)      : OFF");
-    } else {
-        cons_show("OTR logging (/otr log)      : Redacted");
-    }
-}
-
-static void
 _cons_show_log_prefs(void)
 {
     ProfWin *console = wins_get_console();
@@ -1294,7 +1272,6 @@ _cons_show_log_prefs(void)
     cons_log_setting();
     cons_chlog_setting();
     cons_grlog_setting();
-    cons_otr_log_setting();
 
     if (wins_is_current(console)) {
         win_update_virtual(console);
@@ -1391,6 +1368,38 @@ _cons_show_connection_prefs(void)
 }
 
 static void
+_cons_show_otr_prefs(void)
+{
+    ProfWin *console = wins_get_console();
+    cons_show("OTR preferences:");
+    cons_show("");
+
+    char *policy_value = prefs_get_string(PREF_OTR_POLICY);
+    cons_show("OTR policy (/otr policy) : %s", policy_value);
+
+    if (prefs_get_boolean(PREF_OTR_WARN)) {
+        cons_show("Warn non-OTR (/otr warn) : ON");
+    } else {
+        cons_show("Warn non-OTR (/otr warn) : OFF");
+    }
+
+    char *log_value = prefs_get_string(PREF_OTR_LOG);
+
+    if (strcmp(log_value, "on") == 0) {
+        cons_show("OTR logging (/otr log)   : ON");
+    } else if (strcmp(log_value, "off") == 0) {
+        cons_show("OTR logging (/otr log)   : OFF");
+    } else {
+        cons_show("OTR logging (/otr log)   : Redacted");
+    }
+
+    if (wins_is_current(console)) {
+        win_update_virtual(console);
+    }
+    cons_alert();
+}
+
+static void
 _cons_show_themes(GSList *themes)
 {
     ProfWin *console = wins_get_console();
@@ -1428,6 +1437,8 @@ _cons_prefs(void)
     cons_show_presence_prefs();
     cons_show("");
     cons_show_connection_prefs();
+    cons_show("");
+    cons_show_otr_prefs();
     cons_show("");
 
     if (wins_is_current(console)) {
@@ -1767,11 +1778,10 @@ console_init_module(void)
     cons_log_setting = _cons_log_setting;
     cons_chlog_setting = _cons_chlog_setting;
     cons_grlog_setting = _cons_grlog_setting;
-    cons_otr_log_setting = _cons_otr_log_setting;
-    cons_otrwarn_setting = _cons_otrwarn_setting;
     cons_show_log_prefs = _cons_show_log_prefs;
     cons_autoaway_setting = _cons_autoaway_setting;
     cons_show_presence_prefs = _cons_show_presence_prefs;
+    cons_show_otr_prefs = _cons_show_otr_prefs;
     cons_reconnect_setting = _cons_reconnect_setting;
     cons_autoping_setting = _cons_autoping_setting;
     cons_priority_setting = _cons_priority_setting;

@@ -52,6 +52,7 @@ void (*accounts_set_resource)(const char * const account_name, const char * cons
 void (*accounts_set_password)(const char * const account_name, const char * const value);
 void (*accounts_set_muc_service)(const char * const account_name, const char * const value);
 void (*accounts_set_muc_nick)(const char * const account_name, const char * const value);
+void (*accounts_set_otr_policy)(const char * const account_name, const char * const value);
 void (*accounts_set_last_presence)(const char * const account_name, const char * const value);
 void (*accounts_set_login_presence)(const char * const account_name, const char * const value);
 resource_presence_t (*accounts_get_login_presence)(const char * const account_name);
@@ -65,5 +66,6 @@ void (*accounts_set_priority_all)(const char * const account_name, const gint va
 gint (*accounts_get_priority_for_presence_type)(const char * const account_name,
     resource_presence_t presence_type);
 void (*accounts_clear_password)(const char * const account_name);
+void (*accounts_clear_otr)(const char * const account_name);
 
 #endif

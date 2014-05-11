@@ -50,7 +50,8 @@ static gchar *string_keys[] = {
     "presence.last",
     "presence.login",
     "muc.service",
-    "muc.nick"
+    "muc.nick",
+    "otr.policy"
 };
 
 static void _fix_legacy_accounts(const char * const account_name);
@@ -212,10 +213,15 @@ _accounts_get_account(const char * const name)
         gchar *muc_service = g_key_file_get_string(accounts, name, "muc.service", NULL);
         gchar *muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
 
+        gchar *otr_policy = NULL;
+        if (g_key_file_has_key(accounts, name, "otr.policy", NULL)) {
+            otr_policy = g_key_file_get_string(accounts, name, "otr.policy", NULL);
+        }
+
         ProfAccount *new_account = account_new(name, jid, password, enabled,
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
-            priority_dnd, muc_service, muc_nick);
+            priority_dnd, muc_service, muc_nick, otr_policy);
 
         g_free(jid);
         g_free(password);
@@ -225,6 +231,7 @@ _accounts_get_account(const char * const name)
         g_free(login_presence);
         g_free(muc_service);
         g_free(muc_nick);
+        g_free(otr_policy);
 
         return new_account;
     }
@@ -383,6 +390,15 @@ _accounts_clear_password(const char * const account_name)
 }
 
 static void
+_accounts_clear_otr(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "otr.policy", NULL);
+        _save_accounts();
+    }
+}
+
+static void
 _accounts_set_muc_service(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
@@ -396,6 +412,15 @@ _accounts_set_muc_nick(const char * const account_name, const char * const value
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "muc.nick", value);
+        _save_accounts();
+    }
+}
+
+static void
+_accounts_set_otr_policy(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "otr.policy", value);
         _save_accounts();
     }
 }
@@ -660,6 +685,7 @@ accounts_init_module(void)
     accounts_set_password = _accounts_set_password;
     accounts_set_muc_service = _accounts_set_muc_service;
     accounts_set_muc_nick = _accounts_set_muc_nick;
+    accounts_set_otr_policy = _accounts_set_otr_policy;
     accounts_set_last_presence = _accounts_set_last_presence;
     accounts_set_login_presence = _accounts_set_login_presence;
     accounts_get_last_presence = _accounts_get_last_presence;
@@ -672,5 +698,6 @@ accounts_init_module(void)
     accounts_set_priority_all = _accounts_set_priority_all;
     accounts_get_priority_for_presence_type = _accounts_get_priority_for_presence_type;
     accounts_clear_password = _accounts_clear_password;
+    accounts_clear_otr = _accounts_clear_otr;
 }
 

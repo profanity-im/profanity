@@ -32,6 +32,7 @@
 #include "roster_list.h"
 #include "contact.h"
 #include "ui/ui.h"
+#include "config/preferences.h"
 
 #define PRESENCE_ONLINE 1
 #define PRESENCE_OFFLINE 0
@@ -516,6 +517,21 @@ _otr_get_their_fingerprint(const char * const recipient)
 }
 
 static char *
+_otr_get_policy(const char * const recipient)
+{
+    // check account setting
+    ProfAccount *account = accounts_get_account(jabber_get_account_name());
+    if (account->otr_policy != NULL) {
+        account_free(account);
+        return account->otr_policy;
+    }
+    account_free(account);
+
+    // check global setting
+    return prefs_get_string(PREF_OTR_POLICY);
+}
+
+static char *
 _otr_encrypt_message(const char * const to, const char * const message)
 {
     char *newmessage = NULL;
@@ -596,4 +612,5 @@ otr_init_module(void)
     otr_smp_secret = _otr_smp_secret;
     otr_smp_question = _otr_smp_question;
     otr_smp_answer = _otr_smp_answer;
+    otr_get_policy = _otr_get_policy;
 }

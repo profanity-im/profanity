@@ -34,7 +34,7 @@ account_new(const gchar * const name, const gchar * const jid,
     int port, const gchar * const resource, const gchar * const last_presence,
     const gchar * const login_presence, int priority_online, int priority_chat,
     int priority_away, int priority_xa, int priority_dnd,
-    const gchar * const muc_service, const gchar * const muc_nick)
+    const gchar * const muc_service, const gchar * const muc_nick, const gchar * const otr_policy)
 {
     ProfAccount *new_account = malloc(sizeof(ProfAccount));
 
@@ -111,6 +111,12 @@ account_new(const gchar * const name, const gchar * const jid,
         new_account->muc_nick = strdup(muc_nick);
     }
 
+    if (otr_policy != NULL) {
+        new_account->otr_policy = strdup(otr_policy);
+    } else {
+        new_account->otr_policy = NULL;
+    }
+
     return new_account;
 }
 
@@ -137,7 +143,7 @@ account_free(ProfAccount *account)
         free(account->login_presence);
         free(account->muc_service);
         free(account->muc_nick);
+        free(account->otr_policy);
         free(account);
     }
 }
-

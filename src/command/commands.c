@@ -266,6 +266,16 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_set_muc_nick(account_name, value);
                     cons_show("Updated muc nick for account %s: %s", account_name, value);
                     cons_show("");
+                } else if (strcmp(property, "otr") == 0) {
+                    if ((g_strcmp0(value, "manual") != 0)
+                            && (g_strcmp0(value, "opportunistic") != 0)
+                            && (g_strcmp0(value, "always") != 0)) {
+                        cons_show("OTR policy must be one of: manual, opportunistic or always.");
+                    } else {
+                        accounts_set_otr_policy(account_name, value);
+                        cons_show("Updated OTR policy for account %s: %s", account_name, value);
+                        cons_show("");
+                    }
                 } else if (strcmp(property, "status") == 0) {
                     if (!valid_resource_presence_string(value) && (strcmp(value, "last") != 0)) {
                         cons_show("Invalid status: %s", value);
@@ -331,6 +341,10 @@ cmd_account(gchar **args, struct cmd_help_t help)
                 if (strcmp(property, "password") == 0) {
                     accounts_clear_password(account_name);
                     cons_show("Removed password for account %s", account_name);
+                    cons_show("");
+                } else if (strcmp(property, "otr") == 0) {
+                    accounts_clear_otr(account_name);
+                    cons_show("OTR policy removed for account %s", account_name);
                     cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);
@@ -653,6 +667,10 @@ cmd_prefs(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "presence") == 0) {
         cons_show("");
         cons_show_presence_prefs();
+        cons_show("");
+    } else if (strcmp(args[0], "otr") == 0) {
+        cons_show("");
+        cons_show_otr_prefs();
         cons_show("");
     } else {
         cons_show("Usage: %s", help.usage);
@@ -992,7 +1010,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     cons_show_error("Failed to encrypt and send message,");
                 }
             } else {
-                char *policy = prefs_get_string(PREF_OTR_POLICY);
+                char *policy = otr_get_policy(usr_jid);
 
                 if (strcmp(policy, "always") == 0) {
                     cons_show_error("Failed to send message. Please check OTR policy");
