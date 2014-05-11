@@ -390,6 +390,15 @@ _accounts_clear_password(const char * const account_name)
 }
 
 static void
+_accounts_clear_otr(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "otr.policy", NULL);
+        _save_accounts();
+    }
+}
+
+static void
 _accounts_set_muc_service(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
@@ -689,5 +698,6 @@ accounts_init_module(void)
     accounts_set_priority_all = _accounts_set_priority_all;
     accounts_get_priority_for_presence_type = _accounts_get_priority_for_presence_type;
     accounts_clear_password = _accounts_clear_password;
+    accounts_clear_otr = _accounts_clear_otr;
 }
 
