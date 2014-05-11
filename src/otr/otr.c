@@ -519,6 +519,14 @@ _otr_get_their_fingerprint(const char * const recipient)
 static char *
 _otr_get_policy(const char * const recipient)
 {
+    // check account setting
+    ProfAccount *account = accounts_get_account(jabber_get_account_name());
+    if (account->otr_policy != NULL) {
+        account_free(account);
+        return account->otr_policy;
+    }
+    account_free(account);
+
     // check global setting
     return prefs_get_string(PREF_OTR_POLICY);
 }
