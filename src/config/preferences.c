@@ -45,7 +45,7 @@
 #define PREF_GROUP_PRESENCE "presence"
 #define PREF_GROUP_CONNECTION "connection"
 #define PREF_GROUP_ALIAS "alias"
-#define PREF_GROUP_OTR_POLICY "policy"
+#define PREF_GROUP_OTR "otr"
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;
@@ -78,6 +78,27 @@ prefs_load(void)
         log_maxsize = 0;
         g_error_free(err);
     }
+
+    // move pre 0.4.1 OTR preferences to [otr] group
+    err = NULL;
+    gboolean ui_otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
+    if (!err) {
+        g_key_file_set_boolean(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_WARN), ui_otr_warn);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "otr.warn", NULL);
+    }
+    err = NULL;
+    gchar *ui_otr_log = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "otr", &err);
+    if (!err) {
+        g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_LOG), ui_otr_log);
+        g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "otr", NULL);
+    }
+    err = NULL;
+    gchar *ui_otr_policy = g_key_file_get_string(prefs, "policy", "otr.policy", &err);
+    if (!err) {
+        g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_POLICY), ui_otr_policy);
+        g_key_file_remove_group(prefs, "policy", NULL);
+    }
+    _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
     autocomplete_add(boolean_choice_ac, "on");
@@ -374,7 +395,6 @@ _get_group(preference_t pref)
         case PREF_STATUSES_CONSOLE:
         case PREF_STATUSES_CHAT:
         case PREF_STATUSES_MUC:
-        case PREF_OTR_WARN:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -386,18 +406,19 @@ _get_group(preference_t pref)
             return PREF_GROUP_NOTIFICATIONS;
         case PREF_CHLOG:
         case PREF_GRLOG:
-        case PREF_OTR_LOG:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
             return PREF_GROUP_LOGGING;
-        case PREF_OTR_POLICY:
-            return PREF_GROUP_OTR_POLICY;
         case PREF_AUTOAWAY_CHECK:
         case PREF_AUTOAWAY_MODE:
         case PREF_AUTOAWAY_MESSAGE:
             return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
             return PREF_GROUP_CONNECTION;
+        case PREF_OTR_WARN:
+        case PREF_OTR_LOG:
+        case PREF_OTR_POLICY:
+            return PREF_GROUP_OTR;
         default:
             return NULL;
     }
@@ -459,11 +480,11 @@ _get_key(preference_t pref)
         case PREF_CONNECT_ACCOUNT:
             return "account";
         case PREF_OTR_LOG:
-            return "otr";
+            return "log";
         case PREF_OTR_WARN:
-            return "otr.warn";
+            return "warn";
         case PREF_OTR_POLICY:
-            return "otr.policy";
+            return "policy";
         case PREF_LOG_ROTATE:
             return "rotate";
         case PREF_LOG_SHARED:
