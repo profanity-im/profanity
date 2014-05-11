@@ -862,39 +862,77 @@ _cons_show_account(ProfAccount *account)
     cons_show("");
     cons_show("Account %s:", account->name);
     if (account->enabled) {
-        cons_show   ("enabled        : TRUE");
+        cons_show   ("enabled           : TRUE");
     } else {
-        cons_show   ("enabled        : FALSE");
+        cons_show   ("enabled           : FALSE");
     }
-    cons_show       ("jid            : %s", account->jid);
+    cons_show       ("jid               : %s", account->jid);
     if (account->password != NULL) {
-        cons_show       ("password       : [redacted]");
+        cons_show   ("password          : [redacted]");
     }
     if (account->resource != NULL) {
-        cons_show   ("resource       : %s", account->resource);
+        cons_show   ("resource          : %s", account->resource);
     }
     if (account->server != NULL) {
-        cons_show   ("server         : %s", account->server);
+        cons_show   ("server            : %s", account->server);
     }
     if (account->port != 0) {
-        cons_show   ("port           : %d", account->port);
+        cons_show   ("port              : %d", account->port);
     }
     if (account->muc_service != NULL) {
-        cons_show   ("muc service    : %s", account->muc_service);
+        cons_show   ("muc service       : %s", account->muc_service);
     }
     if (account->muc_nick != NULL) {
-        cons_show   ("muc nick       : %s", account->muc_nick);
-    }
-    if (account->otr_policy != NULL) {
-        cons_show   ("OTR policy     : %s", account->otr_policy);
+        cons_show   ("muc nick          : %s", account->muc_nick);
     }
     if (account->last_presence != NULL) {
-        cons_show   ("Last presence  : %s", account->last_presence);
+        cons_show   ("Last presence     : %s", account->last_presence);
     }
     if (account->login_presence != NULL) {
-        cons_show   ("Login presence : %s", account->login_presence);
+        cons_show   ("Login presence    : %s", account->login_presence);
     }
-    cons_show       ("Priority       : chat:%d, online:%d, away:%d, xa:%d, dnd:%d",
+
+    if (account->otr_policy != NULL) {
+        cons_show   ("OTR policy        : %s", account->otr_policy);
+    }
+    if (g_list_length(account->otr_manual) > 0) {
+        GString *manual = g_string_new("OTR manual        : ");
+        GList *curr = account->otr_manual;
+        while (curr != NULL) {
+            g_string_append(manual, curr->data);
+            if (curr->next != NULL) {
+                g_string_append(manual, ", ");
+            }
+            curr = curr->next;
+        }
+        cons_show(manual->str);
+    }
+    if (g_list_length(account->otr_opportunistic) > 0) {
+        GString *opportunistic = g_string_new("OTR opportunistic : ");
+        GList *curr = account->otr_opportunistic;
+        while (curr != NULL) {
+            g_string_append(opportunistic, curr->data);
+            if (curr->next != NULL) {
+                g_string_append(opportunistic, ", ");
+            }
+            curr = curr->next;
+        }
+        cons_show(opportunistic->str);
+    }
+    if (g_list_length(account->otr_always) > 0) {
+        GString *always = g_string_new("OTR always        : ");
+        GList *curr = account->otr_always;
+        while (curr != NULL) {
+            g_string_append(always, curr->data);
+            if (curr->next != NULL) {
+                g_string_append(always, ", ");
+            }
+            curr = curr->next;
+        }
+        cons_show(always->str);
+    }
+
+    cons_show       ("Priority          : chat:%d, online:%d, away:%d, xa:%d, dnd:%d",
         account->priority_chat, account->priority_online, account->priority_away,
         account->priority_xa, account->priority_dnd);
 
