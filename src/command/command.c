@@ -1028,6 +1028,7 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "password");
     autocomplete_add(account_set_ac, "muc");
     autocomplete_add(account_set_ac, "nick");
+    autocomplete_add(account_set_ac, "otr");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -1979,15 +1980,25 @@ _account_autocomplete(char *input, int *size)
     gboolean result = FALSE;
 
     input[*size] = '\0';
-    gchar **args = parse_args(input, 3, 3, &result);
+    gchar **args = parse_args(input, 3, 4, &result);
 
     if ((strncmp(input, "/account set", 12) == 0) && (result == TRUE)) {
         GString *beginning = g_string_new("/account set ");
         g_string_append(beginning, args[1]);
-        found = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
-        g_string_free(beginning, TRUE);
-        if (found != NULL) {
-            return found;
+        if ((g_strv_length(args) > 3) && (g_strcmp0(args[2], "otr")) == 0) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            found = autocomplete_param_with_ac(input, size, beginning->str, otr_policy_ac);
+            g_string_free(beginning, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+        } else {
+            found = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac);
+            g_string_free(beginning, TRUE);
+            if (found != NULL) {
+                return found;
+            }
         }
     }
 

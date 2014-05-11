@@ -265,6 +265,15 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_set_muc_nick(account_name, value);
                     cons_show("Updated muc nick for account %s: %s", account_name, value);
                     cons_show("");
+                } else if (strcmp(property, "otr") == 0) {
+                    if ((g_strcmp0(value, "manual") != 0)
+                            && (g_strcmp0(value, "opportunistic") != 0)
+                            && (g_strcmp0(value, "always") != 0)) {
+                        cons_show("Invalid setting.");
+                    } else {
+                        cons_show("Updated OTR policy for account %s: %s", account_name, value);
+                        cons_show("");
+                    }
                 } else if (strcmp(property, "status") == 0) {
                     if (!valid_resource_presence_string(value) && (strcmp(value, "last") != 0)) {
                         cons_show("Invalid status: %s", value);
