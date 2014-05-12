@@ -906,6 +906,7 @@ _cons_show_account(ProfAccount *account)
             curr = curr->next;
         }
         cons_show(manual->str);
+        g_string_free(manual, TRUE);
     }
     if (g_list_length(account->otr_opportunistic) > 0) {
         GString *opportunistic = g_string_new("OTR opportunistic : ");
@@ -918,6 +919,7 @@ _cons_show_account(ProfAccount *account)
             curr = curr->next;
         }
         cons_show(opportunistic->str);
+        g_string_free(opportunistic, TRUE);
     }
     if (g_list_length(account->otr_always) > 0) {
         GString *always = g_string_new("OTR always        : ");
@@ -930,6 +932,7 @@ _cons_show_account(ProfAccount *account)
             curr = curr->next;
         }
         cons_show(always->str);
+        g_string_free(always, TRUE);
     }
 
     cons_show       ("Priority          : chat:%d, online:%d, away:%d, xa:%d, dnd:%d",
