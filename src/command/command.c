@@ -1665,21 +1665,21 @@ _bookmark_autocomplete(char *input, int *size)
 
     gboolean result;
     gchar **args = parse_args(input, 3, 8, &result);
+    gboolean handle_options = result && (g_strv_length(args) > 2);
 
-    if (result && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
-        GString *beginning = g_string_new("/bookmark ");
+    if (handle_options && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
+        GString *beginning = g_string_new("/bookmark");
         gboolean autojoin = FALSE;
         int num_args = g_strv_length(args);
 
-        if (num_args > 2) {
-            g_string_append(beginning, args[0]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[0]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[1]);
+        if (num_args == 4 && g_strcmp0(args[2], "autojoin") == 0) {
             g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-            if (num_args == 4 && g_strcmp0(args[2], "autojoin") == 0) {
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[2]);
-                autojoin = TRUE;
-            }
+            g_string_append(beginning, args[2]);
+            autojoin = TRUE;
         }
 
         if (num_args > 4) {
@@ -1706,16 +1706,14 @@ _bookmark_autocomplete(char *input, int *size)
             }
         }
 
-        if (num_args > 2) {
-            if (autojoin) {
-                found = autocomplete_param_with_func(input, size, beginning->str, prefs_autocomplete_boolean_choice);
-            } else {
-                found = autocomplete_param_with_ac(input, size, beginning->str, bookmark_property_ac);
-            }
-            g_string_free(beginning, TRUE);
-            if (found != NULL) {
-                return found;
-            }
+        if (autojoin) {
+            found = autocomplete_param_with_func(input, size, beginning->str, prefs_autocomplete_boolean_choice);
+        } else {
+            found = autocomplete_param_with_ac(input, size, beginning->str, bookmark_property_ac);
+        }
+        g_string_free(beginning, TRUE);
+        if (found != NULL) {
+            return found;
         }
     }
 
