@@ -1538,15 +1538,39 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
-        _autoaway_autocomplete, _theme_autocomplete, _log_autocomplete,
-        _account_autocomplete, _roster_autocomplete, _group_autocomplete,
-        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
-        _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete,
-        _join_autocomplete };
+    GHashTable *ac_funcs = g_hash_table_new(g_str_hash, g_str_equal);
+    g_hash_table_insert(ac_funcs, "/who",           _who_autocomplete);
+    g_hash_table_insert(ac_funcs, "/sub",           _sub_autocomplete);
+    g_hash_table_insert(ac_funcs, "/notify",        _notify_autocomplete);
+    g_hash_table_insert(ac_funcs, "/autoaway",      _autoaway_autocomplete);
+    g_hash_table_insert(ac_funcs, "/theme",         _theme_autocomplete);
+    g_hash_table_insert(ac_funcs, "/log",           _log_autocomplete);
+    g_hash_table_insert(ac_funcs, "/account",       _account_autocomplete);
+    g_hash_table_insert(ac_funcs, "/roster",        _roster_autocomplete);
+    g_hash_table_insert(ac_funcs, "/group",         _group_autocomplete);
+    g_hash_table_insert(ac_funcs, "/bookmark",      _bookmark_autocomplete);
+    g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
+    g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
+    g_hash_table_insert(ac_funcs, "/connect",       _connect_autocomplete);
+    g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
+    g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
+    g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
 
-    for (i = 0; i < ARRAY_SIZE(acs); i++) {
-        result = acs[i](input, size);
+    char parsed[*size+1];
+    i = 0;
+    while (i < *size) {
+        if (input[i] == ' ') {
+            break;
+        } else {
+            parsed[i] = input[i];
+        }
+        i++;
+    }
+    parsed[i] = '\0';
+
+    char * (*ac_func)(char *, int *) = g_hash_table_lookup(ac_funcs, parsed);
+    if (ac_func != NULL) {
+        result = ac_func(input, size);
         if (result != NULL) {
             ui_replace_input(input, result, size);
             g_free(result);
