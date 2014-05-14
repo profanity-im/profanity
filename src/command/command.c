@@ -1571,15 +1571,39 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    autocompleter acs[] = { _who_autocomplete, _sub_autocomplete, _notify_autocomplete,
-        _autoaway_autocomplete, _theme_autocomplete, _log_autocomplete,
-        _account_autocomplete, _roster_autocomplete, _group_autocomplete,
-        _bookmark_autocomplete, _autoconnect_autocomplete, _otr_autocomplete,
-        _connect_autocomplete, _statuses_autocomplete, _alias_autocomplete,
-        _join_autocomplete };
+    GHashTable *ac_funcs = g_hash_table_new(g_str_hash, g_str_equal);
+    g_hash_table_insert(ac_funcs, "/who",           _who_autocomplete);
+    g_hash_table_insert(ac_funcs, "/sub",           _sub_autocomplete);
+    g_hash_table_insert(ac_funcs, "/notify",        _notify_autocomplete);
+    g_hash_table_insert(ac_funcs, "/autoaway",      _autoaway_autocomplete);
+    g_hash_table_insert(ac_funcs, "/theme",         _theme_autocomplete);
+    g_hash_table_insert(ac_funcs, "/log",           _log_autocomplete);
+    g_hash_table_insert(ac_funcs, "/account",       _account_autocomplete);
+    g_hash_table_insert(ac_funcs, "/roster",        _roster_autocomplete);
+    g_hash_table_insert(ac_funcs, "/group",         _group_autocomplete);
+    g_hash_table_insert(ac_funcs, "/bookmark",      _bookmark_autocomplete);
+    g_hash_table_insert(ac_funcs, "/autoconnect",   _autoconnect_autocomplete);
+    g_hash_table_insert(ac_funcs, "/otr",           _otr_autocomplete);
+    g_hash_table_insert(ac_funcs, "/connect",       _connect_autocomplete);
+    g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
+    g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
+    g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
 
-    for (i = 0; i < ARRAY_SIZE(acs); i++) {
-        result = acs[i](input, size);
+    char parsed[*size+1];
+    i = 0;
+    while (i < *size) {
+        if (input[i] == ' ') {
+            break;
+        } else {
+            parsed[i] = input[i];
+        }
+        i++;
+    }
+    parsed[i] = '\0';
+
+    char * (*ac_func)(char *, int *) = g_hash_table_lookup(ac_funcs, parsed);
+    if (ac_func != NULL) {
+        result = ac_func(input, size);
         if (result != NULL) {
             ui_replace_input(input, result, size);
             g_free(result);
@@ -1653,35 +1677,56 @@ _bookmark_autocomplete(char *input, int *size)
     char *found = NULL;
 
     gboolean result;
-    gchar **args = parse_args(input, 3, 7, &result);
+    gchar **args = parse_args(input, 3, 8, &result);
+    gboolean handle_options = result && (g_strv_length(args) > 2);
 
-    if (result && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
-        GString *beginning = g_string_new("/bookmark ");
+    if (handle_options && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
+        GString *beginning = g_string_new("/bookmark");
+        gboolean autojoin = FALSE;
+        int num_args = g_strv_length(args);
 
-        if (g_strv_length(args) > 2) {
-            g_string_append(beginning, args[0]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[0]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[1]);
+        if (num_args == 4 && g_strcmp0(args[2], "autojoin") == 0) {
             g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
+            g_string_append(beginning, args[2]);
+            autojoin = TRUE;
+        }
 
-            if (g_strv_length(args) > 4) {
+        if (num_args > 4) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[3]);
+            if (num_args == 6 && g_strcmp0(args[4], "autojoin") == 0) {
                 g_string_append(beginning, " ");
-                g_string_append(beginning, args[2]);
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[3]);
-
-                if (g_strv_length(args) > 6) {
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[4]);
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[5]);
-                }
+                g_string_append(beginning, args[4]);
+                autojoin = TRUE;
             }
+        }
 
+        if (num_args > 6) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[4]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[5]);
+            if (num_args == 8 && g_strcmp0(args[6], "autojoin") == 0) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[6]);
+                autojoin = TRUE;
+            }
+        }
+
+        if (autojoin) {
+            found = autocomplete_param_with_func(input, size, beginning->str, prefs_autocomplete_boolean_choice);
+        } else {
             found = autocomplete_param_with_ac(input, size, beginning->str, bookmark_property_ac);
-            g_string_free(beginning, TRUE);
-            if (found != NULL) {
-                return found;
-            }
+        }
+        g_string_free(beginning, TRUE);
+        if (found != NULL) {
+            return found;
         }
     }
 
