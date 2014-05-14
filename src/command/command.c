@@ -1680,31 +1680,33 @@ _bookmark_autocomplete(char *input, int *size)
                 g_string_append(beginning, args[2]);
                 autojoin = TRUE;
             }
+        }
 
-            if (num_args > 4) {
+        if (num_args > 4) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[2]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[3]);
+            if (num_args == 6 && g_strcmp0(args[4], "autojoin") == 0) {
                 g_string_append(beginning, " ");
-                g_string_append(beginning, args[2]);
-                g_string_append(beginning, " ");
-                g_string_append(beginning, args[3]);
-                if (num_args == 6 && g_strcmp0(args[4], "autojoin") == 0) {
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[4]);
-                    autojoin = TRUE;
-                }
-
-                if (num_args > 6) {
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[4]);
-                    g_string_append(beginning, " ");
-                    g_string_append(beginning, args[5]);
-                    if (num_args == 8 && g_strcmp0(args[6], "autojoin") == 0) {
-                        g_string_append(beginning, " ");
-                        g_string_append(beginning, args[6]);
-                        autojoin = TRUE;
-                    }
-                }
+                g_string_append(beginning, args[4]);
+                autojoin = TRUE;
             }
+        }
 
+        if (num_args > 6) {
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[4]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[5]);
+            if (num_args == 8 && g_strcmp0(args[6], "autojoin") == 0) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[6]);
+                autojoin = TRUE;
+            }
+        }
+
+        if (num_args > 2) {
             if (autojoin) {
                 found = autocomplete_param_with_func(input, size, beginning->str, prefs_autocomplete_boolean_choice);
             } else {
