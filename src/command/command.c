@@ -1664,31 +1664,52 @@ _bookmark_autocomplete(char *input, int *size)
     char *found = NULL;
 
     gboolean result;
-    gchar **args = parse_args(input, 3, 7, &result);
+    gchar **args = parse_args(input, 3, 8, &result);
 
     if (result && ((strcmp(args[0], "add") == 0) || (strcmp(args[0], "update") == 0)) ) {
         GString *beginning = g_string_new("/bookmark ");
+        gboolean autojoin = FALSE;
+        int num_args = g_strv_length(args);
 
-        if (g_strv_length(args) > 2) {
+        if (num_args > 2) {
             g_string_append(beginning, args[0]);
             g_string_append(beginning, " ");
             g_string_append(beginning, args[1]);
+            if (num_args == 4 && g_strcmp0(args[2], "autojoin") == 0) {
+                g_string_append(beginning, " ");
+                g_string_append(beginning, args[2]);
+                autojoin = TRUE;
+            }
 
-            if (g_strv_length(args) > 4) {
+            if (num_args > 4) {
                 g_string_append(beginning, " ");
                 g_string_append(beginning, args[2]);
                 g_string_append(beginning, " ");
                 g_string_append(beginning, args[3]);
+                if (num_args == 6 && g_strcmp0(args[4], "autojoin") == 0) {
+                    g_string_append(beginning, " ");
+                    g_string_append(beginning, args[4]);
+                    autojoin = TRUE;
+                }
 
-                if (g_strv_length(args) > 6) {
+                if (num_args > 6) {
                     g_string_append(beginning, " ");
                     g_string_append(beginning, args[4]);
                     g_string_append(beginning, " ");
                     g_string_append(beginning, args[5]);
+                    if (num_args == 8 && g_strcmp0(args[6], "autojoin") == 0) {
+                        g_string_append(beginning, " ");
+                        g_string_append(beginning, args[6]);
+                        autojoin = TRUE;
+                    }
                 }
             }
 
-            found = autocomplete_param_with_ac(input, size, beginning->str, bookmark_property_ac);
+            if (autojoin) {
+                found = autocomplete_param_with_func(input, size, beginning->str, prefs_autocomplete_boolean_choice);
+            } else {
+                found = autocomplete_param_with_ac(input, size, beginning->str, bookmark_property_ac);
+            }
             g_string_free(beginning, TRUE);
             if (found != NULL) {
                 return found;
