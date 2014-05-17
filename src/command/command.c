@@ -1607,9 +1607,11 @@ _cmd_complete_parameters(char *input, int *size)
         if (result != NULL) {
             ui_replace_input(input, result, size);
             g_free(result);
+            g_hash_table_destroy(ac_funcs);
             return;
         }
     }
+    g_hash_table_destroy(ac_funcs);
 
     return;
 }
