@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity], [0.4.1], [boothj5web@gmail.com])
+AC_INIT([profanity], [0.5.0], [boothj5web@gmail.com])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -18,7 +18,7 @@ AS_CASE([$host_os],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
 
-PACKAGE_STATUS="release"
+PACKAGE_STATUS="development"
 
 ### Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then
