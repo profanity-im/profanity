@@ -1,5 +1,5 @@
 Name:		profanity
-Version:	0.4.0
+Version:	0.4.1
 Release:	2%{?dist}
 Summary:	A console based XMPP client
 
@@ -15,6 +15,7 @@ BuildRequires:	openssl-devel
 BuildRequires:	glib2-devel
 BuildRequires:	expat-devel
 BuildRequires:	libotr-devel
+BuildRequires:	gnutls-devel
 Requires:	libstrophe
 Requires:	libcurl
 Requires:	ncurses-libs
@@ -22,6 +23,7 @@ Requires:	openssl
 Requires:	glib2
 Requires:	expat
 Requires:	libotr
+Requires:	gnutls
 
 %description
 Profanity is a console based XMPP client written in C using ncurses and libstrophe, inspired by Irssi.
