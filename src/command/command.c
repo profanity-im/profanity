@@ -618,7 +618,7 @@ static struct cmd_t command_defs[] =
           "policy - manual, opportunistic or always.",
           "secret [secret]- Verify a contacts identity using a shared secret.",
           "question [question] [answer] - Verify a contacts identity using a question and expected anwser, if the question has spaces, surround with double quotes.",
-          "answer [anwser] - Respond to a question answer verification request with your answer.",
+          "answer [answer] - Respond to a question answer verification request with your answer.",
           NULL } } },
 
     { "/outtype",
@@ -1483,7 +1483,7 @@ _cmd_complete_parameters(char *input, int *size)
             }
         }
 
-    // otherwise autocomple using roster
+    // otherwise autocomplete using roster
     } else {
         gchar *contact_choices[] = { "/msg", "/info", "/status" };
         for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
