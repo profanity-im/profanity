@@ -6,6 +6,9 @@
 #include <string.h>
 #include <glib.h>
 
+
+#include "config.h"
+
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
