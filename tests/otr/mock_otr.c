@@ -6,9 +6,12 @@
 #include <string.h>
 #include <glib.h>
 
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
+#endif
 #include "config/account.h"
 
+#ifdef HAVE_LIBOTR
 static void
 _mock_otr_keygen(ProfAccount *account)
 {
@@ -88,3 +91,4 @@ otr_start_query_returns(char *query)
     otr_start_query = _mock_otr_start_query;
     will_return(_mock_otr_start_query, query);
 }
+#endif

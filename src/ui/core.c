@@ -48,7 +48,9 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
+#endif
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/statusbar.h"

@@ -41,7 +41,9 @@
 #include "jid.h"
 #include "log.h"
 #include "muc.h"
+#ifdef HAVE_LIBOTR
 #include "otr/otr.h"
+#endif
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
