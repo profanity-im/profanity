@@ -26,6 +26,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+
+#include "prof_config.h"
+
 #include "chat_session.h"
 #include "command/command.h"
 #include "command/commands.h"
@@ -40,7 +44,9 @@
 #include "log.h"
 #include "muc.h"
 #include "plugins/plugins.h"
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
+#endif
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
