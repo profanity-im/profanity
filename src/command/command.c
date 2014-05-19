@@ -28,6 +28,8 @@
 
 #include <glib.h>
 
+#include "config.h"
+
 #include "chat_session.h"
 #include "command/command.h"
 #include "command/commands.h"

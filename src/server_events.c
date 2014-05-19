@@ -23,6 +23,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "config.h"
+
 #include "chat_session.h"
 #include "log.h"
 #include "muc.h"
