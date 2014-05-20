@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "prof_config.h"
+
 #include "common.h"
 #include "config/theme.h"
 #include "config/preferences.h"
