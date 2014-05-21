@@ -1,7 +1,7 @@
 language: c
 install:
     - sudo apt-get update
-    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev
+    - sudo apt-get -y install libssl-dev libexpat1-dev libncursesw5-dev libglib2.0-dev libnotify-dev libcurl3-dev libxss-dev libotr2-dev autoconf-archive libgcrypt11-dev
     - git clone git://github.com/strophe/libstrophe.git
     - cd libstrophe
     - ./bootstrap.sh
