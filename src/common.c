@@ -31,8 +31,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <glib.h>
-#include <gnutls/gnutls.h>
-#include <gnutls/crypto.h>
+#include <gcrypt.h>
 
 #include "log.h"
 #include "common.h"
@@ -393,16 +392,12 @@ generate_unique_id(char *prefix)
 char *
 sha1_hash(char *str)
 {
-    gnutls_hash_hd_t dig;
-    gnutls_digest_algorithm_t algorithm = GNUTLS_DIG_SHA1;
+   int msg_length = strlen(str);
+   int hash_length = gcry_md_get_algo_dlen(GCRY_MD_SHA1);
+   unsigned char hash[ hash_length ];
+   gcry_md_hash_buffer(GCRY_MD_SHA1, hash, str, msg_length);
 
-    gnutls_hash_init(&dig, algorithm);
-    gnutls_hash(dig, str, strlen(str));
-
-    unsigned char output[20];
-    gnutls_hash_output(dig, output);
-
-    return g_base64_encode(output, sizeof(output));
+   return g_base64_encode(hash, sizeof(hash));
 }
 
 int
