@@ -27,6 +27,7 @@
 
 #include "jid.h"
 #include "config/account.h"
+#include "common.h"
 
 ProfAccount*
 account_new(const gchar * const name, const gchar * const jid,

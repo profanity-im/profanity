@@ -72,6 +72,13 @@ p_slist_free_full(GSList *items, GDestroyNotify free_func)
     g_slist_free (items);
 }
 
+void
+p_list_free_full(GList *items, GDestroyNotify free_func)
+{
+    g_list_foreach (items, (GFunc) free_func, NULL);
+    g_list_free (items);
+}
+
 gboolean
 create_dir(char *name)
 {

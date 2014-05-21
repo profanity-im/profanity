@@ -12,6 +12,7 @@
 #include "xmpp/mock_xmpp.h"
 
 #include "muc.h"
+#include "common.h"
 
 #include "command/commands.h"
 

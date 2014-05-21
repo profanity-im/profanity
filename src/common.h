@@ -29,6 +29,7 @@
 
 #if !GLIB_CHECK_VERSION(2,28,0)
 #define g_slist_free_full(items, free_func)         p_slist_free_full(items, free_func)
+#define g_list_free_full(items, free_func)          p_list_free_full(items, free_func)
 #endif
 
 #if !GLIB_CHECK_VERSION(2,30,0)
@@ -72,6 +73,7 @@ typedef enum {
 
 gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
+void p_list_free_full(GList *items, GDestroyNotify free_func);
 gboolean create_dir(char *name);
 gboolean mkdir_recursive(const char *dir);
 char * str_replace(const char *string, const char *substr,

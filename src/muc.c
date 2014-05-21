@@ -26,6 +26,7 @@
 #include <glib.h>
 
 #include "contact.h"
+#include "common.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
 
