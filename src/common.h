@@ -38,7 +38,7 @@
 
 #if !GLIB_CHECK_VERSION(2,32,0)
 #define g_hash_table_add(hash_table, key)           p_hash_table_add(hash_table, key)
-#define g_hash_table_contains(hash_table, key)      p_hash_table_contains(hash_table, key);
+#define g_hash_table_contains(hash_table, key)      p_hash_table_contains(hash_table, key)
 #endif
 
 #ifndef NOTIFY_CHECK_VERSION
