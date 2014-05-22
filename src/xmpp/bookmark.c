@@ -326,8 +326,10 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
 
                 ++autojoin_count;
 
+                char *account_name = jabber_get_account_name();
+                ProfAccount *account = accounts_get_account(account_name);
                 if (name == NULL) {
-                    name = my_jid->localpart;
+                    name = account->muc_nick;
                 }
 
                 log_debug("Autojoin %s with nick=%s", jid, name);
@@ -337,6 +339,7 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
                     muc_join_room(jid, name, password, TRUE);
                 }
                 jid_destroy(room_jid);
+                account_free(account);
             } else {
                 log_debug("Rejected autojoin %s (maximum has been reached)", jid);
             }
