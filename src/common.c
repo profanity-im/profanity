@@ -81,7 +81,10 @@ p_list_free_full(GList *items, GDestroyNotify free_func)
 gboolean
 p_hash_table_add(GHashTable *hash_table, gpointer key)
 {
-    return g_hash_table_replace(hash_table, key, key);
+    gpointer found = g_hash_table_lookup(hash_table, key);
+    g_hash_table_replace(hash_table, key, key);
+
+    return (found == NULL);
 }
 
 gboolean
