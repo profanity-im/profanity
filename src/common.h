@@ -38,6 +38,7 @@
 
 #if !GLIB_CHECK_VERSION(2,32,0)
 #define g_hash_table_add(hash_table, key)           p_hash_table_add(hash_table, key)
+#define g_hash_table_contains(hash_table, key)      p_hash_table_contains(hash_table, key);
 #endif
 
 #ifndef NOTIFY_CHECK_VERSION
@@ -79,6 +80,7 @@ gchar* p_utf8_substring(const gchar *str, glong start_pos, glong end_pos);
 void p_slist_free_full(GSList *items, GDestroyNotify free_func);
 void p_list_free_full(GList *items, GDestroyNotify free_func);
 gboolean p_hash_table_add(GHashTable *hash_table, gpointer key);
+gboolean p_hash_table_contains(GHashTable  *hash_table, gconstpointer  key);
 
 gboolean create_dir(char *name);
 gboolean mkdir_recursive(const char *dir);
