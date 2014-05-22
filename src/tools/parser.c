@@ -25,6 +25,8 @@
 
 #include <glib.h>
 
+#include "common.h"
+
 /*
  * Take a full line of input and return an array of strings representing
  * the arguments of a command.

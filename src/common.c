@@ -31,8 +31,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <glib.h>
-#include <gnutls/gnutls.h>
-#include <gnutls/crypto.h>
+#include <gcrypt.h>
 
 #include "log.h"
 #include "common.h"
@@ -65,12 +64,36 @@ p_utf8_substring(const gchar *str, glong start_pos, glong end_pos)
     return out;
 }
 
-// backwards compatibility for GLib version < 2.28
 void
 p_slist_free_full(GSList *items, GDestroyNotify free_func)
 {
     g_slist_foreach (items, (GFunc) free_func, NULL);
     g_slist_free (items);
+}
+
+void
+p_list_free_full(GList *items, GDestroyNotify free_func)
+{
+    g_list_foreach (items, (GFunc) free_func, NULL);
+    g_list_free (items);
+}
+
+gboolean
+p_hash_table_add(GHashTable *hash_table, gpointer key)
+{
+    // doesn't handle when key exists, but value == NULL
+    gpointer found = g_hash_table_lookup(hash_table, key);
+    g_hash_table_replace(hash_table, key, key);
+
+    return (found == NULL);
+}
+
+gboolean
+p_hash_table_contains(GHashTable  *hash_table, gconstpointer key)
+{
+    // doesn't handle when key exists, but value == NULL
+    gpointer found = g_hash_table_lookup(hash_table, key);
+    return (found != NULL);
 }
 
 gboolean
@@ -393,16 +416,12 @@ generate_unique_id(char *prefix)
 char *
 sha1_hash(char *str)
 {
-    gnutls_hash_hd_t dig;
-    gnutls_digest_algorithm_t algorithm = GNUTLS_DIG_SHA1;
+   int msg_length = strlen(str);
+   int hash_length = gcry_md_get_algo_dlen(GCRY_MD_SHA1);
+   unsigned char hash[ hash_length ];
+   gcry_md_hash_buffer(GCRY_MD_SHA1, hash, str, msg_length);
 
-    gnutls_hash_init(&dig, algorithm);
-    gnutls_hash(dig, str, strlen(str));
-
-    unsigned char output[20];
-    gnutls_hash_output(dig, output);
-
-    return g_base64_encode(output, sizeof(output));
+   return g_base64_encode(hash, sizeof(hash));
 }
 
 int
