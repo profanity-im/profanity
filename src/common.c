@@ -64,7 +64,6 @@ p_utf8_substring(const gchar *str, glong start_pos, glong end_pos)
     return out;
 }
 
-// backwards compatibility for GLib version < 2.28
 void
 p_slist_free_full(GSList *items, GDestroyNotify free_func)
 {
@@ -77,6 +76,12 @@ p_list_free_full(GList *items, GDestroyNotify free_func)
 {
     g_list_foreach (items, (GFunc) free_func, NULL);
     g_list_free (items);
+}
+
+gboolean
+p_hash_table_add(GHashTable *hash_table, gpointer key)
+{
+    return g_hash_table_replace(hash_table, key, key);
 }
 
 gboolean
