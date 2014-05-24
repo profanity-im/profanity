@@ -260,9 +260,9 @@ void (*notifier_init)(void);
 void (*notifier_uninit)(void);
 
 void (*notify_typing)(const char * const handle);
-void (*notify_message)(const char * const handle, int win);
+void (*notify_message)(const char * const handle, int win, const char * const text);
 void (*notify_room_message)(const char * const handle, const char * const room,
-    int win);
+    int win, const char * const text);
 void (*notify_remind)(void);
 void (*notify_invite)(const char * const from, const char * const room,
     const char * const reason);

@@ -52,7 +52,13 @@ typedef enum {
     PREF_STATES,
     PREF_OUTTYPE,
     PREF_NOTIFY_TYPING,
+    PREF_NOTIFY_TYPING_CURRENT,
     PREF_NOTIFY_MESSAGE,
+    PREF_NOTIFY_MESSAGE_CURRENT,
+    PREF_NOTIFY_MESSAGE_TEXT,
+    PREF_NOTIFY_ROOM,
+    PREF_NOTIFY_ROOM_CURRENT,
+    PREF_NOTIFY_ROOM_TEXT,
     PREF_NOTIFY_INVITE,
     PREF_NOTIFY_SUB,
     PREF_CHLOG,
@@ -86,6 +92,7 @@ void prefs_set_gone(gint value);
 
 void prefs_set_notify_remind(gint period);
 gint prefs_get_notify_remind(void);
+
 void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
 gint prefs_get_priority(void);

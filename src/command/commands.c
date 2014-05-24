@@ -2198,44 +2198,108 @@ gboolean
 cmd_notify(gchar **args, struct cmd_help_t help)
 {
     char *kind = args[0];
-    char *value = args[1];
 
     // bad kind
     if ((strcmp(kind, "message") != 0) && (strcmp(kind, "typing") != 0) &&
             (strcmp(kind, "remind") != 0) && (strcmp(kind, "invite") != 0) &&
-            (strcmp(kind, "sub") != 0)) {
+            (strcmp(kind, "sub") != 0) && (strcmp(kind, "room") != 0)) {
         cons_show("Usage: %s", help.usage);
 
     // set message setting
     } else if (strcmp(kind, "message") == 0) {
-        if (strcmp(value, "on") == 0) {
+        if (strcmp(args[1], "on") == 0) {
             cons_show("Message notifications enabled.");
             prefs_set_boolean(PREF_NOTIFY_MESSAGE, TRUE);
-        } else if (strcmp(value, "off") == 0) {
+        } else if (strcmp(args[1], "off") == 0) {
             cons_show("Message notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_MESSAGE, FALSE);
+        } else if (strcmp(args[1], "current") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Current window message notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Current window message notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, FALSE);
+            } else {
+                cons_show("Usage: /notify message current on|off");
+            }
+        } else if (strcmp(args[1], "text") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Showing text in message notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Showing text in message notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, FALSE);
+            } else {
+                cons_show("Usage: /notify message text on|off");
+            }
         } else {
             cons_show("Usage: /notify message on|off");
         }
 
+    // set room setting
+    } else if (strcmp(kind, "room") == 0) {
+        if (strcmp(args[1], "on") == 0) {
+            cons_show("Chat room notifications enabled.");
+            prefs_set_string(PREF_NOTIFY_ROOM, "on");
+        } else if (strcmp(args[1], "off") == 0) {
+            cons_show("Chat room notifications disabled.");
+            prefs_set_string(PREF_NOTIFY_ROOM, "off");
+        } else if (strcmp(args[1], "mention") == 0) {
+            cons_show("Chat room notifications enabled on mention.");
+            prefs_set_string(PREF_NOTIFY_ROOM, "mention");
+        } else if (strcmp(args[1], "current") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Current window chat room message notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_CURRENT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Current window chat room message notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_CURRENT, FALSE);
+            } else {
+                cons_show("Usage: /notify room current on|off");
+            }
+        } else if (strcmp(args[1], "text") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Showing text in chat room message notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TEXT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Showing text in chat room message notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TEXT, FALSE);
+            } else {
+                cons_show("Usage: /notify room text on|off");
+            }
+        } else {
+            cons_show("Usage: /notify room on|off|mention");
+        }
+
     // set typing setting
     } else if (strcmp(kind, "typing") == 0) {
-        if (strcmp(value, "on") == 0) {
+        if (strcmp(args[1], "on") == 0) {
             cons_show("Typing notifications enabled.");
             prefs_set_boolean(PREF_NOTIFY_TYPING, TRUE);
-        } else if (strcmp(value, "off") == 0) {
+        } else if (strcmp(args[1], "off") == 0) {
             cons_show("Typing notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_TYPING, FALSE);
+        } else if (strcmp(args[1], "current") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Current window typing notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_TYPING_CURRENT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Current window typing notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_TYPING_CURRENT, FALSE);
+            } else {
+                cons_show("Usage: /notify typing current on|off");
+            }
         } else {
             cons_show("Usage: /notify typing on|off");
         }
 
     // set invite setting
     } else if (strcmp(kind, "invite") == 0) {
-        if (strcmp(value, "on") == 0) {
+        if (strcmp(args[1], "on") == 0) {
             cons_show("Chat room invite notifications enabled.");
             prefs_set_boolean(PREF_NOTIFY_INVITE, TRUE);
-        } else if (strcmp(value, "off") == 0) {
+        } else if (strcmp(args[1], "off") == 0) {
             cons_show("Chat room invite notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_INVITE, FALSE);
         } else {
@@ -2244,10 +2308,10 @@ cmd_notify(gchar **args, struct cmd_help_t help)
 
     // set subscription setting
     } else if (strcmp(kind, "sub") == 0) {
-        if (strcmp(value, "on") == 0) {
+        if (strcmp(args[1], "on") == 0) {
             cons_show("Subscription notifications enabled.");
             prefs_set_boolean(PREF_NOTIFY_SUB, TRUE);
-        } else if (strcmp(value, "off") == 0) {
+        } else if (strcmp(args[1], "off") == 0) {
             cons_show("Subscription notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_SUB, FALSE);
         } else {
@@ -2256,7 +2320,7 @@ cmd_notify(gchar **args, struct cmd_help_t help)
 
     // set remind setting
     } else if (strcmp(kind, "remind") == 0) {
-        gint period = atoi(value);
+        gint period = atoi(args[1]);
         prefs_set_notify_remind(period);
         if (period == 0) {
             cons_show("Message reminders disabled.");

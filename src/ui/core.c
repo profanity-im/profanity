@@ -278,14 +278,17 @@ _ui_contact_typing(const char * const barejid)
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING)) {
-        PContact contact = roster_get_contact(barejid);
-        char const *display_usr = NULL;
-        if (p_contact_name(contact) != NULL) {
-            display_usr = p_contact_name(contact);
-        } else {
-            display_usr = barejid;
+        gboolean is_current = wins_is_current(window);
+        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT)) ) {
+            PContact contact = roster_get_contact(barejid);
+            char const *display_usr = NULL;
+            if (p_contact_name(contact) != NULL) {
+                display_usr = p_contact_name(contact);
+            } else {
+                display_usr = barejid;
+            }
+            notify_typing(display_usr);
         }
-        notify_typing(display_usr);
     }
 }
 
@@ -373,8 +376,16 @@ _ui_incoming_msg(const char * const from, const char * const message,
 
     if (prefs_get_boolean(PREF_BEEP))
         beep();
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
-        notify_message(display_from, ui_index);
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
+        gboolean is_current = wins_is_current(window);
+        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
+            if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
+                notify_message(display_from, ui_index, message);
+            } else {
+                notify_message(display_from, ui_index, NULL);
+            }
+        }
+    }
 
     free(display_from);
 
@@ -1701,10 +1712,33 @@ _ui_room_message(const char * const room_jid, const char * const nick,
         if (prefs_get_boolean(PREF_BEEP)) {
             beep();
         }
-        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-            Jid *jidp = jid_create(room_jid);
-            notify_room_message(nick, jidp->localpart, ui_index);
-            jid_destroy(jidp);
+
+        gboolean notify = FALSE;
+        char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+        if (g_strcmp0(room_setting, "on") == 0) {
+            notify = TRUE;
+        }
+        if (g_strcmp0(room_setting, "mention") == 0) {
+            char *message_lower = g_utf8_strdown(message, -1);
+            char *nick_lower = g_utf8_strdown(nick, -1);
+            if (g_strrstr(message_lower, nick_lower) != NULL) {
+                notify = TRUE;
+            }
+            g_free(message_lower);
+            g_free(nick_lower);
+        }
+
+        if (notify) {
+            gboolean is_current = wins_is_current(window);
+            if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
+                Jid *jidp = jid_create(room_jid);
+                if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
+                    notify_room_message(nick, jidp->localpart, ui_index, message);
+                } else {
+                    notify_room_message(nick, jidp->localpart, ui_index, NULL);
+                }
+                jid_destroy(jidp);
+            }
         }
     }
 

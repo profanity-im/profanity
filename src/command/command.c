@@ -469,28 +469,44 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/notify",
-        cmd_notify, parse_args, 2, 2, &cons_notify_setting,
-        { "/notify type value", "Control various desktop noficiations.",
-        { "/notify type value",
-          "------------------",
+        cmd_notify, parse_args, 2, 3, &cons_notify_setting,
+        { "/notify [type value]|[type setting value]", "Control various desktop noficiations.",
+        { "/notify [type value]|[type setting value]",
+          "-----------------------------------------",
           "Settings for various desktop notifications where type is one of:",
-          "message : Notificaitons for messages.",
-          "        : on|off",
-          "remind  : Notification reminders of unread messages.",
-          "        : where value is the reminder period in seconds,",
-          "        : use 0 to disable.",
-          "typing  : Notifications when contacts are typing.",
-          "        : on|off",
-          "invite  : Notifications for chat room invites.",
-          "        : on|off",
-          "sub     : Notifications for subscription requests.",
-          "        : on|off",
+          "message         : Notificaitons for regular messages.",
+          "                : on|off",
+          "message current : Whether messages in the current window trigger notifications.",
+          "                : on|off",
+          "message text    : Show message text in message notifications.",
+          "                : on|off",
+          "room            : Notificaitons for chat room messages.",
+          "                : on|off|mention",
+          "room current    : Whether chat room messages in the current window trigger notifications.",
+          "                : on|off",
+          "room text       : Show message test in chat room message notifications.",
+          "                : on|off",
+          "remind          : Notification reminders of unread messages.",
+          "                : where value is the reminder period in seconds,",
+          "                : use 0 to disable.",
+          "typing          : Notifications when contacts are typing.",
+          "                : on|off",
+          "typing current  : Whether typing notifications are triggerd for the current window.",
+          "                : on|off",
+          "invite          : Notifications for chat room invites.",
+          "                : on|off",
+          "sub             : Notifications for subscription requests.",
+          "                : on|off",
           "",
-          "Example : /notify message on (enable message notifications)",
-          "Example : /notify remind 10  (remind every 10 seconds)",
-          "Example : /notify remind 0   (switch off reminders)",
-          "Example : /notify typing on  (enable typing notifications)",
-          "Example : /notify invite on  (enable chat room invite notifications)",
+          "Example : /notify message on        (enable message notifications)",
+          "Example : /notify message text on   (show message text in notifications)",
+          "Example : /notify room mention      (enable chat room notifications only on mention)",
+          "Example : /notify room current off  (disable room message notifications when window visible)",
+          "Example : /notify room text off     (do not show message text in chat room notifications)",
+          "Example : /notify remind 10         (remind every 10 seconds)",
+          "Example : /notify remind 0          (switch off reminders)",
+          "Example : /notify typing on         (enable typing notifications)",
+          "Example : /notify invite on         (enable chat room invite notifications)",
           NULL } } },
 
     { "/flash",
@@ -883,6 +899,9 @@ static Autocomplete commands_ac;
 static Autocomplete who_ac;
 static Autocomplete help_ac;
 static Autocomplete notify_ac;
+static Autocomplete notify_room_ac;
+static Autocomplete notify_message_ac;
+static Autocomplete notify_typing_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
 static Autocomplete log_ac;
@@ -973,10 +992,29 @@ cmd_init(void)
 
     notify_ac = autocomplete_new();
     autocomplete_add(notify_ac, "message");
+    autocomplete_add(notify_ac, "room");
     autocomplete_add(notify_ac, "typing");
     autocomplete_add(notify_ac, "remind");
     autocomplete_add(notify_ac, "invite");
     autocomplete_add(notify_ac, "sub");
+
+    notify_message_ac = autocomplete_new();
+    autocomplete_add(notify_message_ac, "on");
+    autocomplete_add(notify_message_ac, "off");
+    autocomplete_add(notify_message_ac, "current");
+    autocomplete_add(notify_message_ac, "text");
+
+    notify_room_ac = autocomplete_new();
+    autocomplete_add(notify_room_ac, "on");
+    autocomplete_add(notify_room_ac, "off");
+    autocomplete_add(notify_room_ac, "mention");
+    autocomplete_add(notify_room_ac, "current");
+    autocomplete_add(notify_room_ac, "text");
+
+    notify_typing_ac = autocomplete_new();
+    autocomplete_add(notify_typing_ac, "on");
+    autocomplete_add(notify_typing_ac, "off");
+    autocomplete_add(notify_typing_ac, "current");
 
     sub_ac = autocomplete_new();
     autocomplete_add(sub_ac, "request");
@@ -1152,6 +1190,9 @@ cmd_uninit(void)
     autocomplete_free(who_ac);
     autocomplete_free(help_ac);
     autocomplete_free(notify_ac);
+    autocomplete_free(notify_message_ac);
+    autocomplete_free(notify_room_ac);
+    autocomplete_free(notify_typing_ac);
     autocomplete_free(sub_ac);
     autocomplete_free(titlebar_ac);
     autocomplete_free(log_ac);
@@ -1264,6 +1305,9 @@ cmd_reset_autocomplete()
     presence_reset_sub_request_search();
     autocomplete_reset(help_ac);
     autocomplete_reset(notify_ac);
+    autocomplete_reset(notify_message_ac);
+    autocomplete_reset(notify_room_ac);
+    autocomplete_reset(notify_typing_ac);
     autocomplete_reset(sub_ac);
 
     if (ui_current_win_type() == WIN_MUC) {
@@ -1761,8 +1805,47 @@ _notify_autocomplete(char *input, int *size)
     int i = 0;
     char *result = NULL;
 
-    gchar *boolean_choices[] = { "/notify message", "/notify typing",
-        "/notify invite", "/notify sub" };
+    result = autocomplete_param_with_func(input, size, "/notify room current", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/notify message current", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/notify typing current", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/notify room text", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/notify message text", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/notify room", notify_room_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/notify message", notify_message_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/notify typing", notify_typing_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    gchar *boolean_choices[] = { "/notify invite", "/notify sub" };
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],
             prefs_autocomplete_boolean_choice);
