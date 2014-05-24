@@ -1163,6 +1163,11 @@ _cons_notify_setting(void)
     else
         cons_show("Messages (/notify message)          : OFF");
 
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM))
+        cons_show("Messages (/notify room)             : ON");
+    else
+        cons_show("Messages (/notify room)             : OFF");
+
     if (prefs_get_boolean(PREF_NOTIFY_TYPING))
         cons_show("Composing (/notify typing)          : ON");
     else

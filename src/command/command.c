@@ -473,7 +473,9 @@ static struct cmd_t command_defs[] =
         { "/notify type value",
           "------------------",
           "Settings for various desktop notifications where type is one of:",
-          "message : Notificaitons for messages.",
+          "message : Notificaitons for regular messages.",
+          "        : on|off",
+          "room    : Notificaitons for chat room messages.",
           "        : on|off",
           "remind  : Notification reminders of unread messages.",
           "        : where value is the reminder period in seconds,",
@@ -486,6 +488,7 @@ static struct cmd_t command_defs[] =
           "        : on|off",
           "",
           "Example : /notify message on (enable message notifications)",
+          "Example : /notify message on (enable chat room notifications)",
           "Example : /notify remind 10  (remind every 10 seconds)",
           "Example : /notify remind 0   (switch off reminders)",
           "Example : /notify typing on  (enable typing notifications)",
@@ -964,6 +967,7 @@ cmd_init(void)
 
     notify_ac = autocomplete_new();
     autocomplete_add(notify_ac, "message");
+    autocomplete_add(notify_ac, "room");
     autocomplete_add(notify_ac, "typing");
     autocomplete_add(notify_ac, "remind");
     autocomplete_add(notify_ac, "invite");
@@ -1771,7 +1775,7 @@ _notify_autocomplete(char *input, int *size)
     char *result = NULL;
 
     gchar *boolean_choices[] = { "/notify message", "/notify typing",
-        "/notify invite", "/notify sub" };
+        "/notify invite", "/notify sub", "/notify room" };
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],
             prefs_autocomplete_boolean_choice);

@@ -1696,7 +1696,7 @@ _ui_room_message(const char * const room_jid, const char * const nick,
         if (prefs_get_boolean(PREF_BEEP)) {
             beep();
         }
-        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
+        if (prefs_get_boolean(PREF_NOTIFY_ROOM)) {
             Jid *jidp = jid_create(room_jid);
             notify_room_message(nick, jidp->localpart, ui_index);
             jid_destroy(jidp);

@@ -2200,7 +2200,7 @@ cmd_notify(gchar **args, struct cmd_help_t help)
     // bad kind
     if ((strcmp(kind, "message") != 0) && (strcmp(kind, "typing") != 0) &&
             (strcmp(kind, "remind") != 0) && (strcmp(kind, "invite") != 0) &&
-            (strcmp(kind, "sub") != 0)) {
+            (strcmp(kind, "sub") != 0) && (strcmp(kind, "room") != 0)) {
         cons_show("Usage: %s", help.usage);
 
     // set message setting
@@ -2213,6 +2213,18 @@ cmd_notify(gchar **args, struct cmd_help_t help)
             prefs_set_boolean(PREF_NOTIFY_MESSAGE, FALSE);
         } else {
             cons_show("Usage: /notify message on|off");
+        }
+
+    // set room setting
+    } else if (strcmp(kind, "room") == 0) {
+        if (strcmp(value, "on") == 0) {
+            cons_show("Chat room notifications enabled.");
+            prefs_set_boolean(PREF_NOTIFY_ROOM, TRUE);
+        } else if (strcmp(value, "off") == 0) {
+            cons_show("Chat room notifications disabled.");
+            prefs_set_boolean(PREF_NOTIFY_ROOM, FALSE);
+        } else {
+            cons_show("Usage: /notify room on|off");
         }
 
     // set typing setting
