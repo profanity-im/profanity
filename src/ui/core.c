@@ -370,8 +370,12 @@ _ui_incoming_msg(const char * const from, const char * const message,
 
     if (prefs_get_boolean(PREF_BEEP))
         beep();
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
-        notify_message(display_from, ui_index);
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
+        gboolean is_current = wins_is_current(window);
+        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
+            notify_message(display_from, ui_index);
+        }
+    }
 
     free(display_from);
 
@@ -1696,8 +1700,9 @@ _ui_room_message(const char * const room_jid, const char * const nick,
         if (prefs_get_boolean(PREF_BEEP)) {
             beep();
         }
-        char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+
         gboolean notify = FALSE;
+        char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
         if (g_strcmp0(room_setting, "on") == 0) {
             notify = TRUE;
         }
@@ -1710,10 +1715,14 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             g_free(message_lower);
             g_free(nick_lower);
         }
+
         if (notify) {
-            Jid *jidp = jid_create(room_jid);
-            notify_room_message(nick, jidp->localpart, ui_index);
-            jid_destroy(jidp);
+            gboolean is_current = wins_is_current(window);
+            if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
+                Jid *jidp = jid_create(room_jid);
+                notify_room_message(nick, jidp->localpart, ui_index);
+                jid_destroy(jidp);
+            }
         }
     }
 

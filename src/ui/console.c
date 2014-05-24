@@ -1163,8 +1163,18 @@ _cons_notify_setting(void)
     else
         cons_show("Messages (/notify message)          : OFF");
 
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT))
+        cons_show("Messages current (/notify message)  : ON");
+    else
+        cons_show("Messages current (/notify message)  : OFF");
+
     char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
-    cons_show    ("Chat room messages (/notify room)   : %s", room_setting);
+    cons_show    ("Room messages (/notify room)        : %s", room_setting);
+
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT))
+        cons_show("Room current (/notify room)         : ON");
+    else
+        cons_show("Room current (/notify room)         : OFF");
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING))
         cons_show("Composing (/notify typing)          : ON");
