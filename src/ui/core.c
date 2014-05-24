@@ -376,7 +376,11 @@ _ui_incoming_msg(const char * const from, const char * const message,
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
         gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
-            notify_message(display_from, ui_index);
+            if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
+                notify_message(display_from, ui_index, message);
+            } else {
+                notify_message(display_from, ui_index, NULL);
+            }
         }
     }
 
@@ -1723,7 +1727,11 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             gboolean is_current = wins_is_current(window);
             if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
                 Jid *jidp = jid_create(room_jid);
-                notify_room_message(nick, jidp->localpart, ui_index);
+                if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
+                    notify_room_message(nick, jidp->localpart, ui_index, message);
+                } else {
+                    notify_room_message(nick, jidp->localpart, ui_index, NULL);
+                }
                 jid_destroy(jidp);
             }
         }

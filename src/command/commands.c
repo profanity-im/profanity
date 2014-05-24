@@ -2220,6 +2220,16 @@ cmd_notify(gchar **args, struct cmd_help_t help)
             } else {
                 cons_show("Usage: /notify message current on|off");
             }
+        } else if (strcmp(args[1], "text") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Showing text in message notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Showing text in message notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_MESSAGE_TEXT, FALSE);
+            } else {
+                cons_show("Usage: /notify message text on|off");
+            }
         } else {
             cons_show("Usage: /notify message on|off");
         }
@@ -2244,6 +2254,16 @@ cmd_notify(gchar **args, struct cmd_help_t help)
                 prefs_set_boolean(PREF_NOTIFY_ROOM_CURRENT, FALSE);
             } else {
                 cons_show("Usage: /notify room current on|off");
+            }
+        } else if (strcmp(args[1], "text") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Showing text in chat room message notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TEXT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Showing text in chat room message notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_TEXT, FALSE);
+            } else {
+                cons_show("Usage: /notify room text on|off");
             }
         } else {
             cons_show("Usage: /notify room on|off|mention");

@@ -477,9 +477,13 @@ static struct cmd_t command_defs[] =
           "                : on|off",
           "message current : Whether messages in the current window trigger notifications.",
           "                : on|off",
+          "message text    : Show message text in message notifications.",
+          "                : on|off",
           "room            : Notificaitons for chat room messages.",
           "                : on|off|mention",
           "room current    : Whether chat room messages in the current window trigger notifications.",
+          "                : on|off",
+          "room text       : Show message test in chat room message notifications.",
           "                : on|off",
           "remind          : Notification reminders of unread messages.",
           "                : where value is the reminder period in seconds,",
@@ -494,8 +498,10 @@ static struct cmd_t command_defs[] =
           "                : on|off",
           "",
           "Example : /notify message on        (enable message notifications)",
+          "Example : /notify message text on   (show message text in notifications)",
           "Example : /notify room mention      (enable chat room notifications only on mention)",
           "Example : /notify room current off  (disable room message notifications when window visible)",
+          "Example : /notify room text off     (do not show message text in chat room notifications)",
           "Example : /notify remind 10         (remind every 10 seconds)",
           "Example : /notify remind 0          (switch off reminders)",
           "Example : /notify typing on         (enable typing notifications)",
@@ -987,12 +993,14 @@ cmd_init(void)
     autocomplete_add(notify_message_ac, "on");
     autocomplete_add(notify_message_ac, "off");
     autocomplete_add(notify_message_ac, "current");
+    autocomplete_add(notify_message_ac, "text");
 
     notify_room_ac = autocomplete_new();
     autocomplete_add(notify_room_ac, "on");
     autocomplete_add(notify_room_ac, "off");
     autocomplete_add(notify_room_ac, "mention");
     autocomplete_add(notify_room_ac, "current");
+    autocomplete_add(notify_room_ac, "text");
 
     notify_typing_ac = autocomplete_new();
     autocomplete_add(notify_typing_ac, "on");
@@ -1817,6 +1825,16 @@ _notify_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_func(input, size, "/notify typing current", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/notify room text", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, size, "/notify message text", prefs_autocomplete_boolean_choice);
     if (result != NULL) {
         return result;
     }

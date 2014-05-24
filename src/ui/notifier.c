@@ -85,25 +85,31 @@ _notify_invite(const char * const from, const char * const room,
 }
 
 static void
-_notify_message(const char * const handle, int win)
+_notify_message(const char * const handle, int win, const char * const text)
 {
-    char message[strlen(handle) + 1 + 14];
-    sprintf(message, "%s: message (%d).", handle, win);
+    GString *message = g_string_new("");
+    g_string_append_printf(message, "%s (win %d)", handle, win);
+    if (text != NULL) {
+        g_string_append_printf(message, "\n%s", text);
+    }
 
-    _notify(message, 10000, "incoming message");
+    _notify(message->str, 10000, "incoming message");
+
+    g_string_free(message, TRUE);
 }
 
 static void
-_notify_room_message(const char * const handle, const char * const room, int win)
+_notify_room_message(const char * const handle, const char * const room, int win, const char * const text)
 {
-    GString *text = g_string_new("");
+    GString *message = g_string_new("");
+    g_string_append_printf(message, "%s in %s (win %d)", handle, room, win);
+    if (text != NULL) {
+        g_string_append_printf(message, "\n%s", text);
+    }
 
-    g_string_append_printf(text, "Room: %s\n", room);
-    g_string_append_printf(text, "%s: message (%d).", handle, win);
+    _notify(message->str, 10000, "incoming message");
 
-    _notify(text->str, 10000, "incoming message");
-
-    g_string_free(text, TRUE);
+    g_string_free(message, TRUE);
 }
 
 static void
@@ -165,7 +171,6 @@ _notify(const char * const message, int timeout,
     const char * const category)
 {
 #ifdef HAVE_LIBNOTIFY
-
     if (notify_is_initted()) {
         NotifyNotification *notification;
         notification = notify_notification_new("Profanity", message, NULL);

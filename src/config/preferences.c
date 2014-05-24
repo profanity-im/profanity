@@ -403,8 +403,10 @@ _get_group(preference_t pref)
         case PREF_NOTIFY_TYPING_CURRENT:
         case PREF_NOTIFY_MESSAGE:
         case PREF_NOTIFY_MESSAGE_CURRENT:
+        case PREF_NOTIFY_MESSAGE_TEXT:
         case PREF_NOTIFY_ROOM:
         case PREF_NOTIFY_ROOM_CURRENT:
+        case PREF_NOTIFY_ROOM_TEXT:
         case PREF_NOTIFY_INVITE:
         case PREF_NOTIFY_SUB:
             return PREF_GROUP_NOTIFICATIONS;
@@ -471,10 +473,14 @@ _get_key(preference_t pref)
             return "message";
         case PREF_NOTIFY_MESSAGE_CURRENT:
             return "message.current";
+        case PREF_NOTIFY_MESSAGE_TEXT:
+            return "message.text";
         case PREF_NOTIFY_ROOM:
             return "room";
         case PREF_NOTIFY_ROOM_CURRENT:
             return "room.current";
+        case PREF_NOTIFY_ROOM_TEXT:
+            return "room.text";
         case PREF_NOTIFY_INVITE:
             return "invite";
         case PREF_NOTIFY_SUB:
