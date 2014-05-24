@@ -468,24 +468,24 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/notify",
-        cmd_notify, parse_args, 2, 2, &cons_notify_setting,
-        { "/notify type value", "Control various desktop noficiations.",
-        { "/notify type value",
-          "------------------",
+        cmd_notify, parse_args, 2, 3, &cons_notify_setting,
+        { "/notify [type value]", "Control various desktop noficiations.",
+        { "/notify [type value]",
+          "--------------------",
           "Settings for various desktop notifications where type is one of:",
-          "message : Notificaitons for regular messages.",
-          "        : on|off",
-          "room    : Notificaitons for chat room messages.",
-          "        : on|off",
-          "remind  : Notification reminders of unread messages.",
-          "        : where value is the reminder period in seconds,",
-          "        : use 0 to disable.",
-          "typing  : Notifications when contacts are typing.",
-          "        : on|off",
-          "invite  : Notifications for chat room invites.",
-          "        : on|off",
-          "sub     : Notifications for subscription requests.",
-          "        : on|off",
+          "message         : Notificaitons for regular messages.",
+          "                : on|off",
+          "room            : Notificaitons for chat room messages.",
+          "                : on|off|mention",
+          "remind          : Notification reminders of unread messages.",
+          "                : where value is the reminder period in seconds,",
+          "                : use 0 to disable.",
+          "typing          : Notifications when contacts are typing.",
+          "                : on|off",
+          "invite          : Notifications for chat room invites.",
+          "                : on|off",
+          "sub             : Notifications for subscription requests.",
+          "                : on|off",
           "",
           "Example : /notify message on (enable message notifications)",
           "Example : /notify message on (enable chat room notifications)",
@@ -877,6 +877,7 @@ static Autocomplete commands_ac;
 static Autocomplete who_ac;
 static Autocomplete help_ac;
 static Autocomplete notify_ac;
+static Autocomplete notify_room_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
 static Autocomplete log_ac;
@@ -972,6 +973,11 @@ cmd_init(void)
     autocomplete_add(notify_ac, "remind");
     autocomplete_add(notify_ac, "invite");
     autocomplete_add(notify_ac, "sub");
+
+    notify_room_ac = autocomplete_new();
+    autocomplete_add(notify_room_ac, "on");
+    autocomplete_add(notify_room_ac, "off");
+    autocomplete_add(notify_room_ac, "mention");
 
     sub_ac = autocomplete_new();
     autocomplete_add(sub_ac, "request");
@@ -1147,6 +1153,7 @@ cmd_uninit(void)
     autocomplete_free(who_ac);
     autocomplete_free(help_ac);
     autocomplete_free(notify_ac);
+    autocomplete_free(notify_room_ac);
     autocomplete_free(sub_ac);
     autocomplete_free(titlebar_ac);
     autocomplete_free(log_ac);
@@ -1259,6 +1266,7 @@ cmd_reset_autocomplete()
     presence_reset_sub_request_search();
     autocomplete_reset(help_ac);
     autocomplete_reset(notify_ac);
+    autocomplete_reset(notify_room_ac);
     autocomplete_reset(sub_ac);
 
     if (ui_current_win_type() == WIN_MUC) {
@@ -1774,8 +1782,13 @@ _notify_autocomplete(char *input, int *size)
     int i = 0;
     char *result = NULL;
 
+    result = autocomplete_param_with_ac(input, size, "/notify room", notify_room_ac);
+    if (result != NULL) {
+        return result;
+    }
+
     gchar *boolean_choices[] = { "/notify message", "/notify typing",
-        "/notify invite", "/notify sub", "/notify room" };
+        "/notify invite", "/notify sub" };
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],
             prefs_autocomplete_boolean_choice);

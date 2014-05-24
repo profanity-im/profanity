@@ -2219,12 +2219,15 @@ cmd_notify(gchar **args, struct cmd_help_t help)
     } else if (strcmp(kind, "room") == 0) {
         if (strcmp(value, "on") == 0) {
             cons_show("Chat room notifications enabled.");
-            prefs_set_boolean(PREF_NOTIFY_ROOM, TRUE);
+            prefs_set_string(PREF_NOTIFY_ROOM, "on");
         } else if (strcmp(value, "off") == 0) {
             cons_show("Chat room notifications disabled.");
-            prefs_set_boolean(PREF_NOTIFY_ROOM, FALSE);
+            prefs_set_string(PREF_NOTIFY_ROOM, "off");
+        } else if (strcmp(value, "mention") == 0) {
+            cons_show("Chat room notifications enable on mention.");
+            prefs_set_string(PREF_NOTIFY_ROOM, "mention");
         } else {
-            cons_show("Usage: /notify room on|off");
+            cons_show("Usage: /notify room on|off|mention");
         }
 
     // set typing setting

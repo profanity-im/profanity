@@ -1696,7 +1696,15 @@ _ui_room_message(const char * const room_jid, const char * const nick,
         if (prefs_get_boolean(PREF_BEEP)) {
             beep();
         }
-        if (prefs_get_boolean(PREF_NOTIFY_ROOM)) {
+        char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+        gboolean notify = FALSE;
+        if (g_strcmp0(room_setting, "on") == 0) {
+            notify = TRUE;
+        }
+        if ( (g_strcmp0(room_setting, "mention") == 0) && (g_strrstr(message, nick) != NULL) ) {
+            notify = TRUE;
+        }
+        if (notify) {
             Jid *jidp = jid_create(room_jid);
             notify_room_message(nick, jidp->localpart, ui_index);
             jid_destroy(jidp);

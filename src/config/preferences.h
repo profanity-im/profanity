@@ -87,6 +87,7 @@ void prefs_set_gone(gint value);
 
 void prefs_set_notify_remind(gint period);
 gint prefs_get_notify_remind(void);
+
 void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
 gint prefs_get_priority(void);
