@@ -90,7 +90,7 @@ _notify_message(const char * const handle, int win, const char * const text)
         g_string_append_printf(message, "\n%s", text);
     }
 
-    _notify(message->str, 10000, "incoming message");
+    notify(message->str, 10000, "incoming message");
 
     g_string_free(message, TRUE);
 }
@@ -104,7 +104,7 @@ _notify_room_message(const char * const handle, const char * const room, int win
         g_string_append_printf(message, "\n%s", text);
     }
 
-    _notify(message->str, 10000, "incoming message");
+    notify(message->str, 10000, "incoming message");
 
     g_string_free(message, TRUE);
 }
