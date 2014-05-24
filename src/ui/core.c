@@ -277,14 +277,17 @@ _ui_contact_typing(const char * const barejid)
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING)) {
-        PContact contact = roster_get_contact(barejid);
-        char const *display_usr = NULL;
-        if (p_contact_name(contact) != NULL) {
-            display_usr = p_contact_name(contact);
-        } else {
-            display_usr = barejid;
+        gboolean is_current = wins_is_current(window);
+        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT)) ) {
+            PContact contact = roster_get_contact(barejid);
+            char const *display_usr = NULL;
+            if (p_contact_name(contact) != NULL) {
+                display_usr = p_contact_name(contact);
+            } else {
+                display_usr = barejid;
+            }
+            notify_typing(display_usr);
         }
-        notify_typing(display_usr);
     }
 }
 

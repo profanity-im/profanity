@@ -476,9 +476,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         // deal with chat states if recipient supports them
         if (recipient_supports && (!delayed)) {
             if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
-                if (prefs_get_boolean(PREF_NOTIFY_TYPING) || prefs_get_boolean(PREF_INTYPE)) {
-                    handle_typing(jid->barejid);
-                }
+                handle_typing(jid->barejid);
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
                 handle_gone(jid->barejid);
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) {

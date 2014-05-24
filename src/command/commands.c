@@ -2212,10 +2212,10 @@ cmd_notify(gchar **args, struct cmd_help_t help)
             prefs_set_boolean(PREF_NOTIFY_MESSAGE, FALSE);
         } else if (strcmp(args[1], "current") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Current window messages notifications enabled.");
+                cons_show("Current window message notifications enabled.");
                 prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, TRUE);
             } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Current window messages notifications disabled.");
+                cons_show("Current window message notifications disabled.");
                 prefs_set_boolean(PREF_NOTIFY_MESSAGE_CURRENT, FALSE);
             } else {
                 cons_show("Usage: /notify message current on|off");
@@ -2233,14 +2233,14 @@ cmd_notify(gchar **args, struct cmd_help_t help)
             cons_show("Chat room notifications disabled.");
             prefs_set_string(PREF_NOTIFY_ROOM, "off");
         } else if (strcmp(args[1], "mention") == 0) {
-            cons_show("Chat room notifications enable on mention.");
+            cons_show("Chat room notifications enabled on mention.");
             prefs_set_string(PREF_NOTIFY_ROOM, "mention");
         } else if (strcmp(args[1], "current") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
-                cons_show("Current window chat room messages notifications enabled.");
+                cons_show("Current window chat room message notifications enabled.");
                 prefs_set_boolean(PREF_NOTIFY_ROOM_CURRENT, TRUE);
             } else if (g_strcmp0(args[2], "off") == 0) {
-                cons_show("Current window chat room messages notifications disabled.");
+                cons_show("Current window chat room message notifications disabled.");
                 prefs_set_boolean(PREF_NOTIFY_ROOM_CURRENT, FALSE);
             } else {
                 cons_show("Usage: /notify room current on|off");
@@ -2257,6 +2257,16 @@ cmd_notify(gchar **args, struct cmd_help_t help)
         } else if (strcmp(args[1], "off") == 0) {
             cons_show("Typing notifications disabled.");
             prefs_set_boolean(PREF_NOTIFY_TYPING, FALSE);
+        } else if (strcmp(args[1], "current") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Current window typing notifications enabled.");
+                prefs_set_boolean(PREF_NOTIFY_TYPING_CURRENT, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Current window typing notifications disabled.");
+                prefs_set_boolean(PREF_NOTIFY_TYPING_CURRENT, FALSE);
+            } else {
+                cons_show("Usage: /notify typing current on|off");
+            }
         } else {
             cons_show("Usage: /notify typing on|off");
         }

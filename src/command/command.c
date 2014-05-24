@@ -486,6 +486,8 @@ static struct cmd_t command_defs[] =
           "                : use 0 to disable.",
           "typing          : Notifications when contacts are typing.",
           "                : on|off",
+          "typing current  : Whether typing notifications are triggerd for the current window.",
+          "                : on|off",
           "invite          : Notifications for chat room invites.",
           "                : on|off",
           "sub             : Notifications for subscription requests.",
@@ -884,6 +886,7 @@ static Autocomplete help_ac;
 static Autocomplete notify_ac;
 static Autocomplete notify_room_ac;
 static Autocomplete notify_message_ac;
+static Autocomplete notify_typing_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
 static Autocomplete log_ac;
@@ -990,6 +993,11 @@ cmd_init(void)
     autocomplete_add(notify_room_ac, "off");
     autocomplete_add(notify_room_ac, "mention");
     autocomplete_add(notify_room_ac, "current");
+
+    notify_typing_ac = autocomplete_new();
+    autocomplete_add(notify_typing_ac, "on");
+    autocomplete_add(notify_typing_ac, "off");
+    autocomplete_add(notify_typing_ac, "current");
 
     sub_ac = autocomplete_new();
     autocomplete_add(sub_ac, "request");
@@ -1167,6 +1175,7 @@ cmd_uninit(void)
     autocomplete_free(notify_ac);
     autocomplete_free(notify_message_ac);
     autocomplete_free(notify_room_ac);
+    autocomplete_free(notify_typing_ac);
     autocomplete_free(sub_ac);
     autocomplete_free(titlebar_ac);
     autocomplete_free(log_ac);
@@ -1281,6 +1290,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(notify_ac);
     autocomplete_reset(notify_message_ac);
     autocomplete_reset(notify_room_ac);
+    autocomplete_reset(notify_typing_ac);
     autocomplete_reset(sub_ac);
 
     if (ui_current_win_type() == WIN_MUC) {
@@ -1806,6 +1816,11 @@ _notify_autocomplete(char *input, int *size)
         return result;
     }
 
+    result = autocomplete_param_with_func(input, size, "/notify typing current", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
     result = autocomplete_param_with_ac(input, size, "/notify room", notify_room_ac);
     if (result != NULL) {
         return result;
@@ -1816,7 +1831,12 @@ _notify_autocomplete(char *input, int *size)
         return result;
     }
 
-    gchar *boolean_choices[] = { "/notify typing", "/notify invite", "/notify sub" };
+    result = autocomplete_param_with_ac(input, size, "/notify typing", notify_typing_ac);
+    if (result != NULL) {
+        return result;
+    }
+
+    gchar *boolean_choices[] = { "/notify invite", "/notify sub" };
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],
             prefs_autocomplete_boolean_choice);

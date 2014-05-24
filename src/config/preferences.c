@@ -400,6 +400,7 @@ _get_group(preference_t pref)
         case PREF_OUTTYPE:
             return PREF_GROUP_CHATSTATES;
         case PREF_NOTIFY_TYPING:
+        case PREF_NOTIFY_TYPING_CURRENT:
         case PREF_NOTIFY_MESSAGE:
         case PREF_NOTIFY_MESSAGE_CURRENT:
         case PREF_NOTIFY_ROOM:
@@ -464,6 +465,8 @@ _get_key(preference_t pref)
             return "outtype";
         case PREF_NOTIFY_TYPING:
             return "typing";
+        case PREF_NOTIFY_TYPING_CURRENT:
+            return "typing.current";
         case PREF_NOTIFY_MESSAGE:
             return "message";
         case PREF_NOTIFY_MESSAGE_CURRENT:
@@ -515,6 +518,7 @@ _get_default_boolean(preference_t pref)
         case PREF_LOG_SHARED:
         case PREF_NOTIFY_MESSAGE_CURRENT:
         case PREF_NOTIFY_ROOM_CURRENT:
+        case PREF_NOTIFY_TYPING_CURRENT:
             return TRUE;
         default:
             return FALSE;

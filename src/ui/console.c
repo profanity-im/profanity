@@ -1181,6 +1181,11 @@ _cons_notify_setting(void)
     else
         cons_show("Composing (/notify typing)          : OFF");
 
+    if (prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT))
+        cons_show("Composing current (/notify typing)  : ON");
+    else
+        cons_show("Composing current (/notify typing)  : OFF");
+
     if (prefs_get_boolean(PREF_NOTIFY_INVITE))
         cons_show("Room invites (/notify invite)       : ON");
     else
