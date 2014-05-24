@@ -1701,8 +1701,14 @@ _ui_room_message(const char * const room_jid, const char * const nick,
         if (g_strcmp0(room_setting, "on") == 0) {
             notify = TRUE;
         }
-        if ( (g_strcmp0(room_setting, "mention") == 0) && (g_strrstr(message, nick) != NULL) ) {
-            notify = TRUE;
+        if (g_strcmp0(room_setting, "mention") == 0) {
+            char *message_lower = g_utf8_strdown(message, -1);
+            char *nick_lower = g_utf8_strdown(nick, -1);
+            if (g_strrstr(message_lower, nick_lower) != NULL) {
+                notify = TRUE;
+            }
+            g_free(message_lower);
+            g_free(nick_lower);
         }
         if (notify) {
             Jid *jidp = jid_create(room_jid);
