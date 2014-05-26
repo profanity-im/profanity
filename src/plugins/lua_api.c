@@ -73,7 +73,6 @@ static int
 lua_api_register_timed(lua_State *L)
 {
     int interval_seconds = lua_tonumber(L, -1);
-    cons_show("interval seconds = %d", interval_seconds);
     lua_pop(L, 1);
     int *p_callback_ref = malloc(sizeof(int));
     *p_callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);

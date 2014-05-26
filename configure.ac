@@ -120,8 +120,8 @@ elif test "x$enable_lua_plugins" != xno; then
     #AX_PROG_LUA
     #AX_LUA_HEADERS
     #AX_LUA_LIBS
-    LUA_INCLUDE="-I/usr/include/lua5.1"
-    LUA_LIB="-llua5.1"
+    LUA_INCLUDE="-I/usr/include/lua5.2"
+    LUA_LIB="-llua5.2"
     AM_CONDITIONAL([BUILD_LUA_API], [true])
     AC_DEFINE([HAVE_LUA], [1], [Lua support])
 else
