@@ -24,20 +24,20 @@ _mock_otr_keygen(ProfAccount *account)
 static char *
 _mock_otr_libotr_version(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 static char *
 _mock_otr_get_my_fingerprint(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 static char *
 _mock_otr_get_their_fingerprint(const char * const recipient)
 {
     check_expected(recipient);
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 static gboolean
@@ -49,7 +49,7 @@ _mock_otr_key_loaded(void)
 static char *
 _mock_otr_start_query(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 void

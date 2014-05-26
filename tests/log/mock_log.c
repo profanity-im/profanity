@@ -41,7 +41,7 @@ void log_msg(log_level_t level, const char * const area,
     const char * const msg) {}
 char * get_log_file_location(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 log_level_t log_level_from_string(char *log_level)
@@ -56,7 +56,7 @@ void chat_log_close(void) {}
 GSList * chat_log_get_previous(const gchar * const login,
     const gchar * const recipient, GSList *history)
 {
-    return (GSList *)mock();
+    return mock_ptr_type(GSList *);
 }
 
 void groupchat_log_init(void) {}

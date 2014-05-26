@@ -11,13 +11,13 @@ static ProfAccount *
 _mock_accounts_get_account(const char * const name)
 {
     check_expected(name);
-    return (ProfAccount *)mock();
+    return mock_ptr_type(ProfAccount *);
 }
 
 gchar **
 _mock_accounts_get_list(void)
 {
-    return (gchar **)mock();
+    return mock_ptr_type(gchar **);
 }
 
 void

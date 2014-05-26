@@ -10,15 +10,15 @@ install:
     - sudo make install
     - cd ..
     - rm -rf libstrophe
-    - wget https://open.cryptomilk.org/attachments/download/34/cmocka-0.3.2.tar.xz
-    - tar -xvf cmocka-0.3.2.tar.xz
-    - cd cmocka-0.3.2
+    - wget https://open.cryptomilk.org/attachments/download/42/cmocka-0.4.1.tar.xz
+    - tar -xvf cmocka-0.4.1.tar.xz
+    - cd cmocka-0.4.1
     - mkdir build
     - cd build
     - cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug ..
     - make
     - sudo make install
     - cd ../..
-    - rm -rf cmocka-0.3.2
+    - rm -rf cmocka-0.4.1
     - ./bootstrap.sh
 script: ./configure && make && make check
