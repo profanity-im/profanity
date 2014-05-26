@@ -73,7 +73,7 @@ void _mock_cons_show_account_list(gchar **accounts)
 static
 char * _mock_ui_ask_password(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 static
@@ -91,7 +91,7 @@ win_type_t _mock_ui_current_win_type(void)
 static
 char * _mock_ui_current_recipeint(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 static

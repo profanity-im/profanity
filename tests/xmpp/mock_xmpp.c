@@ -17,7 +17,7 @@ _mock_jabber_get_connection_status(void)
 static char *
 _mock_jabber_get_account_name(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 static void
@@ -47,7 +47,7 @@ _mock_jabber_connect_with_account(const ProfAccount * const account)
 static char *
 _mock_jabber_get_presence_message(void)
 {
-    return (char *)mock();
+    return mock_ptr_type(char *);
 }
 
 static void
@@ -61,7 +61,7 @@ _mock_presence_update(resource_presence_t status, const char * const msg, int id
 static const GList *
 _mock_bookmark_get_list(void)
 {
-    return (GList *)mock();
+    return mock_ptr_type(GList *);
 }
 
 static gboolean

@@ -370,12 +370,12 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
         return 1;
 
     // ALT-LEFT
-    } else if ((result == KEY_CODE_YES) && (ch == 537)) {
+    } else if ((result == KEY_CODE_YES) && (ch == 537 || ch == 542)) {
         ui_previous_win();
         return 1;
 
     // ALT-RIGHT
-    } else if ((result == KEY_CODE_YES) && (ch == 552)) {
+    } else if ((result == KEY_CODE_YES) && (ch == 552 || ch == 557)) {
         ui_next_win();
         return 1;
 
