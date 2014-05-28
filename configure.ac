@@ -146,11 +146,9 @@ if test "x$enable_plugins" = xno; then
     AM_CONDITIONAL([BUILD_LUA_API], [false])
 elif test "x$enable_lua_plugins" != xno; then
     # TODO get the following macros working
-    #AX_PROG_LUA
-    #AX_LUA_HEADERS
-    #AX_LUA_LIBS
-    LUA_INCLUDE="-I/usr/include/lua5.2"
-    LUA_LIB="-llua5.2"
+    AX_PROG_LUA
+    AX_LUA_HEADERS
+    AX_LUA_LIBS
     AM_CONDITIONAL([BUILD_LUA_API], [true])
     AC_DEFINE([HAVE_LUA], [1], [Lua support])
 else
