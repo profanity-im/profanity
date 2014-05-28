@@ -1,0 +1,4 @@
+#!/bin/sh
+
+./configure --enable-python-plugins --enable-ruby-plugins --enable-c-plugins --disable-lua-plugins CFLAGS='-g -O0' CXXFLAGS='-g -O0'
+
