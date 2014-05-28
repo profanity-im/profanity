@@ -23,6 +23,10 @@
 #ifndef RUBY_API_H
 #define RUBY_API_H
 
+#ifndef STR2CSTR
+#define STR2CSTR(x) StringValuePtr(x)
+#endif
+
 void ruby_env_init(void);
 void ruby_api_init(void);
 void ruby_shutdown(void);

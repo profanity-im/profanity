@@ -56,7 +56,9 @@ AC_ARG_WITH([xscreensaver],
 AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 
+
 ### plugins
+
 # ruby
 if test "x$enable_plugins" = xno; then
     AM_CONDITIONAL([BUILD_RUBY_API], [false])
@@ -65,10 +67,37 @@ elif test "x$enable_ruby_plugins" != xno; then
     if test "$RUBY_CMD_EXISTS" == "yes"; then
         ac_mkmf_result=`ruby -rmkmf -e ";" 2>&1`
         if test -z "$ac_mkmf_result"; then
-            AC_DEFUN([AX_WITH_RUBY],[
-                AX_WITH_PROG(RUBY,ruby,$1,$2)
-            ])
-            AX_RUBY_DEVEL
+            AC_MSG_CHECKING(Ruby rbconfig)
+                ruby_rbconfig="RbConfig"
+                if ! ruby -r rbconfig -e 'RbConfig' >/dev/null 2>/dev/null; then
+	                ruby_rbconfig="Config"
+                fi
+            AC_MSG_RESULT($ruby_rbconfig)
+            
+            AC_MSG_CHECKING(Ruby cflags)
+            rubyhdrdir=`ruby -r mkmf -e "print $ruby_rbconfig::CONFIG[['rubyhdrdir']] || $ruby_rbconfig::CONFIG[['archdir']]" 2>/dev/null`
+            if test "X$rubyhdrdir" != "X"; then
+                RUBY_CFLAGS="-I$rubyhdrdir"
+                rubyarch=`ruby -r rbconfig -e "print $ruby_rbconfig::CONFIG[['arch']]"`
+                if test -d "$rubyhdrdir/$rubyarch"; then
+                    RUBY_CFLAGS="$RUBY_CFLAGS -I$rubyhdrdir/$rubyarch"
+                fi
+                AC_MSG_RESULT($RUBY_CFLAGS)
+
+                AC_MSG_CHECKING(Ruby libs)
+	            rubylibs=`ruby -r rbconfig -e "print $ruby_rbconfig::CONFIG[['LIBS']]"`
+	            RUBY_LIBS="$rubylibs"
+	            librubyarg=`ruby -r rbconfig -e "print $ruby_rbconfig.expand($ruby_rbconfig::CONFIG[['LIBRUBYARG']])"`
+	            RUBY_LIBS="$librubyarg $RUBY_LIBS"
+	            rubylibdir=`ruby -r rbconfig -e "print $ruby_rbconfig.expand($ruby_rbconfig::CONFIG[['libdir']])"`
+	            RUBY_LIBS="$RUBY_LIBS -L$rubylibdir"
+                AC_MSG_RESULT($RUBY_LIBS)
+
+                AC_MSG_CHECKING(Ruby ld flags)
+	            rubyldflags=`ruby -r rbconfig -e "print $ruby_rbconfig::CONFIG[['LDFLAGS']]"`
+	            RUBY_LDFLAGS="$rubyldflags"
+                AC_MSG_RESULT($rubyldflags)
+            fi
             AM_CONDITIONAL([BUILD_RUBY_API], [true])
             AC_DEFINE([HAVE_RUBY], [1], [Ruby support])
         else
@@ -318,9 +347,9 @@ AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_LDFLAGS="$AM_LDFLAGS $PYTHON_LDFLAGS $RUBY_LDFLAGS $LUA_LIB -export-dynamic"
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $GCRYPT_CFLAGS $PYTHON_CPPFLAGS $RUBY_CPPFLAGS $LUA_INCLUDE"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $GCRYPT_CFLAGS $PYTHON_CPPFLAGS $RUBY_CFLAGS $LUA_INCLUDE"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS $GCRYPT_LIBS"
+LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS $GCRYPT_LIBS $RUBY_LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
