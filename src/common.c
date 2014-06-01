@@ -31,7 +31,8 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <glib.h>
-#include <gcrypt.h>
+
+#include "tools/sha1.h"
 
 #include "log.h"
 #include "common.h"
@@ -416,12 +417,17 @@ generate_unique_id(char *prefix)
 char *
 sha1_hash(char *str)
 {
-   int msg_length = strlen(str);
-   int hash_length = gcry_md_get_algo_dlen(GCRY_MD_SHA1);
-   unsigned char hash[ hash_length ];
-   gcry_md_hash_buffer(GCRY_MD_SHA1, hash, str, msg_length);
+    SHA1_CTX ctx;
+    uint8_t digest[20];
+    uint8_t *input = (uint8_t*)malloc(strlen(str) + 1);
+    memcpy(input, str, strlen(str) + 1);
 
-   return g_base64_encode(hash, sizeof(hash));
+    SHA1_Init(&ctx);
+    SHA1_Update(&ctx, input, strlen(str));
+    SHA1_Final(&ctx, digest);
+
+    free(input);
+    return g_base64_encode(digest, sizeof(digest));
 }
 
 int

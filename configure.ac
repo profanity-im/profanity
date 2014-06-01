@@ -122,7 +122,6 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
-AX_LIB_GCRYPT([yes])
 
 AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lcurl"])
 
@@ -218,9 +217,9 @@ AC_CHECK_HEADERS([ncurses.h], [], [])
 AM_CFLAGS="-Wall -Wno-deprecated-declarations"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $GCRYPT_CFLAGS"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS $GCRYPT_LIBS"
+LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
