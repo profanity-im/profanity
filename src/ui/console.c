@@ -1174,7 +1174,13 @@ _cons_notify_setting(void)
         cons_show("Messages text (/notify message)     : OFF");
 
     char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+    if (g_strcmp0(room_setting, "on") == 0) {
+    cons_show    ("Room messages (/notify room)        : ON");
+    } else if (g_strcmp0(room_setting, "off") == 0) {
+    cons_show    ("Room messages (/notify room)        : OFF");
+    } else {
     cons_show    ("Room messages (/notify room)        : %s", room_setting);
+    }
 
     if (prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT))
         cons_show("Room current (/notify room)         : ON");
