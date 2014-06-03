@@ -1832,7 +1832,20 @@ _ui_status_room(const char * const contact)
         win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
     }
 }
+/*
+static void
+_ui_info_room(const char * const contact)
+{
+    PContact pcontact = muc_get_participant(ui_current_recipient(), contact);
+    ProfWin *current = wins_get_current();
 
+    if (pcontact != NULL) {
+        win_show_info(current, pcontact);
+    } else {
+        win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
+    }
+}
+*/
 static gint
 _ui_unread(void)
 {
