@@ -35,6 +35,7 @@
 
 #include "config/theme.h"
 #include "ui/window.h"
+#include "xmpp/xmpp.h"
 
 static void _win_chat_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
@@ -217,6 +218,135 @@ win_show_contact(ProfWin *window, PContact contact)
 
     wprintw(window->win, "\n");
     win_presence_colour_off(window, presence);
+}
+
+void
+win_show_info(ProfWin *window, PContact contact)
+{
+    const char *barejid = p_contact_barejid(contact);
+    const char *name = p_contact_name(contact);
+    const char *presence = p_contact_presence(contact);
+    const char *sub = p_contact_subscription(contact);
+    GList *resources = p_contact_get_available_resources(contact);
+    GList *ordered_resources = NULL;
+    GDateTime *last_activity = p_contact_last_activity(contact);
+    WINDOW *win = window->win;
+
+    win_print_time(window, '-');
+    wprintw(win, "\n");
+    win_print_time(window, '-');
+    win_presence_colour_on(window, presence);
+    wprintw(win, "%s", barejid);
+    if (name != NULL) {
+        wprintw(win, " (%s)", name);
+    }
+    win_presence_colour_off(window, presence);
+    wprintw(win, ":\n");
+
+    if (sub != NULL) {
+        win_print_time(window, '-');
+        wprintw(win, "Subscription: %s\n", sub);
+    }
+
+    if (last_activity != NULL) {
+        GDateTime *now = g_date_time_new_now_local();
+        GTimeSpan span = g_date_time_difference(now, last_activity);
+
+        win_print_time(window, '-');
+        wprintw(win, "Last activity: ");
+
+        int hours = span / G_TIME_SPAN_HOUR;
+        span = span - hours * G_TIME_SPAN_HOUR;
+        if (hours > 0) {
+            wprintw(win, "%dh", hours);
+        }
+
+        int minutes = span / G_TIME_SPAN_MINUTE;
+        span = span - minutes * G_TIME_SPAN_MINUTE;
+        wprintw(win, "%dm", minutes);
+
+        int seconds = span / G_TIME_SPAN_SECOND;
+        wprintw(win, "%ds", seconds);
+
+        wprintw(win, "\n");
+
+        g_date_time_unref(now);
+    }
+
+    if (resources != NULL) {
+        win_print_time(window, '-');
+        wprintw(win, "Resources:\n");
+
+        // sort in order of availabiltiy
+        while (resources != NULL) {
+            Resource *resource = resources->data;
+            ordered_resources = g_list_insert_sorted(ordered_resources,
+                resource, (GCompareFunc)resource_compare_availability);
+            resources = g_list_next(resources);
+        }
+    }
+
+    while (ordered_resources != NULL) {
+        Resource *resource = ordered_resources->data;
+        const char *resource_presence = string_from_resource_presence(resource->presence);
+        win_print_time(window, '-');
+        win_presence_colour_on(window, resource_presence);
+        wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+        if (resource->status != NULL) {
+            wprintw(win, ", \"%s\"", resource->status);
+        }
+        wprintw(win, "\n");
+        win_presence_colour_off(window, resource_presence);
+
+        if (resource->caps_str != NULL) {
+            Capabilities *caps = caps_get(resource->caps_str);
+            if (caps != NULL) {
+                // show identity
+                if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                    win_print_time(window, '-');
+                    wprintw(win, "    Identity: ");
+                    if (caps->name != NULL) {
+                        wprintw(win, "%s", caps->name);
+                        if ((caps->category != NULL) || (caps->type != NULL)) {
+                            wprintw(win, " ");
+                        }
+                    }
+                    if (caps->type != NULL) {
+                        wprintw(win, "%s", caps->type);
+                        if (caps->category != NULL) {
+                            wprintw(win, " ");
+                        }
+                    }
+                    if (caps->category != NULL) {
+                        wprintw(win, "%s", caps->category);
+                    }
+                    wprintw(win, "\n");
+                }
+                if (caps->software != NULL) {
+                    win_print_time(window, '-');
+                    wprintw(win, "    Software: %s", caps->software);
+                }
+                if (caps->software_version != NULL) {
+                    wprintw(win, ", %s", caps->software_version);
+                }
+                if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                    wprintw(win, "\n");
+                }
+                if (caps->os != NULL) {
+                    win_print_time(window, '-');
+                    wprintw(win, "    OS: %s", caps->os);
+                }
+                if (caps->os_version != NULL) {
+                    wprintw(win, ", %s", caps->os_version);
+                }
+                if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                    wprintw(win, "\n");
+                }
+            }
+        }
+
+        ordered_resources = g_list_next(ordered_resources);
+    }
 }
 
 void

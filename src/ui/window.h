@@ -77,5 +77,6 @@ void win_show_status_string(ProfWin *window, const char * const from,
     const char * const default_show);
 void win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
+void win_show_info(ProfWin *window, PContact contact);
 
 #endif
