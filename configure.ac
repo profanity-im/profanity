@@ -10,6 +10,7 @@ AX_PREFIX_CONFIG_H([src/prof_config.h], [PROF], [src/config.h])
 
 ### Checks for programs.
 AC_PROG_CC
+AC_PROG_LIBTOOL
 
 ### Get canonical host
 AC_CANONICAL_HOST
