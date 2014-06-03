@@ -153,7 +153,9 @@ void (*ui_handle_room_join_error)(const char * const room, const char * const er
 void (*ui_status_room)(const char * const contact);
 void (*ui_info_room)(const char * const contact);
 void (*ui_status)(void);
+void (*ui_info)(void);
 void (*ui_status_private)(void);
+void (*ui_info_private)(void);
 
 void (*ui_create_duck_win)(void);
 void (*ui_open_duck_win)(void);

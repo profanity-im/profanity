@@ -1402,28 +1402,16 @@ cmd_info(gchar **args, struct cmd_help_t help)
             break;
         case WIN_CHAT:
             if (usr != NULL) {
-                cons_show("No parameter required for /info in chat.");
+                ui_current_print_line("No parameter required when in chat.");
             } else {
-                pcontact = roster_get_contact(recipient);
-                if (pcontact != NULL) {
-                    cons_show_info(pcontact);
-                } else {
-                    cons_show("No such contact \"%s\" in roster.", recipient);
-                }
+                ui_info();
             }
             break;
         case WIN_PRIVATE:
             if (usr != NULL) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
-                Jid *jid = jid_create(recipient);
-                pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-                if (pcontact != NULL) {
-                    cons_show_info(pcontact);
-                } else {
-                    cons_show("No such participant \"%s\" in room.", jid->resourcepart);
-                }
-                jid_destroy(jid);
+                ui_info_private();
             }
             break;
         case WIN_CONSOLE:

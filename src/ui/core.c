@@ -1805,6 +1805,20 @@ _ui_status(void)
 }
 
 static void
+_ui_info(void)
+{
+    char *recipient = ui_current_recipient();
+    PContact pcontact = roster_get_contact(recipient);
+    ProfWin *current = wins_get_current();
+
+    if (pcontact != NULL) {
+        win_show_info(current, pcontact);
+    } else {
+        win_print_line(current, '-', 0, "Error getting contact info.");
+    }
+}
+
+static void
 _ui_status_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
@@ -1813,6 +1827,22 @@ _ui_status_private(void)
 
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
+    } else {
+        win_print_line(current, '-', 0, "Error getting contact info.");
+    }
+
+    jid_destroy(jid);
+}
+
+static void
+_ui_info_private(void)
+{
+    Jid *jid = jid_create(ui_current_recipient());
+    PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+    ProfWin *current = wins_get_current();
+
+    if (pcontact != NULL) {
+        win_show_info(current, pcontact);
     } else {
         win_print_line(current, '-', 0, "Error getting contact info.");
     }
@@ -2172,7 +2202,9 @@ ui_init_module(void)
     ui_room_subject = _ui_room_subject;
     ui_room_broadcast = _ui_room_broadcast;
     ui_status = _ui_status;
+    ui_info = _ui_info;
     ui_status_private = _ui_status_private;
+    ui_info_private = _ui_info_private;
     ui_status_room = _ui_status_room;
     ui_info_room = _ui_info_room;
     ui_unread = _ui_unread;
