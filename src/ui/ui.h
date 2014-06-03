@@ -151,6 +151,7 @@ void (*ui_handle_room_join_error)(const char * const room, const char * const er
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);
+void (*ui_info_room)(const char * const contact);
 void (*ui_status)(void);
 void (*ui_status_private)(void);
 

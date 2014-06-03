@@ -1395,14 +1395,9 @@ cmd_info(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (usr != NULL) {
-                pcontact = muc_get_participant(recipient, usr);
-                if (pcontact != NULL) {
-                    cons_show_info(pcontact);
-                } else {
-                    cons_show("No such participant \"%s\" in room.", usr);
-                }
+                ui_info_room(usr);
             } else {
-                cons_show("No nickname supplied to /info in chat room.");
+                ui_current_print_line("You must specify a nickname.");
             }
             break;
         case WIN_CHAT:

@@ -1832,7 +1832,7 @@ _ui_status_room(const char * const contact)
         win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
     }
 }
-/*
+
 static void
 _ui_info_room(const char * const contact)
 {
@@ -1845,7 +1845,7 @@ _ui_info_room(const char * const contact)
         win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
     }
 }
-*/
+
 static gint
 _ui_unread(void)
 {
@@ -2174,6 +2174,7 @@ ui_init_module(void)
     ui_status = _ui_status;
     ui_status_private = _ui_status_private;
     ui_status_room = _ui_status_room;
+    ui_info_room = _ui_info_room;
     ui_unread = _ui_unread;
     ui_win_unread = _ui_win_unread;
     ui_ask_password = _ui_ask_password;
