@@ -43,6 +43,8 @@ python_env_init(void)
     g_string_append(path, plugins_dir);
     g_string_append(path, "/");
     g_free(plugins_dir);
+    g_string_append(path, ":");
+    g_string_append(path, PROF_PYTHON_SITE_PATH);
     PySys_SetPath(path->str);
     python_check_error();
     g_string_free(path, TRUE);
