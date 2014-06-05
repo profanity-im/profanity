@@ -148,6 +148,24 @@ c_api_win_show(char *tag, char *line)
 }
 
 void
+c_api_win_show_green(char *tag, char *line)
+{
+    api_win_show_green(tag, line);
+}
+
+void
+c_api_win_show_red(char *tag, char *line)
+{
+    api_win_show_red(tag, line);
+}
+
+void
+c_api_win_show_cyan(char *tag, char *line)
+{
+    api_win_show_cyan(tag, line);
+}
+
+void
 c_command_callback(PluginCommand *command, gchar **args)
 {
     CommandWrapper *wrapper = command->callback;
@@ -190,4 +208,7 @@ c_api_init(void)
     prof_win_focus = c_api_win_focus;
     prof_win_process_line = c_api_win_process_line;
     prof_win_show = c_api_win_show;
+    prof_win_show_green = c_api_win_show_green;
+    prof_win_show_red = c_api_win_show_red;
+    prof_win_show_cyan = c_api_win_show_cyan;
 }

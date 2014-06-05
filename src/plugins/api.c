@@ -29,6 +29,7 @@
 #include "profanity.h"
 #include "ui/windows.h"
 #include "ui/ui.h"
+#include "config/theme.h"
 
 void
 api_cons_alert(void)
@@ -166,8 +167,46 @@ void
 api_win_show(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    win_print_time(window, '-');
-    wprintw(window->win, "%s\n", line);
+    win_print_line(window, '-', 0, line);
+
+    // refresh if current
+    if (wins_is_current(window)) {
+        int num = wins_get_num(window);
+        ui_switch_win(num);
+    }
+}
+
+void
+api_win_show_green(const char *tag, const char *line)
+{
+    ProfWin *window = wins_get_by_recipient(tag);
+    win_print_line(window, '-', COLOUR_ONLINE, line);
+
+    // refresh if current
+    if (wins_is_current(window)) {
+        int num = wins_get_num(window);
+        ui_switch_win(num);
+    }
+}
+
+void
+api_win_show_red(const char *tag, const char *line)
+{
+    ProfWin *window = wins_get_by_recipient(tag);
+    win_print_line(window, '-', COLOUR_OFFLINE, line);
+
+    // refresh if current
+    if (wins_is_current(window)) {
+        int num = wins_get_num(window);
+        ui_switch_win(num);
+    }
+}
+
+void
+api_win_show_cyan(const char *tag, const char *line)
+{
+    ProfWin *window = wins_get_by_recipient(tag);
+    win_print_line(window, '-', COLOUR_AWAY, line);
 
     // refresh if current
     if (wins_is_current(window)) {

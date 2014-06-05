@@ -244,6 +244,48 @@ python_api_win_show(PyObject *self, PyObject *args)
     return Py_BuildValue("");
 }
 
+static PyObject *
+python_api_win_show_green(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+    char *line = NULL;
+
+    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
+        return Py_BuildValue("");
+    }
+
+    api_win_show_green(tag, line);
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_win_show_red(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+    char *line = NULL;
+
+    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
+        return Py_BuildValue("");
+    }
+
+    api_win_show_red(tag, line);
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_win_show_cyan(PyObject *self, PyObject *args)
+{
+    char *tag = NULL;
+    char *line = NULL;
+
+    if (!PyArg_ParseTuple(args, "ss", &tag, &line)) {
+        return Py_BuildValue("");
+    }
+
+    api_win_show_cyan(tag, line);
+    return Py_BuildValue("");
+}
+
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
@@ -321,6 +363,9 @@ static PyMethodDef apiMethods[] = {
     { "win_create", python_api_win_create, METH_VARARGS, "Create a new window." },
     { "win_focus", python_api_win_focus, METH_VARARGS, "Focus a window." },
     { "win_show", python_api_win_show, METH_VARARGS, "Show text in the window." },
+    { "win_show_green", python_api_win_show_green, METH_VARARGS, "Show green text in the window." },
+    { "win_show_red", python_api_win_show_red, METH_VARARGS, "Show red text in the window." },
+    { "win_show_cyan", python_api_win_show_cyan, METH_VARARGS, "Show cyan text in the window." },
     { "win_process_line", python_api_win_process_line, METH_VARARGS, "Send a line of input to a window." },
     { NULL, NULL, 0, NULL }
 };

@@ -48,5 +48,8 @@ void api_win_create(const char *tag, void *callback,
 void api_win_focus(const char *tag);
 void api_win_process_line(const char *tag, const char * const line);
 void api_win_show(const char *tag, const char *line);
+void api_win_show_green(const char *tag, const char *line);
+void api_win_show_red(const char *tag, const char *line);
+void api_win_show_cyan(const char *tag, const char *line);
 
 #endif

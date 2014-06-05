@@ -202,6 +202,36 @@ ruby_api_win_show(VALUE self, VALUE v_tag, VALUE v_line)
     return Qnil;
 }
 
+static VALUE
+ruby_api_win_show_green(VALUE self, VALUE v_tag, VALUE v_line)
+{
+    char *tag = STR2CSTR(v_tag);
+    char *line = STR2CSTR(v_line);
+
+    api_win_show_green(tag, line);
+    return Qnil;
+}
+
+static VALUE
+ruby_api_win_show_red(VALUE self, VALUE v_tag, VALUE v_line)
+{
+    char *tag = STR2CSTR(v_tag);
+    char *line = STR2CSTR(v_line);
+
+    api_win_show_red(tag, line);
+    return Qnil;
+}
+
+static VALUE
+ruby_api_win_show_cyan(VALUE self, VALUE v_tag, VALUE v_line)
+{
+    char *tag = STR2CSTR(v_tag);
+    char *line = STR2CSTR(v_line);
+
+    api_win_show_cyan(tag, line);
+    return Qnil;
+}
+
 void
 ruby_command_callback(PluginCommand *command, gchar **args)
 {
@@ -245,7 +275,6 @@ ruby_window_callback(PluginWindowCallback *window_callback, char *tag, char *lin
             rb_str_new2(tag), rb_str_new2(line));
 }
 
-
 static VALUE prof_module;
 
 void
@@ -269,4 +298,7 @@ ruby_api_init(void)
     rb_define_module_function(prof_module, "win_focus", RUBY_METHOD_FUNC(ruby_api_win_focus), 1);
     rb_define_module_function(prof_module, "win_process_line", RUBY_METHOD_FUNC(ruby_api_win_process_line), 2);
     rb_define_module_function(prof_module, "win_show", RUBY_METHOD_FUNC(ruby_api_win_show), 2);
+    rb_define_module_function(prof_module, "win_show_green", RUBY_METHOD_FUNC(ruby_api_win_show_green), 2);
+    rb_define_module_function(prof_module, "win_show_red", RUBY_METHOD_FUNC(ruby_api_win_show_red), 2);
+    rb_define_module_function(prof_module, "win_show_cyan", RUBY_METHOD_FUNC(ruby_api_win_show_cyan), 2);
 }
