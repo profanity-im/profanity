@@ -140,6 +140,11 @@ api_win_create(const char *tag, void *callback,
     window->callback_func = callback_func;
     callbacks_add_window_handler(tag, window);
     wins_new(tag, WIN_PLUGIN);
+
+    // set status bar active
+    ProfWin *win = wins_get_by_recipient(tag);
+    int num = wins_get_num(win);
+    ui_status_bar_active(num);
 }
 
 void
@@ -163,4 +168,10 @@ api_win_show(const char *tag, const char *line)
     ProfWin *window = wins_get_by_recipient(tag);
     win_print_time(window, '-');
     wprintw(window->win, "%s\n", line);
+
+    // refresh if current
+    if (wins_is_current(window)) {
+        int num = wins_get_num(window);
+        ui_switch_win(num);
+    }
 }

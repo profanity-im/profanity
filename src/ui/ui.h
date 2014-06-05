@@ -258,6 +258,10 @@ void (*cons_autoconnect_setting)(void);
 void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
 void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
 
+void (*ui_status_bar_inactive)(const int win);
+void (*ui_status_bar_active)(const int win);
+void (*ui_status_bar_new)(const int win);
+
 // desktop notifier actions
 void (*notifier_init)(void);
 void (*notifier_uninit)(void);

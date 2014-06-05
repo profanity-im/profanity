@@ -2144,6 +2144,24 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
     }
 }
 
+static void
+_ui_status_bar_inactive(const int win)
+{
+    status_bar_inactive(win);
+}
+
+static void
+_ui_status_bar_active(const int win)
+{
+    status_bar_active(win);
+}
+
+static void
+_ui_status_bar_new(const int win)
+{
+    status_bar_new(win);
+}
+
 void
 ui_init_module(void)
 {
@@ -2256,4 +2274,7 @@ ui_init_module(void)
     ui_open_xmlconsole_win = _ui_open_xmlconsole_win;
     ui_handle_room_join_error = _ui_handle_room_join_error;
     ui_swap_wins = _ui_swap_wins;
+    ui_status_bar_inactive = _ui_status_bar_inactive;
+    ui_status_bar_active = _ui_status_bar_active;
+    ui_status_bar_new = _ui_status_bar_new;
 }
