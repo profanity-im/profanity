@@ -53,5 +53,6 @@ void (*prof_win_show)(PROF_WIN_TAG win, char *line);
 void (*prof_win_show_green)(PROF_WIN_TAG win, char *line);
 void (*prof_win_show_red)(PROF_WIN_TAG win, char *line);
 void (*prof_win_show_cyan)(PROF_WIN_TAG win, char *line);
+void (*prof_win_show_yellow)(PROF_WIN_TAG win, char *line);
 
 #endif

@@ -232,6 +232,16 @@ ruby_api_win_show_cyan(VALUE self, VALUE v_tag, VALUE v_line)
     return Qnil;
 }
 
+static VALUE
+ruby_api_win_show_yellow(VALUE self, VALUE v_tag, VALUE v_line)
+{
+    char *tag = STR2CSTR(v_tag);
+    char *line = STR2CSTR(v_line);
+
+    api_win_show_yellow(tag, line);
+    return Qnil;
+}
+
 void
 ruby_command_callback(PluginCommand *command, gchar **args)
 {
@@ -301,4 +311,5 @@ ruby_api_init(void)
     rb_define_module_function(prof_module, "win_show_green", RUBY_METHOD_FUNC(ruby_api_win_show_green), 2);
     rb_define_module_function(prof_module, "win_show_red", RUBY_METHOD_FUNC(ruby_api_win_show_red), 2);
     rb_define_module_function(prof_module, "win_show_cyan", RUBY_METHOD_FUNC(ruby_api_win_show_cyan), 2);
+    rb_define_module_function(prof_module, "win_show_yellow", RUBY_METHOD_FUNC(ruby_api_win_show_yellow), 2);
 }

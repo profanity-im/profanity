@@ -51,5 +51,6 @@ void api_win_show(const char *tag, const char *line);
 void api_win_show_green(const char *tag, const char *line);
 void api_win_show_red(const char *tag, const char *line);
 void api_win_show_cyan(const char *tag, const char *line);
+void api_win_show_yellow(const char *tag, const char *line);
 
 #endif

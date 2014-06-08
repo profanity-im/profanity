@@ -228,6 +228,14 @@ lua_api_win_show_cyan(lua_State *L)
     return 0;
 }
 
+static int
+lua_api_win_show_yellow(lua_State *L)
+{
+    const char *tag = lua_tostring(L, -2);
+    const char *line = lua_tostring(L, -1);
+    api_win_show_yellow(tag, line);
+    return 0;
+}
 
 void
 lua_command_callback(PluginCommand *command, gchar **args)
@@ -338,6 +346,8 @@ lua_api_init(lua_State *L)
     lua_setglobal(L, "prof_win_show_red");
     lua_pushcfunction(L, lua_api_win_show_cyan);
     lua_setglobal(L, "prof_win_show_cyan");
+    lua_pushcfunction(L, lua_api_win_show_yellow);
+    lua_setglobal(L, "prof_win_show_yellow");
     lua_pushcfunction(L, lua_api_win_process_line);
     lua_setglobal(L, "prof_win_process_line");
 }

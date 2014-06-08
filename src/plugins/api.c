@@ -214,3 +214,16 @@ api_win_show_cyan(const char *tag, const char *line)
         ui_switch_win(num);
     }
 }
+
+void
+api_win_show_yellow(const char *tag, const char *line)
+{
+    ProfWin *window = wins_get_by_recipient(tag);
+    win_print_line(window, '-', COLOUR_INCOMING, line);
+
+    // refresh if current
+    if (wins_is_current(window)) {
+        int num = wins_get_num(window);
+        ui_switch_win(num);
+    }
+}
