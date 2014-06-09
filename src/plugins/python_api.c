@@ -26,6 +26,7 @@
 
 #include "plugins/api.h"
 #include "plugins/python_api.h"
+#include "plugins/python_plugins.h"
 #include "plugins/callbacks.h"
 
 static PyObject*
@@ -303,6 +304,7 @@ python_api_win_show_yellow(PyObject *self, PyObject *args)
 void
 python_command_callback(PluginCommand *command, gchar **args)
 {
+    disable_python_threads();
     PyObject *p_args = NULL;
     int num_args = g_strv_length(args);
     if (num_args == 0) {
@@ -339,17 +341,21 @@ python_command_callback(PluginCommand *command, gchar **args)
         PyErr_Print();
         PyErr_Clear();
     }
+    allow_python_threads();
 }
 
 void
 python_timed_callback(PluginTimedFunction *timed_function)
 {
+    disable_python_threads();
     PyObject_CallObject(timed_function->callback, NULL);
+    allow_python_threads();
 }
 
 void
 python_window_callback(PluginWindowCallback *window_callback, char *tag, char *line)
 {
+    disable_python_threads();
     PyObject *p_args = NULL;
     p_args = Py_BuildValue("ss", tag, line);
     PyObject_CallObject(window_callback->callback, p_args);
@@ -359,6 +365,7 @@ python_window_callback(PluginWindowCallback *window_callback, char *tag, char *l
         PyErr_Print();
         PyErr_Clear();
     }
+    allow_python_threads();
 }
 
 static PyMethodDef apiMethods[] = {

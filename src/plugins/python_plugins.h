@@ -47,4 +47,7 @@ void python_on_shutdown_hook(ProfPlugin *plugin);
 void python_plugin_destroy(ProfPlugin *plugin);
 void python_check_error(void);
 
+void allow_python_threads();
+void disable_python_threads();
+
 #endif
