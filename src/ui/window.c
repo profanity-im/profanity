@@ -85,7 +85,8 @@ win_print_line(ProfWin *window, const char show_char, int attrs,
 {
     win_print_time(window, show_char);
     wattron(window->win, attrs);
-    wprintw(window->win, "%s\n", msg);
+    waddstr(window->win, msg);
+    wprintw(window->win, "\n");
     wattroff(window->win, attrs);
 }
 
@@ -93,7 +94,8 @@ void
 win_print_line_no_time(ProfWin *window, int attrs, const char * const msg)
 {
     wattron(window->win, attrs);
-    wprintw(window->win, "%s\n", msg);
+    waddstr(window->win, msg);
+    wprintw(window->win, "\n");
     wattroff(window->win, attrs);
 }
 
@@ -107,7 +109,8 @@ win_vprint_line(ProfWin *window, const char show_char, int attrs,
     g_string_vprintf(fmt_msg, msg, arg);
     win_print_time(window, show_char);
     wattron(window->win, attrs);
-    wprintw(window->win, "%s\n", fmt_msg->str);
+    waddstr(window->win, fmt_msg->str);
+    wprintw(window->win, "\n");
     wattroff(window->win, attrs);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
