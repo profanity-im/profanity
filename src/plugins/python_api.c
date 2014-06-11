@@ -28,6 +28,7 @@
 #include "plugins/python_api.h"
 #include "plugins/python_plugins.h"
 #include "plugins/callbacks.h"
+#include "plugins/autocompleters.h"
 
 static PyObject*
 python_api_cons_alert(PyObject *self, PyObject *args)
@@ -85,6 +86,30 @@ python_api_register_timed(PyObject *self, PyObject *args)
         api_register_timed(p_callback, interval_seconds, python_timed_callback);
     }
 
+    return Py_BuildValue("");
+}
+
+static PyObject *
+python_api_register_ac(PyObject *self, PyObject *args)
+{
+    const char *key = NULL;
+    PyObject *items = NULL;
+
+    if (!PyArg_ParseTuple(args, "sO", &key, &items)) {
+        return Py_BuildValue("");
+    }
+
+    Py_ssize_t len = PyList_Size(items);
+    char *c_items[len];
+
+    Py_ssize_t i = 0;
+    for (i = 0; i < len; i++) {
+        PyObject *item = PyList_GetItem(items, i);
+        char *c_item = PyString_AsString(item);
+        c_items[i] = c_item;
+    }
+
+    autocompleters_add(key, c_items);
     return Py_BuildValue("");
 }
 
@@ -359,6 +384,7 @@ static PyMethodDef apiMethods[] = {
     { "cons_show", python_api_cons_show, METH_VARARGS, "Print a line to the console." },
     { "register_command", python_api_register_command, METH_VARARGS, "Register a command." },
     { "register_timed", python_api_register_timed, METH_VARARGS, "Register a timed function." },
+    { "register_ac", python_api_register_ac, METH_VARARGS, "Register an autocompleter." },
     { "send_line", python_api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
