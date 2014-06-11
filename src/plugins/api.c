@@ -26,6 +26,7 @@
 
 #include "log.h"
 #include "plugins/callbacks.h"
+#include "plugins/autocompleters.h"
 #include "profanity.h"
 #include "ui/windows.h"
 #include "ui/ui.h"
@@ -76,6 +77,12 @@ api_register_timed(void *callback, int interval_seconds,
     timed_function->timer = g_timer_new();
 
     callbacks_add_timed(timed_function);
+}
+
+void
+api_register_ac(const char *key, char **items)
+{
+    autocompleters_add(key, items);
 }
 
 void

@@ -1349,6 +1349,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     bookmark_autocomplete_reset();
+    plugins_reset_autocomplete();
 }
 
 // Command execution
@@ -1662,6 +1663,13 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
     g_hash_table_destroy(ac_funcs);
+
+    result = plugins_autocomplete(input, size);
+    if (result != NULL) {
+        ui_replace_input(input, result, size);
+        g_free(result);
+        return;
+    }
 
     return;
 }

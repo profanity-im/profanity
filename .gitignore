@@ -33,7 +33,6 @@ core
 bugs/
 *.pyc
 TODO
-plugins/
 *_key.txt
 *_fingerprints.txt
 src/gitversion.h

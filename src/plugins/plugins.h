@@ -81,5 +81,8 @@ gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
 gchar * plugins_get_dir(void);
 
+char* plugins_autocomplete(char *input, int *size);
+void plugins_reset_autocomplete(void);
+
 void plugins_win_process_line(char *win, const char * const line);
 #endif

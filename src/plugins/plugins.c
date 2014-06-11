@@ -27,6 +27,7 @@
 #include "config/preferences.h"
 #include "log.h"
 #include "plugins/callbacks.h"
+#include "plugins/autocompleters.h"
 #include "plugins/api.h"
 #include "plugins/plugins.h"
 
@@ -58,6 +59,7 @@ void
 plugins_init(void)
 {
     plugins = NULL;
+    autocompleters_init();
 
 #ifdef PROF_HAVE_PYTHON
     python_env_init();
@@ -155,6 +157,18 @@ plugins_get_lang_string(ProfPlugin *plugin)
         default:
             return "Unknown";
     }
+}
+
+char *
+plugins_autocomplete(char *input, int *size)
+{
+    return autocompleters_complete(input, size);
+}
+
+void
+plugins_reset_autocomplete(void)
+{
+    autocompleters_reset();
 }
 
 void

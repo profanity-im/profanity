@@ -30,7 +30,9 @@ core_sources = \
 	src/config/theme.c src/config/theme.h \
 	src/plugins/plugins.h src/plugins/plugins.c \
 	src/plugins/api.h src/plugins/api.c \
-	src/plugins/callbacks.h src/plugins/callbacks.c
+	src/plugins/callbacks.h src/plugins/callbacks.c \
+	src/plugins/autocompleters.c src/plugins/autocompleters.h
+
 
 tests_sources = \
 	src/contact.c src/contact.h src/common.c \
@@ -56,6 +58,7 @@ tests_sources = \
     src/plugins/plugins.h src/plugins/plugins.c \
     src/plugins/api.h src/plugins/api.c \
     src/plugins/callbacks.h src/plugins/callbacks.c \
+	src/plugins/autocompleters.c src/plugins/autocompleters.h \
     src/server_events.c src/server_events.h \
     tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
     tests/otr/mock_otr.h tests/otr/mock_otr.c \
