@@ -183,16 +183,6 @@ ruby_api_win_focus(VALUE self, VALUE v_tag)
 }
 
 static VALUE
-ruby_api_win_process_line(VALUE self, VALUE v_tag, VALUE v_line)
-{
-    char *tag = STR2CSTR(v_tag);
-    char *line = STR2CSTR(v_line);
-
-    api_win_process_line(tag, line);
-    return Qnil;
-}
-
-static VALUE
 ruby_api_win_show(VALUE self, VALUE v_tag, VALUE v_line)
 {
     char *tag = STR2CSTR(v_tag);
@@ -306,7 +296,6 @@ ruby_api_init(void)
     rb_define_module_function(prof_module, "win_exists", RUBY_METHOD_FUNC(ruby_api_win_exists), 1);
     rb_define_module_function(prof_module, "win_create", RUBY_METHOD_FUNC(ruby_api_win_create), 2);
     rb_define_module_function(prof_module, "win_focus", RUBY_METHOD_FUNC(ruby_api_win_focus), 1);
-    rb_define_module_function(prof_module, "win_process_line", RUBY_METHOD_FUNC(ruby_api_win_process_line), 2);
     rb_define_module_function(prof_module, "win_show", RUBY_METHOD_FUNC(ruby_api_win_show), 2);
     rb_define_module_function(prof_module, "win_show_green", RUBY_METHOD_FUNC(ruby_api_win_show_green), 2);
     rb_define_module_function(prof_module, "win_show_red", RUBY_METHOD_FUNC(ruby_api_win_show_red), 2);

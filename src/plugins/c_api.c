@@ -136,12 +136,6 @@ c_api_win_focus(char *tag)
 }
 
 void
-c_api_win_process_line(char *tag, char *line)
-{
-    api_win_process_line(tag, line);
-}
-
-void
 c_api_win_show(char *tag, char *line)
 {
     api_win_show(tag, line);
@@ -212,7 +206,6 @@ c_api_init(void)
     prof_win_exists = c_api_win_exists;
     prof_win_create = c_api_win_create;
     prof_win_focus = c_api_win_focus;
-    prof_win_process_line = c_api_win_process_line;
     prof_win_show = c_api_win_show;
     prof_win_show_green = c_api_win_show_green;
     prof_win_show_red = c_api_win_show_red;

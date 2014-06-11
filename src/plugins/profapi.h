@@ -48,7 +48,6 @@ void (*prof_log_error)(const char *message);
 int (*prof_win_exists)(PROF_WIN_TAG win);
 void (*prof_win_create)(PROF_WIN_TAG win, void(*input_handler)(PROF_WIN_TAG win, char *line));
 void (*prof_win_focus)(PROF_WIN_TAG win);
-void (*prof_win_process_line)(PROF_WIN_TAG win, char *line);
 void (*prof_win_show)(PROF_WIN_TAG win, char *line);
 void (*prof_win_show_green)(PROF_WIN_TAG win, char *line);
 void (*prof_win_show_red)(PROF_WIN_TAG win, char *line);

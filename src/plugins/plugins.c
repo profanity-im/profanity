@@ -160,7 +160,8 @@ plugins_get_lang_string(ProfPlugin *plugin)
 void
 plugins_win_process_line(char *win, const char * const line)
 {
-    api_win_process_line(win, line);
+    PluginWindowCallback *window = callbacks_get_window_handler(win);
+    window->callback_func(window, win, line);
 }
 
 void

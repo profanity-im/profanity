@@ -184,15 +184,6 @@ lua_api_win_focus(lua_State *L)
 }
 
 static int
-lua_api_win_process_line(lua_State *L)
-{
-    const char *tag = lua_tostring(L, -2);
-    const char *line = lua_tostring(L, -1);
-    api_win_process_line(tag, strdup(line));
-    return 0;
-}
-
-static int
 lua_api_win_show(lua_State *L)
 {
     const char *tag = lua_tostring(L, -2);
@@ -348,6 +339,4 @@ lua_api_init(lua_State *L)
     lua_setglobal(L, "prof_win_show_cyan");
     lua_pushcfunction(L, lua_api_win_show_yellow);
     lua_setglobal(L, "prof_win_show_yellow");
-    lua_pushcfunction(L, lua_api_win_process_line);
-    lua_setglobal(L, "prof_win_process_line");
 }

@@ -157,13 +157,6 @@ api_win_focus(const char *tag)
 }
 
 void
-api_win_process_line(const char *tag, const char * const line)
-{
-    PluginWindowCallback *window = callbacks_get_window_handler(tag);
-    window->callback_func(window, tag, line);
-}
-
-void
 api_win_show(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
