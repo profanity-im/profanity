@@ -210,5 +210,5 @@ c_api_init(void)
     prof_win_show_green = c_api_win_show_green;
     prof_win_show_red = c_api_win_show_red;
     prof_win_show_cyan = c_api_win_show_cyan;
-    prof_win_show_cyan = c_api_win_show_yellow;
+    prof_win_show_yellow = c_api_win_show_yellow;
 }
