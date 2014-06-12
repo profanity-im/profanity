@@ -26,7 +26,7 @@
 #include <glib.h>
 
 typedef char*(*autocomplete_func)(char *);
-typedef struct autocomplete_t *Autocomplete;
+typedef struct autocomplete_t* Autocomplete;
 
 // allocate new autocompleter with no items
 Autocomplete autocomplete_new(void);

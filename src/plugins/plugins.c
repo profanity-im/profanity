@@ -413,6 +413,8 @@ plugins_shutdown(void)
 #ifdef PROF_HAVE_C
     c_shutdown();
 #endif
+
+    autocompleters_destroy();
 }
 
 gchar *

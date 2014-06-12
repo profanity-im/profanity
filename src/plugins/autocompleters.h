@@ -29,5 +29,6 @@ void autocompleters_init(void);
 void autocompleters_add(const char *key, char **items);
 char* autocompleters_complete(char *input, int *size);
 void autocompleters_reset(void);
+void autocompleters_destroy(void);
 
 #endif

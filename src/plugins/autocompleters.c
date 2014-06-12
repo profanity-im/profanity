@@ -31,7 +31,7 @@ static GHashTable *autocompleters;
 void
 autocompleters_init(void)
 {
-    autocompleters = g_hash_table_new(g_str_hash, g_str_equal);
+    autocompleters = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)autocomplete_free);
 }
 
 void
@@ -72,4 +72,9 @@ autocompleters_reset(void)
         autocomplete_reset(curr->data);
         curr = g_list_next(curr);
     }
+}
+
+void autocompleters_destroy(void)
+{
+    g_hash_table_destroy(autocompleters);
 }
