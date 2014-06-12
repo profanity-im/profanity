@@ -108,6 +108,7 @@ python_api_register_ac(PyObject *self, PyObject *args)
         char *c_item = PyString_AsString(item);
         c_items[i] = c_item;
     }
+    c_items[len] = NULL;
 
     autocompleters_add(key, c_items);
     return Py_BuildValue("");
