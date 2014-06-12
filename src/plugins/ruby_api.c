@@ -27,6 +27,7 @@
 #include "plugins/api.h"
 #include "plugins/ruby_api.h"
 #include "plugins/callbacks.h"
+#include "plugins/autocompleters.h"
 
 static VALUE
 ruby_api_cons_alert(VALUE self)
@@ -70,6 +71,27 @@ ruby_api_register_timed(VALUE self, VALUE v_callback, VALUE v_interval_seconds)
     int interval_seconds = NUM2INT(v_interval_seconds);
 
     api_register_timed((void*)v_callback, interval_seconds, ruby_timed_callback);
+
+    return Qnil;
+}
+
+static VALUE
+ruby_api_register_ac(VALUE self, VALUE v_key, VALUE v_items)
+{
+    const char *key = STR2CSTR(v_key);
+    int len = RARRAY_LEN(v_items);
+    VALUE *items = RARRAY_PTR(v_items);
+
+    char *c_items[len];
+
+    int i = 0;
+    for (i = 0; i < len; i++) {
+        char *c_item = STR2CSTR(items[i]);
+        c_items[i] = c_item;
+    }
+    c_items[len] = NULL;
+
+    autocompleters_add(key, c_items);
 
     return Qnil;
 }
@@ -286,6 +308,7 @@ ruby_api_init(void)
     rb_define_module_function(prof_module, "cons_show", RUBY_METHOD_FUNC(ruby_api_cons_show), 1);
     rb_define_module_function(prof_module, "register_command", RUBY_METHOD_FUNC(ruby_api_register_command), 7);
     rb_define_module_function(prof_module, "register_timed", RUBY_METHOD_FUNC(ruby_api_register_timed), 2);
+    rb_define_module_function(prof_module, "register_ac", RUBY_METHOD_FUNC(ruby_api_register_ac), 2);
     rb_define_module_function(prof_module, "send_line", RUBY_METHOD_FUNC(ruby_api_send_line), 1);
     rb_define_module_function(prof_module, "notify", RUBY_METHOD_FUNC(ruby_api_notify), 3);
     rb_define_module_function(prof_module, "get_current_recipient", RUBY_METHOD_FUNC(ruby_api_get_current_recipient), 0);
