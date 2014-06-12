@@ -32,6 +32,7 @@
 #include "plugins/api.h"
 #include "plugins/lua_api.h"
 #include "plugins/callbacks.h"
+#include "plugins/autocompleters.h"
 
 #include "ui/ui.h"
 
@@ -78,6 +79,37 @@ lua_api_register_timed(lua_State *L)
     *p_callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
     api_register_timed(p_callback_ref, interval_seconds, lua_timed_callback);
+
+    return 0;
+}
+
+static int
+lua_api_register_ac(lua_State *L)
+{
+    const char *key = lua_tostring(L, -2);
+    int len = lua_objlen(L, -1);
+    char *c_items[len];
+
+    int i;
+    for (i = 0; i < len; i++) {
+        lua_pushinteger(L, i+1);
+        lua_gettable(L, -2);
+
+        // create copy as cannot guarantee the
+        // item does not get gc'd after pop
+        const char *val = lua_tostring(L, -1);
+        c_items[i] = strdup(val);
+        lua_pop(L, 1);
+    }
+    c_items[len] = NULL;
+
+    // makes own copy of items
+    autocompleters_add(key, c_items);
+
+    // free all items
+    for (i = 0; i < len; i++) {
+        free(c_items[i]);
+    }
 
     return 0;
 }
@@ -309,6 +341,8 @@ lua_api_init(lua_State *L)
     lua_setglobal(L, "prof_register_command");
     lua_pushcfunction(L, lua_api_register_timed);
     lua_setglobal(L, "prof_register_timed");
+    lua_pushcfunction(L, lua_api_register_ac);
+    lua_setglobal(L, "prof_register_ac");
     lua_pushcfunction(L, lua_api_send_line);
     lua_setglobal(L, "prof_send_line");
     lua_pushcfunction(L, lua_api_notify);
