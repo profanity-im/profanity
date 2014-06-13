@@ -130,10 +130,6 @@ elif test "x$enable_python_plugins" != xno; then
         AX_PYTHON_DEVEL
         AM_CONDITIONAL([BUILD_PYTHON_API], [true])
         AC_DEFINE([HAVE_PYTHON], [1], [Python support])
-        pythonsitepath=`python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())" 2>/dev/null`
-        if test "X$pythonsitepath" != "X"; then
-            AC_DEFINE_UNQUOTED([PYTHON_SITE_PATH], ["$pythonsitepath"], [Python Site Path])
-        fi
     else
         if test "x$enable_python_plugins" = xyes; then
             AC_MSG_ERROR([Python not found, cannot enable Python plugins.])
