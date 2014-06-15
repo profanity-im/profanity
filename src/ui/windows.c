@@ -239,6 +239,7 @@ wins_new(const char * const from, win_type_t type)
     int cols = getmaxx(stdscr);
     ProfWin *new = win_create(from, cols, type);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
+    g_list_free(keys);
     return new;
 }
 
