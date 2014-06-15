@@ -1,0 +1,8 @@
+{
+  _dl_init
+  Memcheck:Leak
+  ...
+  fun:_dl_init
+  obj:/lib/x86_64-linux-gnu/ld-2.17.so
+  ...
+}
