@@ -21,6 +21,7 @@ core_sources = \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
 	src/tools/parser.h \
+	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
@@ -42,6 +43,7 @@ tests_sources = \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
 	src/tools/parser.h \
+	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
