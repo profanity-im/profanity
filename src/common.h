@@ -99,7 +99,7 @@ resource_presence_t resource_presence_from_string(const char * const str);
 contact_presence_t contact_presence_from_resource_presence(resource_presence_t resource_presence);
 
 char * p_sha1_hash(char *str);
-char * generate_unique_id(char *prefix);
+char * create_unique_id(char *prefix);
 
 int cmp_win_num(gconstpointer a, gconstpointer b);
 int get_next_available_win_num(GList *used);

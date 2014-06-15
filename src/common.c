@@ -397,7 +397,7 @@ xdg_get_data_home(void)
 }
 
 char *
-generate_unique_id(char *prefix)
+create_unique_id(char *prefix)
 {
     static unsigned long unique_id;
     char *result = NULL;
