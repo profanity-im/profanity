@@ -209,6 +209,7 @@ _jabber_shutdown(void)
     _connection_free_saved_details();
     _connection_free_session_data();
     xmpp_shutdown();
+    free(jabber_conn.log);
 }
 
 static void
@@ -358,6 +359,9 @@ _jabber_connect(const char * const fulljid, const char * const passwd,
     jid_destroy(jid);
 
     log_info("Connecting as %s", fulljid);
+    if (jabber_conn.log != NULL) {
+        free(jabber_conn.log);
+    }
     jabber_conn.log = _xmpp_get_file_logger();
 
     if (jabber_conn.conn != NULL) {
