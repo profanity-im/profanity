@@ -154,11 +154,13 @@ wins_get_by_recipient(const char * const recipient)
     while (curr != NULL) {
         ProfWin *window = curr->data;
         if (g_strcmp0(window->from, recipient) == 0) {
+            g_list_free(values);
             return window;
         }
         curr = g_list_next(curr);
     }
 
+    g_list_free(values);
     return NULL;
 }
 
@@ -172,11 +174,13 @@ wins_get_num(ProfWin *window)
         gconstpointer num_p = curr->data;
         ProfWin *curr_win = g_hash_table_lookup(windows, num_p);
         if (g_strcmp0(curr_win->from, window->from) == 0) {
+            g_list_free(keys);
             return GPOINTER_TO_INT(num_p);
         }
         curr = g_list_next(curr);
     }
 
+    g_list_free(keys);
     return -1;
 }
 
@@ -238,6 +242,7 @@ wins_new(const char * const from, win_type_t type)
     int cols = getmaxx(stdscr);
     ProfWin *new = win_create(from, cols, type);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
+    g_list_free(keys);
     return new;
 }
 

@@ -576,18 +576,18 @@ _free_room(ChatRoom *room)
         free(room->subject);
         free(room->password);
         if (room->roster != NULL) {
-            g_hash_table_remove_all(room->roster);
+            g_hash_table_destroy(room->roster);
         }
         if (room->nick_ac != NULL) {
             autocomplete_free(room->nick_ac);
         }
         if (room->nick_changes != NULL) {
-            g_hash_table_remove_all(room->nick_changes);
+            g_hash_table_destroy(room->nick_changes);
         }
-        free(room);
         if (room->pending_broadcasts != NULL) {
             g_list_free_full(room->pending_broadcasts, free);
         }
+        free(room);
     }
 }
 

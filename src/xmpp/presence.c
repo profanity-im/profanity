@@ -116,7 +116,7 @@ _presence_subscription(const char * const jid, const jabber_subscr_t action)
     }
 
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
-    char *id = generate_unique_id("sub");
+    char *id = create_unique_id("sub");
     xmpp_stanza_set_id(presence, id);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, type);
@@ -125,6 +125,7 @@ _presence_subscription(const char * const jid, const jabber_subscr_t action)
     xmpp_stanza_release(presence);
 
     jid_destroy(jidp);
+    free(id);
 }
 
 static GSList *
@@ -207,7 +208,7 @@ _presence_update(const resource_presence_t presence_type, const char * const msg
     connection_set_priority(pri);
 
     xmpp_stanza_t *presence = stanza_create_presence(ctx);
-    char *id = generate_unique_id("presence");
+    char *id = create_unique_id("presence");
     xmpp_stanza_set_id(presence, id);
     stanza_attach_show(ctx, presence, show);
     stanza_attach_status(ctx, presence, msg);
@@ -224,6 +225,7 @@ _presence_update(const resource_presence_t presence_type, const char * const msg
         last = STANZA_TEXT_ONLINE;
     }
     accounts_set_last_presence(jabber_get_account_name(), last);
+    free(id);
 }
 
 static void
@@ -545,6 +547,7 @@ _available_handler(xmpp_conn_t * const conn,
         if (priority_str != NULL) {
             priority = atoi(priority_str);
         }
+        free(priority_str);
     }
 
     resource_presence_t presence = resource_presence_from_string(show_str);
@@ -622,9 +625,10 @@ _get_caps_key(xmpp_stanza_t * const stanza)
     if ((hash_type != NULL) && (strcmp(hash_type, "sha-1") == 0)) {
         log_debug("Hash type %s supported.", hash_type);
         caps_key = strdup(node);
-        id = generate_unique_id("caps");
+        id = create_unique_id("caps");
 
         _send_caps_request(node, caps_key, id, from);
+        free(id);
 
     // unsupported hash or legacy capabilities
     } else {

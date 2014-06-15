@@ -104,10 +104,12 @@ static void
 cb_write_fingerprints(void *opdata)
 {
     gcry_error_t err = 0;
-    gchar *data_home = xdg_get_data_home();
-    gchar *account_dir = str_replace(jid, "@", "_at_");
 
+    gchar *data_home = xdg_get_data_home();
     GString *basedir = g_string_new(data_home);
+    free(data_home);
+
+    gchar *account_dir = str_replace(jid, "@", "_at_");
     g_string_append(basedir, "/profanity/otr/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
@@ -174,9 +176,10 @@ _otr_on_connect(ProfAccount *account)
     log_info("Loading OTR key for %s", jid);
 
     gchar *data_home = xdg_get_data_home();
-    gchar *account_dir = str_replace(jid, "@", "_at_");
-
     GString *basedir = g_string_new(data_home);
+    free(data_home);
+
+    gchar *account_dir = str_replace(jid, "@", "_at_");
     g_string_append(basedir, "/profanity/otr/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");
@@ -256,9 +259,10 @@ _otr_keygen(ProfAccount *account)
     jid = strdup(account->jid);
 
     gchar *data_home = xdg_get_data_home();
-    gchar *account_dir = str_replace(jid, "@", "_at_");
-
     GString *basedir = g_string_new(data_home);
+    free(data_home);
+
+    gchar *account_dir = str_replace(jid, "@", "_at_");
     g_string_append(basedir, "/profanity/otr/");
     g_string_append(basedir, account_dir);
     g_string_append(basedir, "/");

@@ -100,7 +100,7 @@ stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char * const jid,
 {
     xmpp_stanza_t *stanza = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(stanza, STANZA_NAME_IQ);
-    char *id = generate_unique_id("bookmark_add");
+    char *id = create_unique_id("bookmark_add");
     xmpp_stanza_set_id(stanza, id);
     xmpp_stanza_set_type(stanza, STANZA_TYPE_SET);
 
@@ -196,8 +196,9 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, STANZA_TYPE_CHAT);
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
-    char *id = generate_unique_id(NULL);
+    char *id = create_unique_id(NULL);
     xmpp_stanza_set_id(msg, id);
+    free(id);
 
     chat_state = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(chat_state, state);
@@ -219,8 +220,9 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, type);
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
-    char *id = generate_unique_id(NULL);
+    char *id = create_unique_id(NULL);
     xmpp_stanza_set_id(msg, id);
+    free(id);
 
     body = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(body, STANZA_NAME_BODY);
@@ -322,8 +324,9 @@ stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     message = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_attribute(message, STANZA_ATTR_TO, contact);
-    char *id = generate_unique_id(NULL);
+    char *id = create_unique_id(NULL);
     xmpp_stanza_set_id(message, id);
+    free(id);
 
     x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
@@ -347,8 +350,9 @@ stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
-    char *id = generate_unique_id("join");
+    char *id = create_unique_id("join");
     xmpp_stanza_set_id(presence, id);
+    free(id);
 
     xmpp_stanza_t *x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
@@ -359,7 +363,7 @@ stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
         xmpp_stanza_t *pass = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(pass, "password");
         xmpp_stanza_t *text = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(text, strdup(passwd));
+        xmpp_stanza_set_text(text, passwd);
         xmpp_stanza_add_child(pass, text);
         xmpp_stanza_add_child(x, pass);
         xmpp_stanza_release(text);
@@ -377,8 +381,9 @@ stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
     const char * const full_room_jid)
 {
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
-    char *id = generate_unique_id("sub");
+    char *id = create_unique_id("sub");
     xmpp_stanza_set_id(presence, id);
+    free(id);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
 
@@ -397,8 +402,9 @@ stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char * const room,
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_type(presence, STANZA_TYPE_UNAVAILABLE);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_jid->str);
-    char *id = generate_unique_id("leave");
+    char *id = create_unique_id("leave");
     xmpp_stanza_set_id(presence, id);
+    free(id);
 
     g_string_free(full_jid, TRUE);
 
@@ -510,8 +516,9 @@ stanza_create_ping_iq(xmpp_ctx_t *ctx)
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
-    char *id = generate_unique_id("ping");
+    char *id = create_unique_id("ping");
     xmpp_stanza_set_id(iq, id);
+    free(id);
 
     xmpp_stanza_t *ping = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(ping, STANZA_NAME_PING);
