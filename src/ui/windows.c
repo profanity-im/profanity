@@ -305,11 +305,14 @@ wins_xmlconsole_exists(void)
 
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        if (window->type == WIN_XML)
+        if (window->type == WIN_XML) {
+            g_list_free(values);
             return TRUE;
+        }
         curr = g_list_next(curr);
     }
 
+    g_list_free(values);
     return FALSE;
 }
 
