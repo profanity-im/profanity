@@ -545,6 +545,7 @@ _available_handler(xmpp_conn_t * const conn,
         if (priority_str != NULL) {
             priority = atoi(priority_str);
         }
+        free(priority_str);
     }
 
     resource_presence_t presence = resource_presence_from_string(show_str);
