@@ -117,7 +117,13 @@ _jabber_connect_with_account(const ProfAccount * const account)
     log_info("Connecting using account: %s", account->name);
 
     // save account name and password for reconnect
+    if (saved_account.name != NULL) {
+        free(saved_account.name);
+    }
     saved_account.name = strdup(account->name);
+    if (saved_account.passwd != NULL) {
+        free(saved_account.passwd);
+    }
     saved_account.passwd = strdup(account->password);
 
     // connect with fulljid
