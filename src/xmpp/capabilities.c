@@ -202,7 +202,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
         curr = g_slist_next(curr);
     }
 
-    char *result = sha1_hash(s->str);
+    char *result = p_sha1_hash(s->str);
 
     g_string_free(s, TRUE);
     g_slist_free_full(identities, g_free);

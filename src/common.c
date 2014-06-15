@@ -33,7 +33,7 @@
 #include <curl/easy.h>
 #include <glib.h>
 
-#include "tools/sha1.h"
+#include "tools/p_sha1.h"
 
 #include "log.h"
 #include "common.h"
@@ -416,16 +416,16 @@ generate_unique_id(char *prefix)
 }
 
 char *
-sha1_hash(char *str)
+p_sha1_hash(char *str)
 {
-    SHA1_CTX ctx;
+    P_SHA1_CTX ctx;
     uint8_t digest[20];
     uint8_t *input = (uint8_t*)malloc(strlen(str) + 1);
     memcpy(input, str, strlen(str) + 1);
 
-    SHA1_Init(&ctx);
-    SHA1_Update(&ctx, input, strlen(str));
-    SHA1_Final(&ctx, digest);
+    P_SHA1_Init(&ctx);
+    P_SHA1_Update(&ctx, input, strlen(str));
+    P_SHA1_Final(&ctx, digest);
 
     free(input);
     return g_base64_encode(digest, sizeof(digest));
