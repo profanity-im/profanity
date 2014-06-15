@@ -199,6 +199,9 @@ _jabber_disconnect(void)
 static void
 _jabber_shutdown(void)
 {
+    _connection_free_saved_account();
+    _connection_free_saved_details();
+    _connection_free_session_data();
     xmpp_shutdown();
 }
 
