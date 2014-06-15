@@ -238,6 +238,7 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
 #endif
     }
     xmpp_stanza_set_attribute(identity, "name", name_str->str);
+    g_string_free(name_str, TRUE);
 
     xmpp_stanza_t *feature_caps = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(feature_caps, STANZA_NAME_FEATURE);
