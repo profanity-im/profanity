@@ -363,7 +363,7 @@ stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
         xmpp_stanza_t *pass = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(pass, "password");
         xmpp_stanza_t *text = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(text, strdup(passwd));
+        xmpp_stanza_set_text(text, passwd);
         xmpp_stanza_add_child(pass, text);
         xmpp_stanza_add_child(x, pass);
         xmpp_stanza_release(text);
