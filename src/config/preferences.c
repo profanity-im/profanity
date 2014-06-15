@@ -360,8 +360,9 @@ static void
 _save_prefs(void)
 {
     gsize g_data_size;
-    char *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
+    gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
     g_file_set_contents(prefs_loc, g_prefs_data, g_data_size, NULL);
+    g_free(g_prefs_data);
 }
 
 static gchar *
