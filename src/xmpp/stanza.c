@@ -198,6 +198,7 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
     char *id = generate_unique_id(NULL);
     xmpp_stanza_set_id(msg, id);
+    free(id);
 
     chat_state = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(chat_state, state);
@@ -221,6 +222,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
     char *id = generate_unique_id(NULL);
     xmpp_stanza_set_id(msg, id);
+    free(id);
 
     body = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(body, STANZA_NAME_BODY);
@@ -324,6 +326,7 @@ stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     xmpp_stanza_set_attribute(message, STANZA_ATTR_TO, contact);
     char *id = generate_unique_id(NULL);
     xmpp_stanza_set_id(message, id);
+    free(id);
 
     x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
@@ -349,6 +352,7 @@ stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
     char *id = generate_unique_id("join");
     xmpp_stanza_set_id(presence, id);
+    free(id);
 
     xmpp_stanza_t *x = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(x, STANZA_NAME_X);
@@ -379,6 +383,7 @@ stanza_create_room_newnick_presence(xmpp_ctx_t *ctx,
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
     char *id = generate_unique_id("sub");
     xmpp_stanza_set_id(presence, id);
+    free(id);
     xmpp_stanza_set_name(presence, STANZA_NAME_PRESENCE);
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
 
@@ -399,6 +404,7 @@ stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char * const room,
     xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_jid->str);
     char *id = generate_unique_id("leave");
     xmpp_stanza_set_id(presence, id);
+    free(id);
 
     g_string_free(full_jid, TRUE);
 
@@ -512,6 +518,7 @@ stanza_create_ping_iq(xmpp_ctx_t *ctx)
     xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
     char *id = generate_unique_id("ping");
     xmpp_stanza_set_id(iq, id);
+    free(id);
 
     xmpp_stanza_t *ping = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(ping, STANZA_NAME_PING);

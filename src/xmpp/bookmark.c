@@ -403,6 +403,7 @@ _send_bookmarks(void)
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     char *id = generate_unique_id("bookmarks_update");
     xmpp_stanza_set_id(iq, id);
+    free(id);
     xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
 
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);

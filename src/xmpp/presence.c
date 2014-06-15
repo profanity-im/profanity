@@ -125,6 +125,7 @@ _presence_subscription(const char * const jid, const jabber_subscr_t action)
     xmpp_stanza_release(presence);
 
     jid_destroy(jidp);
+    free(id);
 }
 
 static GSList *
@@ -224,6 +225,7 @@ _presence_update(const resource_presence_t presence_type, const char * const msg
         last = STANZA_TEXT_ONLINE;
     }
     accounts_set_last_presence(jabber_get_account_name(), last);
+    free(id);
 }
 
 static void
@@ -626,6 +628,7 @@ _get_caps_key(xmpp_stanza_t * const stanza)
         id = generate_unique_id("caps");
 
         _send_caps_request(node, caps_key, id, from);
+        free(id);
 
     // unsupported hash or legacy capabilities
     } else {
