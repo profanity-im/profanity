@@ -584,10 +584,10 @@ _free_room(ChatRoom *room)
         if (room->nick_changes != NULL) {
             g_hash_table_remove_all(room->nick_changes);
         }
-        free(room);
         if (room->pending_broadcasts != NULL) {
             g_list_free_full(room->pending_broadcasts, free);
         }
+        free(room);
     }
 }
 
