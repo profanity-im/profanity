@@ -162,6 +162,9 @@ autocomplete_complete(Autocomplete ac, gchar *search_str)
 
     // first search attempt
     if (ac->last_found == NULL) {
+        if (ac->search_str != NULL) {
+            FREE_SET_NULL(ac->search_str);
+        }
         ac->search_str = strdup(search_str);
         found = _search_from(ac, ac->items);
         return found;

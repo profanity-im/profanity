@@ -6,3 +6,14 @@
   obj:/lib/x86_64-linux-gnu/ld-2.17.so
   ...
 }
+
+{
+  otrl_init
+  Memcheck:Leak
+  ...
+  fun:_otr_init
+  fun:_init
+  fun:prof_run
+  ...
+}
+
