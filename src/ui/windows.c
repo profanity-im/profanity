@@ -159,6 +159,7 @@ wins_get_by_recipient(const char * const recipient)
         curr = g_list_next(curr);
     }
 
+    g_list_free(values);
     return NULL;
 }
 
