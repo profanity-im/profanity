@@ -171,7 +171,7 @@ prefs_get_string(preference_t pref)
     char *result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
-        return def;
+        return strdup(def);
     } else {
         return result;
     }

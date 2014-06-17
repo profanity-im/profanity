@@ -72,14 +72,18 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
     ui_update_screen();
 
+    char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
     if (account_name != NULL) {
-      char *cmd = "/connect";
-      snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
-      process_input(inp);
-    } else if (prefs_get_string(PREF_CONNECT_ACCOUNT) != NULL) {
-      char *cmd = "/connect";
-      snprintf(inp, sizeof(inp), "%s %s", cmd, prefs_get_string(PREF_CONNECT_ACCOUNT));
-      process_input(inp);
+        char *cmd = "/connect";
+        snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
+        process_input(inp);
+    } else if (pref_connect_account != NULL) {
+        char *cmd = "/connect";
+        snprintf(inp, sizeof(inp), "%s %s", cmd, pref_connect_account);
+        process_input(inp);
+    }
+    if (pref_connect_account != NULL) {
+        free(pref_connect_account);
     }
 
     while(cmd_result == TRUE) {
