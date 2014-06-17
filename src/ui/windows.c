@@ -352,6 +352,7 @@ wins_get_chat_recipients(void)
         }
         curr = g_list_next(curr);
     }
+    g_list_free(values);
     return result;
 }
 
