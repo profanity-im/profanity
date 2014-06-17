@@ -82,9 +82,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         snprintf(inp, sizeof(inp), "%s %s", cmd, pref_connect_account);
         process_input(inp);
     }
-    if (pref_connect_account != NULL) {
-        free(pref_connect_account);
-    }
+    prefs_free_string(pref_connect_account);
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
@@ -255,12 +253,8 @@ _handle_idle_time()
             }
         }
     }
-    if (pref_autoaway_mode != NULL) {
-        free(pref_autoaway_mode);
-    }
-    if (pref_autoaway_message != NULL) {
-        free(pref_autoaway_message);
-    }
+    prefs_free_string(pref_autoaway_mode);
+    prefs_free_string(pref_autoaway_message);
 }
 
 static void
@@ -285,9 +279,9 @@ _init(const int disable_tls, char *log_level)
     chat_log_init();
     groupchat_log_init();
     accounts_load();
-    gchar *theme = prefs_get_string(PREF_THEME);
+    char *theme = prefs_get_string(PREF_THEME);
     theme_init(theme);
-    g_free(theme);
+    prefs_free_string(theme);
     ui_init();
     jabber_init(disable_tls);
     cmd_init();

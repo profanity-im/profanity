@@ -115,6 +115,7 @@ void prefs_free_aliases(GList *aliases);
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
 char * prefs_get_string(preference_t pref);
+void prefs_free_string(char *pref);
 void prefs_set_string(preference_t pref, char *value);
 
 #endif

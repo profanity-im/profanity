@@ -28,6 +28,12 @@
 
 #include "config/accounts.h"
 
+typedef enum {
+    PROF_OTRPOLICY_MANUAL,
+    PROF_OTRPOLICY_OPPORTUNISTIC,
+    PROF_OTRPOLICY_ALWAYS
+} prof_otrpolicy_t;
+
 void otr_init_module(void);
 
 OtrlUserState otr_userstate(void);
@@ -63,6 +69,6 @@ char * (*otr_decrypt_message)(const char * const from, const char * const messag
 
 void (*otr_free_message)(char *message);
 
-char * (*otr_get_policy)(const char * const recipient);
+prof_otrpolicy_t (*otr_get_policy)(const char * const recipient);
 
 #endif

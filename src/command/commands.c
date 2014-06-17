@@ -1003,23 +1003,25 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
-                        if (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0) {
+                        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+                        if (strcmp(pref_otr_log, "on") == 0) {
                             chat_log_chat(jidp->barejid, usr_jid, msg, PROF_OUT_LOG, NULL);
-                        } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+                        } else if (strcmp(pref_otr_log, "redact") == 0) {
                             chat_log_chat(jidp->barejid, usr_jid, "[redacted]", PROF_OUT_LOG, NULL);
                         }
+                        prefs_free_string(pref_otr_log);
                         jid_destroy(jidp);
                     }
                 } else {
                     cons_show_error("Failed to encrypt and send message,");
                 }
             } else {
-                char *policy = otr_get_policy(usr_jid);
+                prof_otrpolicy_t policy = otr_get_policy(usr_jid);
 
-                if (strcmp(policy, "always") == 0) {
+                if (policy == PROF_OTRPOLICY_ALWAYS) {
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
-                } else if (strcmp(policy, "opportunistic") == 0) {
+                } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
                     char *otr_base_tag = OTRL_MESSAGE_TAG_BASE;
                     char *otr_v2_tag = OTRL_MESSAGE_TAG_V2;
                     int N = strlen(otr_base_tag) + strlen(otr_v2_tag) + strlen(msg) + 1;
@@ -1033,7 +1035,6 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     message_send(msg, usr_jid);
                 }
                 ui_outgoing_msg("me", usr_jid, msg);
-                free(policy);
 
                 if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
@@ -1956,11 +1957,13 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
                             Jid *jidp = jid_create(jid);
-                            if (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0) {
+                            char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+                            if (strcmp(pref_otr_log, "on") == 0) {
                                 chat_log_chat(jidp->barejid, recipient, tiny, PROF_OUT_LOG, NULL);
-                            } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+                            } else if (strcmp(pref_otr_log, "redact") == 0) {
                                 chat_log_chat(jidp->barejid, recipient, "[redacted]", PROF_OUT_LOG, NULL);
                             }
+                            prefs_free_string(pref_otr_log);
                             jid_destroy(jidp);
                         }
 
@@ -2723,6 +2726,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         if (args[1] == NULL) {
             char *policy = prefs_get_string(PREF_OTR_POLICY);
             cons_show("OTR policy is now set to: %s", policy);
+            prefs_free_string(policy);
             return TRUE;
         }
 

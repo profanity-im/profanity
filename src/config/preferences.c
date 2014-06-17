@@ -164,18 +164,28 @@ prefs_get_string(preference_t pref)
     const char *key = _get_key(pref);
     char *def = _get_default_string(pref);
 
-    if (!g_key_file_has_key(prefs, group, key, NULL)) {
-        return def;
-    }
-
     char *result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
-        return strdup(def);
+        if (def != NULL) {
+            return strdup(def);
+        } else {
+            return NULL;
+        }
     } else {
         return result;
     }
 }
+
+void
+prefs_free_string(char *pref)
+{
+    if (pref != NULL) {
+        free(pref);
+    }
+    pref = NULL;
+}
+
 
 void
 prefs_set_string(preference_t pref, char *value)

@@ -1413,13 +1413,11 @@ cmd_execute_default(const char * const inp)
                 ui_current_print_line("You are not currently connected.");
             } else {
 #ifdef HAVE_LIBOTR
-                char *policy = otr_get_policy(recipient);
-                if ((strcmp(policy, "always") == 0) && !otr_is_secure(recipient)) {
+                prof_otrpolicy_t policy = otr_get_policy(recipient);
+                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(recipient)) {
                     cons_show_error("Failed to send message. Please check OTR policy");
-                    free(policy);
                     return TRUE;
                 }
-                free(policy);
                 if (otr_is_secure(recipient)) {
                     char *encrypted = otr_encrypt_message(recipient, inp);
                     if (encrypted != NULL) {
@@ -1428,11 +1426,13 @@ cmd_execute_default(const char * const inp)
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
                             Jid *jidp = jid_create(jid);
-                            if (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0) {
+                            char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+                            if (strcmp(pref_otr_log, "on") == 0) {
                                 chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
-                            } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+                            } else if (strcmp(pref_otr_log, "redact") == 0) {
                                 chat_log_chat(jidp->barejid, recipient, "[redacted]", PROF_OUT_LOG, NULL);
                             }
+                            prefs_free_string(pref_otr_log);
                             jid_destroy(jidp);
                         }
 

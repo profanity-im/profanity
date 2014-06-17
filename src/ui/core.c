@@ -436,12 +436,13 @@ _ui_group_removed(const char * const contact, const char * const group)
 static void
 _ui_auto_away(void)
 {
-    if (prefs_get_string(PREF_AUTOAWAY_MESSAGE) != NULL) {
+    char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
+    if (pref_autoaway_message != NULL) {
         int pri =
             accounts_get_priority_for_presence_type(jabber_get_account_name(),
                 RESOURCE_AWAY);
         cons_show("Idle for %d minutes, status set to away (priority %d), \"%s\".",
-            prefs_get_autoaway_time(), pri, prefs_get_string(PREF_AUTOAWAY_MESSAGE));
+            prefs_get_autoaway_time(), pri, pref_autoaway_message);
         title_bar_set_presence(CONTACT_AWAY);
         ui_current_page_off();
     } else {
@@ -453,6 +454,7 @@ _ui_auto_away(void)
         title_bar_set_presence(CONTACT_AWAY);
         ui_current_page_off();
     }
+    prefs_free_string(pref_autoaway_message);
 }
 
 static void
@@ -1722,6 +1724,7 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             g_free(message_lower);
             g_free(nick_lower);
         }
+        prefs_free_string(room_setting);
 
         if (notify) {
             gboolean is_current = wins_is_current(window);
