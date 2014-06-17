@@ -111,9 +111,11 @@ wins_get_next(void)
     // if there is a next window return it
     curr = g_list_next(curr);
     if (curr != NULL) {
+        g_list_free(keys);
         return wins_get_by_num(GPOINTER_TO_INT(curr->data));
     // otherwise return the first window (console)
     } else {
+        g_list_free(keys);
         return wins_get_console();
     }
 }
@@ -137,10 +139,12 @@ wins_get_previous(void)
     // if there is a previous window return it
     curr = g_list_previous(curr);
     if (curr != NULL) {
+        g_list_free(keys);
         return wins_get_by_num(GPOINTER_TO_INT(curr->data));
     // otherwise return the last window
     } else {
         int new_num = GPOINTER_TO_INT(g_list_last(keys)->data);
+        g_list_free(keys);
         return wins_get_by_num(new_num);
     }
 }
@@ -258,6 +262,7 @@ wins_get_total_unread(void)
         result += window->unread;
         curr = g_list_next(curr);
     }
+    g_list_free(values);
     return result;
 }
 
@@ -279,6 +284,7 @@ wins_resize_all(void)
             wresize(window->win, PAD_SIZE, cols);
             curr = g_list_next(curr);
         }
+        g_list_free(values);
     }
 
     ProfWin *current_win = wins_get_current();
@@ -294,11 +300,14 @@ wins_duck_exists(void)
 
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        if (window->type == WIN_DUCK)
+        if (window->type == WIN_DUCK) {
+            g_list_free(values);
             return TRUE;
+        }
         curr = g_list_next(curr);
     }
 
+    g_list_free(values);
     return FALSE;
 }
 
@@ -329,11 +338,14 @@ wins_get_xmlconsole(void)
 
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        if (window->type == WIN_XML)
+        if (window->type == WIN_XML) {
+            g_list_free(values);
             return window;
+        }
         curr = g_list_next(curr);
     }
 
+    g_list_free(values);
     return NULL;
 }
 
@@ -351,6 +363,7 @@ wins_get_chat_recipients(void)
         }
         curr = g_list_next(curr);
     }
+    g_list_free(values);
     return result;
 }
 
@@ -368,6 +381,7 @@ wins_get_prune_recipients(void)
         }
         curr = g_list_next(curr);
     }
+    g_list_free(values);
     return result;
 }
 
@@ -392,6 +406,7 @@ wins_lost_connection(void)
         }
         curr = g_list_next(curr);
     }
+    g_list_free(values);
 }
 
 gboolean
@@ -494,8 +509,10 @@ wins_tidy(void)
         windows = new_windows;
         current = 1;
         ui_switch_win(1);
+        g_list_free(keys);
         return TRUE;
     } else {
+        g_list_free(keys);
         return FALSE;
     }
 }
@@ -620,6 +637,7 @@ wins_create_summary(void)
         curr = g_list_next(curr);
     }
 
+    g_list_free(keys);
     return result;
 }
 

@@ -520,35 +520,35 @@ _otr_get_their_fingerprint(const char * const recipient)
     }
 }
 
-static char *
+static prof_otrpolicy_t
 _otr_get_policy(const char * const recipient)
 {
     ProfAccount *account = accounts_get_account(jabber_get_account_name());
     // check contact specific setting
     if (g_list_find_custom(account->otr_manual, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);
-        return "manual";
+        return PROF_OTRPOLICY_MANUAL;
     }
     if (g_list_find_custom(account->otr_opportunistic, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);
-        return "opportunistic";
+        return PROF_OTRPOLICY_OPPORTUNISTIC;
     }
     if (g_list_find_custom(account->otr_always, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);
-        return "always";
+        return PROF_OTRPOLICY_ALWAYS;
     }
 
     // check default account setting
     if (account->otr_policy != NULL) {
-        char *result;
+        prof_otrpolicy_t result;
         if (g_strcmp0(account->otr_policy, "manual") == 0) {
-            result = "manual";
+            result = PROF_OTRPOLICY_MANUAL;
         }
         if (g_strcmp0(account->otr_policy, "opportunistic") == 0) {
-            result = "opportunistic";
+            result = PROF_OTRPOLICY_OPPORTUNISTIC;
         }
         if (g_strcmp0(account->otr_policy, "always") == 0) {
-            result = "always";
+            result = PROF_OTRPOLICY_ALWAYS;
         }
         account_free(account);
         return result;
@@ -556,7 +556,20 @@ _otr_get_policy(const char * const recipient)
     account_free(account);
 
     // check global setting
-    return prefs_get_string(PREF_OTR_POLICY);
+    char *pref_otr_policy = prefs_get_string(PREF_OTR_POLICY);
+
+    // pref defaults to manual
+    prof_otrpolicy_t result = PROF_OTRPOLICY_MANUAL;
+
+    if (strcmp(pref_otr_policy, "opportunistic") == 0) {
+        result = PROF_OTRPOLICY_OPPORTUNISTIC;
+    } else if (strcmp(pref_otr_policy, "always") == 0) {
+        result = PROF_OTRPOLICY_ALWAYS;
+    }
+
+    prefs_free_string(pref_otr_policy);
+
+    return result;
 }
 
 static char *

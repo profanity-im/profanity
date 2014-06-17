@@ -82,22 +82,31 @@ prefs_load(void)
     // move pre 0.4.1 OTR preferences to [otr] group
     err = NULL;
     gboolean ui_otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
-    if (!err) {
+    if (err == NULL) {
         g_key_file_set_boolean(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_WARN), ui_otr_warn);
         g_key_file_remove_key(prefs, PREF_GROUP_UI, "otr.warn", NULL);
+    } else {
+        g_error_free(err);
     }
+
     err = NULL;
     gchar *ui_otr_log = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "otr", &err);
-    if (!err) {
+    if (err == NULL) {
         g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_LOG), ui_otr_log);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "otr", NULL);
+    } else {
+        g_error_free(err);
     }
+
     err = NULL;
     gchar *ui_otr_policy = g_key_file_get_string(prefs, "policy", "otr.policy", &err);
-    if (!err) {
+    if (err == NULL) {
         g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_POLICY), ui_otr_policy);
         g_key_file_remove_group(prefs, "policy", NULL);
+    } else {
+        g_error_free(err);
     }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -155,18 +164,28 @@ prefs_get_string(preference_t pref)
     const char *key = _get_key(pref);
     char *def = _get_default_string(pref);
 
-    if (!g_key_file_has_key(prefs, group, key, NULL)) {
-        return def;
-    }
-
     char *result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
-        return def;
+        if (def != NULL) {
+            return strdup(def);
+        } else {
+            return NULL;
+        }
     } else {
         return result;
     }
 }
+
+void
+prefs_free_string(char *pref)
+{
+    if (pref != NULL) {
+        free(pref);
+    }
+    pref = NULL;
+}
+
 
 void
 prefs_set_string(preference_t pref, char *value)

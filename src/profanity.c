@@ -74,15 +74,17 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     ui_update_screen();
     plugins_on_start();
 
+    char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
     if (account_name != NULL) {
-      char *cmd = "/connect";
-      snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
-      prof_process_input(inp);
-    } else if (prefs_get_string(PREF_CONNECT_ACCOUNT) != NULL) {
-      char *cmd = "/connect";
-      snprintf(inp, sizeof(inp), "%s %s", cmd, prefs_get_string(PREF_CONNECT_ACCOUNT));
-      prof_process_input(inp);
+        char *cmd = "/connect";
+        snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
+        prof_process_input(inp);
+    } else if (pref_connect_account != NULL) {
+        char *cmd = "/connect";
+        snprintf(inp, sizeof(inp), "%s %s", cmd, pref_connect_account);
+        prof_process_input(inp);
     }
+    prefs_free_string(pref_connect_account);
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
@@ -219,6 +221,8 @@ _handle_idle_time()
     gint prefs_time = prefs_get_autoaway_time() * 60000;
     resource_presence_t current_presence = accounts_get_last_presence(jabber_get_account_name());
     unsigned long idle_ms = ui_get_idle_time();
+    char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
+    char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
 
     if (!idle) {
         if ((current_presence == RESOURCE_ONLINE) || (current_presence == RESOURCE_CHAT)) {
@@ -226,13 +230,13 @@ _handle_idle_time()
                 idle = TRUE;
 
                 // handle away mode
-                if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
-                    presence_update(RESOURCE_AWAY, prefs_get_string(PREF_AUTOAWAY_MESSAGE), 0);
+                if (strcmp(pref_autoaway_mode, "away") == 0) {
+                    presence_update(RESOURCE_AWAY, pref_autoaway_message, 0);
                     ui_auto_away();
 
                 // handle idle mode
-                } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
-                    presence_update(RESOURCE_ONLINE, prefs_get_string(PREF_AUTOAWAY_MESSAGE), idle_ms / 1000);
+                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
+                    presence_update(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
                 }
             }
         }
@@ -243,16 +247,18 @@ _handle_idle_time()
 
             // handle check
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
-                if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
+                if (strcmp(pref_autoaway_mode, "away") == 0) {
                     presence_update(RESOURCE_ONLINE, NULL, 0);
                     ui_end_auto_away();
-                } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
+                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
                     presence_update(RESOURCE_ONLINE, NULL, 0);
                     ui_titlebar_presence(CONTACT_ONLINE);
                 }
             }
         }
     }
+    prefs_free_string(pref_autoaway_mode);
+    prefs_free_string(pref_autoaway_message);
 }
 
 static void
@@ -277,9 +283,9 @@ _init(const int disable_tls, char *log_level)
     chat_log_init();
     groupchat_log_init();
     accounts_load();
-    gchar *theme = prefs_get_string(PREF_THEME);
+    char *theme = prefs_get_string(PREF_THEME);
     theme_init(theme);
-    g_free(theme);
+    prefs_free_string(theme);
     ui_init();
     jabber_init(disable_tls);
     cmd_init();

@@ -95,6 +95,9 @@ void
 title_bar_console(void)
 {
     werase(win);
+    if (current_recipient != NULL) {
+        free(current_recipient);
+    }
     current_recipient = NULL;
     typing = FALSE;
     typing_elapsed = NULL;

@@ -927,12 +927,13 @@ _cons_show_aliases(GList *aliases)
 static void
 _cons_theme_setting(void)
 {
-    gchar *theme = prefs_get_string(PREF_THEME);
+    char *theme = prefs_get_string(PREF_THEME);
     if (theme == NULL) {
         cons_show("Theme (/theme)                : default");
     } else {
         cons_show("Theme (/theme)                : %s", theme);
     }
+    prefs_free_string(theme);
 }
 
 static void
@@ -965,10 +966,13 @@ _cons_splash_setting(void)
 static void
 _cons_autoconnect_setting(void)
 {
-    if (prefs_get_string(PREF_CONNECT_ACCOUNT) != NULL)
-        cons_show("Autoconnect (/autoconnect)      : %s", prefs_get_string(PREF_CONNECT_ACCOUNT));
+    char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
+    if (pref_connect_account != NULL)
+        cons_show("Autoconnect (/autoconnect)      : %s", pref_connect_account);
     else
         cons_show("Autoconnect (/autoconnect)      : OFF");
+
+    prefs_free_string(pref_connect_account);
 }
 
 static void
@@ -999,6 +1003,10 @@ _cons_statuses_setting(void)
     cons_show("Console statuses (/statuses)  : %s", console);
     cons_show("Chat statuses (/statuses)     : %s", chat);
     cons_show("MUC statuses (/statuses)      : %s", muc);
+
+    prefs_free_string(console);
+    prefs_free_string(chat);
+    prefs_free_string(muc);
 }
 
 static void
@@ -1058,6 +1066,7 @@ _cons_notify_setting(void)
     } else {
     cons_show    ("Room messages (/notify room)        : %s", room_setting);
     }
+    prefs_free_string(room_setting);
 
     if (prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT))
         cons_show("Room current (/notify room)         : ON");
@@ -1234,20 +1243,24 @@ _cons_show_log_prefs(void)
 static void
 _cons_autoaway_setting(void)
 {
-    if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "off") == 0) {
+    char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
+    if (strcmp(pref_autoaway_mode, "off") == 0) {
         cons_show("Autoaway (/autoaway mode)            : OFF");
     } else {
-        cons_show("Autoaway (/autoaway mode)            : %s", prefs_get_string(PREF_AUTOAWAY_MODE));
+        cons_show("Autoaway (/autoaway mode)            : %s", pref_autoaway_mode);
     }
+    prefs_free_string(pref_autoaway_mode);
 
     cons_show("Autoaway minutes (/autoaway time)    : %d minutes", prefs_get_autoaway_time());
 
-    if ((prefs_get_string(PREF_AUTOAWAY_MESSAGE) == NULL) ||
-            (strcmp(prefs_get_string(PREF_AUTOAWAY_MESSAGE), "") == 0)) {
+    char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
+    if ((pref_autoaway_message == NULL) ||
+            (strcmp(pref_autoaway_message, "") == 0)) {
         cons_show("Autoaway message (/autoaway message) : OFF");
     } else {
-        cons_show("Autoaway message (/autoaway message) : \"%s\"", prefs_get_string(PREF_AUTOAWAY_MESSAGE));
+        cons_show("Autoaway message (/autoaway message) : \"%s\"", pref_autoaway_message);
     }
+    prefs_free_string(pref_autoaway_message);
 
     if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
         cons_show("Autoaway check (/autoaway check)     : ON");
@@ -1328,6 +1341,7 @@ _cons_show_otr_prefs(void)
 
     char *policy_value = prefs_get_string(PREF_OTR_POLICY);
     cons_show("OTR policy (/otr policy) : %s", policy_value);
+    prefs_free_string(policy_value);
 
     if (prefs_get_boolean(PREF_OTR_WARN)) {
         cons_show("Warn non-OTR (/otr warn) : ON");
@@ -1336,7 +1350,6 @@ _cons_show_otr_prefs(void)
     }
 
     char *log_value = prefs_get_string(PREF_OTR_LOG);
-
     if (strcmp(log_value, "on") == 0) {
         cons_show("OTR logging (/otr log)   : ON");
     } else if (strcmp(log_value, "off") == 0) {
@@ -1344,6 +1357,7 @@ _cons_show_otr_prefs(void)
     } else {
         cons_show("OTR logging (/otr log)   : Redacted");
     }
+    prefs_free_string(log_value);
 
     if (wins_is_current(console)) {
         win_update_virtual(console);

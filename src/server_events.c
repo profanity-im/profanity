@@ -242,12 +242,12 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     gboolean was_decrypted = FALSE;
     char *newmessage;
 
-    char *policy = otr_get_policy(from);
+    prof_otrpolicy_t policy = otr_get_policy(from);
     char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
 
     if (!priv) {
         //check for OTR whitespace (opportunistic or always)
-        if (strcmp(policy, "opportunistic") == 0 || strcmp(policy, "always") == 0) {
+        if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
             if (whitespace_base) {
                 if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
                     // Remove whitespace pattern for proper display in UI
@@ -282,7 +282,7 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     } else {
         plugin_message = plugins_on_message_received(from, newmessage);
     }
-    if (strcmp(policy, "always") == 0 && !was_decrypted && !whitespace_base) {
+    if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
         message_send(otr_query_message, from);
@@ -295,11 +295,13 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
 
-        if (!was_decrypted || (strcmp(prefs_get_string(PREF_OTR_LOG), "on") == 0)) {
+        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+        if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
             chat_log_chat(jidp->barejid, from_jid->barejid, plugin_message, PROF_IN_LOG, NULL);
-        } else if (strcmp(prefs_get_string(PREF_OTR_LOG), "redact") == 0) {
+        } else if (strcmp(pref_otr_log, "redact") == 0) {
             chat_log_chat(jidp->barejid, from_jid->barejid, "[redacted]", PROF_IN_LOG, NULL);
         }
+        prefs_free_string(pref_otr_log);
 
         jid_destroy(jidp);
         jid_destroy(from_jid);
@@ -441,6 +443,8 @@ handle_contact_offline(char *barejid, char *resource, char *status)
                 }
             }
         }
+        prefs_free_string(show_console);
+        prefs_free_string(show_chat_win);
         jid_destroy(jid);
     }
 }
@@ -480,6 +484,8 @@ handle_contact_online(char *barejid, Resource *resource,
                 }
             }
         }
+        prefs_free_string(show_console);
+        prefs_free_string(show_chat_win);
     }
 }
 
@@ -540,6 +546,7 @@ handle_room_member_presence(const char * const room,
             ui_room_member_presence(room, nick, show, status);
             ui_current_page_off();
         }
+        prefs_free_string(muc_status_pref);
     }
 }
 
@@ -555,6 +562,7 @@ handle_room_member_online(const char * const room, const char * const nick,
         ui_room_member_online(room, nick, show, status);
         ui_current_page_off();
     }
+    prefs_free_string(muc_status_pref);
 }
 
 void
@@ -568,6 +576,7 @@ handle_room_member_offline(const char * const room, const char * const nick,
         ui_room_member_offline(room, nick);
         ui_current_page_off();
     }
+    prefs_free_string(muc_status_pref);
 }
 
 void

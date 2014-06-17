@@ -93,7 +93,7 @@ cb_otr_error_message_free(void *opdata, const char *err_msg)
 static void
 cb_timer_control(void *opdata, unsigned int interval)
 {
-    current_interval = interval; 
+    current_interval = interval;
 }
 
 static void
@@ -139,7 +139,7 @@ cb_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
                 ui_smp_answer_success(context->username);
             }
             break;
-            
+
         case OTRL_SMPEVENT_FAILURE:
             if (context->smstate->received_question == 0) {
                 if (nextMsg == OTRL_SMP_EXPECT3) {

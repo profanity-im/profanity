@@ -278,6 +278,7 @@ parse_args_with_freetext(const char * const inp, int min, int max, gboolean *res
 
     // if min allowed is 0 and 0 found, return empty char* array
     } else if (min == 0 && num == 0) {
+        g_slist_free_full(tokens, free);
         gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         *result = TRUE;
