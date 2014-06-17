@@ -219,6 +219,8 @@ _handle_idle_time()
     gint prefs_time = prefs_get_autoaway_time() * 60000;
     resource_presence_t current_presence = accounts_get_last_presence(jabber_get_account_name());
     unsigned long idle_ms = ui_get_idle_time();
+    char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
+    char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
 
     if (!idle) {
         if ((current_presence == RESOURCE_ONLINE) || (current_presence == RESOURCE_CHAT)) {
@@ -226,13 +228,13 @@ _handle_idle_time()
                 idle = TRUE;
 
                 // handle away mode
-                if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
-                    presence_update(RESOURCE_AWAY, prefs_get_string(PREF_AUTOAWAY_MESSAGE), 0);
+                if (strcmp(pref_autoaway_mode, "away") == 0) {
+                    presence_update(RESOURCE_AWAY, pref_autoaway_message, 0);
                     ui_auto_away();
 
                 // handle idle mode
-                } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
-                    presence_update(RESOURCE_ONLINE, prefs_get_string(PREF_AUTOAWAY_MESSAGE), idle_ms / 1000);
+                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
+                    presence_update(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
                 }
             }
         }
@@ -243,15 +245,21 @@ _handle_idle_time()
 
             // handle check
             if (prefs_get_boolean(PREF_AUTOAWAY_CHECK)) {
-                if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "away") == 0) {
+                if (strcmp(pref_autoaway_mode, "away") == 0) {
                     presence_update(RESOURCE_ONLINE, NULL, 0);
                     ui_end_auto_away();
-                } else if (strcmp(prefs_get_string(PREF_AUTOAWAY_MODE), "idle") == 0) {
+                } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
                     presence_update(RESOURCE_ONLINE, NULL, 0);
                     ui_titlebar_presence(CONTACT_ONLINE);
                 }
             }
         }
+    }
+    if (pref_autoaway_mode != NULL) {
+        free(pref_autoaway_mode);
+    }
+    if (pref_autoaway_message != NULL) {
+        free(pref_autoaway_message);
     }
 }
 

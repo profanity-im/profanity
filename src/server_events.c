@@ -254,6 +254,7 @@ handle_incoming_message(char *from, char *message, gboolean priv)
 
         // internal OTR message
         if (newmessage == NULL) {
+            free(policy);
             return;
         }
     } else {
@@ -264,6 +265,7 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         cons_show("Attempting to start OTR session...");
         message_send(otr_query_message, from);
     }
+    free(policy);
 
     ui_incoming_msg(from, newmessage, NULL, priv);
 

@@ -1413,10 +1413,13 @@ cmd_execute_default(const char * const inp)
                 ui_current_print_line("You are not currently connected.");
             } else {
 #ifdef HAVE_LIBOTR
-                if ((strcmp(otr_get_policy(recipient), "always") == 0) && !otr_is_secure(recipient)) {
+                char *policy = otr_get_policy(recipient);
+                if ((strcmp(policy, "always") == 0) && !otr_is_secure(recipient)) {
                     cons_show_error("Failed to send message. Please check OTR policy");
+                    free(policy);
                     return TRUE;
                 }
+                free(policy);
                 if (otr_is_secure(recipient)) {
                     char *encrypted = otr_encrypt_message(recipient, inp);
                     if (encrypted != NULL) {

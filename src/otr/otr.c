@@ -527,15 +527,15 @@ _otr_get_policy(const char * const recipient)
     // check contact specific setting
     if (g_list_find_custom(account->otr_manual, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);
-        return "manual";
+        return strdup("manual");
     }
     if (g_list_find_custom(account->otr_opportunistic, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);
-        return "opportunistic";
+        return strdup("opportunistic");
     }
     if (g_list_find_custom(account->otr_always, recipient, (GCompareFunc)g_strcmp0)) {
         account_free(account);
-        return "always";
+        return strdup("always");
     }
 
     // check default account setting
@@ -551,7 +551,7 @@ _otr_get_policy(const char * const recipient)
             result = "always";
         }
         account_free(account);
-        return result;
+        return strdup(result);
     }
     account_free(account);
 

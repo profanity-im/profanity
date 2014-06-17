@@ -1033,6 +1033,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     message_send(msg, usr_jid);
                 }
                 ui_outgoing_msg("me", usr_jid, msg);
+                free(policy);
 
                 if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
