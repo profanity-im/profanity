@@ -7,6 +7,8 @@
   ...
 }
 
+# libotr
+
 {
   otrl_init
   Memcheck:Leak
@@ -17,3 +19,37 @@
   ...
 }
 
+{
+  otrl_privkey_read
+  Memcheck:Leak
+  ...
+  fun:otrl_privkey_read_FILEp
+  fun:otrl_privkey_read
+  ...
+}
+
+# Ignore history module, needs to be rewritten
+
+{
+  history_next
+  Memcheck:Leak
+  ...
+  fun:history_next
+  ...
+}
+
+{
+  history_previous
+  Memcheck:Leak
+  ...
+  fun:history_previous
+  ...
+}
+
+{
+  history_append
+  Memcheck:Leak
+  ...
+  fun:history_append
+  ...
+}

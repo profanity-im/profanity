@@ -258,6 +258,7 @@ wins_get_total_unread(void)
         result += window->unread;
         curr = g_list_next(curr);
     }
+    g_list_free(values);
     return result;
 }
 
