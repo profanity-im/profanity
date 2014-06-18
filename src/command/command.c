@@ -971,6 +971,7 @@ cmd_init(void)
         g_string_free(ac_alias, TRUE);
         curr = g_list_next(curr);
     }
+    prefs_free_aliases(aliases);
 
     prefs_ac = autocomplete_new();
     autocomplete_add(prefs_ac, "ui");

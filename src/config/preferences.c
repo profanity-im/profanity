@@ -348,11 +348,15 @@ prefs_get_aliases(void)
             char *name = keys[i];
             char *value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
-            ProfAlias *alias = malloc(sizeof(struct prof_alias_t));
-            alias->name = strdup(name);
-            alias->value = strdup(value);
+            if (value != NULL) {
+                ProfAlias *alias = malloc(sizeof(struct prof_alias_t));
+                alias->name = strdup(name);
+                alias->value = strdup(value);
 
-            result = g_list_insert_sorted(result, alias, (GCompareFunc)_alias_cmp);
+                free(value);
+
+                result = g_list_insert_sorted(result, alias, (GCompareFunc)_alias_cmp);
+            }
         }
 
         g_strfreev(keys);
