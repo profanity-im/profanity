@@ -2048,10 +2048,14 @@ _win_handle_page(const wint_t * const ch)
 {
     ProfWin *current = wins_get_current();
     int rows = getmaxy(stdscr);
+    int cols = getmaxx(stdscr);
+    int x = getmaxx(current->win);
     int y = getcury(current->win);
 
     int page_space = rows - 4;
+    int horiz_page_space = cols;
     int *page_start = &(current->y_pos);
+    int *horiz_page_start = &(current->x_pos);
 
     if (prefs_get_boolean(PREF_MOUSE)) {
         MEVENT mouse_event;
@@ -2090,8 +2094,34 @@ _win_handle_page(const wint_t * const ch)
         }
     }
 
+    // ctrl+P
+    if (*ch == 16) {
+        *horiz_page_start -= horiz_page_space;
+
+        // went past beginning, show first page
+        if (*horiz_page_start < 0)
+            *horiz_page_start = 0;
+
+        current->paged = 1;
+        win_update_virtual(current);
+
+    // ctrl+N
+    } else if (*ch == 14) {
+        *horiz_page_start += horiz_page_space;
+
+        // only got half a screen, show full screen
+        if ((x - (*horiz_page_start)) < horiz_page_space)
+            *horiz_page_start = x - horiz_page_space;
+
+        // went past end, show full screen
+        else if (*horiz_page_start >= x)
+          *horiz_page_start = x - horiz_page_space;
+
+        current->paged = 1;
+        win_update_virtual(current);
+
     // page up
-    if (*ch == KEY_PPAGE) {
+    } else if (*ch == KEY_PPAGE) {
         *page_start -= page_space;
 
         // went past beginning, show first page
@@ -2118,7 +2148,7 @@ _win_handle_page(const wint_t * const ch)
     }
 
     // switch off page if last line visible
-    if ((y-1) - *page_start == page_space) {
+    if ((y-1) - *page_start == page_space && *horiz_page_start == 0) {
         current->paged = 0;
     }
 }
