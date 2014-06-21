@@ -33,6 +33,11 @@
 
 #include "contact.h"
 
+#define NO_ME   1
+#define NO_EOL  4
+#define NO_DATE 2
+#define NO_EOL_DATE 6
+
 #define PAD_SIZE 1000
 
 typedef enum {
@@ -60,16 +65,9 @@ typedef struct prof_win_t {
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);
 void win_free(ProfWin *window);
-void win_vprint_line(ProfWin *self, const char show_char, int attrs,
-    const char * const msg, ...);
-void win_print_line(ProfWin *self, const char show_char, int attrs,
-    const char * const msg);
-void win_print_line_no_time(ProfWin *window, int attrs, const char * const msg);
 void win_update_virtual(ProfWin *window);
 void win_move_to_end(ProfWin *window);
-void win_print_time(ProfWin *window, char show_char);
-void win_presence_colour_on(ProfWin *window, const char * const presence);
-void win_presence_colour_off(ProfWin *window, const char * const presence);
+int  win_presence_colour(const char * const presence);
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_status_string(ProfWin *window, const char * const from,
     const char * const show, const char * const status,
@@ -78,5 +76,7 @@ void win_show_status_string(ProfWin *window, const char * const from,
 void win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
 void win_show_info(ProfWin *window, PContact contact);
+void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message, ...);
+void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message);
 
 #endif

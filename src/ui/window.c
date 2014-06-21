@@ -37,9 +37,6 @@
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
-static void _win_chat_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
-    const char * const from, const char * const message);
-
 ProfWin*
 win_create(const char * const title, int cols, win_type_t type)
 {
@@ -69,52 +66,6 @@ win_free(ProfWin* window)
 }
 
 void
-win_print_time(ProfWin* window, char show_char)
-{
-    GDateTime *time = g_date_time_new_now_local();
-    gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-    wattron(window->win, COLOUR_TIME);
-    wprintw(window->win, "%s %c ", date_fmt, show_char);
-    wattroff(window->win, COLOUR_TIME);
-    g_date_time_unref(time);
-    g_free(date_fmt);
-}
-
-void
-win_print_line(ProfWin *window, const char show_char, int attrs,
-    const char * const msg)
-{
-    win_print_time(window, show_char);
-    wattron(window->win, attrs);
-    wprintw(window->win, "%s\n", msg);
-    wattroff(window->win, attrs);
-}
-
-void
-win_print_line_no_time(ProfWin *window, int attrs, const char * const msg)
-{
-    wattron(window->win, attrs);
-    wprintw(window->win, "%s\n", msg);
-    wattroff(window->win, attrs);
-}
-
-void
-win_vprint_line(ProfWin *window, const char show_char, int attrs,
-    const char * const msg, ...)
-{
-    va_list arg;
-    va_start(arg, msg);
-    GString *fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_print_time(window, show_char);
-    wattron(window->win, attrs);
-    wprintw(window->win, "%s\n", fmt_msg->str);
-    wattroff(window->win, attrs);
-    g_string_free(fmt_msg, TRUE);
-    va_end(arg);
-}
-
-void
 win_update_virtual(ProfWin *window)
 {
     int rows, cols;
@@ -138,39 +89,21 @@ win_move_to_end(ProfWin *window)
     }
 }
 
-void
-win_presence_colour_on(ProfWin *window, const char * const presence)
+int
+win_presence_colour(const char * const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
-        wattron(window->win, COLOUR_ONLINE);
+        return COLOUR_ONLINE;
     } else if (g_strcmp0(presence, "away") == 0) {
-        wattron(window->win, COLOUR_AWAY);
+        return COLOUR_AWAY;
     } else if (g_strcmp0(presence, "chat") == 0) {
-        wattron(window->win, COLOUR_CHAT);
+        return COLOUR_CHAT;
     } else if (g_strcmp0(presence, "dnd") == 0) {
-        wattron(window->win, COLOUR_DND);
+        return COLOUR_DND;
     } else if (g_strcmp0(presence, "xa") == 0) {
-        wattron(window->win, COLOUR_XA);
+        return COLOUR_XA;
     } else {
-        wattron(window->win, COLOUR_OFFLINE);
-    }
-}
-
-void
-win_presence_colour_off(ProfWin *window, const char * const presence)
-{
-    if (g_strcmp0(presence, "online") == 0) {
-        wattroff(window->win, COLOUR_ONLINE);
-    } else if (g_strcmp0(presence, "away") == 0) {
-        wattroff(window->win, COLOUR_AWAY);
-    } else if (g_strcmp0(presence, "chat") == 0) {
-        wattroff(window->win, COLOUR_CHAT);
-    } else if (g_strcmp0(presence, "dnd") == 0) {
-        wattroff(window->win, COLOUR_DND);
-    } else if (g_strcmp0(presence, "xa") == 0) {
-        wattroff(window->win, COLOUR_XA);
-    } else {
-        wattroff(window->win, COLOUR_OFFLINE);
+        return COLOUR_OFFLINE;
     }
 }
 
@@ -183,43 +116,39 @@ win_show_contact(ProfWin *window, PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    win_print_time(window, '-');
-    win_presence_colour_on(window, presence);
+    int presence_colour = win_presence_colour(presence);
 
     if (name != NULL) {
-        wprintw(window->win, "%s", name);
+        win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", name);
     } else {
-        wprintw(window->win, "%s", barejid);
+        win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
     }
 
-    wprintw(window->win, " is %s", presence);
+    win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " is %s", presence);
 
     if (last_activity != NULL) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
-        wprintw(window->win, ", idle ");
-
         int hours = span / G_TIME_SPAN_HOUR;
         span = span - hours * G_TIME_SPAN_HOUR;
-        if (hours > 0) {
-            wprintw(window->win, "%dh", hours);
-        }
-
         int minutes = span / G_TIME_SPAN_MINUTE;
         span = span - minutes * G_TIME_SPAN_MINUTE;
-        wprintw(window->win, "%dm", minutes);
-
         int seconds = span / G_TIME_SPAN_SECOND;
-        wprintw(window->win, "%ds", seconds);
+
+        if (hours > 0) {
+          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
+        }
+        else {
+          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dm%ds", minutes, seconds);
+        }
     }
 
     if (status != NULL) {
-        wprintw(window->win, ", \"%s\"", p_contact_status(contact));
+        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", \"%s\"", p_contact_status(contact));
     }
 
-    wprintw(window->win, "\n");
-    win_presence_colour_off(window, presence);
+    win_save_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
 }
 
 void
@@ -232,52 +161,42 @@ win_show_info(ProfWin *window, PContact contact)
     GList *resources = p_contact_get_available_resources(contact);
     GList *ordered_resources = NULL;
     GDateTime *last_activity = p_contact_last_activity(contact);
-    WINDOW *win = window->win;
 
-    win_print_time(window, '-');
-    wprintw(win, "\n");
-    win_print_time(window, '-');
-    win_presence_colour_on(window, presence);
-    wprintw(win, "%s", barejid);
+    int presence_colour = win_presence_colour(presence);
+
+    win_save_print(window, '-', NULL, 0, 0, "", "");
+    win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
     if (name != NULL) {
-        wprintw(win, " (%s)", name);
+        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " (%s)", name);
     }
-    win_presence_colour_off(window, presence);
-    wprintw(win, ":\n");
+    win_save_print(window, '-', NULL, NO_DATE, 0, "", ":");
 
     if (sub != NULL) {
-        win_print_time(window, '-');
-        wprintw(win, "Subscription: %s\n", sub);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "Subscription: %s", sub);
     }
 
     if (last_activity != NULL) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
-        win_print_time(window, '-');
-        wprintw(win, "Last activity: ");
-
         int hours = span / G_TIME_SPAN_HOUR;
         span = span - hours * G_TIME_SPAN_HOUR;
-        if (hours > 0) {
-            wprintw(win, "%dh", hours);
-        }
-
         int minutes = span / G_TIME_SPAN_MINUTE;
         span = span - minutes * G_TIME_SPAN_MINUTE;
-        wprintw(win, "%dm", minutes);
-
         int seconds = span / G_TIME_SPAN_SECOND;
-        wprintw(win, "%ds", seconds);
 
-        wprintw(win, "\n");
+        if (hours > 0) {
+          win_save_vprint(window, '-', NULL, 0, 0, "", "Last activity: %dh%dm%ds", hours, minutes, seconds);
+        }
+        else {
+          win_save_vprint(window, '-', NULL, 0, 0, "", "Last activity: %dm%ds", minutes, seconds);
+        }
 
         g_date_time_unref(now);
     }
 
     if (resources != NULL) {
-        win_print_time(window, '-');
-        wprintw(win, "Resources:\n");
+        win_save_print(window, '-', NULL, 0, 0, "", "Resources:");
 
         // sort in order of availabiltiy
         while (resources != NULL) {
@@ -291,58 +210,53 @@ win_show_info(ProfWin *window, PContact contact)
     while (ordered_resources != NULL) {
         Resource *resource = ordered_resources->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
-        win_print_time(window, '-');
-        win_presence_colour_on(window, resource_presence);
-        wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+        int presence_colour = win_presence_colour(resource_presence);
+        win_save_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status != NULL) {
-            wprintw(win, ", \"%s\"", resource->status);
+            win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", \"%s\"", resource->status);
         }
-        wprintw(win, "\n");
-        win_presence_colour_off(window, resource_presence);
+        win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
 
         if (resource->caps_str != NULL) {
             Capabilities *caps = caps_get(resource->caps_str);
             if (caps != NULL) {
                 // show identity
                 if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                    win_print_time(window, '-');
-                    wprintw(win, "    Identity: ");
+                    win_save_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
                     if (caps->name != NULL) {
-                        wprintw(win, "%s", caps->name);
+                        win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", caps->name);
                         if ((caps->category != NULL) || (caps->type != NULL)) {
-                            wprintw(win, " ");
+                            win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", " ");
                         }
                     }
                     if (caps->type != NULL) {
-                        wprintw(win, "%s", caps->type);
+                        win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", caps->type);
                         if (caps->category != NULL) {
-                            wprintw(win, " ");
+                            win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", " ");
                         }
                     }
                     if (caps->category != NULL) {
-                        wprintw(win, "%s", caps->category);
+                        win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", caps->category);
                     }
-                    wprintw(win, "\n");
+                    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
                 }
                 if (caps->software != NULL) {
-                    win_print_time(window, '-');
-                    wprintw(win, "    Software: %s", caps->software);
+                    win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
                 }
                 if (caps->software_version != NULL) {
-                    wprintw(win, ", %s", caps->software_version);
+                    win_save_vprint(window, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->software_version);
                 }
                 if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                    wprintw(win, "\n");
+                    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
                 }
                 if (caps->os != NULL) {
-                    win_print_time(window, '-');
-                    wprintw(win, "    OS: %s", caps->os);
+                    win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
                 }
                 if (caps->os_version != NULL) {
-                    wprintw(win, ", %s", caps->os_version);
+                    win_save_vprint(window, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->os_version);
                 }
                 if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                    wprintw(win, "\n");
+                    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
                 }
             }
         }
@@ -357,81 +271,47 @@ win_show_status_string(ProfWin *window, const char * const from,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show)
 {
-    WINDOW *win = window->win;
-
-    win_print_time(window, '-');
+    int presence_colour;
 
     if (show != NULL) {
-        if (strcmp(show, "away") == 0) {
-            wattron(win, COLOUR_AWAY);
-        } else if (strcmp(show, "chat") == 0) {
-            wattron(win, COLOUR_CHAT);
-        } else if (strcmp(show, "dnd") == 0) {
-            wattron(win, COLOUR_DND);
-        } else if (strcmp(show, "xa") == 0) {
-            wattron(win, COLOUR_XA);
-        } else if (strcmp(show, "online") == 0) {
-            wattron(win, COLOUR_ONLINE);
-        } else {
-            wattron(win, COLOUR_OFFLINE);
-        }
+        presence_colour = win_presence_colour(show);
     } else if (strcmp(default_show, "online") == 0) {
-        wattron(win, COLOUR_ONLINE);
+        presence_colour = COLOUR_ONLINE;
     } else {
-        wattron(win, COLOUR_OFFLINE);
+        presence_colour = COLOUR_OFFLINE;
     }
 
-    wprintw(win, "%s %s", pre, from);
+
+    win_save_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "%s %s", pre, from);
 
     if (show != NULL)
-        wprintw(win, " is %s", show);
+        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " is %s", show);
     else
-        wprintw(win, " is %s", default_show);
+        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " is %s", default_show);
 
     if (last_activity != NULL) {
         GDateTime *now = g_date_time_new_now_local();
         GTimeSpan span = g_date_time_difference(now, last_activity);
 
-        wprintw(win, ", idle ");
-
         int hours = span / G_TIME_SPAN_HOUR;
         span = span - hours * G_TIME_SPAN_HOUR;
-        if (hours > 0) {
-            wprintw(win, "%dh", hours);
-        }
-
         int minutes = span / G_TIME_SPAN_MINUTE;
         span = span - minutes * G_TIME_SPAN_MINUTE;
-        wprintw(win, "%dm", minutes);
-
         int seconds = span / G_TIME_SPAN_SECOND;
-        wprintw(win, "%ds", seconds);
+
+        if (hours > 0) {
+          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
+        }
+        else {
+          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dm%ds", minutes, seconds);
+        }
     }
 
     if (status != NULL)
-        wprintw(win, ", \"%s\"", status);
+        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", \"%s\"", status);
 
-    wprintw(win, "\n");
+    win_save_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
 
-    if (show != NULL) {
-        if (strcmp(show, "away") == 0) {
-            wattroff(win, COLOUR_AWAY);
-        } else if (strcmp(show, "chat") == 0) {
-            wattroff(win, COLOUR_CHAT);
-        } else if (strcmp(show, "dnd") == 0) {
-            wattroff(win, COLOUR_DND);
-        } else if (strcmp(show, "xa") == 0) {
-            wattroff(win, COLOUR_XA);
-        } else if (strcmp(show, "online") == 0) {
-            wattroff(win, COLOUR_ONLINE);
-        } else {
-            wattroff(win, COLOUR_OFFLINE);
-        }
-    } else if (strcmp(default_show, "online") == 0) {
-        wattroff(win, COLOUR_ONLINE);
-    } else {
-        wattroff(win, COLOUR_OFFLINE);
-    }
 }
 
 void
@@ -442,7 +322,7 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     {
         case WIN_CHAT:
         case WIN_PRIVATE:
-            _win_chat_print_incoming_message(window, tv_stamp, from, message);
+            win_save_print(window, '-', tv_stamp, 1, 0, from, message);
             break;
         default:
             assert(FALSE);
@@ -450,33 +330,67 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     }
 }
 
-static void
-_win_chat_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
-    const char * const from, const char * const message)
-{
-    if (tv_stamp == NULL) {
-        win_print_time(window, '-');
-    } else {
-        GDateTime *time = g_date_time_new_from_timeval_utc(tv_stamp);
-        gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-        wattron(window->win, COLOUR_TIME);
-        wprintw(window->win, "%s - ", date_fmt);
-        wattroff(window->win, COLOUR_TIME);
-        g_date_time_unref(time);
-        g_free(date_fmt);
-    }
+void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message, ...) {
+  va_list arg;
+  va_start(arg, message);
+  GString *fmt_msg = g_string_new(NULL);
+  g_string_vprintf(fmt_msg, message, arg);
+  win_save_print(window, show_char, tstamp, flags, attrs, from, fmt_msg->str);
+}
 
-    if (strncmp(message, "/me ", 4) == 0) {
-        wattron(window->win, COLOUR_THEM);
+void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message) {
+    // flags : 1st bit =  0/1 - me/not me
+    //         2nd bit =  0/1 - date/no date
+    //         3rd bit =  0/1 - eol/no eol
+    //         4th bit =  0/1 - color from/no color from
+    int unattr_me = 0;
+    int offset = 0;
+    int colour = COLOUR_ME;
+    gchar *date_fmt;
+    GDateTime *time;
+    if(tstamp == NULL) {
+      time = g_date_time_new_now_local();
+      date_fmt = g_date_time_format(time, "%H:%M:%S");
+    }
+    else {
+      time = g_date_time_new_from_timeval_utc(tstamp);
+      date_fmt = g_date_time_format(time, "%H:%M:%S");
+    }
+    g_date_time_unref(time);
+//  buffer_push(window->buffer, time, from, message, attrs);
+    if((flags & 2) == 0) {
+      wattron(window->win, COLOUR_TIME);
+      wprintw(window->win, "%s %c ", date_fmt, show_char);
+      wattroff(window->win, COLOUR_TIME);
+    }
+    g_free(date_fmt);
+
+    if(strlen(from) > 0) {
+      if((flags & 1) != 0) {
+        colour = COLOUR_THEM;
+      }
+      if((flags & 8) != 0) {
+        colour = 0;
+      }
+      wattron(window->win, colour);
+      if(strncmp(message, "/me ", 4) == 0) {
         wprintw(window->win, "*%s ", from);
-        waddstr(window->win, message + 4);
-        wprintw(window->win, "\n");
-        wattroff(window->win, COLOUR_THEM);
-    } else {
-        wattron(window->win, COLOUR_THEM);
+        offset = 4;
+        unattr_me = 1;
+      }
+      else {
         wprintw(window->win, "%s: ", from);
-        wattroff(window->win, COLOUR_THEM);
-        waddstr(window->win, message);
-        wprintw(window->win, "\n");
+        wattroff(window->win, colour);
+      }
+    }
+    wattron(window->win, attrs);
+    if((flags & 4) == 0)
+      wprintw(window->win, "%s\n", message+offset);
+    else
+      wprintw(window->win, "%s", message+offset);
+    wattroff(window->win, attrs);
+
+    if(unattr_me) {
+      wattroff(window->win, colour);
     }
 }

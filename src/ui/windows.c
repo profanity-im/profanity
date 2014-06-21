@@ -394,10 +394,7 @@ wins_lost_connection(void)
     while (curr != NULL) {
         ProfWin *window = curr->data;
         if (window->type != WIN_CONSOLE) {
-            win_print_time(window, '-');
-            wattron(window->win, COLOUR_ERROR);
-            wprintw(window->win, "%s\n", "Lost connection.");
-            wattroff(window->win, COLOUR_ERROR);
+            win_save_print(window, '-', NULL, 0, COLOUR_ERROR, "", "Lost connection.");
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
