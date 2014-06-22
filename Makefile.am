@@ -17,6 +17,7 @@ core_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/windows.c src/ui/windows.h \
+	src/ui/buffer.c \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
@@ -53,6 +54,7 @@ tests_sources = \
 	src/config/theme.c src/config/theme.h \
 	src/ui/windows.c src/ui/windows.h \
 	src/ui/window.c src/ui/window.h \
+	src/ui/buffer.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/server_events.c src/server_events.h \

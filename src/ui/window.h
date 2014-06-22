@@ -32,6 +32,7 @@
 #endif
 
 #include "contact.h"
+#include "ui/buffer.h"
 
 #define NO_ME   1
 #define NO_EOL  4
@@ -53,6 +54,7 @@ typedef enum {
 typedef struct prof_win_t {
     char *from;
     WINDOW *win;
+    ProfBuff *buffer;
     win_type_t type;
     gboolean is_otr;
     gboolean is_trusted;

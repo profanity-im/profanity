@@ -44,6 +44,7 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->from = strdup(title);
     new_win->win = newpad(PAD_SIZE, cols);
     wbkgd(new_win->win, COLOUR_TEXT);
+    new_win->buffer = buffer_create();
     new_win->y_pos = 0;
     new_win->x_pos = 0;
     new_win->paged = 0;
@@ -60,6 +61,7 @@ win_create(const char * const title, int cols, win_type_t type)
 void
 win_free(ProfWin* window)
 {
+    buffer_free(window->buffer);
     delwin(window->win);
     free(window->from);
     free(window);
@@ -357,7 +359,7 @@ void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int
       date_fmt = g_date_time_format(time, "%H:%M:%S");
     }
     g_date_time_unref(time);
-//  buffer_push(window->buffer, time, from, message, attrs);
+    buffer_push(window->buffer, show_char, tstamp, flags, attrs, from, message);
     if((flags & 2) == 0) {
       wattron(window->win, COLOUR_TIME);
       wprintw(window->win, "%s %c ", date_fmt, show_char);
