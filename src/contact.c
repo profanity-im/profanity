@@ -240,6 +240,8 @@ _get_most_available_resource(PContact contact)
 
         resources = g_list_next(resources);
     }
+    free(resources);
+    free(current);
 
     return highest;
 }
