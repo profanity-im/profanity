@@ -82,6 +82,7 @@ main(int argc, char **argv)
     if (!g_option_context_parse(context, &argc, &argv, &error)) {
         g_print("%s\n", error->message);
         g_option_context_free(context);
+        g_error_free(error);
         return 1;
     }
 
