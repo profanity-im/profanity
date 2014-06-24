@@ -137,6 +137,9 @@ _ui_get_idle_time(void)
         XFree(info);
         return result;
     }
+    if (info != NULL) {
+        XFree(info);
+    }
 // if no libxss or xss idle time failed, use profanity idle time
 #endif
     gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
