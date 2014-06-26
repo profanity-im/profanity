@@ -54,7 +54,7 @@ void chat_log_chat(const gchar * const login, gchar *other,
     const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp) {}
 void chat_log_close(void) {}
 GSList * chat_log_get_previous(const gchar * const login,
-    const gchar * const recipient, GSList *history)
+    const gchar * const recipient)
 {
     return mock_ptr_type(GSList *);
 }

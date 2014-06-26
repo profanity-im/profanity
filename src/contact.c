@@ -223,11 +223,12 @@ _get_most_available_resource(PContact contact)
     //      xa
     //      dnd
     GList *resources = g_hash_table_get_values(contact->available_resources);
-    Resource *current = resources->data;
+    GList *curr = resources;
+    Resource *current = curr->data;
     Resource *highest = current;
-    resources = g_list_next(resources);
-    while (resources != NULL) {
-        current = resources->data;
+    curr = g_list_next(curr);
+    while (curr != NULL) {
+        current = curr->data;
 
         // priority is same as current highest, choose presence
         if (current->priority == highest->priority) {
@@ -238,8 +239,9 @@ _get_most_available_resource(PContact contact)
             highest = current;
         }
 
-        resources = g_list_next(resources);
+        curr = g_list_next(curr);
     }
+    g_list_free(resources);
 
     return highest;
 }

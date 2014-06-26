@@ -163,6 +163,14 @@ _otr_init(void)
     data_loaded = FALSE;
 }
 
+static void
+_otr_shutdown(void)
+{
+    if (jid != NULL) {
+        free(jid);
+    }
+}
+
 void
 _otr_poll(void)
 {
@@ -172,6 +180,9 @@ _otr_poll(void)
 static void
 _otr_on_connect(ProfAccount *account)
 {
+    if (jid != NULL) {
+        free(jid);
+    }
     jid = strdup(account->jid);
     log_info("Loading OTR key for %s", jid);
 
@@ -253,10 +264,11 @@ _otr_keygen(ProfAccount *account)
         return;
     }
 
+    if (jid != NULL) {
+        free(jid);
+    }
     jid = strdup(account->jid);
     log_info("Generating OTR key for %s", jid);
-
-    jid = strdup(account->jid);
 
     gchar *data_home = xdg_get_data_home();
     GString *basedir = g_string_new(data_home);
@@ -634,6 +646,7 @@ void
 otr_init_module(void)
 {
     otr_init = _otr_init;
+    otr_shutdown = _otr_shutdown;
     otr_libotr_version = _otr_libotr_version;
     otr_start_query = _otr_start_query;
     otr_poll = _otr_poll;
