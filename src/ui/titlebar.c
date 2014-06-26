@@ -166,8 +166,10 @@ _title_bar_draw(void)
     // show privacy
     if (current_recipient != NULL) {
         char *recipient_jid = NULL;
-        if (roster_find_contact(current_recipient) != NULL) {
+        char *found_contact = roster_find_contact(current_recipient);
+        if (found_contact != NULL) {
             recipient_jid = roster_barejid_from_name(current_recipient);
+            free(found_contact);
         } else {
             recipient_jid = current_recipient;
         }

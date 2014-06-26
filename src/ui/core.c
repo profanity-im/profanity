@@ -135,6 +135,9 @@ _ui_get_idle_time(void)
         XFree(info);
         return result;
     }
+    if (info != NULL) {
+        XFree(info);
+    }
 // if no libxss or xss idle time failed, use profanity idle time
 #endif
     gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
@@ -2054,13 +2057,13 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
 {
     ProfWin *window = wins_get_by_num(win_index);
     if (!window->history_shown) {
-        GSList *history = NULL;
         Jid *jid = jid_create(jabber_get_fulljid());
-        history = chat_log_get_previous(jid->barejid, contact, history);
+        GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
-        while (history != NULL) {
-            win_save_print(window, '-', NULL, NO_DATE, 0, "", history->data);
-            history = g_slist_next(history);
+        GSList *curr = history;
+        while (curr != NULL) {
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", curr->data);
+            curr = g_slist_next(curr);
         }
         window->history_shown = 1;
 
