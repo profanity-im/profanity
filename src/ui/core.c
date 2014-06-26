@@ -2131,13 +2131,13 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
 {
     ProfWin *window = wins_get_by_num(win_index);
     if (!window->history_shown) {
-        GSList *history = NULL;
         Jid *jid = jid_create(jabber_get_fulljid());
-        history = chat_log_get_previous(jid->barejid, contact, history);
+        GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
-        while (history != NULL) {
-            wprintw(win, "%s\n", history->data);
-            history = g_slist_next(history);
+        GSList *curr = history;
+        while (curr != NULL) {
+            wprintw(win, "%s\n", curr->data);
+            curr = g_slist_next(curr);
         }
         window->history_shown = 1;
 
