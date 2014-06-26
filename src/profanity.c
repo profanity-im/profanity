@@ -305,6 +305,9 @@ _shutdown(void)
     muc_close();
     caps_close();
     ui_close();
+#ifdef HAVE_LIBOTR
+    otr_shutdown();
+#endif
     chat_log_close();
     prefs_close();
     theme_close();
