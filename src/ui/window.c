@@ -340,14 +340,8 @@ void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, in
   win_save_print(window, show_char, tstamp, flags, attrs, from, fmt_msg->str);
 }
 
+
 void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message) {
-    // flags : 1st bit =  0/1 - me/not me
-    //         2nd bit =  0/1 - date/no date
-    //         3rd bit =  0/1 - eol/no eol
-    //         4th bit =  0/1 - color from/no color from
-    int unattr_me = 0;
-    int offset = 0;
-    int colour = COLOUR_ME;
     gchar *date_fmt;
     GDateTime *time;
     if(tstamp == NULL) {
@@ -359,13 +353,25 @@ void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int
       date_fmt = g_date_time_format(time, "%H:%M:%S");
     }
     g_date_time_unref(time);
-    buffer_push(window->buffer, show_char, tstamp, flags, attrs, from, message);
+    buffer_push(window->buffer, show_char, date_fmt, flags, attrs, from, message);
+    win_print(window, show_char, date_fmt, flags, attrs, from, message);
+    g_free(date_fmt);
+}
+
+
+void win_print(ProfWin *window, const char show_char, const char * const date_fmt, int flags, int attrs, const char * const from, const char * const message) {
+    // flags : 1st bit =  0/1 - me/not me
+    //         2nd bit =  0/1 - date/no date
+    //         3rd bit =  0/1 - eol/no eol
+    //         4th bit =  0/1 - color from/no color from
+    int unattr_me = 0;
+    int offset = 0;
+    int colour = COLOUR_ME;
     if((flags & 2) == 0) {
       wattron(window->win, COLOUR_TIME);
       wprintw(window->win, "%s %c ", date_fmt, show_char);
       wattroff(window->win, COLOUR_TIME);
     }
-    g_free(date_fmt);
 
     if(strlen(from) > 0) {
       if((flags & 1) != 0) {
@@ -394,5 +400,15 @@ void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int
 
     if(unattr_me) {
       wattroff(window->win, colour);
+    }
+}
+
+void win_redraw(ProfWin *window) {
+    int i, size;
+    werase(window->win);
+    size = buffer_size(window->buffer);
+    for(i = 0; i < size; i++) {
+      ProfBuffEntry e = buffer_yield_entry(window->buffer, i);
+      win_print(window, e.show_char, e.date_fmt, e.flags, e.attrs, e.from, e.message);
     }
 }

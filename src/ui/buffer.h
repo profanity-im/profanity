@@ -8,7 +8,7 @@
 
 typedef struct prof_buff_entry_t {
   char show_char;
-  GTimeVal tstamp;
+  char *date_fmt;
   int flags;
   int attrs;
   char *from;
@@ -24,6 +24,8 @@ typedef struct prof_buff_t {
 
 ProfBuff* buffer_create();
 void buffer_free(ProfBuff* buffer);
-void buffer_push(ProfBuff* buffer, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message);
+void buffer_push(ProfBuff* buffer, const char show_char, const char * const date_fmt, int flags, int attrs, const char * const from, const char * const message);
+int buffer_size(ProfBuff* buffer);
 int buffer_yield(ProfBuff* buffer, int line, ProfBuffEntry** list);
+ProfBuffEntry buffer_yield_entry(ProfBuff* buffer, int entry);
 #endif
