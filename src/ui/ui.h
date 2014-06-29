@@ -259,7 +259,6 @@ void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime
 void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
 
 // desktop notifier actions
-void (*notifier_init)(void);
 void (*notifier_uninit)(void);
 
 void (*notify_typing)(const char * const handle);

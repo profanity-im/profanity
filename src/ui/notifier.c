@@ -41,14 +41,6 @@ static void _notify(const char * const message, int timeout,
     const char * const category);
 
 static void
-_notifier_init(void)
-{
-#ifdef HAVE_LIBNOTIFY
-    notify_init("Profanity");
-#endif
-}
-
-static void
 _notifier_uninit(void)
 {
 #ifdef HAVE_LIBNOTIFY
@@ -171,6 +163,15 @@ _notify(const char * const message, int timeout,
     const char * const category)
 {
 #ifdef HAVE_LIBNOTIFY
+    log_debug("Attempting notification: %s", message);
+    if (notify_is_initted()) {
+	log_debug("Reinitialising libnotify");
+	notify_uninit();
+	notify_init("Profanity");
+    } else {
+	log_debug("Initialising libnotify");
+	notify_init("Profanity");
+    }
     if (notify_is_initted()) {
         NotifyNotification *notification;
         notification = notify_notification_new("Profanity", message, NULL);
@@ -185,9 +186,11 @@ _notify(const char * const message, int timeout,
             log_error("Error sending desktop notification:");
             log_error("  -> Message : %s", message);
             log_error("  -> Error   : %s", error->message);
-        }
+        } else {
+	    log_debug("Notification sent.");
+	}
     } else {
-        log_error("Libnotify initialisation error.");
+        log_error("Libnotify not initialised.");
     }
 #endif
 #ifdef PLATFORM_CYGWIN
@@ -244,7 +247,6 @@ _notify(const char * const message, int timeout,
 void
 notifier_init_module(void)
 {
-    notifier_init = _notifier_init;
     notifier_uninit = _notifier_uninit;
     notify_typing = _notify_typing;
     notify_invite = _notify_invite;
