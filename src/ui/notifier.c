@@ -165,12 +165,12 @@ _notify(const char * const message, int timeout,
 #ifdef HAVE_LIBNOTIFY
     log_debug("Attempting notification: %s", message);
     if (notify_is_initted()) {
-	log_debug("Reinitialising libnotify");
-	notify_uninit();
-	notify_init("Profanity");
+        log_debug("Reinitialising libnotify");
+        notify_uninit();
+        notify_init("Profanity");
     } else {
-	log_debug("Initialising libnotify");
-	notify_init("Profanity");
+        log_debug("Initialising libnotify");
+        notify_init("Profanity");
     }
     if (notify_is_initted()) {
         NotifyNotification *notification;
