@@ -95,7 +95,6 @@ _ui_init(void)
     create_input_window();
     wins_init();
     cons_about();
-    notifier_init();
 #ifdef PROF_HAVE_LIBXSS
     display = XOpenDisplay(0);
 #endif

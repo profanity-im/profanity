@@ -263,7 +263,6 @@ void (*ui_status_bar_active)(const int win);
 void (*ui_status_bar_new)(const int win);
 
 // desktop notifier actions
-void (*notifier_init)(void);
 void (*notifier_uninit)(void);
 
 void (*notify_typing)(const char * const handle);
