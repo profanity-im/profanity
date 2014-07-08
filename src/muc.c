@@ -29,6 +29,7 @@
 #include "common.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
+#include "ui/ui.h"
 
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
@@ -565,6 +566,32 @@ muc_complete_roster_nick_change(const char * const room,
     }
 
     return NULL;
+}
+
+void
+muc_autocomplete(char *input, int *size)
+{
+    char *recipient = ui_current_recipient();
+    Autocomplete nick_ac = muc_get_roster_ac(recipient);
+    if (nick_ac != NULL) {
+        input[*size] = '\0';
+        gchar *last_space = g_strrstr(input, " ");
+        char *result = NULL;
+        if (last_space == NULL) {
+            result = autocomplete_complete(nick_ac, input);
+        } else {
+            int len = (last_space - input);
+            cons_debug("SIZE: %d", len);
+            char *start_str = strndup(input, len);
+            result = autocomplete_param_with_ac(input, size, start_str, nick_ac);
+            free(start_str);
+        }
+        if (result != NULL) {
+            ui_replace_input(input, result, size);
+            g_free(result);
+            return;
+        }
+    }
 }
 
 static void

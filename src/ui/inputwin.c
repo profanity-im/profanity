@@ -39,6 +39,7 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "log.h"
+#include "muc.h"
 #include "profanity.h"
 #include "roster_list.h"
 #include "ui/ui.h"
@@ -511,7 +512,12 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case 9: // tab
-            cmd_autocomplete(input, size);
+            if ((strncmp(input, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
+                cons_debug("MUC AC");
+                muc_autocomplete(input, size);
+            } else {
+                cmd_autocomplete(input, size);
+            }
             return 1;
 
         default:
