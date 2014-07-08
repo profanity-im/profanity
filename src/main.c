@@ -89,9 +89,6 @@ main(int argc, char **argv)
     g_option_context_free(context);
 
     if (version == TRUE) {
-
-        g_print("\n");
-
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
             g_print("Profanity, version %sdev.%s.%s\n", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
@@ -126,8 +123,6 @@ main(int argc, char **argv)
 #else
         g_print("OTR support: Disabled\n");
 #endif
-
-        g_print("\n");
 
         return 0;
     }
