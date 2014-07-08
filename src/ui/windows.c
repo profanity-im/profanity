@@ -111,8 +111,9 @@ wins_get_next(void)
     // if there is a next window return it
     curr = g_list_next(curr);
     if (curr != NULL) {
+        int next = GPOINTER_TO_INT(curr->data);
         g_list_free(keys);
-        return wins_get_by_num(GPOINTER_TO_INT(curr->data));
+        return wins_get_by_num(next);
     // otherwise return the first window (console)
     } else {
         g_list_free(keys);
@@ -139,8 +140,9 @@ wins_get_previous(void)
     // if there is a previous window return it
     curr = g_list_previous(curr);
     if (curr != NULL) {
+        int previous = GPOINTER_TO_INT(curr->data);
         g_list_free(keys);
-        return wins_get_by_num(GPOINTER_TO_INT(curr->data));
+        return wins_get_by_num(previous);
     // otherwise return the last window
     } else {
         int new_num = GPOINTER_TO_INT(g_list_last(keys)->data);
