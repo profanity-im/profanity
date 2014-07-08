@@ -89,7 +89,6 @@ main(int argc, char **argv)
     g_option_context_free(context);
 
     if (version == TRUE) {
-
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
             g_print("Profanity, version %sdev.%s.%s\n", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
@@ -105,6 +104,26 @@ main(int argc, char **argv)
         g_print("\n");
         g_print("This is free software; you are free to change and redistribute it.\n");
         g_print("There is NO WARRANTY, to the extent permitted by law.\n");
+        g_print("\n");
+
+        g_print("Build information:\n");
+#ifdef HAVE_OSXNOTIFY
+        g_print("Desktop notification support: Enabled\n");
+#endif
+#ifdef HAVE_LIBNOTIFY
+        g_print("Desktop notification support: Enabled\n");
+#endif
+#ifndef HAVE_OSXNOTIFY
+#ifndef HAVE_LIBNOTIFY
+        g_print("Desktop notification support: Disabled\n");
+#endif
+#endif
+#ifdef HAVE_LIBOTR
+        g_print("OTR support: Enabled\n");
+#else
+        g_print("OTR support: Disabled\n");
+#endif
+
         return 0;
     }
 
