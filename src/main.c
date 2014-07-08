@@ -104,6 +104,26 @@ main(int argc, char **argv)
         g_print("\n");
         g_print("This is free software; you are free to change and redistribute it.\n");
         g_print("There is NO WARRANTY, to the extent permitted by law.\n");
+        g_print("\n");
+
+        g_print("Build information:\n");
+#ifdef PROF_HAVE_OSXNOTIFY
+        g_print("Desktop notification support: Enabled\n");
+#endif
+#ifdef PROF_HAVE_LIBNOTIFY
+        g_print("Desktop notification support: Enabled\n");
+#endif
+#ifndef PROF_HAVE_OSXNOTIFY
+#ifndef PROF_HAVE_LIBNOTIFY
+        g_print("Desktop notification support: Disabled\n");
+#endif
+#endif
+#ifdef PROF_HAVE_LIBOTR
+        g_print("OTR support: Enabled\n");
+#else
+        g_print("OTR support: Disabled\n");
+#endif
+
         return 0;
     }
 
