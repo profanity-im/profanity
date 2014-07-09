@@ -1456,7 +1456,7 @@ _ui_room_join(const char * const room, gboolean focus)
         status_bar_active(num);
         ProfWin *console = wins_get_console();
         char *nick = muc_get_room_nick(room);
-        win_save_vprint(window, '!', NULL, 0, COLOUR_TYPING, "", "-> Autojoined %s as %s (%d).", room, nick, num);
+        win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "-> Autojoined %s as %s (%d).", room, nick, num);
         win_update_virtual(console);
     }
 }
