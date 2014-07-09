@@ -148,7 +148,7 @@ autocomplete_contains(Autocomplete ac, const char *value)
 }
 
 gchar *
-autocomplete_complete(Autocomplete ac, gchar *search_str)
+autocomplete_complete(Autocomplete ac, gchar *search_str, gboolean quote)
 {
     gchar *found = NULL;
 
@@ -166,18 +166,18 @@ autocomplete_complete(Autocomplete ac, gchar *search_str)
             FREE_SET_NULL(ac->search_str);
         }
         ac->search_str = strdup(search_str);
-        found = _search_from(ac, ac->items, TRUE);
+        found = _search_from(ac, ac->items, quote);
         return found;
 
     // subsequent search attempt
     } else {
         // search from here+1 tp end
-        found = _search_from(ac, g_slist_next(ac->last_found), TRUE);
+        found = _search_from(ac, g_slist_next(ac->last_found), quote);
         if (found != NULL)
             return found;
 
         // search from beginning
-        found = _search_from(ac, ac->items, TRUE);
+        found = _search_from(ac, ac->items, quote);
         if (found != NULL)
             return found;
 
@@ -235,7 +235,7 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
         }
         inp_cpy[(*size) - len] = '\0';
 
-        char *found = autocomplete_complete(ac, inp_cpy);
+        char *found = autocomplete_complete(ac, inp_cpy, TRUE);
         if (found != NULL) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);

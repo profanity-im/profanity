@@ -149,7 +149,7 @@ presence_clear_sub_requests(void)
 static char *
 _presence_sub_request_find(char * search_str)
 {
-    return autocomplete_complete(sub_requests_ac, search_str);
+    return autocomplete_complete(sub_requests_ac, search_str, TRUE);
 }
 
 static gboolean

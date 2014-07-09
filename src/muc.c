@@ -117,7 +117,7 @@ muc_reset_invites_ac(void)
 char *
 muc_find_invite(char *search_str)
 {
-    return autocomplete_complete(invite_ac, search_str);
+    return autocomplete_complete(invite_ac, search_str, TRUE);
 }
 
 void
@@ -578,7 +578,7 @@ muc_autocomplete(char *input, int *size)
         gchar *last_space = g_strrstr(input, " ");
         char *result = NULL;
         if (last_space == NULL) {
-            result = autocomplete_complete(nick_ac, input);
+            result = autocomplete_complete(nick_ac, input, TRUE);
         } else {
             int len = (last_space - input);
             char *start_str = strndup(input, len);

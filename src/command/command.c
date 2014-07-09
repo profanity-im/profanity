@@ -1272,7 +1272,7 @@ cmd_autocomplete(char *input, int *size)
             inp_cpy[i] = input[i];
         }
         inp_cpy[i] = '\0';
-        found = autocomplete_complete(commands_ac, inp_cpy);
+        found = autocomplete_complete(commands_ac, inp_cpy, TRUE);
         if (found != NULL) {
             char *auto_msg = strdup(found);
             ui_replace_input(input, auto_msg, size);

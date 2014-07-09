@@ -125,7 +125,7 @@ prefs_close(void)
 char *
 prefs_autocomplete_boolean_choice(char *prefix)
 {
-    return autocomplete_complete(boolean_choice_ac, prefix);
+    return autocomplete_complete(boolean_choice_ac, prefix, TRUE);
 }
 
 void
