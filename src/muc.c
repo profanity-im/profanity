@@ -578,11 +578,11 @@ muc_autocomplete(char *input, int *size)
         gchar *last_space = g_strrstr(input, " ");
         char *result = NULL;
         if (last_space == NULL) {
-            result = autocomplete_complete(nick_ac, input, TRUE);
+            result = autocomplete_complete(nick_ac, input, FALSE);
         } else {
             int len = (last_space - input);
             char *start_str = strndup(input, len);
-            result = autocomplete_param_with_ac(input, size, start_str, nick_ac);
+            result = autocomplete_param_with_ac(input, size, start_str, nick_ac, FALSE);
             free(start_str);
         }
         if (result != NULL) {

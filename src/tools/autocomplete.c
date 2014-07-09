@@ -220,7 +220,7 @@ autocomplete_param_with_func(char *input, int *size, char *command,
 
 char *
 autocomplete_param_with_ac(char *input, int *size, char *command,
-    Autocomplete ac)
+    Autocomplete ac, gboolean quote)
 {
     GString *auto_msg = NULL;
     char *result = NULL;
@@ -235,7 +235,7 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
         }
         inp_cpy[(*size) - len] = '\0';
 
-        char *found = autocomplete_complete(ac, inp_cpy, TRUE);
+        char *found = autocomplete_complete(ac, inp_cpy, quote);
         if (found != NULL) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
