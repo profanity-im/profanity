@@ -581,7 +581,6 @@ muc_autocomplete(char *input, int *size)
             result = autocomplete_complete(nick_ac, input);
         } else {
             int len = (last_space - input);
-            cons_debug("SIZE: %d", len);
             char *start_str = strndup(input, len);
             result = autocomplete_param_with_ac(input, size, start_str, nick_ac);
             free(start_str);

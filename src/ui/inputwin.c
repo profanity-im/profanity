@@ -512,11 +512,12 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case 9: // tab
-            if ((strncmp(input, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
-                cons_debug("MUC AC");
-                muc_autocomplete(input, size);
-            } else {
-                cmd_autocomplete(input, size);
+            if (*size != 0) {
+                if ((strncmp(input, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
+                    muc_autocomplete(input, size);
+                } else if (strncmp(input, "/", 1) == 0) {
+                    cmd_autocomplete(input, size);
+                }
             }
             return 1;
 
