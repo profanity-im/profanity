@@ -171,7 +171,7 @@ autocomplete_complete(Autocomplete ac, gchar *search_str, gboolean quote)
 
     // subsequent search attempt
     } else {
-        // search from here+1 tp end
+        // search from here+1 to end
         found = _search_from(ac, g_slist_next(ac->last_found), quote);
         if (found != NULL)
             return found;

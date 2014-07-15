@@ -579,16 +579,28 @@ muc_autocomplete(char *input, int *size)
         char *result = NULL;
         if (last_space == NULL) {
             result = autocomplete_complete(nick_ac, input, FALSE);
+            if (result != NULL) {
+                ui_replace_input(input, result, size);
+                g_free(result);
+                return;
+            }
         } else {
-            int len = (last_space - input);
-            char *start_str = strndup(input, len);
-            result = autocomplete_param_with_ac(input, size, start_str, nick_ac, FALSE);
-            free(start_str);
-        }
-        if (result != NULL) {
-            ui_replace_input(input, result, size);
-            g_free(result);
-            return;
+            char *search_str = last_space+1;
+            if (*search_str != '\0') {
+                result = autocomplete_complete(nick_ac, search_str, FALSE);
+                if (result != NULL) {
+                    if (g_str_has_suffix(input, result) == FALSE) {
+                        gchar *start_str = g_strndup(input, search_str - input);
+                        GString *replace_with = g_string_new(start_str);
+                        g_string_append(replace_with, result);
+                        ui_replace_input(input, replace_with->str, size);
+                        g_string_free(replace_with, TRUE);
+                        g_free(start_str);
+                        g_free(result);
+                        return;
+                    }
+                }
+            }
         }
     }
 }
