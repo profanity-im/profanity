@@ -1303,10 +1303,8 @@ cmd_reset_autocomplete()
     autocomplete_reset(sub_ac);
 
     if (ui_current_win_type() == WIN_MUC) {
-        Autocomplete nick_ac = muc_get_roster_ac(ui_current_recipient());
-        if (nick_ac != NULL) {
-            autocomplete_reset(nick_ac);
-        }
+        char *recipient = ui_current_recipient();
+        muc_reset_autocomplete(recipient);
     }
 
     autocomplete_reset(who_ac);

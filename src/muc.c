@@ -36,6 +36,7 @@ typedef struct _muc_room_t {
     char *nick; // e.g. Some User
     char *password;
     char *subject;
+    char *autocomplete_prefix;
     GList *pending_broadcasts;
     gboolean autojoin;
     gboolean pending_nick_change;
@@ -141,6 +142,7 @@ muc_join_room(const char * const room, const char * const nick,
     ChatRoom *new_room = malloc(sizeof(ChatRoom));
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
+    new_room->autocomplete_prefix = NULL;
     if (password != NULL) {
         new_room->password = strdup(password);
     } else {
@@ -571,37 +573,69 @@ muc_complete_roster_nick_change(const char * const room,
 void
 muc_autocomplete(char *input, int *size)
 {
+    if (rooms == NULL) {
+        return;
+    }
+
     char *recipient = ui_current_recipient();
-    Autocomplete nick_ac = muc_get_roster_ac(recipient);
-    if (nick_ac != NULL) {
-        input[*size] = '\0';
-        gchar *last_space = g_strrstr(input, " ");
-        char *result = NULL;
-        if (last_space == NULL) {
-            result = autocomplete_complete(nick_ac, input, FALSE);
-            if (result != NULL) {
-                ui_replace_input(input, result, size);
-                g_free(result);
-                return;
-            }
-        } else {
-            char *search_str = last_space+1;
-            if (*search_str != '\0') {
-                result = autocomplete_complete(nick_ac, search_str, FALSE);
-                if (result != NULL) {
-                    if (g_str_has_suffix(input, result) == FALSE) {
-                        gchar *start_str = g_strndup(input, search_str - input);
-                        GString *replace_with = g_string_new(start_str);
-                        g_string_append(replace_with, result);
-                        ui_replace_input(input, replace_with->str, size);
-                        g_string_free(replace_with, TRUE);
-                        g_free(start_str);
-                        g_free(result);
-                        return;
-                    }
-                }
-            }
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, recipient);
+
+    if (chat_room == NULL) {
+        return;
+    }
+
+    if (chat_room->nick_ac == NULL) {
+        return;
+    }
+
+    input[*size] = '\0';
+    char *search_str = NULL;
+
+    gchar *last_space = g_strrstr(input, " ");
+    if (last_space == NULL) {
+        search_str = input;
+        if (chat_room->autocomplete_prefix == NULL) {
+            chat_room->autocomplete_prefix = strdup("");
         }
+    } else {
+        search_str = last_space+1;
+        if (chat_room->autocomplete_prefix == NULL) {
+            chat_room->autocomplete_prefix = g_strndup(input, search_str - input);
+        }
+    }
+
+    char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE);
+    if (result != NULL) {
+        GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
+        g_string_append(replace_with, result);
+        ui_replace_input(input, replace_with->str, size);
+        g_string_free(replace_with, TRUE);
+        g_free(result);
+    }
+
+    return;
+}
+
+void
+muc_reset_autocomplete(const char * const room)
+{
+    if (rooms == NULL) {
+        return;
+    }
+
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room == NULL) {
+        return;
+    }
+
+    if (chat_room->nick_ac != NULL) {
+        autocomplete_reset(chat_room->nick_ac);
+    }
+
+    if (chat_room->autocomplete_prefix != NULL) {
+        free(chat_room->autocomplete_prefix);
+        chat_room->autocomplete_prefix = NULL;
     }
 }
 
@@ -613,6 +647,9 @@ _free_room(ChatRoom *room)
         free(room->nick);
         free(room->subject);
         free(room->password);
+        if (room->autocomplete_prefix != NULL) {
+            free(room->autocomplete_prefix);
+        }
         if (room->roster != NULL) {
             g_hash_table_destroy(room->roster);
         }
