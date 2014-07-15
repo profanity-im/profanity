@@ -77,5 +77,6 @@ void muc_add_pending_broadcast(const char * const room, const char * const messa
 GList * muc_get_pending_broadcasts(const char * const room);
 
 void muc_autocomplete(char *input, int *size);
+void muc_reset_autocomplete(const char * const room);
 
 #endif

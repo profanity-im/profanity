@@ -53,7 +53,7 @@ autocompleters_complete(char *input, int *size)
     GList *keys = g_hash_table_get_keys(autocompleters);
     GList *curr = keys;
     while (curr != NULL) {
-        result = autocomplete_param_with_ac(input, size, curr->data, g_hash_table_lookup(autocompleters, curr->data));
+        result = autocomplete_param_with_ac(input, size, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
         if (result != NULL) {
             return result;
         }

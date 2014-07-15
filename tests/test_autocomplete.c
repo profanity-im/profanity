@@ -24,7 +24,7 @@ void reset_after_create(void **state)
 void find_after_create(void **state)
 {
     Autocomplete ac = autocomplete_new();
-    autocomplete_complete(ac, "hello");
+    autocomplete_complete(ac, "hello", TRUE);
     autocomplete_clear(ac);
 }
 
@@ -42,7 +42,7 @@ void add_one_and_complete(void **state)
 {
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
-    char *result = autocomplete_complete(ac, "Hel");
+    char *result = autocomplete_complete(ac, "Hel", TRUE);
 
     assert_string_equal("Hello", result);
 
@@ -54,7 +54,7 @@ void add_two_and_complete_returns_first(void **state)
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Help");
-    char *result = autocomplete_complete(ac, "Hel");
+    char *result = autocomplete_complete(ac, "Hel", TRUE);
 
     assert_string_equal("Hello", result);
 
@@ -66,8 +66,8 @@ void add_two_and_complete_returns_second(void **state)
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Help");
-    char *result1 = autocomplete_complete(ac, "Hel");
-    char *result2 = autocomplete_complete(ac, result1);
+    char *result1 = autocomplete_complete(ac, "Hel", TRUE);
+    char *result2 = autocomplete_complete(ac, result1, TRUE);
 
     assert_string_equal("Help", result2);
 

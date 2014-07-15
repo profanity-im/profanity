@@ -41,7 +41,7 @@ void autocomplete_add(Autocomplete ac, const char *item);
 void autocomplete_remove(Autocomplete ac, const char * const item);
 
 // find the next item prefixed with search string
-gchar * autocomplete_complete(Autocomplete ac, gchar *search_str);
+gchar * autocomplete_complete(Autocomplete ac, gchar *search_str, gboolean quote);
 
 GSList * autocomplete_get_list(Autocomplete ac);
 gint autocomplete_length(Autocomplete ac);
@@ -50,7 +50,7 @@ char * autocomplete_param_with_func(char *input, int *size, char *command,
     autocomplete_func func);
 
 char * autocomplete_param_with_ac(char *input, int *size, char *command,
-    Autocomplete ac);
+    Autocomplete ac, gboolean quote);
 
 char * autocomplete_param_no_with_func(char *input, int *size, char *command,
     int arg_number, autocomplete_func func);
