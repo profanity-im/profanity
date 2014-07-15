@@ -101,13 +101,13 @@ _accounts_close(void)
 static char *
 _accounts_find_enabled(char *prefix)
 {
-    return autocomplete_complete(enabled_ac, prefix);
+    return autocomplete_complete(enabled_ac, prefix, TRUE);
 }
 
 static char *
 _accounts_find_all(char *prefix)
 {
-    return autocomplete_complete(all_ac, prefix);
+    return autocomplete_complete(all_ac, prefix, TRUE);
 }
 
 static void

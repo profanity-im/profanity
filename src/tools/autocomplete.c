@@ -34,7 +34,7 @@ struct autocomplete_t {
     gchar *search_str;
 };
 
-static gchar * _search_from(Autocomplete ac, GSList *curr);
+static gchar * _search_from(Autocomplete ac, GSList *curr, gboolean quote);
 
 Autocomplete
 autocomplete_new(void)
@@ -148,7 +148,7 @@ autocomplete_contains(Autocomplete ac, const char *value)
 }
 
 gchar *
-autocomplete_complete(Autocomplete ac, gchar *search_str)
+autocomplete_complete(Autocomplete ac, gchar *search_str, gboolean quote)
 {
     gchar *found = NULL;
 
@@ -166,18 +166,18 @@ autocomplete_complete(Autocomplete ac, gchar *search_str)
             FREE_SET_NULL(ac->search_str);
         }
         ac->search_str = strdup(search_str);
-        found = _search_from(ac, ac->items);
+        found = _search_from(ac, ac->items, quote);
         return found;
 
     // subsequent search attempt
     } else {
-        // search from here+1 tp end
-        found = _search_from(ac, g_slist_next(ac->last_found));
+        // search from here+1 to end
+        found = _search_from(ac, g_slist_next(ac->last_found), quote);
         if (found != NULL)
             return found;
 
         // search from beginning
-        found = _search_from(ac, ac->items);
+        found = _search_from(ac, ac->items, quote);
         if (found != NULL)
             return found;
 
@@ -220,7 +220,7 @@ autocomplete_param_with_func(char *input, int *size, char *command,
 
 char *
 autocomplete_param_with_ac(char *input, int *size, char *command,
-    Autocomplete ac)
+    Autocomplete ac, gboolean quote)
 {
     GString *auto_msg = NULL;
     char *result = NULL;
@@ -235,7 +235,7 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
         }
         inp_cpy[(*size) - len] = '\0';
 
-        char *found = autocomplete_complete(ac, inp_cpy);
+        char *found = autocomplete_complete(ac, inp_cpy, quote);
         if (found != NULL) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -292,7 +292,7 @@ autocomplete_param_no_with_func(char *input, int *size, char *command,
 }
 
 static gchar *
-_search_from(Autocomplete ac, GSList *curr)
+_search_from(Autocomplete ac, GSList *curr, gboolean quote)
 {
     while(curr) {
 
@@ -303,7 +303,7 @@ _search_from(Autocomplete ac, GSList *curr)
             ac->last_found = curr;
 
             // if contains space, quote before returning
-            if (g_strrstr(curr->data, " ")) {
+            if (quote && g_strrstr(curr->data, " ")) {
                 GString *quoted = g_string_new("\"");
                 g_string_append(quoted, curr->data);
                 g_string_append(quoted, "\"");
