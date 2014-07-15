@@ -608,6 +608,9 @@ muc_autocomplete(char *input, int *size)
     if (result != NULL) {
         GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
         g_string_append(replace_with, result);
+        if (last_space == NULL || (*(last_space+1) == '\0')) {
+            g_string_append(replace_with, ": ");
+        }
         ui_replace_input(input, replace_with->str, size);
         g_string_free(replace_with, TRUE);
         g_free(result);
