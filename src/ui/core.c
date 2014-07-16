@@ -1582,7 +1582,7 @@ _ui_room_history(const char * const room_jid, const char * const nick,
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
 
-    win_save_vprint(window, '-', (&tv_stamp), 8, 0, nick, message);
+    win_save_vprint(window, '-', (&tv_stamp), NO_COLOUR_FROM, 0, nick, message);
 
     if (wins_is_current(window)) {
         win_update_virtual(window);
@@ -1599,9 +1599,9 @@ _ui_room_message(const char * const room_jid, const char * const nick,
 
     if (strcmp(nick, my_nick) != 0) {
         if (g_strrstr(message, my_nick) != NULL) {
-            win_save_print(window, '-', NULL, 1, COLOUR_ROOMMENTION, nick, message);
+            win_save_print(window, '-', NULL, NO_ME, COLOUR_ROOMMENTION, nick, message);
         } else {
-            win_save_print(window, '-', NULL, 1, 0, nick, message);
+            win_save_print(window, '-', NULL, NO_ME, 0, nick, message);
         }
     } else {
         win_save_print(window, '-', NULL, 0, 0, nick, message);

@@ -324,7 +324,7 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     {
         case WIN_CHAT:
         case WIN_PRIVATE:
-            win_save_print(window, '-', tv_stamp, 1, 0, from, message);
+            win_save_print(window, '-', tv_stamp, NO_ME, 0, from, message);
             break;
         default:
             assert(FALSE);
