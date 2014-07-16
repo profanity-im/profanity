@@ -332,34 +332,42 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     }
 }
 
-void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message, ...) {
-  va_list arg;
-  va_start(arg, message);
-  GString *fmt_msg = g_string_new(NULL);
-  g_string_vprintf(fmt_msg, message, arg);
-  win_save_print(window, show_char, tstamp, flags, attrs, from, fmt_msg->str);
+void
+win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp,
+    int flags, int attrs, const char * const from, const char * const message, ...)
+{
+    va_list arg;
+    va_start(arg, message);
+    GString *fmt_msg = g_string_new(NULL);
+    g_string_vprintf(fmt_msg, message, arg);
+    win_save_print(window, show_char, tstamp, flags, attrs, from, fmt_msg->str);
 }
 
-
-void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message) {
+void
+win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
+    int flags, int attrs, const char * const from, const char * const message)
+{
     gchar *date_fmt;
     GDateTime *time;
-    if(tstamp == NULL) {
-      time = g_date_time_new_now_local();
-      date_fmt = g_date_time_format(time, "%H:%M:%S");
+
+    if (tstamp == NULL) {
+        time = g_date_time_new_now_local();
+        date_fmt = g_date_time_format(time, "%H:%M:%S");
+    } else {
+        time = g_date_time_new_from_timeval_utc(tstamp);
+        date_fmt = g_date_time_format(time, "%H:%M:%S");
     }
-    else {
-      time = g_date_time_new_from_timeval_utc(tstamp);
-      date_fmt = g_date_time_format(time, "%H:%M:%S");
-    }
+
     g_date_time_unref(time);
     buffer_push(window->buffer, show_char, date_fmt, flags, attrs, from, message);
     win_print(window, show_char, date_fmt, flags, attrs, from, message);
     g_free(date_fmt);
 }
 
-
-void win_print(ProfWin *window, const char show_char, const char * const date_fmt, int flags, int attrs, const char * const from, const char * const message) {
+void
+win_print(ProfWin *window, const char show_char, const char * const date_fmt,
+    int flags, int attrs, const char * const from, const char * const message)
+{
     // flags : 1st bit =  0/1 - me/not me
     //         2nd bit =  0/1 - date/no date
     //         3rd bit =  0/1 - eol/no eol
@@ -367,48 +375,57 @@ void win_print(ProfWin *window, const char show_char, const char * const date_fm
     int unattr_me = 0;
     int offset = 0;
     int colour = COLOUR_ME;
-    if((flags & 2) == 0) {
-      wattron(window->win, COLOUR_TIME);
-      wprintw(window->win, "%s %c ", date_fmt, show_char);
-      wattroff(window->win, COLOUR_TIME);
+
+    if ((flags & 2) == 0) {
+        wattron(window->win, COLOUR_TIME);
+        wprintw(window->win, "%s %c ", date_fmt, show_char);
+        wattroff(window->win, COLOUR_TIME);
     }
 
-    if(strlen(from) > 0) {
-      if((flags & 1) != 0) {
-        colour = COLOUR_THEM;
-      }
-      if((flags & 8) != 0) {
-        colour = 0;
-      }
-      wattron(window->win, colour);
-      if(strncmp(message, "/me ", 4) == 0) {
-        wprintw(window->win, "*%s ", from);
-        offset = 4;
-        unattr_me = 1;
-      }
-      else {
-        wprintw(window->win, "%s: ", from);
-        wattroff(window->win, colour);
-      }
+    if (strlen(from) > 0) {
+        if ((flags & 1) != 0) {
+            colour = COLOUR_THEM;
+        }
+
+        if((flags & 8) != 0) {
+            colour = 0;
+        }
+
+        wattron(window->win, colour);
+        if (strncmp(message, "/me ", 4) == 0) {
+            wprintw(window->win, "*%s ", from);
+            offset = 4;
+            unattr_me = 1;
+        } else {
+            wprintw(window->win, "%s: ", from);
+            wattroff(window->win, colour);
+        }
     }
+
     wattron(window->win, attrs);
-    if((flags & 4) == 0)
-      wprintw(window->win, "%s\n", message+offset);
-    else
-      wprintw(window->win, "%s", message+offset);
+
+    if ((flags & 4) == 0) {
+        wprintw(window->win, "%s\n", message+offset);
+    } else {
+        wprintw(window->win, "%s", message+offset);
+    }
+
     wattroff(window->win, attrs);
 
-    if(unattr_me) {
-      wattroff(window->win, colour);
+    if (unattr_me) {
+        wattroff(window->win, colour);
     }
 }
 
-void win_redraw(ProfWin *window) {
+void
+win_redraw(ProfWin *window)
+{
     int i, size;
     werase(window->win);
     size = buffer_size(window->buffer);
-    for(i = 0; i < size; i++) {
-      ProfBuffEntry e = buffer_yield_entry(window->buffer, i);
-      win_print(window, e.show_char, e.date_fmt, e.flags, e.attrs, e.from, e.message);
+
+    for (i = 0; i < size; i++) {
+        ProfBuffEntry e = buffer_yield_entry(window->buffer, i);
+        win_print(window, e.show_char, e.date_fmt, e.flags, e.attrs, e.from, e.message);
     }
 }
