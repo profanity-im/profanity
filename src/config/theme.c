@@ -89,6 +89,7 @@ static struct colours_t {
         NCURSES_COLOR_T error;
         NCURSES_COLOR_T incoming;
         NCURSES_COLOR_T roominfo;
+        NCURSES_COLOR_T roommention;
         NCURSES_COLOR_T me;
         NCURSES_COLOR_T them;
         NCURSES_COLOR_T otrstartedtrusted;
@@ -202,29 +203,30 @@ theme_init_colours(void)
 
     // room chat
     init_pair(19, colour_prefs.roominfo, colour_prefs.bkgnd);
+    init_pair(20, colour_prefs.roommention, colour_prefs.bkgnd);
 
     // statuses
-    init_pair(20, colour_prefs.online, colour_prefs.bkgnd);
-    init_pair(21, colour_prefs.offline, colour_prefs.bkgnd);
-    init_pair(22, colour_prefs.away, colour_prefs.bkgnd);
-    init_pair(23, colour_prefs.chat, colour_prefs.bkgnd);
-    init_pair(24, colour_prefs.dnd, colour_prefs.bkgnd);
-    init_pair(25, colour_prefs.xa, colour_prefs.bkgnd);
+    init_pair(21, colour_prefs.online, colour_prefs.bkgnd);
+    init_pair(22, colour_prefs.offline, colour_prefs.bkgnd);
+    init_pair(23, colour_prefs.away, colour_prefs.bkgnd);
+    init_pair(24, colour_prefs.chat, colour_prefs.bkgnd);
+    init_pair(25, colour_prefs.dnd, colour_prefs.bkgnd);
+    init_pair(26, colour_prefs.xa, colour_prefs.bkgnd);
 
     // states
-    init_pair(26, colour_prefs.typing, colour_prefs.bkgnd);
-    init_pair(27, colour_prefs.gone, colour_prefs.bkgnd);
+    init_pair(27, colour_prefs.typing, colour_prefs.bkgnd);
+    init_pair(28, colour_prefs.gone, colour_prefs.bkgnd);
 
     // subscription status
-    init_pair(28, colour_prefs.subscribed, colour_prefs.bkgnd);
-    init_pair(29, colour_prefs.unsubscribed, colour_prefs.bkgnd);
+    init_pair(29, colour_prefs.subscribed, colour_prefs.bkgnd);
+    init_pair(30, colour_prefs.unsubscribed, colour_prefs.bkgnd);
 
     // otr messages
-    init_pair(30, colour_prefs.otrstartedtrusted, colour_prefs.bkgnd);
-    init_pair(31, colour_prefs.otrstarteduntrusted, colour_prefs.bkgnd);
-    init_pair(32, colour_prefs.otrended, colour_prefs.bkgnd);
-    init_pair(33, colour_prefs.otrtrusted, colour_prefs.bkgnd);
-    init_pair(34, colour_prefs.otruntrusted, colour_prefs.bkgnd);
+    init_pair(31, colour_prefs.otrstartedtrusted, colour_prefs.bkgnd);
+    init_pair(32, colour_prefs.otrstarteduntrusted, colour_prefs.bkgnd);
+    init_pair(33, colour_prefs.otrended, colour_prefs.bkgnd);
+    init_pair(34, colour_prefs.otrtrusted, colour_prefs.bkgnd);
+    init_pair(35, colour_prefs.otruntrusted, colour_prefs.bkgnd);
 }
 
 static NCURSES_COLOR_T
@@ -398,6 +400,10 @@ _load_colours(void)
     gchar *roominfo_val = g_key_file_get_string(theme, "colours", "roominfo", NULL);
     _set_colour(roominfo_val, &colour_prefs.roominfo, COLOR_YELLOW);
     g_free(roominfo_val);
+
+    gchar *roommention_val = g_key_file_get_string(theme, "colours", "roommention", NULL);
+    _set_colour(roommention_val, &colour_prefs.roommention, COLOR_YELLOW);
+    g_free(roommention_val);
 
     gchar *me_val = g_key_file_get_string(theme, "colours", "me", NULL);
     _set_colour(me_val, &colour_prefs.me, COLOR_YELLOW);

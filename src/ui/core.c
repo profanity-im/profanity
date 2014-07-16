@@ -1657,9 +1657,10 @@ _ui_room_message(const char * const room_jid, const char * const nick,
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
     int num = wins_get_num(window);
+    char *my_nick = muc_get_room_nick(room_jid);
 
     win_print_time(window, '-');
-    if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
+    if (strcmp(nick, my_nick) != 0) {
         if (strncmp(message, "/me ", 4) == 0) {
             wattron(window->win, COLOUR_THEM);
             wprintw(window->win, "*%s ", nick);
@@ -1668,7 +1669,13 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             wattroff(window->win, COLOUR_THEM);
         } else {
             _win_show_user(window->win, nick, 1);
-            _win_show_message(window->win, message);
+            if (g_strrstr(message, my_nick) != NULL) {
+                wattron(window->win, COLOUR_ROOMMENTION);
+                _win_show_message(window->win, message);
+                wattroff(window->win, COLOUR_ROOMMENTION);
+            } else {
+                _win_show_message(window->win, message);
+            }
         }
 
     } else {
@@ -1698,7 +1705,7 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             win_update_virtual(current);
         }
 
-        if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
+        if (strcmp(nick, my_nick) != 0) {
             if (prefs_get_boolean(PREF_FLASH)) {
                 flash();
             }
