@@ -3,24 +3,22 @@
 
 #include "config.h"
 
-//#include "ui/window.h"
 #define BUFF_SIZE 1000
 
 typedef struct prof_buff_entry_t {
-  char show_char;
-  char *date_fmt;
-  int flags;
-  int attrs;
-  char *from;
-  char *message;
+    char show_char;
+    char *date_fmt;
+    int flags;
+    int attrs;
+    char *from;
+    char *message;
 } ProfBuffEntry;
 
 typedef struct prof_buff_t {
-  ProfBuffEntry entry[BUFF_SIZE];
-  int wrap;
-  int current;
+    ProfBuffEntry entry[BUFF_SIZE];
+    int wrap;
+    int current;
 } ProfBuff;
-
 
 ProfBuff* buffer_create();
 void buffer_free(ProfBuff* buffer);
