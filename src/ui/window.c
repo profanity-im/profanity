@@ -126,7 +126,7 @@ win_show_contact(ProfWin *window, PContact contact)
         win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
     }
 
-    win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " is %s", presence);
+    win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence);
 
     if (last_activity != NULL) {
         GDateTime *now = g_date_time_new_now_local();
@@ -139,15 +139,15 @@ win_show_contact(ProfWin *window, PContact contact)
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
+          win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
         }
         else {
-          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dm%ds", minutes, seconds);
+          win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dm%ds", minutes, seconds);
         }
     }
 
     if (status != NULL) {
-        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", \"%s\"", p_contact_status(contact));
+        win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", p_contact_status(contact));
     }
 
     win_save_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
@@ -169,7 +169,7 @@ win_show_info(ProfWin *window, PContact contact)
     win_save_print(window, '-', NULL, 0, 0, "", "");
     win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
     if (name != NULL) {
-        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " (%s)", name);
+        win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
     }
     win_save_print(window, '-', NULL, NO_DATE, 0, "", ":");
 
@@ -215,7 +215,7 @@ win_show_info(ProfWin *window, PContact contact)
         int presence_colour = win_presence_colour(resource_presence);
         win_save_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status != NULL) {
-            win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", \"%s\"", resource->status);
+            win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
         }
         win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
 
@@ -226,19 +226,19 @@ win_show_info(ProfWin *window, PContact contact)
                 if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
                     win_save_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
                     if (caps->name != NULL) {
-                        win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", caps->name);
+                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                         if ((caps->category != NULL) || (caps->type != NULL)) {
-                            win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", " ");
+                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
                     if (caps->type != NULL) {
-                        win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", caps->type);
+                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                         if (caps->category != NULL) {
-                            win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", " ");
+                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
                     if (caps->category != NULL) {
-                        win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", caps->category);
+                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                     }
                     win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
                 }
@@ -246,7 +246,7 @@ win_show_info(ProfWin *window, PContact contact)
                     win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
                 }
                 if (caps->software_version != NULL) {
-                    win_save_vprint(window, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->software_version);
+                    win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
                 }
                 if ((caps->software != NULL) || (caps->software_version != NULL)) {
                     win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
@@ -255,7 +255,7 @@ win_show_info(ProfWin *window, PContact contact)
                     win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
                 }
                 if (caps->os_version != NULL) {
-                    win_save_vprint(window, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->os_version);
+                    win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
                 }
                 if ((caps->os != NULL) || (caps->os_version != NULL)) {
                     win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
@@ -287,9 +287,9 @@ win_show_status_string(ProfWin *window, const char * const from,
     win_save_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "%s %s", pre, from);
 
     if (show != NULL)
-        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " is %s", show);
+        win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", show);
     else
-        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", " is %s", default_show);
+        win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", default_show);
 
     if (last_activity != NULL) {
         GDateTime *now = g_date_time_new_now_local();
@@ -302,15 +302,15 @@ win_show_status_string(ProfWin *window, const char * const from,
         int seconds = span / G_TIME_SPAN_SECOND;
 
         if (hours > 0) {
-          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
+          win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dh%dm%ds", hours, minutes, seconds);
         }
         else {
-          win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", idle %dm%ds", minutes, seconds);
+          win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", idle %dm%ds", minutes, seconds);
         }
     }
 
     if (status != NULL)
-        win_save_vprint(window, '-', NULL, NO_EOL_DATE, presence_colour, "", ", \"%s\"", status);
+        win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", status);
 
     win_save_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
 

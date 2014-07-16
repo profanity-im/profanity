@@ -65,7 +65,7 @@ static void
 _cons_show_word(const char * const word)
 {
     ProfWin *console = wins_get_console();
-    win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", word);
+    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", word);
 
     if (wins_is_current(console)) {
         win_update_virtual(console);
@@ -255,8 +255,8 @@ _cons_show_login_success(ProfAccount *account)
     const char *presence_str = string_from_resource_presence(presence);
 
     int presence_colour = win_presence_colour(presence_str);
-    win_save_vprint(console, '-', NULL, NO_EOL_DATE, presence_colour, "", "%s", presence_str);
-    win_save_vprint(console, '-', NULL, NO_EOL_DATE, 0, "", " (priority %d)",
+    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", presence_str);
+    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
     win_save_print(console, '-', NULL, NO_DATE, 0, "", ".");
     if (wins_is_current(console)) {
@@ -338,19 +338,19 @@ _cons_show_caps(const char * const contact, Resource *resource)
             if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
                 win_save_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
                 if (caps->name != NULL) {
-                    win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", caps->name);
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                     if ((caps->category != NULL) || (caps->type != NULL)) {
-                        win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", " ");
+                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (caps->type != NULL) {
-                    win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", caps->type);
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                     if (caps->category != NULL) {
-                        win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", " ");
+                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (caps->category != NULL) {
-                    win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", caps->category);
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                 }
                 win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
             }
@@ -358,7 +358,7 @@ _cons_show_caps(const char * const contact, Resource *resource)
                 win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "Software: %s", caps->software);
             }
             if (caps->software_version != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->software_version);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
             }
             if ((caps->software != NULL) || (caps->software_version != NULL)) {
                 win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
@@ -367,7 +367,7 @@ _cons_show_caps(const char * const contact, Resource *resource)
                 win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "OS: %s", caps->os);
             }
             if (caps->os_version != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->os_version);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
             }
             if ((caps->os != NULL) || (caps->os_version != NULL)) {
                 win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
@@ -467,7 +467,7 @@ _cons_show_room_list(GSList *rooms, const char * const conference_node)
             DiscoItem *room = rooms->data;
             win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "  %s", room->jid);
             if (room->name != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL_DATE, 0, "", ", (%s)", room->name);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", (%s)", room->name);
             }
             win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
             rooms = g_slist_next(rooms);
@@ -504,19 +504,19 @@ _cons_show_bookmarks(const GList *list)
             }
             win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s", item->jid);
             if (item->nick != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL_DATE, presence_colour, "", "/%s", item->nick);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "/%s", item->nick);
             }
             if (item->autojoin) {
-                win_save_print(console, '-', NULL, NO_EOL_DATE, presence_colour, "", " (autojoin)");
+                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (autojoin)");
             }
             if (item->password != NULL) {
-                win_save_print(console, '-', NULL, NO_EOL_DATE, presence_colour, "", " (private)");
+                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
             }
             if (muc_room_is_active(item->jid)) {
                 ProfWin *roomwin = wins_get_by_recipient(item->jid);
                 if (roomwin != NULL) {
                     int num = wins_get_num(roomwin);
-                    win_save_vprint(console, '-', NULL, NO_EOL_DATE, presence_colour, "", " (%d)", num);
+                    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%d)", num);
                 }
             }
             win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
@@ -587,7 +587,7 @@ _cons_show_disco_items(GSList *items, const char * const jid)
             DiscoItem *item = items->data;
             win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "  %s", item->jid);
             if (item->name != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL_DATE, 0, "", ", (%s)", item->name);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", (%s)", item->name);
             }
             win_save_vprint(console, '-', NULL, NO_DATE, 0, "", "");
             items = g_slist_next(items);
@@ -799,7 +799,7 @@ _cons_show_account(ProfAccount *account)
             win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
 
             if (resource->status != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL_DATE, presence_colour, "", ", \"%s\"", resource->status);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
             }
             win_save_vprint(console, '-', NULL, NO_DATE, 0, "", "");
 
@@ -810,19 +810,19 @@ _cons_show_account(ProfAccount *account)
                     if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
                         win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Identity: ");
                         if (caps->name != NULL) {
-                            win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", caps->name);
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                             if ((caps->category != NULL) || (caps->type != NULL)) {
-                                win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", " ");
+                                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                             }
                         }
                         if (caps->type != NULL) {
-                            win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", caps->type);
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                             if (caps->category != NULL) {
-                                win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", " ");
+                                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                             }
                         }
                         if (caps->category != NULL) {
-                            win_save_print(console, '-', NULL, NO_EOL_DATE, 0, "", caps->category);
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                         }
                         win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
                     }
@@ -830,7 +830,7 @@ _cons_show_account(ProfAccount *account)
                         win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
                     }
                     if (caps->software_version != NULL) {
-                        win_save_vprint(console, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->software_version);
+                        win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
                     }
                     if ((caps->software != NULL) || (caps->software_version != NULL)) {
                         win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
@@ -839,7 +839,7 @@ _cons_show_account(ProfAccount *account)
                         win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
                     }
                     if (caps->os_version != NULL) {
-                        win_save_vprint(console, '-', NULL, NO_EOL_DATE, 0, "", ", %s", caps->os_version);
+                        win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
                     }
                     if ((caps->os != NULL) || (caps->os_version != NULL)) {
                         win_save_print(console, '-', NULL, NO_DATE, 0, "", "");

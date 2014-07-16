@@ -1378,7 +1378,7 @@ _ui_duck_result(const char * const result)
             } else {
                 gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
                 if (string != NULL) {
-                    win_save_print(window, '-', NULL, NO_EOL_DATE, 0, "", string);
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", string);
                     g_free(string);
                 }
             }
@@ -1477,7 +1477,7 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
         if (presence == NULL) {
             length++;
             win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d participants: ", length);
-            win_save_vprint(window, '!', NULL, NO_EOL_DATE, COLOUR_ONLINE, "", "%s, ", muc_get_room_nick(room));
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s, ", muc_get_room_nick(room));
         } else {
             win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d %s: ", length, presence);
         }
@@ -1488,10 +1488,10 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
             const char *show = p_contact_presence(member);
 
             int presence_colour = win_presence_colour(show);
-            win_save_vprint(window, '!', NULL, NO_EOL_DATE, COLOUR_ONLINE|presence_colour, "", "%s", nick);
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE|presence_colour, "", "%s", nick);
 
             if (roster->next != NULL) {
-                win_save_print(window, '!', NULL, NO_EOL_DATE, COLOUR_ONLINE, "", ", ");
+                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", ", ");
             }
 
             roster = g_list_next(roster);

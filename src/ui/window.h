@@ -39,8 +39,6 @@
 #define NO_EOL  4
 #define NO_COLOUR_FROM  8
 
-#define NO_EOL_DATE 6
-
 #define PAD_SIZE 1000
 
 typedef enum {
