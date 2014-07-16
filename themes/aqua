@@ -23,6 +23,7 @@ gone=blue
 error=white
 incoming=white
 roominfo=white
+roommention=white
 me=white
 them=cyan
 titlebar.unencrypted=cyan
