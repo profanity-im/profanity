@@ -1595,9 +1595,14 @@ _ui_room_message(const char * const room_jid, const char * const nick,
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
     int num = wins_get_num(window);
+    char *my_nick = muc_get_room_nick(room_jid);
 
-    if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
-        win_save_print(window, '-', NULL, 1, 0, nick, message);
+    if (strcmp(nick, my_nick) != 0) {
+        if (g_strrstr(message, my_nick) != NULL) {
+            win_save_print(window, '-', NULL, 1, COLOUR_ROOMMENTION, nick, message);
+        } else {
+            win_save_print(window, '-', NULL, 1, 0, nick, message);
+        }
     } else {
         win_save_print(window, '-', NULL, 0, 0, nick, message);
     }
@@ -1616,7 +1621,7 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             win_update_virtual(current);
         }
 
-        if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
+        if (strcmp(nick, my_nick) != 0) {
             if (prefs_get_boolean(PREF_FLASH)) {
                 flash();
             }
