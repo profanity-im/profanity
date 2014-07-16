@@ -1534,12 +1534,12 @@ _cons_splash_logo(void)
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %sdev.%s.%s\n", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %sdev\n", PACKAGE_VERSION);
+        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %sdev", PACKAGE_VERSION);
 #endif
     } else {
-        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %s\n", PACKAGE_VERSION);
+        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %s", PACKAGE_VERSION);
     }
 }
 
