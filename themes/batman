@@ -23,6 +23,7 @@ gone=red
 error=red
 incoming=yellow
 roominfo=green
+roommention=cyan
 me=black
 them=yellow
 titlebar.unencrypted=red
