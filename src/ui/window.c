@@ -376,18 +376,18 @@ win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int offset = 0;
     int colour = COLOUR_ME;
 
-    if ((flags & 2) == 0) {
+    if ((flags & NO_DATE) == 0) {
         wattron(window->win, COLOUR_TIME);
         wprintw(window->win, "%s %c ", date_fmt, show_char);
         wattroff(window->win, COLOUR_TIME);
     }
 
     if (strlen(from) > 0) {
-        if ((flags & 1) != 0) {
+        if ((flags & NO_ME) != 0) {
             colour = COLOUR_THEM;
         }
 
-        if((flags & 8) != 0) {
+        if ((flags & NO_COLOUR_FROM) != 0) {
             colour = 0;
         }
 
@@ -404,7 +404,7 @@ win_print(ProfWin *window, const char show_char, const char * const date_fmt,
 
     wattron(window->win, attrs);
 
-    if ((flags & 4) == 0) {
+    if ((flags & NO_EOL) == 0) {
         wprintw(window->win, "%s\n", message+offset);
     } else {
         wprintw(window->win, "%s", message+offset);
