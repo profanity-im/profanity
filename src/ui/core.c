@@ -190,6 +190,8 @@ static void
 _ui_resize(const int ch, const char * const input, const int size)
 {
     log_info("Resizing UI");
+    erase();
+    refresh();
     title_bar_resize();
     wins_resize_all();
     status_bar_resize();
