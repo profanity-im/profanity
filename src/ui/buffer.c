@@ -15,56 +15,39 @@
 #include "ui/window.h"
 #include "ui/buffer.h"
 
-ProfBuff*
+struct prof_buff_t {
+    GSList *entries;
+};
+
+static void _free_entry(ProfBuffEntry *entry);
+
+ProfBuff
 buffer_create()
 {
-    ProfBuff* new_buff = malloc(sizeof(struct prof_buff_t));
-    new_buff->wrap = 0;
-    new_buff->current = 0;
+    ProfBuff new_buff = malloc(sizeof(struct prof_buff_t));
+    new_buff->entries = NULL;
     return new_buff;
 }
 
 int
-buffer_size(ProfBuff* buffer)
+buffer_size(ProfBuff buffer)
 {
-    if(buffer->wrap == 1) {
-        return BUFF_SIZE;
-    } else {
-        return buffer->current;
-    }
+    return g_slist_length(buffer->entries);
 }
 
 void
-buffer_free(ProfBuff* buffer)
+buffer_free(ProfBuff buffer)
 {
-    int i = 0;
-    int imax = buffer->current;
-
-    if (buffer->wrap == 1) {
-        imax = BUFF_SIZE;
-    }
-
-    for (i = 0; i < imax; i++) {
-        free(buffer->entry[i].message);
-        free(buffer->entry[i].from);
-        free(buffer->entry[i].date_fmt);
-    }
-
+    g_slist_free_full(buffer->entries, (GDestroyNotify)_free_entry);
     free(buffer);
+    buffer = NULL;
 }
 
 void
-buffer_push(ProfBuff* buffer, const char show_char, const char * const date_fmt,
+buffer_push(ProfBuff buffer, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message)
 {
-    int *current = &(buffer->current);
-    ProfBuffEntry* e = &(buffer->entry[buffer->current]);
-
-    if (buffer->wrap == 1) {
-        free(e->message);
-        free(e->from);
-    }
-
+    ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = show_char;
     e->flags = flags;
     e->attrs = attrs;
@@ -78,21 +61,27 @@ buffer_push(ProfBuff* buffer, const char show_char, const char * const date_fmt,
     e->message = malloc(strlen(message)+1);
     strcpy(e->message, message);
 
-    *current += 1;
-    if (*current >= BUFF_SIZE) {
-        *current = 0;
-        buffer->wrap = 1;
+    if (g_slist_length(buffer->entries) == BUFF_SIZE) {
+        _free_entry(buffer->entries->data);
+        buffer->entries = g_slist_delete_link(buffer->entries, buffer->entries);
     }
+
+    buffer->entries = g_slist_append(buffer->entries, e);
 }
 
 ProfBuffEntry
-buffer_yield_entry(ProfBuff* buffer, int entry)
+buffer_yield_entry(ProfBuff buffer, int entry)
 {
-    return (buffer->entry)[entry];
-
-    if (buffer->wrap == 1) {
-        return buffer->entry[(buffer->current + entry) % BUFF_SIZE];
-    } else {
-        return buffer->entry[entry % (buffer->current)];
-    }
+    GSList *node = g_slist_nth(buffer->entries, entry);
+    ProfBuffEntry *buff_entry = node->data;
+    return *buff_entry;
 }
+
+static void
+_free_entry(ProfBuffEntry *entry)
+{
+    free(entry->message);
+    free(entry->from);
+    free(entry->date_fmt);
+}
+
