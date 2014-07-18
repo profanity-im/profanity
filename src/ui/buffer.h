@@ -3,8 +3,6 @@
 
 #include "config.h"
 
-#define BUFF_SIZE 1000
-
 typedef struct prof_buff_entry_t {
     char show_char;
     char *date_fmt;

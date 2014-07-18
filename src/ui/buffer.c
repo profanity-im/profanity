@@ -61,7 +61,7 @@ buffer_push(ProfBuff buffer, const char show_char, const char * const date_fmt,
     e->message = malloc(strlen(message)+1);
     strcpy(e->message, message);
 
-    if (g_slist_length(buffer->entries) == BUFF_SIZE) {
+    if (g_slist_length(buffer->entries) == PAD_SIZE) {
         _free_entry(buffer->entries->data);
         buffer->entries = g_slist_delete_link(buffer->entries, buffer->entries);
     }
