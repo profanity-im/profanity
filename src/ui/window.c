@@ -46,7 +46,6 @@ win_create(const char * const title, int cols, win_type_t type)
     wbkgd(new_win->win, COLOUR_TEXT);
     new_win->buffer = buffer_create();
     new_win->y_pos = 0;
-    new_win->x_pos = 0;
     new_win->paged = 0;
     new_win->unread = 0;
     new_win->history_shown = 0;
@@ -72,7 +71,7 @@ win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    pnoutrefresh(window->win, window->y_pos, window->x_pos, 1, 0, rows-3, cols-1);
+    pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
 }
 
 void
@@ -85,7 +84,6 @@ win_move_to_end(ProfWin *window)
     int size = rows - 3;
 
     window->y_pos = y - (size - 1);
-    window->x_pos = 0;
     if (window->y_pos < 0) {
         window->y_pos = 0;
     }
