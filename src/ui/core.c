@@ -191,8 +191,8 @@ _ui_resize(const int ch, const char * const input, const int size)
 {
     log_info("Resizing UI");
     title_bar_resize();
-    status_bar_resize();
     wins_resize_all();
+    status_bar_resize();
     inp_win_resize(input, size);
     ProfWin *window = wins_get_current();
     win_update_virtual(window);
