@@ -423,7 +423,7 @@ win_redraw(ProfWin *window)
     size = buffer_size(window->buffer);
 
     for (i = 0; i < size; i++) {
-        ProfBuffEntry e = buffer_yield_entry(window->buffer, i);
-        win_print(window, e.show_char, e.date_fmt, e.flags, e.attrs, e.from, e.message);
+        ProfBuffEntry *e = buffer_yield_entry(window->buffer, i);
+        win_print(window, e->show_char, e->date_fmt, e->flags, e->attrs, e->from, e->message);
     }
 }

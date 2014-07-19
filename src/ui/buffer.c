@@ -69,12 +69,11 @@ buffer_push(ProfBuff buffer, const char show_char, const char * const date_fmt,
     buffer->entries = g_slist_append(buffer->entries, e);
 }
 
-ProfBuffEntry
+ProfBuffEntry*
 buffer_yield_entry(ProfBuff buffer, int entry)
 {
     GSList *node = g_slist_nth(buffer->entries, entry);
-    ProfBuffEntry *buff_entry = node->data;
-    return *buff_entry;
+    return node->data;
 }
 
 static void
