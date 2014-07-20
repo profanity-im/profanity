@@ -15,6 +15,8 @@
 #include "ui/window.h"
 #include "ui/buffer.h"
 
+#define BUFF_SIZE 1200
+
 struct prof_buff_t {
     GSList *entries;
 };
@@ -61,7 +63,7 @@ buffer_push(ProfBuff buffer, const char show_char, const char * const date_fmt,
     e->message = malloc(strlen(message)+1);
     strcpy(e->message, message);
 
-    if (g_slist_length(buffer->entries) == PAD_SIZE) {
+    if (g_slist_length(buffer->entries) == BUFF_SIZE) {
         _free_entry(buffer->entries->data);
         buffer->entries = g_slist_delete_link(buffer->entries, buffer->entries);
     }
