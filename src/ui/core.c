@@ -1375,7 +1375,7 @@ _ui_duck_result(const char * const result)
             gchar *ptr = g_utf8_offset_to_pointer(result, offset);
             gunichar unichar = g_utf8_get_char(ptr);
             if (unichar == '\n') {
-                win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
+                win_save_newline(window);
                 win_save_print(window, '-', NULL, NO_EOL, 0, "", "");
             } else {
                 gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
@@ -1388,7 +1388,7 @@ _ui_duck_result(const char * const result)
             offset++;
         }
 
-        win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
+        win_save_newline(window);
     }
 }
 

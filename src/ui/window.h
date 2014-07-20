@@ -79,6 +79,7 @@ void win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
 void win_show_info(ProfWin *window, PContact contact);
 void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message, ...);
 void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message);
+void win_save_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
 
 #endif

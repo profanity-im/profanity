@@ -219,7 +219,7 @@ win_show_info(ProfWin *window, PContact contact)
         if (resource->status != NULL) {
             win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
         }
-        win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
+        win_save_newline(window);
 
         if (resource->caps_str != NULL) {
             Capabilities *caps = caps_get(resource->caps_str);
@@ -242,7 +242,7 @@ win_show_info(ProfWin *window, PContact contact)
                     if (caps->category != NULL) {
                         win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                     }
-                    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
+                    win_save_newline(window);
                 }
                 if (caps->software != NULL) {
                     win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
@@ -251,7 +251,7 @@ win_show_info(ProfWin *window, PContact contact)
                     win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
                 }
                 if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
+                    win_save_newline(window);
                 }
                 if (caps->os != NULL) {
                     win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
@@ -260,7 +260,7 @@ win_show_info(ProfWin *window, PContact contact)
                     win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
                 }
                 if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
+                    win_save_newline(window);
                 }
             }
         }
@@ -364,6 +364,12 @@ win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
     buffer_push(window->buffer, show_char, date_fmt, flags, attrs, from, message);
     _win_print(window, show_char, date_fmt, flags, attrs, from, message);
     g_free(date_fmt);
+}
+
+void
+win_save_newline(ProfWin *window)
+{
+    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
 }
 
 static void

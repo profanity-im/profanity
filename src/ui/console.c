@@ -352,7 +352,7 @@ _cons_show_caps(const char * const contact, Resource *resource)
                 if (caps->category != NULL) {
                     win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                 }
-                win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+                win_save_newline(console);
             }
             if (caps->software != NULL) {
                 win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "Software: %s", caps->software);
@@ -361,7 +361,7 @@ _cons_show_caps(const char * const contact, Resource *resource)
                 win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
             }
             if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+                win_save_newline(console);
             }
             if (caps->os != NULL) {
                 win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "OS: %s", caps->os);
@@ -370,7 +370,7 @@ _cons_show_caps(const char * const contact, Resource *resource)
                 win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
             }
             if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+                win_save_newline(console);
             }
 
             if (caps->features != NULL) {
@@ -469,7 +469,7 @@ _cons_show_room_list(GSList *rooms, const char * const conference_node)
             if (room->name != NULL) {
                 win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", (%s)", room->name);
             }
-            win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+            win_save_newline(console);
             rooms = g_slist_next(rooms);
         }
     } else {
@@ -519,7 +519,7 @@ _cons_show_bookmarks(const GList *list)
                     win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%d)", num);
                 }
             }
-            win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+            win_save_newline(console);
             list = g_list_next(list);
         }
 
@@ -824,7 +824,7 @@ _cons_show_account(ProfAccount *account)
                         if (caps->category != NULL) {
                             win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                         }
-                        win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+                        win_save_newline(console);
                     }
                     if (caps->software != NULL) {
                         win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
@@ -833,7 +833,7 @@ _cons_show_account(ProfAccount *account)
                         win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
                     }
                     if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                        win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+                        win_save_newline(console);
                     }
                     if (caps->os != NULL) {
                         win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
@@ -842,7 +842,7 @@ _cons_show_account(ProfAccount *account)
                         win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
                     }
                     if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                        win_save_print(console, '-', NULL, NO_DATE, 0, "", "");
+                        win_save_newline(console);
                     }
                 }
             }
