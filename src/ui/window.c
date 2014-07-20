@@ -37,6 +37,10 @@
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
+static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
+    int flags, int attrs, const char * const from, const char * const message);
+
+
 ProfWin*
 win_create(const char * const title, int cols, win_type_t type)
 {
@@ -358,12 +362,12 @@ win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
 
     g_date_time_unref(time);
     buffer_push(window->buffer, show_char, date_fmt, flags, attrs, from, message);
-    win_print(window, show_char, date_fmt, flags, attrs, from, message);
+    _win_print(window, show_char, date_fmt, flags, attrs, from, message);
     g_free(date_fmt);
 }
 
-void
-win_print(ProfWin *window, const char show_char, const char * const date_fmt,
+static void
+_win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message)
 {
     // flags : 1st bit =  0/1 - me/not me
@@ -424,6 +428,6 @@ win_redraw(ProfWin *window)
 
     for (i = 0; i < size; i++) {
         ProfBuffEntry *e = buffer_yield_entry(window->buffer, i);
-        win_print(window, e->show_char, e->date_fmt, e->flags, e->attrs, e->from, e->message);
+        _win_print(window, e->show_char, e->date_fmt, e->flags, e->attrs, e->from, e->message);
     }
 }
