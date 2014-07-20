@@ -1179,15 +1179,15 @@ _ui_current_recipient(void)
 static void
 _ui_current_print_line(const char * const msg, ...)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_save_print(current, '-', NULL, 0, 0, "", fmt_msg->str);
+    win_save_println(window, fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
-    win_update_virtual(current);
+    win_update_virtual(window);
 }
 
 static void
@@ -1724,12 +1724,12 @@ _ui_status(void)
 {
     char *recipient = ui_current_recipient();
     PContact pcontact = roster_get_contact(recipient);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_contact(current, pcontact);
+        win_show_contact(window, pcontact);
     } else {
-        win_save_print(current, '-', NULL, 0, 0, "", "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 }
 
@@ -1738,12 +1738,12 @@ _ui_info(void)
 {
     char *recipient = ui_current_recipient();
     PContact pcontact = roster_get_contact(recipient);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_info(current, pcontact);
+        win_show_info(window, pcontact);
     } else {
-        win_save_print(current, '-', NULL, 0, 0, "", "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 }
 
@@ -1752,12 +1752,12 @@ _ui_status_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_contact(current, pcontact);
+        win_show_contact(window, pcontact);
     } else {
-        win_save_print(current, '-', NULL, 0, 0, "", "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 
     jid_destroy(jid);
@@ -1768,12 +1768,12 @@ _ui_info_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_info(current, pcontact);
+        win_show_info(window, pcontact);
     } else {
-        win_save_print(current, '-', NULL, 0, 0, "", "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 
     jid_destroy(jid);
