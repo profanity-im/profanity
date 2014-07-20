@@ -1320,7 +1320,7 @@ _ui_create_duck_win(void)
     ProfWin *window = wins_new("DuckDuckGo search", WIN_DUCK);
     int num = wins_get_num(window);
     ui_switch_win(num);
-    win_save_print(window, '-', NULL, 0, 0, "", "Type ':help' to find out more.");
+    win_save_println(window, "Type ':help' to find out more.");
 }
 
 static void
@@ -1356,7 +1356,7 @@ _ui_duck(const char * const query)
 {
     ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
     if (window != NULL) {
-        win_save_print(window, '-', NULL, 0, 0, "", "");
+        win_save_println(window, "");
         win_save_print(window, '-', NULL, NO_EOL, COLOUR_ME, "", "Query  : ");
         win_save_print(window, '-', NULL, NO_DATE, 0, "", query);
     }

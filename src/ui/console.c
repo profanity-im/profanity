@@ -81,7 +81,7 @@ _cons_debug(const char * const msg, ...)
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
         g_string_vprintf(fmt_msg, msg, arg);
-        win_save_print(console, '-', NULL, 0, 0, "", fmt_msg->str);
+        win_save_println(console, fmt_msg->str);
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
 
@@ -103,7 +103,7 @@ _cons_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_save_print(console, '-', NULL, 0, 0, "", fmt_msg->str);
+    win_save_println(console, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
@@ -193,13 +193,13 @@ _cons_about(void)
     }
 
     win_save_vprint(console, '-', NULL, 0, 0, "", "Copyright (C) 2012 - 2014 James Booth <%s>.", PACKAGE_BUGREPORT);
-    win_save_print(console, '-', NULL, 0, 0, "", "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
-    win_save_print(console, '-', NULL, 0, 0, "", "");
-    win_save_print(console, '-', NULL, 0, 0, "", "This is free software; you are free to change and redistribute it.");
-    win_save_print(console, '-', NULL, 0, 0, "", "There is NO WARRANTY, to the extent permitted by law.");
-    win_save_print(console, '-', NULL, 0, 0, "", "");
-    win_save_print(console, '-', NULL, 0, 0, "", "Type '/help' to show complete help.");
-    win_save_print(console, '-', NULL, 0, 0, "", "");
+    win_save_println(console, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
+    win_save_println(console, "");
+    win_save_println(console, "This is free software; you are free to change and redistribute it.");
+    win_save_println(console, "There is NO WARRANTY, to the extent permitted by law.");
+    win_save_println(console, "");
+    win_save_println(console, "Type '/help' to show complete help.");
+    win_save_println(console, "");
 
     if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
@@ -226,13 +226,13 @@ _cons_check_version(gboolean not_available_msg)
         if (relase_valid) {
             if (release_is_new(latest_release)) {
                 win_save_vprint(console, '-', NULL, 0, 0, "", "A new version of Profanity is available: %s", latest_release);
-                win_save_print(console, '-', NULL, 0, 0, "", "Check <http://www.profanity.im> for details.");
+                win_save_println(console, "Check <http://www.profanity.im> for details.");
                 free(latest_release);
-                win_save_print(console, '-', NULL, 0, 0, "", "");
+                win_save_println(console, "");
             } else {
                 if (not_available_msg) {
-                    win_save_print(console, '-', NULL, 0, 0, "", "No new version available.");
-                    win_save_print(console, '-', NULL, 0, 0, "", "");
+                    win_save_println(console, "No new version available.");
+                    win_save_println(console, "");
                 }
             }
 
@@ -275,7 +275,7 @@ _cons_show_wins(void)
 
     GSList *curr = window_strings;
     while (curr != NULL) {
-        win_save_print(console, '-', NULL, 0, 0, "", curr->data);
+        win_save_println(console, curr->data);
         curr = g_slist_next(curr);
     }
 
@@ -374,7 +374,7 @@ _cons_show_caps(const char * const contact, Resource *resource)
             }
 
             if (caps->features != NULL) {
-                win_save_print(console, '-', NULL, 0, 0, "", "Features:");
+                win_save_println(console, "Features:");
                 GSList *feature = caps->features;
                 while (feature != NULL) {
                     win_save_vprint(console, '-', NULL, 0, 0, "", " %s", feature->data);
@@ -781,7 +781,7 @@ _cons_show_account(ProfAccount *account)
         GList *ordered_resources = NULL;
 
         if (resources != NULL) {
-            win_save_print(console, '-', NULL, 0, 0, "", "Resources:");
+            win_save_println(console, "Resources:");
 
             // sort in order of availabiltiy
             while (resources != NULL) {
@@ -1521,7 +1521,7 @@ static void
 _cons_splash_logo(void)
 {
     ProfWin *console = wins_get_console();
-    win_save_print(console, '-', NULL, 0, 0, "", "Welcome to");
+    win_save_println(console, "Welcome to");
 
     win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "                   ___            _           ");
     win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "                  / __)          (_)_         ");

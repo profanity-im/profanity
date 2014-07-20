@@ -367,6 +367,12 @@ win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
 }
 
 void
+win_save_println(ProfWin *window, const char * const message)
+{
+    win_save_print(window, '-', NULL, 0, 0, "", message);
+}
+
+void
 win_save_newline(ProfWin *window)
 {
     win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
