@@ -1490,10 +1490,10 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
             const char *show = p_contact_presence(member);
 
             int presence_colour = win_presence_colour(show);
-            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE|presence_colour, "", "%s", nick);
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", nick);
 
             if (roster->next != NULL) {
-                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", ", ");
+                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
             }
 
             roster = g_list_next(roster);
