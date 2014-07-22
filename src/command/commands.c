@@ -802,8 +802,16 @@ _who_roster(const char * const group, const char * const presence)
     GSList *list = NULL;
     if (group != NULL) {
         list = roster_get_group(group);
+        if (list == NULL) {
+            cons_show("No such group: %s.", group);
+            return;
+        }
     } else {
         list = roster_get_contacts();
+        if (list == NULL) {
+            cons_show("No contacts in roster.");
+            return;
+        }
     }
 
     // no arg, show all contacts
