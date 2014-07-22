@@ -1584,7 +1584,27 @@ _ui_room_history(const char * const room_jid, const char * const nick,
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
 
-    win_save_vprint(window, '-', (&tv_stamp), NO_COLOUR_FROM, 0, nick, message);
+    GString *line = g_string_new("");
+
+    GDateTime *time = g_date_time_new_from_timeval_utc(&tv_stamp);
+    gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+    g_string_append(line, date_fmt);
+    g_string_append(line, " - ");
+    g_date_time_unref(time);
+    g_free(date_fmt);
+
+    if (strncmp(message, "/me ", 4) == 0) {
+        g_string_append(line, "*");
+        g_string_append(line, nick);
+        g_string_append(line, message + 4);
+    } else {
+        g_string_append(line, nick);
+        g_string_append(line, ": ");
+        g_string_append(line, message);
+    }
+
+    win_save_print(window, '-', NULL, NO_DATE, 0, "", line->str);
+    g_string_free(line, TRUE);
 
     if (wins_is_current(window)) {
         win_update_virtual(window);
