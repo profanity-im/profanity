@@ -62,6 +62,7 @@ static int _strtoi(char *str, int *saveptr, int min, int max);
 static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size);
 static gint _compare_commands(Command *a, Command *b);
 static void _who_room(const char * const presence);
+static void _who_roster(const char * const group, const char * const presence);
 
 extern GHashTable *commands;
 
@@ -794,6 +795,177 @@ _who_room(const char * const presence)
     }
 }
 
+static void
+_who_roster(const char * const group, const char * const presence)
+{
+    cons_show("");
+    GSList *list = NULL;
+    if (group != NULL) {
+        list = roster_get_group(group);
+    } else {
+        list = roster_get_contacts();
+    }
+
+    // no arg, show all contacts
+    if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
+        if (group != NULL) {
+            if (list == NULL) {
+                cons_show("No contacts in group %s.", group);
+            } else {
+                cons_show("%s:", group);
+                cons_show_contacts(list);
+            }
+        } else {
+            if (list == NULL) {
+                cons_show("You have no contacts.");
+            } else {
+                cons_show("All contacts:");
+                cons_show_contacts(list);
+            }
+        }
+
+    // available
+    } else if (strcmp("available", presence) == 0) {
+        GSList *filtered = NULL;
+
+        while (list != NULL) {
+            PContact contact = list->data;
+            if (p_contact_is_available(contact)) {
+                filtered = g_slist_append(filtered, contact);
+            }
+            list = g_slist_next(list);
+        }
+
+        if (group != NULL) {
+            if (filtered == NULL) {
+                cons_show("No contacts in group %s are %s.", group, presence);
+            } else {
+                cons_show("%s (%s):", group, presence);
+                cons_show_contacts(filtered);
+            }
+        } else {
+            if (filtered == NULL) {
+                cons_show("No contacts are %s.", presence);
+            } else {
+                cons_show("Contacts (%s):", presence);
+                cons_show_contacts(filtered);
+            }
+        }
+
+    // unavailable
+    } else if (strcmp("unavailable", presence) == 0) {
+        GSList *filtered = NULL;
+
+        while (list != NULL) {
+            PContact contact = list->data;
+            if (!p_contact_is_available(contact)) {
+                filtered = g_slist_append(filtered, contact);
+            }
+            list = g_slist_next(list);
+        }
+
+        if (group != NULL) {
+            if (filtered == NULL) {
+                cons_show("No contacts in group %s are %s.", group, presence);
+            } else {
+                cons_show("%s (%s):", group, presence);
+                cons_show_contacts(filtered);
+            }
+        } else {
+            if (filtered == NULL) {
+                cons_show("No contacts are %s.", presence);
+            } else {
+                cons_show("Contacts (%s):", presence);
+                cons_show_contacts(filtered);
+            }
+        }
+
+    // online, available resources
+    } else if (strcmp("online", presence) == 0) {
+        GSList *filtered = NULL;
+
+        while (list != NULL) {
+            PContact contact = list->data;
+            if (p_contact_has_available_resource(contact)) {
+                filtered = g_slist_append(filtered, contact);
+            }
+            list = g_slist_next(list);
+        }
+
+        if (group != NULL) {
+            if (filtered == NULL) {
+                cons_show("No contacts in group %s are %s.", group, presence);
+            } else {
+                cons_show("%s (%s):", group, presence);
+                cons_show_contacts(filtered);
+            }
+        } else {
+            if (filtered == NULL) {
+                cons_show("No contacts are %s.", presence);
+            } else {
+                cons_show("Contacts (%s):", presence);
+                cons_show_contacts(filtered);
+            }
+        }
+
+    // offline, no available resources
+    } else if (strcmp("offline", presence) == 0) {
+        GSList *filtered = NULL;
+
+        while (list != NULL) {
+            PContact contact = list->data;
+            if (!p_contact_has_available_resource(contact)) {
+                filtered = g_slist_append(filtered, contact);
+            }
+            list = g_slist_next(list);
+        }
+
+        if (group != NULL) {
+            if (filtered == NULL) {
+                cons_show("No contacts in group %s are %s.", group, presence);
+            } else {
+                cons_show("%s (%s):", group, presence);
+                cons_show_contacts(filtered);
+            }
+        } else {
+            if (filtered == NULL) {
+                cons_show("No contacts are %s.", presence);
+            } else {
+                cons_show("Contacts (%s):", presence);
+                cons_show_contacts(filtered);
+            }
+        }
+
+    // show specific status
+    } else {
+        GSList *filtered = NULL;
+
+        while (list != NULL) {
+            PContact contact = list->data;
+            if (strcmp(p_contact_presence(contact), presence) == 0) {
+                filtered = g_slist_append(filtered, contact);
+            }
+            list = g_slist_next(list);
+        }
+
+        if (group != NULL) {
+            if (filtered == NULL) {
+                cons_show("No contacts in group %s are %s.", group, presence);
+            } else {
+                cons_show("%s (%s):", group, presence);
+                cons_show_contacts(filtered);
+            }
+        } else {
+            if (filtered == NULL) {
+                cons_show("No contacts are %s.", presence);
+            } else {
+                cons_show("Contacts (%s):", presence);
+                cons_show_contacts(filtered);
+            }
+        }
+    }
+}
+
 gboolean
 cmd_who(gchar **args, struct cmd_help_t help)
 {
@@ -831,172 +1003,7 @@ cmd_who(gchar **args, struct cmd_help_t help)
                 }
 
             } else {
-                cons_show("");
-                GSList *list = NULL;
-                if (group != NULL) {
-                    list = roster_get_group(group);
-                } else {
-                    list = roster_get_contacts();
-                }
-
-                // no arg, show all contacts
-                if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
-                    if (group != NULL) {
-                        if (list == NULL) {
-                            cons_show("No contacts in group %s.", group);
-                        } else {
-                            cons_show("%s:", group);
-                            cons_show_contacts(list);
-                        }
-                    } else {
-                        if (list == NULL) {
-                            cons_show("You have no contacts.");
-                        } else {
-                            cons_show("All contacts:");
-                            cons_show_contacts(list);
-                        }
-                    }
-
-                // available
-                } else if (strcmp("available", presence) == 0) {
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        if (p_contact_is_available(contact)) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    if (group != NULL) {
-                        if (filtered == NULL) {
-                            cons_show("No contacts in group %s are %s.", group, presence);
-                        } else {
-                            cons_show("%s (%s):", group, presence);
-                            cons_show_contacts(filtered);
-                        }
-                    } else {
-                        if (filtered == NULL) {
-                            cons_show("No contacts are %s.", presence);
-                        } else {
-                            cons_show("Contacts (%s):", presence);
-                            cons_show_contacts(filtered);
-                        }
-                    }
-
-                // unavailable
-                } else if (strcmp("unavailable", presence) == 0) {
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        if (!p_contact_is_available(contact)) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    if (group != NULL) {
-                        if (filtered == NULL) {
-                            cons_show("No contacts in group %s are %s.", group, presence);
-                        } else {
-                            cons_show("%s (%s):", group, presence);
-                            cons_show_contacts(filtered);
-                        }
-                    } else {
-                        if (filtered == NULL) {
-                            cons_show("No contacts are %s.", presence);
-                        } else {
-                            cons_show("Contacts (%s):", presence);
-                            cons_show_contacts(filtered);
-                        }
-                    }
-
-                // online, available resources
-                } else if (strcmp("online", presence) == 0) {
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        if (p_contact_has_available_resource(contact)) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    if (group != NULL) {
-                        if (filtered == NULL) {
-                            cons_show("No contacts in group %s are %s.", group, presence);
-                        } else {
-                            cons_show("%s (%s):", group, presence);
-                            cons_show_contacts(filtered);
-                        }
-                    } else {
-                        if (filtered == NULL) {
-                            cons_show("No contacts are %s.", presence);
-                        } else {
-                            cons_show("Contacts (%s):", presence);
-                            cons_show_contacts(filtered);
-                        }
-                    }
-
-                // offline, no available resources
-                } else if (strcmp("offline", presence) == 0) {
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        if (!p_contact_has_available_resource(contact)) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    if (group != NULL) {
-                        if (filtered == NULL) {
-                            cons_show("No contacts in group %s are %s.", group, presence);
-                        } else {
-                            cons_show("%s (%s):", group, presence);
-                            cons_show_contacts(filtered);
-                        }
-                    } else {
-                        if (filtered == NULL) {
-                            cons_show("No contacts are %s.", presence);
-                        } else {
-                            cons_show("Contacts (%s):", presence);
-                            cons_show_contacts(filtered);
-                        }
-                    }
-
-                // show specific status
-                } else {
-                    GSList *filtered = NULL;
-
-                    while (list != NULL) {
-                        PContact contact = list->data;
-                        if (strcmp(p_contact_presence(contact), presence) == 0) {
-                            filtered = g_slist_append(filtered, contact);
-                        }
-                        list = g_slist_next(list);
-                    }
-
-                    if (group != NULL) {
-                        if (filtered == NULL) {
-                            cons_show("No contacts in group %s are %s.", group, presence);
-                        } else {
-                            cons_show("%s (%s):", group, presence);
-                            cons_show_contacts(filtered);
-                        }
-                    } else {
-                        if (filtered == NULL) {
-                            cons_show("No contacts are %s.", presence);
-                        } else {
-                            cons_show("Contacts (%s):", presence);
-                            cons_show_contacts(filtered);
-                        }
-                    }
-                }
+                _who_roster(group, presence);
             }
         }
     }
