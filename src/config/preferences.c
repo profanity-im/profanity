@@ -252,7 +252,11 @@ prefs_get_priority(void)
 gint
 prefs_get_reconnect(void)
 {
-    return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", NULL);
+    if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "reconnect", NULL)) {
+        return 30;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "reconnect", NULL);
+    }
 }
 
 void
