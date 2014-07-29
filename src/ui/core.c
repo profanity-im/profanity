@@ -68,8 +68,6 @@ static Display *display;
 
 static GTimer *ui_idle_time;
 
-static void _win_show_user(WINDOW *win, const char * const user, const int colour);
-static void _win_show_message(WINDOW *win, const char * const message);
 static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch);
 static void _win_show_history(WINDOW *win, int win_index,
@@ -193,9 +191,11 @@ static void
 _ui_resize(const int ch, const char * const input, const int size)
 {
     log_info("Resizing UI");
+    erase();
+    refresh();
     title_bar_resize();
-    status_bar_resize();
     wins_resize_all();
+    status_bar_resize();
     inp_win_resize(input, size);
     ProfWin *window = wins_get_current();
     win_update_virtual(window);
@@ -237,13 +237,13 @@ _ui_handle_stanza(const char * const msg)
         ProfWin *xmlconsole = wins_get_xmlconsole();
 
         if (g_str_has_prefix(msg, "SENT:")) {
-            win_print_line_no_time(xmlconsole, 0, "SENT:");
-            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, &msg[6]);
-            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, "");
+            win_save_print(xmlconsole, '-', NULL, NO_DATE, 0, "", "SENT:");
+            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_ONLINE, "", &msg[6]);
+            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_ONLINE, "", "");
         } else if (g_str_has_prefix(msg, "RECV:")) {
-            win_print_line_no_time(xmlconsole, 0, "RECV:");
-            win_print_line_no_time(xmlconsole, COLOUR_AWAY, &msg[6]);
-            win_print_line_no_time(xmlconsole, COLOUR_ONLINE, "");
+            win_save_print(xmlconsole, '-', NULL, NO_DATE, 0, "", "RECV:");
+            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_AWAY, "", &msg[6]);
+            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_AWAY, "", "");
         }
 
         if (wins_is_current(xmlconsole)) {
@@ -519,13 +519,13 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
     } else if (win->type == WIN_MUC) {
         g_string_printf(msg, "Room %s not found: %s", recipient, err_msg);
         cons_show_error(msg->str);
-        win_print_line(win, '!', COLOUR_ERROR, msg->str);
+        win_save_print(win, '!', NULL, 0, COLOUR_ERROR, "", msg->str);
 
     // unknown chat recipient
     } else {
         g_string_printf(msg, "Recipient %s not found: %s", recipient, err_msg);
         cons_show_error(msg->str);
-        win_print_line(win, '!', COLOUR_ERROR, msg->str);
+        win_save_print(win, '!', NULL, 0, COLOUR_ERROR, "", msg->str);
     }
 
     ProfWin *current = wins_get_current();
@@ -546,7 +546,7 @@ _ui_handle_recipient_error(const char * const recipient, const char * const err_
 
     // show in window if exists for recipient
     if (win != NULL)  {
-        win_print_line(win, '!', COLOUR_ERROR, msg->str);
+        win_save_print(win, '!', NULL, 0, COLOUR_ERROR, "", msg->str);
     }
 
     ProfWin *current = wins_get_current();
@@ -777,9 +777,9 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
     window->is_otr = TRUE;
     window->is_trusted = trusted;
     if (trusted) {
-        win_vprint_line(window, '!', COLOUR_OTR_STARTED_TRUSTED, "OTR session started (trusted).");
+        win_save_print(window, '!', NULL, 0, COLOUR_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
     } else {
-        win_vprint_line(window, '!', COLOUR_OTR_STARTED_UNTRUSTED, "OTR session started (untrusted).");
+        win_save_print(window, '!', NULL, 0, COLOUR_OTR_STARTED_UNTRUSTED, "", "OTR session started (untrusted).");
     }
 
     if (wins_is_current(window)) {
@@ -812,7 +812,7 @@ _ui_smp_recipient_initiated(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "%s wants to authenticate your identity, use '/otr secret <secret>'.", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "%s wants to authenticate your identity, use '/otr secret <secret>'.", recipient);
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -827,9 +827,9 @@ _ui_smp_recipient_initiated_q(const char * const recipient, const char *question
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "%s wants to authenticate your identity with the following question:", recipient);
-        win_vprint_line(window, '!', 0, "  %s", question);
-        win_vprint_line(window, '!', 0, "use '/otr answer <answer>'.");
+        win_save_vprint(window, '!', NULL, 0, 0, "", "%s wants to authenticate your identity with the following question:", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", question);
+        win_save_print(window, '!', NULL, 0, 0, "", "use '/otr answer <answer>'.");
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -844,7 +844,7 @@ _ui_smp_unsuccessful_sender(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "Authentication failed, the secret you entered does not match the secret entered by %s.", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Authentication failed, the secret you entered does not match the secret entered by %s.", recipient);
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -859,7 +859,7 @@ _ui_smp_unsuccessful_receiver(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "Authentication failed, the secret entered by %s does not match yours.", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Authentication failed, the secret entered by %s does not match yours.", recipient);
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -874,7 +874,7 @@ _ui_smp_aborted(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "SMP session aborted.");
+        win_save_print(window, '!', NULL, 0, 0, "", "SMP session aborted.");
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -889,7 +889,7 @@ _ui_smp_successful(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "Authentication successful.");
+        win_save_print(window, '!', NULL, 0, 0, "", "Authentication successful.");
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -904,7 +904,7 @@ _ui_smp_answer_success(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "%s successfully authenticated you.", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "%s successfully authenticated you.", recipient);
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -919,7 +919,7 @@ _ui_smp_answer_failure(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "%s failed to authenticated you.", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "%s failed to authenticate you.", recipient);
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -934,7 +934,7 @@ _ui_gone_insecure(const char * const recipient)
     if (window != NULL) {
         window->is_otr = FALSE;
         window->is_trusted = FALSE;
-        win_vprint_line(window, '!', COLOUR_OTR_ENDED, "OTR session ended.");
+        win_save_print(window, '!', NULL, 0, COLOUR_OTR_ENDED, "", "OTR session ended.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -953,7 +953,7 @@ _ui_trust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = TRUE;
-        win_vprint_line(window, '!', COLOUR_OTR_TRUSTED, "OTR session trusted.");
+        win_save_print(window, '!', NULL, 0, COLOUR_OTR_TRUSTED, "", "OTR session trusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -972,7 +972,7 @@ _ui_untrust(const char * const recipient)
     if (window != NULL) {
         window->is_otr = TRUE;
         window->is_trusted = FALSE;
-        win_vprint_line(window, '!', COLOUR_OTR_UNTRUSTED, "OTR session untrusted.");
+        win_save_print(window, '!', NULL, 0, COLOUR_OTR_UNTRUSTED, "", "OTR session untrusted.");
 
         if (wins_is_current(window)) {
             GString *recipient_str = _get_recipient_string(window);
@@ -1129,7 +1129,7 @@ _ui_otr_authenticating(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "Authenticating %s...", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Authenticating %s...", recipient);
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -1144,7 +1144,7 @@ _ui_otr_authetication_waiting(const char * const recipient)
     if (window == NULL) {
         return;
     } else {
-        win_vprint_line(window, '!', 0, "Awaiting authentication from %s...", recipient);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Awaiting authentication from %s...", recipient);
         win_update_virtual(window);
         if (wins_is_current(window)) {
             ui_current_page_off();
@@ -1182,15 +1182,15 @@ _ui_current_recipient(void)
 static void
 _ui_current_print_line(const char * const msg, ...)
 {
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
     va_list arg;
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_print_line(current, '-', 0, fmt_msg->str);
+    win_save_println(window, fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
-    win_update_virtual(current);
+    win_update_virtual(window);
 }
 
 static void
@@ -1201,7 +1201,7 @@ _ui_current_print_formatted_line(const char show_char, int attrs, const char * c
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_print_line(current, show_char, attrs, fmt_msg->str);
+    win_save_print(current, show_char, NULL, 0, attrs, "", fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
     win_update_virtual(current);
@@ -1211,7 +1211,7 @@ static void
 _ui_current_error_line(const char * const msg)
 {
     ProfWin *current = wins_get_current();
-    win_print_line(current, '-', COLOUR_ERROR, msg);
+    win_save_print(current, '-', NULL, 0, COLOUR_ERROR, "", msg);
     win_update_virtual(current);
 }
 
@@ -1245,8 +1245,7 @@ _ui_print_system_msg_from_recipient(const char * const from, const char *message
         }
     }
 
-    win_print_time(window, '-');
-    wprintw(window->win, "*%s %s\n", jid->barejid, message);
+    win_save_vprint(window, '-', NULL, 0, 0, "", "*%s %s", jid->barejid, message);
 
     // this is the current window
     if (wins_is_current(window)) {
@@ -1272,7 +1271,7 @@ _ui_recipient_gone(const char * const barejid)
 
     ProfWin *window = wins_get_by_recipient(barejid);
     if (window != NULL) {
-        win_vprint_line(window, '!', COLOUR_GONE, "<- %s has left the conversation.", display_usr);
+        win_save_vprint(window, '!', NULL, 0, COLOUR_GONE, "", "<- %s has left the conversation.", display_usr);
         if (wins_is_current(window)) {
             win_update_virtual(window);
         }
@@ -1324,7 +1323,7 @@ _ui_create_duck_win(void)
     ProfWin *window = wins_new("DuckDuckGo search", WIN_DUCK);
     int num = wins_get_num(window);
     ui_switch_win(num);
-    win_print_line(window, '-', 0, "Type ':help' to find out more.");
+    win_save_println(window, "Type ':help' to find out more.");
 }
 
 static void
@@ -1360,14 +1359,9 @@ _ui_duck(const char * const query)
 {
     ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
     if (window != NULL) {
-        win_print_time(window, '-');
-        wprintw(window->win, "\n");
-        win_print_time(window, '-');
-        wattron(window->win, COLOUR_ME);
-        wprintw(window->win, "Query  : ");
-        wattroff(window->win, COLOUR_ME);
-        wprintw(window->win, query);
-        wprintw(window->win, "\n");
+        win_save_println(window, "");
+        win_save_print(window, '-', NULL, NO_EOL, COLOUR_ME, "", "Query  : ");
+        win_save_print(window, '-', NULL, NO_DATE, 0, "", query);
     }
 }
 
@@ -1377,22 +1371,19 @@ _ui_duck_result(const char * const result)
     ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
 
     if (window != NULL) {
-        win_print_time(window, '-');
-        wattron(window->win, COLOUR_THEM);
-        wprintw(window->win, "Result : ");
-        wattroff(window->win, COLOUR_THEM);
+        win_save_print(window, '-', NULL, NO_EOL, COLOUR_THEM, "", "Result  : ");
 
         glong offset = 0;
         while (offset < g_utf8_strlen(result, -1)) {
             gchar *ptr = g_utf8_offset_to_pointer(result, offset);
             gunichar unichar = g_utf8_get_char(ptr);
             if (unichar == '\n') {
-                wprintw(window->win, "\n");
-                win_print_time(window, '-');
+                win_save_newline(window);
+                win_save_print(window, '-', NULL, NO_EOL, 0, "", "");
             } else {
                 gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
                 if (string != NULL) {
-                    wprintw(window->win, string);
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", string);
                     g_free(string);
                 }
             }
@@ -1400,7 +1391,7 @@ _ui_duck_result(const char * const result)
             offset++;
         }
 
-        wprintw(window->win, "\n");
+        win_save_newline(window);
     }
 }
 
@@ -1449,17 +1440,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
         num = wins_get_num(window);
     }
 
-    win_print_time(window, '-');
-    if (strncmp(message, "/me ", 4) == 0) {
-        wattron(window->win, COLOUR_ME);
-        wprintw(window->win, "*%s ", from);
-        wprintw(window->win, "%s", message + 4);
-        wprintw(window->win, "\n");
-        wattroff(window->win, COLOUR_ME);
-    } else {
-        _win_show_user(window->win, from, 0);
-        _win_show_message(window->win, new_message);
-    }
+    win_save_print(window, '-', NULL, 0, 0, from, new_message);
     ui_switch_win(num);
 }
 
@@ -1482,7 +1463,7 @@ _ui_room_join(const char * const room, gboolean focus)
         status_bar_active(num);
         ProfWin *console = wins_get_console();
         char *nick = muc_get_room_nick(room);
-        win_vprint_line(console, '!', COLOUR_TYPING, "-> Autojoined %s as %s (%d).", room, nick, num);
+        win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "-> Autojoined %s as %s (%d).", room, nick, num);
         win_update_virtual(console);
     }
 }
@@ -1492,29 +1473,21 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
 {
     ProfWin *window = wins_get_by_recipient(room);
 
-    win_print_time(window, '!');
     if ((roster == NULL) || (g_list_length(roster) == 0)) {
-        wattron(window->win, COLOUR_ROOMINFO);
         if (presence == NULL) {
-            wprintw(window->win, "Room is empty.\n");
+            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room is empty.");
         } else {
-            wprintw(window->win, "No participants %s.\n", presence);
+            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "No participants %s.", presence);
         }
-        wattroff(window->win, COLOUR_ROOMINFO);
     } else {
         int length = g_list_length(roster);
-        wattron(window->win, COLOUR_ROOMINFO);
         if (presence == NULL) {
             length++;
-            wprintw(window->win, "%d participants: ", length);
-            wattroff(window->win, COLOUR_ROOMINFO);
-            wattron(window->win, COLOUR_ONLINE);
-            wprintw(window->win, "%s", muc_get_room_nick(room));
-            wprintw(window->win, ", ");
+            win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d participants: ", length);
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s", muc_get_room_nick(room));
+            win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
         } else {
-            wprintw(window->win, "%d %s: ", length, presence);
-            wattroff(window->win, COLOUR_ROOMINFO);
-            wattron(window->win, COLOUR_ONLINE);
+            win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d %s: ", length, presence);
         }
 
         while (roster != NULL) {
@@ -1522,19 +1495,17 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
             const char *nick = p_contact_barejid(member);
             const char *show = p_contact_presence(member);
 
-            win_presence_colour_on(window, show);
-            wprintw(window->win, "%s", nick);
-            win_presence_colour_off(window, show);
+            int presence_colour = win_presence_colour(show);
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", nick);
 
             if (roster->next != NULL) {
-                wprintw(window->win, ", ");
+                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
             }
 
             roster = g_list_next(roster);
         }
+        win_save_print(window, '!', NULL, NO_DATE, COLOUR_ONLINE, "", "");
 
-        wprintw(window->win, "\n");
-        wattroff(window->win, COLOUR_ONLINE);
     }
 
     if (wins_is_current(window)) {
@@ -1553,10 +1524,7 @@ _ui_room_member_offline(const char * const room, const char * const nick)
 {
     ProfWin *window = wins_get_by_recipient(room);
 
-    win_print_time(window, '!');
-    wattron(window->win, COLOUR_OFFLINE);
-    wprintw(window->win, "<- %s has left the room.\n", nick);
-    wattroff(window->win, COLOUR_OFFLINE);
+    win_save_vprint(window, '!', NULL, 0, COLOUR_OFFLINE, "", "<- %s has left the room.", nick);
 
     if (wins_is_current(window)) {
         win_update_virtual(window);
@@ -1569,10 +1537,7 @@ _ui_room_member_online(const char * const room, const char * const nick,
 {
     ProfWin *window = wins_get_by_recipient(room);
 
-    win_print_time(window, '!');
-    wattron(window->win, COLOUR_ONLINE);
-    wprintw(window->win, "-> %s has joined the room.\n", nick);
-    wattroff(window->win, COLOUR_ONLINE);
+    win_save_vprint(window, '!', NULL, 0, COLOUR_ONLINE, "", "-> %s has joined the room.", nick);
 
     if (wins_is_current(window)) {
         win_update_virtual(window);
@@ -1600,10 +1565,7 @@ _ui_room_member_nick_change(const char * const room,
 {
     ProfWin *window = wins_get_by_recipient(room);
 
-    win_print_time(window, '!');
-    wattron(window->win, COLOUR_THEM);
-    wprintw(window->win, "** %s is now known as %s\n", old_nick, nick);
-    wattroff(window->win, COLOUR_THEM);
+    win_save_vprint(window, '!', NULL, 0, COLOUR_THEM, "", "** %s is now known as %s", old_nick, nick);
 
     if (wins_is_current(window)) {
         win_update_virtual(window);
@@ -1615,10 +1577,7 @@ _ui_room_nick_change(const char * const room, const char * const nick)
 {
     ProfWin *window = wins_get_by_recipient(room);
 
-    win_print_time(window, '!');
-    wattron(window->win, COLOUR_ME);
-    wprintw(window->win, "** You are now known as %s\n", nick);
-    wattroff(window->win, COLOUR_ME);
+    win_save_vprint(window, '!', NULL, 0, COLOUR_ME, "", "** You are now known as %s", nick);
 
     if (wins_is_current(window)) {
         win_update_virtual(window);
@@ -1631,20 +1590,27 @@ _ui_room_history(const char * const room_jid, const char * const nick,
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
 
+    GString *line = g_string_new("");
+
     GDateTime *time = g_date_time_new_from_timeval_utc(&tv_stamp);
     gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-    wprintw(window->win, "%s - ", date_fmt);
+    g_string_append(line, date_fmt);
+    g_string_append(line, " - ");
     g_date_time_unref(time);
     g_free(date_fmt);
 
     if (strncmp(message, "/me ", 4) == 0) {
-        wprintw(window->win, "*%s ", nick);
-        waddstr(window->win, message + 4);
-        wprintw(window->win, "\n");
+        g_string_append(line, "*");
+        g_string_append(line, nick);
+        g_string_append(line, message + 4);
     } else {
-        wprintw(window->win, "%s: ", nick);
-        _win_show_message(window->win, message);
+        g_string_append(line, nick);
+        g_string_append(line, ": ");
+        g_string_append(line, message);
     }
+
+    win_save_print(window, '-', NULL, NO_DATE, 0, "", line->str);
+    g_string_free(line, TRUE);
 
     if (wins_is_current(window)) {
         win_update_virtual(window);
@@ -1659,36 +1625,14 @@ _ui_room_message(const char * const room_jid, const char * const nick,
     int num = wins_get_num(window);
     char *my_nick = muc_get_room_nick(room_jid);
 
-    win_print_time(window, '-');
     if (strcmp(nick, my_nick) != 0) {
-        if (strncmp(message, "/me ", 4) == 0) {
-            wattron(window->win, COLOUR_THEM);
-            wprintw(window->win, "*%s ", nick);
-            waddstr(window->win, message + 4);
-            wprintw(window->win, "\n");
-            wattroff(window->win, COLOUR_THEM);
+        if (g_strrstr(message, my_nick) != NULL) {
+            win_save_print(window, '-', NULL, NO_ME, COLOUR_ROOMMENTION, nick, message);
         } else {
-            _win_show_user(window->win, nick, 1);
-            if (g_strrstr(message, my_nick) != NULL) {
-                wattron(window->win, COLOUR_ROOMMENTION);
-                _win_show_message(window->win, message);
-                wattroff(window->win, COLOUR_ROOMMENTION);
-            } else {
-                _win_show_message(window->win, message);
-            }
+            win_save_print(window, '-', NULL, NO_ME, 0, nick, message);
         }
-
     } else {
-        if (strncmp(message, "/me ", 4) == 0) {
-            wattron(window->win, COLOUR_ME);
-            wprintw(window->win, "*%s ", nick);
-            waddstr(window->win, message + 4);
-            wprintw(window->win, "\n");
-            wattroff(window->win, COLOUR_ME);
-        } else {
-            _win_show_user(window->win, nick, 0);
-            _win_show_message(window->win, message);
-        }
+        win_save_print(window, '-', NULL, 0, 0, nick, message);
     }
 
     // currently in groupchat window
@@ -1767,11 +1711,8 @@ _ui_room_subject(const char * const room_jid, const char * const subject)
     ProfWin *window = wins_get_by_recipient(room_jid);
     int num = wins_get_num(window);
 
-    win_print_time(window, '!');
-    wattron(window->win, COLOUR_ROOMINFO);
-    wprintw(window->win, "Room subject: ");
-    wattroff(window->win, COLOUR_ROOMINFO);
-    wprintw(window->win, "%s\n", subject);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
+    win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
 
     // currently in groupchat window
     if (wins_is_current(window)) {
@@ -1790,11 +1731,8 @@ _ui_room_broadcast(const char * const room_jid, const char * const message)
     ProfWin *window = wins_get_by_recipient(room_jid);
     int num = wins_get_num(window);
 
-    win_print_time(window, '!');
-    wattron(window->win, COLOUR_ROOMINFO);
-    wprintw(window->win, "Room message: ");
-    wattroff(window->win, COLOUR_ROOMINFO);
-    wprintw(window->win, "%s\n", message);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room message: ");
+    win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", message);
 
     // currently in groupchat window
     if (wins_is_current(window)) {
@@ -1812,12 +1750,12 @@ _ui_status(void)
 {
     char *recipient = ui_current_recipient();
     PContact pcontact = roster_get_contact(recipient);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_contact(current, pcontact);
+        win_show_contact(window, pcontact);
     } else {
-        win_print_line(current, '-', 0, "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 }
 
@@ -1826,12 +1764,12 @@ _ui_info(void)
 {
     char *recipient = ui_current_recipient();
     PContact pcontact = roster_get_contact(recipient);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_info(current, pcontact);
+        win_show_info(window, pcontact);
     } else {
-        win_print_line(current, '-', 0, "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 }
 
@@ -1840,12 +1778,12 @@ _ui_status_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_contact(current, pcontact);
+        win_show_contact(window, pcontact);
     } else {
-        win_print_line(current, '-', 0, "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 
     jid_destroy(jid);
@@ -1856,12 +1794,12 @@ _ui_info_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
     PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
-    ProfWin *current = wins_get_current();
+    ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
-        win_show_info(current, pcontact);
+        win_show_info(window, pcontact);
     } else {
-        win_print_line(current, '-', 0, "Error getting contact info.");
+        win_save_println(window, "Error getting contact info.");
     }
 
     jid_destroy(jid);
@@ -1876,7 +1814,7 @@ _ui_status_room(const char * const contact)
     if (pcontact != NULL) {
         win_show_contact(current, pcontact);
     } else {
-        win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
+        win_save_vprint(current, '-', NULL, 0, 0, "", "No such participant \"%s\" in room.", contact);
     }
 }
 
@@ -1889,7 +1827,7 @@ _ui_info_room(const char * const contact)
     if (pcontact != NULL) {
         win_show_info(current, pcontact);
     } else {
-        win_vprint_line(current, '-', 0, "No such participant \"%s\" in room.", contact);
+        win_save_vprint(current, '-', NULL, 0, 0, "", "No such participant \"%s\" in room.", contact);
     }
 }
 
@@ -2011,27 +1949,6 @@ _ui_draw_term_title(void)
 }
 
 static void
-_win_show_user(WINDOW *win, const char * const user, const int colour)
-{
-    if (colour)
-        wattron(win, COLOUR_THEM);
-    else
-        wattron(win, COLOUR_ME);
-    wprintw(win, "%s: ", user);
-    if (colour)
-        wattroff(win, COLOUR_THEM);
-    else
-        wattroff(win, COLOUR_ME);
-}
-
-static void
-_win_show_message(WINDOW *win, const char * const message)
-{
-    waddstr(win, message);
-    wprintw(win, "\n");
-}
-
-static void
 _win_handle_switch(const wint_t * const ch)
 {
     if (*ch == KEY_F(1)) {
@@ -2147,7 +2064,7 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
         jid_destroy(jid);
         GSList *curr = history;
         while (curr != NULL) {
-            wprintw(win, "%s\n", curr->data);
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", curr->data);
             curr = g_slist_next(curr);
         }
         window->history_shown = 1;

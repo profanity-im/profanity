@@ -274,20 +274,15 @@ wins_resize_all(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    // only make the pads bigger, to avoid data loss on cropping
-    if (cols > max_cols) {
-        max_cols = cols;
-
-        GList *values = g_hash_table_get_values(windows);
-        GList *curr = values;
-
-        while (curr != NULL) {
-            ProfWin *window = curr->data;
-            wresize(window->win, PAD_SIZE, cols);
-            curr = g_list_next(curr);
-        }
-        g_list_free(values);
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+    while (curr != NULL) {
+      ProfWin *window = curr->data;
+      wresize(window->win, PAD_SIZE, cols);
+      win_redraw(window);
+      curr = g_list_next(curr);
     }
+    g_list_free(values);
 
     ProfWin *current_win = wins_get_current();
 
@@ -396,10 +391,7 @@ wins_lost_connection(void)
     while (curr != NULL) {
         ProfWin *window = curr->data;
         if (window->type != WIN_CONSOLE) {
-            win_print_time(window, '-');
-            wattron(window->win, COLOUR_ERROR);
-            wprintw(window->win, "%s\n", "Lost connection.");
-            wattroff(window->win, COLOUR_ERROR);
+            win_save_print(window, '-', NULL, 0, COLOUR_ERROR, "", "Lost connection.");
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {

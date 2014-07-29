@@ -167,7 +167,7 @@ void
 api_win_show(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    win_print_line(window, '-', 0, line);
+    win_save_print(window, '!', NULL, 0, 0, "", line);
 
     // refresh if current
     if (wins_is_current(window)) {
@@ -180,7 +180,7 @@ void
 api_win_show_green(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    win_print_line(window, '-', COLOUR_ONLINE, line);
+    win_save_print(window, '!', NULL, 0, COLOUR_ONLINE, "", line);
 
     // refresh if current
     if (wins_is_current(window)) {
@@ -193,7 +193,7 @@ void
 api_win_show_red(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    win_print_line(window, '-', COLOUR_OFFLINE, line);
+    win_save_print(window, '!', NULL, 0, COLOUR_OFFLINE, "", line);
 
     // refresh if current
     if (wins_is_current(window)) {
@@ -206,7 +206,7 @@ void
 api_win_show_cyan(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    win_print_line(window, '-', COLOUR_AWAY, line);
+    win_save_print(window, '!', NULL, 0, COLOUR_AWAY, "", line);
 
     // refresh if current
     if (wins_is_current(window)) {
@@ -219,7 +219,7 @@ void
 api_win_show_yellow(const char *tag, const char *line)
 {
     ProfWin *window = wins_get_by_recipient(tag);
-    win_print_line(window, '-', COLOUR_INCOMING, line);
+    win_save_print(window, '!', NULL, 0, COLOUR_INCOMING, "", line);
 
     // refresh if current
     if (wins_is_current(window)) {

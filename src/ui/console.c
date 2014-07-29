@@ -54,7 +54,7 @@ static void
 _cons_show_time(void)
 {
     ProfWin *console = wins_get_console();
-    win_print_time(console, '-');
+    win_save_print(console, '-', NULL, NO_EOL, 0, "", "");
 
     if (wins_is_current(console)) {
         win_update_virtual(console);
@@ -65,7 +65,7 @@ static void
 _cons_show_word(const char * const word)
 {
     ProfWin *console = wins_get_console();
-    wprintw(console->win, "%s", word);
+    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", word);
 
     if (wins_is_current(console)) {
         win_update_virtual(console);
@@ -81,8 +81,7 @@ _cons_debug(const char * const msg, ...)
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
         g_string_vprintf(fmt_msg, msg, arg);
-        win_print_time(console, '-');
-        wprintw(console->win, "%s\n", fmt_msg->str);
+        win_save_println(console, fmt_msg->str);
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
 
@@ -104,8 +103,7 @@ _cons_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_print_time(console, '-');
-    wprintw(console->win, "%s\n", fmt_msg->str);
+    win_save_println(console, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
@@ -122,10 +120,7 @@ _cons_show_error(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_ERROR);
-    wprintw(console->win, "%s\n", fmt_msg->str);
-    wattroff(console->win, COLOUR_ERROR);
+    win_save_print(console, '-', NULL, 0, COLOUR_ERROR, "", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
@@ -148,7 +143,7 @@ _cons_show_typing(const char * const barejid)
         display_usr = barejid;
     }
 
-    win_vprint_line(console, '-', COLOUR_TYPING, "!! %s is typing a message...", display_usr);
+    win_save_vprint(console, '-', NULL, 0, COLOUR_TYPING, "", "!! %s is typing a message...", display_usr);
 
     if (wins_is_current(console)) {
         win_update_virtual(console);
@@ -166,10 +161,7 @@ _cons_show_incoming_message(const char * const short_from, const int win_index)
     if (ui_index == 10) {
         ui_index = 0;
     }
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_INCOMING);
-    wprintw(console->win, "<< incoming from %s (%d)\n", short_from, ui_index);
-    wattroff(console->win, COLOUR_INCOMING);
+    win_save_vprint(console, '-', NULL, 0, COLOUR_INCOMING, "", "<< incoming from %s (%d)", short_from, ui_index);
 
     if (wins_is_current(console)) {
         win_update_virtual(console);
@@ -188,37 +180,26 @@ _cons_about(void)
     if (prefs_get_boolean(PREF_SPLASH)) {
         _cons_splash_logo();
     } else {
-        win_print_time(console, '-');
-
 
         if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
 #ifdef PROF_HAVE_GIT_VERSION
-            wprintw(console->win, "Welcome to Profanity, version %sdev.%s.%s\n", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+            win_save_vprint(console, '-', NULL, 0, 0, "", "Welcome to Profanity, version %sdev.%s.%s", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-            wprintw(console->win, "Welcome to Profanity, version %sdev\n", PROF_PACKAGE_VERSION);
+            win_save_vprint(console, '-', NULL, 0, 0, "", "Welcome to Profanity, version %sdev", PROF_PACKAGE_VERSION);
 #endif
         } else {
-            wprintw(console->win, "Welcome to Profanity, version %s\n", PROF_PACKAGE_VERSION);
+            win_save_vprint(console, '-', NULL, 0, 0, "", "Welcome to Profanity, version %s", PROF_PACKAGE_VERSION);
         }
     }
 
-    win_print_time(console, '-');
-    wprintw(console->win, "Copyright (C) 2012 - 2014 James Booth <%s>.\n", PROF_PACKAGE_BUGREPORT);
-    win_print_time(console, '-');
-    wprintw(console->win, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
-    win_print_time(console, '-');
-    wprintw(console->win, "\n");
-    win_print_time(console, '-');
-    wprintw(console->win, "This is free software; you are free to change and redistribute it.\n");
-    win_print_time(console, '-');
-
-    wprintw(console->win, "There is NO WARRANTY, to the extent permitted by law.\n");
-    win_print_time(console, '-');
-    wprintw(console->win, "\n");
-    win_print_time(console, '-');
-    wprintw(console->win, "Type '/help' to show complete help.\n");
-    win_print_time(console, '-');
-    wprintw(console->win, "\n");
+    win_save_vprint(console, '-', NULL, 0, 0, "", "Copyright (C) 2012 - 2014 James Booth <%s>.", PROF_PACKAGE_BUGREPORT);
+    win_save_println(console, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
+    win_save_println(console, "");
+    win_save_println(console, "This is free software; you are free to change and redistribute it.");
+    win_save_println(console, "There is NO WARRANTY, to the extent permitted by law.");
+    win_save_println(console, "");
+    win_save_println(console, "Type '/help' to show complete help.");
+    win_save_println(console, "");
 
     if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
@@ -244,17 +225,14 @@ _cons_check_version(gboolean not_available_msg)
 
         if (relase_valid) {
             if (release_is_new(latest_release)) {
-                win_print_time(console, '-');
-                wprintw(console->win, "A new version of Profanity is available: %s", latest_release);
-                win_print_time(console, '-');
-                wprintw(console->win, "Check <http://www.profanity.im> for details.\n");
+                win_save_vprint(console, '-', NULL, 0, 0, "", "A new version of Profanity is available: %s", latest_release);
+                win_save_println(console, "Check <http://www.profanity.im> for details.");
                 free(latest_release);
-                win_print_time(console, '-');
-                wprintw(console->win, "\n");
+                win_save_println(console, "");
             } else {
                 if (not_available_msg) {
-                    cons_show("No new version available.");
-                    cons_show("");
+                    win_save_println(console, "No new version available.");
+                    win_save_println(console, "");
                 }
             }
 
@@ -271,18 +249,16 @@ static void
 _cons_show_login_success(ProfAccount *account)
 {
     ProfWin *console = wins_get_console();
-    win_print_time(console, '-');
-    wprintw(console->win, "%s logged in successfully, ", account->jid);
+    win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "%s logged in successfully, ", account->jid);
 
     resource_presence_t presence = accounts_get_login_presence(account->name);
     const char *presence_str = string_from_resource_presence(presence);
 
-    win_presence_colour_on(console, presence_str);
-    wprintw(console->win, "%s", presence_str);
-    win_presence_colour_off(console, presence_str);
-    wprintw(console->win, " (priority %d)",
+    int presence_colour = win_presence_colour(presence_str);
+    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", presence_str);
+    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
-    wprintw(console->win, ".\n");
+    win_save_print(console, '-', NULL, NO_DATE, 0, "", ".");
     if (wins_is_current(console)) {
         win_update_virtual(console);
     }
@@ -299,9 +275,7 @@ _cons_show_wins(void)
 
     GSList *curr = window_strings;
     while (curr != NULL) {
-        win_print_time(console, '-');
-        wprintw(console->win, curr->data);
-        wprintw(console->win, "\n");
+        win_save_println(console, curr->data);
         curr = g_slist_next(curr);
     }
 
@@ -349,67 +323,61 @@ static void
 _cons_show_caps(const char * const contact, Resource *resource)
 {
     ProfWin *console = wins_get_console();
-    WINDOW *win = console->win;
     cons_show("");
     const char *resource_presence = string_from_resource_presence(resource->presence);
-    win_print_time(console, '-');
-    win_presence_colour_on(console, resource_presence);
-    wprintw(console->win, "%s", contact);
-    win_presence_colour_off(console, resource_presence);
-    wprintw(win, ":\n");
+
+    int presence_colour = win_presence_colour(resource_presence);
+    win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", contact);
+    win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
+
 
     if (resource->caps_str != NULL) {
         Capabilities *caps = caps_get(resource->caps_str);
         if (caps != NULL) {
             // show identity
             if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                win_print_time(console, '-');
-                wprintw(win, "Identity: ");
+                win_save_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
                 if (caps->name != NULL) {
-                    wprintw(win, "%s", caps->name);
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                     if ((caps->category != NULL) || (caps->type != NULL)) {
-                        wprintw(win, " ");
+                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (caps->type != NULL) {
-                    wprintw(win, "%s", caps->type);
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                     if (caps->category != NULL) {
-                        wprintw(win, " ");
+                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (caps->category != NULL) {
-                    wprintw(win, "%s", caps->category);
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                 }
-                wprintw(win, "\n");
+                win_save_newline(console);
             }
             if (caps->software != NULL) {
-                win_print_time(console, '-');
-                wprintw(win, "Software: %s", caps->software);
+                win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "Software: %s", caps->software);
             }
             if (caps->software_version != NULL) {
-                wprintw(win, ", %s", caps->software_version);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
             }
             if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                wprintw(win, "\n");
+                win_save_newline(console);
             }
             if (caps->os != NULL) {
-                win_print_time(console, '-');
-                wprintw(win, "OS: %s", caps->os);
+                win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "OS: %s", caps->os);
             }
             if (caps->os_version != NULL) {
-                wprintw(win, ", %s", caps->os_version);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
             }
             if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                wprintw(win, "\n");
+                win_save_newline(console);
             }
 
             if (caps->features != NULL) {
-                win_print_time(console, '-');
-                wprintw(win, "Features:\n");
+                win_save_println(console, "Features:");
                 GSList *feature = caps->features;
                 while (feature != NULL) {
-                    win_print_time(console, '-');
-                    wprintw(win, "  %s\n", feature->data);
+                    win_save_vprint(console, '-', NULL, 0, 0, "", " %s", feature->data);
                     feature = g_slist_next(feature);
                 }
             }
@@ -429,11 +397,9 @@ _cons_show_software_version(const char * const jid, const char * const  presence
     ProfWin *console = wins_get_console();
     if ((name != NULL) || (version != NULL) || (os != NULL)) {
         cons_show("");
-        win_print_time(console, '-');
-        win_presence_colour_on(console, presence);
-        wprintw(console->win, "%s", jid);
-        win_presence_colour_off(console, presence);
-        wprintw(console->win, ":\n");
+        int presence_colour = win_presence_colour(presence);
+        win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", jid);
+        win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
     }
     if (name != NULL) {
         cons_show("Name    : %s", name);
@@ -499,12 +465,11 @@ _cons_show_room_list(GSList *rooms, const char * const conference_node)
         cons_show("Chat rooms at %s:", conference_node);
         while (rooms != NULL) {
             DiscoItem *room = rooms->data;
-            win_print_time(console, '-');
-            wprintw(console->win, "  %s", room->jid);
+            win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "  %s", room->jid);
             if (room->name != NULL) {
-                wprintw(console->win, ", (%s)", room->name);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", (%s)", room->name);
             }
-            wprintw(console->win, "\n");
+            win_save_newline(console);
             rooms = g_slist_next(rooms);
         }
     } else {
@@ -532,32 +497,29 @@ _cons_show_bookmarks(const GList *list)
         while (list != NULL) {
             Bookmark *item = list->data;
 
-            win_print_time(console, '-');
+            int presence_colour = 0;
 
             if (muc_room_is_active(item->jid)) {
-                wattron(console->win, COLOUR_ONLINE);
+                presence_colour = COLOUR_ONLINE;
             }
-            wprintw(console->win, "  %s", item->jid);
+            win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s", item->jid);
             if (item->nick != NULL) {
-                wprintw(console->win, "/%s", item->nick);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "/%s", item->nick);
             }
             if (item->autojoin) {
-                wprintw(console->win, " (autojoin)");
+                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (autojoin)");
             }
             if (item->password != NULL) {
-                wprintw(console->win, " (private)");
+                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
             }
             if (muc_room_is_active(item->jid)) {
                 ProfWin *roomwin = wins_get_by_recipient(item->jid);
                 if (roomwin != NULL) {
                     int num = wins_get_num(roomwin);
-                    wprintw(console->win, " (");
-                    wprintw(console->win, "%d", num);
-                    wprintw(console->win, ")");
+                    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%d)", num);
                 }
-                wattroff(console->win, COLOUR_ONLINE);
             }
-            wprintw(console->win, "\n");
+            win_save_newline(console);
             list = g_list_next(list);
         }
 
@@ -623,12 +585,11 @@ _cons_show_disco_items(GSList *items, const char * const jid)
         cons_show("Service discovery items for %s:", jid);
         while (items != NULL) {
             DiscoItem *item = items->data;
-            win_print_time(console, '-');
-            wprintw(console->win, "  %s", item->jid);
+            win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "  %s", item->jid);
             if (item->name != NULL) {
-                wprintw(console->win, ", (%s)", item->name);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", (%s)", item->name);
             }
-            wprintw(console->win, "\n");
+            win_save_vprint(console, '-', NULL, NO_DATE, 0, "", "");
             items = g_slist_next(items);
         }
     } else {
@@ -712,10 +673,8 @@ _cons_show_account_list(gchar **accounts)
             if ((jabber_get_connection_status() == JABBER_CONNECTED) &&
                     (g_strcmp0(jabber_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
-                win_print_time(console, '-');
-                win_presence_colour_on(console, string_from_resource_presence(presence));
-                wprintw(console->win, "%s\n", accounts[i]);
-                win_presence_colour_off(console, string_from_resource_presence(presence));
+                int presence_colour = win_presence_colour(string_from_resource_presence(presence));
+                win_save_vprint(console, '-', NULL, 0, presence_colour, "", "%s", accounts[i]);
             } else {
                 cons_show(accounts[i]);
             }
@@ -821,10 +780,8 @@ _cons_show_account(ProfAccount *account)
         GList *resources = jabber_get_available_resources();
         GList *ordered_resources = NULL;
 
-        WINDOW *win = console->win;
         if (resources != NULL) {
-            win_print_time(console, '-');
-            wprintw(win, "Resources:\n");
+            win_save_println(console, "Resources:");
 
             // sort in order of availabiltiy
             while (resources != NULL) {
@@ -838,58 +795,54 @@ _cons_show_account(ProfAccount *account)
         while (ordered_resources != NULL) {
             Resource *resource = ordered_resources->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
-            win_print_time(console, '-');
-            win_presence_colour_on(console, resource_presence);
-            wprintw(win, "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+            int presence_colour = win_presence_colour(resource_presence);
+            win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
+
             if (resource->status != NULL) {
-                wprintw(win, ", \"%s\"", resource->status);
+                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
             }
-            wprintw(win, "\n");
-            win_presence_colour_off(console, resource_presence);
+            win_save_vprint(console, '-', NULL, NO_DATE, 0, "", "");
 
             if (resource->caps_str != NULL) {
                 Capabilities *caps = caps_get(resource->caps_str);
                 if (caps != NULL) {
                     // show identity
                     if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                        win_print_time(console, '-');
-                        wprintw(win, "    Identity: ");
+                        win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Identity: ");
                         if (caps->name != NULL) {
-                            wprintw(win, "%s", caps->name);
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                             if ((caps->category != NULL) || (caps->type != NULL)) {
-                                wprintw(win, " ");
+                                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                             }
                         }
                         if (caps->type != NULL) {
-                            wprintw(win, "%s", caps->type);
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                             if (caps->category != NULL) {
-                                wprintw(win, " ");
+                                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                             }
                         }
                         if (caps->category != NULL) {
-                            wprintw(win, "%s", caps->category);
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                         }
-                        wprintw(win, "\n");
+                        win_save_newline(console);
                     }
                     if (caps->software != NULL) {
-                        win_print_time(console, '-');
-                        wprintw(win, "    Software: %s", caps->software);
+                        win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
                     }
                     if (caps->software_version != NULL) {
-                        wprintw(win, ", %s", caps->software_version);
+                        win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
                     }
                     if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                        wprintw(win, "\n");
+                        win_save_newline(console);
                     }
                     if (caps->os != NULL) {
-                        win_print_time(console, '-');
-                        wprintw(win, "    OS: %s", caps->os);
+                        win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
                     }
                     if (caps->os_version != NULL) {
-                        wprintw(win, ", %s", caps->os_version);
+                        win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
                     }
                     if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                        wprintw(win, "\n");
+                        win_save_newline(console);
                     }
                 }
             }
@@ -1568,55 +1521,25 @@ static void
 _cons_splash_logo(void)
 {
     ProfWin *console = wins_get_console();
-    win_print_time(console, '-');
-    wprintw(console->win, "Welcome to\n");
+    win_save_println(console, "Welcome to");
 
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "                   ___            _           \n");
-    wattroff(console->win, COLOUR_SPLASH);
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "                   ___            _           ");
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "                  / __)          (_)_         ");
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "|_|                                    (____/ ");
+    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "");
 
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "                  / __)          (_)_         \n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, " ____   ____ ___ | |__ ____ ____  _| |_ _   _ \n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |\n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |\n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |\n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wattron(console->win, COLOUR_SPLASH);
-    wprintw(console->win, "|_|                                    (____/ \n");
-    wattroff(console->win, COLOUR_SPLASH);
-
-    win_print_time(console, '-');
-    wprintw(console->win, "\n");
-    win_print_time(console, '-');
     if (strcmp(PROF_PACKAGE_STATUS, "development") == 0) {
 #ifdef PROF_HAVE_GIT_VERSION
-        wprintw(console->win, "Version %sdev.%s.%s\n", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %sdev.%s.%s", PROF_PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        wprintw(console->win, "Version %sdev\n", PROF_PACKAGE_VERSION);
+        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %sdev", PROF_PACKAGE_VERSION);
 #endif
     } else {
-        wprintw(console->win, "Version %s\n", PROF_PACKAGE_VERSION);
+        win_save_vprint(console, '-', NULL, 0, 0, "", "Version %s", PROF_PACKAGE_VERSION);
     }
 }
 
@@ -1637,21 +1560,17 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         }
 
         const char *presence = p_contact_presence(contact);
-        win_print_time(console, '-');
+        int presence_colour;
         if (p_contact_subscribed(contact)) {
-            win_presence_colour_on(console, presence);
-            wprintw(console->win, "%s\n", title->str);
-            win_presence_colour_off(console, presence);
+            presence_colour = win_presence_colour(presence);
         } else {
-            win_presence_colour_on(console, "offline");
-            wprintw(console->win, "%s\n", title->str);
-            win_presence_colour_off(console, "offline");
+            presence_colour = win_presence_colour("offline");
         }
+        win_save_vprint(console, '-', NULL, 0, presence_colour, "", title->str);
 
         g_string_free(title, TRUE);
 
-        win_print_time(console, '-');
-        wprintw(console->win, "    Subscription : ");
+        win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Subscription : ");
         GString *sub = g_string_new("");
         sub = g_string_append(sub, p_contact_subscription(contact));
         if (p_contact_pending_out(contact)) {
@@ -1661,16 +1580,11 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
             sub = g_string_append(sub, ", request received");
         }
         if (p_contact_subscribed(contact)) {
-            wattron(console->win, COLOUR_SUBSCRIBED);
+            presence_colour = COLOUR_SUBSCRIBED;
         } else {
-            wattron(console->win, COLOUR_UNSUBSCRIBED);
+            presence_colour = COLOUR_UNSUBSCRIBED;
         }
-        wprintw(console->win, "%s\n", sub->str);
-        if (p_contact_subscribed(contact)) {
-            wattroff(console->win, COLOUR_SUBSCRIBED);
-        } else {
-            wattroff(console->win, COLOUR_UNSUBSCRIBED);
-        }
+        win_save_vprint(console, '-', NULL, NO_DATE, presence_colour, "", "%s", sub->str);
 
         g_string_free(sub, TRUE);
 

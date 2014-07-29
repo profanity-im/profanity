@@ -107,10 +107,11 @@ status_bar_resize(void)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
+    werase(status_bar);
+
     mvwin(status_bar, rows-2, 0);
     wresize(status_bar, 1, cols);
     wbkgd(status_bar, COLOUR_STATUS_TEXT);
-    werase(status_bar);
     wattron(status_bar, COLOUR_STATUS_BRACKET);
     mvwprintw(status_bar, 0, cols - 34, _active);
     mvwprintw(status_bar, 0, cols - 34 + ((current - 1) * 3), bracket);
