@@ -217,10 +217,12 @@ _notify(const char * const message, int timeout,
 #ifdef HAVE_OSXNOTIFY
     GString *notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message \"");
 
-    char *escaped = str_replace(message, "\"", "\\\"");
-    g_string_append(notify_command, escaped);
+    char *escaped_double = str_replace(message, "\"", "\\\"");
+    char *escaped_single = str_replace(escaped_double, "`", "\\`");
+    g_string_append(notify_command, escaped_single);
     g_string_append(notify_command, "\"");
-    free(escaped);
+    free(escaped_double);
+    free(escaped_single);
 
     char *term_name = getenv("TERM_PROGRAM");
     char *app_id = NULL;
