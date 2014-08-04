@@ -1397,6 +1397,13 @@ cmd_execute_default(const char * const inp)
     jabber_conn_status_t status = jabber_get_connection_status();
     char *recipient = ui_current_recipient();
 
+    // handle unknown commands
+    if ((inp[0] == '/') && (!g_str_has_prefix(inp, "/me "))) {
+        cons_show("Unknown command: %s", inp);
+        cons_alert();
+        return TRUE;
+    }
+
     switch (win_type)
     {
         case WIN_MUC:
