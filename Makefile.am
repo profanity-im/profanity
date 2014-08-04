@@ -17,7 +17,7 @@ core_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/windows.c src/ui/windows.h \
-	src/ui/buffer.c \
+	src/ui/buffer.c src/ui/buffer.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
 	src/command/history.h src/tools/parser.c \
@@ -99,6 +99,8 @@ otr4_sources = \
 
 themes_sources = themes/*
 
+script_sources = bootstrap.sh configure-debug install-all.sh
+
 man_sources = docs/profanity.1
 
 if BUILD_OTR
@@ -129,7 +131,7 @@ tests_testsuite_LDADD = -lcmocka
 
 man_MANS = $(man_sources)
 
-EXTRA_DIST = $(man_sources) $(themes_sources)
+EXTRA_DIST = $(man_sources) $(themes_sources) $(script_sources) profrc.example
 
 if INCLUDE_GIT_VERSION
 EXTRA_DIST += .git/HEAD .git/index
