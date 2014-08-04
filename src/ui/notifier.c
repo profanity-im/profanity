@@ -219,7 +219,23 @@ _notify(const char * const message, int timeout,
 
     char *escaped_double = str_replace(message, "\"", "\\\"");
     char *escaped_single = str_replace(escaped_double, "`", "\\`");
-    g_string_append(notify_command, escaped_single);
+
+    if (escaped_single[0] == '<') {
+        g_string_append(notify_command, "\\<");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else if (escaped_single[0] == '[') {
+        g_string_append(notify_command, "\\[");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else if (escaped_single[0] == '(') {
+        g_string_append(notify_command, "\\(");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else if (escaped_single[0] == '{') {
+        g_string_append(notify_command, "\\{");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else {
+        g_string_append(notify_command, escaped_single);
+    }
+
     g_string_append(notify_command, "\"");
     free(escaped_double);
     free(escaped_single);
