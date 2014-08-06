@@ -1391,14 +1391,18 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
 }
 
 gboolean
-cmd_execute_default(const char * const inp)
+cmd_execute_default(const char * inp)
 {
     win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
     char *recipient = ui_current_recipient();
 
+    // handle escaped commands - treat as normal message
+    if (g_str_has_prefix(inp, "//")) {
+        inp++;
+
     // handle unknown commands
-    if ((inp[0] == '/') && (!g_str_has_prefix(inp, "/me "))) {
+    } else if ((inp[0] == '/') && (!g_str_has_prefix(inp, "/me "))) {
         cons_show("Unknown command: %s", inp);
         cons_alert();
         return TRUE;
