@@ -76,7 +76,7 @@ install_lib_strophe()
     cd libstrophe
     git checkout 0.8.6
     ./bootstrap.sh
-    ./configure --prefix=/usr
+    ./configure --prefix=$1
     make
     sudo make install
 
@@ -173,15 +173,15 @@ unknown)    echo The install script will not work on this OS.
             exit
             ;;
 fedora)     fedora_prepare
-            install_lib_strophe
+            install_lib_strophe /usr
             install_profanity
             ;;
 debian)     debian_prepare
-            install_lib_strophe
+            install_lib_strophe /usr
             install_profanity
             ;;
 opensuse)   opensuse_prepare
-            install_lib_strophe
+            install_lib_strophe /usr/local
             install_profanity
             ;;
 cygwin)     cygwin_prepare
