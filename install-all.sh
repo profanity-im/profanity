@@ -76,7 +76,7 @@ install_lib_strophe()
     cd libstrophe
     git checkout 0.8.6
     ./bootstrap.sh
-    ./configure
+    ./configure --prefix=/usr
     make
     sudo make install
 
