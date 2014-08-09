@@ -225,7 +225,6 @@ AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
 ### Checks for library functions.
-AS_IF([test "x$PLATFORM" != xosx], [AC_FUNC_MALLOC])
 AC_CHECK_FUNCS([atexit memset strdup strstr])
 
 AC_CONFIG_FILES([Makefile])
