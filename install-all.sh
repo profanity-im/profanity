@@ -41,10 +41,10 @@ fedora_prepare()
 
 opensuse_prepare()
 {
- echo
- echo Profanity installer...installing dependencies
- echo
- sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel
+    echo
+    echo Profanity installer...installing dependencies
+    echo
+    sudo zypper -n in gcc git automake make autoconf libopenssl-devel expat libexpat-devel ncurses-devel glib2-devel libnotify-devel libcurl-devel libXScrnSaver-devel libotr-devel
 }
 
 cygwin_prepare()
@@ -53,19 +53,18 @@ cygwin_prepare()
     echo Profanity installer... installing dependencies
     echo
 
-    wget --no-check-certificate https://raw.github.com/boothj5/apt-cyg/master/apt-cyg
+    wget https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg
+    #wget --no-check-certificate https://raw.github.com/boothj5/apt-cyg/master/apt-cyg
     #wget http://apt-cyg.googlecode.com/svn/trunk/apt-cyg
     chmod +x apt-cyg
     mv apt-cyg /usr/local/bin/
 
     if [ -n "$CYG_MIRROR" ]; then
-        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+        apt-cyg -m $CYG_MIRROR install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel
     else
-        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel
+        apt-cyg install git make gcc-core m4 automake autoconf pkg-config openssl-devel libexpat-devel zlib-devel libncursesw-devel libglib2.0-devel libcurl-devel libidn-devel libssh2-devel libkrb5-devel openldap-devel libgcrypt-devel
 
     fi
-
-    export LIBRARY_PATH=/usr/local/lib/
 }
 
 install_lib_strophe()
@@ -73,10 +72,9 @@ install_lib_strophe()
     echo
     echo Profanity installer... installing libstrophe
     echo
-    #clone fork so as to not pick up any breaking changes
-    #git clone git://github.com/strophe/libstrophe.git
-    git clone git://github.com/boothj5/libstrophe.git
+    git clone git://github.com/strophe/libstrophe.git
     cd libstrophe
+    git checkout 0.8.6
     ./bootstrap.sh
     ./configure
     make
@@ -105,9 +103,10 @@ cyg_install_lib_strophe()
     echo
     git clone git://github.com/strophe/libstrophe.git
     cd libstrophe
+    git checkout 0.8.6
     ./bootstrap.sh
     ./bootstrap.sh # second call seems to fix problem on cygwin
-    ./configure
+    ./configure --prefix=/usr
     make
     make install
 
