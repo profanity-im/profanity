@@ -182,6 +182,7 @@ debian)     debian_prepare
             ;;
 opensuse)   opensuse_prepare
             install_lib_strophe /usr/local
+            sudo /sbin/ldconfig
             install_profanity
             ;;
 cygwin)     cygwin_prepare
