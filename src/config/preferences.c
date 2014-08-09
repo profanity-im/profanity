@@ -553,6 +553,7 @@ _get_default_boolean(preference_t pref)
         case PREF_NOTIFY_MESSAGE_CURRENT:
         case PREF_NOTIFY_ROOM_CURRENT:
         case PREF_NOTIFY_TYPING_CURRENT:
+        case PREF_SPLASH:
             return TRUE;
         default:
             return FALSE;
