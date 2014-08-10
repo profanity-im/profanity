@@ -107,17 +107,24 @@ main(int argc, char **argv)
         g_print("\n");
 
         g_print("Build information:\n");
+
+        gboolean notify_enabled = FALSE;
+
 #ifdef HAVE_OSXNOTIFY
-        g_print("Desktop notification support: Enabled\n");
+        notify_enabled = TRUE;
 #endif
 #ifdef HAVE_LIBNOTIFY
-        g_print("Desktop notification support: Enabled\n");
+        notify_enabled = TRUE;
 #endif
-#ifndef HAVE_OSXNOTIFY
-#ifndef HAVE_LIBNOTIFY
-        g_print("Desktop notification support: Disabled\n");
+#ifdef PLATFORM_CYGWIN
+        notify_enabled = TRUE;
 #endif
-#endif
+        if (notify_enabled) {
+            g_print("Desktop notification support: Enabled\n");
+        } else {
+            g_print("Desktop notification support: Disabled\n");
+        }
+
 #ifdef HAVE_LIBOTR
         g_print("OTR support: Enabled\n");
 #else
