@@ -29,7 +29,7 @@
 #ifdef PROF_HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
-#ifdef PROF_PLATFORM_CYGWIN
+#ifdef PLATFORM_CYGWIN
 #include <windows.h>
 #endif
 
@@ -190,7 +190,7 @@ _notify(const char * const message, int timeout,
         log_error("Libnotify not initialised.");
     }
 #endif
-#ifdef PROF_PLATFORM_CYGWIN
+#ifdef PLATFORM_CYGWIN
     NOTIFYICONDATA nid;
     nid.cbSize = sizeof(NOTIFYICONDATA);
     //nid.hWnd = hWnd;
