@@ -179,7 +179,7 @@ prof_handle_activity(void)
 gboolean
 process_input(char *inp)
 {
-    log_debug("Input recieved: %s", inp);
+    log_debug("Input received: %s", inp);
     gboolean result = FALSE;
     g_strstrip(inp);
 

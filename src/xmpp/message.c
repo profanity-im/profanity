@@ -381,7 +381,7 @@ _groupchat_handler(xmpp_conn_t * const conn,
 
     // room not active in profanity
     if (!muc_room_is_active(jid->barejid)) {
-        log_error("Message recieved for inactive chat room: %s", jid->str);
+        log_error("Message received for inactive chat room: %s", jid->str);
         jid_destroy(jid);
         return 1;
     }

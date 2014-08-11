@@ -513,7 +513,7 @@ static struct cmd_t command_defs[] =
         { "/flash on|off", "Terminal flash on new messages.",
         { "/flash on|off",
           "-------------",
-          "Make the terminal flash when incoming messages are recieved.",
+          "Make the terminal flash when incoming messages are received.",
           "The flash will only occur if you are not in the chat window associated with the user sending the message.",
           "If the terminal doesn't support flashing, it may attempt to beep.",
           NULL } } },

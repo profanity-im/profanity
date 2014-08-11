@@ -72,7 +72,7 @@ cb_otr_error_message(void *opdata, ConnContext *context,
     switch(err_code)
     {
         case OTRL_ERRCODE_ENCRYPTION_ERROR:
-            return strdup("OTR Error: occured while encrypting a message");
+            return strdup("OTR Error: occurred while encrypting a message");
         case OTRL_ERRCODE_MSG_NOT_IN_PRIVATE:
             return strdup("OTR Error: Sent encrypted message to somebody who is not in a mutual OTR session");
         case OTRL_ERRCODE_MSG_UNREADABLE:
