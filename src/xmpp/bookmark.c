@@ -422,7 +422,9 @@ _send_bookmarks(void)
         xmpp_stanza_set_attribute(conference, STANZA_ATTR_JID, bookmark->jid);
 
         Jid *jidp = jid_create(bookmark->jid);
-        xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
+        if (jidp->localpart != NULL) {
+            xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
+        }
         jid_destroy(jidp);
 
         if (bookmark->autojoin) {

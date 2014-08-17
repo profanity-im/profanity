@@ -1865,11 +1865,15 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
         }
 
         if (strcmp(cmd, "add") == 0) {
-            gboolean added = bookmark_add(jid, nick, password, autojoin);
-            if (added) {
-                cons_show("Bookmark added for %s.", jid);
+            if (strchr(jid, '@')==NULL) {
+                cons_show("Can't add bookmark with JID '%s'; should be '%s@domain.tld'", jid, jid);
             } else {
-                cons_show("Bookmark already exists, use /bookmark update to edit.");
+                gboolean added = bookmark_add(jid, nick, password, autojoin);
+                if (added) {
+                    cons_show("Bookmark added for %s.", jid);
+                } else {
+                    cons_show("Bookmark already exists, use /bookmark update to edit.");
+                }
             }
         } else if (strcmp(cmd, "update") == 0) {
             gboolean updated = bookmark_update(jid, nick, password, autojoin);
