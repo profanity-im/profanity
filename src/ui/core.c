@@ -1721,7 +1721,7 @@ _ui_room_subject(const char * const room_jid, const char * const subject)
 
     // not currenlty on groupchat window
     } else {
-        status_bar_new(num);
+        status_bar_active(num);
     }
 }
 
