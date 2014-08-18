@@ -126,6 +126,24 @@ void cmd_bookmark_list_shows_bookmarks(void **state)
     g_list_free_full(bookmarks, (GDestroyNotify)_free_bookmark);
 }
 
+void cmd_bookmark_add_shows_message_when_invalid_jid(void **state)
+{
+    mock_bookmark_add();
+    mock_cons_show();
+    char *jid = "room";
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "add", jid, NULL };
+
+    mock_connection_status(JABBER_CONNECTED);
+
+    expect_cons_show("Can't add bookmark with JID 'room'; should be 'room@domain.tld'");
+
+    gboolean result = cmd_bookmark(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 {
     mock_bookmark_add();

@@ -155,7 +155,7 @@ _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     if (id != NULL) {
         log_error("IQ error received, id: %s.", id);
     } else {
-        log_error("IQ error recieved.");
+        log_error("IQ error received.");
     }
 
     return 1;
@@ -434,7 +434,7 @@ static int
 _disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    log_debug("Recieved diso#info response");
+    log_debug("Received diso#info response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
@@ -603,7 +603,7 @@ _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     void * const userdata)
 {
 
-    log_debug("Recieved diso#items response");
+    log_debug("Received diso#items response");
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     GSList *items = NULL;
