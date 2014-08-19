@@ -304,9 +304,9 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/bookmark",
-        cmd_bookmark, parse_args, 1, 8, NULL,
-        { "/bookmark list|add|update|remove|join [room@server] [nick value] [password value] [autojoin on|off]", "Manage bookmarks.",
-        { "/bookmark list|add|update|remove|join [room@server] [nick value] [password value] [autojoin on|off]",
+        cmd_bookmark, parse_args, 0, 8, NULL,
+        { "/bookmark [list|add|update|remove|join] [room@server] [nick value] [password value] [autojoin on|off]", "Manage bookmarks.",
+        { "/bookmark [list|add|update|remove|join] [room@server] [nick value] [password value] [autojoin on|off]",
           "---------------------------------------------------------------------------------------------------",
           "Manage bookmarks.",
           "list: List all bookmarks.",
@@ -317,6 +317,7 @@ static struct cmd_t command_defs[] =
           "update: Update any of the above properties associated with the bookmark.",
           "remove: Remove the bookmark for room@server.",
           "join: Join room@server using the properties associated with the bookmark.",
+          "When in a chat room, the /bookmark command with no arguments will bookmark the current room with the current settings, and set autojoin to \"on\".",
           NULL } } },
 
     { "/disco",
