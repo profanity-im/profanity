@@ -135,10 +135,14 @@ static void
 _cons_show_typing(const char * const barejid)
 {
     ProfWin *console = wins_get_console();
-    PContact contact = roster_get_contact(barejid);
     const char * display_usr = NULL;
-    if (p_contact_name(contact) != NULL) {
-        display_usr = p_contact_name(contact);
+    PContact contact = roster_get_contact(barejid);
+    if (contact != NULL) {
+        if (p_contact_name(contact) != NULL) {
+            display_usr = p_contact_name(contact);
+        } else {
+            display_usr = barejid;
+        }
     } else {
         display_usr = barejid;
     }

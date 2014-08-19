@@ -60,6 +60,7 @@ void cmd_bookmark_shows_message_when_undefined(void **state)
 void cmd_bookmark_shows_usage_when_no_args(void **state)
 {
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { NULL };
@@ -83,6 +84,7 @@ static void _free_bookmark(Bookmark *bookmark)
 void cmd_bookmark_list_shows_bookmarks(void **state)
 {
     mock_cons_show_bookmarks();
+    mock_current_win_type(WIN_CONSOLE);
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "list", NULL };
     GList *bookmarks = NULL;
@@ -130,6 +132,7 @@ void cmd_bookmark_add_shows_message_when_invalid_jid(void **state)
 {
     mock_bookmark_add();
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     char *jid = "room";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", jid, NULL };
@@ -148,6 +151,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid(void **state)
 {
     mock_bookmark_add();
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     char *jid = "room@conf.server";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", jid, NULL };
@@ -167,6 +171,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick(void **state)
 {
     mock_bookmark_add();
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -187,6 +192,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_autojoin(void **state)
 {
     mock_bookmark_add();
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     char *jid = "room@conf.server";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", jid, "autojoin", "on", NULL };
@@ -206,6 +212,7 @@ void cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin(void **state)
 {
     mock_bookmark_add();
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     char *jid = "room@conf.server";
     char *nick = "bob";
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -226,6 +233,7 @@ void cmd_bookmark_remove_removes_bookmark(void **state)
 {
     mock_bookmark_remove();
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     char *jid = "room@conf.server";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "remove", jid, NULL };
@@ -245,6 +253,7 @@ void cmd_bookmark_remove_shows_message_when_no_bookmark(void **state)
 {
     mock_bookmark_remove();
     mock_cons_show();
+    mock_current_win_type(WIN_CONSOLE);
     char *jid = "room@conf.server";
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "remove", jid, NULL };
