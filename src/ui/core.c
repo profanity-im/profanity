@@ -1471,44 +1471,47 @@ static void
 _ui_room_roster(const char * const room, GList *roster, const char * const presence)
 {
     ProfWin *window = wins_get_by_recipient(room);
-
-    if ((roster == NULL) || (g_list_length(roster) == 0)) {
-        if (presence == NULL) {
-            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room is empty.");
-        } else {
-            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "No participants %s.", presence);
-        }
+    if (window == NULL) {
+        log_error("Received room roster but no window open for %s.", room);
     } else {
-        int length = g_list_length(roster);
-        if (presence == NULL) {
-            length++;
-            win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d participants: ", length);
-            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s", muc_get_room_nick(room));
-            win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
+        if ((roster == NULL) || (g_list_length(roster) == 0)) {
+            if (presence == NULL) {
+                win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room is empty.");
+            } else {
+                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "No participants %s.", presence);
+            }
         } else {
-            win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d %s: ", length, presence);
-        }
-
-        while (roster != NULL) {
-            PContact member = roster->data;
-            const char *nick = p_contact_barejid(member);
-            const char *show = p_contact_presence(member);
-
-            int presence_colour = win_presence_colour(show);
-            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", nick);
-
-            if (roster->next != NULL) {
+            int length = g_list_length(roster);
+            if (presence == NULL) {
+                length++;
+                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d participants: ", length);
+                win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s", muc_get_room_nick(room));
                 win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
+            } else {
+                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d %s: ", length, presence);
             }
 
-            roster = g_list_next(roster);
+            while (roster != NULL) {
+                PContact member = roster->data;
+                const char *nick = p_contact_barejid(member);
+                const char *show = p_contact_presence(member);
+
+                int presence_colour = win_presence_colour(show);
+                win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", nick);
+
+                if (roster->next != NULL) {
+                    win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
+                }
+
+                roster = g_list_next(roster);
+            }
+            win_save_print(window, '!', NULL, NO_DATE, COLOUR_ONLINE, "", "");
+
         }
-        win_save_print(window, '!', NULL, NO_DATE, COLOUR_ONLINE, "", "");
 
-    }
-
-    if (wins_is_current(window)) {
-        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            win_update_virtual(window);
+        }
     }
 }
 
@@ -1522,11 +1525,13 @@ static void
 _ui_room_member_offline(const char * const room, const char * const nick)
 {
     ProfWin *window = wins_get_by_recipient(room);
-
-    win_save_vprint(window, '!', NULL, 0, COLOUR_OFFLINE, "", "<- %s has left the room.", nick);
-
-    if (wins_is_current(window)) {
-        win_update_virtual(window);
+    if (window == NULL) {
+        log_error("Received offline presence for room participant %s, but no window open for %s.", nick, room);
+    } else {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_OFFLINE, "", "<- %s has left the room.", nick);
+        if (wins_is_current(window)) {
+            win_update_virtual(window);
+        }
     }
 }
 
@@ -1535,11 +1540,13 @@ _ui_room_member_online(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     ProfWin *window = wins_get_by_recipient(room);
-
-    win_save_vprint(window, '!', NULL, 0, COLOUR_ONLINE, "", "-> %s has joined the room.", nick);
-
-    if (wins_is_current(window)) {
-        win_update_virtual(window);
+    if (window == NULL) {
+        log_error("Received online presence for room participant %s, but no window open for %s.", nick, room);
+    } else {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ONLINE, "", "-> %s has joined the room.", nick);
+        if (wins_is_current(window)) {
+            win_update_virtual(window);
+        }
     }
 }
 
@@ -1548,13 +1555,13 @@ _ui_room_member_presence(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     ProfWin *window = wins_get_by_recipient(room);
-
-    if (window != NULL) {
+    if (window == NULL) {
+        log_error("Received presence for room participant %s, but no window open for %s.", nick, room);
+    } else {
         win_show_status_string(window, nick, show, status, NULL, "++", "online");
-    }
-
-    if (wins_is_current(window)) {
-        win_update_virtual(window);
+        if (wins_is_current(window)) {
+            win_update_virtual(window);
+        }
     }
 }
 
@@ -1563,11 +1570,13 @@ _ui_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick)
 {
     ProfWin *window = wins_get_by_recipient(room);
-
-    win_save_vprint(window, '!', NULL, 0, COLOUR_THEM, "", "** %s is now known as %s", old_nick, nick);
-
-    if (wins_is_current(window)) {
-        win_update_virtual(window);
+    if (window == NULL) {
+        log_error("Received nick change for room participant %s, but no window open for %s.", old_nick, room);
+    } else {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_THEM, "", "** %s is now known as %s", old_nick, nick);
+        if (wins_is_current(window)) {
+            win_update_virtual(window);
+        }
     }
 }
 
@@ -1575,11 +1584,13 @@ static void
 _ui_room_nick_change(const char * const room, const char * const nick)
 {
     ProfWin *window = wins_get_by_recipient(room);
-
-    win_save_vprint(window, '!', NULL, 0, COLOUR_ME, "", "** You are now known as %s", nick);
-
-    if (wins_is_current(window)) {
-        win_update_virtual(window);
+    if (window == NULL) {
+        log_error("Received self nick change %s, but no window open for %s.", nick, room);
+    } else {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ME, "", "** You are now known as %s", nick);
+        if (wins_is_current(window)) {
+            win_update_virtual(window);
+        }
     }
 }
 
@@ -1588,31 +1599,34 @@ _ui_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
-
-    GString *line = g_string_new("");
-
-    GDateTime *time = g_date_time_new_from_timeval_utc(&tv_stamp);
-    gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-    g_string_append(line, date_fmt);
-    g_string_append(line, " - ");
-    g_date_time_unref(time);
-    g_free(date_fmt);
-
-    if (strncmp(message, "/me ", 4) == 0) {
-        g_string_append(line, "*");
-        g_string_append(line, nick);
-        g_string_append(line, message + 4);
+    if (window == NULL) {
+        log_error("Room history message received from %s, but no window open for %s", nick, room_jid);
     } else {
-        g_string_append(line, nick);
-        g_string_append(line, ": ");
-        g_string_append(line, message);
-    }
+        GString *line = g_string_new("");
 
-    win_save_print(window, '-', NULL, NO_DATE, 0, "", line->str);
-    g_string_free(line, TRUE);
+        GDateTime *time = g_date_time_new_from_timeval_utc(&tv_stamp);
+        gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
+        g_string_append(line, date_fmt);
+        g_string_append(line, " - ");
+        g_date_time_unref(time);
+        g_free(date_fmt);
 
-    if (wins_is_current(window)) {
-        win_update_virtual(window);
+        if (strncmp(message, "/me ", 4) == 0) {
+            g_string_append(line, "*");
+            g_string_append(line, nick);
+            g_string_append(line, message + 4);
+        } else {
+            g_string_append(line, nick);
+            g_string_append(line, ": ");
+            g_string_append(line, message);
+        }
+
+        win_save_print(window, '-', NULL, NO_DATE, 0, "", line->str);
+        g_string_free(line, TRUE);
+
+        if (wins_is_current(window)) {
+            win_update_virtual(window);
+        }
     }
 }
 
@@ -1621,86 +1635,90 @@ _ui_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
-    int num = wins_get_num(window);
-    char *my_nick = muc_get_room_nick(room_jid);
-
-    if (strcmp(nick, my_nick) != 0) {
-        if (g_strrstr(message, my_nick) != NULL) {
-            win_save_print(window, '-', NULL, NO_ME, COLOUR_ROOMMENTION, nick, message);
-        } else {
-            win_save_print(window, '-', NULL, NO_ME, 0, nick, message);
-        }
+    if (window == NULL) {
+        log_error("Room message received from %s, but no window open for %s", nick, room_jid);
     } else {
-        win_save_print(window, '-', NULL, 0, 0, nick, message);
-    }
-
-    // currently in groupchat window
-    if (wins_is_current(window)) {
-        status_bar_active(num);
-        win_update_virtual(window);
-
-    // not currenlty on groupchat window
-    } else {
-        status_bar_new(num);
-        cons_show_incoming_message(nick, num);
-        if (wins_get_current_num() == 0) {
-            ProfWin *current = wins_get_current();
-            win_update_virtual(current);
-        }
+        int num = wins_get_num(window);
+        char *my_nick = muc_get_room_nick(room_jid);
 
         if (strcmp(nick, my_nick) != 0) {
-            if (prefs_get_boolean(PREF_FLASH)) {
-                flash();
+            if (g_strrstr(message, my_nick) != NULL) {
+                win_save_print(window, '-', NULL, NO_ME, COLOUR_ROOMMENTION, nick, message);
+            } else {
+                win_save_print(window, '-', NULL, NO_ME, 0, nick, message);
             }
+        } else {
+            win_save_print(window, '-', NULL, 0, 0, nick, message);
         }
 
-        window->unread++;
-    }
+        // currently in groupchat window
+        if (wins_is_current(window)) {
+            status_bar_active(num);
+            win_update_virtual(window);
 
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
+        // not currenlty on groupchat window
+        } else {
+            status_bar_new(num);
+            cons_show_incoming_message(nick, num);
+            if (wins_get_current_num() == 0) {
+                ProfWin *current = wins_get_current();
+                win_update_virtual(current);
+            }
 
-    if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
-        if (prefs_get_boolean(PREF_BEEP)) {
-            beep();
+            if (strcmp(nick, my_nick) != 0) {
+                if (prefs_get_boolean(PREF_FLASH)) {
+                    flash();
+                }
+            }
+
+            window->unread++;
         }
 
-        gboolean notify = FALSE;
-        char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
-        if (g_strcmp0(room_setting, "on") == 0) {
-            notify = TRUE;
+        int ui_index = num;
+        if (ui_index == 10) {
+            ui_index = 0;
         }
-        if (g_strcmp0(room_setting, "mention") == 0) {
-            char *message_lower = g_utf8_strdown(message, -1);
-            char *nick_lower = g_utf8_strdown(nick, -1);
-            if (g_strrstr(message_lower, nick_lower) != NULL) {
+
+        if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
+            if (prefs_get_boolean(PREF_BEEP)) {
+                beep();
+            }
+
+            gboolean notify = FALSE;
+            char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+            if (g_strcmp0(room_setting, "on") == 0) {
                 notify = TRUE;
             }
-            g_free(message_lower);
-            g_free(nick_lower);
-        }
-        prefs_free_string(room_setting);
-
-        if (notify) {
-            gboolean is_current = wins_is_current(window);
-            if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
-                Jid *jidp = jid_create(room_jid);
-                if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
-                    notify_room_message(nick, jidp->localpart, ui_index, message);
-                } else {
-                    notify_room_message(nick, jidp->localpart, ui_index, NULL);
+            if (g_strcmp0(room_setting, "mention") == 0) {
+                char *message_lower = g_utf8_strdown(message, -1);
+                char *nick_lower = g_utf8_strdown(nick, -1);
+                if (g_strrstr(message_lower, nick_lower) != NULL) {
+                    notify = TRUE;
                 }
-                jid_destroy(jidp);
+                g_free(message_lower);
+                g_free(nick_lower);
+            }
+            prefs_free_string(room_setting);
+
+            if (notify) {
+                gboolean is_current = wins_is_current(window);
+                if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT)) ) {
+                    Jid *jidp = jid_create(room_jid);
+                    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT)) {
+                        notify_room_message(nick, jidp->localpart, ui_index, message);
+                    } else {
+                        notify_room_message(nick, jidp->localpart, ui_index, NULL);
+                    }
+                    jid_destroy(jidp);
+                }
             }
         }
-    }
 
-    ProfWin *current = wins_get_current();
-    if (!current->paged) {
-        win_move_to_end(current);
-        win_update_virtual(current);
+        ProfWin *current = wins_get_current();
+        if (!current->paged) {
+            win_move_to_end(current);
+            win_update_virtual(current);
+        }
     }
 }
 
@@ -1708,19 +1726,23 @@ static void
 _ui_room_subject(const char * const room_jid, const char * const subject)
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
-    int num = wins_get_num(window);
-
-    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
-    win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
-
-    // currently in groupchat window
-    if (wins_is_current(window)) {
-        status_bar_active(num);
-        win_update_virtual(window);
-
-    // not currenlty on groupchat window
+    if (window == NULL) {
+        log_error("Received room subject, but no window open for %s.", room_jid);
     } else {
-        status_bar_active(num);
+        int num = wins_get_num(window);
+
+        win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
+        win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
+
+        // currently in groupchat window
+        if (wins_is_current(window)) {
+            status_bar_active(num);
+            win_update_virtual(window);
+
+        // not currenlty on groupchat window
+        } else {
+            status_bar_active(num);
+        }
     }
 }
 
@@ -1728,19 +1750,23 @@ static void
 _ui_room_broadcast(const char * const room_jid, const char * const message)
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
-    int num = wins_get_num(window);
-
-    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room message: ");
-    win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", message);
-
-    // currently in groupchat window
-    if (wins_is_current(window)) {
-        status_bar_active(num);
-        win_update_virtual(window);
-
-    // not currenlty on groupchat window
+    if (window == NULL) {
+        log_error("Received room broadcast, but no window open for %s.", room_jid);
     } else {
-        status_bar_new(num);
+        int num = wins_get_num(window);
+
+        win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room message: ");
+        win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", message);
+
+        // currently in groupchat window
+        if (wins_is_current(window)) {
+            status_bar_active(num);
+            win_update_virtual(window);
+
+        // not currenlty on groupchat window
+        } else {
+            status_bar_new(num);
+        }
     }
 }
 
