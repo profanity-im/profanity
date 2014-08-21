@@ -279,7 +279,10 @@ _ui_contact_typing(const char * const barejid)
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING)) {
-        gboolean is_current = wins_is_current(window);
+        gboolean is_current = FALSE;
+        if (window != NULL) {
+            is_current = wins_is_current(window);
+        }
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT)) ) {
             PContact contact = roster_get_contact(barejid);
             char const *display_usr = NULL;
