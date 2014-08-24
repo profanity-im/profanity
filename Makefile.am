@@ -131,7 +131,7 @@ tests_testsuite_LDADD = -lcmocka
 
 man_MANS = $(man_sources)
 
-EXTRA_DIST = $(man_sources) $(themes_sources) $(script_sources) profrc.example
+EXTRA_DIST = $(man_sources) $(themes_sources) $(script_sources) profrc.example LICENSE.txt
 
 if INCLUDE_GIT_VERSION
 EXTRA_DIST += .git/HEAD .git/index
