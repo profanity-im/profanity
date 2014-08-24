@@ -38,16 +38,52 @@ AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
 AC_ARG_ENABLE([otr],
     [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
+AC_ARG_WITH([libxml2],
+    [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
     [AS_HELP_STRING([--with-xscreensaver], [use libXScrnSaver to determine idle time])])
 AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 
-### libstrophe
+### Select first existing xml library among expat and libxml2
+PARSER=""
+PARSER_LIBS=""
+PARSER_CFLAGS=""
+AS_IF([test "x$with_libxml2" != xyes],
+    [PKG_CHECK_MODULES([expat], [expat],
+        [PARSER_CFLAGS="$expat_CFLAGS"; PARSER_LIBS="$expat_LIBS"; PARSER="expat"],
+        [AC_CHECK_LIB([expat], [XML_ParserCreate],
+            [PARSER_LIBS="-lexpat"; PARSER="expat"],
+            AS_IF([test "x$with_libxml2" = xno],
+                [AC_MSG_ERROR([expat is required but does not exist])]))])
+    ])
+
+AS_IF([test "x$PARSER" = x -a "x$with_libxml2" != xno],
+    [PKG_CHECK_MODULES([libxml2], [libxml-2.0],
+        [PARSER_CFLAGS="$libxml2_CFLAGS"; PARSER_LIBS="$libxml2_LIBS"; PARSER="libxml2"],
+        AS_IF([test "x$with_libxml2" = xyes],
+            [AC_MSG_ERROR([libxml2 is required but does not exist])]))
+    ])
+
+AS_IF([test "x$PARSER" = x],
+    [AC_MSG_ERROR([either expat or libxml2 is required for profanity])])
+AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
+LIBS="$LIBS $PARSER_LIBS"
+
+### Check for libstrophe dependencies
+AC_CHECK_LIB([resolv], [res_query], [],
+    [AC_CHECK_LIB([resolv], [__res_query], [],
+        [AC_MSG_ERROR([libresolv is required for profanity])])])
+PKG_CHECK_MODULES([openssl], [openssl], [],
+    [AC_MSG_ERROR([openssl is required for profanity])])
+AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
+LIBS="$LIBS $openssl_LIBS"
+
+# TODO: autodetect of XML parser libstrophe linked with
 CFLAGS_RESTORE="$CFLAGS"
 CFLAGS="$CFLAGS $AM_CPPFLAGS"
-AC_CHECK_LIB([strophe], [main], [],
-    [AC_MSG_ERROR([libstrophe is required for profanity])])
+AC_CHECK_LIB([strophe], [parser_new], [],
+    [AC_MSG_ERROR([libstrophe linked with $PARSER is required for profanity])])
 CFLAGS="$CFLAGS_RESTORE"
 
 ### Check for ncurses library
@@ -200,6 +236,7 @@ echo "PACKAGE_STATUS : $PACKAGE_STATUS"
 echo "AM_CFLAGS      : $AM_CFLAGS"
 echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
 echo "LIBS           : $LIBS"
+echo "XML Parser     : $PARSER"
 echo "Install themes : $THEMES_INSTALL"
 echo "Themes path    : $THEMES_PATH"
 echo ""
