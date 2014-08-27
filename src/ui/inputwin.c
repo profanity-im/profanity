@@ -272,7 +272,7 @@ _clear_input(void)
 /*
  * Deal with command editing, return 1 if ch was an edit
  * key press: up, down, left, right or backspace
- * return 0 if it wasnt
+ * return 0 if it wasn't
  */
 static int
 _handle_edit(int result, const wint_t ch, char *input, int *size)

@@ -121,7 +121,7 @@ _notify_subscription(const char * const from)
 {
     GString *message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
-    _notify(message->str, 10000, "Incomming message");
+    _notify(message->str, 10000, "Incoming message");
     g_string_free(message, TRUE);
 }
 

@@ -514,7 +514,7 @@ muc_get_roster_ac(const char * const room)
 }
 
 /*
- * Set to TRUE when the rooms roster has been fully recieved
+ * Set to TRUE when the rooms roster has been fully received
  */
 void
 muc_set_roster_received(const char * const room)
@@ -527,7 +527,7 @@ muc_set_roster_received(const char * const room)
 }
 
 /*
- * Returns TRUE id the rooms roster has been fully recieved
+ * Returns TRUE id the rooms roster has been fully received
  */
 gboolean
 muc_get_roster_received(const char * const room)
