@@ -60,7 +60,7 @@
 #endif
 
 static void _cons_splash_logo(void);
-void _show_roster_contacts(GSList *list, gboolean show_groups);
+void _show_roster_contacts(GSList *list, gboolean show_groups, gboolean show_subscriptions);
 
 static void
 _cons_show_time(void)
@@ -1445,7 +1445,21 @@ _cons_show_roster_group(const char * const group, GSList *list)
         cons_show("No group named %s exists.", group);
     }
 
-    _show_roster_contacts(list, FALSE);
+    _show_roster_contacts(list, FALSE, TRUE);
+    if (wins_is_current(console)) {
+        win_update_virtual(console);
+    }
+    cons_alert();
+}
+
+static void
+_cons_show_roster_full(GSList *list)
+{
+    ProfWin *console = wins_get_console();
+    cons_show("");
+    cons_show("Roster:");
+
+    _show_roster_contacts(list, TRUE, TRUE);
     if (wins_is_current(console)) {
         win_update_virtual(console);
     }
@@ -1459,7 +1473,7 @@ _cons_show_roster(GSList *list)
     cons_show("");
     cons_show("Roster:");
 
-    _show_roster_contacts(list, TRUE);
+    _show_roster_contacts(list, FALSE, FALSE);
     if (wins_is_current(console)) {
         win_update_virtual(console);
     }
@@ -1560,7 +1574,7 @@ _cons_splash_logo(void)
 }
 
 void
-_show_roster_contacts(GSList *list, gboolean show_groups)
+_show_roster_contacts(GSList *list, gboolean show_groups, gboolean show_subscriptions)
 {
     ProfWin *console = wins_get_console();
     GSList *curr = list;
@@ -1585,25 +1599,25 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         win_save_vprint(console, '-', NULL, 0, presence_colour, "", title->str);
 
         g_string_free(title, TRUE);
+        if (show_subscriptions) {
+            win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Subscription : ");
+            GString *sub = g_string_new("");
+            sub = g_string_append(sub, p_contact_subscription(contact));
+            if (p_contact_pending_out(contact)) {
+                sub = g_string_append(sub, ", request sent");
+            }
+            if (presence_sub_request_exists(p_contact_barejid(contact))) {
+                sub = g_string_append(sub, ", request received");
+            }
+            if (p_contact_subscribed(contact)) {
+                presence_colour = COLOUR_SUBSCRIBED;
+            } else {
+                presence_colour = COLOUR_UNSUBSCRIBED;
+            }
+            win_save_vprint(console, '-', NULL, NO_DATE, presence_colour, "", "%s", sub->str);
 
-        win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Subscription : ");
-        GString *sub = g_string_new("");
-        sub = g_string_append(sub, p_contact_subscription(contact));
-        if (p_contact_pending_out(contact)) {
-            sub = g_string_append(sub, ", request sent");
+            g_string_free(sub, TRUE);
         }
-        if (presence_sub_request_exists(p_contact_barejid(contact))) {
-            sub = g_string_append(sub, ", request received");
-        }
-        if (p_contact_subscribed(contact)) {
-            presence_colour = COLOUR_SUBSCRIBED;
-        } else {
-            presence_colour = COLOUR_UNSUBSCRIBED;
-        }
-        win_save_vprint(console, '-', NULL, NO_DATE, presence_colour, "", "%s", sub->str);
-
-        g_string_free(sub, TRUE);
-
         if (show_groups) {
             GSList *groups = p_contact_groups(contact);
             if (groups != NULL) {
@@ -1688,6 +1702,7 @@ console_init_module(void)
     cons_navigation_help = _cons_navigation_help;
     cons_show_roster_group = _cons_show_roster_group;
     cons_show_roster = _cons_show_roster;
+    cons_show_roster_full = _cons_show_roster_full;
     cons_show_contacts = _cons_show_contacts;
     cons_alert = _cons_alert;
     cons_show_contact_online = _cons_show_contact_online;

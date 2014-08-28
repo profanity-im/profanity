@@ -219,6 +219,7 @@ void (*cons_show_word)(const char * const word);
 void (*cons_show_error)(const char * const cmd, ...);
 void (*cons_show_contacts)(GSList * list);
 void (*cons_show_roster)(GSList * list);
+void (*cons_show_roster_full)(GSList * list);
 void (*cons_show_roster_group)(const char * const group, GSList * list);
 void (*cons_show_wins)(void);
 void (*cons_show_status)(const char * const barejid);
