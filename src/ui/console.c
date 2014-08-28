@@ -1457,7 +1457,7 @@ _cons_show_roster(GSList *list)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
-    cons_show("Roster:");
+    cons_show("Roster: jid (nick) - subscription - groups");
 
     _show_roster_contacts(list, TRUE);
     if (wins_is_current(console)) {
@@ -1582,11 +1582,11 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         } else {
             presence_colour = win_presence_colour("offline");
         }
-        win_save_vprint(console, '-', NULL, 0, presence_colour, "", title->str);
+        win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", title->str);
 
         g_string_free(title, TRUE);
 
-        win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Subscription : ");
+        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " - ");
         GString *sub = g_string_new("");
         sub = g_string_append(sub, p_contact_subscription(contact));
         if (p_contact_pending_out(contact)) {
@@ -1600,14 +1600,19 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         } else {
             presence_colour = COLOUR_UNSUBSCRIBED;
         }
-        win_save_vprint(console, '-', NULL, NO_DATE, presence_colour, "", "%s", sub->str);
+
+        if (show_groups) {
+            win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", sub->str);
+        } else {
+            win_save_vprint(console, '-', NULL, NO_DATE, presence_colour, "", "%s", sub->str);
+        }
 
         g_string_free(sub, TRUE);
 
         if (show_groups) {
             GSList *groups = p_contact_groups(contact);
             if (groups != NULL) {
-                GString *groups_str = g_string_new("    Groups : ");
+                GString *groups_str = g_string_new(" - ");
                 while (groups != NULL) {
                     g_string_append(groups_str, groups->data);
                     if (g_slist_next(groups) != NULL) {
@@ -1615,9 +1620,10 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
                     }
                     groups = g_slist_next(groups);
                 }
-
-                cons_show(groups_str->str);
+                win_save_vprint(console, '-', NULL, NO_DATE, 0, "", "%s", groups_str->str);
                 g_string_free(groups_str, TRUE);
+            } else {
+                 win_save_print(console, '-', NULL, NO_DATE, 0, "", " ");
             }
         }
 
