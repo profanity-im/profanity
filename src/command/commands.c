@@ -1292,7 +1292,10 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         GSList *list = roster_get_contacts();
         cons_show_roster(list);
         return TRUE;
-
+    } else if (strcmp(args[0], "full") == 0) {
+        GSList *list = roster_get_contacts();
+        cons_show_roster_full(list);
+        return TRUE;
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
         char *jid = args[1];

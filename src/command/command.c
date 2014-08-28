@@ -171,6 +171,7 @@ static struct cmd_t command_defs[] =
           "The 'clearnick' command removes the current nickname, jid is required.",
           "",
           "Example : /roster (show your roster)",
+          "Example : /roster full (show your roster with groups and subscriptions)",
           "Example : /roster add someone@contacts.org (add the contact)",
           "Example : /roster add someone@contacts.org Buddy (add the contact with nickname 'Buddy')",
           "Example : /roster remove someone@contacts.org (remove the contact)",
@@ -1102,6 +1103,7 @@ cmd_init(void)
 
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, "add");
+    autocomplete_add(roster_ac, "full");
     autocomplete_add(roster_ac, "nick");
     autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
@@ -1718,6 +1720,10 @@ _roster_autocomplete(char *input, int *size)
         return result;
     }
     result = autocomplete_param_with_ac(input, size, "/roster", roster_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/roster full", roster_ac, TRUE);
     if (result != NULL) {
         return result;
     }
