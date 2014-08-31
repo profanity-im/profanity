@@ -2082,14 +2082,14 @@ _win_handle_page(const wint_t * const ch)
 
         // went past end, show full screen
         else if (*page_start >= y)
-            *page_start = y - page_space;
+            *page_start = y - page_space - 1;
 
         current->paged = 1;
         win_update_virtual(current);
     }
 
-    // switch off page if last line visible
-    if ((y-1) - *page_start == page_space) {
+    // switch off page if last line and space line visible
+    if ((y) - *page_start == page_space) {
         current->paged = 0;
     }
 }
