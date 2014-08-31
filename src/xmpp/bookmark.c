@@ -331,7 +331,6 @@ _bookmark_handle_result(xmpp_conn_t * const conn,
         item->autojoin = autojoin_val;
         bookmark_list = g_list_append(bookmark_list, item);
 
-        /* TODO: preference whether autojoin */
         if (autojoin_val) {
             if (autojoin_count < BOOKMARK_AUTOJOIN_MAX) {
                 Jid *room_jid;
