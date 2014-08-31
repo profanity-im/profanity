@@ -1480,8 +1480,6 @@ _cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_
 
     if (wins_is_current(console)) {
         ui_current_page_off();
-    }
-    if (wins_is_current(console)) {
         win_update_virtual(console);
     }
 }
@@ -1498,8 +1496,6 @@ _cons_show_contact_offline(PContact contact, char *resource, char *status)
 
     if (wins_is_current(console)) {
         ui_current_page_off();
-    }
-    if (wins_is_current(console)) {
         win_update_virtual(console);
     }
 }
