@@ -18,6 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * In addition, as a special exception, the copyright holders give permission to
+ * link the code of portions of this program with the OpenSSL library under
+ * certain conditions as described in each individual source file, and
+ * distribute linked combinations including the two.
+ *
+ * You must obey the GNU General Public License in all respects for all of the
+ * code used other than OpenSSL. If you modify file(s) with this exception, you
+ * may extend this exception to your version of the file(s), but you are not
+ * obligated to do so. If you do not wish to do so, delete this exception
+ * statement from your version. If you delete this exception statement from all
+ * source files in the program, then also delete it here.
+ *
  */
 
 #include "prof_config.h"
@@ -467,7 +479,6 @@ cmd_disconnect(gchar **args, struct cmd_help_t help)
         muc_clear_invites();
         chat_sessions_clear();
         ui_disconnected();
-        ui_current_page_off();
         free(jid);
     } else {
         cons_show("You are not currently connected.");
@@ -1224,7 +1235,6 @@ cmd_group(gchar **args, struct cmd_help_t help)
         if (p_contact_in_group(pcontact, group)) {
             const char *display_name = p_contact_name_or_jid(pcontact);
             ui_contact_already_in_group(display_name, group);
-            ui_current_page_off();
         } else {
             roster_send_add_to_group(group, pcontact);
         }
@@ -1256,7 +1266,6 @@ cmd_group(gchar **args, struct cmd_help_t help)
         if (!p_contact_in_group(pcontact, group)) {
             const char *display_name = p_contact_name_or_jid(pcontact);
             ui_contact_not_in_group(display_name, group);
-            ui_current_page_off();
         } else {
             roster_send_remove_from_group(group, pcontact);
         }
@@ -2839,7 +2848,6 @@ cmd_otr(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "warn") == 0) {
         gboolean result =  _cmd_set_boolean_preference(args[1], help,
             "OTR warning message", PREF_OTR_WARN);
-        ui_current_update_virtual();
         return result;
 
     } else if (strcmp(args[0], "libver") == 0) {

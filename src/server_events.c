@@ -18,6 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * In addition, as a special exception, the copyright holders give permission to
+ * link the code of portions of this program with the OpenSSL library under
+ * certain conditions as described in each individual source file, and
+ * distribute linked combinations including the two.
+ *
+ * You must obey the GNU General Public License in all respects for all of the
+ * code used other than OpenSSL. If you modify file(s) with this exception, you
+ * may extend this exception to your version of the file(s), but you are not
+ * obligated to do so. If you do not wish to do so, delete this exception
+ * statement from your version. If you delete this exception statement from all
+ * source files in the program, then also delete it here.
+ *
  */
 
 #include <string.h>
@@ -122,7 +134,6 @@ handle_lost_connection(void)
     muc_clear_invites();
     chat_sessions_clear();
     ui_disconnected();
-    ui_current_page_off();
 }
 
 void
@@ -130,7 +141,6 @@ handle_failed_login(void)
 {
     cons_show_error("Login failed.");
     log_info("Login failed");
-    ui_current_page_off();
 }
 
 void
@@ -138,28 +148,24 @@ handle_software_version_result(const char * const jid, const char * const  prese
     const char * const name, const char * const version, const char * const os)
 {
     cons_show_software_version(jid, presence, name, version, os);
-    ui_current_page_off();
 }
 
 void
 handle_disco_info(const char *from, GSList *identities, GSList *features)
 {
     cons_show_disco_info(from, identities, features);
-    ui_current_page_off();
 }
 
 void
 handle_room_list(GSList *rooms, const char *conference_node)
 {
     cons_show_room_list(rooms, conference_node);
-    ui_current_page_off();
 }
 
 void
 handle_disco_items(GSList *items, const char *jid)
 {
     cons_show_disco_items(items, jid);
-    ui_current_page_off();
 }
 
 void
@@ -170,7 +176,6 @@ handle_room_invite(jabber_invite_t invite_type,
     if (!muc_room_is_active(room) && !muc_invites_include(room)) {
         cons_show_room_invite(invitor, room, reason);
         muc_add_invite(room);
-        ui_current_page_off();
     }
 }
 
@@ -180,7 +185,6 @@ handle_room_broadcast(const char *const room_jid,
 {
     if (muc_get_roster_received(room_jid)) {
         ui_room_broadcast(room_jid, message);
-        ui_current_page_off();
     } else {
         muc_add_pending_broadcast(room_jid, message);
     }
@@ -192,7 +196,6 @@ handle_room_subject(const char * const room_jid, const char * const subject)
     muc_set_subject(room_jid, subject);
     if (muc_get_roster_received(room_jid)) {
         ui_room_subject(room_jid, subject);
-        ui_current_page_off();
     }
 }
 
@@ -201,7 +204,6 @@ handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
     ui_room_history(room_jid, nick, tv_stamp, message);
-    ui_current_page_off();
 }
 
 void
@@ -230,7 +232,6 @@ void
 handle_duck_result(const char * const result)
 {
     ui_duck_result(result);
-    ui_current_page_off();
 }
 
 void
@@ -369,14 +370,12 @@ void
 handle_typing(char *from)
 {
     ui_contact_typing(from);
-    ui_current_page_off();
 }
 
 void
 handle_gone(const char * const from)
 {
     ui_recipient_gone(from);
-    ui_current_page_off();
 }
 
 void
@@ -388,7 +387,6 @@ handle_subscription(const char *from, jabber_subscr_t type)
         cons_show("Received authorization request from %s", from);
         log_info("Received authorization request from %s", from);
         ui_print_system_msg_from_recipient(from, "Authorization request, type '/sub allow' to accept or '/sub deny' to reject");
-        ui_current_page_off();
         if (prefs_get_boolean(PREF_NOTIFY_SUB)) {
             notify_subscription(from);
         }
@@ -397,13 +395,11 @@ handle_subscription(const char *from, jabber_subscr_t type)
         cons_show("Subscription received from %s", from);
         log_info("Subscription received from %s", from);
         ui_print_system_msg_from_recipient(from, "Subscribed");
-        ui_current_page_off();
         break;
     case PRESENCE_UNSUBSCRIBED:
         cons_show("%s deleted subscription", from);
         log_info("%s deleted subscription", from);
         ui_print_system_msg_from_recipient(from, "Unsubscribed");
-        ui_current_page_off();
         break;
     default:
         /* unknown type */
@@ -500,7 +496,6 @@ handle_room_nick_change(const char * const room,
     const char * const nick)
 {
     ui_room_nick_change(room, nick);
-    ui_current_page_off();
 }
 
 void
@@ -519,7 +514,6 @@ handle_room_roster_complete(const char * const room)
     char *subject = muc_get_subject(room);
     if (subject != NULL) {
         ui_room_subject(room, subject);
-        ui_current_page_off();
     }
 
     GList *pending_broadcasts = muc_get_pending_broadcasts(room);
@@ -529,7 +523,6 @@ handle_room_roster_complete(const char * const room)
             ui_room_broadcast(room, curr->data);
             curr = g_list_next(curr);
         }
-        ui_current_page_off();
     }
 }
 
@@ -544,7 +537,6 @@ handle_room_member_presence(const char * const room,
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         if (g_strcmp0(muc_status_pref, "all") == 0) {
             ui_room_member_presence(room, nick, show, status);
-            ui_current_page_off();
         }
         prefs_free_string(muc_status_pref);
     }
@@ -560,7 +552,6 @@ handle_room_member_online(const char * const room, const char * const nick,
     char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     if (g_strcmp0(muc_status_pref, "none") != 0) {
         ui_room_member_online(room, nick, show, status);
-        ui_current_page_off();
     }
     prefs_free_string(muc_status_pref);
 }
@@ -574,7 +565,6 @@ handle_room_member_offline(const char * const room, const char * const nick,
     char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     if (g_strcmp0(muc_status_pref, "none") != 0) {
         ui_room_member_offline(room, nick);
-        ui_current_page_off();
     }
     prefs_free_string(muc_status_pref);
 }
@@ -584,7 +574,6 @@ handle_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick)
 {
     ui_room_member_nick_change(room, old_nick, nick);
-    ui_current_page_off();
 }
 
 void
@@ -592,7 +581,6 @@ handle_group_add(const char * const contact,
     const char * const group)
 {
     ui_group_added(contact, group);
-    ui_current_page_off();
 }
 
 void
@@ -600,21 +588,18 @@ handle_group_remove(const char * const contact,
     const char * const group)
 {
     ui_group_removed(contact, group);
-    ui_current_page_off();
 }
 
 void
 handle_roster_remove(const char * const barejid)
 {
     ui_roster_remove(barejid);
-    ui_current_page_off();
 }
 
 void
 handle_roster_add(const char * const barejid, const char * const name)
 {
     ui_roster_add(barejid, name);
-    ui_current_page_off();
 }
 
 void
@@ -622,7 +607,6 @@ handle_autoping_cancel(void)
 {
     prefs_set_autoping(0);
     cons_show_error("Server ping not supported, autoping disabled.");
-    ui_current_page_off();
 }
 
 void

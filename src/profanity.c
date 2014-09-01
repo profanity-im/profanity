@@ -18,6 +18,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Profanity.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * In addition, as a special exception, the copyright holders give permission to
+ * link the code of portions of this program with the OpenSSL library under
+ * certain conditions as described in each individual source file, and
+ * distribute linked combinations including the two.
+ *
+ * You must obey the GNU General Public License in all respects for all of the
+ * code used other than OpenSSL. If you modify file(s) with this exception, you
+ * may extend this exception to your version of the file(s), but you are not
+ * obligated to do so. If you do not wish to do so, delete this exception
+ * statement from your version. If you delete this exception statement from all
+ * source files in the program, then also delete it here.
+ *
  */
 #include "prof_config.h"
 
@@ -71,7 +83,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     char inp[INP_WIN_MAX];
     int size = 0;
 
-    ui_update_screen();
     plugins_on_start();
 
     char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
@@ -85,6 +96,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         prof_process_input(inp);
     }
     prefs_free_string(pref_connect_account);
+    ui_update();
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
@@ -107,11 +119,11 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             plugins_run_timed();
 
             ui_handle_special_keys(&ch, inp, size);
-            ui_update_screen();
 #ifdef PROF_HAVE_LIBOTR
             otr_poll();
 #endif
             jabber_process_events();
+            ui_update();
 
             ch = ui_get_char(inp, &size);
         }
@@ -210,7 +222,6 @@ prof_process_input(char *inp)
 
     ui_input_clear();
     roster_reset_search_attempts();
-    ui_current_page_off();
 
     return result;
 }

@@ -133,11 +133,6 @@ void _stub_ui_handle_recipient_not_found(const char * const recipient, const cha
 }
 
 static
-void _stub_ui_current_update_virtual(void)
-{
-}
-
-static
 void _mock_ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...)
 {
     check_expected(show_char);
@@ -269,12 +264,6 @@ void
 stub_ui_handle_recipient_error(void)
 {
     ui_handle_recipient_error = _stub_ui_handle_recipient_error;
-}
-
-void
-stub_ui_current_update_virtual(void)
-{
-    ui_current_update_virtual = _stub_ui_current_update_virtual;
 }
 
 void
