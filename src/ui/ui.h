@@ -60,7 +60,7 @@ void notifier_init_module(void);
 // ui startup and control
 void (*ui_init)(void);
 void (*ui_load_colours)(void);
-void (*ui_update_screen)(void);
+void (*ui_update)(void);
 void (*ui_close)(void);
 void (*ui_resize)(const int ch, const char * const input,
     const int size);
@@ -106,8 +106,6 @@ char* (*ui_current_recipient)(void);
 void (*ui_current_print_line)(const char * const msg, ...);
 void (*ui_current_print_formatted_line)(const char show_char, int attrs, const char * const msg, ...);
 void (*ui_current_error_line)(const char * const msg);
-void (*ui_current_page_off)(void);
-void (*ui_current_update_virtual)(void);
 
 void (*ui_otr_authenticating)(const char * const recipient);
 void (*ui_otr_authetication_waiting)(const char * const recipient);

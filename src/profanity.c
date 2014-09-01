@@ -82,8 +82,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     char inp[INP_WIN_MAX];
     int size = 0;
 
-    ui_update_screen();
-
     char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
     if (account_name != NULL) {
         char *cmd = "/connect";
@@ -95,6 +93,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         process_input(inp);
     }
     prefs_free_string(pref_connect_account);
+    ui_update();
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
@@ -115,11 +114,11 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             }
 
             ui_handle_special_keys(&ch, inp, size);
-            ui_update_screen();
 #ifdef HAVE_LIBOTR
             otr_poll();
 #endif
             jabber_process_events();
+            ui_update();
 
             ch = ui_get_char(inp, &size);
         }
@@ -218,7 +217,6 @@ process_input(char *inp)
 
     ui_input_clear();
     roster_reset_search_attempts();
-    ui_current_page_off();
 
     return result;
 }

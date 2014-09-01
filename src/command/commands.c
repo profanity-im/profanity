@@ -478,7 +478,6 @@ cmd_disconnect(gchar **args, struct cmd_help_t help)
         muc_clear_invites();
         chat_sessions_clear();
         ui_disconnected();
-        ui_current_page_off();
         free(jid);
     } else {
         cons_show("You are not currently connected.");
@@ -1233,7 +1232,6 @@ cmd_group(gchar **args, struct cmd_help_t help)
         if (p_contact_in_group(pcontact, group)) {
             const char *display_name = p_contact_name_or_jid(pcontact);
             ui_contact_already_in_group(display_name, group);
-            ui_current_page_off();
         } else {
             roster_send_add_to_group(group, pcontact);
         }
@@ -1265,7 +1263,6 @@ cmd_group(gchar **args, struct cmd_help_t help)
         if (!p_contact_in_group(pcontact, group)) {
             const char *display_name = p_contact_name_or_jid(pcontact);
             ui_contact_not_in_group(display_name, group);
-            ui_current_page_off();
         } else {
             roster_send_remove_from_group(group, pcontact);
         }
@@ -2827,7 +2824,6 @@ cmd_otr(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "warn") == 0) {
         gboolean result =  _cmd_set_boolean_preference(args[1], help,
             "OTR warning message", PREF_OTR_WARN);
-        ui_current_update_virtual();
         return result;
 
     } else if (strcmp(args[0], "libver") == 0) {

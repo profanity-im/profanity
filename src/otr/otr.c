@@ -306,8 +306,6 @@ _otr_keygen(ProfAccount *account)
     log_debug("Generating private key file %s for %s", keysfilename->str, jid);
     cons_show("Generating private key, this may take some time.");
     cons_show("Moving the mouse randomly around the screen may speed up the process!");
-    ui_current_page_off();
-    ui_update_screen();
     err = otrl_privkey_generate(user_state, keysfilename->str, account->jid, "xmpp");
     if (!err == GPG_ERR_NO_ERROR) {
         g_string_free(basedir, TRUE);
