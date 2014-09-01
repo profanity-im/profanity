@@ -1341,6 +1341,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
     }
 
     win_save_print(window, '-', NULL, 0, 0, from, message);
+    ui_switch_win(num);
 }
 
 static void
