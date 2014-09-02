@@ -1796,7 +1796,15 @@ cmd_room(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    cons_show("You said %s.", args[1]);
+    if (g_strcmp0(args[1], "accept") == 0) {
+        // check that we're in room, we're owner and room requires configuration
+
+    } else if (g_strcmp0(args[1], "cancel") == 0) {
+        // check that we're in room, we're owner and room requires configuration
+
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
     return TRUE;
 }
 
