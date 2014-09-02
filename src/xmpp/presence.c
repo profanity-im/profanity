@@ -708,6 +708,11 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         // handle roster complete
         } else if (!muc_get_roster_received(from_room)) {
             handle_room_roster_complete(from_room);
+
+            // room configuration required
+            if (stanza_muc_requires_config(stanza)) {
+                handle_room_requires_config(from_room);
+            }
         }
 
     // handle presence from room members

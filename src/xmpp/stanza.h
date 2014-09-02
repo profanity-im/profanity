@@ -198,6 +198,7 @@ gboolean stanza_is_muc_presence(xmpp_stanza_t * const stanza);
 gboolean stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     const char * const self_jid);
 gboolean stanza_is_room_nick_change(xmpp_stanza_t * const stanza);
+gboolean stanza_muc_requires_config(xmpp_stanza_t * const stanza);
 
 char * stanza_get_new_nick(xmpp_stanza_t * const stanza);
 

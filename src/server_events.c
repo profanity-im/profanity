@@ -450,6 +450,12 @@ handle_room_nick_change(const char * const room,
 }
 
 void
+handle_room_requires_config(const char * const room)
+{
+    ui_room_requires_config(room);
+}
+
+void
 handle_room_roster_complete(const char * const room)
 {
     if (muc_room_is_autojoin(room)) {
