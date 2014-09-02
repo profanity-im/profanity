@@ -1787,6 +1787,20 @@ cmd_decline(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_room(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    cons_show("You said %s.", args[1]);
+    return TRUE;
+}
+
+gboolean
 cmd_rooms(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();

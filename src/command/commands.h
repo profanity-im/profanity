@@ -104,6 +104,7 @@ gboolean cmd_prefs(gchar **args, struct cmd_help_t help);
 gboolean cmd_priority(gchar **args, struct cmd_help_t help);
 gboolean cmd_quit(gchar **args, struct cmd_help_t help);
 gboolean cmd_reconnect(gchar **args, struct cmd_help_t help);
+gboolean cmd_room(gchar **args, struct cmd_help_t help);
 gboolean cmd_rooms(gchar **args, struct cmd_help_t help);
 gboolean cmd_bookmark(gchar **args, struct cmd_help_t help);
 gboolean cmd_roster(gchar **args, struct cmd_help_t help);
