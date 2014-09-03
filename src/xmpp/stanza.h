@@ -74,6 +74,7 @@
 #define STANZA_NAME_PASSWORD "password"
 #define STANZA_NAME_CONFERENCE "conference"
 #define STANZA_NAME_VALUE "value"
+#define STANZA_NAME_DESTROY "destroy"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -203,6 +204,8 @@ gboolean stanza_muc_requires_config(xmpp_stanza_t * const stanza);
 
 char * stanza_get_new_nick(xmpp_stanza_t * const stanza);
 xmpp_stanza_t* stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx,
+    const char * const room_jid);
+xmpp_stanza_t* stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx,
     const char * const room_jid);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);

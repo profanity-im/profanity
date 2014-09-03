@@ -168,6 +168,16 @@ _iq_create_instant_room(const char * const room_jid)
     xmpp_stanza_release(iq);
 }
 
+static void
+_iq_destroy_instant_room(const char * const room_jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_instant_room_destroy_iq(ctx, room_jid);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
 static int
 _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
@@ -678,4 +688,5 @@ iq_init_module(void)
     iq_send_software_version = _iq_send_software_version;
     iq_set_autoping = _iq_set_autoping;
     iq_create_instant_room = _iq_create_instant_room;
+    iq_destroy_instant_room = _iq_destroy_instant_room;
 }
