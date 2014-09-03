@@ -424,6 +424,35 @@ stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char * const room,
 }
 
 xmpp_stanza_t *
+stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx, const char * const room_jid)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room_jid);
+    char *id = create_unique_id("leave");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_MUC_OWNER);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_type(x, "submit");
+    xmpp_stanza_set_ns(x, STANZA_NS_DATA);
+
+    xmpp_stanza_add_child(query, x);
+    xmpp_stanza_release(x);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
 stanza_create_presence(xmpp_ctx_t * const ctx)
 {
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);

@@ -141,6 +141,7 @@
 #define STANZA_NS_CHATSTATES "http://jabber.org/protocol/chatstates"
 #define STANZA_NS_MUC "http://jabber.org/protocol/muc"
 #define STANZA_NS_MUC_USER "http://jabber.org/protocol/muc#user"
+#define STANZA_NS_MUC_OWNER "http://jabber.org/protocol/muc#owner"
 #define STANZA_NS_CAPS "http://jabber.org/protocol/caps"
 #define STANZA_NS_PING "urn:xmpp:ping"
 #define STANZA_NS_LASTACTIVITY "jabber:iq:last"
@@ -201,6 +202,8 @@ gboolean stanza_is_room_nick_change(xmpp_stanza_t * const stanza);
 gboolean stanza_muc_requires_config(xmpp_stanza_t * const stanza);
 
 char * stanza_get_new_nick(xmpp_stanza_t * const stanza);
+xmpp_stanza_t* stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx,
+    const char * const room_jid);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);

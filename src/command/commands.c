@@ -1797,7 +1797,9 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[1], "accept") == 0) {
-        // check that we're in room, we're owner and room requires configuration
+        // TODO check that we're in room, we're owner and room requires configuration
+        char *room = ui_current_recipient();
+        iq_create_instant_room(room);
 
     } else if (g_strcmp0(args[1], "cancel") == 0) {
         // check that we're in room, we're owner and room requires configuration
