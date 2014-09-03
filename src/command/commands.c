@@ -65,6 +65,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
@@ -1796,19 +1797,49 @@ cmd_room(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (g_strcmp0(args[1], "accept") == 0) {
-        // TODO check that we're in room, we're owner and room requires configuration
-        char *room = ui_current_recipient();
-        iq_create_instant_room(room);
-
-    } else if (g_strcmp0(args[1], "cancel") == 0) {
-        // check that we're in room, we're owner and room requires configuration
-        char *room = ui_current_recipient();
-        iq_destroy_instant_room(room);
-
-    } else {
-        cons_show("Usage: %s", help.usage);
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command /room only usable in chat rooms.");
+        return TRUE;
     }
+
+    if (g_strcmp0(args[0], "config") != 0) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    if ((g_strcmp0(args[1], "accept") != 0) &&
+            (g_strcmp0(args[1], "cancel") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+    int num = wins_get_num(window);
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+    gboolean requires_config = muc_requires_config(room);
+    if (!requires_config) {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room ooes not require configuration.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[1], "accept") == 0) {
+        iq_confirm_instant_room(room);
+        muc_set_requires_config(room, FALSE);
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
+        cons_show("Room unlocked: %s (%d)", room, ui_index);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[1], "cancel") == 0) {
+        iq_destroy_instant_room(room);
+        return TRUE;
+    }
+
     return TRUE;
 }
 

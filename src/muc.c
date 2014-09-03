@@ -49,6 +49,7 @@ typedef struct _muc_room_t {
     char *password;
     char *subject;
     char *autocomplete_prefix;
+    gboolean pending_config;
     GList *pending_broadcasts;
     gboolean autojoin;
     gboolean pending_nick_change;
@@ -162,6 +163,7 @@ muc_join_room(const char * const room, const char * const nick,
     }
     new_room->subject = NULL;
     new_room->pending_broadcasts = NULL;
+    new_room->pending_config = FALSE;
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)p_contact_free);
     new_room->nick_ac = autocomplete_new();
@@ -183,6 +185,39 @@ muc_leave_room(const char * const room)
     if (rooms != NULL) {
         g_hash_table_remove(rooms, room);
     }
+}
+
+gboolean
+muc_requires_config(const char * const room)
+{
+    if (rooms == NULL) {
+        return FALSE;
+    }
+
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room == NULL) {
+        return FALSE;
+    }
+
+    return chat_room->pending_config;
+}
+
+void
+muc_set_requires_config(const char * const room, gboolean val)
+{
+    if (rooms == NULL) {
+        return;
+    }
+
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+
+    if (chat_room == NULL) {
+        return;
+    }
+
+    chat_room->pending_config = val;
+    return;
 }
 
 /*

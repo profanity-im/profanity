@@ -452,12 +452,14 @@ handle_room_nick_change(const char * const room,
 void
 handle_room_requires_config(const char * const room)
 {
+    muc_set_requires_config(room, TRUE);
     ui_room_requires_config(room);
 }
 
 void
 handle_room_destroy(const char * const room)
 {
+    muc_leave_room(room);
     ui_room_destroyed(room);
 }
 

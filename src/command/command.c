@@ -309,7 +309,7 @@ static struct cmd_t command_defs[] =
         { "/room config accept|cancel", "Room configuration.",
         { "/room config accept|cncel",
           "-------------------------",
-          "Accept or cancel room creation.",
+          "Accept or cancel default room configuration.",
           NULL } } },
 
     { "/rooms",

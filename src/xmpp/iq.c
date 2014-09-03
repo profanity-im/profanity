@@ -163,7 +163,7 @@ _iq_send_software_version(const char * const fulljid)
 }
 
 static void
-_iq_create_instant_room(const char * const room_jid)
+_iq_confirm_instant_room(const char * const room_jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -760,6 +760,6 @@ iq_init_module(void)
     iq_disco_items_request = _iq_disco_items_request;
     iq_send_software_version = _iq_send_software_version;
     iq_set_autoping = _iq_set_autoping;
-    iq_create_instant_room = _iq_create_instant_room;
+    iq_confirm_instant_room = _iq_confirm_instant_room;
     iq_destroy_instant_room = _iq_destroy_instant_room;
 }
