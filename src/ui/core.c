@@ -1596,6 +1596,10 @@ _ui_room_requires_config(const char * const room_jid)
         log_error("Received room config request, but no window open for %s.", room_jid);
     } else {
         int num = wins_get_num(window);
+        int ui_index = num;
+        if (ui_index == 10) {
+            ui_index = 0;
+        }
 
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room requires configuration, use '/room config accept' or '/room config cancel'");
 
@@ -1607,6 +1611,21 @@ _ui_room_requires_config(const char * const room_jid)
         } else {
             status_bar_new(num);
         }
+
+        cons_show("Room created, locked: %s (%d)", room_jid, ui_index);
+    }
+}
+
+static void
+_ui_room_destroyed(const char * const room_jid)
+{
+    ProfWin *window = wins_get_by_recipient(room_jid);
+    if (window == NULL) {
+        log_error("Received room destroy result, but no window open for %s.", room_jid);
+    } else {
+        int num = wins_get_num(window);
+        ui_close_win(num);
+        cons_show("Room destroyed: %s", room_jid);
     }
 }
 
@@ -2086,4 +2105,5 @@ ui_init_module(void)
     ui_swap_wins = _ui_swap_wins;
     ui_update = _ui_update;
     ui_room_requires_config = _ui_room_requires_config;
+    ui_room_destroyed = _ui_room_destroyed;
 }

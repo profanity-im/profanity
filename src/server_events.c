@@ -456,6 +456,12 @@ handle_room_requires_config(const char * const room)
 }
 
 void
+handle_room_destroy(const char * const room)
+{
+    ui_room_destroyed(room);
+}
+
+void
 handle_room_roster_complete(const char * const room)
 {
     if (muc_room_is_autojoin(room)) {
