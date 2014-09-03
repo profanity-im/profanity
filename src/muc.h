@@ -91,4 +91,7 @@ GList * muc_get_pending_broadcasts(const char * const room);
 void muc_autocomplete(char *input, int *size);
 void muc_reset_autocomplete(const char * const room);
 
+gboolean muc_requires_config(const char * const room);
+void muc_set_requires_config(const char * const room, gboolean val);
+
 #endif

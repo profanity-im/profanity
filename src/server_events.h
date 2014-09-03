@@ -69,6 +69,8 @@ void handle_contact_online(char *contact, Resource *resource,
 void handle_leave_room(const char * const room);
 void handle_room_nick_change(const char * const room,
     const char * const nick);
+void handle_room_requires_config(const char * const room);
+void handle_room_destroy(const char * const room);
 void handle_room_roster_complete(const char * const room);
 void handle_room_member_presence(const char * const room,
     const char * const nick, const char * const show,

@@ -73,6 +73,8 @@ static int _disco_items_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _destroy_room_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
     void * const userdata);
 
@@ -94,6 +96,8 @@ iq_add_handlers(void)
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _version_result_handler);
 
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _ping_get_handler);
+
+    HANDLE(NULL,                STANZA_TYPE_RESULT, _destroy_room_result_handler);
 
     if (prefs_get_autoping() != 0) {
         int millis = prefs_get_autoping() * 1000;
@@ -158,6 +162,30 @@ _iq_send_software_version(const char * const fulljid)
     xmpp_stanza_release(iq);
 }
 
+static void
+_iq_confirm_instant_room(const char * const room_jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_instant_room_request_iq(ctx, room_jid);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_destroy_instant_room(const char * const room_jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_instant_room_destroy_iq(ctx, room_jid);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _destroy_room_result_handler, id, NULL);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
 static int
 _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
@@ -165,8 +193,10 @@ _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
     if (id != NULL) {
+        log_debug("IQ error handler fired, id: %s.", id);
         log_error("IQ error received, id: %s.", id);
     } else {
+        log_debug("IQ error handler fired.");
         log_error("IQ error received.");
     }
 
@@ -179,6 +209,12 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
 {
     char *id = xmpp_stanza_get_id(stanza);
     char *type = xmpp_stanza_get_type(stanza);
+
+    if (id != NULL) {
+        log_debug("IQ pong handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ pong handler fired.");
+    }
 
     if (id != NULL && type != NULL) {
         // show warning if error
@@ -228,6 +264,14 @@ static int
 _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
+    char *id = xmpp_stanza_get_id(stanza);
+
+    if (id != NULL) {
+        log_debug("IQ version result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ version result handler fired.");
+    }
+
     const char *jid = xmpp_stanza_get_attribute(stanza, "from");
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
@@ -283,6 +327,12 @@ _ping_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *to = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TO);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
+    if (id != NULL) {
+        log_debug("IQ ping get handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ ping get handler fired.");
+    }
+
     if ((from == NULL) || (to == NULL)) {
         return 1;
     }
@@ -310,6 +360,12 @@ _version_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if (id != NULL) {
+        log_debug("IQ version get handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ version get handler fired.");
+    }
 
     if (from != NULL) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
@@ -370,7 +426,14 @@ _disco_items_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if (id != NULL) {
+        log_debug("IQ disco items get handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ disco items get handler fired.");
+    }
 
     if (from != NULL) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
@@ -401,6 +464,14 @@ _disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_t *incoming_query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     const char *node_str = xmpp_stanza_get_attribute(incoming_query, STANZA_ATTR_NODE);
 
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+
+    if (id != NULL) {
+        log_debug("IQ disco info get handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ disco info get handler fired.");
+    }
+
     if (from != NULL) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(response, STANZA_NAME_IQ);
@@ -419,6 +490,28 @@ _disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     }
 
     return 1;
+}
+
+static int
+_destroy_room_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+
+    if (id != NULL) {
+        log_debug("IQ destroy room result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ destroy room result handler fired.");
+    }
+
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (from == NULL) {
+        log_error("No from attribute for IQ destroy room result");
+    } else {
+        handle_room_destroy(from);
+    }
+
+    return 0;
 }
 
 static void
@@ -667,4 +760,6 @@ iq_init_module(void)
     iq_disco_items_request = _iq_disco_items_request;
     iq_send_software_version = _iq_send_software_version;
     iq_set_autoping = _iq_set_autoping;
+    iq_confirm_instant_room = _iq_confirm_instant_room;
+    iq_destroy_instant_room = _iq_destroy_instant_room;
 }

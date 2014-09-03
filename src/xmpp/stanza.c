@@ -424,6 +424,62 @@ stanza_create_room_leave_presence(xmpp_ctx_t *ctx, const char * const room,
 }
 
 xmpp_stanza_t *
+stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx, const char * const room_jid)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room_jid);
+    char *id = create_unique_id("leave");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_MUC_OWNER);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_type(x, "submit");
+    xmpp_stanza_set_ns(x, STANZA_NS_DATA);
+
+    xmpp_stanza_add_child(query, x);
+    xmpp_stanza_release(x);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
+stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx, const char * const room_jid)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room_jid);
+    char *id = create_unique_id("leave");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_MUC_OWNER);
+
+    xmpp_stanza_t *destroy = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(destroy, STANZA_NAME_DESTROY);
+
+    xmpp_stanza_add_child(query, destroy);
+    xmpp_stanza_release(destroy);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
 stanza_create_presence(xmpp_ctx_t * const ctx)
 {
     xmpp_stanza_t *presence = xmpp_stanza_new(ctx);
@@ -647,6 +703,52 @@ stanza_is_muc_presence(xmpp_stanza_t * const stanza)
     }
 
     return TRUE;
+}
+
+gboolean
+stanza_muc_requires_config(xmpp_stanza_t * const stanza)
+{
+    // no stanza, or not presence stanza
+    if ((stanza == NULL) || (g_strcmp0(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0)) {
+        return FALSE;
+    }
+
+    // muc user namespaced x element
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    if (x != NULL) {
+
+        // check for item element with owner affiliation
+        xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, "item");
+        if (item == NULL) {
+            return FALSE;
+        }
+        char *affiliation = xmpp_stanza_get_attribute(item, "affiliation");
+        if (g_strcmp0(affiliation, "owner") != 0) {
+            return FALSE;
+        }
+
+        // check for status code 110 and 201
+        gboolean has110 = FALSE;
+        gboolean has201 = FALSE;
+        xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
+        while (x_children != NULL) {
+            if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
+                char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
+                if (g_strcmp0(code, "110") == 0) {
+                    has110 = TRUE;
+                }
+                if (g_strcmp0(code, "201") == 0) {
+                    has201 = TRUE;
+                }
+            }
+            x_children = xmpp_stanza_get_next(x_children);
+        }
+
+        if (has110 && has201) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 gboolean

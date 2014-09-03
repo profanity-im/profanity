@@ -1594,6 +1594,47 @@ _ui_room_message(const char * const room_jid, const char * const nick,
 }
 
 static void
+_ui_room_requires_config(const char * const room_jid)
+{
+    ProfWin *window = wins_get_by_recipient(room_jid);
+    if (window == NULL) {
+        log_error("Received room config request, but no window open for %s.", room_jid);
+    } else {
+        int num = wins_get_num(window);
+        int ui_index = num;
+        if (ui_index == 10) {
+            ui_index = 0;
+        }
+
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room requires configuration, use '/room config accept' or '/room config cancel'");
+
+        // currently in groupchat window
+        if (wins_is_current(window)) {
+            status_bar_active(num);
+
+        // not currenlty on groupchat window
+        } else {
+            status_bar_new(num);
+        }
+
+        cons_show("Room created, locked: %s (%d)", room_jid, ui_index);
+    }
+}
+
+static void
+_ui_room_destroyed(const char * const room_jid)
+{
+    ProfWin *window = wins_get_by_recipient(room_jid);
+    if (window == NULL) {
+        log_error("Received room destroy result, but no window open for %s.", room_jid);
+    } else {
+        int num = wins_get_num(window);
+        ui_close_win(num);
+        cons_show("Room destroyed: %s", room_jid);
+    }
+}
+
+static void
 _ui_room_subject(const char * const room_jid, const char * const subject)
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
@@ -2089,4 +2130,6 @@ ui_init_module(void)
     ui_status_bar_active = _ui_status_bar_active;
     ui_status_bar_new = _ui_status_bar_new;
     ui_update = _ui_update;
+    ui_room_requires_config = _ui_room_requires_config;
+    ui_room_destroyed = _ui_room_destroyed;
 }
