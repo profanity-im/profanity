@@ -75,6 +75,8 @@ static int _disco_items_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _destroy_room_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _manual_pong_handler(xmpp_conn_t *const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
     void * const userdata);
 
@@ -186,6 +188,21 @@ _iq_destroy_instant_room(const char * const room_jid)
     xmpp_stanza_release(iq);
 }
 
+static void
+_iq_send_ping(const char * const target)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_ping_iq(ctx, target);
+    char *id = xmpp_stanza_get_id(iq);
+
+    GDateTime *now = g_date_time_new_now_local();
+    xmpp_id_handler_add(conn, _manual_pong_handler, id, now);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
 static int
 _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
@@ -241,13 +258,33 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
+_manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    GDateTime *sent = (GDateTime *)userdata;
+    GDateTime *now = g_date_time_new_now_local();
+
+    GTimeSpan elapsed = g_date_time_difference(now, sent);
+    int elapsed_millis = elapsed / 1000;
+
+    g_date_time_unref(sent);
+    g_date_time_unref(now);
+
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    handle_ping_result(from, elapsed_millis);
+
+    return 0;
+}
+
+static int
 _ping_timed_handler(xmpp_conn_t * const conn, void * const userdata)
 {
     xmpp_ctx_t *ctx = (xmpp_ctx_t *)userdata;
 
     if (jabber_get_connection_status() == JABBER_CONNECTED) {
 
-        xmpp_stanza_t *iq = stanza_create_ping_iq(ctx);
+        xmpp_stanza_t *iq = stanza_create_ping_iq(ctx, NULL);
         char *id = xmpp_stanza_get_id(iq);
 
         // add pong handler
@@ -762,4 +799,5 @@ iq_init_module(void)
     iq_set_autoping = _iq_set_autoping;
     iq_confirm_instant_room = _iq_confirm_instant_room;
     iq_destroy_instant_room = _iq_destroy_instant_room;
+    iq_send_ping = _iq_send_ping;
 }

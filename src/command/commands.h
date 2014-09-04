@@ -125,5 +125,6 @@ gboolean cmd_wins(gchar **args, struct cmd_help_t help);
 gboolean cmd_xa(gchar **args, struct cmd_help_t help);
 gboolean cmd_alias(gchar **args, struct cmd_help_t help);
 gboolean cmd_xmlconsole(gchar **args, struct cmd_help_t help);
+gboolean cmd_ping(gchar **args, struct cmd_help_t help);
 
 #endif

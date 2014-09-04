@@ -723,6 +723,15 @@ static struct cmd_t command_defs[] =
           "A value of 0 will switch off autopinging the server.",
           NULL } } },
 
+    { "/ping",
+        cmd_ping, parse_args, 0, 1, NULL,
+        { "/ping [target]", "Send ping IQ request.",
+        { "/ping [rarget]",
+          "--------------",
+          "Sends an IQ ping stanza to the specificed target.",
+          "If no target is supplied, your chat server will be used.",
+          NULL } } },
+
     { "/autoaway",
         cmd_autoaway, parse_args_with_freetext, 2, 2, &cons_autoaway_setting,
         { "/autoaway setting value", "Set auto idle/away properties.",
@@ -1628,7 +1637,7 @@ _cmd_complete_parameters(char *input, int *size)
             }
         }
 
-        gchar *resource_choices[] = { "/caps", "/software" };
+        gchar *resource_choices[] = { "/caps", "/software", "/ping" };
         for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {
             result = autocomplete_param_with_func(input, size, resource_choices[i],
                 roster_find_resource);

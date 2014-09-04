@@ -579,11 +579,14 @@ stanza_contains_chat_state(xmpp_stanza_t *stanza)
 }
 
 xmpp_stanza_t *
-stanza_create_ping_iq(xmpp_ctx_t *ctx)
+stanza_create_ping_iq(xmpp_ctx_t *ctx, const char * const target)
 {
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    if (target != NULL) {
+        xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, target);
+    }
     char *id = create_unique_id("ping");
     xmpp_stanza_set_id(iq, id);
     free(id);
