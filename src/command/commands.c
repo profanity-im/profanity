@@ -1823,7 +1823,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
     gboolean requires_config = muc_requires_config(room);
     if (!requires_config) {
-        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room ooes not require configuration.");
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
         return TRUE;
     }
 
