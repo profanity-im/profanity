@@ -2577,6 +2577,26 @@ cmd_autoping(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_ping(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currenlty connected.");
+        return TRUE;
+    }
+
+    iq_send_ping(args[0]);
+
+    if (args[0] == NULL) {
+        cons_show("Pinged server...");
+    } else {
+        cons_show("Pinged %s...", args[0]);
+    }
+    return TRUE;
+}
+
+gboolean
 cmd_autoaway(gchar **args, struct cmd_help_t help)
 {
     char *setting = args[0];

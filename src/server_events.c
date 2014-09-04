@@ -579,3 +579,13 @@ handle_xmpp_stanza(const char * const msg)
 {
     ui_handle_stanza(msg);
 }
+
+void
+handle_ping_result(const char * const from, int millis)
+{
+    if (from == NULL) {
+        cons_show("Ping response from server: %dms.", millis);
+    } else {
+        cons_show("Ping response from %s: %dms.", from, millis);
+    }
+}
