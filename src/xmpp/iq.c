@@ -75,6 +75,8 @@ static int _disco_items_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _destroy_room_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_config_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
@@ -98,8 +100,6 @@ iq_add_handlers(void)
     HANDLE(STANZA_NS_VERSION,   STANZA_TYPE_RESULT, _version_result_handler);
 
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _ping_get_handler);
-
-    HANDLE(NULL,                STANZA_TYPE_RESULT, _destroy_room_result_handler);
 
     if (prefs_get_autoping() != 0) {
         int millis = prefs_get_autoping() * 1000;
@@ -194,6 +194,10 @@ _iq_request_room_config_form(const char * const room_jid)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_room_config_request_iq(ctx, room_jid);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_config_handler, id, NULL);
+
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -566,6 +570,32 @@ _destroy_room_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
         log_error("No from attribute for IQ destroy room result");
     } else {
         handle_room_destroy(from);
+    }
+
+    return 0;
+}
+
+static int
+_room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+
+    if (id != NULL) {
+        log_debug("IQ room config handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ room config handler fired.");
+    }
+
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (from == NULL) {
+        log_error("No from attribute for IQ destroy room result");
+    } else {
+        // get form
+
+
+
+//        handle_room_configure(from);
     }
 
     return 0;
