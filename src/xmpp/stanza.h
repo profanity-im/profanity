@@ -207,6 +207,10 @@ xmpp_stanza_t* stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx,
     const char * const room_jid);
 xmpp_stanza_t* stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx,
     const char * const room_jid);
+xmpp_stanza_t* stanza_create_room_config_request_iq(xmpp_ctx_t *ctx,
+    const char * const room_jid);
+xmpp_stanza_t* stanza_create_room_config_cancel_iq(xmpp_ctx_t *ctx,
+    const char * const room_jid);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);

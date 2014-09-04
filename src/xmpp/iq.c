@@ -189,6 +189,26 @@ _iq_destroy_instant_room(const char * const room_jid)
 }
 
 static void
+_iq_request_room_config_form(const char * const room_jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_config_request_iq(ctx, room_jid);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_config_cancel(const char * const room_jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, room_jid);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
 _iq_send_ping(const char * const target)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -800,4 +820,6 @@ iq_init_module(void)
     iq_confirm_instant_room = _iq_confirm_instant_room;
     iq_destroy_instant_room = _iq_destroy_instant_room;
     iq_send_ping = _iq_send_ping;
+    iq_request_room_config_form = _iq_request_room_config_form;
+    iq_room_config_cancel = _iq_room_config_cancel;
 }

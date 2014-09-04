@@ -306,10 +306,13 @@ static struct cmd_t command_defs[] =
 
     { "/room",
         cmd_room, parse_args, 2, 2, NULL,
-        { "/room config accept|cancel", "Room configuration.",
-        { "/room config accept|cncel",
-          "-------------------------",
-          "Accept or cancel default room configuration.",
+        { "/room config accept|destroy|edit|cancel", "Room configuration.",
+        { "/room config accept|destroy|edit|cancel",
+          "---------------------------------------",
+          "config accept  - Accept default room configuration.",
+          "config destroy - Cancel default room configuration.",
+          "config edit    - Edit room configuration.",
+          "config cancel  - Cancel room configuration.",
           NULL } } },
 
     { "/rooms",
@@ -1210,6 +1213,8 @@ cmd_init(void)
 
     room_config_ac = autocomplete_new();
     autocomplete_add(room_config_ac, "accept");
+    autocomplete_add(room_config_ac, "destroy");
+    autocomplete_add(room_config_ac, "edit");
     autocomplete_add(room_config_ac, "cancel");
 
     cmd_history_init();

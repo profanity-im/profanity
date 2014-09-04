@@ -1809,7 +1809,9 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if ((g_strcmp0(args[1], "accept") != 0) &&
-            (g_strcmp0(args[1], "cancel") != 0)) {
+            (g_strcmp0(args[1], "cancel") != 0) &&
+            (g_strcmp0(args[1], "destroy") != 0) &&
+            (g_strcmp0(args[1], "edit") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
@@ -1821,22 +1823,33 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (ui_index == 10) {
         ui_index = 0;
     }
-    gboolean requires_config = muc_requires_config(room);
-    if (!requires_config) {
-        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
+
+    if (g_strcmp0(args[1], "accept") == 0) {
+        gboolean requires_config = muc_requires_config(room);
+        if (!requires_config) {
+            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
+            return TRUE;
+        } else {
+            iq_confirm_instant_room(room);
+            muc_set_requires_config(room, FALSE);
+            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
+            cons_show("Room unlocked: %s (%d)", room, ui_index);
+            return TRUE;
+        }
+    }
+
+    if (g_strcmp0(args[1], "destroy") == 0) {
+        iq_destroy_instant_room(room);
         return TRUE;
     }
 
-    if (g_strcmp0(args[1], "accept") == 0) {
-        iq_confirm_instant_room(room);
-        muc_set_requires_config(room, FALSE);
-        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
-        cons_show("Room unlocked: %s (%d)", room, ui_index);
+    if (g_strcmp0(args[1], "edit") == 0) {
+        iq_request_room_config_form(room);
         return TRUE;
     }
 
     if (g_strcmp0(args[1], "cancel") == 0) {
-        iq_destroy_instant_room(room);
+        iq_room_config_cancel(room);
         return TRUE;
     }
 

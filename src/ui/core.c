@@ -1601,7 +1601,8 @@ _ui_room_requires_config(const char * const room_jid)
             ui_index = 0;
         }
 
-        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room requires configuration, use '/room config accept' or '/room config cancel'");
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
+            "Room requires configuration, use '/room config accept' or '/room config destroy'");
 
         // currently in groupchat window
         if (wins_is_current(window)) {
