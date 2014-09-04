@@ -728,6 +728,7 @@ static struct cmd_t command_defs[] =
         { "/ping [rarget]",
           "--------------",
           "Sends an IQ ping stanza to the specificed target.",
+          "If no target is supplied, your chat server will be used.",
           NULL } } },
 
     { "/autoaway",
