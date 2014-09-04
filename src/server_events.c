@@ -464,6 +464,23 @@ handle_room_destroy(const char * const room)
 }
 
 void
+handle_room_configure(const char * const room, DataForm *form)
+{
+    cons_show("Recieved configuration form for %s", room);
+    if (form->form_type != NULL) {
+        cons_show("Form type: %s", form->form_type);
+    } else {
+        cons_show("No form type specified");
+    }
+}
+
+void
+handle_room_configuration_form_error(void)
+{
+    cons_show("Error parsing room configuration form.");
+}
+
+void
 handle_room_roster_complete(const char * const room)
 {
     if (muc_room_is_autojoin(room)) {

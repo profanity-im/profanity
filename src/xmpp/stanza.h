@@ -36,6 +36,7 @@
 #define XMPP_STANZA_H
 
 #include <strophe.h>
+#include <xmpp/xmpp.h>
 
 #define STANZA_NAME_ACTIVE "active"
 #define STANZA_NAME_INACTIVE "inactive"
@@ -153,16 +154,6 @@
 #define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
-
-typedef struct form_field_t {
-    char *var;
-    GSList *values;
-} FormField;
-
-typedef struct data_form_t {
-    char *form_type;
-    GSList *fields;
-} DataForm;
 
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 

@@ -95,5 +95,7 @@ void handle_presence_error(const char *from, const char * const type,
     const char *err_msg);
 void handle_xmpp_stanza(const char * const msg);
 void handle_ping_result(const char * const from, int millis);
+void handle_room_configure(const char * const room, DataForm *form);
+void handle_room_configuration_form_error(void);
 
 #endif

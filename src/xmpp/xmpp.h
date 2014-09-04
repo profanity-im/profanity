@@ -86,6 +86,16 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
+typedef struct form_field_t {
+    char *var;
+    GSList *values;
+} FormField;
+
+typedef struct data_form_t {
+    char *form_type;
+    GSList *fields;
+} DataForm;
+
 void jabber_init_module(void);
 void bookmark_init_module(void);
 void capabilities_init_module(void);
