@@ -730,25 +730,16 @@ stanza_muc_requires_config(xmpp_stanza_t * const stanza)
             return FALSE;
         }
 
-        // check for status code 110 and 201
-        gboolean has110 = FALSE;
-        gboolean has201 = FALSE;
+        // check for status code 201
         xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
         while (x_children != NULL) {
             if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
                 char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
-                if (g_strcmp0(code, "110") == 0) {
-                    has110 = TRUE;
-                }
                 if (g_strcmp0(code, "201") == 0) {
-                    has201 = TRUE;
+                    return TRUE;
                 }
             }
             x_children = xmpp_stanza_get_next(x_children);
-        }
-
-        if (has110 && has201) {
-            return TRUE;
         }
     }
     return FALSE;
