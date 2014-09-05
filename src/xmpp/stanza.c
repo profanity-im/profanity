@@ -1087,23 +1087,39 @@ stanza_create_form(xmpp_stanza_t * const stanza)
 
     //handle fields
     while (child != NULL) {
+        char *label = xmpp_stanza_get_attribute(child, "label");
+        char *type = xmpp_stanza_get_attribute(child, "type");
         char *var = xmpp_stanza_get_attribute(child, "var");
 
         // handle FORM_TYPE
         if (g_strcmp0(var, "FORM_TYPE") == 0) {
             xmpp_stanza_t *value = xmpp_stanza_get_child_by_name(child, "value");
             char *value_text = xmpp_stanza_get_text(value);
-            result->form_type = strdup(value_text);
-            xmpp_free(ctx, value_text);
+            if (value_text != NULL) {
+                result->form_type = strdup(value_text);
+                xmpp_free(ctx, value_text);
+            }
 
         // handle regular fields
         } else {
             FormField *field = malloc(sizeof(FormField));
-            field->var = strdup(var);
-            field->values = NULL;
-            xmpp_stanza_t *value = xmpp_stanza_get_children(child);
+            field->label = NULL;
+            field->type = NULL;
+            field->var = NULL;
+
+            if (label != NULL) {
+                field->label = strdup(label);
+            }
+            if (type != NULL) {
+                field->type = strdup(type);
+            }
+            if (var != NULL) {
+                field->var = strdup(var);
+            }
 
             // handle values
+            field->values = NULL;
+            xmpp_stanza_t *value = xmpp_stanza_get_children(child);
             while (value != NULL) {
                 char *text = xmpp_stanza_get_text(value);
                 if (text != NULL) {

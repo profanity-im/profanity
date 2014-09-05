@@ -87,6 +87,8 @@ typedef struct disco_identity_t {
 } DiscoIdentity;
 
 typedef struct form_field_t {
+    char *label;
+    char *type;
     char *var;
     GSList *values;
 } FormField;

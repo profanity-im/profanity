@@ -477,8 +477,17 @@ handle_room_configure(const char * const room, DataForm *form)
     GSList *curr = fields;
     while (curr != NULL) {
         FormField *field = curr->data;
+
+        if (field->label != NULL) {
+            cons_show("  Field: %s", field->label);
+        } else {
+            cons_show("  Field:");
+        }
+        if (field->type != NULL) {
+            cons_show("    Type: %s", field->type);
+        }
         if (field->var != NULL) {
-            cons_show("  Field: %s", field->var);
+            cons_show("    var: %s", field->var);
         }
 
         curr = g_slist_next(curr);
