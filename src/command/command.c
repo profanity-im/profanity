@@ -736,7 +736,7 @@ static struct cmd_t command_defs[] =
         { "/autoaway setting value", "Set auto idle/away properties.",
         { "/autoaway setting value",
           "-----------------------",
-          "'setting' may be one of 'mode', 'minutes', 'message' or 'check', with the following values:",
+          "'setting' may be one of 'mode', 'time', 'message' or 'check', with the following values:",
           "",
           "mode    : idle - Sends idle time, whilst your status remains online.",
           "          away - Sends an away presence.",
