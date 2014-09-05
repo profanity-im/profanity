@@ -472,6 +472,17 @@ handle_room_configure(const char * const room, DataForm *form)
     } else {
         cons_show("No form type specified");
     }
+
+    GSList *fields = form->fields;
+    GSList *curr = fields;
+    while (curr != NULL) {
+        FormField *field = curr->data;
+        if (field->var != NULL) {
+            cons_show("  Field: %s", field->var);
+        }
+
+        curr = g_slist_next(curr);
+    }
 }
 
 void
