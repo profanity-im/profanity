@@ -175,4 +175,6 @@ void (*roster_send_remove_from_group)(const char * const group, PContact contact
 void (*roster_send_add_new)(const char * const barejid, const char * const name);
 void (*roster_send_remove)(const char * const barejid);
 
+void (*form_destroy)(DataForm *form);
+
 #endif

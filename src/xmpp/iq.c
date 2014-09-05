@@ -52,6 +52,7 @@
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
+#include "xmpp/form.h"
 #include "roster_list.h"
 #include "xmpp/xmpp.h"
 
@@ -613,7 +614,7 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             return 0;
         }
 
-        DataForm *form = stanza_create_form(x);
+        DataForm *form = form_create(x);
         handle_room_configure(from, form);
     }
 
@@ -766,7 +767,7 @@ _disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
 
         xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
         if (softwareinfo != NULL) {
-            DataForm *form = stanza_create_form(softwareinfo);
+            DataForm *form = form_create(softwareinfo);
             FormField *formField = NULL;
 
             if (g_strcmp0(form->form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
@@ -788,7 +789,7 @@ _disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
                 }
             }
 
-            stanza_destroy_form(form);
+            form_destroy(form);
         }
 
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);

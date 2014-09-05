@@ -46,8 +46,6 @@
 
 #include "muc.h"
 
-static int _field_compare(FormField *f1, FormField *f2);
-
 #if 0
 xmpp_stanza_t *
 stanza_create_bookmarks_pubsub_request(xmpp_ctx_t *ctx)
@@ -1071,95 +1069,6 @@ stanza_get_error_message(xmpp_stanza_t *stanza)
     return strdup("unknown");
 }
 
-DataForm *
-stanza_create_form(xmpp_stanza_t * const stanza)
-{
-    DataForm *result = NULL;
-    xmpp_ctx_t *ctx = connection_get_ctx();
-
-    xmpp_stanza_t *child = xmpp_stanza_get_children(stanza);
-
-    if (child != NULL) {
-        result = malloc(sizeof(DataForm));
-        result->form_type = NULL;
-        result->fields = NULL;
-    }
-
-    //handle fields
-    while (child != NULL) {
-        char *label = xmpp_stanza_get_attribute(child, "label");
-        char *type = xmpp_stanza_get_attribute(child, "type");
-        char *var = xmpp_stanza_get_attribute(child, "var");
-
-        // handle FORM_TYPE
-        if (g_strcmp0(var, "FORM_TYPE") == 0) {
-            xmpp_stanza_t *value = xmpp_stanza_get_child_by_name(child, "value");
-            char *value_text = xmpp_stanza_get_text(value);
-            if (value_text != NULL) {
-                result->form_type = strdup(value_text);
-                xmpp_free(ctx, value_text);
-            }
-
-        // handle regular fields
-        } else {
-            FormField *field = malloc(sizeof(FormField));
-            field->label = NULL;
-            field->type = NULL;
-            field->var = NULL;
-
-            if (label != NULL) {
-                field->label = strdup(label);
-            }
-            if (type != NULL) {
-                field->type = strdup(type);
-            }
-            if (var != NULL) {
-                field->var = strdup(var);
-            }
-
-            // handle values
-            field->values = NULL;
-            xmpp_stanza_t *value = xmpp_stanza_get_children(child);
-            while (value != NULL) {
-                char *text = xmpp_stanza_get_text(value);
-                if (text != NULL) {
-                    field->values = g_slist_insert_sorted(field->values, strdup(text), (GCompareFunc)strcmp);
-                    xmpp_free(ctx, text);
-                }
-                value = xmpp_stanza_get_next(value);
-            }
-
-            result->fields = g_slist_insert_sorted(result->fields, field, (GCompareFunc)_field_compare);
-        }
-
-        child = xmpp_stanza_get_next(child);
-    }
-
-    return result;
-}
-
-void
-stanza_destroy_form(DataForm *form)
-{
-    if (form != NULL) {
-        if (form->fields != NULL) {
-            GSList *curr_field = form->fields;
-            while (curr_field != NULL) {
-                FormField *field = curr_field->data;
-                free(field->var);
-                if ((field->values) != NULL) {
-                    g_slist_free_full(field->values, free);
-                }
-                curr_field = curr_field->next;
-            }
-            g_slist_free_full(form->fields, free);
-        }
-
-        free(form->form_type);
-        free(form);
-    }
-}
-
 void
 stanza_attach_priority(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence,
     const int pri)
@@ -1262,10 +1171,4 @@ stanza_get_presence_string_from_type(resource_presence_t presence_type)
         default:
             return NULL;
     }
-}
-
-static int
-_field_compare(FormField *f1, FormField *f2)
-{
-    return strcmp(f1->var, f2->var);
 }

@@ -47,6 +47,7 @@
 #include "common.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
+#include "xmpp/form.h"
 
 static GHashTable *capabilities;
 
@@ -137,7 +138,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     GSList *form_names = NULL;
     DataForm *form = NULL;
     FormField *field = NULL;
-    GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)stanza_destroy_form);
+    GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)form_destroy);
 
     GString *s = g_string_new("");
 
@@ -170,7 +171,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
             features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (strcmp(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
-                form = stanza_create_form(child);
+                form = form_create(child);
                 form_names = g_slist_insert_sorted(form_names, g_strdup(form->form_type), (GCompareFunc)strcmp);
                 g_hash_table_insert(forms, g_strdup(form->form_type), form);
             }
