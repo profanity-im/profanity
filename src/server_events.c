@@ -468,24 +468,71 @@ handle_room_configure(const char * const room, DataForm *form)
 {
     cons_show("Recieved configuration form for %s", room);
 
+    if (form->type != NULL) {
+        cons_show("  Type: %s", form->type);
+    }
+    if (form->title != NULL) {
+        cons_show("  Title: %s", form->title);
+    }
+    if (form->instructions != NULL) {
+        cons_show("  Instructions: %s", form->instructions);
+    }
+
     GSList *fields = form->fields;
-    GSList *curr = fields;
-    while (curr != NULL) {
-        FormField *field = curr->data;
+    GSList *curr_field = fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        cons_show("  Field:");
 
         if (field->label != NULL) {
-            cons_show("  Field: %s", field->label);
-        } else {
-            cons_show("  Field:");
+            cons_show("    Label: %s", field->label);
         }
         if (field->type != NULL) {
             cons_show("    Type: %s", field->type);
         }
         if (field->var != NULL) {
-            cons_show("    var: %s", field->var);
+            cons_show("    Var: %s", field->var);
+        }
+        if (field->description != NULL) {
+            cons_show("    Description: %s", field->description);
         }
 
-        curr = g_slist_next(curr);
+        if (field->required) {
+            cons_show("    Required: TRUE");
+        } else {
+            cons_show("    Required: FALSE");
+        }
+
+        GSList *values = field->values;
+        GSList *curr_value = values;
+        if (curr_value != NULL) {
+            cons_show("    Values:");
+        }
+        while (curr_value != NULL) {
+            char *value = curr_value->data;
+            cons_show("      %s", value);
+
+            curr_value = g_slist_next(curr_value);
+        }
+
+        GSList *options = field->options;
+        GSList *curr_option = options;
+        if (curr_option != NULL) {
+            cons_show("    Options:");
+        }
+        while (curr_option != NULL) {
+            FormOption *option = curr_option->data;
+            if (option->label != NULL) {
+                cons_show("      Label: %s", option->label);
+            }
+            if (option->value != NULL) {
+                cons_show("      Value: %s", option->value);
+            }
+
+            curr_option = g_slist_next(curr_option);
+        }
+
+        curr_field = g_slist_next(curr_field);
     }
 
     form_destroy(form);
