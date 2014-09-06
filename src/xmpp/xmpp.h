@@ -86,15 +86,25 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
+typedef struct form_option_t {
+    char *label;
+    char *value;
+} FormOption;
+
 typedef struct form_field_t {
     char *label;
     char *type;
     char *var;
+    char *description;
+    gboolean required;
     GSList *values;
+    GSList *options;
 } FormField;
 
 typedef struct data_form_t {
-    char *form_type;
+    char *type;
+    char *title;
+    char *instructions;
     GSList *fields;
 } DataForm;
 
@@ -105,6 +115,7 @@ void iq_init_module(void);
 void message_init_module(void);
 void presence_init_module(void);
 void roster_init_module(void);
+void form_init_module(void);
 
 // connection functions
 void (*jabber_init)(const int disable_tls);
@@ -176,5 +187,6 @@ void (*roster_send_add_new)(const char * const barejid, const char * const name)
 void (*roster_send_remove)(const char * const barejid);
 
 void (*form_destroy)(DataForm *form);
+char * (*form_get_field_by_var)(DataForm *form, const char * const var);
 
 #endif

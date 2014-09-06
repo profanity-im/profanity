@@ -467,11 +467,6 @@ void
 handle_room_configure(const char * const room, DataForm *form)
 {
     cons_show("Recieved configuration form for %s", room);
-    if (form->form_type != NULL) {
-        cons_show("Form type: %s", form->form_type);
-    } else {
-        cons_show("No form type specified");
-    }
 
     GSList *fields = form->fields;
     GSList *curr = fields;
@@ -492,6 +487,8 @@ handle_room_configure(const char * const room, DataForm *form)
 
         curr = g_slist_next(curr);
     }
+
+    form_destroy(form);
 }
 
 void
