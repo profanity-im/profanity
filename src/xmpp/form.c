@@ -167,8 +167,9 @@ form_create(xmpp_stanza_t * const form_stanza)
 
             // handle repeated field children
             xmpp_stanza_t *field_child = xmpp_stanza_get_children(field_stanza);
-            child_name = xmpp_stanza_get_name(field_child);
             while (field_child != NULL) {
+                child_name = xmpp_stanza_get_name(field_child);
+
                 // handle values
                 if (g_strcmp0(child_name, "value") == 0) {
                     char *value = xmpp_stanza_get_text(field_child);

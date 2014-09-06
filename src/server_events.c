@@ -526,7 +526,7 @@ handle_room_configure(const char * const room, DataForm *form)
                 cons_show("      Label: %s", option->label);
             }
             if (option->value != NULL) {
-                cons_show("      Value: %s", option->value);
+                cons_show("        Value: %s", option->value);
             }
 
             curr_option = g_slist_next(curr_option);
