@@ -5,7 +5,7 @@ install:
     - git clone git://github.com/strophe/libstrophe.git
     - cd libstrophe
     - ./bootstrap.sh
-    - ./configure
+    - ./configure --prefix=/usr
     - make
     - sudo make install
     - cd ..
