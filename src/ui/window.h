@@ -58,6 +58,7 @@ typedef enum {
     WIN_CONSOLE,
     WIN_CHAT,
     WIN_MUC,
+    WIN_MUC_CONFIG,
     WIN_PRIVATE,
     WIN_DUCK,
     WIN_XML

@@ -385,7 +385,11 @@ wins_get_prune_recipients(void)
 
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        if (window->unread == 0 && window->type != WIN_MUC && window->type != WIN_CONSOLE) {
+        if (window->unread == 0 &&
+                window->type != WIN_MUC &&
+                window->type != WIN_MUC_CONFIG &&
+                window->type != WIN_XML &&
+                window->type != WIN_CONSOLE) {
             result = g_slist_append(result, window->from);
         }
         curr = g_list_next(curr);
@@ -539,6 +543,7 @@ wins_create_summary(void)
         GString *chat_string;
         GString *priv_string;
         GString *muc_string;
+        GString *muc_config_string;
         GString *duck_string;
         GString *xml_string;
 
@@ -603,6 +608,14 @@ wins_create_summary(void)
 
                 result = g_slist_append(result, strdup(muc_string->str));
                 g_string_free(muc_string, TRUE);
+
+                break;
+
+            case WIN_MUC_CONFIG:
+                muc_config_string = g_string_new("");
+                g_string_printf(muc_config_string, "%d: %s", ui_index, window->from);
+                result = g_slist_append(result, strdup(muc_config_string->str));
+                g_string_free(muc_config_string, TRUE);
 
                 break;
 

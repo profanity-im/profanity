@@ -1873,51 +1873,58 @@ _ui_draw_term_title(void)
 static void
 _ui_handle_room_configuration(const char * const room, DataForm *form)
 {
-    cons_show("Recieved configuration form for %s", room);
+    GString *title = g_string_new(room);
+    g_string_append(title, " config");
+    ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
+    g_string_free(title, TRUE);
+    int num = wins_get_num(window);
+    ui_switch_win(num);
+
+    win_save_vprint(window, '-', NULL, 0, 0, "", "Receieved configuration for room %s.", room);
 
     if (form->type != NULL) {
-        cons_show("  Type: %s", form->type);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "  Type: %s", form->type);
     }
     if (form->title != NULL) {
-        cons_show("  Title: %s", form->title);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "  Title: %s", form->title);
     }
     if (form->instructions != NULL) {
-        cons_show("  Instructions: %s", form->instructions);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "  Instructions: %s", form->instructions);
     }
 
     GSList *fields = form->fields;
     GSList *curr_field = fields;
     while (curr_field != NULL) {
         FormField *field = curr_field->data;
-        cons_show("  Field:");
+        win_save_vprint(window, '-', NULL, 0, 0, "", "  Field:");
 
         if (field->label != NULL) {
-            cons_show("    Label: %s", field->label);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Label: %s", field->label);
         }
         if (field->type != NULL) {
-            cons_show("    Type: %s", field->type);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Type: %s", field->type);
         }
         if (field->var != NULL) {
-            cons_show("    Var: %s", field->var);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Var: %s", field->var);
         }
         if (field->description != NULL) {
-            cons_show("    Description: %s", field->description);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Description: %s", field->description);
         }
 
         if (field->required) {
-            cons_show("    Required: TRUE");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Required: TRUE");
         } else {
-            cons_show("    Required: FALSE");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Required: FALSE");
         }
 
         GSList *values = field->values;
         GSList *curr_value = values;
         if (curr_value != NULL) {
-            cons_show("    Values:");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Values:");
         }
         while (curr_value != NULL) {
             char *value = curr_value->data;
-            cons_show("      %s", value);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "      %s", value);
 
             curr_value = g_slist_next(curr_value);
         }
@@ -1925,15 +1932,15 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
         GSList *options = field->options;
         GSList *curr_option = options;
         if (curr_option != NULL) {
-            cons_show("    Options:");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "    Options:");
         }
         while (curr_option != NULL) {
             FormOption *option = curr_option->data;
             if (option->label != NULL) {
-                cons_show("      Label: %s", option->label);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "      Label: %s", option->label);
             }
             if (option->value != NULL) {
-                cons_show("        Value: %s", option->value);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "        Value: %s", option->value);
             }
 
             curr_option = g_slist_next(curr_option);
