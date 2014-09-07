@@ -589,3 +589,13 @@ handle_ping_result(const char * const from, int millis)
         cons_show("Ping response from %s: %dms.", from, millis);
     }
 }
+
+void
+handle_ping_error_result(const char * const from, const char * const error)
+{
+    if (error == NULL) {
+        cons_show_error("Error returned from pinging %s.", from);
+    } else {
+        cons_show_error("Error returned form pinging %s: %s.", from, error);
+    }
+}
