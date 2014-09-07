@@ -103,9 +103,9 @@ CFLAGS_RESTORE="$CFLAGS"
 CFLAGS="$CFLAGS $NCURSES_CFLAGS"
 AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
    [AC_LINK_IFELSE([AC_LANG_SOURCE([
-       #include <ncurses.h>
+       void wget_wch(void);
        int main() {
-           (void)wget_wch(NULL, NULL);
+           wget_wch();
            return 0;
        }
        ])],
