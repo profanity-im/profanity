@@ -95,5 +95,6 @@ void handle_presence_error(const char *from, const char * const type,
     const char *err_msg);
 void handle_xmpp_stanza(const char * const msg);
 void handle_ping_result(const char * const from, int millis);
+void handle_ping_error_result(const char * const from, const char * const error);
 
 #endif
