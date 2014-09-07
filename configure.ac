@@ -82,7 +82,7 @@ LIBS="$LIBS $openssl_LIBS"
 # TODO: autodetect of XML parser libstrophe linked with
 CFLAGS_RESTORE="$CFLAGS"
 CFLAGS="$CFLAGS $AM_CPPFLAGS"
-AC_CHECK_LIB([strophe], [parser_new], [],
+AC_CHECK_LIB([strophe], [xmpp_ctx_new], [],
     [AC_MSG_ERROR([libstrophe linked with $PARSER is required for profanity])])
 CFLAGS="$CFLAGS_RESTORE"
 
