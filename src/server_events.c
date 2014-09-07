@@ -596,6 +596,6 @@ handle_ping_error_result(const char * const from, const char * const error)
     if (error == NULL) {
         cons_show_error("Error returned from pinging %s.", from);
     } else {
-        cons_show_error("Error returned form pinging %s: %s.", from, error);
+        cons_show_error("Error returned from pinging %s: %s.", from, error);
     }
 }
