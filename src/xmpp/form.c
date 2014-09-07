@@ -203,13 +203,8 @@ static void
 _free_option(FormOption *option)
 {
     if (option != NULL) {
-        if (option->label != NULL) {
-            free(option->label);
-        }
-        if (option->value != NULL) {
-            free(option->value);
-        }
-
+        free(option->label);
+        free(option->value);
         free(option);
     }
 }
@@ -218,25 +213,12 @@ static void
 _free_field(FormField *field)
 {
     if (field != NULL) {
-        if (field->label != NULL) {
-            free(field->label);
-        }
-        if (field->type != NULL) {
-            free(field->type);
-        }
-        if (field->var != NULL) {
-            free(field->var);
-        }
-        if (field->description != NULL) {
-            free(field->description);
-        }
-        if (field->values != NULL) {
-            g_slist_free_full(field->values, free);
-        }
-        if (field->options != NULL) {
-            g_slist_free_full(field->options, (GDestroyNotify)_free_option);
-        }
-
+        free(field->label);
+        free(field->type);
+        free(field->var);
+        free(field->description);
+        g_slist_free_full(field->values, free);
+        g_slist_free_full(field->options, (GDestroyNotify)_free_option);
         free(field);
     }
 }
@@ -245,20 +227,10 @@ static void
 _form_destroy(DataForm *form)
 {
     if (form != NULL) {
-        if (form->type != NULL) {
-            free(form->type);
-        }
-        if (form->title != NULL) {
-            free(form->title);
-        }
-        if (form->instructions != NULL) {
-            free(form->instructions);
-        }
-
-        if (form->fields != NULL) {
-            g_slist_free_full(form->fields, (GDestroyNotify)_free_field);
-        }
-
+        free(form->type);
+        free(form->title);
+        free(form->instructions);
+        g_slist_free_full(form->fields, (GDestroyNotify)_free_field);
         free(form);
     }
 }
