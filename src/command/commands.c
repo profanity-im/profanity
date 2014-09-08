@@ -1844,7 +1844,16 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[1], "edit") == 0) {
-        iq_request_room_config_form(room);
+        GString *win_title = g_string_new(room);
+        g_string_append(win_title, " config");
+        ProfWin *window = wins_get_by_recipient(win_title->str);
+        g_string_free(win_title, TRUE);
+        if (window != NULL) {
+            int num = wins_get_num(window);
+            ui_switch_win(num);
+        } else {
+            iq_request_room_config_form(room);
+        }
         return TRUE;
     }
 
