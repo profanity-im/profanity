@@ -1880,70 +1880,98 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
     int num = wins_get_num(window);
     ui_switch_win(num);
 
-    win_save_vprint(window, '-', NULL, 0, 0, "", "Receieved configuration for room %s.", room);
-
-    if (form->type != NULL) {
-        win_save_vprint(window, '-', NULL, 0, 0, "", "  Type: %s", form->type);
-    }
     if (form->title != NULL) {
-        win_save_vprint(window, '-', NULL, 0, 0, "", "  Title: %s", form->title);
+        win_save_print(window, '-', NULL, 0, 0, "", form->title);
+    } else {
+        win_save_vprint(window, '-', NULL, 0, 0, "", "Configuration for room %s.", room);
     }
+    win_save_print(window, '-', NULL, 0, 0, "", "");
+
     if (form->instructions != NULL) {
-        win_save_vprint(window, '-', NULL, 0, 0, "", "  Instructions: %s", form->instructions);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "Instructions:");
+        win_save_print(window, '-', NULL, 0, 0, "", form->instructions);
+        win_save_print(window, '-', NULL, 0, 0, "", "");
     }
 
     GSList *fields = form->fields;
     GSList *curr_field = fields;
     while (curr_field != NULL) {
         FormField *field = curr_field->data;
-        win_save_vprint(window, '-', NULL, 0, 0, "", "  Field:");
 
-        if (field->label != NULL) {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Label: %s", field->label);
-        }
-        if (field->type != NULL) {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Type: %s", field->type);
-        }
-        if (field->var != NULL) {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Var: %s", field->var);
-        }
-        if (field->description != NULL) {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Description: %s", field->description);
-        }
-
-        if (field->required) {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Required: TRUE");
-        } else {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Required: FALSE");
-        }
-
-        GSList *values = field->values;
-        GSList *curr_value = values;
-        if (curr_value != NULL) {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Values:");
-        }
-        while (curr_value != NULL) {
-            char *value = curr_value->data;
-            win_save_vprint(window, '-', NULL, 0, 0, "", "      %s", value);
-
-            curr_value = g_slist_next(curr_value);
-        }
-
-        GSList *options = field->options;
-        GSList *curr_option = options;
-        if (curr_option != NULL) {
-            win_save_vprint(window, '-', NULL, 0, 0, "", "    Options:");
-        }
-        while (curr_option != NULL) {
-            FormOption *option = curr_option->data;
-            if (option->label != NULL) {
-                win_save_vprint(window, '-', NULL, 0, 0, "", "      Label: %s", option->label);
+        if (g_strcmp0(field->type, "hidden") != 0) {
+            if (field->required) {
+                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (%s) Required: ", field->label, field->var);
+            } else {
+                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (%s): ", field->label, field->var);
             }
-            if (option->value != NULL) {
-                win_save_vprint(window, '-', NULL, 0, 0, "", "        Value: %s", option->value);
+/*
+TODO add command to get help for a field
+            if (field->description != NULL) {
+                win_save_print(window, '-', NULL, 0, 0, "", field->description);
             }
+*/
 
-            curr_option = g_slist_next(curr_option);
+            GSList *values = field->values;
+            GSList *curr_value = values;
+            if (g_strcmp0(field->type, "text-single") == 0) {
+                if (curr_value != NULL) {
+                    char *value = curr_value->data;
+                    if (value != NULL) {
+                        if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
+                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
+                        } else {
+                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", value);
+                        }
+                    }
+                }
+                win_save_newline(window);
+            }
+            if (g_strcmp0(field->type, "text-private") == 0) {
+                if (curr_value != NULL) {
+                    char *value = curr_value->data;
+                    if (value != NULL) {
+                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
+                    }
+                }
+                win_save_newline(window);
+            }
+            if (g_strcmp0(field->type, "boolean") == 0) {
+                if (curr_value == NULL) {
+                    win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+                } else {
+                    char *value = curr_value->data;
+                    if (value == NULL) {
+                        win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+                    } else {
+                        if (g_strcmp0(value, "0") == 0) {
+                            win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+                        } else {
+                            win_save_print(window, '-', NULL, NO_DATE, COLOUR_ONLINE, "", "TRUE");
+                        }
+                    }
+                }
+            }
+            if (g_strcmp0(field->type, "list-single") == 0) {
+                if (curr_value != NULL) {
+                    win_save_newline(window);
+                    char *value = curr_value->data;
+                    GSList *options = field->options;
+                    GSList *curr_option = options;
+                    while (curr_option != NULL) {
+                        FormOption *option = curr_option->data;
+                        if (g_strcmp0(option->value, value) == 0) {
+                            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
+                        } else {
+                            win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
+                        }
+                        curr_option = g_slist_next(curr_option);
+                    }
+                }
+            }
+            if (g_strcmp0(field->type, "list-multi") == 0) {
+            }
+            if (g_strcmp0(field->type, "jid-multi") == 0) {
+            }
         }
 
         curr_field = g_slist_next(curr_field);
