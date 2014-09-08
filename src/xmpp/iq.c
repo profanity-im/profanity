@@ -620,6 +620,7 @@ static int
 _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
+    // TODO handle errors
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
     if (id != NULL) {
