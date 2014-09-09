@@ -1016,6 +1016,8 @@ stanza_get_error_message(xmpp_stanza_t *stanza)
     if (error_stanza == NULL) {
         return strdup("unknown");
     } else {
+
+        // check for text child
         xmpp_stanza_t *text_stanza = xmpp_stanza_get_child_by_name(error_stanza, STANZA_NAME_TEXT);
 
         // check for text
