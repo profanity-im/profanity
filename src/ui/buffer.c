@@ -118,5 +118,6 @@ _free_entry(ProfBuffEntry *entry)
     free(entry->message);
     free(entry->from);
     free(entry->date_fmt);
+    free(entry);
 }
 
