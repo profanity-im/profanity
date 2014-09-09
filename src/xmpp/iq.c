@@ -208,14 +208,17 @@ _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    char *error_msg = stanza_get_error_message(stanza);
 
     if (id != NULL) {
-        log_debug("IQ error handler fired, id: %s.", id);
-        log_error("IQ error received, id: %s.", id);
+        log_debug("IQ error handler fired, id: %s, error: %s", id, error_msg);
+        log_error("IQ error received, id: %s, error: %s", id, error_msg);
     } else {
-        log_debug("IQ error handler fired.");
-        log_error("IQ error received.");
+        log_debug("IQ error handler fired, error: %s", error_msg);
+        log_error("IQ error received, error: %s", error_msg);
     }
+
+    free(error_msg);
 
     return 1;
 }
@@ -236,7 +239,9 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     if (id != NULL && type != NULL) {
         // show warning if error
         if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
-            log_warning("Server ping (id=%s) responded with error", id);
+            char *error_msg = stanza_get_error_message(stanza);
+            log_warning("Server ping (id=%s) responded with error: %s", id, error_msg);
+            free(error_msg);
 
             // turn off autoping if error type is 'cancel'
             xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
@@ -261,7 +266,16 @@ static int
 _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *type = xmpp_stanza_get_type(stanza);
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_ping_error_result(from, error_message);
+        free(error_message);
+        return 0;
+    }
 
     GDateTime *sent = (GDateTime *)userdata;
     GDateTime *now = g_date_time_new_now_local();
@@ -271,46 +285,6 @@ _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
 
     g_date_time_unref(sent);
     g_date_time_unref(now);
-
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    char *type = xmpp_stanza_get_type(stanza);
-
-    // handle error responses
-    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
-        xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
-
-        // no error stanza
-        if (error == NULL) {
-            handle_ping_error_result(from, NULL);
-            return 0;
-        }
-
-        // no children of error stanza
-        xmpp_stanza_t *error_child = xmpp_stanza_get_children(error);
-        if (error_child == NULL) {
-            handle_ping_error_result(from, NULL);
-            return 0;
-        }
-
-        // text child found
-        xmpp_stanza_t *error_text_stanza = xmpp_stanza_get_child_by_name(error, STANZA_NAME_TEXT);
-        if (error_text_stanza != NULL) {
-            char *error_text = xmpp_stanza_get_text(error_text_stanza);
-
-            // text found
-            if (error_text != NULL) {
-                handle_ping_error_result(from, error_text);
-                xmpp_free(ctx, error_text);
-                return 0;
-            }
-
-        // no text child found
-        } else {
-            char *error_child_name = xmpp_stanza_get_name(error_child);
-            handle_ping_error_result(from, error_child_name);
-            return 0;
-        }
-    }
 
     handle_ping_result(from, elapsed_millis);
 
