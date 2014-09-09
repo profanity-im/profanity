@@ -470,9 +470,21 @@ handle_room_configure(const char * const room, DataForm *form)
 }
 
 void
-handle_room_configuration_form_error(void)
+handle_room_configuration_form_error(const char * const room, const char * const message)
 {
-    cons_show("Error parsing room configuration form.");
+    if (room != NULL) {
+        if (message != NULL) {
+            cons_show_error("Room config error for %s: %s.", room, message);
+        } else {
+            cons_show_error("Room config error for %s.", room);
+        }
+    } else {
+        if (message != NULL) {
+            cons_show_error("Room config error: %s.", message);
+        } else {
+            cons_show_error("Room config error.");
+        }
+    }
 }
 
 void

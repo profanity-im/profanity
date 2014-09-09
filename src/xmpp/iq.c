@@ -594,8 +594,9 @@ static int
 _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    // TODO handle errors
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (id != NULL) {
         log_debug("IQ room config handler fired, id: %s.", id);
@@ -603,35 +604,43 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         log_debug("IQ room config handler fired.");
     }
 
-    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    if (from == NULL) {
-        log_error("No from attribute for IQ destroy room result");
-    } else {
-        // get form
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        if (query == NULL) {
-            log_error("No query element found parsing room config response");
-            handle_room_configuration_form_error();
-            return 0;
-        }
-
-        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
-        if (x == NULL) {
-            log_error("No x element found with %s namespace parsing room config response", STANZA_NS_DATA);
-            handle_room_configuration_form_error();
-            return 0;
-        }
-
-        char *type = xmpp_stanza_get_attribute(x, STANZA_ATTR_TYPE);
-        if (g_strcmp0(type, "form") != 0) {
-            log_error("x element not of type 'form' parsing room config response");
-            handle_room_configuration_form_error();
-            return 0;
-        }
-
-        DataForm *form = form_create(x);
-        handle_room_configure(from, form);
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_configuration_form_error(from, error_message);
+        free(error_message);
+        return 0;
     }
+
+    if (from == NULL) {
+        log_error("No from attribute for IQ config request result");
+        handle_room_configuration_form_error(from, "No from attribute for room cofig response.");
+        return 0;
+    }
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        log_error("No query element found parsing room config response");
+        handle_room_configuration_form_error(from, "No query element found parsing room config response");
+        return 0;
+    }
+
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
+    if (x == NULL) {
+        log_error("No x element found with %s namespace parsing room config response", STANZA_NS_DATA);
+        handle_room_configuration_form_error(from, "No form data element found parsing room config response");
+        return 0;
+    }
+
+    char *form_type = xmpp_stanza_get_attribute(x, STANZA_ATTR_TYPE);
+    if (g_strcmp0(form_type, "form") != 0) {
+        log_error("x element not of type 'form' parsing room config response");
+        handle_room_configuration_form_error(from, "Form not of type 'form' parsing room config response.");
+        return 0;
+    }
+
+    DataForm *form = form_create(x);
+    handle_room_configure(from, form);
 
     return 0;
 }

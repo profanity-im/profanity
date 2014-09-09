@@ -97,6 +97,6 @@ void handle_xmpp_stanza(const char * const msg);
 void handle_ping_result(const char * const from, int millis);
 void handle_ping_error_result(const char * const from, const char * const error);
 void handle_room_configure(const char * const room, DataForm *form);
-void handle_room_configuration_form_error(void);
+void handle_room_configuration_form_error(const char * const from, const char * const message);
 
 #endif
