@@ -208,14 +208,17 @@ _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    char *error_msg = stanza_get_error_message(stanza);
 
     if (id != NULL) {
-        log_debug("IQ error handler fired, id: %s.", id);
-        log_error("IQ error received, id: %s.", id);
+        log_debug("IQ error handler fired, id: %s, error: %s", id, error_msg);
+        log_error("IQ error received, id: %s, error: %s", id, error_msg);
     } else {
-        log_debug("IQ error handler fired.");
-        log_error("IQ error received.");
+        log_debug("IQ error handler fired, error: %s", error_msg);
+        log_error("IQ error received, error: %s", error_msg);
     }
+
+    free(error_msg);
 
     return 1;
 }
@@ -236,7 +239,9 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     if (id != NULL && type != NULL) {
         // show warning if error
         if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
-            log_warning("Server ping (id=%s) responded with error", id);
+            char *error_msg = stanza_get_error_message(stanza);
+            log_warning("Server ping (id=%s) responded with error: %s", id, error_msg);
+            free(error_msg);
 
             // turn off autoping if error type is 'cancel'
             xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
