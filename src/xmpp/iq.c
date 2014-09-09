@@ -99,8 +99,6 @@ iq_add_handlers(void)
 
     HANDLE(STANZA_NS_PING,      STANZA_TYPE_GET,    _ping_get_handler);
 
-    HANDLE(NULL,                STANZA_TYPE_RESULT, _destroy_room_result_handler);
-
     if (prefs_get_autoping() != 0) {
         int millis = prefs_get_autoping() * 1000;
         xmpp_timed_handler_add(conn, _ping_timed_handler, millis, ctx);
