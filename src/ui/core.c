@@ -1900,9 +1900,13 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
 
         if (g_strcmp0(field->type, "hidden") != 0) {
             if (field->required) {
-                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (%s) Required: ", field->label, field->var);
+                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (", field->label);
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_AWAY, "", field->var);
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ") Required: ");
             } else {
-                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (%s): ", field->label, field->var);
+                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (", field->label);
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_AWAY, "", field->var);
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", "): ");
             }
 /*
 TODO add command to get help for a field
