@@ -1969,6 +1969,20 @@ TODO add command to get help for a field
                 }
             }
             if (g_strcmp0(field->type, "list-multi") == 0) {
+                if (curr_value != NULL) {
+                    win_save_newline(window);
+                    GSList *options = field->options;
+                    GSList *curr_option = options;
+                    while (curr_option != NULL) {
+                        FormOption *option = curr_option->data;
+                        if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0) != NULL) {
+                            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
+                        } else {
+                            win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
+                        }
+                        curr_option = g_slist_next(curr_option);
+                    }
+                }
             }
             if (g_strcmp0(field->type, "jid-multi") == 0) {
             }
