@@ -1985,6 +1985,12 @@ TODO add command to get help for a field
                 }
             }
             if (g_strcmp0(field->type, "jid-multi") == 0) {
+                win_save_newline(window);
+                while (curr_value != NULL) {
+                    char *value = curr_value->data;
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
+                    curr_value = g_slist_next(curr_value);
+                }
             }
         }
 
