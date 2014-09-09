@@ -355,6 +355,7 @@ win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp,
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
     win_save_print(window, show_char, tstamp, flags, attrs, from, fmt_msg->str);
+    g_string_free(fmt_msg, TRUE);
 }
 
 void
