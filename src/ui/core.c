@@ -1871,12 +1871,132 @@ _ui_draw_term_title(void)
 }
 
 static void
+_ui_handle_form_field(ProfWin *window, FormField *field)
+{
+    GSList *values = field->values;
+    GSList *curr_value = values;
+
+    switch (field->type_t) {
+    case FIELD_HIDDEN:
+        break;
+    case FIELD_TEXT_SINGLE:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
+                } else {
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", value);
+                }
+            }
+        }
+        win_save_newline(window);
+        break;
+    case FIELD_TEXT_PRIVATE:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
+            }
+        }
+        win_save_newline(window);
+        break;
+    case FIELD_TEXT_MULTI:
+        win_save_newline(window);
+        while (curr_value != NULL) {
+            char *value = curr_value->data;
+            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
+            curr_value = g_slist_next(curr_value);
+        }
+        break;
+    case FIELD_BOOLEAN:
+        if (curr_value == NULL) {
+            win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+        } else {
+            char *value = curr_value->data;
+            if (value == NULL) {
+                win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+            } else {
+                if (g_strcmp0(value, "0") == 0) {
+                    win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+                } else {
+                    win_save_print(window, '-', NULL, NO_DATE, COLOUR_ONLINE, "", "TRUE");
+                }
+            }
+        }
+        break;
+    case FIELD_LIST_SINGLE:
+        if (curr_value != NULL) {
+            win_save_newline(window);
+            char *value = curr_value->data;
+            GSList *options = field->options;
+            GSList *curr_option = options;
+            while (curr_option != NULL) {
+                FormOption *option = curr_option->data;
+                if (g_strcmp0(option->value, value) == 0) {
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
+                } else {
+                    win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
+                }
+                curr_option = g_slist_next(curr_option);
+            }
+        }
+        break;
+    case FIELD_LIST_MUTLI:
+        if (curr_value != NULL) {
+            win_save_newline(window);
+            GSList *options = field->options;
+            GSList *curr_option = options;
+            while (curr_option != NULL) {
+                FormOption *option = curr_option->data;
+                if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0) != NULL) {
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
+                } else {
+                    win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
+                }
+                curr_option = g_slist_next(curr_option);
+            }
+        }
+        break;
+    case FIELD_JID_SINGLE:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", value);
+            }
+        }
+        win_save_newline(window);
+        break;
+    case FIELD_JID_MULTI:
+        win_save_newline(window);
+        while (curr_value != NULL) {
+            char *value = curr_value->data;
+            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
+            curr_value = g_slist_next(curr_value);
+        }
+        break;
+    case FIELD_FIXED:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", value);
+            }
+        }
+        win_save_newline(window);
+        break;
+    default:
+        break;
+    }
+}
+
+static void
 _ui_handle_room_configuration(const char * const room, DataForm *form)
 {
     GString *title = g_string_new(room);
     g_string_append(title, " config");
     ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
     g_string_free(title, TRUE);
+
     int num = wins_get_num(window);
     ui_switch_win(num);
 
@@ -1909,120 +2029,7 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
                 win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", "): ");
             }
 
-            GSList *values = field->values;
-            GSList *curr_value = values;
-
-            switch (field->type_t) {
-            case FIELD_HIDDEN:
-                break;
-            case FIELD_TEXT_SINGLE:
-                if (curr_value != NULL) {
-                    char *value = curr_value->data;
-                    if (value != NULL) {
-                        if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
-                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
-                        } else {
-                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", value);
-                        }
-                    }
-                }
-                win_save_newline(window);
-                break;
-            case FIELD_TEXT_PRIVATE:
-                if (curr_value != NULL) {
-                    char *value = curr_value->data;
-                    if (value != NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
-                    }
-                }
-                win_save_newline(window);
-                break;
-            case FIELD_TEXT_MULTI:
-                win_save_newline(window);
-                while (curr_value != NULL) {
-                    char *value = curr_value->data;
-                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
-                    curr_value = g_slist_next(curr_value);
-                }
-                break;
-            case FIELD_BOOLEAN:
-                if (curr_value == NULL) {
-                    win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
-                } else {
-                    char *value = curr_value->data;
-                    if (value == NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
-                    } else {
-                        if (g_strcmp0(value, "0") == 0) {
-                            win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
-                        } else {
-                            win_save_print(window, '-', NULL, NO_DATE, COLOUR_ONLINE, "", "TRUE");
-                        }
-                    }
-                }
-                break;
-            case FIELD_LIST_SINGLE:
-                if (curr_value != NULL) {
-                    win_save_newline(window);
-                    char *value = curr_value->data;
-                    GSList *options = field->options;
-                    GSList *curr_option = options;
-                    while (curr_option != NULL) {
-                        FormOption *option = curr_option->data;
-                        if (g_strcmp0(option->value, value) == 0) {
-                            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
-                        } else {
-                            win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
-                        }
-                        curr_option = g_slist_next(curr_option);
-                    }
-                }
-                break;
-            case FIELD_LIST_MUTLI:
-                if (curr_value != NULL) {
-                    win_save_newline(window);
-                    GSList *options = field->options;
-                    GSList *curr_option = options;
-                    while (curr_option != NULL) {
-                        FormOption *option = curr_option->data;
-                        if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0) != NULL) {
-                            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
-                        } else {
-                            win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
-                        }
-                        curr_option = g_slist_next(curr_option);
-                    }
-                }
-                break;
-            case FIELD_JID_SINGLE:
-                if (curr_value != NULL) {
-                    char *value = curr_value->data;
-                    if (value != NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", value);
-                    }
-                }
-                win_save_newline(window);
-                break;
-            case FIELD_JID_MULTI:
-                win_save_newline(window);
-                while (curr_value != NULL) {
-                    char *value = curr_value->data;
-                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
-                    curr_value = g_slist_next(curr_value);
-                }
-                break;
-            case FIELD_FIXED:
-                if (curr_value != NULL) {
-                    char *value = curr_value->data;
-                    if (value != NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", value);
-                    }
-                }
-                win_save_newline(window);
-                break;
-            default:
-                break;
-            }
+            _ui_handle_form_field(window, field);
 
 /*
 TODO add command to get help for a field
