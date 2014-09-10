@@ -180,6 +180,7 @@ void (*iq_set_autoping)(int seconds);
 void (*iq_confirm_instant_room)(const char * const room_jid);
 void (*iq_destroy_instant_room)(const char * const room_jid);
 void (*iq_request_room_config_form)(const char * const room_jid);
+void (*iq_submit_room_config)(const char * const room, DataForm *form);
 void (*iq_room_config_cancel)(const char * const room_jid);
 void (*iq_send_ping)(const char * const target);
 

@@ -43,6 +43,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/capabilities.h"
+#include "xmpp/form.h"
 
 #include "muc.h"
 
@@ -609,6 +610,31 @@ stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char * const id,
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
     xmpp_stanza_set_ns(query, XMPP_NS_DISCO_ITEMS);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
+stanza_create_room_config_submit_iq(xmpp_ctx_t *ctx, const char * const room, DataForm *form)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room);
+    char *id = create_unique_id("roomconf_submit");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_MUC_OWNER);
+
+    xmpp_stanza_t *x = form_create_submission(form);
+    xmpp_stanza_add_child(query, x);
+    xmpp_stanza_release(x);
 
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_release(query);

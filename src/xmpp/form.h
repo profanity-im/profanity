@@ -36,5 +36,6 @@
 #define FROM_H
 
 DataForm* form_create(xmpp_stanza_t * const stanza);
+xmpp_stanza_t* form_create_submission(DataForm *form);
 
 #endif

@@ -470,6 +470,12 @@ handle_room_configure(const char * const room, DataForm *form)
 }
 
 void
+handle_room_config_submit_result(void)
+{
+    ui_handle_room_config_submit_result();
+}
+
+void
 handle_room_configuration_form_error(const char * const room, const char * const message)
 {
     if (room != NULL) {

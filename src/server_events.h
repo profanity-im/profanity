@@ -98,5 +98,6 @@ void handle_ping_result(const char * const from, int millis);
 void handle_ping_error_result(const char * const from, const char * const error);
 void handle_room_configure(const char * const room, DataForm *form);
 void handle_room_configuration_form_error(const char * const from, const char * const message);
+void handle_room_config_submit_result(void);
 
 #endif

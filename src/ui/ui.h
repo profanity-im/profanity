@@ -161,6 +161,7 @@ void (*ui_handle_error)(const char * const err_msg);
 void (*ui_clear_win_title)(void);
 void (*ui_handle_room_join_error)(const char * const room, const char * const err);
 void (*ui_handle_room_configuration)(const char * const room, DataForm *form);
+void (*ui_handle_room_config_submit_result)(void);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);

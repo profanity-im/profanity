@@ -1997,6 +1997,8 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
     ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
     g_string_free(title, TRUE);
 
+    window->form = form;
+
     int num = wins_get_num(window);
     ui_switch_win(num);
 
@@ -2041,8 +2043,12 @@ TODO add command to get help for a field
 
         curr_field = g_slist_next(curr_field);
     }
+}
 
-    form_destroy(form);
+static void
+_ui_handle_room_config_submit_result(void)
+{
+    cons_show("GOT ROOM CONFIG SUBMIT RESULT!!!!");
 }
 
 static void
@@ -2283,4 +2289,5 @@ ui_init_module(void)
     ui_room_requires_config = _ui_room_requires_config;
     ui_room_destroyed = _ui_room_destroyed;
     ui_handle_room_configuration = _ui_handle_room_configuration;
+    ui_handle_room_config_submit_result = _ui_handle_room_config_submit_result;
 }

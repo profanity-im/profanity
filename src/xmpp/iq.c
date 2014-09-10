@@ -78,6 +78,8 @@ static int _destroy_room_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_config_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_config_submit_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
@@ -198,6 +200,20 @@ _iq_request_room_config_form(const char * const room_jid)
 
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _room_config_handler, id, NULL);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_submit_room_config(const char * const room, DataForm *form)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_config_submit_iq(ctx, room, form);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_config_submit_handler, id, NULL);
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
@@ -645,6 +661,23 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     return 0;
 }
 
+static int
+_room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+
+    if (id != NULL) {
+        log_debug("IQ room config handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ room config handler fired.");
+    }
+
+    handle_room_config_submit_result();
+
+    return 0;
+}
+
 static void
 _identity_destroy(DiscoIdentity *identity)
 {
@@ -897,4 +930,5 @@ iq_init_module(void)
     iq_send_ping = _iq_send_ping;
     iq_request_room_config_form = _iq_request_room_config_form;
     iq_room_config_cancel = _iq_room_config_cancel;
+    iq_submit_room_config = _iq_submit_room_config;
 }

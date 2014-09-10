@@ -45,6 +45,7 @@
 
 #include "contact.h"
 #include "ui/buffer.h"
+#include "xmpp/xmpp.h"
 
 #define NO_ME   1
 #define NO_DATE 2
@@ -75,6 +76,7 @@ typedef struct prof_win_t {
     int paged;
     int unread;
     int history_shown;
+    DataForm *form;
 } ProfWin;
 
 ProfWin* win_create(const char * const title, int cols, win_type_t type);

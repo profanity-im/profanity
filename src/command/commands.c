@@ -1798,7 +1798,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     win_type_t win_type = ui_current_win_type();
-    if (win_type != WIN_MUC) {
+    if (win_type != WIN_MUC && win_type != WIN_MUC_CONFIG) {
         cons_show("Command /room only usable in chat rooms.");
         return TRUE;
     }
@@ -1811,6 +1811,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if ((g_strcmp0(args[1], "accept") != 0) &&
             (g_strcmp0(args[1], "cancel") != 0) &&
             (g_strcmp0(args[1], "destroy") != 0) &&
+            (g_strcmp0(args[1], "submit") != 0) &&
             (g_strcmp0(args[1], "edit") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
@@ -1855,6 +1856,20 @@ cmd_room(gchar **args, struct cmd_help_t help)
             iq_request_room_config_form(room);
         }
         return TRUE;
+    }
+
+    if (g_strcmp0(args[1], "submit") == 0) {
+        ProfWin *current = wins_get_current();
+        if (current->type != WIN_MUC_CONFIG) {
+            cons_show("Room configuration can only be submitted when in the room configuration window.");
+            return TRUE;
+        } else {
+            gchar **split_recipient = g_strsplit(room, " ", 2);
+            room = split_recipient[0];
+            iq_submit_room_config(room, current->form);
+            g_strfreev(split_recipient);
+            return TRUE;
+        }
     }
 
     if (g_strcmp0(args[1], "cancel") == 0) {
