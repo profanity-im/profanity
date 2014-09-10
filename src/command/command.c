@@ -305,7 +305,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args, 2, 2, NULL,
+        cmd_room, parse_args, 1, 1, NULL,
         { "/room config accept|destroy|edit|cancel", "Room configuration.",
         { "/room config accept|destroy|edit|cancel",
           "---------------------------------------",
@@ -956,7 +956,6 @@ static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
 static Autocomplete room_ac;
-static Autocomplete room_config_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1209,13 +1208,11 @@ cmd_init(void)
     autocomplete_add(alias_ac, "list");
 
     room_ac = autocomplete_new();
+    autocomplete_add(room_ac, "accept");
+    autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
-
-    room_config_ac = autocomplete_new();
-    autocomplete_add(room_config_ac, "accept");
-    autocomplete_add(room_config_ac, "destroy");
-    autocomplete_add(room_config_ac, "edit");
-    autocomplete_add(room_config_ac, "cancel");
+    autocomplete_add(room_ac, "submit");
+    autocomplete_add(room_ac, "cancel");
 
     cmd_history_init();
 }
@@ -1261,7 +1258,6 @@ cmd_uninit(void)
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
     autocomplete_free(room_ac);
-    autocomplete_free(room_config_ac);
 }
 
 gboolean
@@ -1386,7 +1382,6 @@ cmd_reset_autocomplete()
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
-    autocomplete_reset(room_config_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -2079,11 +2074,6 @@ static char *
 _room_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-
-    result = autocomplete_param_with_ac(input, size, "/room config", room_config_ac, TRUE);
-    if (result != NULL) {
-        return result;
-    }
 
     result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
     if (result != NULL) {

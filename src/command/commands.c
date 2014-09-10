@@ -1797,84 +1797,103 @@ cmd_room(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    // room command allowed in window
     win_type_t win_type = ui_current_win_type();
     if (win_type != WIN_MUC && win_type != WIN_MUC_CONFIG) {
-        cons_show("Command /room only usable in chat rooms.");
+        cons_show("Command '/room' does not apply to this window.");
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "config") != 0) {
+    // validate subcommand
+    if ((g_strcmp0(args[0], "accept") != 0) &&
+            (g_strcmp0(args[0], "destroy") != 0) &&
+            (g_strcmp0(args[0], "config") != 0) &&
+            (g_strcmp0(args[0], "submit") != 0) &&
+            (g_strcmp0(args[0], "cancel") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
 
-    if ((g_strcmp0(args[1], "accept") != 0) &&
-            (g_strcmp0(args[1], "cancel") != 0) &&
-            (g_strcmp0(args[1], "destroy") != 0) &&
-            (g_strcmp0(args[1], "submit") != 0) &&
-            (g_strcmp0(args[1], "edit") != 0)) {
-        cons_show("Usage: %s", help.usage);
+    // validate subcommand for window type
+    if (win_type == WIN_MUC &&
+            ((g_strcmp0(args[0], "submit") == 0) ||
+            (g_strcmp0(args[0], "cancel") == 0))) {
+        cons_show("Command '/room %s' only allowed in room configuration windows.", args[0]);
+        return TRUE;
+    }
+    if (win_type == WIN_MUC_CONFIG &&
+            ((g_strcmp0(args[0], "accept") == 0) ||
+            (g_strcmp0(args[0], "destroy") == 0) ||
+            (g_strcmp0(args[0], "config") == 0))) {
+        cons_show("Command '/room %s' only allowed in chat room windows.", args[0]);
         return TRUE;
     }
 
     char *room = ui_current_recipient();
-    ProfWin *window = wins_get_by_recipient(room);
-    int num = wins_get_num(window);
-    int ui_index = num;
-    if (ui_index == 10) {
-        ui_index = 0;
-    }
 
-    if (g_strcmp0(args[1], "accept") == 0) {
-        gboolean requires_config = muc_requires_config(room);
-        if (!requires_config) {
-            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
+    // commands available in room
+    if ((g_strcmp0(args[0], "accept") == 0) ||
+            (g_strcmp0(args[0], "destroy") == 0) ||
+            (g_strcmp0(args[0], "config") == 0)) {
+
+        ProfWin *window = wins_get_by_recipient(room);
+        int num = wins_get_num(window);
+        int ui_index = num;
+        if (ui_index == 10) {
+            ui_index = 0;
+        }
+
+        if (g_strcmp0(args[0], "accept") == 0) {
+            gboolean requires_config = muc_requires_config(room);
+            if (!requires_config) {
+                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
+                return TRUE;
+            } else {
+                iq_confirm_instant_room(room);
+                muc_set_requires_config(room, FALSE);
+                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
+                cons_show("Room unlocked: %s (%d)", room, ui_index);
+                return TRUE;
+            }
+        }
+
+        if (g_strcmp0(args[0], "destroy") == 0) {
+            iq_destroy_instant_room(room);
             return TRUE;
-        } else {
-            iq_confirm_instant_room(room);
-            muc_set_requires_config(room, FALSE);
-            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
-            cons_show("Room unlocked: %s (%d)", room, ui_index);
+        }
+
+        if (g_strcmp0(args[0], "config") == 0) {
+            GString *win_title = g_string_new(room);
+            g_string_append(win_title, " config");
+            ProfWin *window = wins_get_by_recipient(win_title->str);
+            g_string_free(win_title, TRUE);
+            if (window != NULL) {
+                num = wins_get_num(window);
+                ui_switch_win(num);
+            } else {
+                iq_request_room_config_form(room);
+            }
             return TRUE;
         }
     }
 
-    if (g_strcmp0(args[1], "destroy") == 0) {
-        iq_destroy_instant_room(room);
-        return TRUE;
-    }
+    // commands allowed in room config
+    if ((g_strcmp0(args[0], "submit") == 0) ||
+            (g_strcmp0(args[0], "cancel") == 0)) {
 
-    if (g_strcmp0(args[1], "edit") == 0) {
-        GString *win_title = g_string_new(room);
-        g_string_append(win_title, " config");
-        ProfWin *window = wins_get_by_recipient(win_title->str);
-        g_string_free(win_title, TRUE);
-        if (window != NULL) {
-            int num = wins_get_num(window);
-            ui_switch_win(num);
-        } else {
-            iq_request_room_config_form(room);
-        }
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[1], "submit") == 0) {
-        ProfWin *current = wins_get_current();
-        if (current->type != WIN_MUC_CONFIG) {
-            cons_show("Room configuration can only be submitted when in the room configuration window.");
-            return TRUE;
-        } else {
+        if (g_strcmp0(args[0], "submit") == 0) {
+            ProfWin *current = wins_get_current();
             gchar **split_recipient = g_strsplit(room, " ", 2);
             room = split_recipient[0];
             iq_submit_room_config(room, current->form);
             g_strfreev(split_recipient);
             return TRUE;
         }
-    }
 
-    if (g_strcmp0(args[1], "cancel") == 0) {
-        iq_room_config_cancel(room);
-        return TRUE;
+        if (g_strcmp0(args[0], "cancel") == 0) {
+            iq_room_config_cancel(room);
+            return TRUE;
+        }
     }
 
     return TRUE;
