@@ -1830,14 +1830,14 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+    int num = wins_get_num(window);
 
     // commands available in room
     if ((g_strcmp0(args[0], "accept") == 0) ||
             (g_strcmp0(args[0], "destroy") == 0) ||
             (g_strcmp0(args[0], "config") == 0)) {
 
-        ProfWin *window = wins_get_by_recipient(room);
-        int num = wins_get_num(window);
         int ui_index = num;
         if (ui_index == 10) {
             ui_index = 0;
@@ -1881,19 +1881,28 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if ((g_strcmp0(args[0], "submit") == 0) ||
             (g_strcmp0(args[0], "cancel") == 0)) {
 
-        if (g_strcmp0(args[0], "submit") == 0) {
-            ProfWin *current = wins_get_current();
-            gchar **split_recipient = g_strsplit(room, " ", 2);
-            room = split_recipient[0];
-            iq_submit_room_config(room, current->form);
-            g_strfreev(split_recipient);
-            return TRUE;
-        }
+        ProfWin *current = wins_get_current();
+        gchar **split_recipient = g_strsplit(room, " ", 2);
+        room = split_recipient[0];
 
+        if (g_strcmp0(args[0], "submit") == 0) {
+            iq_submit_room_config(room, current->form);
+
+        }
         if (g_strcmp0(args[0], "cancel") == 0) {
             iq_room_config_cancel(room);
-            return TRUE;
         }
+
+        current = wins_get_by_recipient(room);
+        if (current == NULL) {
+            current = wins_get_console();
+        }
+        num = wins_get_num(current);
+        ui_switch_win(num);
+
+        g_strfreev(split_recipient);
+
+        return TRUE;
     }
 
     return TRUE;
