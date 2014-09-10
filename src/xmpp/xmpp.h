@@ -86,6 +86,20 @@ typedef struct disco_identity_t {
     char *category;
 } DiscoIdentity;
 
+typedef enum {
+    FIELD_HIDDEN,
+    FIELD_TEXT_SINGLE,
+    FIELD_TEXT_PRIVATE,
+    FIELD_TEXT_MULTI,
+    FIELD_BOOLEAN,
+    FIELD_LIST_SINGLE,
+    FIELD_LIST_MUTLI,
+    FIELD_JID_SINGLE,
+    FIELD_JID_MULTI,
+    FIELD_FIXED,
+    FIELD_UNKNOWN
+} form_field_type_t;
+
 typedef struct form_option_t {
     char *label;
     char *value;
@@ -94,6 +108,7 @@ typedef struct form_option_t {
 typedef struct form_field_t {
     char *label;
     char *type;
+    form_field_type_t type_t;
     char *var;
     char *description;
     gboolean required;

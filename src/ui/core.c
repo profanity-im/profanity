@@ -1908,16 +1908,14 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
                 win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_AWAY, "", field->var);
                 win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", "): ");
             }
-/*
-TODO add command to get help for a field
-            if (field->description != NULL) {
-                win_save_print(window, '-', NULL, 0, 0, "", field->description);
-            }
-*/
 
             GSList *values = field->values;
             GSList *curr_value = values;
-            if (g_strcmp0(field->type, "text-single") == 0) {
+
+            switch (field->type_t) {
+            case FIELD_HIDDEN:
+                break;
+            case FIELD_TEXT_SINGLE:
                 if (curr_value != NULL) {
                     char *value = curr_value->data;
                     if (value != NULL) {
@@ -1929,8 +1927,8 @@ TODO add command to get help for a field
                     }
                 }
                 win_save_newline(window);
-            }
-            if (g_strcmp0(field->type, "text-private") == 0) {
+                break;
+            case FIELD_TEXT_PRIVATE:
                 if (curr_value != NULL) {
                     char *value = curr_value->data;
                     if (value != NULL) {
@@ -1938,16 +1936,16 @@ TODO add command to get help for a field
                     }
                 }
                 win_save_newline(window);
-            }
-            if (g_strcmp0(field->type, "text-multi") == 0) {
+                break;
+            case FIELD_TEXT_MULTI:
                 win_save_newline(window);
                 while (curr_value != NULL) {
                     char *value = curr_value->data;
                     win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
                     curr_value = g_slist_next(curr_value);
                 }
-            }
-            if (g_strcmp0(field->type, "boolean") == 0) {
+                break;
+            case FIELD_BOOLEAN:
                 if (curr_value == NULL) {
                     win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
                 } else {
@@ -1962,8 +1960,8 @@ TODO add command to get help for a field
                         }
                     }
                 }
-            }
-            if (g_strcmp0(field->type, "list-single") == 0) {
+                break;
+            case FIELD_LIST_SINGLE:
                 if (curr_value != NULL) {
                     win_save_newline(window);
                     char *value = curr_value->data;
@@ -1979,8 +1977,8 @@ TODO add command to get help for a field
                         curr_option = g_slist_next(curr_option);
                     }
                 }
-            }
-            if (g_strcmp0(field->type, "list-multi") == 0) {
+                break;
+            case FIELD_LIST_MUTLI:
                 if (curr_value != NULL) {
                     win_save_newline(window);
                     GSList *options = field->options;
@@ -1995,8 +1993,8 @@ TODO add command to get help for a field
                         curr_option = g_slist_next(curr_option);
                     }
                 }
-            }
-            if (g_strcmp0(field->type, "jid-single") == 0) {
+                break;
+            case FIELD_JID_SINGLE:
                 if (curr_value != NULL) {
                     char *value = curr_value->data;
                     if (value != NULL) {
@@ -2004,16 +2002,16 @@ TODO add command to get help for a field
                     }
                 }
                 win_save_newline(window);
-            }
-            if (g_strcmp0(field->type, "jid-multi") == 0) {
+                break;
+            case FIELD_JID_MULTI:
                 win_save_newline(window);
                 while (curr_value != NULL) {
                     char *value = curr_value->data;
                     win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
                     curr_value = g_slist_next(curr_value);
                 }
-            }
-            if (g_strcmp0(field->type, "fixed") == 0) {
+                break;
+            case FIELD_FIXED:
                 if (curr_value != NULL) {
                     char *value = curr_value->data;
                     if (value != NULL) {
@@ -2021,7 +2019,17 @@ TODO add command to get help for a field
                     }
                 }
                 win_save_newline(window);
+                break;
+            default:
+                break;
             }
+
+/*
+TODO add command to get help for a field
+            if (field->description != NULL) {
+                win_save_print(window, '-', NULL, 0, 0, "", field->description);
+            }
+*/
         }
 
         curr_field = g_slist_next(curr_field);

@@ -137,6 +137,42 @@ _is_required(xmpp_stanza_t * const stanza)
     }
 }
 
+static form_field_type_t
+_get_field_type(const char * const type)
+{
+    if (g_strcmp0(type, "hidden") == 0) {
+        return FIELD_HIDDEN;
+    }
+    if (g_strcmp0(type, "text-single") == 0) {
+        return FIELD_TEXT_SINGLE;
+    }
+    if (g_strcmp0(type, "text-private") == 0) {
+        return FIELD_TEXT_PRIVATE;
+    }
+    if (g_strcmp0(type, "text-multi") == 0) {
+        return FIELD_TEXT_MULTI;
+    }
+    if (g_strcmp0(type, "boolean") == 0) {
+        return FIELD_BOOLEAN;
+    }
+    if (g_strcmp0(type, "list-single") == 0) {
+        return FIELD_LIST_SINGLE;
+    }
+    if (g_strcmp0(type, "list-multi") == 0) {
+        return FIELD_LIST_MUTLI;
+    }
+    if (g_strcmp0(type, "jid-single") == 0) {
+        return FIELD_JID_SINGLE;
+    }
+    if (g_strcmp0(type, "jid-multi") == 0) {
+        return FIELD_JID_MULTI;
+    }
+    if (g_strcmp0(type, "fixed") == 0) {
+        return FIELD_FIXED;
+    }
+    return FIELD_UNKNOWN;
+}
+
 DataForm *
 form_create(xmpp_stanza_t * const form_stanza)
 {
@@ -161,6 +197,7 @@ form_create(xmpp_stanza_t * const form_stanza)
             FormField *field = _field_new();
             field->label = _get_attr(field_stanza, "label");
             field->type = _get_attr(field_stanza, "type");
+            field->type_t = _get_field_type(field->type);
             field->var = _get_attr(field_stanza, "var");
             field->description = _get_property(field_stanza, "desc");
             field->required = _is_required(field_stanza);
