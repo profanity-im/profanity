@@ -121,6 +121,8 @@ typedef struct data_form_t {
     char *title;
     char *instructions;
     GSList *fields;
+    GHashTable *var_to_tag;
+    GHashTable *tag_to_var;
 } DataForm;
 
 void jabber_init_module(void);

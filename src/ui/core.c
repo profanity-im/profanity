@@ -2021,13 +2021,11 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
         FormField *field = curr_field->data;
 
         if (g_strcmp0(field->type, "hidden") != 0) {
+            win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (", field->label);
+            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_AWAY, "", g_hash_table_lookup(form->var_to_tag, field->var));
             if (field->required) {
-                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (", field->label);
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_AWAY, "", field->var);
                 win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ") Required: ");
             } else {
-                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (", field->label);
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_AWAY, "", field->var);
                 win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", "): ");
             }
 

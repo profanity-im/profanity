@@ -78,6 +78,8 @@ _form_new(void)
     form->title = NULL;
     form->instructions = NULL;
     form->fields = NULL;
+    form->var_to_tag = NULL;
+    form->tag_to_var = NULL;
 
     return form;
 }
@@ -186,6 +188,10 @@ form_create(xmpp_stanza_t * const form_stanza)
     form->type = _get_attr(form_stanza, "type");
     form->title = _get_property(form_stanza, "title");
     form->instructions = _get_property(form_stanza, "instructions");
+    form->var_to_tag = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    form->tag_to_var = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+
+    int tag_num = 1;
 
     // get fields
     xmpp_stanza_t *form_child = xmpp_stanza_get_children(form_stanza);
@@ -198,7 +204,14 @@ form_create(xmpp_stanza_t * const form_stanza)
             field->label = _get_attr(field_stanza, "label");
             field->type = _get_attr(field_stanza, "type");
             field->type_t = _get_field_type(field->type);
+
             field->var = _get_attr(field_stanza, "var");
+            GString *tag = g_string_new("");
+            g_string_printf(tag, "field%d", tag_num++);
+            g_hash_table_insert(form->var_to_tag, strdup(field->var), strdup(tag->str));
+            g_hash_table_insert(form->tag_to_var, strdup(tag->str), strdup(field->var));
+            g_string_free(tag, TRUE);
+
             field->description = _get_property(field_stanza, "desc");
             field->required = _is_required(field_stanza);
 
@@ -348,6 +361,8 @@ _form_destroy(DataForm *form)
         free(form->title);
         free(form->instructions);
         g_slist_free_full(form->fields, (GDestroyNotify)_free_field);
+        g_hash_table_destroy(form->var_to_tag);
+        g_hash_table_destroy(form->tag_to_var);
         free(form);
     }
 }
