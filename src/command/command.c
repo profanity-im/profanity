@@ -305,14 +305,16 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args, 1, 1, NULL,
-        { "/room config accept|destroy|edit|cancel", "Room configuration.",
-        { "/room config accept|destroy|edit|cancel",
-          "---------------------------------------",
+        cmd_room, parse_args, 1, 3, NULL,
+        { "/room config accept|destroy|config|submit|cancel [tag value]", "Room configuration.",
+        { "/room config accept|destroy|config|submit|cancel [tag value]",
+          "------------------------------------------------------------",
           "config accept  - Accept default room configuration.",
           "config destroy - Cancel default room configuration.",
-          "config edit    - Edit room configuration.",
+          "config config  - Edit room configuration.",
+          "config submit  - Cancel room configuration.",
           "config cancel  - Cancel room configuration.",
+          "config set tag value - Set room configuration field to value.",
           NULL } } },
 
     { "/rooms",
@@ -1213,6 +1215,7 @@ cmd_init(void)
     autocomplete_add(room_ac, "config");
     autocomplete_add(room_ac, "submit");
     autocomplete_add(room_ac, "cancel");
+    autocomplete_add(room_ac, "set");
 
     cmd_history_init();
 }

@@ -206,5 +206,6 @@ void (*roster_send_remove)(const char * const barejid);
 
 void (*form_destroy)(DataForm *form);
 char * (*form_get_field_by_var)(DataForm *form, const char * const var);
+void (*form_set_value_by_tag)(DataForm *form, const char * const tag, char *value);
 
 #endif

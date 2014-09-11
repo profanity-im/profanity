@@ -1809,6 +1809,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
             (g_strcmp0(args[0], "submit") != 0) &&
+            (g_strcmp0(args[0], "set") != 0) &&
             (g_strcmp0(args[0], "cancel") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
@@ -1817,7 +1818,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
     // validate subcommand for window type
     if (win_type == WIN_MUC &&
             ((g_strcmp0(args[0], "submit") == 0) ||
-            (g_strcmp0(args[0], "cancel") == 0))) {
+            (g_strcmp0(args[0], "cancel") == 0) ||
+            (g_strcmp0(args[0], "set") == 0))) {
         cons_show("Command '/room %s' only allowed in room configuration windows.", args[0]);
         return TRUE;
     }
@@ -1879,7 +1881,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
 
     // commands allowed in room config
     if ((g_strcmp0(args[0], "submit") == 0) ||
-            (g_strcmp0(args[0], "cancel") == 0)) {
+            (g_strcmp0(args[0], "cancel") == 0) ||
+            (g_strcmp0(args[0], "set") == 0)) {
 
         ProfWin *current = wins_get_current();
         gchar **split_recipient = g_strsplit(room, " ", 2);
@@ -1892,15 +1895,37 @@ cmd_room(gchar **args, struct cmd_help_t help)
         if (g_strcmp0(args[0], "cancel") == 0) {
             iq_room_config_cancel(room);
         }
-
-        wins_close_current();
-
-        current = wins_get_by_recipient(room);
-        if (current == NULL) {
-            current = wins_get_console();
+        if (g_strcmp0(args[0], "set") == 0) {
+            char *tag = NULL;
+            char *value = NULL;
+            if (args[1] != NULL) {
+                tag = args[1];
+            } else {
+                cons_show("Usage: %s", help.usage);
+                g_strfreev(split_recipient);
+                return TRUE;
+            }
+            if (args[2] != NULL) {
+                value = args[2];
+            } else {
+                cons_show("Usage: %s", help.usage);
+                g_strfreev(split_recipient);
+                return TRUE;
+            }
+            form_set_value_by_tag(current->form, tag, value);
+            cons_show("Field set.");
         }
-        num = wins_get_num(current);
-        ui_switch_win(num);
+
+        if ((g_strcmp0(args[0], "submit") == 0) ||
+                (g_strcmp0(args[0], "cancel") == 0)) {
+            wins_close_current();
+            current = wins_get_by_recipient(room);
+            if (current == NULL) {
+                current = wins_get_console();
+            }
+            num = wins_get_num(current);
+            ui_switch_win(num);
+        }
 
         g_strfreev(split_recipient);
 

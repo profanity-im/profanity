@@ -382,9 +382,32 @@ _form_get_field_by_var(DataForm *form, const char * const var)
     return NULL;
 }
 
+static void
+_form_set_value_by_tag(DataForm *form, const char * const tag, char *value)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                if (g_slist_length(field->values) == 0) {
+                    field->values = g_slist_append(field->values, strdup(value));
+                } else if (g_slist_length(field->values) == 1) {
+                    free(field->values->data);
+                    field->values->data = strdup(value);
+                    return;
+                }
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+}
+
 void
 form_init_module(void)
 {
     form_destroy = _form_destroy;
     form_get_field_by_var = _form_get_field_by_var;
+    form_set_value_by_tag = _form_set_value_by_tag;
 }
