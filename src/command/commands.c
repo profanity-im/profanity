@@ -1901,19 +1901,23 @@ cmd_room(gchar **args, struct cmd_help_t help)
             if (args[1] != NULL) {
                 tag = args[1];
             } else {
-                cons_show("Usage: %s", help.usage);
+                ui_current_print_line("/room set command requires a field tag and value");
                 g_strfreev(split_recipient);
                 return TRUE;
             }
             if (args[2] != NULL) {
                 value = args[2];
             } else {
-                cons_show("Usage: %s", help.usage);
+                ui_current_print_line("/room set command requires a field tag and value");
                 g_strfreev(split_recipient);
                 return TRUE;
             }
-            form_set_value_by_tag(current->form, tag, value);
-            cons_show("Field set.");
+            if (!form_tag_exists(current->form, tag)) {
+                ui_current_print_line("Form does not contain a field with tag %s", tag);
+            } else {
+                form_set_value_by_tag(current->form, tag, value);
+                ui_current_print_line("%s set to %s", tag, value);
+            }
         }
 
         if ((g_strcmp0(args[0], "submit") == 0) ||

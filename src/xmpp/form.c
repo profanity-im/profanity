@@ -382,6 +382,20 @@ _form_get_field_by_var(DataForm *form, const char * const var)
     return NULL;
 }
 
+static gboolean
+_form_tag_exists(DataForm *form, const char * const tag)
+{
+    GList *tags = g_hash_table_get_keys(form->tag_to_var);
+    GList *curr = tags;
+    while (curr != NULL) {
+        if (g_strcmp0(curr->data, tag) == 0) {
+            return TRUE;
+        }
+        curr = g_list_next(curr);
+    }
+    return FALSE;
+}
+
 static void
 _form_set_value_by_tag(DataForm *form, const char * const tag, char *value)
 {
@@ -410,4 +424,5 @@ form_init_module(void)
     form_destroy = _form_destroy;
     form_get_field_by_var = _form_get_field_by_var;
     form_set_value_by_tag = _form_set_value_by_tag;
+    form_tag_exists = _form_tag_exists;
 }
