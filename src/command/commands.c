@@ -1893,6 +1893,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
             iq_room_config_cancel(room);
         }
 
+        wins_close_current();
+
         current = wins_get_by_recipient(room);
         if (current == NULL) {
             current = wins_get_console();
