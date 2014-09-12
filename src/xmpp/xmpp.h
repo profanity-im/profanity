@@ -40,6 +40,7 @@
 #include "config/accounts.h"
 #include "contact.h"
 #include "jid.h"
+#include "tools/autocomplete.h"
 
 #define JABBER_PRIORITY_MIN -128
 #define JABBER_PRIORITY_MAX 127
@@ -123,6 +124,7 @@ typedef struct data_form_t {
     GSList *fields;
     GHashTable *var_to_tag;
     GHashTable *tag_to_var;
+    Autocomplete tag_ac;
 } DataForm;
 
 void jabber_init_module(void);

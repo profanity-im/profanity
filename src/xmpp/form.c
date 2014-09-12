@@ -190,6 +190,7 @@ form_create(xmpp_stanza_t * const form_stanza)
     form->instructions = _get_property(form_stanza, "instructions");
     form->var_to_tag = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     form->tag_to_var = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    form->tag_ac = autocomplete_new();
 
     int tag_num = 1;
 
@@ -210,6 +211,7 @@ form_create(xmpp_stanza_t * const form_stanza)
             g_string_printf(tag, "field%d", tag_num++);
             g_hash_table_insert(form->var_to_tag, strdup(field->var), strdup(tag->str));
             g_hash_table_insert(form->tag_to_var, strdup(tag->str), strdup(field->var));
+            autocomplete_add(form->tag_ac, tag->str);
             g_string_free(tag, TRUE);
 
             field->description = _get_property(field_stanza, "desc");
@@ -363,6 +365,7 @@ _form_destroy(DataForm *form)
         g_slist_free_full(form->fields, (GDestroyNotify)_free_field);
         g_hash_table_destroy(form->var_to_tag);
         g_hash_table_destroy(form->tag_to_var);
+        autocomplete_free(form->tag_ac);
         free(form);
     }
 }

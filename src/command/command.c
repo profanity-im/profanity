@@ -65,6 +65,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 
 typedef char*(*autocompleter)(char*, int*);
 
@@ -2077,6 +2078,17 @@ static char *
 _room_autocomplete(char *input, int *size)
 {
     char *result = NULL;
+
+    ProfWin *current = wins_get_current();
+    if (current != NULL) {
+        DataForm *form = current->form;
+        if (form != NULL) {
+            result = autocomplete_param_with_ac(input, size, "/room set", form->tag_ac, TRUE);
+            if (result != NULL) {
+                return result;
+            }
+        }
+    }
 
     result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
     if (result != NULL) {
