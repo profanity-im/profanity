@@ -1920,6 +1920,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
                 switch (field_type) {
                 case FIELD_TEXT_SINGLE:
                 case FIELD_TEXT_PRIVATE:
+                case FIELD_JID_SINGLE:
                     form_set_value_by_tag(current->form, tag, value);
                     ui_current_print_line("%s set to %s", tag, value);
                     break;
