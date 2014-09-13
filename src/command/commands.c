@@ -1810,6 +1810,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "config") != 0) &&
             (g_strcmp0(args[0], "submit") != 0) &&
             (g_strcmp0(args[0], "set") != 0) &&
+            (g_strcmp0(args[0], "add") != 0) &&
+            (g_strcmp0(args[0], "remove") != 0) &&
             (g_strcmp0(args[0], "cancel") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
@@ -1819,6 +1821,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (win_type == WIN_MUC &&
             ((g_strcmp0(args[0], "submit") == 0) ||
             (g_strcmp0(args[0], "cancel") == 0) ||
+            (g_strcmp0(args[0], "add") == 0) ||
+            (g_strcmp0(args[0], "remove") == 0) ||
             (g_strcmp0(args[0], "set") == 0))) {
         cons_show("Command '/room %s' only allowed in room configuration windows.", args[0]);
         return TRUE;
@@ -1882,6 +1886,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
     // commands allowed in room config
     if ((g_strcmp0(args[0], "submit") == 0) ||
             (g_strcmp0(args[0], "cancel") == 0) ||
+            (g_strcmp0(args[0], "add") == 0) ||
+            (g_strcmp0(args[0], "remove") == 0) ||
             (g_strcmp0(args[0], "set") == 0)) {
 
         ProfWin *current = wins_get_current();
@@ -1945,9 +1951,57 @@ cmd_room(gchar **args, struct cmd_help_t help)
                     }
                     break;
                 default:
-                    ui_current_print_line("Value %s not valid for field: %s", value, tag);
+                    ui_current_print_line("Set command not valid for field: %s", value, tag);
                     break;
                 }
+            }
+        }
+
+        if (g_strcmp0(args[0], "add") == 0) {
+            char *tag = NULL;
+            char *value = NULL;
+            if (args[1] != NULL) {
+                tag = args[1];
+            } else {
+                ui_current_print_line("/room add command requires a field tag and value");
+                g_strfreev(split_recipient);
+                return TRUE;
+            }
+            if (args[2] != NULL) {
+                value = args[2];
+            } else {
+                ui_current_print_line("/room add command requires a field tag and value");
+                g_strfreev(split_recipient);
+                return TRUE;
+            }
+            if (!form_tag_exists(current->form, tag)) {
+                ui_current_print_line("Form does not contain a field with tag %s", tag);
+            } else {
+                ui_current_print_line("Add Tag: %s, Value: %s", tag, value);
+            }
+        }
+
+        if (g_strcmp0(args[0], "remove") == 0) {
+            char *tag = NULL;
+            char *value = NULL;
+            if (args[1] != NULL) {
+                tag = args[1];
+            } else {
+                ui_current_print_line("/room remove command requires a field tag and value");
+                g_strfreev(split_recipient);
+                return TRUE;
+            }
+            if (args[2] != NULL) {
+                value = args[2];
+            } else {
+                ui_current_print_line("/room remove command requires a field tag and value");
+                g_strfreev(split_recipient);
+                return TRUE;
+            }
+            if (!form_tag_exists(current->form, tag)) {
+                ui_current_print_line("Form does not contain a field with tag %s", tag);
+            } else {
+                ui_current_print_line("Remove Tag: %s, Value: %s", tag, value);
             }
         }
 

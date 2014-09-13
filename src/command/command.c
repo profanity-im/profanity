@@ -307,15 +307,17 @@ static struct cmd_t command_defs[] =
 
     { "/room",
         cmd_room, parse_args, 1, 3, NULL,
-        { "/room config accept|destroy|config|submit|cancel [tag value]", "Room configuration.",
-        { "/room config accept|destroy|config|submit|cancel [tag value]",
-          "------------------------------------------------------------",
+        { "/room config accept|destroy|config|submit|cancel|set|add|remove [tag value]", "Room configuration.",
+        { "/room config accept|destroy|config|submit|cancel|set|add|remove [tag value]",
+          "---------------------------------------------------------------------------",
           "config accept  - Accept default room configuration.",
           "config destroy - Cancel default room configuration.",
           "config config  - Edit room configuration.",
           "config submit  - Cancel room configuration.",
           "config cancel  - Cancel room configuration.",
-          "config set tag value - Set room configuration field to value.",
+          "config set tag value    - Set room configuration field to value.",
+          "config add tag value    - Add value to room configuration field.",
+          "config remove tag value - Remove value from room configuration field.",
           NULL } } },
 
     { "/rooms",
@@ -1217,6 +1219,8 @@ cmd_init(void)
     autocomplete_add(room_ac, "submit");
     autocomplete_add(room_ac, "cancel");
     autocomplete_add(room_ac, "set");
+    autocomplete_add(room_ac, "add");
+    autocomplete_add(room_ac, "remove");
 
     cmd_history_init();
 }
@@ -2084,6 +2088,14 @@ _room_autocomplete(char *input, int *size)
         DataForm *form = current->form;
         if (form != NULL) {
             result = autocomplete_param_with_ac(input, size, "/room set", form->tag_ac, TRUE);
+            if (result != NULL) {
+                return result;
+            }
+            result = autocomplete_param_with_ac(input, size, "/room add", form->tag_ac, TRUE);
+            if (result != NULL) {
+                return result;
+            }
+            result = autocomplete_param_with_ac(input, size, "/room remove", form->tag_ac, TRUE);
             if (result != NULL) {
                 return result;
             }
