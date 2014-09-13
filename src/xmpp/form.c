@@ -274,14 +274,11 @@ form_create_submission(DataForm *form)
         GSList *curr_value = NULL;
 
         switch (field->type_t) {
-
-            case FIELD_HIDDEN:
             case FIELD_TEXT_SINGLE:
             case FIELD_TEXT_PRIVATE:
             case FIELD_BOOLEAN:
             case FIELD_LIST_SINGLE:
             case FIELD_JID_SINGLE:
-            case FIELD_FIXED:
                 value_stanza = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(value_stanza, "value");
                 if (field->values != NULL) {
@@ -319,6 +316,8 @@ form_create_submission(DataForm *form)
                     curr_value = g_slist_next(curr_value);
                 }
                 break;
+            case FIELD_HIDDEN:
+            case FIELD_FIXED:
             default:
                 break;
         }
