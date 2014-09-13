@@ -441,6 +441,31 @@ _form_set_value_by_tag(DataForm *form, const char * const tag, char *value)
     }
 }
 
+static gboolean
+_form_field_contains_option_by_tag(DataForm *form, const char * const tag, char *value)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                GSList *curr_option = field->options;
+                while (curr_option != NULL) {
+                    FormOption *option = curr_option->data;
+                    if (g_strcmp0(option->value, value) == 0) {
+                        return TRUE;
+                    }
+                    curr_option = g_slist_next(curr_option);
+                }
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+
+    return FALSE;
+}
+
 void
 form_init_module(void)
 {
@@ -448,5 +473,6 @@ form_init_module(void)
     form_get_form_type_field = _form_get_form_type_field;
     form_get_field_type_by_tag = _form_get_field_type_by_tag;
     form_set_value_by_tag = _form_set_value_by_tag;
+    form_field_contains_option_by_tag = _form_field_contains_option_by_tag;
     form_tag_exists = _form_tag_exists;
 }

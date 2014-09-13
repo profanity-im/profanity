@@ -1916,6 +1916,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
                 ui_current_print_line("Form does not contain a field with tag %s", tag);
             } else {
                 form_field_type_t field_type = form_get_field_type_by_tag(current->form, tag);
+                gboolean valid = FALSE;
                 switch (field_type) {
                 case FIELD_TEXT_SINGLE:
                 case FIELD_TEXT_PRIVATE:
@@ -1930,11 +1931,20 @@ cmd_room(gchar **args, struct cmd_help_t help)
                         form_set_value_by_tag(current->form, tag, "0");
                         ui_current_print_line("%s set to %s", tag, value);
                     } else {
-                        ui_current_print_line("Value %s not valid for boolean field: %s", tag, value);
+                        ui_current_print_line("Value %s not valid for boolean field: %s", value, tag);
+                    }
+                    break;
+                case FIELD_LIST_SINGLE:
+                    valid = form_field_contains_option_by_tag(current->form, tag, value);
+                    if (valid == TRUE) {
+                        form_set_value_by_tag(current->form, tag, value);
+                        ui_current_print_line("%s set to %s", tag, value);
+                    } else {
+                        ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
                     }
                     break;
                 default:
-                    ui_current_print_line("Value %s not valid for field: %s", tag, value);
+                    ui_current_print_line("Value %s not valid for field: %s", value, tag);
                     break;
                 }
             }
