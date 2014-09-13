@@ -2041,6 +2041,8 @@ TODO add command to get help for a field
 
         curr_field = g_slist_next(curr_field);
     }
+
+    win_save_println(window, "");
 }
 
 static void

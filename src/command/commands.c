@@ -1915,8 +1915,16 @@ cmd_room(gchar **args, struct cmd_help_t help)
             if (!form_tag_exists(current->form, tag)) {
                 ui_current_print_line("Form does not contain a field with tag %s", tag);
             } else {
-                form_set_value_by_tag(current->form, tag, value);
-                ui_current_print_line("%s set to %s", tag, value);
+                form_field_type_t field_type = form_get_field_type_by_tag(current->form, tag);
+                switch (field_type) {
+                case FIELD_TEXT_SINGLE:
+                    form_set_value_by_tag(current->form, tag, value);
+                    ui_current_print_line("%s set to %s", tag, value);
+                    break;
+                default:
+                    ui_current_print_line("Value %s not valid for field: %s", tag, value);
+                    break;
+                }
             }
         }
 

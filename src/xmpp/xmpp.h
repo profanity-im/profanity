@@ -210,5 +210,6 @@ void (*form_destroy)(DataForm *form);
 char * (*form_get_form_type_field)(DataForm *form);
 void (*form_set_value_by_tag)(DataForm *form, const char * const tag, char *value);
 gboolean (*form_tag_exists)(DataForm *form, const char * const tag);
+form_field_type_t (*form_get_field_type_by_tag)(DataForm *form, const char * const tag);
 
 #endif

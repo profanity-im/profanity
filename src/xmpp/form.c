@@ -277,6 +277,8 @@ form_create_submission(DataForm *form)
         GSList *curr_value = NULL;
 
         switch (field->type_t) {
+            case FIELD_HIDDEN:
+            case FIELD_FIXED:
             case FIELD_TEXT_SINGLE:
             case FIELD_TEXT_PRIVATE:
             case FIELD_BOOLEAN:
@@ -319,8 +321,6 @@ form_create_submission(DataForm *form)
                     curr_value = g_slist_next(curr_value);
                 }
                 break;
-            case FIELD_HIDDEN:
-            case FIELD_FIXED:
             default:
                 break;
         }
@@ -402,6 +402,23 @@ _form_tag_exists(DataForm *form, const char * const tag)
     return FALSE;
 }
 
+static form_field_type_t
+_form_get_field_type_by_tag(DataForm *form, const char * const tag)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                return field->type_t;
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+    return FIELD_UNKNOWN;
+}
+
 static void
 _form_set_value_by_tag(DataForm *form, const char * const tag, char *value)
 {
@@ -429,6 +446,7 @@ form_init_module(void)
 {
     form_destroy = _form_destroy;
     form_get_form_type_field = _form_get_form_type_field;
+    form_get_field_type_by_tag = _form_get_field_type_by_tag;
     form_set_value_by_tag = _form_set_value_by_tag;
     form_tag_exists = _form_tag_exists;
 }
