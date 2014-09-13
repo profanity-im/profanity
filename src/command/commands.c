@@ -1918,8 +1918,20 @@ cmd_room(gchar **args, struct cmd_help_t help)
                 form_field_type_t field_type = form_get_field_type_by_tag(current->form, tag);
                 switch (field_type) {
                 case FIELD_TEXT_SINGLE:
+                case FIELD_TEXT_PRIVATE:
                     form_set_value_by_tag(current->form, tag, value);
                     ui_current_print_line("%s set to %s", tag, value);
+                    break;
+                case FIELD_BOOLEAN:
+                    if (g_strcmp0(value, "on") == 0) {
+                        form_set_value_by_tag(current->form, tag, "1");
+                        ui_current_print_line("%s set to %s", tag, value);
+                    } else if (g_strcmp0(value, "off") == 0) {
+                        form_set_value_by_tag(current->form, tag, "0");
+                        ui_current_print_line("%s set to %s", tag, value);
+                    } else {
+                        ui_current_print_line("Value %s not valid for boolean field: %s", tag, value);
+                    }
                     break;
                 default:
                     ui_current_print_line("Value %s not valid for field: %s", tag, value);
