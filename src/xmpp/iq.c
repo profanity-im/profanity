@@ -827,7 +827,7 @@ _disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
             DataForm *form = form_create(softwareinfo);
             FormField *formField = NULL;
 
-            char *form_type = form_get_field_by_var(form, "FORM_TYPE");
+            char *form_type = form_get_form_type_field(form);
             if (g_strcmp0(form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
                 GSList *field = form->fields;
                 while (field != NULL) {

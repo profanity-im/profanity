@@ -207,7 +207,7 @@ void (*roster_send_add_new)(const char * const barejid, const char * const name)
 void (*roster_send_remove)(const char * const barejid);
 
 void (*form_destroy)(DataForm *form);
-char * (*form_get_field_by_var)(DataForm *form, const char * const var);
+char * (*form_get_form_type_field)(DataForm *form);
 void (*form_set_value_by_tag)(DataForm *form, const char * const tag, char *value);
 gboolean (*form_tag_exists)(DataForm *form, const char * const tag);
 

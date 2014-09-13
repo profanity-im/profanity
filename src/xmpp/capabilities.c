@@ -172,7 +172,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (strcmp(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
                 form = form_create(child);
-                char *form_type = form_get_field_by_var(form, "FORM_TYPE");
+                char *form_type = form_get_form_type_field(form);
                 form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)strcmp);
                 g_hash_table_insert(forms, g_strdup(form_type), form);
             }
@@ -196,7 +196,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     curr = form_names;
     while (curr != NULL) {
         form = g_hash_table_lookup(forms, curr->data);
-        char *form_type = form_get_field_by_var(form, "FORM_TYPE");
+        char *form_type = form_get_form_type_field(form);
         g_string_append(s, form_type);
         g_string_append(s, "<");
 

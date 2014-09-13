@@ -374,12 +374,12 @@ _form_destroy(DataForm *form)
 }
 
 static char *
-_form_get_field_by_var(DataForm *form, const char * const var)
+_form_get_form_type_field(DataForm *form)
 {
     GSList *curr = form->fields;
     while (curr != NULL) {
         FormField *field = curr->data;
-        if (g_strcmp0(field->var, var) == 0) {
+        if (g_strcmp0(field->var, "FORM_TYPE") == 0) {
             return field->values->data;
         }
         curr = g_slist_next(curr);
@@ -428,7 +428,7 @@ void
 form_init_module(void)
 {
     form_destroy = _form_destroy;
-    form_get_field_by_var = _form_get_field_by_var;
+    form_get_form_type_field = _form_get_form_type_field;
     form_set_value_by_tag = _form_set_value_by_tag;
     form_tag_exists = _form_tag_exists;
 }
