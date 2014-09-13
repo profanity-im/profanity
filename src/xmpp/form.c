@@ -162,7 +162,7 @@ _get_field_type(const char * const type)
         return FIELD_LIST_SINGLE;
     }
     if (g_strcmp0(type, "list-multi") == 0) {
-        return FIELD_LIST_MUTLI;
+        return FIELD_LIST_MULTI;
     }
     if (g_strcmp0(type, "jid-single") == 0) {
         return FIELD_JID_SINGLE;
@@ -300,7 +300,7 @@ form_create_submission(DataForm *form)
                 break;
 
             case FIELD_TEXT_MULTI:
-            case FIELD_LIST_MUTLI:
+            case FIELD_LIST_MULTI:
             case FIELD_JID_MULTI:
                 curr_value = field->values;
                 while (curr_value != NULL) {
@@ -403,7 +403,7 @@ _form_tag_exists(DataForm *form, const char * const tag)
 }
 
 static form_field_type_t
-_form_get_field_type_by_tag(DataForm *form, const char * const tag)
+_form_get_field_type(DataForm *form, const char * const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var != NULL) {
@@ -420,7 +420,7 @@ _form_get_field_type_by_tag(DataForm *form, const char * const tag)
 }
 
 static void
-_form_set_value_by_tag(DataForm *form, const char * const tag, char *value)
+_form_set_value(DataForm *form, const char * const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var != NULL) {
@@ -441,8 +441,37 @@ _form_set_value_by_tag(DataForm *form, const char * const tag, char *value)
     }
 }
 
+static void
+_form_add_value(DataForm *form, const char * const tag, char *value)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                gboolean already_set = FALSE;
+                GSList *curr_value = field->values;
+                while (curr_value != NULL) {
+                    if (g_strcmp0(curr_value->data, value) == 0) {
+                        already_set = TRUE;
+                        break;
+                    }
+                    curr_value = g_slist_next(curr_value);
+                }
+
+                if (!already_set) {
+                    field->values = g_slist_append(field->values, strdup(value));
+                }
+                return;
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+}
+
 static gboolean
-_form_field_contains_option_by_tag(DataForm *form, const char * const tag, char *value)
+_form_field_contains_option(DataForm *form, const char * const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
     if (var != NULL) {
@@ -471,8 +500,9 @@ form_init_module(void)
 {
     form_destroy = _form_destroy;
     form_get_form_type_field = _form_get_form_type_field;
-    form_get_field_type_by_tag = _form_get_field_type_by_tag;
-    form_set_value_by_tag = _form_set_value_by_tag;
-    form_field_contains_option_by_tag = _form_field_contains_option_by_tag;
+    form_get_field_type = _form_get_field_type;
+    form_set_value = _form_set_value;
+    form_add_value = _form_add_value;
+    form_field_contains_option = _form_field_contains_option;
     form_tag_exists = _form_tag_exists;
 }

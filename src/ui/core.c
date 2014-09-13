@@ -1942,7 +1942,7 @@ _ui_handle_form_field(ProfWin *window, FormField *field)
             }
         }
         break;
-    case FIELD_LIST_MUTLI:
+    case FIELD_LIST_MULTI:
         if (curr_value != NULL) {
             win_save_newline(window);
             GSList *options = field->options;

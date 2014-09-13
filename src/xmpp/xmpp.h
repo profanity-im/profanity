@@ -94,7 +94,7 @@ typedef enum {
     FIELD_TEXT_MULTI,
     FIELD_BOOLEAN,
     FIELD_LIST_SINGLE,
-    FIELD_LIST_MUTLI,
+    FIELD_LIST_MULTI,
     FIELD_JID_SINGLE,
     FIELD_JID_MULTI,
     FIELD_FIXED,
@@ -208,9 +208,10 @@ void (*roster_send_remove)(const char * const barejid);
 
 void (*form_destroy)(DataForm *form);
 char * (*form_get_form_type_field)(DataForm *form);
-void (*form_set_value_by_tag)(DataForm *form, const char * const tag, char *value);
+void (*form_set_value)(DataForm *form, const char * const tag, char *value);
+void (*form_add_value)(DataForm *form, const char * const tag, char *value);
 gboolean (*form_tag_exists)(DataForm *form, const char * const tag);
-form_field_type_t (*form_get_field_type_by_tag)(DataForm *form, const char * const tag);
-gboolean (*form_field_contains_option_by_tag)(DataForm *form, const char * const tag, char *value);
+form_field_type_t (*form_get_field_type)(DataForm *form, const char * const tag);
+gboolean (*form_field_contains_option)(DataForm *form, const char * const tag, char *value);
 
 #endif
