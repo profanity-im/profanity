@@ -80,6 +80,7 @@ _form_new(void)
     form->fields = NULL;
     form->var_to_tag = NULL;
     form->tag_to_var = NULL;
+    form->tag_ac = NULL;
 
     return form;
 }
