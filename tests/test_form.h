@@ -8,3 +8,6 @@ void set_value_updates_when_one(void **state);
 void add_unique_value_adds_when_none(void **state);
 void add_unique_value_does_nothing_when_exists(void **state);
 void add_unique_value_adds_when_doesnt_exist(void **state);
+void add_value_adds_when_none(void **state);
+void add_value_adds_when_some(void **state);
+void add_value_adds_when_exists(void **state);

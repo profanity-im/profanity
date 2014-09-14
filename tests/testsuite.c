@@ -541,6 +541,9 @@ int main(int argc, char* argv[]) {
         unit_test(add_unique_value_adds_when_none),
         unit_test(add_unique_value_does_nothing_when_exists),
         unit_test(add_unique_value_adds_when_doesnt_exist),
+        unit_test(add_value_adds_when_none),
+        unit_test(add_value_adds_when_some),
+        unit_test(add_value_adds_when_exists),
     };
 
     return run_tests(all_tests);

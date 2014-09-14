@@ -354,3 +354,121 @@ void add_unique_value_adds_when_doesnt_exist(void **state)
 
     form_destroy(form);
 }
+
+void add_value_adds_when_none(void **state)
+{
+    form_init_module();
+
+    DataForm *form = _new_form();
+    g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
+
+    FormField *field1 = _new_field();
+    field1->var = strdup("var1");
+    field1->type_t = FIELD_LIST_MULTI;
+    form->fields = g_slist_append(form->fields, field1);
+
+    form_add_value(form, "tag1", "somevalue");
+
+    int length = 0;
+    char *value = NULL;
+    GSList *curr_field = form->fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        if (g_strcmp0(field->var, "var1") == 0) {
+            length = g_slist_length(field->values);
+            value = field->values->data;
+            break;
+        }
+        curr_field = g_slist_next(curr_field);
+    }
+
+    assert_int_equal(length, 1);
+    assert_string_equal(value, "somevalue");
+
+    form_destroy(form);
+}
+
+void add_value_adds_when_some(void **state)
+{
+    form_init_module();
+
+    DataForm *form = _new_form();
+    g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
+
+    FormField *field1 = _new_field();
+    field1->var = strdup("var1");
+    field1->type_t = FIELD_LIST_MULTI;
+    field1->values = g_slist_append(field1->values, strdup("some text"));
+    field1->values = g_slist_append(field1->values, strdup("some more text"));
+    field1->values = g_slist_append(field1->values, strdup("yet some more text"));
+    form->fields = g_slist_append(form->fields, field1);
+
+    form_add_value(form, "tag1", "new value");
+
+    int num_values = 0;
+    int new_value_count = 0;
+    GSList *curr_field = form->fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        if (g_strcmp0(field->var, "var1") == 0) {
+            GSList *curr_value = field->values;
+            while (curr_value != NULL) {
+                num_values++;
+                if (g_strcmp0(curr_value->data, "new value") == 0) {
+                    new_value_count++;
+                }
+                curr_value = g_slist_next(curr_value);
+            }
+            break;
+        }
+        curr_field = g_slist_next(curr_field);
+    }
+
+    assert_int_equal(num_values, 4);
+    assert_int_equal(new_value_count, 1);
+
+    form_destroy(form);
+}
+
+void add_value_adds_when_exists(void **state)
+{
+    form_init_module();
+
+    DataForm *form = _new_form();
+    g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
+
+    FormField *field1 = _new_field();
+    field1->var = strdup("var1");
+    field1->type_t = FIELD_LIST_MULTI;
+    field1->values = g_slist_append(field1->values, strdup("some text"));
+    field1->values = g_slist_append(field1->values, strdup("some more text"));
+    field1->values = g_slist_append(field1->values, strdup("yet some more text"));
+    field1->values = g_slist_append(field1->values, strdup("new value"));
+    form->fields = g_slist_append(form->fields, field1);
+
+    form_add_value(form, "tag1", "new value");
+
+    int num_values = 0;
+    int new_value_count = 0;
+    GSList *curr_field = form->fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        if (g_strcmp0(field->var, "var1") == 0) {
+            GSList *curr_value = field->values;
+            while (curr_value != NULL) {
+                num_values++;
+                if (g_strcmp0(curr_value->data, "new value") == 0) {
+                    new_value_count++;
+                }
+                curr_value = g_slist_next(curr_value);
+            }
+            break;
+        }
+        curr_field = g_slist_next(curr_field);
+    }
+
+    assert_int_equal(num_values, 5);
+    assert_int_equal(new_value_count, 2);
+
+    form_destroy(form);
+}
