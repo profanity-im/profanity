@@ -486,10 +486,79 @@ _form_add_unique_value(DataForm *form, const char * const tag, char *value)
     return FALSE;
 }
 
-static void
+static gboolean
 _form_remove_value(DataForm *form, const char * const tag, char *value)
 {
-    // TODO
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                GSList *found = g_slist_find_custom(field->values, value, (GCompareFunc)g_strcmp0);
+                if (found != NULL) {
+                    free(found->data);
+                    found->data = NULL;
+                    field->values = g_slist_delete_link(field->values, found);
+                    return TRUE;
+                } else {
+                    return FALSE;
+                }
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+
+    return FALSE;
+}
+
+static gboolean
+_form_remove_text_multi_value(DataForm *form, const char * const tag, int index)
+{
+    index--;
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                GSList *item = g_slist_nth(field->values, index);
+                if (item != NULL) {
+                    free(item->data);
+                    item->data = NULL;
+                    field->values = g_slist_delete_link(field->values, item);
+                    return TRUE;
+                } else {
+                    return FALSE;
+                }
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+
+    return FALSE;
+}
+
+static int
+_form_get_value_count(DataForm *form, const char * const tag)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                if ((g_slist_length(field->values) == 1) && (field->values->data == NULL)) {
+                    return 0;
+                } else {
+                    return g_slist_length(field->values);
+                }
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+
+    return 0;
 }
 
 static gboolean
@@ -527,6 +596,8 @@ form_init_module(void)
     form_add_unique_value = _form_add_unique_value;
     form_add_value = _form_add_value;
     form_remove_value = _form_remove_value;
+    form_remove_text_multi_value = _form_remove_text_multi_value;
     form_field_contains_option = _form_field_contains_option;
     form_tag_exists = _form_tag_exists;
+    form_get_value_count = _form_get_value_count;
 }

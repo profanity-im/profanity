@@ -1914,7 +1914,10 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         int index = 1;
         while (curr_value != NULL) {
             char *value = curr_value->data;
-            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%d] %s", index++, value);
+            GString *val_tag = g_string_new("");
+            g_string_printf(val_tag, "val%d", index++);
+            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%s] %s", val_tag->str, value);
+            g_string_free(val_tag, TRUE);
             curr_value = g_slist_next(curr_value);
         }
         break;

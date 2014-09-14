@@ -211,9 +211,11 @@ char * (*form_get_form_type_field)(DataForm *form);
 void (*form_set_value)(DataForm *form, const char * const tag, char *value);
 gboolean (*form_add_unique_value)(DataForm *form, const char * const tag, char *value);
 void (*form_add_value)(DataForm *form, const char * const tag, char *value);
-void (*form_remove_value)(DataForm *form, const char * const tag, char *value);
+gboolean (*form_remove_value)(DataForm *form, const char * const tag, char *value);
+gboolean (*form_remove_text_multi_value)(DataForm *form, const char * const tag, int index);
 gboolean (*form_tag_exists)(DataForm *form, const char * const tag);
 form_field_type_t (*form_get_field_type)(DataForm *form, const char * const tag);
 gboolean (*form_field_contains_option)(DataForm *form, const char * const tag, char *value);
+int (*form_get_value_count)(DataForm *form, const char * const tag);
 
 #endif

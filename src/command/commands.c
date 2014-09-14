@@ -2035,22 +2035,51 @@ cmd_room(gchar **args, struct cmd_help_t help)
             } else {
                 form_field_type_t field_type = form_get_field_type(current->form, tag);
                 gboolean valid = FALSE;
+                gboolean removed = FALSE;
                 switch (field_type) {
                 case FIELD_LIST_MULTI:
                     valid = form_field_contains_option(current->form, tag, value);
                     if (valid == TRUE) {
-                        form_remove_value(current->form, tag, value);
-                        ui_current_print_line("Removed %s from %s", value, tag);
+                        removed = form_remove_value(current->form, tag, value);
+                        if (removed) {
+                            ui_current_print_line("Removed %s from %s", value, tag);
+                        } else {
+                            ui_current_print_line("Value %s is not currently set for %s", value, tag);
+                        }
                     } else {
                         ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
                     }
                     break;
                 case FIELD_TEXT_MULTI:
-                    ui_current_print_line("TODO");
+                    if (!g_str_has_prefix(value, "val")) {
+                        ui_current_print_line("No such value %s for %s", value, tag);
+                        break;
+                    }
+                    if (strlen(value) < 4) {
+                        ui_current_print_line("No such value %s for %s", value, tag);
+                        break;
+                    }
+
+                    int index = strtol(&value[3], NULL, 10);
+                    if ((index < 1) || (index > form_get_value_count(current->form, tag))) {
+                        ui_current_print_line("No such value %s for %s", value, tag);
+                        break;
+                    }
+
+                    removed = form_remove_text_multi_value(current->form, tag, index);
+                    if (removed) {
+                        ui_current_print_line("Removed %s from %s", value, tag);
+                    } else {
+                        ui_current_print_line("Could not remove %s from %s", value, tag);
+                    }
                     break;
                 case FIELD_JID_MULTI:
-                    form_remove_value(current->form, tag, value);
-                    ui_current_print_line("Removed %s from %s", value, tag);
+                    removed = form_remove_value(current->form, tag, value);
+                    if (removed) {
+                        ui_current_print_line("Removed %s from %s", value, tag);
+                    } else {
+                        ui_current_print_line("Field %s does not contain %s", tag, value);
+                    }
                     break;
                 default:
                     ui_current_print_line("Remove command not valid for field: %s", tag);
