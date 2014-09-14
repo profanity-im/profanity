@@ -430,6 +430,7 @@ _form_set_value(DataForm *form, const char * const tag, char *value)
             if (g_strcmp0(field->var, var) == 0) {
                 if (g_slist_length(field->values) == 0) {
                     field->values = g_slist_append(field->values, strdup(value));
+                    return;
                 } else if (g_slist_length(field->values) == 1) {
                     free(field->values->data);
                     field->values->data = strdup(value);
@@ -450,24 +451,39 @@ _form_add_value(DataForm *form, const char * const tag, char *value)
         while (curr != NULL) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
-                gboolean already_set = FALSE;
-                GSList *curr_value = field->values;
-                while (curr_value != NULL) {
-                    if (g_strcmp0(curr_value->data, value) == 0) {
-                        already_set = TRUE;
-                        break;
-                    }
-                    curr_value = g_slist_next(curr_value);
-                }
-
-                if (!already_set) {
-                    field->values = g_slist_append(field->values, strdup(value));
-                }
+                field->values = g_slist_append(field->values, strdup(value));
                 return;
             }
             curr = g_slist_next(curr);
         }
     }
+}
+
+static gboolean
+_form_add_unique_value(DataForm *form, const char * const tag, char *value)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                GSList *curr_value = field->values;
+                while (curr_value != NULL) {
+                    if (g_strcmp0(curr_value->data, value) == 0) {
+                        return FALSE;
+                    }
+                    curr_value = g_slist_next(curr_value);
+                }
+
+                field->values = g_slist_append(field->values, strdup(value));
+                return TRUE;
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+
+    return FALSE;
 }
 
 static void
@@ -508,6 +524,7 @@ form_init_module(void)
     form_get_form_type_field = _form_get_form_type_field;
     form_get_field_type = _form_get_field_type;
     form_set_value = _form_set_value;
+    form_add_unique_value = _form_add_unique_value;
     form_add_value = _form_add_value;
     form_remove_value = _form_remove_value;
     form_field_contains_option = _form_field_contains_option;

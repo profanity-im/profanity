@@ -1979,20 +1979,32 @@ cmd_room(gchar **args, struct cmd_help_t help)
             } else {
                 form_field_type_t field_type = form_get_field_type(current->form, tag);
                 gboolean valid = FALSE;
+                gboolean added = FALSE;
                 switch (field_type) {
                 case FIELD_LIST_MULTI:
                     valid = form_field_contains_option(current->form, tag, value);
-                    if (valid == TRUE) {
-                        form_add_value(current->form, tag, value);
-                        ui_current_print_line("Added %s to %s", value, tag);
+                    if (valid) {
+                        added = form_add_unique_value(current->form, tag, value);
+                        if (added) {
+                            ui_current_print_line("Added %s to %s", value, tag);
+                        } else {
+                            ui_current_print_line("Value %s already selected for %s", value, tag);
+                        }
                     } else {
                         ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
                     }
                     break;
                 case FIELD_TEXT_MULTI:
-                case FIELD_JID_MULTI:
                     form_add_value(current->form, tag, value);
                     ui_current_print_line("Added %s to %s", value, tag);
+                    break;
+                case FIELD_JID_MULTI:
+                    added = form_add_unique_value(current->form, tag, value);
+                    if (added) {
+                        ui_current_print_line("Added %s to %s", value, tag);
+                    } else {
+                        ui_current_print_line("JID %s already exists in %s", value, tag);
+                    }
                     break;
                 default:
                     ui_current_print_line("Add command not valid for field: %s", tag);
