@@ -1,0 +1,10 @@
+void get_form_type_field_returns_null_no_fields(void **state);
+void get_form_type_field_returns_null_when_not_present(void **state);
+void get_form_type_field_returns_value_when_present(void **state);
+void get_field_type_returns_unknown_when_no_fields(void **state);
+void get_field_type_returns_correct_type(void **state);
+void set_value_adds_when_none(void **state);
+void set_value_updates_when_one(void **state);
+void add_unique_value_adds_when_none(void **state);
+void add_unique_value_does_nothing_when_exists(void **state);
+void add_unique_value_adds_when_doesnt_exist(void **state);

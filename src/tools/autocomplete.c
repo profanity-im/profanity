@@ -62,10 +62,12 @@ autocomplete_new(void)
 void
 autocomplete_clear(Autocomplete ac)
 {
-    g_slist_free_full(ac->items, free);
-    ac->items = NULL;
+    if (ac != NULL) {
+        g_slist_free_full(ac->items, free);
+        ac->items = NULL;
 
-    autocomplete_reset(ac);
+        autocomplete_reset(ac);
+    }
 }
 
 void

@@ -31,6 +31,7 @@
 #include "test_muc.h"
 #include "test_cmd_roster.h"
 #include "test_cmd_win.h"
+#include "test_form.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
@@ -529,6 +530,17 @@ int main(int argc, char* argv[]) {
 
         unit_test(cmd_win_shows_message_when_win_doesnt_exist),
         unit_test(cmd_win_switches_to_given_win_when_exists),
+
+        unit_test(get_form_type_field_returns_null_no_fields),
+        unit_test(get_form_type_field_returns_null_when_not_present),
+        unit_test(get_form_type_field_returns_value_when_present),
+        unit_test(get_field_type_returns_unknown_when_no_fields),
+        unit_test(get_field_type_returns_correct_type),
+        unit_test(set_value_adds_when_none),
+        unit_test(set_value_updates_when_one),
+        unit_test(add_unique_value_adds_when_none),
+        unit_test(add_unique_value_does_nothing_when_exists),
+        unit_test(add_unique_value_adds_when_doesnt_exist),
     };
 
     return run_tests(all_tests);

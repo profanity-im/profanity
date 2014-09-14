@@ -11,7 +11,7 @@ core_sources = \
 	src/xmpp/capabilities.h src/xmpp/connection.h \
 	src/xmpp/roster.c src/xmpp/roster.h \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
-    src/xmpp/form.c src/xmpp/form.h \
+	src/xmpp/form.c src/xmpp/form.h \
 	src/server_events.c src/server_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
@@ -39,6 +39,7 @@ tests_sources = \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
+	src/xmpp/form.c src/xmpp/form.h \
 	src/xmpp/xmpp.h \
 	src/ui/ui.h \
 	src/command/command.h src/command/command.c src/command/history.c \
@@ -86,6 +87,7 @@ tests_sources = \
 	tests/test_muc.c tests/test_muc.h \
 	tests/test_cmd_roster.c tests/test_cmd_roster.h \
 	tests/test_cmd_win.c tests/test_cmd_win.h \
+	tests/test_form.c tests/test_form.h \
 	tests/testsuite.c
 
 main_source = src/main.c
