@@ -4,3 +4,4 @@ Don't allow form windows to be closed without submitting/cancelling
 Help command for form fields
 Command to show current form
 Handle error on form submit
+Show field after setting/adding/removing

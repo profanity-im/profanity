@@ -1903,9 +1903,10 @@ _ui_handle_form_field(ProfWin *window, FormField *field)
         break;
     case FIELD_TEXT_MULTI:
         win_save_newline(window);
+        int index = 1;
         while (curr_value != NULL) {
             char *value = curr_value->data;
-            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
+            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%d] %s", index++, value);
             curr_value = g_slist_next(curr_value);
         }
         break;
@@ -1934,9 +1935,9 @@ _ui_handle_form_field(ProfWin *window, FormField *field)
             while (curr_option != NULL) {
                 FormOption *option = curr_option->data;
                 if (g_strcmp0(option->value, value) == 0) {
-                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%s] %s", option->value, option->label);
                 } else {
-                    win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_OFFLINE, "", "  [%s] %s", option->value, option->label);
                 }
                 curr_option = g_slist_next(curr_option);
             }
@@ -1950,9 +1951,9 @@ _ui_handle_form_field(ProfWin *window, FormField *field)
             while (curr_option != NULL) {
                 FormOption *option = curr_option->data;
                 if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0) != NULL) {
-                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s (%s)", option->label, option->value);
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%s] %s", option->value, option->label);
                 } else {
-                    win_save_vprint(window, '-', NULL, 0, 0, "", "  %s (%s)", option->label, option->value);
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_OFFLINE, "", "  [%s] %s", option->value, option->label);
                 }
                 curr_option = g_slist_next(curr_option);
             }
@@ -2021,12 +2022,13 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
         FormField *field = curr_field->data;
 
         if (g_strcmp0(field->type, "hidden") != 0) {
-            win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "%s (", field->label);
-            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_AWAY, "", g_hash_table_lookup(form->var_to_tag, field->var));
+            char *tag = g_hash_table_lookup(form->var_to_tag, field->var);
+            win_save_vprint(window, '-', NULL, NO_EOL, COLOUR_AWAY, "", "[%s] ", tag);
+            win_save_vprint(window, '-', NULL, NO_EOL | NO_DATE, 0, "", "%s", field->label);
             if (field->required) {
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ") Required: ");
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " (required): ");
             } else {
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", "): ");
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ": ");
             }
 
             _ui_handle_form_field(window, field);

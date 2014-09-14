@@ -2021,7 +2021,29 @@ cmd_room(gchar **args, struct cmd_help_t help)
             if (!form_tag_exists(current->form, tag)) {
                 ui_current_print_line("Form does not contain a field with tag %s", tag);
             } else {
-                ui_current_print_line("Remove Tag: %s, Value: %s", tag, value);
+                form_field_type_t field_type = form_get_field_type(current->form, tag);
+                gboolean valid = FALSE;
+                switch (field_type) {
+                case FIELD_LIST_MULTI:
+                    valid = form_field_contains_option(current->form, tag, value);
+                    if (valid == TRUE) {
+                        form_remove_value(current->form, tag, value);
+                        ui_current_print_line("Removed %s from %s", value, tag);
+                    } else {
+                        ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
+                    }
+                    break;
+                case FIELD_TEXT_MULTI:
+                    ui_current_print_line("TODO");
+                    break;
+                case FIELD_JID_MULTI:
+                    form_remove_value(current->form, tag, value);
+                    ui_current_print_line("Removed %s from %s", value, tag);
+                    break;
+                default:
+                    ui_current_print_line("Remove command not valid for field: %s", tag);
+                    break;
+                }
             }
         }
 

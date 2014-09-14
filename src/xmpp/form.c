@@ -470,6 +470,12 @@ _form_add_value(DataForm *form, const char * const tag, char *value)
     }
 }
 
+static void
+_form_remove_value(DataForm *form, const char * const tag, char *value)
+{
+    // TODO
+}
+
 static gboolean
 _form_field_contains_option(DataForm *form, const char * const tag, char *value)
 {
@@ -503,6 +509,7 @@ form_init_module(void)
     form_get_field_type = _form_get_field_type;
     form_set_value = _form_set_value;
     form_add_value = _form_add_value;
+    form_remove_value = _form_remove_value;
     form_field_contains_option = _form_field_contains_option;
     form_tag_exists = _form_tag_exists;
 }
