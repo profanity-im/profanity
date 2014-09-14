@@ -1871,8 +1871,16 @@ _ui_draw_term_title(void)
 }
 
 static void
-_ui_handle_form_field(ProfWin *window, FormField *field)
+_ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
 {
+    win_save_vprint(window, '-', NULL, NO_EOL, COLOUR_AWAY, "", "[%s] ", tag);
+    win_save_vprint(window, '-', NULL, NO_EOL | NO_DATE, 0, "", "%s", field->label);
+    if (field->required) {
+        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " (required): ");
+    } else {
+        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ": ");
+    }
+
     GSList *values = field->values;
     GSList *curr_value = values;
 
@@ -2023,15 +2031,7 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
 
         if (g_strcmp0(field->type, "hidden") != 0) {
             char *tag = g_hash_table_lookup(form->var_to_tag, field->var);
-            win_save_vprint(window, '-', NULL, NO_EOL, COLOUR_AWAY, "", "[%s] ", tag);
-            win_save_vprint(window, '-', NULL, NO_EOL | NO_DATE, 0, "", "%s", field->label);
-            if (field->required) {
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " (required): ");
-            } else {
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ": ");
-            }
-
-            _ui_handle_form_field(window, field);
+            _ui_handle_form_field(window, tag, field);
 
 /*
 TODO add command to get help for a field
