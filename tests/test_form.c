@@ -472,3 +472,141 @@ void add_value_adds_when_exists(void **state)
 
     form_destroy(form);
 }
+
+void remove_value_does_nothing_when_none(void **state)
+{
+    form_init_module();
+
+    DataForm *form = _new_form();
+    g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
+
+    FormField *field1 = _new_field();
+    field1->var = strdup("var1");
+    field1->type_t = FIELD_LIST_MULTI;
+    form->fields = g_slist_append(form->fields, field1);
+
+    gboolean res = form_remove_value(form, "tag1", "some value");
+
+    int length = -1;
+    GSList *curr_field = form->fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        if (g_strcmp0(field->var, "var1") == 0) {
+            length = g_slist_length(field->values);
+        }
+        curr_field = g_slist_next(curr_field);
+    }
+
+    assert_false(res);
+    assert_int_equal(length, 0);
+
+    form_destroy(form);
+}
+
+void remove_value_does_nothing_when_doesnt_exist(void **state)
+{
+    form_init_module();
+
+    DataForm *form = _new_form();
+    g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
+
+    FormField *field1 = _new_field();
+    field1->var = strdup("var1");
+    field1->type_t = FIELD_LIST_MULTI;
+    field1->values = g_slist_append(field1->values, strdup("value1"));
+    field1->values = g_slist_append(field1->values, strdup("value2"));
+    field1->values = g_slist_append(field1->values, strdup("value3"));
+    field1->values = g_slist_append(field1->values, strdup("value4"));
+    form->fields = g_slist_append(form->fields, field1);
+
+    gboolean res = form_remove_value(form, "tag1", "value5");
+
+    int length = -1;
+    int value_count = 0;
+    GSList *curr_field = form->fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        if (g_strcmp0(field->var, "var1") == 0) {
+            length = g_slist_length(field->values);
+            GSList *curr_value = field->values;
+            while (curr_value != NULL) {
+                if (g_strcmp0(curr_value->data, "value5") == 0) {
+                    value_count++;
+                }
+                curr_value = g_slist_next(curr_value);
+            }
+        }
+        curr_field = g_slist_next(curr_field);
+    }
+
+    assert_false(res);
+    assert_int_equal(length, 4);
+    assert_int_equal(value_count, 0);
+
+    form_destroy(form);
+}
+
+void remove_value_does_removes_when_one(void **state)
+{
+    form_init_module();
+
+    DataForm *form = _new_form();
+    g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
+
+    FormField *field1 = _new_field();
+    field1->var = strdup("var1");
+    field1->type_t = FIELD_LIST_MULTI;
+    field1->values = g_slist_append(field1->values, strdup("value4"));
+    form->fields = g_slist_append(form->fields, field1);
+
+    gboolean res = form_remove_value(form, "tag1", "value4");
+
+    int length = -1;
+    GSList *curr_field = form->fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        if (g_strcmp0(field->var, "var1") == 0) {
+            length = g_slist_length(field->values);
+        }
+        curr_field = g_slist_next(curr_field);
+    }
+
+    assert_true(res);
+    assert_int_equal(length, 0);
+
+    form_destroy(form);
+}
+
+void remove_value_does_removes_when_many(void **state)
+{
+    form_init_module();
+
+    DataForm *form = _new_form();
+    g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
+
+    FormField *field1 = _new_field();
+    field1->var = strdup("var1");
+    field1->type_t = FIELD_LIST_MULTI;
+    field1->values = g_slist_append(field1->values, strdup("value1"));
+    field1->values = g_slist_append(field1->values, strdup("value2"));
+    field1->values = g_slist_append(field1->values, strdup("value3"));
+    field1->values = g_slist_append(field1->values, strdup("value4"));
+    form->fields = g_slist_append(form->fields, field1);
+
+    gboolean res = form_remove_value(form, "tag1", "value2");
+
+    int length = -1;
+    GSList *curr_field = form->fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+        if (g_strcmp0(field->var, "var1") == 0) {
+            length = g_slist_length(field->values);
+        }
+        curr_field = g_slist_next(curr_field);
+    }
+
+    assert_true(res);
+    assert_int_equal(length, 3);
+
+    form_destroy(form);
+}

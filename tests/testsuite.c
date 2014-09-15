@@ -544,6 +544,10 @@ int main(int argc, char* argv[]) {
         unit_test(add_value_adds_when_none),
         unit_test(add_value_adds_when_some),
         unit_test(add_value_adds_when_exists),
+        unit_test(remove_value_does_nothing_when_none),
+        unit_test(remove_value_does_nothing_when_doesnt_exist),
+        unit_test(remove_value_does_removes_when_one),
+        unit_test(remove_value_does_removes_when_many),
     };
 
     return run_tests(all_tests);
