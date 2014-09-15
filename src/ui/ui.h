@@ -163,6 +163,7 @@ void (*ui_handle_room_join_error)(const char * const room, const char * const er
 void (*ui_handle_room_configuration)(const char * const room, DataForm *form);
 void (*ui_handle_room_config_submit_result)(void);
 void (*ui_show_form)(ProfWin *window, const char * const room, DataForm *form);
+void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);

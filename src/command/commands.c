@@ -1858,15 +1858,15 @@ cmd_form(gchar **args, struct cmd_help_t help)
             case FIELD_TEXT_PRIVATE:
             case FIELD_JID_SINGLE:
                 form_set_value(current->form, tag, value);
-                ui_current_print_line("%s set to %s", tag, value);
+                ui_show_form_field(current, current->form, tag);
                 break;
             case FIELD_BOOLEAN:
                 if (g_strcmp0(value, "on") == 0) {
                     form_set_value(current->form, tag, "1");
-                    ui_current_print_line("%s set to %s", tag, value);
+                    ui_show_form_field(current, current->form, tag);
                 } else if (g_strcmp0(value, "off") == 0) {
                     form_set_value(current->form, tag, "0");
-                    ui_current_print_line("%s set to %s", tag, value);
+                    ui_show_form_field(current, current->form, tag);
                 } else {
                     ui_current_print_line("Value %s not valid for boolean field: %s", value, tag);
                 }
@@ -1875,7 +1875,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
                 valid = form_field_contains_option(current->form, tag, value);
                 if (valid == TRUE) {
                     form_set_value(current->form, tag, value);
-                    ui_current_print_line("%s set to %s", tag, value);
+                    ui_show_form_field(current, current->form, tag);
                 } else {
                     ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
                 }
@@ -1916,7 +1916,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
                 if (valid) {
                     added = form_add_unique_value(current->form, tag, value);
                     if (added) {
-                        ui_current_print_line("Added %s to %s", value, tag);
+                        ui_show_form_field(current, current->form, tag);
                     } else {
                         ui_current_print_line("Value %s already selected for %s", value, tag);
                     }
@@ -1926,12 +1926,12 @@ cmd_form(gchar **args, struct cmd_help_t help)
                 break;
             case FIELD_TEXT_MULTI:
                 form_add_value(current->form, tag, value);
-                ui_current_print_line("Added %s to %s", value, tag);
+                ui_show_form_field(current, current->form, tag);
                 break;
             case FIELD_JID_MULTI:
                 added = form_add_unique_value(current->form, tag, value);
                 if (added) {
-                    ui_current_print_line("Added %s to %s", value, tag);
+                    ui_show_form_field(current, current->form, tag);
                 } else {
                     ui_current_print_line("JID %s already exists in %s", value, tag);
                 }
@@ -1972,7 +1972,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
                 if (valid == TRUE) {
                     removed = form_remove_value(current->form, tag, value);
                     if (removed) {
-                        ui_current_print_line("Removed %s from %s", value, tag);
+                        ui_show_form_field(current, current->form, tag);
                     } else {
                         ui_current_print_line("Value %s is not currently set for %s", value, tag);
                     }
@@ -1998,7 +1998,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
 
                 removed = form_remove_text_multi_value(current->form, tag, index);
                 if (removed) {
-                    ui_current_print_line("Removed %s from %s", value, tag);
+                    ui_show_form_field(current, current->form, tag);
                 } else {
                     ui_current_print_line("Could not remove %s from %s", value, tag);
                 }
@@ -2006,7 +2006,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
             case FIELD_JID_MULTI:
                 removed = form_remove_value(current->form, tag, value);
                 if (removed) {
-                    ui_current_print_line("Removed %s from %s", value, tag);
+                    ui_show_form_field(current, current->form, tag);
                 } else {
                     ui_current_print_line("Field %s does not contain %s", tag, value);
                 }

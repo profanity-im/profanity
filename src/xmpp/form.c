@@ -593,6 +593,23 @@ _form_field_contains_option(DataForm *form, const char * const tag, char *value)
     return FALSE;
 }
 
+static FormField *
+_form_get_field_by_tag(DataForm *form, const char * const tag)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                return field;
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+    return NULL;
+}
+
 void
 form_init_module(void)
 {
@@ -607,4 +624,5 @@ form_init_module(void)
     form_field_contains_option = _form_field_contains_option;
     form_tag_exists = _form_tag_exists;
     form_get_value_count = _form_get_value_count;
+    form_get_field_by_tag = _form_get_field_by_tag;
 }

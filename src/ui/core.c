@@ -2055,6 +2055,14 @@ TODO add command to get help for a field
 }
 
 static void
+_ui_show_form_field(ProfWin *window, DataForm *form, char *tag)
+{
+    FormField *field = form_get_field_by_tag(form, tag);
+    _ui_handle_form_field(window, tag, field);
+    win_save_println(window, "");
+}
+
+static void
 _ui_handle_room_configuration(const char * const room, DataForm *form)
 {
     GString *title = g_string_new(room);
@@ -2317,4 +2325,5 @@ ui_init_module(void)
     ui_handle_room_config_submit_result = _ui_handle_room_config_submit_result;
     ui_win_has_unsaved_form = _ui_win_has_unsaved_form;
     ui_show_form = _ui_show_form;
+    ui_show_form_field = _ui_show_form_field;
 }
