@@ -1788,6 +1788,246 @@ cmd_decline(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_form(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC_CONFIG) {
+        cons_show("Command '/form' does not apply to this window.");
+        return TRUE;
+    }
+
+    if ((g_strcmp0(args[0], "submit") != 0) &&
+            (g_strcmp0(args[0], "cancel") != 0) &&
+            (g_strcmp0(args[0], "set") != 0) &&
+            (g_strcmp0(args[0], "add") != 0) &&
+            (g_strcmp0(args[0], "remove") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *recipient = ui_current_recipient();
+    ProfWin *current = wins_get_current();
+    gchar **split_recipient = g_strsplit(recipient, " ", 2);
+    char *room = split_recipient[0];
+
+    if (g_strcmp0(args[0], "submit") == 0) {
+        iq_submit_room_config(room, current->form);
+
+    }
+    if (g_strcmp0(args[0], "cancel") == 0) {
+        iq_room_config_cancel(room);
+    }
+    if (g_strcmp0(args[0], "set") == 0) {
+        char *tag = NULL;
+        char *value = NULL;
+        if (args[1] != NULL) {
+            tag = args[1];
+        } else {
+            ui_current_print_line("/room set command requires a field tag and value");
+            g_strfreev(split_recipient);
+            return TRUE;
+        }
+        if (args[2] != NULL) {
+            value = args[2];
+        } else {
+            ui_current_print_line("/room set command requires a field tag and value");
+            g_strfreev(split_recipient);
+            return TRUE;
+        }
+        if (!form_tag_exists(current->form, tag)) {
+            ui_current_print_line("Form does not contain a field with tag %s", tag);
+        } else {
+            form_field_type_t field_type = form_get_field_type(current->form, tag);
+            gboolean valid = FALSE;
+            switch (field_type) {
+            case FIELD_TEXT_SINGLE:
+            case FIELD_TEXT_PRIVATE:
+            case FIELD_JID_SINGLE:
+                form_set_value(current->form, tag, value);
+                ui_current_print_line("%s set to %s", tag, value);
+                break;
+            case FIELD_BOOLEAN:
+                if (g_strcmp0(value, "on") == 0) {
+                    form_set_value(current->form, tag, "1");
+                    ui_current_print_line("%s set to %s", tag, value);
+                } else if (g_strcmp0(value, "off") == 0) {
+                    form_set_value(current->form, tag, "0");
+                    ui_current_print_line("%s set to %s", tag, value);
+                } else {
+                    ui_current_print_line("Value %s not valid for boolean field: %s", value, tag);
+                }
+                break;
+            case FIELD_LIST_SINGLE:
+                valid = form_field_contains_option(current->form, tag, value);
+                if (valid == TRUE) {
+                    form_set_value(current->form, tag, value);
+                    ui_current_print_line("%s set to %s", tag, value);
+                } else {
+                    ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
+                }
+                break;
+            default:
+                ui_current_print_line("Set command not valid for field: %s", tag);
+                break;
+            }
+        }
+    }
+
+    if (g_strcmp0(args[0], "add") == 0) {
+        char *tag = NULL;
+        char *value = NULL;
+        if (args[1] != NULL) {
+            tag = args[1];
+        } else {
+            ui_current_print_line("/room add command requires a field tag and value");
+            g_strfreev(split_recipient);
+            return TRUE;
+        }
+        if (args[2] != NULL) {
+            value = args[2];
+        } else {
+            ui_current_print_line("/room add command requires a field tag and value");
+            g_strfreev(split_recipient);
+            return TRUE;
+        }
+        if (!form_tag_exists(current->form, tag)) {
+            ui_current_print_line("Form does not contain a field with tag %s", tag);
+        } else {
+            form_field_type_t field_type = form_get_field_type(current->form, tag);
+            gboolean valid = FALSE;
+            gboolean added = FALSE;
+            switch (field_type) {
+            case FIELD_LIST_MULTI:
+                valid = form_field_contains_option(current->form, tag, value);
+                if (valid) {
+                    added = form_add_unique_value(current->form, tag, value);
+                    if (added) {
+                        ui_current_print_line("Added %s to %s", value, tag);
+                    } else {
+                        ui_current_print_line("Value %s already selected for %s", value, tag);
+                    }
+                } else {
+                    ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
+                }
+                break;
+            case FIELD_TEXT_MULTI:
+                form_add_value(current->form, tag, value);
+                ui_current_print_line("Added %s to %s", value, tag);
+                break;
+            case FIELD_JID_MULTI:
+                added = form_add_unique_value(current->form, tag, value);
+                if (added) {
+                    ui_current_print_line("Added %s to %s", value, tag);
+                } else {
+                    ui_current_print_line("JID %s already exists in %s", value, tag);
+                }
+                break;
+            default:
+                ui_current_print_line("Add command not valid for field: %s", tag);
+                break;
+            }
+        }
+    }
+
+    if (g_strcmp0(args[0], "remove") == 0) {
+        char *tag = NULL;
+        char *value = NULL;
+        if (args[1] != NULL) {
+            tag = args[1];
+        } else {
+            ui_current_print_line("/room remove command requires a field tag and value");
+            g_strfreev(split_recipient);
+            return TRUE;
+        }
+        if (args[2] != NULL) {
+            value = args[2];
+        } else {
+            ui_current_print_line("/room remove command requires a field tag and value");
+            g_strfreev(split_recipient);
+            return TRUE;
+        }
+        if (!form_tag_exists(current->form, tag)) {
+            ui_current_print_line("Form does not contain a field with tag %s", tag);
+        } else {
+            form_field_type_t field_type = form_get_field_type(current->form, tag);
+            gboolean valid = FALSE;
+            gboolean removed = FALSE;
+            switch (field_type) {
+            case FIELD_LIST_MULTI:
+                valid = form_field_contains_option(current->form, tag, value);
+                if (valid == TRUE) {
+                    removed = form_remove_value(current->form, tag, value);
+                    if (removed) {
+                        ui_current_print_line("Removed %s from %s", value, tag);
+                    } else {
+                        ui_current_print_line("Value %s is not currently set for %s", value, tag);
+                    }
+                } else {
+                    ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
+                }
+                break;
+            case FIELD_TEXT_MULTI:
+                if (!g_str_has_prefix(value, "val")) {
+                    ui_current_print_line("No such value %s for %s", value, tag);
+                    break;
+                }
+                if (strlen(value) < 4) {
+                    ui_current_print_line("No such value %s for %s", value, tag);
+                    break;
+                }
+
+                int index = strtol(&value[3], NULL, 10);
+                if ((index < 1) || (index > form_get_value_count(current->form, tag))) {
+                    ui_current_print_line("No such value %s for %s", value, tag);
+                    break;
+                }
+
+                removed = form_remove_text_multi_value(current->form, tag, index);
+                if (removed) {
+                    ui_current_print_line("Removed %s from %s", value, tag);
+                } else {
+                    ui_current_print_line("Could not remove %s from %s", value, tag);
+                }
+                break;
+            case FIELD_JID_MULTI:
+                removed = form_remove_value(current->form, tag, value);
+                if (removed) {
+                    ui_current_print_line("Removed %s from %s", value, tag);
+                } else {
+                    ui_current_print_line("Field %s does not contain %s", tag, value);
+                }
+                break;
+            default:
+                ui_current_print_line("Remove command not valid for field: %s", tag);
+                break;
+            }
+        }
+    }
+
+    if ((g_strcmp0(args[0], "submit") == 0) ||
+            (g_strcmp0(args[0], "cancel") == 0)) {
+        wins_close_current();
+        current = wins_get_by_recipient(room);
+        if (current == NULL) {
+            current = wins_get_console();
+        }
+        int num = wins_get_num(current);
+        ui_switch_win(num);
+    }
+
+    g_strfreev(split_recipient);
+
+    return TRUE;
+}
+
+gboolean
 cmd_room(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -1797,41 +2037,16 @@ cmd_room(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    // room command allowed in window
     win_type_t win_type = ui_current_win_type();
-    if (win_type != WIN_MUC && win_type != WIN_MUC_CONFIG) {
+    if (win_type != WIN_MUC) {
         cons_show("Command '/room' does not apply to this window.");
         return TRUE;
     }
 
-    // validate subcommand
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
-            (g_strcmp0(args[0], "config") != 0) &&
-            (g_strcmp0(args[0], "submit") != 0) &&
-            (g_strcmp0(args[0], "set") != 0) &&
-            (g_strcmp0(args[0], "add") != 0) &&
-            (g_strcmp0(args[0], "remove") != 0) &&
-            (g_strcmp0(args[0], "cancel") != 0)) {
+            (g_strcmp0(args[0], "config") != 0)) {
         cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
-
-    // validate subcommand for window type
-    if (win_type == WIN_MUC &&
-            ((g_strcmp0(args[0], "submit") == 0) ||
-            (g_strcmp0(args[0], "cancel") == 0) ||
-            (g_strcmp0(args[0], "add") == 0) ||
-            (g_strcmp0(args[0], "remove") == 0) ||
-            (g_strcmp0(args[0], "set") == 0))) {
-        cons_show("Command '/room %s' only allowed in room configuration windows.", args[0]);
-        return TRUE;
-    }
-    if (win_type == WIN_MUC_CONFIG &&
-            ((g_strcmp0(args[0], "accept") == 0) ||
-            (g_strcmp0(args[0], "destroy") == 0) ||
-            (g_strcmp0(args[0], "config") == 0))) {
-        cons_show("Command '/room %s' only allowed in chat room windows.", args[0]);
         return TRUE;
     }
 
@@ -1839,268 +2054,41 @@ cmd_room(gchar **args, struct cmd_help_t help)
     ProfWin *window = wins_get_by_recipient(room);
     int num = wins_get_num(window);
 
-    // commands available in room
-    if ((g_strcmp0(args[0], "accept") == 0) ||
-            (g_strcmp0(args[0], "destroy") == 0) ||
-            (g_strcmp0(args[0], "config") == 0)) {
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
 
-        int ui_index = num;
-        if (ui_index == 10) {
-            ui_index = 0;
-        }
-
-        if (g_strcmp0(args[0], "accept") == 0) {
-            gboolean requires_config = muc_requires_config(room);
-            if (!requires_config) {
-                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
-                return TRUE;
-            } else {
-                iq_confirm_instant_room(room);
-                muc_set_requires_config(room, FALSE);
-                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
-                cons_show("Room unlocked: %s (%d)", room, ui_index);
-                return TRUE;
-            }
-        }
-
-        if (g_strcmp0(args[0], "destroy") == 0) {
-            iq_destroy_instant_room(room);
+    if (g_strcmp0(args[0], "accept") == 0) {
+        gboolean requires_config = muc_requires_config(room);
+        if (!requires_config) {
+            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
             return TRUE;
-        }
-
-        if (g_strcmp0(args[0], "config") == 0) {
-            GString *win_title = g_string_new(room);
-            g_string_append(win_title, " config");
-            ProfWin *window = wins_get_by_recipient(win_title->str);
-            g_string_free(win_title, TRUE);
-            if (window != NULL) {
-                num = wins_get_num(window);
-                ui_switch_win(num);
-            } else {
-                iq_request_room_config_form(room);
-            }
+        } else {
+            iq_confirm_instant_room(room);
+            muc_set_requires_config(room, FALSE);
+            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
+            cons_show("Room unlocked: %s (%d)", room, ui_index);
             return TRUE;
         }
     }
 
-    // commands allowed in room config
-    if ((g_strcmp0(args[0], "submit") == 0) ||
-            (g_strcmp0(args[0], "cancel") == 0) ||
-            (g_strcmp0(args[0], "add") == 0) ||
-            (g_strcmp0(args[0], "remove") == 0) ||
-            (g_strcmp0(args[0], "set") == 0)) {
+    if (g_strcmp0(args[0], "destroy") == 0) {
+        iq_destroy_instant_room(room);
+        return TRUE;
+    }
 
-        ProfWin *current = wins_get_current();
-        gchar **split_recipient = g_strsplit(room, " ", 2);
-        room = split_recipient[0];
-
-        if (g_strcmp0(args[0], "submit") == 0) {
-            iq_submit_room_config(room, current->form);
-
-        }
-        if (g_strcmp0(args[0], "cancel") == 0) {
-            iq_room_config_cancel(room);
-        }
-        if (g_strcmp0(args[0], "set") == 0) {
-            char *tag = NULL;
-            char *value = NULL;
-            if (args[1] != NULL) {
-                tag = args[1];
-            } else {
-                ui_current_print_line("/room set command requires a field tag and value");
-                g_strfreev(split_recipient);
-                return TRUE;
-            }
-            if (args[2] != NULL) {
-                value = args[2];
-            } else {
-                ui_current_print_line("/room set command requires a field tag and value");
-                g_strfreev(split_recipient);
-                return TRUE;
-            }
-            if (!form_tag_exists(current->form, tag)) {
-                ui_current_print_line("Form does not contain a field with tag %s", tag);
-            } else {
-                form_field_type_t field_type = form_get_field_type(current->form, tag);
-                gboolean valid = FALSE;
-                switch (field_type) {
-                case FIELD_TEXT_SINGLE:
-                case FIELD_TEXT_PRIVATE:
-                case FIELD_JID_SINGLE:
-                    form_set_value(current->form, tag, value);
-                    ui_current_print_line("%s set to %s", tag, value);
-                    break;
-                case FIELD_BOOLEAN:
-                    if (g_strcmp0(value, "on") == 0) {
-                        form_set_value(current->form, tag, "1");
-                        ui_current_print_line("%s set to %s", tag, value);
-                    } else if (g_strcmp0(value, "off") == 0) {
-                        form_set_value(current->form, tag, "0");
-                        ui_current_print_line("%s set to %s", tag, value);
-                    } else {
-                        ui_current_print_line("Value %s not valid for boolean field: %s", value, tag);
-                    }
-                    break;
-                case FIELD_LIST_SINGLE:
-                    valid = form_field_contains_option(current->form, tag, value);
-                    if (valid == TRUE) {
-                        form_set_value(current->form, tag, value);
-                        ui_current_print_line("%s set to %s", tag, value);
-                    } else {
-                        ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
-                    }
-                    break;
-                default:
-                    ui_current_print_line("Set command not valid for field: %s", tag);
-                    break;
-                }
-            }
-        }
-
-        if (g_strcmp0(args[0], "add") == 0) {
-            char *tag = NULL;
-            char *value = NULL;
-            if (args[1] != NULL) {
-                tag = args[1];
-            } else {
-                ui_current_print_line("/room add command requires a field tag and value");
-                g_strfreev(split_recipient);
-                return TRUE;
-            }
-            if (args[2] != NULL) {
-                value = args[2];
-            } else {
-                ui_current_print_line("/room add command requires a field tag and value");
-                g_strfreev(split_recipient);
-                return TRUE;
-            }
-            if (!form_tag_exists(current->form, tag)) {
-                ui_current_print_line("Form does not contain a field with tag %s", tag);
-            } else {
-                form_field_type_t field_type = form_get_field_type(current->form, tag);
-                gboolean valid = FALSE;
-                gboolean added = FALSE;
-                switch (field_type) {
-                case FIELD_LIST_MULTI:
-                    valid = form_field_contains_option(current->form, tag, value);
-                    if (valid) {
-                        added = form_add_unique_value(current->form, tag, value);
-                        if (added) {
-                            ui_current_print_line("Added %s to %s", value, tag);
-                        } else {
-                            ui_current_print_line("Value %s already selected for %s", value, tag);
-                        }
-                    } else {
-                        ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
-                    }
-                    break;
-                case FIELD_TEXT_MULTI:
-                    form_add_value(current->form, tag, value);
-                    ui_current_print_line("Added %s to %s", value, tag);
-                    break;
-                case FIELD_JID_MULTI:
-                    added = form_add_unique_value(current->form, tag, value);
-                    if (added) {
-                        ui_current_print_line("Added %s to %s", value, tag);
-                    } else {
-                        ui_current_print_line("JID %s already exists in %s", value, tag);
-                    }
-                    break;
-                default:
-                    ui_current_print_line("Add command not valid for field: %s", tag);
-                    break;
-                }
-            }
-        }
-
-        if (g_strcmp0(args[0], "remove") == 0) {
-            char *tag = NULL;
-            char *value = NULL;
-            if (args[1] != NULL) {
-                tag = args[1];
-            } else {
-                ui_current_print_line("/room remove command requires a field tag and value");
-                g_strfreev(split_recipient);
-                return TRUE;
-            }
-            if (args[2] != NULL) {
-                value = args[2];
-            } else {
-                ui_current_print_line("/room remove command requires a field tag and value");
-                g_strfreev(split_recipient);
-                return TRUE;
-            }
-            if (!form_tag_exists(current->form, tag)) {
-                ui_current_print_line("Form does not contain a field with tag %s", tag);
-            } else {
-                form_field_type_t field_type = form_get_field_type(current->form, tag);
-                gboolean valid = FALSE;
-                gboolean removed = FALSE;
-                switch (field_type) {
-                case FIELD_LIST_MULTI:
-                    valid = form_field_contains_option(current->form, tag, value);
-                    if (valid == TRUE) {
-                        removed = form_remove_value(current->form, tag, value);
-                        if (removed) {
-                            ui_current_print_line("Removed %s from %s", value, tag);
-                        } else {
-                            ui_current_print_line("Value %s is not currently set for %s", value, tag);
-                        }
-                    } else {
-                        ui_current_print_line("Value %s not a valid option for field: %s", value, tag);
-                    }
-                    break;
-                case FIELD_TEXT_MULTI:
-                    if (!g_str_has_prefix(value, "val")) {
-                        ui_current_print_line("No such value %s for %s", value, tag);
-                        break;
-                    }
-                    if (strlen(value) < 4) {
-                        ui_current_print_line("No such value %s for %s", value, tag);
-                        break;
-                    }
-
-                    int index = strtol(&value[3], NULL, 10);
-                    if ((index < 1) || (index > form_get_value_count(current->form, tag))) {
-                        ui_current_print_line("No such value %s for %s", value, tag);
-                        break;
-                    }
-
-                    removed = form_remove_text_multi_value(current->form, tag, index);
-                    if (removed) {
-                        ui_current_print_line("Removed %s from %s", value, tag);
-                    } else {
-                        ui_current_print_line("Could not remove %s from %s", value, tag);
-                    }
-                    break;
-                case FIELD_JID_MULTI:
-                    removed = form_remove_value(current->form, tag, value);
-                    if (removed) {
-                        ui_current_print_line("Removed %s from %s", value, tag);
-                    } else {
-                        ui_current_print_line("Field %s does not contain %s", tag, value);
-                    }
-                    break;
-                default:
-                    ui_current_print_line("Remove command not valid for field: %s", tag);
-                    break;
-                }
-            }
-        }
-
-        if ((g_strcmp0(args[0], "submit") == 0) ||
-                (g_strcmp0(args[0], "cancel") == 0)) {
-            wins_close_current();
-            current = wins_get_by_recipient(room);
-            if (current == NULL) {
-                current = wins_get_console();
-            }
-            num = wins_get_num(current);
+    if (g_strcmp0(args[0], "config") == 0) {
+        GString *win_title = g_string_new(room);
+        g_string_append(win_title, " config");
+        ProfWin *window = wins_get_by_recipient(win_title->str);
+        g_string_free(win_title, TRUE);
+        if (window != NULL) {
+            num = wins_get_num(window);
             ui_switch_win(num);
+        } else {
+            iq_request_room_config_form(room);
         }
-
-        g_strfreev(split_recipient);
-
         return TRUE;
     }
 

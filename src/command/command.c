@@ -87,7 +87,7 @@ static char * _statuses_autocomplete(char *input, int *size);
 static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
-static char * _room_autocomplete(char *input, int *size);
+static char * _form_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -306,18 +306,25 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args, 1, 3, NULL,
-        { "/room config accept|destroy|config|submit|cancel|set|add|remove [tag value]", "Room configuration.",
-        { "/room config accept|destroy|config|submit|cancel|set|add|remove [tag value]",
-          "---------------------------------------------------------------------------",
-          "config accept  - Accept default room configuration.",
-          "config destroy - Cancel default room configuration.",
-          "config config  - Edit room configuration.",
-          "config submit  - Cancel room configuration.",
-          "config cancel  - Cancel room configuration.",
-          "config set tag value    - Set room configuration field to value.",
-          "config add tag value    - Add value to room configuration field.",
-          "config remove tag value - Remove value from room configuration field.",
+        cmd_room, parse_args, 1, 1, NULL,
+        { "/room accept|destroy|config", "Room configuration.",
+        { "/room accept|destroy|config",
+          "---------------------------",
+          "accept  - Accept default room configuration.",
+          "destroy - Reject default room configuration.",
+          "config  - Edit room configuration.",
+          NULL } } },
+
+    { "/form",
+        cmd_form, parse_args, 1, 3, NULL,
+        { "/form submit|cancel|set|add|remove [tag value]", "Form manipulation.",
+        { "/form submit|cancel|set|add|remove [tag value]",
+          "----------------------------------------------",
+          "set tag value    - Set tagged form field to value.",
+          "add tag value    - Add value to tagged form field.",
+          "remove tag value - Remove value from tagged form field.",
+          "submit           - Submit the current form.",
+          "cancel           - Cancel changes to the current form.",
           NULL } } },
 
     { "/rooms",
@@ -961,6 +968,7 @@ static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
 static Autocomplete room_ac;
+static Autocomplete form_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1216,11 +1224,13 @@ cmd_init(void)
     autocomplete_add(room_ac, "accept");
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
-    autocomplete_add(room_ac, "submit");
-    autocomplete_add(room_ac, "cancel");
-    autocomplete_add(room_ac, "set");
-    autocomplete_add(room_ac, "add");
-    autocomplete_add(room_ac, "remove");
+
+    form_ac = autocomplete_new();
+    autocomplete_add(form_ac, "submit");
+    autocomplete_add(form_ac, "cancel");
+    autocomplete_add(form_ac, "set");
+    autocomplete_add(form_ac, "add");
+    autocomplete_add(form_ac, "remove");
 
     cmd_history_init();
 }
@@ -1266,6 +1276,7 @@ cmd_uninit(void)
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
     autocomplete_free(room_ac);
+    autocomplete_free(form_ac);
 }
 
 gboolean
@@ -1390,6 +1401,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
+    autocomplete_reset(form_ac);
     bookmark_autocomplete_reset();
 }
 
@@ -1639,8 +1651,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/room" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -1668,7 +1680,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
-    g_hash_table_insert(ac_funcs, "/room",          _room_autocomplete);
+    g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2079,7 +2091,7 @@ _theme_autocomplete(char *input, int *size)
 }
 
 static char *
-_room_autocomplete(char *input, int *size)
+_form_autocomplete(char *input, int *size)
 {
     char *result = NULL;
 
@@ -2087,22 +2099,22 @@ _room_autocomplete(char *input, int *size)
     if (current != NULL) {
         DataForm *form = current->form;
         if (form != NULL) {
-            result = autocomplete_param_with_ac(input, size, "/room set", form->tag_ac, TRUE);
+            result = autocomplete_param_with_ac(input, size, "/form set", form->tag_ac, TRUE);
             if (result != NULL) {
                 return result;
             }
-            result = autocomplete_param_with_ac(input, size, "/room add", form->tag_ac, TRUE);
+            result = autocomplete_param_with_ac(input, size, "/form add", form->tag_ac, TRUE);
             if (result != NULL) {
                 return result;
             }
-            result = autocomplete_param_with_ac(input, size, "/room remove", form->tag_ac, TRUE);
+            result = autocomplete_param_with_ac(input, size, "/form remove", form->tag_ac, TRUE);
             if (result != NULL) {
                 return result;
             }
         }
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
+    result = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
     if (result != NULL) {
         return result;
     }
