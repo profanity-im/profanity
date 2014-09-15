@@ -1805,6 +1805,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
 
     if ((g_strcmp0(args[0], "submit") != 0) &&
             (g_strcmp0(args[0], "cancel") != 0) &&
+            (g_strcmp0(args[0], "show") != 0) &&
             (g_strcmp0(args[0], "set") != 0) &&
             (g_strcmp0(args[0], "add") != 0) &&
             (g_strcmp0(args[0], "remove") != 0)) {
@@ -1816,6 +1817,12 @@ cmd_form(gchar **args, struct cmd_help_t help)
     ProfWin *current = wins_get_current();
     gchar **split_recipient = g_strsplit(recipient, " ", 2);
     char *room = split_recipient[0];
+
+    if (g_strcmp0(args[0], "show") == 0) {
+        ui_show_form(current, room, current->form);
+        g_strfreev(split_recipient);
+        return TRUE;
+    }
 
     if (g_strcmp0(args[0], "submit") == 0) {
         iq_submit_room_config(room, current->form);

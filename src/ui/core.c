@@ -2016,18 +2016,8 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
 }
 
 static void
-_ui_handle_room_configuration(const char * const room, DataForm *form)
+_ui_show_form(ProfWin *window, const char * const room, DataForm *form)
 {
-    GString *title = g_string_new(room);
-    g_string_append(title, " config");
-    ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
-    g_string_free(title, TRUE);
-
-    window->form = form;
-
-    int num = wins_get_num(window);
-    ui_switch_win(num);
-
     if (form->title != NULL) {
         win_save_print(window, '-', NULL, 0, 0, "", form->title);
     } else {
@@ -2062,6 +2052,22 @@ TODO add command to get help for a field
     }
 
     win_save_println(window, "");
+}
+
+static void
+_ui_handle_room_configuration(const char * const room, DataForm *form)
+{
+    GString *title = g_string_new(room);
+    g_string_append(title, " config");
+    ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
+    g_string_free(title, TRUE);
+
+    window->form = form;
+
+    int num = wins_get_num(window);
+    ui_switch_win(num);
+
+    ui_show_form(window, room, form);
 }
 
 static void
@@ -2310,4 +2316,5 @@ ui_init_module(void)
     ui_handle_room_configuration = _ui_handle_room_configuration;
     ui_handle_room_config_submit_result = _ui_handle_room_config_submit_result;
     ui_win_has_unsaved_form = _ui_win_has_unsaved_form;
+    ui_show_form = _ui_show_form;
 }

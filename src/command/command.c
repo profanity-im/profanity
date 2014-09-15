@@ -317,12 +317,13 @@ static struct cmd_t command_defs[] =
 
     { "/form",
         cmd_form, parse_args, 1, 3, NULL,
-        { "/form submit|cancel|set|add|remove [tag value]", "Form manipulation.",
-        { "/form submit|cancel|set|add|remove [tag value]",
-          "----------------------------------------------",
+        { "/form show|submit|cancel|set|add|remove [tag value]", "Form manipulation.",
+        { "/form show|submit|cancel|set|add|remove [tag value]",
+          "---------------------------------------------------",
           "set tag value    - Set tagged form field to value.",
           "add tag value    - Add value to tagged form field.",
           "remove tag value - Remove value from tagged form field.",
+          "show             - Show the current form.",
           "submit           - Submit the current form.",
           "cancel           - Cancel changes to the current form.",
           NULL } } },
@@ -1228,6 +1229,7 @@ cmd_init(void)
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");
     autocomplete_add(form_ac, "cancel");
+    autocomplete_add(form_ac, "show");
     autocomplete_add(form_ac, "set");
     autocomplete_add(form_ac, "add");
     autocomplete_add(form_ac, "remove");
