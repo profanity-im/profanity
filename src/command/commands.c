@@ -2490,6 +2490,17 @@ cmd_close(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    // check for unsaved form
+    if (ui_win_has_unsaved_form(index)) {
+        ProfWin *window = wins_get_current();
+        if (wins_is_current(window)) {
+            ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
+        } else {
+            cons_show("Cannot close form window with unsaved changes, use /form submit or /form cancel");
+        }
+        return TRUE;
+    }
+
     // handle leaving rooms, or chat
     if (conn_status == JABBER_CONNECTED) {
         ui_close_connected_win(index);

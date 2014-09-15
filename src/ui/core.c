@@ -632,7 +632,7 @@ _ui_close_all_wins(void)
 
     while (curr != NULL) {
         int num = GPOINTER_TO_INT(curr->data);
-        if (num != 1) {
+        if ((num != 1) && (!ui_win_has_unsaved_form(num))) {
             if (conn_status == JABBER_CONNECTED) {
                 ui_close_connected_win(num);
             }
@@ -659,7 +659,7 @@ _ui_close_read_wins(void)
 
     while (curr != NULL) {
         int num = GPOINTER_TO_INT(curr->data);
-        if ((num != 1) && (ui_win_unread(num) == 0)) {
+        if ((num != 1) && (ui_win_unread(num) == 0) && (!ui_win_has_unsaved_form(num))) {
             if (conn_status == JABBER_CONNECTED) {
                 ui_close_connected_win(num);
             }
@@ -673,6 +673,20 @@ _ui_close_read_wins(void)
     g_list_free(win_nums);
 
     return count;
+}
+
+static gboolean
+_ui_win_has_unsaved_form(int num)
+{
+    ProfWin *window = wins_get_by_num(num);
+
+    if (window->type != WIN_MUC_CONFIG) {
+        return FALSE;
+    }
+    if (window->form == NULL) {
+        return FALSE;
+    }
+    return window->form->modified;
 }
 
 GString *
@@ -2295,4 +2309,5 @@ ui_init_module(void)
     ui_room_destroyed = _ui_room_destroyed;
     ui_handle_room_configuration = _ui_handle_room_configuration;
     ui_handle_room_config_submit_result = _ui_handle_room_config_submit_result;
+    ui_win_has_unsaved_form = _ui_win_has_unsaved_form;
 }

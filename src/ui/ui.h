@@ -201,6 +201,8 @@ void (*ui_create_xmlconsole_win)(void);
 gboolean (*ui_xmlconsole_exists)(void);
 void (*ui_open_xmlconsole_win)(void);
 
+gboolean (*ui_win_has_unsaved_form)(int num);
+
 // console window actions
 void (*cons_show)(const char * const msg, ...);
 void (*cons_about)(void);

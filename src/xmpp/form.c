@@ -192,6 +192,7 @@ form_create(xmpp_stanza_t * const form_stanza)
     form->var_to_tag = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     form->tag_to_var = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     form->tag_ac = autocomplete_new();
+    form->modified = FALSE;
 
     int tag_num = 1;
 
@@ -430,10 +431,12 @@ _form_set_value(DataForm *form, const char * const tag, char *value)
             if (g_strcmp0(field->var, var) == 0) {
                 if (g_slist_length(field->values) == 0) {
                     field->values = g_slist_append(field->values, strdup(value));
+                    form->modified = TRUE;
                     return;
                 } else if (g_slist_length(field->values) == 1) {
                     free(field->values->data);
                     field->values->data = strdup(value);
+                    form->modified = TRUE;
                     return;
                 }
             }
@@ -452,6 +455,7 @@ _form_add_value(DataForm *form, const char * const tag, char *value)
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 field->values = g_slist_append(field->values, strdup(value));
+                form->modified = TRUE;
                 return;
             }
             curr = g_slist_next(curr);
@@ -477,6 +481,7 @@ _form_add_unique_value(DataForm *form, const char * const tag, char *value)
                 }
 
                 field->values = g_slist_append(field->values, strdup(value));
+                form->modified = TRUE;
                 return TRUE;
             }
             curr = g_slist_next(curr);
@@ -500,6 +505,7 @@ _form_remove_value(DataForm *form, const char * const tag, char *value)
                     free(found->data);
                     found->data = NULL;
                     field->values = g_slist_delete_link(field->values, found);
+                    form->modified = TRUE;
                     return TRUE;
                 } else {
                     return FALSE;
@@ -527,6 +533,7 @@ _form_remove_text_multi_value(DataForm *form, const char * const tag, int index)
                     free(item->data);
                     item->data = NULL;
                     field->values = g_slist_delete_link(field->values, item);
+                    form->modified = TRUE;
                     return TRUE;
                 } else {
                     return FALSE;

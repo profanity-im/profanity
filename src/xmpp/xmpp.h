@@ -125,6 +125,7 @@ typedef struct data_form_t {
     GHashTable *var_to_tag;
     GHashTable *tag_to_var;
     Autocomplete tag_ac;
+    gboolean modified;
 } DataForm;
 
 void jabber_init_module(void);
