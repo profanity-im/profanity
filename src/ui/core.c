@@ -118,8 +118,9 @@ _ui_update(void)
     ProfWin *current = wins_get_current();
     if (current->paged == 0) {
         win_move_to_end(current);
-        win_update_virtual(current);
     }
+
+    win_update_virtual(current);
 
     if (prefs_get_boolean(PREF_TITLEBAR)) {
         _ui_draw_term_title();
