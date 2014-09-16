@@ -130,7 +130,7 @@ endif
 TESTS = tests/testsuite
 check_PROGRAMS = tests/testsuite
 tests_testsuite_SOURCES = $(tests_sources)
-tests_testsuite_LDADD = -lcmocka -lstrophe
+tests_testsuite_LDADD = -lcmocka
 
 man_MANS = $(man_sources)
 
