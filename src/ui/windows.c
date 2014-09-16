@@ -81,7 +81,11 @@ wins_get_console(void)
 ProfWin *
 wins_get_current(void)
 {
-    return g_hash_table_lookup(windows, GINT_TO_POINTER(current));
+    if (windows != NULL) {
+        return g_hash_table_lookup(windows, GINT_TO_POINTER(current));
+    } else {
+        return NULL;
+    }
 }
 
 GList *

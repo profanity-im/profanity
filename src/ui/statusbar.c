@@ -103,14 +103,7 @@ create_status_bar(void)
 void
 status_bar_update_virtual(void)
 {
-    GDateTime *now_time = g_date_time_new_now_local();
-    GTimeSpan elapsed = g_date_time_difference(now_time, last_time);
-
-    if (elapsed >= TIME_CHECK) {
-        _status_bar_draw();
-    }
-
-    g_date_time_unref(now_time);
+    _status_bar_draw();
 }
 
 void
