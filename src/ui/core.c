@@ -2035,13 +2035,6 @@ _ui_show_form(ProfWin *window, const char * const room, DataForm *form)
         if (g_strcmp0(field->type, "hidden") != 0) {
             char *tag = g_hash_table_lookup(form->var_to_tag, field->var);
             _ui_handle_form_field(window, tag, field);
-
-/*
-TODO add command to get help for a field
-            if (field->description != NULL) {
-                win_save_print(window, '-', NULL, 0, 0, "", field->description);
-            }
-*/
         }
 
         curr_field = g_slist_next(curr_field);
@@ -2083,14 +2076,88 @@ _ui_handle_room_config_submit_result(void)
 static void
 _ui_show_form_field_help(ProfWin *window, DataForm *form, char *tag)
 {
-    win_save_println(window, "HELP FIELD");
+    FormField *field = form_get_field_by_tag(form, tag);
+    if (field != NULL) {
+        win_save_print(window, '-', NULL, NO_EOL, 0, "", field->label);
+        if (field->required) {
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", " (Required):");
+        } else {
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", ":");
+        }
+        if (field->description != NULL) {
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Description : %s", field->description);
+        }
+        win_save_vprint(window, '-', NULL, 0, 0, "", "  Type        : %s", field->type);
+
+        int num_values = 0;
+        GSList *curr_option = NULL;
+        FormOption *option = NULL;
+
+        switch (field->type_t) {
+        case FIELD_TEXT_SINGLE:
+        case FIELD_TEXT_PRIVATE:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
+            break;
+        case FIELD_TEXT_MULTI:
+            num_values = form_get_value_count(form, tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
+            if (num_values > 0) {
+                win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "  Where       : <value> between 'val1' and 'val%d'", num_values);
+            }
+            break;
+        case FIELD_BOOLEAN:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is either 'on' or 'off'");
+            break;
+        case FIELD_LIST_SINGLE:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
+            curr_option = field->options;
+            while (curr_option != NULL) {
+                option = curr_option->data;
+                win_save_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
+                curr_option = g_slist_next(curr_option);
+            }
+            break;
+        case FIELD_LIST_MULTI:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
+            curr_option = field->options;
+            while (curr_option != NULL) {
+                option = curr_option->data;
+                win_save_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
+                curr_option = g_slist_next(curr_option);
+            }
+            break;
+        case FIELD_JID_SINGLE:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            break;
+        case FIELD_JID_MULTI:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form set %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            break;
+        case FIELD_FIXED:
+        case FIELD_UNKNOWN:
+        case FIELD_HIDDEN:
+        default:
+            break;
+        }
+    } else {
+        win_save_vprint(window, '-', NULL, 0, 0, "", "No such field %s", tag);
+    }
 }
 
 static void
 _ui_show_form_help(ProfWin *window, DataForm *form)
 {
     if (form->instructions != NULL) {
-        win_save_vprint(window, '-', NULL, 0, 0, "", "Instructions:");
+        win_save_print(window, '-', NULL, 0, 0, "", "Instructions:");
         win_save_print(window, '-', NULL, 0, 0, "", form->instructions);
         win_save_print(window, '-', NULL, 0, 0, "", "");
     }

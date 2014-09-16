@@ -2115,6 +2115,10 @@ _form_autocomplete(char *input, int *size)
             if (result != NULL) {
                 return result;
             }
+            result = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
+            if (result != NULL) {
+                return result;
+            }
         }
     }
 
