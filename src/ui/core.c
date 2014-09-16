@@ -2025,11 +2025,7 @@ _ui_show_form(ProfWin *window, const char * const room, DataForm *form)
     }
     win_save_print(window, '-', NULL, 0, 0, "", "");
 
-    if (form->instructions != NULL) {
-        win_save_vprint(window, '-', NULL, 0, 0, "", "Instructions:");
-        win_save_print(window, '-', NULL, 0, 0, "", form->instructions);
-        win_save_print(window, '-', NULL, 0, 0, "", "");
-    }
+    ui_show_form_help(window, form);
 
     GSList *fields = form->fields;
     GSList *curr_field = fields;
@@ -2082,6 +2078,33 @@ static void
 _ui_handle_room_config_submit_result(void)
 {
     cons_show("GOT ROOM CONFIG SUBMIT RESULT!!!!");
+}
+
+static void
+_ui_show_form_field_help(ProfWin *window, DataForm *form, char *tag)
+{
+    win_save_println(window, "HELP FIELD");
+}
+
+static void
+_ui_show_form_help(ProfWin *window, DataForm *form)
+{
+    if (form->instructions != NULL) {
+        win_save_vprint(window, '-', NULL, 0, 0, "", "Instructions:");
+        win_save_print(window, '-', NULL, 0, 0, "", form->instructions);
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+    }
+}
+
+static void
+_ui_show_lines(ProfWin *window, const gchar** lines)
+{
+    if (lines != NULL) {
+        int i;
+        for (i = 0; lines[i] != NULL; i++) {
+            win_save_print(window, '-', NULL, 0, 0, "", lines[i]);
+        }
+    }
 }
 
 static void
@@ -2326,4 +2349,7 @@ ui_init_module(void)
     ui_win_has_unsaved_form = _ui_win_has_unsaved_form;
     ui_show_form = _ui_show_form;
     ui_show_form_field = _ui_show_form_field;
+    ui_show_form_help = _ui_show_form_help;
+    ui_show_form_field_help = _ui_show_form_field_help;
+    ui_show_lines = _ui_show_lines;
 }

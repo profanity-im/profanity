@@ -634,12 +634,9 @@ cmd_help(gchar **args, struct cmd_help_t help)
         }
 
         cons_show("");
-
         if (help_text != NULL) {
-            int i;
-            for (i = 0; help_text[i] != NULL; i++) {
-                cons_show(help_text[i]);
-            }
+            ProfWin *console = wins_get_console();
+            ui_show_lines(console, help_text);
         } else {
             cons_show("No such command.");
         }
@@ -1806,6 +1803,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
     if ((g_strcmp0(args[0], "submit") != 0) &&
             (g_strcmp0(args[0], "cancel") != 0) &&
             (g_strcmp0(args[0], "show") != 0) &&
+            (g_strcmp0(args[0], "help") != 0) &&
             (g_strcmp0(args[0], "set") != 0) &&
             (g_strcmp0(args[0], "add") != 0) &&
             (g_strcmp0(args[0], "remove") != 0)) {
@@ -1820,6 +1818,27 @@ cmd_form(gchar **args, struct cmd_help_t help)
 
     if (g_strcmp0(args[0], "show") == 0) {
         ui_show_form(current, room, current->form);
+        g_strfreev(split_recipient);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "help") == 0) {
+        char *tag = args[1];
+        if (tag != NULL) {
+            ui_show_form_field_help(current, current->form, tag);
+        } else {
+            ui_show_form_help(current, current->form);
+
+            const gchar **help_text = NULL;
+            Command *command = g_hash_table_lookup(commands, "/form");
+
+            if (command != NULL) {
+                help_text = command->help.long_help;
+            }
+
+            ui_show_lines(current, help_text);
+        }
+        ui_current_print_line("");
         g_strfreev(split_recipient);
         return TRUE;
     }
