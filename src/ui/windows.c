@@ -618,6 +618,9 @@ wins_create_summary(void)
             case WIN_MUC_CONFIG:
                 muc_config_string = g_string_new("");
                 g_string_printf(muc_config_string, "%d: %s", ui_index, window->from);
+                if ((window->form != NULL) && (window->form->modified)) {
+                    g_string_append(muc_config_string, " *");
+                }
                 result = g_slist_append(result, strdup(muc_config_string->str));
                 g_string_free(muc_config_string, TRUE);
 
