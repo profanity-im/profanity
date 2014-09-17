@@ -39,6 +39,7 @@ _new_field(void)
     field->options = NULL;
     field->var = NULL;
     field->values = NULL;
+    field->value_ac = NULL;
 
     return field;
 

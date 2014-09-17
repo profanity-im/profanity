@@ -2128,7 +2128,7 @@ _form_autocomplete(char *input, int *size)
                 form_field_type_t field_type = form_get_field_type(form, tag);
 
                 // handle boolean (set)
-                if ((g_strcmp0(args[0], "set") == 0)  && field_type == FIELD_BOOLEAN) {
+                if ((g_strcmp0(args[0], "set") == 0) && field_type == FIELD_BOOLEAN) {
                     found = autocomplete_param_with_func(input, size, beginning->str,
                         prefs_autocomplete_boolean_choice);
                     g_string_free(beginning, TRUE);
@@ -2138,7 +2138,7 @@ _form_autocomplete(char *input, int *size)
                 }
 
                 // handle list-single (set)
-                if ((g_strcmp0(args[0], "set") == 0)  && field_type == FIELD_LIST_SINGLE) {
+                if ((g_strcmp0(args[0], "set") == 0) && field_type == FIELD_LIST_SINGLE) {
                     Autocomplete ac = form_get_value_ac(form, tag);
                     found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
                     g_string_free(beginning, TRUE);
@@ -2148,6 +2148,15 @@ _form_autocomplete(char *input, int *size)
                 }
 
                 // handle list-multi (add, remove)
+                if (((g_strcmp0(args[0], "set") == 0) || (g_strcmp0(args[0], "remove") == 0))
+                        && field_type == FIELD_LIST_MULTI) {
+                    Autocomplete ac = form_get_value_ac(form, tag);
+                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
 
                 // handle text-multi (remove)
 

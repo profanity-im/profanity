@@ -242,7 +242,7 @@ form_create(xmpp_stanza_t * const form_stanza)
                     option->label = _get_attr(field_child, "label");
                     option->value = _get_property(field_child, "value");
 
-                    if (field->type_t == FIELD_LIST_SINGLE) {
+                    if ((field->type_t == FIELD_LIST_SINGLE) || (field->type_t == FIELD_LIST_MULTI)) {
                         autocomplete_add(field->value_ac, option->value);
                     }
 
