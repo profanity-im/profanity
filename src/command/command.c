@@ -2169,6 +2169,14 @@ _form_autocomplete(char *input, int *size)
                 }
 
                 // handle jid-multi (remove)
+                if ((g_strcmp0(args[0], "remove") == 0) && field_type == FIELD_JID_MULTI) {
+                    Autocomplete ac = form_get_value_ac(form, tag);
+                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
             }
 
             found = autocomplete_param_with_ac(input, size, "/form set", form->tag_ac, TRUE);

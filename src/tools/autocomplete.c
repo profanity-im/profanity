@@ -99,16 +99,18 @@ autocomplete_length(Autocomplete ac)
 void
 autocomplete_add(Autocomplete ac, const char *item)
 {
-    char *item_cpy;
-    GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
+    if (ac != NULL) {
+        char *item_cpy;
+        GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
-    // if item already exists
-    if (curr != NULL) {
-        return;
+        // if item already exists
+        if (curr != NULL) {
+            return;
+        }
+
+        item_cpy = strdup(item);
+        ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
     }
-
-    item_cpy = strdup(item);
-    ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
     return;
 }
 

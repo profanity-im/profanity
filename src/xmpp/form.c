@@ -234,7 +234,6 @@ form_create(xmpp_stanza_t * const form_stanza)
                     char *value = xmpp_stanza_get_text(field_child);
                     if (value != NULL) {
                         field->values = g_slist_append(field->values, strdup(value));
-                        xmpp_free(ctx, value);
 
                         if (field->type_t == FIELD_TEXT_MULTI) {
                             GString *ac_val = g_string_new("");
@@ -242,6 +241,11 @@ form_create(xmpp_stanza_t * const form_stanza)
                             autocomplete_add(field->value_ac, ac_val->str);
                             g_string_free(ac_val, TRUE);
                         }
+                        if (field->type_t == FIELD_JID_MULTI) {
+                            autocomplete_add(field->value_ac, value);
+                        }
+
+                        xmpp_free(ctx, value);
                     }
 
                 // handle options
@@ -502,6 +506,9 @@ _form_add_unique_value(DataForm *form, const char * const tag, char *value)
                 }
 
                 field->values = g_slist_append(field->values, strdup(value));
+                if (field->type_t == FIELD_JID_MULTI) {
+                    autocomplete_add(field->value_ac, value);
+                }
                 form->modified = TRUE;
                 return TRUE;
             }
@@ -526,6 +533,9 @@ _form_remove_value(DataForm *form, const char * const tag, char *value)
                     free(found->data);
                     found->data = NULL;
                     field->values = g_slist_delete_link(field->values, found);
+                    if (field->type_t == FIELD_JID_MULTI) {
+                        autocomplete_remove(field->value_ac, value);
+                    }
                     form->modified = TRUE;
                     return TRUE;
                 } else {
