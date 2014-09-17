@@ -62,10 +62,12 @@ autocomplete_new(void)
 void
 autocomplete_clear(Autocomplete ac)
 {
-    g_slist_free_full(ac->items, free);
-    ac->items = NULL;
+    if (ac != NULL) {
+        g_slist_free_full(ac->items, free);
+        ac->items = NULL;
 
-    autocomplete_reset(ac);
+        autocomplete_reset(ac);
+    }
 }
 
 void
@@ -97,35 +99,39 @@ autocomplete_length(Autocomplete ac)
 void
 autocomplete_add(Autocomplete ac, const char *item)
 {
-    char *item_cpy;
-    GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
+    if (ac != NULL) {
+        char *item_cpy;
+        GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
-    // if item already exists
-    if (curr != NULL) {
-        return;
+        // if item already exists
+        if (curr != NULL) {
+            return;
+        }
+
+        item_cpy = strdup(item);
+        ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
     }
-
-    item_cpy = strdup(item);
-    ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
     return;
 }
 
 void
 autocomplete_remove(Autocomplete ac, const char * const item)
 {
-    GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
+    if (ac != NULL) {
+        GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
-    if (!curr) {
-        return;
+        if (!curr) {
+            return;
+        }
+
+        // reset last found if it points to the item to be removed
+        if (ac->last_found == curr) {
+            ac->last_found = NULL;
+        }
+
+        free(curr->data);
+        ac->items = g_slist_delete_link(ac->items, curr);
     }
-
-    // reset last found if it points to the item to be removed
-    if (ac->last_found == curr) {
-        ac->last_found = NULL;
-    }
-
-    free(curr->data);
-    ac->items = g_slist_delete_link(ac->items, curr);
 
     return;
 }

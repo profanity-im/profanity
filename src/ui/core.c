@@ -636,7 +636,7 @@ _ui_close_all_wins(void)
 
     while (curr != NULL) {
         int num = GPOINTER_TO_INT(curr->data);
-        if (num != 1) {
+        if ((num != 1) && (!ui_win_has_unsaved_form(num))) {
             if (conn_status == JABBER_CONNECTED) {
                 ui_close_connected_win(num);
             }
@@ -663,7 +663,7 @@ _ui_close_read_wins(void)
 
     while (curr != NULL) {
         int num = GPOINTER_TO_INT(curr->data);
-        if ((num != 1) && (ui_win_unread(num) == 0)) {
+        if ((num != 1) && (ui_win_unread(num) == 0) && (!ui_win_has_unsaved_form(num))) {
             if (conn_status == JABBER_CONNECTED) {
                 ui_close_connected_win(num);
             }
@@ -677,6 +677,20 @@ _ui_close_read_wins(void)
     g_list_free(win_nums);
 
     return count;
+}
+
+static gboolean
+_ui_win_has_unsaved_form(int num)
+{
+    ProfWin *window = wins_get_by_num(num);
+
+    if (window->type != WIN_MUC_CONFIG) {
+        return FALSE;
+    }
+    if (window->form == NULL) {
+        return FALSE;
+    }
+    return window->form->modified;
 }
 
 GString *
@@ -1607,7 +1621,8 @@ _ui_room_requires_config(const char * const room_jid)
             ui_index = 0;
         }
 
-        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room requires configuration, use '/room config accept' or '/room config cancel'");
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
+            "Room requires configuration, use '/room config accept' or '/room config destroy'");
 
         // currently in groupchat window
         if (wins_is_current(window)) {
@@ -1876,6 +1891,386 @@ _ui_draw_term_title(void)
 }
 
 static void
+_ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
+{
+    win_save_vprint(window, '-', NULL, NO_EOL, COLOUR_AWAY, "", "[%s] ", tag);
+    win_save_vprint(window, '-', NULL, NO_EOL | NO_DATE, 0, "", "%s", field->label);
+    if (field->required) {
+        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " (required): ");
+    } else {
+        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ": ");
+    }
+
+    GSList *values = field->values;
+    GSList *curr_value = values;
+
+    switch (field->type_t) {
+    case FIELD_HIDDEN:
+        break;
+    case FIELD_TEXT_SINGLE:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                if (g_strcmp0(field->var, "muc#roomconfig_roomsecret") == 0) {
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
+                } else {
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", value);
+                }
+            }
+        }
+        win_save_newline(window);
+        break;
+    case FIELD_TEXT_PRIVATE:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "[hidden]");
+            }
+        }
+        win_save_newline(window);
+        break;
+    case FIELD_TEXT_MULTI:
+        win_save_newline(window);
+        int index = 1;
+        while (curr_value != NULL) {
+            char *value = curr_value->data;
+            GString *val_tag = g_string_new("");
+            g_string_printf(val_tag, "val%d", index++);
+            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%s] %s", val_tag->str, value);
+            g_string_free(val_tag, TRUE);
+            curr_value = g_slist_next(curr_value);
+        }
+        break;
+    case FIELD_BOOLEAN:
+        if (curr_value == NULL) {
+            win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+        } else {
+            char *value = curr_value->data;
+            if (value == NULL) {
+                win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+            } else {
+                if (g_strcmp0(value, "0") == 0) {
+                    win_save_print(window, '-', NULL, NO_DATE, COLOUR_OFFLINE, "", "FALSE");
+                } else {
+                    win_save_print(window, '-', NULL, NO_DATE, COLOUR_ONLINE, "", "TRUE");
+                }
+            }
+        }
+        break;
+    case FIELD_LIST_SINGLE:
+        if (curr_value != NULL) {
+            win_save_newline(window);
+            char *value = curr_value->data;
+            GSList *options = field->options;
+            GSList *curr_option = options;
+            while (curr_option != NULL) {
+                FormOption *option = curr_option->data;
+                if (g_strcmp0(option->value, value) == 0) {
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%s] %s", option->value, option->label);
+                } else {
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_OFFLINE, "", "  [%s] %s", option->value, option->label);
+                }
+                curr_option = g_slist_next(curr_option);
+            }
+        }
+        break;
+    case FIELD_LIST_MULTI:
+        if (curr_value != NULL) {
+            win_save_newline(window);
+            GSList *options = field->options;
+            GSList *curr_option = options;
+            while (curr_option != NULL) {
+                FormOption *option = curr_option->data;
+                if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0) != NULL) {
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  [%s] %s", option->value, option->label);
+                } else {
+                    win_save_vprint(window, '-', NULL, 0, COLOUR_OFFLINE, "", "  [%s] %s", option->value, option->label);
+                }
+                curr_option = g_slist_next(curr_option);
+            }
+        }
+        break;
+    case FIELD_JID_SINGLE:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", value);
+            }
+        }
+        win_save_newline(window);
+        break;
+    case FIELD_JID_MULTI:
+        win_save_newline(window);
+        while (curr_value != NULL) {
+            char *value = curr_value->data;
+            win_save_vprint(window, '-', NULL, 0, COLOUR_ONLINE, "", "  %s", value);
+            curr_value = g_slist_next(curr_value);
+        }
+        break;
+    case FIELD_FIXED:
+        if (curr_value != NULL) {
+            char *value = curr_value->data;
+            if (value != NULL) {
+                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", value);
+            }
+        }
+        win_save_newline(window);
+        break;
+    default:
+        break;
+    }
+}
+
+static void
+_ui_show_form(ProfWin *window, const char * const room, DataForm *form)
+{
+    if (form->title != NULL) {
+        win_save_print(window, '-', NULL, 0, 0, "", form->title);
+    } else {
+        win_save_vprint(window, '-', NULL, 0, 0, "", "Configuration for room %s.", room);
+    }
+    win_save_print(window, '-', NULL, 0, 0, "", "");
+
+    ui_show_form_help(window, form);
+
+    GSList *fields = form->fields;
+    GSList *curr_field = fields;
+    while (curr_field != NULL) {
+        FormField *field = curr_field->data;
+
+        if (g_strcmp0(field->type, "hidden") != 0) {
+            char *tag = g_hash_table_lookup(form->var_to_tag, field->var);
+            _ui_handle_form_field(window, tag, field);
+        }
+
+        curr_field = g_slist_next(curr_field);
+    }
+
+    win_save_println(window, "");
+}
+
+static void
+_ui_show_form_field(ProfWin *window, DataForm *form, char *tag)
+{
+    FormField *field = form_get_field_by_tag(form, tag);
+    _ui_handle_form_field(window, tag, field);
+    win_save_println(window, "");
+}
+
+static void
+_ui_handle_room_configuration(const char * const room, DataForm *form)
+{
+    GString *title = g_string_new(room);
+    g_string_append(title, " config");
+    ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
+    g_string_free(title, TRUE);
+
+    window->form = form;
+
+    int num = wins_get_num(window);
+    ui_switch_win(num);
+
+    ui_show_form(window, room, form);
+}
+
+static void
+_ui_handle_room_configuration_form_error(const char * const room, const char * const message)
+{
+    ProfWin *window = NULL;
+    GString *message_str = g_string_new("");
+
+    if (room) {
+        window = wins_get_by_recipient(room);
+        g_string_printf(message_str, "Could not get room configuration for %s", room);
+    } else {
+        window = wins_get_console();
+        g_string_printf(message_str, "Could not get room configuration");
+    }
+
+    if (message) {
+        g_string_append(message_str, ": ");
+        g_string_append(message_str, message);
+    }
+
+    win_save_print(window, '-', NULL, 0, COLOUR_ERROR, "", message_str->str);
+
+    g_string_free(message_str, TRUE);
+}
+
+static void
+_ui_handle_room_config_submit_result(const char * const room)
+{
+    ProfWin *muc_window = NULL;
+    ProfWin *form_window = NULL;
+    int num;
+
+    if (room) {
+        GString *form_recipient = g_string_new(room);
+        g_string_append(form_recipient, " config");
+
+        muc_window = wins_get_by_recipient(room);
+        form_window = wins_get_by_recipient(form_recipient->str);
+        g_string_free(form_recipient, TRUE);
+
+        if (form_window) {
+            num = wins_get_num(form_window);
+            wins_close_by_num(num);
+        }
+
+        if (muc_window) {
+            int num = wins_get_num(muc_window);
+            ui_switch_win(num);
+            win_save_print(muc_window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room configuration successfull");
+        } else {
+            ui_switch_win(1);
+            cons_show("Room configuration successfull: %s", room);
+        }
+    } else {
+        cons_show("Room configuration successful"); 
+    }
+}
+
+static void
+_ui_handle_room_config_submit_result_error(const char * const room, const char * const message)
+{
+    ProfWin *console = wins_get_console();
+    ProfWin *muc_window = NULL;
+    ProfWin *form_window = NULL;
+
+    if (room) {
+        GString *form_recipient = g_string_new(room);
+        g_string_append(form_recipient, " config");
+
+        muc_window = wins_get_by_recipient(room);
+        form_window = wins_get_by_recipient(form_recipient->str);
+        g_string_free(form_recipient, TRUE);
+
+        if (form_window) {
+            if (message) {
+                win_save_vprint(form_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error: %s", message);
+            } else {
+                win_save_print(form_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error");
+            }
+        } else if (muc_window) {
+            if (message) {
+                win_save_vprint(muc_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error: %s", message);
+            } else {
+                win_save_print(muc_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error");
+            }
+        } else {
+            if (message) {
+                win_save_vprint(console, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error for %s: %s", room, message);
+            } else {
+                win_save_vprint(console, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error for %s", room);
+            }
+        }
+    } else {
+        win_save_print(console, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error");
+    }
+}
+
+static void
+_ui_show_form_field_help(ProfWin *window, DataForm *form, char *tag)
+{
+    FormField *field = form_get_field_by_tag(form, tag);
+    if (field != NULL) {
+        win_save_print(window, '-', NULL, NO_EOL, 0, "", field->label);
+        if (field->required) {
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", " (Required):");
+        } else {
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", ":");
+        }
+        if (field->description != NULL) {
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Description : %s", field->description);
+        }
+        win_save_vprint(window, '-', NULL, 0, 0, "", "  Type        : %s", field->type);
+
+        int num_values = 0;
+        GSList *curr_option = NULL;
+        FormOption *option = NULL;
+
+        switch (field->type_t) {
+        case FIELD_TEXT_SINGLE:
+        case FIELD_TEXT_PRIVATE:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
+            break;
+        case FIELD_TEXT_MULTI:
+            num_values = form_get_value_count(form, tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
+            if (num_values > 0) {
+                win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "  Where       : <value> between 'val1' and 'val%d'", num_values);
+            }
+            break;
+        case FIELD_BOOLEAN:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is either 'on' or 'off'");
+            break;
+        case FIELD_LIST_SINGLE:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
+            curr_option = field->options;
+            while (curr_option != NULL) {
+                option = curr_option->data;
+                win_save_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
+                curr_option = g_slist_next(curr_option);
+            }
+            break;
+        case FIELD_LIST_MULTI:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
+            curr_option = field->options;
+            while (curr_option != NULL) {
+                option = curr_option->data;
+                win_save_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
+                curr_option = g_slist_next(curr_option);
+            }
+            break;
+        case FIELD_JID_SINGLE:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            break;
+        case FIELD_JID_MULTI:
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form set %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form set %s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            break;
+        case FIELD_FIXED:
+        case FIELD_UNKNOWN:
+        case FIELD_HIDDEN:
+        default:
+            break;
+        }
+    } else {
+        win_save_vprint(window, '-', NULL, 0, 0, "", "No such field %s", tag);
+    }
+}
+
+static void
+_ui_show_form_help(ProfWin *window, DataForm *form)
+{
+    if (form->instructions != NULL) {
+        win_save_print(window, '-', NULL, 0, 0, "", "Instructions:");
+        win_save_print(window, '-', NULL, 0, 0, "", form->instructions);
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+    }
+}
+
+static void
+_ui_show_lines(ProfWin *window, const gchar** lines)
+{
+    if (lines != NULL) {
+        int i;
+        for (i = 0; lines[i] != NULL; i++) {
+            win_save_print(window, '-', NULL, 0, 0, "", lines[i]);
+        }
+    }
+}
+
+static void
 _win_handle_switch(const wint_t * const ch)
 {
     if (*ch == KEY_F(1)) {
@@ -2133,4 +2528,14 @@ ui_init_module(void)
     ui_update = _ui_update;
     ui_room_requires_config = _ui_room_requires_config;
     ui_room_destroyed = _ui_room_destroyed;
+    ui_handle_room_configuration = _ui_handle_room_configuration;
+    ui_handle_room_config_submit_result = _ui_handle_room_config_submit_result;
+    ui_handle_room_config_submit_result_error = _ui_handle_room_config_submit_result_error;
+    ui_win_has_unsaved_form = _ui_win_has_unsaved_form;
+    ui_show_form = _ui_show_form;
+    ui_show_form_field = _ui_show_form_field;
+    ui_show_form_help = _ui_show_form_help;
+    ui_show_form_field_help = _ui_show_form_field_help;
+    ui_show_lines = _ui_show_lines;
+    ui_handle_room_configuration_form_error = _ui_handle_room_configuration_form_error;
 }

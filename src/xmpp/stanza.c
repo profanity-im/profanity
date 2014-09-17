@@ -43,10 +43,9 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/capabilities.h"
+#include "xmpp/form.h"
 
 #include "muc.h"
-
-static int _field_compare(FormField *f1, FormField *f2);
 
 #if 0
 xmpp_stanza_t *
@@ -430,7 +429,7 @@ stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx, const char * const room_j
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
     xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room_jid);
-    char *id = create_unique_id("leave");
+    char *id = create_unique_id("room");
     xmpp_stanza_set_id(iq, id);
     free(id);
 
@@ -459,7 +458,7 @@ stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx, const char * const room_j
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
     xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
     xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room_jid);
-    char *id = create_unique_id("leave");
+    char *id = create_unique_id("room");
     xmpp_stanza_set_id(iq, id);
     free(id);
 
@@ -472,6 +471,56 @@ stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx, const char * const room_j
 
     xmpp_stanza_add_child(query, destroy);
     xmpp_stanza_release(destroy);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
+stanza_create_room_config_request_iq(xmpp_ctx_t *ctx, const char * const room_jid)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_GET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room_jid);
+    char *id = create_unique_id("room");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_MUC_OWNER);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
+stanza_create_room_config_cancel_iq(xmpp_ctx_t *ctx, const char * const room_jid)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room_jid);
+    char *id = create_unique_id("room");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_MUC_OWNER);
+
+    xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_type(x, "cancel");
+    xmpp_stanza_set_ns(x, STANZA_NS_DATA);
+
+    xmpp_stanza_add_child(query, x);
+    xmpp_stanza_release(x);
 
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_release(query);
@@ -561,6 +610,31 @@ stanza_create_disco_items_iq(xmpp_ctx_t *ctx, const char * const id,
     xmpp_stanza_t *query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
     xmpp_stanza_set_ns(query, XMPP_NS_DISCO_ITEMS);
+
+    xmpp_stanza_add_child(iq, query);
+    xmpp_stanza_release(query);
+
+    return iq;
+}
+
+xmpp_stanza_t *
+stanza_create_room_config_submit_iq(xmpp_ctx_t *ctx, const char * const room, DataForm *form)
+{
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_TO, room);
+    char *id = create_unique_id("roomconf_submit");
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_MUC_OWNER);
+
+    xmpp_stanza_t *x = form_create_submission(form);
+    xmpp_stanza_add_child(query, x);
+    xmpp_stanza_release(x);
 
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_release(query);
@@ -1023,79 +1097,6 @@ stanza_get_error_message(xmpp_stanza_t *stanza)
     return strdup("unknown");
 }
 
-DataForm *
-stanza_create_form(xmpp_stanza_t * const stanza)
-{
-    DataForm *result = NULL;
-    xmpp_ctx_t *ctx = connection_get_ctx();
-
-    xmpp_stanza_t *child = xmpp_stanza_get_children(stanza);
-
-    if (child != NULL) {
-        result = malloc(sizeof(DataForm));
-        result->form_type = NULL;
-        result->fields = NULL;
-    }
-
-    //handle fields
-    while (child != NULL) {
-        char *var = xmpp_stanza_get_attribute(child, "var");
-
-        // handle FORM_TYPE
-        if (g_strcmp0(var, "FORM_TYPE") == 0) {
-            xmpp_stanza_t *value = xmpp_stanza_get_child_by_name(child, "value");
-            char *value_text = xmpp_stanza_get_text(value);
-            result->form_type = strdup(value_text);
-            xmpp_free(ctx, value_text);
-
-        // handle regular fields
-        } else {
-            FormField *field = malloc(sizeof(FormField));
-            field->var = strdup(var);
-            field->values = NULL;
-            xmpp_stanza_t *value = xmpp_stanza_get_children(child);
-
-            // handle values
-            while (value != NULL) {
-                char *text = xmpp_stanza_get_text(value);
-                if (text != NULL) {
-                    field->values = g_slist_insert_sorted(field->values, strdup(text), (GCompareFunc)strcmp);
-                    xmpp_free(ctx, text);
-                }
-                value = xmpp_stanza_get_next(value);
-            }
-
-            result->fields = g_slist_insert_sorted(result->fields, field, (GCompareFunc)_field_compare);
-        }
-
-        child = xmpp_stanza_get_next(child);
-    }
-
-    return result;
-}
-
-void
-stanza_destroy_form(DataForm *form)
-{
-    if (form != NULL) {
-        if (form->fields != NULL) {
-            GSList *curr_field = form->fields;
-            while (curr_field != NULL) {
-                FormField *field = curr_field->data;
-                free(field->var);
-                if ((field->values) != NULL) {
-                    g_slist_free_full(field->values, free);
-                }
-                curr_field = curr_field->next;
-            }
-            g_slist_free_full(form->fields, free);
-        }
-
-        free(form->form_type);
-        free(form);
-    }
-}
-
 void
 stanza_attach_priority(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence,
     const int pri)
@@ -1198,10 +1199,4 @@ stanza_get_presence_string_from_type(resource_presence_t presence_type)
         default:
             return NULL;
     }
-}
-
-static int
-_field_compare(FormField *f1, FormField *f2)
-{
-    return strcmp(f1->var, f2->var);
 }

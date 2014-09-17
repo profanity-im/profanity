@@ -86,10 +86,10 @@ title_bar_update_virtual(void)
                 g_timer_destroy(typing_elapsed);
                 typing_elapsed = NULL;
 
-                _title_bar_draw();
             }
         }
     }
+    _title_bar_draw();
 }
 
 void
@@ -240,6 +240,14 @@ _title_bar_draw(void)
         }
     }
 #endif
+
+    // show indicator for unsaved forms
+    ProfWin *current = wins_get_current();
+    if ((current != NULL ) && (current->type == WIN_MUC_CONFIG)) {
+        if ((current->form != NULL) && (current->form->modified)) {
+            wprintw(win, " *");
+        }
+    }
 
     // show contact typing
     if (typing) {

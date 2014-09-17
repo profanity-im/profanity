@@ -160,6 +160,15 @@ void (*ui_handle_recipient_error)(const char * const recipient, const char * con
 void (*ui_handle_error)(const char * const err_msg);
 void (*ui_clear_win_title)(void);
 void (*ui_handle_room_join_error)(const char * const room, const char * const err);
+void (*ui_handle_room_configuration)(const char * const room, DataForm *form);
+void (*ui_handle_room_configuration_form_error)(const char * const room, const char * const message);
+void (*ui_handle_room_config_submit_result)(const char * const room);
+void (*ui_handle_room_config_submit_result_error)(const char * const room, const char * const message);
+void (*ui_show_form)(ProfWin *window, const char * const room, DataForm *form);
+void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
+void (*ui_show_form_help)(ProfWin *window, DataForm *form);
+void (*ui_show_form_field_help)(ProfWin *window, DataForm *form, char *tag);
+void (*ui_show_lines)(ProfWin *window, const gchar** lines);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);
@@ -198,6 +207,8 @@ void (*ui_invalid_command_usage)(const char * const usage, void (**setting_func)
 void (*ui_create_xmlconsole_win)(void);
 gboolean (*ui_xmlconsole_exists)(void);
 void (*ui_open_xmlconsole_win)(void);
+
+gboolean (*ui_win_has_unsaved_form)(int num);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);

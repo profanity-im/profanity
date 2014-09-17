@@ -36,6 +36,7 @@
 #define XMPP_STANZA_H
 
 #include <strophe.h>
+#include <xmpp/xmpp.h>
 
 #define STANZA_NAME_ACTIVE "active"
 #define STANZA_NAME_INACTIVE "inactive"
@@ -154,16 +155,6 @@
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
-typedef struct form_field_t {
-    char *var;
-    GSList *values;
-} FormField;
-
-typedef struct data_form_t {
-    char *form_type;
-    GSList *fields;
-} DataForm;
-
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
@@ -207,6 +198,12 @@ xmpp_stanza_t* stanza_create_instant_room_request_iq(xmpp_ctx_t *ctx,
     const char * const room_jid);
 xmpp_stanza_t* stanza_create_instant_room_destroy_iq(xmpp_ctx_t *ctx,
     const char * const room_jid);
+xmpp_stanza_t* stanza_create_room_config_request_iq(xmpp_ctx_t *ctx,
+    const char * const room_jid);
+xmpp_stanza_t* stanza_create_room_config_cancel_iq(xmpp_ctx_t *ctx,
+    const char * const room_jid);
+xmpp_stanza_t* stanza_create_room_config_submit_iq(xmpp_ctx_t *ctx,
+    const char * const room, DataForm *form);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);

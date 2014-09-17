@@ -513,6 +513,30 @@ handle_room_destroy(const char * const room)
 }
 
 void
+handle_room_configure(const char * const room, DataForm *form)
+{
+    ui_handle_room_configuration(room, form);
+}
+
+void
+handle_room_configuration_form_error(const char * const room, const char * const message)
+{
+    ui_handle_room_configuration_form_error(room, message);
+}
+
+void
+handle_room_config_submit_result(const char * const room)
+{
+    ui_handle_room_config_submit_result(room);
+}
+
+void
+handle_room_config_submit_result_error(const char * const room, const char * const message)
+{
+    ui_handle_room_config_submit_result_error(room, message);
+}
+
+void
 handle_room_roster_complete(const char * const room)
 {
     if (muc_room_is_autojoin(room)) {

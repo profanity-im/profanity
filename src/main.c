@@ -63,6 +63,7 @@ _init_modules(void)
     message_init_module();
     presence_init_module();
     roster_init_module();
+    form_init_module();
 
     ui_init_module();
     console_init_module();

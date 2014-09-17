@@ -52,6 +52,7 @@
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
+#include "xmpp/form.h"
 #include "roster_list.h"
 #include "xmpp/xmpp.h"
 
@@ -74,6 +75,10 @@ static int _disco_items_result_handler(xmpp_conn_t * const conn,
 static int _disco_items_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _destroy_room_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_config_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_config_submit_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
@@ -182,6 +187,44 @@ _iq_destroy_instant_room(const char * const room_jid)
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _destroy_room_result_handler, id, NULL);
 
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_request_room_config_form(const char * const room_jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_config_request_iq(ctx, room_jid);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_config_handler, id, NULL);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_submit_room_config(const char * const room, DataForm *form)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_config_submit_iq(ctx, room, form);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_config_submit_handler, id, NULL);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_config_cancel(const char * const room_jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, room_jid);
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -563,6 +606,88 @@ _destroy_room_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     return 0;
 }
 
+static int
+_room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if (id != NULL) {
+        log_debug("IQ room config handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ room config handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_configuration_form_error(from, error_message);
+        free(error_message);
+        return 0;
+    }
+
+    if (from == NULL) {
+        log_error("No from attribute for IQ config request result");
+        handle_room_configuration_form_error(from, "No from attribute for room cofig response.");
+        return 0;
+    }
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        log_error("No query element found parsing room config response");
+        handle_room_configuration_form_error(from, "No query element found parsing room config response");
+        return 0;
+    }
+
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
+    if (x == NULL) {
+        log_error("No x element found with %s namespace parsing room config response", STANZA_NS_DATA);
+        handle_room_configuration_form_error(from, "No form data element found parsing room config response");
+        return 0;
+    }
+
+    char *form_type = xmpp_stanza_get_attribute(x, STANZA_ATTR_TYPE);
+    if (g_strcmp0(form_type, "form") != 0) {
+        log_error("x element not of type 'form' parsing room config response");
+        handle_room_configuration_form_error(from, "Form not of type 'form' parsing room config response.");
+        return 0;
+    }
+
+    DataForm *form = form_create(x);
+    handle_room_configure(from, form);
+
+    return 0;
+}
+
+static int
+_room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if (id != NULL) {
+        log_debug("IQ room config submit handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ room config submit handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_config_submit_result_error(from, error_message);
+        free(error_message);
+        return 0;
+    }
+
+    handle_room_config_submit_result(from);
+
+    return 0;
+}
+
 static void
 _identity_destroy(DiscoIdentity *identity)
 {
@@ -709,10 +834,11 @@ _disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
 
         xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
         if (softwareinfo != NULL) {
-            DataForm *form = stanza_create_form(softwareinfo);
+            DataForm *form = form_create(softwareinfo);
             FormField *formField = NULL;
 
-            if (g_strcmp0(form->form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
+            char *form_type = form_get_form_type_field(form);
+            if (g_strcmp0(form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
                 GSList *field = form->fields;
                 while (field != NULL) {
                     formField = field->data;
@@ -731,7 +857,7 @@ _disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanz
                 }
             }
 
-            stanza_destroy_form(form);
+            form_destroy(form);
         }
 
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
@@ -812,4 +938,7 @@ iq_init_module(void)
     iq_confirm_instant_room = _iq_confirm_instant_room;
     iq_destroy_instant_room = _iq_destroy_instant_room;
     iq_send_ping = _iq_send_ping;
+    iq_request_room_config_form = _iq_request_room_config_form;
+    iq_room_config_cancel = _iq_room_config_cancel;
+    iq_submit_room_config = _iq_submit_room_config;
 }

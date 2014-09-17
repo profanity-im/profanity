@@ -66,6 +66,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/bookmark.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 
 typedef char*(*autocompleter)(char*, int*);
 
@@ -87,7 +88,7 @@ static char * _statuses_autocomplete(char *input, int *size);
 static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
-static char * _room_autocomplete(char *input, int *size);
+static char * _form_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -306,11 +307,27 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args, 2, 2, NULL,
-        { "/room config accept|cancel", "Room configuration.",
-        { "/room config accept|cncel",
-          "-------------------------",
-          "Accept or cancel default room configuration.",
+        cmd_room, parse_args, 1, 1, NULL,
+        { "/room accept|destroy|config", "Room configuration.",
+        { "/room accept|destroy|config",
+          "---------------------------",
+          "accept  - Accept default room configuration.",
+          "destroy - Reject default room configuration.",
+          "config  - Edit room configuration.",
+          NULL } } },
+
+    { "/form",
+        cmd_form, parse_args, 1, 3, NULL,
+        { "/form show|submit|cancel|set|add|remove|help [tag] [value]", "Form manipulation.",
+        { "/form show|submit|cancel|set|add|remove|help [tag] [value]",
+          "----------------------------------------------------------",
+          "set tag value    - Set tagged form field to value.",
+          "add tag value    - Add value to tagged form field.",
+          "remove tag value - Remove value from tagged form field.",
+          "show             - Show the current form.",
+          "submit           - Submit the current form.",
+          "cancel           - Cancel changes to the current form.",
+          "help [tag]       - Display help for form, or a specific field.",
           NULL } } },
 
     { "/rooms",
@@ -962,7 +979,7 @@ static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
 static Autocomplete room_ac;
-static Autocomplete room_config_ac;
+static Autocomplete form_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1215,11 +1232,18 @@ cmd_init(void)
     autocomplete_add(alias_ac, "list");
 
     room_ac = autocomplete_new();
+    autocomplete_add(room_ac, "accept");
+    autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
 
-    room_config_ac = autocomplete_new();
-    autocomplete_add(room_config_ac, "accept");
-    autocomplete_add(room_config_ac, "cancel");
+    form_ac = autocomplete_new();
+    autocomplete_add(form_ac, "submit");
+    autocomplete_add(form_ac, "cancel");
+    autocomplete_add(form_ac, "show");
+    autocomplete_add(form_ac, "set");
+    autocomplete_add(form_ac, "add");
+    autocomplete_add(form_ac, "remove");
+    autocomplete_add(form_ac, "help");
 
     cmd_history_init();
 }
@@ -1265,7 +1289,7 @@ cmd_uninit(void)
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
     autocomplete_free(room_ac);
-    autocomplete_free(room_config_ac);
+    autocomplete_free(form_ac);
 }
 
 gboolean
@@ -1390,7 +1414,15 @@ cmd_reset_autocomplete()
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
-    autocomplete_reset(room_config_ac);
+    autocomplete_reset(form_ac);
+
+    if (ui_current_win_type() == WIN_MUC_CONFIG) {
+        ProfWin *window = wins_get_current();
+        if (window && window->form) {
+            form_reset_autocompleters(window->form);
+        }
+    }
+
     bookmark_autocomplete_reset();
     plugins_reset_autocomplete();
 }
@@ -1667,8 +1699,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/room" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -1696,7 +1728,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
-    g_hash_table_insert(ac_funcs, "/room",          _room_autocomplete);
+    g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2114,18 +2146,104 @@ _theme_autocomplete(char *input, int *size)
 }
 
 static char *
-_room_autocomplete(char *input, int *size)
+_form_autocomplete(char *input, int *size)
 {
-    char *result = NULL;
+    char *found = NULL;
 
-    result = autocomplete_param_with_ac(input, size, "/room config", room_config_ac, TRUE);
-    if (result != NULL) {
-        return result;
+    ProfWin *current = wins_get_current();
+    if (current != NULL) {
+        DataForm *form = current->form;
+        if (form != NULL) {
+            gboolean result = FALSE;
+
+            input[*size] = '\0';
+            gchar **args = parse_args(input, 3, 3, &result);
+
+            if ((strncmp(input, "/form", 5) == 0) && (result == TRUE)) {
+                char *cmd = args[0];
+                char *tag = args[1];
+
+                GString *beginning = g_string_new("/form ");
+                g_string_append(beginning, cmd);
+                g_string_append(beginning, " ");
+                g_string_append(beginning, tag);
+
+                form_field_type_t field_type = form_get_field_type(form, tag);
+
+                // handle boolean (set)
+                if ((g_strcmp0(args[0], "set") == 0) && field_type == FIELD_BOOLEAN) {
+                    found = autocomplete_param_with_func(input, size, beginning->str,
+                        prefs_autocomplete_boolean_choice);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
+
+                // handle list-single (set)
+                if ((g_strcmp0(args[0], "set") == 0) && field_type == FIELD_LIST_SINGLE) {
+                    Autocomplete ac = form_get_value_ac(form, tag);
+                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
+
+                // handle list-multi (add, remove)
+                if (((g_strcmp0(args[0], "set") == 0) || (g_strcmp0(args[0], "remove") == 0))
+                        && field_type == FIELD_LIST_MULTI) {
+                    Autocomplete ac = form_get_value_ac(form, tag);
+                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
+
+                // handle text-multi (remove)
+                if ((g_strcmp0(args[0], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
+                    Autocomplete ac = form_get_value_ac(form, tag);
+                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
+
+                // handle jid-multi (remove)
+                if ((g_strcmp0(args[0], "remove") == 0) && field_type == FIELD_JID_MULTI) {
+                    Autocomplete ac = form_get_value_ac(form, tag);
+                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
+            }
+
+            found = autocomplete_param_with_ac(input, size, "/form set", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+            found = autocomplete_param_with_ac(input, size, "/form add", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+            found = autocomplete_param_with_ac(input, size, "/form remove", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+            found = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+        }
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
+    if (found != NULL) {
+        return found;
     }
 
     return NULL;

@@ -68,6 +68,7 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->type = type;
     new_win->is_otr = FALSE;
     new_win->is_trusted = FALSE;
+    new_win->form = NULL;
     scrollok(new_win->win, TRUE);
 
     return new_win;
@@ -79,6 +80,7 @@ win_free(ProfWin* window)
     buffer_free(window->buffer);
     delwin(window->win);
     free(window->from);
+    form_destroy(window->form);
     free(window);
 }
 
