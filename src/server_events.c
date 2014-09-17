@@ -478,19 +478,7 @@ handle_room_config_submit_result(void)
 void
 handle_room_configuration_form_error(const char * const room, const char * const message)
 {
-    if (room != NULL) {
-        if (message != NULL) {
-            cons_show_error("Room config error for %s: %s.", room, message);
-        } else {
-            cons_show_error("Room config error for %s.", room);
-        }
-    } else {
-        if (message != NULL) {
-            cons_show_error("Room config error: %s.", message);
-        } else {
-            cons_show_error("Room config error.");
-        }
-    }
+    ui_handle_room_configuration_form_error(room, message);
 }
 
 void

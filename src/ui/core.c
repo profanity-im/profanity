@@ -2069,6 +2069,30 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
 }
 
 static void
+_ui_handle_room_configuration_form_error(const char * const room, const char * const message)
+{
+    ProfWin *window = NULL;
+    GString *message_str = g_string_new("");
+
+    if (room) {
+        window = wins_get_by_recipient(room);
+        g_string_printf(message_str, "Could not get room configuration for %s", room);
+    } else {
+        window = wins_get_console();
+        g_string_printf(message_str, "Could not get room configuration");
+    }
+
+    if (message) {
+        g_string_append(message_str, ": ");
+        g_string_append(message_str, message);
+    }
+
+    win_save_print(window, '-', NULL, 0, COLOUR_ERROR, "", message_str->str);
+
+    g_string_free(message_str, TRUE);
+}
+
+static void
 _ui_handle_room_config_submit_result(void)
 {
     cons_show("GOT ROOM CONFIG SUBMIT RESULT!!!!");
@@ -2420,4 +2444,5 @@ ui_init_module(void)
     ui_show_form_help = _ui_show_form_help;
     ui_show_form_field_help = _ui_show_form_field_help;
     ui_show_lines = _ui_show_lines;
+    ui_handle_room_configuration_form_error = _ui_handle_room_configuration_form_error;
 }
