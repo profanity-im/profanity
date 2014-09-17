@@ -666,14 +666,24 @@ _room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     void * const userdata)
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (id != NULL) {
-        log_debug("IQ room config handler fired, id: %s.", id);
+        log_debug("IQ room config submit handler fired, id: %s.", id);
     } else {
-        log_debug("IQ room config handler fired.");
+        log_debug("IQ room config submit handler fired.");
     }
 
-    handle_room_config_submit_result();
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_config_submit_result_error(from, error_message);
+        free(error_message);
+        return 0;
+    }
+
+    handle_room_config_submit_result(from);
 
     return 0;
 }

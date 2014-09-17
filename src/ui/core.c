@@ -2093,9 +2093,75 @@ _ui_handle_room_configuration_form_error(const char * const room, const char * c
 }
 
 static void
-_ui_handle_room_config_submit_result(void)
+_ui_handle_room_config_submit_result(const char * const room)
 {
-    cons_show("GOT ROOM CONFIG SUBMIT RESULT!!!!");
+    ProfWin *muc_window = NULL;
+    ProfWin *form_window = NULL;
+    int num;
+
+    if (room) {
+        GString *form_recipient = g_string_new(room);
+        g_string_append(form_recipient, " config");
+
+        muc_window = wins_get_by_recipient(room);
+        form_window = wins_get_by_recipient(form_recipient->str);
+        g_string_free(form_recipient, TRUE);
+
+        if (form_window) {
+            num = wins_get_num(form_window);
+            wins_close_by_num(num);
+        }
+
+        if (muc_window) {
+            int num = wins_get_num(muc_window);
+            ui_switch_win(num);
+            win_save_print(muc_window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room configuration successfull");
+        } else {
+            ui_switch_win(1);
+            cons_show("Room configuration successfull: %s", room);
+        }
+    } else {
+        cons_show("Room configuration successful"); 
+    }
+}
+
+static void
+_ui_handle_room_config_submit_result_error(const char * const room, const char * const message)
+{
+    ProfWin *console = wins_get_console();
+    ProfWin *muc_window = NULL;
+    ProfWin *form_window = NULL;
+
+    if (room) {
+        GString *form_recipient = g_string_new(room);
+        g_string_append(form_recipient, " config");
+
+        muc_window = wins_get_by_recipient(room);
+        form_window = wins_get_by_recipient(form_recipient->str);
+        g_string_free(form_recipient, TRUE);
+
+        if (form_window) {
+            if (message) {
+                win_save_vprint(form_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error: %s", message);
+            } else {
+                win_save_print(form_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error");
+            }
+        } else if (muc_window) {
+            if (message) {
+                win_save_vprint(muc_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error: %s", message);
+            } else {
+                win_save_print(muc_window, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error");
+            }
+        } else {
+            if (message) {
+                win_save_vprint(console, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error for %s: %s", room, message);
+            } else {
+                win_save_vprint(console, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error for %s", room);
+            }
+        }
+    } else {
+        win_save_print(console, '!', NULL, 0, COLOUR_ERROR, "", "Configuration error");
+    }
 }
 
 static void
@@ -2438,6 +2504,7 @@ ui_init_module(void)
     ui_room_destroyed = _ui_room_destroyed;
     ui_handle_room_configuration = _ui_handle_room_configuration;
     ui_handle_room_config_submit_result = _ui_handle_room_config_submit_result;
+    ui_handle_room_config_submit_result_error = _ui_handle_room_config_submit_result_error;
     ui_win_has_unsaved_form = _ui_win_has_unsaved_form;
     ui_show_form = _ui_show_form;
     ui_show_form_field = _ui_show_form_field;
