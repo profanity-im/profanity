@@ -1406,6 +1406,14 @@ cmd_reset_autocomplete()
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
     autocomplete_reset(form_ac);
+
+    if (ui_current_win_type() == WIN_MUC_CONFIG) {
+        ProfWin *window = wins_get_current();
+        if (window && window->form) {
+            form_reset_autocompleters(window->form);
+        }
+    }
+
     bookmark_autocomplete_reset();
 }
 
@@ -2130,6 +2138,14 @@ _form_autocomplete(char *input, int *size)
                 }
 
                 // handle list-single (set)
+                if ((g_strcmp0(args[0], "set") == 0)  && field_type == FIELD_LIST_SINGLE) {
+                    Autocomplete ac = form_get_value_ac(form, tag);
+                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
 
                 // handle list-multi (add, remove)
 

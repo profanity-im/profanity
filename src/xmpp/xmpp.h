@@ -115,6 +115,7 @@ typedef struct form_field_t {
     gboolean required;
     GSList *values;
     GSList *options;
+    Autocomplete value_ac;
 } FormField;
 
 typedef struct data_form_t {
@@ -219,5 +220,7 @@ form_field_type_t (*form_get_field_type)(DataForm *form, const char * const tag)
 gboolean (*form_field_contains_option)(DataForm *form, const char * const tag, char *value);
 int (*form_get_value_count)(DataForm *form, const char * const tag);
 FormField* (*form_get_field_by_tag)(DataForm *form, const char * const tag);
+Autocomplete (*form_get_value_ac)(DataForm *form, const char * const tag);
+void (*form_reset_autocompleters)(DataForm *form);
 
 #endif

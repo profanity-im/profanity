@@ -207,6 +207,7 @@ form_create(xmpp_stanza_t * const form_stanza)
             field->label = _get_attr(field_stanza, "label");
             field->type = _get_attr(field_stanza, "type");
             field->type_t = _get_field_type(field->type);
+            field->value_ac = autocomplete_new();
 
             field->var = _get_attr(field_stanza, "var");
 
@@ -240,6 +241,10 @@ form_create(xmpp_stanza_t * const form_stanza)
                     FormOption *option = malloc(sizeof(FormOption));
                     option->label = _get_attr(field_child, "label");
                     option->value = _get_property(field_child, "value");
+
+                    if (field->type_t == FIELD_LIST_SINGLE) {
+                        autocomplete_add(field->value_ac, option->value);
+                    }
 
                     field->options = g_slist_append(field->options, option);
                 }
@@ -355,6 +360,7 @@ _free_field(FormField *field)
         free(field->description);
         g_slist_free_full(field->values, free);
         g_slist_free_full(field->options, (GDestroyNotify)_free_option);
+        autocomplete_free(field->value_ac);
         free(field);
     }
 }
@@ -610,6 +616,35 @@ _form_get_field_by_tag(DataForm *form, const char * const tag)
     return NULL;
 }
 
+static Autocomplete
+_form_get_value_ac(DataForm *form, const char * const tag)
+{
+    char *var = g_hash_table_lookup(form->tag_to_var, tag);
+    if (var != NULL) {
+        GSList *curr = form->fields;
+        while (curr != NULL) {
+            FormField *field = curr->data;
+            if (g_strcmp0(field->var, var) == 0) {
+                return field->value_ac;
+            }
+            curr = g_slist_next(curr);
+        }
+    }
+    return NULL;
+}
+
+static void
+_form_reset_autocompleters(DataForm *form)
+{
+    autocomplete_reset(form->tag_ac);
+    GSList *curr_field = form->fields;
+    while (curr_field) {
+        FormField *field = curr_field->data;
+        autocomplete_reset(field->value_ac);
+        curr_field = g_slist_next(curr_field);
+    }
+}
+
 void
 form_init_module(void)
 {
@@ -624,5 +659,7 @@ form_init_module(void)
     form_field_contains_option = _form_field_contains_option;
     form_tag_exists = _form_tag_exists;
     form_get_value_count = _form_get_value_count;
+    form_get_value_ac = _form_get_value_ac;
     form_get_field_by_tag = _form_get_field_by_tag;
+    form_reset_autocompleters = _form_reset_autocompleters;
 }
