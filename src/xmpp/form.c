@@ -225,6 +225,7 @@ form_create(xmpp_stanza_t * const form_stanza)
 
             // handle repeated field children
             xmpp_stanza_t *field_child = xmpp_stanza_get_children(field_stanza);
+            int value_index = 1;
             while (field_child != NULL) {
                 child_name = xmpp_stanza_get_name(field_child);
 
@@ -234,6 +235,13 @@ form_create(xmpp_stanza_t * const form_stanza)
                     if (value != NULL) {
                         field->values = g_slist_append(field->values, strdup(value));
                         xmpp_free(ctx, value);
+
+                        if (field->type_t == FIELD_TEXT_MULTI) {
+                            GString *ac_val = g_string_new("");
+                            g_string_printf(ac_val, "val%d", value_index++);
+                            autocomplete_add(field->value_ac, ac_val->str);
+                            g_string_free(ac_val, TRUE);
+                        }
                     }
 
                 // handle options
@@ -461,6 +469,13 @@ _form_add_value(DataForm *form, const char * const tag, char *value)
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 field->values = g_slist_append(field->values, strdup(value));
+                if (field->type_t == FIELD_TEXT_MULTI) {
+                    int total = g_slist_length(field->values);
+                    GString *value_index = g_string_new("");
+                    g_string_printf(value_index, "val%d", total);
+                    autocomplete_add(field->value_ac, value_index->str);
+                    g_string_free(value_index, TRUE);
+                }
                 form->modified = TRUE;
                 return;
             }
@@ -539,6 +554,10 @@ _form_remove_text_multi_value(DataForm *form, const char * const tag, int index)
                     free(item->data);
                     item->data = NULL;
                     field->values = g_slist_delete_link(field->values, item);
+                    GString *value_index = g_string_new("");
+                    g_string_printf(value_index, "val%d", index+1);
+                    autocomplete_remove(field->value_ac, value_index->str);
+                    g_string_free(value_index, TRUE);
                     form->modified = TRUE;
                     return TRUE;
                 } else {

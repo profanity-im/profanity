@@ -115,19 +115,21 @@ autocomplete_add(Autocomplete ac, const char *item)
 void
 autocomplete_remove(Autocomplete ac, const char * const item)
 {
-    GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
+    if (ac != NULL) {
+        GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
-    if (!curr) {
-        return;
+        if (!curr) {
+            return;
+        }
+
+        // reset last found if it points to the item to be removed
+        if (ac->last_found == curr) {
+            ac->last_found = NULL;
+        }
+
+        free(curr->data);
+        ac->items = g_slist_delete_link(ac->items, curr);
     }
-
-    // reset last found if it points to the item to be removed
-    if (ac->last_found == curr) {
-        ac->last_found = NULL;
-    }
-
-    free(curr->data);
-    ac->items = g_slist_delete_link(ac->items, curr);
 
     return;
 }
