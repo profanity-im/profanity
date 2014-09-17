@@ -1616,8 +1616,16 @@ _ui_room_requires_config(const char * const room_jid)
             ui_index = 0;
         }
 
+        win_save_print(window, '-', NULL, 0, 0, "", "");
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
-            "Room requires configuration, use '/room config accept' or '/room config destroy'");
+            "Room requires configuration.");
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
+            "Use '/room accept' to accept the defaults");
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
+            "Use '/room destroy' to cancel and destroy the room");
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
+            "Use '/room config' to edit the room configuration");
+        win_save_print(window, '-', NULL, 0, 0, "", "");
 
         // currently in groupchat window
         if (wins_is_current(window)) {
