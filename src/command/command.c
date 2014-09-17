@@ -2097,34 +2097,69 @@ _theme_autocomplete(char *input, int *size)
 static char *
 _form_autocomplete(char *input, int *size)
 {
-    char *result = NULL;
+    char *found = NULL;
 
     ProfWin *current = wins_get_current();
     if (current != NULL) {
         DataForm *form = current->form;
         if (form != NULL) {
-            result = autocomplete_param_with_ac(input, size, "/form set", form->tag_ac, TRUE);
-            if (result != NULL) {
-                return result;
+            gboolean result = FALSE;
+
+            input[*size] = '\0';
+            gchar **args = parse_args(input, 3, 3, &result);
+
+            if ((strncmp(input, "/form", 5) == 0) && (result == TRUE)) {
+                char *cmd = args[0];
+                char *tag = args[1];
+
+                GString *beginning = g_string_new("/form ");
+                g_string_append(beginning, cmd);
+                g_string_append(beginning, " ");
+                g_string_append(beginning, tag);
+
+                form_field_type_t field_type = form_get_field_type(form, tag);
+
+                // handle boolean (set)
+                if ((g_strcmp0(args[0], "set") == 0)  && field_type == FIELD_BOOLEAN) {
+                    found = autocomplete_param_with_func(input, size, beginning->str,
+                        prefs_autocomplete_boolean_choice);
+                    g_string_free(beginning, TRUE);
+                    if (found != NULL) {
+                        return found;
+                    }
+                }
+
+                // handle list-single (set)
+
+                // handle list-multi (add, remove)
+
+                // handle text-multi (remove)
+
+                // handle jid-multi (remove)
             }
-            result = autocomplete_param_with_ac(input, size, "/form add", form->tag_ac, TRUE);
-            if (result != NULL) {
-                return result;
+
+            found = autocomplete_param_with_ac(input, size, "/form set", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
             }
-            result = autocomplete_param_with_ac(input, size, "/form remove", form->tag_ac, TRUE);
-            if (result != NULL) {
-                return result;
+            found = autocomplete_param_with_ac(input, size, "/form add", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
             }
-            result = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
-            if (result != NULL) {
-                return result;
+            found = autocomplete_param_with_ac(input, size, "/form remove", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
+            }
+            found = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
+            if (found != NULL) {
+                return found;
             }
         }
     }
 
-    result = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
-    if (result != NULL) {
-        return result;
+    found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
+    if (found != NULL) {
+        return found;
     }
 
     return NULL;
