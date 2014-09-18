@@ -973,11 +973,12 @@ stanza_contains_caps(xmpp_stanza_t * const stanza)
 {
     xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
 
-    if (caps == NULL) {
+    if (!caps) {
         return FALSE;
     }
 
-    if (strcmp(xmpp_stanza_get_ns(caps), STANZA_NS_CAPS) != 0) {
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
         return FALSE;
     }
 
@@ -989,18 +990,50 @@ stanza_caps_get_hash(xmpp_stanza_t * const stanza)
 {
     xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
 
-    if (caps == NULL) {
+    if (!caps) {
         return NULL;
     }
 
-    if (strcmp(xmpp_stanza_get_ns(caps), STANZA_NS_CAPS) != 0) {
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
         return NULL;
     }
 
-    char *result = xmpp_stanza_get_attribute(caps, STANZA_ATTR_HASH);
+    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_HASH);
+}
 
-    return result;
+char *
+stanza_caps_get_node(xmpp_stanza_t * const stanza)
+{
+    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
 
+    if (!caps) {
+        return NULL;
+    }
+
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
+        return NULL;
+    }
+
+    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
+}
+
+char *
+stanza_get_caps_ver(xmpp_stanza_t * const stanza)
+{
+    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
+
+    if (!caps) {
+        return NULL;
+    }
+
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
+        return NULL;
+    }
+
+    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
 }
 
 char *

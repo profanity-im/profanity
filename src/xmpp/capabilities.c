@@ -61,62 +61,15 @@ caps_init(void)
 }
 
 void
-caps_add(const char * const caps_str, const char * const category,
-    const char * const type, const char * const name,
-    const char * const software, const char * const software_version,
-    const char * const os, const char * const os_version,
-    GSList *features)
+caps_add(const char * const ver, Capabilities *caps)
 {
-    Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
-
-    if (category != NULL) {
-        new_caps->category = strdup(category);
-    } else {
-        new_caps->category = NULL;
-    }
-    if (type != NULL) {
-        new_caps->type = strdup(type);
-    } else {
-        new_caps->type = NULL;
-    }
-    if (name != NULL) {
-        new_caps->name = strdup(name);
-    } else {
-        new_caps->name = NULL;
-    }
-    if (software != NULL) {
-        new_caps->software = strdup(software);
-    } else {
-        new_caps->software = NULL;
-    }
-    if (software_version != NULL) {
-        new_caps->software_version = strdup(software_version);
-    } else {
-        new_caps->software_version = NULL;
-    }
-    if (os != NULL) {
-        new_caps->os = strdup(os);
-    } else {
-        new_caps->os = NULL;
-    }
-    if (os_version != NULL) {
-        new_caps->os_version = strdup(os_version);
-    } else {
-        new_caps->os_version = NULL;
-    }
-    if (features != NULL) {
-        new_caps->features = features;
-    } else {
-        new_caps->features = NULL;
-    }
-
-    g_hash_table_insert(capabilities, strdup(caps_str), new_caps);
+    g_hash_table_insert(capabilities, strdup(ver), caps);
 }
 
 gboolean
-caps_contains(const char * const caps_str)
+caps_contains(const char * const caps_ver)
 {
-    return (g_hash_table_lookup(capabilities, caps_str) != NULL);
+    return (g_hash_table_lookup(capabilities, caps_ver) != NULL);
 }
 
 static Capabilities *
@@ -227,6 +180,109 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
 
     return result;
 }
+
+Capabilities *
+caps_create(xmpp_stanza_t *query)
+{
+    const char *category = NULL;
+    const char *type = NULL;
+    const char *name = NULL;
+    const char *software = NULL;
+    const char *software_version = NULL;
+    const char *os = NULL;
+    const char *os_version = NULL;
+    GSList *features = NULL;
+
+    xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
+    if (identity != NULL) {
+        category = xmpp_stanza_get_attribute(identity, "category");
+        type = xmpp_stanza_get_attribute(identity, "type");
+        name = xmpp_stanza_get_attribute(identity, "name");
+    }
+
+    xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
+    if (softwareinfo != NULL) {
+        DataForm *form = form_create(softwareinfo);
+        FormField *formField = NULL;
+
+        char *form_type = form_get_form_type_field(form);
+        if (g_strcmp0(form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
+            GSList *field = form->fields;
+            while (field != NULL) {
+                formField = field->data;
+                if (formField->values != NULL) {
+                    if (strcmp(formField->var, "software") == 0) {
+                        software = formField->values->data;
+                    } else if (strcmp(formField->var, "software_version") == 0) {
+                        software_version = formField->values->data;
+                    } else if (strcmp(formField->var, "os") == 0) {
+                        os = formField->values->data;
+                    } else if (strcmp(formField->var, "os_version") == 0) {
+                        os_version = formField->values->data;
+                    }
+                }
+                field = g_slist_next(field);
+            }
+        }
+
+        form_destroy(form);
+    }
+
+    xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    while (child != NULL) {
+        if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
+            features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
+        }
+
+        child = xmpp_stanza_get_next(child);
+    }
+
+    Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
+
+    if (category != NULL) {
+        new_caps->category = strdup(category);
+    } else {
+        new_caps->category = NULL;
+    }
+    if (type != NULL) {
+        new_caps->type = strdup(type);
+    } else {
+        new_caps->type = NULL;
+    }
+    if (name != NULL) {
+        new_caps->name = strdup(name);
+    } else {
+        new_caps->name = NULL;
+    }
+    if (software != NULL) {
+        new_caps->software = strdup(software);
+    } else {
+        new_caps->software = NULL;
+    }
+    if (software_version != NULL) {
+        new_caps->software_version = strdup(software_version);
+    } else {
+        new_caps->software_version = NULL;
+    }
+    if (os != NULL) {
+        new_caps->os = strdup(os);
+    } else {
+        new_caps->os = NULL;
+    }
+    if (os_version != NULL) {
+        new_caps->os_version = strdup(os_version);
+    } else {
+        new_caps->os_version = NULL;
+    }
+    if (features != NULL) {
+        new_caps->features = features;
+    } else {
+        new_caps->features = NULL;
+    }
+
+    return new_caps;
+}
+
 
 xmpp_stanza_t *
 caps_create_query_response_stanza(xmpp_ctx_t * const ctx)

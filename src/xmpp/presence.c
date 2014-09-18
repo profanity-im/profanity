@@ -581,11 +581,45 @@ _available_handler(xmpp_conn_t * const conn,
         free(priority_str);
     }
 
-    // get capabilities key
-    char *caps_key = NULL;
+    // send disco info for capabilities, if not cached
     if (stanza_contains_caps(stanza)) {
-        caps_key = _get_caps_key(stanza);
+        log_info("Presence contains capabilities.");
+
+        char *hash = stanza_caps_get_hash(stanza);
+
+        // hash supported xep-0115
+        if (g_strcmp0(hash, "sha-1") == 0) {
+            log_info("Hash %s supported");
+
+            char *ver = stanza_get_caps_ver(stanza);
+            if (caps_contains(ver)) {
+                log_info("Capabilities cached");
+            } else {
+                log_info("Capabilities not cached, sending service discovery request");
+                char *node = stanza_caps_get_node(stanza);
+                char *id = create_unique_id("caps");
+
+                iq_send_caps_request(from, id, node, ver);
+
+                // send service discovery request
+                // with id handler to validate response,
+                // generate hash,
+                // if match, cache against hash
+            }
+
+        // no hash, or not supported
+        } else {
+            if (hash) {
+                log_info("Hash %s not supported, not sending service discovery request");
+                // send service discovery request, cache against from full jid
+            } else {
+                log_info("No hash specified, not sending service discovery request");
+                // do legacy
+            }
+        }
     }
+
+    char *caps_key = strdup("hello");
 
     // create Resource
     Resource *resource = NULL;
@@ -647,8 +681,6 @@ _get_caps_key(xmpp_stanza_t * const stanza)
     char *node = stanza_get_caps_str(stanza);
     char *caps_key = NULL;
     char *id = NULL;
-
-    log_debug("Presence contains capabilities.");
 
     if (node == NULL) {
         return NULL;
