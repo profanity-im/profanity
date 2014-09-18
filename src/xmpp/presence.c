@@ -503,8 +503,16 @@ static int
 _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (from) {
+        log_info("Available presence handler fired for: %s", from);
+    } else {
+        log_info("Available presence handler fired");
+    }
+
     // handler still fires if error
     if (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_ERROR) == 0) {
+        log_info("Available presence of type error, exiting handler");
         return 1;
     }
 
@@ -513,47 +521,58 @@ _available_handler(xmpp_conn_t * const conn,
             (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_SUBSCRIBE) == 0) ||
             (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_SUBSCRIBED) == 0) ||
             (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_UNSUBSCRIBED) == 0)) {
+        log_info("Available presence of subscription type, exiting handler");
         return 1;
     }
 
     // handler still fires for muc presence
     if (stanza_is_muc_presence(stanza)) {
+        log_info("Available presence MUC type, exiting handler");
         return 1;
     }
 
-    const char *jid = xmpp_conn_get_jid(conn);
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    log_debug("Available presence handler fired for %s", from);
+    // exit when no from attribute
+    if (!from) {
+        log_warning("No from attribute found.");
+        return 1;
+    }
 
-    Jid *my_jid = jid_create(jid);
+    // own jid is invalid
+    const char *my_jid_str = xmpp_conn_get_jid(conn);
+    Jid *my_jid = jid_create(my_jid_str);
+    if (!my_jid) {
+        if (my_jid_str) {
+            log_error("Could not parse account JID: %s", my_jid_str);
+        } else {
+            log_error("Could not parse account JID: NULL");
+        }
+        return 1;
+    }
+
+    // contact jid invalud
     Jid *from_jid = jid_create(from);
-    if (my_jid == NULL || from_jid == NULL) {
+    if (!from_jid) {
+        log_warning("Could not parse contact JID: %s", from);
         jid_destroy(my_jid);
-        jid_destroy(from_jid);
         return 1;
     }
 
+    // presence properties
     char *show_str = stanza_get_show(stanza, "online");
     char *status_str = stanza_get_status(stanza, NULL);
+
+    // presence last activity
     int idle_seconds = stanza_get_idle_time(stanza);
     GDateTime *last_activity = NULL;
-
-    char *caps_key = NULL;
-    if (stanza_contains_caps(stanza)) {
-        caps_key = _get_caps_key(stanza);
-    }
-
     if (idle_seconds > 0) {
         GDateTime *now = g_date_time_new_now_local();
         last_activity = g_date_time_add_seconds(now, 0 - idle_seconds);
         g_date_time_unref(now);
     }
 
-    // get priority
+    // priority
     int priority = 0;
-    xmpp_stanza_t *priority_stanza =
-        xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PRIORITY);
-
+    xmpp_stanza_t *priority_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PRIORITY);
     if (priority_stanza != NULL) {
         char *priority_str = xmpp_stanza_get_text(priority_stanza);
         if (priority_str != NULL) {
@@ -562,37 +581,39 @@ _available_handler(xmpp_conn_t * const conn,
         free(priority_str);
     }
 
-    resource_presence_t presence = resource_presence_from_string(show_str);
-    Resource *resource = NULL;
-
-    // hack for servers that do not send fulljid with initial presence
-    if (from_jid->resourcepart == NULL) {
-        resource = resource_new("__prof_default", presence,
-            status_str, priority, caps_key);
-    } else {
-        resource = resource_new(from_jid->resourcepart, presence,
-            status_str, priority, caps_key);
+    // get capabilities key
+    char *caps_key = NULL;
+    if (stanza_contains_caps(stanza)) {
+        caps_key = _get_caps_key(stanza);
     }
 
-    // self presence
-    if (strcmp(my_jid->barejid, from_jid->barejid) == 0) {
+    // create Resource
+    Resource *resource = NULL;
+    resource_presence_t presence = resource_presence_from_string(show_str);
+    if (from_jid->resourcepart == NULL) { // hack for servers that do not send full jid
+        resource = resource_new("__prof_default", presence, status_str, priority, caps_key);
+    } else {
+        resource = resource_new(from_jid->resourcepart, presence, status_str, priority, caps_key);
+    }
+    free(caps_key);
+    free(status_str);
+    free(show_str);
+
+    // check for self presence
+    if (g_strcmp0(my_jid->barejid, from_jid->barejid) == 0) {
         connection_add_available_resource(resource);
 
     // contact presence
     } else {
-        handle_contact_online(from_jid->barejid, resource,
-            last_activity);
+        handle_contact_online(from_jid->barejid, resource, last_activity);
     }
-
-    free(caps_key);
-    free(status_str);
-    free(show_str);
-    jid_destroy(my_jid);
-    jid_destroy(from_jid);
 
     if (last_activity != NULL) {
         g_date_time_unref(last_activity);
     }
+
+    jid_destroy(my_jid);
+    jid_destroy(from_jid);
 
     return 1;
 }
