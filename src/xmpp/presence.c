@@ -582,7 +582,7 @@ _available_handler(xmpp_conn_t * const conn,
     }
 
     // send disco info for capabilities, if not cached
-    if (stanza_contains_caps(stanza)) {
+    if ((g_strcmp0(my_jid->fulljid, from_jid->fulljid) != 0) && (stanza_contains_caps(stanza))) {
         log_info("Presence contains capabilities.");
 
         char *hash = stanza_caps_get_hash(stanza);
