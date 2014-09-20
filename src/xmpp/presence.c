@@ -592,19 +592,17 @@ _available_handler(xmpp_conn_t * const conn,
             log_info("Hash %s supported");
 
             char *ver = stanza_get_caps_ver(stanza);
-            if (caps_contains(ver)) {
-                log_info("Capabilities cached");
-            } else {
-                log_info("Capabilities not cached, sending service discovery request");
-                char *node = stanza_caps_get_node(stanza);
-                char *id = create_unique_id("caps");
+            if (ver) {
+                if (caps_contains(ver)) {
+                    log_info("Capabilities cached: %s", ver);
+                    caps_map(from, ver);
+                } else {
+                    log_info("Capabilities not cached: %s, sending service discovery request", ver);
+                    char *node = stanza_caps_get_node(stanza);
+                    char *id = create_unique_id("caps");
 
-                iq_send_caps_request(from, id, node, ver);
-
-                // send service discovery request
-                // with id handler to validate response,
-                // generate hash,
-                // if match, cache against hash
+                    iq_send_caps_request(from, id, node, ver);
+                }
             }
 
         // no hash, or not supported
@@ -619,17 +617,14 @@ _available_handler(xmpp_conn_t * const conn,
         }
     }
 
-    char *caps_key = strdup("hello");
-
     // create Resource
     Resource *resource = NULL;
     resource_presence_t presence = resource_presence_from_string(show_str);
     if (from_jid->resourcepart == NULL) { // hack for servers that do not send full jid
-        resource = resource_new("__prof_default", presence, status_str, priority, caps_key);
+        resource = resource_new("__prof_default", presence, status_str, priority);
     } else {
-        resource = resource_new(from_jid->resourcepart, presence, status_str, priority, caps_key);
+        resource = resource_new(from_jid->resourcepart, presence, status_str, priority);
     }
-    free(caps_key);
     free(status_str);
     free(show_str);
 

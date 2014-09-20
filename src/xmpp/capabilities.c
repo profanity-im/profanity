@@ -50,6 +50,7 @@
 #include "xmpp/form.h"
 
 static GHashTable *capabilities;
+static GHashTable *jid_lookup;
 
 static void _caps_destroy(Capabilities *caps);
 
@@ -58,12 +59,19 @@ caps_init(void)
 {
     capabilities = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
         (GDestroyNotify)_caps_destroy);
+    jid_lookup = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
 caps_add(const char * const ver, Capabilities *caps)
 {
     g_hash_table_insert(capabilities, strdup(ver), caps);
+}
+
+void
+caps_map(const char * const jid, const char * const ver)
+{
+    g_hash_table_insert(jid_lookup, strdup(jid), strdup(ver));
 }
 
 gboolean
@@ -76,6 +84,20 @@ static Capabilities *
 _caps_get(const char * const caps_str)
 {
     return g_hash_table_lookup(capabilities, caps_str);
+}
+
+static Capabilities *
+_caps_lookup(const char * const jid)
+{
+    char *ver = g_hash_table_lookup(jid_lookup, jid);
+    if (ver) {
+        Capabilities *caps = g_hash_table_lookup(capabilities, ver);
+        if (caps) {
+            return caps;
+        }
+    }
+
+    return NULL;
 }
 
 char *
@@ -365,6 +387,7 @@ static void
 _caps_close(void)
 {
     g_hash_table_destroy(capabilities);
+    g_hash_table_destroy(jid_lookup);
 }
 
 static void
@@ -389,5 +412,6 @@ void
 capabilities_init_module(void)
 {
     caps_get = _caps_get;
+    caps_lookup = _caps_lookup;
     caps_close = _caps_close;
 }

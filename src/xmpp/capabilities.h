@@ -41,6 +41,7 @@
 
 void caps_init(void);
 void caps_add(const char * const ver, Capabilities *caps);
+void caps_map(const char * const jid, const char * const ver);
 gboolean caps_contains(const char * const caps_ver);
 char* caps_create_sha1_str(xmpp_stanza_t * const query);
 xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t * const ctx);

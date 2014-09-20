@@ -348,6 +348,12 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
         log_info("Capabilities response handler fired");
     }
 
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from) {
+        log_info("No from attribute");
+        return 0;
+    }
+
     char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
         log_warning("No node attribute found");
@@ -367,12 +373,14 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
         log_info("Valid SHA-1 hash found: %s", given_sha1);
 
         if (caps_contains(given_sha1)) {
-            log_info("Capabilties cached");
+            log_info("Capabilties cached: %s", given_sha1);
         } else {
-            log_info("Capabilities not cached, storing");
+            log_info("Capabilities not cached: %s, storing", given_sha1);
             Capabilities *capabilities = caps_create(query);
             caps_add(given_sha1, capabilities);
         }
+
+        caps_map(from, given_sha1);
     }
 
     g_free(generated_sha1);

@@ -40,7 +40,7 @@
 #include <resource.h>
 
 Resource * resource_new(const char * const name, resource_presence_t presence,
-    const char * const status, const int priority, const char * const caps_str)
+    const char * const status, const int priority)
 {
     assert(name != NULL);
     Resource *new_resource = malloc(sizeof(struct resource_t));
@@ -52,11 +52,6 @@ Resource * resource_new(const char * const name, resource_presence_t presence,
         new_resource->status = NULL;
     }
     new_resource->priority = priority;
-    if (caps_str != NULL) {
-        new_resource->caps_str = strdup(caps_str);
-    } else {
-        new_resource->caps_str = NULL;
-    }
 
     return new_resource;
 }
@@ -96,7 +91,6 @@ void resource_destroy(Resource *resource)
     if (resource != NULL) {
         free(resource->name);
         free(resource->status);
-        free(resource->caps_str);
         free(resource);
     }
 }
