@@ -70,9 +70,8 @@ static int _muc_user_handler(xmpp_conn_t * const conn,
 static int _presence_error_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 
-static char* _get_caps_key(xmpp_stanza_t * const stanza);
-static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
 void _send_caps_request(char *node, char *caps_key, char *id, char *from);
+static void _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence);
 
 void
 presence_sub_requests_init(void)
@@ -667,55 +666,6 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
         log_debug("No node string, not sending discovery IQ.");
     }
 }
-
-static char *
-_get_caps_key(xmpp_stanza_t * const stanza)
-{
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    char *hash_type = stanza_caps_get_hash(stanza);
-    char *node = stanza_get_caps_str(stanza);
-    char *caps_key = NULL;
-    char *id = NULL;
-
-    if (node == NULL) {
-        return NULL;
-    }
-
-    // xep-0115
-    if ((hash_type != NULL) && (strcmp(hash_type, "sha-1") == 0)) {
-        log_debug("Hash type %s supported.", hash_type);
-        caps_key = strdup(node);
-        id = create_unique_id("caps");
-
-        _send_caps_request(node, caps_key, id, from);
-        free(id);
-
-    // unsupported hash or legacy capabilities
-    } else {
-        if (hash_type != NULL) {
-            log_debug("Hash type %s unsupported.", hash_type);
-        } else {
-            log_debug("No hash type, using legacy capabilities.");
-        }
-
-        guint from_hash = g_str_hash(from);
-        char from_hash_str[9];
-        g_snprintf(from_hash_str, sizeof(from_hash_str), "%08x", from_hash);
-        caps_key = strdup(from_hash_str);
-        GString *id_str = g_string_new("capsreq_");
-        g_string_append(id_str, from_hash_str);
-        id = id_str->str;
-
-        _send_caps_request(node, caps_key, id, from);
-
-        g_string_free(id_str, TRUE);
-    }
-
-    g_free(node);
-
-    return caps_key;
-}
-
 static int
 _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
@@ -768,11 +718,6 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *status_str;
 
-        char *caps_key = NULL;
-        if (stanza_contains_caps(stanza)) {
-            caps_key = _get_caps_key(stanza);
-        }
-
         log_debug("Room presence received from %s", from_jid->fulljid);
 
         status_str = stanza_get_status(stanza, NULL);
@@ -792,19 +737,19 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         } else {
             char *show_str = stanza_get_show(stanza, "online");
             if (!muc_get_roster_received(from_room)) {
-                muc_add_to_roster(from_room, from_nick, show_str, status_str, caps_key);
+                muc_add_to_roster(from_room, from_nick, show_str, status_str);
             } else {
                 char *old_nick = muc_complete_roster_nick_change(from_room, from_nick);
 
                 if (old_nick != NULL) {
-                    muc_add_to_roster(from_room, from_nick, show_str, status_str, caps_key);
+                    muc_add_to_roster(from_room, from_nick, show_str, status_str);
                     handle_room_member_nick_change(from_room, old_nick, from_nick);
                     free(old_nick);
                 } else {
                     if (!muc_nick_in_roster(from_room, from_nick)) {
-                        handle_room_member_online(from_room, from_nick, show_str, status_str, caps_key);
+                        handle_room_member_online(from_room, from_nick, show_str, status_str);
                     } else {
-                        handle_room_member_presence(from_room, from_nick, show_str, status_str, caps_key);
+                        handle_room_member_presence(from_room, from_nick, show_str, status_str);
                     }
                 }
             }
@@ -813,7 +758,6 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         free(status_str);
-        free(caps_key);
     }
 
     jid_destroy(from_jid);

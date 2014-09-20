@@ -518,9 +518,9 @@ handle_room_roster_complete(const char * const room)
 void
 handle_room_member_presence(const char * const room,
     const char * const nick, const char * const show,
-    const char * const status, const char * const caps_str)
+    const char * const status)
 {
-    gboolean updated = muc_add_to_roster(room, nick, show, status, caps_str);
+    gboolean updated = muc_add_to_roster(room, nick, show, status);
 
     if (updated) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
@@ -533,10 +533,9 @@ handle_room_member_presence(const char * const room,
 
 void
 handle_room_member_online(const char * const room, const char * const nick,
-    const char * const show, const char * const status,
-    const char * const caps_str)
+    const char * const show, const char * const status)
 {
-    muc_add_to_roster(room, nick, show, status, caps_str);
+    muc_add_to_roster(room, nick, show, status);
 
     char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     if (g_strcmp0(muc_status_pref, "none") != 0) {
