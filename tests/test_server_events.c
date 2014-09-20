@@ -21,7 +21,7 @@ void console_doesnt_show_online_presence_when_set_none(void **state)
     prefs_set_string(PREF_STATUSES_CONSOLE, "none");
     roster_init();
     roster_add("test1@server", "bob", NULL, "both", FALSE);
-    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10, "caps");
+    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
 
     handle_contact_online("test1@server", resource, NULL);
 
@@ -35,7 +35,7 @@ void console_shows_online_presence_when_set_online(void **state)
     prefs_set_string(PREF_STATUSES_CONSOLE, "online");
     roster_init();
     roster_add("test1@server", "bob", NULL, "both", FALSE);
-    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10, "caps");
+    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
     PContact contact = roster_get_contact("test1@server");
 
     expect_cons_show_contact_online(contact, resource, NULL);
@@ -52,7 +52,7 @@ void console_shows_online_presence_when_set_all(void **state)
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
     roster_init();
     roster_add("test1@server", "bob", NULL, "both", FALSE);
-    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10, "caps");
+    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
     PContact contact = roster_get_contact("test1@server");
 
     expect_cons_show_contact_online(contact, resource, NULL);
@@ -69,7 +69,7 @@ void console_doesnt_show_dnd_presence_when_set_none(void **state)
     prefs_set_string(PREF_STATUSES_CONSOLE, "none");
     roster_init();
     roster_add("test1@server", "bob", NULL, "both", FALSE);
-    Resource *resource = resource_new("resource", RESOURCE_DND, NULL, 10, "caps");
+    Resource *resource = resource_new("resource", RESOURCE_DND, NULL, 10);
 
     handle_contact_online("test1@server", resource, NULL);
 
@@ -83,7 +83,7 @@ void console_doesnt_show_dnd_presence_when_set_online(void **state)
     prefs_set_string(PREF_STATUSES_CONSOLE, "online");
     roster_init();
     roster_add("test1@server", "bob", NULL, "both", FALSE);
-    Resource *resource = resource_new("resource", RESOURCE_DND, NULL, 10, "caps");
+    Resource *resource = resource_new("resource", RESOURCE_DND, NULL, 10);
 
     handle_contact_online("test1@server", resource, NULL);
 
@@ -97,7 +97,7 @@ void console_shows_dnd_presence_when_set_all(void **state)
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
     roster_init();
     roster_add("test1@server", "bob", NULL, "both", FALSE);
-    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10, "caps");
+    Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
     PContact contact = roster_get_contact("test1@server");
 
     expect_cons_show_contact_online(contact, resource, NULL);
