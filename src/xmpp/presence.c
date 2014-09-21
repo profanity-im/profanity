@@ -726,12 +726,6 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         log_debug("Room presence received from %s", from_jid->fulljid);
 
-        // send disco info for capabilities, if not cached
-        if (stanza_contains_caps(stanza)) {
-            log_info("Presence contains capabilities.");
-            _handle_caps(stanza);
-        }
-
         status_str = stanza_get_status(stanza, NULL);
 
         if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
@@ -747,6 +741,12 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 handle_room_member_offline(from_room, from_nick, "offline", status_str);
             }
         } else {
+            // send disco info for capabilities, if not cached
+            if (stanza_contains_caps(stanza)) {
+                log_info("Presence contains capabilities.");
+                _handle_caps(stanza);
+            }
+
             char *show_str = stanza_get_show(stanza, "online");
             if (!muc_get_roster_received(from_room)) {
                 muc_add_to_roster(from_room, from_nick, show_str, status_str);

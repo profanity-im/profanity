@@ -354,6 +354,20 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
         return 0;
     }
 
+    char *type = xmpp_stanza_get_type(stanza);
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        log_warning("Error received for capabilities response from %s: ", from, error_message);
+        free(error_message);
+        return 0;
+    }
+
+    if (query == NULL) {
+        log_warning("No query element found.");
+        return 0;
+    }
+
     char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
         log_warning("No node attribute found");
