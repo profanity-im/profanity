@@ -498,6 +498,45 @@ _unavailable_handler(xmpp_conn_t * const conn,
     return 1;
 }
 
+static void
+_handle_caps(xmpp_stanza_t *const stanza)
+{
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
+    if (from) {
+        char *hash = stanza_caps_get_hash(stanza);
+
+        // hash supported xep-0115
+        if (g_strcmp0(hash, "sha-1") == 0) {
+            log_info("Hash %s supported");
+
+            char *ver = stanza_get_caps_ver(stanza);
+            if (ver) {
+                if (caps_contains(ver)) {
+                    log_info("Capabilities cached: %s", ver);
+                    caps_map(from, ver);
+                } else {
+                    log_info("Capabilities not cached: %s, sending service discovery request", ver);
+                    char *node = stanza_caps_get_node(stanza);
+                    char *id = create_unique_id("caps");
+
+                    iq_send_caps_request(from, id, node, ver);
+                }
+            }
+
+        // no hash, or not supported
+        } else {
+            if (hash) {
+                log_info("Hash %s not supported, not sending service discovery request");
+                // send service discovery request, cache against from full jid
+            } else {
+                log_info("No hash specified, not sending service discovery request");
+                // do legacy
+            }
+        }
+    }
+}
+
 static int
 _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
@@ -580,37 +619,7 @@ _available_handler(xmpp_conn_t * const conn,
     // send disco info for capabilities, if not cached
     if ((g_strcmp0(my_jid->fulljid, from_jid->fulljid) != 0) && (stanza_contains_caps(stanza))) {
         log_info("Presence contains capabilities.");
-
-        char *hash = stanza_caps_get_hash(stanza);
-
-        // hash supported xep-0115
-        if (g_strcmp0(hash, "sha-1") == 0) {
-            log_info("Hash %s supported");
-
-            char *ver = stanza_get_caps_ver(stanza);
-            if (ver) {
-                if (caps_contains(ver)) {
-                    log_info("Capabilities cached: %s", ver);
-                    caps_map(from, ver);
-                } else {
-                    log_info("Capabilities not cached: %s, sending service discovery request", ver);
-                    char *node = stanza_caps_get_node(stanza);
-                    char *id = create_unique_id("caps");
-
-                    iq_send_caps_request(from, id, node, ver);
-                }
-            }
-
-        // no hash, or not supported
-        } else {
-            if (hash) {
-                log_info("Hash %s not supported, not sending service discovery request");
-                // send service discovery request, cache against from full jid
-            } else {
-                log_info("No hash specified, not sending service discovery request");
-                // do legacy
-            }
-        }
+        _handle_caps(stanza);
     }
 
     // create Resource
@@ -716,6 +725,12 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         char *status_str;
 
         log_debug("Room presence received from %s", from_jid->fulljid);
+
+        // send disco info for capabilities, if not cached
+        if (stanza_contains_caps(stanza)) {
+            log_info("Presence contains capabilities.");
+            _handle_caps(stanza);
+        }
 
         status_str = stanza_get_status(stanza, NULL);
 
