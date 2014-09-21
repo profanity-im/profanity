@@ -1,0 +1,5 @@
+Generate own hash only once
+Handle legacy capabilities
+Merge caps and disco info commands, keep disco info
+Use filesystem cache
+

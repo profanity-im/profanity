@@ -45,6 +45,7 @@
 #include <strophe.h>
 
 #include "common.h"
+#include "log.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
@@ -115,10 +116,9 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
     FormField *field = NULL;
     GHashTable *forms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)form_destroy);
 
-    GString *s = g_string_new("");
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
-    while (child != NULL) {
+    while (child) {
         if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_IDENTITY) == 0) {
             category = xmpp_stanza_get_attribute(child, "category");
             type = xmpp_stanza_get_attribute(child, "type");
@@ -127,15 +127,15 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
 
             GString *identity_str = g_string_new(category);
             g_string_append(identity_str, "/");
-            if (type != NULL) {
+            if (type) {
                 g_string_append(identity_str, type);
             }
             g_string_append(identity_str, "/");
-            if (lang != NULL) {
+            if (lang) {
                 g_string_append(identity_str, lang);
             }
             g_string_append(identity_str, "/");
-            if (name != NULL) {
+            if (name) {
                 g_string_append(identity_str, name);
             }
             g_string_append(identity_str, "<");
@@ -145,7 +145,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
             feature_str = xmpp_stanza_get_attribute(child, "var");
             features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
-            if (strcmp(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
+            if (g_strcmp0(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
                 form = form_create(child);
                 char *form_type = form_get_form_type_field(form);
                 form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)strcmp);
@@ -155,44 +155,53 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
         child = xmpp_stanza_get_next(child);
     }
 
+    GString *s = g_string_new("");
+
     GSList *curr = identities;
-    while (curr != NULL) {
+    while (curr) {
         g_string_append(s, curr->data);
         curr = g_slist_next(curr);
     }
 
     curr = features;
-    while (curr != NULL) {
+    while (curr) {
         g_string_append(s, curr->data);
         g_string_append(s, "<");
         curr = g_slist_next(curr);
     }
 
     curr = form_names;
-    while (curr != NULL) {
+    while (curr) {
         form = g_hash_table_lookup(forms, curr->data);
         char *form_type = form_get_form_type_field(form);
         g_string_append(s, form_type);
         g_string_append(s, "<");
 
-        GSList *curr_field = form->fields;
-        while (curr_field != NULL) {
+        GSList *sorted_fields = form_get_non_form_type_fields_sorted(form);
+        GSList *curr_field = sorted_fields;
+        while (curr_field) {
             field = curr_field->data;
             g_string_append(s, field->var);
             g_string_append(s, "<");
-            GSList *curr_value = field->values;
-            while (curr_value != NULL) {
+
+            GSList *sorted_values = form_get_field_values_sorted(field);
+            GSList *curr_value = sorted_values;
+            while (curr_value) {
                 g_string_append(s, curr_value->data);
                 g_string_append(s, "<");
                 curr_value = g_slist_next(curr_value);
             }
+            g_slist_free(sorted_values);
             curr_field = g_slist_next(curr_field);
         }
+        g_slist_free(sorted_fields);
 
         curr = g_slist_next(curr);
     }
 
+    log_debug("Generating capabilities hash for: %s", s->str);
     char *result = p_sha1_hash(s->str);
+    log_debug("Hash: %s", result);
 
     g_string_free(s, TRUE);
     g_slist_free_full(identities, g_free);

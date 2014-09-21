@@ -226,4 +226,7 @@ FormField* (*form_get_field_by_tag)(DataForm *form, const char * const tag);
 Autocomplete (*form_get_value_ac)(DataForm *form, const char * const tag);
 void (*form_reset_autocompleters)(DataForm *form);
 
+GSList * (*form_get_non_form_type_fields_sorted)(DataForm *form);
+GSList * (*form_get_field_values_sorted)(FormField *field);
+
 #endif
