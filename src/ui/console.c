@@ -286,15 +286,15 @@ _cons_show_caps(const char * const fulljid, Resource *resource)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
-    const char *resource_presence = string_from_resource_presence(resource->presence);
-
-    int presence_colour = win_presence_colour(resource_presence);
-    win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", fulljid);
-    win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
 
     Capabilities *caps = caps_lookup(fulljid);
-
     if (caps) {
+        const char *resource_presence = string_from_resource_presence(resource->presence);
+
+        int presence_colour = win_presence_colour(resource_presence);
+        win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", fulljid);
+        win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
+
         // show identity
         if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
             win_save_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
@@ -342,6 +342,9 @@ _cons_show_caps(const char * const fulljid, Resource *resource)
                 feature = g_slist_next(feature);
             }
         }
+
+    } else {
+        cons_show("No capabilities found for %s", fulljid);
     }
 
     cons_alert();

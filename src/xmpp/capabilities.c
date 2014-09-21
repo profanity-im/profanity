@@ -199,9 +199,7 @@ caps_create_sha1_str(xmpp_stanza_t * const query)
         curr = g_slist_next(curr);
     }
 
-    log_debug("Generating capabilities hash for: %s", s->str);
     char *result = p_sha1_hash(s->str);
-    log_debug("Hash: %s", result);
 
     g_string_free(s, TRUE);
     g_slist_free_full(identities, g_free);
