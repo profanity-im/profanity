@@ -502,16 +502,8 @@ static int
 _available_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata)
 {
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    if (from) {
-        log_info("Available presence handler fired for: %s", from);
-    } else {
-        log_info("Available presence handler fired");
-    }
-
     // handler still fires if error
     if (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_ERROR) == 0) {
-        log_info("Available presence of type error, exiting handler");
         return 1;
     }
 
@@ -520,14 +512,19 @@ _available_handler(xmpp_conn_t * const conn,
             (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_SUBSCRIBE) == 0) ||
             (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_SUBSCRIBED) == 0) ||
             (g_strcmp0(xmpp_stanza_get_type(stanza), STANZA_TYPE_UNSUBSCRIBED) == 0)) {
-        log_info("Available presence of subscription type, exiting handler");
         return 1;
     }
 
     // handler still fires for muc presence
     if (stanza_is_muc_presence(stanza)) {
-        log_info("Available presence MUC type, exiting handler");
         return 1;
+    }
+
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (from) {
+        log_info("Available presence handler fired for: %s", from);
+    } else {
+        log_info("Available presence handler fired");
     }
 
     // exit when no from attribute

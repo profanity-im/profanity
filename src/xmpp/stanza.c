@@ -765,21 +765,13 @@ stanza_is_muc_presence(xmpp_stanza_t * const stanza)
         return FALSE;
     }
 
-    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
 
-    if (x == NULL) {
+    if (x) {
+        return TRUE;
+    } else {
         return FALSE;
     }
-
-    char *ns = xmpp_stanza_get_ns(x);
-    if (ns == NULL) {
-        return FALSE;
-    }
-    if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
-        return FALSE;
-    }
-
-    return TRUE;
 }
 
 gboolean
