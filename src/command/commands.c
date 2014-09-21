@@ -1565,6 +1565,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
                         }
                     }
                 }
+                jid_destroy(jid);
             } else {
                 cons_show("You must provide a jid to the /caps command.");
             }
