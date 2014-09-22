@@ -83,14 +83,14 @@ caps_add(const char * const ver, Capabilities *caps)
 {
     gboolean cached = g_key_file_has_group(cache, ver);
     if (!cached) {
+        if (caps->name) {
+            g_key_file_set_string(cache, ver, "name", caps->name);
+        }
         if (caps->category) {
             g_key_file_set_string(cache, ver, "category", caps->category);
         }
         if (caps->type) {
             g_key_file_set_string(cache, ver, "type", caps->type);
-        }
-        if (caps->name) {
-            g_key_file_set_string(cache, ver, "name", caps->name);
         }
         if (caps->software) {
             g_key_file_set_string(cache, ver, "software", caps->software);
