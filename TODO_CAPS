@@ -1,4 +1,2 @@
-Generate own hash only once
 Handle legacy capabilities
 Move /caps command into /disco info
-Use filesystem cache
