@@ -277,6 +277,7 @@ win_show_info(ProfWin *window, PContact contact)
             if ((caps->os != NULL) || (caps->os_version != NULL)) {
                 win_save_newline(window);
             }
+            caps_destroy(caps);
         }
 
         ordered_resources = g_list_next(ordered_resources);

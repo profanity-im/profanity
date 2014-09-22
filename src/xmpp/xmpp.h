@@ -193,9 +193,9 @@ void (*iq_send_caps_request)(const char * const to, const char * const id,
     const char * const node, const char * const ver);
 
 // caps functions
-Capabilities* (*caps_get)(const char * const caps_str);
 Capabilities* (*caps_lookup)(const char * const jid);
 void (*caps_close)(void);
+void (*caps_destroy)(Capabilities *caps);
 
 gboolean (*bookmark_add)(const char *jid, const char *nick, const char *password, const char *autojoin_str);
 gboolean (*bookmark_update)(const char *jid, const char *nick, const char *password, const char *autojoin_str);

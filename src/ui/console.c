@@ -342,6 +342,7 @@ _cons_show_caps(const char * const fulljid, Resource *resource)
                 feature = g_slist_next(feature);
             }
         }
+        caps_destroy(caps);
 
     } else {
         cons_show("No capabilities found for %s", fulljid);
@@ -777,6 +778,7 @@ _cons_show_account(ProfAccount *account)
                 if ((caps->os != NULL) || (caps->os_version != NULL)) {
                     win_save_newline(console);
                 }
+                caps_destroy(caps);
             }
 
             ordered_resources = g_list_next(ordered_resources);
