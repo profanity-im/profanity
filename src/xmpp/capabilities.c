@@ -49,11 +49,14 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/form.h"
+#include "xmpp/capabilities.h"
 
 static gchar *cache_loc;
 static GKeyFile *cache;
 
 static GHashTable *jid_lookup;
+
+static char *my_sha1;
 
 static void _caps_destroy(Capabilities *caps);
 static gchar* _get_cache_file(void);
@@ -71,6 +74,8 @@ caps_init(void)
         NULL);
 
     jid_lookup = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+
+    my_sha1 = NULL;
 }
 
 void
@@ -425,6 +430,17 @@ caps_create(xmpp_stanza_t *query)
     return new_caps;
 }
 
+char*
+caps_get_my_sha1(xmpp_ctx_t * const ctx)
+{
+    if (my_sha1 == NULL) {
+        xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
+        my_sha1 = caps_create_sha1_str(query);
+        xmpp_stanza_release(query);
+    }
+
+    return my_sha1;
+}
 
 xmpp_stanza_t *
 caps_create_query_response_stanza(xmpp_ctx_t * const ctx)

@@ -46,5 +46,6 @@ gboolean caps_contains(const char * const caps_ver);
 char* caps_create_sha1_str(xmpp_stanza_t * const query);
 xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t * const ctx);
 Capabilities* caps_create(xmpp_stanza_t *query);
+char* caps_get_my_sha1(xmpp_ctx_t * const ctx);
 
 #endif
