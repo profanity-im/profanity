@@ -189,10 +189,13 @@ void (*iq_request_room_config_form)(const char * const room_jid);
 void (*iq_submit_room_config)(const char * const room, DataForm *form);
 void (*iq_room_config_cancel)(const char * const room_jid);
 void (*iq_send_ping)(const char * const target);
+void (*iq_send_caps_request)(const char * const to, const char * const id,
+    const char * const node, const char * const ver);
 
 // caps functions
-Capabilities* (*caps_get)(const char * const caps_str);
+Capabilities* (*caps_lookup)(const char * const jid);
 void (*caps_close)(void);
+void (*caps_destroy)(Capabilities *caps);
 
 gboolean (*bookmark_add)(const char *jid, const char *nick, const char *password, const char *autojoin_str);
 gboolean (*bookmark_update)(const char *jid, const char *nick, const char *password, const char *autojoin_str);
@@ -222,5 +225,8 @@ int (*form_get_value_count)(DataForm *form, const char * const tag);
 FormField* (*form_get_field_by_tag)(DataForm *form, const char * const tag);
 Autocomplete (*form_get_value_ac)(DataForm *form, const char * const tag);
 void (*form_reset_autocompleters)(DataForm *form);
+
+GSList * (*form_get_non_form_type_fields_sorted)(DataForm *form);
+GSList * (*form_get_field_values_sorted)(FormField *field);
 
 #endif

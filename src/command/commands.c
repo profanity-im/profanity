@@ -1525,7 +1525,6 @@ cmd_caps(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
-    char *recipient;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -1536,11 +1535,13 @@ cmd_caps(gchar **args, struct cmd_help_t help)
     {
         case WIN_MUC:
             if (args[0] != NULL) {
-                recipient = ui_current_recipient();
-                pcontact = muc_get_participant(recipient, args[0]);
+                char *room = ui_current_recipient();
+                pcontact = muc_get_participant(room, args[0]);
                 if (pcontact != NULL) {
+                    Jid *jidp = jid_create_from_bare_and_resource(room, args[0]);
                     Resource *resource = p_contact_get_resource(pcontact, args[0]);
-                    cons_show_caps(args[0], resource);
+                    cons_show_caps(jidp->fulljid, resource);
+                    jid_destroy(jidp);
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
                 }
@@ -1568,6 +1569,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
                         }
                     }
                 }
+                jid_destroy(jid);
             } else {
                 cons_show("You must provide a jid to the /caps command.");
             }
@@ -1576,7 +1578,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
             if (args[0] != NULL) {
                 cons_show("No parameter needed to /caps when in private chat.");
             } else {
-                recipient = ui_current_recipient();
+                char *recipient = ui_current_recipient();
                 Jid *jid = jid_create(recipient);
                 if (jid) {
                     pcontact = muc_get_participant(jid->barejid, jid->resourcepart);

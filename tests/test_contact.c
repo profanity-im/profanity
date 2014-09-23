@@ -118,11 +118,11 @@ void contact_presence_uses_highest_priority(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
         "is offline", FALSE);
 
-    Resource *resource10 = resource_new("resource10", RESOURCE_ONLINE, NULL, 10, NULL);
-    Resource *resource20 = resource_new("resource20", RESOURCE_CHAT, NULL, 20, NULL);
-    Resource *resource30 = resource_new("resource30", RESOURCE_AWAY, NULL, 30, NULL);
-    Resource *resource1 = resource_new("resource1", RESOURCE_XA, NULL, 1, NULL);
-    Resource *resource2 = resource_new("resource2", RESOURCE_DND, NULL, 2, NULL);
+    Resource *resource10 = resource_new("resource10", RESOURCE_ONLINE, NULL, 10);
+    Resource *resource20 = resource_new("resource20", RESOURCE_CHAT, NULL, 20);
+    Resource *resource30 = resource_new("resource30", RESOURCE_AWAY, NULL, 30);
+    Resource *resource1 = resource_new("resource1", RESOURCE_XA, NULL, 1);
+    Resource *resource2 = resource_new("resource2", RESOURCE_DND, NULL, 2);
     p_contact_set_presence(contact, resource10);
     p_contact_set_presence(contact, resource20);
     p_contact_set_presence(contact, resource30);
@@ -141,11 +141,11 @@ void contact_presence_chat_when_same_prioroty(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
         "is offline", FALSE);
 
-    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10, NULL);
-    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10, NULL);
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10);
+    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_online);
     p_contact_set_presence(contact, resource_chat);
     p_contact_set_presence(contact, resource_away);
@@ -164,10 +164,10 @@ void contact_presence_online_when_same_prioroty(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
         "is offline", FALSE);
 
-    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10, NULL);
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_online);
     p_contact_set_presence(contact, resource_away);
     p_contact_set_presence(contact, resource_xa);
@@ -185,9 +185,9 @@ void contact_presence_away_when_same_prioroty(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
         "is offline", FALSE);
 
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_away);
     p_contact_set_presence(contact, resource_xa);
     p_contact_set_presence(contact, resource_dnd);
@@ -204,8 +204,8 @@ void contact_presence_xa_when_same_prioroty(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
         "is offline", FALSE);
 
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_xa);
     p_contact_set_presence(contact, resource_dnd);
 
@@ -221,7 +221,7 @@ void contact_presence_dnd(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
         "is offline", FALSE);
 
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_dnd);
 
     const char *presence = p_contact_presence(contact);
@@ -296,11 +296,11 @@ void contact_not_available_when_highest_priority_away(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
         "is offline", FALSE);
 
-    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10, NULL);
-    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10, NULL);
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 20, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10);
+    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 20);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_online);
     p_contact_set_presence(contact, resource_chat);
     p_contact_set_presence(contact, resource_away);
@@ -319,11 +319,11 @@ void contact_not_available_when_highest_priority_xa(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
         "is offline", FALSE);
 
-    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10, NULL);
-    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10, NULL);
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 20, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10);
+    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 20);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_online);
     p_contact_set_presence(contact, resource_chat);
     p_contact_set_presence(contact, resource_away);
@@ -342,11 +342,11 @@ void contact_not_available_when_highest_priority_dnd(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
         "is offline", FALSE);
 
-    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10, NULL);
-    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10, NULL);
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 20, NULL);
+    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10);
+    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 20);
     p_contact_set_presence(contact, resource_online);
     p_contact_set_presence(contact, resource_chat);
     p_contact_set_presence(contact, resource_away);
@@ -365,11 +365,11 @@ void contact_available_when_highest_priority_online(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
         "is offline", FALSE);
 
-    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 20, NULL);
-    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10, NULL);
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 20);
+    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 10);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_online);
     p_contact_set_presence(contact, resource_chat);
     p_contact_set_presence(contact, resource_away);
@@ -388,11 +388,11 @@ void contact_available_when_highest_priority_chat(void **state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
         "is offline", FALSE);
 
-    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10, NULL);
-    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 20, NULL);
-    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10, NULL);
-    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10, NULL);
-    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10, NULL);
+    Resource *resource_online = resource_new("resource_online", RESOURCE_ONLINE, NULL, 10);
+    Resource *resource_chat = resource_new("resource_chat", RESOURCE_CHAT, NULL, 20);
+    Resource *resource_away = resource_new("resource_away", RESOURCE_AWAY, NULL, 10);
+    Resource *resource_xa = resource_new("resource_xa", RESOURCE_XA, NULL, 10);
+    Resource *resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_online);
     p_contact_set_presence(contact, resource_chat);
     p_contact_set_presence(contact, resource_away);

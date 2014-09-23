@@ -209,6 +209,8 @@ int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);
 gboolean stanza_contains_caps(xmpp_stanza_t * const stanza);
 char * stanza_caps_get_hash(xmpp_stanza_t * const stanza);
+char * stanza_get_caps_ver(xmpp_stanza_t * const stanza);
+char * stanza_caps_get_node(xmpp_stanza_t * const stanza);
 
 DataForm * stanza_create_form(xmpp_stanza_t * const stanza);
 void stanza_destroy_form(DataForm *form);

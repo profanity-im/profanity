@@ -235,48 +235,49 @@ win_show_info(ProfWin *window, PContact contact)
         }
         win_save_newline(window);
 
-        if (resource->caps_str != NULL) {
-            Capabilities *caps = caps_get(resource->caps_str);
-            if (caps != NULL) {
-                // show identity
-                if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                    win_save_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
-                    if (caps->name != NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                        if ((caps->category != NULL) || (caps->type != NULL)) {
-                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
-                        }
+        Jid *jidp = jid_create_from_bare_and_resource(barejid, resource->name);
+        Capabilities *caps = caps_lookup(jidp->fulljid);
+
+        if (caps) {
+            // show identity
+            if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                win_save_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
+                if (caps->name != NULL) {
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                    if ((caps->category != NULL) || (caps->type != NULL)) {
+                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
-                    if (caps->type != NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                        if (caps->category != NULL) {
-                            win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
-                        }
-                    }
+                }
+                if (caps->type != NULL) {
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                     if (caps->category != NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
-                    win_save_newline(window);
                 }
-                if (caps->software != NULL) {
-                    win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
+                if (caps->category != NULL) {
+                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                 }
-                if (caps->software_version != NULL) {
-                    win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
-                }
-                if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                    win_save_newline(window);
-                }
-                if (caps->os != NULL) {
-                    win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
-                }
-                if (caps->os_version != NULL) {
-                    win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-                }
-                if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                    win_save_newline(window);
-                }
+                win_save_newline(window);
             }
+            if (caps->software != NULL) {
+                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
+            }
+            if (caps->software_version != NULL) {
+                win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+            }
+            if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                win_save_newline(window);
+            }
+            if (caps->os != NULL) {
+                win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
+            }
+            if (caps->os_version != NULL) {
+                win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
+            }
+            if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                win_save_newline(window);
+            }
+            caps_destroy(caps);
         }
 
         ordered_resources = g_list_next(ordered_resources);

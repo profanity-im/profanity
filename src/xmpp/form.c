@@ -107,9 +107,9 @@ _get_property(xmpp_stanza_t * const stanza, const char * const property)
     xmpp_ctx_t *ctx = connection_get_ctx();
 
     xmpp_stanza_t *child = xmpp_stanza_get_child_by_name(stanza, property);
-    if (child != NULL) {
+    if (child) {
         char *child_text = xmpp_stanza_get_text(child);
-        if (child_text != NULL) {
+        if (child_text) {
             result = strdup(child_text);
             xmpp_free(ctx, child_text);
         }
@@ -122,7 +122,7 @@ static char *
 _get_attr(xmpp_stanza_t * const stanza, const char * const attr)
 {
     char *result = xmpp_stanza_get_attribute(stanza, attr);
-    if (result != NULL) {
+    if (result) {
         return strdup(result);
     } else {
         return NULL;
@@ -133,7 +133,7 @@ static gboolean
 _is_required(xmpp_stanza_t * const stanza)
 {
     xmpp_stanza_t *child = xmpp_stanza_get_child_by_name(stanza, "required");
-    if (child != NULL) {
+    if (child) {
         return TRUE;
     } else {
         return FALSE;
@@ -198,7 +198,7 @@ form_create(xmpp_stanza_t * const form_stanza)
 
     // get fields
     xmpp_stanza_t *form_child = xmpp_stanza_get_children(form_stanza);
-    while (form_child != NULL) {
+    while (form_child) {
         char *child_name = xmpp_stanza_get_name(form_child);
         if (g_strcmp0(child_name, "field") == 0) {
             xmpp_stanza_t *field_stanza = form_child;
@@ -226,13 +226,13 @@ form_create(xmpp_stanza_t * const form_stanza)
             // handle repeated field children
             xmpp_stanza_t *field_child = xmpp_stanza_get_children(field_stanza);
             int value_index = 1;
-            while (field_child != NULL) {
+            while (field_child) {
                 child_name = xmpp_stanza_get_name(field_child);
 
                 // handle values
                 if (g_strcmp0(child_name, "value") == 0) {
                     char *value = xmpp_stanza_get_text(field_child);
-                    if (value != NULL) {
+                    if (value) {
                         field->values = g_slist_append(field->values, strdup(value));
 
                         if (field->type_t == FIELD_TEXT_MULTI) {
@@ -284,7 +284,7 @@ form_create_submission(DataForm *form)
     xmpp_stanza_set_type(x, "submit");
 
     GSList *curr_field = form->fields;
-    while (curr_field != NULL) {
+    while (curr_field) {
         FormField *field = curr_field->data;
 
         xmpp_stanza_t *field_stanza = xmpp_stanza_new(ctx);
@@ -304,8 +304,8 @@ form_create_submission(DataForm *form)
             case FIELD_JID_SINGLE:
                 value_stanza = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(value_stanza, "value");
-                if (field->values != NULL) {
-                    if (field->values->data != NULL) {
+                if (field->values) {
+                    if (field->values->data) {
                         xmpp_stanza_t *text_stanza = xmpp_stanza_new(ctx);
                         xmpp_stanza_set_text(text_stanza, field->values->data);
                         xmpp_stanza_add_child(value_stanza, text_stanza);
@@ -321,12 +321,12 @@ form_create_submission(DataForm *form)
             case FIELD_LIST_MULTI:
             case FIELD_JID_MULTI:
                 curr_value = field->values;
-                while (curr_value != NULL) {
+                while (curr_value) {
                     char *value = curr_value->data;
 
                     value_stanza = xmpp_stanza_new(ctx);
                     xmpp_stanza_set_name(value_stanza, "value");
-                    if (value != NULL) {
+                    if (value) {
                         xmpp_stanza_t *text_stanza = xmpp_stanza_new(ctx);
                         xmpp_stanza_set_text(text_stanza, value);
                         xmpp_stanza_add_child(value_stanza, text_stanza);
@@ -355,7 +355,7 @@ form_create_submission(DataForm *form)
 static void
 _free_option(FormOption *option)
 {
-    if (option != NULL) {
+    if (option) {
         free(option->label);
         free(option->value);
         free(option);
@@ -365,7 +365,7 @@ _free_option(FormOption *option)
 static void
 _free_field(FormField *field)
 {
-    if (field != NULL) {
+    if (field) {
         free(field->label);
         free(field->type);
         free(field->var);
@@ -380,7 +380,7 @@ _free_field(FormField *field)
 static void
 _form_destroy(DataForm *form)
 {
-    if (form != NULL) {
+    if (form) {
         free(form->type);
         free(form->title);
         free(form->instructions);
@@ -392,11 +392,49 @@ _form_destroy(DataForm *form)
     }
 }
 
+static int
+_field_compare_by_var(FormField *a, FormField *b)
+{
+    return g_strcmp0(a->var, b->var);
+}
+
+static GSList *
+_form_get_non_form_type_fields_sorted(DataForm *form)
+{
+    GSList *sorted = NULL;
+    GSList *curr = form->fields;
+    while (curr) {
+        FormField *field = curr->data;
+        if (g_strcmp0(field->var, "FORM_TYPE") != 0) {
+            sorted = g_slist_insert_sorted(sorted, field, (GCompareFunc)_field_compare_by_var);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return sorted;
+}
+
+static GSList *
+_form_get_field_values_sorted(FormField *field)
+{
+    GSList *sorted = NULL;
+    GSList *curr = field->values;
+    while (curr) {
+        char *value = curr->data;
+        if (value) {
+            sorted = g_slist_insert_sorted(sorted, value, (GCompareFunc)g_strcmp0);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return sorted;
+}
+
 static char *
 _form_get_form_type_field(DataForm *form)
 {
     GSList *curr = form->fields;
-    while (curr != NULL) {
+    while (curr) {
         FormField *field = curr->data;
         if (g_strcmp0(field->var, "FORM_TYPE") == 0) {
             return field->values->data;
@@ -412,7 +450,7 @@ _form_tag_exists(DataForm *form, const char * const tag)
 {
     GList *tags = g_hash_table_get_keys(form->tag_to_var);
     GList *curr = tags;
-    while (curr != NULL) {
+    while (curr) {
         if (g_strcmp0(curr->data, tag) == 0) {
             return TRUE;
         }
@@ -425,9 +463,9 @@ static form_field_type_t
 _form_get_field_type(DataForm *form, const char * const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 return field->type_t;
@@ -442,9 +480,9 @@ static void
 _form_set_value(DataForm *form, const char * const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 if (g_slist_length(field->values) == 0) {
@@ -467,9 +505,9 @@ static void
 _form_add_value(DataForm *form, const char * const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 field->values = g_slist_append(field->values, strdup(value));
@@ -492,13 +530,13 @@ static gboolean
 _form_add_unique_value(DataForm *form, const char * const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 GSList *curr_value = field->values;
-                while (curr_value != NULL) {
+                while (curr_value) {
                     if (g_strcmp0(curr_value->data, value) == 0) {
                         return FALSE;
                     }
@@ -523,13 +561,13 @@ static gboolean
 _form_remove_value(DataForm *form, const char * const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 GSList *found = g_slist_find_custom(field->values, value, (GCompareFunc)g_strcmp0);
-                if (found != NULL) {
+                if (found) {
                     free(found->data);
                     found->data = NULL;
                     field->values = g_slist_delete_link(field->values, found);
@@ -554,13 +592,13 @@ _form_remove_text_multi_value(DataForm *form, const char * const tag, int index)
 {
     index--;
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 GSList *item = g_slist_nth(field->values, index);
-                if (item != NULL) {
+                if (item) {
                     free(item->data);
                     item->data = NULL;
                     field->values = g_slist_delete_link(field->values, item);
@@ -585,9 +623,9 @@ static int
 _form_get_value_count(DataForm *form, const char * const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 if ((g_slist_length(field->values) == 1) && (field->values->data == NULL)) {
@@ -607,13 +645,13 @@ static gboolean
 _form_field_contains_option(DataForm *form, const char * const tag, char *value)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 GSList *curr_option = field->options;
-                while (curr_option != NULL) {
+                while (curr_option) {
                     FormOption *option = curr_option->data;
                     if (g_strcmp0(option->value, value) == 0) {
                         return TRUE;
@@ -632,9 +670,9 @@ static FormField *
 _form_get_field_by_tag(DataForm *form, const char * const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 return field;
@@ -649,9 +687,9 @@ static Autocomplete
 _form_get_value_ac(DataForm *form, const char * const tag)
 {
     char *var = g_hash_table_lookup(form->tag_to_var, tag);
-    if (var != NULL) {
+    if (var) {
         GSList *curr = form->fields;
-        while (curr != NULL) {
+        while (curr) {
             FormField *field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 return field->value_ac;
@@ -691,4 +729,6 @@ form_init_module(void)
     form_get_value_ac = _form_get_value_ac;
     form_get_field_by_tag = _form_get_field_by_tag;
     form_reset_autocompleters = _form_reset_autocompleters;
+    form_get_non_form_type_fields_sorted = _form_get_non_form_type_fields_sorted;
+    form_get_field_values_sorted = _form_get_field_values_sorted;
 }

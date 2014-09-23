@@ -765,21 +765,13 @@ stanza_is_muc_presence(xmpp_stanza_t * const stanza)
         return FALSE;
     }
 
-    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
 
-    if (x == NULL) {
+    if (x) {
+        return TRUE;
+    } else {
         return FALSE;
     }
-
-    char *ns = xmpp_stanza_get_ns(x);
-    if (ns == NULL) {
-        return FALSE;
-    }
-    if (strcmp(ns, STANZA_NS_MUC_USER) != 0) {
-        return FALSE;
-    }
-
-    return TRUE;
 }
 
 gboolean
@@ -973,11 +965,12 @@ stanza_contains_caps(xmpp_stanza_t * const stanza)
 {
     xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
 
-    if (caps == NULL) {
+    if (!caps) {
         return FALSE;
     }
 
-    if (strcmp(xmpp_stanza_get_ns(caps), STANZA_NS_CAPS) != 0) {
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
         return FALSE;
     }
 
@@ -989,18 +982,50 @@ stanza_caps_get_hash(xmpp_stanza_t * const stanza)
 {
     xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
 
-    if (caps == NULL) {
+    if (!caps) {
         return NULL;
     }
 
-    if (strcmp(xmpp_stanza_get_ns(caps), STANZA_NS_CAPS) != 0) {
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
         return NULL;
     }
 
-    char *result = xmpp_stanza_get_attribute(caps, STANZA_ATTR_HASH);
+    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_HASH);
+}
 
-    return result;
+char *
+stanza_caps_get_node(xmpp_stanza_t * const stanza)
+{
+    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
 
+    if (!caps) {
+        return NULL;
+    }
+
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
+        return NULL;
+    }
+
+    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
+}
+
+char *
+stanza_get_caps_ver(xmpp_stanza_t * const stanza)
+{
+    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
+
+    if (!caps) {
+        return NULL;
+    }
+
+    char *ns = xmpp_stanza_get_ns(caps);
+    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
+        return NULL;
+    }
+
+    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
 }
 
 char *
@@ -1173,14 +1198,13 @@ stanza_attach_caps(xmpp_ctx_t * const ctx, xmpp_stanza_t * const presence)
     xmpp_stanza_set_ns(caps, STANZA_NS_CAPS);
     xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
 
-    char *sha1 = caps_create_sha1_str(query);
+    char *sha1 = caps_get_my_sha1(ctx);
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_HASH, "sha-1");
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_NODE, "http://www.profanity.im");
     xmpp_stanza_set_attribute(caps, STANZA_ATTR_VER, sha1);
     xmpp_stanza_add_child(presence, caps);
     xmpp_stanza_release(caps);
     xmpp_stanza_release(query);
-    g_free(sha1);
 }
 
 const char *

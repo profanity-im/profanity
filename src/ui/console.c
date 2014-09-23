@@ -282,67 +282,70 @@ _cons_show_info(PContact pcontact)
 }
 
 static void
-_cons_show_caps(const char * const contact, Resource *resource)
+_cons_show_caps(const char * const fulljid, Resource *resource)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
-    const char *resource_presence = string_from_resource_presence(resource->presence);
 
-    int presence_colour = win_presence_colour(resource_presence);
-    win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", contact);
-    win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
+    Capabilities *caps = caps_lookup(fulljid);
+    if (caps) {
+        const char *resource_presence = string_from_resource_presence(resource->presence);
 
-    if (resource->caps_str != NULL) {
-        Capabilities *caps = caps_get(resource->caps_str);
-        if (caps != NULL) {
-            // show identity
-            if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                win_save_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
-                if (caps->name != NULL) {
-                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                    if ((caps->category != NULL) || (caps->type != NULL)) {
-                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
-                    }
+        int presence_colour = win_presence_colour(resource_presence);
+        win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", fulljid);
+        win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
+
+        // show identity
+        if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+            win_save_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
+            if (caps->name != NULL) {
+                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                if ((caps->category != NULL) || (caps->type != NULL)) {
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
-                if (caps->type != NULL) {
-                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                    if (caps->category != NULL) {
-                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
-                    }
-                }
+            }
+            if (caps->type != NULL) {
+                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                 if (caps->category != NULL) {
-                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
-                win_save_newline(console);
             }
-            if (caps->software != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "Software: %s", caps->software);
+            if (caps->category != NULL) {
+                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
             }
-            if (caps->software_version != NULL) {
-                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
-            }
-            if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                win_save_newline(console);
-            }
-            if (caps->os != NULL) {
-                win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "OS: %s", caps->os);
-            }
-            if (caps->os_version != NULL) {
-                win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-            }
-            if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                win_save_newline(console);
-            }
+            win_save_newline(console);
+        }
+        if (caps->software != NULL) {
+            win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "Software: %s", caps->software);
+        }
+        if (caps->software_version != NULL) {
+            win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+        }
+        if ((caps->software != NULL) || (caps->software_version != NULL)) {
+            win_save_newline(console);
+        }
+        if (caps->os != NULL) {
+            win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "OS: %s", caps->os);
+        }
+        if (caps->os_version != NULL) {
+            win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
+        }
+        if ((caps->os != NULL) || (caps->os_version != NULL)) {
+            win_save_newline(console);
+        }
 
-            if (caps->features != NULL) {
-                win_save_println(console, "Features:");
-                GSList *feature = caps->features;
-                while (feature != NULL) {
-                    win_save_vprint(console, '-', NULL, 0, 0, "", " %s", feature->data);
-                    feature = g_slist_next(feature);
-                }
+        if (caps->features != NULL) {
+            win_save_println(console, "Features:");
+            GSList *feature = caps->features;
+            while (feature != NULL) {
+                win_save_vprint(console, '-', NULL, 0, 0, "", " %s", feature->data);
+                feature = g_slist_next(feature);
             }
         }
+        caps_destroy(caps);
+
+    } else {
+        cons_show("No capabilities found for %s", fulljid);
     }
 
     cons_alert();
@@ -733,49 +736,49 @@ _cons_show_account(ProfAccount *account)
                 win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
             }
             win_save_vprint(console, '-', NULL, NO_DATE, 0, "", "");
+            Jid *jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
+            Capabilities *caps = caps_lookup(jidp->fulljid);
 
-            if (resource->caps_str != NULL) {
-                Capabilities *caps = caps_get(resource->caps_str);
-                if (caps != NULL) {
-                    // show identity
-                    if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                        win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Identity: ");
-                        if (caps->name != NULL) {
-                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                            if ((caps->category != NULL) || (caps->type != NULL)) {
-                                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
-                            }
+            if (caps != NULL) {
+                // show identity
+                if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                    win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Identity: ");
+                    if (caps->name != NULL) {
+                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                        if ((caps->category != NULL) || (caps->type != NULL)) {
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
-                        if (caps->type != NULL) {
-                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                            if (caps->category != NULL) {
-                                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
-                            }
-                        }
+                    }
+                    if (caps->type != NULL) {
+                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                         if (caps->category != NULL) {
-                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
-                        win_save_newline(console);
                     }
-                    if (caps->software != NULL) {
-                        win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
+                    if (caps->category != NULL) {
+                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                     }
-                    if (caps->software_version != NULL) {
-                        win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
-                    }
-                    if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                        win_save_newline(console);
-                    }
-                    if (caps->os != NULL) {
-                        win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
-                    }
-                    if (caps->os_version != NULL) {
-                        win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
-                    }
-                    if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                        win_save_newline(console);
-                    }
+                    win_save_newline(console);
                 }
+                if (caps->software != NULL) {
+                    win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
+                }
+                if (caps->software_version != NULL) {
+                    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+                }
+                if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                    win_save_newline(console);
+                }
+                if (caps->os != NULL) {
+                    win_save_vprint(console, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
+                }
+                if (caps->os_version != NULL) {
+                    win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
+                }
+                if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                    win_save_newline(console);
+                }
+                caps_destroy(caps);
             }
 
             ordered_resources = g_list_next(ordered_resources);

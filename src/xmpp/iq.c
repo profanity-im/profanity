@@ -66,7 +66,7 @@ static int _version_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_info_get_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
-static int _disco_info_result_handler(xmpp_conn_t * const conn,
+static int _disco_info_response_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _version_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
@@ -84,6 +84,8 @@ static int _manual_pong_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
     void * const userdata);
+static int _caps_response_handler(xmpp_conn_t *const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 iq_add_handlers(void)
@@ -94,7 +96,6 @@ iq_add_handlers(void)
     HANDLE(NULL,                STANZA_TYPE_ERROR,  _error_handler);
 
     HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_GET,    _disco_info_get_handler);
-    HANDLE(XMPP_NS_DISCO_INFO,  STANZA_TYPE_RESULT, _disco_info_result_handler);
 
     HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_GET,    _disco_items_get_handler);
     HANDLE(XMPP_NS_DISCO_ITEMS, STANZA_TYPE_RESULT, _disco_items_result_handler);
@@ -142,7 +143,38 @@ _iq_disco_info_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, "discoinforeq", jid, NULL);
+    char *id = create_unique_id("disco_info");
+    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
+
+    xmpp_id_handler_add(conn, _disco_info_response_handler, id, NULL);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_send_caps_request(const char * const to, const char * const id,
+    const char * const node, const char * const ver)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+
+    if (!node) {
+        log_error("Could not create caps request, no node");
+        return;
+    }
+    if (!ver) {
+        log_error("Could not create caps request, no ver");
+        return;
+    }
+
+    GString *node_str = g_string_new("");
+    g_string_printf(node_str, "%s#%s", node, ver);
+    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, to, node_str->str);
+    g_string_free(node_str, TRUE);
+
+    xmpp_id_handler_add(conn, _caps_response_handler, id, NULL);
+
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -300,6 +332,73 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     }
 
     // remove this handler
+    return 0;
+}
+
+static int
+_caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
+    if (id) {
+        log_info("Capabilities response handler fired for id %s", id);
+    } else {
+        log_info("Capabilities response handler fired");
+    }
+
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from) {
+        log_info("No from attribute");
+        return 0;
+    }
+
+    char *type = xmpp_stanza_get_type(stanza);
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        log_warning("Error received for capabilities response from %s: ", from, error_message);
+        free(error_message);
+        return 0;
+    }
+
+    if (query == NULL) {
+        log_warning("No query element found.");
+        return 0;
+    }
+
+    char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
+    if (node == NULL) {
+        log_warning("No node attribute found");
+        return 0;
+    }
+
+    // validate sha1
+    gchar **split = g_strsplit(node, "#", -1);
+    char *given_sha1 = split[1];
+    char *generated_sha1 = caps_create_sha1_str(query);
+
+    if (g_strcmp0(given_sha1, generated_sha1) != 0) {
+        log_warning("Generated sha-1 does not match given:");
+        log_warning("Generated : %s", generated_sha1);
+        log_warning("Given     : %s", given_sha1);
+    } else {
+        log_info("Valid SHA-1 hash found: %s", given_sha1);
+
+        if (caps_contains(given_sha1)) {
+            log_info("Capabilties cached: %s", given_sha1);
+        } else {
+            log_info("Capabilities not cached: %s, storing", given_sha1);
+            Capabilities *capabilities = caps_create(query);
+            caps_add(given_sha1, capabilities);
+        }
+
+        caps_map(from, given_sha1);
+    }
+
+    g_free(generated_sha1);
+    g_strfreev(split);
     return 0;
 }
 
@@ -710,171 +809,60 @@ _item_destroy(DiscoItem *item)
 }
 
 static int
-_disco_info_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+_disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     log_debug("Received diso#info response");
-    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (g_strcmp0(id, "discoinforeq") == 0) {
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-
-        if (query != NULL) {
-            xmpp_stanza_t *child = xmpp_stanza_get_children(query);
-            GSList *identities = NULL;
-            GSList *features = NULL;
-            while (child != NULL) {
-                const char *stanza_name = xmpp_stanza_get_name(child);
-                if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
-                    const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
-                    if (var != NULL) {
-                        features = g_slist_append(features, strdup(var));
-                    }
-                } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
-                    const char *name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-                    const char *type = xmpp_stanza_get_attribute(child, STANZA_ATTR_TYPE);
-                    const char *category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
-
-                    if ((name != NULL) || (category != NULL) || (type != NULL)) {
-                        DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
-
-                        if (name != NULL) {
-                            identity->name = strdup(name);
-                        } else {
-                            identity->name = NULL;
-                        }
-                        if (category != NULL) {
-                            identity->category = strdup(category);
-                        } else {
-                            identity->category = NULL;
-                        }
-                        if (type != NULL) {
-                            identity->type = strdup(type);
-                        } else {
-                            identity->type = NULL;
-                        }
-
-                        identities = g_slist_append(identities, identity);
-                    }
-                }
-
-                child = xmpp_stanza_get_next(child);
-            }
-
-            handle_disco_info(from, identities, features);
-            g_slist_free_full(features, free);
-            g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
-        }
-    } else if ((id != NULL) && (g_str_has_prefix(id, "capsreq"))) {
-        log_debug("Response to query: %s", id);
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
-        char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
-        if (node == NULL) {
-            return 1;
-        }
-
-        char *caps_key = NULL;
-
-        // xep-0115
-        if (g_strcmp0(id, "capsreq") == 0) {
-            log_debug("xep-0115 supported capabilities");
-            caps_key = strdup(node);
-
-            // validate sha1
-            gchar **split = g_strsplit(node, "#", -1);
-            char *given_sha1 = split[1];
-            char *generated_sha1 = caps_create_sha1_str(query);
-
-            if (g_strcmp0(given_sha1, generated_sha1) != 0) {
-                log_info("Generated sha-1 does not match given:");
-                log_info("Generated : %s", generated_sha1);
-                log_info("Given     : %s", given_sha1);
-                g_free(generated_sha1);
-                g_strfreev(split);
-                free(caps_key);
-
-                return 1;
-            }
-            g_free(generated_sha1);
-            g_strfreev(split);
-
-        // non supported hash, or legacy caps
-        } else {
-            log_debug("Unsupported hash, or legacy capabilities");
-            caps_key = strdup(id + 8);
-            log_debug("Caps key: %s", caps_key);
-        }
-
-        // already cached
-        if (caps_contains(caps_key)) {
-            log_info("Client info already cached.");
-            free(caps_key);
-            return 1;
-        }
-
-        log_debug("Client info not cached");
-
-        const char *category = NULL;
-        const char *type = NULL;
-        const char *name = NULL;
-        const char *software = NULL;
-        const char *software_version = NULL;
-        const char *os = NULL;
-        const char *os_version = NULL;
-        GSList *features = NULL;
-
-        xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
-        if (identity != NULL) {
-            category = xmpp_stanza_get_attribute(identity, "category");
-            type = xmpp_stanza_get_attribute(identity, "type");
-            name = xmpp_stanza_get_attribute(identity, "name");
-        }
-
-        xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
-        if (softwareinfo != NULL) {
-            DataForm *form = form_create(softwareinfo);
-            FormField *formField = NULL;
-
-            char *form_type = form_get_form_type_field(form);
-            if (g_strcmp0(form_type, STANZA_DATAFORM_SOFTWARE) == 0) {
-                GSList *field = form->fields;
-                while (field != NULL) {
-                    formField = field->data;
-                    if (formField->values != NULL) {
-                        if (strcmp(formField->var, "software") == 0) {
-                            software = formField->values->data;
-                        } else if (strcmp(formField->var, "software_version") == 0) {
-                            software_version = formField->values->data;
-                        } else if (strcmp(formField->var, "os") == 0) {
-                            os = formField->values->data;
-                        } else if (strcmp(formField->var, "os_version") == 0) {
-                            os_version = formField->values->data;
-                        }
-                    }
-                    field = g_slist_next(field);
-                }
-            }
-
-            form_destroy(form);
-        }
-
+    if (query != NULL) {
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+        GSList *identities = NULL;
+        GSList *features = NULL;
         while (child != NULL) {
-            if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
-                features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
+            const char *stanza_name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
+                const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
+                if (var != NULL) {
+                    features = g_slist_append(features, strdup(var));
+                }
+            } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
+                const char *name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                const char *type = xmpp_stanza_get_attribute(child, STANZA_ATTR_TYPE);
+                const char *category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
+
+                if ((name != NULL) || (category != NULL) || (type != NULL)) {
+                    DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
+
+                    if (name != NULL) {
+                        identity->name = strdup(name);
+                    } else {
+                        identity->name = NULL;
+                    }
+                    if (category != NULL) {
+                        identity->category = strdup(category);
+                    } else {
+                        identity->category = NULL;
+                    }
+                    if (type != NULL) {
+                        identity->type = strdup(type);
+                    } else {
+                        identity->type = NULL;
+                    }
+
+                    identities = g_slist_append(identities, identity);
+                }
             }
 
             child = xmpp_stanza_get_next(child);
         }
 
-        caps_add(caps_key, category, type, name, software, software_version,
-            os, os_version, features);
-
-        free(caps_key);
+        handle_disco_info(from, identities, features);
+        g_slist_free_full(features, free);
+        g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
     }
-
     return 1;
 }
 
@@ -941,4 +929,5 @@ iq_init_module(void)
     iq_request_room_config_form = _iq_request_room_config_form;
     iq_room_config_cancel = _iq_room_config_cancel;
     iq_submit_room_config = _iq_submit_room_config;
+    iq_send_caps_request = _iq_send_caps_request;
 }
