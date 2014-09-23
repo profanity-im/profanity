@@ -521,6 +521,8 @@ _handle_caps(xmpp_stanza_t *const stanza)
                     char *id = create_unique_id("caps");
 
                     iq_send_caps_request(from, id, node, ver);
+
+                    free(id);
                 }
             }
 
