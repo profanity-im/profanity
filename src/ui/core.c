@@ -2134,7 +2134,7 @@ _ui_handle_room_config_submit_result(const char * const room)
             cons_show("Room configuration successfull: %s", room);
         }
     } else {
-        cons_show("Room configuration successful"); 
+        cons_show("Room configuration successful");
     }
 }
 
