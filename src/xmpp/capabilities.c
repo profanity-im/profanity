@@ -400,7 +400,7 @@ caps_create(xmpp_stanza_t *query)
         }
         if (found) {
             break;
-        } 
+        }
         curr_identity = g_slist_next(curr_identity);
     }
 

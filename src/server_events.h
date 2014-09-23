@@ -43,6 +43,7 @@ void handle_failed_login(void);
 void handle_software_version_result(const char * const jid, const char * const  presence,
     const char * const name, const char * const version, const char * const os);
 void handle_disco_info(const char *from, GSList *identities, GSList *features);
+void handle_disco_info_error(const char * const from, const char * const error);
 void handle_room_list(GSList *rooms, const char *conference_node);
 void handle_disco_items(GSList *items, const char *jid);
 void handle_room_invite(jabber_invite_t invite_type,

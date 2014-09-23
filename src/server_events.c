@@ -155,6 +155,16 @@ handle_disco_info(const char *from, GSList *identities, GSList *features)
 }
 
 void
+handle_disco_info_error(const char * const from, const char * const error)
+{
+    if (from) {
+        cons_show_error("Service discovery failed for %s: %s", from, error);
+    } else {
+        cons_show_error("Service discovery failed: %s", error);
+    }
+}
+
+void
 handle_room_list(GSList *rooms, const char *conference_node)
 {
     cons_show_room_list(rooms, conference_node);
