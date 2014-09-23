@@ -340,13 +340,6 @@ caps_create(xmpp_stanza_t *query)
     char *os_version = NULL;
     GSList *features = NULL;
 
-    xmpp_stanza_t *identity = xmpp_stanza_get_child_by_name(query, "identity");
-    if (identity != NULL) {
-        category = xmpp_stanza_get_attribute(identity, "category");
-        type = xmpp_stanza_get_attribute(identity, "type");
-        name = xmpp_stanza_get_attribute(identity, "name");
-    }
-
     xmpp_stanza_t *softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
     if (softwareinfo != NULL) {
         DataForm *form = form_create(softwareinfo);
@@ -376,12 +369,67 @@ caps_create(xmpp_stanza_t *query)
     }
 
     xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+    GSList *identity_stanzas = NULL;
     while (child != NULL) {
         if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
             features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
         }
+        if (g_strcmp0(xmpp_stanza_get_name(child), "identity") == 0) {
+            identity_stanzas = g_slist_append(identity_stanzas, child);
+        }
 
         child = xmpp_stanza_get_next(child);
+    }
+
+    // find identity by locale
+    const gchar* const *langs = g_get_language_names();
+    int num_langs = g_strv_length((gchar**)langs);
+    xmpp_stanza_t *found = NULL;
+    GSList *curr_identity = identity_stanzas;
+    while (curr_identity) {
+        xmpp_stanza_t *id_stanza = curr_identity->data;
+        char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
+        if (stanza_lang) {
+            int i = 0;
+            for (i = 0; i < num_langs; i++) {
+                if (g_strcmp0(langs[i], stanza_lang) == 0) {
+                    found = id_stanza;
+                    break;
+                }
+            }
+        }
+        if (found) {
+            break;
+        } 
+        curr_identity = g_slist_next(curr_identity);
+    }
+
+    // not lang match, use default with no lang
+    if (!found) {
+        curr_identity = identity_stanzas;
+        while (curr_identity) {
+            xmpp_stanza_t *id_stanza = curr_identity->data;
+            char *stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
+            if (!stanza_lang) {
+                found = id_stanza;
+                break;
+            }
+
+            curr_identity = g_slist_next(curr_identity);
+        }
+    }
+
+    // no matching lang, no identity without lang, use first
+    if (!found) {
+        if (identity_stanzas) {
+            found = identity_stanzas->data;
+        }
+    }
+
+    if (found) {
+        category = xmpp_stanza_get_attribute(found, "category");
+        type = xmpp_stanza_get_attribute(found, "type");
+        name = xmpp_stanza_get_attribute(found, "name");
     }
 
     Capabilities *new_caps = malloc(sizeof(struct capabilities_t));
