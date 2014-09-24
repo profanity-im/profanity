@@ -392,6 +392,7 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
             log_info("Capabilities not cached: %s, storing", given_sha1);
             Capabilities *capabilities = caps_create(query);
             caps_add(given_sha1, capabilities);
+            caps_destroy(capabilities);
         }
 
         caps_map(from, given_sha1);
