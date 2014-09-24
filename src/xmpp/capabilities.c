@@ -110,7 +110,7 @@ caps_add(const char * const ver, Capabilities *caps)
             const gchar* features_list[num];
             int curr = 0;
             while (curr_feature) {
-                features_list[curr++] = strdup(curr_feature->data);
+                features_list[curr++] = curr_feature->data;
                 curr_feature = g_slist_next(curr_feature);
             }
             g_key_file_set_string_list(cache, ver, "features", features_list, num);
@@ -425,6 +425,8 @@ caps_create(xmpp_stanza_t *query)
             found = identity_stanzas->data;
         }
     }
+
+    g_slist_free(identity_stanzas);
 
     if (found) {
         category = xmpp_stanza_get_attribute(found, "category");
