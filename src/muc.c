@@ -75,7 +75,7 @@ void
 muc_close(void)
 {
     autocomplete_free(invite_ac);
-    if (rooms != NULL) {
+    if (rooms) {
         g_hash_table_destroy(rooms);
         rooms = NULL;
     }
@@ -110,7 +110,7 @@ muc_invites_include(const char * const room)
 {
     GSList *invites = autocomplete_create_list(invite_ac);
     GSList *curr = invites;
-    while (curr != NULL) {
+    while (curr) {
         if (strcmp(curr->data, room) == 0) {
             g_slist_free_full(invites, g_free);
             return TRUE;
@@ -119,6 +119,7 @@ muc_invites_include(const char * const room)
         }
     }
     g_slist_free_full(invites, g_free);
+
     return FALSE;
 }
 
@@ -140,14 +141,11 @@ muc_clear_invites(void)
     autocomplete_clear(invite_ac);
 }
 
-/*
- * Join the chat room with the specified nickname
- */
 void
 muc_join_room(const char * const room, const char * const nick,
     const char * const password, gboolean autojoin)
 {
-    if (rooms == NULL) {
+    if (!rooms) {
         rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
             (GDestroyNotify)_free_room);
     }
@@ -156,7 +154,7 @@ muc_join_room(const char * const room, const char * const nick,
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
     new_room->autocomplete_prefix = NULL;
-    if (password != NULL) {
+    if (password) {
         new_room->password = strdup(password);
     } else {
         new_room->password = NULL;
@@ -176,13 +174,10 @@ muc_join_room(const char * const room, const char * const nick,
     g_hash_table_insert(rooms, strdup(room), new_room);
 }
 
-/*
- * Leave the room
- */
 void
 muc_leave_room(const char * const room)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         g_hash_table_remove(rooms, room);
     }
 }
@@ -190,13 +185,12 @@ muc_leave_room(const char * const room)
 gboolean
 muc_requires_config(const char * const room)
 {
-    if (rooms == NULL) {
+    if (!rooms) {
         return FALSE;
     }
 
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room == NULL) {
+    if (!chat_room) {
         return FALSE;
     }
 
@@ -206,17 +200,17 @@ muc_requires_config(const char * const room)
 void
 muc_set_requires_config(const char * const room, gboolean val)
 {
-    if (rooms == NULL) {
+    if (!rooms) {
         return;
     }
 
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-    if (chat_room == NULL) {
+    if (!chat_room) {
         return;
     }
 
     chat_room->pending_config = val;
+
     return;
 }
 
@@ -226,14 +220,9 @@ muc_set_requires_config(const char * const room, gboolean val)
 gboolean
 muc_room_is_active(const char * const room)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
+        return (chat_room != NULL);
     } else {
         return FALSE;
     }
@@ -242,29 +231,23 @@ muc_room_is_active(const char * const room)
 gboolean
 muc_room_is_autojoin(const char * const room)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
+        if (chat_room) {
             return chat_room->autojoin;
-        } else {
-            return FALSE;
         }
-    } else {
-        return FALSE;
     }
+
+    return FALSE;
 }
 
 void
 muc_set_subject(const char * const room, const char * const subject)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
-            if (chat_room->subject != NULL) {
-                free(chat_room->subject);
-            }
+        if (chat_room) {
+            free(chat_room->subject);
             chat_room->subject = strdup(subject);
         }
     }
@@ -273,26 +256,22 @@ muc_set_subject(const char * const room, const char * const subject)
 char *
 muc_get_subject(const char * const room)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
+        if (chat_room) {
             return chat_room->subject;
-        } else {
-            return NULL;
         }
-    } else {
-        return NULL;
     }
+
+    return NULL;
 }
 
 void
 muc_add_pending_broadcast(const char * const room, const char * const message)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
+        if (chat_room) {
             chat_room->pending_broadcasts = g_list_append(chat_room->pending_broadcasts, strdup(message));
         }
     }
@@ -301,17 +280,14 @@ muc_add_pending_broadcast(const char * const room, const char * const message)
 GList *
 muc_get_pending_broadcasts(const char * const room)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
+        if (chat_room) {
             return chat_room->pending_broadcasts;
-        } else {
-            return NULL;
         }
-    } else {
-        return NULL;
     }
+
+    return NULL;
 }
 
 char *
@@ -319,7 +295,7 @@ muc_get_old_nick(const char * const room, const char * const new_nick)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if ((chat_room != NULL) && (chat_room->pending_nick_change)) {
+    if (chat_room && chat_room->pending_nick_change) {
         return g_hash_table_lookup(chat_room->nick_changes, new_nick);
     }
 
@@ -335,7 +311,7 @@ muc_set_room_pending_nick_change(const char * const room, const char * const new
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         chat_room->pending_nick_change = TRUE;
         g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(chat_room->nick));
     }
@@ -350,7 +326,7 @@ muc_is_room_pending_nick_change(const char * const room)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         return chat_room->pending_nick_change;
     } else {
         return FALSE;
@@ -366,7 +342,7 @@ muc_complete_room_nick_change(const char * const room, const char * const nick)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         free(chat_room->nick);
         chat_room->nick = strdup(nick);
         chat_room->pending_nick_change = FALSE;
@@ -382,7 +358,7 @@ muc_complete_room_nick_change(const char * const room, const char * const nick)
 GList *
 muc_get_active_room_list(void)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         return g_hash_table_get_keys(rooms);
     } else {
         return NULL;
@@ -396,17 +372,14 @@ muc_get_active_room_list(void)
 char *
 muc_get_room_nick(const char * const room)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
+        if (chat_room) {
             return chat_room->nick;
-        } else {
-            return NULL;
         }
-    } else {
-        return NULL;
     }
+
+    return NULL;
 }
 
 /*
@@ -416,17 +389,14 @@ muc_get_room_nick(const char * const room)
 char *
 muc_get_room_password(const char * const room)
 {
-    if (rooms != NULL) {
+    if (rooms) {
         ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
-
-        if (chat_room != NULL) {
+        if (chat_room) {
             return chat_room->password;
-        } else {
-            return NULL;
         }
-    } else {
-        return NULL;
     }
+
+    return NULL;
 }
 
 /*
@@ -455,16 +425,17 @@ muc_add_to_roster(const char * const room, const char * const nick,
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     gboolean updated = FALSE;
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         PContact old = g_hash_table_lookup(chat_room->roster, nick);
 
-        if (old == NULL) {
+        if (!old) {
             updated = TRUE;
             autocomplete_add(chat_room->nick_ac, nick);
         } else if ((g_strcmp0(p_contact_presence(old), show) != 0) ||
                     (g_strcmp0(p_contact_status(old), status) != 0)) {
             updated = TRUE;
         }
+
         PContact contact = p_contact_new(nick, NULL, NULL, NULL, NULL, FALSE);
         resource_presence_t resource_presence = resource_presence_from_string(show);
         Resource *resource = resource_new(nick, resource_presence, status, 0);
@@ -483,7 +454,7 @@ muc_remove_from_roster(const char * const room, const char * const nick)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         g_hash_table_remove(chat_room->roster, nick);
         autocomplete_remove(chat_room->nick_ac, nick);
     }
@@ -494,7 +465,7 @@ muc_get_participant(const char * const room, const char * const nick)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         PContact participant = g_hash_table_lookup(chat_room->roster, nick);
         return participant;
     }
@@ -511,7 +482,7 @@ muc_get_roster(const char * const room)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         GList *result = NULL;
         GHashTableIter iter;
         gpointer key;
@@ -536,7 +507,7 @@ muc_get_roster_ac(const char * const room)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         return chat_room->nick_ac;
     } else {
         return NULL;
@@ -551,7 +522,7 @@ muc_set_roster_received(const char * const room)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         chat_room->roster_received = TRUE;
     }
 }
@@ -564,7 +535,7 @@ muc_get_roster_received(const char * const room)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         return chat_room->roster_received;
     } else {
         return FALSE;
@@ -581,7 +552,7 @@ muc_set_roster_pending_nick_change(const char * const room,
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         g_hash_table_insert(chat_room->nick_changes, strdup(new_nick), strdup(old_nick));
         muc_remove_from_roster(room, old_nick);
     }
@@ -599,9 +570,9 @@ muc_complete_roster_nick_change(const char * const room,
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         char *old_nick = g_hash_table_lookup(chat_room->nick_changes, nick);
-        if (old_nick != NULL) {
+        if (old_nick) {
             char *old_nick_cpy = strdup(old_nick);
             g_hash_table_remove(chat_room->nick_changes, nick);
 
@@ -615,18 +586,18 @@ muc_complete_roster_nick_change(const char * const room,
 void
 muc_autocomplete(char *input, int *size)
 {
-    if (rooms == NULL) {
+    if (!rooms) {
         return;
     }
 
     char *recipient = ui_current_recipient();
     ChatRoom *chat_room = g_hash_table_lookup(rooms, recipient);
 
-    if (chat_room == NULL) {
+    if (!chat_room) {
         return;
     }
 
-    if (chat_room->nick_ac == NULL) {
+    if (!chat_room->nick_ac) {
         return;
     }
 
@@ -634,23 +605,23 @@ muc_autocomplete(char *input, int *size)
     char *search_str = NULL;
 
     gchar *last_space = g_strrstr(input, " ");
-    if (last_space == NULL) {
+    if (!last_space) {
         search_str = input;
-        if (chat_room->autocomplete_prefix == NULL) {
+        if (!chat_room->autocomplete_prefix) {
             chat_room->autocomplete_prefix = strdup("");
         }
     } else {
         search_str = last_space+1;
-        if (chat_room->autocomplete_prefix == NULL) {
+        if (!chat_room->autocomplete_prefix) {
             chat_room->autocomplete_prefix = g_strndup(input, search_str - input);
         }
     }
 
     char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE);
-    if (result != NULL) {
+    if (result) {
         GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
         g_string_append(replace_with, result);
-        if (last_space == NULL || (*(last_space+1) == '\0')) {
+        if (!last_space || (*(last_space+1) == '\0')) {
             g_string_append(replace_with, ": ");
         }
         ui_replace_input(input, replace_with->str, size);
@@ -664,21 +635,21 @@ muc_autocomplete(char *input, int *size)
 void
 muc_reset_autocomplete(const char * const room)
 {
-    if (rooms == NULL) {
+    if (!rooms) {
         return;
     }
 
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room == NULL) {
+    if (!chat_room) {
         return;
     }
 
-    if (chat_room->nick_ac != NULL) {
+    if (chat_room->nick_ac) {
         autocomplete_reset(chat_room->nick_ac);
     }
 
-    if (chat_room->autocomplete_prefix != NULL) {
+    if (chat_room->autocomplete_prefix) {
         free(chat_room->autocomplete_prefix);
         chat_room->autocomplete_prefix = NULL;
     }
@@ -687,24 +658,22 @@ muc_reset_autocomplete(const char * const room)
 static void
 _free_room(ChatRoom *room)
 {
-    if (room != NULL) {
+    if (room) {
         free(room->room);
         free(room->nick);
         free(room->subject);
         free(room->password);
-        if (room->autocomplete_prefix != NULL) {
-            free(room->autocomplete_prefix);
-        }
-        if (room->roster != NULL) {
+        free(room->autocomplete_prefix);
+        if (room->roster) {
             g_hash_table_destroy(room->roster);
         }
-        if (room->nick_ac != NULL) {
+        if (room->nick_ac) {
             autocomplete_free(room->nick_ac);
         }
-        if (room->nick_changes != NULL) {
+        if (room->nick_changes) {
             g_hash_table_destroy(room->nick_changes);
         }
-        if (room->pending_broadcasts != NULL) {
+        if (room->pending_broadcasts) {
             g_list_free_full(room->pending_broadcasts, free);
         }
         free(room);
