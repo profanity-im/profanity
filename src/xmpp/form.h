@@ -33,7 +33,7 @@
  */
 
 #ifndef FORM_H
-#define FROM_H
+#define FORM_H
 
 #include "xmpp/xmpp.h"
 
