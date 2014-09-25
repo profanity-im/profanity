@@ -437,13 +437,9 @@ muc_nick_in_roster(const char * const room, const char * const nick)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
 
-    if (chat_room != NULL) {
+    if (chat_room) {
         PContact contact = g_hash_table_lookup(chat_room->roster, nick);
-        if (contact != NULL) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
+        return (contact != NULL);
     }
 
     return FALSE;
