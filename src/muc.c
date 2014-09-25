@@ -594,9 +594,7 @@ _free_room(ChatRoom *room)
         if (room->roster) {
             g_hash_table_destroy(room->roster);
         }
-        if (room->nick_ac) {
-            autocomplete_free(room->nick_ac);
-        }
+        autocomplete_free(room->nick_ac);
         if (room->nick_changes) {
             g_hash_table_destroy(room->nick_changes);
         }

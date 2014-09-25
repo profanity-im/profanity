@@ -80,8 +80,10 @@ autocomplete_reset(Autocomplete ac)
 void
 autocomplete_free(Autocomplete ac)
 {
-    autocomplete_clear(ac);
-    free(ac);
+    if (ac) {
+        autocomplete_clear(ac);
+        free(ac);
+    }
 }
 
 gint

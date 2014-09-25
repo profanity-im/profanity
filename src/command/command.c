@@ -1257,9 +1257,7 @@ cmd_uninit(void)
     autocomplete_free(autoaway_mode_ac);
     autocomplete_free(autoconnect_ac);
     autocomplete_free(theme_ac);
-    if (theme_load_ac != NULL) {
-        autocomplete_free(theme_load_ac);
-    }
+    autocomplete_free(theme_load_ac);
     autocomplete_free(account_ac);
     autocomplete_free(account_set_ac);
     autocomplete_free(account_clear_ac);

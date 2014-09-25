@@ -77,9 +77,7 @@ bookmark_request(void)
     id = strdup("bookmark_init_request");
 
     autojoin_count = 0;
-    if (bookmark_ac != NULL) {
-        autocomplete_free(bookmark_ac);
-    }
+    autocomplete_free(bookmark_ac);
     bookmark_ac = autocomplete_new();
     if (bookmark_list != NULL) {
         g_list_free_full(bookmark_list, _bookmark_item_destroy);
