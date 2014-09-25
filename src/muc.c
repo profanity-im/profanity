@@ -102,13 +102,13 @@ muc_invite_count(void)
 GSList *
 muc_get_invites(void)
 {
-    return autocomplete_get_list(invite_ac);
+    return autocomplete_create_list(invite_ac);
 }
 
 gboolean
 muc_invites_include(const char * const room)
 {
-    GSList *invites = autocomplete_get_list(invite_ac);
+    GSList *invites = autocomplete_create_list(invite_ac);
     GSList *curr = invites;
     while (curr != NULL) {
         if (strcmp(curr->data, room) == 0) {

@@ -142,7 +142,7 @@ _presence_subscription(const char * const jid, const jabber_subscr_t action)
 static GSList *
 _presence_get_subscription_requests(void)
 {
-    return autocomplete_get_list(sub_requests_ac);
+    return autocomplete_create_list(sub_requests_ac);
 }
 
 static gint
@@ -167,7 +167,7 @@ static gboolean
 _presence_sub_request_exists(const char * const bare_jid)
 {
     gboolean result = FALSE;
-    GSList *requests_p = autocomplete_get_list(sub_requests_ac);
+    GSList *requests_p = autocomplete_create_list(sub_requests_ac);
     GSList *requests = requests_p;
 
     while (requests != NULL) {

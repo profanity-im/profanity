@@ -339,7 +339,7 @@ roster_get_group(const char * const group)
 GSList *
 roster_get_groups(void)
 {
-    return autocomplete_get_list(groups_ac);
+    return autocomplete_create_list(groups_ac);
 }
 
 char *
