@@ -454,7 +454,7 @@ _cons_show_bookmarks(const GList *list)
 
             int presence_colour = 0;
 
-            if (muc_room_is_active(item->jid)) {
+            if (muc_active(item->jid)) {
                 presence_colour = COLOUR_ONLINE;
             }
             win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s", item->jid);
@@ -467,7 +467,7 @@ _cons_show_bookmarks(const GList *list)
             if (item->password != NULL) {
                 win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
             }
-            if (muc_room_is_active(item->jid)) {
+            if (muc_active(item->jid)) {
                 ProfWin *roomwin = wins_get_by_recipient(item->jid);
                 if (roomwin != NULL) {
                     int num = wins_get_num(roomwin);

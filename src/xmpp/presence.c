@@ -242,12 +242,12 @@ _presence_update(const resource_presence_t presence_type, const char * const msg
 static void
 _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
 {
-    GList *rooms_p = muc_get_active_room_list();
+    GList *rooms_p = muc_rooms();
     GList *rooms = rooms_p;
 
     while (rooms != NULL) {
         const char *room = rooms->data;
-        const char *nick = muc_get_room_nick(room);
+        const char *nick = muc_nick(room);
 
         if (nick != NULL) {
             char *full_room_jid = create_fulljid(room, nick);
@@ -331,7 +331,7 @@ _presence_leave_chat_room(const char * const room_jid)
     log_debug("Sending room leave presence to: %s", room_jid);
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
-    char *nick = muc_get_room_nick(room_jid);
+    char *nick = muc_nick(room_jid);
 
     if (nick != NULL) {
         xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
@@ -702,7 +702,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             // leave room if not self nick change
             if (new_nick != NULL) {
-                muc_set_room_pending_nick_change(from_room, new_nick);
+                muc_nick_change_start(from_room, new_nick);
             } else {
                 handle_leave_room(from_room);
             }
@@ -711,11 +711,11 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         } else {
 
             // handle self nick change
-            if (muc_is_room_pending_nick_change(from_room)) {
+            if (muc_nick_change_pending(from_room)) {
                 handle_room_nick_change(from_room, from_nick);
 
             // handle roster complete
-            } else if (!muc_get_roster_received(from_room)) {
+            } else if (!muc_roster_complete(from_room)) {
                 handle_room_roster_complete(from_room);
 
                 // room configuration required
@@ -752,7 +752,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             if (stanza_is_room_nick_change(stanza)) {
                 char *new_nick = stanza_get_new_nick(stanza);
                 if (new_nick != NULL) {
-                    muc_set_roster_pending_nick_change(from_room, new_nick, from_nick);
+                    muc_roster_nick_change_start(from_room, new_nick, from_nick);
                     free(new_nick);
                 }
             } else {
@@ -766,17 +766,17 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             }
 
             char *show_str = stanza_get_show(stanza, "online");
-            if (!muc_get_roster_received(from_room)) {
-                muc_add_to_roster(from_room, from_nick, show_str, status_str);
+            if (!muc_roster_complete(from_room)) {
+                muc_roster_add(from_room, from_nick, show_str, status_str);
             } else {
-                char *old_nick = muc_complete_roster_nick_change(from_room, from_nick);
+                char *old_nick = muc_roster_nick_change_complete(from_room, from_nick);
 
                 if (old_nick != NULL) {
-                    muc_add_to_roster(from_room, from_nick, show_str, status_str);
+                    muc_roster_add(from_room, from_nick, show_str, status_str);
                     handle_room_member_nick_change(from_room, old_nick, from_nick);
                     free(old_nick);
                 } else {
-                    if (!muc_nick_in_roster(from_room, from_nick)) {
+                    if (!muc_roster_contains_nick(from_room, from_nick)) {
                         handle_room_member_online(from_room, from_nick, show_str, status_str);
                     } else {
                         handle_room_member_presence(from_room, from_nick, show_str, status_str);

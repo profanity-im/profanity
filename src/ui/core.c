@@ -1207,7 +1207,7 @@ _ui_new_chat_win(const char * const to)
     if (window == NULL) {
         Jid *jid = jid_create(to);
 
-        if (muc_room_is_active(jid->barejid)) {
+        if (muc_active(jid->barejid)) {
             window = wins_new(to, WIN_PRIVATE);
         } else {
             window = wins_new(to, WIN_CHAT);
@@ -1324,7 +1324,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
     if (window == NULL) {
         Jid *jid = jid_create(to);
 
-        if (muc_room_is_active(jid->barejid)) {
+        if (muc_active(jid->barejid)) {
             window = wins_new(to, WIN_PRIVATE);
         } else {
             window = wins_new(to, WIN_CHAT);
@@ -1377,7 +1377,7 @@ _ui_room_join(const char * const room, gboolean focus)
     } else {
         status_bar_active(num);
         ProfWin *console = wins_get_console();
-        char *nick = muc_get_room_nick(room);
+        char *nick = muc_nick(room);
         win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "-> Autojoined %s as %s (%d).", room, nick, num);
     }
 }
@@ -1400,7 +1400,7 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
             if (presence == NULL) {
                 length++;
                 win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d participants: ", length);
-                win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s", muc_get_room_nick(room));
+                win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s", muc_nick(room));
                 win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
             } else {
                 win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d %s: ", length, presence);
@@ -1531,7 +1531,7 @@ _ui_room_message(const char * const room_jid, const char * const nick,
         log_error("Room message received from %s, but no window open for %s", nick, room_jid);
     } else {
         int num = wins_get_num(window);
-        char *my_nick = muc_get_room_nick(room_jid);
+        char *my_nick = muc_nick(room_jid);
 
         if (strcmp(nick, my_nick) != 0) {
             if (g_strrstr(message, my_nick) != NULL) {
@@ -1566,7 +1566,7 @@ _ui_room_message(const char * const room_jid, const char * const nick,
             ui_index = 0;
         }
 
-        if (strcmp(nick, muc_get_room_nick(room_jid)) != 0) {
+        if (strcmp(nick, muc_nick(room_jid)) != 0) {
             if (prefs_get_boolean(PREF_BEEP)) {
                 beep();
             }
@@ -1731,7 +1731,7 @@ static void
 _ui_status_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
-    PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+    PContact pcontact = muc_roster_item(jid->barejid, jid->resourcepart);
     ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
@@ -1747,7 +1747,7 @@ static void
 _ui_info_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
-    PContact pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+    PContact pcontact = muc_roster_item(jid->barejid, jid->resourcepart);
     ProfWin *window = wins_get_current();
 
     if (pcontact != NULL) {
@@ -1762,7 +1762,7 @@ _ui_info_private(void)
 static void
 _ui_status_room(const char * const contact)
 {
-    PContact pcontact = muc_get_participant(ui_current_recipient(), contact);
+    PContact pcontact = muc_roster_item(ui_current_recipient(), contact);
     ProfWin *current = wins_get_current();
 
     if (pcontact != NULL) {
@@ -1775,7 +1775,7 @@ _ui_status_room(const char * const contact)
 static void
 _ui_info_room(const char * const contact)
 {
-    PContact pcontact = muc_get_participant(ui_current_recipient(), contact);
+    PContact pcontact = muc_roster_item(ui_current_recipient(), contact);
     ProfWin *current = wins_get_current();
 
     if (pcontact != NULL) {

@@ -1356,7 +1356,7 @@ void
 cmd_reset_autocomplete()
 {
     roster_reset_search_attempts();
-    muc_reset_invites_ac();
+    muc_invites_reset_ac();
     accounts_reset_all_search();
     accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
@@ -1370,7 +1370,7 @@ cmd_reset_autocomplete()
 
     if (ui_current_win_type() == WIN_MUC) {
         char *recipient = ui_current_recipient();
-        muc_reset_autocomplete(recipient);
+        muc_autocomplete_reset(recipient);
     }
 
     autocomplete_reset(who_ac);
@@ -1605,7 +1605,7 @@ _cmd_complete_parameters(char *input, int *size)
     // autocomplete nickname in chat rooms
     if (ui_current_win_type() == WIN_MUC) {
         char *recipient = ui_current_recipient();
-        Autocomplete nick_ac = muc_get_roster_ac(recipient);
+        Autocomplete nick_ac = muc_roster_ac(recipient);
         if (nick_ac != NULL) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
@@ -1655,7 +1655,7 @@ _cmd_complete_parameters(char *input, int *size)
     gchar *invite_choices[] = { "/decline", "/join" };
     for (i = 0; i < ARRAY_SIZE(invite_choices); i++) {
         result = autocomplete_param_with_func(input, size, invite_choices[i],
-            muc_find_invite);
+            muc_invites_find);
         if (result != NULL) {
             ui_replace_input(input, result, size);
             g_free(result);

@@ -392,7 +392,7 @@ _groupchat_handler(xmpp_conn_t * const conn,
     }
 
     // room not active in profanity
-    if (!muc_room_is_active(jid->barejid)) {
+    if (!muc_active(jid->barejid)) {
         log_error("Message received for inactive chat room: %s", jid->str);
         jid_destroy(jid);
         return 1;
@@ -444,7 +444,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         return 1;
 
     // private message from chat room use full jid (room/nick)
-    } else if (muc_room_is_active(jid->barejid)) {
+    } else if (muc_active(jid->barejid)) {
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;
         gboolean delayed = stanza_get_delay(stanza, &tv_stamp);

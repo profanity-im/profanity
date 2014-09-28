@@ -476,7 +476,7 @@ cmd_disconnect(gchar **args, struct cmd_help_t help)
         cons_show("%s logged out successfully.", jid);
         jabber_disconnect();
         roster_clear();
-        muc_clear_invites();
+        muc_invites_clear();
         chat_sessions_clear();
         ui_disconnected();
         free(jid);
@@ -726,7 +726,7 @@ static void
 _who_room(const char * const presence)
 {
     char *room = ui_current_recipient();
-    GList *list = muc_get_roster(room);
+    GList *list = muc_roster(room);
 
     // no arg, show all contacts
     if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
@@ -1048,7 +1048,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 
     if (win_type == WIN_MUC) {
         char *room_name = ui_current_recipient();
-        if (muc_nick_in_roster(room_name, usr)) {
+        if (muc_roster_contains_nick(room_name, usr)) {
             GString *full_jid = g_string_new(room_name);
             g_string_append(full_jid, "/");
             g_string_append(full_jid, usr);
@@ -1533,7 +1533,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
         case WIN_MUC:
             if (args[0] != NULL) {
                 char *room = ui_current_recipient();
-                pcontact = muc_get_participant(room, args[0]);
+                pcontact = muc_roster_item(room, args[0]);
                 if (pcontact != NULL) {
                     Jid *jidp = jid_create_from_bare_and_resource(room, args[0]);
                     Resource *resource = p_contact_get_resource(pcontact, args[0]);
@@ -1578,7 +1578,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
                 char *recipient = ui_current_recipient();
                 Jid *jid = jid_create(recipient);
                 if (jid) {
-                    pcontact = muc_get_participant(jid->barejid, jid->resourcepart);
+                    pcontact = muc_roster_item(jid->barejid, jid->resourcepart);
                     Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
                     cons_show_caps(jid->resourcepart, resource);
                     jid_destroy(jid);
@@ -1611,7 +1611,7 @@ cmd_software(gchar **args, struct cmd_help_t help)
         case WIN_MUC:
             if (args[0] != NULL) {
                 recipient = ui_current_recipient();
-                pcontact = muc_get_participant(recipient, args[0]);
+                pcontact = muc_roster_item(recipient, args[0]);
                 if (pcontact != NULL) {
                     Jid *jid = jid_create_from_bare_and_resource(recipient, args[0]);
                     iq_send_software_version(jid->fulljid);
@@ -1715,10 +1715,10 @@ cmd_join(gchar **args, struct cmd_help_t help)
         nick = account->muc_nick;
     }
 
-    if (!muc_room_is_active(room)) {
+    if (!muc_active(room)) {
         presence_join_room(room, nick, passwd);
-        muc_join_room(room, nick, passwd, FALSE);
-    } else if (muc_get_roster_received(room)) {
+        muc_join(room, nick, passwd, FALSE);
+    } else if (muc_roster_complete(room)) {
         ui_room_join(room, TRUE);
     }
 
@@ -1767,7 +1767,7 @@ cmd_invite(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_invites(gchar **args, struct cmd_help_t help)
 {
-    GSList *invites = muc_get_invites();
+    GSList *invites = muc_invites();
     cons_show_room_invites(invites);
     g_slist_free_full(invites, g_free);
     return TRUE;
@@ -1776,10 +1776,10 @@ cmd_invites(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_decline(gchar **args, struct cmd_help_t help)
 {
-    if (!muc_invites_include(args[0])) {
+    if (!muc_invites_contain(args[0])) {
         cons_show("No such invite exists.");
     } else {
-        muc_remove_invite(args[0]);
+        muc_invites_remove(args[0]);
         cons_show("Declined invite to %s.", args[0]);
     }
 
@@ -2099,8 +2099,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "info") == 0) {
-        char *role = muc_get_role_str(room);
-        char *affiliation = muc_get_affiliation_str(room);
+        char *role = muc_role_str(room);
+        char *affiliation = muc_affiliation_str(room);
         ui_current_print_line("Affiliation: %s, Role: %s", affiliation, role);
         return TRUE;
     }
@@ -2179,8 +2179,8 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
         // default to current nickname, password, and autojoin "on"
         if (cmd == NULL) {
             char *jid = ui_current_recipient();
-            char *nick = muc_get_room_nick(jid);
-            char *password = muc_get_room_password(jid);
+            char *nick = muc_nick(jid);
+            char *password = muc_password(jid);
             gboolean added = bookmark_add(jid, nick, password, "on");
             if (added) {
                 ui_current_print_formatted_line('!', 0, "Bookmark added for %s.", jid);

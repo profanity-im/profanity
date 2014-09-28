@@ -495,8 +495,8 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     PContact contact;
     Jid *jidp = jid_create(jid);
-    if (muc_room_is_active(jidp->barejid)) {
-        contact = muc_get_participant(jidp->barejid, jidp->resourcepart);
+    if (muc_active(jidp->barejid)) {
+        contact = muc_roster_item(jidp->barejid, jidp->resourcepart);
     } else {
         contact = roster_get_contact(jidp->barejid);
     }

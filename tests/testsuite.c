@@ -419,12 +419,12 @@ int main(int argc, char* argv[]) {
             load_preferences,
             close_preferences),
 
-        unit_test_setup_teardown(test_muc_add_invite, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_invites_add, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_remove_invite, muc_before_test, muc_after_test),
-        unit_test_setup_teardown(test_muc_invite_count_0, muc_before_test, muc_after_test),
-        unit_test_setup_teardown(test_muc_invite_count_5, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_invites_count_0, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_invites_count_5, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_room_is_not_active, muc_before_test, muc_after_test),
-        unit_test_setup_teardown(test_muc_room_is_active, muc_before_test, muc_after_test),
+        unit_test_setup_teardown(test_muc_active, muc_before_test, muc_after_test),
 
         unit_test(cmd_bookmark_shows_message_when_disconnected),
         unit_test(cmd_bookmark_shows_message_when_disconnecting),

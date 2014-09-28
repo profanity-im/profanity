@@ -129,7 +129,7 @@ static void
 _notify_remind(void)
 {
     gint unread = ui_unread();
-    gint open = muc_invite_count();
+    gint open = muc_invites_count();
     gint subs = presence_sub_request_count();
 
     GString *text = g_string_new("");
