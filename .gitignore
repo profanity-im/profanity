@@ -58,4 +58,4 @@ cppcheck.out
 gitpushall.sh
 Debug/
 profanity.mk
-
+compile_commands.json
