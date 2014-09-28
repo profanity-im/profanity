@@ -2083,7 +2083,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
 
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
-            (g_strcmp0(args[0], "config") != 0)) {
+            (g_strcmp0(args[0], "config") != 0) &&
+            (g_strcmp0(args[0], "info") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
@@ -2095,6 +2096,13 @@ cmd_room(gchar **args, struct cmd_help_t help)
     int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
+    }
+
+    if (g_strcmp0(args[0], "info") == 0) {
+        char *role = muc_get_role_str(room);
+        char *affiliation = muc_get_affiliation_str(room);
+        ui_current_print_line("Affiliation: %s, Role: %s", affiliation, role);
+        return TRUE;
     }
 
     if (g_strcmp0(args[0], "accept") == 0) {

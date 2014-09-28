@@ -307,12 +307,13 @@ static struct cmd_t command_defs[] =
 
     { "/room",
         cmd_room, parse_args, 1, 1, NULL,
-        { "/room accept|destroy|config", "Room configuration.",
-        { "/room accept|destroy|config",
-          "---------------------------",
+        { "/room accept|destroy|config|info", "Room configuration.",
+        { "/room accept|destroy|config|info",
+          "--------------------------------",
           "accept  - Accept default room configuration.",
           "destroy - Reject default room configuration.",
           "config  - Edit room configuration.",
+          "info    - Show room details.",
           NULL } } },
 
     { "/form",
@@ -1226,6 +1227,7 @@ cmd_init(void)
     autocomplete_add(room_ac, "accept");
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
+    autocomplete_add(room_ac, "info");
 
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");

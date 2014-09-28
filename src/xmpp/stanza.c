@@ -822,11 +822,11 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
 
     // muc user namespaced x element
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
-    if (x != NULL) {
+    if (x) {
 
         // check for status child element with 110 code
         xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
-        while (x_children != NULL) {
+        while (x_children) {
             if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_STATUS) == 0) {
                 char *code = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_CODE);
                 if (g_strcmp0(code, "110") == 0) {
@@ -838,9 +838,9 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
 
         // check for item child element with jid property
         xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
-        if (item != NULL) {
+        if (item) {
             char *jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-            if (jid != NULL) {
+            if (jid) {
                 if (g_str_has_prefix(self_jid, jid)) {
                     return TRUE;
                 }
@@ -849,7 +849,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
 
         // check if 'from' attribute identifies this user
         char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-        if (from != NULL) {
+        if (from) {
             Jid *from_jid = jid_create(from);
             if (muc_room_is_active(from_jid->barejid)) {
                 char *nick = muc_get_room_nick(from_jid->barejid);
@@ -861,7 +861,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
             // check if a new nickname maps to a pending nick change for this user
             if (muc_is_room_pending_nick_change(from_jid->barejid)) {
                 char *new_nick = from_jid->resourcepart;
-                if (new_nick != NULL) {
+                if (new_nick) {
                     char *nick = muc_get_room_nick(from_jid->barejid);
                     char *old_nick = muc_get_old_nick(from_jid->barejid, new_nick);
                     if (g_strcmp0(old_nick, nick) == 0) {

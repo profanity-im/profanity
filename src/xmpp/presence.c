@@ -697,6 +697,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         char *type = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TYPE);
         char *new_nick = stanza_get_new_nick(stanza);
 
+        // self unavailable
         if ((type != NULL) && (strcmp(type, STANZA_TYPE_UNAVAILABLE) == 0)) {
 
             // leave room if not self nick change
@@ -706,18 +707,33 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 handle_leave_room(from_room);
             }
 
-        // handle self nick change
-        } else if (muc_is_room_pending_nick_change(from_room)) {
-            muc_complete_room_nick_change(from_room, from_nick);
-            handle_room_nick_change(from_room, from_nick);
+        // self online
+        } else {
 
-        // handle roster complete
-        } else if (!muc_get_roster_received(from_room)) {
-            handle_room_roster_complete(from_room);
+            // handle self nick change
+            if (muc_is_room_pending_nick_change(from_room)) {
+                handle_room_nick_change(from_room, from_nick);
 
-            // room configuration required
-            if (stanza_muc_requires_config(stanza)) {
-                handle_room_requires_config(from_room);
+            // handle roster complete
+            } else if (!muc_get_roster_received(from_room)) {
+                handle_room_roster_complete(from_room);
+
+                // room configuration required
+                if (stanza_muc_requires_config(stanza)) {
+                    handle_room_requires_config(from_room);
+                }
+            }
+
+            // set own affiliation and role
+            xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+            if (x) {
+                xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
+                if (item) {
+                    char *role = xmpp_stanza_get_attribute(item, "role");
+                    muc_set_role(from_room, role);
+                    char *affiliation = xmpp_stanza_get_attribute(item, "affiliation");
+                    muc_set_affiliation(from_room, affiliation);
+                }
             }
         }
 

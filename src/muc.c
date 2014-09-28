@@ -43,9 +43,26 @@
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 
+typedef enum {
+    MUC_ROLE_NONE,
+    MUC_ROLE_VISITOR,
+    MUC_ROLE_PARTICIPANT,
+    MUC_ROLE_MODERATOR
+} muc_role_t;
+
+typedef enum {
+    MUC_AFFILIATION_NONE,
+    MUC_AFFILIATION_OUTCAST,
+    MUC_AFFILIATION_MEMBER,
+    MUC_AFFILIATION_ADMIN,
+    MUC_AFFILIATION_OWNER
+} muc_affiliation_t;
+
 typedef struct _muc_room_t {
     char *room; // e.g. test@conference.server
     char *nick; // e.g. Some User
+    muc_role_t role;
+    muc_affiliation_t affiliation;
     char *password;
     char *subject;
     char *autocomplete_prefix;
@@ -64,6 +81,10 @@ Autocomplete invite_ac;
 
 static void _free_room(ChatRoom *room);
 static gint _compare_participants(PContact a, PContact b);
+static muc_role_t _role_from_string(const char * const role);
+static muc_affiliation_t _affiliation_from_string(const char * const affiliation);
+static char* _role_to_string(muc_role_t role);
+static char* _affiliation_to_string(muc_affiliation_t affiliation);
 
 void
 muc_init(void)
@@ -147,6 +168,8 @@ muc_join_room(const char * const room, const char * const nick,
     ChatRoom *new_room = malloc(sizeof(ChatRoom));
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
+    new_room->role = MUC_ROLE_NONE;
+    new_room->affiliation = MUC_AFFILIATION_NONE;
     new_room->autocomplete_prefix = NULL;
     if (password) {
         new_room->password = strdup(password);
@@ -582,6 +605,46 @@ muc_reset_autocomplete(const char * const room)
     }
 }
 
+char *
+muc_get_role_str(const char * const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return _role_to_string(chat_room->role);
+    } else {
+        return "none";
+    }
+}
+
+void
+muc_set_role(const char * const room, const char * const role)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        chat_room->role = _role_from_string(role);
+    }
+}
+
+char *
+muc_get_affiliation_str(const char * const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return _affiliation_to_string(chat_room->affiliation);
+    } else {
+        return "none";
+    }
+}
+
+void
+muc_set_affiliation(const char * const room, const char * const affiliation)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        chat_room->affiliation = _affiliation_from_string(affiliation);
+    }
+}
+
 static void
 _free_room(ChatRoom *room)
 {
@@ -618,6 +681,99 @@ gint _compare_participants(PContact a, PContact b)
 
     g_free(key_a);
     g_free(key_b);
+
+    return result;
+}
+
+static muc_role_t
+_role_from_string(const char * const role)
+{
+    if (role) {
+        if (g_strcmp0(role, "visitor") == 0) {
+            return MUC_ROLE_VISITOR;
+        } else if (g_strcmp0(role, "participant") == 0) {
+            return MUC_ROLE_PARTICIPANT;
+        } else if (g_strcmp0(role, "moderator") == 0) {
+            return MUC_ROLE_MODERATOR;
+        } else {
+            return MUC_ROLE_NONE;
+        }
+    } else {
+        return MUC_ROLE_NONE;
+    }
+}
+
+static char *
+_role_to_string(muc_role_t role)
+{
+    char *result = NULL;
+
+    switch (role) {
+    case MUC_ROLE_NONE:
+        result = "none";
+        break;
+    case MUC_ROLE_VISITOR:
+        result = "visitor";
+        break;
+    case MUC_ROLE_PARTICIPANT:
+        result = "participant";
+        break;
+    case MUC_ROLE_MODERATOR:
+        result = "moderator";
+        break;
+    default:
+        result = "none";
+        break;
+    }
+
+    return result;
+}
+
+static muc_affiliation_t
+_affiliation_from_string(const char * const affiliation)
+{
+    if (affiliation) {
+        if (g_strcmp0(affiliation, "outcast") == 0) {
+            return MUC_AFFILIATION_OUTCAST;
+        } else if (g_strcmp0(affiliation, "member") == 0) {
+            return MUC_AFFILIATION_MEMBER;
+        } else if (g_strcmp0(affiliation, "admin") == 0) {
+            return MUC_AFFILIATION_ADMIN;
+        } else if (g_strcmp0(affiliation, "owner") == 0) {
+            return MUC_AFFILIATION_OWNER;
+        } else {
+            return MUC_AFFILIATION_NONE;
+        }
+    } else {
+        return MUC_AFFILIATION_NONE;
+    }
+}
+
+static char *
+_affiliation_to_string(muc_affiliation_t affiliation)
+{
+    char *result = NULL;
+
+    switch (affiliation) {
+    case MUC_AFFILIATION_NONE:
+        result = "none";
+        break;
+    case MUC_AFFILIATION_OUTCAST:
+        result = "outcast";
+        break;
+    case MUC_AFFILIATION_MEMBER:
+        result = "member";
+        break;
+    case MUC_AFFILIATION_ADMIN:
+        result = "admin";
+        break;
+    case MUC_AFFILIATION_OWNER:
+        result = "owner";
+        break;
+    default:
+        result = "none";
+        break;
+    }
 
     return result;
 }

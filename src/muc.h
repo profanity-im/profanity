@@ -93,4 +93,9 @@ void muc_reset_autocomplete(const char * const room);
 gboolean muc_requires_config(const char * const room);
 void muc_set_requires_config(const char * const room, gboolean val);
 
+void muc_set_role(const char * const room, const char * const role);
+void muc_set_affiliation(const char * const room, const char * const affiliation);
+char *muc_get_role_str(const char * const room);
+char *muc_get_affiliation_str(const char * const room);
+
 #endif

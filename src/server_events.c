@@ -456,6 +456,7 @@ void
 handle_room_nick_change(const char * const room,
     const char * const nick)
 {
+    muc_complete_room_nick_change(room, nick);
     ui_room_nick_change(room, nick);
 }
 
