@@ -56,4 +56,6 @@ profanity.workspace
 pageing.txt
 cppcheck.out
 gitpushall.sh
+Debug/
+profanity.mk
 
