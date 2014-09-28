@@ -51,6 +51,9 @@ push-all.sh
 .codelite/
 Profanity.project
 Profanity.workspace
+profanity.project
+profanity.workspace
 pageing.txt
 cppcheck.out
 gitpushall.sh
+
