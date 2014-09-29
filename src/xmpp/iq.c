@@ -493,16 +493,17 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         os_str = xmpp_stanza_get_text(os);
     }
 
-    PContact contact;
     Jid *jidp = jid_create(jid);
+    const char *presence = NULL;
     if (muc_active(jidp->barejid)) {
-        contact = muc_roster_item(jidp->barejid, jidp->resourcepart);
+        Occupant *occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
+        presence = string_from_resource_presence(occupant->presence);
     } else {
-        contact = roster_get_contact(jidp->barejid);
+        PContact contact = roster_get_contact(jidp->barejid);
+        Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
+        presence = string_from_resource_presence(resource->presence);
     }
 
-    Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
-    const char *presence = string_from_resource_presence(resource->presence);
     handle_software_version_result(jid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);

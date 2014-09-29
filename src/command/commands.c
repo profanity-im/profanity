@@ -737,9 +737,9 @@ _who_room(const char * const presence)
         GList *filtered = NULL;
 
         while (list != NULL) {
-            PContact contact = list->data;
-            if (p_contact_is_available(contact)) {
-                filtered = g_list_append(filtered, contact);
+            Occupant *occupant = list->data;
+            if (muc_occupant_available(occupant)) {
+                filtered = g_list_append(filtered, occupant);
             }
             list = g_list_next(list);
         }
@@ -751,51 +751,24 @@ _who_room(const char * const presence)
         GList *filtered = NULL;
 
         while (list != NULL) {
-            PContact contact = list->data;
-            if (!p_contact_is_available(contact)) {
-                filtered = g_list_append(filtered, contact);
+            Occupant *occupant = list->data;
+            if (!muc_occupant_available(occupant)) {
+                filtered = g_list_append(filtered, occupant);
             }
             list = g_list_next(list);
         }
 
         ui_room_roster(room, filtered, "unavailable");
 
-    // online, available resources
-    } else if (strcmp("online", presence) == 0) {
-        GList *filtered = NULL;
-
-        while (list != NULL) {
-            PContact contact = list->data;
-            if (p_contact_has_available_resource(contact)) {
-                filtered = g_list_append(filtered, contact);
-            }
-            list = g_list_next(list);
-        }
-
-        ui_room_roster(room, filtered, "online");
-
-    // offline, no available resources
-    } else if (strcmp("offline", presence) == 0) {
-        GList *filtered = NULL;
-
-        while (list != NULL) {
-            PContact contact = list->data;
-            if (!p_contact_has_available_resource(contact)) {
-                filtered = g_list_append(filtered, contact);
-            }
-            list = g_list_next(list);
-        }
-
-        ui_room_roster(room, filtered, "offline");
-
     // show specific status
     } else {
         GList *filtered = NULL;
 
         while (list != NULL) {
-            PContact contact = list->data;
-            if (strcmp(p_contact_presence(contact), presence) == 0) {
-                filtered = g_list_append(filtered, contact);
+            Occupant *occupant = list->data;
+            const char *presence_str = string_from_resource_presence(occupant->presence);
+            if (strcmp(presence_str, presence) == 0) {
+                filtered = g_list_append(filtered, occupant);
             }
             list = g_list_next(list);
         }
@@ -1464,6 +1437,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
+    Occupant *occupant = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -1473,28 +1447,34 @@ cmd_info(gchar **args, struct cmd_help_t help)
     switch (win_type)
     {
         case WIN_MUC:
-            if (usr != NULL) {
-                ui_info_room(usr);
+            if (usr) {
+                char *room = ui_current_recipient();
+                occupant = muc_roster_item(room, usr);
+                if (occupant) {
+                    ui_info_room(room, occupant);
+                } else {
+                    ui_current_print_line("No such occupant \"%s\" in room.", usr);
+                }
             } else {
                 ui_current_print_line("You must specify a nickname.");
             }
             break;
         case WIN_CHAT:
-            if (usr != NULL) {
+            if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ui_info();
             }
             break;
         case WIN_PRIVATE:
-            if (usr != NULL) {
+            if (usr) {
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ui_info_private();
             }
             break;
         case WIN_CONSOLE:
-            if (usr != NULL) {
+            if (usr) {
                 char *usr_jid = roster_barejid_from_name(usr);
                 if (usr_jid == NULL) {
                     usr_jid = usr;
@@ -1522,6 +1502,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
+    Occupant *occupant = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -1533,11 +1514,10 @@ cmd_caps(gchar **args, struct cmd_help_t help)
         case WIN_MUC:
             if (args[0] != NULL) {
                 char *room = ui_current_recipient();
-                pcontact = muc_roster_item(room, args[0]);
-                if (pcontact != NULL) {
+                occupant = muc_roster_item(room, args[0]);
+                if (occupant) {
                     Jid *jidp = jid_create_from_bare_and_resource(room, args[0]);
-                    Resource *resource = p_contact_get_resource(pcontact, args[0]);
-                    cons_show_caps(jidp->fulljid, resource);
+                    cons_show_caps(jidp->fulljid, occupant->presence);
                     jid_destroy(jidp);
                 } else {
                     cons_show("No such participant \"%s\" in room.", args[0]);
@@ -1562,7 +1542,7 @@ cmd_caps(gchar **args, struct cmd_help_t help)
                         if (resource == NULL) {
                             cons_show("Could not find resource %s, for contact %s", jid->barejid, jid->resourcepart);
                         } else {
-                            cons_show_caps(jid->fulljid, resource);
+                            cons_show_caps(jid->fulljid, resource->presence);
                         }
                     }
                 }
@@ -1578,9 +1558,8 @@ cmd_caps(gchar **args, struct cmd_help_t help)
                 char *recipient = ui_current_recipient();
                 Jid *jid = jid_create(recipient);
                 if (jid) {
-                    pcontact = muc_roster_item(jid->barejid, jid->resourcepart);
-                    Resource *resource = p_contact_get_resource(pcontact, jid->resourcepart);
-                    cons_show_caps(jid->resourcepart, resource);
+                    occupant = muc_roster_item(jid->barejid, jid->resourcepart);
+                    cons_show_caps(jid->resourcepart, occupant->presence);
                     jid_destroy(jid);
                 }
             }
@@ -1598,7 +1577,7 @@ cmd_software(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
-    PContact pcontact = NULL;
+    Occupant *occupant = NULL;
     char *recipient;
 
     if (conn_status != JABBER_CONNECTED) {
@@ -1611,8 +1590,8 @@ cmd_software(gchar **args, struct cmd_help_t help)
         case WIN_MUC:
             if (args[0] != NULL) {
                 recipient = ui_current_recipient();
-                pcontact = muc_roster_item(recipient, args[0]);
-                if (pcontact != NULL) {
+                occupant = muc_roster_item(recipient, args[0]);
+                if (occupant) {
                     Jid *jid = jid_create_from_bare_and_resource(recipient, args[0]);
                     iq_send_software_version(jid->fulljid);
                     jid_destroy(jid);

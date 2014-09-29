@@ -32,6 +32,7 @@
  *
  */
 
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -282,14 +283,14 @@ _cons_show_info(PContact pcontact)
 }
 
 static void
-_cons_show_caps(const char * const fulljid, Resource *resource)
+_cons_show_caps(const char * const fulljid, resource_presence_t presence)
 {
     ProfWin *console = wins_get_console();
     cons_show("");
 
     Capabilities *caps = caps_lookup(fulljid);
     if (caps) {
-        const char *resource_presence = string_from_resource_presence(resource->presence);
+        const char *resource_presence = string_from_resource_presence(presence);
 
         int presence_colour = win_presence_colour(resource_presence);
         win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", fulljid);

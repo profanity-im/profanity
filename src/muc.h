@@ -41,6 +41,29 @@
 #include "jid.h"
 #include "tools/autocomplete.h"
 
+typedef enum {
+    MUC_ROLE_NONE,
+    MUC_ROLE_VISITOR,
+    MUC_ROLE_PARTICIPANT,
+    MUC_ROLE_MODERATOR
+} muc_role_t;
+
+typedef enum {
+    MUC_AFFILIATION_NONE,
+    MUC_AFFILIATION_OUTCAST,
+    MUC_AFFILIATION_MEMBER,
+    MUC_AFFILIATION_ADMIN,
+    MUC_AFFILIATION_OWNER
+} muc_affiliation_t;
+
+typedef struct _muc_occupant_t {
+    char *nick;
+    muc_role_t role;
+    muc_affiliation_t affiliation;
+    resource_presence_t presence;
+    char *status;
+} Occupant;
+
 void muc_init(void);
 void muc_close(void);
 
@@ -68,12 +91,14 @@ void muc_roster_remove(const char * const room, const char * const nick);
 void muc_roster_set_complete(const char * const room);
 GList * muc_roster(const char * const room);
 Autocomplete muc_roster_ac(const char * const room);
-PContact muc_roster_item(const char * const room, const char * const nick);
+Occupant* muc_roster_item(const char * const room, const char * const nick);
+
+gboolean muc_occupant_available(Occupant *occupant);
 
 void muc_roster_nick_change_start(const char * const room, const char * const new_nick, const char * const old_nick);
 char* muc_roster_nick_change_complete(const char * const room, const char * const nick);
 
-void muc_invites_add(const char *room);
+void muc_invites_add(const char * const room);
 void muc_invites_remove(const char * const room);
 gint muc_invites_count(void);
 GSList* muc_invites(void);

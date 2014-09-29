@@ -1393,13 +1393,13 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
             if (presence == NULL) {
                 win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room is empty.");
             } else {
-                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "No participants %s.", presence);
+                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "No occupants %s.", presence);
             }
         } else {
             int length = g_list_length(roster);
             if (presence == NULL) {
                 length++;
-                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d participants: ", length);
+                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d occupants: ", length);
                 win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s", muc_nick(room));
                 win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
             } else {
@@ -1407,12 +1407,11 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
             }
 
             while (roster != NULL) {
-                PContact member = roster->data;
-                const char *nick = p_contact_barejid(member);
-                const char *show = p_contact_presence(member);
+                Occupant *occupant = roster->data;
+                const char *presence_str = string_from_resource_presence(occupant->presence);
 
-                int presence_colour = win_presence_colour(show);
-                win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", nick);
+                int presence_colour = win_presence_colour(presence_str);
+                win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
 
                 if (roster->next != NULL) {
                     win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
@@ -1731,11 +1730,11 @@ static void
 _ui_status_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
-    PContact pcontact = muc_roster_item(jid->barejid, jid->resourcepart);
+    Occupant *occupant = muc_roster_item(jid->barejid, jid->resourcepart);
     ProfWin *window = wins_get_current();
 
-    if (pcontact != NULL) {
-        win_show_contact(window, pcontact);
+    if (occupant) {
+        win_show_occupant(window, occupant);
     } else {
         win_save_println(window, "Error getting contact info.");
     }
@@ -1747,11 +1746,11 @@ static void
 _ui_info_private(void)
 {
     Jid *jid = jid_create(ui_current_recipient());
-    PContact pcontact = muc_roster_item(jid->barejid, jid->resourcepart);
+    Occupant *occupant = muc_roster_item(jid->barejid, jid->resourcepart);
     ProfWin *window = wins_get_current();
 
-    if (pcontact != NULL) {
-        win_show_info(window, pcontact);
+    if (occupant) {
+        win_show_occupant_info(window, jid->barejid, occupant);
     } else {
         win_save_println(window, "Error getting contact info.");
     }
@@ -1762,27 +1761,21 @@ _ui_info_private(void)
 static void
 _ui_status_room(const char * const contact)
 {
-    PContact pcontact = muc_roster_item(ui_current_recipient(), contact);
+    Occupant *occupant = muc_roster_item(ui_current_recipient(), contact);
     ProfWin *current = wins_get_current();
 
-    if (pcontact != NULL) {
-        win_show_contact(current, pcontact);
+    if (occupant) {
+        win_show_occupant(current, occupant);
     } else {
         win_save_vprint(current, '-', NULL, 0, 0, "", "No such participant \"%s\" in room.", contact);
     }
 }
 
 static void
-_ui_info_room(const char * const contact)
+_ui_info_room(const char * const room, Occupant *occupant)
 {
-    PContact pcontact = muc_roster_item(ui_current_recipient(), contact);
     ProfWin *current = wins_get_current();
-
-    if (pcontact != NULL) {
-        win_show_info(current, pcontact);
-    } else {
-        win_save_vprint(current, '-', NULL, 0, 0, "", "No such participant \"%s\" in room.", contact);
-    }
+    win_show_occupant_info(current, room, occupant);
 }
 
 static gint
