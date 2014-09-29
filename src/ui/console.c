@@ -206,7 +206,6 @@ _cons_check_version(gboolean not_available_msg)
             if (release_is_new(latest_release)) {
                 win_save_vprint(console, '-', NULL, 0, 0, "", "A new version of Profanity is available: %s", latest_release);
                 win_save_println(console, "Check <http://www.profanity.im> for details.");
-                free(latest_release);
                 win_save_println(console, "");
             } else {
                 if (not_available_msg) {
@@ -217,6 +216,7 @@ _cons_check_version(gboolean not_available_msg)
 
             cons_alert();
         }
+        free(latest_release);
     }
 }
 
