@@ -202,6 +202,8 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
 
     win_save_newline(window);
 
+    win_save_vprint(window, '-', NULL, NO_DATE, 0, "", "Role: %s, Affiliation: %s", occupant->role, occupant->affiliation);
+
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     Capabilities *caps = caps_lookup(jidp->fulljid);
 

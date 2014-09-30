@@ -85,7 +85,8 @@ char* muc_old_nick(const char * const room, const char * const new_nick);
 
 gboolean muc_roster_contains_nick(const char * const room, const char * const nick);
 gboolean muc_roster_complete(const char * const room);
-gboolean muc_roster_add(const char * const room, const char * const nick, const char * const show,
+gboolean muc_roster_add(const char * const room, const char * const nick, const char * const role, 
+    const char * const affiliation, const char * const show,
     const char * const status);
 void muc_roster_remove(const char * const room, const char * const nick);
 void muc_roster_set_complete(const char * const room);

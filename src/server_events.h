@@ -73,11 +73,10 @@ void handle_room_nick_change(const char * const room,
 void handle_room_requires_config(const char * const room);
 void handle_room_destroy(const char * const room);
 void handle_room_roster_complete(const char * const room);
-void handle_room_member_presence(const char * const room,
-    const char * const nick, const char * const show,
-    const char * const status);
-void handle_room_member_online(const char * const room, const char * const nick,
-    const char * const show, const char * const status);
+void handle_room_member_presence(const char * const room, const char * const nick, const char * const role,
+    const char * const affiliation, const char * const show, const char * const status);
+void handle_room_member_online(const char * const room, const char * const nick, const char * const role,
+    const char * const affiliation, const char * const show, const char * const status);
 void handle_room_member_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status);
 void handle_room_member_nick_change(const char * const room,
