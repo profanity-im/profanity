@@ -20,5 +20,6 @@ install:
     - sudo make install
     - cd ../..
     - rm -rf cmocka-0.4.1
+    - mkdir m4
     - ./bootstrap.sh
 script: ./configure && make && make check
