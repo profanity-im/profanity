@@ -2237,8 +2237,8 @@ _ui_show_form_field_help(ProfWin *window, DataForm *form, char *tag)
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_JID_MULTI:
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form set %s <value>", tag);
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form set %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_FIXED:
