@@ -1900,6 +1900,57 @@ _ui_show_room_info(ProfWin *window, const char * const room)
 }
 
 static void
+_ui_show_room_role_list(ProfWin *window, const char * const room, muc_role_t role)
+{
+    GSList *occupants = muc_occupants_by_role(room, role);
+
+    if (!occupants) {
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+        switch (role) {
+            case MUC_ROLE_MODERATOR:
+                win_save_print(window, '!', NULL, 0, 0, "", "No moderators found.");
+                break;
+            case MUC_ROLE_PARTICIPANT:
+                win_save_print(window, '!', NULL, 0, 0, "", "No participants found.");
+                break;
+            case MUC_ROLE_VISITOR:
+                win_save_print(window, '!', NULL, 0, 0, "", "No visitors found.");
+                break;
+            default:
+                break;
+        }
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+    } else {
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+        switch (role) {
+            case MUC_ROLE_MODERATOR:
+                win_save_print(window, '!', NULL, 0, 0, "", "Moderators:");
+                break;
+            case MUC_ROLE_PARTICIPANT:
+                win_save_print(window, '!', NULL, 0, 0, "", "Participants:");
+                break;
+            case MUC_ROLE_VISITOR:
+                win_save_print(window, '!', NULL, 0, 0, "", "Visitors:");
+                break;
+            default:
+                break;
+        }
+
+        GSList *curr_occupant = occupants;
+        while(curr_occupant) {
+            Occupant *occupant = curr_occupant->data;
+            if (occupant->role == role) {
+                win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+            }
+
+            curr_occupant = g_slist_next(curr_occupant);
+        }
+
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+    }
+}
+
+static void
 _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
 {
     win_save_vprint(window, '-', NULL, NO_EOL, COLOUR_AWAY, "", "[%s] ", tag);
@@ -2527,4 +2578,5 @@ ui_init_module(void)
     ui_show_lines = _ui_show_lines;
     ui_handle_room_configuration_form_error = _ui_handle_room_configuration_form_error;
     ui_show_room_info = _ui_show_room_info;
+    ui_show_room_role_list = _ui_show_room_role_list;
 }

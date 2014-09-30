@@ -138,6 +138,8 @@ void (*ui_room_subject)(const char * const room_jid,
 void (*ui_room_requires_config)(const char * const room_jid);
 void (*ui_room_destroyed)(const char * const room_jid);
 void (*ui_show_room_info)(ProfWin *window, const char * const room);
+void (*ui_show_room_role_list)(ProfWin *window, const char * const room, muc_role_t role);
+
 void (*ui_room_broadcast)(const char * const room_jid,
     const char * const message);
 void (*ui_room_member_offline)(const char * const room, const char * const nick);

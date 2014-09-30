@@ -519,6 +519,29 @@ muc_occupant_role_str(Occupant *occupant)
     return _role_to_string(occupant->role);
 }
 
+GSList *
+muc_occupants_by_role(const char * const room, muc_role_t role)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        GSList *result = NULL;
+        GHashTableIter iter;
+        gpointer key;
+        gpointer value;
+
+        g_hash_table_iter_init(&iter, chat_room->roster);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            Occupant *occupant = (Occupant *)value;
+            if (occupant->role == role) {
+                result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_occupants);
+            }
+        }
+        return result;
+    } else {
+        return NULL;
+    }
+}
+
 /*
  * Remove the old_nick from the roster, and flag that a pending nickname change
  * is in progress

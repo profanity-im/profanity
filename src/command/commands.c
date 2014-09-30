@@ -2063,6 +2063,9 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
+            (g_strcmp0(args[0], "moderators") != 0) &&
+            (g_strcmp0(args[0], "participants") != 0) &&
+            (g_strcmp0(args[0], "visitors") != 0) &&
             (g_strcmp0(args[0], "info") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
@@ -2079,6 +2082,21 @@ cmd_room(gchar **args, struct cmd_help_t help)
 
     if (g_strcmp0(args[0], "info") == 0) {
         ui_show_room_info(window, room);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "moderators") == 0) {
+        ui_show_room_role_list(window, room, MUC_ROLE_MODERATOR);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "participants") == 0) {
+        ui_show_room_role_list(window, room, MUC_ROLE_PARTICIPANT);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "visitors") == 0) {
+        ui_show_room_role_list(window, room, MUC_ROLE_VISITOR);
         return TRUE;
     }
 

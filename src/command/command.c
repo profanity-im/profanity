@@ -1228,6 +1228,9 @@ cmd_init(void)
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
     autocomplete_add(room_ac, "info");
+    autocomplete_add(room_ac, "moderators");
+    autocomplete_add(room_ac, "participants");
+    autocomplete_add(room_ac, "visitors");
 
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");

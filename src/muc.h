@@ -85,7 +85,7 @@ char* muc_old_nick(const char * const room, const char * const new_nick);
 
 gboolean muc_roster_contains_nick(const char * const room, const char * const nick);
 gboolean muc_roster_complete(const char * const room);
-gboolean muc_roster_add(const char * const room, const char * const nick, const char * const role, 
+gboolean muc_roster_add(const char * const room, const char * const nick, const char * const role,
     const char * const affiliation, const char * const show,
     const char * const status);
 void muc_roster_remove(const char * const room, const char * const nick);
@@ -97,6 +97,7 @@ Occupant* muc_roster_item(const char * const room, const char * const nick);
 gboolean muc_occupant_available(Occupant *occupant);
 const char * muc_occupant_affiliation_str(Occupant *occupant);
 const char * muc_occupant_role_str(Occupant *occupant);
+GSList * muc_occupants_by_role(const char * const room, muc_role_t role);
 
 void muc_roster_nick_change_start(const char * const room, const char * const new_nick, const char * const old_nick);
 char* muc_roster_nick_change_complete(const char * const room, const char * const nick);
