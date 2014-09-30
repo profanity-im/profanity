@@ -2080,7 +2080,10 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "info") == 0) {
         char *role = muc_role_str(room);
         char *affiliation = muc_affiliation_str(room);
-        ui_current_print_line("Affiliation: %s, Role: %s", affiliation, role);
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Affiliation: %s", affiliation);
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Role: %s", role);
+        win_save_print(window, '-', NULL, 0, 0, "", "");
         return TRUE;
     }
 

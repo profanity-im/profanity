@@ -190,19 +190,23 @@ void
 win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant)
 {
     const char *presence_str = string_from_resource_presence(occupant->presence);
+    const char *occupant_affiliation = muc_occupant_affiliation_str(occupant);
+    const char *occupant_role = muc_occupant_role_str(occupant);
 
     int presence_colour = win_presence_colour(presence_str);
 
-    win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", occupant->nick);
-    win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
+    win_save_print(window, '-', NULL, 0, 0, "", "");
+    win_save_print(window, '!', NULL, NO_EOL, presence_colour, "", occupant->nick);
+    win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
 
     if (occupant->status) {
-        win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
     }
 
     win_save_newline(window);
 
-    win_save_vprint(window, '-', NULL, NO_DATE, 0, "", "Role: %s, Affiliation: %s", occupant->role, occupant->affiliation);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "  Affiliation: %s", occupant_affiliation);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "  Role: %s", occupant_role);
 
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     Capabilities *caps = caps_lookup(jidp->fulljid);
@@ -210,44 +214,46 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
     if (caps) {
         // show identity
         if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-            win_save_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
+            win_save_print(window, '!', NULL, NO_EOL, 0, "", "  Identity: ");
             if (caps->name != NULL) {
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                 if ((caps->category != NULL) || (caps->type != NULL)) {
                     win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (caps->type != NULL) {
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
+                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                 if (caps->category != NULL) {
-                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (caps->category != NULL) {
-                win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
             }
             win_save_newline(window);
         }
         if (caps->software != NULL) {
-            win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
+            win_save_vprint(window, '!', NULL, NO_EOL, 0, "", "  Software: %s", caps->software);
         }
         if (caps->software_version != NULL) {
-            win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
         }
         if ((caps->software != NULL) || (caps->software_version != NULL)) {
             win_save_newline(window);
         }
         if (caps->os != NULL) {
-            win_save_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
+            win_save_vprint(window, '!', NULL, NO_EOL, 0, "", "  OS: %s", caps->os);
         }
         if (caps->os_version != NULL) {
-            win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
         }
         if ((caps->os != NULL) || (caps->os_version != NULL)) {
             win_save_newline(window);
         }
         caps_destroy(caps);
     }
+
+    win_save_print(window, '-', NULL, 0, 0, "", "");
 }
 
 void

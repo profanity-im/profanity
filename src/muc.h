@@ -95,6 +95,8 @@ Autocomplete muc_roster_ac(const char * const room);
 Occupant* muc_roster_item(const char * const room, const char * const nick);
 
 gboolean muc_occupant_available(Occupant *occupant);
+const char * muc_occupant_affiliation_str(Occupant *occupant);
+const char * muc_occupant_role_str(Occupant *occupant);
 
 void muc_roster_nick_change_start(const char * const room, const char * const new_nick, const char * const old_nick);
 char* muc_roster_nick_change_complete(const char * const room, const char * const nick);

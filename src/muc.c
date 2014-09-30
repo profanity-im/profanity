@@ -507,6 +507,18 @@ muc_occupant_available(Occupant *occupant)
     return (occupant->presence == RESOURCE_ONLINE || occupant->presence == RESOURCE_CHAT);
 }
 
+const char *
+muc_occupant_affiliation_str(Occupant *occupant)
+{
+    return _affiliation_to_string(occupant->affiliation);
+}
+
+const char *
+muc_occupant_role_str(Occupant *occupant)
+{
+    return _role_to_string(occupant->role);
+}
+
 /*
  * Remove the old_nick from the roster, and flag that a pending nickname change
  * is in progress
