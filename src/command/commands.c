@@ -2066,6 +2066,10 @@ cmd_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "moderators") != 0) &&
             (g_strcmp0(args[0], "participants") != 0) &&
             (g_strcmp0(args[0], "visitors") != 0) &&
+            (g_strcmp0(args[0], "owners") != 0) &&
+            (g_strcmp0(args[0], "admins") != 0) &&
+            (g_strcmp0(args[0], "members") != 0) &&
+            (g_strcmp0(args[0], "outcasts") != 0) &&
             (g_strcmp0(args[0], "info") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
@@ -2089,16 +2093,32 @@ cmd_room(gchar **args, struct cmd_help_t help)
         ui_show_room_role_list(window, room, MUC_ROLE_MODERATOR);
         return TRUE;
     }
-
     if (g_strcmp0(args[0], "participants") == 0) {
         ui_show_room_role_list(window, room, MUC_ROLE_PARTICIPANT);
         return TRUE;
     }
-
     if (g_strcmp0(args[0], "visitors") == 0) {
         ui_show_room_role_list(window, room, MUC_ROLE_VISITOR);
         return TRUE;
     }
+
+    if (g_strcmp0(args[0], "owners") == 0) {
+        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OWNER);
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "admins") == 0) {
+        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_ADMIN);
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "members") == 0) {
+        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_MEMBER);
+        return TRUE;
+    }
+    if (g_strcmp0(args[0], "outcasts") == 0) {
+        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OUTCAST);
+        return TRUE;
+    }
+
 
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(room);

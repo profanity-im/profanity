@@ -1892,7 +1892,6 @@ _ui_show_room_info(ProfWin *window, const char * const room)
     char *role = muc_role_str(room);
     char *affiliation = muc_affiliation_str(room);
 
-    win_save_print(window, '-', NULL, 0, 0, "", "");
     win_save_vprint(window, '!', NULL, 0, 0, "", "Room: %s", room);
     win_save_vprint(window, '!', NULL, 0, 0, "", "  Affiliation: %s", affiliation);
     win_save_vprint(window, '!', NULL, 0, 0, "", "  Role: %s", role);
@@ -1905,7 +1904,6 @@ _ui_show_room_role_list(ProfWin *window, const char * const room, muc_role_t rol
     GSList *occupants = muc_occupants_by_role(room, role);
 
     if (!occupants) {
-        win_save_print(window, '-', NULL, 0, 0, "", "");
         switch (role) {
             case MUC_ROLE_MODERATOR:
                 win_save_print(window, '!', NULL, 0, 0, "", "No moderators found.");
@@ -1921,7 +1919,6 @@ _ui_show_room_role_list(ProfWin *window, const char * const room, muc_role_t rol
         }
         win_save_print(window, '-', NULL, 0, 0, "", "");
     } else {
-        win_save_print(window, '-', NULL, 0, 0, "", "");
         switch (role) {
             case MUC_ROLE_MODERATOR:
                 win_save_print(window, '!', NULL, 0, 0, "", "Moderators:");
@@ -1940,6 +1937,61 @@ _ui_show_room_role_list(ProfWin *window, const char * const room, muc_role_t rol
         while(curr_occupant) {
             Occupant *occupant = curr_occupant->data;
             if (occupant->role == role) {
+                win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+            }
+
+            curr_occupant = g_slist_next(curr_occupant);
+        }
+
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+    }
+}
+
+static void
+_ui_show_room_affiliation_list(ProfWin *window, const char * const room, muc_affiliation_t affiliation)
+{
+    GSList *occupants = muc_occupants_by_affiliation(room, affiliation);
+
+    if (!occupants) {
+        switch (affiliation) {
+            case MUC_AFFILIATION_OWNER:
+                win_save_print(window, '!', NULL, 0, 0, "", "No owners found.");
+                break;
+            case MUC_AFFILIATION_ADMIN:
+                win_save_print(window, '!', NULL, 0, 0, "", "No admins found.");
+                break;
+            case MUC_AFFILIATION_MEMBER:
+                win_save_print(window, '!', NULL, 0, 0, "", "No members found.");
+                break;
+            case MUC_AFFILIATION_OUTCAST:
+                win_save_print(window, '!', NULL, 0, 0, "", "No outcasts found.");
+                break;
+            default:
+                break;
+        }
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+    } else {
+        switch (affiliation) {
+            case MUC_AFFILIATION_OWNER:
+                win_save_print(window, '!', NULL, 0, 0, "", "Owners:");
+                break;
+            case MUC_AFFILIATION_ADMIN:
+                win_save_print(window, '!', NULL, 0, 0, "", "Admins:");
+                break;
+            case MUC_AFFILIATION_MEMBER:
+                win_save_print(window, '!', NULL, 0, 0, "", "Members:");
+                break;
+            case MUC_AFFILIATION_OUTCAST:
+                win_save_print(window, '!', NULL, 0, 0, "", "Outcasts:");
+                break;
+            default:
+                break;
+        }
+
+        GSList *curr_occupant = occupants;
+        while(curr_occupant) {
+            Occupant *occupant = curr_occupant->data;
+            if (occupant->affiliation == affiliation) {
                 win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
             }
 
@@ -2579,4 +2631,5 @@ ui_init_module(void)
     ui_handle_room_configuration_form_error = _ui_handle_room_configuration_form_error;
     ui_show_room_info = _ui_show_room_info;
     ui_show_room_role_list = _ui_show_room_role_list;
+    ui_show_room_affiliation_list = _ui_show_room_affiliation_list;
 }

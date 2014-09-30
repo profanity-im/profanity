@@ -195,7 +195,6 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
 
     int presence_colour = win_presence_colour(presence_str);
 
-    win_save_print(window, '-', NULL, 0, 0, "", "");
     win_save_print(window, '!', NULL, NO_EOL, presence_colour, "", occupant->nick);
     win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
 

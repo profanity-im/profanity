@@ -1231,6 +1231,10 @@ cmd_init(void)
     autocomplete_add(room_ac, "moderators");
     autocomplete_add(room_ac, "participants");
     autocomplete_add(room_ac, "visitors");
+    autocomplete_add(room_ac, "owners");
+    autocomplete_add(room_ac, "admins");
+    autocomplete_add(room_ac, "members");
+    autocomplete_add(room_ac, "outcasts");
 
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");
