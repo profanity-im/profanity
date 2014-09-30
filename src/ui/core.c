@@ -2041,7 +2041,7 @@ _ui_show_form(ProfWin *window, const char * const room, DataForm *form)
     while (curr_field != NULL) {
         FormField *field = curr_field->data;
 
-        if (g_strcmp0(field->type, "hidden") != 0) {
+        if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
             char *tag = g_hash_table_lookup(form->var_to_tag, field->var);
             _ui_handle_form_field(window, tag, field);
         }
