@@ -5,6 +5,7 @@ install:
     - sudo apt-get -y install libtool python-dev lua5.2 liblua5.2-dev ruby-dev
     - git clone git://github.com/strophe/libstrophe.git
     - cd libstrophe
+    - mkdir m4
     - ./bootstrap.sh
     - ./configure --prefix=/usr
     - make
