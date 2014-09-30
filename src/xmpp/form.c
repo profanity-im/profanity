@@ -211,7 +211,7 @@ form_create(xmpp_stanza_t * const form_stanza)
 
             field->var = _get_attr(field_stanza, "var");
 
-            if (field->type_t != FIELD_HIDDEN) {
+            if (field->type_t != FIELD_HIDDEN && field->var != NULL) {
                 GString *tag = g_string_new("");
                 g_string_printf(tag, "field%d", tag_num++);
                 g_hash_table_insert(form->var_to_tag, strdup(field->var), strdup(tag->str));
@@ -287,64 +287,66 @@ form_create_submission(DataForm *form)
     while (curr_field) {
         FormField *field = curr_field->data;
 
-        xmpp_stanza_t *field_stanza = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(field_stanza, "field");
-        xmpp_stanza_set_attribute(field_stanza, "var", field->var);
+        if (field->type_t != FIELD_FIXED) {
+            xmpp_stanza_t *field_stanza = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(field_stanza, "field");
+            xmpp_stanza_set_attribute(field_stanza, "var", field->var);
 
-        xmpp_stanza_t *value_stanza = NULL;
-        GSList *curr_value = NULL;
+            xmpp_stanza_t *value_stanza = NULL;
+            GSList *curr_value = NULL;
 
-        switch (field->type_t) {
-            case FIELD_HIDDEN:
-            case FIELD_FIXED:
-            case FIELD_TEXT_SINGLE:
-            case FIELD_TEXT_PRIVATE:
-            case FIELD_BOOLEAN:
-            case FIELD_LIST_SINGLE:
-            case FIELD_JID_SINGLE:
-                value_stanza = xmpp_stanza_new(ctx);
-                xmpp_stanza_set_name(value_stanza, "value");
-                if (field->values) {
-                    if (field->values->data) {
-                        xmpp_stanza_t *text_stanza = xmpp_stanza_new(ctx);
-                        xmpp_stanza_set_text(text_stanza, field->values->data);
-                        xmpp_stanza_add_child(value_stanza, text_stanza);
-                        xmpp_stanza_release(text_stanza);
-                    }
-                }
-                xmpp_stanza_add_child(field_stanza, value_stanza);
-                xmpp_stanza_release(value_stanza);
-
-                break;
-
-            case FIELD_TEXT_MULTI:
-            case FIELD_LIST_MULTI:
-            case FIELD_JID_MULTI:
-                curr_value = field->values;
-                while (curr_value) {
-                    char *value = curr_value->data;
-
+            switch (field->type_t) {
+                case FIELD_HIDDEN:
+                case FIELD_TEXT_SINGLE:
+                case FIELD_TEXT_PRIVATE:
+                case FIELD_BOOLEAN:
+                case FIELD_LIST_SINGLE:
+                case FIELD_JID_SINGLE:
                     value_stanza = xmpp_stanza_new(ctx);
                     xmpp_stanza_set_name(value_stanza, "value");
-                    if (value) {
-                        xmpp_stanza_t *text_stanza = xmpp_stanza_new(ctx);
-                        xmpp_stanza_set_text(text_stanza, value);
-                        xmpp_stanza_add_child(value_stanza, text_stanza);
-                        xmpp_stanza_release(text_stanza);
+                    if (field->values) {
+                        if (field->values->data) {
+                            xmpp_stanza_t *text_stanza = xmpp_stanza_new(ctx);
+                            xmpp_stanza_set_text(text_stanza, field->values->data);
+                            xmpp_stanza_add_child(value_stanza, text_stanza);
+                            xmpp_stanza_release(text_stanza);
+                        }
                     }
-
                     xmpp_stanza_add_child(field_stanza, value_stanza);
                     xmpp_stanza_release(value_stanza);
 
-                    curr_value = g_slist_next(curr_value);
-                }
-                break;
-            default:
-                break;
-        }
+                    break;
 
-        xmpp_stanza_add_child(x, field_stanza);
-        xmpp_stanza_release(field_stanza);
+                case FIELD_TEXT_MULTI:
+                case FIELD_LIST_MULTI:
+                case FIELD_JID_MULTI:
+                    curr_value = field->values;
+                    while (curr_value) {
+                        char *value = curr_value->data;
+
+                        value_stanza = xmpp_stanza_new(ctx);
+                        xmpp_stanza_set_name(value_stanza, "value");
+                        if (value) {
+                            xmpp_stanza_t *text_stanza = xmpp_stanza_new(ctx);
+                            xmpp_stanza_set_text(text_stanza, value);
+                            xmpp_stanza_add_child(value_stanza, text_stanza);
+                            xmpp_stanza_release(text_stanza);
+                        }
+
+                        xmpp_stanza_add_child(field_stanza, value_stanza);
+                        xmpp_stanza_release(value_stanza);
+
+                        curr_value = g_slist_next(curr_value);
+                    }
+                    break;
+                case FIELD_FIXED:
+                default:
+                    break;
+            }
+
+            xmpp_stanza_add_child(x, field_stanza);
+            xmpp_stanza_release(field_stanza);
+        }
 
         curr_field = g_slist_next(curr_field);
     }

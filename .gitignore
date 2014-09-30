@@ -57,5 +57,7 @@ pageing.txt
 cppcheck.out
 gitpushall.sh
 Debug/
-profanity.mk
 compile_commands.json
+profanity.mk
+profanity.project
+profanity.workspace
