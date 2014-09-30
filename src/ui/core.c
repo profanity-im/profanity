@@ -1887,6 +1887,19 @@ _ui_draw_term_title(void)
 }
 
 static void
+_ui_show_room_info(ProfWin *window, const char * const room)
+{
+    char *role = muc_role_str(room);
+    char *affiliation = muc_affiliation_str(room);
+
+    win_save_print(window, '-', NULL, 0, 0, "", "");
+    win_save_vprint(window, '!', NULL, 0, 0, "", "Room: %s", room);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "  Affiliation: %s", affiliation);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "  Role: %s", role);
+    win_save_print(window, '-', NULL, 0, 0, "", "");
+}
+
+static void
 _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
 {
     win_save_vprint(window, '-', NULL, NO_EOL, COLOUR_AWAY, "", "[%s] ", tag);
@@ -2513,4 +2526,5 @@ ui_init_module(void)
     ui_show_form_field_help = _ui_show_form_field_help;
     ui_show_lines = _ui_show_lines;
     ui_handle_room_configuration_form_error = _ui_handle_room_configuration_form_error;
+    ui_show_room_info = _ui_show_room_info;
 }
