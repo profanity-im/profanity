@@ -766,6 +766,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             }
 
             char *show_str = stanza_get_show(stanza, "online");
+            char *jid = NULL;
             char *role = NULL;
             char *affiliation = NULL;
 
@@ -773,25 +774,26 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             if (x) {
                 xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
                 if (item) {
+                    jid = xmpp_stanza_get_attribute(item, "jid");
                     role = xmpp_stanza_get_attribute(item, "role");
                     affiliation = xmpp_stanza_get_attribute(item, "affiliation");
                 }
             }
 
             if (!muc_roster_complete(from_room)) {
-                muc_roster_add(from_room, from_nick, role, affiliation, show_str, status_str);
+                muc_roster_add(from_room, from_nick, jid, role, affiliation, show_str, status_str);
             } else {
                 char *old_nick = muc_roster_nick_change_complete(from_room, from_nick);
 
                 if (old_nick != NULL) {
-                    muc_roster_add(from_room, from_nick, role, affiliation, show_str, status_str);
+                    muc_roster_add(from_room, from_nick, jid, role, affiliation, show_str, status_str);
                     handle_room_member_nick_change(from_room, old_nick, from_nick);
                     free(old_nick);
                 } else {
                     if (!muc_roster_contains_nick(from_room, from_nick)) {
-                        handle_room_member_online(from_room, from_nick, role, affiliation, show_str, status_str);
+                        handle_room_member_online(from_room, from_nick, jid, role, affiliation, show_str, status_str);
                     } else {
-                        handle_room_member_presence(from_room, from_nick, role, affiliation, show_str, status_str);
+                        handle_room_member_presence(from_room, from_nick, jid, role, affiliation, show_str, status_str);
                     }
                 }
             }

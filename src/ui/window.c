@@ -204,6 +204,10 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
 
     win_save_newline(window);
 
+    if (occupant->jid) {
+        win_save_vprint(window, '!', NULL, 0, 0, "", "  Jid: %s", occupant->jid);
+    }
+
     win_save_vprint(window, '!', NULL, 0, 0, "", "  Affiliation: %s", occupant_affiliation);
     win_save_vprint(window, '!', NULL, 0, 0, "", "  Role: %s", occupant_role);
 

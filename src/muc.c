@@ -71,8 +71,8 @@ static muc_role_t _role_from_string(const char * const role);
 static muc_affiliation_t _affiliation_from_string(const char * const affiliation);
 static char* _role_to_string(muc_role_t role);
 static char* _affiliation_to_string(muc_affiliation_t affiliation);
-static Occupant* _muc_occupant_new(const char *const nick, muc_role_t role, muc_affiliation_t affiliation,
-    resource_presence_t presence, const char * const status);
+static Occupant* _muc_occupant_new(const char *const nick, const char * const jid,
+    muc_role_t role, muc_affiliation_t affiliation, resource_presence_t presence, const char * const status);
 static void _occupant_free(Occupant *occupant);
 
 void
@@ -383,8 +383,8 @@ muc_roster_contains_nick(const char * const room, const char * const nick)
  * Add a new chat room member to the room's roster
  */
 gboolean
-muc_roster_add(const char * const room, const char * const nick, const char * const role,
-    const char * const affiliation, const char * const show, const char * const status)
+muc_roster_add(const char * const room, const char * const nick, const char * const jid,
+    const char * const role, const char * const affiliation, const char * const show, const char * const status)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     gboolean updated = FALSE;
@@ -404,7 +404,7 @@ muc_roster_add(const char * const room, const char * const nick, const char * co
         resource_presence_t presence = resource_presence_from_string(show);
         muc_role_t role_t = _role_from_string(role);
         muc_affiliation_t affiliation_t = _affiliation_from_string(affiliation);
-        Occupant *occupant = _muc_occupant_new(nick, role_t, affiliation_t, presence, status);
+        Occupant *occupant = _muc_occupant_new(nick, jid, role_t, affiliation_t, presence, status);
         g_hash_table_replace(chat_room->roster, strdup(nick), occupant);
     }
 
@@ -831,7 +831,7 @@ _affiliation_to_string(muc_affiliation_t affiliation)
 }
 
 static Occupant*
-_muc_occupant_new(const char *const nick, muc_role_t role, muc_affiliation_t affiliation, resource_presence_t presence,
+_muc_occupant_new(const char *const nick, const char * const jid, muc_role_t role, muc_affiliation_t affiliation, resource_presence_t presence,
     const char * const status)
 {
     Occupant *occupant = malloc(sizeof(Occupant));
@@ -840,6 +840,12 @@ _muc_occupant_new(const char *const nick, muc_role_t role, muc_affiliation_t aff
         occupant->nick = strdup(nick);
     } else {
         occupant->nick = NULL;
+    }
+
+    if (jid) {
+        occupant->jid = strdup(jid);
+    } else {
+        occupant->jid = NULL;
     }
 
     occupant->presence = presence;
@@ -861,6 +867,7 @@ _occupant_free(Occupant *occupant)
 {
     if (occupant) {
         free(occupant->nick);
+        free(occupant->jid);
         free(occupant->status);
         free(occupant);
         occupant = NULL;

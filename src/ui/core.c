@@ -1937,7 +1937,11 @@ _ui_show_room_role_list(ProfWin *window, const char * const room, muc_role_t rol
         while(curr_occupant) {
             Occupant *occupant = curr_occupant->data;
             if (occupant->role == role) {
-                win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+                if (occupant->jid) {
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
+                } else {
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+                }
             }
 
             curr_occupant = g_slist_next(curr_occupant);
@@ -1992,7 +1996,11 @@ _ui_show_room_affiliation_list(ProfWin *window, const char * const room, muc_aff
         while(curr_occupant) {
             Occupant *occupant = curr_occupant->data;
             if (occupant->affiliation == affiliation) {
-                win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+                if (occupant->jid) {
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
+                } else {
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+                }
             }
 
             curr_occupant = g_slist_next(curr_occupant);

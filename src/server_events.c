@@ -527,10 +527,10 @@ handle_room_roster_complete(const char * const room)
 }
 
 void
-handle_room_member_presence(const char * const room, const char * const nick, const char * const role, 
-    const char *  const affiliation, const char * const show, const char * const status)
+handle_room_member_presence(const char * const room, const char * const nick, const char * const jid,
+    const char * const role, const char *  const affiliation, const char * const show, const char * const status)
 {
-    gboolean updated = muc_roster_add(room, nick, role, affiliation, show, status);
+    gboolean updated = muc_roster_add(room, nick, jid, role, affiliation, show, status);
 
     if (updated) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
@@ -542,10 +542,10 @@ handle_room_member_presence(const char * const room, const char * const nick, co
 }
 
 void
-handle_room_member_online(const char * const room, const char * const nick, const char * const role,
-    const char * const affiliation, const char * const show, const char * const status)
+handle_room_member_online(const char * const room, const char * const nick, const char * const jid,
+    const char * const role, const char * const affiliation, const char * const show, const char * const status)
 {
-    muc_roster_add(room, nick, role, affiliation, show, status);
+    muc_roster_add(room, nick, jid, role, affiliation, show, status);
 
     char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     if (g_strcmp0(muc_status_pref, "none") != 0) {
