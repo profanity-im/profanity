@@ -87,15 +87,9 @@ buffer_push(ProfBuff buffer, const char show_char, const char * const date_fmt,
     e->show_char = show_char;
     e->flags = flags;
     e->attrs = attrs;
-
-    e->date_fmt = malloc(strlen(date_fmt)+1);
-    strcpy(e->date_fmt, date_fmt);
-
-    e->from = malloc(strlen(from)+1);
-    strcpy(e->from, from);
-
-    e->message = malloc(strlen(message)+1);
-    strcpy(e->message, message);
+    e->date_fmt = strdup(date_fmt);
+    e->from = strdup(from);
+    e->message = strdup(message);
 
     if (g_slist_length(buffer->entries) == BUFF_SIZE) {
         _free_entry(buffer->entries->data);
