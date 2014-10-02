@@ -1400,11 +1400,11 @@ _ui_show_room_disco_info(const char * const room, GSList *identities, GSList *fe
         if (((identities != NULL) && (g_slist_length(identities) > 0)) ||
             ((features != NULL) && (g_slist_length(features) > 0))) {
             if (identities != NULL) {
-                win_save_print(window, '!', NULL, 0, 0, "", "  Identities:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Identities:");
             }
             while (identities != NULL) {
                 DiscoIdentity *identity = identities->data;  // anme trpe, cat
-                GString *identity_str = g_string_new("    ");
+                GString *identity_str = g_string_new("  ");
                 if (identity->name != NULL) {
                     identity_str = g_string_append(identity_str, identity->name);
                     identity_str = g_string_append(identity_str, " ");
@@ -1422,12 +1422,13 @@ _ui_show_room_disco_info(const char * const room, GSList *identities, GSList *fe
             }
 
             if (features != NULL) {
-                win_save_print(window, '!', NULL, 0, 0, "", "  Features:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Features:");
             }
             while (features != NULL) {
-                win_save_vprint(window, '!', NULL, 0, 0, "", "    %s", features->data);
+                win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", features->data);
                 features = g_slist_next(features);
             }
+            win_save_print(window, '-', NULL, 0, 0, "", "");
         }
     }
 }
@@ -1943,8 +1944,8 @@ _ui_show_room_info(ProfWin *window, const char * const room)
     char *affiliation = muc_affiliation_str(room);
 
     win_save_vprint(window, '!', NULL, 0, 0, "", "Room: %s", room);
-    win_save_vprint(window, '!', NULL, 0, 0, "", "  Affiliation: %s", affiliation);
-    win_save_vprint(window, '!', NULL, 0, 0, "", "  Role: %s", role);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "Affiliation: %s", affiliation);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "Role: %s", role);
     win_save_print(window, '-', NULL, 0, 0, "", "");
 }
 
