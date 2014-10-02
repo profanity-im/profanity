@@ -1383,6 +1383,56 @@ _ui_room_join(const char * const room, gboolean focus)
 }
 
 static void
+_ui_handle_room_info_error(const char * const room, const char * const error)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Room info request failed: %s", error);
+        win_save_print(window, '-', NULL, 0, 0, "", "");
+    }
+}
+
+static void
+_ui_show_room_disco_info(const char * const room, GSList *identities, GSList *features)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        if (((identities != NULL) && (g_slist_length(identities) > 0)) ||
+            ((features != NULL) && (g_slist_length(features) > 0))) {
+            if (identities != NULL) {
+                win_save_print(window, '!', NULL, 0, 0, "", "  Identities:");
+            }
+            while (identities != NULL) {
+                DiscoIdentity *identity = identities->data;  // anme trpe, cat
+                GString *identity_str = g_string_new("    ");
+                if (identity->name != NULL) {
+                    identity_str = g_string_append(identity_str, identity->name);
+                    identity_str = g_string_append(identity_str, " ");
+                }
+                if (identity->type != NULL) {
+                    identity_str = g_string_append(identity_str, identity->type);
+                    identity_str = g_string_append(identity_str, " ");
+                }
+                if (identity->category != NULL) {
+                    identity_str = g_string_append(identity_str, identity->category);
+                }
+                win_save_print(window, '!', NULL, 0, 0, "", identity_str->str);
+                g_string_free(identity_str, FALSE);
+                identities = g_slist_next(identities);
+            }
+
+            if (features != NULL) {
+                win_save_print(window, '!', NULL, 0, 0, "", "  Features:");
+            }
+            while (features != NULL) {
+                win_save_vprint(window, '!', NULL, 0, 0, "", "    %s", features->data);
+                features = g_slist_next(features);
+            }
+        }
+    }
+}
+
+static void
 _ui_room_roster(const char * const room, GList *roster, const char * const presence)
 {
     ProfWin *window = wins_get_by_recipient(room);
@@ -2645,4 +2695,6 @@ ui_init_module(void)
     ui_show_room_info = _ui_show_room_info;
     ui_show_room_role_list = _ui_show_room_role_list;
     ui_show_room_affiliation_list = _ui_show_room_affiliation_list;
+    ui_handle_room_info_error = _ui_handle_room_info_error;
+    ui_show_room_disco_info = _ui_show_room_disco_info;
 }

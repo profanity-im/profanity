@@ -153,6 +153,20 @@ _iq_disco_info_request(gchar *jid)
 }
 
 static void
+_iq_room_info_request(gchar *room)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = create_unique_id("room_disco_info");
+    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
+
+    xmpp_id_handler_add(conn, _disco_info_response_handler, id, room);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
 _iq_send_caps_request(const char * const to, const char * const id,
     const char * const node, const char * const ver)
 {
@@ -814,15 +828,30 @@ static int
 _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    log_info("Received diso#info response");
-
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     const char *type = xmpp_stanza_get_type(stanza);
+
+    char *room = NULL;
+    if (userdata) {
+        room = (char *) userdata;
+        log_info("Received diso#info response for room: %s", room);
+    } else {
+        room = NULL;
+        if (from) {
+            log_info("Received diso#info response from: %s", from);
+        } else {
+            log_info("Received diso#info response");
+        }
+    }
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        handle_disco_info_error(from, error_message);
+        if (room) {
+            handle_room_info_error(room, error_message);
+        } else {
+            handle_disco_info_error(from, error_message);
+        }
         free(error_message);
         return 0;
     }
@@ -871,7 +900,12 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
             child = xmpp_stanza_get_next(child);
         }
 
-        handle_disco_info(from, identities, features);
+        if (room) {
+            handle_room_disco_info(room, identities, features);
+        } else {
+            handle_disco_info(from, identities, features);
+        }
+
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
     }
@@ -942,4 +976,5 @@ iq_init_module(void)
     iq_room_config_cancel = _iq_room_config_cancel;
     iq_submit_room_config = _iq_submit_room_config;
     iq_send_caps_request = _iq_send_caps_request;
+    iq_room_info_request = _iq_room_info_request;
 }

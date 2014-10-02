@@ -191,6 +191,7 @@ void (*iq_room_config_cancel)(const char * const room_jid);
 void (*iq_send_ping)(const char * const target);
 void (*iq_send_caps_request)(const char * const to, const char * const id,
     const char * const node, const char * const ver);
+void (*iq_room_info_request)(gchar *room);
 
 // caps functions
 Capabilities* (*caps_lookup)(const char * const jid);

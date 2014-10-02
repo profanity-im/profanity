@@ -2081,6 +2081,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "info") == 0) {
+        iq_room_info_request(room);
         ui_show_room_info(window, room);
         return TRUE;
     }
