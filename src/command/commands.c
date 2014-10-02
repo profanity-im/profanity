@@ -1104,15 +1104,11 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
                 } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
-                    char *otr_base_tag = OTRL_MESSAGE_TAG_BASE;
-                    char *otr_v2_tag = OTRL_MESSAGE_TAG_V2;
-                    int N = strlen(otr_base_tag) + strlen(otr_v2_tag) + strlen(msg) + 1;
-                    char *temp = (char *) malloc( (unsigned) N*sizeof(char *) );
-                    strcpy( temp , msg );
-                    strcat( temp , otr_base_tag);
-                    strcat( temp, otr_v2_tag);
-                    message_send(temp, usr_jid);
-                    free(temp);
+                    GString *otr_message = g_string_new(msg);
+                    g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
+                    g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
+                    message_send(otr_message->str, usr_jid);
+                    g_string_free(otr_message, TRUE);
                 } else {
                     message_send(msg, usr_jid);
                 }
