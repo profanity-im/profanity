@@ -1,7 +1,8 @@
+Get disco info information using /room info
 Handle status codes
-List members of different roles/affiliations
 Changing subject
 Moderator use cases
 Admin use cases
 Owner use cases
-Check commands from private conversations
+
+Check all commands from private conversations
