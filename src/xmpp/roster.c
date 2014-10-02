@@ -246,6 +246,11 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
     const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
 
+    // do not set nickname to empty string, set to NULL instead
+    if (name && (strlen(name) == 0)) {
+        name = NULL;
+    }
+
     // remove from roster
     if (g_strcmp0(sub, "remove") == 0) {
         // remove barejid and name
@@ -291,17 +296,18 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     // handle initial roster response
     if (g_strcmp0(id, "roster") == 0) {
-        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza,
-            STANZA_NAME_QUERY);
+        xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
         xmpp_stanza_t *item = xmpp_stanza_get_children(query);
 
         while (item != NULL) {
-            const char *barejid =
-                xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-            const char *name =
-                xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
-            const char *sub =
-                xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+            const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+            const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
+            const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
+
+            // do not set nickname to empty string, set to NULL instead
+            if (name && (strlen(name) == 0)) {
+                name = NULL;
+            }
 
             gboolean pending_out = FALSE;
             const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
@@ -323,8 +329,7 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         char *account_name = jabber_get_account_name();
         const char *fulljid = jabber_get_fulljid();
 
-        resource_presence_t conn_presence =
-            accounts_get_login_presence(account_name);
+        resource_presence_t conn_presence = accounts_get_login_presence(account_name);
         presence_update(conn_presence, NULL, 0);
 
         plugins_on_connect(account_name, fulljid);
