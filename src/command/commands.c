@@ -725,75 +725,128 @@ cmd_theme(gchar **args, struct cmd_help_t help)
 static void
 _who_room(gchar **args, struct cmd_help_t help)
 {
-    char *presence = args[0];
     if ((g_strv_length(args) == 2) && (args[1] != NULL)) {
         cons_show("Argument group is not applicable to chat rooms.");
         return;
     }
 
     // bad arg
-    if ((presence != NULL)
-            && (strcmp(presence, "online") != 0)
-            && (strcmp(presence, "available") != 0)
-            && (strcmp(presence, "unavailable") != 0)
-            && (strcmp(presence, "away") != 0)
-            && (strcmp(presence, "chat") != 0)
-            && (strcmp(presence, "xa") != 0)
-            && (strcmp(presence, "dnd") != 0)
-            && (strcmp(presence, "any") != 0)) {
+    if (args[0] != NULL &&
+            (g_strcmp0(args[0], "online") != 0) &&
+            (g_strcmp0(args[0], "available") != 0) &&
+            (g_strcmp0(args[0], "unavailable") != 0) &&
+            (g_strcmp0(args[0], "away") != 0) &&
+            (g_strcmp0(args[0], "chat") != 0) &&
+            (g_strcmp0(args[0], "xa") != 0) &&
+            (g_strcmp0(args[0], "dnd") != 0) &&
+            (g_strcmp0(args[0], "any") != 0) &&
+            (g_strcmp0(args[0], "moderator") != 0) &&
+            (g_strcmp0(args[0], "participant") != 0) &&
+            (g_strcmp0(args[0], "visitor") != 0) &&
+            (g_strcmp0(args[0], "owner") != 0) &&
+            (g_strcmp0(args[0], "admin") != 0) &&
+            (g_strcmp0(args[0], "member") != 0) &&
+            (g_strcmp0(args[0], "outcast") != 0)) {
         cons_show("Usage: %s", help.usage);
         return;
     }
 
     char *room = ui_current_recipient();
-    GList *list = muc_roster(room);
 
-    // no arg, show all contacts
-    if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
-        ui_room_roster(room, list, NULL);
+    // presence filter
+    if (args[0] == NULL ||
+            (g_strcmp0(args[0], "online") == 0) ||
+            (g_strcmp0(args[0], "available") == 0) ||
+            (g_strcmp0(args[0], "unavailable") == 0) ||
+            (g_strcmp0(args[0], "away") == 0) ||
+            (g_strcmp0(args[0], "chat") == 0) ||
+            (g_strcmp0(args[0], "xa") == 0) ||
+            (g_strcmp0(args[0], "dnd") == 0) ||
+            (g_strcmp0(args[0], "any") == 0)) {
 
-    // available
-    } else if (strcmp("available", presence) == 0) {
-        GList *filtered = NULL;
+        char *presence = args[0];
+        GList *list = muc_roster(room);
 
-        while (list != NULL) {
-            Occupant *occupant = list->data;
-            if (muc_occupant_available(occupant)) {
-                filtered = g_list_append(filtered, occupant);
+        // no arg, show all contacts
+        if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
+            ui_room_roster(room, list, NULL);
+
+        // available
+        } else if (strcmp("available", presence) == 0) {
+            GList *filtered = NULL;
+
+            while (list != NULL) {
+                Occupant *occupant = list->data;
+                if (muc_occupant_available(occupant)) {
+                    filtered = g_list_append(filtered, occupant);
+                }
+                list = g_list_next(list);
             }
-            list = g_list_next(list);
+
+            ui_room_roster(room, filtered, "available");
+
+        // unavailable
+        } else if (strcmp("unavailable", presence) == 0) {
+            GList *filtered = NULL;
+
+            while (list != NULL) {
+                Occupant *occupant = list->data;
+                if (!muc_occupant_available(occupant)) {
+                    filtered = g_list_append(filtered, occupant);
+                }
+                list = g_list_next(list);
+            }
+
+            ui_room_roster(room, filtered, "unavailable");
+
+        // show specific status
+        } else {
+            GList *filtered = NULL;
+
+            while (list != NULL) {
+                Occupant *occupant = list->data;
+                const char *presence_str = string_from_resource_presence(occupant->presence);
+                if (strcmp(presence_str, presence) == 0) {
+                    filtered = g_list_append(filtered, occupant);
+                }
+                list = g_list_next(list);
+            }
+
+            ui_room_roster(room, filtered, presence);
         }
 
-        ui_room_roster(room, filtered, "available");
-
-    // unavailable
-    } else if (strcmp("unavailable", presence) == 0) {
-        GList *filtered = NULL;
-
-        while (list != NULL) {
-            Occupant *occupant = list->data;
-            if (!muc_occupant_available(occupant)) {
-                filtered = g_list_append(filtered, occupant);
-            }
-            list = g_list_next(list);
-        }
-
-        ui_room_roster(room, filtered, "unavailable");
-
-    // show specific status
+    // role or affiliation filter
     } else {
-        GList *filtered = NULL;
-
-        while (list != NULL) {
-            Occupant *occupant = list->data;
-            const char *presence_str = string_from_resource_presence(occupant->presence);
-            if (strcmp(presence_str, presence) == 0) {
-                filtered = g_list_append(filtered, occupant);
-            }
-            list = g_list_next(list);
+        ProfWin *window = wins_get_by_recipient(room);
+        if (g_strcmp0(args[0], "moderator") == 0) {
+            ui_show_room_role_list(window, room, MUC_ROLE_MODERATOR);
+            return;
+        }
+        if (g_strcmp0(args[0], "participant") == 0) {
+            ui_show_room_role_list(window, room, MUC_ROLE_PARTICIPANT);
+            return;
+        }
+        if (g_strcmp0(args[0], "visitor") == 0) {
+            ui_show_room_role_list(window, room, MUC_ROLE_VISITOR);
+            return;
         }
 
-        ui_room_roster(room, filtered, presence);
+        if (g_strcmp0(args[0], "owner") == 0) {
+            ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OWNER);
+            return;
+        }
+        if (g_strcmp0(args[0], "admin") == 0) {
+            ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_ADMIN);
+            return;
+        }
+        if (g_strcmp0(args[0], "member") == 0) {
+            ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_MEMBER);
+            return;
+        }
+        if (g_strcmp0(args[0], "outcast") == 0) {
+            ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OUTCAST);
+            return;
+        }
     }
 }
 
@@ -1006,12 +1059,10 @@ cmd_who(gchar **args, struct cmd_help_t help)
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
+    } else if (win_type == WIN_MUC) {
+        _who_room(args, help);
     } else {
-        if (win_type == WIN_MUC) {
-            _who_room(args, help);
-        } else {
-            _who_roster(args, help);
-        }
+        _who_roster(args, help);
     }
 
     if (win_type != WIN_CONSOLE && win_type != WIN_MUC) {
@@ -2075,13 +2126,18 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
+
+            // roles
             (g_strcmp0(args[0], "moderators") != 0) &&
             (g_strcmp0(args[0], "participants") != 0) &&
             (g_strcmp0(args[0], "visitors") != 0) &&
+
+            // affiliations
             (g_strcmp0(args[0], "owners") != 0) &&
             (g_strcmp0(args[0], "admins") != 0) &&
             (g_strcmp0(args[0], "members") != 0) &&
             (g_strcmp0(args[0], "outcasts") != 0) &&
+
             (g_strcmp0(args[0], "info") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
@@ -2099,19 +2155,6 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "info") == 0) {
         iq_room_info_request(room);
         ui_show_room_info(window, room);
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "moderators") == 0) {
-        ui_show_room_role_list(window, room, MUC_ROLE_MODERATOR);
-        return TRUE;
-    }
-    if (g_strcmp0(args[0], "participants") == 0) {
-        ui_show_room_role_list(window, room, MUC_ROLE_PARTICIPANT);
-        return TRUE;
-    }
-    if (g_strcmp0(args[0], "visitors") == 0) {
-        ui_show_room_role_list(window, room, MUC_ROLE_VISITOR);
         return TRUE;
     }
 
@@ -2156,24 +2199,9 @@ cmd_room(gchar **args, struct cmd_help_t help)
             }
             jid_destroy(jidp);
             return TRUE;
-        } else {
-            ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OWNER);
-            return TRUE;
         }
-    }
-    if (g_strcmp0(args[0], "admins") == 0) {
-        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_ADMIN);
         return TRUE;
     }
-    if (g_strcmp0(args[0], "members") == 0) {
-        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_MEMBER);
-        return TRUE;
-    }
-    if (g_strcmp0(args[0], "outcasts") == 0) {
-        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OUTCAST);
-        return TRUE;
-    }
-
 
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(room);

@@ -937,7 +937,8 @@ static struct cmd_t command_defs[] =
 };
 
 static Autocomplete commands_ac;
-static Autocomplete who_ac;
+static Autocomplete who_room_ac;
+static Autocomplete who_roster_ac;
 static Autocomplete help_ac;
 static Autocomplete notify_ac;
 static Autocomplete notify_room_ac;
@@ -1152,16 +1153,32 @@ cmd_init(void)
 
     theme_load_ac = NULL;
 
-    who_ac = autocomplete_new();
-    autocomplete_add(who_ac, "chat");
-    autocomplete_add(who_ac, "online");
-    autocomplete_add(who_ac, "away");
-    autocomplete_add(who_ac, "xa");
-    autocomplete_add(who_ac, "dnd");
-    autocomplete_add(who_ac, "offline");
-    autocomplete_add(who_ac, "available");
-    autocomplete_add(who_ac, "unavailable");
-    autocomplete_add(who_ac, "any");
+    who_roster_ac = autocomplete_new();
+    autocomplete_add(who_roster_ac, "chat");
+    autocomplete_add(who_roster_ac, "online");
+    autocomplete_add(who_roster_ac, "away");
+    autocomplete_add(who_roster_ac, "xa");
+    autocomplete_add(who_roster_ac, "dnd");
+    autocomplete_add(who_roster_ac, "offline");
+    autocomplete_add(who_roster_ac, "available");
+    autocomplete_add(who_roster_ac, "unavailable");
+    autocomplete_add(who_roster_ac, "any");
+
+    who_room_ac = autocomplete_new();
+    autocomplete_add(who_room_ac, "chat");
+    autocomplete_add(who_room_ac, "online");
+    autocomplete_add(who_room_ac, "away");
+    autocomplete_add(who_room_ac, "xa");
+    autocomplete_add(who_room_ac, "dnd");
+    autocomplete_add(who_room_ac, "available");
+    autocomplete_add(who_room_ac, "unavailable");
+    autocomplete_add(who_room_ac, "moderator");
+    autocomplete_add(who_room_ac, "participant");
+    autocomplete_add(who_room_ac, "visitor");
+    autocomplete_add(who_room_ac, "owner");
+    autocomplete_add(who_room_ac, "admin");
+    autocomplete_add(who_room_ac, "member");
+    autocomplete_add(who_room_ac, "outcast");
 
     bookmark_ac = autocomplete_new();
     autocomplete_add(bookmark_ac, "list");
@@ -1253,7 +1270,8 @@ void
 cmd_uninit(void)
 {
     autocomplete_free(commands_ac);
-    autocomplete_free(who_ac);
+    autocomplete_free(who_room_ac);
+    autocomplete_free(who_roster_ac);
     autocomplete_free(help_ac);
     autocomplete_free(notify_ac);
     autocomplete_free(notify_message_ac);
@@ -1381,7 +1399,8 @@ cmd_reset_autocomplete()
         muc_autocomplete_reset(recipient);
     }
 
-    autocomplete_reset(who_ac);
+    autocomplete_reset(who_room_ac);
+    autocomplete_reset(who_roster_ac);
     autocomplete_reset(prefs_ac);
     autocomplete_reset(log_ac);
     autocomplete_reset(commands_ac);
@@ -1753,22 +1772,31 @@ _sub_autocomplete(char *input, int *size)
 static char *
 _who_autocomplete(char *input, int *size)
 {
-    int i = 0;
     char *result = NULL;
-    gchar *group_commands[] = { "/who any", "/who online", "/who offline",
-        "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
-        "/who unavailable" };
+    win_type_t win_type = ui_current_win_type();
 
-    for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
-        result = autocomplete_param_with_func(input, size, group_commands[i], roster_find_group);
+    if (win_type == WIN_MUC) {
+        result = autocomplete_param_with_ac(input, size, "/who", who_room_ac, TRUE);
         if (result != NULL) {
             return result;
         }
-    }
+    } else {
+        int i = 0;
+        gchar *group_commands[] = { "/who any", "/who online", "/who offline",
+            "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
+            "/who unavailable" };
 
-    result = autocomplete_param_with_ac(input, size, "/who", who_ac, TRUE);
-    if (result != NULL) {
-        return result;
+        for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
+            result = autocomplete_param_with_func(input, size, group_commands[i], roster_find_group);
+            if (result != NULL) {
+                return result;
+            }
+        }
+
+        result = autocomplete_param_with_ac(input, size, "/who", who_roster_ac, TRUE);
+        if (result != NULL) {
+            return result;
+        }
     }
 
     return NULL;
