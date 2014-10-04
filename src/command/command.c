@@ -88,6 +88,7 @@ static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
 static char * _form_autocomplete(char *input, int *size);
+static char * _room_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -306,7 +307,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args, 1, 1, NULL,
+        cmd_room, parse_args, 1, 4, NULL,
         { "/room accept|destroy|config|info", "Room configuration.",
         { "/room accept|destroy|config|info",
           "--------------------------------",
@@ -1670,8 +1671,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/room" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, room_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -1700,6 +1701,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
     g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
+    g_hash_table_insert(ac_funcs, "/room",          _room_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2208,6 +2210,19 @@ _form_autocomplete(char *input, int *size)
     found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
     if (found != NULL) {
         return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_room_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
+    if (result != NULL) {
+        return result;
     }
 
     return NULL;

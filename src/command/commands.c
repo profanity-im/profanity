@@ -2100,8 +2100,50 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "owners") == 0) {
-        ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OWNER);
-        return TRUE;
+        if ((g_strcmp0(args[1], "add") == 0) || (g_strcmp0(args[1], "remove") == 0)) {
+            char *nick = args[2];
+            if (!nick) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            }
+            Occupant *occupant = muc_roster_item(room, nick);
+            if (!occupant) {
+                win_save_vprint(window, '!', NULL, 0, 0, "", "Could not find occupant: ", nick);
+                return TRUE;
+            }
+            if (!occupant->jid) {
+                win_save_vprint(window, '!', NULL, 0, 0, "", "Could not find JID for occupant: ", nick);
+                return TRUE;
+            }
+            Jid *jidp = jid_create(occupant->jid);
+            if (!jidp->barejid) {
+                win_save_vprint(window, '!', NULL, 0, 0, "", "Could not find bare JID for occupant:", nick);
+                jid_destroy(jidp);
+                return TRUE;
+            }
+
+            char *reason = args[3];
+            if (g_strcmp0(args[1], "add") == 0) {
+                if (occupant->affiliation == MUC_AFFILIATION_OWNER) {
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "%s already has owner affiliation", nick);
+                } else {
+                    iq_room_owner_add(room, jidp->barejid, reason);
+                }
+            } else {
+                if (occupant->affiliation != MUC_AFFILIATION_OWNER) {
+                    const char *affiliation_str = muc_occupant_affiliation_str(occupant);
+                    win_save_vprint(window, '!', NULL, 0, 0, "",
+                        "%s does not have owner affiliation, current affiliation:", nick, affiliation_str);
+                } else {
+                    iq_room_owner_remove(room, jidp->barejid, reason);
+                }
+            }
+            jid_destroy(jidp);
+            return TRUE;
+        } else {
+            ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_OWNER);
+            return TRUE;
+        }
     }
     if (g_strcmp0(args[0], "admins") == 0) {
         ui_show_room_affiliation_list(window, room, MUC_AFFILIATION_ADMIN);
@@ -2120,12 +2162,12 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(room);
         if (!requires_config) {
-            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
+            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
             return TRUE;
         } else {
             iq_confirm_instant_room(room);
             muc_set_requires_config(room, FALSE);
-            win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
+            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
             cons_show("Room unlocked: %s (%d)", room, ui_index);
             return TRUE;
         }
