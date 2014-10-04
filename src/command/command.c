@@ -973,6 +973,9 @@ static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
 static Autocomplete room_ac;
+static Autocomplete room_affiliation_ac;
+static Autocomplete room_role_ac;
+static Autocomplete room_cmd_ac;
 static Autocomplete form_ac;
 
 /*
@@ -1249,6 +1252,23 @@ cmd_init(void)
     autocomplete_add(room_ac, "role");
     autocomplete_add(room_ac, "affiliation");
 
+    room_affiliation_ac = autocomplete_new();
+    autocomplete_add(room_affiliation_ac, "owner");
+    autocomplete_add(room_affiliation_ac, "admin");
+    autocomplete_add(room_affiliation_ac, "member");
+    autocomplete_add(room_affiliation_ac, "outcast");
+    autocomplete_add(room_affiliation_ac, "none");
+
+    room_role_ac = autocomplete_new();
+    autocomplete_add(room_role_ac, "moderator");
+    autocomplete_add(room_role_ac, "participant");
+    autocomplete_add(room_role_ac, "visitor");
+    autocomplete_add(room_role_ac, "none");
+
+    room_cmd_ac = autocomplete_new();
+    autocomplete_add(room_cmd_ac, "list");
+    autocomplete_add(room_cmd_ac, "set");
+
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");
     autocomplete_add(form_ac, "cancel");
@@ -1301,6 +1321,9 @@ cmd_uninit(void)
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
     autocomplete_free(room_ac);
+    autocomplete_free(room_affiliation_ac);
+    autocomplete_free(room_role_ac);
+    autocomplete_free(room_cmd_ac);
     autocomplete_free(form_ac);
 }
 
@@ -1427,6 +1450,9 @@ cmd_reset_autocomplete()
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
+    autocomplete_reset(room_affiliation_ac);
+    autocomplete_reset(room_role_ac);
+    autocomplete_reset(room_cmd_ac);
     autocomplete_reset(form_ac);
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
@@ -2242,6 +2268,36 @@ static char *
 _room_autocomplete(char *input, int *size)
 {
     char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation set", room_affiliation_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation list", room_affiliation_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room role set", room_role_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room role list", room_role_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation", room_cmd_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room role", room_cmd_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
 
     result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
     if (result != NULL) {
