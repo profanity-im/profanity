@@ -2126,18 +2126,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
-
-            // roles
-            (g_strcmp0(args[0], "moderators") != 0) &&
-            (g_strcmp0(args[0], "participants") != 0) &&
-            (g_strcmp0(args[0], "visitors") != 0) &&
-
-            // affiliations
-            (g_strcmp0(args[0], "owners") != 0) &&
-            (g_strcmp0(args[0], "admins") != 0) &&
-            (g_strcmp0(args[0], "members") != 0) &&
-            (g_strcmp0(args[0], "outcasts") != 0) &&
-
+            (g_strcmp0(args[0], "role") != 0) &&
+            (g_strcmp0(args[0], "affiliation") != 0) &&
             (g_strcmp0(args[0], "info") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
@@ -2158,48 +2148,45 @@ cmd_room(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "owners") == 0) {
-        if ((g_strcmp0(args[1], "add") == 0) || (g_strcmp0(args[1], "remove") == 0)) {
-            char *nick = args[2];
-            if (!nick) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            }
-            Occupant *occupant = muc_roster_item(room, nick);
-            if (!occupant) {
-                win_save_vprint(window, '!', NULL, 0, 0, "", "Could not find occupant: ", nick);
-                return TRUE;
-            }
-            if (!occupant->jid) {
-                win_save_vprint(window, '!', NULL, 0, 0, "", "Could not find JID for occupant: ", nick);
-                return TRUE;
-            }
-            Jid *jidp = jid_create(occupant->jid);
-            if (!jidp->barejid) {
-                win_save_vprint(window, '!', NULL, 0, 0, "", "Could not find bare JID for occupant:", nick);
-                jid_destroy(jidp);
-                return TRUE;
-            }
-
-            char *reason = args[3];
-            if (g_strcmp0(args[1], "add") == 0) {
-                if (occupant->affiliation == MUC_AFFILIATION_OWNER) {
-                    win_save_vprint(window, '!', NULL, 0, 0, "", "%s already has owner affiliation", nick);
-                } else {
-                    iq_room_owner_add(room, jidp->barejid, reason);
-                }
-            } else {
-                if (occupant->affiliation != MUC_AFFILIATION_OWNER) {
-                    const char *affiliation_str = muc_occupant_affiliation_str(occupant);
-                    win_save_vprint(window, '!', NULL, 0, 0, "",
-                        "%s does not have owner affiliation, current affiliation:", nick, affiliation_str);
-                } else {
-                    iq_room_owner_remove(room, jidp->barejid, reason);
-                }
-            }
-            jid_destroy(jidp);
+    if (g_strcmp0(args[0], "affiliation") == 0) {
+        char *cmd = args[1];
+        if (cmd == NULL) {
+            cons_show("Usage: %s", help.usage);
             return TRUE;
         }
+
+        char *affiliation = args[2];
+        if ((g_strcmp0(affiliation, "owner") != 0) &&
+                (g_strcmp0(affiliation, "admin") != 0) &&
+                (g_strcmp0(affiliation, "member") != 0) &&
+                (g_strcmp0(affiliation, "outcast") != 0) &&
+                (g_strcmp0(affiliation, "none") != 0)) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        if (g_strcmp0(cmd, "list") == 0) {
+            iq_room_affiliation_list(room, affiliation);
+            return TRUE;
+        }
+
+        if (g_strcmp0(cmd, "set") == 0) {
+            char *jid = args[3];
+            if (jid == NULL) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            } else {
+                char *reason = args[4];
+                iq_room_affiliation_set(room, jid, affiliation, reason);
+                return TRUE;
+            }
+        }
+
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "role") == 0) {
+        cons_show("/room role...");
         return TRUE;
     }
 
