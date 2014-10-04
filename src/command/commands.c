@@ -74,8 +74,8 @@ static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
 static int _strtoi(char *str, int *saveptr, int min, int max);
 static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size);
 static gint _compare_commands(Command *a, Command *b);
-static void _who_room(const char * const presence);
-static void _who_roster(const char * const group, const char * const presence);
+static void _who_room(gchar **args, struct cmd_help_t help);
+static void _who_roster(gchar **args, struct cmd_help_t help);
 
 extern GHashTable *commands;
 
@@ -723,8 +723,28 @@ cmd_theme(gchar **args, struct cmd_help_t help)
 }
 
 static void
-_who_room(const char * const presence)
+_who_room(gchar **args, struct cmd_help_t help)
 {
+    char *presence = args[0];
+    if ((g_strv_length(args) == 2) && (args[1] != NULL)) {
+        cons_show("Argument group is not applicable to chat rooms.");
+        return;
+    }
+
+    // bad arg
+    if ((presence != NULL)
+            && (strcmp(presence, "online") != 0)
+            && (strcmp(presence, "available") != 0)
+            && (strcmp(presence, "unavailable") != 0)
+            && (strcmp(presence, "away") != 0)
+            && (strcmp(presence, "chat") != 0)
+            && (strcmp(presence, "xa") != 0)
+            && (strcmp(presence, "dnd") != 0)
+            && (strcmp(presence, "any") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return;
+    }
+
     char *room = ui_current_recipient();
     GList *list = muc_roster(room);
 
@@ -778,8 +798,30 @@ _who_room(const char * const presence)
 }
 
 static void
-_who_roster(const char * const group, const char * const presence)
+_who_roster(gchar **args, struct cmd_help_t help)
 {
+    char *presence = args[0];
+
+    // bad arg
+    if ((presence != NULL)
+            && (strcmp(presence, "online") != 0)
+            && (strcmp(presence, "available") != 0)
+            && (strcmp(presence, "unavailable") != 0)
+            && (strcmp(presence, "offline") != 0)
+            && (strcmp(presence, "away") != 0)
+            && (strcmp(presence, "chat") != 0)
+            && (strcmp(presence, "xa") != 0)
+            && (strcmp(presence, "dnd") != 0)
+            && (strcmp(presence, "any") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return;
+    }
+
+    char *group = NULL;
+    if ((g_strv_length(args) == 2) && (args[1] != NULL)) {
+        group = args[1];
+    }
+
     cons_show("");
     GSList *list = NULL;
     if (group != NULL) {
@@ -965,36 +1007,10 @@ cmd_who(gchar **args, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else {
-        char *presence = args[0];
-        char *group = NULL;
-        if ((g_strv_length(args) == 2) && (args[1] != NULL)) {
-            group = args[1];
-        }
-
-        // bad arg
-        if ((presence != NULL)
-                && (strcmp(presence, "online") != 0)
-                && (strcmp(presence, "available") != 0)
-                && (strcmp(presence, "unavailable") != 0)
-                && (strcmp(presence, "offline") != 0)
-                && (strcmp(presence, "away") != 0)
-                && (strcmp(presence, "chat") != 0)
-                && (strcmp(presence, "xa") != 0)
-                && (strcmp(presence, "dnd") != 0)
-                && (strcmp(presence, "any") != 0)) {
-            cons_show("Usage: %s", help.usage);
-
+        if (win_type == WIN_MUC) {
+            _who_room(args, help);
         } else {
-            if (win_type == WIN_MUC) {
-                if (group != NULL) {
-                    cons_show("The group argument is not valid when in a chat room.");
-                } else {
-                    _who_room(presence);
-                }
-
-            } else {
-                _who_roster(group, presence);
-            }
+            _who_roster(args, help);
         }
     }
 
