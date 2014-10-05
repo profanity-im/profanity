@@ -2206,13 +2206,18 @@ cmd_room(gchar **args, struct cmd_help_t help)
         if ((g_strcmp0(affiliation, "owner") != 0) &&
                 (g_strcmp0(affiliation, "admin") != 0) &&
                 (g_strcmp0(affiliation, "member") != 0) &&
+                (g_strcmp0(affiliation, "none") != 0) &&
                 (g_strcmp0(affiliation, "outcast") != 0)) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
         }
 
         if (g_strcmp0(cmd, "list") == 0) {
-            iq_room_affiliation_list(room, affiliation);
+            if (g_strcmp0(affiliation, "none") == 0) {
+                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
+            } else {
+                iq_room_affiliation_list(room, affiliation);
+            }
             return TRUE;
         }
 

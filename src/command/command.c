@@ -1259,6 +1259,7 @@ cmd_init(void)
     autocomplete_add(room_affiliation_ac, "owner");
     autocomplete_add(room_affiliation_ac, "admin");
     autocomplete_add(room_affiliation_ac, "member");
+    autocomplete_add(room_affiliation_ac, "none");
     autocomplete_add(room_affiliation_ac, "outcast");
 
     room_role_ac = autocomplete_new();
