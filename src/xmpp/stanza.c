@@ -221,6 +221,29 @@ stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
 }
 
 xmpp_stanza_t *
+stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char * const room, const char * const subject)
+{
+    xmpp_stanza_t *msg = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
+    xmpp_stanza_set_type(msg, STANZA_TYPE_GROUPCHAT);
+    xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, room);
+
+    xmpp_stanza_t *subject_st = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(subject_st, STANZA_NAME_SUBJECT);
+    if (subject) {
+        xmpp_stanza_t *subject_text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(subject_text, subject);
+        xmpp_stanza_add_child(subject_st, subject_text);
+        xmpp_stanza_release(subject_text);
+    }
+
+    xmpp_stanza_add_child(msg, subject_st);
+    xmpp_stanza_release(subject_st);
+
+    return msg;
+}
+
+xmpp_stanza_t *
 stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     const char * const type, const char * const message,
     const char * const state)

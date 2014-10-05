@@ -51,7 +51,7 @@ void handle_room_invite(jabber_invite_t invite_type,
     const char * const reason);
 void handle_room_broadcast(const char *const room_jid,
     const char * const message);
-void handle_room_subject(const char * const room_jid, const char * const subject);
+void handle_room_subject(const char * const room, const char * const nick, const char * const subject);
 void handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void handle_room_message(const char * const room_jid, const char * const nick,

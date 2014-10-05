@@ -232,7 +232,11 @@ muc_set_subject(const char * const room, const char * const subject)
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         free(chat_room->subject);
-        chat_room->subject = strdup(subject);
+        if (subject) {
+            chat_room->subject = strdup(subject);
+        } else {
+            chat_room->subject = NULL;
+        }
     }
 }
 

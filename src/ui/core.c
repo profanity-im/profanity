@@ -1704,16 +1704,29 @@ _ui_room_destroyed(const char * const room_jid)
 }
 
 static void
-_ui_room_subject(const char * const room_jid, const char * const subject)
+_ui_room_subject(const char * const room, const char * const nick, const char * const subject)
 {
-    ProfWin *window = wins_get_by_recipient(room_jid);
+    ProfWin *window = wins_get_by_recipient(room);
     if (window == NULL) {
-        log_error("Received room subject, but no window open for %s.", room_jid);
+        log_error("Received room subject, but no window open for %s.", room);
     } else {
         int num = wins_get_num(window);
 
-        win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
-        win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
+        if (subject) {
+            if (nick) {
+                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "*%s has set the room subject: ", nick);
+                win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
+            } else {
+                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
+                win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
+            }
+        } else {
+            if (nick) {
+                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "*%s has cleared the room subject: ", nick);
+            } else {
+                win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room subject cleared");
+            }
+        }
 
         // currently in groupchat window
         if (wins_is_current(window)) {

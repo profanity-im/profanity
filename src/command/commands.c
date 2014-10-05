@@ -2126,6 +2126,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
+            (g_strcmp0(args[0], "subject") != 0) &&
             (g_strcmp0(args[0], "role") != 0) &&
             (g_strcmp0(args[0], "affiliation") != 0) &&
             (g_strcmp0(args[0], "info") != 0)) {
@@ -2145,6 +2146,36 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "info") == 0) {
         iq_room_info_request(room);
         ui_show_room_info(window, room);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "subject") == 0) {
+        if (args[1] == NULL) {
+            char *subject = muc_subject(room);
+            if (subject) {
+                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
+                win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
+            } else {
+                win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room has no subject");
+            }
+            return TRUE;
+        }
+
+        if (g_strcmp0(args[1], "set") == 0) {
+            if (args[2]) {
+                message_send_groupchat_subject(room, args[2]);
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+            return TRUE;
+        }
+
+        if (g_strcmp0(args[1], "clear") == 0) {
+            message_send_groupchat_subject(room, NULL);
+            return TRUE;
+        }
+
+        cons_show("Usage: %s", help.usage);
         return TRUE;
     }
 

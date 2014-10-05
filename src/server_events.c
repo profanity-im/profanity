@@ -239,11 +239,11 @@ handle_room_broadcast(const char *const room_jid,
 }
 
 void
-handle_room_subject(const char * const room_jid, const char * const subject)
+handle_room_subject(const char * const room, const char * const nick, const char * const subject)
 {
-    muc_set_subject(room_jid, subject);
-    if (muc_roster_complete(room_jid)) {
-        ui_room_subject(room_jid, subject);
+    muc_set_subject(room, subject);
+    if (muc_roster_complete(room)) {
+        ui_room_subject(room, nick, subject);
     }
 }
 
@@ -553,7 +553,7 @@ handle_room_roster_complete(const char * const room)
 
     char *subject = muc_subject(room);
     if (subject != NULL) {
-        ui_room_subject(room, subject);
+        ui_room_subject(room, NULL, subject);
     }
 
     GList *pending_broadcasts = muc_pending_broadcasts(room);

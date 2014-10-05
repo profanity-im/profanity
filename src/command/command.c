@@ -976,6 +976,7 @@ static Autocomplete room_ac;
 static Autocomplete room_affiliation_ac;
 static Autocomplete room_role_ac;
 static Autocomplete room_cmd_ac;
+static Autocomplete room_subject_ac;
 static Autocomplete form_ac;
 
 /*
@@ -1249,6 +1250,7 @@ cmd_init(void)
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
     autocomplete_add(room_ac, "info");
+    autocomplete_add(room_ac, "subject");
     autocomplete_add(room_ac, "role");
     autocomplete_add(room_ac, "affiliation");
 
@@ -1267,6 +1269,10 @@ cmd_init(void)
     room_cmd_ac = autocomplete_new();
     autocomplete_add(room_cmd_ac, "list");
     autocomplete_add(room_cmd_ac, "set");
+
+    room_subject_ac = autocomplete_new();
+    autocomplete_add(room_subject_ac, "set");
+    autocomplete_add(room_subject_ac, "clear");
 
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");
@@ -1323,6 +1329,7 @@ cmd_uninit(void)
     autocomplete_free(room_affiliation_ac);
     autocomplete_free(room_role_ac);
     autocomplete_free(room_cmd_ac);
+    autocomplete_free(room_subject_ac);
     autocomplete_free(form_ac);
 }
 
@@ -1452,6 +1459,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(room_affiliation_ac);
     autocomplete_reset(room_role_ac);
     autocomplete_reset(room_cmd_ac);
+    autocomplete_reset(room_subject_ac);
     autocomplete_reset(form_ac);
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
@@ -2294,6 +2302,11 @@ _room_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/room role", room_cmd_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room subject", room_subject_ac, TRUE);
     if (result != NULL) {
         return result;
     }

@@ -125,6 +125,17 @@ _message_send_groupchat(const char * const msg, const char * const recipient)
 }
 
 static void
+_message_send_groupchat_subject(const char * const room, const char * const subject)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *message = stanza_create_room_subject_message(ctx, room, subject);
+
+    xmpp_send(conn, message);
+    xmpp_stanza_release(message);
+}
+
+static void
 _message_send_duck(const char * const query)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -361,10 +372,8 @@ _groupchat_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
     if (subject != NULL) {
         message = xmpp_stanza_get_text(subject);
-        if (message != NULL) {
-            handle_room_subject(jid->barejid, message);
-            xmpp_free(ctx, message);
-        }
+        handle_room_subject(jid->barejid, jid->resourcepart, message);
+        xmpp_free(ctx, message);
 
         jid_destroy(jid);
         return 1;
@@ -530,4 +539,5 @@ message_init_module(void)
     message_send_paused = _message_send_paused;
     message_send_inactive = _message_send_inactive;
     message_send_gone = _message_send_gone;
+    message_send_groupchat_subject = _message_send_groupchat_subject;
 }
