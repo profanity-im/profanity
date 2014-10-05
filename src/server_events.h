@@ -65,7 +65,6 @@ void handle_room_affiliation_list(const char * const room, const char * const af
 void handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
     const char * const error);
 void handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation);
-void handle_room_kick(const char * const room, const char * const nick);
 void handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
 void handle_duck_result(const char * const result);
 void handle_incoming_message(char *from, char *message, gboolean priv);
@@ -91,6 +90,11 @@ void handle_room_member_offline(const char * const room, const char * const nick
     const char * const show, const char * const status);
 void handle_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick);
+void handle_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
+    const char * const reason);
+void handle_room_kicked(const char * const room, const char * const actor, const char * const reason);
+void handle_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason);
 void handle_group_add(const char * const contact,
     const char * const group);
 void handle_group_remove(const char * const contact,

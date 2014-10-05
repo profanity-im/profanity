@@ -960,7 +960,6 @@ _room_kick_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
         return 0;
     }
 
-    handle_room_kick(from, nick);
     free(nick);
 
     return 0;

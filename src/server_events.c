@@ -490,6 +490,7 @@ void
 handle_leave_room(const char * const room)
 {
     muc_leave(room);
+    ui_leave_room(room);
 }
 
 void
@@ -511,7 +512,22 @@ void
 handle_room_destroy(const char * const room)
 {
     muc_leave(room);
-    ui_room_destroyed(room);
+    ui_room_destroy(room);
+}
+
+void
+handle_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
+    const char * const reason)
+{
+    muc_leave(room);
+    ui_room_destroyed(room, reason, new_jid, password);
+}
+
+void
+handle_room_kicked(const char * const room, const char * const actor, const char * const reason)
+{
+    muc_leave(room);
+    ui_room_kicked(room, actor, reason);
 }
 
 void
@@ -536,12 +552,6 @@ void
 handle_room_config_submit_result_error(const char * const room, const char * const message)
 {
     ui_handle_room_config_submit_result_error(room, message);
-}
-
-void
-handle_room_kick(const char * const room, const char * const nick)
-{
-    ui_handle_room_kick(room, nick);
 }
 
 void
@@ -618,6 +628,15 @@ handle_room_member_offline(const char * const room, const char * const nick,
     }
     prefs_free_string(muc_status_pref);
 }
+
+void
+handle_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason)
+{
+    muc_roster_remove(room, nick);
+    ui_room_member_kicked(room, nick, actor, reason);
+}
+
 
 void
 handle_room_member_nick_change(const char * const room,

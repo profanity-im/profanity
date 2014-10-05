@@ -1010,6 +1010,156 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
     return FALSE;
 }
 
+GSList *
+stanza_get_status_codes_by_ns(xmpp_stanza_t * const stanza, char *ns)
+{
+    GSList *codes = NULL;
+    xmpp_stanza_t *ns_child = xmpp_stanza_get_child_by_ns(stanza, ns);
+    if (ns_child) {
+        xmpp_stanza_t *child = xmpp_stanza_get_children(ns_child);
+        while (child) {
+            char *name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(name, STANZA_NAME_STATUS) == 0) {
+                char *code = xmpp_stanza_get_attribute(child, STANZA_ATTR_CODE);
+                if (code) {
+                    codes = g_slist_append(codes, code);
+                }
+            }
+            child = xmpp_stanza_get_next(child);
+        }
+    }
+    return codes;
+}
+
+gboolean
+stanza_room_destroyed(xmpp_stanza_t *stanza)
+{
+    char *stanza_name = xmpp_stanza_get_name(stanza);
+    if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+        if (x) {
+            xmpp_stanza_t *destroy = xmpp_stanza_get_child_by_name(x, STANZA_NAME_DESTROY);
+            if (destroy) {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+char *
+stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza)
+{
+    char *stanza_name = xmpp_stanza_get_name(stanza);
+    if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+        if (x) {
+            xmpp_stanza_t *destroy = xmpp_stanza_get_child_by_name(x, STANZA_NAME_DESTROY);
+            if (destroy) {
+                char *jid = xmpp_stanza_get_attribute(destroy, STANZA_ATTR_JID);
+                if (jid) {
+                    return jid;
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+
+char *
+stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza)
+{
+    char *stanza_name = xmpp_stanza_get_name(stanza);
+    if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+        if (x) {
+            xmpp_stanza_t *destroy = xmpp_stanza_get_child_by_name(x, STANZA_NAME_DESTROY);
+            if (destroy) {
+                xmpp_stanza_t *password_st = xmpp_stanza_get_child_by_name(destroy, STANZA_NAME_PASSWORD);
+                if (password_st) {
+                    char *password = xmpp_stanza_get_text(password_st);
+                    if (password) {
+                        return password;
+                    }
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+char *
+stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza)
+{
+    char *stanza_name = xmpp_stanza_get_name(stanza);
+    if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+        if (x) {
+            xmpp_stanza_t *destroy = xmpp_stanza_get_child_by_name(x, STANZA_NAME_DESTROY);
+            if (destroy) {
+                xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(destroy, STANZA_NAME_REASON);
+                if (reason_st) {
+                    char *reason = xmpp_stanza_get_text(reason_st);
+                    if (reason) {
+                        return reason;
+                    }
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+char *
+stanza_get_kick_actor(xmpp_stanza_t *stanza)
+{
+    char *stanza_name = xmpp_stanza_get_name(stanza);
+    if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+        if (x) {
+            xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
+            if (item) {
+                xmpp_stanza_t *actor = xmpp_stanza_get_child_by_name(item, STANZA_NAME_ACTOR);
+                if (actor) {
+                    char *nick = xmpp_stanza_get_attribute(actor, STANZA_ATTR_NICK);
+                    if (nick) {
+                        return nick;
+                    }
+                    char *jid = xmpp_stanza_get_attribute(actor, STANZA_ATTR_JID);
+                    if (jid) {
+                        return jid;
+                    }
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+char *
+stanza_get_kick_reason(xmpp_stanza_t *stanza)
+{
+    char *stanza_name = xmpp_stanza_get_name(stanza);
+    if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
+        xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+        if (x) {
+            xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
+            if (item) {
+                xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(item, STANZA_NAME_REASON);
+                if (reason_st) {
+                    char *reason = xmpp_stanza_get_text(reason_st);
+                    if (reason) {
+                        return reason;
+                    }
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
 gboolean
 stanza_is_room_nick_change(xmpp_stanza_t * const stanza)
 {

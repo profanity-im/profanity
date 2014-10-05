@@ -1494,6 +1494,31 @@ _ui_room_member_offline(const char * const room, const char * const nick)
 }
 
 static void
+_ui_room_member_kicked(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Received kick for room participant %s, but no window open for %s.", nick, room);
+    } else {
+        GString *message = g_string_new(nick);
+        g_string_append(message, " has been kicked from the room");
+        if (actor) {
+            g_string_append(message, " by ");
+            g_string_append(message, actor);
+        }
+        if (reason) {
+            g_string_append(message, ", reason: ");
+            g_string_append(message, reason);
+        }
+
+        win_save_vprint(window, '!', NULL, 0, COLOUR_OFFLINE, "", "<- %s", message->str);
+        g_string_free(message, TRUE);
+    }
+}
+
+
+static void
 _ui_room_member_online(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
@@ -1691,7 +1716,7 @@ _ui_room_requires_config(const char * const room_jid)
 }
 
 static void
-_ui_room_destroyed(const char * const room_jid)
+_ui_room_destroy(const char * const room_jid)
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
     if (window == NULL) {
@@ -1700,6 +1725,71 @@ _ui_room_destroyed(const char * const room_jid)
         int num = wins_get_num(window);
         ui_close_win(num);
         cons_show("Room destroyed: %s", room_jid);
+    }
+}
+
+static void
+_ui_leave_room(const char * const room)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        int num = wins_get_num(window);
+        ui_close_win(num);
+    }
+}
+
+static void
+_ui_room_destroyed(const char * const room, const char * const reason, const char * const new_jid,
+    const char * const password)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Received room destroy, but no window open for %s.", room);
+    } else {
+        int num = wins_get_num(window);
+        ui_close_win(num);
+        ProfWin *console = wins_get_console();
+
+        if (reason) {
+            win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "<- Room destroyed: %s, reason: %s", room, reason);
+        } else {
+            win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "<- Room destroyed: %s", room);
+        }
+
+        if (new_jid) {
+            if (password) {
+                win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "Replacement room: %s, password: %s", new_jid, password);
+            } else {
+                win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "Replacement room: %s", new_jid);
+            }
+        }
+    }
+}
+
+static void
+_ui_room_kicked(const char * const room, const char * const actor, const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Received kick, but no window open for %s.", room);
+    } else {
+        int num = wins_get_num(window);
+        ui_close_win(num);
+
+        GString *message = g_string_new("Kicked from ");
+        g_string_append(message, room);
+        if (actor) {
+            g_string_append(message, " by ");
+            g_string_append(message, actor);
+        }
+        if (reason) {
+            g_string_append(message, ", reason: ");
+            g_string_append(message, reason);
+        }
+
+        ProfWin *console = wins_get_console();
+        win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "<- %s", message->str);
+        g_string_free(message, TRUE);
     }
 }
 
@@ -1747,17 +1837,6 @@ _ui_handle_room_kick_error(const char * const room, const char * const nick, con
         log_error("Kick error received for %s, but no window open for %s.", nick, room);
     } else {
         win_save_vprint(window, '!', NULL, 0, COLOUR_ERROR, "", "Error kicking %s: %s", nick, error);
-    }
-}
-
-static void
-_ui_handle_room_kick(const char * const room, const char * const nick)
-{
-    ProfWin *window = wins_get_by_recipient(room);
-    if (window == NULL) {
-        log_error("Kick result received for %s, but no window open for %s.", nick, room);
-    } else {
-        win_save_vprint(window, '!', NULL, 0, 0, "", "%s has been kicked from the room", nick);
     }
 }
 
@@ -2766,7 +2845,7 @@ ui_init_module(void)
     ui_swap_wins = _ui_swap_wins;
     ui_update = _ui_update;
     ui_room_requires_config = _ui_room_requires_config;
-    ui_room_destroyed = _ui_room_destroyed;
+    ui_room_destroy = _ui_room_destroy;
     ui_handle_room_configuration = _ui_handle_room_configuration;
     ui_handle_room_config_submit_result = _ui_handle_room_config_submit_result;
     ui_handle_room_config_submit_result_error = _ui_handle_room_config_submit_result_error;
@@ -2783,9 +2862,13 @@ ui_init_module(void)
     ui_handle_room_info_error = _ui_handle_room_info_error;
     ui_show_room_disco_info = _ui_show_room_disco_info;
     ui_handle_room_affiliation_list_error = _ui_handle_room_affiliation_list_error;
-    ui_handle_room_affiliation_list =_ui_handle_room_affiliation_list;
-    ui_handle_room_affiliation_set_error =_ui_handle_room_affiliation_set_error;
+    ui_handle_room_affiliation_list = _ui_handle_room_affiliation_list;
+    ui_handle_room_affiliation_set_error = _ui_handle_room_affiliation_set_error;
     ui_handle_room_affiliation_set = _ui_handle_room_affiliation_set;
-    ui_handle_room_kick_error =_ui_handle_room_kick_error;
-    ui_handle_room_kick = _ui_handle_room_kick;
+    ui_handle_room_kick_error = _ui_handle_room_kick_error;
+    ui_room_destroyed = _ui_room_destroyed;
+    ui_room_kicked = _ui_room_kicked;
+    ui_leave_room = _ui_leave_room;
+    ui_room_member_kicked = _ui_room_member_kicked;
 }
+

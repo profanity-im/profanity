@@ -76,6 +76,7 @@
 #define STANZA_NAME_CONFERENCE "conference"
 #define STANZA_NAME_VALUE "value"
 #define STANZA_NAME_DESTROY "destroy"
+#define STANZA_NAME_ACTOR "actor"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -247,5 +248,13 @@ xmpp_stanza_t * stanza_create_roster_remove_set(xmpp_ctx_t *ctx,
     const char * const barejid);
 
 char * stanza_get_error_message(xmpp_stanza_t * const stanza);
+
+GSList* stanza_get_status_codes_by_ns(xmpp_stanza_t * const stanza, char *ns);
+gboolean stanza_room_destroyed(xmpp_stanza_t *stanza);
+char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
+char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
+char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
+char* stanza_get_kick_actor(xmpp_stanza_t *stanza);
+char* stanza_get_kick_reason(xmpp_stanza_t *stanza);
 
 #endif

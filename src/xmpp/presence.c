@@ -704,7 +704,30 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             if (new_nick != NULL) {
                 muc_nick_change_start(from_room, new_nick);
             } else {
-                handle_leave_room(from_room);
+                GSList *status_codes = stanza_get_status_codes_by_ns(stanza, STANZA_NS_MUC_USER);
+
+                // room destroyed
+                if (stanza_room_destroyed(stanza)) {
+                    char *new_jid = stanza_get_muc_destroy_alternative_room(stanza);
+                    char *password = stanza_get_muc_destroy_alternative_password(stanza);
+                    char *reason = stanza_get_muc_destroy_reason(stanza);
+                    handle_room_destroyed(from_room, new_jid, password, reason);
+                    free(password);
+                    free(reason);
+
+                // kicked from room
+                } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
+                    char *actor = stanza_get_kick_actor(stanza);
+                    char *reason = stanza_get_kick_reason(stanza);
+                    handle_room_kicked(from_room, actor, reason);
+                    free(reason);
+
+                // normal exit
+                } else {
+                    handle_leave_room(from_room);
+                }
+
+                g_slist_free(status_codes);
             }
 
         // self online
@@ -756,7 +779,19 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                     free(new_nick);
                 }
             } else {
-                handle_room_member_offline(from_room, from_nick, "offline", status_str);
+                GSList *status_codes = stanza_get_status_codes_by_ns(stanza, STANZA_NS_MUC_USER);
+
+                // kicked from room
+                if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
+                    char *actor = stanza_get_kick_actor(stanza);
+                    char *reason = stanza_get_kick_reason(stanza);
+                    handle_room_occupent_kicked(from_room, from_nick, actor, reason);
+                    free(reason);
+
+                // normal exit
+                } else {
+                    handle_room_member_offline(from_room, from_nick, "offline", status_str);
+                }
             }
         } else {
             // send disco info for capabilities, if not cached
