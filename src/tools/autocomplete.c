@@ -62,7 +62,7 @@ autocomplete_new(void)
 void
 autocomplete_clear(Autocomplete ac)
 {
-    if (ac != NULL) {
+    if (ac) {
         g_slist_free_full(ac->items, free);
         ac->items = NULL;
 
@@ -80,16 +80,18 @@ autocomplete_reset(Autocomplete ac)
 void
 autocomplete_free(Autocomplete ac)
 {
-    autocomplete_clear(ac);
-    free(ac);
+    if (ac) {
+        autocomplete_clear(ac);
+        free(ac);
+    }
 }
 
 gint
 autocomplete_length(Autocomplete ac)
 {
-    if (ac == NULL) {
+    if (!ac) {
         return 0;
-    } else if (ac->items == NULL) {
+    } else if (!ac->items) {
         return 0;
     } else {
         return g_slist_length(ac->items);
@@ -99,25 +101,26 @@ autocomplete_length(Autocomplete ac)
 void
 autocomplete_add(Autocomplete ac, const char *item)
 {
-    if (ac != NULL) {
+    if (ac) {
         char *item_cpy;
         GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
         // if item already exists
-        if (curr != NULL) {
+        if (curr) {
             return;
         }
 
         item_cpy = strdup(item);
         ac->items = g_slist_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
     }
+
     return;
 }
 
 void
 autocomplete_remove(Autocomplete ac, const char * const item)
 {
-    if (ac != NULL) {
+    if (ac) {
         GSList *curr = g_slist_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
         if (!curr) {
@@ -137,7 +140,7 @@ autocomplete_remove(Autocomplete ac, const char * const item)
 }
 
 GSList *
-autocomplete_get_list(Autocomplete ac)
+autocomplete_create_list(Autocomplete ac)
 {
     GSList *copy = NULL;
     GSList *curr = ac->items;
@@ -171,36 +174,43 @@ autocomplete_complete(Autocomplete ac, gchar *search_str, gboolean quote)
     gchar *found = NULL;
 
     // no autocomplete to search
-    if (ac == NULL)
+    if (!ac) {
         return NULL;
+    }
 
     // no items to search
-    if (!ac->items)
+    if (!ac->items) {
         return NULL;
+    }
 
     // first search attempt
-    if (ac->last_found == NULL) {
-        if (ac->search_str != NULL) {
+    if (!ac->last_found) {
+        if (ac->search_str) {
             FREE_SET_NULL(ac->search_str);
         }
+
         ac->search_str = strdup(search_str);
         found = _search_from(ac, ac->items, quote);
+
         return found;
 
     // subsequent search attempt
     } else {
         // search from here+1 to end
         found = _search_from(ac, g_slist_next(ac->last_found), quote);
-        if (found != NULL)
+        if (found) {
             return found;
+        }
 
         // search from beginning
         found = _search_from(ac, ac->items, quote);
-        if (found != NULL)
+        if (found) {
             return found;
+        }
 
         // we found nothing, reset search
         autocomplete_reset(ac);
+
         return NULL;
     }
 }
@@ -224,7 +234,7 @@ autocomplete_param_with_func(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
 
         char *found = func(inp_cpy);
-        if (found != NULL) {
+        if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
             free(found);
@@ -254,7 +264,7 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
         inp_cpy[(*size) - len] = '\0';
 
         char *found = autocomplete_complete(ac, inp_cpy, quote);
-        if (found != NULL) {
+        if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
             free(found);
@@ -292,9 +302,9 @@ autocomplete_param_no_with_func(char *input, int *size, char *command,
             gchar *comp_str = g_strdup(&inp_cpy[strlen(start_str)]);
 
             // autocomplete param
-            if (comp_str != NULL) {
+            if (comp_str) {
                 char *found = func(comp_str);
-                if (found != NULL) {
+                if (found) {
                     result_str = g_string_new("");
                     g_string_append(result_str, start_str);
                     g_string_append(result_str, found);

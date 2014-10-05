@@ -76,6 +76,7 @@
 #define STANZA_NAME_CONFERENCE "conference"
 #define STANZA_NAME_VALUE "value"
 #define STANZA_NAME_DESTROY "destroy"
+#define STANZA_NAME_ACTOR "actor"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -144,6 +145,7 @@
 #define STANZA_NS_MUC "http://jabber.org/protocol/muc"
 #define STANZA_NS_MUC_USER "http://jabber.org/protocol/muc#user"
 #define STANZA_NS_MUC_OWNER "http://jabber.org/protocol/muc#owner"
+#define STANZA_NS_MUC_ADMIN "http://jabber.org/protocol/muc#admin"
 #define STANZA_NS_CAPS "http://jabber.org/protocol/caps"
 #define STANZA_NS_PING "urn:xmpp:ping"
 #define STANZA_NS_LASTACTIVITY "jabber:iq:last"
@@ -204,6 +206,13 @@ xmpp_stanza_t* stanza_create_room_config_cancel_iq(xmpp_ctx_t *ctx,
     const char * const room_jid);
 xmpp_stanza_t* stanza_create_room_config_submit_iq(xmpp_ctx_t *ctx,
     const char * const room, DataForm *form);
+xmpp_stanza_t* stanza_create_room_affiliation_list_iq(xmpp_ctx_t *ctx, const char * const room,
+    const char * const affiliation);
+xmpp_stanza_t* stanza_create_room_affiliation_set_iq(xmpp_ctx_t *ctx, const char * const room, const char * const jid,
+    const char * const affiliation, const char * const reason);
+xmpp_stanza_t* stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char * const room, const char * const subject);
+xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t * const ctx, const char * const room, const char * const nick,
+    const char * const reason);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);
@@ -239,5 +248,13 @@ xmpp_stanza_t * stanza_create_roster_remove_set(xmpp_ctx_t *ctx,
     const char * const barejid);
 
 char * stanza_get_error_message(xmpp_stanza_t * const stanza);
+
+GSList* stanza_get_status_codes_by_ns(xmpp_stanza_t * const stanza, char *ns);
+gboolean stanza_room_destroyed(xmpp_stanza_t *stanza);
+char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
+char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
+char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
+char* stanza_get_kick_actor(xmpp_stanza_t *stanza);
+char* stanza_get_kick_reason(xmpp_stanza_t *stanza);
 
 #endif

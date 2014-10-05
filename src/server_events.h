@@ -51,12 +51,21 @@ void handle_room_invite(jabber_invite_t invite_type,
     const char * const reason);
 void handle_room_broadcast(const char *const room_jid,
     const char * const message);
-void handle_room_subject(const char * const room_jid, const char * const subject);
+void handle_room_subject(const char * const room, const char * const nick, const char * const subject);
 void handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message);
 void handle_room_join_error(const char * const room, const char * const err);
+void handle_room_info_error(const char * const room, const char * const error);
+void handle_room_disco_info(const char * const room, GSList *identities, GSList *features);
+void handle_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
+    const char * const error);
+void handle_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids);
+void handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
+    const char * const error);
+void handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation);
+void handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
 void handle_duck_result(const char * const result);
 void handle_incoming_message(char *from, char *message, gboolean priv);
 void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
@@ -73,15 +82,19 @@ void handle_room_nick_change(const char * const room,
 void handle_room_requires_config(const char * const room);
 void handle_room_destroy(const char * const room);
 void handle_room_roster_complete(const char * const room);
-void handle_room_member_presence(const char * const room,
-    const char * const nick, const char * const show,
-    const char * const status);
-void handle_room_member_online(const char * const room, const char * const nick,
-    const char * const show, const char * const status);
+void handle_room_member_presence(const char * const room, const char * const nick, const char * const  jid,
+    const char * const role, const char * const affiliation, const char * const show, const char * const status);
+void handle_room_member_online(const char * const room, const char * const nick, const char * const  jid,
+    const char * const role, const char * const affiliation, const char * const show, const char * const status);
 void handle_room_member_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status);
 void handle_room_member_nick_change(const char * const room,
     const char * const old_nick, const char * const nick);
+void handle_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
+    const char * const reason);
+void handle_room_kicked(const char * const room, const char * const actor, const char * const reason);
+void handle_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason);
 void handle_group_add(const char * const contact,
     const char * const group);
 void handle_group_remove(const char * const contact,

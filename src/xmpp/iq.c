@@ -80,6 +80,12 @@ static int _room_config_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_config_submit_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_affiliation_list_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_kick_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
@@ -147,6 +153,20 @@ _iq_disco_info_request(gchar *jid)
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
     xmpp_id_handler_add(conn, _disco_info_response_handler, id, NULL);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_info_request(gchar *room)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    char *id = create_unique_id("room_disco_info");
+    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
+
+    xmpp_id_handler_add(conn, _disco_info_response_handler, id, room);
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
@@ -257,6 +277,59 @@ _iq_room_config_cancel(const char * const room_jid)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_room_config_cancel_iq(ctx, room_jid);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_affiliation_list(const char * const room, char *affiliation)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_affiliation_list_iq(ctx, room, affiliation);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_affiliation_list_result_handler, id, strdup(affiliation));
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_kick_occupant(const char * const room, const char * const nick, const char * const reason)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_kick_iq(ctx, room, nick, reason);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_kick_result_handler, id, strdup(nick));
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+struct affiliation_set_t {
+    char *jid;
+    char *affiliation;
+};
+
+static void
+_iq_room_affiliation_set(const char * const room, const char * const jid, char *affiliation,
+    const char * const reason)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_affiliation_set_iq(ctx, room, jid, affiliation, reason);
+
+    char *id = xmpp_stanza_get_id(iq);
+
+    struct affiliation_set_t *affiliation_set = malloc(sizeof(struct affiliation_set_t));
+    affiliation_set->jid = strdup(jid);
+    affiliation_set->affiliation = strdup(affiliation);
+
+    xmpp_id_handler_add(conn, _room_affiliation_set_result_handler, id, affiliation_set);
+
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -493,16 +566,17 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         os_str = xmpp_stanza_get_text(os);
     }
 
-    PContact contact;
     Jid *jidp = jid_create(jid);
-    if (muc_room_is_active(jidp->barejid)) {
-        contact = muc_get_participant(jidp->barejid, jidp->resourcepart);
+    const char *presence = NULL;
+    if (muc_active(jidp->barejid)) {
+        Occupant *occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
+        presence = string_from_resource_presence(occupant->presence);
     } else {
-        contact = roster_get_contact(jidp->barejid);
+        PContact contact = roster_get_contact(jidp->barejid);
+        Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
+        presence = string_from_resource_presence(resource->presence);
     }
 
-    Resource *resource = p_contact_get_resource(contact, jidp->resourcepart);
-    const char *presence = string_from_resource_presence(resource->presence);
     handle_software_version_result(jid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
@@ -761,6 +835,81 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     return 0;
 }
 
+static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    struct affiliation_set_t *affiliation_set = (struct affiliation_set_t *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ affiliation set handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ affiliation set handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_affiliation_set_error(from, affiliation_set->jid, affiliation_set->affiliation, error_message);
+        free(error_message);
+    } else {
+        handle_room_affiliation_set(from, affiliation_set->jid, affiliation_set->affiliation);
+    }
+
+    free(affiliation_set->jid);
+    free(affiliation_set->affiliation);
+    free(affiliation_set);
+
+    return 0;
+}
+
+static int
+_room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *affiliation = (char *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ affiliation list result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ affiliation list result handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_affiliation_list_result_error(from, affiliation, error_message);
+        free(error_message);
+        free(affiliation);
+        return 0;
+    }
+    GSList *jids = NULL;
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_ADMIN);
+    if (query) {
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+        while (child) {
+            char *name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(name, "item") == 0) {
+                char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+                if (jid) {
+                    jids = g_slist_insert_sorted(jids, jid, (GCompareFunc)g_strcmp0);
+                }
+            }
+            child = xmpp_stanza_get_next(child);
+        }
+    }
+
+    handle_room_affiliation_list(from, affiliation, jids);
+    free(affiliation);
+
+    return 0;
+}
+
 static int
 _room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
@@ -784,6 +933,34 @@ _room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     }
 
     handle_room_config_submit_result(from);
+
+    return 0;
+}
+
+static int
+_room_kick_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *nick = (char *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ kick result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ kick result handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_kick_result_error(from, nick, error_message);
+        free(error_message);
+        free(nick);
+        return 0;
+    }
+
+    free(nick);
 
     return 0;
 }
@@ -813,15 +990,30 @@ static int
 _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
-    log_info("Received diso#info response");
-
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     const char *type = xmpp_stanza_get_type(stanza);
+
+    char *room = NULL;
+    if (userdata) {
+        room = (char *) userdata;
+        log_info("Received diso#info response for room: %s", room);
+    } else {
+        room = NULL;
+        if (from) {
+            log_info("Received diso#info response from: %s", from);
+        } else {
+            log_info("Received diso#info response");
+        }
+    }
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        handle_disco_info_error(from, error_message);
+        if (room) {
+            handle_room_info_error(room, error_message);
+        } else {
+            handle_disco_info_error(from, error_message);
+        }
         free(error_message);
         return 0;
     }
@@ -870,7 +1062,12 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
             child = xmpp_stanza_get_next(child);
         }
 
-        handle_disco_info(from, identities, features);
+        if (room) {
+            handle_room_disco_info(room, identities, features);
+        } else {
+            handle_disco_info(from, identities, features);
+        }
+
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
     }
@@ -941,4 +1138,8 @@ iq_init_module(void)
     iq_room_config_cancel = _iq_room_config_cancel;
     iq_submit_room_config = _iq_submit_room_config;
     iq_send_caps_request = _iq_send_caps_request;
+    iq_room_info_request = _iq_room_info_request;
+    iq_room_affiliation_set = _iq_room_affiliation_set;
+    iq_room_affiliation_list = _iq_room_affiliation_list;
+    iq_room_kick_occupant = _iq_room_kick_occupant;
 }

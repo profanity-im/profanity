@@ -89,6 +89,7 @@ static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
 static char * _form_autocomplete(char *input, int *size);
+static char * _room_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -307,13 +308,14 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args, 1, 1, NULL,
-        { "/room accept|destroy|config", "Room configuration.",
-        { "/room accept|destroy|config",
-          "---------------------------",
+        cmd_room, parse_args_with_freetext, 1, 5, NULL,
+        { "/room accept|destroy|config|info", "Room configuration.",
+        { "/room accept|destroy|config|info",
+          "--------------------------------",
           "accept  - Accept default room configuration.",
           "destroy - Reject default room configuration.",
           "config  - Edit room configuration.",
+          "info    - Show room details.",
           NULL } } },
 
     { "/form",
@@ -944,7 +946,8 @@ static struct cmd_t command_defs[] =
 };
 
 static Autocomplete commands_ac;
-static Autocomplete who_ac;
+static Autocomplete who_room_ac;
+static Autocomplete who_roster_ac;
 static Autocomplete help_ac;
 static Autocomplete notify_ac;
 static Autocomplete notify_room_ac;
@@ -979,6 +982,10 @@ static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
 static Autocomplete room_ac;
+static Autocomplete room_affiliation_ac;
+static Autocomplete room_role_ac;
+static Autocomplete room_cmd_ac;
+static Autocomplete room_subject_ac;
 static Autocomplete form_ac;
 
 /*
@@ -1159,16 +1166,32 @@ cmd_init(void)
 
     theme_load_ac = NULL;
 
-    who_ac = autocomplete_new();
-    autocomplete_add(who_ac, "chat");
-    autocomplete_add(who_ac, "online");
-    autocomplete_add(who_ac, "away");
-    autocomplete_add(who_ac, "xa");
-    autocomplete_add(who_ac, "dnd");
-    autocomplete_add(who_ac, "offline");
-    autocomplete_add(who_ac, "available");
-    autocomplete_add(who_ac, "unavailable");
-    autocomplete_add(who_ac, "any");
+    who_roster_ac = autocomplete_new();
+    autocomplete_add(who_roster_ac, "chat");
+    autocomplete_add(who_roster_ac, "online");
+    autocomplete_add(who_roster_ac, "away");
+    autocomplete_add(who_roster_ac, "xa");
+    autocomplete_add(who_roster_ac, "dnd");
+    autocomplete_add(who_roster_ac, "offline");
+    autocomplete_add(who_roster_ac, "available");
+    autocomplete_add(who_roster_ac, "unavailable");
+    autocomplete_add(who_roster_ac, "any");
+
+    who_room_ac = autocomplete_new();
+    autocomplete_add(who_room_ac, "chat");
+    autocomplete_add(who_room_ac, "online");
+    autocomplete_add(who_room_ac, "away");
+    autocomplete_add(who_room_ac, "xa");
+    autocomplete_add(who_room_ac, "dnd");
+    autocomplete_add(who_room_ac, "available");
+    autocomplete_add(who_room_ac, "unavailable");
+    autocomplete_add(who_room_ac, "moderator");
+    autocomplete_add(who_room_ac, "participant");
+    autocomplete_add(who_room_ac, "visitor");
+    autocomplete_add(who_room_ac, "owner");
+    autocomplete_add(who_room_ac, "admin");
+    autocomplete_add(who_room_ac, "member");
+    autocomplete_add(who_room_ac, "outcast");
 
     bookmark_ac = autocomplete_new();
     autocomplete_add(bookmark_ac, "list");
@@ -1235,6 +1258,31 @@ cmd_init(void)
     autocomplete_add(room_ac, "accept");
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
+    autocomplete_add(room_ac, "info");
+    autocomplete_add(room_ac, "subject");
+    autocomplete_add(room_ac, "kick");
+    autocomplete_add(room_ac, "role");
+    autocomplete_add(room_ac, "affiliation");
+
+    room_affiliation_ac = autocomplete_new();
+    autocomplete_add(room_affiliation_ac, "owner");
+    autocomplete_add(room_affiliation_ac, "admin");
+    autocomplete_add(room_affiliation_ac, "member");
+    autocomplete_add(room_affiliation_ac, "outcast");
+
+    room_role_ac = autocomplete_new();
+    autocomplete_add(room_role_ac, "moderator");
+    autocomplete_add(room_role_ac, "participant");
+    autocomplete_add(room_role_ac, "visitor");
+    autocomplete_add(room_role_ac, "none");
+
+    room_cmd_ac = autocomplete_new();
+    autocomplete_add(room_cmd_ac, "list");
+    autocomplete_add(room_cmd_ac, "set");
+
+    room_subject_ac = autocomplete_new();
+    autocomplete_add(room_subject_ac, "set");
+    autocomplete_add(room_subject_ac, "clear");
 
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");
@@ -1252,7 +1300,8 @@ void
 cmd_uninit(void)
 {
     autocomplete_free(commands_ac);
-    autocomplete_free(who_ac);
+    autocomplete_free(who_room_ac);
+    autocomplete_free(who_roster_ac);
     autocomplete_free(help_ac);
     autocomplete_free(notify_ac);
     autocomplete_free(notify_message_ac);
@@ -1266,9 +1315,7 @@ cmd_uninit(void)
     autocomplete_free(autoaway_mode_ac);
     autocomplete_free(autoconnect_ac);
     autocomplete_free(theme_ac);
-    if (theme_load_ac != NULL) {
-        autocomplete_free(theme_load_ac);
-    }
+    autocomplete_free(theme_load_ac);
     autocomplete_free(account_ac);
     autocomplete_free(account_set_ac);
     autocomplete_free(account_clear_ac);
@@ -1289,6 +1336,10 @@ cmd_uninit(void)
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
     autocomplete_free(room_ac);
+    autocomplete_free(room_affiliation_ac);
+    autocomplete_free(room_role_ac);
+    autocomplete_free(room_cmd_ac);
+    autocomplete_free(room_subject_ac);
     autocomplete_free(form_ac);
 }
 
@@ -1365,7 +1416,7 @@ void
 cmd_reset_autocomplete()
 {
     roster_reset_search_attempts();
-    muc_reset_invites_ac();
+    muc_invites_reset_ac();
     accounts_reset_all_search();
     accounts_reset_enabled_search();
     prefs_reset_boolean_choice();
@@ -1379,10 +1430,11 @@ cmd_reset_autocomplete()
 
     if (ui_current_win_type() == WIN_MUC) {
         char *recipient = ui_current_recipient();
-        muc_reset_autocomplete(recipient);
+        muc_autocomplete_reset(recipient);
     }
 
-    autocomplete_reset(who_ac);
+    autocomplete_reset(who_room_ac);
+    autocomplete_reset(who_roster_ac);
     autocomplete_reset(prefs_ac);
     autocomplete_reset(log_ac);
     autocomplete_reset(commands_ac);
@@ -1414,6 +1466,10 @@ cmd_reset_autocomplete()
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
+    autocomplete_reset(room_affiliation_ac);
+    autocomplete_reset(room_role_ac);
+    autocomplete_reset(room_cmd_ac);
+    autocomplete_reset(room_subject_ac);
     autocomplete_reset(form_ac);
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
@@ -1641,7 +1697,7 @@ _cmd_complete_parameters(char *input, int *size)
     // autocomplete nickname in chat rooms
     if (ui_current_win_type() == WIN_MUC) {
         char *recipient = ui_current_recipient();
-        Autocomplete nick_ac = muc_get_roster_ac(recipient);
+        Autocomplete nick_ac = muc_roster_ac(recipient);
         if (nick_ac != NULL) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
@@ -1691,7 +1747,7 @@ _cmd_complete_parameters(char *input, int *size)
     gchar *invite_choices[] = { "/decline", "/join" };
     for (i = 0; i < ARRAY_SIZE(invite_choices); i++) {
         result = autocomplete_param_with_func(input, size, invite_choices[i],
-            muc_find_invite);
+            muc_invites_find);
         if (result != NULL) {
             ui_replace_input(input, result, size);
             g_free(result);
@@ -1699,8 +1755,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/room" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, room_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -1729,6 +1785,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
     g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
+    g_hash_table_insert(ac_funcs, "/room",          _room_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -1762,6 +1819,39 @@ _cmd_complete_parameters(char *input, int *size)
     }
 
     return;
+}
+
+static char *
+_who_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+    win_type_t win_type = ui_current_win_type();
+
+    if (win_type == WIN_MUC) {
+        result = autocomplete_param_with_ac(input, size, "/who", who_room_ac, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    } else {
+        int i = 0;
+        gchar *group_commands[] = { "/who any", "/who online", "/who offline",
+            "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
+            "/who unavailable" };
+
+        for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
+            result = autocomplete_param_with_func(input, size, group_commands[i], roster_find_group);
+            if (result != NULL) {
+                return result;
+            }
+        }
+
+        result = autocomplete_param_with_ac(input, size, "/who", who_roster_ac, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    return result;
 }
 
 static char *
@@ -2094,30 +2184,6 @@ _otr_autocomplete(char *input, int *size)
 }
 
 static char *
-_who_autocomplete(char *input, int *size)
-{
-    int i = 0;
-    char *result = NULL;
-    gchar *group_commands[] = { "/who any", "/who online", "/who offline",
-        "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
-        "/who unavailable" };
-
-    for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
-        result = autocomplete_param_with_func(input, size, group_commands[i], roster_find_group);
-        if (result != NULL) {
-            return result;
-        }
-    }
-
-    result = autocomplete_param_with_ac(input, size, "/who", who_ac, TRUE);
-    if (result != NULL) {
-        return result;
-    }
-
-    return NULL;
-}
-
-static char *
 _theme_autocomplete(char *input, int *size)
 {
     char *result = NULL;
@@ -2244,6 +2310,63 @@ _form_autocomplete(char *input, int *size)
     found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
     if (found != NULL) {
         return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_room_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation set", room_affiliation_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation list", room_affiliation_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room role set", room_role_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room role list", room_role_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation", room_cmd_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room role", room_cmd_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room subject", room_subject_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    char *recipient = ui_current_recipient();
+    Autocomplete nick_ac = muc_roster_ac(recipient);
+    if (nick_ac != NULL) {
+        result = autocomplete_param_with_ac(input, size, "/room kick", nick_ac, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
+    if (result != NULL) {
+        return result;
     }
 
     return NULL;

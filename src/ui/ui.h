@@ -133,10 +133,20 @@ void (*ui_room_history)(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void (*ui_room_message)(const char * const room_jid, const char * const nick,
     const char * const message);
-void (*ui_room_subject)(const char * const room_jid,
-    const char * const subject);
+void (*ui_room_subject)(const char * const room, const char * const nick, const char * const subject);
 void (*ui_room_requires_config)(const char * const room_jid);
-void (*ui_room_destroyed)(const char * const room_jid);
+void (*ui_room_destroy)(const char * const room_jid);
+void (*ui_show_room_info)(ProfWin *window, const char * const room);
+void (*ui_show_room_role_list)(ProfWin *window, const char * const room, muc_role_t role);
+void (*ui_show_room_affiliation_list)(ProfWin *window, const char * const room, muc_affiliation_t affiliation);
+void (*ui_handle_room_info_error)(const char * const room, const char * const error);
+void (*ui_show_room_disco_info)(const char * const room, GSList *identities, GSList *features);
+void (*ui_room_destroyed)(const char * const room, const char * const reason, const char * const new_jid,
+    const char * const password);
+void (*ui_room_kicked)(const char * const room, const char * const actor, const char * const reason);
+void (*ui_room_member_kicked)(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason);
+void (*ui_leave_room)(const char * const room);
 void (*ui_room_broadcast)(const char * const room_jid,
     const char * const message);
 void (*ui_room_member_offline)(const char * const room, const char * const nick);
@@ -164,6 +174,13 @@ void (*ui_handle_room_configuration)(const char * const room, DataForm *form);
 void (*ui_handle_room_configuration_form_error)(const char * const room, const char * const message);
 void (*ui_handle_room_config_submit_result)(const char * const room);
 void (*ui_handle_room_config_submit_result_error)(const char * const room, const char * const message);
+void (*ui_handle_room_affiliation_list_error)(const char * const room, const char * const affiliation,
+    const char * const error);
+void (*ui_handle_room_affiliation_list)(const char * const room, const char * const affiliation, GSList *jids);
+void (*ui_handle_room_affiliation_set_error)(const char * const room, const char * const jid,
+    const char * const affiliation, const char * const error);
+void (*ui_handle_room_affiliation_set)(const char * const room, const char * const jid, const char * const affiliation);
+void (*ui_handle_room_kick_error)(const char * const room, const char * const nick, const char * const error);
 void (*ui_show_form)(ProfWin *window, const char * const room, DataForm *form);
 void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_form_help)(ProfWin *window, DataForm *form);
@@ -172,7 +189,7 @@ void (*ui_show_lines)(ProfWin *window, const gchar** lines);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);
-void (*ui_info_room)(const char * const contact);
+void (*ui_info_room)(const char * const room, Occupant *occupant);
 void (*ui_status)(void);
 void (*ui_info)(void);
 void (*ui_status_private)(void);
@@ -234,7 +251,7 @@ void (*cons_show_roster_group)(const char * const group, GSList * list);
 void (*cons_show_wins)(void);
 void (*cons_show_status)(const char * const barejid);
 void (*cons_show_info)(PContact pcontact);
-void (*cons_show_caps)(const char * const fulljid, Resource *resource);
+void (*cons_show_caps)(const char * const fulljid, resource_presence_t presence);
 void (*cons_show_themes)(GSList *themes);
 void (*cons_show_aliases)(GList *aliases);
 void (*cons_show_login_success)(ProfAccount *account);

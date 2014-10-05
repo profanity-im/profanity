@@ -31,11 +31,12 @@ void find_after_create(void **state)
 void get_after_create_returns_null(void **state)
 {
     Autocomplete ac = autocomplete_new();
-    GSList *result = autocomplete_get_list(ac);
+    GSList *result = autocomplete_create_list(ac);
 
     assert_null(result);
 
     autocomplete_clear(ac);
+    g_slist_free_full(result, g_free);
 }
 
 void add_one_and_complete(void **state)
@@ -79,11 +80,12 @@ void add_two_adds_two(void **state)
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Help");
-    GSList *result = autocomplete_get_list(ac);
+    GSList *result = autocomplete_create_list(ac);
 
     assert_int_equal(2, g_slist_length(result));
 
     autocomplete_clear(ac);
+    g_slist_free_full(result, g_free);
 }
 
 void add_two_same_adds_one(void **state)
@@ -91,11 +93,12 @@ void add_two_same_adds_one(void **state)
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Hello");
-    GSList *result = autocomplete_get_list(ac);
+    GSList *result = autocomplete_create_list(ac);
 
     assert_int_equal(1, g_slist_length(result));
 
     autocomplete_clear(ac);
+    g_slist_free_full(result, g_free);
 }
 
 void add_two_same_updates(void **state)
@@ -103,7 +106,7 @@ void add_two_same_updates(void **state)
     Autocomplete ac = autocomplete_new();
     autocomplete_add(ac, "Hello");
     autocomplete_add(ac, "Hello");
-    GSList *result = autocomplete_get_list(ac);
+    GSList *result = autocomplete_create_list(ac);
 
     GSList *first = g_slist_nth(result, 0);
 
@@ -112,4 +115,5 @@ void add_two_same_updates(void **state)
     assert_string_equal("Hello", str);
 
     autocomplete_clear(ac);
+    g_slist_free_full(result, g_free);
 }
