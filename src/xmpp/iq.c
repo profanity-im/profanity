@@ -84,6 +84,8 @@ static int _room_affiliation_list_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_kick_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
@@ -288,6 +290,20 @@ _iq_room_affiliation_list(const char * const room, char *affiliation)
 
     char *id = xmpp_stanza_get_id(iq);
     xmpp_id_handler_add(conn, _room_affiliation_list_result_handler, id, strdup(affiliation));
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_kick_occupant(const char * const room, const char * const nick, const char * const reason)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_kick_iq(ctx, room, nick, reason);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_kick_result_handler, id, strdup(nick));
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
@@ -921,6 +937,35 @@ _room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     return 0;
 }
 
+static int
+_room_kick_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *nick = (char *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ kick result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ kick result handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_kick_result_error(from, nick, error_message);
+        free(error_message);
+        free(nick);
+        return 0;
+    }
+
+    handle_room_kick(from, nick);
+    free(nick);
+
+    return 0;
+}
+
 static void
 _identity_destroy(DiscoIdentity *identity)
 {
@@ -1097,4 +1142,5 @@ iq_init_module(void)
     iq_room_info_request = _iq_room_info_request;
     iq_room_affiliation_set = _iq_room_affiliation_set;
     iq_room_affiliation_list = _iq_room_affiliation_list;
+    iq_room_kick_occupant = _iq_room_kick_occupant;
 }

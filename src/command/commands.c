@@ -2127,6 +2127,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
             (g_strcmp0(args[0], "subject") != 0) &&
+            (g_strcmp0(args[0], "kick") != 0) &&
             (g_strcmp0(args[0], "role") != 0) &&
             (g_strcmp0(args[0], "affiliation") != 0) &&
             (g_strcmp0(args[0], "info") != 0)) {
@@ -2176,6 +2177,21 @@ cmd_room(gchar **args, struct cmd_help_t help)
         }
 
         cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "kick") == 0) {
+        char *nick = args[1];
+        if (nick) {
+            if (muc_roster_contains_nick(room, nick)) {
+                char *reason = args[2];
+                iq_room_kick_occupant(room, nick, reason);
+            } else {
+                win_save_vprint(window, '!', NULL, 0, 0, "", "Occupant does not exist: %s", nick);
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
         return TRUE;
     }
 

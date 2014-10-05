@@ -175,6 +175,8 @@ void (*ui_handle_room_affiliation_list)(const char * const room, const char * co
 void (*ui_handle_room_affiliation_set_error)(const char * const room, const char * const jid,
     const char * const affiliation, const char * const error);
 void (*ui_handle_room_affiliation_set)(const char * const room, const char * const jid, const char * const affiliation);
+void (*ui_handle_room_kick_error)(const char * const room, const char * const nick, const char * const error);
+void (*ui_handle_room_kick)(const char * const room, const char * const nick);
 void (*ui_show_form)(ProfWin *window, const char * const room, DataForm *form);
 void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_form_help)(ProfWin *window, DataForm *form);

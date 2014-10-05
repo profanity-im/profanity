@@ -65,6 +65,8 @@ void handle_room_affiliation_list(const char * const room, const char * const af
 void handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
     const char * const error);
 void handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation);
+void handle_room_kick(const char * const room, const char * const nick);
+void handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
 void handle_duck_result(const char * const result);
 void handle_incoming_message(char *from, char *message, gboolean priv);
 void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,

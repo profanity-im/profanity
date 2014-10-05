@@ -210,6 +210,8 @@ xmpp_stanza_t* stanza_create_room_affiliation_list_iq(xmpp_ctx_t *ctx, const cha
 xmpp_stanza_t* stanza_create_room_affiliation_set_iq(xmpp_ctx_t *ctx, const char * const room, const char * const jid,
     const char * const affiliation, const char * const reason);
 xmpp_stanza_t* stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char * const room, const char * const subject);
+xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t * const ctx, const char * const room, const char * const nick,
+    const char * const reason);
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);

@@ -539,6 +539,18 @@ handle_room_config_submit_result_error(const char * const room, const char * con
 }
 
 void
+handle_room_kick(const char * const room, const char * const nick)
+{
+    ui_handle_room_kick(room, nick);
+}
+
+void
+handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error)
+{
+    ui_handle_room_kick_error(room, nick, error);
+}
+
+void
 handle_room_roster_complete(const char * const room)
 {
     if (muc_autojoin(room)) {

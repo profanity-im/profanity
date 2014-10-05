@@ -1251,6 +1251,7 @@ cmd_init(void)
     autocomplete_add(room_ac, "config");
     autocomplete_add(room_ac, "info");
     autocomplete_add(room_ac, "subject");
+    autocomplete_add(room_ac, "kick");
     autocomplete_add(room_ac, "role");
     autocomplete_add(room_ac, "affiliation");
 
@@ -2309,6 +2310,15 @@ _room_autocomplete(char *input, int *size)
     result = autocomplete_param_with_ac(input, size, "/room subject", room_subject_ac, TRUE);
     if (result != NULL) {
         return result;
+    }
+
+    char *recipient = ui_current_recipient();
+    Autocomplete nick_ac = muc_roster_ac(recipient);
+    if (nick_ac != NULL) {
+        result = autocomplete_param_with_ac(input, size, "/room kick", nick_ac, TRUE);
+        if (result != NULL) {
+            return result;
+        }
     }
 
     result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);

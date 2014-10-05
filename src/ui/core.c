@@ -1740,6 +1740,28 @@ _ui_room_subject(const char * const room, const char * const nick, const char * 
 }
 
 static void
+_ui_handle_room_kick_error(const char * const room, const char * const nick, const char * const error)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Kick error received for %s, but no window open for %s.", nick, room);
+    } else {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ERROR, "", "Error kicking %s: %s", nick, error);
+    }
+}
+
+static void
+_ui_handle_room_kick(const char * const room, const char * const nick)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Kick result received for %s, but no window open for %s.", nick, room);
+    } else {
+        win_save_vprint(window, '!', NULL, 0, 0, "", "%s has been kicked from the room", nick);
+    }
+}
+
+static void
 _ui_room_broadcast(const char * const room_jid, const char * const message)
 {
     ProfWin *window = wins_get_by_recipient(room_jid);
@@ -2764,5 +2786,6 @@ ui_init_module(void)
     ui_handle_room_affiliation_list =_ui_handle_room_affiliation_list;
     ui_handle_room_affiliation_set_error =_ui_handle_room_affiliation_set_error;
     ui_handle_room_affiliation_set = _ui_handle_room_affiliation_set;
-
+    ui_handle_room_kick_error =_ui_handle_room_kick_error;
+    ui_handle_room_kick = _ui_handle_room_kick;
 }
