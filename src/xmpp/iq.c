@@ -80,6 +80,10 @@ static int _room_config_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_config_submit_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_affiliation_list_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_timed_handler(xmpp_conn_t * const conn,
@@ -276,22 +280,40 @@ _iq_room_config_cancel(const char * const room_jid)
 }
 
 static void
-_iq_room_affiliation_list(const char * const room, const char * const affiliation)
+_iq_room_affiliation_list(const char * const room, char *affiliation)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_room_affiliation_list_iq(ctx, room, affiliation);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_affiliation_list_result_handler, id, strdup(affiliation));
+
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
 
+struct affiliation_set_t {
+    char *jid;
+    char *affiliation;
+};
+
 static void
-_iq_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation,
+_iq_room_affiliation_set(const char * const room, const char * const jid, char *affiliation,
     const char * const reason)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     xmpp_stanza_t *iq = stanza_create_room_affiliation_set_iq(ctx, room, jid, affiliation, reason);
+
+    char *id = xmpp_stanza_get_id(iq);
+
+    struct affiliation_set_t *affiliation_set = malloc(sizeof(struct affiliation_set_t));
+    affiliation_set->jid = strdup(jid);
+    affiliation_set->affiliation = strdup(affiliation);
+
+    xmpp_id_handler_add(conn, _room_affiliation_set_result_handler, id, affiliation_set);
+
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -793,6 +815,81 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     DataForm *form = form_create(x);
     handle_room_configure(from, form);
+
+    return 0;
+}
+
+static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    struct affiliation_set_t *affiliation_set = (struct affiliation_set_t *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ affiliation set handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ affiliation set handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_affiliation_set_error(from, affiliation_set->jid, affiliation_set->affiliation, error_message);
+        free(error_message);
+    } else {
+        handle_room_affiliation_set(from, affiliation_set->jid, affiliation_set->affiliation);
+    }
+
+    free(affiliation_set->jid);
+    free(affiliation_set->affiliation);
+    free(affiliation_set);
+
+    return 0;
+}
+
+static int
+_room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *affiliation = (char *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ affiliation list result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ affiliation list result handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_affiliation_list_result_error(from, affiliation, error_message);
+        free(error_message);
+        free(affiliation);
+        return 0;
+    }
+    GSList *jids = NULL;
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_ADMIN);
+    if (query) {
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+        while (child) {
+            char *name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(name, "item") == 0) {
+                char *jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+                if (jid) {
+                    jids = g_slist_insert_sorted(jids, jid, (GCompareFunc)g_strcmp0);
+                }
+            }
+            child = xmpp_stanza_get_next(child);
+        }
+    }
+
+    handle_room_affiliation_list(from, affiliation, jids);
+    free(affiliation);
 
     return 0;
 }

@@ -1750,6 +1750,55 @@ _ui_room_broadcast(const char * const room_jid, const char * const message)
 }
 
 static void
+_ui_handle_room_affiliation_list_error(const char * const room, const char * const affiliation,
+    const char * const error)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ERROR, "", "Error retrieving %s list: %s", affiliation, error);
+    }
+}
+
+static void
+_ui_handle_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        if (jids) {
+            win_save_vprint(window, '!', NULL, 0, 0, "", "Affiliation: %s", affiliation);
+            GSList *curr_jid = jids;
+            while (curr_jid) {
+                char *jid = curr_jid->data;
+                win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", jid);
+                curr_jid = g_slist_next(curr_jid);
+            }
+            win_save_print(window, '!', NULL, 0, 0, "", "");
+        } else {
+            win_save_vprint(window, '!', NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
+        }
+    }
+}
+
+static void
+_ui_handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
+    const char * const error)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ERROR, "", "Error setting %s affiliation for %s: %s", affiliation, jid, error);
+    }
+}
+
+static void
+_ui_handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Affiliation for %s set: %s", jid, affiliation);
+    }
+}
+
+static void
 _ui_status(void)
 {
     char *recipient = ui_current_recipient();
@@ -2698,4 +2747,9 @@ ui_init_module(void)
     ui_show_room_affiliation_list = _ui_show_room_affiliation_list;
     ui_handle_room_info_error = _ui_handle_room_info_error;
     ui_show_room_disco_info = _ui_show_room_disco_info;
+    ui_handle_room_affiliation_list_error = _ui_handle_room_affiliation_list_error;
+    ui_handle_room_affiliation_list =_ui_handle_room_affiliation_list;
+    ui_handle_room_affiliation_set_error =_ui_handle_room_affiliation_set_error;
+    ui_handle_room_affiliation_set = _ui_handle_room_affiliation_set;
+
 }

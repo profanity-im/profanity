@@ -192,8 +192,8 @@ void (*iq_send_ping)(const char * const target);
 void (*iq_send_caps_request)(const char * const to, const char * const id,
     const char * const node, const char * const ver);
 void (*iq_room_info_request)(gchar *room);
-void (*iq_room_affiliation_list)(const char * const room, const char * const affiliation);
-void (*iq_room_affiliation_set)(const char * const room, const char * const jid, const char * const affiliation,
+void (*iq_room_affiliation_list)(const char * const room, char *affiliation);
+void (*iq_room_affiliation_set)(const char * const room, const char * const jid, char *affiliation,
     const char * const reason);
 
 // caps functions

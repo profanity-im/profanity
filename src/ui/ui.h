@@ -170,6 +170,12 @@ void (*ui_handle_room_configuration)(const char * const room, DataForm *form);
 void (*ui_handle_room_configuration_form_error)(const char * const room, const char * const message);
 void (*ui_handle_room_config_submit_result)(const char * const room);
 void (*ui_handle_room_config_submit_result_error)(const char * const room, const char * const message);
+void (*ui_handle_room_affiliation_list_error)(const char * const room, const char * const affiliation,
+    const char * const error);
+void (*ui_handle_room_affiliation_list)(const char * const room, const char * const affiliation, GSList *jids);
+void (*ui_handle_room_affiliation_set_error)(const char * const room, const char * const jid,
+    const char * const affiliation, const char * const error);
+void (*ui_handle_room_affiliation_set)(const char * const room, const char * const jid, const char * const affiliation);
 void (*ui_show_form)(ProfWin *window, const char * const room, DataForm *form);
 void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_form_help)(ProfWin *window, DataForm *form);

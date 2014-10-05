@@ -2159,8 +2159,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
         if ((g_strcmp0(affiliation, "owner") != 0) &&
                 (g_strcmp0(affiliation, "admin") != 0) &&
                 (g_strcmp0(affiliation, "member") != 0) &&
-                (g_strcmp0(affiliation, "outcast") != 0) &&
-                (g_strcmp0(affiliation, "none") != 0)) {
+                (g_strcmp0(affiliation, "outcast") != 0)) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
         }

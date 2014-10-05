@@ -307,7 +307,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args, 1, 4, NULL,
+        cmd_room, parse_args_with_freetext, 1, 5, NULL,
         { "/room accept|destroy|config|info", "Room configuration.",
         { "/room accept|destroy|config|info",
           "--------------------------------",
@@ -1257,7 +1257,6 @@ cmd_init(void)
     autocomplete_add(room_affiliation_ac, "admin");
     autocomplete_add(room_affiliation_ac, "member");
     autocomplete_add(room_affiliation_ac, "outcast");
-    autocomplete_add(room_affiliation_ac, "none");
 
     room_role_ac = autocomplete_new();
     autocomplete_add(room_role_ac, "moderator");

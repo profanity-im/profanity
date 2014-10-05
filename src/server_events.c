@@ -183,6 +183,34 @@ handle_room_list(GSList *rooms, const char *conference_node)
 }
 
 void
+handle_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
+    const char * const error)
+{
+    log_debug("Error retrieving %s list for room %s: %s", affiliation, room, error);
+    ui_handle_room_affiliation_list_error(room, affiliation, error);
+}
+
+void
+handle_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids)
+{
+    ui_handle_room_affiliation_list(room, affiliation, jids);
+}
+
+void
+handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
+    const char * const error)
+{
+    log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation, room, jid, error);
+    ui_handle_room_affiliation_set_error(room, jid, affiliation, error);
+}
+
+void
+handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation)
+{
+    ui_handle_room_affiliation_set(room, jid, affiliation);
+}
+
+void
 handle_disco_items(GSList *items, const char *jid)
 {
     cons_show_disco_items(items, jid);
