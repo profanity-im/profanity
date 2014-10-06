@@ -2277,15 +2277,27 @@ static char *
 _room_autocomplete(char *input, int *size)
 {
     char *result = NULL;
+    gboolean parse_result;
 
-    result = autocomplete_param_with_ac(input, size, "/room affiliation set", room_affiliation_ac, TRUE);
-    if (result != NULL) {
-        return result;
-    }
+    char *recipient = ui_current_recipient();
+    Autocomplete nick_ac = muc_roster_ac(recipient);
 
-    result = autocomplete_param_with_ac(input, size, "/room affiliation list", room_affiliation_ac, TRUE);
-    if (result != NULL) {
-        return result;
+    input[*size] = '\0';
+    gchar **args = parse_args(input, 4, 4, &parse_result);
+
+    if ((strncmp(input, "/room", 5) == 0) && (parse_result == TRUE)) {
+        GString *beginning = g_string_new("/room ");
+        g_string_append(beginning, args[0]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[1]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[2]);
+
+        result = autocomplete_param_with_ac(input, size, beginning->str, nick_ac, TRUE);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
     }
 
     result = autocomplete_param_with_ac(input, size, "/room role set", room_role_ac, TRUE);
@@ -2294,6 +2306,16 @@ _room_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/room role list", room_role_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation set", room_affiliation_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation list", room_affiliation_ac, TRUE);
     if (result != NULL) {
         return result;
     }
@@ -2313,8 +2335,6 @@ _room_autocomplete(char *input, int *size)
         return result;
     }
 
-    char *recipient = ui_current_recipient();
-    Autocomplete nick_ac = muc_roster_ac(recipient);
     if (nick_ac != NULL) {
         result = autocomplete_param_with_ac(input, size, "/room kick", nick_ac, TRUE);
         if (result != NULL) {

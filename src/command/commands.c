@@ -2237,7 +2237,44 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "role") == 0) {
-        cons_show("/room role...");
+        char *cmd = args[1];
+        if (cmd == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *role = args[2];
+        if ((g_strcmp0(role, "visitor") != 0) &&
+                (g_strcmp0(role, "participant") != 0) &&
+                (g_strcmp0(role, "moderator") != 0) &&
+                (g_strcmp0(role, "none") != 0)) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        if (g_strcmp0(cmd, "list") == 0) {
+            if (g_strcmp0(role, "none") == 0) {
+                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no role.");
+            } else if (g_strcmp0(role, "visitor") == 0) {
+                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with visitor role.");
+            } else {
+                iq_room_role_list(room, role);
+            }
+            return TRUE;
+        }
+
+        if (g_strcmp0(cmd, "set") == 0) {
+            char *nick = args[3];
+            if (nick == NULL) {
+                cons_show("Usage: %s", help.usage);
+                return TRUE;
+            } else {
+                char *reason = args[4];
+                iq_room_role_set(room, nick, role, reason);
+                return TRUE;
+            }
+        }
+
         return TRUE;
     }
 

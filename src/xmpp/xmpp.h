@@ -198,6 +198,9 @@ void (*iq_room_affiliation_list)(const char * const room, char *affiliation);
 void (*iq_room_affiliation_set)(const char * const room, const char * const jid, char *affiliation,
     const char * const reason);
 void (*iq_room_kick_occupant)(const char * const room, const char * const nick, const char * const reason);
+void (*iq_room_role_set)(const char * const room, const char * const nick, char *role,
+    const char * const reason);
+void (*iq_room_role_list)(const char * const room, char *role);
 
 // caps functions
 Capabilities* (*caps_lookup)(const char * const jid);

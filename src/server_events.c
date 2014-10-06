@@ -197,6 +197,33 @@ handle_room_affiliation_list(const char * const room, const char * const affilia
 }
 
 void
+handle_room_role_set_error(const char * const room, const char * const nick, const char * const role,
+    const char * const error)
+{
+    log_debug("Error setting role %s list for room %s, user %s: %s", role, room, nick, error);
+    ui_handle_room_role_set_error(room, nick, role, error);
+}
+
+void
+handle_room_role_set(const char * const room, const char * const nick, const char * const role)
+{
+    ui_handle_room_role_set(room, nick, role);
+}
+
+void
+handle_room_role_list_result_error(const char * const room, const char * const role, const char * const error)
+{
+    log_debug("Error retrieving %s list for room %s: %s", role, room, error);
+    ui_handle_room_role_list_error(room, role, error);
+}
+
+void
+handle_room_role_list(const char * const room, const char * const role, GSList *nicks)
+{
+    ui_handle_room_role_list(room, role, nicks);
+}
+
+void
 handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
     const char * const error)
 {

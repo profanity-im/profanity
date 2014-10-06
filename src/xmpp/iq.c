@@ -84,6 +84,10 @@ static int _room_affiliation_list_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_role_set_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_role_list_result_handler(xmpp_conn_t * const conn,
+    xmpp_stanza_t * const stanza, void * const userdata);
 static int _room_kick_result_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t * const stanza, void * const userdata);
 static int _manual_pong_handler(xmpp_conn_t *const conn,
@@ -309,9 +313,9 @@ _iq_room_kick_occupant(const char * const room, const char * const nick, const c
     xmpp_stanza_release(iq);
 }
 
-struct affiliation_set_t {
-    char *jid;
-    char *affiliation;
+struct privilege_set_t {
+    char *item;
+    char *privilege;
 };
 
 static void
@@ -324,11 +328,45 @@ _iq_room_affiliation_set(const char * const room, const char * const jid, char *
 
     char *id = xmpp_stanza_get_id(iq);
 
-    struct affiliation_set_t *affiliation_set = malloc(sizeof(struct affiliation_set_t));
-    affiliation_set->jid = strdup(jid);
-    affiliation_set->affiliation = strdup(affiliation);
+    struct privilege_set_t *affiliation_set = malloc(sizeof(struct privilege_set_t));
+    affiliation_set->item = strdup(jid);
+    affiliation_set->privilege = strdup(affiliation);
 
     xmpp_id_handler_add(conn, _room_affiliation_set_result_handler, id, affiliation_set);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_role_set(const char * const room, const char * const nick, char *role,
+    const char * const reason)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_role_set_iq(ctx, room, nick, role, reason);
+
+    char *id = xmpp_stanza_get_id(iq);
+
+    struct privilege_set_t *role_set = malloc(sizeof(struct privilege_set_t));
+    role_set->item = strdup(nick);
+    role_set->privilege = strdup(role);
+
+    xmpp_id_handler_add(conn, _room_role_set_result_handler, id, role_set);
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
+_iq_room_role_list(const char * const room, char *role)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_create_room_role_list_iq(ctx, room, role);
+
+    char *id = xmpp_stanza_get_id(iq);
+    xmpp_id_handler_add(conn, _room_role_list_result_handler, id, strdup(role));
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
@@ -841,7 +879,7 @@ static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_s
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *type = xmpp_stanza_get_type(stanza);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    struct affiliation_set_t *affiliation_set = (struct affiliation_set_t *)userdata;
+    struct privilege_set_t *affiliation_set = (struct privilege_set_t *)userdata;
 
     if (id != NULL) {
         log_debug("IQ affiliation set handler fired, id: %s.", id);
@@ -852,15 +890,45 @@ static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_s
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        handle_room_affiliation_set_error(from, affiliation_set->jid, affiliation_set->affiliation, error_message);
+        handle_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
         free(error_message);
     } else {
-        handle_room_affiliation_set(from, affiliation_set->jid, affiliation_set->affiliation);
+        handle_room_affiliation_set(from, affiliation_set->item, affiliation_set->privilege);
     }
 
-    free(affiliation_set->jid);
-    free(affiliation_set->affiliation);
+    free(affiliation_set->item);
+    free(affiliation_set->privilege);
     free(affiliation_set);
+
+    return 0;
+}
+
+static int _room_role_set_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    struct privilege_set_t *role_set = (struct privilege_set_t *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ role set handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ role set handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_role_set_error(from, role_set->item, role_set->privilege, error_message);
+        free(error_message);
+    } else {
+        handle_room_role_set(from, role_set->item, role_set->privilege);
+    }
+
+    free(role_set->item);
+    free(role_set->privilege);
+    free(role_set);
 
     return 0;
 }
@@ -906,6 +974,51 @@ _room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * 
 
     handle_room_affiliation_list(from, affiliation, jids);
     free(affiliation);
+
+    return 0;
+}
+
+static int
+_room_role_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+{
+    const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
+    const char *type = xmpp_stanza_get_type(stanza);
+    const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *role = (char *)userdata;
+
+    if (id != NULL) {
+        log_debug("IQ role list result handler fired, id: %s.", id);
+    } else {
+        log_debug("IQ role list result handler fired.");
+    }
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        char *error_message = stanza_get_error_message(stanza);
+        handle_room_role_list_result_error(from, role, error_message);
+        free(error_message);
+        free(role);
+        return 0;
+    }
+    GSList *nicks = NULL;
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_ADMIN);
+    if (query) {
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+        while (child) {
+            char *name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(name, "item") == 0) {
+                char *nick = xmpp_stanza_get_attribute(child, STANZA_ATTR_NICK);
+                if (nick) {
+                    nicks = g_slist_insert_sorted(nicks, nick, (GCompareFunc)g_strcmp0);
+                }
+            }
+            child = xmpp_stanza_get_next(child);
+        }
+    }
+
+    handle_room_role_list(from, role, nicks);
+    free(role);
 
     return 0;
 }
@@ -1141,5 +1254,7 @@ iq_init_module(void)
     iq_room_info_request = _iq_room_info_request;
     iq_room_affiliation_set = _iq_room_affiliation_set;
     iq_room_affiliation_list = _iq_room_affiliation_list;
+    iq_room_role_set = _iq_room_role_set;
     iq_room_kick_occupant = _iq_room_kick_occupant;
+    iq_room_role_list = _iq_room_role_list;
 }
