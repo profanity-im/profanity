@@ -210,6 +210,10 @@ xmpp_stanza_t* stanza_create_room_affiliation_list_iq(xmpp_ctx_t *ctx, const cha
     const char * const affiliation);
 xmpp_stanza_t* stanza_create_room_affiliation_set_iq(xmpp_ctx_t *ctx, const char * const room, const char * const jid,
     const char * const affiliation, const char * const reason);
+xmpp_stanza_t* stanza_create_room_role_set_iq(xmpp_ctx_t * const ctx, const char * const room, const char * const jid,
+    const char * const role, const char * const reason);
+xmpp_stanza_t* stanza_create_room_role_list_iq(xmpp_ctx_t *ctx, const char * const room, const char * const role);
+
 xmpp_stanza_t* stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char * const room, const char * const subject);
 xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t * const ctx, const char * const room, const char * const nick,
     const char * const reason);
@@ -254,7 +258,7 @@ gboolean stanza_room_destroyed(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
-char* stanza_get_kick_actor(xmpp_stanza_t *stanza);
-char* stanza_get_kick_reason(xmpp_stanza_t *stanza);
+char* stanza_get_kickban_actor(xmpp_stanza_t *stanza);
+char* stanza_get_kickban_reason(xmpp_stanza_t *stanza);
 
 #endif

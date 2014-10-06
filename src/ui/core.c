@@ -1522,6 +1522,29 @@ _ui_room_member_kicked(const char * const room, const char * const nick, const c
     }
 }
 
+static void
+_ui_room_member_banned(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Received ban for room participant %s, but no window open for %s.", nick, room);
+    } else {
+        GString *message = g_string_new(nick);
+        g_string_append(message, " has been banned from the room");
+        if (actor) {
+            g_string_append(message, " by ");
+            g_string_append(message, actor);
+        }
+        if (reason) {
+            g_string_append(message, ", reason: ");
+            g_string_append(message, reason);
+        }
+
+        win_save_vprint(window, '!', NULL, 0, COLOUR_OFFLINE, "", "<- %s", message->str);
+        g_string_free(message, TRUE);
+    }
+}
 
 static void
 _ui_room_member_online(const char * const room, const char * const nick,
@@ -1799,6 +1822,33 @@ _ui_room_kicked(const char * const room, const char * const actor, const char * 
 }
 
 static void
+_ui_room_banned(const char * const room, const char * const actor, const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Received ban, but no window open for %s.", room);
+    } else {
+        int num = wins_get_num(window);
+        ui_close_win(num);
+
+        GString *message = g_string_new("Banned from ");
+        g_string_append(message, room);
+        if (actor) {
+            g_string_append(message, " by ");
+            g_string_append(message, actor);
+        }
+        if (reason) {
+            g_string_append(message, ", reason: ");
+            g_string_append(message, reason);
+        }
+
+        ProfWin *console = wins_get_console();
+        win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "<- %s", message->str);
+        g_string_free(message, TRUE);
+    }
+}
+
+static void
 _ui_room_subject(const char * const room, const char * const nick, const char * const subject)
 {
     ProfWin *window = wins_get_by_recipient(room);
@@ -1899,6 +1949,44 @@ _ui_handle_room_affiliation_list(const char * const room, const char * const aff
 }
 
 static void
+_ui_handle_room_role_list_error(const char * const room, const char * const role, const char * const error)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ERROR, "", "Error retrieving %s list: %s", role, error);
+    }
+}
+
+static void
+_ui_handle_room_role_list(const char * const room, const char * const role, GSList *nicks)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        if (nicks) {
+            win_save_vprint(window, '!', NULL, 0, 0, "", "Role: %s", role);
+            GSList *curr_nick = nicks;
+            while (curr_nick) {
+                char *nick = curr_nick->data;
+                Occupant *occupant = muc_roster_item(room, nick);
+                if (occupant) {
+                    if (occupant->jid) {
+                        win_save_vprint(window, '!', NULL, 0, 0, "", "  %s (%s)", nick, occupant->jid);
+                    } else {
+                        win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", nick);
+                    }
+                } else {
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", nick);
+                }
+                curr_nick = g_slist_next(curr_nick);
+            }
+            win_save_print(window, '!', NULL, 0, 0, "", "");
+        } else {
+            win_save_vprint(window, '!', NULL, 0, 0, "", "No occupants found with role: %s", role);
+        }
+    }
+}
+
+static void
 _ui_handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
     const char * const error)
 {
@@ -1914,6 +2002,25 @@ _ui_handle_room_affiliation_set(const char * const room, const char * const jid,
     ProfWin *window = wins_get_by_recipient(room);
     if (window) {
         win_save_vprint(window, '!', NULL, 0, 0, "", "Affiliation for %s set: %s", jid, affiliation);
+    }
+}
+
+static void
+_ui_handle_room_role_set_error(const char * const room, const char * const nick, const char * const role,
+    const char * const error)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        win_save_vprint(window, '!', NULL, 0, COLOUR_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
+    }
+}
+
+static void
+_ui_handle_room_role_set(const char * const room, const char * const nick, const char * const role)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window) {
+        win_save_vprint(window, '!', NULL, 0, 0, "", "Role for %s set: %s", nick, role);
     }
 }
 
@@ -2894,7 +3001,13 @@ ui_init_module(void)
     ui_handle_room_kick_error = _ui_handle_room_kick_error;
     ui_room_destroyed = _ui_room_destroyed;
     ui_room_kicked = _ui_room_kicked;
+    ui_room_banned = _ui_room_banned;
     ui_leave_room = _ui_leave_room;
     ui_room_member_kicked = _ui_room_member_kicked;
+    ui_room_member_banned = _ui_room_member_banned;
+    ui_handle_room_role_set_error = _ui_handle_room_role_set_error;
+    ui_handle_room_role_set = _ui_handle_room_role_set;
+    ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
+    ui_handle_room_role_list = _ui_handle_room_role_list;
 }
 

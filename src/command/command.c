@@ -1432,6 +1432,7 @@ cmd_reset_autocomplete()
     if (ui_current_win_type() == WIN_MUC) {
         char *recipient = ui_current_recipient();
         muc_autocomplete_reset(recipient);
+        muc_jid_autocomplete_reset(recipient);
     }
 
     autocomplete_reset(who_room_ac);
@@ -2320,15 +2321,39 @@ static char *
 _room_autocomplete(char *input, int *size)
 {
     char *result = NULL;
+    gboolean parse_result;
 
-    result = autocomplete_param_with_ac(input, size, "/room affiliation set", room_affiliation_ac, TRUE);
-    if (result != NULL) {
-        return result;
+    char *recipient = ui_current_recipient();
+    Autocomplete nick_ac = muc_roster_ac(recipient);
+    Autocomplete jid_ac = muc_roster_jid_ac(recipient);
+
+    input[*size] = '\0';
+    gchar **args = parse_args(input, 4, 4, &parse_result);
+
+    if ((strncmp(input, "/room role", 10) == 0) && (parse_result == TRUE)) {
+        GString *beginning = g_string_new("/room role ");
+        g_string_append(beginning, args[1]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[2]);
+
+        result = autocomplete_param_with_ac(input, size, beginning->str, nick_ac, TRUE);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room affiliation list", room_affiliation_ac, TRUE);
-    if (result != NULL) {
-        return result;
+    if ((strncmp(input, "/room affiliation", 17) == 0) && (parse_result == TRUE)) {
+        GString *beginning = g_string_new("/room affiliation ");
+        g_string_append(beginning, args[1]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[2]);
+
+        result = autocomplete_param_with_ac(input, size, beginning->str, jid_ac, TRUE);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
     }
 
     result = autocomplete_param_with_ac(input, size, "/room role set", room_role_ac, TRUE);
@@ -2337,6 +2362,16 @@ _room_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/room role list", room_role_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation set", room_affiliation_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/room affiliation list", room_affiliation_ac, TRUE);
     if (result != NULL) {
         return result;
     }
@@ -2356,8 +2391,6 @@ _room_autocomplete(char *input, int *size)
         return result;
     }
 
-    char *recipient = ui_current_recipient();
-    Autocomplete nick_ac = muc_roster_ac(recipient);
     if (nick_ac != NULL) {
         result = autocomplete_param_with_ac(input, size, "/room kick", nick_ac, TRUE);
         if (result != NULL) {

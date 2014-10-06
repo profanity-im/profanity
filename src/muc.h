@@ -93,6 +93,10 @@ void muc_roster_remove(const char * const room, const char * const nick);
 void muc_roster_set_complete(const char * const room);
 GList * muc_roster(const char * const room);
 Autocomplete muc_roster_ac(const char * const room);
+Autocomplete muc_roster_jid_ac(const char * const room);
+void muc_jid_autocomplete_reset(const char * const room);
+void muc_jid_autocomplete_add_all(const char * const room, GSList *jids);
+
 Occupant* muc_roster_item(const char * const room, const char * const nick);
 
 gboolean muc_occupant_available(Occupant *occupant);
