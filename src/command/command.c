@@ -1252,6 +1252,7 @@ cmd_init(void)
     autocomplete_add(room_ac, "info");
     autocomplete_add(room_ac, "subject");
     autocomplete_add(room_ac, "kick");
+    autocomplete_add(room_ac, "ban");
     autocomplete_add(room_ac, "role");
     autocomplete_add(room_ac, "affiliation");
 
@@ -2350,6 +2351,13 @@ _room_autocomplete(char *input, int *size)
 
     if (nick_ac != NULL) {
         result = autocomplete_param_with_ac(input, size, "/room kick", nick_ac, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    if (jid_ac != NULL) {
+        result = autocomplete_param_with_ac(input, size, "/room ban", jid_ac, TRUE);
         if (result != NULL) {
             return result;
         }

@@ -2128,6 +2128,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "config") != 0) &&
             (g_strcmp0(args[0], "subject") != 0) &&
             (g_strcmp0(args[0], "kick") != 0) &&
+            (g_strcmp0(args[0], "ban") != 0) &&
             (g_strcmp0(args[0], "role") != 0) &&
             (g_strcmp0(args[0], "affiliation") != 0) &&
             (g_strcmp0(args[0], "info") != 0)) {
@@ -2189,6 +2190,17 @@ cmd_room(gchar **args, struct cmd_help_t help)
             } else {
                 win_save_vprint(window, '!', NULL, 0, 0, "", "Occupant does not exist: %s", nick);
             }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "ban") == 0) {
+        char *jid = args[1];
+        if (jid) {
+            char *reason = args[2];
+            iq_room_affiliation_set(room, jid, "outcast", reason);
         } else {
             cons_show("Usage: %s", help.usage);
         }
