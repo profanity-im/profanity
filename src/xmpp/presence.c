@@ -694,6 +694,20 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
     char *room = from_jid->barejid;
     char *nick = from_jid->resourcepart;
 
+    char *jid = NULL;
+    char *role = NULL;
+    char *affiliation = NULL;
+
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    if (x) {
+        xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
+        if (item) {
+            jid = xmpp_stanza_get_attribute(item, "jid");
+            role = xmpp_stanza_get_attribute(item, "role");
+            affiliation = xmpp_stanza_get_attribute(item, "affiliation");
+        }
+    }
+
     // handle self presence
     if (stanza_is_muc_self_presence(stanza, jabber_get_fulljid())) {
         log_debug("Room self presence received from %s", from_jid->fulljid);
@@ -742,19 +756,6 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
         // self online
         } else {
             gboolean config_required = stanza_muc_requires_config(stanza);
-            char *role = NULL;
-            char *affiliation = NULL;
-
-            // get own affiliation and role
-            xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
-            if (x) {
-                xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
-                if (item) {
-                    role = xmpp_stanza_get_attribute(item, "role");
-                    affiliation = xmpp_stanza_get_attribute(item, "affiliation");
-                }
-            }
-
             handle_muc_self_online(room, nick, config_required, role, affiliation);
         }
 
@@ -768,7 +769,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
             // handle nickname change
             char *new_nick = stanza_get_new_nick(stanza);
             if (new_nick) {
-                muc_roster_nick_change_start(room, new_nick, nick);
+                muc_occupant_nick_change_start(room, new_nick, nick);
 
             // handle left room
             } else {
@@ -790,7 +791,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
 
                 // normal exit
                 } else {
-                    handle_room_member_offline(room, nick, "offline", status_str);
+                    handle_room_occupant_offline(room, nick, "offline", status_str);
                 }
             }
 
@@ -803,20 +804,6 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
             }
 
             char *show_str = stanza_get_show(stanza, "online");
-            char *jid = NULL;
-            char *role = NULL;
-            char *affiliation = NULL;
-
-            xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
-            if (x) {
-                xmpp_stanza_t *item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
-                if (item) {
-                    jid = xmpp_stanza_get_attribute(item, "jid");
-                    role = xmpp_stanza_get_attribute(item, "role");
-                    affiliation = xmpp_stanza_get_attribute(item, "affiliation");
-                }
-            }
-
             handle_muc_occupant_online(room, nick, jid, role, affiliation, show_str, status_str);
 
             free(show_str);

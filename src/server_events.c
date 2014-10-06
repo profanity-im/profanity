@@ -522,21 +522,6 @@ handle_leave_room(const char * const room)
 }
 
 void
-handle_room_nick_change(const char * const room,
-    const char * const nick)
-{
-    muc_nick_change_complete(room, nick);
-    ui_room_nick_change(room, nick);
-}
-
-void
-handle_room_requires_config(const char * const room)
-{
-    muc_set_requires_config(room, TRUE);
-    ui_room_requires_config(room);
-}
-
-void
 handle_room_destroy(const char * const room)
 {
     muc_leave(room);
@@ -596,63 +581,7 @@ handle_room_kick_result_error(const char * const room, const char * const nick, 
 }
 
 void
-handle_room_roster_complete(const char * const room)
-{
-    if (muc_autojoin(room)) {
-        ui_room_join(room, FALSE);
-    } else {
-        ui_room_join(room, TRUE);
-    }
-    muc_invites_remove(room);
-    muc_roster_set_complete(room);
-    GList *roster = muc_roster(room);
-    ui_room_roster(room, roster, NULL);
-
-    char *subject = muc_subject(room);
-    if (subject != NULL) {
-        ui_room_subject(room, NULL, subject);
-    }
-
-    GList *pending_broadcasts = muc_pending_broadcasts(room);
-    if (pending_broadcasts != NULL) {
-        GList *curr = pending_broadcasts;
-        while (curr != NULL) {
-            ui_room_broadcast(room, curr->data);
-            curr = g_list_next(curr);
-        }
-    }
-}
-
-void
-handle_room_member_presence(const char * const room, const char * const nick, const char * const jid,
-    const char * const role, const char *  const affiliation, const char * const show, const char * const status)
-{
-    gboolean updated = muc_roster_add(room, nick, jid, role, affiliation, show, status);
-
-    if (updated) {
-        char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
-        if (g_strcmp0(muc_status_pref, "all") == 0) {
-            ui_room_member_presence(room, nick, show, status);
-        }
-        prefs_free_string(muc_status_pref);
-    }
-}
-
-void
-handle_room_member_online(const char * const room, const char * const nick, const char * const jid,
-    const char * const role, const char * const affiliation, const char * const show, const char * const status)
-{
-    muc_roster_add(room, nick, jid, role, affiliation, show, status);
-
-    char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
-    if (g_strcmp0(muc_status_pref, "none") != 0) {
-        ui_room_member_online(room, nick, show, status);
-    }
-    prefs_free_string(muc_status_pref);
-}
-
-void
-handle_room_member_offline(const char * const room, const char * const nick,
+handle_room_occupant_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     muc_roster_remove(room, nick);
@@ -678,13 +607,6 @@ handle_room_occupent_banned(const char * const room, const char * const nick, co
 {
     muc_roster_remove(room, nick);
     ui_room_member_banned(room, nick, actor, reason);
-}
-
-void
-handle_room_member_nick_change(const char * const room,
-    const char * const old_nick, const char * const nick)
-{
-    ui_room_member_nick_change(room, old_nick, nick);
 }
 
 void
@@ -752,15 +674,40 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 {
     // handle self nick change
     if (muc_nick_change_pending(room)) {
-        handle_room_nick_change(room, nick);
+        muc_nick_change_complete(room, nick);
+        ui_room_nick_change(room, nick);
 
     // handle roster complete
     } else if (!muc_roster_complete(room)) {
-        handle_room_roster_complete(room);
+        if (muc_autojoin(room)) {
+            ui_room_join(room, FALSE);
+        } else {
+            ui_room_join(room, TRUE);
+        }
+        muc_invites_remove(room);
+        muc_roster_set_complete(room);
+
+        GList *roster = muc_roster(room);
+        ui_room_roster(room, roster, NULL);
+
+        char *subject = muc_subject(room);
+        if (subject != NULL) {
+            ui_room_subject(room, NULL, subject);
+        }
+
+        GList *pending_broadcasts = muc_pending_broadcasts(room);
+        if (pending_broadcasts != NULL) {
+            GList *curr = pending_broadcasts;
+            while (curr != NULL) {
+                ui_room_broadcast(room, curr->data);
+                curr = g_list_next(curr);
+            }
+        }
 
         // room configuration required
         if (config_required) {
-            handle_room_requires_config(room);
+            muc_set_requires_config(room, TRUE);
+            ui_room_requires_config(room);
         }
     }
 
@@ -770,22 +717,36 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 
 void
 handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
-    const char * const role, const char * const affiliation, const char * const show_str, const char * const status_str)
+    const char * const role, const char * const affiliation, const char * const show, const char * const status)
 {
     if (!muc_roster_complete(room)) {
-        muc_roster_add(room, nick, jid, role, affiliation, show_str, status_str);
+        muc_roster_add(room, nick, jid, role, affiliation, show, status);
     } else {
         char *old_nick = muc_roster_nick_change_complete(room, nick);
 
         if (old_nick) {
-            muc_roster_add(room, nick, jid, role, affiliation, show_str, status_str);
-            handle_room_member_nick_change(room, old_nick, nick);
+            muc_roster_add(room, nick, jid, role, affiliation, show, status);
+            ui_room_member_nick_change(room, old_nick, nick);
             free(old_nick);
         } else {
             if (!muc_roster_contains_nick(room, nick)) {
-                handle_room_member_online(room, nick, jid, role, affiliation, show_str, status_str);
+                muc_roster_add(room, nick, jid, role, affiliation, show, status);
+
+                char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+                if (g_strcmp0(muc_status_pref, "none") != 0) {
+                    ui_room_member_online(room, nick, show, status);
+                }
+                prefs_free_string(muc_status_pref);
             } else {
-                handle_room_member_presence(room, nick, jid, role, affiliation, show_str, status_str);
+                gboolean updated = muc_roster_add(room, nick, jid, role, affiliation, show, status);
+
+                if (updated) {
+                    char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+                    if (g_strcmp0(muc_status_pref, "all") == 0) {
+                        ui_room_member_presence(room, nick, show, status);
+                    }
+                    prefs_free_string(muc_status_pref);
+                }
             }
         }
     }
