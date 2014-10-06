@@ -1517,6 +1517,29 @@ _ui_room_member_kicked(const char * const room, const char * const nick, const c
     }
 }
 
+static void
+_ui_room_member_banned(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Received ban for room participant %s, but no window open for %s.", nick, room);
+    } else {
+        GString *message = g_string_new(nick);
+        g_string_append(message, " has been banned from the room");
+        if (actor) {
+            g_string_append(message, " by ");
+            g_string_append(message, actor);
+        }
+        if (reason) {
+            g_string_append(message, ", reason: ");
+            g_string_append(message, reason);
+        }
+
+        win_save_vprint(window, '!', NULL, 0, COLOUR_OFFLINE, "", "<- %s", message->str);
+        g_string_free(message, TRUE);
+    }
+}
 
 static void
 _ui_room_member_online(const char * const room, const char * const nick,
@@ -1777,6 +1800,33 @@ _ui_room_kicked(const char * const room, const char * const actor, const char * 
         ui_close_win(num);
 
         GString *message = g_string_new("Kicked from ");
+        g_string_append(message, room);
+        if (actor) {
+            g_string_append(message, " by ");
+            g_string_append(message, actor);
+        }
+        if (reason) {
+            g_string_append(message, ", reason: ");
+            g_string_append(message, reason);
+        }
+
+        ProfWin *console = wins_get_console();
+        win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "<- %s", message->str);
+        g_string_free(message, TRUE);
+    }
+}
+
+static void
+_ui_room_banned(const char * const room, const char * const actor, const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window == NULL) {
+        log_error("Received ban, but no window open for %s.", room);
+    } else {
+        int num = wins_get_num(window);
+        ui_close_win(num);
+
+        GString *message = g_string_new("Banned from ");
         g_string_append(message, room);
         if (actor) {
             g_string_append(message, " by ");
@@ -2925,8 +2975,10 @@ ui_init_module(void)
     ui_handle_room_kick_error = _ui_handle_room_kick_error;
     ui_room_destroyed = _ui_room_destroyed;
     ui_room_kicked = _ui_room_kicked;
+    ui_room_banned = _ui_room_banned;
     ui_leave_room = _ui_leave_room;
     ui_room_member_kicked = _ui_room_member_kicked;
+    ui_room_member_banned = _ui_room_member_banned;
     ui_handle_room_role_set_error = _ui_handle_room_role_set_error;
     ui_handle_room_role_set = _ui_handle_room_role_set;
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;

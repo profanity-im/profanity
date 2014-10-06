@@ -146,6 +146,9 @@ void (*ui_room_destroyed)(const char * const room, const char * const reason, co
 void (*ui_room_kicked)(const char * const room, const char * const actor, const char * const reason);
 void (*ui_room_member_kicked)(const char * const room, const char * const nick, const char * const actor,
     const char * const reason);
+void (*ui_room_banned)(const char * const room, const char * const actor, const char * const reason);
+void (*ui_room_member_banned)(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason);
 void (*ui_leave_room)(const char * const room);
 void (*ui_room_broadcast)(const char * const room_jid,
     const char * const message);

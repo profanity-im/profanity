@@ -717,9 +717,16 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
                 // kicked from room
                 } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
-                    char *actor = stanza_get_kick_actor(stanza);
-                    char *reason = stanza_get_kick_reason(stanza);
+                    char *actor = stanza_get_kickban_actor(stanza);
+                    char *reason = stanza_get_kickban_reason(stanza);
                     handle_room_kicked(from_room, actor, reason);
+                    free(reason);
+
+                // banned from room
+                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
+                    char *actor = stanza_get_kickban_actor(stanza);
+                    char *reason = stanza_get_kickban_reason(stanza);
+                    handle_room_banned(from_room, actor, reason);
                     free(reason);
 
                 // normal exit
@@ -783,9 +790,16 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
                 // kicked from room
                 if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
-                    char *actor = stanza_get_kick_actor(stanza);
-                    char *reason = stanza_get_kick_reason(stanza);
+                    char *actor = stanza_get_kickban_actor(stanza);
+                    char *reason = stanza_get_kickban_reason(stanza);
                     handle_room_occupent_kicked(from_room, from_nick, actor, reason);
+                    free(reason);
+
+                // banned from room
+                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
+                    char *actor = stanza_get_kickban_actor(stanza);
+                    char *reason = stanza_get_kickban_reason(stanza);
+                    handle_room_occupent_banned(from_room, from_nick, actor, reason);
                     free(reason);
 
                 // normal exit

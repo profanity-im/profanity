@@ -193,6 +193,7 @@ handle_room_affiliation_list_result_error(const char * const room, const char * 
 void
 handle_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids)
 {
+    muc_jid_autocomplete_add_all(room, jids);
     ui_handle_room_affiliation_list(room, affiliation, jids);
 }
 
@@ -558,6 +559,13 @@ handle_room_kicked(const char * const room, const char * const actor, const char
 }
 
 void
+handle_room_banned(const char * const room, const char * const actor, const char * const reason)
+{
+    muc_leave(room);
+    ui_room_banned(room, actor, reason);
+}
+
+void
 handle_room_configure(const char * const room, DataForm *form)
 {
     ui_handle_room_configuration(room, form);
@@ -664,6 +672,13 @@ handle_room_occupent_kicked(const char * const room, const char * const nick, co
     ui_room_member_kicked(room, nick, actor, reason);
 }
 
+void
+handle_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason)
+{
+    muc_roster_remove(room, nick);
+    ui_room_member_banned(room, nick, actor, reason);
+}
 
 void
 handle_room_member_nick_change(const char * const room,

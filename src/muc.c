@@ -58,6 +58,7 @@ typedef struct _muc_room_t {
     gboolean pending_nick_change;
     GHashTable *roster;
     Autocomplete nick_ac;
+    Autocomplete jid_ac;
     GHashTable *nick_changes;
     gboolean roster_received;
 } ChatRoom;
@@ -170,6 +171,7 @@ muc_join(const char * const room, const char * const nick,
     new_room->pending_config = FALSE;
     new_room->roster = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_occupant_free);
     new_room->nick_ac = autocomplete_new();
+    new_room->jid_ac = autocomplete_new();
     new_room->nick_changes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
     new_room->roster_received = FALSE;
     new_room->pending_nick_change = FALSE;
@@ -410,6 +412,14 @@ muc_roster_add(const char * const room, const char * const nick, const char * co
         muc_affiliation_t affiliation_t = _affiliation_from_string(affiliation);
         Occupant *occupant = _muc_occupant_new(nick, jid, role_t, affiliation_t, presence, status);
         g_hash_table_replace(chat_room->roster, strdup(nick), occupant);
+
+        if (jid) {
+            Jid *jidp = jid_create(jid);
+            if (jidp->barejid) {
+                autocomplete_add(chat_room->jid_ac, jidp->barejid);
+            }
+            jid_destroy(jidp);
+        }
     }
 
     return updated;
@@ -474,6 +484,17 @@ muc_roster_ac(const char * const room)
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         return chat_room->nick_ac;
+    } else {
+        return NULL;
+    }
+}
+
+Autocomplete
+muc_roster_jid_ac(const char * const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return chat_room->jid_ac;
     } else {
         return NULL;
     }
@@ -646,6 +667,39 @@ muc_autocomplete(char *input, int *size)
 }
 
 void
+muc_jid_autocomplete_reset(const char * const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        if (chat_room->jid_ac) {
+            autocomplete_reset(chat_room->jid_ac);
+        }
+    }
+}
+
+void
+muc_jid_autocomplete_add_all(const char * const room, GSList *jids)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        if (chat_room->jid_ac) {
+            GSList *curr_jid = jids;
+            while (curr_jid) {
+                char *jid = curr_jid->data;
+                Jid *jidp = jid_create(jid);
+                if (jidp) {
+                    if (jidp->barejid) {
+                        autocomplete_add(chat_room->jid_ac, jidp->barejid);
+                    }
+                }
+                jid_destroy(jidp);
+                curr_jid = g_slist_next(curr_jid);
+            }
+        }
+    }
+}
+
+void
 muc_autocomplete_reset(const char * const room)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
@@ -714,6 +768,7 @@ _free_room(ChatRoom *room)
             g_hash_table_destroy(room->roster);
         }
         autocomplete_free(room->nick_ac);
+        autocomplete_free(room->jid_ac);
         if (room->nick_changes) {
             g_hash_table_destroy(room->nick_changes);
         }

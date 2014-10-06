@@ -1,8 +1,4 @@
-Include self in role/affiliation lists
-Handle status codes
-Changing subject
-Moderator use cases
-Admin use cases
-Owner use cases
-
+Include self in role/affiliation lists (roster)
+Show role/affiliation on join
+Show role/affiliation on update
 Check all commands from private conversations

@@ -100,6 +100,9 @@ void handle_room_destroyed(const char * const room, const char * const new_jid, 
 void handle_room_kicked(const char * const room, const char * const actor, const char * const reason);
 void handle_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
     const char * const reason);
+void handle_room_banned(const char * const room, const char * const actor, const char * const reason);
+void handle_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
+    const char * const reason);
 void handle_group_add(const char * const contact,
     const char * const group);
 void handle_group_remove(const char * const contact,
