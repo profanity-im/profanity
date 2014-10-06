@@ -745,3 +745,48 @@ handle_ping_error_result(const char * const from, const char * const error)
         cons_show_error("Error returned from pinging %s: %s.", from, error);
     }
 }
+
+void
+handle_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
+    const char * const role, const char * const affiliation)
+{
+    // handle self nick change
+    if (muc_nick_change_pending(room)) {
+        handle_room_nick_change(room, nick);
+
+    // handle roster complete
+    } else if (!muc_roster_complete(room)) {
+        handle_room_roster_complete(room);
+
+        // room configuration required
+        if (config_required) {
+            handle_room_requires_config(room);
+        }
+    }
+
+    muc_set_role(room, role);
+    muc_set_affiliation(room, affiliation);
+}
+
+void
+handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
+    const char * const role, const char * const affiliation, const char * const show_str, const char * const status_str)
+{
+    if (!muc_roster_complete(room)) {
+        muc_roster_add(room, nick, jid, role, affiliation, show_str, status_str);
+    } else {
+        char *old_nick = muc_roster_nick_change_complete(room, nick);
+
+        if (old_nick) {
+            muc_roster_add(room, nick, jid, role, affiliation, show_str, status_str);
+            handle_room_member_nick_change(room, old_nick, nick);
+            free(old_nick);
+        } else {
+            if (!muc_roster_contains_nick(room, nick)) {
+                handle_room_member_online(room, nick, jid, role, affiliation, show_str, status_str);
+            } else {
+                handle_room_member_presence(room, nick, jid, role, affiliation, show_str, status_str);
+            }
+        }
+    }
+}
