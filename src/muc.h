@@ -105,7 +105,7 @@ const char * muc_occupant_role_str(Occupant *occupant);
 GSList * muc_occupants_by_role(const char * const room, muc_role_t role);
 GSList * muc_occupants_by_affiliation(const char * const room, muc_affiliation_t affiliation);
 
-void muc_roster_nick_change_start(const char * const room, const char * const new_nick, const char * const old_nick);
+void muc_occupant_nick_change_start(const char * const room, const char * const new_nick, const char * const old_nick);
 char* muc_roster_nick_change_complete(const char * const room, const char * const nick);
 
 void muc_invites_add(const char * const room);

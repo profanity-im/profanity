@@ -1261,22 +1261,22 @@ stanza_get_new_nick(xmpp_stanza_t * const stanza)
 {
     if (!stanza_is_room_nick_change(stanza)) {
         return NULL;
-    } else {
-        xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
-        xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
-
-        while (x_children != NULL) {
-            if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
-                char *nick = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_NICK);
-                if (nick != NULL) {
-                    return strdup(nick);
-                }
-            }
-            x_children = xmpp_stanza_get_next(x_children);
-        }
-
-        return NULL;
     }
+
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
+    xmpp_stanza_t *x_children = xmpp_stanza_get_children(x);
+
+    while (x_children != NULL) {
+        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
+            char *nick = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_NICK);
+            if (nick) {
+                return nick;
+            }
+        }
+        x_children = xmpp_stanza_get_next(x_children);
+    }
+
+    return NULL;
 }
 
 int

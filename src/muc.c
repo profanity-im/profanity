@@ -595,7 +595,7 @@ muc_occupants_by_affiliation(const char * const room, muc_affiliation_t affiliat
  * is in progress
  */
 void
-muc_roster_nick_change_start(const char * const room,
+muc_occupant_nick_change_start(const char * const room,
     const char * const new_nick, const char * const old_nick)
 {
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);

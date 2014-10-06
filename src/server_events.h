@@ -82,19 +82,9 @@ void handle_contact_offline(char *contact, char *resource, char *status);
 void handle_contact_online(char *contact, Resource *resource,
     GDateTime *last_activity);
 void handle_leave_room(const char * const room);
-void handle_room_nick_change(const char * const room,
-    const char * const nick);
-void handle_room_requires_config(const char * const room);
 void handle_room_destroy(const char * const room);
-void handle_room_roster_complete(const char * const room);
-void handle_room_member_presence(const char * const room, const char * const nick, const char * const  jid,
-    const char * const role, const char * const affiliation, const char * const show, const char * const status);
-void handle_room_member_online(const char * const room, const char * const nick, const char * const  jid,
-    const char * const role, const char * const affiliation, const char * const show, const char * const status);
-void handle_room_member_offline(const char * const room, const char * const nick,
+void handle_room_occupant_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status);
-void handle_room_member_nick_change(const char * const room,
-    const char * const old_nick, const char * const nick);
 void handle_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
     const char * const reason);
 void handle_room_kicked(const char * const room, const char * const actor, const char * const reason);
@@ -121,5 +111,10 @@ void handle_room_configure(const char * const room, DataForm *form);
 void handle_room_configuration_form_error(const char * const from, const char * const message);
 void handle_room_config_submit_result(const char * const room);
 void handle_room_config_submit_result_error(const char * const room, const char * const message);
+void handle_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
+    const char * const role, const char * const affiliation);
+void handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
+    const char * const role, const char * const affiliation, const char * const show_str,
+    const char * const status_str);
 
 #endif
