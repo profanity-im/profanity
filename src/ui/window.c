@@ -61,10 +61,10 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->from = strdup(title);
 
     if (type == WIN_MUC) {
-        new_win->win = newpad(PAD_SIZE, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1));
+        new_win->win = newpad(PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
         wbkgd(new_win->win, COLOUR_TEXT);
 
-        new_win->subwin = newpad(PAD_SIZE, cols/OCCUPANT_WIN_SIZE);
+        new_win->subwin = newpad(PAD_SIZE, OCCUPANT_WIN_WIDTH);
         wbkgd(new_win->subwin, COLOUR_TEXT);
     } else {
         new_win->win = newpad(PAD_SIZE, (cols));
@@ -108,8 +108,8 @@ win_update_virtual(ProfWin *window)
     getmaxyx(stdscr, rows, cols);
 
     if (window->type == WIN_MUC) {
-        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1)) -1);
-        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1), rows-3, cols-1);
+        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
+        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
     } else {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
     }
