@@ -293,16 +293,24 @@ wins_resize_all(void)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
     while (curr != NULL) {
-      ProfWin *window = curr->data;
-      wresize(window->win, PAD_SIZE, cols);
-      win_redraw(window);
-      curr = g_list_next(curr);
+        ProfWin *window = curr->data;
+        if (window->type == WIN_MUC) {
+            wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1));
+        } else {
+            wresize(window->win, PAD_SIZE, cols);
+        }
+        win_redraw(window);
+        curr = g_list_next(curr);
     }
     g_list_free(values);
 
     ProfWin *current_win = wins_get_current();
-
-    pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
+    if (current_win->type == WIN_MUC) {
+        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1)) -1);
+        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1), rows-3, cols-1);
+    } else {
+        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
+    }
 }
 
 gboolean

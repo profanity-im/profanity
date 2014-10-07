@@ -52,6 +52,7 @@
 #include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
+#define OCCUPANT_WIN_SIZE 5
 
 void ui_init_module(void);
 void console_init_module(void);
@@ -65,7 +66,7 @@ void (*ui_close)(void);
 void (*ui_resize)(const int ch, const char * const input,
     const int size);
 GSList* (*ui_get_recipients)(void);
-void (*ui_handle_special_keys)(const wint_t * const ch, const char * const inp,
+void (*ui_handle_special_keys)(const wint_t * const ch, const int result, const char * const inp,
     const int size);
 gboolean (*ui_switch_win)(const int i);
 void (*ui_next_win)(void);
@@ -222,7 +223,7 @@ void (*ui_update_presence)(const resource_presence_t resource_presence,
 void (*ui_about)(void);
 void (*ui_statusbar_new)(const int win);
 
-wint_t (*ui_get_char)(char *input, int *size);
+wint_t (*ui_get_char)(char *input, int *size, int *result);
 void (*ui_input_clear)(void);
 void (*ui_input_nonblocking)(void);
 void (*ui_replace_input)(char *input, const char * const new_input, int *size);
@@ -234,6 +235,8 @@ gboolean (*ui_xmlconsole_exists)(void);
 void (*ui_open_xmlconsole_win)(void);
 
 gboolean (*ui_win_has_unsaved_form)(int num);
+
+void (*ui_muc_roster)(const char * const room);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);

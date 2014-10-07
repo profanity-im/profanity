@@ -100,6 +100,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
+        int result;
         size = 0;
 
         while(ch != '\n') {
@@ -118,14 +119,14 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
             plugins_run_timed();
 
-            ui_handle_special_keys(&ch, inp, size);
+            ui_handle_special_keys(&ch, result, inp, size);
 #ifdef PROF_HAVE_LIBOTR
             otr_poll();
 #endif
             jabber_process_events();
             ui_update();
 
-            ch = ui_get_char(inp, &size);
+            ch = ui_get_char(inp, &size, &result);
         }
 
         inp[size++] = '\0';

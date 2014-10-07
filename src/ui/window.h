@@ -70,11 +70,13 @@ typedef enum {
 typedef struct prof_win_t {
     char *from;
     WINDOW *win;
+    WINDOW *subwin;
     ProfBuff buffer;
     win_type_t type;
     gboolean is_otr;
     gboolean is_trusted;
     int y_pos;
+    int sub_y_pos;
     int paged;
     int unread;
     int history_shown;

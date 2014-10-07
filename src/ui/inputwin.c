@@ -120,7 +120,7 @@ inp_block(void)
 }
 
 wint_t
-inp_get_char(char *input, int *size)
+inp_get_char(char *input, int *size, int *result)
 {
     wint_t ch;
     int display_size = 0;
@@ -131,7 +131,7 @@ inp_get_char(char *input, int *size)
 
     // echo off, and get some more input
     noecho();
-    int result = wget_wch(inp_win, &ch);
+    *result = wget_wch(inp_win, &ch);
 
     gboolean in_command = FALSE;
     if ((display_size > 0 && input[0] == '/') ||
@@ -140,12 +140,12 @@ inp_get_char(char *input, int *size)
     }
 
     if (prefs_get_boolean(PREF_STATES)) {
-        if (result == ERR) {
+        if (*result == ERR) {
             prof_handle_idle();
         }
         if (prefs_get_boolean(PREF_OUTTYPE)
-                && (result != ERR)
-                && (result != KEY_CODE_YES)
+                && (*result != ERR)
+                && (*result != KEY_CODE_YES)
                 && !in_command
                 && _printable(ch)) {
             prof_handle_activity();
@@ -153,8 +153,8 @@ inp_get_char(char *input, int *size)
     }
 
     // if it wasn't an arrow key etc
-    if (!_handle_edit(result, ch, input, size)) {
-        if (_printable(ch) && result != KEY_CODE_YES) {
+    if (!_handle_edit(*result, ch, input, size)) {
+        if (_printable(ch) && *result != KEY_CODE_YES) {
             if (*size >= INP_WIN_MAX) {
                 return ERR;
             }
