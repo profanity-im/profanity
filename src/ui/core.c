@@ -2493,8 +2493,6 @@ _ui_show_form(ProfWin *window, const char * const room, DataForm *form)
 
         curr_field = g_slist_next(curr_field);
     }
-
-    win_save_println(window, "");
 }
 
 static void
@@ -2519,6 +2517,12 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
     ui_switch_win(num);
 
     ui_show_form(window, room, form);
+
+    win_save_print(window, '-', NULL, 0, 0, "", "");
+    win_save_print(window, '-', NULL, 0, COLOUR_ROOMINFO, "", "Use '/form submit' to save changes.");
+    win_save_print(window, '-', NULL, 0, COLOUR_ROOMINFO, "", "Use '/form cancel' to cancel changes.");
+    win_save_print(window, '-', NULL, 0, COLOUR_ROOMINFO, "", "See '/form help' for more information.");
+    win_save_print(window, '-', NULL, 0, 0, "", "");
 }
 
 static void
@@ -2568,10 +2572,10 @@ _ui_handle_room_config_submit_result(const char * const room)
         if (muc_window) {
             int num = wins_get_num(muc_window);
             ui_switch_win(num);
-            win_save_print(muc_window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room configuration successfull");
+            win_save_print(muc_window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room configuration successful");
         } else {
             ui_switch_win(1);
-            cons_show("Room configuration successfull: %s", room);
+            cons_show("Room configuration successful: %s", room);
         }
     } else {
         cons_show("Room configuration successful");
@@ -2701,7 +2705,7 @@ static void
 _ui_show_form_help(ProfWin *window, DataForm *form)
 {
     if (form->instructions != NULL) {
-        win_save_print(window, '-', NULL, 0, 0, "", "Instructions:");
+        win_save_print(window, '-', NULL, 0, 0, "", "Supplied instructions:");
         win_save_print(window, '-', NULL, 0, 0, "", form->instructions);
         win_save_print(window, '-', NULL, 0, 0, "", "");
     }
