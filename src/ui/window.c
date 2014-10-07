@@ -46,6 +46,7 @@
 #endif
 
 #include "config/theme.h"
+#include "ui/ui.h"
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
@@ -60,10 +61,10 @@ win_create(const char * const title, int cols, win_type_t type)
     new_win->from = strdup(title);
 
     if (type == WIN_MUC) {
-        new_win->win = newpad(PAD_SIZE, (cols/4) * 3);
+        new_win->win = newpad(PAD_SIZE, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1));
         wbkgd(new_win->win, COLOUR_TEXT);
 
-        new_win->subwin = newpad(PAD_SIZE, cols/4);
+        new_win->subwin = newpad(PAD_SIZE, cols/OCCUPANT_WIN_SIZE);
         wvline(new_win->subwin, 0, 0);
         wbkgd(new_win->subwin, COLOUR_TEXT);
     } else {
@@ -92,6 +93,9 @@ win_free(ProfWin* window)
 {
     buffer_free(window->buffer);
     delwin(window->win);
+    if (window->subwin) {
+        delwin(window->subwin);
+    }
     free(window->from);
     form_destroy(window->form);
     free(window);
@@ -104,12 +108,11 @@ win_update_virtual(ProfWin *window)
     getmaxyx(stdscr, rows, cols);
 
     if (window->type == WIN_MUC) {
-        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/4) * 3) -1);
-        pnoutrefresh(window->subwin, 0, 0, 1, (cols/4) * 3, rows-3, cols-1);
+        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1)) -1);
+        pnoutrefresh(window->subwin, 0, 0, 1, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1), rows-3, cols-1);
     } else {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
     }
-
 }
 
 void
