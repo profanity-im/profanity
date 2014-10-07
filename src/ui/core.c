@@ -2563,10 +2563,10 @@ _ui_handle_room_config_submit_result(const char * const room)
         if (muc_window) {
             int num = wins_get_num(muc_window);
             ui_switch_win(num);
-            win_save_print(muc_window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room configuration successfull");
+            win_save_print(muc_window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room configuration successful");
         } else {
             ui_switch_win(1);
-            cons_show("Room configuration successfull: %s", room);
+            cons_show("Room configuration successful: %s", room);
         }
     } else {
         cons_show("Room configuration successful");
