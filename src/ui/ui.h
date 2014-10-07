@@ -235,6 +235,8 @@ void (*ui_open_xmlconsole_win)(void);
 
 gboolean (*ui_win_has_unsaved_form)(int num);
 
+void (*ui_muc_roster)(const char * const room);
+
 // console window actions
 void (*cons_show)(const char * const msg, ...);
 void (*cons_about)(void);

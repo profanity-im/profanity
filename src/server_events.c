@@ -591,6 +591,7 @@ handle_room_occupant_offline(const char * const room, const char * const nick,
         ui_room_member_offline(room, nick);
     }
     prefs_free_string(muc_status_pref);
+    ui_muc_roster(room);
 }
 
 void
@@ -599,6 +600,7 @@ handle_room_occupent_kicked(const char * const room, const char * const nick, co
 {
     muc_roster_remove(room, nick);
     ui_room_member_kicked(room, nick, actor, reason);
+    ui_muc_roster(room);
 }
 
 void
@@ -607,6 +609,7 @@ handle_room_occupent_banned(const char * const room, const char * const nick, co
 {
     muc_roster_remove(room, nick);
     ui_room_member_banned(room, nick, actor, reason);
+    ui_muc_roster(room);
 }
 
 void
@@ -716,6 +719,8 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 
     muc_set_role(room, role);
     muc_set_affiliation(room, affiliation);
+
+    ui_muc_roster(room);
 }
 
 void
@@ -751,4 +756,6 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
         }
         prefs_free_string(muc_status_pref);
     }
+
+    ui_muc_roster(room);
 }

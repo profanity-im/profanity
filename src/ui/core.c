@@ -2714,6 +2714,72 @@ _ui_show_lines(ProfWin *window, const gchar** lines)
 }
 
 static void
+_ui_muc_roster(const char * const room)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (room) {
+        GList *roster = muc_roster(room);
+        if (roster) {
+            werase(window->subwin);
+
+            wattron(window->subwin, COLOUR_ROOMINFO);
+            wprintw(window->subwin, " -Moderators\n");
+            wattroff(window->subwin, COLOUR_ROOMINFO);
+            GList *roster_curr = roster;
+            while (roster_curr) {
+                Occupant *occupant = roster_curr->data;
+                if (occupant->role == MUC_ROLE_MODERATOR) {
+                    wprintw(window->subwin, "   ");
+                    const char *presence_str = string_from_resource_presence(occupant->presence);
+                    int presence_colour = win_presence_colour(presence_str);
+                    wattron(window->subwin, presence_colour);
+                    wprintw(window->subwin, occupant->nick);
+                    wattroff(window->subwin, presence_colour);
+                    wprintw(window->subwin, "\n");
+                }
+                roster_curr = g_list_next(roster_curr);
+            }
+
+            wattron(window->subwin, COLOUR_ROOMINFO);
+            wprintw(window->subwin, " -Participants\n");
+            wattroff(window->subwin, COLOUR_ROOMINFO);
+            roster_curr = roster;
+            while (roster_curr) {
+                Occupant *occupant = roster_curr->data;
+                if (occupant->role == MUC_ROLE_PARTICIPANT) {
+                    wprintw(window->subwin, "   ");
+                    const char *presence_str = string_from_resource_presence(occupant->presence);
+                    int presence_colour = win_presence_colour(presence_str);
+                    wattron(window->subwin, presence_colour);
+                    wprintw(window->subwin, occupant->nick);
+                    wattroff(window->subwin, presence_colour);
+                    wprintw(window->subwin, "\n");
+                }
+                roster_curr = g_list_next(roster_curr);
+            }
+
+            wattron(window->subwin, COLOUR_ROOMINFO);
+            wprintw(window->subwin, " -Visitors\n");
+            wattroff(window->subwin, COLOUR_ROOMINFO);
+            roster_curr = roster;
+            while (roster_curr) {
+                Occupant *occupant = roster_curr->data;
+                if (occupant->role == MUC_ROLE_VISITOR) {
+                    wprintw(window->subwin, "   ");
+                    const char *presence_str = string_from_resource_presence(occupant->presence);
+                    int presence_colour = win_presence_colour(presence_str);
+                    wattron(window->subwin, presence_colour);
+                    wprintw(window->subwin, occupant->nick);
+                    wattroff(window->subwin, presence_colour);
+                    wprintw(window->subwin, "\n");
+                }
+                roster_curr = g_list_next(roster_curr);
+            }
+        }
+    }
+}
+
+static void
 _win_handle_switch(const wint_t * const ch)
 {
     if (*ch == KEY_F(1)) {
@@ -2980,5 +3046,6 @@ ui_init_module(void)
     ui_handle_room_role_set = _ui_handle_room_role_set;
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
     ui_handle_room_role_list = _ui_handle_room_role_list;
+    ui_muc_roster = _ui_muc_roster;
 }
 
