@@ -670,8 +670,11 @@ handle_ping_error_result(const char * const from, const char * const error)
 
 void
 handle_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
-    const char * const role, const char * const affiliation)
+    const char * const role, const char * const affiliation, const char * const jid, const char * const show,
+    const char * const status)
 {
+    muc_roster_add(room, nick, jid, role, affiliation, show, status);
+
     // handle self nick change
     if (muc_nick_change_pending(room)) {
         muc_nick_change_complete(room, nick);

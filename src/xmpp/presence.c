@@ -694,6 +694,9 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
     char *room = from_jid->barejid;
     char *nick = from_jid->resourcepart;
 
+    char *show_str = stanza_get_show(stanza, "online");
+    char *status_str = stanza_get_status(stanza, NULL);
+
     char *jid = NULL;
     char *role = NULL;
     char *affiliation = NULL;
@@ -756,13 +759,12 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
         // self online
         } else {
             gboolean config_required = stanza_muc_requires_config(stanza);
-            handle_muc_self_online(room, nick, config_required, role, affiliation);
+            handle_muc_self_online(room, nick, config_required, role, affiliation, jid, show_str, status_str);
         }
 
     // handle presence from room members
     } else {
         log_debug("Room presence received from %s", from_jid->fulljid);
-        char *status_str = stanza_get_status(stanza, NULL);
 
         if (g_strcmp0(type, STANZA_TYPE_UNAVAILABLE) == 0) {
 
@@ -803,15 +805,12 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                 _handle_caps(stanza);
             }
 
-            char *show_str = stanza_get_show(stanza, "online");
             handle_muc_occupant_online(room, nick, jid, role, affiliation, show_str, status_str);
-
-            free(show_str);
         }
-
-        free(status_str);
     }
 
+    free(show_str);
+    free(status_str);
     jid_destroy(from_jid);
 
     return 1;

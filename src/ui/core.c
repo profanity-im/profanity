@@ -1449,10 +1449,7 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
         } else {
             int length = g_list_length(roster);
             if (presence == NULL) {
-                length++;
                 win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d occupants: ", length);
-                win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", "%s", muc_nick(room));
-                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", ");
             } else {
                 win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%d %s: ", length, presence);
             }

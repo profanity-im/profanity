@@ -112,7 +112,8 @@ void handle_room_configuration_form_error(const char * const from, const char * 
 void handle_room_config_submit_result(const char * const room);
 void handle_room_config_submit_result_error(const char * const room, const char * const message);
 void handle_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
-    const char * const role, const char * const affiliation);
+    const char * const role, const char * const affiliation, const char * const jid, const char * const show,
+    const char * const status);
 void handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
     const char * const role, const char * const affiliation, const char * const show_str,
     const char * const status_str);
