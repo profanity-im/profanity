@@ -75,6 +75,7 @@ typedef struct prof_win_t {
     gboolean is_otr;
     gboolean is_trusted;
     int y_pos;
+    int sub_y_pos;
     int paged;
     int unread;
     int history_shown;

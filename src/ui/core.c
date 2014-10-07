@@ -80,7 +80,7 @@ static Display *display;
 static GTimer *ui_idle_time;
 
 static void _win_handle_switch(const wint_t * const ch);
-static void _win_handle_page(const wint_t * const ch);
+static void _win_handle_page(const wint_t * const ch, const int result);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static void _ui_draw_term_title(void);
@@ -175,9 +175,9 @@ _ui_close(void)
 }
 
 static wint_t
-_ui_get_char(char *input, int *size)
+_ui_get_char(char *input, int *size, int *result)
 {
-    wint_t ch = inp_get_char(input, size);
+    wint_t ch = inp_get_char(input, size, result);
     if (ch != ERR) {
         ui_reset_idle_time();
     }
@@ -585,11 +585,11 @@ _ui_disconnected(void)
 }
 
 static void
-_ui_handle_special_keys(const wint_t * const ch, const char * const inp,
+_ui_handle_special_keys(const wint_t * const ch, const int result, const char * const inp,
     const int size)
 {
     _win_handle_switch(ch);
-    _win_handle_page(ch);
+    _win_handle_page(ch, result);
     if (*ch == KEY_RESIZE) {
         ui_resize(*ch, inp, size);
     }
@@ -2806,11 +2806,12 @@ _win_handle_switch(const wint_t * const ch)
 }
 
 static void
-_win_handle_page(const wint_t * const ch)
+_win_handle_page(const wint_t * const ch, const int result)
 {
     ProfWin *current = wins_get_current();
     int rows = getmaxy(stdscr);
     int y = getcury(current->win);
+    int sub_y = getcury(current->subwin);
 
     int page_space = rows - 4;
     int *page_start = &(current->y_pos);
@@ -2882,6 +2883,33 @@ _win_handle_page(const wint_t * const ch)
     // switch off page if last line and space line visible
     if ((y) - *page_start == page_space) {
         current->paged = 0;
+    }
+
+    if (current->type == WIN_MUC) {
+        // alt up arrow
+        if ((result == KEY_CODE_YES) && (*ch == 565)) {
+            current->sub_y_pos -= page_space;
+
+            // went past beginning, show first page
+            if (current->sub_y_pos < 0)
+                current->sub_y_pos = 0;
+
+            win_update_virtual(current);
+
+        // alt down arrow
+        } else if ((result == KEY_CODE_YES) && (*ch == 524)) {
+            current->sub_y_pos += page_space;
+
+            // only got half a screen, show full screen
+            if ((sub_y- (current->sub_y_pos)) < page_space)
+                current->sub_y_pos = sub_y - page_space;
+
+            // went past end, show full screen
+            else if (current->sub_y_pos >= sub_y)
+                current->sub_y_pos = sub_y - page_space - 1;
+
+            win_update_virtual(current);
+        }
     }
 }
 

@@ -65,7 +65,6 @@ win_create(const char * const title, int cols, win_type_t type)
         wbkgd(new_win->win, COLOUR_TEXT);
 
         new_win->subwin = newpad(PAD_SIZE, cols/OCCUPANT_WIN_SIZE);
-        wvline(new_win->subwin, 0, 0);
         wbkgd(new_win->subwin, COLOUR_TEXT);
     } else {
         new_win->win = newpad(PAD_SIZE, (cols));
@@ -76,6 +75,7 @@ win_create(const char * const title, int cols, win_type_t type)
 
     new_win->buffer = buffer_create();
     new_win->y_pos = 0;
+    new_win->sub_y_pos = 0;
     new_win->paged = 0;
     new_win->unread = 0;
     new_win->history_shown = 0;
@@ -109,7 +109,7 @@ win_update_virtual(ProfWin *window)
 
     if (window->type == WIN_MUC) {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1)) -1);
-        pnoutrefresh(window->subwin, 0, 0, 1, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1), rows-3, cols-1);
+        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1), rows-3, cols-1);
     } else {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
     }

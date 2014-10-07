@@ -693,9 +693,6 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
         muc_invites_remove(room);
         muc_roster_set_complete(room);
 
-        GList *roster = muc_roster(room);
-        ui_room_roster(room, roster, NULL);
-
         char *subject = muc_subject(room);
         if (subject != NULL) {
             ui_room_subject(room, NULL, subject);
