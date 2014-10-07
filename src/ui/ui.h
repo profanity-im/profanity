@@ -52,7 +52,8 @@
 #include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
-#define OCCUPANT_WIN_SIZE 5
+#define OCCUPANT_WIN_RATIO 5
+#define OCCUPANT_WIN_WIDTH 100
 
 void ui_init_module(void);
 void console_init_module(void);

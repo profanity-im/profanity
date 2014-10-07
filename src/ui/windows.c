@@ -295,7 +295,7 @@ wins_resize_all(void)
     while (curr != NULL) {
         ProfWin *window = curr->data;
         if (window->type == WIN_MUC) {
-            wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1));
+            wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
         } else {
             wresize(window->win, PAD_SIZE, cols);
         }
@@ -306,8 +306,8 @@ wins_resize_all(void)
 
     ProfWin *current_win = wins_get_current();
     if (current_win->type == WIN_MUC) {
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1)) -1);
-        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_SIZE) * (OCCUPANT_WIN_SIZE-1), rows-3, cols-1);
+        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
+        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
     } else {
         pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
     }
