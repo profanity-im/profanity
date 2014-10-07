@@ -2891,7 +2891,7 @@ _win_handle_page(const wint_t * const ch, const int result)
 
     if (current->type == WIN_MUC) {
         // alt up arrow
-        if ((result == KEY_CODE_YES) && (*ch == 565)) {
+        if ((result == KEY_CODE_YES) && ((*ch == 565) || (*ch == 337))) {
             current->sub_y_pos -= page_space;
 
             // went past beginning, show first page
@@ -2901,7 +2901,7 @@ _win_handle_page(const wint_t * const ch, const int result)
             win_update_virtual(current);
 
         // alt down arrow
-        } else if ((result == KEY_CODE_YES) && (*ch == 524)) {
+        } else if ((result == KEY_CODE_YES) && ((*ch == 524) || (*ch == 336))) {
             current->sub_y_pos += page_space;
 
             // only got half a screen, show full screen
