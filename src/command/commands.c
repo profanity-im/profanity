@@ -2336,9 +2336,24 @@ cmd_occupants(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    if (g_strcmp0(args[0], "default") == 0) {
+        if (g_strcmp0(args[1], "show") == 0) {
+            cons_show("Occupant list enabled.");
+            prefs_set_boolean(PREF_OCCUPANTS, TRUE);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "hide") == 0) {
+            cons_show("Occupant list disabled.");
+            prefs_set_boolean(PREF_OCCUPANTS, FALSE);
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+    }
+
     win_type_t win_type = ui_current_win_type();
     if (win_type != WIN_MUC) {
-        cons_show("Command '/occupants' does not apply to this window.");
+        cons_show("Cannot show/hide occupant list when not in chat room.");
         return TRUE;
     }
 

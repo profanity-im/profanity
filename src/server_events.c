@@ -693,6 +693,12 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
         muc_invites_remove(room);
         muc_roster_set_complete(room);
 
+        // show roster if occupants list disabled by default
+        if (!prefs_get_boolean(PREF_OCCUPANTS)) {
+            GList *roster = muc_roster(room);
+            ui_room_roster(room, roster, NULL);
+        }
+
         char *subject = muc_subject(room);
         if (subject != NULL) {
             ui_room_subject(room, NULL, subject);

@@ -849,6 +849,15 @@ _cons_splash_setting(void)
 }
 
 static void
+_cons_occupants_setting(void)
+{
+    if (prefs_get_boolean(PREF_OCCUPANTS))
+        cons_show("Occupants (/occupants)        : show");
+    else
+        cons_show("Occupants (/occupants)        : hide");
+}
+
+static void
 _cons_autoconnect_setting(void)
 {
     char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
@@ -916,6 +925,7 @@ _cons_show_ui_prefs(void)
     cons_vercheck_setting();
     cons_mouse_setting();
     cons_statuses_setting();
+    cons_occupants_setting();
     cons_titlebar_setting();
 
     cons_alert();
@@ -1290,16 +1300,17 @@ _cons_navigation_help(void)
     cons_show("");
     cons_show("Navigation:");
     cons_show("");
-    cons_show("Alt-1 (F1)               : This console window.");
-    cons_show("Alt-2..Alt-0 (F2..F10)   : Chat windows.");
-    cons_show("Alt-LEFT                 : Previous chat window");
-    cons_show("Alt-RIGHT                : Next chat window");
-    cons_show("UP, DOWN                 : Navigate input history.");
-    cons_show("LEFT, RIGHT, HOME, END   : Edit current input.");
-    cons_show("CTRL-LEFT, CTRL-RIGHT    : Jump word in input.");
-    cons_show("ESC                      : Clear current input.");
-    cons_show("TAB                      : Autocomplete.");
-    cons_show("PAGE UP, PAGE DOWN       : Page the main window.");
+    cons_show("Alt-1 (F1)                       : This console window.");
+    cons_show("Alt-2..Alt-0 (F2..F10)           : Chat windows.");
+    cons_show("Alt-LEFT                         : Previous chat window");
+    cons_show("Alt-RIGHT                        : Next chat window");
+    cons_show("UP, DOWN                         : Navigate input history.");
+    cons_show("LEFT, RIGHT, HOME, END           : Edit current input.");
+    cons_show("CTRL-LEFT, CTRL-RIGHT            : Jump word in input.");
+    cons_show("ESC                              : Clear current input.");
+    cons_show("TAB                              : Autocomplete.");
+    cons_show("PAGE UP, PAGE DOWN               : Page the main window.");
+    cons_show("SHIFT-PAGE UP, SHIFT-PAGE DOWN   : Page the main window.");
     cons_show("");
 
     cons_alert();
@@ -1512,6 +1523,7 @@ console_init_module(void)
     cons_flash_setting = _cons_flash_setting;
     cons_splash_setting = _cons_splash_setting;
     cons_autoconnect_setting = _cons_autoconnect_setting;
+    cons_occupants_setting = _cons_occupants_setting;
     cons_vercheck_setting = _cons_vercheck_setting;
     cons_mouse_setting = _cons_mouse_setting;
     cons_statuses_setting = _cons_statuses_setting;
