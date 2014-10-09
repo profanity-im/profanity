@@ -103,6 +103,19 @@ win_hide_subwin(ProfWin *window)
 }
 
 void
+win_show_subwin(ProfWin *window)
+{
+    if (!window->subwin) {
+        window->subwin = newpad(PAD_SIZE, OCCUPANT_WIN_WIDTH);
+        wbkgd(window->subwin, COLOUR_TEXT);
+
+        int cols = getmaxx(stdscr);
+        wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
+        win_redraw(window);
+    }
+}
+
+void
 win_free(ProfWin* window)
 {
     buffer_free(window->buffer);

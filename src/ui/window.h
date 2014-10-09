@@ -103,5 +103,6 @@ void win_save_println(ProfWin *window, const char * const message);
 void win_save_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
 void win_hide_subwin(ProfWin *window);
+void win_show_subwin(ProfWin *window);
 
 #endif

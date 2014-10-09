@@ -987,6 +987,7 @@ static Autocomplete room_role_ac;
 static Autocomplete room_cmd_ac;
 static Autocomplete room_subject_ac;
 static Autocomplete form_ac;
+static Autocomplete occupants_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1295,6 +1296,10 @@ cmd_init(void)
     autocomplete_add(form_ac, "remove");
     autocomplete_add(form_ac, "help");
 
+    occupants_ac = autocomplete_new();
+    autocomplete_add(occupants_ac, "show");
+    autocomplete_add(occupants_ac, "hide");
+
     cmd_history_init();
 }
 
@@ -1343,6 +1348,7 @@ cmd_uninit(void)
     autocomplete_free(room_cmd_ac);
     autocomplete_free(room_subject_ac);
     autocomplete_free(form_ac);
+    autocomplete_free(occupants_ac);
 }
 
 gboolean
@@ -1474,6 +1480,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(room_cmd_ac);
     autocomplete_reset(room_subject_ac);
     autocomplete_reset(form_ac);
+    autocomplete_reset(occupants_ac);
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
         ProfWin *window = wins_get_current();
@@ -1731,8 +1738,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/occupants" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, occupants_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);

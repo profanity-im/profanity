@@ -2788,7 +2788,8 @@ _ui_room_show_occupants(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
     if (window && !window->subwin) {
-        cons_debug("Showing occupants");
+        wins_show_subwin(window);
+        ui_muc_roster(room);
     }
 }
 
