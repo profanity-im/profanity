@@ -46,6 +46,7 @@
 #endif
 
 #include "config/theme.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
@@ -60,7 +61,7 @@ win_create(const char * const title, int cols, win_type_t type)
     ProfWin *new_win = malloc(sizeof(struct prof_win_t));
     new_win->from = strdup(title);
 
-    if (type == WIN_MUC) {
+    if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
         new_win->win = newpad(PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
         wbkgd(new_win->win, COLOUR_TEXT);
 

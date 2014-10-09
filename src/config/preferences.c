@@ -431,6 +431,7 @@ _get_group(preference_t pref)
         case PREF_INTYPE:
         case PREF_HISTORY:
         case PREF_MOUSE:
+        case PREF_OCCUPANTS:
         case PREF_STATUSES:
         case PREF_STATUSES_CONSOLE:
         case PREF_STATUSES_CHAT:
@@ -493,6 +494,8 @@ _get_key(preference_t pref)
             return "history";
         case PREF_MOUSE:
             return "mouse";
+        case PREF_OCCUPANTS:
+            return "occupants";
         case PREF_STATUSES:
             return "statuses";
         case PREF_STATUSES_CONSOLE:
@@ -566,6 +569,7 @@ _get_default_boolean(preference_t pref)
         case PREF_NOTIFY_ROOM_CURRENT:
         case PREF_NOTIFY_TYPING_CURRENT:
         case PREF_SPLASH:
+        case PREF_OCCUPANTS:
             return TRUE;
         default:
             return FALSE;
