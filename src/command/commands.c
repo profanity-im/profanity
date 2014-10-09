@@ -2330,6 +2330,50 @@ cmd_room(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_occupants(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "default") == 0) {
+        if (g_strcmp0(args[1], "show") == 0) {
+            cons_show("Occupant list enabled.");
+            prefs_set_boolean(PREF_OCCUPANTS, TRUE);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "hide") == 0) {
+            cons_show("Occupant list disabled.");
+            prefs_set_boolean(PREF_OCCUPANTS, FALSE);
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Cannot show/hide occupant list when not in chat room.");
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+
+    if (g_strcmp0(args[0], "show") == 0) {
+        ui_room_show_occupants(room);
+    } else if (g_strcmp0(args[0], "hide") == 0) {
+        ui_room_hide_occupants(room);
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_rooms(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();

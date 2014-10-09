@@ -46,6 +46,7 @@
 #endif
 
 #include "config/theme.h"
+#include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
@@ -60,7 +61,7 @@ win_create(const char * const title, int cols, win_type_t type)
     ProfWin *new_win = malloc(sizeof(struct prof_win_t));
     new_win->from = strdup(title);
 
-    if (type == WIN_MUC) {
+    if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
         new_win->win = newpad(PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
         wbkgd(new_win->win, COLOUR_TEXT);
 
@@ -89,6 +90,33 @@ win_create(const char * const title, int cols, win_type_t type)
 }
 
 void
+win_hide_subwin(ProfWin *window)
+{
+    if (window->subwin) {
+        delwin(window->subwin);
+    }
+    window->subwin = NULL;
+    window->sub_y_pos = 0;
+
+    int cols = getmaxx(stdscr);
+    wresize(window->win, PAD_SIZE, cols);
+    win_redraw(window);
+}
+
+void
+win_show_subwin(ProfWin *window)
+{
+    if (!window->subwin) {
+        window->subwin = newpad(PAD_SIZE, OCCUPANT_WIN_WIDTH);
+        wbkgd(window->subwin, COLOUR_TEXT);
+
+        int cols = getmaxx(stdscr);
+        wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
+        win_redraw(window);
+    }
+}
+
+void
 win_free(ProfWin* window)
 {
     buffer_free(window->buffer);
@@ -107,7 +135,7 @@ win_update_virtual(ProfWin *window)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    if (window->type == WIN_MUC) {
+    if ((window->type == WIN_MUC) && (window->subwin)) {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
         pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
     } else {

@@ -90,6 +90,7 @@ static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
 static char * _form_autocomplete(char *input, int *size);
 static char * _room_autocomplete(char *input, int *size);
+static char * _occupants_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -316,6 +317,16 @@ static struct cmd_t command_defs[] =
           "destroy - Reject default room configuration.",
           "config  - Edit room configuration.",
           "info    - Show room details.",
+          NULL } } },
+
+    { "/occupants",
+        cmd_occupants, parse_args, 1, 2, &cons_occupants_setting,
+        { "/occupants show|hide|default [show|hide]", "Show or hide room occupants.",
+        { "/occupants show|hide|default [show|hide]",
+          "----------------------------------------",
+          "show    - Show the occupants panel in chat rooms.",
+          "hide    - Hide the occupants panel in chat rooms.",
+          "default - Whether occupants are shown by default in new rooms, 'show' or 'hide'",
           NULL } } },
 
     { "/form",
@@ -987,6 +998,8 @@ static Autocomplete room_role_ac;
 static Autocomplete room_cmd_ac;
 static Autocomplete room_subject_ac;
 static Autocomplete form_ac;
+static Autocomplete occupants_ac;
+static Autocomplete occupants_default_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1295,6 +1308,15 @@ cmd_init(void)
     autocomplete_add(form_ac, "remove");
     autocomplete_add(form_ac, "help");
 
+    occupants_ac = autocomplete_new();
+    autocomplete_add(occupants_ac, "show");
+    autocomplete_add(occupants_ac, "hide");
+    autocomplete_add(occupants_ac, "default");
+
+    occupants_default_ac = autocomplete_new();
+    autocomplete_add(occupants_default_ac, "show");
+    autocomplete_add(occupants_default_ac, "hide");
+
     cmd_history_init();
 }
 
@@ -1343,6 +1365,8 @@ cmd_uninit(void)
     autocomplete_free(room_cmd_ac);
     autocomplete_free(room_subject_ac);
     autocomplete_free(form_ac);
+    autocomplete_free(occupants_ac);
+    autocomplete_free(occupants_default_ac);
 }
 
 gboolean
@@ -1474,6 +1498,8 @@ cmd_reset_autocomplete()
     autocomplete_reset(room_cmd_ac);
     autocomplete_reset(room_subject_ac);
     autocomplete_reset(form_ac);
+    autocomplete_reset(occupants_ac);
+    autocomplete_reset(occupants_default_ac);
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
         ProfWin *window = wins_get_current();
@@ -1789,6 +1815,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
     g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
     g_hash_table_insert(ac_funcs, "/room",          _room_autocomplete);
+    g_hash_table_insert(ac_funcs, "/occupants",     _occupants_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2311,6 +2338,24 @@ _form_autocomplete(char *input, int *size)
     }
 
     found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_occupants_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_ac(input, size, "/occupants default", occupants_default_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, size, "/occupants", occupants_ac, TRUE);
     if (found != NULL) {
         return found;
     }

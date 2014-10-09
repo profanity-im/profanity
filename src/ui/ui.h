@@ -162,6 +162,8 @@ void (*ui_room_member_nick_change)(const char * const room,
 void (*ui_room_nick_change)(const char * const room, const char * const nick);
 void (*ui_room_member_presence)(const char * const room,
     const char * const nick, const char * const show, const char * const status);
+void (*ui_room_show_occupants)(const char * const room);
+void (*ui_room_hide_occupants)(const char * const room);
 void (*ui_roster_add)(const char * const barejid, const char * const name);
 void (*ui_roster_remove)(const char * const barejid);
 void (*ui_contact_already_in_group)(const char * const contact, const char * const group);
@@ -289,6 +291,7 @@ void (*cons_beep_setting)(void);
 void (*cons_flash_setting)(void);
 void (*cons_splash_setting)(void);
 void (*cons_vercheck_setting)(void);
+void (*cons_occupants_setting)(void);
 void (*cons_mouse_setting)(void);
 void (*cons_statuses_setting)(void);
 void (*cons_titlebar_setting)(void);
