@@ -89,6 +89,20 @@ win_create(const char * const title, int cols, win_type_t type)
 }
 
 void
+win_hide_subwin(ProfWin *window)
+{
+    if (window->subwin) {
+        delwin(window->subwin);
+    }
+    window->subwin = NULL;
+    window->sub_y_pos = 0;
+
+    int cols = getmaxx(stdscr);
+    wresize(window->win, PAD_SIZE, cols);
+    win_redraw(window);
+}
+
+void
 win_free(ProfWin* window)
 {
     buffer_free(window->buffer);
@@ -107,7 +121,7 @@ win_update_virtual(ProfWin *window)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    if (window->type == WIN_MUC) {
+    if ((window->type == WIN_MUC) && (window->subwin)) {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
         pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
     } else {

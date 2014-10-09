@@ -2797,7 +2797,7 @@ _ui_room_hide_occupants(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
     if (window && window->subwin) {
-        cons_debug("Hiding occupants");
+        wins_hide_subwin(window);
     }
 }
 
@@ -3097,7 +3097,7 @@ ui_init_module(void)
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
     ui_handle_room_role_list = _ui_handle_room_role_list;
     ui_muc_roster = _ui_muc_roster;
-    ui_room_show_occupants = _ui_room_show_occupants; 
+    ui_room_show_occupants = _ui_room_show_occupants;
     ui_room_hide_occupants = _ui_room_hide_occupants;
 }
 
