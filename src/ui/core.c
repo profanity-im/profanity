@@ -2721,7 +2721,7 @@ static void
 _ui_muc_roster(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    if (room) {
+    if (window) {
         GList *roster = muc_roster(room);
         if (roster) {
             werase(window->subwin);
@@ -2780,6 +2780,24 @@ _ui_muc_roster(const char * const room)
                 roster_curr = g_list_next(roster_curr);
             }
         }
+    }
+}
+
+static void
+_ui_room_show_occupants(const char * const room)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window && !window->subwin) {
+        cons_debug("Showing occupants");
+    }
+}
+
+static void
+_ui_room_hide_occupants(const char * const room)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    if (window && window->subwin) {
+        cons_debug("Hiding occupants");
     }
 }
 
@@ -3079,5 +3097,7 @@ ui_init_module(void)
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
     ui_handle_room_role_list = _ui_handle_room_role_list;
     ui_muc_roster = _ui_muc_roster;
+    ui_room_show_occupants = _ui_room_show_occupants; 
+    ui_room_hide_occupants = _ui_room_hide_occupants;
 }
 

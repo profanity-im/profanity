@@ -317,6 +317,15 @@ static struct cmd_t command_defs[] =
           "info    - Show room details.",
           NULL } } },
 
+    { "/occupants",
+        cmd_occupants, parse_args, 1, 1, NULL,
+        { "/occupants show|hide", "Room configuration.",
+        { "/occupants show|hide",
+          "--------------------",
+          "show - Show the occupants panel in chat rooms.",
+          "hide - Hide the occupants panel in chat rooms.",
+          NULL } } },
+
     { "/form",
         cmd_form, parse_args, 1, 3, NULL,
         { "/form show|submit|cancel|set|add|remove|help [tag] [value]", "Form manipulation.",
