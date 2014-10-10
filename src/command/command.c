@@ -90,6 +90,7 @@ static char * _log_autocomplete(char *input, int *size);
 static char * _form_autocomplete(char *input, int *size);
 static char * _room_autocomplete(char *input, int *size);
 static char * _occupants_autocomplete(char *input, int *size);
+static char * _kick_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -316,6 +317,15 @@ static struct cmd_t command_defs[] =
           "destroy - Reject default room configuration.",
           "config  - Edit room configuration.",
           "info    - Show room details.",
+          NULL } } },
+
+    { "/kick",
+        cmd_kick, parse_args_with_freetext, 1, 2, NULL,
+        { "/kick nick [reason]", "Kick occupants from chat rooms.",
+        { "/kick nick [reason]",
+          "-------------------",
+          "nick   - Nickname of the occupant to kick from the room.",
+          "reason - Optional reason for kicking the occupant.",
           NULL } } },
 
     { "/occupants",
@@ -1264,7 +1274,6 @@ cmd_init(void)
     autocomplete_add(room_ac, "config");
     autocomplete_add(room_ac, "info");
     autocomplete_add(room_ac, "subject");
-    autocomplete_add(room_ac, "kick");
     autocomplete_add(room_ac, "ban");
     autocomplete_add(room_ac, "role");
     autocomplete_add(room_ac, "affiliation");
@@ -1780,6 +1789,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
     g_hash_table_insert(ac_funcs, "/room",          _room_autocomplete);
     g_hash_table_insert(ac_funcs, "/occupants",     _occupants_autocomplete);
+    g_hash_table_insert(ac_funcs, "/kick",          _kick_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2321,6 +2331,23 @@ _occupants_autocomplete(char *input, int *size)
 }
 
 static char *
+_kick_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+    char *recipient = ui_current_recipient();
+    Autocomplete nick_ac = muc_roster_ac(recipient);
+
+    if (nick_ac != NULL) {
+        result = autocomplete_param_with_ac(input, size, "/kick", nick_ac, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    return NULL;
+}
+
+static char *
 _room_autocomplete(char *input, int *size)
 {
     char *result = NULL;
@@ -2392,13 +2419,6 @@ _room_autocomplete(char *input, int *size)
     result = autocomplete_param_with_ac(input, size, "/room subject", room_subject_ac, TRUE);
     if (result != NULL) {
         return result;
-    }
-
-    if (nick_ac != NULL) {
-        result = autocomplete_param_with_ac(input, size, "/room kick", nick_ac, TRUE);
-        if (result != NULL) {
-            return result;
-        }
     }
 
     if (jid_ac != NULL) {
