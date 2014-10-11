@@ -2142,6 +2142,34 @@ cmd_kick(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_ban(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/kick' only applies in chat rooms.");
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+
+    char *jid = args[0];
+    if (jid) {
+        char *reason = args[1];
+        iq_room_affiliation_set(room, jid, "outcast", reason);
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
+    return TRUE;
+}
+
+gboolean
 cmd_room(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -2161,7 +2189,6 @@ cmd_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
             (g_strcmp0(args[0], "subject") != 0) &&
-            (g_strcmp0(args[0], "ban") != 0) &&
             (g_strcmp0(args[0], "role") != 0) &&
             (g_strcmp0(args[0], "affiliation") != 0) &&
             (g_strcmp0(args[0], "info") != 0)) {
@@ -2211,17 +2238,6 @@ cmd_room(gchar **args, struct cmd_help_t help)
         }
 
         cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "ban") == 0) {
-        char *jid = args[1];
-        if (jid) {
-            char *reason = args[2];
-            iq_room_affiliation_set(room, jid, "outcast", reason);
-        } else {
-            cons_show("Usage: %s", help.usage);
-        }
         return TRUE;
     }
 
