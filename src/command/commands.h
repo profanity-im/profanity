@@ -129,5 +129,6 @@ gboolean cmd_form(gchar **args, struct cmd_help_t help);
 gboolean cmd_occupants(gchar **args, struct cmd_help_t help);
 gboolean cmd_kick(gchar **args, struct cmd_help_t help);
 gboolean cmd_ban(gchar **args, struct cmd_help_t help);
+gboolean cmd_subject(gchar **args, struct cmd_help_t help);
 
 #endif

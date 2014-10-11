@@ -338,6 +338,15 @@ static struct cmd_t command_defs[] =
           "reason - Optional reason for banning the user.",
           NULL } } },
 
+    { "/subject",
+        cmd_subject, parse_args_with_freetext, 0, 2, NULL,
+        { "/subject set|clear [subject]", "Set or clear room subject.",
+        { "/subject set|clear [subject]",
+          "----------------------------",
+          "set subject  - Set the room subject.",
+          "clear        - Clear the room subject.",
+          NULL } } },
+
     { "/occupants",
         cmd_occupants, parse_args, 1, 2, &cons_occupants_setting,
         { "/occupants show|hide|default [show|hide]", "Show or hide room occupants.",
@@ -1007,7 +1016,7 @@ static Autocomplete room_ac;
 static Autocomplete room_affiliation_ac;
 static Autocomplete room_role_ac;
 static Autocomplete room_cmd_ac;
-static Autocomplete room_subject_ac;
+static Autocomplete subject_ac;
 static Autocomplete form_ac;
 static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
@@ -1283,7 +1292,6 @@ cmd_init(void)
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
     autocomplete_add(room_ac, "info");
-    autocomplete_add(room_ac, "subject");
     autocomplete_add(room_ac, "role");
     autocomplete_add(room_ac, "affiliation");
 
@@ -1304,9 +1312,9 @@ cmd_init(void)
     autocomplete_add(room_cmd_ac, "list");
     autocomplete_add(room_cmd_ac, "set");
 
-    room_subject_ac = autocomplete_new();
-    autocomplete_add(room_subject_ac, "set");
-    autocomplete_add(room_subject_ac, "clear");
+    subject_ac = autocomplete_new();
+    autocomplete_add(subject_ac, "set");
+    autocomplete_add(subject_ac, "clear");
 
     form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");
@@ -1372,7 +1380,7 @@ cmd_uninit(void)
     autocomplete_free(room_affiliation_ac);
     autocomplete_free(room_role_ac);
     autocomplete_free(room_cmd_ac);
-    autocomplete_free(room_subject_ac);
+    autocomplete_free(subject_ac);
     autocomplete_free(form_ac);
     autocomplete_free(occupants_ac);
     autocomplete_free(occupants_default_ac);
@@ -1505,7 +1513,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(room_affiliation_ac);
     autocomplete_reset(room_role_ac);
     autocomplete_reset(room_cmd_ac);
-    autocomplete_reset(room_subject_ac);
+    autocomplete_reset(subject_ac);
     autocomplete_reset(form_ac);
     autocomplete_reset(occupants_ac);
     autocomplete_reset(occupants_default_ac);
@@ -1766,8 +1774,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -2439,11 +2447,6 @@ _room_autocomplete(char *input, int *size)
     }
 
     result = autocomplete_param_with_ac(input, size, "/room role", room_cmd_ac, TRUE);
-    if (result != NULL) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, size, "/room subject", room_subject_ac, TRUE);
     if (result != NULL) {
         return result;
     }
