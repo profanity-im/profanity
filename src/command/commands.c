@@ -2223,6 +2223,125 @@ cmd_subject(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_affiliation(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/affiliation' does not apply to this window.");
+        return TRUE;
+    }
+
+    char *cmd = args[0];
+    if (cmd == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *affiliation = args[1];
+    if ((g_strcmp0(affiliation, "owner") != 0) &&
+            (g_strcmp0(affiliation, "admin") != 0) &&
+            (g_strcmp0(affiliation, "member") != 0) &&
+            (g_strcmp0(affiliation, "none") != 0) &&
+            (g_strcmp0(affiliation, "outcast") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+
+    if (g_strcmp0(cmd, "list") == 0) {
+        if (g_strcmp0(affiliation, "none") == 0) {
+            win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
+        } else {
+            iq_room_affiliation_list(room, affiliation);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(cmd, "set") == 0) {
+        char *jid = args[2];
+        if (jid == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            char *reason = args[3];
+            iq_room_affiliation_set(room, jid, affiliation, reason);
+            return TRUE;
+        }
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_role(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/role' does not apply to this window.");
+        return TRUE;
+    }
+
+    char *cmd = args[0];
+    if (cmd == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *role = args[1];
+    if ((g_strcmp0(role, "visitor") != 0) &&
+            (g_strcmp0(role, "participant") != 0) &&
+            (g_strcmp0(role, "moderator") != 0) &&
+            (g_strcmp0(role, "none") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+
+    if (g_strcmp0(cmd, "list") == 0) {
+        if (g_strcmp0(role, "none") == 0) {
+            win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no role.");
+        } else if (g_strcmp0(role, "visitor") == 0) {
+            win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with visitor role.");
+        } else {
+            iq_room_role_list(room, role);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(cmd, "set") == 0) {
+        char *nick = args[2];
+        if (nick == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            char *reason = args[3];
+            iq_room_role_set(room, nick, role, reason);
+            return TRUE;
+        }
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_room(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -2240,9 +2359,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
 
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
-            (g_strcmp0(args[0], "config") != 0) &&
-            (g_strcmp0(args[0], "role") != 0) &&
-            (g_strcmp0(args[0], "affiliation") != 0)) {
+            (g_strcmp0(args[0], "config") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
@@ -2254,89 +2371,6 @@ cmd_room(gchar **args, struct cmd_help_t help)
     int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
-    }
-
-    if (g_strcmp0(args[0], "affiliation") == 0) {
-        char *cmd = args[1];
-        if (cmd == NULL) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        char *affiliation = args[2];
-        if ((g_strcmp0(affiliation, "owner") != 0) &&
-                (g_strcmp0(affiliation, "admin") != 0) &&
-                (g_strcmp0(affiliation, "member") != 0) &&
-                (g_strcmp0(affiliation, "none") != 0) &&
-                (g_strcmp0(affiliation, "outcast") != 0)) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "list") == 0) {
-            if (g_strcmp0(affiliation, "none") == 0) {
-                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
-            } else {
-                iq_room_affiliation_list(room, affiliation);
-            }
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "set") == 0) {
-            char *jid = args[3];
-            if (jid == NULL) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            } else {
-                char *reason = args[4];
-                iq_room_affiliation_set(room, jid, affiliation, reason);
-                return TRUE;
-            }
-        }
-
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "role") == 0) {
-        char *cmd = args[1];
-        if (cmd == NULL) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        char *role = args[2];
-        if ((g_strcmp0(role, "visitor") != 0) &&
-                (g_strcmp0(role, "participant") != 0) &&
-                (g_strcmp0(role, "moderator") != 0) &&
-                (g_strcmp0(role, "none") != 0)) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "list") == 0) {
-            if (g_strcmp0(role, "none") == 0) {
-                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no role.");
-            } else if (g_strcmp0(role, "visitor") == 0) {
-                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with visitor role.");
-            } else {
-                iq_room_role_list(room, role);
-            }
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "set") == 0) {
-            char *nick = args[3];
-            if (nick == NULL) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            } else {
-                char *reason = args[4];
-                iq_room_role_set(room, nick, role, reason);
-                return TRUE;
-            }
-        }
-
-        return TRUE;
     }
 
     if (g_strcmp0(args[0], "accept") == 0) {

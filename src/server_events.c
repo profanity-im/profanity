@@ -762,6 +762,8 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
         }
         prefs_free_string(muc_status_pref);
         ui_muc_roster(room);
+    } else {
+        ui_muc_roster(room);
     }
 
 }

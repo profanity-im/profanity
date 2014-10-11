@@ -88,10 +88,11 @@ static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
 static char * _form_autocomplete(char *input, int *size);
-static char * _room_autocomplete(char *input, int *size);
 static char * _occupants_autocomplete(char *input, int *size);
 static char * _kick_autocomplete(char *input, int *size);
 static char * _ban_autocomplete(char *input, int *size);
+static char * _affiliation_autocomplete(char *input, int *size);
+static char * _role_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -345,6 +346,26 @@ static struct cmd_t command_defs[] =
           "----------------------------",
           "set subject  - Set the room subject.",
           "clear        - Clear the room subject.",
+          NULL } } },
+
+    { "/affiliation",
+        cmd_affiliation, parse_args, 1, 3, NULL,
+        { "/affiliation set|list [affiliation] [jid]", "Manage room affiliations.",
+        { "/affiliation set|list [affiliation] [jid]",
+          "-----------------------------------------",
+          "set affiliation jid - Set the affiliation of user with jid.",
+          "list affiliation    - List all users with the specified affiliation.",
+          "The affiliation may be one of owner, admin, member, outcast or none.",
+          NULL } } },
+
+    { "/role",
+        cmd_role, parse_args, 1, 3, NULL,
+        { "/role set|list [role] [nick]", "Manage room roles.",
+        { "/role set|list [role] [nick]",
+          "----------------------------",
+          "set role nick - Set the role of occupant with nick.",
+          "list role     - List all occupants with the specified role.",
+          "The role may be one of moderator, participant, visitor or none.",
           NULL } } },
 
     { "/occupants",
@@ -1013,9 +1034,9 @@ static Autocomplete alias_ac;
 static Autocomplete aliases_ac;
 static Autocomplete join_property_ac;
 static Autocomplete room_ac;
-static Autocomplete room_affiliation_ac;
-static Autocomplete room_role_ac;
-static Autocomplete room_cmd_ac;
+static Autocomplete affiliation_ac;
+static Autocomplete role_ac;
+static Autocomplete privilege_cmd_ac;
 static Autocomplete subject_ac;
 static Autocomplete form_ac;
 static Autocomplete occupants_ac;
@@ -1291,25 +1312,23 @@ cmd_init(void)
     autocomplete_add(room_ac, "accept");
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
-    autocomplete_add(room_ac, "role");
-    autocomplete_add(room_ac, "affiliation");
 
-    room_affiliation_ac = autocomplete_new();
-    autocomplete_add(room_affiliation_ac, "owner");
-    autocomplete_add(room_affiliation_ac, "admin");
-    autocomplete_add(room_affiliation_ac, "member");
-    autocomplete_add(room_affiliation_ac, "none");
-    autocomplete_add(room_affiliation_ac, "outcast");
+    affiliation_ac = autocomplete_new();
+    autocomplete_add(affiliation_ac, "owner");
+    autocomplete_add(affiliation_ac, "admin");
+    autocomplete_add(affiliation_ac, "member");
+    autocomplete_add(affiliation_ac, "none");
+    autocomplete_add(affiliation_ac, "outcast");
 
-    room_role_ac = autocomplete_new();
-    autocomplete_add(room_role_ac, "moderator");
-    autocomplete_add(room_role_ac, "participant");
-    autocomplete_add(room_role_ac, "visitor");
-    autocomplete_add(room_role_ac, "none");
+    role_ac = autocomplete_new();
+    autocomplete_add(role_ac, "moderator");
+    autocomplete_add(role_ac, "participant");
+    autocomplete_add(role_ac, "visitor");
+    autocomplete_add(role_ac, "none");
 
-    room_cmd_ac = autocomplete_new();
-    autocomplete_add(room_cmd_ac, "list");
-    autocomplete_add(room_cmd_ac, "set");
+    privilege_cmd_ac = autocomplete_new();
+    autocomplete_add(privilege_cmd_ac, "list");
+    autocomplete_add(privilege_cmd_ac, "set");
 
     subject_ac = autocomplete_new();
     autocomplete_add(subject_ac, "set");
@@ -1376,9 +1395,9 @@ cmd_uninit(void)
     autocomplete_free(aliases_ac);
     autocomplete_free(join_property_ac);
     autocomplete_free(room_ac);
-    autocomplete_free(room_affiliation_ac);
-    autocomplete_free(room_role_ac);
-    autocomplete_free(room_cmd_ac);
+    autocomplete_free(affiliation_ac);
+    autocomplete_free(role_ac);
+    autocomplete_free(privilege_cmd_ac);
     autocomplete_free(subject_ac);
     autocomplete_free(form_ac);
     autocomplete_free(occupants_ac);
@@ -1509,9 +1528,9 @@ cmd_reset_autocomplete()
     autocomplete_reset(aliases_ac);
     autocomplete_reset(join_property_ac);
     autocomplete_reset(room_ac);
-    autocomplete_reset(room_affiliation_ac);
-    autocomplete_reset(room_role_ac);
-    autocomplete_reset(room_cmd_ac);
+    autocomplete_reset(affiliation_ac);
+    autocomplete_reset(role_ac);
+    autocomplete_reset(privilege_cmd_ac);
     autocomplete_reset(subject_ac);
     autocomplete_reset(form_ac);
     autocomplete_reset(occupants_ac);
@@ -1773,8 +1792,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -1803,10 +1822,11 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
     g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
-    g_hash_table_insert(ac_funcs, "/room",          _room_autocomplete);
     g_hash_table_insert(ac_funcs, "/occupants",     _occupants_autocomplete);
     g_hash_table_insert(ac_funcs, "/kick",          _kick_autocomplete);
     g_hash_table_insert(ac_funcs, "/ban",           _ban_autocomplete);
+    g_hash_table_insert(ac_funcs, "/affiliation",   _affiliation_autocomplete);
+    g_hash_table_insert(ac_funcs, "/role",          _role_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2382,36 +2402,21 @@ _ban_autocomplete(char *input, int *size)
 }
 
 static char *
-_room_autocomplete(char *input, int *size)
+_affiliation_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-    gboolean parse_result;
-
     char *recipient = ui_current_recipient();
-    Autocomplete nick_ac = muc_roster_ac(recipient);
+    gboolean parse_result;
     Autocomplete jid_ac = muc_roster_jid_ac(recipient);
 
     input[*size] = '\0';
-    gchar **args = parse_args(input, 4, 4, &parse_result);
+    gchar **args = parse_args(input, 3, 3, &parse_result);
 
-    if ((strncmp(input, "/room role", 10) == 0) && (parse_result == TRUE)) {
-        GString *beginning = g_string_new("/room role ");
-        g_string_append(beginning, args[1]);
+    if ((strncmp(input, "/affiliation", 12) == 0) && (parse_result == TRUE)) {
+        GString *beginning = g_string_new("/affiliation ");
+        g_string_append(beginning, args[0]);
         g_string_append(beginning, " ");
-        g_string_append(beginning, args[2]);
-
-        result = autocomplete_param_with_ac(input, size, beginning->str, nick_ac, TRUE);
-        g_string_free(beginning, TRUE);
-        if (result != NULL) {
-            return result;
-        }
-    }
-
-    if ((strncmp(input, "/room affiliation", 17) == 0) && (parse_result == TRUE)) {
-        GString *beginning = g_string_new("/room affiliation ");
         g_string_append(beginning, args[1]);
-        g_string_append(beginning, " ");
-        g_string_append(beginning, args[2]);
 
         result = autocomplete_param_with_ac(input, size, beginning->str, jid_ac, TRUE);
         g_string_free(beginning, TRUE);
@@ -2420,37 +2425,59 @@ _room_autocomplete(char *input, int *size)
         }
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room role set", room_role_ac, TRUE);
+    result = autocomplete_param_with_ac(input, size, "/affiliation set", affiliation_ac, TRUE);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room role list", room_role_ac, TRUE);
+    result = autocomplete_param_with_ac(input, size, "/affiliation list", affiliation_ac, TRUE);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room affiliation set", room_affiliation_ac, TRUE);
+    result = autocomplete_param_with_ac(input, size, "/affiliation", privilege_cmd_ac, TRUE);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room affiliation list", room_affiliation_ac, TRUE);
+    return NULL;
+}
+
+static char *
+_role_autocomplete(char *input, int *size)
+{
+    char *result = NULL;
+    char *recipient = ui_current_recipient();
+    gboolean parse_result;
+    Autocomplete nick_ac = muc_roster_ac(recipient);
+
+    input[*size] = '\0';
+    gchar **args = parse_args(input, 3, 3, &parse_result);
+
+    if ((strncmp(input, "/role", 5) == 0) && (parse_result == TRUE)) {
+        GString *beginning = g_string_new("/role ");
+        g_string_append(beginning, args[0]);
+        g_string_append(beginning, " ");
+        g_string_append(beginning, args[1]);
+
+        result = autocomplete_param_with_ac(input, size, beginning->str, nick_ac, TRUE);
+        g_string_free(beginning, TRUE);
+        if (result != NULL) {
+            return result;
+        }
+    }
+
+    result = autocomplete_param_with_ac(input, size, "/role set", role_ac, TRUE);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room affiliation", room_cmd_ac, TRUE);
+    result = autocomplete_param_with_ac(input, size, "/role list", role_ac, TRUE);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, size, "/room role", room_cmd_ac, TRUE);
-    if (result != NULL) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, size, "/room", room_ac, TRUE);
+    result = autocomplete_param_with_ac(input, size, "/role", privilege_cmd_ac, TRUE);
     if (result != NULL) {
         return result;
     }
