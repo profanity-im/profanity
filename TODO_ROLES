@@ -1,4 +1,5 @@
 Reorganise/simplify room commands
+Add /room affiliation|role list with no arg to show all
 Fix room commands help
 Show role/affiliation on join
 Show role/affiliation on update

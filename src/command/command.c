@@ -1291,7 +1291,6 @@ cmd_init(void)
     autocomplete_add(room_ac, "accept");
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
-    autocomplete_add(room_ac, "info");
     autocomplete_add(room_ac, "role");
     autocomplete_add(room_ac, "affiliation");
 

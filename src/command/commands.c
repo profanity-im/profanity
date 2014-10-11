@@ -1501,6 +1501,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
     Occupant *occupant = NULL;
+    char *room = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -1510,6 +1511,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
     switch (win_type)
     {
         case WIN_MUC:
+            room = ui_current_recipient();
             if (usr) {
                 char *room = ui_current_recipient();
                 occupant = muc_roster_item(room, usr);
@@ -1519,7 +1521,10 @@ cmd_info(gchar **args, struct cmd_help_t help)
                     ui_current_print_line("No such occupant \"%s\" in room.", usr);
                 }
             } else {
-                ui_current_print_line("You must specify a nickname.");
+                ProfWin *window = wins_get_by_recipient(room);
+                iq_room_info_request(room);
+                ui_show_room_info(window, room);
+                return TRUE;
             }
             break;
         case WIN_CHAT:
@@ -2237,8 +2242,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "destroy") != 0) &&
             (g_strcmp0(args[0], "config") != 0) &&
             (g_strcmp0(args[0], "role") != 0) &&
-            (g_strcmp0(args[0], "affiliation") != 0) &&
-            (g_strcmp0(args[0], "info") != 0)) {
+            (g_strcmp0(args[0], "affiliation") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
@@ -2250,12 +2254,6 @@ cmd_room(gchar **args, struct cmd_help_t help)
     int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
-    }
-
-    if (g_strcmp0(args[0], "info") == 0) {
-        iq_room_info_request(room);
-        ui_show_room_info(window, room);
-        return TRUE;
     }
 
     if (g_strcmp0(args[0], "affiliation") == 0) {
