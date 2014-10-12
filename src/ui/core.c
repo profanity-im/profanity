@@ -1375,6 +1375,18 @@ _ui_room_join(const char * const room, gboolean focus)
         window = wins_new(room, WIN_MUC);
     }
 
+    char *nick = muc_nick(room);
+    char *role = muc_role_str(room);
+    char *affiliation = muc_affiliation_str(room);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "-> You have joined the room as %s", nick);
+    if (role) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", role: %s", role);
+    }
+    if (affiliation) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", affiliation: %s", affiliation);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
+
     num = wins_get_num(window);
 
     if (focus) {
@@ -1385,6 +1397,20 @@ _ui_room_join(const char * const room, gboolean focus)
         char *nick = muc_nick(room);
         win_save_vprint(console, '!', NULL, 0, COLOUR_TYPING, "", "-> Autojoined %s as %s (%d).", room, nick, num);
     }
+}
+
+static void
+_ui_room_role_change(const char * const room, const char * const role)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your role has been changed to: %s", role);
+}
+
+static void
+_ui_room_affiliation_change(const char * const room, const char * const affiliation)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
 }
 
 static void
@@ -1941,6 +1967,7 @@ _ui_handle_room_affiliation_list(const char * const room, const char * const aff
             win_save_print(window, '!', NULL, 0, 0, "", "");
         } else {
             win_save_vprint(window, '!', NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
+            win_save_print(window, '!', NULL, 0, 0, "", "");
         }
     }
 }
@@ -1979,6 +2006,7 @@ _ui_handle_room_role_list(const char * const room, const char * const role, GSLi
             win_save_print(window, '!', NULL, 0, 0, "", "");
         } else {
             win_save_vprint(window, '!', NULL, 0, 0, "", "No occupants found with role: %s", role);
+            win_save_print(window, '!', NULL, 0, 0, "", "");
         }
     }
 }
@@ -3126,5 +3154,7 @@ ui_init_module(void)
     ui_muc_roster = _ui_muc_roster;
     ui_room_show_occupants = _ui_room_show_occupants;
     ui_room_hide_occupants = _ui_room_hide_occupants;
+    ui_room_role_change = _ui_room_role_change;
+    ui_room_affiliation_change = _ui_room_affiliation_change;
 }
 

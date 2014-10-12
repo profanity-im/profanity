@@ -726,6 +726,10 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
     const char * const status)
 {
     muc_roster_add(room, nick, jid, role, affiliation, show, status);
+    char *old_role = muc_role_str(room);
+    char *old_affiliation = muc_affiliation_str(room);
+    muc_set_role(room, role);
+    muc_set_affiliation(room, affiliation);
 
     // handle self nick change
     if (muc_nick_change_pending(room)) {
@@ -767,10 +771,16 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
             muc_set_requires_config(room, TRUE);
             ui_room_requires_config(room);
         }
-    }
 
-    muc_set_role(room, role);
-    muc_set_affiliation(room, affiliation);
+    // check for change in role/affiliation
+    } else {
+        if (g_strcmp0(role, old_role) != 0) {
+            ui_room_role_change(room, role);
+        }
+        if (g_strcmp0(affiliation, old_affiliation) != 0) {
+            ui_room_affiliation_change(room, affiliation);
+        }
+    }
 
     ui_muc_roster(room);
 }
@@ -810,6 +820,8 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
             ui_room_member_presence(room, nick, show, status);
         }
         prefs_free_string(muc_status_pref);
+        ui_muc_roster(room);
+    } else {
         ui_muc_roster(room);
     }
 }

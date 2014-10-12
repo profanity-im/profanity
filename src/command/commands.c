@@ -1504,6 +1504,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
     Occupant *occupant = NULL;
+    char *room = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -1513,6 +1514,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
     switch (win_type)
     {
         case WIN_MUC:
+            room = ui_current_recipient();
             if (usr) {
                 char *room = ui_current_recipient();
                 occupant = muc_roster_item(room, usr);
@@ -1522,7 +1524,10 @@ cmd_info(gchar **args, struct cmd_help_t help)
                     ui_current_print_line("No such occupant \"%s\" in room.", usr);
                 }
             } else {
-                ui_current_print_line("You must specify a nickname.");
+                ProfWin *window = wins_get_by_recipient(room);
+                iq_room_info_request(room);
+                ui_show_room_info(window, room);
+                return TRUE;
             }
             break;
         case WIN_CHAT:
@@ -2111,6 +2116,256 @@ cmd_form(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_kick(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/kick' only applies in chat rooms.");
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+
+    char *nick = args[0];
+    if (nick) {
+        if (muc_roster_contains_nick(room, nick)) {
+            char *reason = args[1];
+            iq_room_kick_occupant(room, nick, reason);
+        } else {
+            win_save_vprint(window, '!', NULL, 0, 0, "", "Occupant does not exist: %s", nick);
+        }
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_ban(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/kick' only applies in chat rooms.");
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+
+    char *jid = args[0];
+    if (jid) {
+        char *reason = args[1];
+        iq_room_affiliation_set(room, jid, "outcast", reason);
+    } else {
+        cons_show("Usage: %s", help.usage);
+    }
+    return TRUE;
+}
+
+gboolean
+cmd_subject(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/room' does not apply to this window.");
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+
+    if (args[0] == NULL) {
+        char *subject = muc_subject(room);
+        if (subject) {
+            win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
+            win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
+        } else {
+            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room has no subject");
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "set") == 0) {
+        if (args[1]) {
+            message_send_groupchat_subject(room, args[1]);
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "clear") == 0) {
+        message_send_groupchat_subject(room, NULL);
+        return TRUE;
+    }
+
+    cons_show("Usage: %s", help.usage);
+    return TRUE;
+}
+
+gboolean
+cmd_affiliation(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/affiliation' does not apply to this window.");
+        return TRUE;
+    }
+
+    char *cmd = args[0];
+    if (cmd == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *affiliation = args[1];
+    if ((affiliation != NULL) &&
+            (g_strcmp0(affiliation, "owner") != 0) &&
+            (g_strcmp0(affiliation, "admin") != 0) &&
+            (g_strcmp0(affiliation, "member") != 0) &&
+            (g_strcmp0(affiliation, "none") != 0) &&
+            (g_strcmp0(affiliation, "outcast") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+
+    if (g_strcmp0(cmd, "list") == 0) {
+        if (!affiliation) {
+            iq_room_affiliation_list(room, "owner");
+            iq_room_affiliation_list(room, "admin");
+            iq_room_affiliation_list(room, "member");
+            iq_room_affiliation_list(room, "outcast");
+        } else if (g_strcmp0(affiliation, "none") == 0) {
+            win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
+        } else {
+            iq_room_affiliation_list(room, affiliation);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(cmd, "set") == 0) {
+        if (!affiliation) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *jid = args[2];
+        if (jid == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            char *reason = args[3];
+            iq_room_affiliation_set(room, jid, affiliation, reason);
+            return TRUE;
+        }
+    }
+
+    cons_show("Usage: %s", help.usage);
+    return TRUE;
+}
+
+gboolean
+cmd_role(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    if (win_type != WIN_MUC) {
+        cons_show("Command '/role' does not apply to this window.");
+        return TRUE;
+    }
+
+    char *cmd = args[0];
+    if (cmd == NULL) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *role = args[1];
+    if ((role != NULL ) &&
+            (g_strcmp0(role, "visitor") != 0) &&
+            (g_strcmp0(role, "participant") != 0) &&
+            (g_strcmp0(role, "moderator") != 0) &&
+            (g_strcmp0(role, "none") != 0)) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+
+    char *room = ui_current_recipient();
+    ProfWin *window = wins_get_by_recipient(room);
+
+    if (g_strcmp0(cmd, "list") == 0) {
+        if (!role) {
+            iq_room_role_list(room, "moderator");
+            iq_room_role_list(room, "participant");
+            iq_room_role_list(room, "visitor");
+        } else if (g_strcmp0(role, "none") == 0) {
+            win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no role.");
+        } else {
+            iq_room_role_list(room, role);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(cmd, "set") == 0) {
+        if (!role) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *nick = args[2];
+        if (nick == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            char *reason = args[3];
+            iq_room_role_set(room, nick, role, reason);
+            return TRUE;
+        }
+    }
+
+    cons_show("Usage: %s", help.usage);
+    return TRUE;
+}
+
+gboolean
 cmd_room(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
@@ -2128,13 +2383,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
 
     if ((g_strcmp0(args[0], "accept") != 0) &&
             (g_strcmp0(args[0], "destroy") != 0) &&
-            (g_strcmp0(args[0], "config") != 0) &&
-            (g_strcmp0(args[0], "subject") != 0) &&
-            (g_strcmp0(args[0], "kick") != 0) &&
-            (g_strcmp0(args[0], "ban") != 0) &&
-            (g_strcmp0(args[0], "role") != 0) &&
-            (g_strcmp0(args[0], "affiliation") != 0) &&
-            (g_strcmp0(args[0], "info") != 0)) {
+            (g_strcmp0(args[0], "config") != 0)) {
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
@@ -2146,151 +2395,6 @@ cmd_room(gchar **args, struct cmd_help_t help)
     int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
-    }
-
-    if (g_strcmp0(args[0], "info") == 0) {
-        iq_room_info_request(room);
-        ui_show_room_info(window, room);
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "subject") == 0) {
-        if (args[1] == NULL) {
-            char *subject = muc_subject(room);
-            if (subject) {
-                win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
-                win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
-            } else {
-                win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room has no subject");
-            }
-            return TRUE;
-        }
-
-        if (g_strcmp0(args[1], "set") == 0) {
-            if (args[2]) {
-                message_send_groupchat_subject(room, args[2]);
-            } else {
-                cons_show("Usage: %s", help.usage);
-            }
-            return TRUE;
-        }
-
-        if (g_strcmp0(args[1], "clear") == 0) {
-            message_send_groupchat_subject(room, NULL);
-            return TRUE;
-        }
-
-        cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "kick") == 0) {
-        char *nick = args[1];
-        if (nick) {
-            if (muc_roster_contains_nick(room, nick)) {
-                char *reason = args[2];
-                iq_room_kick_occupant(room, nick, reason);
-            } else {
-                win_save_vprint(window, '!', NULL, 0, 0, "", "Occupant does not exist: %s", nick);
-            }
-        } else {
-            cons_show("Usage: %s", help.usage);
-        }
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "ban") == 0) {
-        char *jid = args[1];
-        if (jid) {
-            char *reason = args[2];
-            iq_room_affiliation_set(room, jid, "outcast", reason);
-        } else {
-            cons_show("Usage: %s", help.usage);
-        }
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "affiliation") == 0) {
-        char *cmd = args[1];
-        if (cmd == NULL) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        char *affiliation = args[2];
-        if ((g_strcmp0(affiliation, "owner") != 0) &&
-                (g_strcmp0(affiliation, "admin") != 0) &&
-                (g_strcmp0(affiliation, "member") != 0) &&
-                (g_strcmp0(affiliation, "none") != 0) &&
-                (g_strcmp0(affiliation, "outcast") != 0)) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "list") == 0) {
-            if (g_strcmp0(affiliation, "none") == 0) {
-                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
-            } else {
-                iq_room_affiliation_list(room, affiliation);
-            }
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "set") == 0) {
-            char *jid = args[3];
-            if (jid == NULL) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            } else {
-                char *reason = args[4];
-                iq_room_affiliation_set(room, jid, affiliation, reason);
-                return TRUE;
-            }
-        }
-
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "role") == 0) {
-        char *cmd = args[1];
-        if (cmd == NULL) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        char *role = args[2];
-        if ((g_strcmp0(role, "visitor") != 0) &&
-                (g_strcmp0(role, "participant") != 0) &&
-                (g_strcmp0(role, "moderator") != 0) &&
-                (g_strcmp0(role, "none") != 0)) {
-            cons_show("Usage: %s", help.usage);
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "list") == 0) {
-            if (g_strcmp0(role, "none") == 0) {
-                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no role.");
-            } else if (g_strcmp0(role, "visitor") == 0) {
-                win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with visitor role.");
-            } else {
-                iq_room_role_list(room, role);
-            }
-            return TRUE;
-        }
-
-        if (g_strcmp0(cmd, "set") == 0) {
-            char *nick = args[3];
-            if (nick == NULL) {
-                cons_show("Usage: %s", help.usage);
-                return TRUE;
-            } else {
-                char *reason = args[4];
-                iq_room_role_set(room, nick, role, reason);
-                return TRUE;
-            }
-        }
-
-        return TRUE;
     }
 
     if (g_strcmp0(args[0], "accept") == 0) {
