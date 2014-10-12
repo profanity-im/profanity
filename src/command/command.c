@@ -311,14 +311,13 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/room",
-        cmd_room, parse_args_with_freetext, 1, 5, NULL,
-        { "/room accept|destroy|config|info", "Room configuration.",
-        { "/room accept|destroy|config|info",
-          "--------------------------------",
+        cmd_room, parse_args, 1, 1, NULL,
+        { "/room accept|destroy|config", "Room configuration.",
+        { "/room accept|destroy|config",
+          "---------------------------",
           "accept  - Accept default room configuration.",
           "destroy - Reject default room configuration.",
           "config  - Edit room configuration.",
-          "info    - Show room details.",
           NULL } } },
 
     { "/kick",
@@ -331,7 +330,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/ban",
-        cmd_ban, parse_args, 1, 2, NULL,
+        cmd_ban, parse_args_with_freetext, 1, 2, NULL,
         { "/ban jid [reason]", "Ban users from chat rooms.",
         { "/ban jid [reason]",
           "-----------------",
