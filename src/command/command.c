@@ -354,7 +354,7 @@ static struct cmd_t command_defs[] =
         { "/affiliation set|list [affiliation] [jid]",
           "-----------------------------------------",
           "set affiliation jid - Set the affiliation of user with jid.",
-          "list affiliation    - List all users with the specified affiliation.",
+          "list [affiliation]  - List all users with the specified affiliation, or all if none specified.",
           "The affiliation may be one of owner, admin, member, outcast or none.",
           NULL } } },
 
@@ -364,7 +364,7 @@ static struct cmd_t command_defs[] =
         { "/role set|list [role] [nick]",
           "----------------------------",
           "set role nick - Set the role of occupant with nick.",
-          "list role     - List all occupants with the specified role.",
+          "list [role]   - List all occupants with the specified role, or all if none specified.",
           "The role may be one of moderator, participant, visitor or none.",
           NULL } } },
 

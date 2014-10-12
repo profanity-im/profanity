@@ -1936,6 +1936,7 @@ _ui_handle_room_affiliation_list(const char * const room, const char * const aff
             win_save_print(window, '!', NULL, 0, 0, "", "");
         } else {
             win_save_vprint(window, '!', NULL, 0, 0, "", "No users found with affiliation: %s", affiliation);
+            win_save_print(window, '!', NULL, 0, 0, "", "");
         }
     }
 }
@@ -1974,6 +1975,7 @@ _ui_handle_room_role_list(const char * const room, const char * const role, GSLi
             win_save_print(window, '!', NULL, 0, 0, "", "");
         } else {
             win_save_vprint(window, '!', NULL, 0, 0, "", "No occupants found with role: %s", role);
+            win_save_print(window, '!', NULL, 0, 0, "", "");
         }
     }
 }

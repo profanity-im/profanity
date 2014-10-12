@@ -2244,7 +2244,17 @@ cmd_affiliation(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    char *room = ui_current_recipient();
+
     char *affiliation = args[1];
+    if (!affiliation) {
+        iq_room_affiliation_list(room, "owner");
+        iq_room_affiliation_list(room, "admin");
+        iq_room_affiliation_list(room, "member");
+        iq_room_affiliation_list(room, "outcast");
+        return TRUE;
+    }
+
     if ((g_strcmp0(affiliation, "owner") != 0) &&
             (g_strcmp0(affiliation, "admin") != 0) &&
             (g_strcmp0(affiliation, "member") != 0) &&
@@ -2254,7 +2264,6 @@ cmd_affiliation(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    char *room = ui_current_recipient();
     ProfWin *window = wins_get_by_recipient(room);
 
     if (g_strcmp0(cmd, "list") == 0) {
@@ -2303,7 +2312,16 @@ cmd_role(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    char *room = ui_current_recipient();
+
     char *role = args[1];
+    if (!role) {
+        iq_room_role_list(room, "moderator");
+        iq_room_role_list(room, "participant");
+        iq_room_role_list(room, "visitor");
+        return TRUE;
+    }
+
     if ((g_strcmp0(role, "visitor") != 0) &&
             (g_strcmp0(role, "participant") != 0) &&
             (g_strcmp0(role, "moderator") != 0) &&
@@ -2312,14 +2330,11 @@ cmd_role(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    char *room = ui_current_recipient();
     ProfWin *window = wins_get_by_recipient(room);
 
     if (g_strcmp0(cmd, "list") == 0) {
         if (g_strcmp0(role, "none") == 0) {
             win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with no role.");
-        } else if (g_strcmp0(role, "visitor") == 0) {
-            win_save_print(window, '!', NULL, 0, 0, "", "Cannot list users with visitor role.");
         } else {
             iq_room_role_list(room, role);
         }
