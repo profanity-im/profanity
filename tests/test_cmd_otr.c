@@ -432,11 +432,6 @@ void cmd_otr_theirfp_shows_message_when_in_private(void **state)
     test_cmd_otr_theirfp_from_wintype(WIN_PRIVATE);
 }
 
-void cmd_otr_theirfp_shows_message_when_in_duck(void **state)
-{
-    test_cmd_otr_theirfp_from_wintype(WIN_DUCK);
-}
-
 void cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
@@ -511,11 +506,6 @@ void cmd_otr_start_shows_message_when_in_muc(void **state)
 void cmd_otr_start_shows_message_when_in_private(void **state)
 {
     test_cmd_otr_start_from_wintype(WIN_PRIVATE);
-}
-
-void cmd_otr_start_shows_message_when_in_duck(void **state)
-{
-    test_cmd_otr_start_from_wintype(WIN_DUCK);
 }
 
 void cmd_otr_start_shows_message_when_already_started(void **state)

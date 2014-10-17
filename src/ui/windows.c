@@ -343,25 +343,6 @@ wins_show_subwin(ProfWin *window)
 }
 
 gboolean
-wins_duck_exists(void)
-{
-    GList *values = g_hash_table_get_values(windows);
-    GList *curr = values;
-
-    while (curr != NULL) {
-        ProfWin *window = curr->data;
-        if (window->type == WIN_DUCK) {
-            g_list_free(values);
-            return TRUE;
-        }
-        curr = g_list_next(curr);
-    }
-
-    g_list_free(values);
-    return FALSE;
-}
-
-gboolean
 wins_xmlconsole_exists(void)
 {
     GList *values = g_hash_table_get_values(windows);
@@ -585,7 +566,6 @@ wins_create_summary(void)
         GString *priv_string;
         GString *muc_string;
         GString *muc_config_string;
-        GString *duck_string;
         GString *xml_string;
 
         switch (window->type)
@@ -660,14 +640,6 @@ wins_create_summary(void)
                 }
                 result = g_slist_append(result, strdup(muc_config_string->str));
                 g_string_free(muc_config_string, TRUE);
-
-                break;
-
-            case WIN_DUCK:
-                duck_string = g_string_new("");
-                g_string_printf(duck_string, "%d: DuckDuckGo search", ui_index);
-                result = g_slist_append(result, strdup(duck_string->str));
-                g_string_free(duck_string, TRUE);
 
                 break;
 

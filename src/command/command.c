@@ -502,17 +502,6 @@ static struct cmd_t command_defs[] =
           "Example : /tiny http://www.profanity.im",
           NULL } } },
 
-    { "/duck",
-        cmd_duck, parse_args_with_freetext, 1, 1, NULL,
-        { "/duck query", "Perform search using DuckDuckGo chatbot.",
-        { "/duck query",
-          "-----------",
-          "Send a search query to the DuckDuckGo chatbot.",
-          "Your chat service must be federated, i.e. allow message to be sent/received outside of its domain.",
-          "",
-          "Example : /duck dennis ritchie",
-          NULL } } },
-
     { "/who",
         cmd_who, parse_args, 0, 2, NULL,
         { "/who [status] [group]", "Show contacts/room participants with chosen status.",
@@ -1691,15 +1680,6 @@ cmd_execute_default(const char * inp)
         case WIN_CONSOLE:
         case WIN_XML:
             cons_show("Unknown command: %s", inp);
-            break;
-
-        case WIN_DUCK:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                message_send_duck(inp);
-                ui_duck(inp);
-            }
             break;
 
         default:

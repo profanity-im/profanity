@@ -582,7 +582,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
         _cmd_show_filtered_help("Basic commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "chatting") == 0) {
-        gchar *filter[] = { "/chlog", "/otr", "/duck", "/gone", "/history",
+        gchar *filter[] = { "/chlog", "/otr", "/gone", "/history",
             "/info", "/intype", "/msg", "/notify", "/outtype", "/status",
             "/close", "/clear", "/tiny" };
         _cmd_show_filtered_help("Chat commands", filter, ARRAY_SIZE(filter));
@@ -616,7 +616,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "other") == 0) {
-        gchar *filter[] = { "/duck", "/vercheck" };
+        gchar *filter[] = { "/vercheck" };
         _cmd_show_filtered_help("Other commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "navigation") == 0) {
@@ -1402,40 +1402,6 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         cons_show("Usage: %s", help.usage);
         return TRUE;
     }
-}
-
-gboolean
-cmd_duck(gchar **args, struct cmd_help_t help)
-{
-    char *query = args[0];
-
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    // if no duck win open, create it and send a help command
-    if (!ui_duck_exists()) {
-        ui_create_duck_win();
-
-        if (query != NULL) {
-            message_send_duck(query);
-            ui_duck(query);
-        }
-
-    // window exists, send query
-    } else {
-        ui_open_duck_win();
-
-        if (query != NULL) {
-            message_send_duck(query);
-            ui_duck(query);
-        }
-    }
-
-    return TRUE;
 }
 
 gboolean

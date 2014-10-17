@@ -62,7 +62,6 @@ typedef enum {
     WIN_MUC,
     WIN_MUC_CONFIG,
     WIN_PRIVATE,
-    WIN_DUCK,
     WIN_XML
 } win_type_t;
 

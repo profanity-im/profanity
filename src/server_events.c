@@ -296,12 +296,6 @@ handle_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-handle_duck_result(const char * const result)
-{
-    ui_duck_result(result);
-}
-
-void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
 #ifdef HAVE_LIBOTR

@@ -71,7 +71,6 @@ void handle_room_role_set_error(const char * const room, const char * const nick
     const char * const error);
 void handle_room_role_set(const char * const from, const char * const nick, const char * const role);
 void handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
-void handle_duck_result(const char * const result);
 void handle_incoming_message(char *from, char *message, gboolean priv);
 void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     gboolean priv);

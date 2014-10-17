@@ -234,12 +234,6 @@ _ui_win_exists(int index)
 }
 
 static gboolean
-_ui_duck_exists(void)
-{
-    return wins_duck_exists();
-}
-
-static gboolean
 _ui_xmlconsole_exists(void)
 {
     return wins_xmlconsole_exists();
@@ -1235,15 +1229,6 @@ _ui_new_chat_win(const char * const to)
 }
 
 static void
-_ui_create_duck_win(void)
-{
-    ProfWin *window = wins_new("DuckDuckGo search", WIN_DUCK);
-    int num = wins_get_num(window);
-    ui_switch_win(num);
-    win_save_println(window, "Type ':help' to find out more.");
-}
-
-static void
 _ui_create_xmlconsole_win(void)
 {
     ProfWin *window = wins_new("XML Console", WIN_XML);
@@ -1258,57 +1243,6 @@ _ui_open_xmlconsole_win(void)
     if (window != NULL) {
         int num = wins_get_num(window);
         ui_switch_win(num);
-    }
-}
-
-static void
-_ui_open_duck_win(void)
-{
-    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
-    if (window != NULL) {
-        int num = wins_get_num(window);
-        ui_switch_win(num);
-    }
-}
-
-static void
-_ui_duck(const char * const query)
-{
-    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
-    if (window != NULL) {
-        win_save_println(window, "");
-        win_save_print(window, '-', NULL, NO_EOL, COLOUR_ME, "", "Query  : ");
-        win_save_print(window, '-', NULL, NO_DATE, 0, "", query);
-    }
-}
-
-static void
-_ui_duck_result(const char * const result)
-{
-    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
-
-    if (window != NULL) {
-        win_save_print(window, '-', NULL, NO_EOL, COLOUR_THEM, "", "Result  : ");
-
-        glong offset = 0;
-        while (offset < g_utf8_strlen(result, -1)) {
-            gchar *ptr = g_utf8_offset_to_pointer(result, offset);
-            gunichar unichar = g_utf8_get_char(ptr);
-            if (unichar == '\n') {
-                win_save_newline(window);
-                win_save_print(window, '-', NULL, NO_EOL, 0, "", "");
-            } else {
-                gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
-                if (string != NULL) {
-                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", string);
-                    g_free(string);
-                }
-            }
-
-            offset++;
-        }
-
-        win_save_newline(window);
     }
 }
 
@@ -2993,7 +2927,6 @@ ui_init_module(void)
     ui_resize = _ui_resize;
     ui_load_colours = _ui_load_colours;
     ui_win_exists = _ui_win_exists;
-    ui_duck_exists = _ui_duck_exists;
     ui_contact_typing = _ui_contact_typing;
     ui_get_recipients = _ui_get_recipients;
     ui_incoming_msg = _ui_incoming_msg;
@@ -3027,10 +2960,6 @@ ui_init_module(void)
     ui_print_system_msg_from_recipient = _ui_print_system_msg_from_recipient;
     ui_recipient_gone = _ui_recipient_gone;
     ui_new_chat_win = _ui_new_chat_win;
-    ui_create_duck_win = _ui_create_duck_win;
-    ui_open_duck_win = _ui_open_duck_win;
-    ui_duck = _ui_duck;
-    ui_duck_result = _ui_duck_result;
     ui_outgoing_msg = _ui_outgoing_msg;
     ui_room_join = _ui_room_join;
     ui_room_roster = _ui_room_roster;

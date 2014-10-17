@@ -209,12 +209,6 @@ void (*ui_info)(void);
 void (*ui_status_private)(void);
 void (*ui_info_private)(void);
 
-void (*ui_create_duck_win)(void);
-void (*ui_open_duck_win)(void);
-void (*ui_duck)(const char * const query);
-void (*ui_duck_result)(const char * const result);
-gboolean (*ui_duck_exists)(void);
-
 void (*ui_tidy_wins)(void);
 void (*ui_prune_wins)(void);
 gboolean (*ui_swap_wins)(int source_win, int target_win);
