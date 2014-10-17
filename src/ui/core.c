@@ -1329,6 +1329,15 @@ _ui_room_join(const char * const room, gboolean focus)
 }
 
 static void
+_ui_switch_to_room(const char * const room)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    int num = wins_get_num(window);
+    num = wins_get_num(window);
+    ui_switch_win(num);
+}
+
+static void
 _ui_room_role_change(const char * const room, const char * const role)
 {
     ProfWin *window = wins_get_by_recipient(room);
@@ -3059,5 +3068,6 @@ ui_init_module(void)
     ui_room_hide_occupants = _ui_room_hide_occupants;
     ui_room_role_change = _ui_room_role_change;
     ui_room_affiliation_change = _ui_room_affiliation_change;
+    ui_switch_to_room = _ui_switch_to_room;
 }
 

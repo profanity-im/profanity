@@ -1728,7 +1728,7 @@ cmd_join(gchar **args, struct cmd_help_t help)
         presence_join_room(room, nick, passwd);
         muc_join(room, nick, passwd, FALSE);
     } else if (muc_roster_complete(room)) {
-        ui_room_join(room, TRUE);
+        ui_switch_to_room(room);
     }
 
     jid_destroy(room_arg);
