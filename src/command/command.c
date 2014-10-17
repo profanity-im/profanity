@@ -1050,7 +1050,6 @@ cmd_init(void)
     autocomplete_add(help_ac, "contacts");
     autocomplete_add(help_ac, "service");
     autocomplete_add(help_ac, "settings");
-    autocomplete_add(help_ac, "other");
     autocomplete_add(help_ac, "navigation");
 
     // load command defs into hash table

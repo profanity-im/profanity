@@ -615,10 +615,6 @@ cmd_help(gchar **args, struct cmd_help_t help)
             "/titlebar", "/vercheck" };
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
-    } else if (strcmp(args[0], "other") == 0) {
-        gchar *filter[] = { "/vercheck" };
-        _cmd_show_filtered_help("Other commands", filter, ARRAY_SIZE(filter));
-
     } else if (strcmp(args[0], "navigation") == 0) {
         cons_navigation_help();
     } else {
