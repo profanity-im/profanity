@@ -158,8 +158,8 @@ void (*ui_leave_room)(const char * const room);
 void (*ui_room_broadcast)(const char * const room_jid,
     const char * const message);
 void (*ui_room_member_offline)(const char * const room, const char * const nick);
-void (*ui_room_member_online)(const char * const room,
-    const char * const nick, const char * const show, const char * const status);
+void (*ui_room_member_online)(const char * const room, const char * const nick, const char * const roles,
+    const char * const affiliation, const char * const show, const char * const status);
 void (*ui_room_member_nick_change)(const char * const room,
     const char * const old_nick, const char * const nick);
 void (*ui_room_nick_change)(const char * const room, const char * const nick);

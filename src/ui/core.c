@@ -1508,14 +1508,21 @@ _ui_room_member_banned(const char * const room, const char * const nick, const c
 }
 
 static void
-_ui_room_member_online(const char * const room, const char * const nick,
-    const char * const show, const char * const status)
+_ui_room_member_online(const char * const room, const char * const nick, const char * const role,
+    const char * const affiliation, const char * const show, const char * const status)
 {
     ProfWin *window = wins_get_by_recipient(room);
     if (window == NULL) {
         log_error("Received online presence for room participant %s, but no window open for %s.", nick, room);
     } else {
-        win_save_vprint(window, '!', NULL, 0, COLOUR_ONLINE, "", "-> %s has joined the room.", nick);
+        win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ONLINE, "", "-> %s has joined the room", nick);
+        if (role) {
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", ", role: %s", role);
+        }
+        if (affiliation) {
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", ", affiliation: %s", affiliation);
+        }
+        win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
     }
 }
 
