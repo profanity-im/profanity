@@ -667,8 +667,8 @@ handle_ping_error_result(const char * const from, const char * const error)
 
 void
 handle_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
-    const char * const role, const char * const affiliation, const char * const jid, const char * const show,
-    const char * const status)
+    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
+    const char * const jid, const char * const show, const char * const status)
 {
     muc_roster_add(room, nick, jid, role, affiliation, show, status);
     char *old_role = muc_role_str(room);
@@ -721,15 +721,15 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
     } else {
         // both changed
         if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-            ui_room_role_and_affiliation_change(room, role, affiliation);
+            ui_room_role_and_affiliation_change(room, role, affiliation, actor, reason);
 
         // role changed
         } else if (g_strcmp0(role, old_role) != 0) {
-            ui_room_role_change(room, role);
+            ui_room_role_change(room, role, actor, reason);
 
         // affiliation changed
         } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-            ui_room_affiliation_change(room, affiliation);
+            ui_room_affiliation_change(room, affiliation, actor, reason);
         }
     }
 

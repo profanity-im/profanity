@@ -131,10 +131,12 @@ void (*ui_outgoing_msg)(const char * const from, const char * const to,
     const char * const message);
 void (*ui_room_join)(const char * const room, gboolean focus);
 void (*ui_switch_to_room)(const char * const room);
-void (*ui_room_role_change)(const char * const room, const char * const role);
-void (*ui_room_affiliation_change)(const char * const room, const char * const affiliation);
+void (*ui_room_role_change)(const char * const room, const char * const role, const char * const actor,
+    const char * const reason);
+void (*ui_room_affiliation_change)(const char * const room, const char * const affiliation, const char * const actor,
+    const char * const reason);
 void (*ui_room_role_and_affiliation_change)(const char * const room, const char * const role,
-    const char * const affiliation);
+    const char * const affiliation, const char * const actor, const char * const reason);
 void (*ui_room_roster)(const char * const room, GList *roster, const char * const presence);
 void (*ui_room_history)(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);

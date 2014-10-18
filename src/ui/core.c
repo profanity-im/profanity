@@ -1338,24 +1338,48 @@ _ui_switch_to_room(const char * const room)
 }
 
 static void
-_ui_room_role_change(const char * const room, const char * const role)
+_ui_room_role_change(const char * const room, const char * const role, const char * const actor,
+    const char * const reason)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your role has been changed to: %s", role);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Your role has been changed to: %s", role);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
 }
 
 static void
-_ui_room_affiliation_change(const char * const room, const char * const affiliation)
+_ui_room_affiliation_change(const char * const room, const char * const affiliation, const char * const actor,
+    const char * const reason)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
 }
 
 static void
-_ui_room_role_and_affiliation_change(const char * const room, const char * const role, const char * const affiliation)
+_ui_room_role_and_affiliation_change(const char * const room, const char * const role, const char * const affiliation,
+    const char * const actor, const char * const reason)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
 }
 
 static void
