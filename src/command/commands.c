@@ -2120,7 +2120,7 @@ cmd_ban(gchar **args, struct cmd_help_t help)
 
     win_type_t win_type = ui_current_win_type();
     if (win_type != WIN_MUC) {
-        cons_show("Command '/kick' only applies in chat rooms.");
+        cons_show("Command '/ban' only applies in chat rooms.");
         return TRUE;
     }
 
