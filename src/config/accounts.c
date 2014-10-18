@@ -36,6 +36,7 @@
 #include <string.h>
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "accounts.h"
 
@@ -79,6 +80,10 @@ _accounts_load(void)
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
     accounts_loc = _get_accounts_file();
+
+    if (g_file_test(accounts_loc, G_FILE_TEST_EXISTS)) {
+        g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
+    }
 
     accounts = g_key_file_new();
     g_key_file_load_from_file(accounts, accounts_loc, G_KEY_FILE_KEEP_COMMENTS,
@@ -804,6 +809,7 @@ _save_accounts(void)
     gsize g_data_size;
     gchar *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
     g_file_set_contents(accounts_loc, g_accounts_data, g_data_size, NULL);
+    g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
     g_free(g_accounts_data);
 }
 
