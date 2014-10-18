@@ -64,12 +64,10 @@ void handle_room_affiliation_list_result_error(const char * const room, const ch
 void handle_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids);
 void handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
     const char * const error);
-void handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation);
 void handle_room_role_list_result_error(const char * const from, const char * const role, const char * const error);
 void handle_room_role_list(const char * const from, const char * const role, GSList *nicks);
 void handle_room_role_set_error(const char * const room, const char * const nick, const char * const role,
     const char * const error);
-void handle_room_role_set(const char * const from, const char * const nick, const char * const role);
 void handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
 void handle_incoming_message(char *from, char *message, gboolean priv);
 void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
@@ -114,7 +112,7 @@ void handle_muc_self_online(const char * const room, const char * const nick, gb
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const jid, const char * const show, const char * const status);
 void handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
-    const char * const role, const char * const affiliation, const char * const show_str,
-    const char * const status_str);
+    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
+    const char * const show_str, const char * const status_str);
 
 #endif

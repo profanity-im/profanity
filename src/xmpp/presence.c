@@ -736,15 +736,15 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
 
                 // kicked from room
                 } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
-                    char *actor = stanza_get_kickban_actor(stanza);
-                    char *reason = stanza_get_kickban_reason(stanza);
+                    char *actor = stanza_get_actor(stanza);
+                    char *reason = stanza_get_reason(stanza);
                     handle_room_kicked(room, actor, reason);
                     free(reason);
 
                 // banned from room
                 } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
-                    char *actor = stanza_get_kickban_actor(stanza);
-                    char *reason = stanza_get_kickban_reason(stanza);
+                    char *actor = stanza_get_actor(stanza);
+                    char *reason = stanza_get_reason(stanza);
                     handle_room_banned(room, actor, reason);
                     free(reason);
 
@@ -759,8 +759,8 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
         // self online
         } else {
             gboolean config_required = stanza_muc_requires_config(stanza);
-            char *actor = stanza_get_kickban_actor(stanza);
-            char *reason = stanza_get_kickban_reason(stanza);
+            char *actor = stanza_get_actor(stanza);
+            char *reason = stanza_get_reason(stanza);
             handle_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
         }
 
@@ -781,15 +781,15 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
 
                 // kicked from room
                 if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
-                    char *actor = stanza_get_kickban_actor(stanza);
-                    char *reason = stanza_get_kickban_reason(stanza);
+                    char *actor = stanza_get_actor(stanza);
+                    char *reason = stanza_get_reason(stanza);
                     handle_room_occupent_kicked(room, nick, actor, reason);
                     free(reason);
 
                 // banned from room
                 } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
-                    char *actor = stanza_get_kickban_actor(stanza);
-                    char *reason = stanza_get_kickban_reason(stanza);
+                    char *actor = stanza_get_actor(stanza);
+                    char *reason = stanza_get_reason(stanza);
                     handle_room_occupent_banned(room, nick, actor, reason);
                     free(reason);
 
@@ -807,7 +807,9 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                 _handle_caps(stanza);
             }
 
-            handle_muc_occupant_online(room, nick, jid, role, affiliation, show_str, status_str);
+            char *actor = stanza_get_actor(stanza);
+            char *reason = stanza_get_reason(stanza);
+            handle_muc_occupant_online(room, nick, jid, role, affiliation, actor, reason, show_str, status_str);
         }
     }
 

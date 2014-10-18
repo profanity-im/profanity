@@ -137,6 +137,12 @@ void (*ui_room_affiliation_change)(const char * const room, const char * const a
     const char * const reason);
 void (*ui_room_role_and_affiliation_change)(const char * const room, const char * const role,
     const char * const affiliation, const char * const actor, const char * const reason);
+void (*ui_room_occupant_role_change)(const char * const room, const char * const nick, const char * const role,
+    const char * const actor, const char * const reason);
+void (*ui_room_occupant_affiliation_change)(const char * const room, const char * const nick, const char * const affiliation,
+    const char * const actor, const char * const reason);
+void (*ui_room_occupant_role_and_affiliation_change)(const char * const room, const char * const nick, const char * const role,
+    const char * const affiliation, const char * const actor, const char * const reason);
 void (*ui_room_roster)(const char * const room, GList *roster, const char * const presence);
 void (*ui_room_history)(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
@@ -193,10 +199,8 @@ void (*ui_handle_room_affiliation_list_error)(const char * const room, const cha
 void (*ui_handle_room_affiliation_list)(const char * const room, const char * const affiliation, GSList *jids);
 void (*ui_handle_room_affiliation_set_error)(const char * const room, const char * const jid,
     const char * const affiliation, const char * const error);
-void (*ui_handle_room_affiliation_set)(const char * const room, const char * const jid, const char * const affiliation);
 void (*ui_handle_room_role_set_error)(const char * const room, const char * const nick, const char * const role,
     const char * const error);
-void (*ui_handle_room_role_set)(const char * const room, const char * const nick, const char * const role);
 void (*ui_handle_room_role_list_error)(const char * const room, const char * const role, const char * const error);
 void (*ui_handle_room_role_list)(const char * const room, const char * const role, GSList *nicks);
 void (*ui_handle_room_kick_error)(const char * const room, const char * const nick, const char * const error);
@@ -205,6 +209,7 @@ void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_form_help)(ProfWin *window, DataForm *form);
 void (*ui_show_form_field_help)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_lines)(ProfWin *window, const gchar** lines);
+void (*ui_redraw_all_room_rosters)(void);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);
@@ -288,6 +293,7 @@ void (*cons_show_received_subs)(void);
 void (*cons_show_sent_subs)(void);
 void (*cons_alert)(void);
 void (*cons_theme_setting)(void);
+void (*cons_privileges_setting)(void);
 void (*cons_beep_setting)(void);
 void (*cons_flash_setting)(void);
 void (*cons_splash_setting)(void);

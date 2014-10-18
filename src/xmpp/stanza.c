@@ -1181,7 +1181,7 @@ stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza)
 }
 
 char *
-stanza_get_kickban_actor(xmpp_stanza_t *stanza)
+stanza_get_actor(xmpp_stanza_t *stanza)
 {
     char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
@@ -1207,7 +1207,7 @@ stanza_get_kickban_actor(xmpp_stanza_t *stanza)
 }
 
 char *
-stanza_get_kickban_reason(xmpp_stanza_t *stanza)
+stanza_get_reason(xmpp_stanza_t *stanza)
 {
     char *stanza_name = xmpp_stanza_get_name(stanza);
     if (g_strcmp0(stanza_name, STANZA_NAME_PRESENCE) == 0) {
