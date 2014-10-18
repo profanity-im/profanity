@@ -1845,7 +1845,6 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
-    g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
     g_hash_table_insert(ac_funcs, "/occupants",     _occupants_autocomplete);
     g_hash_table_insert(ac_funcs, "/kick",          _kick_autocomplete);
     g_hash_table_insert(ac_funcs, "/ban",           _ban_autocomplete);
@@ -1875,6 +1874,16 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
     g_hash_table_destroy(ac_funcs);
+
+    input[*size] = '\0';
+    if (g_str_has_prefix(input, "/field") || g_str_has_prefix(input, "/form")) {
+        result = _form_autocomplete(input, size);
+        if (result != NULL) {
+            ui_replace_input(input, result, size);
+            g_free(result);
+            return;
+        }
+    }
 
     return;
 }
@@ -2278,6 +2287,49 @@ _form_autocomplete(char *input, int *size)
     if (current != NULL) {
         DataForm *form = current->form;
         if (form != NULL) {
+            input[*size] = '\0';
+
+            if (g_str_has_prefix(input, "/field")) {
+                gchar **split = g_strsplit(input, " ", 0);
+                if (g_strv_length(split) == 2) {
+                    char *field_tag = split[0]+1;
+                    if (form_tag_exists(form, field_tag)) {
+                        form_field_type_t field_type = form_get_field_type(form, field_tag);
+
+                        switch (field_type)
+                        {
+                            case FIELD_BOOLEAN:
+                                found = autocomplete_param_with_func(input, size, split[0],
+                                    prefs_autocomplete_boolean_choice);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if (found) {
+                            return found;
+                        }
+                    }
+                }
+
+            } else {
+                found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
+                if (found != NULL) {
+                    return found;
+                }
+            }
+        }
+    }
+
+    return found;
+
+/*
+    char *found = NULL;
+
+    ProfWin *current = wins_get_current();
+    if (current != NULL) {
+        DataForm *form = current->form;
+        if (form != NULL) {
             gboolean result = FALSE;
 
             input[*size] = '\0';
@@ -2371,6 +2423,7 @@ _form_autocomplete(char *input, int *size)
     }
 
     return NULL;
+*/
 }
 
 static char *
