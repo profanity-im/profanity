@@ -1352,6 +1352,13 @@ _ui_room_affiliation_change(const char * const room, const char * const affiliat
 }
 
 static void
+_ui_room_role_and_affiliation_change(const char * const room, const char * const role, const char * const affiliation)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
+}
+
+static void
 _ui_handle_room_info_error(const char * const room, const char * const error)
 {
     ProfWin *window = wins_get_by_recipient(room);
@@ -3076,5 +3083,6 @@ ui_init_module(void)
     ui_room_role_change = _ui_room_role_change;
     ui_room_affiliation_change = _ui_room_affiliation_change;
     ui_switch_to_room = _ui_switch_to_room;
+    ui_room_role_and_affiliation_change = _ui_room_role_and_affiliation_change;
 }
 

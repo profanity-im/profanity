@@ -719,10 +719,16 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 
     // check for change in role/affiliation
     } else {
-        if (g_strcmp0(role, old_role) != 0) {
+        // both changed
+        if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
+            ui_room_role_and_affiliation_change(room, role, affiliation);
+
+        // role changed
+        } else if (g_strcmp0(role, old_role) != 0) {
             ui_room_role_change(room, role);
-        }
-        if (g_strcmp0(affiliation, old_affiliation) != 0) {
+
+        // affiliation changed
+        } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
             ui_room_affiliation_change(room, affiliation);
         }
     }
