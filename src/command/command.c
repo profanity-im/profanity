@@ -2295,6 +2295,7 @@ _form_autocomplete(char *input, int *size)
                     char *field_tag = split[0]+1;
                     if (form_tag_exists(form, field_tag)) {
                         form_field_type_t field_type = form_get_field_type(form, field_tag);
+                        Autocomplete ac = NULL;
 
                         switch (field_type)
                         {
@@ -2302,16 +2303,19 @@ _form_autocomplete(char *input, int *size)
                                 found = autocomplete_param_with_func(input, size, split[0],
                                     prefs_autocomplete_boolean_choice);
                                 break;
+                            case FIELD_LIST_SINGLE:
+                                ac = form_get_value_ac(form, field_tag);
+                                found = autocomplete_param_with_ac(input, size, split[0], ac, TRUE);
+                                break;
                             default:
                                 break;
                         }
-
-                        if (found) {
-                            return found;
-                        }
                     }
                 }
-
+                g_strfreev(split);
+                if (found) {
+                    return found;
+                }
             } else {
                 found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
                 if (found != NULL) {
