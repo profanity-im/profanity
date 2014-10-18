@@ -37,6 +37,8 @@
 
 #include <glib.h>
 
+#include "xmpp/form.h"
+
 GHashTable *commands;
 
 void cmd_init(void);
@@ -46,6 +48,8 @@ void cmd_autocomplete(char *input, int *size);
 void cmd_reset_autocomplete(void);
 void cmd_autocomplete_add(char *value);
 void cmd_autocomplete_remove(char *value);
+void cmd_autocomplete_add_form_fields(DataForm *form);
+void cmd_autocomplete_remove_form_fields(DataForm *form);
 void cmd_alias_add(char *value);
 void cmd_alias_remove(char *value);
 

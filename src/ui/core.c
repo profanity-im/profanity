@@ -726,7 +726,16 @@ static gboolean
 _ui_switch_win(const int i)
 {
     if (ui_win_exists(i)) {
+        ProfWin *old_current = wins_get_current();
+        if (old_current->type == WIN_MUC_CONFIG) {
+            cmd_autocomplete_remove_form_fields(old_current->form);
+        }
+
         ProfWin *new_current = wins_get_by_num(i);
+        if (new_current->type == WIN_MUC_CONFIG) {
+            cmd_autocomplete_add_form_fields(new_current->form);
+        }
+
         wins_set_current_by_num(i);
 
         new_current->unread = 0;
@@ -751,7 +760,16 @@ _ui_switch_win(const int i)
 static void
 _ui_previous_win(void)
 {
+    ProfWin *old_current = wins_get_current();
+    if (old_current->type == WIN_MUC_CONFIG) {
+        cmd_autocomplete_remove_form_fields(old_current->form);
+    }
+
     ProfWin *new_current = wins_get_previous();
+    if (new_current->type == WIN_MUC_CONFIG) {
+        cmd_autocomplete_add_form_fields(new_current->form);
+    }
+
     int i = wins_get_num(new_current);
     wins_set_current_by_num(i);
 
@@ -773,7 +791,16 @@ _ui_previous_win(void)
 static void
 _ui_next_win(void)
 {
+    ProfWin *old_current = wins_get_current();
+    if (old_current->type == WIN_MUC_CONFIG) {
+        cmd_autocomplete_remove_form_fields(old_current->form);
+    }
+
     ProfWin *new_current = wins_get_next();
+    if (new_current->type == WIN_MUC_CONFIG) {
+        cmd_autocomplete_add_form_fields(new_current->form);
+    }
+
     int i = wins_get_num(new_current);
     wins_set_current_by_num(i);
 
