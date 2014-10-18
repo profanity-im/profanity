@@ -759,7 +759,9 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
         // self online
         } else {
             gboolean config_required = stanza_muc_requires_config(stanza);
-            handle_muc_self_online(room, nick, config_required, role, affiliation, jid, show_str, status_str);
+            char *actor = stanza_get_kickban_actor(stanza);
+            char *reason = stanza_get_kickban_reason(stanza);
+            handle_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
         }
 
     // handle presence from room members

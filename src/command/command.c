@@ -349,22 +349,22 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/affiliation",
-        cmd_affiliation, parse_args, 1, 3, NULL,
-        { "/affiliation set|list [affiliation] [jid]", "Manage room affiliations.",
-        { "/affiliation set|list [affiliation] [jid]",
-          "-----------------------------------------",
-          "set affiliation jid - Set the affiliation of user with jid.",
-          "list [affiliation]  - List all users with the specified affiliation, or all if none specified.",
+        cmd_affiliation, parse_args_with_freetext, 1, 4, NULL,
+        { "/affiliation set|list [affiliation] [jid] [reason]", "Manage room affiliations.",
+        { "/affiliation set|list [affiliation] [jid] [reason]",
+          "--------------------------------------------------",
+          "set affiliation jid [reason]- Set the affiliation of user with jid, with an optional reason.",
+          "list [affiliation]          - List all users with the specified affiliation, or all if none specified.",
           "The affiliation may be one of owner, admin, member, outcast or none.",
           NULL } } },
 
     { "/role",
-        cmd_role, parse_args, 1, 3, NULL,
-        { "/role set|list [role] [nick]", "Manage room roles.",
-        { "/role set|list [role] [nick]",
-          "----------------------------",
-          "set role nick - Set the role of occupant with nick.",
-          "list [role]   - List all occupants with the specified role, or all if none specified.",
+        cmd_role, parse_args_with_freetext, 1, 4, NULL,
+        { "/role set|list [role] [nick] [reason]", "Manage room roles.",
+        { "/role set|list [role] [nick] [reason]",
+          "-------------------------------------",
+          "set role nick [reason] - Set the role of occupant with nick, with an optional reason.",
+          "list [role]            - List all occupants with the specified role, or all if none specified.",
           "The role may be one of moderator, participant, visitor or none.",
           NULL } } },
 
@@ -501,17 +501,6 @@ static struct cmd_t command_defs[] =
           "Send the url as a tiny url.",
           "",
           "Example : /tiny http://www.profanity.im",
-          NULL } } },
-
-    { "/duck",
-        cmd_duck, parse_args_with_freetext, 1, 1, NULL,
-        { "/duck query", "Perform search using DuckDuckGo chatbot.",
-        { "/duck query",
-          "-----------",
-          "Send a search query to the DuckDuckGo chatbot.",
-          "Your chat service must be federated, i.e. allow message to be sent/received outside of its domain.",
-          "",
-          "Example : /duck dennis ritchie",
           NULL } } },
 
     { "/who",
@@ -1070,7 +1059,6 @@ cmd_init(void)
     autocomplete_add(help_ac, "contacts");
     autocomplete_add(help_ac, "service");
     autocomplete_add(help_ac, "settings");
-    autocomplete_add(help_ac, "other");
     autocomplete_add(help_ac, "navigation");
 
     // load command defs into hash table
@@ -1723,15 +1711,6 @@ cmd_execute_default(const char * inp)
         case WIN_CONSOLE:
         case WIN_XML:
             cons_show("Unknown command: %s", inp);
-            break;
-
-        case WIN_DUCK:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                message_send_duck(inp);
-                ui_duck(inp);
-            }
             break;
 
         case WIN_PLUGIN:

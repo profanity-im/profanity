@@ -130,8 +130,13 @@ void (*ui_recipient_gone)(const char * const barejid);
 void (*ui_outgoing_msg)(const char * const from, const char * const to,
     const char * const message);
 void (*ui_room_join)(const char * const room, gboolean focus);
-void (*ui_room_role_change)(const char * const room, const char * const role);
-void (*ui_room_affiliation_change)(const char * const room, const char * const affiliation);
+void (*ui_switch_to_room)(const char * const room);
+void (*ui_room_role_change)(const char * const room, const char * const role, const char * const actor,
+    const char * const reason);
+void (*ui_room_affiliation_change)(const char * const room, const char * const affiliation, const char * const actor,
+    const char * const reason);
+void (*ui_room_role_and_affiliation_change)(const char * const room, const char * const role,
+    const char * const affiliation, const char * const actor, const char * const reason);
 void (*ui_room_roster)(const char * const room, GList *roster, const char * const presence);
 void (*ui_room_history)(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
@@ -157,8 +162,8 @@ void (*ui_leave_room)(const char * const room);
 void (*ui_room_broadcast)(const char * const room_jid,
     const char * const message);
 void (*ui_room_member_offline)(const char * const room, const char * const nick);
-void (*ui_room_member_online)(const char * const room,
-    const char * const nick, const char * const show, const char * const status);
+void (*ui_room_member_online)(const char * const room, const char * const nick, const char * const roles,
+    const char * const affiliation, const char * const show, const char * const status);
 void (*ui_room_member_nick_change)(const char * const room,
     const char * const old_nick, const char * const nick);
 void (*ui_room_nick_change)(const char * const room, const char * const nick);
@@ -208,12 +213,6 @@ void (*ui_status)(void);
 void (*ui_info)(void);
 void (*ui_status_private)(void);
 void (*ui_info_private)(void);
-
-void (*ui_create_duck_win)(void);
-void (*ui_open_duck_win)(void);
-void (*ui_duck)(const char * const query);
-void (*ui_duck_result)(const char * const result);
-gboolean (*ui_duck_exists)(void);
 
 void (*ui_tidy_wins)(void);
 void (*ui_prune_wins)(void);

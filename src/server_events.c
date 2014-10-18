@@ -307,12 +307,6 @@ handle_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-handle_duck_result(const char * const result)
-{
-    ui_duck_result(result);
-}
-
-void
 handle_incoming_message(char *from, char *message, gboolean priv)
 {
     char *plugin_message = NULL;
@@ -722,8 +716,8 @@ handle_ping_error_result(const char * const from, const char * const error)
 
 void
 handle_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
-    const char * const role, const char * const affiliation, const char * const jid, const char * const show,
-    const char * const status)
+    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
+    const char * const jid, const char * const show, const char * const status)
 {
     muc_roster_add(room, nick, jid, role, affiliation, show, status);
     char *old_role = muc_role_str(room);
@@ -774,11 +768,17 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 
     // check for change in role/affiliation
     } else {
-        if (g_strcmp0(role, old_role) != 0) {
-            ui_room_role_change(room, role);
-        }
-        if (g_strcmp0(affiliation, old_affiliation) != 0) {
-            ui_room_affiliation_change(room, affiliation);
+        // both changed
+        if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
+            ui_room_role_and_affiliation_change(room, role, affiliation, actor, reason);
+
+        // role changed
+        } else if (g_strcmp0(role, old_role) != 0) {
+            ui_room_role_change(room, role, actor, reason);
+
+        // affiliation changed
+        } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
+            ui_room_affiliation_change(room, affiliation, actor, reason);
         }
     }
 
@@ -807,7 +807,7 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
     if (!existing) {
         char *muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         if (g_strcmp0(muc_status_pref, "none") != 0) {
-            ui_room_member_online(room, nick, show, status);
+            ui_room_member_online(room, nick, role, affiliation, show, status);
         }
         prefs_free_string(muc_status_pref);
         ui_muc_roster(room);

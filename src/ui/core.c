@@ -235,12 +235,6 @@ _ui_win_exists(int index)
 }
 
 static gboolean
-_ui_duck_exists(void)
-{
-    return wins_duck_exists();
-}
-
-static gboolean
 _ui_xmlconsole_exists(void)
 {
     return wins_xmlconsole_exists();
@@ -1238,15 +1232,6 @@ _ui_new_chat_win(const char * const to)
 }
 
 static void
-_ui_create_duck_win(void)
-{
-    ProfWin *window = wins_new("DuckDuckGo search", WIN_DUCK);
-    int num = wins_get_num(window);
-    ui_switch_win(num);
-    win_save_println(window, "Type ':help' to find out more.");
-}
-
-static void
 _ui_create_xmlconsole_win(void)
 {
     ProfWin *window = wins_new("XML Console", WIN_XML);
@@ -1261,57 +1246,6 @@ _ui_open_xmlconsole_win(void)
     if (window != NULL) {
         int num = wins_get_num(window);
         ui_switch_win(num);
-    }
-}
-
-static void
-_ui_open_duck_win(void)
-{
-    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
-    if (window != NULL) {
-        int num = wins_get_num(window);
-        ui_switch_win(num);
-    }
-}
-
-static void
-_ui_duck(const char * const query)
-{
-    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
-    if (window != NULL) {
-        win_save_println(window, "");
-        win_save_print(window, '-', NULL, NO_EOL, COLOUR_ME, "", "Query  : ");
-        win_save_print(window, '-', NULL, NO_DATE, 0, "", query);
-    }
-}
-
-static void
-_ui_duck_result(const char * const result)
-{
-    ProfWin *window = wins_get_by_recipient("DuckDuckGo search");
-
-    if (window != NULL) {
-        win_save_print(window, '-', NULL, NO_EOL, COLOUR_THEM, "", "Result  : ");
-
-        glong offset = 0;
-        while (offset < g_utf8_strlen(result, -1)) {
-            gchar *ptr = g_utf8_offset_to_pointer(result, offset);
-            gunichar unichar = g_utf8_get_char(ptr);
-            if (unichar == '\n') {
-                win_save_newline(window);
-                win_save_print(window, '-', NULL, NO_EOL, 0, "", "");
-            } else {
-                gchar *string = g_ucs4_to_utf8(&unichar, 1, NULL, NULL, NULL);
-                if (string != NULL) {
-                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", string);
-                    g_free(string);
-                }
-            }
-
-            offset++;
-        }
-
-        win_save_newline(window);
     }
 }
 
@@ -1400,17 +1334,57 @@ _ui_room_join(const char * const room, gboolean focus)
 }
 
 static void
-_ui_room_role_change(const char * const room, const char * const role)
+_ui_switch_to_room(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your role has been changed to: %s", role);
+    int num = wins_get_num(window);
+    num = wins_get_num(window);
+    ui_switch_win(num);
 }
 
 static void
-_ui_room_affiliation_change(const char * const room, const char * const affiliation)
+_ui_room_role_change(const char * const room, const char * const role, const char * const actor,
+    const char * const reason)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Your role has been changed to: %s", role);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
+}
+
+static void
+_ui_room_affiliation_change(const char * const room, const char * const affiliation, const char * const actor,
+    const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Your affiliation has been changed to: %s", affiliation);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
+}
+
+static void
+_ui_room_role_and_affiliation_change(const char * const room, const char * const role, const char * const affiliation,
+    const char * const actor, const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Your role and affiliation have been changed, role: %s, affiliation: %s", role, affiliation);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
 }
 
 static void
@@ -1570,14 +1544,21 @@ _ui_room_member_banned(const char * const room, const char * const nick, const c
 }
 
 static void
-_ui_room_member_online(const char * const room, const char * const nick,
-    const char * const show, const char * const status)
+_ui_room_member_online(const char * const room, const char * const nick, const char * const role,
+    const char * const affiliation, const char * const show, const char * const status)
 {
     ProfWin *window = wins_get_by_recipient(room);
     if (window == NULL) {
         log_error("Received online presence for room participant %s, but no window open for %s.", nick, room);
     } else {
-        win_save_vprint(window, '!', NULL, 0, COLOUR_ONLINE, "", "-> %s has joined the room.", nick);
+        win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ONLINE, "", "-> %s has joined the room", nick);
+        if (role) {
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", ", role: %s", role);
+        }
+        if (affiliation) {
+            win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ONLINE, "", ", affiliation: %s", affiliation);
+        }
+        win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
     }
 }
 
@@ -3016,7 +2997,6 @@ ui_init_module(void)
     ui_resize = _ui_resize;
     ui_load_colours = _ui_load_colours;
     ui_win_exists = _ui_win_exists;
-    ui_duck_exists = _ui_duck_exists;
     ui_contact_typing = _ui_contact_typing;
     ui_get_recipients = _ui_get_recipients;
     ui_incoming_msg = _ui_incoming_msg;
@@ -3050,10 +3030,6 @@ ui_init_module(void)
     ui_print_system_msg_from_recipient = _ui_print_system_msg_from_recipient;
     ui_recipient_gone = _ui_recipient_gone;
     ui_new_chat_win = _ui_new_chat_win;
-    ui_create_duck_win = _ui_create_duck_win;
-    ui_open_duck_win = _ui_open_duck_win;
-    ui_duck = _ui_duck;
-    ui_duck_result = _ui_duck_result;
     ui_outgoing_msg = _ui_outgoing_msg;
     ui_room_join = _ui_room_join;
     ui_room_roster = _ui_room_roster;
@@ -3156,5 +3132,7 @@ ui_init_module(void)
     ui_room_hide_occupants = _ui_room_hide_occupants;
     ui_room_role_change = _ui_room_role_change;
     ui_room_affiliation_change = _ui_room_affiliation_change;
+    ui_switch_to_room = _ui_switch_to_room;
+    ui_room_role_and_affiliation_change = _ui_room_role_and_affiliation_change;
 }
 

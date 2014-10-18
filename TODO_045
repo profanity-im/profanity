@@ -1,0 +1,7 @@
+Show own role affilaition changes (including actor/reason)
+Show occupants role and affiliation changes (including actor/reason)
+Add config option to not show role/affilation messages and changes
+Check all commands from private conversations                                                                      
+Test all freetext args     
+Make form editing commands less verbose
+Check /help groupings (add new commands)
