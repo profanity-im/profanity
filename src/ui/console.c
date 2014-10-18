@@ -822,6 +822,15 @@ _cons_theme_setting(void)
 }
 
 static void
+_cons_privileges_setting(void)
+{
+    if (prefs_get_boolean(PREF_MUC_PRIVILEGES))
+        cons_show("MUC privileges (/privileges)  : ON");
+    else
+        cons_show("MUC privileges (/privileges)  : OFF");
+}
+
+static void
 _cons_beep_setting(void)
 {
     if (prefs_get_boolean(PREF_BEEP))
@@ -926,6 +935,7 @@ _cons_show_ui_prefs(void)
     cons_mouse_setting();
     cons_statuses_setting();
     cons_occupants_setting();
+    cons_privileges_setting();
     cons_titlebar_setting();
 
     cons_alert();
@@ -1518,6 +1528,7 @@ console_init_module(void)
     cons_show_account_list = _cons_show_account_list;
     cons_show_account = _cons_show_account;
     cons_theme_setting = _cons_theme_setting;
+    cons_privileges_setting = _cons_privileges_setting;
     cons_beep_setting = _cons_beep_setting;
     cons_flash_setting = _cons_flash_setting;
     cons_splash_setting = _cons_splash_setting;

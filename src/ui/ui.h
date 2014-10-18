@@ -209,6 +209,7 @@ void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_form_help)(ProfWin *window, DataForm *form);
 void (*ui_show_form_field_help)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_lines)(ProfWin *window, const gchar** lines);
+void (*ui_redraw_all_room_rosters)(void);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);
@@ -292,6 +293,7 @@ void (*cons_show_received_subs)(void);
 void (*cons_show_sent_subs)(void);
 void (*cons_alert)(void);
 void (*cons_theme_setting)(void);
+void (*cons_privileges_setting)(void);
 void (*cons_beep_setting)(void);
 void (*cons_flash_setting)(void);
 void (*cons_splash_setting)(void);

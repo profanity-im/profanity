@@ -131,5 +131,6 @@ gboolean cmd_ban(gchar **args, struct cmd_help_t help);
 gboolean cmd_subject(gchar **args, struct cmd_help_t help);
 gboolean cmd_affiliation(gchar **args, struct cmd_help_t help);
 gboolean cmd_role(gchar **args, struct cmd_help_t help);
+gboolean cmd_privileges(gchar **args, struct cmd_help_t help);
 
 #endif

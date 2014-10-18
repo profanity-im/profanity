@@ -707,17 +707,19 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 
     // check for change in role/affiliation
     } else {
-        // both changed
-        if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-            ui_room_role_and_affiliation_change(room, role, affiliation, actor, reason);
+        if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
+            // both changed
+            if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
+                ui_room_role_and_affiliation_change(room, role, affiliation, actor, reason);
 
-        // role changed
-        } else if (g_strcmp0(role, old_role) != 0) {
-            ui_room_role_change(room, role, actor, reason);
+            // role changed
+            } else if (g_strcmp0(role, old_role) != 0) {
+                ui_room_role_change(room, role, actor, reason);
 
-        // affiliation changed
-        } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-            ui_room_affiliation_change(room, affiliation, actor, reason);
+            // affiliation changed
+            } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
+                ui_room_affiliation_change(room, affiliation, actor, reason);
+            }
         }
     }
 
@@ -776,17 +778,19 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
 
     // presence unchanged, check for role/affiliation change
     } else {
-        // both changed
-        if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
-            ui_room_occupant_role_and_affiliation_change(room, nick, role, affiliation, actor, reason);
+        if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
+            // both changed
+            if ((g_strcmp0(role, old_role) != 0) && (g_strcmp0(affiliation, old_affiliation) != 0)) {
+                ui_room_occupant_role_and_affiliation_change(room, nick, role, affiliation, actor, reason);
 
-        // role changed
-        } else if (g_strcmp0(role, old_role) != 0) {
-            ui_room_occupant_role_change(room, nick, role, actor, reason);
+            // role changed
+            } else if (g_strcmp0(role, old_role) != 0) {
+                ui_room_occupant_role_change(room, nick, role, actor, reason);
 
-        // affiliation changed
-        } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
-            ui_room_occupant_affiliation_change(room, nick, affiliation, actor, reason);
+            // affiliation changed
+            } else if (g_strcmp0(affiliation, old_affiliation) != 0) {
+                ui_room_occupant_affiliation_change(room, nick, affiliation, actor, reason);
+            }
         }
         ui_muc_roster(room);
     }

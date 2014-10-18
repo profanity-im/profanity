@@ -1,5 +1,3 @@
-Dont show success message for affiliation/role changes for user changing them
-Add config option to not show role/affilation messages and changes
 Check all commands from private conversations                                                                      
 Test all freetext args     
 Make form editing commands less verbose

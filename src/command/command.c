@@ -547,6 +547,17 @@ static struct cmd_t command_defs[] =
           "Logout of any current session, and quit Profanity.",
           NULL } } },
 
+    { "/privileges",
+        cmd_privileges, parse_args, 1, 1, &cons_privileges_setting,
+        { "/privileges on|off", "Show occupant privileges in chat rooms.",
+        { "/privileges on|off",
+          "---------------------------",
+          "If enabled:",
+          "The room roster will be broken down my role.",
+          "An occupants role and affiliation will be shown when they join a room.",
+          "Changes to occupant privileges will be shown in the chat room.",
+          NULL } } },
+
     { "/beep",
         cmd_beep, parse_args, 1, 1, &cons_beep_setting,
         { "/beep on|off", "Terminal beep on new messages.",
@@ -1697,7 +1708,7 @@ _cmd_complete_parameters(char *input, int *size)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history", "/titlebar",
-        "/vercheck" };
+        "/vercheck", "/privileges" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],

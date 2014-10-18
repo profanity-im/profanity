@@ -590,7 +590,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "groupchat") == 0) {
         gchar *filter[] = { "/close", "/clear", "/decline", "/grlog",
             "/invite", "/invites", "/join", "/leave", "/notify", "/msg",
-            "/rooms", "/tiny", "/who", "/nick" };
+            "/rooms", "/tiny", "/who", "/nick", "/privileges" };
         _cmd_show_filtered_help("Groupchat commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "presence") == 0) {
@@ -612,7 +612,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
             "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
-            "/titlebar", "/vercheck" };
+            "/titlebar", "/vercheck", "/privileges" };
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "navigation") == 0) {
@@ -2876,6 +2876,16 @@ cmd_leave(gchar **args, struct cmd_help_t help)
     ui_close_win(index);
 
     return TRUE;
+}
+
+gboolean
+cmd_privileges(gchar **args, struct cmd_help_t help)
+{
+    gboolean result = _cmd_set_boolean_preference(args[0], help, "MUC privileges", PREF_MUC_PRIVILEGES);
+
+    ui_redraw_all_room_rosters();
+
+    return result;
 }
 
 gboolean
