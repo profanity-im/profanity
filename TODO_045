@@ -1,4 +1,4 @@
-Show occupants role and affiliation changes (including actor/reason)
+Dont show success message for affiliation/role changes for user changing them
 Add config option to not show role/affilation messages and changes
 Check all commands from private conversations                                                                      
 Test all freetext args     

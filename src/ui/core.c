@@ -1382,6 +1382,52 @@ _ui_room_role_and_affiliation_change(const char * const room, const char * const
     win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
 }
 
+
+static void
+_ui_room_occupant_role_change(const char * const room, const char * const nick, const char * const role,
+    const char * const actor, const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%s's role has been changed to: %s", nick, role);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
+}
+
+static void
+_ui_room_occupant_affiliation_change(const char * const room, const char * const nick, const char * const affiliation,
+    const char * const actor, const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%s's affiliation has been changed to: %s", nick, affiliation);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
+}
+
+static void
+_ui_room_occupant_role_and_affiliation_change(const char * const room, const char * const nick, const char * const role,
+    const char * const affiliation, const char * const actor, const char * const reason)
+{
+    ProfWin *window = wins_get_by_recipient(room);
+    win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "%s's role and affiliation have been changed, role: %s, affiliation: %s", nick, role, affiliation);
+    if (actor) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", by: %s", actor);
+    }
+    if (reason) {
+        win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, COLOUR_ROOMINFO, "", ", reason: %s", reason);
+    }
+    win_save_print(window, '!', NULL, NO_DATE, COLOUR_ROOMINFO, "", "");
+}
+
 static void
 _ui_handle_room_info_error(const char * const room, const char * const error)
 {
@@ -3108,5 +3154,8 @@ ui_init_module(void)
     ui_room_affiliation_change = _ui_room_affiliation_change;
     ui_switch_to_room = _ui_switch_to_room;
     ui_room_role_and_affiliation_change = _ui_room_role_and_affiliation_change;
+    ui_room_occupant_role_change = _ui_room_occupant_role_change;
+    ui_room_occupant_affiliation_change = _ui_room_occupant_affiliation_change;
+    ui_room_occupant_role_and_affiliation_change = _ui_room_occupant_role_and_affiliation_change;
 }
 

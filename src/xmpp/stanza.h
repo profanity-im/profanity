@@ -258,7 +258,7 @@ gboolean stanza_room_destroyed(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_alternative_room(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
-char* stanza_get_kickban_actor(xmpp_stanza_t *stanza);
-char* stanza_get_kickban_reason(xmpp_stanza_t *stanza);
+char* stanza_get_actor(xmpp_stanza_t *stanza);
+char* stanza_get_reason(xmpp_stanza_t *stanza);
 
 #endif

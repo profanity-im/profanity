@@ -114,7 +114,7 @@ void handle_muc_self_online(const char * const room, const char * const nick, gb
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const jid, const char * const show, const char * const status);
 void handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
-    const char * const role, const char * const affiliation, const char * const show_str,
-    const char * const status_str);
+    const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
+    const char * const show_str, const char * const status_str);
 
 #endif
