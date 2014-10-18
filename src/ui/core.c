@@ -2044,30 +2044,12 @@ _ui_handle_room_affiliation_set_error(const char * const room, const char * cons
 }
 
 static void
-_ui_handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation)
-{
-    ProfWin *window = wins_get_by_recipient(room);
-    if (window) {
-        win_save_vprint(window, '!', NULL, 0, 0, "", "Affiliation for %s set: %s", jid, affiliation);
-    }
-}
-
-static void
 _ui_handle_room_role_set_error(const char * const room, const char * const nick, const char * const role,
     const char * const error)
 {
     ProfWin *window = wins_get_by_recipient(room);
     if (window) {
         win_save_vprint(window, '!', NULL, 0, COLOUR_ERROR, "", "Error setting %s role for %s: %s", role, nick, error);
-    }
-}
-
-static void
-_ui_handle_room_role_set(const char * const room, const char * const nick, const char * const role)
-{
-    ProfWin *window = wins_get_by_recipient(room);
-    if (window) {
-        win_save_vprint(window, '!', NULL, 0, 0, "", "Role for %s set: %s", nick, role);
     }
 }
 
@@ -3135,7 +3117,6 @@ ui_init_module(void)
     ui_handle_room_affiliation_list_error = _ui_handle_room_affiliation_list_error;
     ui_handle_room_affiliation_list = _ui_handle_room_affiliation_list;
     ui_handle_room_affiliation_set_error = _ui_handle_room_affiliation_set_error;
-    ui_handle_room_affiliation_set = _ui_handle_room_affiliation_set;
     ui_handle_room_kick_error = _ui_handle_room_kick_error;
     ui_room_destroyed = _ui_room_destroyed;
     ui_room_kicked = _ui_room_kicked;
@@ -3144,7 +3125,6 @@ ui_init_module(void)
     ui_room_member_kicked = _ui_room_member_kicked;
     ui_room_member_banned = _ui_room_member_banned;
     ui_handle_room_role_set_error = _ui_handle_room_role_set_error;
-    ui_handle_room_role_set = _ui_handle_room_role_set;
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
     ui_handle_room_role_list = _ui_handle_room_role_list;
     ui_muc_roster = _ui_muc_roster;

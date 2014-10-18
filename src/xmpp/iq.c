@@ -892,8 +892,6 @@ static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_s
         char *error_message = stanza_get_error_message(stanza);
         handle_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
         free(error_message);
-    } else {
-        handle_room_affiliation_set(from, affiliation_set->item, affiliation_set->privilege);
     }
 
     free(affiliation_set->item);
@@ -922,8 +920,6 @@ static int _room_role_set_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t
         char *error_message = stanza_get_error_message(stanza);
         handle_room_role_set_error(from, role_set->item, role_set->privilege, error_message);
         free(error_message);
-    } else {
-        handle_room_role_set(from, role_set->item, role_set->privilege);
     }
 
     free(role_set->item);

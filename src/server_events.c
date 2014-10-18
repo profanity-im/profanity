@@ -206,12 +206,6 @@ handle_room_role_set_error(const char * const room, const char * const nick, con
 }
 
 void
-handle_room_role_set(const char * const room, const char * const nick, const char * const role)
-{
-    ui_handle_room_role_set(room, nick, role);
-}
-
-void
 handle_room_role_list_result_error(const char * const room, const char * const role, const char * const error)
 {
     log_debug("Error retrieving %s list for room %s: %s", role, room, error);
@@ -230,12 +224,6 @@ handle_room_affiliation_set_error(const char * const room, const char * const ji
 {
     log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation, room, jid, error);
     ui_handle_room_affiliation_set_error(room, jid, affiliation, error);
-}
-
-void
-handle_room_affiliation_set(const char * const room, const char * const jid, const char * const affiliation)
-{
-    ui_handle_room_affiliation_set(room, jid, affiliation);
 }
 
 void
