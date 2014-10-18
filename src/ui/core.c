@@ -1013,6 +1013,13 @@ _ui_close_current(void)
 static void
 _ui_close_win(int index)
 {
+    ProfWin *window = wins_get_by_num(index);
+    if (window) {
+        if (window->type == WIN_MUC_CONFIG && window->form) {
+            cmd_autocomplete_remove_form_fields(window->form);
+        }
+    }
+
     wins_close_by_num(index);
     title_bar_console();
     status_bar_current(1);

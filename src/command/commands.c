@@ -2060,6 +2060,10 @@ cmd_form(gchar **args, struct cmd_help_t help)
 
     if ((g_strcmp0(args[0], "submit") == 0) ||
             (g_strcmp0(args[0], "cancel") == 0)) {
+        if (current->form) {
+            cmd_autocomplete_remove_form_fields(current->form);
+        }
+
         wins_close_current();
         current = wins_get_by_recipient(room);
         if (current == NULL) {
