@@ -40,6 +40,7 @@
 #include <unistd.h>
 
 #include "glib.h"
+#include "glib/gstdio.h"
 
 #include "log.h"
 
@@ -133,6 +134,7 @@ log_init(log_level_t filter)
     tz = g_time_zone_new_local();
     gchar *log_file = _get_main_log_file();
     logp = fopen(log_file, "a");
+    g_chmod(log_file, S_IRUSR | S_IWUSR);
     mainlogfile = g_string_new(log_file);
     free(log_file);
 }
@@ -274,6 +276,7 @@ chat_log_chat(const gchar * const login, gchar *other,
     date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
     FILE *logp = fopen(dated_log->filename, "a");
+    g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
     if (logp != NULL) {
         if (direction == PROF_IN_LOG) {
             if (strncmp(msg, "/me ", 4) == 0) {
@@ -322,6 +325,7 @@ groupchat_log_chat(const gchar * const login, const gchar * const room,
     gchar *date_fmt = g_date_time_format(dt, "%H:%M:%S");
 
     FILE *logp = fopen(dated_log->filename, "a");
+    g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
     if (logp != NULL) {
         if (strncmp(msg, "/me ", 4) == 0) {
             fprintf(logp, "%s - *%s %s\n", date_fmt, nick, msg + 4);

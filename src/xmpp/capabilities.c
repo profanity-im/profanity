@@ -42,6 +42,7 @@
 #include <string.h>
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <strophe.h>
 
 #include "common.h"
@@ -68,6 +69,10 @@ caps_init(void)
 {
     log_info("Loading capabilities cache");
     cache_loc = _get_cache_file();
+
+    if (g_file_test(cache_loc, G_FILE_TEST_EXISTS)) {
+        g_chmod(cache_loc, S_IRUSR | S_IWUSR);
+    }
 
     cache = g_key_file_new();
     g_key_file_load_from_file(cache, cache_loc, G_KEY_FILE_KEEP_COMMENTS,
@@ -614,6 +619,7 @@ _save_cache(void)
     gsize g_data_size;
     gchar *g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
     g_file_set_contents(cache_loc, g_cache_data, g_data_size, NULL);
+    g_chmod(cache_loc, S_IRUSR | S_IWUSR);
     g_free(g_cache_data);
 }
 
