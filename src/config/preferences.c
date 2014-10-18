@@ -39,6 +39,8 @@
 #include <string.h>
 
 #include <glib.h>
+#include <glib/gstdio.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -79,6 +81,10 @@ prefs_load(void)
 
     log_info("Loading preferences");
     prefs_loc = _get_preferences_file();
+
+    if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
+        g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
+    }
 
     prefs = g_key_file_new();
     g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS,
@@ -401,6 +407,7 @@ _save_prefs(void)
     gsize g_data_size;
     gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
     g_file_set_contents(prefs_loc, g_prefs_data, g_data_size, NULL);
+    g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
     g_free(g_prefs_data);
 }
 
