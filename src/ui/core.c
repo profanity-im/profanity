@@ -2734,24 +2734,24 @@ _ui_show_form_field_help(ProfWin *window, DataForm *form, char *tag)
         switch (field->type_t) {
         case FIELD_TEXT_SINGLE:
         case FIELD_TEXT_PRIVATE:
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
             break;
         case FIELD_TEXT_MULTI:
             num_values = form_get_value_count(form, tag);
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
             if (num_values > 0) {
-                win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
                 win_save_vprint(window, '-', NULL, 0, 0, "", "  Where       : <value> between 'val1' and 'val%d'", num_values);
             }
             break;
         case FIELD_BOOLEAN:
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is either 'on' or 'off'");
             break;
         case FIELD_LIST_SINGLE:
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
             curr_option = field->options;
             while (curr_option != NULL) {
@@ -2761,8 +2761,8 @@ _ui_show_form_field_help(ProfWin *window, DataForm *form, char *tag)
             }
             break;
         case FIELD_LIST_MULTI:
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
             curr_option = field->options;
             while (curr_option != NULL) {
@@ -2772,12 +2772,12 @@ _ui_show_form_field_help(ProfWin *window, DataForm *form, char *tag)
             }
             break;
         case FIELD_JID_SINGLE:
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /form set %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_JID_MULTI:
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /form add %s <value>", tag);
-            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /form remove %s <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
             win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_FIXED:
