@@ -88,7 +88,7 @@ static char * _statuses_autocomplete(char *input, int *size);
 static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
-static char * _form_autocomplete(char *input, int *size);
+static char * _form_field_autocomplete(char *input, int *size);
 static char * _occupants_autocomplete(char *input, int *size);
 static char * _kick_autocomplete(char *input, int *size);
 static char * _ban_autocomplete(char *input, int *size);
@@ -1338,9 +1338,6 @@ cmd_init(void)
     autocomplete_add(form_ac, "submit");
     autocomplete_add(form_ac, "cancel");
     autocomplete_add(form_ac, "show");
-    autocomplete_add(form_ac, "set");
-    autocomplete_add(form_ac, "add");
-    autocomplete_add(form_ac, "remove");
     autocomplete_add(form_ac, "help");
 
     form_field_multi_ac = autocomplete_new();
@@ -1823,8 +1820,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", "/form" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, form_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -1883,8 +1880,8 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_destroy(ac_funcs);
 
     input[*size] = '\0';
-    if (g_str_has_prefix(input, "/field") || g_str_has_prefix(input, "/form")) {
-        result = _form_autocomplete(input, size);
+    if (g_str_has_prefix(input, "/field")) {
+        result = _form_field_autocomplete(input, size);
         if (result != NULL) {
             ui_replace_input(input, result, size);
             g_free(result);
@@ -2286,78 +2283,70 @@ _theme_autocomplete(char *input, int *size)
 }
 
 static char *
-_form_autocomplete(char *input, int *size)
+_form_field_autocomplete(char *input, int *size)
 {
     char *found = NULL;
 
     ProfWin *current = wins_get_current();
-    if (current != NULL) {
-        DataForm *form = current->form;
-        if (form != NULL) {
-            input[*size] = '\0';
+    DataForm *form = current->form;
 
-            if (g_str_has_prefix(input, "/field")) {
-                gchar **split = g_strsplit(input, " ", 0);
-                if (g_strv_length(split) == 3) {
-                    char *field_tag = split[0]+1;
-                    if (form_tag_exists(form, field_tag)) {
-                        form_field_type_t field_type = form_get_field_type(form, field_tag);
-                        Autocomplete value_ac = form_get_value_ac(form, field_tag);;
-                        GString *beginning = g_string_new(split[0]);
-                        g_string_append(beginning, " ");
-                        g_string_append(beginning, split[1]);
+    if (form == NULL) {
+        return NULL;
+    }
 
-                        if (((g_strcmp0(split[1], "add") == 0) || (g_strcmp0(split[1], "remove") == 0))
-                                && field_type == FIELD_LIST_MULTI) {
-                            found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
-                            g_string_free(beginning, TRUE);
+    input[*size] = '\0';
+    gchar **split = g_strsplit(input, " ", 0);
 
-                        } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
-                            found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
-                            g_string_free(beginning, TRUE);
+    if (g_strv_length(split) == 3) {
+        char *field_tag = split[0]+1;
+        if (form_tag_exists(form, field_tag)) {
+            form_field_type_t field_type = form_get_field_type(form, field_tag);
+            Autocomplete value_ac = form_get_value_ac(form, field_tag);;
+            GString *beginning = g_string_new(split[0]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, split[1]);
 
-                        } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_JID_MULTI) {
-                            found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
-                            g_string_free(beginning, TRUE);
-                        }
-                    }
+            if (((g_strcmp0(split[1], "add") == 0) || (g_strcmp0(split[1], "remove") == 0))
+                    && field_type == FIELD_LIST_MULTI) {
+                found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
+                g_string_free(beginning, TRUE);
 
-                } else if (g_strv_length(split) == 2) {
-                    char *field_tag = split[0]+1;
-                    if (form_tag_exists(form, field_tag)) {
-                        form_field_type_t field_type = form_get_field_type(form, field_tag);
-                        Autocomplete value_ac = form_get_value_ac(form, field_tag);;
+            } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
+                found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
+                g_string_free(beginning, TRUE);
 
-                        switch (field_type)
-                        {
-                            case FIELD_BOOLEAN:
-                                found = autocomplete_param_with_func(input, size, split[0], prefs_autocomplete_boolean_choice);
-                                break;
-                            case FIELD_LIST_SINGLE:
-                                found = autocomplete_param_with_ac(input, size, split[0], value_ac, TRUE);
-                                break;
-                            case FIELD_LIST_MULTI:
-                            case FIELD_JID_MULTI:
-                            case FIELD_TEXT_MULTI:
-                                found = autocomplete_param_with_ac(input, size, split[0], form_field_multi_ac, TRUE);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-                g_strfreev(split);
-                if (found) {
-                    return found;
-                }
-            } else {
-                found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
-                if (found != NULL) {
-                    return found;
-                }
+            } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_JID_MULTI) {
+                found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
+                g_string_free(beginning, TRUE);
+            }
+        }
+
+    } else if (g_strv_length(split) == 2) {
+        char *field_tag = split[0]+1;
+        if (form_tag_exists(form, field_tag)) {
+            form_field_type_t field_type = form_get_field_type(form, field_tag);
+            Autocomplete value_ac = form_get_value_ac(form, field_tag);;
+
+            switch (field_type)
+            {
+                case FIELD_BOOLEAN:
+                    found = autocomplete_param_with_func(input, size, split[0], prefs_autocomplete_boolean_choice);
+                    break;
+                case FIELD_LIST_SINGLE:
+                    found = autocomplete_param_with_ac(input, size, split[0], value_ac, TRUE);
+                    break;
+                case FIELD_LIST_MULTI:
+                case FIELD_JID_MULTI:
+                case FIELD_TEXT_MULTI:
+                    found = autocomplete_param_with_ac(input, size, split[0], form_field_multi_ac, TRUE);
+                    break;
+                default:
+                    break;
             }
         }
     }
+
+    g_strfreev(split);
 
     return found;
 }
