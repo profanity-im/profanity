@@ -1586,6 +1586,23 @@ cmd_reset_autocomplete()
 gboolean
 cmd_execute(const char * const command, const char * const inp)
 {
+    if (g_str_has_prefix(command, "/field") && ui_current_win_type() == WIN_MUC_CONFIG) {
+        gboolean result = FALSE;
+        gchar **args = parse_args_with_freetext(inp, 1, 2, &result);
+        if (!result) {
+            ui_current_print_formatted_line('!', 0, "Invalid command, see /form help");
+            result = TRUE;
+        } else {
+            gchar **tokens = g_strsplit(inp, " ", 2);
+            char *field = tokens[0] + 1;
+            result = cmd_form_field(field, args);
+            g_strfreev(tokens);
+        }
+
+        g_strfreev(args);
+        return result;
+    }
+
     Command *cmd = g_hash_table_lookup(commands, command);
     gboolean result = FALSE;
 
