@@ -1039,6 +1039,7 @@ static Autocomplete role_ac;
 static Autocomplete privilege_cmd_ac;
 static Autocomplete subject_ac;
 static Autocomplete form_ac;
+static Autocomplete form_field_multi_ac;
 static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
 
@@ -1342,6 +1343,10 @@ cmd_init(void)
     autocomplete_add(form_ac, "remove");
     autocomplete_add(form_ac, "help");
 
+    form_field_multi_ac = autocomplete_new();
+    autocomplete_add(form_field_multi_ac, "add");
+    autocomplete_add(form_field_multi_ac, "remove");
+
     occupants_ac = autocomplete_new();
     autocomplete_add(occupants_ac, "show");
     autocomplete_add(occupants_ac, "hide");
@@ -1399,6 +1404,7 @@ cmd_uninit(void)
     autocomplete_free(privilege_cmd_ac);
     autocomplete_free(subject_ac);
     autocomplete_free(form_ac);
+    autocomplete_free(form_field_multi_ac);
     autocomplete_free(occupants_ac);
     autocomplete_free(occupants_default_ac);
 }
@@ -1566,6 +1572,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(privilege_cmd_ac);
     autocomplete_reset(subject_ac);
     autocomplete_reset(form_ac);
+    autocomplete_reset(form_field_multi_ac);
     autocomplete_reset(occupants_ac);
     autocomplete_reset(occupants_default_ac);
 
@@ -2291,21 +2298,48 @@ _form_autocomplete(char *input, int *size)
 
             if (g_str_has_prefix(input, "/field")) {
                 gchar **split = g_strsplit(input, " ", 0);
-                if (g_strv_length(split) == 2) {
+                if (g_strv_length(split) == 3) {
                     char *field_tag = split[0]+1;
                     if (form_tag_exists(form, field_tag)) {
                         form_field_type_t field_type = form_get_field_type(form, field_tag);
-                        Autocomplete ac = NULL;
+                        Autocomplete value_ac = form_get_value_ac(form, field_tag);;
+                        GString *beginning = g_string_new(split[0]);
+                        g_string_append(beginning, " ");
+                        g_string_append(beginning, split[1]);
+
+                        if (((g_strcmp0(split[1], "add") == 0) || (g_strcmp0(split[1], "remove") == 0))
+                                && field_type == FIELD_LIST_MULTI) {
+                            found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
+                            g_string_free(beginning, TRUE);
+
+                        } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
+                            found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
+                            g_string_free(beginning, TRUE);
+
+                        } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_JID_MULTI) {
+                            found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
+                            g_string_free(beginning, TRUE);
+                        }
+                    }
+
+                } else if (g_strv_length(split) == 2) {
+                    char *field_tag = split[0]+1;
+                    if (form_tag_exists(form, field_tag)) {
+                        form_field_type_t field_type = form_get_field_type(form, field_tag);
+                        Autocomplete value_ac = form_get_value_ac(form, field_tag);;
 
                         switch (field_type)
                         {
                             case FIELD_BOOLEAN:
-                                found = autocomplete_param_with_func(input, size, split[0],
-                                    prefs_autocomplete_boolean_choice);
+                                found = autocomplete_param_with_func(input, size, split[0], prefs_autocomplete_boolean_choice);
                                 break;
                             case FIELD_LIST_SINGLE:
-                                ac = form_get_value_ac(form, field_tag);
-                                found = autocomplete_param_with_ac(input, size, split[0], ac, TRUE);
+                                found = autocomplete_param_with_ac(input, size, split[0], value_ac, TRUE);
+                                break;
+                            case FIELD_LIST_MULTI:
+                            case FIELD_JID_MULTI:
+                            case FIELD_TEXT_MULTI:
+                                found = autocomplete_param_with_ac(input, size, split[0], form_field_multi_ac, TRUE);
                                 break;
                             default:
                                 break;
@@ -2326,108 +2360,6 @@ _form_autocomplete(char *input, int *size)
     }
 
     return found;
-
-/*
-    char *found = NULL;
-
-    ProfWin *current = wins_get_current();
-    if (current != NULL) {
-        DataForm *form = current->form;
-        if (form != NULL) {
-            gboolean result = FALSE;
-
-            input[*size] = '\0';
-            gchar **args = parse_args(input, 3, 3, &result);
-
-            if ((strncmp(input, "/form", 5) == 0) && (result == TRUE)) {
-                char *cmd = args[0];
-                char *tag = args[1];
-
-                GString *beginning = g_string_new("/form ");
-                g_string_append(beginning, cmd);
-                g_string_append(beginning, " ");
-                g_string_append(beginning, tag);
-
-                form_field_type_t field_type = form_get_field_type(form, tag);
-
-                // handle boolean (set)
-                if ((g_strcmp0(args[0], "set") == 0) && field_type == FIELD_BOOLEAN) {
-                    found = autocomplete_param_with_func(input, size, beginning->str,
-                        prefs_autocomplete_boolean_choice);
-                    g_string_free(beginning, TRUE);
-                    if (found != NULL) {
-                        return found;
-                    }
-                }
-
-                // handle list-single (set)
-                if ((g_strcmp0(args[0], "set") == 0) && field_type == FIELD_LIST_SINGLE) {
-                    Autocomplete ac = form_get_value_ac(form, tag);
-                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
-                    g_string_free(beginning, TRUE);
-                    if (found != NULL) {
-                        return found;
-                    }
-                }
-
-                // handle list-multi (add, remove)
-                if (((g_strcmp0(args[0], "set") == 0) || (g_strcmp0(args[0], "remove") == 0))
-                        && field_type == FIELD_LIST_MULTI) {
-                    Autocomplete ac = form_get_value_ac(form, tag);
-                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
-                    g_string_free(beginning, TRUE);
-                    if (found != NULL) {
-                        return found;
-                    }
-                }
-
-                // handle text-multi (remove)
-                if ((g_strcmp0(args[0], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
-                    Autocomplete ac = form_get_value_ac(form, tag);
-                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
-                    g_string_free(beginning, TRUE);
-                    if (found != NULL) {
-                        return found;
-                    }
-                }
-
-                // handle jid-multi (remove)
-                if ((g_strcmp0(args[0], "remove") == 0) && field_type == FIELD_JID_MULTI) {
-                    Autocomplete ac = form_get_value_ac(form, tag);
-                    found = autocomplete_param_with_ac(input, size, beginning->str, ac, TRUE);
-                    g_string_free(beginning, TRUE);
-                    if (found != NULL) {
-                        return found;
-                    }
-                }
-            }
-
-            found = autocomplete_param_with_ac(input, size, "/form set", form->tag_ac, TRUE);
-            if (found != NULL) {
-                return found;
-            }
-            found = autocomplete_param_with_ac(input, size, "/form add", form->tag_ac, TRUE);
-            if (found != NULL) {
-                return found;
-            }
-            found = autocomplete_param_with_ac(input, size, "/form remove", form->tag_ac, TRUE);
-            if (found != NULL) {
-                return found;
-            }
-            found = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
-            if (found != NULL) {
-                return found;
-            }
-        }
-    }
-
-    found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
-    if (found != NULL) {
-        return found;
-    }
-
-    return NULL;
-*/
 }
 
 static char *
