@@ -88,6 +88,7 @@ static char * _statuses_autocomplete(char *input, int *size);
 static char * _alias_autocomplete(char *input, int *size);
 static char * _join_autocomplete(char *input, int *size);
 static char * _log_autocomplete(char *input, int *size);
+static char * _form_autocomplete(char *input, int *size);
 static char * _form_field_autocomplete(char *input, int *size);
 static char * _occupants_autocomplete(char *input, int *size);
 static char * _kick_autocomplete(char *input, int *size);
@@ -379,13 +380,10 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/form",
-        cmd_form, parse_args, 1, 3, NULL,
-        { "/form show|submit|cancel|set|add|remove|help [tag] [value]", "Form manipulation.",
-        { "/form show|submit|cancel|set|add|remove|help [tag] [value]",
-          "----------------------------------------------------------",
-          "set tag value    - Set tagged form field to value.",
-          "add tag value    - Add value to tagged form field.",
-          "remove tag value - Remove value from tagged form field.",
+        cmd_form, parse_args, 1, 2, NULL,
+        { "/form show|submit|cancel|help", "Form handling.",
+        { "/form show|submit|cancel|help",
+          "-----------------------------",
           "show             - Show the current form.",
           "submit           - Submit the current form.",
           "cancel           - Cancel changes to the current form.",
@@ -1820,8 +1818,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", "/form" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, form_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);
@@ -1849,6 +1847,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/statuses",      _statuses_autocomplete);
     g_hash_table_insert(ac_funcs, "/alias",         _alias_autocomplete);
     g_hash_table_insert(ac_funcs, "/join",          _join_autocomplete);
+    g_hash_table_insert(ac_funcs, "/form",          _form_autocomplete);
     g_hash_table_insert(ac_funcs, "/occupants",     _occupants_autocomplete);
     g_hash_table_insert(ac_funcs, "/kick",          _kick_autocomplete);
     g_hash_table_insert(ac_funcs, "/ban",           _ban_autocomplete);
@@ -2277,6 +2276,28 @@ _theme_autocomplete(char *input, int *size)
     result = autocomplete_param_with_ac(input, size, "/theme", theme_ac, TRUE);
     if (result != NULL) {
         return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_form_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+
+    ProfWin *current = wins_get_current();
+    DataForm *form = current->form;
+    if (form) {
+        found = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
+        if (found != NULL) {
+            return found;
+        }
+    }
+
+    found = autocomplete_param_with_ac(input, size, "/form", form_ac, TRUE);
+    if (found != NULL) {
+        return found;
     }
 
     return NULL;
