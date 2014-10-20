@@ -359,6 +359,16 @@ static struct cmd_t command_defs[] =
           "The affiliation may be one of owner, admin, member, outcast or none.",
           NULL } } },
 
+    { "/affiliations",
+        cmd_affiliation, parse_args, 0, 0, NULL,
+        { "/affiliation set|list [affiliation] [jid] [reason]", "Manage room affiliations.",
+        { "/affiliation set|list [affiliation] [jid] [reason]",
+          "--------------------------------------------------",
+          "set affiliation jid [reason]- Set the affiliation of user with jid, with an optional reason.",
+          "list [affiliation]          - List all users with the specified affiliation, or all if none specified.",
+          "The affiliation may be one of owner, admin, member, outcast or none.",
+          NULL } } },
+
     { "/role",
         cmd_role, parse_args_with_freetext, 1, 4, NULL,
         { "/role set|list [role] [nick] [reason]", "Manage room roles.",
