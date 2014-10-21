@@ -4,7 +4,7 @@ Update inline help
 Build with latest libstrophe
 
 Tag 0.4.5.rc1
-Announce release candidate mailing list
+Announce release candidate at mailing list
 
 Test with valgrind using new commands
 
