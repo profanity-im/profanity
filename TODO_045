@@ -1,0 +1,39 @@
+Review room config/admin commands and output
+Update /prefs
+Update inline help
+Build with latest libstrophe
+
+Tag 0.4.5.rc1
+Announce release candidate mailing list
+
+Test with valgrind using new commands
+
+Update website help
+
+Tag libstrophe release 0.8.7
+    https://github.com/strophe/libstrophe/milestones/0.8.7
+
+Build profanity archives for 0.4.5
+    https://github.com/boothj5/profanity/milestones/0.4.5
+
+Test on:
+    Cygwin
+    Ubuntu
+    Debian
+    Fedora
+    OpenSuse
+    OS X
+
+Notify (libstrophe + profanity):
+    Arch
+    Debian
+    Gentoo
+    Brew
+
+Announce:
+    Mailing list
+    Google+
+    Twitter
+    Softpedia
+    Release website changes
+    
