@@ -107,13 +107,7 @@ void P_SHA1_Transform(uint32_t state[5], const uint8_t buffer[64]);
 
 /* blk0() and blk() perform the initial expand. */
 /* I got the idea of expanding during the round function from SSLeay */
-/* FIXME: can we do this in an endian-proof way? */
-#ifdef WORDS_BIGENDIAN
-#define blk0(i) block->l[i]
-#else
-#define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
-    |(rol(block->l[i],8)&0x00FF00FF))
-#endif
+#define blk0(i) (block->l[i] = (ntohl(block->l[i])))
 #define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15] \
     ^block->l[(i+2)&15]^block->l[i&15],1))
 
