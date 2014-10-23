@@ -1824,7 +1824,7 @@ _ui_room_requires_config(const char * const room_jid)
 
         win_save_print(window, '-', NULL, 0, 0, "", "");
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
-            "Room requires configuration.");
+            "Room locked, requires configuration.");
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
             "Use '/room accept' to accept the defaults");
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
