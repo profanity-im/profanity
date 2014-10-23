@@ -366,6 +366,10 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_clear_server(account_name);
                     cons_show("Removed server for account %s", account_name);
                     cons_show("");
+                } else if (strcmp(property, "port") == 0) {
+                    accounts_clear_port(account_name);
+                    cons_show("Removed port for account %s", account_name);
+                    cons_show("");
                 } else if (strcmp(property, "otr") == 0) {
                     accounts_clear_otr(account_name);
                     cons_show("OTR policy removed for account %s", account_name);
