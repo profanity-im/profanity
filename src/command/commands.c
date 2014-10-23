@@ -1835,6 +1835,7 @@ cmd_form_field(char *tag, gchar **args)
             } else {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
             }
             break;
 
@@ -1845,6 +1846,7 @@ cmd_form_field(char *tag, gchar **args)
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
@@ -1856,6 +1858,7 @@ cmd_form_field(char *tag, gchar **args)
             if ((value == NULL) || !form_field_contains_option(form, tag, value)) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
@@ -1871,11 +1874,13 @@ cmd_form_field(char *tag, gchar **args)
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (g_strcmp0(cmd, "add") == 0) {
@@ -1888,11 +1893,13 @@ cmd_form_field(char *tag, gchar **args)
                 if (!g_str_has_prefix(value, "val")) {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                     break;
                 }
                 if (strlen(value) < 4) {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                     break;
                 }
 
@@ -1900,6 +1907,7 @@ cmd_form_field(char *tag, gchar **args)
                 if ((index < 1) || (index > form_get_value_count(form, tag))) {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                     break;
                 }
 
@@ -1920,11 +1928,13 @@ cmd_form_field(char *tag, gchar **args)
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (g_strcmp0(args[0], "add") == 0) {
@@ -1940,6 +1950,7 @@ cmd_form_field(char *tag, gchar **args)
                 } else {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                 }
                 break;
             }
@@ -1956,6 +1967,7 @@ cmd_form_field(char *tag, gchar **args)
                 } else {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                 }
             }
             break;
@@ -1967,11 +1979,13 @@ cmd_form_field(char *tag, gchar **args)
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (g_strcmp0(args[0], "add") == 0) {
