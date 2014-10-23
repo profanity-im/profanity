@@ -1,4 +1,5 @@
 Review room config/admin commands and output
+    /room destroy should show message to owner, and to participants
 Update /prefs
 Update inline help
 Build with latest libstrophe

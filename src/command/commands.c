@@ -2383,7 +2383,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "destroy") == 0) {
-        iq_destroy_instant_room(room);
+        iq_destroy_room(room);
         return TRUE;
     }
 
