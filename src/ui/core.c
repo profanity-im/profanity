@@ -1841,8 +1841,6 @@ _ui_room_requires_config(const char * const room_jid)
         } else {
             status_bar_new(num);
         }
-
-        cons_show("Room created, locked: %s (%d)", room_jid, ui_index);
     }
 }
 
