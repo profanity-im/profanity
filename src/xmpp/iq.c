@@ -234,7 +234,7 @@ _iq_confirm_instant_room(const char * const room_jid)
 }
 
 static void
-_iq_destroy_instant_room(const char * const room_jid)
+_iq_destroy_room(const char * const room_jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -1241,7 +1241,7 @@ iq_init_module(void)
     iq_send_software_version = _iq_send_software_version;
     iq_set_autoping = _iq_set_autoping;
     iq_confirm_instant_room = _iq_confirm_instant_room;
-    iq_destroy_instant_room = _iq_destroy_instant_room;
+    iq_destroy_room = _iq_destroy_room;
     iq_send_ping = _iq_send_ping;
     iq_request_room_config_form = _iq_request_room_config_form;
     iq_room_config_cancel = _iq_room_config_cancel;
