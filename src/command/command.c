@@ -1194,6 +1194,7 @@ cmd_init(void)
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
+    autocomplete_add(account_clear_ac, "server");
     autocomplete_add(account_clear_ac, "otr");
 
     close_ac = autocomplete_new();
