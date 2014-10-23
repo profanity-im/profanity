@@ -2377,7 +2377,6 @@ cmd_room(gchar **args, struct cmd_help_t help)
             iq_confirm_instant_room(room);
             muc_set_requires_config(room, FALSE);
             win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
-            cons_show("Room unlocked: %s (%d)", room, ui_index);
             return TRUE;
         }
     }
