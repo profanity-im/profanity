@@ -551,10 +551,7 @@ static struct cmd_t command_defs[] =
         { "/privileges on|off", "Show occupant privileges in chat rooms.",
         { "/privileges on|off",
           "---------------------------",
-          "If enabled:",
-          "The room roster will be broken down my role.",
-          "An occupants role and affiliation will be shown when they join a room.",
-          "Changes to occupant privileges will be shown in the chat room.",
+          "If enabled the room roster will be broken down my role, and role information will be showin in the room.",
           NULL } } },
 
     { "/beep",
