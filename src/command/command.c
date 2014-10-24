@@ -381,9 +381,9 @@ static struct cmd_t command_defs[] =
 
     { "/form",
         cmd_form, parse_args, 1, 2, NULL,
-        { "/form show|submit|cancel|help", "Form handling.",
-        { "/form show|submit|cancel|help",
-          "-----------------------------",
+        { "/form show|submit|cancel|help [tag]", "Form handling.",
+        { "/form show|submit|cancel|help [tag]",
+          "-----------------------------------",
           "show             - Show the current form.",
           "submit           - Submit the current form.",
           "cancel           - Cancel changes to the current form.",
