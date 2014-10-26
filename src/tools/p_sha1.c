@@ -135,11 +135,23 @@ void SHAPrintContext(P_P_SHA1_CTX *context, char *msg){
 
 static uint32_t host_to_be(uint32_t i)
 {
+#define le_to_be(i) ((rol((i),24) & 0xFF00FF00) | (rol((i),8) & 0x00FF00FF))
+#if defined(__BIG_ENDIAN__) || \
+    (defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && \
+    __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+    return i;
+#elif defined(__LITTLE_ENDIAN__) || \
+    (defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
+    __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+    return le_to_be(i);
+#else /* fallback to run-time check */
     static const union {
-        unsigned u;
+        uint32_t u;
         unsigned char c;
     } check = {1};
-    return check.c ? (rol(i,24)&0xFF00FF00)|(rol(i,8)&0x00FF00FF) : i;
+
+    return check.c ? le_to_be(i) : i;
+#endif
 }
 
 /* Hash a single 512-bit block. This is the core of the algorithm. */
