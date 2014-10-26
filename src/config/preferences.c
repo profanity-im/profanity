@@ -406,9 +406,16 @@ _save_prefs(void)
 {
     gsize g_data_size;
     gchar *g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    g_file_set_contents(prefs_loc, g_prefs_data, g_data_size, NULL);
+    gchar *xdg_config = xdg_get_config_home();
+    GString *base_str = g_string_new(xdg_config);
+    g_string_append(base_str, "/profanity/");
+    gchar *true_loc = get_file_or_linked(prefs_loc, base_str->str);
+    g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
     g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
+    g_free(xdg_config);
+    free(true_loc);
     g_free(g_prefs_data);
+    g_string_free(base_str, TRUE);
 }
 
 static gchar *
