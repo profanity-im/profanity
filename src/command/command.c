@@ -207,11 +207,14 @@ static struct cmd_t command_defs[] =
 
     { "/info",
         cmd_info, parse_args, 0, 1, NULL,
-        { "/info [contact|nick]", "Show basic information about a contact, or room member.",
+        { "/info [contact|nick]", "Show basic information about a contact, room, or room member.",
         { "/info [contact|nick]",
           "--------------------",
-          "Show information including current subscription status and summary information for each connected resource.",
+          "Show basic information about a contact, room, or room member.",
+          "If in the console, a contact must be specified.",
           "If in a chat window the parameter is not required, the current recipient will be used.",
+          "If in a chat room, providing no arguments will display information about the room.",
+          "If in a chat room, supplying a nick will show information about the occupant.",
           "",
           "Example : /info mybuddy@chat.server.org",
           "Example : /info kai",
@@ -381,9 +384,9 @@ static struct cmd_t command_defs[] =
 
     { "/form",
         cmd_form, parse_args, 1, 2, NULL,
-        { "/form show|submit|cancel|help", "Form handling.",
-        { "/form show|submit|cancel|help",
-          "-----------------------------",
+        { "/form show|submit|cancel|help [tag]", "Form handling.",
+        { "/form show|submit|cancel|help [tag]",
+          "-----------------------------------",
           "show             - Show the current form.",
           "submit           - Submit the current form.",
           "cancel           - Cancel changes to the current form.",
@@ -551,10 +554,7 @@ static struct cmd_t command_defs[] =
         { "/privileges on|off", "Show occupant privileges in chat rooms.",
         { "/privileges on|off",
           "---------------------------",
-          "If enabled:",
-          "The room roster will be broken down my role.",
-          "An occupants role and affiliation will be shown when they join a room.",
-          "Changes to occupant privileges will be shown in the chat room.",
+          "If enabled the room roster will be broken down my role, and role information will be showin in the room.",
           NULL } } },
 
     { "/beep",
@@ -1194,6 +1194,8 @@ cmd_init(void)
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
+    autocomplete_add(account_clear_ac, "server");
+    autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");
 
     close_ac = autocomplete_new();

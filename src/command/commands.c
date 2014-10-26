@@ -362,6 +362,14 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_clear_password(account_name);
                     cons_show("Removed password for account %s", account_name);
                     cons_show("");
+                } else if (strcmp(property, "server") == 0) {
+                    accounts_clear_server(account_name);
+                    cons_show("Removed server for account %s", account_name);
+                    cons_show("");
+                } else if (strcmp(property, "port") == 0) {
+                    accounts_clear_port(account_name);
+                    cons_show("Removed port for account %s", account_name);
+                    cons_show("");
                 } else if (strcmp(property, "otr") == 0) {
                     accounts_clear_otr(account_name);
                     cons_show("OTR policy removed for account %s", account_name);
@@ -1827,6 +1835,7 @@ cmd_form_field(char *tag, gchar **args)
             } else {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
             }
             break;
 
@@ -1837,6 +1846,7 @@ cmd_form_field(char *tag, gchar **args)
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
@@ -1848,6 +1858,7 @@ cmd_form_field(char *tag, gchar **args)
             if ((value == NULL) || !form_field_contains_option(form, tag, value)) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
             } else {
                 form_set_value(form, tag, value);
                 ui_current_print_line("Field updated...");
@@ -1863,11 +1874,13 @@ cmd_form_field(char *tag, gchar **args)
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (g_strcmp0(cmd, "add") == 0) {
@@ -1880,11 +1893,13 @@ cmd_form_field(char *tag, gchar **args)
                 if (!g_str_has_prefix(value, "val")) {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                     break;
                 }
                 if (strlen(value) < 4) {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                     break;
                 }
 
@@ -1892,6 +1907,7 @@ cmd_form_field(char *tag, gchar **args)
                 if ((index < 1) || (index > form_get_value_count(form, tag))) {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                     break;
                 }
 
@@ -1912,11 +1928,13 @@ cmd_form_field(char *tag, gchar **args)
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (g_strcmp0(args[0], "add") == 0) {
@@ -1932,6 +1950,7 @@ cmd_form_field(char *tag, gchar **args)
                 } else {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                 }
                 break;
             }
@@ -1948,6 +1967,7 @@ cmd_form_field(char *tag, gchar **args)
                 } else {
                     ui_current_print_line("Invalid command, usage:");
                     ui_show_form_field_help(current, form, tag);
+                    ui_current_print_line("");
                 }
             }
             break;
@@ -1959,11 +1979,13 @@ cmd_form_field(char *tag, gchar **args)
             if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (value == NULL) {
                 ui_current_print_line("Invalid command, usage:");
                 ui_show_form_field_help(current, form, tag);
+                ui_current_print_line("");
                 break;
             }
             if (g_strcmp0(args[0], "add") == 0) {
@@ -2369,13 +2391,12 @@ cmd_room(gchar **args, struct cmd_help_t help)
             iq_confirm_instant_room(room);
             muc_set_requires_config(room, FALSE);
             win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
-            cons_show("Room unlocked: %s (%d)", room, ui_index);
             return TRUE;
         }
     }
 
     if (g_strcmp0(args[0], "destroy") == 0) {
-        iq_destroy_instant_room(room);
+        iq_destroy_room(room);
         return TRUE;
     }
 

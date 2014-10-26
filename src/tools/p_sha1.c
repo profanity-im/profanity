@@ -101,19 +101,14 @@ A million repetitions of "a"
 
 #include "p_sha1.h"
 
+static uint32_t host_to_be(uint32_t i);
 void P_SHA1_Transform(uint32_t state[5], const uint8_t buffer[64]);
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 /* blk0() and blk() perform the initial expand. */
 /* I got the idea of expanding during the round function from SSLeay */
-/* FIXME: can we do this in an endian-proof way? */
-#ifdef WORDS_BIGENDIAN
-#define blk0(i) block->l[i]
-#else
-#define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
-    |(rol(block->l[i],8)&0x00FF00FF))
-#endif
+#define blk0(i) (block->l[i] = host_to_be(block->l[i]))
 #define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15] \
     ^block->l[(i+2)&15]^block->l[i&15],1))
 
@@ -137,6 +132,15 @@ void SHAPrintContext(P_P_SHA1_CTX *context, char *msg){
 	 context->state[4]);
 }
 #endif /* VERBOSE */
+
+static uint32_t host_to_be(uint32_t i)
+{
+    static const union {
+        unsigned u;
+        unsigned char c;
+    } check = {1};
+    return check.c ? (rol(i,24)&0xFF00FF00)|(rol(i,8)&0x00FF00FF) : i;
+}
 
 /* Hash a single 512-bit block. This is the core of the algorithm. */
 void P_SHA1_Transform(uint32_t state[5], const uint8_t buffer[64])

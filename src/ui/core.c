@@ -1824,7 +1824,7 @@ _ui_room_requires_config(const char * const room_jid)
 
         win_save_print(window, '-', NULL, 0, 0, "", "");
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
-            "Room requires configuration.");
+            "Room locked, requires configuration.");
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
             "Use '/room accept' to accept the defaults");
         win_save_vprint(window, '!', NULL, 0, COLOUR_ROOMINFO, "",
@@ -1841,8 +1841,6 @@ _ui_room_requires_config(const char * const room_jid)
         } else {
             status_bar_new(num);
         }
-
-        cons_show("Room created, locked: %s (%d)", room_jid, ui_index);
     }
 }
 
@@ -2558,7 +2556,8 @@ static void
 _ui_show_form(ProfWin *window, const char * const room, DataForm *form)
 {
     if (form->title != NULL) {
-        win_save_print(window, '-', NULL, 0, 0, "", form->title);
+        win_save_print(window, '-', NULL, NO_EOL, 0, "", "Form title: ");
+        win_save_print(window, '-', NULL, NO_DATE, 0, "", form->title);
     } else {
         win_save_vprint(window, '-', NULL, 0, 0, "", "Configuration for room %s.", room);
     }
@@ -2609,9 +2608,9 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
     ui_show_form(window, room, form);
 
     win_save_print(window, '-', NULL, 0, 0, "", "");
-    win_save_print(window, '-', NULL, 0, COLOUR_ROOMINFO, "", "Use '/form submit' to save changes.");
-    win_save_print(window, '-', NULL, 0, COLOUR_ROOMINFO, "", "Use '/form cancel' to cancel changes.");
-    win_save_print(window, '-', NULL, 0, COLOUR_ROOMINFO, "", "See '/form help' for more information.");
+    win_save_print(window, '-', NULL, 0, 0, "", "Use '/form submit' to save changes.");
+    win_save_print(window, '-', NULL, 0, 0, "", "Use '/form cancel' to cancel changes.");
+    win_save_print(window, '-', NULL, 0, 0, "", "See '/form help' for more information.");
     win_save_print(window, '-', NULL, 0, 0, "", "");
 }
 
