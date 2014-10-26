@@ -116,4 +116,6 @@ char * create_unique_id(char *prefix);
 int cmp_win_num(gconstpointer a, gconstpointer b);
 int get_next_available_win_num(GList *used);
 
+char* get_file_or_linked(char *loc, char *basedir);
+
 #endif

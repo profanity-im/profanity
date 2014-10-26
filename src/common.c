@@ -522,3 +522,28 @@ _data_callback(void *ptr, size_t size, size_t nmemb, void *data)
 
     return realsize;
 }
+
+char*
+get_file_or_linked(char *loc, char *basedir)
+{
+    char *true_loc = NULL;
+
+    // check for symlink
+    if (g_file_test(loc, G_FILE_TEST_IS_SYMLINK)) {
+        true_loc = g_file_read_link(loc, NULL);
+
+        // if relative, add basedir
+        if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
+            GString *base_str = g_string_new(basedir);
+            g_string_append(base_str, true_loc);
+            free(true_loc);
+            true_loc = base_str->str;
+            g_string_free(base_str, FALSE);
+        }
+    // use given location
+    } else {
+        true_loc = strdup(loc);
+    }
+
+    return true_loc;
+}

@@ -826,9 +826,16 @@ _save_accounts(void)
 {
     gsize g_data_size;
     gchar *g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
-    g_file_set_contents(accounts_loc, g_accounts_data, g_data_size, NULL);
+    gchar *xdg_data = xdg_get_data_home();
+    GString *base_str = g_string_new(xdg_data);
+    g_string_append(base_str, "/profanity/");
+    gchar *true_loc = get_file_or_linked(accounts_loc, base_str->str);
+    g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
     g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
+    g_free(xdg_data);
+    free(true_loc);
     g_free(g_accounts_data);
+    g_string_free(base_str, TRUE);
 }
 
 static gchar *
