@@ -944,68 +944,83 @@ _cons_show_ui_prefs(void)
 static void
 _cons_notify_setting(void)
 {
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
-        cons_show("Messages (/notify message)          : ON");
-    else
-        cons_show("Messages (/notify message)          : OFF");
+    gboolean notify_enabled = FALSE;
+#ifdef HAVE_OSXNOTIFY
+    notify_enabled = TRUE;
+#endif
+#ifdef HAVE_LIBNOTIFY
+    notify_enabled = TRUE;
+#endif
+#ifdef PLATFORM_CYGWIN
+    notify_enabled = TRUE;
+#endif
 
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT))
-        cons_show("Messages current (/notify message)  : ON");
-    else
-        cons_show("Messages current (/notify message)  : OFF");
+    if (notify_enabled) {
+        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE))
+            cons_show("Messages (/notify message)          : ON");
+        else
+            cons_show("Messages (/notify message)          : OFF");
 
-    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT))
-        cons_show("Messages text (/notify message)     : ON");
-    else
-        cons_show("Messages text (/notify message)     : OFF");
+        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT))
+            cons_show("Messages current (/notify message)  : ON");
+        else
+            cons_show("Messages current (/notify message)  : OFF");
 
-    char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
-    if (g_strcmp0(room_setting, "on") == 0) {
-    cons_show    ("Room messages (/notify room)        : ON");
-    } else if (g_strcmp0(room_setting, "off") == 0) {
-    cons_show    ("Room messages (/notify room)        : OFF");
+        if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT))
+            cons_show("Messages text (/notify message)     : ON");
+        else
+            cons_show("Messages text (/notify message)     : OFF");
+
+        char *room_setting = prefs_get_string(PREF_NOTIFY_ROOM);
+        if (g_strcmp0(room_setting, "on") == 0) {
+        cons_show    ("Room messages (/notify room)        : ON");
+        } else if (g_strcmp0(room_setting, "off") == 0) {
+        cons_show    ("Room messages (/notify room)        : OFF");
+        } else {
+        cons_show    ("Room messages (/notify room)        : %s", room_setting);
+        }
+        prefs_free_string(room_setting);
+
+        if (prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT))
+            cons_show("Room current (/notify room)         : ON");
+        else
+            cons_show("Room current (/notify room)         : OFF");
+
+        if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT))
+            cons_show("Room text (/notify room)            : ON");
+        else
+            cons_show("Room text (/notify room)            : OFF");
+
+        if (prefs_get_boolean(PREF_NOTIFY_TYPING))
+            cons_show("Composing (/notify typing)          : ON");
+        else
+            cons_show("Composing (/notify typing)          : OFF");
+
+        if (prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT))
+            cons_show("Composing current (/notify typing)  : ON");
+        else
+            cons_show("Composing current (/notify typing)  : OFF");
+
+        if (prefs_get_boolean(PREF_NOTIFY_INVITE))
+            cons_show("Room invites (/notify invite)       : ON");
+        else
+            cons_show("Room invites (/notify invite)       : OFF");
+
+        if (prefs_get_boolean(PREF_NOTIFY_SUB))
+            cons_show("Subscription requests (/notify sub) : ON");
+        else
+            cons_show("Subscription requests (/notify sub) : OFF");
+
+        gint remind_period = prefs_get_notify_remind();
+        if (remind_period == 0) {
+            cons_show("Reminder period (/notify remind)    : OFF");
+        } else if (remind_period == 1) {
+            cons_show("Reminder period (/notify remind)    : 1 second");
+        } else {
+            cons_show("Reminder period (/notify remind)    : %d seconds", remind_period);
+        }
     } else {
-    cons_show    ("Room messages (/notify room)        : %s", room_setting);
-    }
-    prefs_free_string(room_setting);
-
-    if (prefs_get_boolean(PREF_NOTIFY_ROOM_CURRENT))
-        cons_show("Room current (/notify room)         : ON");
-    else
-        cons_show("Room current (/notify room)         : OFF");
-
-    if (prefs_get_boolean(PREF_NOTIFY_ROOM_TEXT))
-        cons_show("Room text (/notify room)            : ON");
-    else
-        cons_show("Room text (/notify room)            : OFF");
-
-    if (prefs_get_boolean(PREF_NOTIFY_TYPING))
-        cons_show("Composing (/notify typing)          : ON");
-    else
-        cons_show("Composing (/notify typing)          : OFF");
-
-    if (prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT))
-        cons_show("Composing current (/notify typing)  : ON");
-    else
-        cons_show("Composing current (/notify typing)  : OFF");
-
-    if (prefs_get_boolean(PREF_NOTIFY_INVITE))
-        cons_show("Room invites (/notify invite)       : ON");
-    else
-        cons_show("Room invites (/notify invite)       : OFF");
-
-    if (prefs_get_boolean(PREF_NOTIFY_SUB))
-        cons_show("Subscription requests (/notify sub) : ON");
-    else
-        cons_show("Subscription requests (/notify sub) : OFF");
-
-    gint remind_period = prefs_get_notify_remind();
-    if (remind_period == 0) {
-        cons_show("Reminder period (/notify remind)    : OFF");
-    } else if (remind_period == 1) {
-        cons_show("Reminder period (/notify remind)    : 1 second");
-    } else {
-        cons_show("Reminder period (/notify remind)    : %d seconds", remind_period);
+        cons_show("Notification support was not included in this build.");
     }
 }
 
@@ -1293,7 +1308,7 @@ _cons_help(void)
     cons_show("/help chatting   - List chat commands.");
     cons_show("/help groupchat  - List groupchat commands.");
     cons_show("/help presence   - List commands to change presence.");
-    cons_show("/help roster     - List commands for manipulating your roster.");
+    cons_show("/help contacts   - List commands for manipulating your roster.");
     cons_show("/help service    - List service discovery commands.");
     cons_show("/help settings   - List commands for changing settings.");
     cons_show("/help navigation - How to navigate around Profanity.");
@@ -1315,11 +1330,12 @@ _cons_navigation_help(void)
     cons_show("Alt-RIGHT                        : Next chat window");
     cons_show("UP, DOWN                         : Navigate input history.");
     cons_show("LEFT, RIGHT, HOME, END           : Edit current input.");
-    cons_show("CTRL-LEFT, CTRL-RIGHT            : Jump word in input.");
+    cons_show("Ctrl-LEFT, Ctrl-RIGHT            : Jump word in input.");
     cons_show("ESC                              : Clear current input.");
     cons_show("TAB                              : Autocomplete.");
     cons_show("PAGE UP, PAGE DOWN               : Page the main window.");
-    cons_show("SHIFT-PAGE UP, SHIFT-PAGE DOWN   : Page the main window.");
+    cons_show("Shift-UP, Shift-DOWN             : Page the occupants panel.");
+    cons_show("Ctrl-UP, Ctrl-DOWN               : Page the occupants panel.");
     cons_show("");
 
     cons_alert();
