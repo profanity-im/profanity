@@ -1308,7 +1308,7 @@ _cons_help(void)
     cons_show("/help chatting   - List chat commands.");
     cons_show("/help groupchat  - List groupchat commands.");
     cons_show("/help presence   - List commands to change presence.");
-    cons_show("/help roster     - List commands for manipulating your roster.");
+    cons_show("/help contacts   - List commands for manipulating your roster.");
     cons_show("/help service    - List service discovery commands.");
     cons_show("/help settings   - List commands for changing settings.");
     cons_show("/help navigation - How to navigate around Profanity.");
@@ -1330,11 +1330,12 @@ _cons_navigation_help(void)
     cons_show("Alt-RIGHT                        : Next chat window");
     cons_show("UP, DOWN                         : Navigate input history.");
     cons_show("LEFT, RIGHT, HOME, END           : Edit current input.");
-    cons_show("CTRL-LEFT, CTRL-RIGHT            : Jump word in input.");
+    cons_show("Ctrl-LEFT, Ctrl-RIGHT            : Jump word in input.");
     cons_show("ESC                              : Clear current input.");
     cons_show("TAB                              : Autocomplete.");
     cons_show("PAGE UP, PAGE DOWN               : Page the main window.");
-    cons_show("SHIFT-PAGE UP, SHIFT-PAGE DOWN   : Page the main window.");
+    cons_show("Shift-UP, Shift-DOWN             : Page the occupants panel.");
+    cons_show("Ctrl-UP, Ctrl-DOWN               : Page the occupants panel.");
     cons_show("");
 
     cons_alert();

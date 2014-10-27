@@ -586,7 +586,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
     } else if (strcmp(args[0], "basic") == 0) {
         gchar *filter[] = { "/about", "/clear", "/close", "/connect",
             "/disconnect", "/help", "/msg", "/join", "/quit", "/vercheck",
-            "/wins" };
+            "/wins", "/ping" };
         _cmd_show_filtered_help("Basic commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "chatting") == 0) {
@@ -597,8 +597,8 @@ cmd_help(gchar **args, struct cmd_help_t help)
 
     } else if (strcmp(args[0], "groupchat") == 0) {
         gchar *filter[] = { "/close", "/clear", "/decline", "/grlog",
-            "/invite", "/invites", "/join", "/leave", "/notify", "/msg",
-            "/rooms", "/tiny", "/who", "/nick", "/privileges" };
+            "/invite", "/invites", "/join", "/leave", "/notify", "/msg", "/room",
+            "/rooms", "/tiny", "/who", "/nick", "/privileges", "/info", "/occupants" };
         _cmd_show_filtered_help("Groupchat commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "presence") == 0) {
@@ -620,7 +620,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
             "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
-            "/titlebar", "/vercheck", "/privileges" };
+            "/titlebar", "/vercheck", "/privileges", "/occupants" };
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "navigation") == 0) {
