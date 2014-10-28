@@ -76,19 +76,24 @@ typedef struct prof_plugin_t {
 void plugins_init(void);
 GSList * plugins_get_list(void);
 char * plugins_get_lang_string(ProfPlugin *plugin);
+void plugins_shutdown(void);
+
 void plugins_on_start(void);
 void plugins_on_connect(const char * const account_name, const char * const fulljid);
 void plugins_on_disconnect(const char * const account_name, const char * const fulljid);
+void plugins_on_shutdown(void);
+
 char * plugins_before_message_displayed(const char * const message);
 char * plugins_on_message_received(const char * const jid, const char *message);
-char * plugins_on_room_message_received(const char * const room, const char * const nick, const char *message);
-char * plugins_on_private_message_received(const char * const room, const char * const nick, const char *message);
 char * plugins_on_message_send(const char * const jid, const char *message);
+
+char * plugins_on_room_message_received(const char * const room, const char * const nick, const char *message);
+char * plugins_on_room_message_send(const char * const room, const char *message);
+
+char * plugins_on_private_message_received(const char * const room, const char * const nick, const char *message);
 char * plugins_on_private_message_send(const char * const room, const char * const nick,
     const char * const message);
-char * plugins_on_room_message_send(const char * const room, const char *message);
-void plugins_on_shutdown(void);
-void plugins_shutdown(void);
+
 gboolean plugins_run_command(const char * const cmd);
 void plugins_run_timed(void);
 gchar * plugins_get_dir(void);
