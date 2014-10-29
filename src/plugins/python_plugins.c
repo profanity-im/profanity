@@ -100,21 +100,16 @@ python_plugin_create(const char * const filename)
         plugin->module = p_module;
         plugin->init_func = python_init_hook;
         plugin->on_start_func = python_on_start_hook;
-        plugin->on_shutdown_func = python_on_shutdown_hook;
         plugin->on_connect_func = python_on_connect_hook;
         plugin->on_disconnect_func = python_on_disconnect_hook;
-        plugin->pre_chat_message_display = python_pre_chat_message_display_hook;
-        plugin->post_chat_message_display = python_post_chat_message_display_hook;
-        plugin->pre_chat_message_send = python_pre_chat_message_send_hook;
-        plugin->post_chat_message_send = python_post_chat_message_send_hook;
-        plugin->pre_room_message_display = python_pre_room_message_display_hook;
-        plugin->post_room_message_display = python_post_room_message_display_hook;
-        plugin->pre_room_message_send = python_pre_room_message_send_hook;
-        plugin->post_room_message_send = python_post_room_message_send_hook;
-        plugin->pre_priv_message_display = python_pre_priv_message_display_hook;
-        plugin->post_priv_message_display = python_post_priv_message_display_hook;
-        plugin->pre_priv_message_send = python_pre_priv_message_send_hook;
-        plugin->post_priv_message_send = python_post_priv_message_send_hook;
+        plugin->before_message_displayed_func = python_before_message_displayed_hook;
+        plugin->on_message_received_func = python_on_message_received_hook;
+        plugin->on_room_message_received_func = python_on_room_message_received_hook;
+        plugin->on_private_message_received_func = python_on_private_message_received_hook;
+        plugin->on_message_send_func = python_on_message_send_hook;
+        plugin->on_private_message_send_func = python_on_private_message_send_hook;
+        plugin->on_room_message_send_func = python_on_room_message_send_hook;
+        plugin->on_shutdown_func = python_on_shutdown_hook;
         g_free(module_name);
 
         allow_python_threads();
@@ -155,25 +150,6 @@ python_on_start_hook(ProfPlugin *plugin)
     PyObject *p_module = plugin->module;
     if (PyObject_HasAttrString(p_module, "prof_on_start")) {
         p_function = PyObject_GetAttrString(p_module, "prof_on_start");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, NULL);
-            python_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-    allow_python_threads();
-}
-
-void
-python_on_shutdown_hook(ProfPlugin *plugin)
-{
-    disable_python_threads();
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_on_shutdown")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_on_shutdown");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, NULL);
@@ -226,16 +202,52 @@ python_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
     allow_python_threads();
 }
 
-char*
-python_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+char *
+python_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("(s)", message);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_before_message_displayed")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_before_message_displayed");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+        }
+    }
+    allow_python_threads();
+    return NULL;
+}
+
+char *
+python_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
+    const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", jid, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_chat_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_chat_message_display");
+    if (PyObject_HasAttrString(p_module, "prof_on_message_received")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_message_received");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject *result = PyObject_CallObject(p_function, p_args);
@@ -262,94 +274,17 @@ python_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid,
     return NULL;
 }
 
-void
-python_post_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
-{
-    disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_post_chat_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_post_chat_message_display");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
-            python_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-
-    allow_python_threads();
-}
-
-char*
-python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
-{
-    disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_chat_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_chat_message_send");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject *result = PyObject_CallObject(p_function, p_args);
-            python_check_error();
-            Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
-        }
-    }
-
-    allow_python_threads();
-    return NULL;
-}
-
-void
-python_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
-{
-    disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", jid, message);
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_chat_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_chat_message_send");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
-            python_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-
-    allow_python_threads();
-}
-
-char*
-python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+char *
+python_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("sss", room, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_room_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_room_message_display");
+    if (PyObject_HasAttrString(p_module, "prof_on_private_message_received")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_private_message_received");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject *result = PyObject_CallObject(p_function, p_args);
@@ -376,37 +311,128 @@ python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room
     return NULL;
 }
 
-void
-python_post_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+char *
+python_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("sss", room, nick, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_room_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_room_message_display");
+    if (PyObject_HasAttrString(p_module, "prof_on_room_message_received")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_room_message_received");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
+            PyObject *result = PyObject_CallObject(p_function, p_args);
             python_check_error();
             Py_XDECREF(p_function);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
         }
     }
 
     allow_python_threads();
+    return NULL;
 }
 
-char*
-python_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
+char *
+python_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
+    const char *message)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("ss", jid, message);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_message_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_message_send");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+        }
+    }
+
+    allow_python_threads();
+    return NULL;
+}
+
+char *
+python_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
+{
+    disable_python_threads();
+    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
+    PyObject *p_function;
+
+    PyObject *p_module = plugin->module;
+    if (PyObject_HasAttrString(p_module, "prof_on_private_message_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_private_message_send");
+        python_check_error();
+        if (p_function && PyCallable_Check(p_function)) {
+            PyObject *result = PyObject_CallObject(p_function, p_args);
+            python_check_error();
+            Py_XDECREF(p_function);
+            if (PyUnicode_Check(result)) {
+                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else if (result != Py_None) {
+                char *result_str = strdup(PyString_AsString(result));
+                Py_XDECREF(result);
+                allow_python_threads();
+                return result_str;
+            } else {
+                allow_python_threads();
+                return NULL;
+            }
+        }
+    }
+
+    allow_python_threads();
+    return NULL;
+}
+
+char *
+python_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char *message)
 {
     disable_python_threads();
     PyObject *p_args = Py_BuildValue("ss", room, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_room_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_room_message_send");
+    if (PyObject_HasAttrString(p_module, "prof_on_room_message_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_room_message_send");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject *result = PyObject_CallObject(p_function, p_args);
@@ -434,137 +460,21 @@ python_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, c
 }
 
 void
-python_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
+python_on_shutdown_hook(ProfPlugin *plugin)
 {
     disable_python_threads();
-    PyObject *p_args = Py_BuildValue("ss", room, message);
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_room_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_room_message_send");
+    if (PyObject_HasAttrString(p_module, "prof_on_shutdown")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_on_shutdown");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
+            PyObject_CallObject(p_function, NULL);
             python_check_error();
             Py_XDECREF(p_function);
         }
     }
-
-    allow_python_threads();
-}
-
-char*
-python_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
-{
-    disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_priv_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_priv_message_display");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject *result = PyObject_CallObject(p_function, p_args);
-            python_check_error();
-            Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
-        }
-    }
-
-    allow_python_threads();
-    return NULL;
-}
-
-void
-python_post_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
-{
-    disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_priv_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_priv_message_display");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
-            python_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-
-    allow_python_threads();
-}
-
-char*
-python_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
-{
-    disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_priv_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_priv_message_send");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject *result = PyObject_CallObject(p_function, p_args);
-            python_check_error();
-            Py_XDECREF(p_function);
-            if (PyUnicode_Check(result)) {
-                char *result_str = strdup(PyString_AsString(PyUnicode_AsUTF8String(result)));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else if (result != Py_None) {
-                char *result_str = strdup(PyString_AsString(result));
-                Py_XDECREF(result);
-                allow_python_threads();
-                return result_str;
-            } else {
-                allow_python_threads();
-                return NULL;
-            }
-        }
-    }
-
-    allow_python_threads();
-    return NULL;
-}
-
-void
-python_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
-{
-    disable_python_threads();
-    PyObject *p_args = Py_BuildValue("sss", room, nick, message);
-    PyObject *p_function;
-
-    PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_post_priv_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_post_priv_message_send");
-        python_check_error();
-        if (p_function && PyCallable_Check(p_function)) {
-            PyObject_CallObject(p_function, p_args);
-            python_check_error();
-            Py_XDECREF(p_function);
-        }
-    }
-
     allow_python_threads();
 }
 

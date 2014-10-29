@@ -1684,9 +1684,8 @@ cmd_execute_default(const char * inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                char *new_message = plugins_pre_room_message_send(recipient, inp);
+                char *new_message = plugins_on_room_message_send(recipient, inp);
                 message_send_groupchat(new_message, recipient);
-                plugins_post_room_message_send(recipient, new_message);
                 free(new_message);
             }
             break;
@@ -1702,7 +1701,7 @@ cmd_execute_default(const char * inp)
                     recipient_jid = recipient;
                 }
 
-                char *plugin_message = plugins_pre_chat_message_send(recipient_jid, inp);
+                char *plugin_message = plugins_on_message_send(recipient_jid, inp);
 
 #ifdef PROF_HAVE_LIBOTR
                 prof_otrpolicy_t policy = otr_get_policy(recipient);
@@ -1744,7 +1743,6 @@ cmd_execute_default(const char * inp)
 
                     ui_outgoing_msg("me", recipient, plugin_message);
                 }
-
 #else
                 message_send(plugin_message, recipient);
                 if (prefs_get_boolean(PREF_CHLOG)) {
@@ -1757,7 +1755,6 @@ cmd_execute_default(const char * inp)
                 ui_outgoing_msg("me", recipient, plugin_message);
 
 #endif
-                plugins_post_chat_message_send(recipient_jid, plugin_message);
                 free(plugin_message);
             }
             break;
@@ -1766,14 +1763,14 @@ cmd_execute_default(const char * inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                char *new_message = plugins_pre_priv_message_send(recipient, inp);
+                Jid *jidp = jid_create(recipient);
+                char *new_message = plugins_on_private_message_send(jidp->barejid, jidp->resourcepart, inp);
 
                 message_send(new_message, recipient);
                 ui_outgoing_msg("me", recipient, new_message);
 
-                plugins_post_priv_message_send(recipient, new_message);
-
                 free(new_message);
+                jid_destroy(jidp);
             }
             break;
 
