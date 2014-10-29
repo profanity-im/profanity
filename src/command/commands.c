@@ -1099,8 +1099,10 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, usr);
 
             if (msg != NULL) {
-                message_send(msg, full_jid->str);
-                ui_outgoing_msg("me", full_jid->str, msg);
+                char *plugin_message = plugins_pre_priv_message_send(full_jid->str, msg);
+                message_send(plugin_message, full_jid->str);
+                ui_outgoing_msg("me", full_jid->str, plugin_message);
+                plugins_post_priv_message_send(full_jid->str, plugin_message);
             } else {
                 ui_new_chat_win(full_jid->str);
             }
@@ -1167,6 +1169,10 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     jid_destroy(jidp);
                 }
             }
+
+            plugins_post_chat_message_send(usr_jid, plugin_message);
+            free(plugin_message);
+
             return TRUE;
 #else
             message_send(plugin_message, usr_jid);
@@ -1178,10 +1184,11 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                 chat_log_chat(jidp->barejid, usr_jid, plugin_message, PROF_OUT_LOG, NULL);
                 jid_destroy(jidp);
             }
+
+            plugins_post_chat_message_send(usr_jid, plugin_message);
+            free(plugin_message);
             return TRUE;
 #endif
-            plugins_pre_chat_message_send(usr_jid, plugin_message);
-            free(plugin_message);
 
         } else {
             const char * jid = NULL;

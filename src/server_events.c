@@ -269,7 +269,9 @@ void
 handle_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
-    ui_room_history(room_jid, nick, tv_stamp, message);
+    char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
+    ui_room_history(room_jid, nick, tv_stamp, new_message);
+    plugins_post_room_message_display(room_jid, nick, new_message);
 }
 
 void
@@ -344,9 +346,9 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     ui_incoming_msg(from, plugin_message, NULL, priv);
 
     if (priv) {
-        plugins_post_priv_message_display(from, newmessage);
+        plugins_post_priv_message_display(from, plugin_message);
     } else {
-        plugins_post_chat_message_display(from, newmessage);
+        plugins_post_chat_message_display(from, plugin_message);
     }
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
@@ -378,9 +380,9 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     ui_incoming_msg(from, plugin_message, NULL, priv);
 
     if (priv) {
-        plugins_post_priv_message_display(from, newmessage);
+        plugins_post_priv_message_display(from, plugin_message);
     } else {
-        plugins_post_chat_message_display(from, newmessage);
+        plugins_post_chat_message_display(from, plugin_message);
     }
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {

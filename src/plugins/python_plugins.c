@@ -327,8 +327,8 @@ python_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, c
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_chat_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_chat_message_send");
+    if (PyObject_HasAttrString(p_module, "prof_post_chat_message_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_post_chat_message_send");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);
@@ -384,8 +384,8 @@ python_post_room_message_display_hook(ProfPlugin *plugin, const char * const roo
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_room_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_room_message_display");
+    if (PyObject_HasAttrString(p_module, "prof_post_room_message_display")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_post_room_message_display");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);
@@ -441,8 +441,8 @@ python_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, 
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_room_message_send")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_room_message_send");
+    if (PyObject_HasAttrString(p_module, "prof_post_room_message_send")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_post_room_message_send");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);
@@ -498,8 +498,8 @@ python_post_priv_message_display_hook(ProfPlugin *plugin, const char * const roo
     PyObject *p_function;
 
     PyObject *p_module = plugin->module;
-    if (PyObject_HasAttrString(p_module, "prof_pre_priv_message_display")) {
-        p_function = PyObject_GetAttrString(p_module, "prof_pre_priv_message_display");
+    if (PyObject_HasAttrString(p_module, "prof_post_priv_message_display")) {
+        p_function = PyObject_GetAttrString(p_module, "prof_post_priv_message_display");
         python_check_error();
         if (p_function && PyCallable_Check(p_function)) {
             PyObject_CallObject(p_function, p_args);
