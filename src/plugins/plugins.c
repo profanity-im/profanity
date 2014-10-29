@@ -202,6 +202,17 @@ plugins_on_start(void)
 }
 
 void
+plugins_on_shutdown(void)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->on_shutdown_func(plugin);
+        curr = g_slist_next(curr);
+    }
+}
+
+void
 plugins_on_connect(const char * const account_name, const char * const fulljid)
 {
     GSList *curr = plugins;
@@ -223,145 +234,16 @@ plugins_on_disconnect(const char * const account_name, const char * const fullji
     }
 }
 
-char *
-plugins_before_message_displayed(const char * const message)
+char*
+plugins_pre_chat_message_display(const char * const jid, const char *message)
 {
-    GSList *curr = plugins;
     char *new_message = NULL;
     char *curr_message = strdup(message);
 
-    while (curr != NULL) {
-        ProfPlugin *plugin = curr->data;
-        new_message = plugin->before_message_displayed_func(plugin, curr_message);
-        if (new_message != NULL) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
-        }
-        curr = g_slist_next(curr);
-    }
-
-    return curr_message;
-}
-
-char *
-plugins_on_message_received(const char * const jid, const char *message)
-{
     GSList *curr = plugins;
-    char *new_message = NULL;
-    char *curr_message = strdup(message);
-
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
-        new_message = plugin->on_message_received_func(plugin, jid, curr_message);
-        if (new_message != NULL) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
-        }
-        curr = g_slist_next(curr);
-    }
-
-    return curr_message;
-}
-
-char *
-plugins_on_private_message_received(const char * const room, const char * const nick,
-    const char *message)
-{
-    GSList *curr = plugins;
-    char *new_message = NULL;
-    char *curr_message = strdup(message);
-
-    while (curr != NULL) {
-        ProfPlugin *plugin = curr->data;
-        new_message = plugin->on_private_message_received_func(plugin, room, nick, curr_message);
-        if (new_message != NULL) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
-        }
-        curr = g_slist_next(curr);
-    }
-
-    return curr_message;
-}
-
-char *
-plugins_on_room_message_received(const char * const room, const char * const nick,
-    const char *message)
-{
-    GSList *curr = plugins;
-    char *new_message = NULL;
-    char *curr_message = strdup(message);
-
-    while (curr != NULL) {
-        ProfPlugin *plugin = curr->data;
-        new_message = plugin->on_room_message_received_func(plugin, room, nick, curr_message);
-        if (new_message != NULL) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
-        }
-        curr = g_slist_next(curr);
-    }
-
-    return curr_message;
-}
-
-char *
-plugins_on_message_send(const char * const jid, const char *message)
-{
-    GSList *curr = plugins;
-    char *new_message = NULL;
-    char *curr_message = strdup(message);
-
-    while (curr != NULL) {
-        ProfPlugin *plugin = curr->data;
-        new_message = plugin->on_message_send_func(plugin, jid, curr_message);
-        if (new_message != NULL) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
-        }
-        curr = g_slist_next(curr);
-    }
-
-    return curr_message;
-}
-
-char *
-plugins_on_private_message_send(const char * const room, const char * const nick,
-    const char * const message)
-{
-    GSList *curr = plugins;
-    char *new_message = NULL;
-    char *curr_message = strdup(message);
-
-    while (curr != NULL) {
-        ProfPlugin *plugin = curr->data;
-        new_message = plugin->on_private_message_send_func(plugin, room, nick, curr_message);
-        if (new_message != NULL) {
-            free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
-        }
-        curr = g_slist_next(curr);
-    }
-
-    return curr_message;
-}
-
-char *
-plugins_on_room_message_send(const char * const room, const char *message)
-{
-    GSList *curr = plugins;
-    char *new_message = NULL;
-    char *curr_message = strdup(message);
-
-    while (curr != NULL) {
-        ProfPlugin *plugin = curr->data;
-        new_message = plugin->on_room_message_send_func(plugin, room, curr_message);
+        new_message = plugin->pre_chat_message_display(plugin, jid, curr_message);
         if (new_message != NULL) {
             free(curr_message);
             curr_message = strdup(new_message);
@@ -374,14 +256,186 @@ plugins_on_room_message_send(const char * const room, const char *message)
 }
 
 void
-plugins_on_shutdown(void)
+plugins_post_chat_message_display(const char * const jid, const char *message)
 {
     GSList *curr = plugins;
     while (curr != NULL) {
         ProfPlugin *plugin = curr->data;
-        plugin->on_shutdown_func(plugin);
+        plugin->post_chat_message_display(plugin, jid, message);
         curr = g_slist_next(curr);
     }
+}
+
+char*
+plugins_pre_chat_message_send(const char * const jid, const char *message)
+{
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
+
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        new_message = plugin->pre_chat_message_send(plugin, jid, curr_message);
+        if (new_message != NULL) {
+            free(curr_message);
+            curr_message = strdup(new_message);
+            free(new_message);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_message;
+}
+
+void
+plugins_post_chat_message_send(const char * const jid, const char *message)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->post_chat_message_send(plugin, jid, message);
+        curr = g_slist_next(curr);
+    }
+}
+
+char*
+plugins_pre_room_message_display(const char * const room, const char * const nick, const char *message)
+{
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
+
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        new_message = plugin->pre_room_message_display(plugin, room, nick, curr_message);
+        if (new_message != NULL) {
+            free(curr_message);
+            curr_message = strdup(new_message);
+            free(new_message);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_message;
+}
+
+void
+plugins_post_room_message_display(const char * const room, const char * const nick, const char *message)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->post_room_message_display(plugin, room, nick, message);
+        curr = g_slist_next(curr);
+    }
+}
+
+char*
+plugins_pre_room_message_send(const char * const room, const char *message)
+{
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
+
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        new_message = plugin->pre_room_message_send(plugin, room, curr_message);
+        if (new_message != NULL) {
+            free(curr_message);
+            curr_message = strdup(new_message);
+            free(new_message);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    return curr_message;
+}
+
+void
+plugins_post_room_message_send(const char * const room, const char *message)
+{
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->post_room_message_send(plugin, room, message);
+        curr = g_slist_next(curr);
+    }
+}
+
+char*
+plugins_pre_priv_message_display(const char * const jid, const char *message)
+{
+    Jid *jidp = jid_create(jid);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
+
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        new_message = plugin->pre_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, curr_message);
+        if (new_message != NULL) {
+            free(curr_message);
+            curr_message = strdup(new_message);
+            free(new_message);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    jid_destroy(jidp);
+    return curr_message;
+}
+
+void
+plugins_post_priv_message_display(const char * const jid, const char *message)
+{
+    Jid *jidp = jid_create(jid);
+
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->post_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, message);
+        curr = g_slist_next(curr);
+    }
+
+    jid_destroy(jidp);
+}
+
+char*
+plugins_pre_priv_message_send(const char * const jid, const char * const message)
+{
+    Jid *jidp = jid_create(jid);
+    char *new_message = NULL;
+    char *curr_message = strdup(message);
+
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
+        if (new_message != NULL) {
+            free(curr_message);
+            curr_message = strdup(new_message);
+            free(new_message);
+        }
+        curr = g_slist_next(curr);
+    }
+
+    jid_destroy(jidp);
+    return curr_message;
+}
+
+void
+plugins_post_priv_message_send(const char * const jid, const char * const message)
+{
+    Jid *jidp = jid_create(jid);
+
+    GSList *curr = plugins;
+    while (curr != NULL) {
+        ProfPlugin *plugin = curr->data;
+        plugin->post_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, message);
+        curr = g_slist_next(curr);
+    }
+
+    jid_destroy(jidp);
 }
 
 void

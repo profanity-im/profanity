@@ -1119,7 +1119,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             usr_jid = usr;
         }
         if (msg != NULL) {
-            char *plugin_message = plugins_on_message_send(usr_jid, msg);
+            char *plugin_message = plugins_pre_chat_message_send(usr_jid, msg);
 #ifdef PROF_HAVE_LIBOTR
             if (otr_is_secure(usr_jid)) {
                 char *encrypted = otr_encrypt_message(usr_jid, plugin_message);
@@ -1180,6 +1180,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             }
             return TRUE;
 #endif
+            plugins_pre_chat_message_send(usr_jid, plugin_message);
             free(plugin_message);
 
         } else {
