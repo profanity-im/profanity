@@ -310,6 +310,8 @@ static void
 _ui_incoming_msg(const char * const from, const char * const message,
     GTimeVal *tv_stamp, gboolean priv)
 {
+    char *new_message = plugins_before_message_displayed(message);
+
     gboolean win_created = FALSE;
     char *display_from = NULL;
     win_type_t win_type;
@@ -346,7 +348,7 @@ _ui_incoming_msg(const char * const from, const char * const message,
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, display_from, new_message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -370,7 +372,7 @@ _ui_incoming_msg(const char * const from, const char * const message,
             }
         }
 
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, display_from, new_message);
     }
 
     int ui_index = num;
@@ -1305,6 +1307,8 @@ static void
 _ui_outgoing_msg(const char * const from, const char * const to,
     const char * const message)
 {
+    char *new_message = plugins_before_message_displayed(message);
+
     PContact contact = roster_get_contact(to);
     ProfWin *window = wins_get_by_recipient(to);
     int num = 0;
@@ -1344,7 +1348,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
         num = wins_get_num(window);
     }
 
-    win_save_print(window, '-', NULL, 0, 0, from, message);
+    win_save_print(window, '-', NULL, 0, 0, from, new_message);
     ui_switch_win(num);
 }
 

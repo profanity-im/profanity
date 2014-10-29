@@ -71,21 +71,16 @@ ruby_plugin_create(const char * const filename)
     plugin->module = (void *)rb_const_get(rb_cObject, rb_intern(module_name));
     plugin->init_func = ruby_init_hook;
     plugin->on_start_func = ruby_on_start_hook;
-    plugin->on_shutdown_func = ruby_on_shutdown_hook;
     plugin->on_connect_func = ruby_on_connect_hook;
     plugin->on_disconnect_func = ruby_on_disconnect_hook;
-    plugin->pre_chat_message_display = ruby_pre_chat_message_display_hook;
-    plugin->post_chat_message_display = ruby_post_chat_message_display_hook;
-    plugin->pre_chat_message_send = ruby_pre_chat_message_send_hook;
-    plugin->post_chat_message_send = ruby_post_chat_message_send_hook;
-    plugin->pre_room_message_display = ruby_pre_room_message_display_hook;
-    plugin->post_room_message_display = ruby_post_room_message_display_hook;
-    plugin->pre_room_message_send = ruby_pre_room_message_send_hook;
-    plugin->post_room_message_send = ruby_post_room_message_send_hook;
-    plugin->pre_priv_message_display = ruby_pre_priv_message_display_hook;
-    plugin->post_priv_message_display = ruby_post_priv_message_display_hook;
-    plugin->pre_priv_message_send = ruby_pre_priv_message_send_hook;
-    plugin->post_priv_message_send = ruby_post_priv_message_send_hook;
+    plugin->before_message_displayed_func = ruby_before_message_displayed_hook;
+    plugin->on_message_received_func = ruby_on_message_received_hook;
+    plugin->on_room_message_received_func = ruby_on_room_message_received_hook;
+    plugin->on_private_message_received_func = ruby_on_private_message_received_hook;
+    plugin->on_message_send_func = ruby_on_message_send_hook;
+    plugin->on_private_message_send_func = ruby_on_private_message_send_hook;
+    plugin->on_room_message_send_func = ruby_on_room_message_send_hook;
+    plugin->on_shutdown_func = ruby_on_shutdown_hook;
     g_free(module_name);
     return plugin;
 }
@@ -108,15 +103,6 @@ ruby_on_start_hook(ProfPlugin *plugin)
     VALUE module = (VALUE) plugin->module;
     if (_method_exists(plugin, "prof_on_start")) {
         rb_funcall(module, rb_intern("prof_on_start"), 0);
-    }
-}
-
-void
-ruby_on_shutdown_hook(ProfPlugin *plugin)
-{
-    VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_on_shutdown")) {
-        rb_funcall(module, rb_intern("prof_on_shutdown"), 0);
     }
 }
 
@@ -144,15 +130,14 @@ ruby_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
     }
 }
 
-char*
-ruby_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+char *
+ruby_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
 {
-    VALUE v_jid = rb_str_new2(jid);
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_pre_chat_message_display")) {
-        VALUE result = rb_funcall(module, rb_intern("prof_pre_chat_message_display"), 2, v_jid, v_message);
+    if (_method_exists(plugin, "prof_before_message_displayed")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_before_message_displayed"), 1, v_message);
         if (TYPE(result) != T_NIL) {
             char *result_str = STR2CSTR(result);
             rb_gc_unregister_address(&result);
@@ -165,27 +150,16 @@ ruby_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, c
     return NULL;
 }
 
-void
-ruby_post_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
+char *
+ruby_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
+    const char *message)
 {
     VALUE v_jid = rb_str_new2(jid);
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_post_chat_message_display")) {
-        rb_funcall(module, rb_intern("prof_post_chat_message_display"), 2, v_jid, v_message);
-    }
-}
-
-char*
-ruby_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
-{
-    VALUE v_jid = rb_str_new2(jid);
-    VALUE v_message = rb_str_new2(message);
-
-    VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_pre_chat_message_send")) {
-        VALUE result = rb_funcall(module, rb_intern("prof_pre_chat_message_send"), 2, v_jid, v_message);
+    if (_method_exists(plugin, "prof_on_message_received")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_message_received"), 2, v_jid, v_message);
         if (TYPE(result) != T_NIL) {
             char *result_str = STR2CSTR(result);
             rb_gc_unregister_address(&result);
@@ -198,28 +172,17 @@ ruby_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, cons
     return NULL;
 }
 
-void
-ruby_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
-{
-    VALUE v_jid = rb_str_new2(jid);
-    VALUE v_message = rb_str_new2(message);
-
-    VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_post_chat_message_send")) {
-        rb_funcall(module, rb_intern("prof_post_chat_message_send"), 2, v_jid, v_message);
-    }
-}
-
-char*
-ruby_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+char *
+ruby_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
 {
     VALUE v_room = rb_str_new2(room);
     VALUE v_nick = rb_str_new2(nick);
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_pre_room_message_display")) {
-        VALUE result = rb_funcall(module, rb_intern("prof_pre_room_message_display"), 3, v_room, v_nick, v_message);
+    if (_method_exists(plugin, "prof_on_private_message_received")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_private_message_received"), 3, v_room, v_nick, v_message);
         if (TYPE(result) != T_NIL) {
             char *result_str = STR2CSTR(result);
             rb_gc_unregister_address(&result);
@@ -232,28 +195,84 @@ ruby_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, 
     return NULL;
 }
 
-void
-ruby_post_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+char *
+ruby_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
 {
     VALUE v_room = rb_str_new2(room);
     VALUE v_nick = rb_str_new2(nick);
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_post_room_message_display")) {
-        rb_funcall(module, rb_intern("prof_post_room_message_display"), 3, v_room, v_nick, v_message);
+    if (_method_exists(plugin, "prof_on_room_message_received")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_room_message_received"), 3, v_room, v_nick, v_message);
+        if (TYPE(result) != T_NIL) {
+            char *result_str = STR2CSTR(result);
+            rb_gc_unregister_address(&result);
+            return result_str;
+        } else {
+            return NULL;
+        }
     }
+
+    return NULL;
 }
 
-char*
-ruby_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
+char *
+ruby_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
+    const char *message)
+{
+    VALUE v_jid = rb_str_new2(jid);
+    VALUE v_message = rb_str_new2(message);
+
+    VALUE module = (VALUE) plugin->module;
+    if (_method_exists(plugin, "prof_on_message_send")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_message_send"), 2, v_jid, v_message);
+        if (TYPE(result) != T_NIL) {
+            char *result_str = STR2CSTR(result);
+            rb_gc_unregister_address(&result);
+            return result_str;
+        } else {
+            return NULL;
+        }
+    }
+
+    return NULL;
+}
+
+char *
+ruby_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message)
+{
+    VALUE v_room = rb_str_new2(room);
+    VALUE v_nick = rb_str_new2(nick);
+    VALUE v_message = rb_str_new2(message);
+
+    VALUE module = (VALUE) plugin->module;
+    if (_method_exists(plugin, "prof_on_private_message_send")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_private_message_send"), 3, v_room, v_nick, v_message);
+        if (TYPE(result) != T_NIL) {
+            char *result_str = STR2CSTR(result);
+            rb_gc_unregister_address(&result);
+            return result_str;
+        } else {
+            return NULL;
+        }
+    }
+
+    return NULL;
+}
+
+char *
+ruby_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char *message)
 {
     VALUE v_jid = rb_str_new2(room);
     VALUE v_message = rb_str_new2(message);
 
     VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_pre_room_message_send")) {
-        VALUE result = rb_funcall(module, rb_intern("prof_pre_room_message_send"), 2, v_jid, v_message);
+    if (_method_exists(plugin, "prof_on_room_message_send")) {
+        VALUE result = rb_funcall(module, rb_intern("prof_on_room_message_send"), 2, v_jid, v_message);
         if (TYPE(result) != T_NIL) {
             char *result_str = STR2CSTR(result);
             rb_gc_unregister_address(&result);
@@ -267,84 +286,11 @@ ruby_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, con
 }
 
 void
-ruby_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
+ruby_on_shutdown_hook(ProfPlugin *plugin)
 {
-    VALUE v_jid = rb_str_new2(room);
-    VALUE v_message = rb_str_new2(message);
-
     VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_post_room_message_send")) {
-        rb_funcall(module, rb_intern("prof_post_room_message_send"), 2, v_jid, v_message);
-    }
-}
-
-char*
-ruby_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
-{
-    VALUE v_room = rb_str_new2(room);
-    VALUE v_nick = rb_str_new2(nick);
-    VALUE v_message = rb_str_new2(message);
-
-    VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_pre_priv_message_display")) {
-        VALUE result = rb_funcall(module, rb_intern("prof_pre_priv_message_display"), 3, v_room, v_nick, v_message);
-        if (TYPE(result) != T_NIL) {
-            char *result_str = STR2CSTR(result);
-            rb_gc_unregister_address(&result);
-            return result_str;
-        } else {
-            return NULL;
-        }
-    }
-
-    return NULL;
-}
-
-void
-ruby_post_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
-{
-    VALUE v_room = rb_str_new2(room);
-    VALUE v_nick = rb_str_new2(nick);
-    VALUE v_message = rb_str_new2(message);
-
-    VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_post_priv_message_display")) {
-        rb_funcall(module, rb_intern("prof_post_priv_message_display"), 3, v_room, v_nick, v_message);
-    }
-}
-
-char*
-ruby_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
-{
-    VALUE v_room = rb_str_new2(room);
-    VALUE v_nick = rb_str_new2(nick);
-    VALUE v_message = rb_str_new2(message);
-
-    VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_pre_priv_message_send")) {
-        VALUE result = rb_funcall(module, rb_intern("prof_pre_priv_message_send"), 3, v_room, v_nick, v_message);
-        if (TYPE(result) != T_NIL) {
-            char *result_str = STR2CSTR(result);
-            rb_gc_unregister_address(&result);
-            return result_str;
-        } else {
-            return NULL;
-        }
-    }
-
-    return NULL;
-}
-
-void
-ruby_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
-{
-    VALUE v_room = rb_str_new2(room);
-    VALUE v_nick = rb_str_new2(nick);
-    VALUE v_message = rb_str_new2(message);
-
-    VALUE module = (VALUE) plugin->module;
-    if (_method_exists(plugin, "prof_post_priv_message_send")) {
-        rb_funcall(module, rb_intern("prof_post_priv_message_send"), 3, v_room, v_nick, v_message);
+    if (_method_exists(plugin, "prof_on_shutdown")) {
+        rb_funcall(module, rb_intern("prof_on_shutdown"), 0);
     }
 }
 

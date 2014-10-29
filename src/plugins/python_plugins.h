@@ -38,31 +38,28 @@
 #include "plugins/plugins.h"
 
 ProfPlugin* python_plugin_create(const char * const filename);
-void python_plugin_destroy(ProfPlugin *plugin);
-void python_check_error(void);
-void allow_python_threads();
-void disable_python_threads();
 
 void python_init_hook(ProfPlugin *plugin, const char * const version, const char * const status);
 void python_on_start_hook(ProfPlugin *plugin);
-void python_on_shutdown_hook(ProfPlugin *plugin);
 void python_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 void python_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
+char * python_before_message_displayed_hook(ProfPlugin *plugin, const char *message);
+char * python_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char * python_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
+char * python_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
+char * python_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char * python_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
+char * python_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char *message);
+void python_on_shutdown_hook(ProfPlugin *plugin);
 
-char* python_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-void  python_post_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-char* python_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-void  python_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+void python_plugin_destroy(ProfPlugin *plugin);
+void python_check_error(void);
 
-char* python_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-void  python_post_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-char* python_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message);
-void  python_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message);
-
-char* python_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-void  python_post_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-char* python_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
-void  python_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
-
+void allow_python_threads();
+void disable_python_threads();
 
 #endif

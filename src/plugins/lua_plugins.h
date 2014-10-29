@@ -38,28 +38,25 @@
 #include "plugins/plugins.h"
 
 ProfPlugin* lua_plugin_create(const char * const filename);
-void lua_plugin_destroy(ProfPlugin *plugin);
-void lua_check_error(int value);
 
 void lua_init_hook(ProfPlugin *plugin, const char * const version, const char * const status);
 void lua_on_start_hook(ProfPlugin *plugin);
-void lua_on_shutdown_hook(ProfPlugin *plugin);
 void lua_on_connect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
 void lua_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name, const char * const fulljid);
+char * lua_before_message_displayed_hook(ProfPlugin *plugin, const char *message);
+char * lua_on_message_received_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char * lua_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
+char * lua_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
+char * lua_on_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
+char * lua_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char * const nick, const char *message);
+char * lua_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
+    const char *message);
+void lua_on_shutdown_hook(ProfPlugin *plugin);
 
-char* lua_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-void  lua_post_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-char* lua_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-void  lua_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message);
-
-char* lua_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-void  lua_post_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-char* lua_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message);
-void  lua_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message);
-
-char* lua_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-void  lua_post_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message);
-char* lua_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
-void  lua_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message);
+void lua_plugin_destroy(ProfPlugin *plugin);
+void lua_check_error(int value);
 
 #endif
