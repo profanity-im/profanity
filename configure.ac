@@ -15,7 +15,7 @@ AC_PROG_CC
 AC_CANONICAL_HOST
 PLATFORM="unknown"
 AS_CASE([$host_os],
-    [freebsd*], [PLATFORM="freebsd"]
+    [freebsd*], [PLATFORM="freebsd"],
     [darwin*], [PLATFORM="osx"],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
