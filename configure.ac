@@ -2,6 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_INIT([profanity], [0.4.5], [boothj5web@gmail.com])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -14,6 +15,7 @@ AC_PROG_CC
 AC_CANONICAL_HOST
 PLATFORM="unknown"
 AS_CASE([$host_os],
+    [freebsd*], [PLATFORM="freebsd"]
     [darwin*], [PLATFORM="osx"],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
@@ -45,46 +47,55 @@ AC_ARG_WITH([xscreensaver],
 AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 
-### Select first existing xml library among expat and libxml2
-PARSER=""
-PARSER_LIBS=""
-PARSER_CFLAGS=""
-AS_IF([test "x$with_libxml2" != xyes],
-    [PKG_CHECK_MODULES([expat], [expat],
-        [PARSER_CFLAGS="$expat_CFLAGS"; PARSER_LIBS="$expat_LIBS"; PARSER="expat"],
-        [AC_CHECK_LIB([expat], [XML_ParserCreate],
-            [PARSER_LIBS="-lexpat"; PARSER="expat"],
-            AS_IF([test "x$with_libxml2" = xno],
-                [AC_MSG_ERROR([expat is required but does not exist])]))])
-    ])
+# Use the CFLAGS and libs provided by libstrophe.pc if libstrophe has pkg-config support.
+PKG_CHECK_MODULES([libstrophe], [libstrophe], [LIBS="$libstrophe_LIBS $LIBS"],
+        [
+	 if test "x$PLATFORM" != xfreebsd; then
+		AC_CHECK_LIB([resolv], [res_query], [],
+		    [AC_CHECK_LIB([resolv], [__res_query], [],
+			[AC_MSG_ERROR([libresolv not found; libresolv required for profanity])])])
+	 else
+		AC_MSG_NOTICE([skipping libresolv checks for freebsd])
+	 fi
 
-AS_IF([test "x$PARSER" = x -a "x$with_libxml2" != xno],
-    [PKG_CHECK_MODULES([libxml2], [libxml-2.0],
-        [PARSER_CFLAGS="$libxml2_CFLAGS"; PARSER_LIBS="$libxml2_LIBS"; PARSER="libxml2"],
-        AS_IF([test "x$with_libxml2" = xyes],
-            [AC_MSG_ERROR([libxml2 is required but does not exist])]))
-    ])
+         ### Check for libstrophe dependencies
+         ### Select first existing xml library among expat and libxml2
+         PARSER=""
+         PARSER_LIBS=""
+         PARSER_CFLAGS=""
+         AS_IF([test "x$with_libxml2" != xyes],
+             [PKG_CHECK_MODULES([expat], [expat],
+                 [PARSER_CFLAGS="$expat_CFLAGS"; PARSER_LIBS="$expat_LIBS"; PARSER="expat"],
+                 [AC_CHECK_LIB([expat], [XML_ParserCreate],
+                     [PARSER_LIBS="-lexpat"; PARSER="expat"],
+                     AS_IF([test "x$with_libxml2" = xno],
+                         [AC_MSG_ERROR([expat is required but does not exist])]))])
+             ])
 
-AS_IF([test "x$PARSER" = x],
-    [AC_MSG_ERROR([either expat or libxml2 is required for profanity])])
-AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
-LIBS="$LIBS $PARSER_LIBS"
+         AS_IF([test "x$PARSER" = x -a "x$with_libxml2" != xno],
+             [PKG_CHECK_MODULES([libxml2], [libxml-2.0],
+                 [PARSER_CFLAGS="$libxml2_CFLAGS"; PARSER_LIBS="$libxml2_LIBS"; PARSER="libxml2"],
+                 AS_IF([test "x$with_libxml2" = xyes],
+                     [AC_MSG_ERROR([libxml2 is required but does not exist])]))
+             ])
 
-### Check for libstrophe dependencies
-AC_CHECK_LIB([resolv], [res_query], [],
-    [AC_CHECK_LIB([resolv], [__res_query], [],
-        [AC_MSG_ERROR([libresolv is required for profanity])])])
-PKG_CHECK_MODULES([openssl], [openssl], [],
-    [AC_MSG_ERROR([openssl is required for profanity])])
-AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
-LIBS="$LIBS $openssl_LIBS"
+         AS_IF([test "x$PARSER" = x],
+             [AC_MSG_ERROR([either expat or libxml2 is required for profanity])])
+         AM_CPPFLAGS="$AM_CPPFLAGS $PARSER_CFLAGS"
+         LIBS="$PARSER_LIBS $LIBS"
 
-# TODO: autodetect of XML parser libstrophe linked with
-CFLAGS_RESTORE="$CFLAGS"
-CFLAGS="$CFLAGS $AM_CPPFLAGS"
-AC_CHECK_LIB([strophe], [xmpp_ctx_new], [],
-    [AC_MSG_ERROR([libstrophe linked with $PARSER is required for profanity])])
-CFLAGS="$CFLAGS_RESTORE"
+         PKG_CHECK_MODULES([openssl], [openssl], [],
+                 [AC_CHECK_HEADER(openssl/ssl.h, [openssl_LIBS="-lssl -lcrypto"], [AC_MSG_ERROR([openssl not found; openssl required for profanity])])])
+         AM_CPPFLAGS="$AM_CPPFLAGS $openssl_CFLAGS"
+         LIBS="$openssl_LIBS $LIBS"
+
+         CFLAGS_RESTORE="$CFLAGS"
+         CFLAGS="$CFLAGS $AM_CPPFLAGS"
+         AC_CHECK_LIB([strophe], [xmpp_ctx_new], [LIBS="-lstrophe $LIBS"; listrophe_CFLAGS=""],
+                [AC_MSG_ERROR([libstrophe linked with $PARSER is required for profanity])])
+         CFLAGS="$CFLAGS_RESTORE"
+        ])
+CFLAGS="$CFLAGS $libstrophe_CFLAGS"
 
 ### Check for ncurses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
@@ -95,8 +106,8 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
             [AC_CHECK_LIB([ncurses], [main], [],
             	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
-LIBS="$LIBS $NCURSES_LIBS"
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lncurses"])
+LIBS="$NCURSES_LIBS $LIBS"
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lncurses $LIBS"])
 
 ### Check wide characters support in ncurses library
 CFLAGS_RESTORE="$CFLAGS"
@@ -123,7 +134,7 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
 
-AS_IF([test "x$PLATFORM" = xosx], [LIBS="$LIBS -lcurl"])
+AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 
 ### Check for desktop notification support
 ### Linux requires libnotify
@@ -219,7 +230,7 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $curl_CFLAGS $libnotify_CFLAGS"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\""
-LIBS="$LIBS $glib_LIBS $curl_LIBS $libnotify_LIBS"
+LIBS="$glib_LIBS $curl_LIBS $libnotify_LIBS $LIBS"
 
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
