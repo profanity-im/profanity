@@ -276,14 +276,9 @@ void
 handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
-    char *new_message = NULL;
-    if (g_strcmp0(nick, muc_nick(room_jid)) != 0) {
-        new_message = plugins_on_room_message_received(room_jid, nick, message);
-    } else {
-        new_message = strdup(message);
-    }
-
+    char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
     ui_room_message(room_jid, nick, new_message);
+    plugins_post_room_message_display(room_jid, nick, new_message);
 
     if (prefs_get_boolean(PREF_GRLOG)) {
         Jid *jid = jid_create(jabber_get_fulljid());
@@ -334,22 +329,25 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         newmessage = message;
     }
 
-    if (priv) {
-        Jid *jid = jid_create(from);
-        char *room = jid->barejid;
-        char *nick = jid->resourcepart;
-        plugin_message = plugins_on_private_message_received(room, nick, newmessage);
-        jid_destroy(jid);
-    } else {
-        plugin_message = plugins_on_message_received(from, newmessage);
-    }
     if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
         message_send(otr_query_message, from);
     }
 
+    if (priv) {
+        plugin_message =  plugins_pre_priv_message_display(from, newmessage);
+    } else {
+        plugin_message = plugins_pre_chat_message_display(from, newmessage);
+    }
+
     ui_incoming_msg(from, plugin_message, NULL, priv);
+
+    if (priv) {
+        plugins_post_priv_message_display(from, newmessage);
+    } else {
+        plugins_post_chat_message_display(from, newmessage);
+    }
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
@@ -372,16 +370,18 @@ handle_incoming_message(char *from, char *message, gboolean priv)
         otr_free_message(newmessage);
 #else
     if (priv) {
-        Jid *jid = jid_create(from);
-        char *room = jid->barejid;
-        char *nick = jid->resourcepart;
-        plugin_message = plugins_on_private_message_received(room, nick, message);
-        jid_destroy(jid);
+        plugin_message =  plugins_pre_priv_message_display(from, newmessage);
     } else {
-        plugin_message = plugins_on_message_received(from, message);
+        plugin_message = plugins_pre_chat_message_display(from, newmessage);
     }
 
     ui_incoming_msg(from, plugin_message, NULL, priv);
+
+    if (priv) {
+        plugins_post_priv_message_display(from, newmessage);
+    } else {
+        plugins_post_chat_message_display(from, newmessage);
+    }
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);
@@ -403,16 +403,18 @@ handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
     char *new_message = NULL;
 
     if (priv) {
-        Jid *jid = jid_create(from);
-        char *room = jid->barejid;
-        char *nick = jid->resourcepart;
-        new_message = plugins_on_private_message_received(room, nick, message);
-        jid_destroy(jid);
+        new_message = plugins_pre_priv_message_display(from, message);
     } else {
-        new_message = plugins_on_message_received(from, message);
+        new_message = plugins_pre_chat_message_display(from, message);
     }
 
     ui_incoming_msg(from, new_message, &tv_stamp, priv);
+
+    if (priv) {
+        plugins_post_priv_message_display(from, message);
+    } else {
+        plugins_post_chat_message_display(from, message);
+    }
 
     if (prefs_get_boolean(PREF_CHLOG) && !priv) {
         Jid *from_jid = jid_create(from);

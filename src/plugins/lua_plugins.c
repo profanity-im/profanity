@@ -89,16 +89,21 @@ lua_plugin_create(const char * const filename)
         plugin->module = module_p;
         plugin->init_func = lua_init_hook;
         plugin->on_start_func = lua_on_start_hook;
+        plugin->on_shutdown_func = lua_on_shutdown_hook;
         plugin->on_connect_func = lua_on_connect_hook;
         plugin->on_disconnect_func = lua_on_disconnect_hook;
-        plugin->before_message_displayed_func = lua_before_message_displayed_hook;
-        plugin->on_message_received_func = lua_on_message_received_hook;
-        plugin->on_room_message_received_func = lua_on_room_message_received_hook;
-        plugin->on_private_message_received_func = lua_on_private_message_received_hook;
-        plugin->on_message_send_func = lua_on_message_send_hook;
-        plugin->on_private_message_send_func = lua_on_private_message_send_hook;
-        plugin->on_room_message_send_func = lua_on_room_message_send_hook;
-        plugin->on_shutdown_func = lua_on_shutdown_hook;
+        plugin->pre_chat_message_display = lua_pre_chat_message_display_hook;
+        plugin->post_chat_message_display = lua_post_chat_message_display_hook;
+        plugin->pre_chat_message_send = lua_pre_chat_message_send_hook;
+        plugin->post_chat_message_send = lua_post_chat_message_send_hook;
+        plugin->pre_room_message_display = lua_pre_room_message_display_hook;
+        plugin->post_room_message_display = lua_post_room_message_display_hook;
+        plugin->pre_room_message_send = lua_pre_room_message_send_hook;
+        plugin->post_room_message_send = lua_post_room_message_send_hook;
+        plugin->pre_priv_message_display = lua_pre_priv_message_display_hook;
+        plugin->post_priv_message_display = lua_post_priv_message_display_hook;
+        plugin->pre_priv_message_send = lua_pre_priv_message_send_hook;
+        plugin->post_priv_message_send = lua_post_priv_message_send_hook;
         g_free(module_name);
         g_free(plugins_dir);
         g_string_free(abs_path, TRUE);
@@ -135,6 +140,22 @@ lua_on_start_hook(ProfPlugin *plugin)
     int *p_ref = (int *)plugin->module;
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
     lua_pushstring(L, "prof_on_start");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        int res2 = lua_pcall(L, 0, 0, 0);
+        lua_check_error(res2);
+        lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
+    }
+}
+
+void
+lua_on_shutdown_hook(ProfPlugin *plugin)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_on_shutdown");
     lua_gettable(L, -2);
     if (!lua_isnil(L, -1)) {
         int res2 = lua_pcall(L, 0, 0, 0);
@@ -183,38 +204,12 @@ lua_on_disconnect_hook(ProfPlugin *plugin, const char * const account_name,
     }
 }
 
-char *
-lua_before_message_displayed_hook(ProfPlugin *plugin, const char *message)
+char*
+lua_pre_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
 {
     int *p_ref = (int *)plugin->module;
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_before_message_displayed");
-    lua_gettable(L, -2);
-    if (!lua_isnil(L, -1)) {
-        lua_pushstring(L, message);
-        int res2 = lua_pcall(L, 1, 1, 0);
-        lua_check_error(res2);
-
-        char *result = NULL;
-        if (lua_isstring(L, -1)) {
-            result = strdup(lua_tostring(L, -1));
-        }
-        lua_pop(L, 2);
-
-        return result;
-    } else {
-        lua_pop(L, 2);
-        return NULL;
-    }
-}
-
-char *
-lua_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
-    const char *message)
-{
-    int *p_ref = (int *)plugin->module;
-    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_on_message_received");
+    lua_pushstring(L, "prof_pre_chat_message_display");
     lua_gettable(L, -2);
     if (!lua_isnil(L, -1)) {
         lua_pushstring(L, jid);
@@ -236,71 +231,30 @@ lua_on_message_received_hook(ProfPlugin *plugin, const char * const jid,
     }
 }
 
-char *
-lua_on_private_message_received_hook(ProfPlugin *plugin, const char * const room,
-    const char * const nick, const char *message)
+void
+lua_post_chat_message_display_hook(ProfPlugin *plugin, const char * const jid, const char *message)
 {
     int *p_ref = (int *)plugin->module;
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_on_private_message_received");
+    lua_pushstring(L, "prof_post_chat_message_display");
     lua_gettable(L, -2);
     if (!lua_isnil(L, -1)) {
-        lua_pushstring(L, room);
-        lua_pushstring(L, nick);
+        lua_pushstring(L, jid);
         lua_pushstring(L, message);
-        int res2 = lua_pcall(L, 3, 1, 0);
+        int res2 = lua_pcall(L, 2, 0, 0);
         lua_check_error(res2);
-
-        char *result = NULL;
-        if (lua_isstring(L, -1)) {
-            result = strdup(lua_tostring(L, -1));
-        }
-
-        lua_pop(L, 2);
-
-        return result;
+        lua_pop(L, 1);
     } else {
         lua_pop(L, 2);
-        return NULL;
     }
 }
 
-char *
-lua_on_room_message_received_hook(ProfPlugin *plugin, const char * const room,
-    const char * const nick, const char *message)
+char*
+lua_pre_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
 {
     int *p_ref = (int *)plugin->module;
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_on_room_message_received");
-    lua_gettable(L, -2);
-    if (!lua_isnil(L, -1)) {
-        lua_pushstring(L, room);
-        lua_pushstring(L, nick);
-        lua_pushstring(L, message);
-        int res2 = lua_pcall(L, 3, 1, 0);
-        lua_check_error(res2);
-
-        char *result = NULL;
-        if (lua_isstring(L, -1)) {
-            result = strdup(lua_tostring(L, -1));
-        }
-
-        lua_pop(L, 2);
-
-        return result;
-    } else {
-        lua_pop(L, 2);
-        return NULL;
-    }
-}
-
-char *
-lua_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
-    const char *message)
-{
-    int *p_ref = (int *)plugin->module;
-    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_on_message_send");
+    lua_pushstring(L, "prof_pre_chat_message_send");
     lua_gettable(L, -2);
     if (!lua_isnil(L, -1)) {
         lua_pushstring(L, jid);
@@ -324,13 +278,30 @@ lua_on_message_send_hook(ProfPlugin *plugin, const char * const jid,
     return NULL;
 }
 
-char *
-lua_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
-    const char * const nick, const char *message)
+void
+lua_post_chat_message_send_hook(ProfPlugin *plugin, const char * const jid, const char *message)
 {
     int *p_ref = (int *)plugin->module;
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_on_private_message_send");
+    lua_pushstring(L, "prof_pre_chat_message_send");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        lua_pushstring(L, jid);
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 2, 0, 0);
+        lua_check_error(res2);
+        lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
+    }
+}
+
+char*
+lua_pre_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_pre_room_message_display");
     lua_gettable(L, -2);
     if (!lua_isnil(L, -1)) {
         lua_pushstring(L, room);
@@ -353,13 +324,31 @@ lua_on_private_message_send_hook(ProfPlugin *plugin, const char * const room,
     }
 }
 
-char *
-lua_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
-    const char *message)
+void
+lua_post_room_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
 {
     int *p_ref = (int *)plugin->module;
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_on_room_message_send");
+    lua_pushstring(L, "prof_post_room_message_display");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        lua_pushstring(L, room);
+        lua_pushstring(L, nick);
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 3, 1, 0);
+        lua_check_error(res2);
+        lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
+    }
+}
+
+char*
+lua_pre_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_pre_room_message_send");
     lua_gettable(L, -2);
     if (!lua_isnil(L, -1)) {
         lua_pushstring(L, room);
@@ -382,14 +371,110 @@ lua_on_room_message_send_hook(ProfPlugin *plugin, const char * const room,
 }
 
 void
-lua_on_shutdown_hook(ProfPlugin *plugin)
+lua_post_room_message_send_hook(ProfPlugin *plugin, const char * const room, const char *message)
 {
     int *p_ref = (int *)plugin->module;
     lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
-    lua_pushstring(L, "prof_on_shutdown");
+    lua_pushstring(L, "prof_post_room_message_send");
     lua_gettable(L, -2);
     if (!lua_isnil(L, -1)) {
-        int res2 = lua_pcall(L, 0, 0, 0);
+        lua_pushstring(L, room);
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 2, 1, 0);
+        lua_check_error(res2);
+        lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
+    }
+}
+
+char*
+lua_pre_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_pre_priv_message_display");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        lua_pushstring(L, room);
+        lua_pushstring(L, nick);
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 3, 1, 0);
+        lua_check_error(res2);
+
+        char *result = NULL;
+        if (lua_isstring(L, -1)) {
+            result = strdup(lua_tostring(L, -1));
+        }
+
+        lua_pop(L, 2);
+
+        return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
+    }
+}
+
+void
+lua_post_priv_message_display_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char *message)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_post_priv_message_display");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        lua_pushstring(L, room);
+        lua_pushstring(L, nick);
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 3, 1, 0);
+        lua_check_error(res2);
+        lua_pop(L, 1);
+    } else {
+        lua_pop(L, 2);
+    }
+}
+
+char*
+lua_pre_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_pre_priv_message_send");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        lua_pushstring(L, room);
+        lua_pushstring(L, nick);
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 3, 1, 0);
+        lua_check_error(res2);
+
+        char *result = NULL;
+        if (lua_isstring(L, -1)) {
+            result = strdup(lua_tostring(L, -1));
+        }
+
+        lua_pop(L, 2);
+
+        return result;
+    } else {
+        lua_pop(L, 2);
+        return NULL;
+    }
+}
+
+void
+lua_post_priv_message_send_hook(ProfPlugin *plugin, const char * const room, const char * const nick, const char * const message)
+{
+    int *p_ref = (int *)plugin->module;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, *p_ref);
+    lua_pushstring(L, "prof_pre_priv_message_send");
+    lua_gettable(L, -2);
+    if (!lua_isnil(L, -1)) {
+        lua_pushstring(L, room);
+        lua_pushstring(L, nick);
+        lua_pushstring(L, message);
+        int res2 = lua_pcall(L, 3, 1, 0);
         lua_check_error(res2);
         lua_pop(L, 1);
     } else {
