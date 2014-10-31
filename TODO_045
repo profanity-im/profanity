@@ -1,8 +1,3 @@
-Build with latest libstrophe
-
-Tag 0.4.5.rc1
-Announce release candidate at mailing list
-
 Test with valgrind using new commands
 
 Update website help
