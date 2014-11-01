@@ -2348,16 +2348,15 @@ _form_field_autocomplete(char *input, int *size)
             if (((g_strcmp0(split[1], "add") == 0) || (g_strcmp0(split[1], "remove") == 0))
                     && field_type == FIELD_LIST_MULTI) {
                 found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
-                g_string_free(beginning, TRUE);
 
             } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
                 found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
-                g_string_free(beginning, TRUE);
 
             } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_JID_MULTI) {
                 found = autocomplete_param_with_ac(input, size, beginning->str, value_ac, TRUE);
-                g_string_free(beginning, TRUE);
             }
+
+            g_string_free(beginning, TRUE);
         }
 
     } else if (g_strv_length(split) == 2) {

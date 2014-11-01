@@ -1,4 +1,9 @@
 Test with valgrind using new commands
+    /affiliation
+    /role
+    /occupants
+    /privileges
+    /ping
 
 Update website help
 

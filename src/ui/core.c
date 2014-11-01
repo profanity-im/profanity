@@ -1519,7 +1519,7 @@ _ui_show_room_disco_info(const char * const room, GSList *identities, GSList *fe
                     identity_str = g_string_append(identity_str, identity->category);
                 }
                 win_save_print(window, '!', NULL, 0, 0, "", identity_str->str);
-                g_string_free(identity_str, FALSE);
+                g_string_free(identity_str, TRUE);
                 identities = g_slist_next(identities);
             }
 

@@ -158,6 +158,8 @@ _iq_disco_info_request(gchar *jid)
 
     xmpp_id_handler_add(conn, _disco_info_response_handler, id, NULL);
 
+    free(id);
+
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
 }
@@ -171,6 +173,8 @@ _iq_room_info_request(gchar *room)
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
 
     xmpp_id_handler_add(conn, _disco_info_response_handler, id, room);
+
+    free(id);
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);

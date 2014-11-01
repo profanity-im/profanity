@@ -2077,15 +2077,15 @@ cmd_form(gchar **args, struct cmd_help_t help)
         iq_submit_room_config(room, current->form);
 
     }
+
     if (g_strcmp0(args[0], "cancel") == 0) {
         iq_room_config_cancel(room);
     }
-    if ((g_strcmp0(args[0], "submit") == 0) ||
-            (g_strcmp0(args[0], "cancel") == 0)) {
+
+    if ((g_strcmp0(args[0], "submit") == 0) || (g_strcmp0(args[0], "cancel") == 0)) {
         if (current->form) {
             cmd_autocomplete_remove_form_fields(current->form);
         }
-
         wins_close_current();
         current = wins_get_by_recipient(room);
         if (current == NULL) {
@@ -2474,6 +2474,7 @@ cmd_rooms(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         ProfAccount *account = accounts_get_account(jabber_get_account_name());
         iq_room_list_request(account->muc_service);
+        account_free(account);
     } else {
         iq_room_list_request(args[0]);
     }

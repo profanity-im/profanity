@@ -453,9 +453,9 @@ _connection_handler(xmpp_conn_t * const conn,
             _connection_free_saved_details();
         }
 
-        Jid *myJid = jid_create(jabber_get_fulljid());
-        jabber_conn.domain = strdup(myJid->domainpart);
-        jid_destroy(myJid);
+        Jid *my_jid = jid_create(jabber_get_fulljid());
+        jabber_conn.domain = strdup(my_jid->domainpart);
+        jid_destroy(my_jid);
 
         chat_sessions_init();
 

@@ -458,6 +458,8 @@ _form_tag_exists(DataForm *form, const char * const tag)
         }
         curr = g_list_next(curr);
     }
+
+    g_list_free(tags);
     return FALSE;
 }
 

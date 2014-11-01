@@ -3,6 +3,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
@@ -59,9 +60,21 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
 {
     mock_accounts_get_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
-    ProfAccount *account = malloc(sizeof(ProfAccount));
-    account->muc_service = "default_conf_server";
     gchar *args[] = { NULL };
+    ProfAccount *account = malloc(sizeof(ProfAccount));
+    account->name = NULL;
+    account->jid = NULL;
+    account->password = NULL;
+    account->resource = NULL;
+    account->server = NULL;
+    account->last_presence = NULL;
+    account->login_presence = NULL;
+    account->muc_nick = NULL;
+    account->otr_policy = NULL;
+    account->otr_manual = NULL;
+    account->otr_opportunistic = NULL;
+    account->otr_always = NULL;
+    account->muc_service = strdup("default_conf_server");
 
     mock_connection_status(JABBER_CONNECTED);
     mock_connection_account_name("account_name");
@@ -75,7 +88,6 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     assert_true(result);
 
     free(help);
-    free(account);
 }
 
 void cmd_rooms_arg_used_when_passed(void **state)
