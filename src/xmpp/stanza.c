@@ -113,6 +113,7 @@ stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char * const jid,
     xmpp_stanza_set_name(stanza, STANZA_NAME_IQ);
     char *id = create_unique_id("bookmark_add");
     xmpp_stanza_set_id(stanza, id);
+    free(id);
     xmpp_stanza_set_type(stanza, STANZA_TYPE_SET);
 
     xmpp_stanza_t *pubsub = xmpp_stanza_new(ctx);
@@ -1054,6 +1055,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
             if (muc_active(from_jid->barejid)) {
                 char *nick = muc_nick(from_jid->barejid);
                 if (g_strcmp0(from_jid->resourcepart, nick) == 0) {
+                    jid_destroy(from_jid);
                     return TRUE;
                 }
             }
@@ -1065,6 +1067,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t * const stanza,
                     char *nick = muc_nick(from_jid->barejid);
                     char *old_nick = muc_old_nick(from_jid->barejid, new_nick);
                     if (g_strcmp0(old_nick, nick) == 0) {
+                        jid_destroy(from_jid);
                         return TRUE;
                     }
                 }
@@ -1090,7 +1093,7 @@ stanza_get_status_codes_by_ns(xmpp_stanza_t * const stanza, char *ns)
             if (g_strcmp0(name, STANZA_NAME_STATUS) == 0) {
                 char *code = xmpp_stanza_get_attribute(child, STANZA_ATTR_CODE);
                 if (code) {
-                    codes = g_slist_append(codes, code);
+                    codes = g_slist_append(codes, strdup(code));
                 }
             }
             child = xmpp_stanza_get_next(child);

@@ -264,6 +264,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
 
     Jid *jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     Capabilities *caps = caps_lookup(jidp->fulljid);
+    jid_destroy(jidp);
 
     if (caps) {
         // show identity
@@ -378,6 +379,7 @@ win_show_info(ProfWin *window, PContact contact)
 
         Jid *jidp = jid_create_from_bare_and_resource(barejid, resource->name);
         Capabilities *caps = caps_lookup(jidp->fulljid);
+        jid_destroy(jidp);
 
         if (caps) {
             // show identity

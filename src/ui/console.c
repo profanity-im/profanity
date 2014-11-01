@@ -739,6 +739,7 @@ _cons_show_account(ProfAccount *account)
             win_save_vprint(console, '-', NULL, NO_DATE, 0, "", "");
             Jid *jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
             Capabilities *caps = caps_lookup(jidp->fulljid);
+            jid_destroy(jidp);
 
             if (caps != NULL) {
                 // show identity

@@ -373,6 +373,7 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         log_info("Error joining room: %s, reason: %s", fulljid->barejid, error_cond);
         handle_room_join_error(fulljid->barejid, error_cond);
+        jid_destroy(fulljid);
         return 1;
     }
 
@@ -753,7 +754,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                     handle_leave_room(room);
                 }
 
-                g_slist_free(status_codes);
+                g_slist_free_full(status_codes, free);
             }
 
         // self online
@@ -797,6 +798,8 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                 } else {
                     handle_room_occupant_offline(room, nick, "offline", status_str);
                 }
+
+                g_slist_free_full(status_codes, free);
             }
 
         // room occupant online
