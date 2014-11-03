@@ -2074,9 +2074,12 @@ _bookmark_autocomplete(char *input, int *size)
         }
         g_string_free(beginning, TRUE);
         if (found != NULL) {
+            g_strfreev(args);
             return found;
         }
     }
+
+    g_strfreev(args);
 
     found = autocomplete_param_with_func(input, size, "/bookmark remove", bookmark_find);
     if (found != NULL) {
@@ -2248,9 +2251,12 @@ _otr_autocomplete(char *input, int *size)
         found = autocomplete_param_with_func(input, size, beginning->str, roster_find_contact);
         g_string_free(beginning, TRUE);
         if (found != NULL) {
+            g_strfreev(args);
             return found;
         }
     }
+
+    g_strfreev(args);
 
     found = autocomplete_param_with_ac(input, size, "/otr policy", otr_policy_ac, TRUE);
     if (found != NULL) {
@@ -2461,9 +2467,12 @@ _affiliation_autocomplete(char *input, int *size)
         result = autocomplete_param_with_ac(input, size, beginning->str, jid_ac, TRUE);
         g_string_free(beginning, TRUE);
         if (result != NULL) {
+            g_strfreev(args);
             return result;
         }
     }
+
+    g_strfreev(args);
 
     result = autocomplete_param_with_ac(input, size, "/affiliation set", affiliation_ac, TRUE);
     if (result != NULL) {
@@ -2503,9 +2512,12 @@ _role_autocomplete(char *input, int *size)
         result = autocomplete_param_with_ac(input, size, beginning->str, nick_ac, TRUE);
         g_string_free(beginning, TRUE);
         if (result != NULL) {
+            g_strfreev(args);
             return result;
         }
     }
+
+    g_strfreev(args);
 
     result = autocomplete_param_with_ac(input, size, "/role set", role_ac, TRUE);
     if (result != NULL) {
@@ -2592,9 +2604,12 @@ _connect_autocomplete(char *input, int *size)
         found = autocomplete_param_with_ac(input, size, beginning->str, connect_property_ac, TRUE);
         g_string_free(beginning, TRUE);
         if (found != NULL) {
+            g_strfreev(args);
             return found;
         }
     }
+
+    g_strfreev(args);
 
     found = autocomplete_param_with_func(input, size, "/connect", accounts_find_enabled);
     if (found != NULL) {
@@ -2631,9 +2646,12 @@ _join_autocomplete(char *input, int *size)
         found = autocomplete_param_with_ac(input, size, beginning->str, join_property_ac, TRUE);
         g_string_free(beginning, TRUE);
         if (found != NULL) {
+            g_strfreev(args);
             return found;
         }
     }
+
+    g_strfreev(args);
 
     return NULL;
 }
@@ -2656,12 +2674,14 @@ _account_autocomplete(char *input, int *size)
             found = autocomplete_param_with_ac(input, size, beginning->str, otr_policy_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found != NULL) {
+                g_strfreev(args);
                 return found;
             }
         } else {
             found = autocomplete_param_with_ac(input, size, beginning->str, account_set_ac, TRUE);
             g_string_free(beginning, TRUE);
             if (found != NULL) {
+                g_strfreev(args);
                 return found;
             }
         }
@@ -2673,6 +2693,7 @@ _account_autocomplete(char *input, int *size)
         found = autocomplete_param_with_ac(input, size, beginning->str, account_clear_ac, TRUE);
         g_string_free(beginning, TRUE);
         if (found != NULL) {
+            g_strfreev(args);
             return found;
         }
     }

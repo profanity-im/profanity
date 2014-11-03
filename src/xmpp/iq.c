@@ -974,6 +974,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * 
 
     handle_room_affiliation_list(from, affiliation, jids);
     free(affiliation);
+    g_slist_free(jids);
 
     return 0;
 }
@@ -1019,6 +1020,7 @@ _room_role_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const s
 
     handle_room_role_list(from, role, nicks);
     free(role);
+    g_slist_free(nicks);
 
     return 0;
 }
