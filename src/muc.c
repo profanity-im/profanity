@@ -454,7 +454,6 @@ muc_roster_item(const char * const room, const char * const nick)
 
 /*
  * Return a list of PContacts representing the room members in the room's roster
- * The list is owned by the room and must not be mofified or freed
  */
 GList *
 muc_roster(const char * const room)
@@ -462,14 +461,15 @@ muc_roster(const char * const room)
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         GList *result = NULL;
-        GHashTableIter iter;
-        gpointer key;
-        gpointer value;
+        GList *occupants = g_hash_table_get_values(chat_room->roster);
 
-        g_hash_table_iter_init(&iter, chat_room->roster);
-        while (g_hash_table_iter_next(&iter, &key, &value)) {
-            result = g_list_insert_sorted(result, value, (GCompareFunc)_compare_occupants);
+        GList *curr = occupants;
+        while (curr) {
+            result = g_list_insert_sorted(result, curr->data, (GCompareFunc)_compare_occupants);
+            curr = g_list_next(curr);
         }
+
+        g_list_free(occupants);
 
         return result;
     } else {

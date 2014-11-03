@@ -2816,15 +2816,15 @@ _ui_muc_roster(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
     if (window) {
-        GList *roster = muc_roster(room);
-        if (roster) {
+        GList *occupants = muc_roster(room);
+        if (occupants) {
             werase(window->subwin);
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
                 wattron(window->subwin, COLOUR_ROOMINFO);
                 wprintw(window->subwin, " -Moderators\n");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
-                GList *roster_curr = roster;
+                GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
@@ -2842,7 +2842,7 @@ _ui_muc_roster(const char * const room)
                 wattron(window->subwin, COLOUR_ROOMINFO);
                 wprintw(window->subwin, " -Participants\n");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
-                roster_curr = roster;
+                roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
@@ -2860,7 +2860,7 @@ _ui_muc_roster(const char * const room)
                 wattron(window->subwin, COLOUR_ROOMINFO);
                 wprintw(window->subwin, " -Visitors\n");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
-                roster_curr = roster;
+                roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
@@ -2878,7 +2878,7 @@ _ui_muc_roster(const char * const room)
                 wattron(window->subwin, COLOUR_ROOMINFO);
                 wprintw(window->subwin, " -Occupants\n");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
-                GList *roster_curr = roster;
+                GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     wprintw(window->subwin, "   ");
@@ -2892,6 +2892,8 @@ _ui_muc_roster(const char * const room)
                 }
             }
         }
+
+        g_list_free(occupants);
     }
 }
 

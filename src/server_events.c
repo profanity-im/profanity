@@ -681,8 +681,9 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 
         // show roster if occupants list disabled by default
         if (!prefs_get_boolean(PREF_OCCUPANTS)) {
-            GList *roster = muc_roster(room);
-            ui_room_roster(room, roster, NULL);
+            GList *occupants = muc_roster(room);
+            ui_room_roster(room, occupants, NULL);
+            g_list_free(occupants);
         }
 
         char *subject = muc_subject(room);

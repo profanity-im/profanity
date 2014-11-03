@@ -769,22 +769,22 @@ _who_room(gchar **args, struct cmd_help_t help)
             (g_strcmp0(args[0], "any") == 0)) {
 
         char *presence = args[0];
-        GList *list = muc_roster(room);
+        GList *occupants = muc_roster(room);
 
         // no arg, show all contacts
         if ((presence == NULL) || (g_strcmp0(presence, "any") == 0)) {
-            ui_room_roster(room, list, NULL);
+            ui_room_roster(room, occupants, NULL);
 
         // available
         } else if (strcmp("available", presence) == 0) {
             GList *filtered = NULL;
 
-            while (list != NULL) {
-                Occupant *occupant = list->data;
+            while (occupants != NULL) {
+                Occupant *occupant = occupants->data;
                 if (muc_occupant_available(occupant)) {
                     filtered = g_list_append(filtered, occupant);
                 }
-                list = g_list_next(list);
+                occupants = g_list_next(occupants);
             }
 
             ui_room_roster(room, filtered, "available");
@@ -793,12 +793,12 @@ _who_room(gchar **args, struct cmd_help_t help)
         } else if (strcmp("unavailable", presence) == 0) {
             GList *filtered = NULL;
 
-            while (list != NULL) {
-                Occupant *occupant = list->data;
+            while (occupants != NULL) {
+                Occupant *occupant = occupants->data;
                 if (!muc_occupant_available(occupant)) {
                     filtered = g_list_append(filtered, occupant);
                 }
-                list = g_list_next(list);
+                occupants = g_list_next(occupants);
             }
 
             ui_room_roster(room, filtered, "unavailable");
@@ -807,17 +807,19 @@ _who_room(gchar **args, struct cmd_help_t help)
         } else {
             GList *filtered = NULL;
 
-            while (list != NULL) {
-                Occupant *occupant = list->data;
+            while (occupants != NULL) {
+                Occupant *occupant = occupants->data;
                 const char *presence_str = string_from_resource_presence(occupant->presence);
                 if (strcmp(presence_str, presence) == 0) {
                     filtered = g_list_append(filtered, occupant);
                 }
-                list = g_list_next(list);
+                occupants = g_list_next(occupants);
             }
 
             ui_room_roster(room, filtered, presence);
         }
+
+        g_list_free(occupants);
 
     // role or affiliation filter
     } else {
