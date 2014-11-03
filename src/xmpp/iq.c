@@ -524,16 +524,17 @@ _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
 {
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *type = xmpp_stanza_get_type(stanza);
+    GDateTime *sent = (GDateTime *)userdata;
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
         handle_ping_error_result(from, error_message);
         free(error_message);
+        g_date_time_unref(sent);
         return 0;
     }
 
-    GDateTime *sent = (GDateTime *)userdata;
     GDateTime *now = g_date_time_new_now_local();
 
     GTimeSpan elapsed = g_date_time_difference(now, sent);

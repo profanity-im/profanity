@@ -1,7 +1,4 @@
 Test with valgrind using new commands
-    /occupants
-    /privileges
-    /ping
     fix muc roster leak
 
 Update website help
