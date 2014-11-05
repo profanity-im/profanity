@@ -506,18 +506,21 @@ static struct cmd_t command_defs[] =
 
     { "/who",
         cmd_who, parse_args, 0, 2, NULL,
-        { "/who [status] [group]", "Show contacts/room participants with chosen status.",
-        { "/who [status] [group]",
-          "---------------------",
-          "Show contacts with the specified status, no status shows all contacts.",
-          "Possible statuses are: online, offline, away, dnd, xa, chat, available, unavailable.",
-          "The groups argument will show only contacts in that group.",
-          "If in a chat room, the participants with the supplied status are displayed.",
+        { "/who [status|role|affiliation] [group]", "Show contacts/room occupants with chosen status, role or affiliation",
+        { "/who [status|role|affiliation] [group]",
+          "--------------------------------------",
+          "Normal usage:",
+          "Status may be one of - online, offline, away, dnd, xa, chat, available, unavailable, or any where:",
+          "online      : Contacts that are online, chat, away, xa, dnd",
+          "available   : Contacts that are available for chat - online, chat.",
+          "unavailable : Contacts that are not available for chat - offline, away, xa, dnd.",
+          "any         : Contacts with any status (same as calling with no argument).",
           "",
-          "online      : Contacts that are connected, i.e. online, chat, away, xa, dnd",
-          "available   : Contacts that are available for chat, i.e. online, chat.",
-          "unavailable : Contacts that are not available for chat, i.e. offline, away, xa, dnd.",
-          "any         : Contacts with any status (same as calling with no argument.",
+          "The group argument filters the list by that group.",
+          "",
+          "In a chat room, a role or affiliation may also be supplied instead of status.",
+          "Roles: moderator, participant, visitor",
+          "Affiliations: owner, admin, member",
           NULL } } },
 
     { "/close",
@@ -1244,7 +1247,6 @@ cmd_init(void)
     autocomplete_add(who_room_ac, "owner");
     autocomplete_add(who_room_ac, "admin");
     autocomplete_add(who_room_ac, "member");
-    autocomplete_add(who_room_ac, "outcast");
 
     bookmark_ac = autocomplete_new();
     autocomplete_add(bookmark_ac, "list");
