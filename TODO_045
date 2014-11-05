@@ -1,4 +1,17 @@
 Update website help
+    Command reference
+        /ping
+        /info
+        /room
+        /form
+        /role
+        /affiliation
+        /privileges
+        /occupants
+    Chat room help - Add note about room creation, remove /who
+    Install guide - Debian, Ubuntu
+    Update screensshots - Include MUC examples
+    Check helpout and FAQ sections for any updates
 
 Tag libstrophe release 0.8.7
     https://github.com/strophe/libstrophe/milestones/0.8.7
