@@ -620,7 +620,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
             "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
-            "/titlebar", "/vercheck", "/privileges", "/occupants" };
+            "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence" };
         _cmd_show_filtered_help("Settings commands", filter, ARRAY_SIZE(filter));
 
     } else if (strcmp(args[0], "navigation") == 0) {
@@ -2920,6 +2920,12 @@ gboolean
 cmd_beep(gchar **args, struct cmd_help_t help)
 {
     return _cmd_set_boolean_preference(args[0], help, "Sound", PREF_BEEP);
+}
+
+gboolean
+cmd_presence(gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args[0], help, "Contact presence", PREF_PRESENCE);
 }
 
 gboolean

@@ -174,6 +174,49 @@ _title_bar_draw(void)
         waddch(win, ' ');
     mvwprintw(win, 0, 0, " %s", current_title);
 
+    // show presence
+    if (prefs_get_boolean(PREF_PRESENCE) && current_recipient) {
+        char *recipient_jid = NULL;
+        char *found_contact = roster_find_contact(current_recipient);
+        if (found_contact) {
+            recipient_jid = roster_barejid_from_name(current_recipient);
+            free(found_contact);
+        } else {
+            recipient_jid = current_recipient;
+        }
+        ProfWin *current = wins_get_by_recipient(recipient_jid);
+        if (current) {
+            if (current->type == WIN_CHAT) {
+                PContact contact = roster_get_contact(recipient_jid);
+                const char *presence = p_contact_presence(contact);
+
+                int presence_colour = COLOUR_TITLE_ONLINE;
+                if (g_strcmp0(presence, "offline") == 0) {
+                    presence_colour = COLOUR_TITLE_OFFLINE;
+                } else if (g_strcmp0(presence, "away") == 0) {
+                    presence_colour = COLOUR_TITLE_AWAY;
+                } else if (g_strcmp0(presence, "xa") == 0) {
+                    presence_colour = COLOUR_TITLE_XA;
+                } else if (g_strcmp0(presence, "chat") == 0) {
+                    presence_colour = COLOUR_TITLE_CHAT;
+                } else if (g_strcmp0(presence, "dnd") == 0) {
+                    presence_colour = COLOUR_TITLE_DND;
+                }
+
+                wprintw(win, " ");
+                wattron(win, COLOUR_TITLE_BRACKET);
+                wprintw(win, "[");
+                wattroff(win, COLOUR_TITLE_BRACKET);
+                wattron(win, presence_colour);
+                wprintw(win, presence);
+                wattroff(win, presence_colour);
+                wattron(win, COLOUR_TITLE_BRACKET);
+                wprintw(win, "]");
+                wattroff(win, COLOUR_TITLE_BRACKET);
+            }
+        }
+    }
+
 #ifdef HAVE_LIBOTR
     // show privacy
     if (current_recipient != NULL) {
@@ -264,22 +307,34 @@ _title_bar_draw(void)
     switch (current_presence)
     {
         case CONTACT_ONLINE:
+            wattron(win, COLOUR_TITLE_ONLINE);
             mvwprintw(win, 0, cols - 13, " ...online ");
+            wattroff(win, COLOUR_TITLE_ONLINE);
             break;
         case CONTACT_AWAY:
+            wattron(win, COLOUR_TITLE_AWAY);
             mvwprintw(win, 0, cols - 13, " .....away ");
+            wattroff(win, COLOUR_TITLE_AWAY);
             break;
         case CONTACT_DND:
+            wattron(win, COLOUR_TITLE_DND);
             mvwprintw(win, 0, cols - 13, " ......dnd ");
+            wattroff(win, COLOUR_TITLE_DND);
             break;
         case CONTACT_CHAT:
+            wattron(win, COLOUR_TITLE_CHAT);
             mvwprintw(win, 0, cols - 13, " .....chat ");
+            wattroff(win, COLOUR_TITLE_CHAT);
             break;
         case CONTACT_XA:
+            wattron(win, COLOUR_TITLE_XA);
             mvwprintw(win, 0, cols - 13, " .......xa ");
+            wattroff(win, COLOUR_TITLE_XA);
             break;
         case CONTACT_OFFLINE:
+            wattron(win, COLOUR_TITLE_OFFLINE);
             mvwprintw(win, 0, cols - 13, " ..offline ");
+            wattroff(win, COLOUR_TITLE_OFFLINE);
             break;
     }
 

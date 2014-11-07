@@ -570,6 +570,14 @@ static struct cmd_t command_defs[] =
           "If the terminal does not support sounds, it may attempt to flash the screen instead.",
           NULL } } },
 
+    { "/presence",
+        cmd_presence, parse_args, 1, 1, &cons_presence_setting,
+        { "/presence on|off", "Show the contacts presence in the titlebar.",
+        { "/presence on|off",
+          "----------------",
+          "Switch display of the contacts presence on or off.",
+          NULL } } },
+
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
         { "/notify [type value]|[type setting value]", "Control various desktop noficiations.",
@@ -1765,7 +1773,7 @@ _cmd_complete_parameters(char *input, int *size)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history", "/titlebar",
-        "/vercheck", "/privileges" };
+        "/vercheck", "/privileges", "/presence" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],

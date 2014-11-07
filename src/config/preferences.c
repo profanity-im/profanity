@@ -451,6 +451,7 @@ _get_group(preference_t pref)
         case PREF_STATUSES_CHAT:
         case PREF_STATUSES_MUC:
         case PREF_MUC_PRIVILEGES:
+        case PREF_PRESENCE:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -567,6 +568,8 @@ _get_key(preference_t pref)
             return "rotate";
         case PREF_LOG_SHARED:
             return "shared";
+        case PREF_PRESENCE:
+            return "presence";
         default:
             return NULL;
     }
@@ -588,6 +591,7 @@ _get_default_boolean(preference_t pref)
         case PREF_SPLASH:
         case PREF_OCCUPANTS:
         case PREF_MUC_PRIVILEGES:
+        case PREF_PRESENCE:
             return TRUE;
         default:
             return FALSE;
