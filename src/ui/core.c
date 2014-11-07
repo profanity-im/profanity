@@ -1343,7 +1343,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
         num = wins_get_num(window);
     }
 
-    win_save_print(window, '-', NULL, 0, 0, from, message);
+    win_save_print(window, '-', NULL, 0, COLOUR_TEXT_ME, from, message);
     ui_switch_win(num);
 }
 
