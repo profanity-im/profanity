@@ -841,6 +841,15 @@ _cons_beep_setting(void)
 }
 
 static void
+_cons_presence_setting(void)
+{
+    if (prefs_get_boolean(PREF_PRESENCE))
+        cons_show("Contact presence (/presence)  : ON");
+    else
+        cons_show("Contact presence (/presence)  : OFF");
+}
+
+static void
 _cons_flash_setting(void)
 {
     if (prefs_get_boolean(PREF_FLASH))
@@ -938,6 +947,7 @@ _cons_show_ui_prefs(void)
     cons_occupants_setting();
     cons_privileges_setting();
     cons_titlebar_setting();
+    cons_presence_setting();
 
     cons_alert();
 }
@@ -1547,6 +1557,7 @@ console_init_module(void)
     cons_theme_setting = _cons_theme_setting;
     cons_privileges_setting = _cons_privileges_setting;
     cons_beep_setting = _cons_beep_setting;
+    cons_presence_setting = _cons_presence_setting;
     cons_flash_setting = _cons_flash_setting;
     cons_splash_setting = _cons_splash_setting;
     cons_autoconnect_setting = _cons_autoconnect_setting;
