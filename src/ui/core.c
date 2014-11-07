@@ -1344,7 +1344,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
         num = wins_get_num(window);
     }
 
-    win_save_print(window, '-', NULL, 0, 0, from, message);
+    win_save_print(window, '-', NULL, 0, COLOUR_TEXT_ME, from, message);
     ui_switch_win(num);
 }
 
@@ -1740,14 +1740,14 @@ _ui_room_message(const char * const room_jid, const char * const nick,
         int num = wins_get_num(window);
         char *my_nick = muc_nick(room_jid);
 
-        if (strcmp(nick, my_nick) != 0) {
+        if (g_strcmp0(nick, my_nick) != 0) {
             if (g_strrstr(message, my_nick) != NULL) {
                 win_save_print(window, '-', NULL, NO_ME, COLOUR_ROOMMENTION, nick, message);
             } else {
-                win_save_print(window, '-', NULL, NO_ME, 0, nick, message);
+                win_save_print(window, '-', NULL, NO_ME, COLOUR_TEXT_THEM, nick, message);
             }
         } else {
-            win_save_print(window, '-', NULL, 0, 0, nick, message);
+            win_save_print(window, '-', NULL, 0, COLOUR_TEXT_ME, nick, message);
         }
 
         // currently in groupchat window

@@ -85,6 +85,8 @@ static struct colours_t {
         NCURSES_COLOR_T statusbaractive;
         NCURSES_COLOR_T statusbarnew;
         NCURSES_COLOR_T maintext;
+        NCURSES_COLOR_T maintextme;
+        NCURSES_COLOR_T maintextthem;
         NCURSES_COLOR_T inputtext;
         NCURSES_COLOR_T timetext;
         NCURSES_COLOR_T splashtext;
@@ -189,56 +191,58 @@ theme_init_colours(void)
 {
     // main text
     init_pair(1, colour_prefs.maintext, colour_prefs.bkgnd);
-    init_pair(2, colour_prefs.splashtext, colour_prefs.bkgnd);
-    init_pair(3, colour_prefs.error, colour_prefs.bkgnd);
-    init_pair(4, colour_prefs.incoming, colour_prefs.bkgnd);
-    init_pair(5, colour_prefs.inputtext, colour_prefs.bkgnd);
-    init_pair(6, colour_prefs.timetext, colour_prefs.bkgnd);
+    init_pair(2, colour_prefs.maintextme, colour_prefs.bkgnd);
+    init_pair(3, colour_prefs.maintextthem, colour_prefs.bkgnd);
+    init_pair(4, colour_prefs.splashtext, colour_prefs.bkgnd);
+    init_pair(5, colour_prefs.error, colour_prefs.bkgnd);
+    init_pair(6, colour_prefs.incoming, colour_prefs.bkgnd);
+    init_pair(7, colour_prefs.inputtext, colour_prefs.bkgnd);
+    init_pair(8, colour_prefs.timetext, colour_prefs.bkgnd);
 
     // title bar
-    init_pair(7, colour_prefs.titlebartext, colour_prefs.titlebar);
-    init_pair(8, colour_prefs.titlebarbrackets, colour_prefs.titlebar);
-    init_pair(9, colour_prefs.titlebarunencrypted, colour_prefs.titlebar);
-    init_pair(10, colour_prefs.titlebarencrypted, colour_prefs.titlebar);
-    init_pair(11, colour_prefs.titlebaruntrusted, colour_prefs.titlebar);
-    init_pair(12, colour_prefs.titlebartrusted, colour_prefs.titlebar);
+    init_pair(9, colour_prefs.titlebartext, colour_prefs.titlebar);
+    init_pair(10, colour_prefs.titlebarbrackets, colour_prefs.titlebar);
+    init_pair(11, colour_prefs.titlebarunencrypted, colour_prefs.titlebar);
+    init_pair(12, colour_prefs.titlebarencrypted, colour_prefs.titlebar);
+    init_pair(13, colour_prefs.titlebaruntrusted, colour_prefs.titlebar);
+    init_pair(14, colour_prefs.titlebartrusted, colour_prefs.titlebar);
 
     // status bar
-    init_pair(13, colour_prefs.statusbartext, colour_prefs.statusbar);
-    init_pair(14, colour_prefs.statusbarbrackets, colour_prefs.statusbar);
-    init_pair(15, colour_prefs.statusbaractive, colour_prefs.statusbar);
-    init_pair(16, colour_prefs.statusbarnew, colour_prefs.statusbar);
+    init_pair(15, colour_prefs.statusbartext, colour_prefs.statusbar);
+    init_pair(16, colour_prefs.statusbarbrackets, colour_prefs.statusbar);
+    init_pair(17, colour_prefs.statusbaractive, colour_prefs.statusbar);
+    init_pair(18, colour_prefs.statusbarnew, colour_prefs.statusbar);
 
     // chat
-    init_pair(17, colour_prefs.me, colour_prefs.bkgnd);
-    init_pair(18, colour_prefs.them, colour_prefs.bkgnd);
+    init_pair(19, colour_prefs.me, colour_prefs.bkgnd);
+    init_pair(20, colour_prefs.them, colour_prefs.bkgnd);
 
     // room chat
-    init_pair(19, colour_prefs.roominfo, colour_prefs.bkgnd);
-    init_pair(20, colour_prefs.roommention, colour_prefs.bkgnd);
+    init_pair(21, colour_prefs.roominfo, colour_prefs.bkgnd);
+    init_pair(22, colour_prefs.roommention, colour_prefs.bkgnd);
 
     // statuses
-    init_pair(21, colour_prefs.online, colour_prefs.bkgnd);
-    init_pair(22, colour_prefs.offline, colour_prefs.bkgnd);
-    init_pair(23, colour_prefs.away, colour_prefs.bkgnd);
-    init_pair(24, colour_prefs.chat, colour_prefs.bkgnd);
-    init_pair(25, colour_prefs.dnd, colour_prefs.bkgnd);
-    init_pair(26, colour_prefs.xa, colour_prefs.bkgnd);
+    init_pair(23, colour_prefs.online, colour_prefs.bkgnd);
+    init_pair(24, colour_prefs.offline, colour_prefs.bkgnd);
+    init_pair(25, colour_prefs.away, colour_prefs.bkgnd);
+    init_pair(26, colour_prefs.chat, colour_prefs.bkgnd);
+    init_pair(27, colour_prefs.dnd, colour_prefs.bkgnd);
+    init_pair(28, colour_prefs.xa, colour_prefs.bkgnd);
 
     // states
-    init_pair(27, colour_prefs.typing, colour_prefs.bkgnd);
-    init_pair(28, colour_prefs.gone, colour_prefs.bkgnd);
+    init_pair(29, colour_prefs.typing, colour_prefs.bkgnd);
+    init_pair(30, colour_prefs.gone, colour_prefs.bkgnd);
 
     // subscription status
-    init_pair(29, colour_prefs.subscribed, colour_prefs.bkgnd);
-    init_pair(30, colour_prefs.unsubscribed, colour_prefs.bkgnd);
+    init_pair(31, colour_prefs.subscribed, colour_prefs.bkgnd);
+    init_pair(32, colour_prefs.unsubscribed, colour_prefs.bkgnd);
 
     // otr messages
-    init_pair(31, colour_prefs.otrstartedtrusted, colour_prefs.bkgnd);
-    init_pair(32, colour_prefs.otrstarteduntrusted, colour_prefs.bkgnd);
-    init_pair(33, colour_prefs.otrended, colour_prefs.bkgnd);
-    init_pair(34, colour_prefs.otrtrusted, colour_prefs.bkgnd);
-    init_pair(35, colour_prefs.otruntrusted, colour_prefs.bkgnd);
+    init_pair(33, colour_prefs.otrstartedtrusted, colour_prefs.bkgnd);
+    init_pair(34, colour_prefs.otrstarteduntrusted, colour_prefs.bkgnd);
+    init_pair(35, colour_prefs.otrended, colour_prefs.bkgnd);
+    init_pair(36, colour_prefs.otrtrusted, colour_prefs.bkgnd);
+    init_pair(37, colour_prefs.otruntrusted, colour_prefs.bkgnd);
 }
 
 static NCURSES_COLOR_T
@@ -328,6 +332,14 @@ _load_colours(void)
     gchar *maintext_val = g_key_file_get_string(theme, "colours", "main.text", NULL);
     _set_colour(maintext_val, &colour_prefs.maintext, COLOR_WHITE);
     g_free(maintext_val);
+
+    gchar *maintextme_val = g_key_file_get_string(theme, "colours", "main.text.me", NULL);
+    _set_colour(maintextme_val, &colour_prefs.maintextme, COLOR_WHITE);
+    g_free(maintextme_val);
+
+    gchar *maintextthem_val = g_key_file_get_string(theme, "colours", "main.text.them", NULL);
+    _set_colour(maintextthem_val, &colour_prefs.maintextthem, COLOR_WHITE);
+    g_free(maintextthem_val);
 
     gchar *splashtext_val = g_key_file_get_string(theme, "colours", "main.splash", NULL);
     _set_colour(splashtext_val, &colour_prefs.splashtext, COLOR_CYAN);
