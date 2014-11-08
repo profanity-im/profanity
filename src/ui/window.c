@@ -53,6 +53,7 @@
 
 static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message);
+static void _win_print_wrapped(WINDOW *win, const char * const message);
 
 
 ProfWin*
@@ -579,9 +580,10 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     wattron(window->win, attrs);
 
     if (flags & NO_EOL) {
-        wprintw(window->win, "%s", message+offset);
+        _win_print_wrapped(window->win, message+offset);
     } else {
-        wprintw(window->win, "%s\n", message+offset);
+        _win_print_wrapped(window->win, message+offset);
+        wprintw(window->win, "\n");
     }
 
     wattroff(window->win, attrs);
@@ -589,6 +591,30 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     if (unattr_me) {
         wattroff(window->win, colour);
     }
+}
+
+static void
+_win_print_wrapped(WINDOW *win, const char * const message)
+{
+    int linei = 0;
+    int wordi = 0;
+    char *word = malloc(strlen(message) + 1);
+
+    while (message[linei] != '\0') {
+        if (message[linei] == ' ') {
+            wprintw(win, " ");
+            linei++;
+        } else {
+            wordi = 0;
+            while (message[linei] != ' ' && message[linei] != '\0') {
+                word[wordi++] = message[linei++];
+            }
+            word[wordi] = '\0';
+            wprintw(win, "%s", word);
+        }
+    }
+
+    free(word);
 }
 
 void
