@@ -604,9 +604,12 @@ _win_print_wrapped(WINDOW *win, const char * const message)
         if (message[linei] == ' ') {
             wprintw(win, " ");
             linei++;
+        } else if (message[linei] == '\n') {
+            wprintw(win, "\n           ");
+            linei++;
         } else {
             wordi = 0;
-            while (message[linei] != ' ' && message[linei] != '\0') {
+            while (message[linei] != ' ' && message[linei] != '\n' && message[linei] != '\0') {
                 word[wordi++] = message[linei++];
             }
             word[wordi] = '\0';

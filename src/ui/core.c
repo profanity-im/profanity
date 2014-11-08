@@ -246,13 +246,13 @@ _ui_handle_stanza(const char * const msg)
         ProfWin *xmlconsole = wins_get_xmlconsole();
 
         if (g_str_has_prefix(msg, "SENT:")) {
-            win_save_print(xmlconsole, '-', NULL, NO_DATE, 0, "", "SENT:");
-            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_ONLINE, "", &msg[6]);
-            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_ONLINE, "", "");
+            win_save_print(xmlconsole, '-', NULL, 0, 0, "", "SENT:");
+            win_save_print(xmlconsole, '-', NULL, 0, COLOUR_ONLINE, "", &msg[6]);
+            win_save_print(xmlconsole, '-', NULL, 0, COLOUR_ONLINE, "", "");
         } else if (g_str_has_prefix(msg, "RECV:")) {
-            win_save_print(xmlconsole, '-', NULL, NO_DATE, 0, "", "RECV:");
-            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_AWAY, "", &msg[6]);
-            win_save_print(xmlconsole, '-', NULL, NO_DATE, COLOUR_AWAY, "", "");
+            win_save_print(xmlconsole, '-', NULL, 0, 0, "", "RECV:");
+            win_save_print(xmlconsole, '-', NULL, 0, COLOUR_AWAY, "", &msg[6]);
+            win_save_print(xmlconsole, '-', NULL, 0, COLOUR_AWAY, "", "");
         }
     }
 }
@@ -3216,4 +3216,3 @@ ui_init_module(void)
     ui_room_occupant_role_and_affiliation_change = _ui_room_occupant_role_and_affiliation_change;
     ui_redraw_all_room_rosters = _ui_redraw_all_room_rosters;
 }
-
