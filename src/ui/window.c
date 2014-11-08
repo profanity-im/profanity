@@ -610,6 +610,16 @@ _win_print_wrapped(WINDOW *win, const char * const message)
                 word[wordi++] = message[linei++];
             }
             word[wordi] = '\0';
+
+            int curx = getcurx(win);
+            int maxx = getmaxx(win);
+
+            if (curx + strlen(word) > maxx) {
+                wprintw(win, "\n           ");
+            }
+            if (curx < 11) {
+                wprintw(win, "           ");
+            }
             wprintw(win, "%s", word);
         }
     }
