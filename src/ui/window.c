@@ -621,13 +621,25 @@ _win_print_wrapped(WINDOW *win, const char * const message)
             int curx = getcurx(win);
             int maxx = getmaxx(win);
 
-            if (curx + strlen(word) > maxx) {
-                wprintw(win, "\n           ");
+            // word larger than line
+            if (strlen(word) > (maxx - 11)) {
+                int i;
+                for (i = 0; i < wordi; i++) {
+                    curx = getcurx(win);
+                    if (curx < 11) {
+                        wprintw(win, "           ");
+                    }
+                    waddch(win, word[i]);
+                }
+            } else {
+                if (curx + strlen(word) > maxx) {
+                    wprintw(win, "\n           ");
+                }
+                if (curx < 11) {
+                    wprintw(win, "           ");
+                }
+                wprintw(win, "%s", word);
             }
-            if (curx < 11) {
-                wprintw(win, "           ");
-            }
-            wprintw(win, "%s", word);
         }
     }
 
