@@ -841,6 +841,15 @@ _cons_beep_setting(void)
 }
 
 static void
+_cons_wrap_setting(void)
+{
+    if (prefs_get_boolean(PREF_WRAP))
+        cons_show("Word wrap (/wrap)             : ON");
+    else
+        cons_show("Word wrap (/wrap)             : OFF");
+}
+
+static void
 _cons_presence_setting(void)
 {
     if (prefs_get_boolean(PREF_PRESENCE))
@@ -941,6 +950,7 @@ _cons_show_ui_prefs(void)
     cons_beep_setting();
     cons_flash_setting();
     cons_splash_setting();
+    cons_wrap_setting();
     cons_vercheck_setting();
     cons_mouse_setting();
     cons_statuses_setting();
@@ -1557,6 +1567,7 @@ console_init_module(void)
     cons_theme_setting = _cons_theme_setting;
     cons_privileges_setting = _cons_privileges_setting;
     cons_beep_setting = _cons_beep_setting;
+    cons_wrap_setting = _cons_wrap_setting;
     cons_presence_setting = _cons_presence_setting;
     cons_flash_setting = _cons_flash_setting;
     cons_splash_setting = _cons_splash_setting;
