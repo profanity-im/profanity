@@ -53,6 +53,7 @@
 
 static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message);
+static void _win_print_wrapped(WINDOW *win, const char * const message);
 
 
 ProfWin*
@@ -551,9 +552,13 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int colour = COLOUR_ME;
 
     if ((flags & NO_DATE) == 0) {
-        wattron(window->win, COLOUR_TIME);
+        if ((flags & NO_COLOUR_DATE) == 0) {
+            wattron(window->win, COLOUR_TIME);
+        }
         wprintw(window->win, "%s %c ", date_fmt, show_char);
-        wattroff(window->win, COLOUR_TIME);
+        if ((flags & NO_COLOUR_DATE) == 0) {
+            wattroff(window->win, COLOUR_TIME);
+        }
     }
 
     if (strlen(from) > 0) {
@@ -579,9 +584,10 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     wattron(window->win, attrs);
 
     if (flags & NO_EOL) {
-        wprintw(window->win, "%s", message+offset);
+        _win_print_wrapped(window->win, message+offset);
     } else {
-        wprintw(window->win, "%s\n", message+offset);
+        _win_print_wrapped(window->win, message+offset);
+        wprintw(window->win, "\n");
     }
 
     wattroff(window->win, attrs);
@@ -589,6 +595,43 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     if (unattr_me) {
         wattroff(window->win, colour);
     }
+}
+
+static void
+_win_print_wrapped(WINDOW *win, const char * const message)
+{
+    int linei = 0;
+    int wordi = 0;
+    char *word = malloc(strlen(message) + 1);
+
+    while (message[linei] != '\0') {
+        if (message[linei] == ' ') {
+            wprintw(win, " ");
+            linei++;
+        } else if (message[linei] == '\n') {
+            wprintw(win, "\n           ");
+            linei++;
+        } else {
+            wordi = 0;
+            while (message[linei] != ' ' && message[linei] != '\n' && message[linei] != '\0') {
+                word[wordi++] = message[linei++];
+            }
+            word[wordi] = '\0';
+
+            int curx = getcurx(win);
+            int maxx = getmaxx(win);
+
+            if (curx + strlen(word) > maxx) {
+                wprintw(win, "\n           ");
+            }
+            if (curx < 11) {
+                wprintw(win, "           ");
+            }
+            wprintw(win, "%s", word);
+        }
+    }
+
+    free(word);
 }
 
 void

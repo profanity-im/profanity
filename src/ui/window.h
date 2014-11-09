@@ -48,10 +48,11 @@
 #include "ui/buffer.h"
 #include "xmpp/xmpp.h"
 
-#define NO_ME   1
-#define NO_DATE 2
-#define NO_EOL  4
+#define NO_ME           1
+#define NO_DATE         2
+#define NO_EOL          4
 #define NO_COLOUR_FROM  8
+#define NO_COLOUR_DATE  16
 
 #define PAD_SIZE 1000
 
