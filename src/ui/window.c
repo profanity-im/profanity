@@ -552,9 +552,13 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int colour = COLOUR_ME;
 
     if ((flags & NO_DATE) == 0) {
-        wattron(window->win, COLOUR_TIME);
+        if ((flags & NO_COLOUR_DATE) == 0) {
+            wattron(window->win, COLOUR_TIME);
+        }
         wprintw(window->win, "%s %c ", date_fmt, show_char);
-        wattroff(window->win, COLOUR_TIME);
+        if ((flags & NO_COLOUR_DATE) == 0) {
+            wattroff(window->win, COLOUR_TIME);
+        }
     }
 
     if (strlen(from) > 0) {

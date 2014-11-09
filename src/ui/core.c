@@ -1706,13 +1706,6 @@ _ui_room_history(const char * const room_jid, const char * const nick,
     } else {
         GString *line = g_string_new("");
 
-        GDateTime *time = g_date_time_new_from_timeval_utc(&tv_stamp);
-        gchar *date_fmt = g_date_time_format(time, "%H:%M:%S");
-        g_string_append(line, date_fmt);
-        g_string_append(line, " - ");
-        g_date_time_unref(time);
-        g_free(date_fmt);
-
         if (strncmp(message, "/me ", 4) == 0) {
             g_string_append(line, "*");
             g_string_append(line, nick);
@@ -1723,7 +1716,7 @@ _ui_room_history(const char * const room_jid, const char * const nick,
             g_string_append(line, message);
         }
 
-        win_save_print(window, '-', NULL, NO_DATE, 0, "", line->str);
+        win_save_print(window, '-', &tv_stamp, NO_COLOUR_DATE, 0, "", line->str);
         g_string_free(line, TRUE);
     }
 }
@@ -3060,7 +3053,21 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
         jid_destroy(jid);
         GSList *curr = history;
         while (curr != NULL) {
-            win_save_print(window, '-', NULL, NO_DATE, 0, "", curr->data);
+            char *line = curr->data;
+            // entry
+            if (line[2] == ':') {
+                char hh[3]; memcpy(hh, &line[0], 2); hh[2] = '\0'; int ihh = atoi(hh);
+                char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
+                char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
+                GDateTime *time = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
+                GTimeVal tv;
+                g_date_time_to_timeval(time, &tv);
+                win_save_print(window, '-', &tv, NO_COLOUR_DATE, 0, "", curr->data+11);
+                g_date_time_unref(time);
+            // header
+            } else {
+                win_save_print(window, '-', NULL, 0, 0, "", curr->data);
+            }
             curr = g_slist_next(curr);
         }
         window->history_shown = 1;
