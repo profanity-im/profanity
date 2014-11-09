@@ -300,6 +300,7 @@ void (*cons_splash_setting)(void);
 void (*cons_vercheck_setting)(void);
 void (*cons_occupants_setting)(void);
 void (*cons_presence_setting)(void);
+void (*cons_wrap_setting)(void);
 void (*cons_mouse_setting)(void);
 void (*cons_statuses_setting)(void);
 void (*cons_titlebar_setting)(void);

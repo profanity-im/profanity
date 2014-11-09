@@ -452,6 +452,7 @@ _get_group(preference_t pref)
         case PREF_STATUSES_MUC:
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
+        case PREF_WRAP:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -570,6 +571,8 @@ _get_key(preference_t pref)
             return "shared";
         case PREF_PRESENCE:
             return "presence";
+        case PREF_WRAP:
+            return "wrap";
         default:
             return NULL;
     }
@@ -592,6 +595,7 @@ _get_default_boolean(preference_t pref)
         case PREF_OCCUPANTS:
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
+        case PREF_WRAP:
             return TRUE;
         default:
             return FALSE;

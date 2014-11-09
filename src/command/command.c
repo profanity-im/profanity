@@ -578,6 +578,14 @@ static struct cmd_t command_defs[] =
           "Switch display of the contacts presence on or off.",
           NULL } } },
 
+    { "/wrap",
+        cmd_wrap, parse_args, 1, 1, &cons_wrap_setting,
+        { "/wrap on|off", "Word wrapping.",
+        { "/wrap on|off",
+          "------------",
+          "Enable or disable word wrapping.",
+          NULL } } },
+
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
         { "/notify [type value]|[type setting value]", "Control various desktop noficiations.",
@@ -1773,7 +1781,7 @@ _cmd_complete_parameters(char *input, int *size)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history", "/titlebar",
-        "/vercheck", "/privileges", "/presence" };
+        "/vercheck", "/privileges", "/presence", "/wrap" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],

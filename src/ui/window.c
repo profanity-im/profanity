@@ -583,10 +583,13 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
 
     wattron(window->win, attrs);
 
-    if (flags & NO_EOL) {
+    if (prefs_get_boolean(PREF_WRAP)) {
         _win_print_wrapped(window->win, message+offset);
     } else {
-        _win_print_wrapped(window->win, message+offset);
+        wprintw(window->win, "%s", message+offset);
+    }
+
+    if ((flags & NO_EOL) == 0) {
         wprintw(window->win, "\n");
     }
 
