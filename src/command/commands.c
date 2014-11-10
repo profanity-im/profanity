@@ -1332,16 +1332,35 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 
     // show/hide roster
     } else if (g_strcmp0(args[0], "show") == 0) {
-        cons_show("Roster enabled.");
-        prefs_set_boolean(PREF_ROSTER, TRUE);
-        ui_show_roster();
-        return TRUE;
+        if (args[1] == NULL) {
+            cons_show("Roster enabled.");
+            prefs_set_boolean(PREF_ROSTER, TRUE);
+            ui_show_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "offline") == 0) {
+            cons_show("Roster offline enabled");
+            prefs_set_boolean(PREF_ROSTER_OFFLINE, TRUE);
+            ui_roster();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
     } else if (g_strcmp0(args[0], "hide") == 0) {
-        cons_show("Roster disabled.");
-        prefs_set_boolean(PREF_ROSTER, FALSE);
-        ui_hide_roster();
-        return TRUE;
-
+        if (args[1] == NULL) {
+            cons_show("Roster disabled.");
+            prefs_set_boolean(PREF_ROSTER, FALSE);
+            ui_hide_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "offline") == 0) {
+            cons_show("Roster offline disabled");
+            prefs_set_boolean(PREF_ROSTER_OFFLINE, FALSE);
+            ui_roster();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
         char *jid = args[1];

@@ -169,17 +169,19 @@ static struct cmd_t command_defs[] =
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        { "/roster [show|hide|add|remove|nick|clearnick] [jid] [nickname]", "Manage your roster.",
-        { "/roster [show|hide|add|remove|nick|clearnick] [jid] [nickname]",
-          "--------------------------------------------------------------",
+        { "/roster [show|hide|add|remove|nick|clearnick] [offline] [jid] [nickname]", "Manage your roster.",
+        { "/roster [show|hide|add|remove|nick|clearnick] [offline] [jid] [nickname]",
+          "------------------------------------------------------------------------",
           "View, add to, and remove from your roster.",
           "Passing no arguments lists all contacts in your roster.",
-          "The 'show' command will show the roster panel in the console window.",
-          "The 'hide' command will hide the roster panel.",
-          "The 'add' command will add a new item, jid is required, nickname is optional.",
-          "The 'remove' command removes a contact, jid is required.",
-          "The 'nick' command changes a contacts nickname, both jid and nickname are required,",
-          "The 'clearnick' command removes the current nickname, jid is required.",
+          "show         - Show the roster panel in the console window.",
+          "hide         - Hide the roster panel.",
+          "show offline - Show offline contacts in the roster panel.",
+          "hide offline - Hide offline contacts in the roster panel.",
+          "add          - Add a new item, jid is required, nickname is optional.",
+          "remove       - Removes a contact, jid is required.",
+          "nick         - Changes a contacts nickname, both jid and nickname are required,",
+          "clearnick    - Removes the current nickname, jid is required.",
           "",
           "Example : /roster (show your roster)",
           "Example : /roster add someone@contacts.org (add the contact)",
@@ -1039,6 +1041,7 @@ static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
+static Autocomplete roster_option_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete bookmark_property_ac;
@@ -1235,6 +1238,9 @@ cmd_init(void)
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
 
+    roster_option_ac = autocomplete_new();
+    autocomplete_add(roster_option_ac, "offline");
+
     group_ac = autocomplete_new();
     autocomplete_add(group_ac, "show");
     autocomplete_add(group_ac, "add");
@@ -1404,6 +1410,7 @@ cmd_uninit(void)
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
+    autocomplete_free(roster_option_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(bookmark_property_ac);
@@ -1572,6 +1579,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
+    autocomplete_reset(roster_option_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(bookmark_property_ac);
@@ -1997,6 +2005,14 @@ _roster_autocomplete(char *input, int *size)
         return result;
     }
     result = autocomplete_param_with_func(input, size, "/roster remove", roster_find_jid);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/roster show", roster_option_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/roster hide", roster_option_ac, TRUE);
     if (result != NULL) {
         return result;
     }
