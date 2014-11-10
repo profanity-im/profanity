@@ -294,8 +294,8 @@ wins_resize_all(void)
     GList *curr = values;
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        if ((window->type == WIN_MUC) && (window->subwin)) {
-            wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
+        if (((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) && (window->subwin)) {
+            wresize(window->win, PAD_SIZE, (cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1));
         } else {
             wresize(window->win, PAD_SIZE, cols);
         }
@@ -305,9 +305,9 @@ wins_resize_all(void)
     g_list_free(values);
 
     ProfWin *current_win = wins_get_current();
-    if ((current_win->type == WIN_MUC) && (current_win->subwin)) {
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
-        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
+    if (((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) && (current_win->subwin)) {
+        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, ((cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1)) -1);
+        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1), rows-3, cols-1);
     } else {
         pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
     }
@@ -322,7 +322,7 @@ wins_hide_subwin(ProfWin *window)
     win_hide_subwin(window);
 
     ProfWin *current_win = wins_get_current();
-    if (current_win->type == WIN_MUC) {
+    if ((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) {
         pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
     }
 }
@@ -336,9 +336,9 @@ wins_show_subwin(ProfWin *window)
     win_show_subwin(window);
 
     ProfWin *current_win = wins_get_current();
-    if (current_win->type == WIN_MUC) {
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
-        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
+    if ((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) {
+        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, ((cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1)) -1);
+        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1), rows-3, cols-1);
     }
 }
 

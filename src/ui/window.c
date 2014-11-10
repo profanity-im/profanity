@@ -62,11 +62,11 @@ win_create(const char * const title, int cols, win_type_t type)
     ProfWin *new_win = malloc(sizeof(struct prof_win_t));
     new_win->from = strdup(title);
 
-    if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
-        new_win->win = newpad(PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
+    if ((type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) || (type == WIN_CONSOLE)) {
+        new_win->win = newpad(PAD_SIZE, (cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1));
         wbkgd(new_win->win, COLOUR_TEXT);
 
-        new_win->subwin = newpad(PAD_SIZE, OCCUPANT_WIN_WIDTH);
+        new_win->subwin = newpad(PAD_SIZE, SUB_WIN_WIDTH);
         wbkgd(new_win->subwin, COLOUR_TEXT);
     } else {
         new_win->win = newpad(PAD_SIZE, (cols));
@@ -108,11 +108,11 @@ void
 win_show_subwin(ProfWin *window)
 {
     if (!window->subwin) {
-        window->subwin = newpad(PAD_SIZE, OCCUPANT_WIN_WIDTH);
+        window->subwin = newpad(PAD_SIZE, SUB_WIN_WIDTH);
         wbkgd(window->subwin, COLOUR_TEXT);
 
         int cols = getmaxx(stdscr);
-        wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
+        wresize(window->win, PAD_SIZE, (cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1));
         win_redraw(window);
     }
 }
@@ -136,9 +136,9 @@ win_update_virtual(ProfWin *window)
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    if ((window->type == WIN_MUC) && (window->subwin)) {
-        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
-        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
+    if (((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) && (window->subwin)) {
+        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1)) -1);
+        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/SUB_WIN_RATIO) * (SUB_WIN_RATIO-1), rows-3, cols-1);
     } else {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
     }
