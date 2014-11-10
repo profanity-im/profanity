@@ -454,6 +454,8 @@ handle_contact_offline(char *barejid, char *resource, char *status)
         prefs_free_string(show_chat_win);
         jid_destroy(jid);
     }
+
+    ui_roster();
 }
 
 void
@@ -494,6 +496,8 @@ handle_contact_online(char *barejid, Resource *resource,
         prefs_free_string(show_console);
         prefs_free_string(show_chat_win);
     }
+
+    ui_roster();
 }
 
 void

@@ -2805,6 +2805,34 @@ _ui_show_lines(ProfWin *window, const gchar** lines)
 }
 
 static void
+_ui_roster(void)
+{
+    ProfWin *window = wins_get_console();
+    if (window) {
+        GSList *contacts = roster_get_contacts();
+        if (contacts) {
+            werase(window->subwin);
+            wattron(window->subwin, COLOUR_ROOMINFO);
+            wprintw(window->subwin, " -Roster\n");
+            wattroff(window->subwin, COLOUR_ROOMINFO);
+            GSList *curr = contacts;
+            while (curr) {
+                PContact contact = curr->data;
+                const char *name = p_contact_name_or_jid(contact);
+                const char *presence = p_contact_presence(contact);
+                int presence_colour = win_presence_colour(presence);
+
+                wattron(window->subwin, presence_colour);
+                wprintw(window->subwin, "   %s\n", name);
+                wattroff(window->subwin, presence_colour);
+                curr = g_slist_next(curr);
+            }
+        }
+        g_slist_free(contacts);
+    }
+}
+
+static void
 _ui_muc_roster(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
@@ -3212,6 +3240,7 @@ ui_init_module(void)
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
     ui_handle_room_role_list = _ui_handle_room_role_list;
     ui_muc_roster = _ui_muc_roster;
+    ui_roster = _ui_roster;
     ui_room_show_occupants = _ui_room_show_occupants;
     ui_room_hide_occupants = _ui_room_hide_occupants;
     ui_room_role_change = _ui_room_role_change;
