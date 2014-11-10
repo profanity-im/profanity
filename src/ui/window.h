@@ -82,7 +82,7 @@ typedef struct prof_win_t {
     DataForm *form;
 } ProfWin;
 
-ProfWin* win_create(const char * const title, int cols, win_type_t type);
+ProfWin* win_create(const char * const title, win_type_t type);
 void win_free(ProfWin *window);
 void win_update_virtual(ProfWin *window);
 void win_move_to_end(ProfWin *window);
@@ -104,5 +104,7 @@ void win_save_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
 void win_hide_subwin(ProfWin *window);
 void win_show_subwin(ProfWin *window);
+int win_main_width(void);
+void win_printline_nowrap(WINDOW *win, char *msg);
 
 #endif

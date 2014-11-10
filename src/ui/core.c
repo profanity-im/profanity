@@ -2813,7 +2813,7 @@ _ui_roster(void)
         if (contacts) {
             werase(window->subwin);
             wattron(window->subwin, COLOUR_ROOMINFO);
-            wprintw(window->subwin, " -Roster\n");
+            win_printline_nowrap(window->subwin, " -Roster");
             wattroff(window->subwin, COLOUR_ROOMINFO);
             GSList *curr_contact = contacts;
             while (curr_contact) {
@@ -2824,7 +2824,12 @@ _ui_roster(void)
                     int presence_colour = win_presence_colour(presence);
 
                     wattron(window->subwin, presence_colour);
-                    wprintw(window->subwin, "   %s\n", name);
+
+                    GString *msg = g_string_new("   ");
+                    g_string_append(msg, name);
+                    win_printline_nowrap(window->subwin, msg->str);
+                    g_string_free(msg, TRUE);
+
                     wattroff(window->subwin, presence_colour);
 
                     GList *resources = p_contact_get_available_resources(contact);
@@ -2844,8 +2849,14 @@ _ui_roster(void)
                         const char *resource_presence = string_from_resource_presence(resource->presence);
                         int resource_presence_colour = win_presence_colour(resource_presence);
                         wattron(window->subwin, resource_presence_colour);
-                        wprintw(window->subwin, "     %s\n", resource->name);
+
+                        GString *msg = g_string_new("     ");
+                        g_string_append(msg, resource->name);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                         wattroff(window->subwin, resource_presence_colour);
+
                         ordered_resources = g_list_next(ordered_resources);
                     }
                     g_list_free(ordered_resources);
@@ -2868,72 +2879,84 @@ _ui_muc_roster(const char * const room)
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Moderators\n");
+                win_printline_nowrap(window->subwin, " -Moderators");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
-                        wprintw(window->subwin, "   ");
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         int presence_colour = win_presence_colour(presence_str);
                         wattron(window->subwin, presence_colour);
-                        wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                         wattroff(window->subwin, presence_colour);
-                        wprintw(window->subwin, "\n");
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
 
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Participants\n");
+                win_printline_nowrap(window->subwin, " -Participants");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
-                        wprintw(window->subwin, "   ");
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         int presence_colour = win_presence_colour(presence_str);
                         wattron(window->subwin, presence_colour);
-                        wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                         wattroff(window->subwin, presence_colour);
-                        wprintw(window->subwin, "\n");
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
 
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Visitors\n");
+                win_printline_nowrap(window->subwin, " -Visitors");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
-                        wprintw(window->subwin, "   ");
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         int presence_colour = win_presence_colour(presence_str);
                         wattron(window->subwin, presence_colour);
-                        wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                         wattroff(window->subwin, presence_colour);
-                        wprintw(window->subwin, "\n");
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
             } else {
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Occupants\n");
+                win_printline_nowrap(window->subwin, " -Occupants\n");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
-                    wprintw(window->subwin, "   ");
                     const char *presence_str = string_from_resource_presence(occupant->presence);
                     int presence_colour = win_presence_colour(presence_str);
                     wattron(window->subwin, presence_colour);
-                    wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                     wattroff(window->subwin, presence_colour);
-                    wprintw(window->subwin, "\n");
                     roster_curr = g_list_next(roster_curr);
                 }
             }
