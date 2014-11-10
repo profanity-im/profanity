@@ -2815,9 +2815,9 @@ _ui_roster(void)
             wattron(window->subwin, COLOUR_ROOMINFO);
             wprintw(window->subwin, " -Roster\n");
             wattroff(window->subwin, COLOUR_ROOMINFO);
-            GSList *curr = contacts;
-            while (curr) {
-                PContact contact = curr->data;
+            GSList *curr_contact = contacts;
+            while (curr_contact) {
+                PContact contact = curr_contact->data;
                 if (p_contact_subscribed(contact)) {
                     const char *name = p_contact_name_or_jid(contact);
                     const char *presence = p_contact_presence(contact);
@@ -2826,19 +2826,31 @@ _ui_roster(void)
                     wattron(window->subwin, presence_colour);
                     wprintw(window->subwin, "   %s\n", name);
                     wattroff(window->subwin, presence_colour);
+
                     GList *resources = p_contact_get_available_resources(contact);
-                    GList *curr_resource = resources;
-                    while (curr_resource) {
-                        Resource *resource = curr_resource->data;
+                    GList *ordered_resources = NULL;
+
+                    // sort in order of availabiltiy
+                    while (resources != NULL) {
+                        Resource *resource = resources->data;
+                        ordered_resources = g_list_insert_sorted(ordered_resources, resource, (GCompareFunc)resource_compare_availability);
+                        resources = g_list_next(resources);
+                    }
+
+                    g_list_free(resources);
+
+                    while (ordered_resources) {
+                        Resource *resource = ordered_resources->data;
                         const char *resource_presence = string_from_resource_presence(resource->presence);
                         int resource_presence_colour = win_presence_colour(resource_presence);
                         wattron(window->subwin, resource_presence_colour);
                         wprintw(window->subwin, "     %s\n", resource->name);
                         wattroff(window->subwin, resource_presence_colour);
-                        curr_resource = g_list_next(curr_resource);
+                        ordered_resources = g_list_next(ordered_resources);
                     }
+                    g_list_free(ordered_resources);
                 }
-                curr = g_slist_next(curr);
+                curr_contact = g_slist_next(curr_contact);
             }
         }
         g_slist_free(contacts);
@@ -3056,7 +3068,7 @@ _win_handle_page(const wint_t * const ch, const int result)
         current->paged = 0;
     }
 
-    if (current->type == WIN_MUC) {
+    if ((current->type == WIN_MUC) || (current->type == WIN_CONSOLE)) {
         // alt up arrow
         if ((result == KEY_CODE_YES) && ((*ch == 565) || (*ch == 337))) {
             current->sub_y_pos -= page_space;
