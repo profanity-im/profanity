@@ -2818,13 +2818,26 @@ _ui_roster(void)
             GSList *curr = contacts;
             while (curr) {
                 PContact contact = curr->data;
-                const char *name = p_contact_name_or_jid(contact);
-                const char *presence = p_contact_presence(contact);
-                int presence_colour = win_presence_colour(presence);
+                if (p_contact_subscribed(contact)) {
+                    const char *name = p_contact_name_or_jid(contact);
+                    const char *presence = p_contact_presence(contact);
+                    int presence_colour = win_presence_colour(presence);
 
-                wattron(window->subwin, presence_colour);
-                wprintw(window->subwin, "   %s\n", name);
-                wattroff(window->subwin, presence_colour);
+                    wattron(window->subwin, presence_colour);
+                    wprintw(window->subwin, "   %s\n", name);
+                    wattroff(window->subwin, presence_colour);
+                    GList *resources = p_contact_get_available_resources(contact);
+                    GList *curr_resource = resources;
+                    while (curr_resource) {
+                        Resource *resource = curr_resource->data;
+                        const char *resource_presence = string_from_resource_presence(resource->presence);
+                        int resource_presence_colour = win_presence_colour(resource_presence);
+                        wattron(window->subwin, resource_presence_colour);
+                        wprintw(window->subwin, "     %s\n", resource->name);
+                        wattroff(window->subwin, resource_presence_colour);
+                        curr_resource = g_list_next(curr_resource);
+                    }
+                }
                 curr = g_slist_next(curr);
             }
         }
