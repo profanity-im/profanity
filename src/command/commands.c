@@ -1330,6 +1330,18 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         cons_show_roster(list);
         return TRUE;
 
+    // show/hide roster
+    } else if (g_strcmp0(args[0], "show") == 0) {
+        cons_show("Roster enabled.");
+        prefs_set_boolean(PREF_ROSTER, TRUE);
+        ui_show_roster();
+        return TRUE;
+    } else if (g_strcmp0(args[0], "hide") == 0) {
+        cons_show("Roster disabled.");
+        prefs_set_boolean(PREF_ROSTER, FALSE);
+        ui_hide_roster();
+        return TRUE;
+
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
         char *jid = args[1];

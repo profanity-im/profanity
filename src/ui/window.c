@@ -71,7 +71,7 @@ win_create(const char * const title, win_type_t type)
     new_win->from = strdup(title);
     int cols = getmaxx(stdscr);
 
-    if ((type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) || (type == WIN_CONSOLE)) {
+    if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
         int main_cols = win_main_width();
         new_win->win = newpad(PAD_SIZE, main_cols);
         wbkgd(new_win->win, COLOUR_TEXT);

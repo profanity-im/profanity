@@ -2986,6 +2986,25 @@ _ui_room_hide_occupants(const char * const room)
 }
 
 static void
+_ui_show_roster(void)
+{
+    ProfWin *window = wins_get_console();
+    if (window && !window->subwin) {
+        wins_show_subwin(window);
+        ui_roster();
+    }
+}
+
+static void
+_ui_hide_roster(void)
+{
+    ProfWin *window = wins_get_console();
+    if (window && window->subwin) {
+        wins_hide_subwin(window);
+    }
+}
+
+static void
 _win_handle_switch(const wint_t * const ch)
 {
     if (*ch == KEY_F(1)) {
@@ -3291,6 +3310,8 @@ ui_init_module(void)
     ui_roster = _ui_roster;
     ui_room_show_occupants = _ui_room_show_occupants;
     ui_room_hide_occupants = _ui_room_hide_occupants;
+    ui_show_roster = _ui_show_roster;
+    ui_hide_roster = _ui_hide_roster;
     ui_room_role_change = _ui_room_role_change;
     ui_room_affiliation_change = _ui_room_affiliation_change;
     ui_switch_to_room = _ui_switch_to_room;

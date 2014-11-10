@@ -122,6 +122,10 @@ handle_login_account_success(char *account_name)
 
     log_info("%s logged in successfully", account->jid);
     account_free(account);
+
+    if (prefs_get_boolean(PREF_ROSTER)) {
+        ui_show_roster();
+    }
 }
 
 void

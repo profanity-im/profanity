@@ -453,6 +453,10 @@ _get_group(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
+        case PREF_ROSTER:
+        case PREF_ROSTER_OFFLINE:
+        case PREF_ROSTER_RESOURCE:
+        case PREF_ROSTER_BY:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -573,6 +577,14 @@ _get_key(preference_t pref)
             return "presence";
         case PREF_WRAP:
             return "wrap";
+        case PREF_ROSTER:
+            return "roster";
+        case PREF_ROSTER_OFFLINE:
+            return "roster.offline";
+        case PREF_ROSTER_RESOURCE:
+            return "roster.resource";
+        case PREF_ROSTER_BY:
+            return "roster.by";
         default:
             return NULL;
     }
@@ -618,6 +630,8 @@ _get_default_string(preference_t pref)
         case PREF_STATUSES_CHAT:
         case PREF_STATUSES_MUC:
             return "all";
+        case PREF_ROSTER_BY:
+            return "none";
         default:
             return NULL;
     }
