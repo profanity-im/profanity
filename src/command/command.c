@@ -169,9 +169,9 @@ static struct cmd_t command_defs[] =
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        { "/roster [show|hide|add|remove|nick|clearnick] [offline|resource] [jid] [nickname]", "Manage your roster.",
-        { "/roster [show|hide|add|remove|nick|clearnick] [offline|resource] [jid] [nickname]",
-          "---------------------------------------------------------------------------------",
+        { "/roster [show|hide|by|add|remove|nick|clearnick] [offline|resource] [group|presence|none] [jid] [nickname]", "Manage your roster.",
+        { "/roster [show|hide|by|add|remove|nick|clearnick] [offline|resource] [group|presence|none] [jid] [nickname]",
+          "----------------------------------------------------------------------------------------------------------",
           "View, add to, and remove from your roster.",
           "Passing no arguments lists all contacts in your roster.",
           "show          - Show the roster panel in the console window.",
@@ -180,6 +180,9 @@ static struct cmd_t command_defs[] =
           "hide offline  - Hide offline contacts in the roster panel.",
           "show resource - Show contact's connected resources in the roster panel.",
           "hide resource - Hide contact's connected resources in the roster panel.",
+          "by group      - Group contacts in the roster panel by roster group.",
+          "by presence   - Group contacts in the roster panel by presence.",
+          "by none       - No grouping in the roster panel.",
           "add           - Add a new item, jid is required, nickname is optional.",
           "remove        - Removes a contact, jid is required.",
           "nick          - Changes a contacts nickname, both jid and nickname are required,",
@@ -1044,6 +1047,7 @@ static Autocomplete close_ac;
 static Autocomplete wins_ac;
 static Autocomplete roster_ac;
 static Autocomplete roster_option_ac;
+static Autocomplete roster_by_ac;
 static Autocomplete group_ac;
 static Autocomplete bookmark_ac;
 static Autocomplete bookmark_property_ac;
@@ -1239,10 +1243,16 @@ cmd_init(void)
     autocomplete_add(roster_ac, "remove");
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
+    autocomplete_add(roster_ac, "by");
 
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
     autocomplete_add(roster_option_ac, "resource");
+
+    roster_by_ac = autocomplete_new();
+    autocomplete_add(roster_by_ac, "group");
+    autocomplete_add(roster_by_ac, "presence");
+    autocomplete_add(roster_by_ac, "none");
 
     group_ac = autocomplete_new();
     autocomplete_add(group_ac, "show");
@@ -1414,6 +1424,7 @@ cmd_uninit(void)
     autocomplete_free(wins_ac);
     autocomplete_free(roster_ac);
     autocomplete_free(roster_option_ac);
+    autocomplete_free(roster_by_ac);
     autocomplete_free(group_ac);
     autocomplete_free(bookmark_ac);
     autocomplete_free(bookmark_property_ac);
@@ -1583,6 +1594,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(wins_ac);
     autocomplete_reset(roster_ac);
     autocomplete_reset(roster_option_ac);
+    autocomplete_reset(roster_by_ac);
     autocomplete_reset(group_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(bookmark_property_ac);
@@ -2016,6 +2028,10 @@ _roster_autocomplete(char *input, int *size)
         return result;
     }
     result = autocomplete_param_with_ac(input, size, "/roster hide", roster_option_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, size, "/roster by", roster_by_ac, TRUE);
     if (result != NULL) {
         return result;
     }

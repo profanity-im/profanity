@@ -1371,6 +1371,27 @@ cmd_roster(gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
             return TRUE;
         }
+    // roster grouping
+    } else if (g_strcmp0(args[0], "by") == 0) {
+        if (g_strcmp0(args[1], "group") == 0) {
+            cons_show("Grouping roster by roster group");
+            prefs_set_string(PREF_ROSTER_BY, "group");
+            ui_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "presence") == 0) {
+            cons_show("Grouping roster by presence");
+            prefs_set_string(PREF_ROSTER_BY, "presence");
+            ui_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "none") == 0) {
+            cons_show("Roster grouping disabled");
+            prefs_set_string(PREF_ROSTER_BY, "none");
+            ui_roster();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
         char *jid = args[1];
