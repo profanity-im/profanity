@@ -681,9 +681,7 @@ win_printline_nowrap(WINDOW *win, char *msg)
     int maxx = getmaxx(win);
     int cury = getcury(win);
 
-    int i = 0;
-    for (i = 0; i<strlen(msg) && i<maxx; i++) {
-        waddch(win, msg[i]);
-    }
+    waddnstr(win, msg, maxx);
+
     wmove(win, cury+1, 0);
 }
