@@ -169,19 +169,21 @@ static struct cmd_t command_defs[] =
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        { "/roster [show|hide|add|remove|nick|clearnick] [offline] [jid] [nickname]", "Manage your roster.",
-        { "/roster [show|hide|add|remove|nick|clearnick] [offline] [jid] [nickname]",
-          "------------------------------------------------------------------------",
+        { "/roster [show|hide|add|remove|nick|clearnick] [offline|resource] [jid] [nickname]", "Manage your roster.",
+        { "/roster [show|hide|add|remove|nick|clearnick] [offline|resource] [jid] [nickname]",
+          "---------------------------------------------------------------------------------",
           "View, add to, and remove from your roster.",
           "Passing no arguments lists all contacts in your roster.",
-          "show         - Show the roster panel in the console window.",
-          "hide         - Hide the roster panel.",
-          "show offline - Show offline contacts in the roster panel.",
-          "hide offline - Hide offline contacts in the roster panel.",
-          "add          - Add a new item, jid is required, nickname is optional.",
-          "remove       - Removes a contact, jid is required.",
-          "nick         - Changes a contacts nickname, both jid and nickname are required,",
-          "clearnick    - Removes the current nickname, jid is required.",
+          "show          - Show the roster panel in the console window.",
+          "hide          - Hide the roster panel.",
+          "show offline  - Show offline contacts in the roster panel.",
+          "hide offline  - Hide offline contacts in the roster panel.",
+          "show resource - Show contact's connected resources in the roster panel.",
+          "hide resource - Hide contact's connected resources in the roster panel.",
+          "add           - Add a new item, jid is required, nickname is optional.",
+          "remove        - Removes a contact, jid is required.",
+          "nick          - Changes a contacts nickname, both jid and nickname are required,",
+          "clearnick     - Removes the current nickname, jid is required.",
           "",
           "Example : /roster (show your roster)",
           "Example : /roster add someone@contacts.org (add the contact)",
@@ -1240,6 +1242,7 @@ cmd_init(void)
 
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
+    autocomplete_add(roster_option_ac, "resource");
 
     group_ac = autocomplete_new();
     autocomplete_add(group_ac, "show");

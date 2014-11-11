@@ -948,6 +948,16 @@ _cons_roster_setting(void)
         cons_show("Roster (/roster)              : show");
     else
         cons_show("Roster (/roster)              : hide");
+
+    if (prefs_get_boolean(PREF_ROSTER_OFFLINE))
+        cons_show("Roster offline (/roster)      : show");
+    else
+        cons_show("Roster offline (/roster)      : hide");
+
+    if (prefs_get_boolean(PREF_ROSTER_RESOURCE))
+        cons_show("Roster resource (/roster)     : show");
+    else
+        cons_show("Roster resource (/roster)     : hide");
 }
 
 static void

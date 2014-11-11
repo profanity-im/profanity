@@ -1342,6 +1342,11 @@ cmd_roster(gchar **args, struct cmd_help_t help)
             prefs_set_boolean(PREF_ROSTER_OFFLINE, TRUE);
             ui_roster();
             return TRUE;
+        } else if (g_strcmp0(args[1], "resource") == 0) {
+            cons_show("Roster resource enabled");
+            prefs_set_boolean(PREF_ROSTER_RESOURCE, TRUE);
+            ui_roster();
+            return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
             return TRUE;
@@ -1355,6 +1360,11 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         } else if (g_strcmp0(args[1], "offline") == 0) {
             cons_show("Roster offline disabled");
             prefs_set_boolean(PREF_ROSTER_OFFLINE, FALSE);
+            ui_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "resource") == 0) {
+            cons_show("Roster resource disabled");
+            prefs_set_boolean(PREF_ROSTER_RESOURCE, FALSE);
             ui_roster();
             return TRUE;
         } else {

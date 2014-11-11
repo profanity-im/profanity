@@ -2835,34 +2835,36 @@ _ui_roster(void)
 
                         wattroff(window->subwin, presence_colour);
 
-                        GList *resources = p_contact_get_available_resources(contact);
-                        GList *ordered_resources = NULL;
+                        if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
+                            GList *resources = p_contact_get_available_resources(contact);
+                            GList *ordered_resources = NULL;
 
-                        // sort in order of availabiltiy
-                        while (resources != NULL) {
-                            Resource *resource = resources->data;
-                            ordered_resources = g_list_insert_sorted(ordered_resources, resource, (GCompareFunc)resource_compare_availability);
-                            resources = g_list_next(resources);
+                            // sort in order of availabiltiy
+                            while (resources != NULL) {
+                                Resource *resource = resources->data;
+                                ordered_resources = g_list_insert_sorted(ordered_resources, resource, (GCompareFunc)resource_compare_availability);
+                                resources = g_list_next(resources);
+                            }
+
+                            g_list_free(resources);
+
+                            while (ordered_resources) {
+                                Resource *resource = ordered_resources->data;
+                                const char *resource_presence = string_from_resource_presence(resource->presence);
+                                int resource_presence_colour = win_presence_colour(resource_presence);
+                                wattron(window->subwin, resource_presence_colour);
+
+                                GString *msg = g_string_new("     ");
+                                g_string_append(msg, resource->name);
+                                win_printline_nowrap(window->subwin, msg->str);
+                                g_string_free(msg, TRUE);
+
+                                wattroff(window->subwin, resource_presence_colour);
+
+                                ordered_resources = g_list_next(ordered_resources);
+                            }
+                            g_list_free(ordered_resources);
                         }
-
-                        g_list_free(resources);
-
-                        while (ordered_resources) {
-                            Resource *resource = ordered_resources->data;
-                            const char *resource_presence = string_from_resource_presence(resource->presence);
-                            int resource_presence_colour = win_presence_colour(resource_presence);
-                            wattron(window->subwin, resource_presence_colour);
-
-                            GString *msg = g_string_new("     ");
-                            g_string_append(msg, resource->name);
-                            win_printline_nowrap(window->subwin, msg->str);
-                            g_string_free(msg, TRUE);
-
-                            wattroff(window->subwin, resource_presence_colour);
-
-                            ordered_resources = g_list_next(ordered_resources);
-                        }
-                        g_list_free(ordered_resources);
                     }
                 }
                 curr_contact = g_slist_next(curr_contact);
