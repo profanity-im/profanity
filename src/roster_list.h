@@ -64,5 +64,6 @@ GSList * roster_get_group(const char * const group);
 GSList * roster_get_groups(void);
 char * roster_find_group(char *search_str);
 char * roster_find_jid(char *search_str);
+GSList * roster_get_contacts_by_presence(const char * const presence);
 
 #endif

@@ -84,6 +84,7 @@ static void _win_handle_page(const wint_t * const ch, const int result);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static void _ui_draw_term_title(void);
+static void _ui_roster_contact(PContact contact);
 
 static void
 _ui_init(void)
@@ -2805,72 +2806,110 @@ _ui_show_lines(ProfWin *window, const gchar** lines)
 }
 
 static void
+_ui_roster_contact(PContact contact)
+{
+    if (p_contact_subscribed(contact)) {
+        ProfWin *window = wins_get_console();
+        const char *name = p_contact_name_or_jid(contact);
+        const char *presence = p_contact_presence(contact);
+
+        if ((g_strcmp0(presence, "offline") != 0) || ((g_strcmp0(presence, "offline") == 0) &&
+                (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
+            int presence_colour = win_presence_colour(presence);
+
+            wattron(window->subwin, presence_colour);
+
+            GString *msg = g_string_new("   ");
+            g_string_append(msg, name);
+            win_printline_nowrap(window->subwin, msg->str);
+            g_string_free(msg, TRUE);
+
+            wattroff(window->subwin, presence_colour);
+
+            if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
+                GList *resources = p_contact_get_available_resources(contact);
+                GList *ordered_resources = NULL;
+
+                // sort in order of availabiltiy
+                while (resources != NULL) {
+                    Resource *resource = resources->data;
+                    ordered_resources = g_list_insert_sorted(ordered_resources, resource, (GCompareFunc)resource_compare_availability);
+                    resources = g_list_next(resources);
+                }
+
+                g_list_free(resources);
+
+                while (ordered_resources) {
+                    Resource *resource = ordered_resources->data;
+                    const char *resource_presence = string_from_resource_presence(resource->presence);
+                    int resource_presence_colour = win_presence_colour(resource_presence);
+                    wattron(window->subwin, resource_presence_colour);
+
+                    GString *msg = g_string_new("     ");
+                    g_string_append(msg, resource->name);
+                    win_printline_nowrap(window->subwin, msg->str);
+                    g_string_free(msg, TRUE);
+
+                    wattroff(window->subwin, resource_presence_colour);
+
+                    ordered_resources = g_list_next(ordered_resources);
+                }
+                g_list_free(ordered_resources);
+            }
+        }
+    }
+}
+
+static void
+_ui_roster_contacts_by_presence(const char * const presence, char *title)
+{
+    ProfWin *window = wins_get_console();
+    GSList *contacts = roster_get_contacts_by_presence(presence);
+    wattron(window->subwin, COLOUR_ROOMINFO);
+    win_printline_nowrap(window->subwin, title);
+    wattroff(window->subwin, COLOUR_ROOMINFO);
+    if (contacts) {
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _ui_roster_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
 _ui_roster(void)
 {
     ProfWin *window = wins_get_console();
     if (window) {
-        GSList *contacts = roster_get_contacts();
-        if (contacts) {
+        if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "presence") == 0) {
             werase(window->subwin);
-            wattron(window->subwin, COLOUR_ROOMINFO);
-            win_printline_nowrap(window->subwin, " -Roster");
-            wattroff(window->subwin, COLOUR_ROOMINFO);
-            GSList *curr_contact = contacts;
-            while (curr_contact) {
-                PContact contact = curr_contact->data;
-                if (p_contact_subscribed(contact)) {
-                    const char *name = p_contact_name_or_jid(contact);
-                    const char *presence = p_contact_presence(contact);
-
-                    if ((g_strcmp0(presence, "offline") != 0) || ((g_strcmp0(presence, "offline") == 0) &&
-                            (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
-                        int presence_colour = win_presence_colour(presence);
-
-                        wattron(window->subwin, presence_colour);
-
-                        GString *msg = g_string_new("   ");
-                        g_string_append(msg, name);
-                        win_printline_nowrap(window->subwin, msg->str);
-                        g_string_free(msg, TRUE);
-
-                        wattroff(window->subwin, presence_colour);
-
-                        if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
-                            GList *resources = p_contact_get_available_resources(contact);
-                            GList *ordered_resources = NULL;
-
-                            // sort in order of availabiltiy
-                            while (resources != NULL) {
-                                Resource *resource = resources->data;
-                                ordered_resources = g_list_insert_sorted(ordered_resources, resource, (GCompareFunc)resource_compare_availability);
-                                resources = g_list_next(resources);
-                            }
-
-                            g_list_free(resources);
-
-                            while (ordered_resources) {
-                                Resource *resource = ordered_resources->data;
-                                const char *resource_presence = string_from_resource_presence(resource->presence);
-                                int resource_presence_colour = win_presence_colour(resource_presence);
-                                wattron(window->subwin, resource_presence_colour);
-
-                                GString *msg = g_string_new("     ");
-                                g_string_append(msg, resource->name);
-                                win_printline_nowrap(window->subwin, msg->str);
-                                g_string_free(msg, TRUE);
-
-                                wattroff(window->subwin, resource_presence_colour);
-
-                                ordered_resources = g_list_next(ordered_resources);
-                            }
-                            g_list_free(ordered_resources);
-                        }
-                    }
-                }
-                curr_contact = g_slist_next(curr_contact);
+            _ui_roster_contacts_by_presence("chat", " -Available for chat");
+            _ui_roster_contacts_by_presence("online", " -Online");
+            _ui_roster_contacts_by_presence("away", " -Away");
+            _ui_roster_contacts_by_presence("xa", " -Extended Away");
+            _ui_roster_contacts_by_presence("dnd", " -Do not disturb");
+            if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
+                _ui_roster_contacts_by_presence("offline", " -Offline");
             }
+        } else {
+            GSList *contacts = roster_get_contacts();
+            if (contacts) {
+                werase(window->subwin);
+                wattron(window->subwin, COLOUR_ROOMINFO);
+                win_printline_nowrap(window->subwin, " -Roster");
+                wattroff(window->subwin, COLOUR_ROOMINFO);
+                GSList *curr_contact = contacts;
+                while (curr_contact) {
+                    PContact contact = curr_contact->data;
+                    _ui_roster_contact(contact);
+                    curr_contact = g_slist_next(curr_contact);
+                }
+            }
+            g_slist_free(contacts);
         }
-        g_slist_free(contacts);
     }
 }
 
