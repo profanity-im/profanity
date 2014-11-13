@@ -52,8 +52,6 @@
 #include "xmpp/xmpp.h"
 
 #define INP_WIN_MAX 1000
-#define OCCUPANT_WIN_RATIO 5
-#define OCCUPANT_WIN_WIDTH 100
 
 void ui_init_module(void);
 void console_init_module(void);
@@ -177,6 +175,8 @@ void (*ui_room_member_presence)(const char * const room,
     const char * const nick, const char * const show, const char * const status);
 void (*ui_room_show_occupants)(const char * const room);
 void (*ui_room_hide_occupants)(const char * const room);
+void (*ui_show_roster)(void);
+void (*ui_hide_roster)(void);
 void (*ui_roster_add)(const char * const barejid, const char * const name);
 void (*ui_roster_remove)(const char * const barejid);
 void (*ui_contact_already_in_group)(const char * const contact, const char * const group);
@@ -246,6 +246,7 @@ void (*ui_open_xmlconsole_win)(void);
 gboolean (*ui_win_has_unsaved_form)(int num);
 
 void (*ui_muc_roster)(const char * const room);
+void (*ui_roster)(void);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);
@@ -299,6 +300,7 @@ void (*cons_flash_setting)(void);
 void (*cons_splash_setting)(void);
 void (*cons_vercheck_setting)(void);
 void (*cons_occupants_setting)(void);
+void (*cons_roster_setting)(void);
 void (*cons_presence_setting)(void);
 void (*cons_wrap_setting)(void);
 void (*cons_mouse_setting)(void);

@@ -1341,6 +1341,68 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         cons_show_roster(list);
         return TRUE;
 
+    // show/hide roster
+    } else if (g_strcmp0(args[0], "show") == 0) {
+        if (args[1] == NULL) {
+            cons_show("Roster enabled.");
+            prefs_set_boolean(PREF_ROSTER, TRUE);
+            ui_show_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "offline") == 0) {
+            cons_show("Roster offline enabled");
+            prefs_set_boolean(PREF_ROSTER_OFFLINE, TRUE);
+            ui_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "resource") == 0) {
+            cons_show("Roster resource enabled");
+            prefs_set_boolean(PREF_ROSTER_RESOURCE, TRUE);
+            ui_roster();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+    } else if (g_strcmp0(args[0], "hide") == 0) {
+        if (args[1] == NULL) {
+            cons_show("Roster disabled.");
+            prefs_set_boolean(PREF_ROSTER, FALSE);
+            ui_hide_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "offline") == 0) {
+            cons_show("Roster offline disabled");
+            prefs_set_boolean(PREF_ROSTER_OFFLINE, FALSE);
+            ui_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "resource") == 0) {
+            cons_show("Roster resource disabled");
+            prefs_set_boolean(PREF_ROSTER_RESOURCE, FALSE);
+            ui_roster();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+    // roster grouping
+    } else if (g_strcmp0(args[0], "by") == 0) {
+        if (g_strcmp0(args[1], "group") == 0) {
+            cons_show("Grouping roster by roster group");
+            prefs_set_string(PREF_ROSTER_BY, "group");
+            ui_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "presence") == 0) {
+            cons_show("Grouping roster by presence");
+            prefs_set_string(PREF_ROSTER_BY, "presence");
+            ui_roster();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "none") == 0) {
+            cons_show("Roster grouping disabled");
+            prefs_set_string(PREF_ROSTER_BY, "none");
+            ui_roster();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
     // add contact
     } else if (strcmp(args[0], "add") == 0) {
         char *jid = args[1];

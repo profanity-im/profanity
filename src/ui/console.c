@@ -942,6 +942,25 @@ _cons_titlebar_setting(void)
 }
 
 static void
+_cons_roster_setting(void)
+{
+    if (prefs_get_boolean(PREF_ROSTER))
+        cons_show("Roster (/roster)              : show");
+    else
+        cons_show("Roster (/roster)              : hide");
+
+    if (prefs_get_boolean(PREF_ROSTER_OFFLINE))
+        cons_show("Roster offline (/roster)      : show");
+    else
+        cons_show("Roster offline (/roster)      : hide");
+
+    if (prefs_get_boolean(PREF_ROSTER_RESOURCE))
+        cons_show("Roster resource (/roster)     : show");
+    else
+        cons_show("Roster resource (/roster)     : hide");
+}
+
+static void
 _cons_show_ui_prefs(void)
 {
     cons_show("UI preferences:");
@@ -955,6 +974,7 @@ _cons_show_ui_prefs(void)
     cons_mouse_setting();
     cons_statuses_setting();
     cons_occupants_setting();
+    cons_roster_setting();
     cons_privileges_setting();
     cons_titlebar_setting();
     cons_presence_setting();
@@ -1573,6 +1593,7 @@ console_init_module(void)
     cons_splash_setting = _cons_splash_setting;
     cons_autoconnect_setting = _cons_autoconnect_setting;
     cons_occupants_setting = _cons_occupants_setting;
+    cons_roster_setting = _cons_roster_setting;
     cons_vercheck_setting = _cons_vercheck_setting;
     cons_mouse_setting = _cons_mouse_setting;
     cons_statuses_setting = _cons_statuses_setting;

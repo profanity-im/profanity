@@ -85,6 +85,7 @@ static void _win_handle_page(const wint_t * const ch, const int result);
 static void _win_show_history(WINDOW *win, int win_index,
     const char * const contact);
 static void _ui_draw_term_title(void);
+static void _ui_roster_contact(PContact contact);
 
 static void
 _ui_init(void)
@@ -402,36 +403,42 @@ _ui_roster_add(const char * const barejid, const char * const name)
     } else {
         cons_show("Roster item added: %s", barejid);
     }
+    ui_roster();
 }
 
 static void
 _ui_roster_remove(const char * const barejid)
 {
     cons_show("Roster item removed: %s", barejid);
+    ui_roster();
 }
 
 static void
 _ui_contact_already_in_group(const char * const contact, const char * const group)
 {
     cons_show("%s already in group %s", contact, group);
+    ui_roster();
 }
 
 static void
 _ui_contact_not_in_group(const char * const contact, const char * const group)
 {
     cons_show("%s is not currently in group %s", contact, group);
+    ui_roster();
 }
 
 static void
 _ui_group_added(const char * const contact, const char * const group)
 {
     cons_show("%s added to group %s", contact, group);
+    ui_roster();
 }
 
 static void
 _ui_group_removed(const char * const contact, const char * const group)
 {
     cons_show("%s removed from group %s", contact, group);
+    ui_roster();
 }
 
 static void
@@ -577,6 +584,7 @@ _ui_disconnected(void)
     title_bar_set_presence(CONTACT_OFFLINE);
     status_bar_clear_message();
     status_bar_update_virtual();
+    ui_hide_roster();
 }
 
 static void
@@ -2806,6 +2814,164 @@ _ui_show_lines(ProfWin *window, const gchar** lines)
 }
 
 static void
+_ui_roster_contact(PContact contact)
+{
+    if (p_contact_subscribed(contact)) {
+        ProfWin *window = wins_get_console();
+        const char *name = p_contact_name_or_jid(contact);
+        const char *presence = p_contact_presence(contact);
+
+        if ((g_strcmp0(presence, "offline") != 0) || ((g_strcmp0(presence, "offline") == 0) &&
+                (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
+            int presence_colour = win_presence_colour(presence);
+
+            wattron(window->subwin, presence_colour);
+
+            GString *msg = g_string_new("   ");
+            g_string_append(msg, name);
+            win_printline_nowrap(window->subwin, msg->str);
+            g_string_free(msg, TRUE);
+
+            wattroff(window->subwin, presence_colour);
+
+            if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
+                GList *resources = p_contact_get_available_resources(contact);
+                GList *ordered_resources = NULL;
+
+                // sort in order of availabiltiy
+                while (resources != NULL) {
+                    Resource *resource = resources->data;
+                    ordered_resources = g_list_insert_sorted(ordered_resources, resource, (GCompareFunc)resource_compare_availability);
+                    resources = g_list_next(resources);
+                }
+
+                g_list_free(resources);
+
+                while (ordered_resources) {
+                    Resource *resource = ordered_resources->data;
+                    const char *resource_presence = string_from_resource_presence(resource->presence);
+                    int resource_presence_colour = win_presence_colour(resource_presence);
+                    wattron(window->subwin, resource_presence_colour);
+
+                    GString *msg = g_string_new("     ");
+                    g_string_append(msg, resource->name);
+                    win_printline_nowrap(window->subwin, msg->str);
+                    g_string_free(msg, TRUE);
+
+                    wattroff(window->subwin, resource_presence_colour);
+
+                    ordered_resources = g_list_next(ordered_resources);
+                }
+                g_list_free(ordered_resources);
+            }
+        }
+    }
+}
+
+static void
+_ui_roster_contacts_by_presence(const char * const presence, char *title)
+{
+    ProfWin *window = wins_get_console();
+    wattron(window->subwin, COLOUR_ROOMINFO);
+    win_printline_nowrap(window->subwin, title);
+    wattroff(window->subwin, COLOUR_ROOMINFO);
+    GSList *contacts = roster_get_contacts_by_presence(presence);
+    if (contacts) {
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _ui_roster_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_ui_roster_contacts_by_group(char *group)
+{
+    ProfWin *window = wins_get_console();
+    wattron(window->subwin, COLOUR_ROOMINFO);
+    GString *title = g_string_new(" -");
+    g_string_append(title, group);
+    win_printline_nowrap(window->subwin, title->str);
+    g_string_free(title, TRUE);
+    wattroff(window->subwin, COLOUR_ROOMINFO);
+    GSList *contacts = roster_get_group(group);
+    if (contacts) {
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _ui_roster_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_ui_roster_contacts_by_no_group(void)
+{
+    ProfWin *window = wins_get_console();
+    GSList *contacts = roster_get_nogroup();
+    if (contacts) {
+        wattron(window->subwin, COLOUR_ROOMINFO);
+        win_printline_nowrap(window->subwin, " -no group");
+        wattroff(window->subwin, COLOUR_ROOMINFO);
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _ui_roster_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_ui_roster(void)
+{
+    ProfWin *window = wins_get_console();
+    if (window) {
+        if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "presence") == 0) {
+            werase(window->subwin);
+            _ui_roster_contacts_by_presence("chat", " -Available for chat");
+            _ui_roster_contacts_by_presence("online", " -Online");
+            _ui_roster_contacts_by_presence("away", " -Away");
+            _ui_roster_contacts_by_presence("xa", " -Extended Away");
+            _ui_roster_contacts_by_presence("dnd", " -Do not disturb");
+            if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
+                _ui_roster_contacts_by_presence("offline", " -Offline");
+            }
+        } else if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "group") == 0) {
+            werase(window->subwin);
+            GSList *groups = roster_get_groups();
+            GSList *curr_group = groups;
+            while (curr_group) {
+                _ui_roster_contacts_by_group(curr_group->data);
+                curr_group = g_slist_next(curr_group);
+            }
+            _ui_roster_contacts_by_no_group();
+        } else {
+            GSList *contacts = roster_get_contacts();
+            if (contacts) {
+                werase(window->subwin);
+                wattron(window->subwin, COLOUR_ROOMINFO);
+                win_printline_nowrap(window->subwin, " -Roster");
+                wattroff(window->subwin, COLOUR_ROOMINFO);
+                GSList *curr_contact = contacts;
+                while (curr_contact) {
+                    PContact contact = curr_contact->data;
+                    _ui_roster_contact(contact);
+                    curr_contact = g_slist_next(curr_contact);
+                }
+            }
+            g_slist_free(contacts);
+        }
+    }
+}
+
+static void
 _ui_muc_roster(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
@@ -2816,72 +2982,84 @@ _ui_muc_roster(const char * const room)
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Moderators\n");
+                win_printline_nowrap(window->subwin, " -Moderators");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
-                        wprintw(window->subwin, "   ");
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         int presence_colour = win_presence_colour(presence_str);
                         wattron(window->subwin, presence_colour);
-                        wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                         wattroff(window->subwin, presence_colour);
-                        wprintw(window->subwin, "\n");
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
 
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Participants\n");
+                win_printline_nowrap(window->subwin, " -Participants");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
-                        wprintw(window->subwin, "   ");
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         int presence_colour = win_presence_colour(presence_str);
                         wattron(window->subwin, presence_colour);
-                        wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                         wattroff(window->subwin, presence_colour);
-                        wprintw(window->subwin, "\n");
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
 
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Visitors\n");
+                win_printline_nowrap(window->subwin, " -Visitors");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
-                        wprintw(window->subwin, "   ");
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         int presence_colour = win_presence_colour(presence_str);
                         wattron(window->subwin, presence_colour);
-                        wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                         wattroff(window->subwin, presence_colour);
-                        wprintw(window->subwin, "\n");
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
             } else {
                 wattron(window->subwin, COLOUR_ROOMINFO);
-                wprintw(window->subwin, " -Occupants\n");
+                win_printline_nowrap(window->subwin, " -Occupants\n");
                 wattroff(window->subwin, COLOUR_ROOMINFO);
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
-                    wprintw(window->subwin, "   ");
                     const char *presence_str = string_from_resource_presence(occupant->presence);
                     int presence_colour = win_presence_colour(presence_str);
                     wattron(window->subwin, presence_colour);
-                    wprintw(window->subwin, occupant->nick);
+
+                        GString *msg = g_string_new("   ");
+                        g_string_append(msg, occupant->nick);
+                        win_printline_nowrap(window->subwin, msg->str);
+                        g_string_free(msg, TRUE);
+
                     wattroff(window->subwin, presence_colour);
-                    wprintw(window->subwin, "\n");
                     roster_curr = g_list_next(roster_curr);
                 }
             }
@@ -2905,6 +3083,25 @@ static void
 _ui_room_hide_occupants(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
+    if (window && window->subwin) {
+        wins_hide_subwin(window);
+    }
+}
+
+static void
+_ui_show_roster(void)
+{
+    ProfWin *window = wins_get_console();
+    if (window && !window->subwin) {
+        wins_show_subwin(window);
+        ui_roster();
+    }
+}
+
+static void
+_ui_hide_roster(void)
+{
+    ProfWin *window = wins_get_console();
     if (window && window->subwin) {
         wins_hide_subwin(window);
     }
@@ -3016,7 +3213,7 @@ _win_handle_page(const wint_t * const ch, const int result)
         current->paged = 0;
     }
 
-    if (current->type == WIN_MUC) {
+    if ((current->type == WIN_MUC) || (current->type == WIN_CONSOLE)) {
         // alt up arrow
         if ((result == KEY_CODE_YES) && ((*ch == 565) || (*ch == 337))) {
             current->sub_y_pos -= page_space;
@@ -3234,8 +3431,11 @@ ui_init_module(void)
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
     ui_handle_room_role_list = _ui_handle_room_role_list;
     ui_muc_roster = _ui_muc_roster;
+    ui_roster = _ui_roster;
     ui_room_show_occupants = _ui_room_show_occupants;
     ui_room_hide_occupants = _ui_room_hide_occupants;
+    ui_show_roster = _ui_show_roster;
+    ui_hide_roster = _ui_hide_roster;
     ui_room_role_change = _ui_room_role_change;
     ui_room_affiliation_change = _ui_room_affiliation_change;
     ui_switch_to_room = _ui_switch_to_room;

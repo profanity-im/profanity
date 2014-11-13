@@ -51,22 +51,32 @@
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
+static int sub_win_ratio = 3; // size = (cols / 10) * SUB_WIN_RATIO
+
 static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message);
 static void _win_print_wrapped(WINDOW *win, const char * const message);
 
+int
+win_main_width(void)
+{
+    int cols = getmaxx(stdscr);
+    return (cols/(10/sub_win_ratio)) * ((10/sub_win_ratio)-1);
+}
 
 ProfWin*
-win_create(const char * const title, int cols, win_type_t type)
+win_create(const char * const title, win_type_t type)
 {
     ProfWin *new_win = malloc(sizeof(struct prof_win_t));
     new_win->from = strdup(title);
+    int cols = getmaxx(stdscr);
 
     if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
-        new_win->win = newpad(PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
+        int main_cols = win_main_width();
+        new_win->win = newpad(PAD_SIZE, main_cols);
         wbkgd(new_win->win, COLOUR_TEXT);
 
-        new_win->subwin = newpad(PAD_SIZE, OCCUPANT_WIN_WIDTH);
+        new_win->subwin = newpad(PAD_SIZE, cols - main_cols);
         wbkgd(new_win->subwin, COLOUR_TEXT);
     } else {
         new_win->win = newpad(PAD_SIZE, (cols));
@@ -108,11 +118,13 @@ void
 win_show_subwin(ProfWin *window)
 {
     if (!window->subwin) {
-        window->subwin = newpad(PAD_SIZE, OCCUPANT_WIN_WIDTH);
+        int cols = getmaxx(stdscr);
+        int main_cols = win_main_width();
+
+        window->subwin = newpad(PAD_SIZE, cols - main_cols);
         wbkgd(window->subwin, COLOUR_TEXT);
 
-        int cols = getmaxx(stdscr);
-        wresize(window->win, PAD_SIZE, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1));
+        wresize(window->win, PAD_SIZE, main_cols);
         win_redraw(window);
     }
 }
@@ -135,10 +147,11 @@ win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
+    int main_cols = win_main_width();
 
-    if ((window->type == WIN_MUC) && (window->subwin)) {
-        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, ((cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1)) -1);
-        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols/OCCUPANT_WIN_RATIO) * (OCCUPANT_WIN_RATIO-1), rows-3, cols-1);
+    if (((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) && (window->subwin)) {
+        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, main_cols-1);
+        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, main_cols, rows-3, cols-1);
     } else {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
     }
@@ -660,4 +673,15 @@ win_redraw(ProfWin *window)
         ProfBuffEntry *e = buffer_yield_entry(window->buffer, i);
         _win_print(window, e->show_char, e->date_fmt, e->flags, e->attrs, e->from, e->message);
     }
+}
+
+void
+win_printline_nowrap(WINDOW *win, char *msg)
+{
+    int maxx = getmaxx(win);
+    int cury = getcury(win);
+
+    waddnstr(win, msg, maxx);
+
+    wmove(win, cury+1, 0);
 }

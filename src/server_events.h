@@ -114,5 +114,7 @@ void handle_muc_self_online(const char * const room, const char * const nick, gb
 void handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const show_str, const char * const status_str);
+void handle_roster_update(const char * const barejid, const char * const name,
+    GSList *groups, const char * const subscription, gboolean pending_out);
 
 #endif

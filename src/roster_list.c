@@ -266,6 +266,26 @@ roster_barejid_from_name(const char * const name)
 }
 
 GSList *
+roster_get_contacts_by_presence(const char * const presence)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        PContact contact = (PContact)value;
+        if (g_strcmp0(p_contact_presence(contact), presence) == 0) {
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+        }
+    }
+
+    // resturn all contact structs
+    return result;
+}
+
+GSList *
 roster_get_contacts(void)
 {
     GSList *result = NULL;
@@ -310,6 +330,26 @@ char *
 roster_find_resource(char *search_str)
 {
     return autocomplete_complete(fulljid_ac, search_str, TRUE);
+}
+
+GSList *
+roster_get_nogroup(void)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        GSList *groups = p_contact_groups(value);
+        if (groups == NULL) {
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+        }
+    }
+
+    // resturn all contact structs
+    return result;
 }
 
 GSList *

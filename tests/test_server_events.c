@@ -18,6 +18,7 @@ void console_doesnt_show_online_presence_when_set_none(void **state)
 {
     mock_cons_show_contact_online();
     stub_ui_chat_win_contact_online();
+    stub_ui_roster();
     prefs_set_string(PREF_STATUSES_CONSOLE, "none");
     roster_init();
     roster_add("test1@server", "bob", NULL, "both", FALSE);
