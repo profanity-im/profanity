@@ -2836,19 +2836,9 @@ _ui_roster_contact(PContact contact)
 
             if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
                 GList *resources = p_contact_get_available_resources(contact);
-                GList *ordered_resources = NULL;
-
-                // sort in order of availabiltiy
-                while (resources != NULL) {
-                    Resource *resource = resources->data;
-                    ordered_resources = g_list_insert_sorted(ordered_resources, resource, (GCompareFunc)resource_compare_availability);
-                    resources = g_list_next(resources);
-                }
-
-                g_list_free(resources);
-
-                while (ordered_resources) {
-                    Resource *resource = ordered_resources->data;
+                GList *curr_resource = resources;
+                while (curr_resource) {
+                    Resource *resource = curr_resource->data;
                     const char *resource_presence = string_from_resource_presence(resource->presence);
                     int resource_presence_colour = win_presence_colour(resource_presence);
                     wattron(window->subwin, resource_presence_colour);
@@ -2860,9 +2850,9 @@ _ui_roster_contact(PContact contact)
 
                     wattroff(window->subwin, resource_presence_colour);
 
-                    ordered_resources = g_list_next(ordered_resources);
+                    curr_resource = g_list_next(curr_resource);
                 }
-                g_list_free(ordered_resources);
+                g_list_free(resources);
             }
         }
     }
@@ -2933,7 +2923,8 @@ _ui_roster(void)
 {
     ProfWin *window = wins_get_console();
     if (window) {
-        if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "presence") == 0) {
+        char *by = prefs_get_string(PREF_ROSTER_BY);
+        if (g_strcmp0(by, "presence") == 0) {
             werase(window->subwin);
             _ui_roster_contacts_by_presence("chat", " -Available for chat");
             _ui_roster_contacts_by_presence("online", " -Online");
@@ -2943,7 +2934,7 @@ _ui_roster(void)
             if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
                 _ui_roster_contacts_by_presence("offline", " -Offline");
             }
-        } else if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "group") == 0) {
+        } else if (g_strcmp0(by, "group") == 0) {
             werase(window->subwin);
             GSList *groups = roster_get_groups();
             GSList *curr_group = groups;
@@ -2951,6 +2942,7 @@ _ui_roster(void)
                 _ui_roster_contacts_by_group(curr_group->data);
                 curr_group = g_slist_next(curr_group);
             }
+            g_slist_free_full(groups, free);
             _ui_roster_contacts_by_no_group();
         } else {
             GSList *contacts = roster_get_contacts();
@@ -2968,6 +2960,7 @@ _ui_roster(void)
             }
             g_slist_free(contacts);
         }
+        free(by);
     }
 }
 
