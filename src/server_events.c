@@ -629,6 +629,14 @@ handle_roster_add(const char * const barejid, const char * const name)
 }
 
 void
+handle_roster_update(const char * const barejid, const char * const name,
+    GSList *groups, const char * const subscription, gboolean pending_out)
+{
+    roster_update(barejid, name, groups, subscription, pending_out);
+    ui_roster();
+}
+
+void
 handle_autoping_cancel(void)
 {
     prefs_set_autoping(0);

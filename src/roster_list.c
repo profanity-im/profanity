@@ -333,6 +333,26 @@ roster_find_resource(char *search_str)
 }
 
 GSList *
+roster_get_nogroup(void)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        GSList *groups = p_contact_groups(value);
+        if (groups == NULL) {
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+        }
+    }
+
+    // resturn all contact structs
+    return result;
+}
+
+GSList *
 roster_get_group(const char * const group)
 {
     GSList *result = NULL;

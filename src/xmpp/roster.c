@@ -280,7 +280,7 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 handle_roster_add(barejid, name);
             }
         } else {
-            roster_update(barejid, name, groups, sub, pending_out);
+            handle_roster_update(barejid, name, groups, sub, pending_out);
         }
     }
 

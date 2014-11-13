@@ -402,36 +402,42 @@ _ui_roster_add(const char * const barejid, const char * const name)
     } else {
         cons_show("Roster item added: %s", barejid);
     }
+    ui_roster();
 }
 
 static void
 _ui_roster_remove(const char * const barejid)
 {
     cons_show("Roster item removed: %s", barejid);
+    ui_roster();
 }
 
 static void
 _ui_contact_already_in_group(const char * const contact, const char * const group)
 {
     cons_show("%s already in group %s", contact, group);
+    ui_roster();
 }
 
 static void
 _ui_contact_not_in_group(const char * const contact, const char * const group)
 {
     cons_show("%s is not currently in group %s", contact, group);
+    ui_roster();
 }
 
 static void
 _ui_group_added(const char * const contact, const char * const group)
 {
     cons_show("%s added to group %s", contact, group);
+    ui_roster();
 }
 
 static void
 _ui_group_removed(const char * const contact, const char * const group)
 {
     cons_show("%s removed from group %s", contact, group);
+    ui_roster();
 }
 
 static void
@@ -577,6 +583,7 @@ _ui_disconnected(void)
     title_bar_set_presence(CONTACT_OFFLINE);
     status_bar_clear_message();
     status_bar_update_virtual();
+    ui_hide_roster();
 }
 
 static void
@@ -2864,11 +2871,52 @@ static void
 _ui_roster_contacts_by_presence(const char * const presence, char *title)
 {
     ProfWin *window = wins_get_console();
-    GSList *contacts = roster_get_contacts_by_presence(presence);
     wattron(window->subwin, COLOUR_ROOMINFO);
     win_printline_nowrap(window->subwin, title);
     wattroff(window->subwin, COLOUR_ROOMINFO);
+    GSList *contacts = roster_get_contacts_by_presence(presence);
     if (contacts) {
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _ui_roster_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_ui_roster_contacts_by_group(char *group)
+{
+    ProfWin *window = wins_get_console();
+    wattron(window->subwin, COLOUR_ROOMINFO);
+    GString *title = g_string_new(" -");
+    g_string_append(title, group);
+    win_printline_nowrap(window->subwin, title->str);
+    g_string_free(title, TRUE);
+    wattroff(window->subwin, COLOUR_ROOMINFO);
+    GSList *contacts = roster_get_group(group);
+    if (contacts) {
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _ui_roster_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_ui_roster_contacts_by_no_group(void)
+{
+    ProfWin *window = wins_get_console();
+    GSList *contacts = roster_get_nogroup();
+    if (contacts) {
+        wattron(window->subwin, COLOUR_ROOMINFO);
+        win_printline_nowrap(window->subwin, " -no group");
+        wattroff(window->subwin, COLOUR_ROOMINFO);
         GSList *curr_contact = contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
@@ -2894,6 +2942,15 @@ _ui_roster(void)
             if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
                 _ui_roster_contacts_by_presence("offline", " -Offline");
             }
+        } else if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "group") == 0) {
+            werase(window->subwin);
+            GSList *groups = roster_get_groups();
+            GSList *curr_group = groups;
+            while (curr_group) {
+                _ui_roster_contacts_by_group(curr_group->data);
+                curr_group = g_slist_next(curr_group);
+            }
+            _ui_roster_contacts_by_no_group();
         } else {
             GSList *contacts = roster_get_contacts();
             if (contacts) {
