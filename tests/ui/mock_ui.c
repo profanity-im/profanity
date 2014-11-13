@@ -29,6 +29,11 @@ void _stub_cons_show(const char * const msg, ...)
 }
 
 static
+void _stub_ui_roster(void)
+{
+}
+
+static
 void _mock_cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
 {
     check_expected(contact);
@@ -198,6 +203,12 @@ void
 stub_ui_chat_win_contact_online(void)
 {
     ui_chat_win_contact_online = _stub_ui_chat_win_contact_online;
+}
+
+void
+stub_ui_roster(void)
+{
+    ui_roster = _stub_ui_roster;
 }
 
 void
