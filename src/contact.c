@@ -330,8 +330,19 @@ GList *
 p_contact_get_available_resources(const PContact contact)
 {
     assert(contact != NULL);
+    GList *resources = g_hash_table_get_values(contact->available_resources);
+    GList *ordered = NULL;
 
-    return g_hash_table_get_values(contact->available_resources);
+    GList *curr_resource = resources;
+    while (curr_resource) {
+        Resource *resource = resources->data;
+        ordered = g_list_insert_sorted(ordered, resource, (GCompareFunc)resource_compare_availability);
+        curr_resource = g_list_next(curr_resource);
+    }
+
+    g_list_free(resources);
+
+    return ordered;
 }
 
 gboolean
