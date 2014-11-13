@@ -201,6 +201,7 @@ roster_remove(const char * const name, const char * const barejid)
             g_string_free(fulljid, TRUE);
             resources = g_list_next(resources);
         }
+        g_list_free(resources);
     }
 
     // remove the contact

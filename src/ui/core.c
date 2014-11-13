@@ -2932,7 +2932,8 @@ _ui_roster(void)
 {
     ProfWin *window = wins_get_console();
     if (window) {
-        if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "presence") == 0) {
+        char *by = prefs_get_string(PREF_ROSTER_BY);
+        if (g_strcmp0(by, "presence") == 0) {
             werase(window->subwin);
             _ui_roster_contacts_by_presence("chat", " -Available for chat");
             _ui_roster_contacts_by_presence("online", " -Online");
@@ -2942,7 +2943,7 @@ _ui_roster(void)
             if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
                 _ui_roster_contacts_by_presence("offline", " -Offline");
             }
-        } else if (g_strcmp0(prefs_get_string(PREF_ROSTER_BY), "group") == 0) {
+        } else if (g_strcmp0(by, "group") == 0) {
             werase(window->subwin);
             GSList *groups = roster_get_groups();
             GSList *curr_group = groups;
@@ -2967,6 +2968,7 @@ _ui_roster(void)
             }
             g_slist_free(contacts);
         }
+        free(by);
     }
 }
 
