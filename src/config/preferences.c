@@ -316,6 +316,44 @@ prefs_set_autoaway_time(gint value)
     _save_prefs();
 }
 
+void
+prefs_set_occupants_size(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.size", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_occupants_size(void)
+{
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "occupants.size", NULL);
+
+    if (result > 99 || result < 1) {
+        return 20;
+    } else {
+        return result;
+    }
+}
+
+void
+prefs_set_roster_size(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.size", value);
+    _save_prefs();
+}
+
+gint
+prefs_get_roster_size(void)
+{
+    gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "roster.size", NULL);
+
+    if (result > 99 || result < 1) {
+        return 20;
+    } else {
+        return result;
+    }
+}
+
 gboolean
 prefs_add_alias(const char * const name, const char * const value)
 {

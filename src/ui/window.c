@@ -53,9 +53,6 @@
 
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
-static int roster_win_percent = 20;
-static int occupants_win_percent = 20;
-
 static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message);
 static void _win_print_wrapped(WINDOW *win, const char * const message);
@@ -63,6 +60,7 @@ static void _win_print_wrapped(WINDOW *win, const char * const message);
 int
 win_roster_cols(void)
 {
+    int roster_win_percent = prefs_get_roster_size();
     int cols = getmaxx(stdscr);
     return CEILING( (((double)cols) / 100) * roster_win_percent);
 }
@@ -70,6 +68,7 @@ win_roster_cols(void)
 int
 win_occpuants_cols(void)
 {
+    int occupants_win_percent = prefs_get_occupants_size();
     int cols = getmaxx(stdscr);
     return CEILING( (((double)cols) / 100) * occupants_win_percent);
 }

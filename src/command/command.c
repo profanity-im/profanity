@@ -169,9 +169,9 @@ static struct cmd_t command_defs[] =
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        { "/roster [show|hide|by|add|remove|nick|clearnick] [offline|resource] [group|presence|none] [jid] [nickname]", "Manage your roster.",
-        { "/roster [show|hide|by|add|remove|nick|clearnick] [offline|resource] [group|presence|none] [jid] [nickname]",
-          "----------------------------------------------------------------------------------------------------------",
+        { "/roster [show|hide|by|size|add|remove|nick|clearnick] [offline|resource] [percent] [group|presence|none] [jid] [nickname]", "Manage your roster.",
+        { "/roster [show|hide|by|size|add|remove|nick|clearnick] [offline|resource] [percent] [group|presence|none] [jid] [nickname]",
+          "-------------------------------------------------------------------------------------------------------------------------",
           "View, add to, and remove from your roster.",
           "Passing no arguments lists all contacts in your roster.",
           "show          - Show the roster panel in the console window.",
@@ -183,6 +183,7 @@ static struct cmd_t command_defs[] =
           "by group      - Group contacts in the roster panel by roster group.",
           "by presence   - Group contacts in the roster panel by presence.",
           "by none       - No grouping in the roster panel.",
+          "size          - Percentage of the screen taken up by the roster (1-99).",
           "add           - Add a new item, jid is required, nickname is optional.",
           "remove        - Removes a contact, jid is required.",
           "nick          - Changes a contacts nickname, both jid and nickname are required,",
@@ -383,12 +384,13 @@ static struct cmd_t command_defs[] =
 
     { "/occupants",
         cmd_occupants, parse_args, 1, 2, &cons_occupants_setting,
-        { "/occupants show|hide|default [show|hide]", "Show or hide room occupants.",
-        { "/occupants show|hide|default [show|hide]",
-          "----------------------------------------",
+        { "/occupants show|hide|default|size [show|hide] [percent]", "Show or hide room occupants.",
+        { "/occupants show|hide|default|size [show|hide] [percent]",
+          "-------------------------------------------------------",
           "show    - Show the occupants panel in chat rooms.",
           "hide    - Hide the occupants panel in chat rooms.",
           "default - Whether occupants are shown by default in new rooms, 'show' or 'hide'",
+          "size    - Percentage of the screen taken by the occupants list in rooms (1-99).",
           NULL } } },
 
     { "/form",
@@ -1244,6 +1246,7 @@ cmd_init(void)
     autocomplete_add(roster_ac, "show");
     autocomplete_add(roster_ac, "hide");
     autocomplete_add(roster_ac, "by");
+    autocomplete_add(roster_ac, "size");
 
     roster_option_ac = autocomplete_new();
     autocomplete_add(roster_option_ac, "offline");
@@ -1388,6 +1391,7 @@ cmd_init(void)
     autocomplete_add(occupants_ac, "show");
     autocomplete_add(occupants_ac, "hide");
     autocomplete_add(occupants_ac, "default");
+    autocomplete_add(occupants_ac, "size");
 
     occupants_default_ac = autocomplete_new();
     autocomplete_add(occupants_default_ac, "show");

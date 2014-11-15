@@ -1330,6 +1330,23 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         cons_show_roster(list);
         return TRUE;
 
+    // set roster size
+    } else if (g_strcmp0(args[0], "size") == 0) {
+        int intval = 0;
+        if (!args[1]) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else if (_strtoi(args[1], &intval, 1, 99) == 0) {
+            prefs_set_roster_size(intval);
+            cons_show("Roster screen size set to: %d%%", intval);
+            if (prefs_get_boolean(PREF_ROSTER)) {
+                wins_resize_all();
+            }
+            return TRUE;
+        } else {
+            return TRUE;
+        }
+
     // show/hide roster
     } else if (g_strcmp0(args[0], "show") == 0) {
         if (args[1] == NULL) {
@@ -2489,6 +2506,19 @@ cmd_occupants(gchar **args, struct cmd_help_t help)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
         return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "size") == 0) {
+        int intval = 0;
+        if (!args[1]) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else if (_strtoi(args[1], &intval, 1, 99) == 0) {
+            prefs_set_occupants_size(intval);
+            cons_show("Occupants screen size set to: %d%%", intval);
+            wins_resize_all();
+            return TRUE;
+        }
     }
 
     if (g_strcmp0(args[0], "default") == 0) {
