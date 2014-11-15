@@ -54,6 +54,7 @@
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
 static int roster_win_percent = 20;
+static int occupants_win_percent = 20;
 
 static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message);
@@ -66,6 +67,13 @@ win_roster_cols(void)
     return CEILING( (((double)cols) / 100) * roster_win_percent);
 }
 
+int
+win_occpuants_cols(void)
+{
+    int cols = getmaxx(stdscr);
+    return CEILING( (((double)cols) / 100) * occupants_win_percent);
+}
+
 ProfWin*
 win_create(const char * const title, win_type_t type)
 {
@@ -74,7 +82,7 @@ win_create(const char * const title, win_type_t type)
     int cols = getmaxx(stdscr);
 
     if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
-        int subwin_cols = win_roster_cols();
+        int subwin_cols = win_occpuants_cols();
         new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
         wbkgd(new_win->win, COLOUR_TEXT);
 
@@ -121,7 +129,12 @@ win_show_subwin(ProfWin *window)
 {
     if (!window->subwin) {
         int cols = getmaxx(stdscr);
-        int subwin_cols = win_roster_cols();
+        int subwin_cols = 0;
+        if (window->type == WIN_CONSOLE) {
+            subwin_cols = win_roster_cols();
+        } else if (window->type == WIN_MUC) {
+            subwin_cols = win_occpuants_cols();
+        }
 
         window->subwin = newpad(PAD_SIZE, subwin_cols);
         wbkgd(window->subwin, COLOUR_TEXT);
@@ -149,9 +162,14 @@ win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    int subwin_cols = win_roster_cols();
 
-    if (((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) && (window->subwin)) {
+    if (window->subwin) {
+        int subwin_cols = 0;
+        if (window->type == WIN_MUC) {
+            subwin_cols = win_occpuants_cols();
+        } else if (window->type == WIN_CONSOLE) {
+            subwin_cols = win_roster_cols();
+        }
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
         pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     } else {
