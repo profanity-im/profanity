@@ -51,17 +51,19 @@
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
-static int sub_win_ratio = 3; // size = (cols / 10) * SUB_WIN_RATIO
+#define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
+
+static int roster_win_percent = 20;
 
 static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
     int flags, int attrs, const char * const from, const char * const message);
 static void _win_print_wrapped(WINDOW *win, const char * const message);
 
 int
-win_main_width(void)
+win_roster_cols(void)
 {
     int cols = getmaxx(stdscr);
-    return (cols/(10/sub_win_ratio)) * ((10/sub_win_ratio)-1);
+    return CEILING( (((double)cols) / 100) * roster_win_percent);
 }
 
 ProfWin*
@@ -72,11 +74,11 @@ win_create(const char * const title, win_type_t type)
     int cols = getmaxx(stdscr);
 
     if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
-        int main_cols = win_main_width();
-        new_win->win = newpad(PAD_SIZE, main_cols);
+        int subwin_cols = win_roster_cols();
+        new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
         wbkgd(new_win->win, COLOUR_TEXT);
 
-        new_win->subwin = newpad(PAD_SIZE, cols - main_cols);
+        new_win->subwin = newpad(PAD_SIZE, subwin_cols);
         wbkgd(new_win->subwin, COLOUR_TEXT);
     } else {
         new_win->win = newpad(PAD_SIZE, (cols));
@@ -119,12 +121,12 @@ win_show_subwin(ProfWin *window)
 {
     if (!window->subwin) {
         int cols = getmaxx(stdscr);
-        int main_cols = win_main_width();
+        int subwin_cols = win_roster_cols();
 
-        window->subwin = newpad(PAD_SIZE, cols - main_cols);
+        window->subwin = newpad(PAD_SIZE, subwin_cols);
         wbkgd(window->subwin, COLOUR_TEXT);
 
-        wresize(window->win, PAD_SIZE, main_cols);
+        wresize(window->win, PAD_SIZE, cols - subwin_cols);
         win_redraw(window);
     }
 }
@@ -147,11 +149,11 @@ win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    int main_cols = win_main_width();
+    int subwin_cols = win_roster_cols();
 
     if (((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) && (window->subwin)) {
-        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, main_cols-1);
-        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, main_cols, rows-3, cols-1);
+        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     } else {
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
     }
