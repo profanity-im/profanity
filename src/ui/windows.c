@@ -285,20 +285,23 @@ wins_get_total_unread(void)
 void
 wins_resize_all(void)
 {
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    int main_cols = win_main_width();
+    int cols = getmaxx(stdscr);
 
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
     while (curr != NULL) {
         ProfWin *window = curr->data;
         if (((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) && (window->subwin)) {
-            wresize(window->win, PAD_SIZE, main_cols);
-            wresize(window->subwin, PAD_SIZE, cols - main_cols);
+            int subwin_cols = 0;
             if (window->type == WIN_MUC) {
+                subwin_cols = win_occpuants_cols();
+                wresize(window->win, PAD_SIZE, cols - subwin_cols);
+                wresize(window->subwin, PAD_SIZE, subwin_cols);
                 ui_muc_roster(window->from);
             } else if (window->type == WIN_CONSOLE) {
+                subwin_cols = win_roster_cols();
+                wresize(window->win, PAD_SIZE, cols - subwin_cols);
+                wresize(window->subwin, PAD_SIZE, subwin_cols);
                 ui_roster();
             }
         } else {
@@ -310,12 +313,7 @@ wins_resize_all(void)
     g_list_free(values);
 
     ProfWin *current_win = wins_get_current();
-    if (((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) && (current_win->subwin)) {
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, main_cols-1);
-        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, main_cols, rows-3, cols-1);
-    } else {
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
-    }
+    win_update_virtual(current_win);
 }
 
 void
@@ -337,14 +335,19 @@ wins_show_subwin(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-    int main_cols = win_main_width();
+    int subwin_cols = 0;
 
     win_show_subwin(window);
 
     ProfWin *current_win = wins_get_current();
+    if (current_win->type == WIN_MUC) {
+        subwin_cols = win_occpuants_cols();
+    } else if (current_win->type == WIN_CONSOLE) {
+        subwin_cols = win_roster_cols();
+    }
     if ((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) {
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, main_cols-1);
-        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, main_cols, rows-3, cols-1);
+        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     }
 }
 

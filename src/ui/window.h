@@ -105,7 +105,8 @@ void win_save_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
 void win_hide_subwin(ProfWin *window);
 void win_show_subwin(ProfWin *window);
-int win_main_width(void);
+int win_roster_cols(void);
+int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
 
 #endif

@@ -58,7 +58,9 @@ typedef enum {
     PREF_HISTORY,
     PREF_MOUSE,
     PREF_OCCUPANTS,
+    PREF_OCCUPANTS_SIZE,
     PREF_ROSTER,
+    PREF_ROSTER_SIZE,
     PREF_ROSTER_OFFLINE,
     PREF_ROSTER_RESOURCE,
     PREF_ROSTER_BY,
@@ -120,6 +122,11 @@ void prefs_set_reconnect(gint value);
 gint prefs_get_reconnect(void);
 void prefs_set_autoping(gint value);
 gint prefs_get_autoping(void);
+
+void prefs_set_occupants_size(gint value);
+gint prefs_get_occupants_size(void);
+void prefs_set_roster_size(gint value);
+gint prefs_get_roster_size(void);
 
 gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);

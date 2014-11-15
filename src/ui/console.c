@@ -883,6 +883,9 @@ _cons_occupants_setting(void)
         cons_show("Occupants (/occupants)        : show");
     else
         cons_show("Occupants (/occupants)        : hide");
+
+    int size = prefs_get_occupants_size();
+    cons_show("Occupants size (/occupants)   : %d", size);
 }
 
 static void
@@ -958,6 +961,9 @@ _cons_roster_setting(void)
         cons_show("Roster resource (/roster)     : show");
     else
         cons_show("Roster resource (/roster)     : hide");
+
+    int size = prefs_get_roster_size();
+    cons_show("Roster size (/roster)         : %d", size);
 }
 
 static void
