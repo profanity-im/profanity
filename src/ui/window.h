@@ -86,7 +86,6 @@ ProfWin* win_create(const char * const title, win_type_t type);
 void win_free(ProfWin *window);
 void win_update_virtual(ProfWin *window);
 void win_move_to_end(ProfWin *window);
-theme_item_t win_presence_colour(const char * const presence);
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_occupant(ProfWin *window, Occupant *occupant);
 void win_show_status_string(ProfWin *window, const char * const from,

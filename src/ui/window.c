@@ -191,30 +191,12 @@ win_move_to_end(ProfWin *window)
     }
 }
 
-theme_item_t
-win_presence_colour(const char * const presence)
-{
-    if (g_strcmp0(presence, "online") == 0) {
-        return THEME_ONLINE;
-    } else if (g_strcmp0(presence, "away") == 0) {
-        return THEME_AWAY;
-    } else if (g_strcmp0(presence, "chat") == 0) {
-        return THEME_CHAT;
-    } else if (g_strcmp0(presence, "dnd") == 0) {
-        return THEME_DND;
-    } else if (g_strcmp0(presence, "xa") == 0) {
-        return THEME_XA;
-    } else {
-        return THEME_OFFLINE;
-    }
-}
-
 void
 win_show_occupant(ProfWin *window, Occupant *occupant)
 {
     const char *presence_str = string_from_resource_presence(occupant->presence);
 
-    theme_item_t presence_colour = win_presence_colour(presence_str);
+    theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
     win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", occupant->nick);
     win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
@@ -235,7 +217,7 @@ win_show_contact(ProfWin *window, PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    theme_item_t presence_colour = win_presence_colour(presence);
+    theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     if (name != NULL) {
         win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", name);
@@ -277,7 +259,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
     const char *occupant_affiliation = muc_occupant_affiliation_str(occupant);
     const char *occupant_role = muc_occupant_role_str(occupant);
 
-    theme_item_t presence_colour = win_presence_colour(presence_str);
+    theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
     win_save_print(window, '!', NULL, NO_EOL, presence_colour, "", occupant->nick);
     win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
@@ -355,7 +337,7 @@ win_show_info(ProfWin *window, PContact contact)
     GList *ordered_resources = NULL;
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    theme_item_t presence_colour = win_presence_colour(presence);
+    theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     win_save_print(window, '-', NULL, 0, 0, "", "");
     win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
@@ -403,7 +385,7 @@ win_show_info(ProfWin *window, PContact contact)
     while (ordered_resources != NULL) {
         Resource *resource = ordered_resources->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
-        int presence_colour = win_presence_colour(resource_presence);
+        theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_save_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
         if (resource->status != NULL) {
             win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
@@ -469,7 +451,7 @@ win_show_status_string(ProfWin *window, const char * const from,
     theme_item_t presence_colour;
 
     if (show != NULL) {
-        presence_colour = win_presence_colour(show);
+        presence_colour = theme_main_presence_attrs(show);
     } else if (strcmp(default_show, "online") == 0) {
         presence_colour = THEME_ONLINE;
     } else {

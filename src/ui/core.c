@@ -1576,7 +1576,7 @@ _ui_room_roster(const char * const room, GList *roster, const char * const prese
                 Occupant *occupant = roster->data;
                 const char *presence_str = string_from_resource_presence(occupant->presence);
 
-                int presence_colour = win_presence_colour(presence_str);
+                theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
                 win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", occupant->nick);
 
                 if (roster->next != NULL) {
@@ -2830,7 +2830,7 @@ _ui_roster_contact(PContact contact)
 
         if ((g_strcmp0(presence, "offline") != 0) || ((g_strcmp0(presence, "offline") == 0) &&
                 (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
-            theme_item_t presence_colour = win_presence_colour(presence);
+            theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
             wattron(window->subwin, theme_attrs(presence_colour));
 
@@ -2847,7 +2847,7 @@ _ui_roster_contact(PContact contact)
                 while (curr_resource) {
                     Resource *resource = curr_resource->data;
                     const char *resource_presence = string_from_resource_presence(resource->presence);
-                    theme_item_t resource_presence_colour = win_presence_colour(resource_presence);
+                    theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
                     wattron(window->subwin, theme_attrs(resource_presence_colour));
 
                     GString *msg = g_string_new("     ");
@@ -2989,7 +2989,7 @@ _ui_muc_roster(const char * const room)
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
                         const char *presence_str = string_from_resource_presence(occupant->presence);
-                        theme_item_t presence_colour = win_presence_colour(presence_str);
+                        theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
                         wattron(window->subwin, theme_attrs(presence_colour));
 
                         GString *msg = g_string_new("   ");
@@ -3010,7 +3010,7 @@ _ui_muc_roster(const char * const room)
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
                         const char *presence_str = string_from_resource_presence(occupant->presence);
-                        theme_item_t presence_colour = win_presence_colour(presence_str);
+                        theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
                         wattron(window->subwin, theme_attrs(presence_colour));
 
                         GString *msg = g_string_new("   ");
@@ -3031,7 +3031,7 @@ _ui_muc_roster(const char * const room)
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
                         const char *presence_str = string_from_resource_presence(occupant->presence);
-                        theme_item_t presence_colour = win_presence_colour(presence_str);
+                        theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
                         wattron(window->subwin, theme_attrs(presence_colour));
 
                         GString *msg = g_string_new("   ");
@@ -3051,7 +3051,7 @@ _ui_muc_roster(const char * const room)
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     const char *presence_str = string_from_resource_presence(occupant->presence);
-                    theme_item_t presence_colour = win_presence_colour(presence_str);
+                    theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
                     wattron(window->subwin, theme_attrs(presence_colour));
 
                     GString *msg = g_string_new("   ");

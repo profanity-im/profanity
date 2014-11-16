@@ -99,5 +99,6 @@ gboolean theme_load(const char * const theme_name);
 GSList* theme_list(void);
 void theme_close(void);
 int theme_attrs(theme_item_t attrs);
+theme_item_t theme_main_presence_attrs(const char * const presence);
 
 #endif
