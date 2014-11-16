@@ -230,7 +230,7 @@ _cons_show_login_success(ProfAccount *account)
     resource_presence_t presence = accounts_get_login_presence(account->name);
     const char *presence_str = string_from_resource_presence(presence);
 
-    int presence_colour = win_presence_colour(presence_str);
+    theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
     win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", presence_str);
     win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
@@ -292,7 +292,7 @@ _cons_show_caps(const char * const fulljid, resource_presence_t presence)
     if (caps) {
         const char *resource_presence = string_from_resource_presence(presence);
 
-        int presence_colour = win_presence_colour(resource_presence);
+        theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", fulljid);
         win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
 
@@ -359,7 +359,7 @@ _cons_show_software_version(const char * const jid, const char * const  presence
     ProfWin *console = wins_get_console();
     if ((name != NULL) || (version != NULL) || (os != NULL)) {
         cons_show("");
-        int presence_colour = win_presence_colour(presence);
+        theme_item_t presence_colour = theme_main_presence_attrs(presence);
         win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", jid);
         win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
     }
@@ -611,7 +611,7 @@ _cons_show_account_list(gchar **accounts)
             if ((jabber_get_connection_status() == JABBER_CONNECTED) &&
                     (g_strcmp0(jabber_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
-                int presence_colour = win_presence_colour(string_from_resource_presence(presence));
+                theme_item_t presence_colour = theme_main_presence_attrs(string_from_resource_presence(presence));
                 win_save_vprint(console, '-', NULL, 0, presence_colour, "", "%s", accounts[i]);
             } else {
                 cons_show(accounts[i]);
@@ -730,7 +730,7 @@ _cons_show_account(ProfAccount *account)
         while (ordered_resources != NULL) {
             Resource *resource = ordered_resources->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
-            int presence_colour = win_presence_colour(resource_presence);
+            theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
             win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
 
             if (resource->status != NULL) {
@@ -1524,9 +1524,9 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         const char *presence = p_contact_presence(contact);
         theme_item_t presence_colour = THEME_TEXT;
         if (p_contact_subscribed(contact)) {
-            presence_colour = win_presence_colour(presence);
+            presence_colour = theme_main_presence_attrs(presence);
         } else {
-            presence_colour = win_presence_colour("offline");
+            presence_colour = theme_main_presence_attrs("offline");
         }
         win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", title->str);
 

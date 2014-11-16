@@ -558,6 +558,24 @@ _theme_find(const char * const theme_name)
     return path;
 }
 
+theme_item_t
+theme_main_presence_attrs(const char * const presence)
+{
+    if (g_strcmp0(presence, "online") == 0) {
+        return THEME_ONLINE;
+    } else if (g_strcmp0(presence, "away") == 0) {
+        return THEME_AWAY;
+    } else if (g_strcmp0(presence, "chat") == 0) {
+        return THEME_CHAT;
+    } else if (g_strcmp0(presence, "dnd") == 0) {
+        return THEME_DND;
+    } else if (g_strcmp0(presence, "xa") == 0) {
+        return THEME_XA;
+    } else {
+        return THEME_OFFLINE;
+    }
+}
+
 int
 theme_attrs(theme_item_t attrs)
 {
