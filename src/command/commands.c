@@ -3031,6 +3031,25 @@ cmd_wrap(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_time(gchar **args, struct cmd_help_t help)
+{
+    if (g_strcmp0(args[0], "minutes") == 0) {
+        prefs_set_string(PREF_TIME, "minutes");
+        cons_show("Time precision set to minutes.");
+        wins_resize_all();
+        return TRUE;
+    } else if (g_strcmp0(args[0], "seconds") == 0) {
+        prefs_set_string(PREF_TIME, "seconds");
+        cons_show("Time precision set to seconds.");
+        wins_resize_all();
+        return TRUE;
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+}
+
+gboolean
 cmd_states(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help, "Sending chat states",
