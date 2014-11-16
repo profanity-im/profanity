@@ -87,7 +87,10 @@ typedef enum {
     THEME_OTR_STARTED_UNTRUSTED,
     THEME_OTR_ENDED,
     THEME_OTR_TRUSTED,
-    THEME_OTR_UNTRUSTED
+    THEME_OTR_UNTRUSTED,
+    THEME_OCCUPANTS_HEADER,
+    THEME_ROSTER_HEADER,
+    THEME_NONE
 } theme_item_t;
 
 void theme_init(const char * const theme_name);

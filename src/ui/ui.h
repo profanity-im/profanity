@@ -62,6 +62,7 @@ void (*ui_init)(void);
 void (*ui_load_colours)(void);
 void (*ui_update)(void);
 void (*ui_close)(void);
+void (*ui_redraw)(void);
 void (*ui_resize)(const int ch, const char * const input,
     const int size);
 GSList* (*ui_get_recipients)(void);

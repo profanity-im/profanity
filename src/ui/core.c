@@ -218,6 +218,14 @@ _ui_resize(const int ch, const char * const input, const int size)
 }
 
 static void
+_ui_redraw(void)
+{
+    title_bar_resize();
+    wins_resize_all();
+    status_bar_resize();
+}
+
+static void
 _ui_load_colours(void)
 {
     if (has_colors()) {
@@ -2861,9 +2869,9 @@ static void
 _ui_roster_contacts_by_presence(const char * const presence, char *title)
 {
     ProfWin *window = wins_get_console();
-    wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+    wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
     win_printline_nowrap(window->subwin, title);
-    wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+    wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
     GSList *contacts = roster_get_contacts_by_presence(presence);
     if (contacts) {
         GSList *curr_contact = contacts;
@@ -2880,12 +2888,12 @@ static void
 _ui_roster_contacts_by_group(char *group)
 {
     ProfWin *window = wins_get_console();
-    wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+    wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
     GString *title = g_string_new(" -");
     g_string_append(title, group);
     win_printline_nowrap(window->subwin, title->str);
     g_string_free(title, TRUE);
-    wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+    wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
     GSList *contacts = roster_get_group(group);
     if (contacts) {
         GSList *curr_contact = contacts;
@@ -2904,9 +2912,9 @@ _ui_roster_contacts_by_no_group(void)
     ProfWin *window = wins_get_console();
     GSList *contacts = roster_get_nogroup();
     if (contacts) {
-        wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+        wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
         win_printline_nowrap(window->subwin, " -no group");
-        wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+        wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
         GSList *curr_contact = contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
@@ -2947,9 +2955,9 @@ _ui_roster(void)
             GSList *contacts = roster_get_contacts();
             if (contacts) {
                 werase(window->subwin);
-                wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
                 win_printline_nowrap(window->subwin, " -Roster");
-                wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
                 GSList *curr_contact = contacts;
                 while (curr_contact) {
                     PContact contact = curr_contact->data;
@@ -2973,9 +2981,9 @@ _ui_muc_roster(const char * const room)
             werase(window->subwin);
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
-                wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 win_printline_nowrap(window->subwin, " -Moderators");
-                wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -2994,9 +3002,9 @@ _ui_muc_roster(const char * const room)
                     roster_curr = g_list_next(roster_curr);
                 }
 
-                wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 win_printline_nowrap(window->subwin, " -Participants");
-                wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -3015,9 +3023,9 @@ _ui_muc_roster(const char * const room)
                     roster_curr = g_list_next(roster_curr);
                 }
 
-                wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 win_printline_nowrap(window->subwin, " -Visitors");
-                wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -3036,9 +3044,9 @@ _ui_muc_roster(const char * const room)
                     roster_curr = g_list_next(roster_curr);
                 }
             } else {
-                wattron(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 win_printline_nowrap(window->subwin, " -Occupants\n");
-                wattroff(window->subwin, theme_attrs(THEME_ROOMINFO));
+                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
@@ -3415,4 +3423,5 @@ ui_init_module(void)
     ui_room_occupant_affiliation_change = _ui_room_occupant_affiliation_change;
     ui_room_occupant_role_and_affiliation_change = _ui_room_occupant_role_and_affiliation_change;
     ui_redraw_all_room_rosters = _ui_redraw_all_room_rosters;
+    ui_redraw = _ui_redraw;
 }
