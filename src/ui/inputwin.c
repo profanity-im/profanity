@@ -83,7 +83,7 @@ create_input_window(void)
 #endif
     getmaxyx(stdscr, rows, cols);
     inp_win = newpad(1, INP_WIN_MAX);
-    wbkgd(inp_win, COLOUR_INPUT_TEXT);
+    wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
     _inp_win_update_virtual();

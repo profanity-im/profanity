@@ -113,7 +113,7 @@ _cons_show_error(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_save_print(console, '-', NULL, 0, COLOUR_ERROR, "", fmt_msg->str);
+    win_save_print(console, '-', NULL, 0, THEME_ERROR, "", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
@@ -136,7 +136,7 @@ _cons_show_typing(const char * const barejid)
         display_usr = barejid;
     }
 
-    win_save_vprint(console, '-', NULL, 0, COLOUR_TYPING, "", "!! %s is typing a message...", display_usr);
+    win_save_vprint(console, '-', NULL, 0, THEME_TYPING, "", "!! %s is typing a message...", display_usr);
     cons_alert();
 }
 
@@ -149,7 +149,7 @@ _cons_show_incoming_message(const char * const short_from, const int win_index)
     if (ui_index == 10) {
         ui_index = 0;
     }
-    win_save_vprint(console, '-', NULL, 0, COLOUR_INCOMING, "", "<< incoming from %s (%d)", short_from, ui_index);
+    win_save_vprint(console, '-', NULL, 0, THEME_INCOMING, "", "<< incoming from %s (%d)", short_from, ui_index);
 
     cons_alert();
 }
@@ -453,10 +453,10 @@ _cons_show_bookmarks(const GList *list)
         while (list != NULL) {
             Bookmark *item = list->data;
 
-            int presence_colour = 0;
+            theme_item_t presence_colour = THEME_TEXT;
 
             if (muc_active(item->jid)) {
-                presence_colour = COLOUR_ONLINE;
+                presence_colour = THEME_ONLINE;
             }
             win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s", item->jid);
             if (item->nick != NULL) {
@@ -1485,14 +1485,14 @@ _cons_splash_logo(void)
     ProfWin *console = wins_get_console();
     win_save_println(console, "Welcome to");
 
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "                   ___            _           ");
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "                  / __)          (_)_         ");
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "|_|                                    (____/ ");
-    win_save_print(console, '-', NULL, 0, COLOUR_SPLASH, "", "");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "                   ___            _           ");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "                  / __)          (_)_         ");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "|_|                                    (____/ ");
+    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "");
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
@@ -1522,7 +1522,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         }
 
         const char *presence = p_contact_presence(contact);
-        int presence_colour;
+        theme_item_t presence_colour = THEME_TEXT;
         if (p_contact_subscribed(contact)) {
             presence_colour = win_presence_colour(presence);
         } else {
@@ -1542,9 +1542,9 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
             sub = g_string_append(sub, ", request received");
         }
         if (p_contact_subscribed(contact)) {
-            presence_colour = COLOUR_SUBSCRIBED;
+            presence_colour = THEME_SUBSCRIBED;
         } else {
-            presence_colour = COLOUR_UNSUBSCRIBED;
+            presence_colour = THEME_UNSUBSCRIBED;
         }
 
         if (show_groups) {

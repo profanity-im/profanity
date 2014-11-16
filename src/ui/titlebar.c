@@ -65,7 +65,7 @@ create_title_bar(void)
     int cols = getmaxx(stdscr);
 
     win = newwin(1, cols, 0, 0);
-    wbkgd(win, COLOUR_TITLE_TEXT);
+    wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
     title_bar_console();
     title_bar_set_presence(CONTACT_OFFLINE);
     wnoutrefresh(win);
@@ -98,7 +98,7 @@ title_bar_resize(void)
     int cols = getmaxx(stdscr);
 
     wresize(win, 1, cols);
-    wbkgd(win, COLOUR_TITLE_TEXT);
+    wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
 
     _title_bar_draw();
 }
@@ -174,6 +174,8 @@ _title_bar_draw(void)
         waddch(win, ' ');
     mvwprintw(win, 0, 0, " %s", current_title);
 
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+
     // show presence
     if (prefs_get_boolean(PREF_PRESENCE) && current_recipient) {
         char *recipient_jid = NULL;
@@ -190,29 +192,31 @@ _title_bar_draw(void)
                 PContact contact = roster_get_contact(recipient_jid);
                 const char *presence = p_contact_presence(contact);
 
-                int presence_colour = COLOUR_TITLE_ONLINE;
+                theme_item_t presence_colour = THEME_TITLE_ONLINE;
                 if (g_strcmp0(presence, "offline") == 0) {
-                    presence_colour = COLOUR_TITLE_OFFLINE;
+                    presence_colour = THEME_TITLE_OFFLINE;
                 } else if (g_strcmp0(presence, "away") == 0) {
-                    presence_colour = COLOUR_TITLE_AWAY;
+                    presence_colour = THEME_TITLE_AWAY;
                 } else if (g_strcmp0(presence, "xa") == 0) {
-                    presence_colour = COLOUR_TITLE_XA;
+                    presence_colour = THEME_TITLE_XA;
                 } else if (g_strcmp0(presence, "chat") == 0) {
-                    presence_colour = COLOUR_TITLE_CHAT;
+                    presence_colour = THEME_TITLE_CHAT;
                 } else if (g_strcmp0(presence, "dnd") == 0) {
-                    presence_colour = COLOUR_TITLE_DND;
+                    presence_colour = THEME_TITLE_DND;
                 }
 
+                int presence_attrs = theme_attrs(presence_colour);
+
                 wprintw(win, " ");
-                wattron(win, COLOUR_TITLE_BRACKET);
+                wattron(win, bracket_attrs);
                 wprintw(win, "[");
-                wattroff(win, COLOUR_TITLE_BRACKET);
-                wattron(win, presence_colour);
+                wattroff(win, bracket_attrs);
+                wattron(win, presence_attrs);
                 wprintw(win, presence);
-                wattroff(win, presence_colour);
-                wattron(win, COLOUR_TITLE_BRACKET);
+                wattroff(win, presence_attrs);
+                wattron(win, bracket_attrs);
                 wprintw(win, "]");
-                wattroff(win, COLOUR_TITLE_BRACKET);
+                wattroff(win, bracket_attrs);
             }
         }
     }
@@ -233,50 +237,54 @@ _title_bar_draw(void)
             if (current->type == WIN_CHAT) {
                 if (!current->is_otr) {
                     if (prefs_get_boolean(PREF_OTR_WARN)) {
+                        int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
                         wprintw(win, " ");
-                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wattron(win, bracket_attrs);
                         wprintw(win, "[");
-                        wattroff(win, COLOUR_TITLE_BRACKET);
-                        wattron(win, COLOUR_TITLE_UNENCRYPTED);
+                        wattroff(win, bracket_attrs);
+                        wattron(win, unencrypted_attrs);
                         wprintw(win, "unencrypted");
-                        wattroff(win, COLOUR_TITLE_UNENCRYPTED);
-                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wattroff(win, unencrypted_attrs);
+                        wattron(win, bracket_attrs);
                         wprintw(win, "]");
-                        wattroff(win, COLOUR_TITLE_BRACKET);
+                        wattroff(win, bracket_attrs);
                     }
                 } else {
+                    int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
                     wprintw(win, " ");
-                    wattron(win, COLOUR_TITLE_BRACKET);
+                    wattron(win, bracket_attrs);
                     wprintw(win, "[");
-                    wattroff(win, COLOUR_TITLE_BRACKET);
-                    wattron(win, COLOUR_TITLE_ENCRYPTED);
+                    wattroff(win, bracket_attrs);
+                    wattron(win, encrypted_attrs);
                     wprintw(win, "OTR");
-                    wattroff(win, COLOUR_TITLE_ENCRYPTED);
-                    wattron(win, COLOUR_TITLE_BRACKET);
+                    wattroff(win, encrypted_attrs);
+                    wattron(win, bracket_attrs);
                     wprintw(win, "]");
-                    wattroff(win, COLOUR_TITLE_BRACKET);
+                    wattroff(win, bracket_attrs);
                     if (current->is_trusted) {
+                        int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
                         wprintw(win, " ");
-                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wattron(win, bracket_attrs);
                         wprintw(win, "[");
-                        wattroff(win, COLOUR_TITLE_BRACKET);
-                        wattron(win, COLOUR_TITLE_TRUSTED);
+                        wattroff(win, bracket_attrs);
+                        wattron(win, trusted_attrs);
                         wprintw(win, "trusted");
-                        wattroff(win, COLOUR_TITLE_TRUSTED);
-                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wattroff(win, trusted_attrs);
+                        wattron(win, bracket_attrs);
                         wprintw(win, "]");
-                        wattroff(win, COLOUR_TITLE_BRACKET);
+                        wattroff(win, bracket_attrs);
                     } else {
+                        int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
                         wprintw(win, " ");
-                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wattron(win, bracket_attrs);
                         wprintw(win, "[");
-                        wattroff(win, COLOUR_TITLE_BRACKET);
-                        wattron(win, COLOUR_TITLE_UNTRUSTED);
+                        wattroff(win, bracket_attrs);
+                        wattron(win, untrusted_attrs);
                         wprintw(win, "untrusted");
-                        wattroff(win, COLOUR_TITLE_UNTRUSTED);
-                        wattron(win, COLOUR_TITLE_BRACKET);
+                        wattroff(win, untrusted_attrs);
+                        wattron(win, bracket_attrs);
                         wprintw(win, "]");
-                        wattroff(win, COLOUR_TITLE_BRACKET);
+                        wattroff(win, bracket_attrs);
                     }
                 }
             }
@@ -300,47 +308,55 @@ _title_bar_draw(void)
     // show presence
     int cols = getmaxx(stdscr);
 
-    wattron(win, COLOUR_TITLE_BRACKET);
+    wattron(win, bracket_attrs);
     mvwaddch(win, 0, cols - 14, '[');
-    wattroff(win, COLOUR_TITLE_BRACKET);
+    wattroff(win, bracket_attrs);
+
+    int presence_attrs = 0;
 
     switch (current_presence)
     {
         case CONTACT_ONLINE:
-            wattron(win, COLOUR_TITLE_ONLINE);
+            presence_attrs = theme_attrs(THEME_TITLE_ONLINE);
+            wattron(win, presence_attrs);
             mvwprintw(win, 0, cols - 13, " ...online ");
-            wattroff(win, COLOUR_TITLE_ONLINE);
+            wattroff(win, presence_attrs);
             break;
         case CONTACT_AWAY:
-            wattron(win, COLOUR_TITLE_AWAY);
+            presence_attrs = theme_attrs(THEME_TITLE_AWAY);
+            wattron(win, presence_attrs);
             mvwprintw(win, 0, cols - 13, " .....away ");
-            wattroff(win, COLOUR_TITLE_AWAY);
+            wattroff(win, presence_attrs);
             break;
         case CONTACT_DND:
-            wattron(win, COLOUR_TITLE_DND);
+            presence_attrs = theme_attrs(THEME_TITLE_DND);
+            wattron(win, presence_attrs);
             mvwprintw(win, 0, cols - 13, " ......dnd ");
-            wattroff(win, COLOUR_TITLE_DND);
+            wattroff(win, presence_attrs);
             break;
         case CONTACT_CHAT:
-            wattron(win, COLOUR_TITLE_CHAT);
+            presence_attrs = theme_attrs(THEME_TITLE_CHAT);
+            wattron(win, presence_attrs);
             mvwprintw(win, 0, cols - 13, " .....chat ");
-            wattroff(win, COLOUR_TITLE_CHAT);
+            wattroff(win, presence_attrs);
             break;
         case CONTACT_XA:
-            wattron(win, COLOUR_TITLE_XA);
+            presence_attrs = theme_attrs(THEME_TITLE_XA);
+            wattron(win, presence_attrs);
             mvwprintw(win, 0, cols - 13, " .......xa ");
-            wattroff(win, COLOUR_TITLE_XA);
+            wattroff(win, presence_attrs);
             break;
         case CONTACT_OFFLINE:
-            wattron(win, COLOUR_TITLE_OFFLINE);
+            presence_attrs = theme_attrs(THEME_TITLE_OFFLINE);
+            wattron(win, presence_attrs);
             mvwprintw(win, 0, cols - 13, " ..offline ");
-            wattroff(win, COLOUR_TITLE_OFFLINE);
+            wattroff(win, presence_attrs);
             break;
     }
 
-    wattron(win, COLOUR_TITLE_BRACKET);
+    wattron(win, bracket_attrs);
     mvwaddch(win, 0, cols - 2, ']');
-    wattroff(win, COLOUR_TITLE_BRACKET);
+    wattroff(win, bracket_attrs);
 
     wnoutrefresh(win);
     inp_put_back();

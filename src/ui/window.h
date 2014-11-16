@@ -86,7 +86,7 @@ ProfWin* win_create(const char * const title, win_type_t type);
 void win_free(ProfWin *window);
 void win_update_virtual(ProfWin *window);
 void win_move_to_end(ProfWin *window);
-int  win_presence_colour(const char * const presence);
+theme_item_t win_presence_colour(const char * const presence);
 void win_show_contact(ProfWin *window, PContact contact);
 void win_show_occupant(ProfWin *window, Occupant *occupant);
 void win_show_status_string(ProfWin *window, const char * const from,
@@ -97,8 +97,8 @@ void win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
 void win_show_info(ProfWin *window, PContact contact);
 void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant);
-void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message, ...);
-void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, int attrs, const char * const from, const char * const message);
+void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...);
+void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message);
 void win_save_println(ProfWin *window, const char * const message);
 void win_save_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
