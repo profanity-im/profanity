@@ -1409,6 +1409,7 @@ cmd_init(void)
     time_ac = autocomplete_new();
     autocomplete_add(time_ac, "minutes");
     autocomplete_add(time_ac, "seconds");
+    autocomplete_add(time_ac, "off");
 
     cmd_history_init();
 }

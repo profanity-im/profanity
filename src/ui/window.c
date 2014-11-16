@@ -580,21 +580,23 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     int colour = COLOUR_ME;
 
     if ((flags & NO_DATE) == 0) {
-        gchar *date_fmt;
+        gchar *date_fmt = NULL;
         char *time_pref = prefs_get_string(PREF_TIME);
         if (g_strcmp0(time_pref, "minutes") == 0) {
             date_fmt = g_date_time_format(time, "%H:%M");
-        } else {
+        } else if (g_strcmp0(time_pref, "seconds") == 0) {
             date_fmt = g_date_time_format(time, "%H:%M:%S");
         }
         free(time_pref);
 
-        if ((flags & NO_COLOUR_DATE) == 0) {
-            wattron(window->win, COLOUR_TIME);
-        }
-        wprintw(window->win, "%s %c ", date_fmt, show_char);
-        if ((flags & NO_COLOUR_DATE) == 0) {
-            wattroff(window->win, COLOUR_TIME);
+        if (date_fmt) {
+            if ((flags & NO_COLOUR_DATE) == 0) {
+                wattron(window->win, COLOUR_TIME);
+            }
+            wprintw(window->win, "%s %c ", date_fmt, show_char);
+            if ((flags & NO_COLOUR_DATE) == 0) {
+                wattroff(window->win, COLOUR_TIME);
+            }
         }
         g_free(date_fmt);
     }
@@ -650,7 +652,7 @@ _win_print_wrapped(WINDOW *win, const char * const message)
     int wrap_space = 0;
     if (g_strcmp0(time_pref, "minutes") == 0) {
         wrap_space = 8;
-    } else {
+    } else if (g_strcmp0(time_pref, "seconds") == 0) {
         wrap_space = 11;
     }
     free(time_pref);

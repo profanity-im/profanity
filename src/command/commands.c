@@ -3043,6 +3043,11 @@ cmd_time(gchar **args, struct cmd_help_t help)
         cons_show("Time precision set to seconds.");
         wins_resize_all();
         return TRUE;
+    } else if (g_strcmp0(args[0], "off") == 0) {
+        prefs_set_string(PREF_TIME, "off");
+        cons_show("Time display disabled.");
+        wins_resize_all();
+        return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);
         return TRUE;
