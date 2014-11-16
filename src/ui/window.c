@@ -641,31 +641,37 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
 }
 
 static void
-_win_print_wrapped(WINDOW *win, const char * const message)
+_win_indent(WINDOW *win, int size)
 {
     int i = 0;
+    for (i = 0; i < size; i++) {
+        waddch(win, ' ');
+    }
+}
+
+static void
+_win_print_wrapped(WINDOW *win, const char * const message)
+{
     int linei = 0;
     int wordi = 0;
     char *word = malloc(strlen(message) + 1);
 
     char *time_pref = prefs_get_string(PREF_TIME);
-    int wrap_space = 0;
+    int indent = 0;
     if (g_strcmp0(time_pref, "minutes") == 0) {
-        wrap_space = 8;
+        indent = 8;
     } else if (g_strcmp0(time_pref, "seconds") == 0) {
-        wrap_space = 11;
+        indent = 11;
     }
     free(time_pref);
 
     while (message[linei] != '\0') {
         if (message[linei] == ' ') {
-            wprintw(win, " ");
+            waddch(win, ' ');
             linei++;
         } else if (message[linei] == '\n') {
             waddch(win, '\n');
-            for (i = 0; i < wrap_space; i++) {
-                waddch(win, ' ');
-            }
+            _win_indent(win, indent);
             linei++;
         } else {
             wordi = 0;
@@ -678,28 +684,22 @@ _win_print_wrapped(WINDOW *win, const char * const message)
             int maxx = getmaxx(win);
 
             // word larger than line
-            if (strlen(word) > (maxx - wrap_space)) {
+            if (strlen(word) > (maxx - indent)) {
                 int i;
                 for (i = 0; i < wordi; i++) {
                     curx = getcurx(win);
-                    if (curx < wrap_space) {
-                        for (i = 0; i < wrap_space; i++) {
-                            waddch(win, ' ');
-                        }
+                    if (curx < indent) {
+                        _win_indent(win, indent);
                     }
                     waddch(win, word[i]);
                 }
             } else {
                 if (curx + strlen(word) > maxx) {
                     waddch(win, '\n');
-                    for (i = 0; i < wrap_space; i++) {
-                        waddch(win, ' ');
-                    }
+                    _win_indent(win, indent);
                 }
-                if (curx < wrap_space) {
-                    for (i = 0; i < wrap_space; i++) {
-                        waddch(win, ' ');
-                    }
+                if (curx < indent) {
+                    _win_indent(win, indent);
                 }
                 wprintw(win, "%s", word);
             }
