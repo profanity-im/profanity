@@ -716,6 +716,7 @@ cmd_theme(gchar **args, struct cmd_help_t help)
         } else if (theme_load(args[1])) {
             ui_load_colours();
             prefs_set_string(PREF_THEME, args[1]);
+            ui_redraw();
             cons_show("Loaded theme: %s", args[1]);
         } else {
             cons_show("Couldn't find theme: %s", args[1]);
@@ -2276,10 +2277,10 @@ cmd_subject(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         char *subject = muc_subject(room);
         if (subject) {
-            win_save_vprint(window, '!', NULL, NO_EOL, COLOUR_ROOMINFO, "", "Room subject: ");
+            win_save_vprint(window, '!', NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
             win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
         } else {
-            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room has no subject");
+            win_save_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Room has no subject");
         }
         return TRUE;
     }
@@ -2477,12 +2478,12 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(room);
         if (!requires_config) {
-            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Current room does not require configuration.");
+            win_save_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Current room does not require configuration.");
             return TRUE;
         } else {
             iq_confirm_instant_room(room);
             muc_set_requires_config(room, FALSE);
-            win_save_print(window, '!', NULL, 0, COLOUR_ROOMINFO, "", "Room unlocked.");
+            win_save_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Room unlocked.");
             return TRUE;
         }
     }

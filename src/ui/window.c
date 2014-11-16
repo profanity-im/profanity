@@ -54,7 +54,7 @@
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
 static void _win_print(ProfWin *window, const char show_char, GDateTime *time,
-    int flags, int attrs, const char * const from, const char * const message);
+    int flags, theme_item_t theme_item, const char * const from, const char * const message);
 static void _win_print_wrapped(WINDOW *win, const char * const message);
 
 int
@@ -83,13 +83,13 @@ win_create(const char * const title, win_type_t type)
     if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
         int subwin_cols = win_occpuants_cols();
         new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
-        wbkgd(new_win->win, COLOUR_TEXT);
+        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
 
         new_win->subwin = newpad(PAD_SIZE, subwin_cols);
-        wbkgd(new_win->subwin, COLOUR_TEXT);
+        wbkgd(new_win->subwin, theme_attrs(THEME_TEXT));
     } else {
         new_win->win = newpad(PAD_SIZE, (cols));
-        wbkgd(new_win->win, COLOUR_TEXT);
+        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
 
         new_win->subwin = NULL;
     }
@@ -136,7 +136,7 @@ win_show_subwin(ProfWin *window)
         }
 
         window->subwin = newpad(PAD_SIZE, subwin_cols);
-        wbkgd(window->subwin, COLOUR_TEXT);
+        wbkgd(window->subwin, theme_attrs(THEME_TEXT));
 
         wresize(window->win, PAD_SIZE, cols - subwin_cols);
         win_redraw(window);
@@ -191,21 +191,21 @@ win_move_to_end(ProfWin *window)
     }
 }
 
-int
+theme_item_t
 win_presence_colour(const char * const presence)
 {
     if (g_strcmp0(presence, "online") == 0) {
-        return COLOUR_ONLINE;
+        return THEME_ONLINE;
     } else if (g_strcmp0(presence, "away") == 0) {
-        return COLOUR_AWAY;
+        return THEME_AWAY;
     } else if (g_strcmp0(presence, "chat") == 0) {
-        return COLOUR_CHAT;
+        return THEME_CHAT;
     } else if (g_strcmp0(presence, "dnd") == 0) {
-        return COLOUR_DND;
+        return THEME_DND;
     } else if (g_strcmp0(presence, "xa") == 0) {
-        return COLOUR_XA;
+        return THEME_XA;
     } else {
-        return COLOUR_OFFLINE;
+        return THEME_OFFLINE;
     }
 }
 
@@ -214,7 +214,7 @@ win_show_occupant(ProfWin *window, Occupant *occupant)
 {
     const char *presence_str = string_from_resource_presence(occupant->presence);
 
-    int presence_colour = win_presence_colour(presence_str);
+    theme_item_t presence_colour = win_presence_colour(presence_str);
 
     win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", occupant->nick);
     win_save_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
@@ -235,7 +235,7 @@ win_show_contact(ProfWin *window, PContact contact)
     const char *status = p_contact_status(contact);
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    int presence_colour = win_presence_colour(presence);
+    theme_item_t presence_colour = win_presence_colour(presence);
 
     if (name != NULL) {
         win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", name);
@@ -277,7 +277,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
     const char *occupant_affiliation = muc_occupant_affiliation_str(occupant);
     const char *occupant_role = muc_occupant_role_str(occupant);
 
-    int presence_colour = win_presence_colour(presence_str);
+    theme_item_t presence_colour = win_presence_colour(presence_str);
 
     win_save_print(window, '!', NULL, NO_EOL, presence_colour, "", occupant->nick);
     win_save_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
@@ -355,7 +355,7 @@ win_show_info(ProfWin *window, PContact contact)
     GList *ordered_resources = NULL;
     GDateTime *last_activity = p_contact_last_activity(contact);
 
-    int presence_colour = win_presence_colour(presence);
+    theme_item_t presence_colour = win_presence_colour(presence);
 
     win_save_print(window, '-', NULL, 0, 0, "", "");
     win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
@@ -466,14 +466,14 @@ win_show_status_string(ProfWin *window, const char * const from,
     GDateTime *last_activity, const char * const pre,
     const char * const default_show)
 {
-    int presence_colour;
+    theme_item_t presence_colour;
 
     if (show != NULL) {
         presence_colour = win_presence_colour(show);
     } else if (strcmp(default_show, "online") == 0) {
-        presence_colour = COLOUR_ONLINE;
+        presence_colour = THEME_ONLINE;
     } else {
-        presence_colour = COLOUR_OFFLINE;
+        presence_colour = THEME_OFFLINE;
     }
 
 
@@ -518,7 +518,7 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     {
         case WIN_CHAT:
         case WIN_PRIVATE:
-            win_save_print(window, '-', tv_stamp, NO_ME, COLOUR_TEXT_THEM, from, message);
+            win_save_print(window, '-', tv_stamp, NO_ME, THEME_TEXT_THEM, from, message);
             break;
         default:
             assert(FALSE);
@@ -528,19 +528,19 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
 
 void
 win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp,
-    int flags, int attrs, const char * const from, const char * const message, ...)
+    int flags, theme_item_t theme_item, const char * const from, const char * const message, ...)
 {
     va_list arg;
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_save_print(window, show_char, tstamp, flags, attrs, from, fmt_msg->str);
+    win_save_print(window, show_char, tstamp, flags, theme_item, from, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
 }
 
 void
 win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
-    int flags, int attrs, const char * const from, const char * const message)
+    int flags, theme_item_t theme_item, const char * const from, const char * const message)
 {
     GDateTime *time;
 
@@ -550,8 +550,8 @@ win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
         time = g_date_time_new_from_timeval_utc(tstamp);
     }
 
-    buffer_push(window->buffer, show_char, time, flags, attrs, from, message);
-    _win_print(window, show_char, time, flags, attrs, from, message);
+    buffer_push(window->buffer, show_char, time, flags, theme_item, from, message);
+    _win_print(window, show_char, time, flags, theme_item, from, message);
 }
 
 void
@@ -568,7 +568,7 @@ win_save_newline(ProfWin *window)
 
 static void
 _win_print(ProfWin *window, const char show_char, GDateTime *time,
-    int flags, int attrs, const char * const from, const char * const message)
+    int flags, theme_item_t theme_item, const char * const from, const char * const message)
 {
     // flags : 1st bit =  0/1 - me/not me
     //         2nd bit =  0/1 - date/no date
@@ -577,7 +577,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     //         5th bit =  0/1 - color date/no date
     int unattr_me = 0;
     int offset = 0;
-    int colour = COLOUR_ME;
+    int colour = theme_attrs(THEME_ME);
 
     if ((flags & NO_DATE) == 0) {
         gchar *date_fmt = NULL;
@@ -591,11 +591,11 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
 
         if (date_fmt) {
             if ((flags & NO_COLOUR_DATE) == 0) {
-                wattron(window->win, COLOUR_TIME);
+                wattron(window->win, theme_attrs(THEME_TIME));
             }
             wprintw(window->win, "%s %c ", date_fmt, show_char);
             if ((flags & NO_COLOUR_DATE) == 0) {
-                wattroff(window->win, COLOUR_TIME);
+                wattroff(window->win, theme_attrs(THEME_TIME));
             }
         }
         g_free(date_fmt);
@@ -603,7 +603,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
 
     if (strlen(from) > 0) {
         if (flags & NO_ME) {
-            colour = COLOUR_THEM;
+            colour = theme_attrs(THEME_THEM);
         }
 
         if (flags & NO_COLOUR_FROM) {
@@ -621,7 +621,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
         }
     }
 
-    wattron(window->win, attrs);
+    wattron(window->win, theme_attrs(theme_item));
 
     if (prefs_get_boolean(PREF_WRAP)) {
         _win_print_wrapped(window->win, message+offset);
@@ -633,7 +633,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
         wprintw(window->win, "\n");
     }
 
-    wattroff(window->win, attrs);
+    wattroff(window->win, theme_attrs(theme_item));
 
     if (unattr_me) {
         wattroff(window->win, colour);
@@ -718,7 +718,7 @@ win_redraw(ProfWin *window)
 
     for (i = 0; i < size; i++) {
         ProfBuffEntry *e = buffer_yield_entry(window->buffer, i);
-        _win_print(window, e->show_char, e->time, e->flags, e->attrs, e->from, e->message);
+        _win_print(window, e->show_char, e->time, e->flags, e->theme_item, e->from, e->message);
     }
 }
 
