@@ -906,6 +906,8 @@ _cons_time_setting(void)
     char *pref_time = prefs_get_string(PREF_TIME);
     if (g_strcmp0(pref_time, "minutes") == 0)
         cons_show("Time (/time)                  : minutes");
+    else if (g_strcmp0(pref_time, "off") == 0)
+        cons_show("Time (/time)                  : OFF");
     else
         cons_show("Time (/time)                  : seconds");
 
