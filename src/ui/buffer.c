@@ -80,14 +80,14 @@ buffer_free(ProfBuff buffer)
 }
 
 void
-buffer_push(ProfBuff buffer, const char show_char, const char * const date_fmt,
+buffer_push(ProfBuff buffer, const char show_char, GDateTime *time,
     int flags, int attrs, const char * const from, const char * const message)
 {
     ProfBuffEntry *e = malloc(sizeof(struct prof_buff_entry_t));
     e->show_char = show_char;
     e->flags = flags;
     e->attrs = attrs;
-    e->date_fmt = strdup(date_fmt);
+    e->time = time;
     e->from = strdup(from);
     e->message = strdup(message);
 
@@ -111,7 +111,6 @@ _free_entry(ProfBuffEntry *entry)
 {
     free(entry->message);
     free(entry->from);
-    free(entry->date_fmt);
+    g_date_time_unref(entry->time);
     free(entry);
 }
-
