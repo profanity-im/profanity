@@ -901,6 +901,18 @@ _cons_autoconnect_setting(void)
 }
 
 static void
+_cons_time_setting(void)
+{
+    char *pref_time = prefs_get_string(PREF_TIME);
+    if (g_strcmp0(pref_time, "minutes") == 0)
+        cons_show("Time (/time)                  : minutes");
+    else
+        cons_show("Time (/time)                  : seconds");
+
+    prefs_free_string(pref_time);
+}
+
+static void
 _cons_vercheck_setting(void)
 {
     if (prefs_get_boolean(PREF_VERCHECK))
@@ -976,6 +988,7 @@ _cons_show_ui_prefs(void)
     cons_flash_setting();
     cons_splash_setting();
     cons_wrap_setting();
+    cons_time_setting();
     cons_vercheck_setting();
     cons_mouse_setting();
     cons_statuses_setting();
@@ -1594,6 +1607,7 @@ console_init_module(void)
     cons_privileges_setting = _cons_privileges_setting;
     cons_beep_setting = _cons_beep_setting;
     cons_wrap_setting = _cons_wrap_setting;
+    cons_time_setting = _cons_time_setting;
     cons_presence_setting = _cons_presence_setting;
     cons_flash_setting = _cons_flash_setting;
     cons_splash_setting = _cons_splash_setting;

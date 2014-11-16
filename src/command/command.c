@@ -598,6 +598,14 @@ static struct cmd_t command_defs[] =
           "Enable or disable word wrapping.",
           NULL } } },
 
+    { "/time",
+        cmd_time, parse_args, 1, 1, &cons_time_setting,
+        { "/time minutes|seconds", "Time display.",
+        { "/time minutes|seconds",
+          "---------------------",
+          "Configure time precision for the main window.",
+          NULL } } },
+
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
         { "/notify [type value]|[type setting value]", "Control various desktop noficiations.",
@@ -1080,6 +1088,7 @@ static Autocomplete form_ac;
 static Autocomplete form_field_multi_ac;
 static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
+static Autocomplete time_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1406,6 +1415,10 @@ cmd_init(void)
     autocomplete_add(occupants_default_ac, "show");
     autocomplete_add(occupants_default_ac, "hide");
 
+    time_ac = autocomplete_new();
+    autocomplete_add(time_ac, "minutes");
+    autocomplete_add(time_ac, "seconds");
+
     cmd_history_init();
 }
 
@@ -1459,6 +1472,7 @@ cmd_uninit(void)
     autocomplete_free(form_field_multi_ac);
     autocomplete_free(occupants_ac);
     autocomplete_free(occupants_default_ac);
+    autocomplete_free(time_ac);
 }
 
 gboolean
@@ -1629,6 +1643,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(form_field_multi_ac);
     autocomplete_reset(occupants_ac);
     autocomplete_reset(occupants_default_ac);
+    autocomplete_reset(time_ac);
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
         ProfWin *window = wins_get_current();
@@ -1924,8 +1939,8 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", "/time" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, time_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, size, cmds[i], completers[i], TRUE);

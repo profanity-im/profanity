@@ -53,7 +53,7 @@
 
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
-static void _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
+static void _win_print(ProfWin *window, const char show_char, GDateTime *time,
     int flags, int attrs, const char * const from, const char * const message);
 static void _win_print_wrapped(WINDOW *win, const char * const message);
 
@@ -542,21 +542,16 @@ void
 win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
     int flags, int attrs, const char * const from, const char * const message)
 {
-    gchar *date_fmt;
     GDateTime *time;
 
     if (tstamp == NULL) {
         time = g_date_time_new_now_local();
-        date_fmt = g_date_time_format(time, "%H:%M:%S");
     } else {
         time = g_date_time_new_from_timeval_utc(tstamp);
-        date_fmt = g_date_time_format(time, "%H:%M:%S");
     }
 
-    g_date_time_unref(time);
-    buffer_push(window->buffer, show_char, date_fmt, flags, attrs, from, message);
-    _win_print(window, show_char, date_fmt, flags, attrs, from, message);
-    g_free(date_fmt);
+    buffer_push(window->buffer, show_char, time, flags, attrs, from, message);
+    _win_print(window, show_char, time, flags, attrs, from, message);
 }
 
 void
@@ -572,18 +567,28 @@ win_save_newline(ProfWin *window)
 }
 
 static void
-_win_print(ProfWin *window, const char show_char, const char * const date_fmt,
+_win_print(ProfWin *window, const char show_char, GDateTime *time,
     int flags, int attrs, const char * const from, const char * const message)
 {
     // flags : 1st bit =  0/1 - me/not me
     //         2nd bit =  0/1 - date/no date
     //         3rd bit =  0/1 - eol/no eol
     //         4th bit =  0/1 - color from/no color from
+    //         5th bit =  0/1 - color date/no date
     int unattr_me = 0;
     int offset = 0;
     int colour = COLOUR_ME;
 
     if ((flags & NO_DATE) == 0) {
+        gchar *date_fmt;
+        char *time_pref = prefs_get_string(PREF_TIME);
+        if (g_strcmp0(time_pref, "minutes") == 0) {
+            date_fmt = g_date_time_format(time, "%H:%M");
+        } else {
+            date_fmt = g_date_time_format(time, "%H:%M:%S");
+        }
+        free(time_pref);
+
         if ((flags & NO_COLOUR_DATE) == 0) {
             wattron(window->win, COLOUR_TIME);
         }
@@ -591,6 +596,7 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
         if ((flags & NO_COLOUR_DATE) == 0) {
             wattroff(window->win, COLOUR_TIME);
         }
+        g_free(date_fmt);
     }
 
     if (strlen(from) > 0) {
@@ -635,16 +641,29 @@ _win_print(ProfWin *window, const char show_char, const char * const date_fmt,
 static void
 _win_print_wrapped(WINDOW *win, const char * const message)
 {
+    int i = 0;
     int linei = 0;
     int wordi = 0;
     char *word = malloc(strlen(message) + 1);
+
+    char *time_pref = prefs_get_string(PREF_TIME);
+    int wrap_space = 0;
+    if (g_strcmp0(time_pref, "minutes") == 0) {
+        wrap_space = 8;
+    } else {
+        wrap_space = 11;
+    }
+    free(time_pref);
 
     while (message[linei] != '\0') {
         if (message[linei] == ' ') {
             wprintw(win, " ");
             linei++;
         } else if (message[linei] == '\n') {
-            wprintw(win, "\n           ");
+            waddch(win, '\n');
+            for (i = 0; i < wrap_space; i++) {
+                waddch(win, ' ');
+            }
             linei++;
         } else {
             wordi = 0;
@@ -657,21 +676,28 @@ _win_print_wrapped(WINDOW *win, const char * const message)
             int maxx = getmaxx(win);
 
             // word larger than line
-            if (strlen(word) > (maxx - 11)) {
+            if (strlen(word) > (maxx - wrap_space)) {
                 int i;
                 for (i = 0; i < wordi; i++) {
                     curx = getcurx(win);
-                    if (curx < 11) {
-                        wprintw(win, "           ");
+                    if (curx < wrap_space) {
+                        for (i = 0; i < wrap_space; i++) {
+                            waddch(win, ' ');
+                        }
                     }
                     waddch(win, word[i]);
                 }
             } else {
                 if (curx + strlen(word) > maxx) {
-                    wprintw(win, "\n           ");
+                    waddch(win, '\n');
+                    for (i = 0; i < wrap_space; i++) {
+                        waddch(win, ' ');
+                    }
                 }
-                if (curx < 11) {
-                    wprintw(win, "           ");
+                if (curx < wrap_space) {
+                    for (i = 0; i < wrap_space; i++) {
+                        waddch(win, ' ');
+                    }
                 }
                 wprintw(win, "%s", word);
             }
@@ -690,7 +716,7 @@ win_redraw(ProfWin *window)
 
     for (i = 0; i < size; i++) {
         ProfBuffEntry *e = buffer_yield_entry(window->buffer, i);
-        _win_print(window, e->show_char, e->date_fmt, e->flags, e->attrs, e->from, e->message);
+        _win_print(window, e->show_char, e->time, e->flags, e->attrs, e->from, e->message);
     }
 }
 
