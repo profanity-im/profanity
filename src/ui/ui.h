@@ -325,6 +325,7 @@ void (*cons_priority_setting)(void);
 void (*cons_autoconnect_setting)(void);
 void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
 void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
+void (*cons_theme_colours)(void);
 
 // desktop notifier actions
 void (*notifier_uninit)(void);

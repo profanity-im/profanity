@@ -703,13 +703,13 @@ gboolean
 cmd_theme(gchar **args, struct cmd_help_t help)
 {
     // list themes
-    if (strcmp(args[0], "list") == 0) {
+    if (g_strcmp0(args[0], "list") == 0) {
         GSList *themes = theme_list();
         cons_show_themes(themes);
         g_slist_free_full(themes, g_free);
 
     // load a theme
-    } else if (strcmp(args[0], "set") == 0) {
+    } else if (g_strcmp0(args[0], "set") == 0) {
         if (args[1] == NULL) {
             cons_show("Usage: %s", help.usage);
         } else if (theme_load(args[1])) {
@@ -720,6 +720,10 @@ cmd_theme(gchar **args, struct cmd_help_t help)
         } else {
             cons_show("Couldn't find theme: %s", args[1]);
         }
+
+    // show colours
+    } else if (g_strcmp0(args[0], "colours") == 0) {
+        cons_theme_colours();
     } else {
         cons_show("Usage: %s", help.usage);
     }

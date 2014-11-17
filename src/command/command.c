@@ -941,14 +941,14 @@ static struct cmd_t command_defs[] =
 
     { "/theme",
         cmd_theme, parse_args, 1, 2, &cons_theme_setting,
-        { "/theme command [theme-name]", "Change colour theme.",
-        { "/theme command [theme-name]",
+        { "/theme list|set [theme-name]", "Change colour theme.",
+        { "/theme list|set [theme-name]",
           "---------------------------",
           "Change the colour settings used.",
           "",
-          "command : One of the following,",
-          "list             : List all available themes.",
-          "set [theme-name] : Load the named theme.\"default\" will reset to the default colours.",
+          "list           : List all available themes.",
+          "set theme-name : Load the named theme.\"default\" will reset to the default colours.",
+          "colours        : Show the colour values as rendered by the terminal.",
           "",
           "Example : /theme list",
           "Example : /theme set mycooltheme",
@@ -1201,6 +1201,7 @@ cmd_init(void)
     theme_ac = autocomplete_new();
     autocomplete_add(theme_ac, "list");
     autocomplete_add(theme_ac, "set");
+    autocomplete_add(theme_ac, "colours");
 
     disco_ac = autocomplete_new();
     autocomplete_add(disco_ac, "info");

@@ -90,7 +90,23 @@ typedef enum {
     THEME_OTR_UNTRUSTED,
     THEME_OCCUPANTS_HEADER,
     THEME_ROSTER_HEADER,
-    THEME_NONE
+    THEME_NONE,
+    THEME_WHITE,
+    THEME_WHITE_BOLD,
+    THEME_GREEN,
+    THEME_GREEN_BOLD,
+    THEME_RED,
+    THEME_RED_BOLD,
+    THEME_YELLOW,
+    THEME_YELLOW_BOLD,
+    THEME_BLUE,
+    THEME_BLUE_BOLD,
+    THEME_CYAN,
+    THEME_CYAN_BOLD,
+    THEME_BLACK,
+    THEME_BLACK_BOLD,
+    THEME_MAGENTA,
+    THEME_MAGENTA_BOLD
 } theme_item_t;
 
 void theme_init(const char * const theme_name);
