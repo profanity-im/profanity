@@ -44,4 +44,4 @@ otr.ended=red
 otr.trusted=green
 otr.untrusted=yellow
 roster.header=bold_yellow
-occupants.header=bold_cyan
+occupants.header=bold_magenta
