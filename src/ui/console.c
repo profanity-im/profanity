@@ -1480,6 +1480,43 @@ _cons_alert(void)
 }
 
 static void
+_cons_theme_colours(void)
+{
+    /*
+     *     { "default", -1 },
+    { "white", COLOR_WHITE },
+    { "green", COLOR_GREEN },
+    { "red", COLOR_RED },
+    { "yellow", COLOR_YELLOW },
+    { "blue", COLOR_BLUE },
+    { "cyan", COLOR_CYAN },
+    { "black", COLOR_BLACK },
+    { "magenta", COLOR_MAGENTA },
+
+     */
+
+    ProfWin *console = wins_get_console();
+    cons_show("Theme colours:");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_WHITE, "",         " white   ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_WHITE_BOLD, "",   " bold_white");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_GREEN, "",         " green   ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_GREEN_BOLD, "",   " bold_green");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_RED, "",           " red     ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_RED_BOLD, "",     " bold_red");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_YELLOW, "",        " yellow  ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_YELLOW_BOLD, "",  " bold_yellow");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_BLUE, "",          " blue    ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_BLUE_BOLD, "",    " bold_blue");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_CYAN, "",          " cyan    ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_CYAN_BOLD, "",    " bold_cyan");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_MAGENTA, "",       " magenta ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_MAGENTA_BOLD, "", " bold_magenta");
+    win_save_print(console, '-', NULL, NO_EOL, THEME_BLACK, "",         " black   ");
+    win_save_print(console, '-', NULL, NO_DATE, THEME_BLACK_BOLD, "",   " bold_black");
+    cons_show("");
+}
+
+static void
 _cons_splash_logo(void)
 {
     ProfWin *console = wins_get_console();
@@ -1651,4 +1688,5 @@ console_init_module(void)
     cons_show_contact_online = _cons_show_contact_online;
     cons_show_contact_offline = _cons_show_contact_offline;
     cons_show_aliases = _cons_show_aliases;
+    cons_theme_colours = _cons_theme_colours;
 }

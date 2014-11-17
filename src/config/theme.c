@@ -264,6 +264,16 @@ theme_init_colours(void)
     // subwin headers
     init_pair(44, colour_prefs.rosterheader, colour_prefs.bkgnd);
     init_pair(45, colour_prefs.occupantsheader, colour_prefs.bkgnd);
+
+    // raw
+    init_pair(46, COLOR_WHITE, colour_prefs.bkgnd);
+    init_pair(47, COLOR_GREEN, colour_prefs.bkgnd);
+    init_pair(48, COLOR_RED, colour_prefs.bkgnd);
+    init_pair(49, COLOR_YELLOW, colour_prefs.bkgnd);
+    init_pair(50, COLOR_BLUE, colour_prefs.bkgnd);
+    init_pair(51, COLOR_CYAN, colour_prefs.bkgnd);
+    init_pair(52, COLOR_BLACK, colour_prefs.bkgnd);
+    init_pair(53, COLOR_MAGENTA, colour_prefs.bkgnd);
 }
 
 static NCURSES_COLOR_T
@@ -308,6 +318,14 @@ _load_colours(void)
         g_hash_table_destroy(bold_items);
     }
     bold_items = g_hash_table_new(g_direct_hash, g_direct_equal);
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_WHITE_BOLD), GINT_TO_POINTER(THEME_WHITE_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_GREEN_BOLD), GINT_TO_POINTER(THEME_GREEN_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_RED_BOLD), GINT_TO_POINTER(THEME_RED_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_YELLOW_BOLD), GINT_TO_POINTER(THEME_YELLOW_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_BLUE_BOLD), GINT_TO_POINTER(THEME_BLUE_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_CYAN_BOLD), GINT_TO_POINTER(THEME_CYAN_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_BLACK_BOLD), GINT_TO_POINTER(THEME_BLACK_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_MAGENTA_BOLD), GINT_TO_POINTER(THEME_MAGENTA_BOLD));
 
     gchar *bkgnd_val = g_key_file_get_string(theme, "colours", "bkgnd", NULL);
     _set_colour(bkgnd_val, &colour_prefs.bkgnd, -1, THEME_NONE);
@@ -582,51 +600,67 @@ theme_attrs(theme_item_t attrs)
     int result = 0;
 
     switch (attrs) {
-    case THEME_TEXT:                   result = COLOR_PAIR(1); break;
-    case THEME_TEXT_ME:                result = COLOR_PAIR(2); break;
-    case THEME_TEXT_THEM:              result = COLOR_PAIR(3); break;
-    case THEME_SPLASH:                 result = COLOR_PAIR(4); break;
-    case THEME_ERROR:                  result = COLOR_PAIR(5); break;
-    case THEME_INCOMING:               result = COLOR_PAIR(6); break;
-    case THEME_INPUT_TEXT:             result = COLOR_PAIR(7); break;
-    case THEME_TIME:                   result = COLOR_PAIR(8); break;
-    case THEME_TITLE_TEXT:             result = COLOR_PAIR(9); break;
-    case THEME_TITLE_BRACKET:          result = COLOR_PAIR(10); break;
-    case THEME_TITLE_UNENCRYPTED:      result = COLOR_PAIR(11); break;
-    case THEME_TITLE_ENCRYPTED:        result = COLOR_PAIR(12); break;
-    case THEME_TITLE_UNTRUSTED:        result = COLOR_PAIR(13); break;
-    case THEME_TITLE_TRUSTED:          result = COLOR_PAIR(14); break;
-    case THEME_TITLE_ONLINE:           result = COLOR_PAIR(15); break;
-    case THEME_TITLE_OFFLINE:          result = COLOR_PAIR(16); break;
-    case THEME_TITLE_AWAY:             result = COLOR_PAIR(17); break;
-    case THEME_TITLE_CHAT:             result = COLOR_PAIR(18); break;
-    case THEME_TITLE_DND:              result = COLOR_PAIR(19); break;
-    case THEME_TITLE_XA:               result = COLOR_PAIR(20); break;
-    case THEME_STATUS_TEXT:            result = COLOR_PAIR(21); break;
-    case THEME_STATUS_BRACKET:         result = COLOR_PAIR(22); break;
-    case THEME_STATUS_ACTIVE:          result = COLOR_PAIR(23); break;
-    case THEME_STATUS_NEW:             result = COLOR_PAIR(24); break;
-    case THEME_ME:                     result = COLOR_PAIR(25); break;
-    case THEME_THEM:                   result = COLOR_PAIR(26); break;
-    case THEME_ROOMINFO:               result = COLOR_PAIR(27); break;
-    case THEME_ROOMMENTION:            result = COLOR_PAIR(28); break;
-    case THEME_ONLINE:                 result = COLOR_PAIR(29); break;
-    case THEME_OFFLINE:                result = COLOR_PAIR(30); break;
-    case THEME_AWAY:                   result = COLOR_PAIR(31); break;
-    case THEME_CHAT:                   result = COLOR_PAIR(32); break;
-    case THEME_DND:                    result = COLOR_PAIR(33); break;
-    case THEME_XA:                     result = COLOR_PAIR(34); break;
-    case THEME_TYPING:                 result = COLOR_PAIR(35); break;
-    case THEME_GONE:                   result = COLOR_PAIR(36); break;
-    case THEME_SUBSCRIBED:             result = COLOR_PAIR(37); break;
-    case THEME_UNSUBSCRIBED:           result = COLOR_PAIR(38); break;
-    case THEME_OTR_STARTED_TRUSTED:    result = COLOR_PAIR(39); break;
-    case THEME_OTR_STARTED_UNTRUSTED:  result = COLOR_PAIR(40); break;
-    case THEME_OTR_ENDED:              result = COLOR_PAIR(41); break;
-    case THEME_OTR_TRUSTED:            result = COLOR_PAIR(42); break;
-    case THEME_OTR_UNTRUSTED:          result = COLOR_PAIR(43); break;
-    case THEME_ROSTER_HEADER:          result = COLOR_PAIR(44); break;
-    case THEME_OCCUPANTS_HEADER:       result = COLOR_PAIR(45); break;
+    case THEME_TEXT:                    result = COLOR_PAIR(1); break;
+    case THEME_TEXT_ME:                 result = COLOR_PAIR(2); break;
+    case THEME_TEXT_THEM:               result = COLOR_PAIR(3); break;
+    case THEME_SPLASH:                  result = COLOR_PAIR(4); break;
+    case THEME_ERROR:                   result = COLOR_PAIR(5); break;
+    case THEME_INCOMING:                result = COLOR_PAIR(6); break;
+    case THEME_INPUT_TEXT:              result = COLOR_PAIR(7); break;
+    case THEME_TIME:                    result = COLOR_PAIR(8); break;
+    case THEME_TITLE_TEXT:              result = COLOR_PAIR(9); break;
+    case THEME_TITLE_BRACKET:           result = COLOR_PAIR(10); break;
+    case THEME_TITLE_UNENCRYPTED:       result = COLOR_PAIR(11); break;
+    case THEME_TITLE_ENCRYPTED:         result = COLOR_PAIR(12); break;
+    case THEME_TITLE_UNTRUSTED:         result = COLOR_PAIR(13); break;
+    case THEME_TITLE_TRUSTED:           result = COLOR_PAIR(14); break;
+    case THEME_TITLE_ONLINE:            result = COLOR_PAIR(15); break;
+    case THEME_TITLE_OFFLINE:           result = COLOR_PAIR(16); break;
+    case THEME_TITLE_AWAY:              result = COLOR_PAIR(17); break;
+    case THEME_TITLE_CHAT:              result = COLOR_PAIR(18); break;
+    case THEME_TITLE_DND:               result = COLOR_PAIR(19); break;
+    case THEME_TITLE_XA:                result = COLOR_PAIR(20); break;
+    case THEME_STATUS_TEXT:             result = COLOR_PAIR(21); break;
+    case THEME_STATUS_BRACKET:          result = COLOR_PAIR(22); break;
+    case THEME_STATUS_ACTIVE:           result = COLOR_PAIR(23); break;
+    case THEME_STATUS_NEW:              result = COLOR_PAIR(24); break;
+    case THEME_ME:                      result = COLOR_PAIR(25); break;
+    case THEME_THEM:                    result = COLOR_PAIR(26); break;
+    case THEME_ROOMINFO:                result = COLOR_PAIR(27); break;
+    case THEME_ROOMMENTION:             result = COLOR_PAIR(28); break;
+    case THEME_ONLINE:                  result = COLOR_PAIR(29); break;
+    case THEME_OFFLINE:                 result = COLOR_PAIR(30); break;
+    case THEME_AWAY:                    result = COLOR_PAIR(31); break;
+    case THEME_CHAT:                    result = COLOR_PAIR(32); break;
+    case THEME_DND:                     result = COLOR_PAIR(33); break;
+    case THEME_XA:                      result = COLOR_PAIR(34); break;
+    case THEME_TYPING:                  result = COLOR_PAIR(35); break;
+    case THEME_GONE:                    result = COLOR_PAIR(36); break;
+    case THEME_SUBSCRIBED:              result = COLOR_PAIR(37); break;
+    case THEME_UNSUBSCRIBED:            result = COLOR_PAIR(38); break;
+    case THEME_OTR_STARTED_TRUSTED:     result = COLOR_PAIR(39); break;
+    case THEME_OTR_STARTED_UNTRUSTED:   result = COLOR_PAIR(40); break;
+    case THEME_OTR_ENDED:               result = COLOR_PAIR(41); break;
+    case THEME_OTR_TRUSTED:             result = COLOR_PAIR(42); break;
+    case THEME_OTR_UNTRUSTED:           result = COLOR_PAIR(43); break;
+    case THEME_ROSTER_HEADER:           result = COLOR_PAIR(44); break;
+    case THEME_OCCUPANTS_HEADER:        result = COLOR_PAIR(45); break;
+    case THEME_WHITE:                   result = COLOR_PAIR(46); break;
+    case THEME_WHITE_BOLD:              result = COLOR_PAIR(46); break;
+    case THEME_GREEN:                   result = COLOR_PAIR(47); break;
+    case THEME_GREEN_BOLD:              result = COLOR_PAIR(47); break;
+    case THEME_RED:                     result = COLOR_PAIR(48); break;
+    case THEME_RED_BOLD:                result = COLOR_PAIR(48); break;
+    case THEME_YELLOW:                  result = COLOR_PAIR(49); break;
+    case THEME_YELLOW_BOLD:             result = COLOR_PAIR(49); break;
+    case THEME_BLUE:                    result = COLOR_PAIR(50); break;
+    case THEME_BLUE_BOLD:               result = COLOR_PAIR(50); break;
+    case THEME_CYAN:                    result = COLOR_PAIR(51); break;
+    case THEME_CYAN_BOLD:               result = COLOR_PAIR(51); break;
+    case THEME_BLACK:                   result = COLOR_PAIR(52); break;
+    case THEME_BLACK_BOLD:              result = COLOR_PAIR(52); break;
+    case THEME_MAGENTA:                 result = COLOR_PAIR(53); break;
+    case THEME_MAGENTA_BOLD:            result = COLOR_PAIR(53); break;
     default:                           break;
     }
 
