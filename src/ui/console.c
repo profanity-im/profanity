@@ -1513,6 +1513,7 @@ _cons_theme_colours(void)
     win_save_print(console, '-', NULL, NO_DATE, THEME_MAGENTA_BOLD, "", " bold_magenta");
     win_save_print(console, '-', NULL, NO_EOL, THEME_BLACK, "",         " black   ");
     win_save_print(console, '-', NULL, NO_DATE, THEME_BLACK_BOLD, "",   " bold_black");
+    cons_show("");
 }
 
 static void
