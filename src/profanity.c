@@ -119,7 +119,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
             plugins_run_timed();
 
-            ui_handle_special_keys(&ch, result, inp, size);
+            ui_handle_special_keys(&ch, result);
 #ifdef PROF_HAVE_LIBOTR
             otr_poll();
 #endif

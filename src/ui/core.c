@@ -205,7 +205,7 @@ _ui_input_nonblocking(void)
 }
 
 static void
-_ui_resize(const int ch, const char * const input, const int size)
+_ui_resize(void)
 {
     log_info("Resizing UI");
     erase();
@@ -213,7 +213,7 @@ _ui_resize(const int ch, const char * const input, const int size)
     title_bar_resize();
     wins_resize_all();
     status_bar_resize();
-    inp_win_resize(input, size);
+    inp_win_resize();
     ProfWin *window = wins_get_current();
     win_update_virtual(window);
 }
@@ -224,6 +224,7 @@ _ui_redraw(void)
     title_bar_resize();
     wins_resize_all();
     status_bar_resize();
+    inp_win_resize();
 }
 
 static void
@@ -596,13 +597,12 @@ _ui_disconnected(void)
 }
 
 static void
-_ui_handle_special_keys(const wint_t * const ch, const int result, const char * const inp,
-    const int size)
+_ui_handle_special_keys(const wint_t * const ch, const int result)
 {
     _win_handle_switch(ch);
     _win_handle_page(ch, result);
     if (*ch == KEY_RESIZE) {
-        ui_resize(*ch, inp, size);
+        ui_resize();
     }
 }
 

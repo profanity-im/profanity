@@ -90,7 +90,7 @@ create_input_window(void)
 }
 
 void
-inp_win_resize(const char * const input, const int size)
+inp_win_resize(void)
 {
     int inp_x;
     getmaxyx(stdscr, rows, cols);
@@ -104,6 +104,7 @@ inp_win_resize(const char * const input, const int size)
         }
     }
 
+    wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     _inp_win_update_virtual();
 }
 
