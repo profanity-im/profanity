@@ -209,6 +209,8 @@ void (*ui_show_form_help)(ProfWin *window, DataForm *form);
 void (*ui_show_form_field_help)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_lines)(ProfWin *window, const gchar** lines);
 void (*ui_redraw_all_room_rosters)(void);
+void (*ui_show_all_room_rosters)(void);
+void (*ui_hide_all_room_rosters)(void);
 
 // contact status functions
 void (*ui_status_room)(const char * const contact);

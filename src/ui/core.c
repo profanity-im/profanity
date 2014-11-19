@@ -706,6 +706,46 @@ _ui_redraw_all_room_rosters(void)
     g_list_free(win_nums);
 }
 
+static void
+_ui_hide_all_room_rosters(void)
+{
+    GList *win_nums = wins_get_nums();
+    GList *curr = win_nums;
+
+    while (curr != NULL) {
+        int num = GPOINTER_TO_INT(curr->data);
+        ProfWin *window = wins_get_by_num(num);
+        if (window->type == WIN_MUC && window->subwin) {
+            char *room = window->from;
+            ui_room_hide_occupants(room);
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(curr);
+    g_list_free(win_nums);
+}
+
+static void
+_ui_show_all_room_rosters(void)
+{
+    GList *win_nums = wins_get_nums();
+    GList *curr = win_nums;
+
+    while (curr != NULL) {
+        int num = GPOINTER_TO_INT(curr->data);
+        ProfWin *window = wins_get_by_num(num);
+        if (window->type == WIN_MUC && window->subwin == NULL) {
+            char *room = window->from;
+            ui_room_show_occupants(room);
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(curr);
+    g_list_free(win_nums);
+}
+
 static gboolean
 _ui_win_has_unsaved_form(int num)
 {
@@ -3424,4 +3464,7 @@ ui_init_module(void)
     ui_room_occupant_role_and_affiliation_change = _ui_room_occupant_role_and_affiliation_change;
     ui_redraw_all_room_rosters = _ui_redraw_all_room_rosters;
     ui_redraw = _ui_redraw;
+    ui_show_all_room_rosters = _ui_show_all_room_rosters;
+    ui_hide_all_room_rosters = _ui_hide_all_room_rosters;
 }
+

@@ -715,6 +715,16 @@ cmd_theme(gchar **args, struct cmd_help_t help)
         } else if (theme_load(args[1])) {
             ui_load_colours();
             prefs_set_string(PREF_THEME, args[1]);
+            if (prefs_get_boolean(PREF_ROSTER)) {
+                ui_show_roster();
+            } else {
+                ui_hide_roster();
+            }
+            if (prefs_get_boolean(PREF_OCCUPANTS)) {
+                ui_show_all_room_rosters();
+            } else {
+                ui_hide_all_room_rosters();
+            }
             ui_redraw();
             cons_show("Loaded theme: %s", args[1]);
         } else {

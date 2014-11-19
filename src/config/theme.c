@@ -47,6 +47,7 @@
 #include "common.h"
 #include "log.h"
 #include "theme.h"
+#include "preferences.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;
@@ -125,6 +126,7 @@ static struct colours_t {
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
 static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, NCURSES_COLOR_T def, theme_item_t theme_item);
 static void _load_colours(void);
+static void _load_preferences(void);
 static gchar * _get_themes_dir(void);
 void _theme_list_dir(const gchar * const dir, GSList **result);
 static GString * _theme_find(const char * const theme_name);
@@ -169,6 +171,7 @@ theme_load(const char * const theme_name)
     }
 
     _load_colours();
+    _load_preferences();
     return TRUE;
 }
 
@@ -379,6 +382,59 @@ _load_colours(void)
     _set_colour("them",                     &colour_prefs.them,                 COLOR_GREEN,    THEME_THEM);
     _set_colour("roster.header",            &colour_prefs.rosterheader,         COLOR_YELLOW,   THEME_ROSTER_HEADER);
     _set_colour("occupants.header",         &colour_prefs.occupantsheader,      COLOR_YELLOW,   THEME_OCCUPANTS_HEADER);
+}
+
+static void
+_set_string_preference(char *prefstr, preference_t pref)
+{
+    if (g_key_file_has_key(theme, "ui", prefstr, NULL)) {
+        gchar *val = g_key_file_get_string(theme, "ui", prefstr, NULL);
+        prefs_set_string(pref, val);
+    }
+}
+
+static void
+_set_boolean_preference(char *prefstr, preference_t pref)
+{
+    if (g_key_file_has_key(theme, "ui", prefstr, NULL)) {
+        gboolean val = g_key_file_get_boolean(theme, "ui", prefstr, NULL);
+        prefs_set_boolean(pref, val);
+    }
+}
+
+static void
+_load_preferences(void)
+{
+    _set_boolean_preference("intype", PREF_INTYPE);
+    _set_boolean_preference("beep", PREF_BEEP);
+    _set_boolean_preference("flash", PREF_FLASH);
+    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
+    _set_boolean_preference("presence", PREF_PRESENCE);
+    _set_boolean_preference("wrap", PREF_WRAP);
+
+    _set_string_preference("time", PREF_TIME);
+    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
+    _set_string_preference("statuses.console", PREF_STATUSES_CONSOLE);
+    _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
+
+    _set_boolean_preference("occupants", PREF_OCCUPANTS);
+
+    if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
+        gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
+        prefs_set_occupants_size(occupants_size);
+    }
+
+    _set_boolean_preference("roster", PREF_ROSTER);
+    _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);
+    _set_boolean_preference("roster.resource", PREF_ROSTER_RESOURCE);
+    _set_string_preference("roster.by", PREF_ROSTER_BY);
+
+    if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
+        gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
+        prefs_set_roster_size(roster_size);
+    }
+
+    _set_boolean_preference("otr.warn", PREF_OTR_WARN);
 }
 
 static gchar *
