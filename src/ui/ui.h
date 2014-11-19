@@ -63,11 +63,9 @@ void (*ui_load_colours)(void);
 void (*ui_update)(void);
 void (*ui_close)(void);
 void (*ui_redraw)(void);
-void (*ui_resize)(const int ch, const char * const input,
-    const int size);
+void (*ui_resize)(void);
 GSList* (*ui_get_recipients)(void);
-void (*ui_handle_special_keys)(const wint_t * const ch, const int result, const char * const inp,
-    const int size);
+void (*ui_handle_special_keys)(const wint_t * const ch, const int result);
 gboolean (*ui_switch_win)(const int i);
 void (*ui_next_win)(void);
 void (*ui_previous_win)(void);
