@@ -47,6 +47,7 @@
 #include "common.h"
 #include "log.h"
 #include "theme.h"
+#include "preferences.h"
 
 static GString *theme_loc;
 static GKeyFile *theme;
@@ -125,6 +126,7 @@ static struct colours_t {
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
 static void _set_colour(gchar *val, NCURSES_COLOR_T *pref, NCURSES_COLOR_T def, theme_item_t theme_item);
 static void _load_colours(void);
+static void _load_preferences(void);
 static gchar * _get_themes_dir(void);
 void _theme_list_dir(const gchar * const dir, GSList **result);
 static GString * _theme_find(const char * const theme_name);
@@ -169,6 +171,7 @@ theme_load(const char * const theme_name)
     }
 
     _load_colours();
+    _load_preferences();
     return TRUE;
 }
 
@@ -290,8 +293,10 @@ _lookup_colour(const char * const colour)
 }
 
 static void
-_set_colour(gchar *val, NCURSES_COLOR_T *pref, NCURSES_COLOR_T def, theme_item_t theme_item)
+_set_colour(char *setting, NCURSES_COLOR_T *pref, NCURSES_COLOR_T def, theme_item_t theme_item)
 {
+    gchar *val = g_key_file_get_string(theme, "colours", setting, NULL);
+
     if(!val) {
         *pref = def;
     } else {
@@ -309,6 +314,8 @@ _set_colour(gchar *val, NCURSES_COLOR_T *pref, NCURSES_COLOR_T def, theme_item_t
             *pref = col;
         }
     }
+
+    g_free(val);
 }
 
 static void
@@ -318,206 +325,116 @@ _load_colours(void)
         g_hash_table_destroy(bold_items);
     }
     bold_items = g_hash_table_new(g_direct_hash, g_direct_equal);
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_WHITE_BOLD), GINT_TO_POINTER(THEME_WHITE_BOLD));
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_GREEN_BOLD), GINT_TO_POINTER(THEME_GREEN_BOLD));
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_RED_BOLD), GINT_TO_POINTER(THEME_RED_BOLD));
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_YELLOW_BOLD), GINT_TO_POINTER(THEME_YELLOW_BOLD));
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_BLUE_BOLD), GINT_TO_POINTER(THEME_BLUE_BOLD));
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_CYAN_BOLD), GINT_TO_POINTER(THEME_CYAN_BOLD));
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_BLACK_BOLD), GINT_TO_POINTER(THEME_BLACK_BOLD));
-    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_MAGENTA_BOLD), GINT_TO_POINTER(THEME_MAGENTA_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_WHITE_BOLD),      GINT_TO_POINTER(THEME_WHITE_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_GREEN_BOLD),      GINT_TO_POINTER(THEME_GREEN_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_RED_BOLD),        GINT_TO_POINTER(THEME_RED_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_YELLOW_BOLD),     GINT_TO_POINTER(THEME_YELLOW_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_BLUE_BOLD),       GINT_TO_POINTER(THEME_BLUE_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_CYAN_BOLD),       GINT_TO_POINTER(THEME_CYAN_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_BLACK_BOLD),      GINT_TO_POINTER(THEME_BLACK_BOLD));
+    g_hash_table_insert(bold_items, GINT_TO_POINTER(THEME_MAGENTA_BOLD),    GINT_TO_POINTER(THEME_MAGENTA_BOLD));
 
-    gchar *bkgnd_val = g_key_file_get_string(theme, "colours", "bkgnd", NULL);
-    _set_colour(bkgnd_val, &colour_prefs.bkgnd, -1, THEME_NONE);
-    g_free(bkgnd_val);
+    _set_colour("bkgnd",                    &colour_prefs.bkgnd,                -1,             THEME_NONE);
+    _set_colour("titlebar",                 &colour_prefs.titlebar,             COLOR_BLUE,     THEME_NONE);
+    _set_colour("statusbar",                &colour_prefs.statusbar,            COLOR_BLUE,     THEME_NONE);
+    _set_colour("titlebar.text",            &colour_prefs.titlebartext,         COLOR_WHITE,    THEME_TITLE_TEXT);
+    _set_colour("titlebar.brackets",        &colour_prefs.titlebarbrackets,     COLOR_CYAN,     THEME_TITLE_BRACKET);
+    _set_colour("titlebar.unencrypted",     &colour_prefs.titlebarunencrypted,  COLOR_RED,      THEME_TITLE_UNENCRYPTED);
+    _set_colour("titlebar.encrypted",       &colour_prefs.titlebarencrypted,    COLOR_WHITE,    THEME_TITLE_ENCRYPTED);
+    _set_colour("titlebar.untrusted",       &colour_prefs.titlebaruntrusted,    COLOR_YELLOW,   THEME_TITLE_UNTRUSTED);
+    _set_colour("titlebar.trusted",         &colour_prefs.titlebartrusted,      COLOR_WHITE,    THEME_TITLE_TRUSTED);
+    _set_colour("titlebar.online",          &colour_prefs.titlebaronline,       COLOR_WHITE,    THEME_TITLE_ONLINE);
+    _set_colour("titlebar.offline",         &colour_prefs.titlebaroffline,      COLOR_WHITE,    THEME_TITLE_OFFLINE);
+    _set_colour("titlebar.away",            &colour_prefs.titlebaraway,         COLOR_WHITE,    THEME_TITLE_AWAY);
+    _set_colour("titlebar.chat",            &colour_prefs.titlebarchat,         COLOR_WHITE,    THEME_TITLE_CHAT);
+    _set_colour("titlebar.dnd",             &colour_prefs.titlebardnd,          COLOR_WHITE,    THEME_TITLE_DND);
+    _set_colour("titlebar.xa",              &colour_prefs.titlebarxa,           COLOR_WHITE,    THEME_TITLE_XA);
+    _set_colour("statusbar.text",           &colour_prefs.statusbartext,        COLOR_WHITE,    THEME_STATUS_TEXT);
+    _set_colour("statusbar.brackets",       &colour_prefs.statusbarbrackets,    COLOR_CYAN,     THEME_STATUS_BRACKET);
+    _set_colour("statusbar.active",         &colour_prefs.statusbaractive,      COLOR_CYAN,     THEME_STATUS_ACTIVE);
+    _set_colour("statusbar.new",            &colour_prefs.statusbarnew,         COLOR_WHITE,    THEME_STATUS_NEW);
+    _set_colour("main.text",                &colour_prefs.maintext,             COLOR_WHITE,    THEME_TEXT);
+    _set_colour("main.text.me",             &colour_prefs.maintextme,           COLOR_WHITE,    THEME_TEXT_ME);
+    _set_colour("main.text.them",           &colour_prefs.maintextthem,         COLOR_WHITE,    THEME_TEXT_THEM);
+    _set_colour("main.splash",              &colour_prefs.splashtext,           COLOR_CYAN,     THEME_SPLASH);
+    _set_colour("input.text",               &colour_prefs.inputtext,            COLOR_WHITE,    THEME_INPUT_TEXT);
+    _set_colour("main.time",                &colour_prefs.timetext,             COLOR_WHITE,    THEME_TIME);
+    _set_colour("subscribed",               &colour_prefs.subscribed,           COLOR_GREEN,    THEME_SUBSCRIBED);
+    _set_colour("unsubscribed",             &colour_prefs.unsubscribed,         COLOR_RED,      THEME_UNSUBSCRIBED);
+    _set_colour("otr.started.trusted",      &colour_prefs.otrstartedtrusted,    COLOR_GREEN,    THEME_OTR_STARTED_TRUSTED);
+    _set_colour("otr.started.untrusted",    &colour_prefs.otrstarteduntrusted,  COLOR_YELLOW,   THEME_OTR_STARTED_UNTRUSTED);
+    _set_colour("otr.ended",                &colour_prefs.otrended,             COLOR_RED,      THEME_OTR_ENDED);
+    _set_colour("otr.trusted",              &colour_prefs.otrtrusted,           COLOR_GREEN,    THEME_OTR_TRUSTED);
+    _set_colour("otr.untrusted",            &colour_prefs.otruntrusted,         COLOR_YELLOW,   THEME_OTR_UNTRUSTED);
+    _set_colour("online",                   &colour_prefs.online,               COLOR_GREEN,    THEME_ONLINE);
+    _set_colour("away",                     &colour_prefs.away,                 COLOR_CYAN,     THEME_AWAY);
+    _set_colour("chat",                     &colour_prefs.chat,                 COLOR_GREEN,    THEME_CHAT);
+    _set_colour("dnd",                      &colour_prefs.dnd,                  COLOR_RED,      THEME_DND);
+    _set_colour("xa",                       &colour_prefs.xa,                   COLOR_CYAN,     THEME_XA);
+    _set_colour("offline",                  &colour_prefs.offline,              COLOR_RED,      THEME_OFFLINE);
+    _set_colour("typing",                   &colour_prefs.typing,               COLOR_YELLOW,   THEME_TYPING);
+    _set_colour("gone",                     &colour_prefs.gone,                 COLOR_RED,      THEME_GONE);
+    _set_colour("error",                    &colour_prefs.error,                COLOR_RED,      THEME_ERROR);
+    _set_colour("incoming",                 &colour_prefs.incoming,             COLOR_YELLOW,   THEME_INCOMING);
+    _set_colour("roominfo",                 &colour_prefs.roominfo,             COLOR_YELLOW,   THEME_ROOMINFO);
+    _set_colour("roommention",              &colour_prefs.roommention,          COLOR_YELLOW,   THEME_ROOMMENTION);
+    _set_colour("me",                       &colour_prefs.me,                   COLOR_YELLOW,   THEME_ME);
+    _set_colour("them",                     &colour_prefs.them,                 COLOR_GREEN,    THEME_THEM);
+    _set_colour("roster.header",            &colour_prefs.rosterheader,         COLOR_YELLOW,   THEME_ROSTER_HEADER);
+    _set_colour("occupants.header",         &colour_prefs.occupantsheader,      COLOR_YELLOW,   THEME_OCCUPANTS_HEADER);
+}
 
-    gchar *titlebar_val = g_key_file_get_string(theme, "colours", "titlebar", NULL);
-    _set_colour(titlebar_val, &colour_prefs.titlebar, COLOR_BLUE, THEME_NONE);
-    g_free(titlebar_val);
+static void
+_set_string_preference(char *prefstr, preference_t pref)
+{
+    if (g_key_file_has_key(theme, "ui", prefstr, NULL)) {
+        gchar *val = g_key_file_get_string(theme, "ui", prefstr, NULL);
+        prefs_set_string(pref, val);
+    }
+}
 
-    gchar *statusbar_val = g_key_file_get_string(theme, "colours", "statusbar", NULL);
-    _set_colour(statusbar_val, &colour_prefs.statusbar, COLOR_BLUE, THEME_NONE);
-    g_free(statusbar_val);
+static void
+_set_boolean_preference(char *prefstr, preference_t pref)
+{
+    if (g_key_file_has_key(theme, "ui", prefstr, NULL)) {
+        gboolean val = g_key_file_get_boolean(theme, "ui", prefstr, NULL);
+        prefs_set_boolean(pref, val);
+    }
+}
 
-    gchar *titlebartext_val = g_key_file_get_string(theme, "colours", "titlebar.text", NULL);
-    _set_colour(titlebartext_val, &colour_prefs.titlebartext, COLOR_WHITE, THEME_TITLE_TEXT);
-    g_free(titlebartext_val);
+static void
+_load_preferences(void)
+{
+    _set_boolean_preference("intype", PREF_INTYPE);
+    _set_boolean_preference("beep", PREF_BEEP);
+    _set_boolean_preference("flash", PREF_FLASH);
+    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
+    _set_boolean_preference("presence", PREF_PRESENCE);
+    _set_boolean_preference("wrap", PREF_WRAP);
 
-    gchar *titlebarbrackets_val = g_key_file_get_string(theme, "colours", "titlebar.brackets", NULL);
-    _set_colour(titlebarbrackets_val, &colour_prefs.titlebarbrackets, COLOR_CYAN, THEME_TITLE_BRACKET);
-    g_free(titlebarbrackets_val);
+    _set_string_preference("time", PREF_TIME);
+    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
+    _set_string_preference("statuses.console", PREF_STATUSES_CONSOLE);
+    _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
 
-    gchar *titlebarunencrypted_val = g_key_file_get_string(theme, "colours", "titlebar.unencrypted", NULL);
-    _set_colour(titlebarunencrypted_val, &colour_prefs.titlebarunencrypted, COLOR_RED, THEME_TITLE_UNENCRYPTED);
-    g_free(titlebarunencrypted_val);
+    _set_boolean_preference("occupants", PREF_OCCUPANTS);
 
-    gchar *titlebarencrypted_val = g_key_file_get_string(theme, "colours", "titlebar.encrypted", NULL);
-    _set_colour(titlebarencrypted_val, &colour_prefs.titlebarencrypted, COLOR_WHITE, THEME_TITLE_ENCRYPTED);
-    g_free(titlebarencrypted_val);
+    if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
+        gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
+        prefs_set_occupants_size(occupants_size);
+    }
 
-    gchar *titlebaruntrusted_val = g_key_file_get_string(theme, "colours", "titlebar.untrusted", NULL);
-    _set_colour(titlebaruntrusted_val, &colour_prefs.titlebaruntrusted, COLOR_YELLOW, THEME_TITLE_UNTRUSTED);
-    g_free(titlebaruntrusted_val);
+    _set_boolean_preference("roster", PREF_ROSTER);
+    _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);
+    _set_boolean_preference("roster.resource", PREF_ROSTER_RESOURCE);
+    _set_string_preference("roster.by", PREF_ROSTER_BY);
 
-    gchar *titlebartrusted_val = g_key_file_get_string(theme, "colours", "titlebar.trusted", NULL);
-    _set_colour(titlebartrusted_val, &colour_prefs.titlebartrusted, COLOR_WHITE, THEME_TITLE_TRUSTED);
-    g_free(titlebartrusted_val);
+    if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
+        gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
+        prefs_set_roster_size(roster_size);
+    }
 
-    gchar *titlebaronline_val = g_key_file_get_string(theme, "colours", "titlebar.online", NULL);
-    _set_colour(titlebaronline_val, &colour_prefs.titlebaronline, COLOR_WHITE, THEME_TITLE_ONLINE);
-    g_free(titlebaronline_val);
-
-    gchar *titlebaroffline_val = g_key_file_get_string(theme, "colours", "titlebar.offline", NULL);
-    _set_colour(titlebaroffline_val, &colour_prefs.titlebaroffline, COLOR_WHITE, THEME_TITLE_OFFLINE);
-    g_free(titlebaroffline_val);
-
-    gchar *titlebaraway_val = g_key_file_get_string(theme, "colours", "titlebar.away", NULL);
-    _set_colour(titlebaraway_val, &colour_prefs.titlebaraway, COLOR_WHITE, THEME_TITLE_AWAY);
-    g_free(titlebaraway_val);
-
-    gchar *titlebarchat_val = g_key_file_get_string(theme, "colours", "titlebar.chat", NULL);
-    _set_colour(titlebarchat_val, &colour_prefs.titlebarchat, COLOR_WHITE, THEME_TITLE_CHAT);
-    g_free(titlebarchat_val);
-
-    gchar *titlebardnd_val = g_key_file_get_string(theme, "colours", "titlebar.dnd", NULL);
-    _set_colour(titlebardnd_val, &colour_prefs.titlebardnd, COLOR_WHITE, THEME_TITLE_DND);
-    g_free(titlebardnd_val);
-
-    gchar *titlebarxa_val = g_key_file_get_string(theme, "colours", "titlebar.xa", NULL);
-    _set_colour(titlebarxa_val, &colour_prefs.titlebarxa, COLOR_WHITE, THEME_TITLE_XA);
-    g_free(titlebarxa_val);
-
-    gchar *statusbartext_val = g_key_file_get_string(theme, "colours", "statusbar.text", NULL);
-    _set_colour(statusbartext_val, &colour_prefs.statusbartext, COLOR_WHITE, THEME_STATUS_TEXT);
-    g_free(statusbartext_val);
-
-    gchar *statusbarbrackets_val = g_key_file_get_string(theme, "colours", "statusbar.brackets", NULL);
-    _set_colour(statusbarbrackets_val, &colour_prefs.statusbarbrackets, COLOR_CYAN, THEME_STATUS_BRACKET);
-    g_free(statusbarbrackets_val);
-
-    gchar *statusbaractive_val = g_key_file_get_string(theme, "colours", "statusbar.active", NULL);
-    _set_colour(statusbaractive_val, &colour_prefs.statusbaractive, COLOR_CYAN, THEME_STATUS_ACTIVE);
-    g_free(statusbaractive_val);
-
-    gchar *statusbarnew_val = g_key_file_get_string(theme, "colours", "statusbar.new", NULL);
-    _set_colour(statusbarnew_val, &colour_prefs.statusbarnew, COLOR_WHITE, THEME_STATUS_NEW);
-    g_free(statusbarnew_val);
-
-    gchar *maintext_val = g_key_file_get_string(theme, "colours", "main.text", NULL);
-    _set_colour(maintext_val, &colour_prefs.maintext, COLOR_WHITE, THEME_TEXT);
-    g_free(maintext_val);
-
-    gchar *maintextme_val = g_key_file_get_string(theme, "colours", "main.text.me", NULL);
-    _set_colour(maintextme_val, &colour_prefs.maintextme, COLOR_WHITE, THEME_TEXT_ME);
-    g_free(maintextme_val);
-
-    gchar *maintextthem_val = g_key_file_get_string(theme, "colours", "main.text.them", NULL);
-    _set_colour(maintextthem_val, &colour_prefs.maintextthem, COLOR_WHITE, THEME_TEXT_THEM);
-    g_free(maintextthem_val);
-
-    gchar *splashtext_val = g_key_file_get_string(theme, "colours", "main.splash", NULL);
-    _set_colour(splashtext_val, &colour_prefs.splashtext, COLOR_CYAN, THEME_SPLASH);
-    g_free(splashtext_val);
-
-    gchar *inputtext_val = g_key_file_get_string(theme, "colours", "input.text", NULL);
-    _set_colour(inputtext_val, &colour_prefs.inputtext, COLOR_WHITE, THEME_INPUT_TEXT);
-    g_free(inputtext_val);
-
-    gchar *timetext_val = g_key_file_get_string(theme, "colours", "main.time", NULL);
-    _set_colour(timetext_val, &colour_prefs.timetext, COLOR_WHITE, THEME_TIME);
-    g_free(timetext_val);
-
-    gchar *subscribed_val = g_key_file_get_string(theme, "colours", "subscribed", NULL);
-    _set_colour(subscribed_val, &colour_prefs.subscribed, COLOR_GREEN, THEME_SUBSCRIBED);
-    g_free(subscribed_val);
-
-    gchar *unsubscribed_val = g_key_file_get_string(theme, "colours", "unsubscribed", NULL);
-    _set_colour(unsubscribed_val, &colour_prefs.unsubscribed, COLOR_RED, THEME_UNSUBSCRIBED);
-    g_free(unsubscribed_val);
-
-    gchar *otrstartedtrusted_val = g_key_file_get_string(theme, "colours", "otr.started.trusted", NULL);
-    _set_colour(otrstartedtrusted_val, &colour_prefs.otrstartedtrusted, COLOR_GREEN, THEME_OTR_STARTED_TRUSTED);
-    g_free(otrstartedtrusted_val);
-
-    gchar *otrstarteduntrusted_val = g_key_file_get_string(theme, "colours", "otr.started.untrusted", NULL);
-    _set_colour(otrstarteduntrusted_val, &colour_prefs.otrstarteduntrusted, COLOR_YELLOW, THEME_OTR_STARTED_UNTRUSTED);
-    g_free(otrstarteduntrusted_val);
-
-    gchar *otrended_val = g_key_file_get_string(theme, "colours", "otr.ended", NULL);
-    _set_colour(otrended_val, &colour_prefs.otrended, COLOR_RED, THEME_OTR_ENDED);
-    g_free(otrended_val);
-
-    gchar *otrtrusted_val = g_key_file_get_string(theme, "colours", "otr.trusted", NULL);
-    _set_colour(otrtrusted_val, &colour_prefs.otrtrusted, COLOR_GREEN, THEME_OTR_TRUSTED);
-    g_free(otrtrusted_val);
-
-    gchar *otruntrusted_val = g_key_file_get_string(theme, "colours", "otr.untrusted", NULL);
-    _set_colour(otruntrusted_val, &colour_prefs.otruntrusted, COLOR_YELLOW, THEME_OTR_UNTRUSTED);
-    g_free(otruntrusted_val);
-
-    gchar *online_val = g_key_file_get_string(theme, "colours", "online", NULL);
-    _set_colour(online_val, &colour_prefs.online, COLOR_GREEN, THEME_ONLINE);
-    g_free(online_val);
-
-    gchar *away_val = g_key_file_get_string(theme, "colours", "away", NULL);
-    _set_colour(away_val, &colour_prefs.away, COLOR_CYAN, THEME_AWAY);
-    g_free(away_val);
-
-    gchar *chat_val = g_key_file_get_string(theme, "colours", "chat", NULL);
-    _set_colour(chat_val, &colour_prefs.chat, COLOR_GREEN, THEME_CHAT);
-    g_free(chat_val);
-
-    gchar *dnd_val = g_key_file_get_string(theme, "colours", "dnd", NULL);
-    _set_colour(dnd_val, &colour_prefs.dnd, COLOR_RED, THEME_DND);
-    g_free(dnd_val);
-
-    gchar *xa_val = g_key_file_get_string(theme, "colours", "xa", NULL);
-    _set_colour(xa_val, &colour_prefs.xa, COLOR_CYAN, THEME_XA);
-    g_free(xa_val);
-
-    gchar *offline_val = g_key_file_get_string(theme, "colours", "offline", NULL);
-    _set_colour(offline_val, &colour_prefs.offline, COLOR_RED, THEME_OFFLINE);
-    g_free(offline_val);
-
-    gchar *typing_val = g_key_file_get_string(theme, "colours", "typing", NULL);
-    _set_colour(typing_val, &colour_prefs.typing, COLOR_YELLOW, THEME_TYPING);
-    g_free(typing_val);
-
-    gchar *gone_val = g_key_file_get_string(theme, "colours", "gone", NULL);
-    _set_colour(gone_val, &colour_prefs.gone, COLOR_RED, THEME_GONE);
-    g_free(gone_val);
-
-    gchar *error_val = g_key_file_get_string(theme, "colours", "error", NULL);
-    _set_colour(error_val, &colour_prefs.error, COLOR_RED, THEME_ERROR);
-    g_free(error_val);
-
-    gchar *incoming_val = g_key_file_get_string(theme, "colours", "incoming", NULL);
-    _set_colour(incoming_val, &colour_prefs.incoming, COLOR_YELLOW, THEME_INCOMING);
-    g_free(incoming_val);
-
-    gchar *roominfo_val = g_key_file_get_string(theme, "colours", "roominfo", NULL);
-    _set_colour(roominfo_val, &colour_prefs.roominfo, COLOR_YELLOW, THEME_ROOMINFO);
-    g_free(roominfo_val);
-
-    gchar *roommention_val = g_key_file_get_string(theme, "colours", "roommention", NULL);
-    _set_colour(roommention_val, &colour_prefs.roommention, COLOR_YELLOW, THEME_ROOMMENTION);
-    g_free(roommention_val);
-
-    gchar *me_val = g_key_file_get_string(theme, "colours", "me", NULL);
-    _set_colour(me_val, &colour_prefs.me, COLOR_YELLOW, THEME_ME);
-    g_free(me_val);
-
-    gchar *them_val = g_key_file_get_string(theme, "colours", "them", NULL);
-    _set_colour(them_val, &colour_prefs.them, COLOR_GREEN, THEME_THEM);
-    g_free(them_val);
-
-    gchar *rosterheader_val = g_key_file_get_string(theme, "colours", "roster.header", NULL);
-    _set_colour(rosterheader_val, &colour_prefs.rosterheader, COLOR_YELLOW, THEME_ROSTER_HEADER);
-    g_free(rosterheader_val);
-
-    gchar *occupantsheader_val = g_key_file_get_string(theme, "colours", "occupants.header", NULL);
-    _set_colour(occupantsheader_val, &colour_prefs.occupantsheader, COLOR_YELLOW, THEME_OCCUPANTS_HEADER);
-    g_free(occupantsheader_val);
+    _set_boolean_preference("otr.warn", PREF_OTR_WARN);
 }
 
 static gchar *
