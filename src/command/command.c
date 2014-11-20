@@ -865,7 +865,7 @@ static struct cmd_t command_defs[] =
           "Example: /autoaway mode idle",
           "Example: /autoaway time 30",
           "Example: /autoaway message I'm not really doing much",
-          "Example: /autoaway check false",
+          "Example: /autoaway check off",
           NULL } } },
 
     { "/priority",
