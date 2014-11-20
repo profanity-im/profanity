@@ -941,9 +941,9 @@ static struct cmd_t command_defs[] =
 
     { "/theme",
         cmd_theme, parse_args, 1, 2, &cons_theme_setting,
-        { "/theme list|set [theme-name]", "Change colour theme.",
-        { "/theme list|set [theme-name]",
-          "---------------------------",
+        { "/theme list|set|colours [theme-name]", "Change colour theme.",
+        { "/theme list|set|colours [theme-name]",
+          "------------------------------------",
           "Change the colour settings used.",
           "",
           "list           : List all available themes.",
