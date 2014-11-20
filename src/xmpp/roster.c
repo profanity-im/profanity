@@ -326,6 +326,8 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             item = xmpp_stanza_get_next(item);
         }
 
+        handle_roster_received();
+
         char *account_name = jabber_get_account_name();
         const char *fulljid = jabber_get_fulljid();
 

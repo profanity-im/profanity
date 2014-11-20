@@ -116,5 +116,6 @@ void handle_muc_occupant_online(const char * const room, const char * const nick
     const char * const show_str, const char * const status_str);
 void handle_roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out);
+void handle_roster_received(void);
 
 #endif
