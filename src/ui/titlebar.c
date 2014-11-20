@@ -58,6 +58,9 @@ static gboolean typing;
 static GTimer *typing_elapsed;
 
 static void _title_bar_draw(void);
+static void _show_contact_presence(void);
+static void _show_self_presence(void);
+static void _show_privacy(void);
 
 void
 create_title_bar(void)
@@ -85,7 +88,6 @@ title_bar_update_virtual(void)
 
                 g_timer_destroy(typing_elapsed);
                 typing_elapsed = NULL;
-
             }
         }
     }
@@ -174,55 +176,95 @@ _title_bar_draw(void)
         waddch(win, ' ');
     mvwprintw(win, 0, 0, " %s", current_title);
 
-    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+    _show_contact_presence();
 
-    // show presence
-    if (prefs_get_boolean(PREF_PRESENCE) && current_recipient) {
-        char *recipient_jid = NULL;
-        char *found_contact = roster_find_contact(current_recipient);
-        if (found_contact) {
-            recipient_jid = roster_barejid_from_name(current_recipient);
-            free(found_contact);
-        } else {
-            recipient_jid = current_recipient;
-        }
-        ProfWin *current = wins_get_by_recipient(recipient_jid);
-        if (current) {
-            if (current->type == WIN_CHAT) {
-                PContact contact = roster_get_contact(recipient_jid);
-                const char *presence = p_contact_presence(contact);
 
-                theme_item_t presence_colour = THEME_TITLE_ONLINE;
-                if (g_strcmp0(presence, "offline") == 0) {
-                    presence_colour = THEME_TITLE_OFFLINE;
-                } else if (g_strcmp0(presence, "away") == 0) {
-                    presence_colour = THEME_TITLE_AWAY;
-                } else if (g_strcmp0(presence, "xa") == 0) {
-                    presence_colour = THEME_TITLE_XA;
-                } else if (g_strcmp0(presence, "chat") == 0) {
-                    presence_colour = THEME_TITLE_CHAT;
-                } else if (g_strcmp0(presence, "dnd") == 0) {
-                    presence_colour = THEME_TITLE_DND;
-                }
+#ifdef HAVE_LIBOTR
+    _show_privacy();
+#endif
 
-                int presence_attrs = theme_attrs(presence_colour);
-
-                wprintw(win, " ");
-                wattron(win, bracket_attrs);
-                wprintw(win, "[");
-                wattroff(win, bracket_attrs);
-                wattron(win, presence_attrs);
-                wprintw(win, presence);
-                wattroff(win, presence_attrs);
-                wattron(win, bracket_attrs);
-                wprintw(win, "]");
-                wattroff(win, bracket_attrs);
-            }
+    // show indicator for unsaved forms
+    ProfWin *current = wins_get_current();
+    if ((current != NULL ) && (current->type == WIN_MUC_CONFIG)) {
+        if ((current->form != NULL) && (current->form->modified)) {
+            wprintw(win, " *");
         }
     }
 
-#ifdef HAVE_LIBOTR
-    // show privacy
+    // show contact typing
+    if (typing) {
+        wprintw(win, " (typing...)");
+    }
+
+    _show_self_presence();
+
+    wnoutrefresh(win);
+    inp_put_back();
+}
+
+static void
+_show_self_presence(void)
+{
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+
+    int cols = getmaxx(stdscr);
+
+    wattron(win, bracket_attrs);
+    mvwaddch(win, 0, cols - 14, '[');
+    wattroff(win, bracket_attrs);
+
+    int presence_attrs = 0;
+
+    switch (current_presence)
+    {
+        case CONTACT_ONLINE:
+            presence_attrs = theme_attrs(THEME_TITLE_ONLINE);
+            wattron(win, presence_attrs);
+            mvwprintw(win, 0, cols - 13, " ...online ");
+            wattroff(win, presence_attrs);
+            break;
+        case CONTACT_AWAY:
+            presence_attrs = theme_attrs(THEME_TITLE_AWAY);
+            wattron(win, presence_attrs);
+            mvwprintw(win, 0, cols - 13, " .....away ");
+            wattroff(win, presence_attrs);
+            break;
+        case CONTACT_DND:
+            presence_attrs = theme_attrs(THEME_TITLE_DND);
+            wattron(win, presence_attrs);
+            mvwprintw(win, 0, cols - 13, " ......dnd ");
+            wattroff(win, presence_attrs);
+            break;
+        case CONTACT_CHAT:
+            presence_attrs = theme_attrs(THEME_TITLE_CHAT);
+            wattron(win, presence_attrs);
+            mvwprintw(win, 0, cols - 13, " .....chat ");
+            wattroff(win, presence_attrs);
+            break;
+        case CONTACT_XA:
+            presence_attrs = theme_attrs(THEME_TITLE_XA);
+            wattron(win, presence_attrs);
+            mvwprintw(win, 0, cols - 13, " .......xa ");
+            wattroff(win, presence_attrs);
+            break;
+        case CONTACT_OFFLINE:
+            presence_attrs = theme_attrs(THEME_TITLE_OFFLINE);
+            wattron(win, presence_attrs);
+            mvwprintw(win, 0, cols - 13, " ..offline ");
+            wattroff(win, presence_attrs);
+            break;
+    }
+
+    wattron(win, bracket_attrs);
+    mvwaddch(win, 0, cols - 2, ']');
+    wattroff(win, bracket_attrs);
+}
+
+static void
+_show_privacy(void)
+{
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+
     if (current_recipient != NULL) {
         char *recipient_jid = NULL;
         char *found_contact = roster_find_contact(current_recipient);
@@ -290,74 +332,54 @@ _title_bar_draw(void)
             }
         }
     }
-#endif
+}
 
-    // show indicator for unsaved forms
-    ProfWin *current = wins_get_current();
-    if ((current != NULL ) && (current->type == WIN_MUC_CONFIG)) {
-        if ((current->form != NULL) && (current->form->modified)) {
-            wprintw(win, " *");
+static void
+_show_contact_presence(void)
+{
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+
+    if (prefs_get_boolean(PREF_PRESENCE) && current_recipient) {
+        char *recipient_jid = NULL;
+        char *found_contact = roster_find_contact(current_recipient);
+        if (found_contact) {
+            recipient_jid = roster_barejid_from_name(current_recipient);
+            free(found_contact);
+        } else {
+            recipient_jid = current_recipient;
+        }
+        ProfWin *current = wins_get_by_recipient(recipient_jid);
+        if (current) {
+            if (current->type == WIN_CHAT) {
+                PContact contact = roster_get_contact(recipient_jid);
+                const char *presence = p_contact_presence(contact);
+
+                theme_item_t presence_colour = THEME_TITLE_ONLINE;
+                if (g_strcmp0(presence, "offline") == 0) {
+                    presence_colour = THEME_TITLE_OFFLINE;
+                } else if (g_strcmp0(presence, "away") == 0) {
+                    presence_colour = THEME_TITLE_AWAY;
+                } else if (g_strcmp0(presence, "xa") == 0) {
+                    presence_colour = THEME_TITLE_XA;
+                } else if (g_strcmp0(presence, "chat") == 0) {
+                    presence_colour = THEME_TITLE_CHAT;
+                } else if (g_strcmp0(presence, "dnd") == 0) {
+                    presence_colour = THEME_TITLE_DND;
+                }
+
+                int presence_attrs = theme_attrs(presence_colour);
+
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, presence_attrs);
+                wprintw(win, presence);
+                wattroff(win, presence_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            }
         }
     }
-
-    // show contact typing
-    if (typing) {
-        wprintw(win, " (typing...)");
-    }
-
-    // show presence
-    int cols = getmaxx(stdscr);
-
-    wattron(win, bracket_attrs);
-    mvwaddch(win, 0, cols - 14, '[');
-    wattroff(win, bracket_attrs);
-
-    int presence_attrs = 0;
-
-    switch (current_presence)
-    {
-        case CONTACT_ONLINE:
-            presence_attrs = theme_attrs(THEME_TITLE_ONLINE);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " ...online ");
-            wattroff(win, presence_attrs);
-            break;
-        case CONTACT_AWAY:
-            presence_attrs = theme_attrs(THEME_TITLE_AWAY);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " .....away ");
-            wattroff(win, presence_attrs);
-            break;
-        case CONTACT_DND:
-            presence_attrs = theme_attrs(THEME_TITLE_DND);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " ......dnd ");
-            wattroff(win, presence_attrs);
-            break;
-        case CONTACT_CHAT:
-            presence_attrs = theme_attrs(THEME_TITLE_CHAT);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " .....chat ");
-            wattroff(win, presence_attrs);
-            break;
-        case CONTACT_XA:
-            presence_attrs = theme_attrs(THEME_TITLE_XA);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " .......xa ");
-            wattroff(win, presence_attrs);
-            break;
-        case CONTACT_OFFLINE:
-            presence_attrs = theme_attrs(THEME_TITLE_OFFLINE);
-            wattron(win, presence_attrs);
-            mvwprintw(win, 0, cols - 13, " ..offline ");
-            wattroff(win, presence_attrs);
-            break;
-    }
-
-    wattron(win, bracket_attrs);
-    mvwaddch(win, 0, cols - 2, ']');
-    wattroff(win, bracket_attrs);
-
-    wnoutrefresh(win);
-    inp_put_back();
 }
