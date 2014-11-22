@@ -158,7 +158,7 @@ void find_first_exists(void **state)
 
     char *search = strdup("B");
 
-    char *result = roster_find_contact(search);
+    char *result = roster_contact_autocomplete(search);
     assert_string_equal("Bob", result);
     free(result);
     free(search);
@@ -172,7 +172,7 @@ void find_second_exists(void **state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char *result = roster_find_contact("Dav");
+    char *result = roster_contact_autocomplete("Dav");
     assert_string_equal("Dave", result);
     free(result);
     roster_free();
@@ -185,7 +185,7 @@ void find_third_exists(void **state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char *result = roster_find_contact("Ja");
+    char *result = roster_contact_autocomplete("Ja");
     assert_string_equal("James", result);
     free(result);
     roster_free();
@@ -198,7 +198,7 @@ void find_returns_null(void **state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char *result = roster_find_contact("Mike");
+    char *result = roster_contact_autocomplete("Mike");
     assert_null(result);
     roster_free();
 }
@@ -206,7 +206,7 @@ void find_returns_null(void **state)
 void find_on_empty_returns_null(void **state)
 {
     roster_init();
-    char *result = roster_find_contact("James");
+    char *result = roster_contact_autocomplete("James");
     assert_null(result);
     roster_free();
 }
@@ -218,8 +218,8 @@ void find_twice_returns_second_when_two_match(void **state)
     roster_add("Jamie", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char *result1 = roster_find_contact("Jam");
-    char *result2 = roster_find_contact(result1);
+    char *result1 = roster_contact_autocomplete("Jam");
+    char *result2 = roster_contact_autocomplete(result1);
     assert_string_equal("Jamie", result2);
     free(result1);
     free(result2);
@@ -240,11 +240,11 @@ void find_five_times_finds_fifth(void **state)
     roster_add("Jamy", NULL, NULL, NULL, FALSE);
     roster_add("Jamz", NULL, NULL, NULL, FALSE);
 
-    char *result1 = roster_find_contact("Jam");
-    char *result2 = roster_find_contact(result1);
-    char *result3 = roster_find_contact(result2);
-    char *result4 = roster_find_contact(result3);
-    char *result5 = roster_find_contact(result4);
+    char *result1 = roster_contact_autocomplete("Jam");
+    char *result2 = roster_contact_autocomplete(result1);
+    char *result3 = roster_contact_autocomplete(result2);
+    char *result4 = roster_contact_autocomplete(result3);
+    char *result5 = roster_contact_autocomplete(result4);
     assert_string_equal("Jamo", result5);
     free(result1);
     free(result2);
@@ -261,9 +261,9 @@ void find_twice_returns_first_when_two_match_and_reset(void **state)
     roster_add("Jamie", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char *result1 = roster_find_contact("Jam");
+    char *result1 = roster_contact_autocomplete("Jam");
     roster_reset_search_attempts();
-    char *result2 = roster_find_contact(result1);
+    char *result2 = roster_contact_autocomplete(result1);
     assert_string_equal("James", result2);
     free(result1);
     free(result2);

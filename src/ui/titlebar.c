@@ -264,7 +264,7 @@ _show_privacy(void)
 
     if (current_recipient != NULL) {
         char *recipient_jid = NULL;
-        char *found_contact = roster_find_contact(current_recipient);
+        char *found_contact = roster_contact_autocomplete(current_recipient);
         if (found_contact != NULL) {
             recipient_jid = roster_barejid_from_name(current_recipient);
             free(found_contact);
@@ -338,7 +338,7 @@ _show_contact_presence(void)
 
     if (prefs_get_boolean(PREF_PRESENCE) && current_recipient) {
         char *recipient_jid = NULL;
-        char *found_contact = roster_find_contact(current_recipient);
+        char *found_contact = roster_contact_autocomplete(current_recipient);
         if (found_contact) {
             recipient_jid = roster_barejid_from_name(current_recipient);
             free(found_contact);
