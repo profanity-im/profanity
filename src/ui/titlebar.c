@@ -178,7 +178,6 @@ _title_bar_draw(void)
 
     _show_contact_presence();
 
-
 #ifdef HAVE_LIBOTR
     _show_privacy();
 #endif
@@ -205,15 +204,13 @@ _title_bar_draw(void)
 static void
 _show_self_presence(void)
 {
+    int presence_attrs = 0;
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
-
     int cols = getmaxx(stdscr);
 
     wattron(win, bracket_attrs);
     mvwaddch(win, 0, cols - 14, '[');
     wattroff(win, bracket_attrs);
-
-    int presence_attrs = 0;
 
     switch (current_presence)
     {
