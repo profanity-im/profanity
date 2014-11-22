@@ -866,7 +866,7 @@ static struct cmd_t command_defs[] =
           "Example: /autoaway mode idle",
           "Example: /autoaway time 30",
           "Example: /autoaway message I'm not really doing much",
-          "Example: /autoaway check false",
+          "Example: /autoaway check off",
           NULL } } },
 
     { "/priority",
@@ -1903,7 +1903,7 @@ _cmd_complete_parameters(char *input, int *size)
         gchar *contact_choices[] = { "/msg", "/info", "/status" };
         for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
             result = autocomplete_param_with_func(input, size, contact_choices[i],
-                roster_find_contact);
+                roster_contact_autocomplete);
             if (result != NULL) {
                 ui_replace_input(input, result, size);
                 g_free(result);
@@ -1914,7 +1914,7 @@ _cmd_complete_parameters(char *input, int *size)
         gchar *resource_choices[] = { "/caps", "/software", "/ping" };
         for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {
             result = autocomplete_param_with_func(input, size, resource_choices[i],
-                roster_find_resource);
+                roster_fulljid_autocomplete);
             if (result != NULL) {
                 ui_replace_input(input, result, size);
                 g_free(result);
@@ -1923,7 +1923,7 @@ _cmd_complete_parameters(char *input, int *size)
         }
     }
 
-    result = autocomplete_param_with_func(input, size, "/invite", roster_find_contact);
+    result = autocomplete_param_with_func(input, size, "/invite", roster_contact_autocomplete);
     if (result != NULL) {
         ui_replace_input(input, result, size);
         g_free(result);
@@ -2039,7 +2039,7 @@ _who_autocomplete(char *input, int *size)
             "/who unavailable" };
 
         for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
-            result = autocomplete_param_with_func(input, size, group_commands[i], roster_find_group);
+            result = autocomplete_param_with_func(input, size, group_commands[i], roster_group_autocomplete);
             if (result != NULL) {
                 return result;
             }
@@ -2058,15 +2058,15 @@ static char *
 _roster_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-    result = autocomplete_param_with_func(input, size, "/roster nick", roster_find_jid);
+    result = autocomplete_param_with_func(input, size, "/roster nick", roster_barejid_autocomplete);
     if (result != NULL) {
         return result;
     }
-    result = autocomplete_param_with_func(input, size, "/roster clearnick", roster_find_jid);
+    result = autocomplete_param_with_func(input, size, "/roster clearnick", roster_barejid_autocomplete);
     if (result != NULL) {
         return result;
     }
-    result = autocomplete_param_with_func(input, size, "/roster remove", roster_find_jid);
+    result = autocomplete_param_with_func(input, size, "/roster remove", roster_barejid_autocomplete);
     if (result != NULL) {
         return result;
     }
@@ -2094,24 +2094,24 @@ static char *
 _group_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-    result = autocomplete_param_with_func(input, size, "/group show", roster_find_group);
+    result = autocomplete_param_with_func(input, size, "/group show", roster_group_autocomplete);
     if (result != NULL) {
         return result;
     }
 
-    result = autocomplete_param_no_with_func(input, size, "/group add", 4, roster_find_contact);
+    result = autocomplete_param_no_with_func(input, size, "/group add", 4, roster_contact_autocomplete);
     if (result != NULL) {
         return result;
     }
-    result = autocomplete_param_no_with_func(input, size, "/group remove", 4, roster_find_contact);
+    result = autocomplete_param_no_with_func(input, size, "/group remove", 4, roster_contact_autocomplete);
     if (result != NULL) {
         return result;
     }
-    result = autocomplete_param_with_func(input, size, "/group add", roster_find_group);
+    result = autocomplete_param_with_func(input, size, "/group add", roster_group_autocomplete);
     if (result != NULL) {
         return result;
     }
-    result = autocomplete_param_with_func(input, size, "/group remove", roster_find_group);
+    result = autocomplete_param_with_func(input, size, "/group remove", roster_group_autocomplete);
     if (result != NULL) {
         return result;
     }
@@ -2353,7 +2353,7 @@ _otr_autocomplete(char *input, int *size)
 {
     char *found = NULL;
 
-    found = autocomplete_param_with_func(input, size, "/otr start", roster_find_contact);
+    found = autocomplete_param_with_func(input, size, "/otr start", roster_contact_autocomplete);
     if (found != NULL) {
         return found;
     }
@@ -2372,7 +2372,7 @@ _otr_autocomplete(char *input, int *size)
         g_string_append(beginning, " ");
         g_string_append(beginning, args[1]);
 
-        found = autocomplete_param_with_func(input, size, beginning->str, roster_find_contact);
+        found = autocomplete_param_with_func(input, size, beginning->str, roster_contact_autocomplete);
         g_string_free(beginning, TRUE);
         if (found != NULL) {
             g_strfreev(args);

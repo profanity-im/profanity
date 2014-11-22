@@ -58,12 +58,12 @@ gboolean roster_add(const char * const barejid, const char * const name, GSList 
 char * roster_barejid_from_name(const char * const name);
 GSList * roster_get_contacts(void);
 gboolean roster_has_pending_subscriptions(void);
-char * roster_find_contact(char *search_str);
-char * roster_find_resource(char *search_str);
+char * roster_contact_autocomplete(char *search_str);
+char * roster_fulljid_autocomplete(char *search_str);
 GSList * roster_get_group(const char * const group);
 GSList * roster_get_groups(void);
-char * roster_find_group(char *search_str);
-char * roster_find_jid(char *search_str);
+char * roster_group_autocomplete(char *search_str);
+char * roster_barejid_autocomplete(char *search_str);
 GSList * roster_get_contacts_by_presence(const char * const presence);
 GSList * roster_get_nogroup(void);
 

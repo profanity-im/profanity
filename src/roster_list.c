@@ -263,7 +263,11 @@ roster_add(const char * const barejid, const char * const name, GSList *groups,
 char *
 roster_barejid_from_name(const char * const name)
 {
-    return g_hash_table_lookup(name_to_barejid, name);
+    if (name) {
+        return g_hash_table_lookup(name_to_barejid, name);
+    } else {
+        return NULL;
+    }
 }
 
 GSList *
@@ -322,13 +326,13 @@ roster_has_pending_subscriptions(void)
 }
 
 char *
-roster_find_contact(char *search_str)
+roster_contact_autocomplete(char *search_str)
 {
     return autocomplete_complete(name_ac, search_str, TRUE);
 }
 
 char *
-roster_find_resource(char *search_str)
+roster_fulljid_autocomplete(char *search_str)
 {
     return autocomplete_complete(fulljid_ac, search_str, TRUE);
 }
@@ -384,13 +388,13 @@ roster_get_groups(void)
 }
 
 char *
-roster_find_group(char *search_str)
+roster_group_autocomplete(char *search_str)
 {
     return autocomplete_complete(groups_ac, search_str, TRUE);
 }
 
 char *
-roster_find_jid(char *search_str)
+roster_barejid_autocomplete(char *search_str)
 {
     return autocomplete_complete(barejid_ac, search_str, TRUE);
 }
