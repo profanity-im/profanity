@@ -263,7 +263,11 @@ roster_add(const char * const barejid, const char * const name, GSList *groups,
 char *
 roster_barejid_from_name(const char * const name)
 {
-    return g_hash_table_lookup(name_to_barejid, name);
+    if (name) {
+        return g_hash_table_lookup(name_to_barejid, name);
+    } else {
+        return NULL;
+    }
 }
 
 GSList *
