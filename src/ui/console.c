@@ -1391,13 +1391,14 @@ _cons_navigation_help(void)
     cons_show("Alt-LEFT                         : Previous chat window");
     cons_show("Alt-RIGHT                        : Next chat window");
     cons_show("UP, DOWN                         : Navigate input history.");
-    cons_show("LEFT, RIGHT, HOME, END           : Edit current input.");
+    cons_show("LEFT, RIGHT, HOME, END           : Move cursor in current input.");
     cons_show("Ctrl-LEFT, Ctrl-RIGHT            : Jump word in input.");
+    cons_show("Alt-Backspace                    : Delete word in input.");
     cons_show("ESC                              : Clear current input.");
     cons_show("TAB                              : Autocomplete.");
     cons_show("PAGE UP, PAGE DOWN               : Page the main window.");
-    cons_show("Shift-UP, Shift-DOWN             : Page the occupants panel.");
-    cons_show("Ctrl-UP, Ctrl-DOWN               : Page the occupants panel.");
+    cons_show("Shift-UP, Shift-DOWN             : Page occupants/roster panel.");
+    cons_show("Ctrl-UP, Ctrl-DOWN               : Page occupants/roster panel.");
     cons_show("");
 
     cons_alert();
