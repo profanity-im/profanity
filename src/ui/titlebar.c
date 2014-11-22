@@ -262,70 +262,58 @@ _show_privacy(void)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
-    if (current_recipient != NULL) {
-        char *recipient_jid = NULL;
-        char *found_contact = roster_contact_autocomplete(current_recipient);
-        if (found_contact != NULL) {
-            recipient_jid = roster_barejid_from_name(current_recipient);
-            free(found_contact);
+    ProfWin *current = wins_get_current();
+    if (current && current->type == WIN_CHAT) {
+        if (!current->is_otr) {
+            if (prefs_get_boolean(PREF_OTR_WARN)) {
+                int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, unencrypted_attrs);
+                wprintw(win, "unencrypted");
+                wattroff(win, unencrypted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            }
         } else {
-            recipient_jid = current_recipient;
-        }
-        ProfWin *current = wins_get_by_recipient(recipient_jid);
-        if (current != NULL) {
-            if (current->type == WIN_CHAT) {
-                if (!current->is_otr) {
-                    if (prefs_get_boolean(PREF_OTR_WARN)) {
-                        int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
-                        wprintw(win, " ");
-                        wattron(win, bracket_attrs);
-                        wprintw(win, "[");
-                        wattroff(win, bracket_attrs);
-                        wattron(win, unencrypted_attrs);
-                        wprintw(win, "unencrypted");
-                        wattroff(win, unencrypted_attrs);
-                        wattron(win, bracket_attrs);
-                        wprintw(win, "]");
-                        wattroff(win, bracket_attrs);
-                    }
-                } else {
-                    int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
-                    wprintw(win, " ");
-                    wattron(win, bracket_attrs);
-                    wprintw(win, "[");
-                    wattroff(win, bracket_attrs);
-                    wattron(win, encrypted_attrs);
-                    wprintw(win, "OTR");
-                    wattroff(win, encrypted_attrs);
-                    wattron(win, bracket_attrs);
-                    wprintw(win, "]");
-                    wattroff(win, bracket_attrs);
-                    if (current->is_trusted) {
-                        int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
-                        wprintw(win, " ");
-                        wattron(win, bracket_attrs);
-                        wprintw(win, "[");
-                        wattroff(win, bracket_attrs);
-                        wattron(win, trusted_attrs);
-                        wprintw(win, "trusted");
-                        wattroff(win, trusted_attrs);
-                        wattron(win, bracket_attrs);
-                        wprintw(win, "]");
-                        wattroff(win, bracket_attrs);
-                    } else {
-                        int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
-                        wprintw(win, " ");
-                        wattron(win, bracket_attrs);
-                        wprintw(win, "[");
-                        wattroff(win, bracket_attrs);
-                        wattron(win, untrusted_attrs);
-                        wprintw(win, "untrusted");
-                        wattroff(win, untrusted_attrs);
-                        wattron(win, bracket_attrs);
-                        wprintw(win, "]");
-                        wattroff(win, bracket_attrs);
-                    }
-                }
+            int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
+            wprintw(win, " ");
+            wattron(win, bracket_attrs);
+            wprintw(win, "[");
+            wattroff(win, bracket_attrs);
+            wattron(win, encrypted_attrs);
+            wprintw(win, "OTR");
+            wattroff(win, encrypted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+            if (current->is_trusted) {
+                int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, trusted_attrs);
+                wprintw(win, "trusted");
+                wattroff(win, trusted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            } else {
+                int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, untrusted_attrs);
+                wprintw(win, "untrusted");
+                wattroff(win, untrusted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
             }
         }
     }
