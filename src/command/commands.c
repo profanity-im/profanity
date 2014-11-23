@@ -1345,6 +1345,12 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         cons_show_roster(list);
         return TRUE;
 
+    // show roster, no offline contacts
+    } else if(g_strcmp0(args[0], "nooffline") == 0){
+        GSList *list = roster_get_contacts_nooffline();
+        cons_show_roster(list);
+        return TRUE;
+
     // set roster size
     } else if (g_strcmp0(args[0], "size") == 0) {
         int intval = 0;
@@ -4041,4 +4047,3 @@ gint _compare_commands(Command *a, Command *b)
 
     return result;
 }
-
