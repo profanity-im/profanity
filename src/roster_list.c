@@ -317,7 +317,8 @@ roster_get_contacts_nooffline(void)
 
     g_hash_table_iter_init(&iter, contacts);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
-        result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+        if(strcmp(p_contact_presence(value), "offline"))
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
     }
 
     // resturn all contact structs
