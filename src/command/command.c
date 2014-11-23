@@ -1251,6 +1251,7 @@ cmd_init(void)
 
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, "add");
+    autocomplete_add(roster_ac, "nooffline");
     autocomplete_add(roster_ac, "nick");
     autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
