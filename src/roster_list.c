@@ -307,6 +307,24 @@ roster_get_contacts(void)
     return result;
 }
 
+GSList *
+roster_get_contacts_online(void)
+{
+    GSList *result = NULL;
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+
+    g_hash_table_iter_init(&iter, contacts);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        if(strcmp(p_contact_presence(value), "offline"))
+            result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
+    }
+
+    // resturn all contact structs
+    return result;
+}
+
 gboolean
 roster_has_pending_subscriptions(void)
 {

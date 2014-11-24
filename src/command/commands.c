@@ -1358,6 +1358,14 @@ cmd_roster(gchar **args, struct cmd_help_t help)
     if (args[0] == NULL) {
         GSList *list = roster_get_contacts();
         cons_show_roster(list);
+        g_slist_free(list);
+        return TRUE;
+
+    // show roster, only online contacts
+    } else if(g_strcmp0(args[0], "online") == 0){
+        GSList *list = roster_get_contacts_online();
+        cons_show_roster(list);
+        g_slist_free(list);
         return TRUE;
 
     // set roster size
@@ -4056,4 +4064,3 @@ gint _compare_commands(Command *a, Command *b)
 
     return result;
 }
-

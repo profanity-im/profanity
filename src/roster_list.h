@@ -57,6 +57,7 @@ gboolean roster_add(const char * const barejid, const char * const name, GSList 
     const char * const subscription, gboolean pending_out);
 char * roster_barejid_from_name(const char * const name);
 GSList * roster_get_contacts(void);
+GSList * roster_get_contacts_online(void);
 gboolean roster_has_pending_subscriptions(void);
 char * roster_contact_autocomplete(char *search_str);
 char * roster_fulljid_autocomplete(char *search_str);

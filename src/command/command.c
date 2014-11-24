@@ -169,11 +169,12 @@ static struct cmd_t command_defs[] =
 
     { "/roster",
         cmd_roster, parse_args_with_freetext, 0, 3, NULL,
-        { "/roster [show|hide|by|size|add|remove|nick|clearnick] [offline|resource] [percent] [group|presence|none] [jid] [nickname]", "Manage your roster.",
-        { "/roster [show|hide|by|size|add|remove|nick|clearnick] [offline|resource] [percent] [group|presence|none] [jid] [nickname]",
+        { "/roster [online|show|hide|by|size|add|remove|nick|clearnick] [offline|resource] [percent] [group|presence|none] [jid] [nickname]", "Manage your roster.",
+        { "/roster [online|show|hide|by|size|add|remove|nick|clearnick] [offline|resource] [percent] [group|presence|none] [jid] [nickname]",
           "-------------------------------------------------------------------------------------------------------------------------",
           "View, add to, and remove from your roster.",
           "Passing no arguments lists all contacts in your roster.",
+          "online        - Show all online contacts in your roster.",
           "show          - Show the roster panel in the console window.",
           "hide          - Hide the roster panel.",
           "show offline  - Show offline contacts in the roster panel.",
@@ -1252,6 +1253,7 @@ cmd_init(void)
 
     roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, "add");
+    autocomplete_add(roster_ac, "online");
     autocomplete_add(roster_ac, "nick");
     autocomplete_add(roster_ac, "clearnick");
     autocomplete_add(roster_ac, "remove");
