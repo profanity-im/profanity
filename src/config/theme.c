@@ -390,6 +390,7 @@ _set_string_preference(char *prefstr, preference_t pref)
     if (g_key_file_has_key(theme, "ui", prefstr, NULL)) {
         gchar *val = g_key_file_get_string(theme, "ui", prefstr, NULL);
         prefs_set_string(pref, val);
+        g_free(val);
     }
 }
 

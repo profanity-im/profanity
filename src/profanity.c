@@ -114,14 +114,14 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
                 g_timer_start(timer);
             }
 
+            ch = ui_get_char(inp, &size, &result);
+
             ui_handle_special_keys(&ch, result);
 #ifdef HAVE_LIBOTR
             otr_poll();
 #endif
             jabber_process_events();
             ui_update();
-
-            ch = ui_get_char(inp, &size, &result);
         }
 
         inp[size++] = '\0';
