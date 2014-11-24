@@ -889,6 +889,7 @@ static struct cmd_t command_defs[] =
           "enable account               : Enable the account, it will be used for autocomplete.",
           "disable account              : Disable the account.",
           "add account                  : Create a new account.",
+          "remove account               : Remove an account.",
           "rename account newname       : Rename account to newname.",
           "set account property value   : Set 'property' of 'account' to 'value'.",
           "clear account property value : Clear 'property' of 'account'.",
@@ -1211,6 +1212,7 @@ cmd_init(void)
     autocomplete_add(account_ac, "list");
     autocomplete_add(account_ac, "show");
     autocomplete_add(account_ac, "add");
+    autocomplete_add(account_ac, "remove");
     autocomplete_add(account_ac, "enable");
     autocomplete_add(account_ac, "disable");
     autocomplete_add(account_ac, "rename");
@@ -2780,7 +2782,7 @@ _account_autocomplete(char *input, int *size)
 
     int i = 0;
     gchar *account_choice[] = { "/account set", "/account show", "/account enable",
-        "/account disable", "/account rename", "/account clear" };
+        "/account disable", "/account rename", "/account clear", "/account remove"  };
 
     for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
         found = autocomplete_param_with_func(input, size, account_choice[i],
