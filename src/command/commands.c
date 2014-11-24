@@ -1070,6 +1070,8 @@ _who_roster(gchar **args, struct cmd_help_t help)
             }
         }
     }
+
+    g_slist_free(list);
 }
 
 gboolean
