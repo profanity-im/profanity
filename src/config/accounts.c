@@ -193,6 +193,16 @@ _accounts_add(const char *account_name, const char *altdomain, const int port)
     jid_destroy(jid);
 }
 
+static int
+_accounts_remove(const char *account_name)
+{
+    int r = g_key_file_remove_group(accounts, account_name, NULL);
+    _save_accounts();
+    autocomplete_remove(all_ac, account_name);
+    autocomplete_remove(enabled_ac, account_name);
+    return r;
+}
+
 static gchar**
 _accounts_get_list(void)
 {
@@ -861,6 +871,7 @@ accounts_init_module(void)
     accounts_reset_all_search = _accounts_reset_all_search;
     accounts_reset_enabled_search = _accounts_reset_enabled_search;
     accounts_add = _accounts_add;
+    accounts_remove = _accounts_remove;
     accounts_get_list = _accounts_get_list;
     accounts_get_account = _accounts_get_account;
     accounts_enable = _accounts_enable;

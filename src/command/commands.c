@@ -190,6 +190,19 @@ cmd_account(gchar **args, struct cmd_help_t help)
             cons_show("Account created.");
             cons_show("");
         }
+    } else if (strcmp(command, "remove") == 0) {
+        char *account_name = args[1];
+        if(!account_name) {
+            cons_show("Usage: %s", help.usage);
+        } else {
+            if(accounts_remove(account_name)){
+                cons_show("Account %s removed.", account_name);
+            } else {
+                cons_show("Failed to remove account %s.", account_name);
+                cons_show("Either the account does not exist, or an unknown error occurred.");
+            }
+            cons_show("");
+        }
     } else if (strcmp(command, "enable") == 0) {
         char *account_name = args[1];
         if (account_name == NULL) {
@@ -1071,6 +1084,8 @@ _who_roster(gchar **args, struct cmd_help_t help)
             }
         }
     }
+
+    g_slist_free(list);
 }
 
 gboolean

@@ -50,6 +50,7 @@ char * (*accounts_find_enabled)(char *prefix);
 void (*accounts_reset_all_search)(void);
 void (*accounts_reset_enabled_search)(void);
 void (*accounts_add)(const char *jid, const char *altdomain, const int port);
+int  (*accounts_remove)(const char *jid);
 gchar** (*accounts_get_list)(void);
 ProfAccount* (*accounts_get_account)(const char * const name);
 gboolean (*accounts_enable)(const char * const name);
