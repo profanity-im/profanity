@@ -21,3 +21,5 @@ void create_with_slash_in_resource(void **state);
 void create_with_at_in_resource(void **state);
 void create_with_at_and_slash_in_resource(void **state);
 void create_full_with_trailing_slash(void **state);
+void returns_fulljid_when_exists(void **state);
+void returns_barejid_when_fulljid_not_exists(void **state);

@@ -131,6 +131,8 @@ int main(int argc, char* argv[]) {
         unit_test(create_with_at_in_resource),
         unit_test(create_with_at_and_slash_in_resource),
         unit_test(create_full_with_trailing_slash),
+        unit_test(returns_fulljid_when_exists),
+        unit_test(returns_barejid_when_fulljid_not_exists),
 
         unit_test(parse_null_returns_null),
         unit_test(parse_empty_returns_null),

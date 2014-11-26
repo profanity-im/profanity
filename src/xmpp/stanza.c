@@ -1313,72 +1313,30 @@ stanza_get_idle_time(xmpp_stanza_t * const stanza)
     }
 }
 
-gboolean
-stanza_contains_caps(xmpp_stanza_t * const stanza)
+XMPPCaps*
+stanza_parse_caps(xmpp_stanza_t * const stanza)
 {
-    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
+    xmpp_stanza_t *caps_st = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
 
-    if (!caps) {
-        return FALSE;
-    }
-
-    char *ns = xmpp_stanza_get_ns(caps);
-    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-char *
-stanza_caps_get_hash(xmpp_stanza_t * const stanza)
-{
-    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
-
-    if (!caps) {
+    if (!caps_st) {
         return NULL;
     }
 
-    char *ns = xmpp_stanza_get_ns(caps);
+    char *ns = xmpp_stanza_get_ns(caps_st);
     if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
         return NULL;
     }
 
-    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_HASH);
-}
+    char *hash = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_HASH);
+    char *node = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_NODE);
+    char *ver = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_VER);
 
-char *
-stanza_caps_get_node(xmpp_stanza_t * const stanza)
-{
-    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
+    XMPPCaps *caps = (XMPPCaps *)malloc(sizeof(XMPPCaps));
+    caps->hash = hash ? strdup(hash) : NULL;
+    caps->node = node ? strdup(node) : NULL;
+    caps->ver = ver ? strdup(ver) : NULL;
 
-    if (!caps) {
-        return NULL;
-    }
-
-    char *ns = xmpp_stanza_get_ns(caps);
-    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
-        return NULL;
-    }
-
-    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_NODE);
-}
-
-char *
-stanza_get_caps_ver(xmpp_stanza_t * const stanza)
-{
-    xmpp_stanza_t *caps = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_C);
-
-    if (!caps) {
-        return NULL;
-    }
-
-    char *ns = xmpp_stanza_get_ns(caps);
-    if (g_strcmp0(ns, STANZA_NS_CAPS) != 0) {
-        return NULL;
-    }
-
-    return xmpp_stanza_get_attribute(caps, STANZA_ATTR_VER);
+    return caps;
 }
 
 char *
@@ -1576,4 +1534,99 @@ stanza_get_presence_string_from_type(resource_presence_t presence_type)
         default:
             return NULL;
     }
+}
+
+Resource*
+stanza_resource_from_presence(XMPPPresence *presence)
+{
+    // create Resource
+    Resource *resource = NULL;
+    resource_presence_t resource_presence = resource_presence_from_string(presence->show);
+    if (presence->jid->resourcepart == NULL) { // hack for servers that do not send full jid
+        resource = resource_new("__prof_default", resource_presence, presence->status, presence->priority);
+    } else {
+        resource = resource_new(presence->jid->resourcepart, resource_presence, presence->status, presence->priority);
+    }
+
+    return resource;
+}
+
+void
+stanza_free_caps(XMPPCaps *caps)
+{
+    if (caps) {
+        if (caps->hash) {
+            free(caps->hash);
+        }
+        if (caps->node) {
+            free(caps->node);
+        }
+        if (caps->ver) {
+            free(caps->ver);
+        }
+        FREE_SET_NULL(caps);
+    }
+}
+
+void
+stanza_free_presence(XMPPPresence *presence)
+{
+    if (presence) {
+        if (presence->jid) {
+            jid_destroy(presence->jid);
+        }
+        if (presence->last_activity) {
+            g_date_time_unref(presence->last_activity);
+        }
+        if (presence->show) {
+            free(presence->show);
+        }
+        if (presence->status) {
+            free(presence->status);
+        }
+        FREE_SET_NULL(presence);
+    }
+}
+
+XMPPPresence *
+stanza_parse_presence(xmpp_stanza_t *stanza, int *err)
+{
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from) {
+        *err = STANZA_PARSE_ERROR_NO_FROM;
+        return NULL;
+    }
+
+    Jid *from_jid = jid_create(from);
+    if (!from_jid) {
+        *err = STANZA_PARSE_ERROR_INVALID_FROM;
+        return NULL;
+    }
+
+    XMPPPresence *result = (XMPPPresence *)malloc(sizeof(XMPPPresence));
+    result->jid = from_jid;
+
+    result->show = stanza_get_show(stanza, "online");
+    result->status = stanza_get_status(stanza, NULL);
+
+    int idle_seconds = stanza_get_idle_time(stanza);
+    if (idle_seconds > 0) {
+        GDateTime *now = g_date_time_new_now_local();
+        result->last_activity = g_date_time_add_seconds(now, 0 - idle_seconds);
+        g_date_time_unref(now);
+    } else {
+        result->last_activity = NULL;
+    }
+
+    result->priority = 0;
+    xmpp_stanza_t *priority_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PRIORITY);
+    if (priority_stanza != NULL) {
+        char *priority_str = xmpp_stanza_get_text(priority_stanza);
+        if (priority_str != NULL) {
+            result->priority = atoi(priority_str);
+        }
+        free(priority_str);
+    }
+
+    return result;
 }

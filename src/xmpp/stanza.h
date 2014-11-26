@@ -157,6 +157,25 @@
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
+typedef struct caps_stanza_t {
+    char *hash;
+    char *node;
+    char *ver;
+} XMPPCaps;
+
+typedef struct presence_stanza_t {
+    Jid *jid;
+    char *show;
+    char *status;
+    int priority;
+    GDateTime *last_activity;
+} XMPPPresence;
+
+typedef enum {
+    STANZA_PARSE_ERROR_NO_FROM,
+    STANZA_PARSE_ERROR_INVALID_FROM
+} stanza_parse_error_t;
+
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
@@ -220,10 +239,6 @@ xmpp_stanza_t* stanza_create_room_kick_iq(xmpp_ctx_t * const ctx, const char * c
 
 int stanza_get_idle_time(xmpp_stanza_t * const stanza);
 char * stanza_get_caps_str(xmpp_stanza_t * const stanza);
-gboolean stanza_contains_caps(xmpp_stanza_t * const stanza);
-char * stanza_caps_get_hash(xmpp_stanza_t * const stanza);
-char * stanza_get_caps_ver(xmpp_stanza_t * const stanza);
-char * stanza_caps_get_node(xmpp_stanza_t * const stanza);
 
 DataForm * stanza_create_form(xmpp_stanza_t * const stanza);
 void stanza_destroy_form(DataForm *form);
@@ -260,5 +275,12 @@ char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
 char* stanza_get_actor(xmpp_stanza_t *stanza);
 char* stanza_get_reason(xmpp_stanza_t *stanza);
+
+Resource* stanza_resource_from_presence(XMPPPresence *presence);
+XMPPPresence* stanza_parse_presence(xmpp_stanza_t *stanza, int *err);
+void stanza_free_presence(XMPPPresence *presence);
+
+XMPPCaps* stanza_parse_caps(xmpp_stanza_t * const stanza);
+void stanza_free_caps(XMPPCaps *caps);
 
 #endif
