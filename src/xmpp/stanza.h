@@ -157,6 +157,19 @@
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
+typedef struct presence_stanza_t {
+    Jid *jid;
+    char *show;
+    char *status;
+    int priority;
+    GDateTime *last_activity;
+} XMPPPresence;
+
+typedef enum {
+    STANZA_PARSE_ERROR_NO_FROM,
+    STANZA_PARSE_ERROR_INVALID_FROM
+} stanza_parse_error_t;
+
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
@@ -260,5 +273,9 @@ char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t *stanza);
 char* stanza_get_muc_destroy_reason(xmpp_stanza_t *stanza);
 char* stanza_get_actor(xmpp_stanza_t *stanza);
 char* stanza_get_reason(xmpp_stanza_t *stanza);
+
+Resource* stanza_resource_from_presence(XMPPPresence *presence);
+XMPPPresence* stanza_parse_presence(xmpp_stanza_t *stanza, int *err);
+void stanza_free_presence(XMPPPresence *presence);
 
 #endif
