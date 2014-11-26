@@ -176,3 +176,17 @@ get_nick_from_full_jid(const char * const full_room_jid)
 
     return nick_part;
 }
+
+
+/*
+ * get the fulljid, fall back to the barejid
+ */
+char *
+jid_fulljid_or_barejid(Jid *jid)
+{
+    if (jid->fulljid) {
+        return jid->fulljid;
+    } else {
+        return jid->barejid;
+    }
+}

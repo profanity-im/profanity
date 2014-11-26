@@ -165,3 +165,21 @@ void create_full_with_trailing_slash(void **state)
     assert_string_equal("room@conference.domain.org", result->barejid);
     assert_string_equal("room@conference.domain.org/nick/", result->fulljid);
 }
+
+void returns_fulljid_when_exists(void **state)
+{
+    Jid *jid = jid_create("localpart@domainpart/resourcepart");
+
+    char *result = jid_fulljid_or_barejid(jid);
+
+    assert_string_equal("localpart@domainpart/resourcepart", result);
+}
+
+void returns_barejid_when_fulljid_not_exists(void **state)
+{
+    Jid *jid = jid_create("localpart@domainpart");
+
+    char *result = jid_fulljid_or_barejid(jid);
+
+    assert_string_equal("localpart@domainpart", result);
+}

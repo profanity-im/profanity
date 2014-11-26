@@ -500,43 +500,30 @@ _unavailable_handler(xmpp_conn_t * const conn,
 }
 
 static void
-_handle_caps(xmpp_stanza_t *const stanza)
+_handle_caps(char *jid, XMPPCaps *caps)
 {
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-
-    if (from) {
-        char *hash = stanza_caps_get_hash(stanza);
-
-        // hash supported xep-0115
-        if (g_strcmp0(hash, "sha-1") == 0) {
-            log_info("Hash %s supported");
-
-            char *ver = stanza_get_caps_ver(stanza);
-            if (ver) {
-                if (caps_contains(ver)) {
-                    log_info("Capabilities cached: %s", ver);
-                    caps_map(from, ver);
-                } else {
-                    log_info("Capabilities not cached: %s, sending service discovery request", ver);
-                    char *node = stanza_caps_get_node(stanza);
-                    char *id = create_unique_id("caps");
-
-                    iq_send_caps_request(from, id, node, ver);
-
-                    free(id);
-                }
-            }
-
-        // no hash, or not supported
-        } else {
-            if (hash) {
-                log_info("Hash %s not supported, not sending service discovery request");
-                // send service discovery request, cache against from full jid
+    // hash supported xep-0115
+    if (g_strcmp0(caps->hash, "sha-1") == 0) {
+        log_info("Hash %s supported", caps->hash);
+        if (caps->ver) {
+            if (caps_contains(caps->ver)) {
+                log_info("Capabilities cached: %s", caps->ver);
+                caps_map(jid, caps->ver);
             } else {
-                log_info("No hash specified, not sending service discovery request");
-                // do legacy
+                log_info("Capabilities not cached: %s, sending service discovery request", caps->ver);
+                char *id = create_unique_id("caps");
+                iq_send_caps_request(jid, id, caps->node, caps->ver);
+                free(id);
             }
         }
+
+    // no hash, or not supported
+    } else if (caps->hash) {
+        log_info("Hash %s not supported, not sending service discovery request", caps->hash);
+        // send service discovery request, cache against from full jid
+    } else {
+        log_info("No hash specified, not sending service discovery request");
+        // do legacy
     }
 }
 
@@ -580,18 +567,21 @@ _available_handler(xmpp_conn_t * const conn,
                 break;
         }
         return 1;
-    } else if (xmpp_presence->jid->fulljid) {
-        log_debug("Presence available handler fired for: %s", xmpp_presence->jid->fulljid);
     } else {
-        log_debug("Presence available handler fired for: %s", xmpp_presence->jid->barejid);
+        char *jid = jid_fulljid_or_barejid(xmpp_presence->jid);
+        log_debug("Presence available handler fired for: %s", jid);
     }
 
     const char *my_jid_str = xmpp_conn_get_jid(conn);
     Jid *my_jid = jid_create(my_jid_str);
-    if ((g_strcmp0(my_jid->fulljid, xmpp_presence->jid->fulljid) != 0) && (stanza_contains_caps(stanza))) {
+
+    XMPPCaps *caps = stanza_parse_caps(stanza);
+    if ((g_strcmp0(my_jid->fulljid, xmpp_presence->jid->fulljid) != 0) && caps) {
         log_info("Presence contains capabilities.");
-        _handle_caps(stanza);
+        char *jid = jid_fulljid_or_barejid(xmpp_presence->jid);
+        _handle_caps(jid, caps);
     }
+    stanza_free_caps(caps);
 
     Resource *resource = stanza_resource_from_presence(xmpp_presence);
 
@@ -627,6 +617,7 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
         log_debug("No node string, not sending discovery IQ.");
     }
 }
+
 static int
 _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
@@ -757,10 +748,12 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
         // room occupant online
         } else {
             // send disco info for capabilities, if not cached
-            if (stanza_contains_caps(stanza)) {
+            XMPPCaps *caps = stanza_parse_caps(stanza);
+            if (caps) {
                 log_info("Presence contains capabilities.");
-                _handle_caps(stanza);
+                _handle_caps(from, caps);
             }
+            stanza_free_caps(caps);
 
             char *actor = stanza_get_actor(stanza);
             char *reason = stanza_get_reason(stanza);
