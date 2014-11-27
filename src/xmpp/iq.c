@@ -181,6 +181,33 @@ _iq_room_info_request(gchar *room)
 }
 
 static void
+_iq_send_caps_request_for_jid(const char * const to, const char * const id,
+    const char * const node, const char * const ver)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+
+    if (!node) {
+        log_error("Could not create caps request, no node");
+        return;
+    }
+    if (!ver) {
+        log_error("Could not create caps request, no ver");
+        return;
+    }
+
+    GString *node_str = g_string_new("");
+    g_string_printf(node_str, "%s#%s", node, ver);
+    xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, to, node_str->str);
+    g_string_free(node_str, TRUE);
+
+    xmpp_id_handler_add(conn, _caps_response_handler, id, strdup(to));
+
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+static void
 _iq_send_caps_request(const char * const to, const char * const id,
     const char * const node, const char * const ver)
 {
@@ -457,6 +484,12 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
+    char *type = xmpp_stanza_get_type(stanza);
+    // ignore non result
+    if ((g_strcmp0(type, "get") == 0) || (g_strcmp0(type, "set") == 0)) {
+        return 1;
+    }
+
     if (id) {
         log_info("Capabilities response handler fired for id %s", id);
     } else {
@@ -469,7 +502,6 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
         return 0;
     }
 
-    char *type = xmpp_stanza_get_type(stanza);
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
@@ -489,32 +521,40 @@ _caps_response_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
         return 0;
     }
 
-    // validate sha1
-    gchar **split = g_strsplit(node, "#", -1);
-    char *given_sha1 = split[1];
-    char *generated_sha1 = caps_create_sha1_str(query);
-
-    if (g_strcmp0(given_sha1, generated_sha1) != 0) {
-        log_warning("Generated sha-1 does not match given:");
-        log_warning("Generated : %s", generated_sha1);
-        log_warning("Given     : %s", given_sha1);
+    if (userdata) {
+        char *jid = (char *)userdata;
+        log_info("Associating capabilities with: %s", jid);
+        Capabilities *capabilities = caps_create(query);
+        caps_add_by_jid(jid, capabilities);
     } else {
-        log_info("Valid SHA-1 hash found: %s", given_sha1);
+        // validate sha1
+        gchar **split = g_strsplit(node, "#", -1);
+        char *given_sha1 = split[1];
+        char *generated_sha1 = caps_create_sha1_str(query);
 
-        if (caps_contains(given_sha1)) {
-            log_info("Capabilties cached: %s", given_sha1);
+        if (g_strcmp0(given_sha1, generated_sha1) != 0) {
+            log_warning("Generated sha-1 does not match given:");
+            log_warning("Generated : %s", generated_sha1);
+            log_warning("Given     : %s", given_sha1);
         } else {
-            log_info("Capabilities not cached: %s, storing", given_sha1);
-            Capabilities *capabilities = caps_create(query);
-            caps_add(given_sha1, capabilities);
-            caps_destroy(capabilities);
+            log_info("Valid SHA-1 hash found: %s", given_sha1);
+
+            if (caps_contains(given_sha1)) {
+                log_info("Capabilties already cached: %s", given_sha1);
+            } else {
+                log_info("Capabilities not cached: %s, storing", given_sha1);
+                Capabilities *capabilities = caps_create(query);
+                caps_add_by_ver(given_sha1, capabilities);
+                caps_destroy(capabilities);
+            }
+
+            caps_map_jid_to_ver(from, given_sha1);
         }
 
-        caps_map(from, given_sha1);
+        g_free(generated_sha1);
+        g_strfreev(split);
     }
 
-    g_free(generated_sha1);
-    g_strfreev(split);
     return 0;
 }
 
@@ -1254,6 +1294,7 @@ iq_init_module(void)
     iq_room_config_cancel = _iq_room_config_cancel;
     iq_submit_room_config = _iq_submit_room_config;
     iq_send_caps_request = _iq_send_caps_request;
+    iq_send_caps_request_for_jid = _iq_send_caps_request_for_jid;
     iq_room_info_request = _iq_room_info_request;
     iq_room_affiliation_set = _iq_room_affiliation_set;
     iq_room_affiliation_list = _iq_room_affiliation_list;

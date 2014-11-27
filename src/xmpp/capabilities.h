@@ -40,9 +40,12 @@
 #include "xmpp/xmpp.h"
 
 void caps_init(void);
-void caps_add(const char * const ver, Capabilities *caps);
-void caps_map(const char * const jid, const char * const ver);
-gboolean caps_contains(const char * const caps_ver);
+
+void caps_add_by_ver(const char * const ver, Capabilities *caps);
+void caps_add_by_jid(const char * const jid, Capabilities *caps);
+void caps_map_jid_to_ver(const char * const jid, const char * const ver);
+gboolean caps_contains(const char * const ver);
+
 char* caps_create_sha1_str(xmpp_stanza_t * const query);
 xmpp_stanza_t* caps_create_query_response_stanza(xmpp_ctx_t * const ctx);
 Capabilities* caps_create(xmpp_stanza_t *query);
