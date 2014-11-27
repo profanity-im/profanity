@@ -83,6 +83,7 @@ gboolean
 cmd_connect(gchar **args, struct cmd_help_t help)
 {
     gboolean result = FALSE;
+    char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
@@ -93,7 +94,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         gchar *opt_keys[] = { "server", "port", NULL };
         gboolean parsed;
 
-        GHashTable *options = parse_options(&args[1], opt_keys, &parsed);
+        GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
         if (!parsed) {
             cons_show("Usage: %s", help.usage);
             cons_show("");
@@ -115,6 +116,15 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         options_destroy(options);
 
         char *user = args[0];
+        if(!user){
+            if(def){
+                user = def;
+                cons_show("Using default account %s.", user);
+            } else {
+                cons_show("No default account.");
+                return TRUE;
+            }
+        }
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
 
@@ -145,6 +155,8 @@ cmd_connect(gchar **args, struct cmd_help_t help)
 
         result = TRUE;
     }
+
+    g_free(def);
 
     return result;
 }
