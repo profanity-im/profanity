@@ -507,22 +507,26 @@ _handle_caps(char *jid, XMPPCaps *caps)
         log_info("Hash %s supported", caps->hash);
         if (caps->ver) {
             if (caps_contains(caps->ver)) {
-                log_info("Capabilities cached: %s", caps->ver);
-                caps_map(jid, caps->ver);
+                log_info("Capabilities cache hit: %s, for %s.", caps->ver, jid);
+                caps_map_jid_to_ver(jid, caps->ver);
             } else {
-                log_info("Capabilities not cached: %s, sending service discovery request", caps->ver);
+                log_info("Capabilities cache miss: %s, for %s, sending service discovery request", caps->ver, jid);
                 char *id = create_unique_id("caps");
                 iq_send_caps_request(jid, id, caps->node, caps->ver);
                 free(id);
             }
         }
 
-    // no hash, or not supported
+    // unsupported hash
     } else if (caps->hash) {
-        log_info("Hash %s not supported, not sending service discovery request", caps->hash);
-        // send service discovery request, cache against from full jid
+        log_info("Hash %s not supported: %s, sending service discovery request", caps->hash, jid);
+        char *id = create_unique_id("caps");
+        iq_send_caps_request_for_jid(jid, id, caps->node, caps->ver);
+        free(id);
+
+    // no hash
     } else {
-        log_info("No hash specified, not sending service discovery request");
+        log_info("No hash specified: %s, not sending service discovery request", jid);
         // do legacy
     }
 }
