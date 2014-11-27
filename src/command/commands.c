@@ -243,6 +243,37 @@ cmd_account(gchar **args, struct cmd_help_t help)
                 cons_show("");
             }
         }
+    } else if (strcmp(command, "default") == 0) {
+        if(g_strv_length(args) == 1){
+            char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
+
+            if(def){
+                cons_show("The default account is %s.", def);
+                free(def);
+            } else {
+                cons_show("No default account.");
+            }
+        } else if(g_strv_length(args) == 2){
+            if(strcmp(args[1], "off") == 0){
+                prefs_set_string(PREF_DEFAULT_ACCOUNT, NULL);
+                cons_show("Removed default account.");
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+        } else if(g_strv_length(args) == 3) {
+            if(strcmp(args[1], "set") == 0){
+                if(accounts_get_account(args[2])){
+                    prefs_set_string(PREF_DEFAULT_ACCOUNT, args[2]);
+                    cons_show("Default account set to %s.", args[2]);
+                } else {
+                    cons_show("Account %s does not exist.", args[2]);
+                }
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
+        }
     } else if (strcmp(command, "set") == 0) {
         if (g_strv_length(args) != 4) {
             cons_show("Usage: %s", help.usage);
