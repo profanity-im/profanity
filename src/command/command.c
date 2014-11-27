@@ -2790,6 +2790,11 @@ _account_autocomplete(char *input, int *size)
 
     g_strfreev(args);
 
+    found = autocomplete_param_with_ac(input, size, "/account default", account_default_ac, TRUE);
+    if(found){
+        return found;
+    }
+
     int i = 0;
     gchar *account_choice[] = { "/account set", "/account show", "/account enable",
         "/account disable", "/account rename", "/account clear", "/account remove",
