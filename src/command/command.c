@@ -1054,6 +1054,7 @@ static Autocomplete theme_load_ac;
 static Autocomplete account_ac;
 static Autocomplete account_set_ac;
 static Autocomplete account_clear_ac;
+static Autocomplete account_default_ac;
 static Autocomplete disco_ac;
 static Autocomplete close_ac;
 static Autocomplete wins_ac;
@@ -1216,6 +1217,7 @@ cmd_init(void)
     autocomplete_add(account_ac, "remove");
     autocomplete_add(account_ac, "enable");
     autocomplete_add(account_ac, "disable");
+    autocomplete_add(account_ac, "default");
     autocomplete_add(account_ac, "rename");
     autocomplete_add(account_ac, "set");
     autocomplete_add(account_ac, "clear");
@@ -1241,6 +1243,10 @@ cmd_init(void)
     autocomplete_add(account_clear_ac, "server");
     autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");
+
+    account_default_ac = autocomplete_new();
+    autocomplete_add(account_default_ac, "set");
+    autocomplete_add(account_default_ac, "off");
 
     close_ac = autocomplete_new();
     autocomplete_add(close_ac, "read");
@@ -1442,6 +1448,7 @@ cmd_uninit(void)
     autocomplete_free(account_ac);
     autocomplete_free(account_set_ac);
     autocomplete_free(account_clear_ac);
+    autocomplete_free(account_default_ac);
     autocomplete_free(disco_ac);
     autocomplete_free(close_ac);
     autocomplete_free(wins_ac);
@@ -1613,6 +1620,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(account_ac);
     autocomplete_reset(account_set_ac);
     autocomplete_reset(account_clear_ac);
+    autocomplete_reset(account_default_ac);
     autocomplete_reset(disco_ac);
     autocomplete_reset(close_ac);
     autocomplete_reset(wins_ac);
@@ -2784,7 +2792,8 @@ _account_autocomplete(char *input, int *size)
 
     int i = 0;
     gchar *account_choice[] = { "/account set", "/account show", "/account enable",
-        "/account disable", "/account rename", "/account clear", "/account remove"  };
+        "/account disable", "/account rename", "/account clear", "/account remove",
+        "/account default set" };
 
     for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
         found = autocomplete_param_with_func(input, size, account_choice[i],
