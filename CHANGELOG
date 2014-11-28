@@ -1,0 +1,9 @@
+0.4.6
+=====
+
+- 16 colour support
+- UI preferences included in themes
+- Word wrapping (/wrap)
+- Show hide time (/time)
+- Show or hide and customise roster panel (/roster)
+- /account remove
