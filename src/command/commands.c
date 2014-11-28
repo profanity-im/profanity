@@ -206,13 +206,19 @@ cmd_account(gchar **args, struct cmd_help_t help)
         if(!account_name) {
             cons_show("Usage: %s", help.usage);
         } else {
+            char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
             if(accounts_remove(account_name)){
                 cons_show("Account %s removed.", account_name);
+                if(def && strcmp(def, account_name) == 0){
+                    prefs_set_string(PREF_DEFAULT_ACCOUNT, NULL);
+                    cons_show("Default account removed because the corresponding account was removed.");
+                }
             } else {
                 cons_show("Failed to remove account %s.", account_name);
                 cons_show("Either the account does not exist, or an unknown error occurred.");
             }
             cons_show("");
+            g_free(def);
         }
     } else if (strcmp(command, "enable") == 0) {
         char *account_name = args[1];
