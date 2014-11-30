@@ -130,17 +130,32 @@ static void _load_preferences(void);
 static gchar * _get_themes_dir(void);
 void _theme_list_dir(const gchar * const dir, GSList **result);
 static GString * _theme_find(const char * const theme_name);
+static gboolean _theme_load_file(const char * const theme_name);
 
 void
 theme_init(const char * const theme_name)
 {
-    if (!theme_load(theme_name) && !theme_load("default")) {
+    if (!_theme_load_file(theme_name) && !_theme_load_file("default")) {
         log_error("Theme initialisation failed");
+    } else {
+        _load_colours();
     }
 }
 
 gboolean
 theme_load(const char * const theme_name)
+{
+    if (_theme_load_file(theme_name)) {
+        _load_colours();
+        _load_preferences();
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+static gboolean
+_theme_load_file(const char * const theme_name)
 {
     // use default theme
     if (theme_name == NULL || strcmp(theme_name, "default") == 0) {
@@ -170,8 +185,6 @@ theme_load(const char * const theme_name)
             NULL);
     }
 
-    _load_colours();
-    _load_preferences();
     return TRUE;
 }
 
