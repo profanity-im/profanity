@@ -557,7 +557,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     //         3rd bit =  0/1 - eol/no eol
     //         4th bit =  0/1 - color from/no color from
     //         5th bit =  0/1 - color date/no date
-    int unattr_me = 0;
+    gboolean me_message = FALSE;
     int offset = 0;
     int colour = theme_attrs(THEME_ME);
 
@@ -596,14 +596,16 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
         if (strncmp(message, "/me ", 4) == 0) {
             wprintw(window->win, "*%s ", from);
             offset = 4;
-            unattr_me = 1;
+            me_message = TRUE;
         } else {
             wprintw(window->win, "%s: ", from);
             wattroff(window->win, colour);
         }
     }
 
-    wattron(window->win, theme_attrs(theme_item));
+    if (!me_message) {
+        wattron(window->win, theme_attrs(theme_item));
+    }
 
     if (prefs_get_boolean(PREF_WRAP)) {
         _win_print_wrapped(window->win, message+offset);
@@ -615,10 +617,10 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
         wprintw(window->win, "\n");
     }
 
-    wattroff(window->win, theme_attrs(theme_item));
-
-    if (unattr_me) {
+    if (me_message) {
         wattroff(window->win, colour);
+    } else {
+        wattroff(window->win, theme_attrs(theme_item));
     }
 }
 
