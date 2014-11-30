@@ -502,7 +502,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
 static void
 _handle_caps(char *jid, XMPPCaps *caps)
 {
-    // hash supported xep-0115
+    // hash supported, xep-0115, cache against ver
     if (g_strcmp0(caps->hash, "sha-1") == 0) {
         log_info("Hash %s supported", caps->hash);
         if (caps->ver) {
@@ -517,17 +517,21 @@ _handle_caps(char *jid, XMPPCaps *caps)
             }
         }
 
-    // unsupported hash
+    // unsupported hash, xep-0115, assoiciate with JID, no cache
     } else if (caps->hash) {
         log_info("Hash %s not supported: %s, sending service discovery request", caps->hash, jid);
         char *id = create_unique_id("caps");
         iq_send_caps_request_for_jid(jid, id, caps->node, caps->ver);
         free(id);
 
-    // no hash
+   // no hash, legacy caps, cache against node#ver
+   } else if (caps->node && caps->ver) {
+        log_info("No hash specified: %s, legacy request made for %s#%s", jid, caps->node, caps->ver);
+        char *id = create_unique_id("caps");
+        iq_send_caps_request_legacy(jid, id, caps->node, caps->ver);
+        free(id);
     } else {
-        log_info("No hash specified: %s, not sending service discovery request", jid);
-        // do legacy
+        log_info("No hash specified: %s, could not create ver string, not sending service disovery request.", jid);
     }
 }
 
