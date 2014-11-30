@@ -2795,8 +2795,15 @@ cmd_alias(gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
             return TRUE;
         } else {
-            GString *ac_value = g_string_new("/");
-            g_string_append(ac_value, alias);
+            char *alias_p = alias;
+            GString *ac_value = g_string_new("");
+            if (alias[0] == '/') {
+                g_string_append(ac_value, alias);
+                alias_p = &alias[1];
+            } else {
+                g_string_append(ac_value, "/");
+                g_string_append(ac_value, alias);
+            }
 
             char *value = args[2];
             if (value == NULL) {
@@ -2808,10 +2815,10 @@ cmd_alias(gchar **args, struct cmd_help_t help)
                 g_string_free(ac_value, TRUE);
                 return TRUE;
             } else {
-                prefs_add_alias(alias, value);
+                prefs_add_alias(alias_p, value);
                 cmd_autocomplete_add(ac_value->str);
-                cmd_alias_add(alias);
-                cons_show("Command alias added /%s -> %s", alias, value);
+                cmd_alias_add(alias_p);
+                cons_show("Command alias added %s -> %s", ac_value->str, value);
                 g_string_free(ac_value, TRUE);
                 return TRUE;
             }
@@ -2822,6 +2829,9 @@ cmd_alias(gchar **args, struct cmd_help_t help)
             cons_show("Usage: %s", help.usage);
             return TRUE;
         } else {
+            if (alias[0] == '/') {
+                alias = &alias[1];
+            }
             gboolean removed = prefs_remove_alias(alias);
             if (!removed) {
                 cons_show("No such command alias /%s", alias);
