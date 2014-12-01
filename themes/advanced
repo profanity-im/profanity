@@ -49,7 +49,7 @@ occupants.header=bold_yellow
 [ui]
 intype=true
 beep=false
-flash=flase
+flash=false
 privileges=true
 presence=true
 wrap=true
