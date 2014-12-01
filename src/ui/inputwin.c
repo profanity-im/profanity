@@ -72,6 +72,7 @@ static void _handle_backspace(int display_size, int inp_x, int *size, char *inpu
 static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
+static void _delete_previous_word(char *input, int *size);
 
 void
 create_input_window(void)
@@ -534,6 +535,10 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             }
             return 1;
 
+        case 23: // ctrl-w
+            _delete_previous_word(input, size);
+            return 1;
+            break;
         default:
             return 0;
         }
@@ -597,9 +602,6 @@ _handle_backspace(int display_size, int inp_x, int *size, char *input)
 static int
 _handle_alt_key(char *input, int *size, int key)
 {
-    int end_del = getcurx(inp_win);
-    int start_del = end_del;
-
     switch (key)
     {
         case '1':
@@ -640,75 +642,82 @@ _handle_alt_key(char *input, int *size, int key)
             break;
         case 263:
         case 127:
-            input[*size] = '\0';
-            gchar *curr_ch = g_utf8_offset_to_pointer(input, end_del);
-            curr_ch = g_utf8_find_prev_char(input, curr_ch);
-            gchar *prev_ch;
-            gunichar curr_uni;
-            gunichar prev_uni;
-
-            while (curr_ch != NULL) {
-                curr_uni = g_utf8_get_char(curr_ch);
-
-                if (g_unichar_isspace(curr_uni)) {
-                    curr_ch = g_utf8_find_prev_char(input, curr_ch);
-                } else {
-                    prev_ch = g_utf8_find_prev_char(input, curr_ch);
-                    if (prev_ch == NULL) {
-                        curr_ch = NULL;
-                        break;
-                    } else {
-                        prev_uni = g_utf8_get_char(prev_ch);
-                        if (g_unichar_isspace(prev_uni)) {
-                            break;
-                        } else {
-                            curr_ch = prev_ch;
-                        }
-                    }
-                }
-            }
-
-            if (curr_ch == NULL) {
-                start_del = 0;
-            } else {
-                start_del = g_utf8_pointer_to_offset(input, curr_ch);
-            }
-
-            gint len = g_utf8_strlen(input, -1);
-            gchar *start_string = g_utf8_substring(input, 0, start_del);
-            gchar *end_string = g_utf8_substring(input, end_del, len);
-
-            int i;
-            for (i = 0; i < strlen(start_string); i++) {
-                input[i] = start_string[i];
-            }
-            for (i = 0; i < strlen(end_string); i++) {
-                input[strlen(start_string)+i] = end_string[i];
-            }
-
-            *size = strlen(start_string)+i;
-            input[*size] = '\0';
-
-            _clear_input();
-            waddstr(inp_win, input);
-            wmove(inp_win, 0, start_del);
-
-            // if gone off screen to left, jump left (half a screen worth)
-            if (start_del <= pad_start) {
-                pad_start = pad_start - (cols / 2);
-                if (pad_start < 0) {
-                    pad_start = 0;
-                }
-
-                _inp_win_update_virtual();
-            }
-
-            return 1;
+            _delete_previous_word(input, size);
             break;
         default:
             break;
     }
     return 1;
+}
+
+static void
+_delete_previous_word(char *input, int *size)
+{
+    int end_del = getcurx(inp_win);
+    int start_del = end_del;
+
+    input[*size] = '\0';
+    gchar *curr_ch = g_utf8_offset_to_pointer(input, end_del);
+    curr_ch = g_utf8_find_prev_char(input, curr_ch);
+    gchar *prev_ch;
+    gunichar curr_uni;
+    gunichar prev_uni;
+
+    while (curr_ch != NULL) {
+        curr_uni = g_utf8_get_char(curr_ch);
+
+        if (g_unichar_isspace(curr_uni)) {
+            curr_ch = g_utf8_find_prev_char(input, curr_ch);
+        } else {
+            prev_ch = g_utf8_find_prev_char(input, curr_ch);
+            if (prev_ch == NULL) {
+                curr_ch = NULL;
+                break;
+            } else {
+                prev_uni = g_utf8_get_char(prev_ch);
+                if (g_unichar_isspace(prev_uni)) {
+                    break;
+                } else {
+                    curr_ch = prev_ch;
+                }
+            }
+        }
+    }
+
+    if (curr_ch == NULL) {
+        start_del = 0;
+    } else {
+        start_del = g_utf8_pointer_to_offset(input, curr_ch);
+    }
+
+    gint len = g_utf8_strlen(input, -1);
+    gchar *start_string = g_utf8_substring(input, 0, start_del);
+    gchar *end_string = g_utf8_substring(input, end_del, len);
+
+    int i;
+    for (i = 0; i < strlen(start_string); i++) {
+        input[i] = start_string[i];
+    }
+    for (i = 0; i < strlen(end_string); i++) {
+        input[strlen(start_string)+i] = end_string[i];
+    }
+
+    *size = strlen(start_string)+i;
+    input[*size] = '\0';
+
+    _clear_input();
+    waddstr(inp_win, input);
+    wmove(inp_win, 0, start_del);
+
+    // if gone off screen to left, jump left (half a screen worth)
+    if (start_del <= pad_start) {
+        pad_start = pad_start - (cols / 2);
+        if (pad_start < 0) {
+            pad_start = 0;
+        }
+
+        _inp_win_update_virtual();
+    }
 }
 
 static void

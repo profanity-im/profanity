@@ -1393,7 +1393,7 @@ _cons_navigation_help(void)
     cons_show("UP, DOWN                         : Navigate input history.");
     cons_show("LEFT, RIGHT, HOME, END           : Move cursor in current input.");
     cons_show("Ctrl-LEFT, Ctrl-RIGHT            : Jump word in input.");
-    cons_show("Alt-Backspace                    : Delete word in input.");
+    cons_show("Ctrl-w, Alt-Backspace            : Delete previous word in input.");
     cons_show("ESC                              : Clear current input.");
     cons_show("TAB                              : Autocomplete.");
     cons_show("PAGE UP, PAGE DOWN               : Page the main window.");

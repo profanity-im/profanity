@@ -60,7 +60,9 @@ static GTimer *typing_elapsed;
 static void _title_bar_draw(void);
 static void _show_contact_presence(void);
 static void _show_self_presence(void);
+#ifdef HAVE_LIBOTR
 static void _show_privacy(void);
+#endif
 
 void
 create_title_bar(void)
@@ -259,6 +261,7 @@ _show_self_presence(void)
     wattroff(win, bracket_attrs);
 }
 
+#ifdef HAVE_LIBOTR
 static void
 _show_privacy(void)
 {
@@ -320,6 +323,7 @@ _show_privacy(void)
         }
     }
 }
+#endif
 
 static void
 _show_contact_presence(void)
