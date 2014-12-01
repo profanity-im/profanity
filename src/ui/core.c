@@ -1766,6 +1766,7 @@ _ui_room_history(const char * const room_jid, const char * const nick,
         if (strncmp(message, "/me ", 4) == 0) {
             g_string_append(line, "*");
             g_string_append(line, nick);
+            g_string_append(line, " ");
             g_string_append(line, message + 4);
         } else {
             g_string_append(line, nick);
