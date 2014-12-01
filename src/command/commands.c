@@ -2990,10 +2990,6 @@ cmd_close(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (index == 0) {
-        index = 10;
-    }
-
     if (!ui_win_exists(index)) {
         cons_show("Window is not open.");
         return TRUE;
