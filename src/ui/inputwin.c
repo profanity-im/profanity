@@ -135,14 +135,6 @@ inp_get_char(char *input, int *size, int *result)
     noecho();
     *result = wget_wch(inp_win, &ch);
 
-    if (*result != ERR) {
-        if (*result == KEY_CODE_YES) {
-            cons_debug("KEY %d, KEY_CODE_YES", ch);
-        } else {
-            cons_debug("KEY %d", ch);
-        }
-    }
-
     gboolean in_command = FALSE;
     if ((display_size > 0 && input[0] == '/') ||
             (display_size == 0 && ch == '/')) {
@@ -610,8 +602,6 @@ _handle_backspace(int display_size, int inp_x, int *size, char *input)
 static int
 _handle_alt_key(char *input, int *size, int key)
 {
-    cons_debug("ALT %d", key);
-
     switch (key)
     {
         case '1':
