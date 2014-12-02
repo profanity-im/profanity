@@ -274,6 +274,16 @@ static struct cmd_t command_defs[] =
           "Example : /status jon",
           NULL } } },
 
+    { "/resource",
+        cmd_resource, parse_args, 1, 2, NULL,
+        { "/resource set|off [resource]", "Set the contact's resource.",
+        { "/resource set|off [resource]",
+          "----------------------------",
+          "Set the resource to use when chatting to a contact.",
+          "set resource - Set the resource.",
+          "off          - Let the server choose which resource to route messages to.",
+          NULL } } },
+
     { "/join",
         cmd_join, parse_args, 1, 5, NULL,
         { "/join room[@server] [nick value] [password value]", "Join a chat room.",

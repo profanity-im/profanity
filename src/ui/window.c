@@ -104,6 +104,7 @@ win_create(const char * const title, win_type_t type)
     new_win->is_otr = FALSE;
     new_win->is_trusted = FALSE;
     new_win->form = NULL;
+    new_win->chat_resource = NULL;
     scrollok(new_win->win, TRUE);
 
     return new_win;
@@ -151,6 +152,7 @@ win_free(ProfWin* window)
     if (window->subwin) {
         delwin(window->subwin);
     }
+    free(window->chat_resource);
     free(window->from);
     form_destroy(window->form);
     free(window);

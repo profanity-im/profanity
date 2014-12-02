@@ -1528,6 +1528,48 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_resource(gchar **args, struct cmd_help_t help)
+{
+    ProfWin *current = wins_get_current();
+    if (current->type != WIN_CHAT) {
+        cons_show("The /resource command is only valid in chat windows.");
+        return TRUE;
+    }
+
+    char *cmd = args[0];
+
+    if (g_strcmp0(cmd, "set") == 0) {
+        char *resource = args[1];
+        if (!resource) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        char *recipent = ui_current_recipient();
+        PContact contact = roster_get_contact(recipent);
+        if (!contact) {
+            cons_show("Cannot choose resource for contact not in roster.");
+            return TRUE;
+        }
+
+        if (!p_contact_get_resource(contact, resource)) {
+            cons_show("No such resource %s.", resource);
+            return TRUE;
+        }
+
+        current->chat_resource = strdup(resource);
+        return TRUE;
+
+    } else if (g_strcmp0(cmd, "off") == 0) {
+        FREE_SET_NULL(current->chat_resource);
+        return TRUE;
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+}
+
+gboolean
 cmd_status(gchar **args, struct cmd_help_t help)
 {
     char *usr = args[0];

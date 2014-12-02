@@ -60,6 +60,7 @@ static GTimer *typing_elapsed;
 static void _title_bar_draw(void);
 static void _show_contact_presence(void);
 static void _show_self_presence(void);
+static void _show_contact_resource(void);
 #ifdef HAVE_LIBOTR
 static void _show_privacy(void);
 #endif
@@ -181,6 +182,10 @@ _title_bar_draw(void)
     mvwprintw(win, 0, 0, " %s", current_title);
 
     if (current && current->type == WIN_CHAT) {
+        if (TRUE) {
+//        if (prefs_get_boolean(PREF_RESOURCE)) {
+            _show_contact_resource();
+        }
         if (prefs_get_boolean(PREF_PRESENCE)) {
             _show_contact_presence();
         }
@@ -319,6 +324,24 @@ _show_privacy(void)
     }
 }
 #endif
+
+static void
+_show_contact_resource(void)
+{
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+
+    ProfWin *current = wins_get_current();
+    if (current && current->chat_resource) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wprintw(win, current->chat_resource);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
+    }
+}
 
 static void
 _show_contact_presence(void)

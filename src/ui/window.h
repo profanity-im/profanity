@@ -68,6 +68,7 @@ typedef enum {
 
 typedef struct prof_win_t {
     char *from;
+    char *chat_resource;
     WINDOW *win;
     WINDOW *subwin;
     ProfBuff buffer;

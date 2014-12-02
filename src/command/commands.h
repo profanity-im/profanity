@@ -135,6 +135,7 @@ gboolean cmd_privileges(gchar **args, struct cmd_help_t help);
 gboolean cmd_presence(gchar **args, struct cmd_help_t help);
 gboolean cmd_wrap(gchar **args, struct cmd_help_t help);
 gboolean cmd_time(gchar **args, struct cmd_help_t help);
+gboolean cmd_resource(gchar **args, struct cmd_help_t help);
 
 gboolean cmd_form_field(char *tag, gchar **args);
 
