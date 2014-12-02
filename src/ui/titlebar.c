@@ -60,7 +60,6 @@ static GTimer *typing_elapsed;
 static void _title_bar_draw(void);
 static void _show_contact_presence(void);
 static void _show_self_presence(void);
-static void _show_contact_resource(void);
 #ifdef HAVE_LIBOTR
 static void _show_privacy(void);
 #endif
@@ -182,13 +181,7 @@ _title_bar_draw(void)
     mvwprintw(win, 0, 0, " %s", current_title);
 
     if (current && current->type == WIN_CHAT) {
-        if (TRUE) {
-//        if (prefs_get_boolean(PREF_RESOURCE)) {
-            _show_contact_resource();
-        }
-        if (prefs_get_boolean(PREF_PRESENCE)) {
-            _show_contact_presence();
-        }
+        _show_contact_presence();
 #ifdef HAVE_LIBOTR
         _show_privacy();
 #endif
@@ -326,60 +319,64 @@ _show_privacy(void)
 #endif
 
 static void
-_show_contact_resource(void)
+_show_contact_presence(void)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
     ProfWin *current = wins_get_current();
     if (current && current->chat_resource) {
+        wprintw(win, "/");
+        wprintw(win, current->chat_resource);
+    }
+
+    if (prefs_get_boolean(PREF_PRESENCE)) {
+        theme_item_t presence_colour = THEME_TITLE_OFFLINE;
+        const char *presence = "offline";
+
+        if (current && current->chat_resource) {
+            char *barejid = roster_barejid_from_name(current_recipient);
+            if (barejid) {
+                PContact contact = roster_get_contact(barejid);
+                if (contact) {
+                    Resource *resource = p_contact_get_resource(contact, current->chat_resource);
+                    if (resource) {
+                        presence = string_from_resource_presence(resource->presence);
+                    }
+                }
+            }
+        } else {
+            char *barejid = roster_barejid_from_name(current_recipient);
+            if (barejid) {
+                PContact contact = roster_get_contact(barejid);
+                if (contact) {
+                    presence = p_contact_presence(contact);
+                }
+            }
+        }
+
+        presence_colour = THEME_TITLE_ONLINE;
+        if (g_strcmp0(presence, "offline") == 0) {
+            presence_colour = THEME_TITLE_OFFLINE;
+        } else if (g_strcmp0(presence, "away") == 0) {
+            presence_colour = THEME_TITLE_AWAY;
+        } else if (g_strcmp0(presence, "xa") == 0) {
+            presence_colour = THEME_TITLE_XA;
+        } else if (g_strcmp0(presence, "chat") == 0) {
+            presence_colour = THEME_TITLE_CHAT;
+        } else if (g_strcmp0(presence, "dnd") == 0) {
+            presence_colour = THEME_TITLE_DND;
+        }
+
+        int presence_attrs = theme_attrs(presence_colour);
         wprintw(win, " ");
         wattron(win, bracket_attrs);
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
-        wprintw(win, current->chat_resource);
+        wattron(win, presence_attrs);
+        wprintw(win, presence);
+        wattroff(win, presence_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
     }
-}
-
-static void
-_show_contact_presence(void)
-{
-    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
-
-    theme_item_t presence_colour = THEME_TITLE_OFFLINE;
-    const char *presence = "offline";
-
-    char *barejid = roster_barejid_from_name(current_recipient);
-    if (barejid) {
-        PContact contact = roster_get_contact(barejid);
-        if (contact) {
-            presence = p_contact_presence(contact);
-            presence_colour = THEME_TITLE_ONLINE;
-            if (g_strcmp0(presence, "offline") == 0) {
-                presence_colour = THEME_TITLE_OFFLINE;
-            } else if (g_strcmp0(presence, "away") == 0) {
-                presence_colour = THEME_TITLE_AWAY;
-            } else if (g_strcmp0(presence, "xa") == 0) {
-                presence_colour = THEME_TITLE_XA;
-            } else if (g_strcmp0(presence, "chat") == 0) {
-                presence_colour = THEME_TITLE_CHAT;
-            } else if (g_strcmp0(presence, "dnd") == 0) {
-                presence_colour = THEME_TITLE_DND;
-            }
-        }
-    }
-
-    int presence_attrs = theme_attrs(presence_colour);
-    wprintw(win, " ");
-    wattron(win, bracket_attrs);
-    wprintw(win, "[");
-    wattroff(win, bracket_attrs);
-    wattron(win, presence_attrs);
-    wprintw(win, presence);
-    wattroff(win, presence_attrs);
-    wattron(win, bracket_attrs);
-    wprintw(win, "]");
-    wattroff(win, bracket_attrs);
 }
