@@ -1149,6 +1149,13 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         if (usr_jid == NULL) {
             usr_jid = usr;
         }
+        GString *send_jid = g_string_new(usr_jid);
+        ProfWin *current = wins_get_current();
+        if (current && current->chat_resource) {
+            g_string_append(send_jid, "/");
+            g_string_append(send_jid, current->chat_resource);
+        }
+
         if (msg != NULL) {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(usr_jid)) {
@@ -1186,7 +1193,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     message_send(otr_message->str, usr_jid);
                     g_string_free(otr_message, TRUE);
                 } else {
-                    message_send(msg, usr_jid);
+                    message_send(msg, send_jid->str);
                 }
                 ui_outgoing_msg("me", usr_jid, msg);
 
@@ -1199,7 +1206,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             }
             return TRUE;
 #else
-            message_send(msg, usr_jid);
+            message_send(msg, send_jid->str);
             ui_outgoing_msg("me", usr_jid, msg);
 
             if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
@@ -1234,6 +1241,8 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 #endif
             return TRUE;
         }
+
+        g_string_free(send_jid, TRUE);
     }
 }
 
@@ -1545,8 +1554,16 @@ cmd_resource(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        char *recipent = ui_current_recipient();
-        PContact contact = roster_get_contact(recipent);
+        char *recipient = ui_current_recipient();
+
+#ifdef HAVE_LIBOTR
+        if (otr_is_secure(recipient)) {
+            cons_show("Cannot choose resource during an OTR session.");
+            return TRUE;
+        }
+#endif
+
+        PContact contact = roster_get_contact(recipient);
         if (!contact) {
             cons_show("Cannot choose resource for contact not in roster.");
             return TRUE;
@@ -2918,6 +2935,13 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
         if (tiny != NULL) {
             if (win_type == WIN_CHAT) {
                 char *recipient = ui_current_recipient();
+                GString *send_recipient = g_string_new(recipient);
+                ProfWin *current = wins_get_current();
+                if (current && current->chat_resource) {
+                    g_string_append(send_recipient, "/");
+                    g_string_append(send_recipient, current->chat_resource);
+                }
+
 #ifdef HAVE_LIBOTR
                 if (otr_is_secure(recipient)) {
                     char *encrypted = otr_encrypt_message(recipient, tiny);
@@ -2942,7 +2966,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send(tiny, recipient);
+                    message_send(tiny, send_recipient->str);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -2953,7 +2977,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                     ui_outgoing_msg("me", recipient, tiny);
                 }
 #else
-                message_send(tiny, recipient);
+                message_send(tiny, send_recipient->str);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -2963,6 +2987,8 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
 
                 ui_outgoing_msg("me", recipient, tiny);
 #endif
+                g_string_free(send_recipient, TRUE);
+
             } else if (win_type == WIN_PRIVATE) {
                 char *recipient = ui_current_recipient();
                 message_send(tiny, recipient);

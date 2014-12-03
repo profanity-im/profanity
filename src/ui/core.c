@@ -883,6 +883,8 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
         window = wins_new(recipient, WIN_CHAT);
     }
 
+    FREE_SET_NULL(window->chat_resource);
+
     window->is_otr = TRUE;
     window->is_trusted = trusted;
     if (trusted) {
