@@ -41,6 +41,7 @@
 #include "contact.h"
 #include "common.h"
 #include "resource.h"
+#include "tools/autocomplete.h"
 
 struct p_contact_t {
     char *barejid;
@@ -51,6 +52,7 @@ struct p_contact_t {
     gboolean pending_out;
     GDateTime *last_activity;
     GHashTable *available_resources;
+    Autocomplete resource_ac;
 };
 
 PContact
@@ -84,6 +86,8 @@ p_contact_new(const char * const barejid, const char * const name,
 
     contact->available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free,
         (GDestroyNotify)resource_destroy);
+
+    contact->resource_ac = autocomplete_new();
 
     return contact;
 }
@@ -131,7 +135,10 @@ p_contact_groups(const PContact contact)
 gboolean
 p_contact_remove_resource(PContact contact, const char * const resource)
 {
-    return g_hash_table_remove(contact->available_resources, resource);
+    gboolean result = g_hash_table_remove(contact->available_resources, resource);
+    autocomplete_remove(contact->resource_ac, resource);
+
+    return result;
 }
 
 void
@@ -152,6 +159,7 @@ p_contact_free(PContact contact)
         }
 
         g_hash_table_destroy(contact->available_resources);
+        autocomplete_free(contact->resource_ac);
         free(contact);
     }
 }
@@ -373,6 +381,7 @@ void
 p_contact_set_presence(const PContact contact, Resource *resource)
 {
     g_hash_table_replace(contact->available_resources, strdup(resource->name), resource);
+    autocomplete_add(contact->resource_ac, strdup(resource->name));
 }
 
 void
@@ -401,4 +410,16 @@ p_contact_set_last_activity(const PContact contact, GDateTime *last_activity)
     if (last_activity != NULL) {
         contact->last_activity = g_date_time_ref(last_activity);
     }
+}
+
+Autocomplete
+p_contact_resource_ac(const PContact contact)
+{
+    return contact->resource_ac;
+}
+
+void
+p_contact_resource_ac_reset(const PContact contact)
+{
+    autocomplete_reset(contact->resource_ac);
 }

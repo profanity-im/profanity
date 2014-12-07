@@ -45,7 +45,6 @@
 #define PAUSED_TIMOUT 10.0
 #define INACTIVE_TIMOUT 30.0
 
-
 typedef enum {
     CHAT_STATE_STARTED,
     CHAT_STATE_ACTIVE,
@@ -55,19 +54,18 @@ typedef enum {
     CHAT_STATE_GONE
 } chat_state_t;
 
-struct chat_session_t {
+typedef struct chat_session_t {
     char *recipient;
+    char *resource;
     gboolean recipient_supports;
     chat_state_t state;
     GTimer *active_timer;
     gboolean sent;
-};
-
-typedef struct chat_session_t *ChatSession;
+} ChatSession;
 
 static GHashTable *sessions;
 
-static void _chat_session_free(ChatSession session);
+static void _chat_session_free(ChatSession *session);
 
 void
 chat_sessions_init(void)
@@ -86,7 +84,7 @@ chat_sessions_clear(void)
 void
 chat_session_start(const char * const recipient, gboolean recipient_supports)
 {
-    ChatSession new_session = malloc(sizeof(struct chat_session_t));
+    ChatSession *new_session = malloc(sizeof(struct chat_session_t));
     new_session->recipient = strdup(recipient);
     new_session->recipient_supports = recipient_supports;
     new_session->state = CHAT_STATE_STARTED;
@@ -98,7 +96,7 @@ chat_session_start(const char * const recipient, gboolean recipient_supports)
 gboolean
 chat_session_exists(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session != NULL) {
         return TRUE;
@@ -110,7 +108,7 @@ chat_session_exists(const char * const recipient)
 void
 chat_session_set_composing(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session != NULL) {
         if (session->state != CHAT_STATE_COMPOSING) {
@@ -124,7 +122,7 @@ chat_session_set_composing(const char * const recipient)
 void
 chat_session_no_activity(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session != NULL) {
         if (session->active_timer != NULL) {
@@ -156,7 +154,7 @@ chat_session_no_activity(const char * const recipient)
 void
 chat_session_set_sent(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session != NULL) {
         session->sent = TRUE;
@@ -166,7 +164,7 @@ chat_session_set_sent(const char * const recipient)
 gboolean
 chat_session_get_sent(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
         return FALSE;
@@ -184,7 +182,7 @@ chat_session_end(const char * const recipient)
 gboolean
 chat_session_is_inactive(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
         return FALSE;
@@ -196,7 +194,7 @@ chat_session_is_inactive(const char * const recipient)
 void
 chat_session_set_active(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session != NULL) {
         session->state = CHAT_STATE_ACTIVE;
@@ -208,7 +206,7 @@ chat_session_set_active(const char * const recipient)
 gboolean
 chat_session_is_paused(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
         return FALSE;
@@ -220,7 +218,7 @@ chat_session_is_paused(const char * const recipient)
 gboolean
 chat_session_is_gone(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
         return FALSE;
@@ -232,7 +230,7 @@ chat_session_is_gone(const char * const recipient)
 void
 chat_session_set_gone(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session != NULL) {
         session->state = CHAT_STATE_GONE;
@@ -242,7 +240,7 @@ chat_session_set_gone(const char * const recipient)
 gboolean
 chat_session_get_recipient_supports(const char * const recipient)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session == NULL) {
         return FALSE;
@@ -255,7 +253,7 @@ void
 chat_session_set_recipient_supports(const char * const recipient,
     gboolean recipient_supports)
 {
-    ChatSession session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, recipient);
 
     if (session != NULL) {
         session->recipient_supports = recipient_supports;
@@ -263,7 +261,7 @@ chat_session_set_recipient_supports(const char * const recipient,
 }
 
 static void
-_chat_session_free(ChatSession session)
+_chat_session_free(ChatSession *session)
 {
     if (session != NULL) {
         free(session->recipient);
