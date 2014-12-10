@@ -86,7 +86,7 @@ typedef struct prof_win_t {
         struct {
             gboolean is_otr;
             gboolean is_trusted;
-            char *chat_resource;
+            char *resource;
         } chat;
 
         // WIN_MUC

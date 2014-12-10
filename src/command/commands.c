@@ -1151,9 +1151,9 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
         GString *send_jid = g_string_new(usr_jid);
         ProfWin *current = wins_get_current();
-        if (current->type == WIN_CHAT && current->wins.chat.chat_resource) {
+        if (current->type == WIN_CHAT && current->wins.chat.resource) {
             g_string_append(send_jid, "/");
-            g_string_append(send_jid, current->wins.chat.chat_resource);
+            g_string_append(send_jid, current->wins.chat.resource);
         }
 
         if (msg != NULL) {
@@ -1574,11 +1574,11 @@ cmd_resource(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        current->wins.chat.chat_resource = strdup(resource);
+        current->wins.chat.resource = strdup(resource);
         return TRUE;
 
     } else if (g_strcmp0(cmd, "off") == 0) {
-        FREE_SET_NULL(current->wins.chat.chat_resource);
+        FREE_SET_NULL(current->wins.chat.resource);
         return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);
@@ -2941,9 +2941,9 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                 char *recipient = ui_current_recipient();
                 GString *send_recipient = g_string_new(recipient);
                 ProfWin *current = wins_get_current();
-                if (current && current->wins.chat.chat_resource) {
+                if (current && current->wins.chat.resource) {
                     g_string_append(send_recipient, "/");
-                    g_string_append(send_recipient, current->wins.chat.chat_resource);
+                    g_string_append(send_recipient, current->wins.chat.resource);
                 }
 
 #ifdef HAVE_LIBOTR
