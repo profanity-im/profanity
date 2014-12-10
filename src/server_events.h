@@ -69,9 +69,10 @@ void handle_room_role_list(const char * const from, const char * const role, GSL
 void handle_room_role_set_error(const char * const room, const char * const nick, const char * const role,
     const char * const error);
 void handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
-void handle_incoming_message(char *from, char *message, gboolean priv);
-void handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
-    gboolean priv);
+void handle_incoming_message(char *barejid, char *message);
+void handle_incoming_private_message(char *fulljid, char *message);
+void handle_delayed_message(char *fulljid, char *message, GTimeVal tv_stamp);
+void handle_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp);
 void handle_typing(char *from);
 void handle_gone(const char * const from);
 void handle_subscription(const char *from, jabber_subscr_t type);

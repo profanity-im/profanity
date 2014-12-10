@@ -315,35 +315,27 @@ _ui_get_recipients(void)
 }
 
 static void
-_ui_incoming_msg(const char * const from, const char * const message,
-    GTimeVal *tv_stamp, gboolean priv)
+_ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal *tv_stamp)
 {
     gboolean win_created = FALSE;
     char *display_from = NULL;
-    win_type_t win_type;
 
-    if (priv) {
-        win_type = WIN_PRIVATE;
-        display_from = get_nick_from_full_jid(from);
-    } else {
-        win_type = WIN_CHAT;
-        PContact contact = roster_get_contact(from);
-        if (contact != NULL) {
-            if (p_contact_name(contact) != NULL) {
-                display_from = strdup(p_contact_name(contact));
-            } else {
-                display_from = strdup(from);
-            }
+    PContact contact = roster_get_contact(barejid);
+    if (contact != NULL) {
+        if (p_contact_name(contact) != NULL) {
+            display_from = strdup(p_contact_name(contact));
         } else {
-            display_from = strdup(from);
+            display_from = strdup(barejid);
         }
+    } else {
+        display_from = strdup(barejid);
     }
 
-    ProfWin *window = wins_get_by_recipient(from);
+    ProfWin *window = wins_get_by_recipient(barejid);
     if (window == NULL) {
-        window = wins_new(from, win_type);
+        window = wins_new(barejid, WIN_CHAT);
 #ifdef HAVE_LIBOTR
-        if (win_type == WIN_CHAT && otr_is_secure(from)) {
+        if (otr_is_secure(barejid)) {
             window->wins.chat.is_otr = TRUE;
         }
 #endif
@@ -362,17 +354,19 @@ _ui_incoming_msg(const char * const from, const char * const message,
     } else {
         status_bar_new(num);
         cons_show_incoming_message(display_from, num);
-        if (prefs_get_boolean(PREF_FLASH))
+
+        if (prefs_get_boolean(PREF_FLASH)) {
             flash();
+        }
 
         window->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(num, from);
+            _win_show_history(num, barejid);
         }
 
         // show users status first, when receiving message via delayed delivery
         if ((tv_stamp != NULL) && (win_created)) {
-            PContact pcontact = roster_get_contact(from);
+            PContact pcontact = roster_get_contact(barejid);
             if (pcontact != NULL) {
                 win_show_contact(window, pcontact);
             }
@@ -386,8 +380,69 @@ _ui_incoming_msg(const char * const from, const char * const message,
         ui_index = 0;
     }
 
-    if (prefs_get_boolean(PREF_BEEP))
+    if (prefs_get_boolean(PREF_BEEP)) {
         beep();
+    }
+
+    if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
+        gboolean is_current = wins_is_current(window);
+        if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
+            if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
+                notify_message(display_from, ui_index, message);
+            } else {
+                notify_message(display_from, ui_index, NULL);
+            }
+        }
+    }
+
+    free(display_from);
+}
+
+static void
+_ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp)
+{
+    char *display_from = NULL;
+    display_from = get_nick_from_full_jid(fulljid);
+
+    ProfWin *window = wins_get_by_recipient(fulljid);
+    if (window == NULL) {
+        window = wins_new(fulljid, WIN_PRIVATE);
+    }
+
+    int num = wins_get_num(window);
+
+    // currently viewing chat window with sender
+    if (wins_is_current(window)) {
+        win_print_incoming_message(window, tv_stamp, display_from, message);
+        title_bar_set_typing(FALSE);
+        status_bar_active(num);
+
+    // not currently viewing chat window with sender
+    } else {
+        status_bar_new(num);
+        cons_show_incoming_message(display_from, num);
+
+        if (prefs_get_boolean(PREF_FLASH)) {
+            flash();
+        }
+
+        window->unread++;
+        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+            _win_show_history(num, fulljid);
+        }
+
+        win_print_incoming_message(window, tv_stamp, display_from, message);
+    }
+
+    int ui_index = num;
+    if (ui_index == 10) {
+        ui_index = 0;
+    }
+
+    if (prefs_get_boolean(PREF_BEEP)) {
+        beep();
+    }
+
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
         gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
@@ -3355,6 +3410,7 @@ ui_init_module(void)
     ui_contact_typing = _ui_contact_typing;
     ui_get_recipients = _ui_get_recipients;
     ui_incoming_msg = _ui_incoming_msg;
+    ui_incoming_private_msg = _ui_incoming_private_msg;
     ui_roster_add = _ui_roster_add;
     ui_roster_remove = _ui_roster_remove;
     ui_contact_already_in_group = _ui_contact_already_in_group;
