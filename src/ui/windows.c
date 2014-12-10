@@ -291,22 +291,34 @@ wins_resize_all(void)
     GList *curr = values;
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        if (((window->type == WIN_MUC) || (window->type == WIN_CONSOLE)) && (window->subwin)) {
-            int subwin_cols = 0;
-            if (window->type == WIN_MUC) {
-                subwin_cols = win_occpuants_cols();
-                wresize(window->win, PAD_SIZE, cols - subwin_cols);
-                wresize(window->subwin, PAD_SIZE, subwin_cols);
-                ui_muc_roster(window->from);
-            } else if (window->type == WIN_CONSOLE) {
+        int subwin_cols = 0;
+
+        switch (window->type) {
+        case WIN_CONSOLE:
+            if (window->wins.cons.subwin) {
                 subwin_cols = win_roster_cols();
                 wresize(window->win, PAD_SIZE, cols - subwin_cols);
-                wresize(window->subwin, PAD_SIZE, subwin_cols);
+                wresize(window->wins.cons.subwin, PAD_SIZE, subwin_cols);
                 ui_roster();
+            } else {
+                wresize(window->win, PAD_SIZE, cols);
             }
-        } else {
+            break;
+        case WIN_MUC:
+            if (window->wins.muc.subwin) {
+                subwin_cols = win_occpuants_cols();
+                wresize(window->win, PAD_SIZE, cols - subwin_cols);
+                wresize(window->wins.muc.subwin, PAD_SIZE, subwin_cols);
+                ui_muc_roster(window->from);
+            } else {
+                wresize(window->win, PAD_SIZE, cols);
+            }
+            break;
+        default:
             wresize(window->win, PAD_SIZE, cols);
+            break;
         }
+
         win_redraw(window);
         curr = g_list_next(curr);
     }
@@ -342,12 +354,12 @@ wins_show_subwin(ProfWin *window)
     ProfWin *current_win = wins_get_current();
     if (current_win->type == WIN_MUC) {
         subwin_cols = win_occpuants_cols();
+        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(current_win->wins.muc.subwin, current_win->wins.muc.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     } else if (current_win->type == WIN_CONSOLE) {
         subwin_cols = win_roster_cols();
-    }
-    if ((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) {
         pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(current_win->subwin, current_win->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        pnoutrefresh(current_win->wins.cons.subwin, current_win->wins.cons.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     }
 }
 
