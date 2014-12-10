@@ -71,7 +71,6 @@ typedef struct prof_win_t {
     WINDOW *win;
     ProfBuff buffer;
     char *from;
-    char *chat_resource;
     int y_pos;
     int paged;
     int unread;
@@ -87,6 +86,7 @@ typedef struct prof_win_t {
         struct {
             gboolean is_otr;
             gboolean is_trusted;
+            char *chat_resource;
         } chat;
 
         // WIN_MUC

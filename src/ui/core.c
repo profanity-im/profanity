@@ -888,7 +888,7 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
         return;
     }
 
-    FREE_SET_NULL(window->chat_resource);
+    FREE_SET_NULL(window->wins.chat.chat_resource);
 
     window->wins.chat.is_otr = TRUE;
     window->wins.chat.is_trusted = trusted;

@@ -324,21 +324,21 @@ _show_contact_presence(void)
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
     ProfWin *current = wins_get_current();
-    if (current && current->chat_resource) {
+    if (current && current->wins.chat.chat_resource) {
         wprintw(win, "/");
-        wprintw(win, current->chat_resource);
+        wprintw(win, current->wins.chat.chat_resource);
     }
 
     if (prefs_get_boolean(PREF_PRESENCE)) {
         theme_item_t presence_colour = THEME_TITLE_OFFLINE;
         const char *presence = "offline";
 
-        if (current && current->chat_resource) {
+        if (current && current->wins.chat.chat_resource) {
             char *barejid = roster_barejid_from_name(current_recipient);
             if (barejid) {
                 PContact contact = roster_get_contact(barejid);
                 if (contact) {
-                    Resource *resource = p_contact_get_resource(contact, current->chat_resource);
+                    Resource *resource = p_contact_get_resource(contact, current->wins.chat.chat_resource);
                     if (resource) {
                         presence = string_from_resource_presence(resource->presence);
                     }

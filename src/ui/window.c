@@ -122,9 +122,8 @@ win_create(const char * const title, win_type_t type)
     if (new_win->type == WIN_CHAT) {
         new_win->wins.chat.is_otr = FALSE;
         new_win->wins.chat.is_trusted = FALSE;
+        new_win->wins.chat.chat_resource = NULL;
     }
-
-    new_win->chat_resource = NULL;
 
     scrollok(new_win->win, TRUE);
 
@@ -223,7 +222,10 @@ win_free(ProfWin* window)
         break;
     }
 
-    free(window->chat_resource);
+    if (window->type == WIN_CHAT) {
+        free(window->wins.chat.chat_resource);
+    }
+
     free(window->from);
 
     if (window->type == WIN_MUC_CONFIG) {
