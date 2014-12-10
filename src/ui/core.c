@@ -345,8 +345,8 @@ _ui_incoming_msg(const char * const from, const char * const message,
     if (window == NULL) {
         window = wins_new(from, win_type);
 #ifdef PROF_HAVE_LIBOTR
-        if (otr_is_secure(from)) {
-            window->is_otr = TRUE;
+        if (win_type == WIN_CHAT && otr_is_secure(from)) {
+            window->wins.chat.is_otr = TRUE;
         }
 #endif
         win_created = TRUE;
@@ -616,7 +616,7 @@ _ui_close_connected_win(int index)
     } else if ((win_type == WIN_CHAT) || (win_type == WIN_PRIVATE)) {
 #ifdef PROF_HAVE_LIBOTR
         ProfWin *window = wins_get_by_num(index);
-        if (window->is_otr) {
+        if (win_is_otr(window)) {
             otr_end_session(window->from);
         }
 #endif
@@ -885,10 +885,14 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
         window = wins_new(recipient, WIN_CHAT);
     }
 
+    if (window->type != WIN_CHAT) {
+        return;
+    }
+
     FREE_SET_NULL(window->chat_resource);
 
-    window->is_otr = TRUE;
-    window->is_trusted = trusted;
+    window->wins.chat.is_otr = TRUE;
+    window->wins.chat.is_trusted = trusted;
     if (trusted) {
         win_save_print(window, '!', NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
     } else {
@@ -1007,8 +1011,11 @@ _ui_gone_insecure(const char * const recipient)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
-        window->is_otr = FALSE;
-        window->is_trusted = FALSE;
+        if (window->type != WIN_CHAT) {
+            return;
+        }
+        window->wins.chat.is_otr = FALSE;
+        window->wins.chat.is_trusted = FALSE;
         win_save_print(window, '!', NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
 
         if (wins_is_current(window)) {
@@ -1024,8 +1031,11 @@ _ui_trust(const char * const recipient)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
-        window->is_otr = TRUE;
-        window->is_trusted = TRUE;
+        if (window->type != WIN_CHAT) {
+            return;
+        }
+        window->wins.chat.is_otr = TRUE;
+        window->wins.chat.is_trusted = TRUE;
         win_save_print(window, '!', NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
 
         if (wins_is_current(window)) {
@@ -1041,8 +1051,11 @@ _ui_untrust(const char * const recipient)
 {
     ProfWin *window = wins_get_by_recipient(recipient);
     if (window != NULL) {
-        window->is_otr = TRUE;
-        window->is_trusted = FALSE;
+        if (window->type != WIN_CHAT) {
+            return;
+        }
+        window->wins.chat.is_otr = TRUE;
+        window->wins.chat.is_trusted = FALSE;
         win_save_print(window, '!', NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
 
         if (wins_is_current(window)) {
@@ -1160,14 +1173,16 @@ static gboolean
 _ui_current_win_is_otr(void)
 {
     ProfWin *current = wins_get_current();
-    return current->is_otr;
+    return win_is_otr(current);
 }
 
 static void
 _ui_current_set_otr(gboolean value)
 {
     ProfWin *current = wins_get_current();
-    current->is_otr = value;
+    if (current->type == WIN_CHAT) {
+        current->wins.chat.is_otr = value;
+    }
 }
 
 static void
@@ -1378,7 +1393,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
             window = wins_new(to, WIN_CHAT);
 #ifdef PROF_HAVE_LIBOTR
             if (otr_is_secure(to)) {
-                window->is_otr = TRUE;
+                window->wins.chat.is_otr = TRUE;
             }
 #endif
         }

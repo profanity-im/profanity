@@ -67,7 +67,6 @@ typedef enum {
 } win_type_t;
 
 typedef struct prof_win_t {
-
     win_type_t type;
 
     WINDOW *win;
@@ -76,11 +75,8 @@ typedef struct prof_win_t {
     char *chat_resource;
     int y_pos;
     int paged;
-    gboolean is_otr;
-    gboolean is_trusted;
     int unread;
     int history_shown;
-
     union {
         // WIN_CONSOLE
         struct {
@@ -90,6 +86,8 @@ typedef struct prof_win_t {
 
         // WIN_CHAT
         struct {
+            gboolean is_otr;
+            gboolean is_trusted;
         } chat;
 
         // WIN_MUC
@@ -137,5 +135,7 @@ void win_show_subwin(ProfWin *window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
+gboolean win_is_otr(ProfWin *window);
+gboolean win_is_trusted(ProfWin *window);
 
 #endif

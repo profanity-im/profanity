@@ -263,7 +263,7 @@ _show_privacy(void)
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
     ProfWin *current = wins_get_current();
-    if (!current->is_otr) {
+    if (!win_is_otr(current)) {
         if (prefs_get_boolean(PREF_OTR_WARN)) {
             int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
             wprintw(win, " ");
@@ -289,7 +289,7 @@ _show_privacy(void)
         wattron(win, bracket_attrs);
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
-        if (current->is_trusted) {
+        if (win_is_trusted(current)) {
             int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
             wprintw(win, " ");
             wattron(win, bracket_attrs);
