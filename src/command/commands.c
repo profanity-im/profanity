@@ -1985,7 +1985,11 @@ gboolean
 cmd_form_field(char *tag, gchar **args)
 {
     ProfWin *current = wins_get_current();
-    DataForm *form = current->form;
+    if (current->type != WIN_MUC_CONFIG) {
+        return TRUE;
+    }
+
+    DataForm *form = current->wins.conf.form;
     if (form) {
         if (!form_tag_exists(form, tag)) {
             ui_current_print_line("Form does not contain a field with tag %s", tag);
@@ -2177,10 +2181,10 @@ cmd_form_field(char *tag, gchar **args)
                 break;
             }
             if (g_strcmp0(args[0], "remove") == 0) {
-                removed = form_remove_value(current->form, tag, value);
+                removed = form_remove_value(form, tag, value);
                 if (removed) {
                     ui_current_print_line("Field updated...");
-                    ui_show_form_field(current, current->form, tag);
+                    ui_show_form_field(current, form, tag);
                 } else {
                     ui_current_print_line("Field %s does not contain %s", tag, value);
                 }
@@ -2225,7 +2229,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
     char *room = split_recipient[0];
 
     if (g_strcmp0(args[0], "show") == 0) {
-        ui_show_form(current, room, current->form);
+        ui_show_form(current, room, current->wins.conf.form);
         g_strfreev(split_recipient);
         return TRUE;
     }
@@ -2233,9 +2237,9 @@ cmd_form(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "help") == 0) {
         char *tag = args[1];
         if (tag != NULL) {
-            ui_show_form_field_help(current, current->form, tag);
+            ui_show_form_field_help(current, current->wins.conf.form, tag);
         } else {
-            ui_show_form_help(current, current->form);
+            ui_show_form_help(current, current->wins.conf.form);
 
             const gchar **help_text = NULL;
             Command *command = g_hash_table_lookup(commands, "/form");
@@ -2252,7 +2256,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "submit") == 0) {
-        iq_submit_room_config(room, current->form);
+        iq_submit_room_config(room, current->wins.conf.form);
 
     }
 
@@ -2261,8 +2265,8 @@ cmd_form(gchar **args, struct cmd_help_t help)
     }
 
     if ((g_strcmp0(args[0], "submit") == 0) || (g_strcmp0(args[0], "cancel") == 0)) {
-        if (current->form) {
-            cmd_autocomplete_remove_form_fields(current->form);
+        if (current->wins.conf.form) {
+            cmd_autocomplete_remove_form_fields(current->wins.conf.form);
         }
         wins_close_current();
         current = wins_get_by_recipient(room);

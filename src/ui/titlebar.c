@@ -189,7 +189,7 @@ _title_bar_draw(void)
             wprintw(win, " (typing...)");
         }
     } else if (current && current->type == WIN_MUC_CONFIG) {
-        if (current->form && current->form->modified) {
+        if (current->wins.conf.form && current->wins.conf.form->modified) {
             wprintw(win, " *");
         }
     }

@@ -754,10 +754,11 @@ _ui_win_has_unsaved_form(int num)
     if (window->type != WIN_MUC_CONFIG) {
         return FALSE;
     }
-    if (window->form == NULL) {
+    if (window->wins.conf.form == NULL) {
         return FALSE;
     }
-    return window->form->modified;
+
+    return window->wins.conf.form->modified;
 }
 
 GString *
@@ -784,12 +785,12 @@ _ui_switch_win(const int i)
     if (ui_win_exists(i)) {
         ProfWin *old_current = wins_get_current();
         if (old_current->type == WIN_MUC_CONFIG) {
-            cmd_autocomplete_remove_form_fields(old_current->form);
+            cmd_autocomplete_remove_form_fields(old_current->wins.conf.form);
         }
 
         ProfWin *new_current = wins_get_by_num(i);
         if (new_current->type == WIN_MUC_CONFIG) {
-            cmd_autocomplete_add_form_fields(new_current->form);
+            cmd_autocomplete_add_form_fields(new_current->wins.conf.form);
         }
 
         wins_set_current_by_num(i);
@@ -818,12 +819,12 @@ _ui_previous_win(void)
 {
     ProfWin *old_current = wins_get_current();
     if (old_current->type == WIN_MUC_CONFIG) {
-        cmd_autocomplete_remove_form_fields(old_current->form);
+        cmd_autocomplete_remove_form_fields(old_current->wins.conf.form);
     }
 
     ProfWin *new_current = wins_get_previous();
     if (new_current->type == WIN_MUC_CONFIG) {
-        cmd_autocomplete_add_form_fields(new_current->form);
+        cmd_autocomplete_add_form_fields(new_current->wins.conf.form);
     }
 
     int i = wins_get_num(new_current);
@@ -849,12 +850,12 @@ _ui_next_win(void)
 {
     ProfWin *old_current = wins_get_current();
     if (old_current->type == WIN_MUC_CONFIG) {
-        cmd_autocomplete_remove_form_fields(old_current->form);
+        cmd_autocomplete_remove_form_fields(old_current->wins.conf.form);
     }
 
     ProfWin *new_current = wins_get_next();
     if (new_current->type == WIN_MUC_CONFIG) {
-        cmd_autocomplete_add_form_fields(new_current->form);
+        cmd_autocomplete_add_form_fields(new_current->wins.conf.form);
     }
 
     int i = wins_get_num(new_current);
@@ -1073,8 +1074,8 @@ _ui_close_win(int index)
 {
     ProfWin *window = wins_get_by_num(index);
     if (window) {
-        if (window->type == WIN_MUC_CONFIG && window->form) {
-            cmd_autocomplete_remove_form_fields(window->form);
+        if (window->type == WIN_MUC_CONFIG && window->wins.conf.form) {
+            cmd_autocomplete_remove_form_fields(window->wins.conf.form);
         }
     }
 
@@ -2652,7 +2653,7 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
     ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
     g_string_free(title, TRUE);
 
-    window->form = form;
+    window->wins.conf.form = form;
 
     int num = wins_get_num(window);
     ui_switch_win(num);

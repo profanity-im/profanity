@@ -106,6 +106,10 @@ win_create(const char * const title, win_type_t type)
         break;
     }
 
+    if (new_win->type == WIN_MUC_CONFIG) {
+        new_win->wins.conf.form = NULL;
+    }
+
     new_win->from = strdup(title);
     new_win->buffer = buffer_create();
     new_win->y_pos = 0;
@@ -115,7 +119,6 @@ win_create(const char * const title, win_type_t type)
     new_win->type = type;
     new_win->is_otr = FALSE;
     new_win->is_trusted = FALSE;
-    new_win->form = NULL;
     new_win->chat_resource = NULL;
     scrollok(new_win->win, TRUE);
 
@@ -198,7 +201,11 @@ win_free(ProfWin* window)
 
     free(window->chat_resource);
     free(window->from);
-    form_destroy(window->form);
+
+    if (window->type == WIN_MUC_CONFIG) {
+        form_destroy(window->wins.conf.form);
+    }
+
     free(window);
 }
 

@@ -79,7 +79,6 @@ typedef struct prof_win_t {
     gboolean is_trusted;
     int unread;
     int history_shown;
-    DataForm *form;
 
     union {
         // WIN_CONSOLE
@@ -100,6 +99,7 @@ typedef struct prof_win_t {
 
         // WIN_MUC_CONFIG
         struct {
+            DataForm *form;
         } conf;
 
         // WIN_PRIVATE
