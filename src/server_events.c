@@ -353,7 +353,7 @@ handle_incoming_message(char *barejid, char *message)
 
     plugin_message = plugins_pre_chat_message_display(barejid, newmessage);
     ui_incoming_msg(barejid, plugin_message, NULL);
-    plugins_post_chat_message_display(from, plugin_message);
+    plugins_post_chat_message_display(barejid, plugin_message);
 
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
