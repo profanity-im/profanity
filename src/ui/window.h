@@ -111,6 +111,9 @@ typedef struct prof_win_t {
 } ProfWin;
 
 ProfWin* win_create(const char * const title, win_type_t type);
+ProfWin* win_create_chat(const char * const barejid);
+ProfWin* win_create_private(const char * const fulljid);
+
 void win_free(ProfWin *window);
 void win_update_virtual(ProfWin *window);
 void win_move_to_end(ProfWin *window);

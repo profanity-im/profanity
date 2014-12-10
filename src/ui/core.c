@@ -333,7 +333,7 @@ _ui_incoming_msg(const char * const barejid, const char * const message, GTimeVa
 
     ProfWin *window = wins_get_by_recipient(barejid);
     if (window == NULL) {
-        window = wins_new(barejid, WIN_CHAT);
+        window = wins_new_chat(barejid);
 #ifdef HAVE_LIBOTR
         if (otr_is_secure(barejid)) {
             window->wins.chat.is_otr = TRUE;
@@ -406,7 +406,7 @@ _ui_incoming_private_msg(const char * const fulljid, const char * const message,
 
     ProfWin *window = wins_get_by_recipient(fulljid);
     if (window == NULL) {
-        window = wins_new(fulljid, WIN_PRIVATE);
+        window = wins_new_private(fulljid);
     }
 
     int num = wins_get_num(window);

@@ -266,6 +266,28 @@ wins_new(const char * const from, win_type_t type)
     return new;
 }
 
+ProfWin *
+wins_new_chat(const char * const barejid)
+{
+    GList *keys = g_hash_table_get_keys(windows);
+    int result = get_next_available_win_num(keys);
+    ProfWin *new = win_create_chat(barejid);
+    g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
+    g_list_free(keys);
+    return new;
+}
+
+ProfWin *
+wins_new_private(const char * const fulljid)
+{
+    GList *keys = g_hash_table_get_keys(windows);
+    int result = get_next_available_win_num(keys);
+    ProfWin *new = win_create_private(fulljid);
+    g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
+    g_list_free(keys);
+    return new;
+}
+
 int
 wins_get_total_unread(void)
 {
