@@ -79,7 +79,9 @@ win_create(const char * const title, win_type_t type)
     ProfWin *new_win = malloc(sizeof(ProfWin));
     int cols = getmaxx(stdscr);
 
-    switch (type) {
+    new_win->type = type;
+
+    switch (new_win->type) {
     case WIN_CONSOLE:
         new_win->win = newpad(PAD_SIZE, (cols));
         wbkgd(new_win->win, theme_attrs(THEME_TEXT));
@@ -116,10 +118,14 @@ win_create(const char * const title, win_type_t type)
     new_win->paged = 0;
     new_win->unread = 0;
     new_win->history_shown = 0;
-    new_win->type = type;
-    new_win->is_otr = FALSE;
-    new_win->is_trusted = FALSE;
+
+    if (new_win->type == WIN_CHAT) {
+        new_win->wins.chat.is_otr = FALSE;
+        new_win->wins.chat.is_trusted = FALSE;
+    }
+
     new_win->chat_resource = NULL;
+
     scrollok(new_win->win, TRUE);
 
     return new_win;
@@ -175,6 +181,24 @@ win_show_subwin(ProfWin *window)
         break;
     default:
         break;
+    }
+}
+
+gboolean win_is_otr(ProfWin *window)
+{
+    if (window->type == WIN_CHAT) {
+        return window->wins.chat.is_otr;
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean win_is_trusted(ProfWin *window)
+{
+    if (window->type == WIN_CHAT) {
+        return window->wins.chat.is_trusted;
+    } else {
+        return FALSE;
     }
 }
 
