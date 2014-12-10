@@ -81,8 +81,7 @@ static GTimer *ui_idle_time;
 
 static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch, const int result);
-static void _win_show_history(WINDOW *win, int win_index,
-    const char * const contact);
+static void _win_show_history(int win_index, const char * const contact);
 static void _ui_draw_term_title(void);
 static void _ui_roster_contact(PContact contact);
 
@@ -368,7 +367,7 @@ _ui_incoming_msg(const char * const from, const char * const message,
 
         window->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(window->win, num, from);
+            _win_show_history(num, from);
         }
 
         // show users status first, when receiving message via delayed delivery
@@ -1339,7 +1338,7 @@ _ui_new_chat_win(const char * const to)
         num = wins_get_num(window);
 
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(window->win, num, to);
+            _win_show_history(num, to);
         }
 
         if (contact != NULL) {
@@ -1401,7 +1400,7 @@ _ui_outgoing_msg(const char * const from, const char * const to,
         num = wins_get_num(window);
 
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(window->win, num, to);
+            _win_show_history(num, to);
         }
 
         if (contact != NULL) {
@@ -3311,10 +3310,10 @@ _win_handle_page(const wint_t * const ch, const int result)
 }
 
 static void
-_win_show_history(WINDOW *win, int win_index, const char * const contact)
+_win_show_history(int win_index, const char * const contact)
 {
     ProfWin *window = wins_get_by_num(win_index);
-    if (!window->history_shown) {
+    if (window->type == WIN_CHAT && !window->wins.chat.history_shown) {
         Jid *jid = jid_create(jabber_get_fulljid());
         GSList *history = chat_log_get_previous(jid->barejid, contact);
         jid_destroy(jid);
@@ -3337,7 +3336,7 @@ _win_show_history(WINDOW *win, int win_index, const char * const contact)
             }
             curr = g_slist_next(curr);
         }
-        window->history_shown = 1;
+        window->wins.chat.history_shown = TRUE;
 
         g_slist_free_full(history, free);
     }

@@ -74,7 +74,6 @@ typedef struct prof_win_t {
     int y_pos;
     int paged;
     int unread;
-    int history_shown;
     union {
         // WIN_CONSOLE
         struct {
@@ -87,6 +86,7 @@ typedef struct prof_win_t {
             gboolean is_otr;
             gboolean is_trusted;
             char *resource;
+            gboolean history_shown;
         } chat;
 
         // WIN_MUC

@@ -117,12 +117,12 @@ win_create(const char * const title, win_type_t type)
     new_win->y_pos = 0;
     new_win->paged = 0;
     new_win->unread = 0;
-    new_win->history_shown = 0;
 
     if (new_win->type == WIN_CHAT) {
+        new_win->wins.chat.resource = NULL;
         new_win->wins.chat.is_otr = FALSE;
         new_win->wins.chat.is_trusted = FALSE;
-        new_win->wins.chat.resource = NULL;
+        new_win->wins.chat.history_shown = FALSE;
     }
 
     scrollok(new_win->win, TRUE);
