@@ -1675,8 +1675,8 @@ cmd_reset_autocomplete()
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
         ProfWin *window = wins_get_current();
-        if (window && window->form) {
-            form_reset_autocompleters(window->form);
+        if (window && window->wins.conf.form) {
+            form_reset_autocompleters(window->wins.conf.form);
         }
     }
 
@@ -2494,10 +2494,14 @@ _resource_autocomplete(char *input, int *size)
 static char *
 _form_autocomplete(char *input, int *size)
 {
+    ProfWin *current = wins_get_current();
+    if (current->type != WIN_MUC_CONFIG) {
+        return NULL;
+    }
+
     char *found = NULL;
 
-    ProfWin *current = wins_get_current();
-    DataForm *form = current->form;
+    DataForm *form = current->wins.conf.form;
     if (form) {
         found = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
         if (found != NULL) {
@@ -2516,11 +2520,14 @@ _form_autocomplete(char *input, int *size)
 static char *
 _form_field_autocomplete(char *input, int *size)
 {
+    ProfWin *current = wins_get_current();
+    if (current->type != WIN_MUC_CONFIG) {
+        return NULL;
+    }
+
     char *found = NULL;
 
-    ProfWin *current = wins_get_current();
-    DataForm *form = current->form;
-
+    DataForm *form = current->wins.conf.form;
     if (form == NULL) {
         return NULL;
     }
