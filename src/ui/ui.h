@@ -120,8 +120,9 @@ void (*ui_handle_stanza)(const char * const msg);
 
 // ui events
 void (*ui_contact_typing)(const char * const from);
-void (*ui_incoming_msg)(const char * const from, const char * const message,
-    GTimeVal *tv_stamp, gboolean priv);
+void (*ui_incoming_msg)(const char * const from, const char * const message, GTimeVal *tv_stamp);
+void (*ui_incoming_private_msg)(const char * const fulljid, const char * const message, GTimeVal *tv_stamp);
+
 void (*ui_disconnected)(void);
 void (*ui_recipient_gone)(const char * const barejid);
 void (*ui_outgoing_msg)(const char * const from, const char * const to,

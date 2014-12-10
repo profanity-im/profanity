@@ -1797,9 +1797,9 @@ cmd_execute_default(const char * inp)
             } else {
                 GString *send_recipient = g_string_new(recipient);
                 ProfWin *current = wins_get_current();
-                if (current && current->wins.chat.chat_resource) {
+                if (current && current->wins.chat.resource) {
                     g_string_append(send_recipient, "/");
-                    g_string_append(send_recipient, current->wins.chat.chat_resource);
+                    g_string_append(send_recipient, current->wins.chat.resource);
                 }
 
                 char *plugin_message = plugins_pre_chat_message_send(recipient, inp);

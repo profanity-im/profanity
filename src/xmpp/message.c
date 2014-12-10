@@ -438,9 +438,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
                 if (delayed) {
-                    handle_delayed_message(jid->str, message, tv_stamp, TRUE);
+                    handle_delayed_private_message(jid->str, message, tv_stamp);
                 } else {
-                    handle_incoming_message(jid->str, message, TRUE);
+                    handle_incoming_private_message(jid->str, message);
                 }
                 xmpp_free(ctx, message);
             }
@@ -489,9 +489,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
                 if (delayed) {
-                    handle_delayed_message(jid->barejid, message, tv_stamp, FALSE);
+                    handle_delayed_message(jid->barejid, message, tv_stamp);
                 } else {
-                    handle_incoming_message(jid->barejid, message, FALSE);
+                    handle_incoming_message(jid->barejid, message);
                 }
                 xmpp_free(ctx, message);
             }

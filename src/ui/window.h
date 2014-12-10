@@ -75,7 +75,6 @@ typedef struct prof_win_t {
     int y_pos;
     int paged;
     int unread;
-    int history_shown;
     union {
         // WIN_CONSOLE
         struct {
@@ -87,7 +86,8 @@ typedef struct prof_win_t {
         struct {
             gboolean is_otr;
             gboolean is_trusted;
-            char *chat_resource;
+            char *resource;
+            gboolean history_shown;
         } chat;
 
         // WIN_MUC
@@ -112,6 +112,9 @@ typedef struct prof_win_t {
 } ProfWin;
 
 ProfWin* win_create(const char * const title, win_type_t type);
+ProfWin* win_create_chat(const char * const barejid);
+ProfWin* win_create_private(const char * const fulljid);
+
 void win_free(ProfWin *window);
 void win_update_virtual(ProfWin *window);
 void win_move_to_end(ProfWin *window);

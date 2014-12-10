@@ -300,7 +300,17 @@ handle_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-handle_incoming_message(char *from, char *message, gboolean priv)
+handle_incoming_private_message(char *fulljid, char *message)
+{
+    char *plugin_message =  plugins_pre_priv_message_display(fulljid, message);
+    ui_incoming_private_msg(fulljid, plugin_message, NULL);
+    plugins_post_priv_message_display(fulljid, plugin_message);
+
+    free(plugin_message);
+}
+
+void
+handle_incoming_message(char *barejid, char *message)
 {
     char *plugin_message = NULL;
 
@@ -308,98 +318,69 @@ handle_incoming_message(char *from, char *message, gboolean priv)
     gboolean was_decrypted = FALSE;
     char *newmessage;
 
-    prof_otrpolicy_t policy = otr_get_policy(from);
+    prof_otrpolicy_t policy = otr_get_policy(barejid);
     char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
 
-    if (!priv) {
-        //check for OTR whitespace (opportunistic or always)
-        if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
-            if (whitespace_base) {
-                if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
-                    // Remove whitespace pattern for proper display in UI
-                    // Handle both BASE+TAGV1/2(16+8) and BASE+TAGV1+TAGV2(16+8+8)
-                    int tag_length	=	24;
-                    if (strstr(message, OTRL_MESSAGE_TAG_V2) && strstr(message, OTRL_MESSAGE_TAG_V1)) {
-                        tag_length = 32;
-                    }
-                    memmove(whitespace_base, whitespace_base+tag_length, tag_length);
-                    char *otr_query_message = otr_start_query();
-                    cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                    message_send(otr_query_message, from);
+    //check for OTR whitespace (opportunistic or always)
+    if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
+        if (whitespace_base) {
+            if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
+                // Remove whitespace pattern for proper display in UI
+                // Handle both BASE+TAGV1/2(16+8) and BASE+TAGV1+TAGV2(16+8+8)
+                int tag_length	=	24;
+                if (strstr(message, OTRL_MESSAGE_TAG_V2) && strstr(message, OTRL_MESSAGE_TAG_V1)) {
+                    tag_length = 32;
                 }
+                memmove(whitespace_base, whitespace_base+tag_length, tag_length);
+                char *otr_query_message = otr_start_query();
+                cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
+                message_send(otr_query_message, barejid);
             }
         }
-        newmessage = otr_decrypt_message(from, message, &was_decrypted);
+    }
+    newmessage = otr_decrypt_message(barejid, message, &was_decrypted);
 
-        // internal OTR message
-        if (newmessage == NULL) {
-            return;
-        }
-    } else {
-        newmessage = message;
+    // internal OTR message
+    if (newmessage == NULL) {
+        return;
     }
 
     if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        message_send(otr_query_message, from);
+        message_send(otr_query_message, barejid);
     }
 
-    if (priv) {
-        plugin_message =  plugins_pre_priv_message_display(from, newmessage);
-    } else {
-        plugin_message = plugins_pre_chat_message_display(from, newmessage);
-    }
+    plugin_message = plugins_pre_chat_message_display(barejid, newmessage);
+    ui_incoming_msg(barejid, plugin_message, NULL);
+    plugins_post_chat_message_display(from, plugin_message);
 
-    ui_incoming_msg(from, plugin_message, NULL, priv);
-
-    if (priv) {
-        plugins_post_priv_message_display(from, plugin_message);
-    } else {
-        plugins_post_chat_message_display(from, plugin_message);
-    }
-
-    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
-        Jid *from_jid = jid_create(from);
+    if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
 
         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
-            chat_log_chat(jidp->barejid, from_jid->barejid, plugin_message, PROF_IN_LOG, NULL);
+            chat_log_chat(jidp->barejid, barejid, newmessage, PROF_IN_LOG, NULL);
         } else if (strcmp(pref_otr_log, "redact") == 0) {
-            chat_log_chat(jidp->barejid, from_jid->barejid, "[redacted]", PROF_IN_LOG, NULL);
+            chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, NULL);
         }
         prefs_free_string(pref_otr_log);
 
         jid_destroy(jidp);
-        jid_destroy(from_jid);
     }
 
-    if (!priv)
-        otr_free_message(newmessage);
+    otr_free_message(newmessage);
 #else
-    if (priv) {
-        plugin_message =  plugins_pre_priv_message_display(from, newmessage);
-    } else {
-        plugin_message = plugins_pre_chat_message_display(from, newmessage);
-    }
+    plugin_message = plugins_pre_chat_message_display(barejid, newmessage);
+    ui_incoming_msg(barejid, plugin_message, NULL);
+    plugins_post_chat_message_display(barejid, plugin_message);
 
-    ui_incoming_msg(from, plugin_message, NULL, priv);
-
-    if (priv) {
-        plugins_post_priv_message_display(from, plugin_message);
-    } else {
-        plugins_post_chat_message_display(from, plugin_message);
-    }
-
-    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
-        Jid *from_jid = jid_create(from);
+    if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, plugin_message, PROF_IN_LOG, NULL);
+        chat_log_chat(jidp->barejid, barejid, newmessage, PROF_IN_LOG, NULL);
         jid_destroy(jidp);
-        jid_destroy(from_jid);
     }
 
 #endif
@@ -407,32 +388,27 @@ handle_incoming_message(char *from, char *message, gboolean priv)
 }
 
 void
-handle_delayed_message(char *from, char *message, GTimeVal tv_stamp,
-    gboolean priv)
+handle_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp)
 {
-    char *new_message = NULL;
+    char *new_message = plugins_pre_priv_message_display(fulljid, message);
+    ui_incoming_private_msg(fulljid, new_message, &tv_stamp);
+    plugins_post_priv_message_display(fulljid, new_message);
 
-    if (priv) {
-        new_message = plugins_pre_priv_message_display(from, message);
-    } else {
-        new_message = plugins_pre_chat_message_display(from, message);
-    }
+    free(new_message);
+}
 
-    ui_incoming_msg(from, new_message, &tv_stamp, priv);
+void
+handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
+{
+    char *new_message = plugins_pre_chat_message_display(barejid, message);
+    ui_incoming_msg(barejid, new_message, &tv_stamp);
+    plugins_post_chat_message_display(barejid, new_message);
 
-    if (priv) {
-        plugins_post_priv_message_display(from, message);
-    } else {
-        plugins_post_chat_message_display(from, message);
-    }
-
-    if (prefs_get_boolean(PREF_CHLOG) && !priv) {
-        Jid *from_jid = jid_create(from);
+    if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
         Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, from_jid->barejid, new_message, PROF_IN_LOG, &tv_stamp);
+        chat_log_chat(jidp->barejid, barejid, message, PROF_IN_LOG, &tv_stamp);
         jid_destroy(jidp);
-        jid_destroy(from_jid);
     }
 
     free(new_message);

@@ -74,6 +74,56 @@ win_occpuants_cols(void)
 }
 
 ProfWin*
+win_create_chat(const char * const barejid)
+{
+    ProfWin *new_win = malloc(sizeof(ProfWin));
+    int cols = getmaxx(stdscr);
+
+    new_win->type = WIN_CHAT;
+
+    new_win->win = newpad(PAD_SIZE, (cols));
+    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+
+    new_win->from = strdup(barejid);
+    new_win->buffer = buffer_create();
+    new_win->y_pos = 0;
+    new_win->paged = 0;
+    new_win->unread = 0;
+
+    new_win->wins.chat.resource = NULL;
+    new_win->wins.chat.is_otr = FALSE;
+    new_win->wins.chat.is_trusted = FALSE;
+    new_win->wins.chat.history_shown = FALSE;
+
+    scrollok(new_win->win, TRUE);
+
+    return new_win;
+}
+
+ProfWin*
+win_create_private(const char * const fulljid)
+{
+    ProfWin *new_win = malloc(sizeof(ProfWin));
+    int cols = getmaxx(stdscr);
+
+    new_win->type = WIN_PRIVATE;
+
+    new_win->win = newpad(PAD_SIZE, (cols));
+    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+
+    new_win->from = strdup(fulljid);
+    new_win->buffer = buffer_create();
+    new_win->y_pos = 0;
+    new_win->paged = 0;
+    new_win->unread = 0;
+
+    scrollok(new_win->win, TRUE);
+
+    return new_win;
+
+}
+
+ProfWin*
 win_create(const char * const title, win_type_t type)
 {
     ProfWin *new_win = malloc(sizeof(ProfWin));
@@ -117,12 +167,12 @@ win_create(const char * const title, win_type_t type)
     new_win->y_pos = 0;
     new_win->paged = 0;
     new_win->unread = 0;
-    new_win->history_shown = 0;
 
     if (new_win->type == WIN_CHAT) {
+        new_win->wins.chat.resource = NULL;
         new_win->wins.chat.is_otr = FALSE;
         new_win->wins.chat.is_trusted = FALSE;
-        new_win->wins.chat.chat_resource = NULL;
+        new_win->wins.chat.history_shown = FALSE;
     }
 
     scrollok(new_win->win, TRUE);
@@ -223,7 +273,7 @@ win_free(ProfWin* window)
     }
 
     if (window->type == WIN_CHAT) {
-        free(window->wins.chat.chat_resource);
+        free(window->wins.chat.resource);
     }
 
     free(window->from);
