@@ -76,27 +76,39 @@ win_occpuants_cols(void)
 ProfWin*
 win_create(const char * const title, win_type_t type)
 {
-    ProfWin *new_win = malloc(sizeof(struct prof_win_t));
-    new_win->from = strdup(title);
+    ProfWin *new_win = malloc(sizeof(ProfWin));
     int cols = getmaxx(stdscr);
 
-    if (type == WIN_MUC && prefs_get_boolean(PREF_OCCUPANTS)) {
-        int subwin_cols = win_occpuants_cols();
-        new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
-        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-
-        new_win->subwin = newpad(PAD_SIZE, subwin_cols);
-        wbkgd(new_win->subwin, theme_attrs(THEME_TEXT));
-    } else {
+    switch (type) {
+    case WIN_CONSOLE:
         new_win->win = newpad(PAD_SIZE, (cols));
         wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-
-        new_win->subwin = NULL;
+        new_win->wins.cons.subwin = NULL;
+        new_win->wins.cons.sub_y_pos = 0;
+        break;
+    case WIN_MUC:
+        if (prefs_get_boolean(PREF_OCCUPANTS)) {
+            int subwin_cols = win_occpuants_cols();
+            new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
+            wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+            new_win->wins.muc.subwin = newpad(PAD_SIZE, subwin_cols);;
+            wbkgd(new_win->wins.muc.subwin, theme_attrs(THEME_TEXT));
+        } else {
+            new_win->win = newpad(PAD_SIZE, (cols));
+            wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+            new_win->wins.muc.subwin = NULL;
+        }
+        new_win->wins.muc.sub_y_pos = 0;
+        break;
+    default:
+        new_win->win = newpad(PAD_SIZE, (cols));
+        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+        break;
     }
 
+    new_win->from = strdup(title);
     new_win->buffer = buffer_create();
     new_win->y_pos = 0;
-    new_win->sub_y_pos = 0;
     new_win->paged = 0;
     new_win->unread = 0;
     new_win->history_shown = 0;
@@ -113,11 +125,24 @@ win_create(const char * const title, win_type_t type)
 void
 win_hide_subwin(ProfWin *window)
 {
-    if (window->subwin) {
-        delwin(window->subwin);
+    switch (window->type) {
+    case WIN_CONSOLE:
+        if (window->wins.cons.subwin) {
+            delwin(window->wins.cons.subwin);
+        }
+        window->wins.cons.subwin = NULL;
+        window->wins.cons.sub_y_pos = 0;
+        break;
+    case WIN_MUC:
+        if (window->wins.muc.subwin) {
+            delwin(window->wins.muc.subwin);
+        }
+        window->wins.muc.subwin = NULL;
+        window->wins.muc.sub_y_pos = 0;
+        break;
+    default:
+        break;
     }
-    window->subwin = NULL;
-    window->sub_y_pos = 0;
 
     int cols = getmaxx(stdscr);
     wresize(window->win, PAD_SIZE, cols);
@@ -127,20 +152,26 @@ win_hide_subwin(ProfWin *window)
 void
 win_show_subwin(ProfWin *window)
 {
-    if (!window->subwin) {
-        int cols = getmaxx(stdscr);
-        int subwin_cols = 0;
-        if (window->type == WIN_CONSOLE) {
-            subwin_cols = win_roster_cols();
-        } else if (window->type == WIN_MUC) {
-            subwin_cols = win_occpuants_cols();
-        }
+    int cols = getmaxx(stdscr);
+    int subwin_cols = 0;
 
-        window->subwin = newpad(PAD_SIZE, subwin_cols);
-        wbkgd(window->subwin, theme_attrs(THEME_TEXT));
-
+    switch (window->type) {
+    case WIN_CONSOLE:
+        subwin_cols = win_roster_cols();
+        window->wins.cons.subwin = newpad(PAD_SIZE, subwin_cols);
+        wbkgd(window->wins.cons.subwin, theme_attrs(THEME_TEXT));
         wresize(window->win, PAD_SIZE, cols - subwin_cols);
         win_redraw(window);
+        break;
+    case WIN_MUC:
+        subwin_cols = win_occpuants_cols();
+        window->wins.muc.subwin = newpad(PAD_SIZE, subwin_cols);
+        wbkgd(window->wins.muc.subwin, theme_attrs(THEME_TEXT));
+        wresize(window->win, PAD_SIZE, cols - subwin_cols);
+        win_redraw(window);
+        break;
+    default:
+        break;
     }
 }
 
@@ -149,9 +180,22 @@ win_free(ProfWin* window)
 {
     buffer_free(window->buffer);
     delwin(window->win);
-    if (window->subwin) {
-        delwin(window->subwin);
+
+    switch (window->type) {
+    case WIN_CONSOLE:
+        if (window->wins.cons.subwin) {
+            delwin(window->wins.cons.subwin);
+        }
+        break;
+    case WIN_MUC:
+        if (window->wins.muc.subwin) {
+            delwin(window->wins.muc.subwin);
+        }
+        break;
+    default:
+        break;
     }
+
     free(window->chat_resource);
     free(window->from);
     form_destroy(window->form);
@@ -163,18 +207,30 @@ win_update_virtual(ProfWin *window)
 {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
+    int subwin_cols = 0;
 
-    if (window->subwin) {
-        int subwin_cols = 0;
-        if (window->type == WIN_MUC) {
-            subwin_cols = win_occpuants_cols();
-        } else if (window->type == WIN_CONSOLE) {
+    switch (window->type) {
+    case WIN_CONSOLE:
+        if (window->wins.cons.subwin) {
             subwin_cols = win_roster_cols();
+            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+            pnoutrefresh(window->wins.cons.subwin, window->wins.cons.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        } else {
+            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
         }
-        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(window->subwin, window->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
-    } else {
+        break;
+    case WIN_MUC:
+        if (window->wins.muc.subwin) {
+            subwin_cols = win_occpuants_cols();
+            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+            pnoutrefresh(window->wins.muc.subwin, window->wins.muc.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        } else {
+            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
+        }
+        break;
+    default:
         pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
+        break;
     }
 }
 

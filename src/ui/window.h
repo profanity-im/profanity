@@ -57,7 +57,6 @@
 #define PAD_SIZE 1000
 
 typedef enum {
-    WIN_UNUSED,
     WIN_CONSOLE,
     WIN_CHAT,
     WIN_MUC,
@@ -67,20 +66,50 @@ typedef enum {
 } win_type_t;
 
 typedef struct prof_win_t {
+
+    win_type_t type;
+
+    WINDOW *win;
+    ProfBuff buffer;
     char *from;
     char *chat_resource;
-    WINDOW *win;
-    WINDOW *subwin;
-    ProfBuff buffer;
-    win_type_t type;
+    int y_pos;
+    int paged;
     gboolean is_otr;
     gboolean is_trusted;
-    int y_pos;
-    int sub_y_pos;
-    int paged;
     int unread;
     int history_shown;
     DataForm *form;
+
+    union {
+        // WIN_CONSOLE
+        struct {
+            WINDOW *subwin;
+            int sub_y_pos;
+        } cons;
+
+        // WIN_CHAT
+        struct {
+        } chat;
+
+        // WIN_MUC
+        struct {
+            WINDOW *subwin;
+            int sub_y_pos;
+        } muc;
+
+        // WIN_MUC_CONFIG
+        struct {
+        } conf;
+
+        // WIN_PRIVATE
+        struct {
+        } priv;
+
+        // WIN_XML
+        struct {
+        } xml;
+    } wins;
 } ProfWin;
 
 ProfWin* win_create(const char * const title, win_type_t type);

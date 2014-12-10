@@ -695,7 +695,7 @@ _ui_redraw_all_room_rosters(void)
     while (curr != NULL) {
         int num = GPOINTER_TO_INT(curr->data);
         ProfWin *window = wins_get_by_num(num);
-        if (window->type == WIN_MUC && window->subwin) {
+        if (window->type == WIN_MUC && window->wins.muc.subwin) {
             char *room = window->from;
             ui_muc_roster(room);
         }
@@ -715,7 +715,7 @@ _ui_hide_all_room_rosters(void)
     while (curr != NULL) {
         int num = GPOINTER_TO_INT(curr->data);
         ProfWin *window = wins_get_by_num(num);
-        if (window->type == WIN_MUC && window->subwin) {
+        if (window->type == WIN_MUC && window->wins.muc.subwin) {
             char *room = window->from;
             ui_room_hide_occupants(room);
         }
@@ -735,7 +735,7 @@ _ui_show_all_room_rosters(void)
     while (curr != NULL) {
         int num = GPOINTER_TO_INT(curr->data);
         ProfWin *window = wins_get_by_num(num);
-        if (window->type == WIN_MUC && window->subwin == NULL) {
+        if (window->type == WIN_MUC && window->wins.muc.subwin == NULL) {
             char *room = window->from;
             ui_room_show_occupants(room);
         }
@@ -2875,14 +2875,14 @@ _ui_roster_contact(PContact contact)
                 (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
             theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
-            wattron(window->subwin, theme_attrs(presence_colour));
+            wattron(window->wins.cons.subwin, theme_attrs(presence_colour));
 
             GString *msg = g_string_new("   ");
             g_string_append(msg, name);
-            win_printline_nowrap(window->subwin, msg->str);
+            win_printline_nowrap(window->wins.cons.subwin, msg->str);
             g_string_free(msg, TRUE);
 
-            wattroff(window->subwin, theme_attrs(presence_colour));
+            wattroff(window->wins.cons.subwin, theme_attrs(presence_colour));
 
             if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
                 GList *resources = p_contact_get_available_resources(contact);
@@ -2891,14 +2891,14 @@ _ui_roster_contact(PContact contact)
                     Resource *resource = curr_resource->data;
                     const char *resource_presence = string_from_resource_presence(resource->presence);
                     theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
-                    wattron(window->subwin, theme_attrs(resource_presence_colour));
+                    wattron(window->wins.cons.subwin, theme_attrs(resource_presence_colour));
 
                     GString *msg = g_string_new("     ");
                     g_string_append(msg, resource->name);
-                    win_printline_nowrap(window->subwin, msg->str);
+                    win_printline_nowrap(window->wins.cons.subwin, msg->str);
                     g_string_free(msg, TRUE);
 
-                    wattroff(window->subwin, theme_attrs(resource_presence_colour));
+                    wattroff(window->wins.cons.subwin, theme_attrs(resource_presence_colour));
 
                     curr_resource = g_list_next(curr_resource);
                 }
@@ -2912,9 +2912,9 @@ static void
 _ui_roster_contacts_by_presence(const char * const presence, char *title)
 {
     ProfWin *window = wins_get_console();
-    wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
-    win_printline_nowrap(window->subwin, title);
-    wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    wattron(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
+    win_printline_nowrap(window->wins.cons.subwin, title);
+    wattroff(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
     GSList *contacts = roster_get_contacts_by_presence(presence);
     if (contacts) {
         GSList *curr_contact = contacts;
@@ -2931,12 +2931,12 @@ static void
 _ui_roster_contacts_by_group(char *group)
 {
     ProfWin *window = wins_get_console();
-    wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    wattron(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
     GString *title = g_string_new(" -");
     g_string_append(title, group);
-    win_printline_nowrap(window->subwin, title->str);
+    win_printline_nowrap(window->wins.cons.subwin, title->str);
     g_string_free(title, TRUE);
-    wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    wattroff(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
     GSList *contacts = roster_get_group(group);
     if (contacts) {
         GSList *curr_contact = contacts;
@@ -2955,9 +2955,9 @@ _ui_roster_contacts_by_no_group(void)
     ProfWin *window = wins_get_console();
     GSList *contacts = roster_get_nogroup();
     if (contacts) {
-        wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        win_printline_nowrap(window->subwin, " -no group");
-        wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        wattron(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
+        win_printline_nowrap(window->wins.cons.subwin, " -no group");
+        wattroff(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
         GSList *curr_contact = contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
@@ -2975,7 +2975,7 @@ _ui_roster(void)
     if (window) {
         char *by = prefs_get_string(PREF_ROSTER_BY);
         if (g_strcmp0(by, "presence") == 0) {
-            werase(window->subwin);
+            werase(window->wins.cons.subwin);
             _ui_roster_contacts_by_presence("chat", " -Available for chat");
             _ui_roster_contacts_by_presence("online", " -Online");
             _ui_roster_contacts_by_presence("away", " -Away");
@@ -2985,7 +2985,7 @@ _ui_roster(void)
                 _ui_roster_contacts_by_presence("offline", " -Offline");
             }
         } else if (g_strcmp0(by, "group") == 0) {
-            werase(window->subwin);
+            werase(window->wins.cons.subwin);
             GSList *groups = roster_get_groups();
             GSList *curr_group = groups;
             while (curr_group) {
@@ -2997,10 +2997,10 @@ _ui_roster(void)
         } else {
             GSList *contacts = roster_get_contacts();
             if (contacts) {
-                werase(window->subwin);
-                wattron(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
-                win_printline_nowrap(window->subwin, " -Roster");
-                wattroff(window->subwin, theme_attrs(THEME_ROSTER_HEADER));
+                werase(window->wins.cons.subwin);
+                wattron(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
+                win_printline_nowrap(window->wins.cons.subwin, " -Roster");
+                wattroff(window->wins.cons.subwin, theme_attrs(THEME_ROSTER_HEADER));
                 GSList *curr_contact = contacts;
                 while (curr_contact) {
                     PContact contact = curr_contact->data;
@@ -3021,88 +3021,88 @@ _ui_muc_roster(const char * const room)
     if (window) {
         GList *occupants = muc_roster(room);
         if (occupants) {
-            werase(window->subwin);
+            werase(window->wins.muc.subwin);
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
-                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_printline_nowrap(window->subwin, " -Moderators");
-                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                wattron(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_printline_nowrap(window->wins.muc.subwin, " -Moderators");
+                wattroff(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                        wattron(window->subwin, theme_attrs(presence_colour));
+                        wattron(window->wins.muc.subwin, theme_attrs(presence_colour));
 
                         GString *msg = g_string_new("   ");
                         g_string_append(msg, occupant->nick);
-                        win_printline_nowrap(window->subwin, msg->str);
+                        win_printline_nowrap(window->wins.muc.subwin, msg->str);
                         g_string_free(msg, TRUE);
 
-                        wattroff(window->subwin, theme_attrs(presence_colour));
+                        wattroff(window->wins.muc.subwin, theme_attrs(presence_colour));
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
 
-                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_printline_nowrap(window->subwin, " -Participants");
-                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                wattron(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_printline_nowrap(window->wins.muc.subwin, " -Participants");
+                wattroff(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                        wattron(window->subwin, theme_attrs(presence_colour));
+                        wattron(window->wins.muc.subwin, theme_attrs(presence_colour));
 
                         GString *msg = g_string_new("   ");
                         g_string_append(msg, occupant->nick);
-                        win_printline_nowrap(window->subwin, msg->str);
+                        win_printline_nowrap(window->wins.muc.subwin, msg->str);
                         g_string_free(msg, TRUE);
 
-                        wattroff(window->subwin, theme_attrs(presence_colour));
+                        wattroff(window->wins.muc.subwin, theme_attrs(presence_colour));
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
 
-                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_printline_nowrap(window->subwin, " -Visitors");
-                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                wattron(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_printline_nowrap(window->wins.muc.subwin, " -Visitors");
+                wattroff(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
                         const char *presence_str = string_from_resource_presence(occupant->presence);
                         theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                        wattron(window->subwin, theme_attrs(presence_colour));
+                        wattron(window->wins.muc.subwin, theme_attrs(presence_colour));
 
                         GString *msg = g_string_new("   ");
                         g_string_append(msg, occupant->nick);
-                        win_printline_nowrap(window->subwin, msg->str);
+                        win_printline_nowrap(window->wins.muc.subwin, msg->str);
                         g_string_free(msg, TRUE);
 
-                        wattroff(window->subwin, theme_attrs(presence_colour));
+                        wattroff(window->wins.muc.subwin, theme_attrs(presence_colour));
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
             } else {
-                wattron(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
-                win_printline_nowrap(window->subwin, " -Occupants\n");
-                wattroff(window->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                wattron(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                win_printline_nowrap(window->wins.muc.subwin, " -Occupants\n");
+                wattroff(window->wins.muc.subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     const char *presence_str = string_from_resource_presence(occupant->presence);
                     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                    wattron(window->subwin, theme_attrs(presence_colour));
+                    wattron(window->wins.muc.subwin, theme_attrs(presence_colour));
 
                     GString *msg = g_string_new("   ");
                     g_string_append(msg, occupant->nick);
-                    win_printline_nowrap(window->subwin, msg->str);
+                    win_printline_nowrap(window->wins.muc.subwin, msg->str);
                     g_string_free(msg, TRUE);
 
-                    wattroff(window->subwin, theme_attrs(presence_colour));
+                    wattroff(window->wins.muc.subwin, theme_attrs(presence_colour));
                     roster_curr = g_list_next(roster_curr);
                 }
             }
@@ -3116,7 +3116,7 @@ static void
 _ui_room_show_occupants(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    if (window && !window->subwin) {
+    if (window && !window->wins.muc.subwin) {
         wins_show_subwin(window);
         ui_muc_roster(room);
     }
@@ -3126,7 +3126,7 @@ static void
 _ui_room_hide_occupants(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
-    if (window && window->subwin) {
+    if (window && window->wins.muc.subwin) {
         wins_hide_subwin(window);
     }
 }
@@ -3135,7 +3135,7 @@ static void
 _ui_show_roster(void)
 {
     ProfWin *window = wins_get_console();
-    if (window && !window->subwin) {
+    if (window && !window->wins.cons.subwin) {
         wins_show_subwin(window);
         ui_roster();
     }
@@ -3145,7 +3145,7 @@ static void
 _ui_hide_roster(void)
 {
     ProfWin *window = wins_get_console();
-    if (window && window->subwin) {
+    if (window && window->wins.cons.subwin) {
         wins_hide_subwin(window);
     }
 }
@@ -3182,7 +3182,6 @@ _win_handle_page(const wint_t * const ch, const int result)
     ProfWin *current = wins_get_current();
     int rows = getmaxy(stdscr);
     int y = getcury(current->win);
-    int sub_y = getcury(current->subwin);
 
     int page_space = rows - 4;
     int *page_start = &(current->y_pos);
@@ -3257,27 +3256,38 @@ _win_handle_page(const wint_t * const ch, const int result)
     }
 
     if ((current->type == WIN_MUC) || (current->type == WIN_CONSOLE)) {
+        int sub_y = 0;
+        int *sub_y_pos = NULL;
+
+        if (current->type == WIN_MUC) {
+            sub_y = getcury(current->wins.muc.subwin);
+            sub_y_pos = &(current->wins.muc.sub_y_pos);
+        } else if (current->type == WIN_CONSOLE) {
+            sub_y = getcury(current->wins.cons.subwin);
+            sub_y_pos = &(current->wins.cons.sub_y_pos);
+        }
+
         // alt up arrow
         if ((result == KEY_CODE_YES) && ((*ch == 565) || (*ch == 337))) {
-            current->sub_y_pos -= page_space;
+            *sub_y_pos -= page_space;
 
             // went past beginning, show first page
-            if (current->sub_y_pos < 0)
-                current->sub_y_pos = 0;
+            if (*sub_y_pos < 0)
+                *sub_y_pos = 0;
 
             win_update_virtual(current);
 
         // alt down arrow
         } else if ((result == KEY_CODE_YES) && ((*ch == 524) || (*ch == 336))) {
-            current->sub_y_pos += page_space;
+            *sub_y_pos += page_space;
 
             // only got half a screen, show full screen
-            if ((sub_y- (current->sub_y_pos)) < page_space)
-                current->sub_y_pos = sub_y - page_space;
+            if ((sub_y- (*sub_y_pos)) < page_space)
+                *sub_y_pos = sub_y - page_space;
 
             // went past end, show full screen
-            else if (current->sub_y_pos >= sub_y)
-                current->sub_y_pos = sub_y - page_space - 1;
+            else if (*sub_y_pos >= sub_y)
+                *sub_y_pos = sub_y - page_space - 1;
 
             win_update_virtual(current);
         }
