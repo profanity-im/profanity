@@ -1321,17 +1321,15 @@ _ui_current_error_line(const char * const msg)
 }
 
 static void
-_ui_print_system_msg_from_recipient(const char * const from, const char *message)
+_ui_print_system_msg_from_recipient(const char * const barejid, const char *message)
 {
-    if (from == NULL || message == NULL)
+    if (barejid == NULL || message == NULL)
         return;
 
-    Jid *jid = jid_create(from);
-
-    ProfWin *window = wins_get_by_recipient(jid->barejid);
+    ProfWin *window = wins_get_by_recipient(barejid);
     if (window == NULL) {
         int num = 0;
-        window = wins_new(jid->barejid, WIN_CHAT);
+        window = wins_new_chat(barejid);
         if (window != NULL) {
             num = wins_get_num(window);
             status_bar_active(num);
@@ -1342,9 +1340,7 @@ _ui_print_system_msg_from_recipient(const char * const from, const char *message
         }
     }
 
-    win_save_vprint(window, '-', NULL, 0, 0, "", "*%s %s", jid->barejid, message);
-
-    jid_destroy(jid);
+    win_save_vprint(window, '-', NULL, 0, 0, "", "*%s %s", barejid, message);
 }
 
 static void
