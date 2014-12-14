@@ -2689,28 +2689,21 @@ cmd_bookmark(gchar **args, struct cmd_help_t help)
 
     win_type_t win_type = ui_current_win_type();
 
-    if (win_type == WIN_MUC) {
-        gchar *cmd = args[0];
-
+    gchar *cmd = args[0];
+    if (win_type == WIN_MUC && cmd == NULL) {
         // default to current nickname, password, and autojoin "on"
-        if (cmd == NULL) {
-            char *jid = ui_current_recipient();
-            char *nick = muc_nick(jid);
-            char *password = muc_password(jid);
-            gboolean added = bookmark_add(jid, nick, password, "on");
-            if (added) {
-                ui_current_print_formatted_line('!', 0, "Bookmark added for %s.", jid);
-            } else {
-                ui_current_print_formatted_line('!', 0, "Bookmark already exists for %s.", jid);
-            }
-            return TRUE;
+        char *jid = ui_current_recipient();
+        char *nick = muc_nick(jid);
+        char *password = muc_password(jid);
+        gboolean added = bookmark_add(jid, nick, password, "on");
+        if (added) {
+            ui_current_print_formatted_line('!', 0, "Bookmark added for %s.", jid);
         } else {
-            ui_current_print_formatted_line('!', 0, "No arguments required for /bookmark in a chat room");
-            return TRUE;
+            ui_current_print_formatted_line('!', 0, "Bookmark already exists for %s.", jid);
         }
+        return TRUE;
 
     } else {
-        gchar *cmd = args[0];
         if (cmd == NULL) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
