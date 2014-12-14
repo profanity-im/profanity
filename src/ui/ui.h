@@ -88,7 +88,7 @@ void (*ui_smp_answer_failure)(const char * const recipient);
 unsigned long (*ui_get_idle_time)(void);
 void (*ui_reset_idle_time)(void);
 void (*ui_new_chat_win)(const char * const to);
-void (*ui_print_system_msg_from_recipient)(const char * const from, const char *message);
+void (*ui_print_system_msg_from_recipient)(const char * const barejid, const char *message);
 gint (*ui_unread)(void);
 void (*ui_close_connected_win)(int index);
 int (*ui_close_all_wins)(void);
