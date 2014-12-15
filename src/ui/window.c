@@ -51,6 +51,9 @@
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
+#define CONS_WIN_TITLE "_cons"
+#define XML_WIN_TITLE "XML Console"
+
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
 static void _win_print(ProfWin *window, const char show_char, GDateTime *time,
@@ -71,6 +74,30 @@ win_occpuants_cols(void)
     int occupants_win_percent = prefs_get_occupants_size();
     int cols = getmaxx(stdscr);
     return CEILING( (((double)cols) / 100) * occupants_win_percent);
+}
+
+ProfWin*
+win_create_console(void)
+{
+    ProfWin *new_win = malloc(sizeof(ProfWin));
+    int cols = getmaxx(stdscr);
+
+    new_win->type = WIN_CONSOLE;
+
+    new_win->win = newpad(PAD_SIZE, (cols));
+    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+    new_win->wins.cons.subwin = NULL;
+    new_win->wins.cons.sub_y_pos = 0;
+
+    new_win->from = strdup(CONS_WIN_TITLE);
+    new_win->buffer = buffer_create();
+    new_win->y_pos = 0;
+    new_win->paged = 0;
+    new_win->unread = 0;
+
+    scrollok(new_win->win, TRUE);
+
+    return new_win;
 }
 
 ProfWin*
@@ -101,6 +128,62 @@ win_create_chat(const char * const barejid)
 }
 
 ProfWin*
+win_create_muc(const char * const roomjid)
+{
+    ProfWin *new_win = malloc(sizeof(ProfWin));
+    int cols = getmaxx(stdscr);
+
+    new_win->type = WIN_MUC;
+
+    if (prefs_get_boolean(PREF_OCCUPANTS)) {
+        int subwin_cols = win_occpuants_cols();
+        new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
+        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+        new_win->wins.muc.subwin = newpad(PAD_SIZE, subwin_cols);;
+        wbkgd(new_win->wins.muc.subwin, theme_attrs(THEME_TEXT));
+    } else {
+        new_win->win = newpad(PAD_SIZE, (cols));
+        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+        new_win->wins.muc.subwin = NULL;
+    }
+    new_win->wins.muc.sub_y_pos = 0;
+
+    new_win->from = strdup(roomjid);
+    new_win->buffer = buffer_create();
+    new_win->y_pos = 0;
+    new_win->paged = 0;
+    new_win->unread = 0;
+
+    scrollok(new_win->win, TRUE);
+
+    return new_win;
+}
+
+ProfWin*
+win_create_muc_config(const char * const title, DataForm *form)
+{
+    ProfWin *new_win = malloc(sizeof(ProfWin));
+    int cols = getmaxx(stdscr);
+
+    new_win->type = WIN_MUC_CONFIG;
+
+    new_win->win = newpad(PAD_SIZE, (cols));
+    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
+
+    new_win->wins.conf.form = form;
+
+    new_win->from = strdup(title);
+    new_win->buffer = buffer_create();
+    new_win->y_pos = 0;
+    new_win->paged = 0;
+    new_win->unread = 0;
+
+    scrollok(new_win->win, TRUE);
+
+    return new_win;
+}
+
+ProfWin*
 win_create_private(const char * const fulljid)
 {
     ProfWin *new_win = malloc(sizeof(ProfWin));
@@ -124,56 +207,21 @@ win_create_private(const char * const fulljid)
 }
 
 ProfWin*
-win_create(const char * const title, win_type_t type)
+win_create_xmlconsole(void)
 {
     ProfWin *new_win = malloc(sizeof(ProfWin));
     int cols = getmaxx(stdscr);
 
-    new_win->type = type;
+    new_win->type = WIN_XML;
 
-    switch (new_win->type) {
-    case WIN_CONSOLE:
-        new_win->win = newpad(PAD_SIZE, (cols));
-        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-        new_win->wins.cons.subwin = NULL;
-        new_win->wins.cons.sub_y_pos = 0;
-        break;
-    case WIN_MUC:
-        if (prefs_get_boolean(PREF_OCCUPANTS)) {
-            int subwin_cols = win_occpuants_cols();
-            new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
-            wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-            new_win->wins.muc.subwin = newpad(PAD_SIZE, subwin_cols);;
-            wbkgd(new_win->wins.muc.subwin, theme_attrs(THEME_TEXT));
-        } else {
-            new_win->win = newpad(PAD_SIZE, (cols));
-            wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-            new_win->wins.muc.subwin = NULL;
-        }
-        new_win->wins.muc.sub_y_pos = 0;
-        break;
-    default:
-        new_win->win = newpad(PAD_SIZE, (cols));
-        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-        break;
-    }
+    new_win->win = newpad(PAD_SIZE, (cols));
+    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
 
-    if (new_win->type == WIN_MUC_CONFIG) {
-        new_win->wins.conf.form = NULL;
-    }
-
-    new_win->from = strdup(title);
+    new_win->from = strdup(XML_WIN_TITLE);
     new_win->buffer = buffer_create();
     new_win->y_pos = 0;
     new_win->paged = 0;
     new_win->unread = 0;
-
-    if (new_win->type == WIN_CHAT) {
-        new_win->wins.chat.resource = NULL;
-        new_win->wins.chat.is_otr = FALSE;
-        new_win->wins.chat.is_trusted = FALSE;
-        new_win->wins.chat.history_shown = FALSE;
-    }
 
     scrollok(new_win->win, TRUE);
 

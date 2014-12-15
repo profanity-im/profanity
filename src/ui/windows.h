@@ -36,6 +36,13 @@
 #define UI_WINDOWS_H
 
 void wins_init(void);
+
+ProfWin * wins_new_xmlconsole(void);
+ProfWin * wins_new_chat(const char * const barejid);
+ProfWin * wins_new_muc(const char * const roomjid);
+ProfWin * wins_new_muc_config(const char * const title, DataForm *form);
+ProfWin * wins_new_private(const char * const fulljid);
+
 ProfWin * wins_get_console(void);
 ProfWin * wins_get_current(void);
 void wins_set_current_by_num(int i);
@@ -49,9 +56,6 @@ void wins_close_current(void);
 void wins_close_by_num(int i);
 void wins_clear_current(void);
 gboolean wins_is_current(ProfWin *window);
-ProfWin * wins_new(const char * const from, win_type_t type);
-ProfWin * wins_new_chat(const char * const barejid);
-ProfWin * wins_new_private(const char * const fulljid);
 int wins_get_total_unread(void);
 void wins_resize_all(void);
 GSList * wins_get_chat_recipients(void);

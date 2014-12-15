@@ -931,11 +931,11 @@ _ui_next_win(void)
 }
 
 static void
-_ui_gone_secure(const char * const recipient, gboolean trusted)
+_ui_gone_secure(const char * const barejid, gboolean trusted)
 {
-    ProfWin *window = wins_get_by_recipient(recipient);
+    ProfWin *window = wins_get_by_recipient(barejid);
     if (window == NULL) {
-        window = wins_new(recipient, WIN_CHAT);
+        window = wins_new_chat(barejid);
     }
 
     if (window->type != WIN_CHAT) {
@@ -964,7 +964,7 @@ _ui_gone_secure(const char * const recipient, gboolean trusted)
         if (ui_index == 10) {
             ui_index = 0;
         }
-        cons_show("%s started an OTR session (%d).", recipient, ui_index);
+        cons_show("%s started an OTR session (%d).", barejid, ui_index);
         cons_alert();
     }
 }
@@ -1380,9 +1380,9 @@ _ui_new_chat_win(const char * const to)
         Jid *jid = jid_create(to);
 
         if (muc_active(jid->barejid)) {
-            window = wins_new(to, WIN_PRIVATE);
+            window = wins_new_private(to);
         } else {
-            window = wins_new(to, WIN_CHAT);
+            window = wins_new_chat(to);
         }
 
         jid_destroy(jid);
@@ -1409,7 +1409,7 @@ _ui_new_chat_win(const char * const to)
 static void
 _ui_create_xmlconsole_win(void)
 {
-    ProfWin *window = wins_new("XML Console", WIN_XML);
+    ProfWin *window = wins_new_xmlconsole();
     int num = wins_get_num(window);
     ui_switch_win(num);
 }
@@ -1437,9 +1437,9 @@ _ui_outgoing_msg(const char * const from, const char * const to,
         Jid *jid = jid_create(to);
 
         if (muc_active(jid->barejid)) {
-            window = wins_new(to, WIN_PRIVATE);
+            window = wins_new_private(to);
         } else {
-            window = wins_new(to, WIN_CHAT);
+            window = wins_new_chat(to);
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(to)) {
                 window->wins.chat.is_otr = TRUE;
@@ -1479,7 +1479,7 @@ _ui_room_join(const char * const room, gboolean focus)
 
     // create new window
     if (window == NULL) {
-        window = wins_new(room, WIN_MUC);
+        window = wins_new_muc(room);
     }
 
     char *nick = muc_nick(room);
@@ -2715,10 +2715,8 @@ _ui_handle_room_configuration(const char * const room, DataForm *form)
 {
     GString *title = g_string_new(room);
     g_string_append(title, " config");
-    ProfWin *window = wins_new(title->str, WIN_MUC_CONFIG);
+    ProfWin *window = wins_new_muc_config(title->str, form);
     g_string_free(title, TRUE);
-
-    window->wins.conf.form = form;
 
     int num = wins_get_num(window);
     ui_switch_win(num);

@@ -110,9 +110,12 @@ typedef struct prof_win_t {
     } wins;
 } ProfWin;
 
-ProfWin* win_create(const char * const title, win_type_t type);
+ProfWin* win_create_console(void);
 ProfWin* win_create_chat(const char * const barejid);
+ProfWin* win_create_muc(const char * const roomjid);
+ProfWin* win_create_muc_config(const char * const title, DataForm *form);
 ProfWin* win_create_private(const char * const fulljid);
+ProfWin* win_create_xmlconsole(void);
 
 void win_free(ProfWin *window);
 void win_update_virtual(ProfWin *window);

@@ -52,8 +52,6 @@
 #include "ui/window.h"
 #include "ui/windows.h"
 
-#define CONS_WIN_TITLE "_cons"
-
 static GHashTable *windows;
 static int current;
 static int max_cols;
@@ -65,7 +63,7 @@ wins_init(void)
         (GDestroyNotify)win_free);
 
     max_cols = getmaxx(stdscr);
-    ProfWin *console = win_create(CONS_WIN_TITLE, WIN_CONSOLE);
+    ProfWin *console = win_create_console();
     g_hash_table_insert(windows, GINT_TO_POINTER(1), console);
 
     current = 1;
@@ -256,11 +254,11 @@ wins_is_current(ProfWin *window)
 }
 
 ProfWin *
-wins_new(const char * const from, win_type_t type)
+wins_new_xmlconsole(void)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
-    ProfWin *new = win_create(from, type);
+    ProfWin *new = win_create_xmlconsole();
     g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
     g_list_free(keys);
     return new;
@@ -272,6 +270,28 @@ wins_new_chat(const char * const barejid)
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
     ProfWin *new = win_create_chat(barejid);
+    g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
+    g_list_free(keys);
+    return new;
+}
+
+ProfWin *
+wins_new_muc(const char * const roomjid)
+{
+    GList *keys = g_hash_table_get_keys(windows);
+    int result = get_next_available_win_num(keys);
+    ProfWin *new = win_create_muc(roomjid);
+    g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
+    g_list_free(keys);
+    return new;
+}
+
+ProfWin *
+wins_new_muc_config(const char * const title, DataForm *form)
+{
+    GList *keys = g_hash_table_get_keys(windows);
+    int result = get_next_available_win_num(keys);
+    ProfWin *new = win_create_muc_config(title, form);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), new);
     g_list_free(keys);
     return new;
