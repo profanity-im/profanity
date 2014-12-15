@@ -157,7 +157,7 @@ api_win_create(const char *tag, void *callback,
     window->callback = callback;
     window->callback_func = callback_func;
     callbacks_add_window_handler(tag, window);
-    wins_new(tag, WIN_PLUGIN);
+    wins_new_plugin(tag);
 
     // set status bar active
     ProfWin *win = wins_get_by_recipient(tag);
