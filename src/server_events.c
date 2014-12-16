@@ -586,7 +586,7 @@ handle_room_occupant_offline(const char * const room, const char * const nick,
         ui_room_member_offline(room, nick);
     }
     prefs_free_string(muc_status_pref);
-    ui_muc_roster(room);
+    occupantswin_occupants(room);
 }
 
 void
@@ -595,7 +595,7 @@ handle_room_occupent_kicked(const char * const room, const char * const nick, co
 {
     muc_roster_remove(room, nick);
     ui_room_member_kicked(room, nick, actor, reason);
-    ui_muc_roster(room);
+    occupantswin_occupants(room);
 }
 
 void
@@ -604,7 +604,7 @@ handle_room_occupent_banned(const char * const room, const char * const nick, co
 {
     muc_roster_remove(room, nick);
     ui_room_member_banned(room, nick, actor, reason);
-    ui_muc_roster(room);
+    occupantswin_occupants(room);
 }
 
 void
@@ -745,7 +745,7 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
         }
     }
 
-    ui_muc_roster(room);
+    occupantswin_occupants(room);
 }
 
 void
@@ -774,7 +774,7 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
     if (old_nick) {
         ui_room_member_nick_change(room, old_nick, nick);
         free(old_nick);
-        ui_muc_roster(room);
+        occupantswin_occupants(room);
         return;
     }
 
@@ -785,7 +785,7 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
             ui_room_member_online(room, nick, role, affiliation, show, status);
         }
         prefs_free_string(muc_status_pref);
-        ui_muc_roster(room);
+        occupantswin_occupants(room);
         return;
     }
 
@@ -796,7 +796,7 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
             ui_room_member_presence(room, nick, show, status);
         }
         prefs_free_string(muc_status_pref);
-        ui_muc_roster(room);
+        occupantswin_occupants(room);
 
     // presence unchanged, check for role/affiliation change
     } else {
@@ -814,6 +814,6 @@ handle_muc_occupant_online(const char * const room, const char * const nick, con
                 ui_room_occupant_affiliation_change(room, nick, affiliation, actor, reason);
             }
         }
-        ui_muc_roster(room);
+        occupantswin_occupants(room);
     }
 }

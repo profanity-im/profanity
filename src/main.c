@@ -69,6 +69,7 @@ _init_modules(void)
     console_init_module();
     notifier_init_module();
     rosterwin_init_module();
+    occupantswin_init_module();
 
     accounts_init_module();
 #ifdef HAVE_LIBOTR

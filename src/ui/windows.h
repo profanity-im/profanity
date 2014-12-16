@@ -44,6 +44,8 @@ ProfWin * wins_new_muc_config(const char * const title, DataForm *form);
 ProfWin * wins_new_private(const char * const fulljid);
 
 ProfWin * wins_get_console(void);
+ProfMucWin * wins_get_muc_win(const char * const roomjid);
+
 ProfWin * wins_get_current(void);
 void wins_set_current_by_num(int i);
 ProfWin * wins_get_by_num(int i);
