@@ -3339,15 +3339,10 @@ _win_handle_page(const wint_t * const ch, const int result)
         current->layout->paged = 0;
     }
 
-    if ((current->type == WIN_MUC) || (current->type == WIN_CONSOLE)) {
-        int sub_y = 0;
-        int *sub_y_pos = NULL;
-
-        if (current->type == WIN_MUC || current->type == WIN_CONSOLE) {
-            ProfLayoutSplit *split_layout = (ProfLayoutSplit*)current->layout;
-            sub_y = getcury(split_layout->subwin);
-            sub_y_pos = &(split_layout->sub_y_pos);
-        }
+    if (current->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)current->layout;
+        int sub_y = getcury(split_layout->subwin);
+        int *sub_y_pos = &(split_layout->sub_y_pos);
 
         // alt up arrow
         if ((result == KEY_CODE_YES) && ((*ch == 565) || (*ch == 337))) {
