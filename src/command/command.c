@@ -1666,8 +1666,9 @@ cmd_reset_autocomplete()
 
     if (ui_current_win_type() == WIN_MUC_CONFIG) {
         ProfWin *window = wins_get_current();
-        if (window && window->wins.conf.form) {
-            form_reset_autocompleters(window->wins.conf.form);
+        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+        if (window && confwin->form) {
+            form_reset_autocompleters(confwin->form);
         }
     }
 
@@ -1782,9 +1783,10 @@ cmd_execute_default(const char * inp)
             } else {
                 GString *send_recipient = g_string_new(recipient);
                 ProfWin *current = wins_get_current();
-                if (current && current->wins.chat.resource) {
+                ProfChatWin *chatwin = (ProfChatWin*)current;
+                if (current && win_has_chat_resource(current)) {
                     g_string_append(send_recipient, "/");
-                    g_string_append(send_recipient, current->wins.chat.resource);
+                    g_string_append(send_recipient, chatwin->resource);
                 }
 
 #ifdef HAVE_LIBOTR
@@ -2462,7 +2464,8 @@ _form_autocomplete(char *input, int *size)
 
     char *found = NULL;
 
-    DataForm *form = current->wins.conf.form;
+    ProfMucConfWin *confwin = (ProfMucConfWin*)current;
+    DataForm *form = confwin->form;
     if (form) {
         found = autocomplete_param_with_ac(input, size, "/form help", form->tag_ac, TRUE);
         if (found != NULL) {
@@ -2488,7 +2491,8 @@ _form_field_autocomplete(char *input, int *size)
 
     char *found = NULL;
 
-    DataForm *form = current->wins.conf.form;
+    ProfMucConfWin *confwin = (ProfMucConfWin*)current;
+    DataForm *form = confwin->form;
     if (form == NULL) {
         return NULL;
     }

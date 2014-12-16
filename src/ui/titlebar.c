@@ -189,7 +189,7 @@ _title_bar_draw(void)
             wprintw(win, " (typing...)");
         }
     } else if (current && current->type == WIN_MUC_CONFIG) {
-        if (current->wins.conf.form && current->wins.conf.form->modified) {
+        if (win_has_modified_form(current)) {
             wprintw(win, " *");
         }
     }
@@ -324,21 +324,22 @@ _show_contact_presence(void)
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
     ProfWin *current = wins_get_current();
-    if (current && current->wins.chat.resource) {
+    ProfChatWin *chatwin = (ProfChatWin*)current;
+    if (current && win_has_chat_resource(current)) {
         wprintw(win, "/");
-        wprintw(win, current->wins.chat.resource);
+        wprintw(win, chatwin->resource);
     }
 
     if (prefs_get_boolean(PREF_PRESENCE)) {
         theme_item_t presence_colour = THEME_TITLE_OFFLINE;
         const char *presence = "offline";
 
-        if (current && current->wins.chat.resource) {
+        if (current && win_has_chat_resource(current)) {
             char *barejid = roster_barejid_from_name(current_recipient);
             if (barejid) {
                 PContact contact = roster_get_contact(barejid);
                 if (contact) {
-                    Resource *resource = p_contact_get_resource(contact, current->wins.chat.resource);
+                    Resource *resource = p_contact_get_resource(contact, chatwin->resource);
                     if (resource) {
                         presence = string_from_resource_presence(resource->presence);
                     }
