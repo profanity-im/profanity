@@ -56,6 +56,8 @@
 
 #define PAD_SIZE 1000
 
+#define LAYOUT_SPLIT_MEMCHECK 1234567
+
 typedef enum {
     LAYOUT_SIMPLE,
     LAYOUT_SPLIT
@@ -77,6 +79,7 @@ typedef struct prof_layout_split_t {
     ProfLayout super;
     WINDOW *subwin;
     int sub_y_pos;
+    unsigned long memcheck;
 } ProfLayoutSplit;
 
 typedef enum {

@@ -108,6 +108,7 @@ _win_create_split_layout(void)
     scrollok(layout->super.win, TRUE);
     layout->subwin = NULL;
     layout->sub_y_pos = 0;
+    layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
 
     return &layout->super;
 }
@@ -164,6 +165,7 @@ win_create_muc(const char * const roomjid)
         layout->subwin = NULL;
     }
     layout->sub_y_pos = 0;
+    layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
     layout->super.buffer = buffer_create();
     layout->super.y_pos = 0;
     layout->super.paged = 0;

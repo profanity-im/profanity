@@ -69,6 +69,7 @@
 #include "ui/inputwin.h"
 #include "ui/window.h"
 #include "ui/windows.h"
+#include "ui/rosterwin.h"
 #include "xmpp/xmpp.h"
 
 static char *win_title;
@@ -83,7 +84,6 @@ static void _win_handle_switch(const wint_t * const ch);
 static void _win_handle_page(const wint_t * const ch, const int result);
 static void _win_show_history(int win_index, const char * const contact);
 static void _ui_draw_term_title(void);
-static void _ui_roster_contact(PContact contact);
 
 static void
 _ui_init(void)
@@ -2939,52 +2939,6 @@ _ui_show_lines(ProfWin *window, const gchar** lines)
 }
 
 static void
-_ui_roster_contact(PContact contact)
-{
-    if (p_contact_subscribed(contact)) {
-        ProfWin *window = wins_get_console();
-        const char *name = p_contact_name_or_jid(contact);
-        const char *presence = p_contact_presence(contact);
-
-        if ((g_strcmp0(presence, "offline") != 0) || ((g_strcmp0(presence, "offline") == 0) &&
-                (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
-            theme_item_t presence_colour = theme_main_presence_attrs(presence);
-
-            ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-            wattron(layout->subwin, theme_attrs(presence_colour));
-
-            GString *msg = g_string_new("   ");
-            g_string_append(msg, name);
-            win_printline_nowrap(layout->subwin, msg->str);
-            g_string_free(msg, TRUE);
-
-            wattroff(layout->subwin, theme_attrs(presence_colour));
-
-            if (prefs_get_boolean(PREF_ROSTER_RESOURCE)) {
-                GList *resources = p_contact_get_available_resources(contact);
-                GList *curr_resource = resources;
-                while (curr_resource) {
-                    Resource *resource = curr_resource->data;
-                    const char *resource_presence = string_from_resource_presence(resource->presence);
-                    theme_item_t resource_presence_colour = theme_main_presence_attrs(resource_presence);
-                    wattron(layout->subwin, theme_attrs(resource_presence_colour));
-
-                    GString *msg = g_string_new("     ");
-                    g_string_append(msg, resource->name);
-                    win_printline_nowrap(layout->subwin, msg->str);
-                    g_string_free(msg, TRUE);
-
-                    wattroff(layout->subwin, theme_attrs(resource_presence_colour));
-
-                    curr_resource = g_list_next(curr_resource);
-                }
-                g_list_free(resources);
-            }
-        }
-    }
-}
-
-static void
 _ui_roster_contacts_by_presence(const char * const presence, char *title)
 {
     ProfWin *window = wins_get_console();
@@ -2998,7 +2952,7 @@ _ui_roster_contacts_by_presence(const char * const presence, char *title)
         GSList *curr_contact = contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
-            _ui_roster_contact(contact);
+            rosterwin_contact(contact);
             curr_contact = g_slist_next(curr_contact);
         }
     }
@@ -3022,7 +2976,7 @@ _ui_roster_contacts_by_group(char *group)
         GSList *curr_contact = contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
-            _ui_roster_contact(contact);
+            rosterwin_contact(contact);
             curr_contact = g_slist_next(curr_contact);
         }
     }
@@ -3043,7 +2997,7 @@ _ui_roster_contacts_by_no_group(void)
         GSList *curr_contact = contacts;
         while (curr_contact) {
             PContact contact = curr_contact->data;
-            _ui_roster_contact(contact);
+            rosterwin_contact(contact);
             curr_contact = g_slist_next(curr_contact);
         }
     }
@@ -3087,7 +3041,7 @@ _ui_roster(void)
                 GSList *curr_contact = contacts;
                 while (curr_contact) {
                     PContact contact = curr_contact->data;
-                    _ui_roster_contact(contact);
+                    rosterwin_contact(contact);
                     curr_contact = g_slist_next(curr_contact);
                 }
             }
