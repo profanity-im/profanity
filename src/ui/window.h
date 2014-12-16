@@ -56,6 +56,32 @@
 
 #define PAD_SIZE 1000
 
+#define LAYOUT_SPLIT_MEMCHECK 1234567
+
+typedef enum {
+    LAYOUT_SIMPLE,
+    LAYOUT_SPLIT
+} layout_type_t;
+
+typedef struct prof_layout_t {
+    layout_type_t type;
+    WINDOW *win;
+    ProfBuff buffer;
+    int y_pos;
+    int paged;
+} ProfLayout;
+
+typedef struct prof_layout_simple_t {
+    ProfLayout super;
+} ProfLayoutSimple;
+
+typedef struct prof_layout_split_t {
+    ProfLayout super;
+    WINDOW *subwin;
+    int sub_y_pos;
+    unsigned long memcheck;
+} ProfLayoutSplit;
+
 typedef enum {
     WIN_CONSOLE,
     WIN_CHAT,
@@ -68,52 +94,43 @@ typedef enum {
 
 typedef struct prof_win_t {
     win_type_t type;
-
-    WINDOW *win;
-    ProfBuff buffer;
+    ProfLayout *layout;
     char *from;
-    int y_pos;
-    int paged;
     int unread;
-    union {
-        // WIN_CONSOLE
-        struct {
-            WINDOW *subwin;
-            int sub_y_pos;
-        } cons;
-
-        // WIN_CHAT
-        struct {
-            gboolean is_otr;
-            gboolean is_trusted;
-            char *resource;
-            gboolean history_shown;
-        } chat;
-
-        // WIN_MUC
-        struct {
-            WINDOW *subwin;
-            int sub_y_pos;
-        } muc;
-
-        // WIN_MUC_CONFIG
-        struct {
-            DataForm *form;
-        } conf;
-
-        // WIN_PRIVATE
-        struct {
-        } priv;
-
-        // WIN_XML
-        struct {
-        } xml;
-
-        // WIN_PLUGIN
-        struct {
-        } plugin;
-    } wins;
 } ProfWin;
+
+typedef struct prof_console_win_t {
+    ProfWin super;
+} ProfConsoleWin;
+
+typedef struct prof_chat_win_t {
+    ProfWin super;
+    gboolean is_otr;
+    gboolean is_trusted;
+    char *resource;
+    gboolean history_shown;
+} ProfChatWin;
+
+typedef struct prof_muc_win_t {
+    ProfWin super;
+} ProfMucWin;
+
+typedef struct prof_mucconf_win_t {
+    ProfWin super;
+    DataForm *form;
+} ProfMucConfWin;
+
+typedef struct prof_private_win_t {
+    ProfWin super;
+} ProfPrivateWin;
+
+typedef struct prof_xml_win_t {
+    ProfWin super;
+} ProfXMLWin;
+
+typedef struct prof_plugin_win_t {
+    ProfWin super;
+} ProfPluginWin;
 
 ProfWin* win_create_console(void);
 ProfWin* win_create_chat(const char * const barejid);
@@ -148,5 +165,10 @@ int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
 gboolean win_is_otr(ProfWin *window);
 gboolean win_is_trusted(ProfWin *window);
+
+gboolean win_has_active_subwin(ProfWin *window);
+gboolean win_has_modified_form(ProfWin *window);
+gboolean win_chat_history_shown(ProfWin *window);
+gboolean win_has_chat_resource(ProfWin *window);
 
 #endif

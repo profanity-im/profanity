@@ -1154,9 +1154,10 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
         GString *send_jid = g_string_new(usr_jid);
         ProfWin *current = wins_get_current();
-        if (current->type == WIN_CHAT && current->wins.chat.resource) {
+        if (current->type == WIN_CHAT && win_has_chat_resource(current)) {
+            ProfChatWin *chatwin = (ProfChatWin *)current;
             g_string_append(send_jid, "/");
-            g_string_append(send_jid, current->wins.chat.resource);
+            g_string_append(send_jid, chatwin->resource);
         }
 
         if (msg != NULL) {
@@ -1415,12 +1416,12 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         } else if (g_strcmp0(args[1], "offline") == 0) {
             cons_show("Roster offline enabled");
             prefs_set_boolean(PREF_ROSTER_OFFLINE, TRUE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "resource") == 0) {
             cons_show("Roster resource enabled");
             prefs_set_boolean(PREF_ROSTER_RESOURCE, TRUE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1435,12 +1436,12 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         } else if (g_strcmp0(args[1], "offline") == 0) {
             cons_show("Roster offline disabled");
             prefs_set_boolean(PREF_ROSTER_OFFLINE, FALSE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "resource") == 0) {
             cons_show("Roster resource disabled");
             prefs_set_boolean(PREF_ROSTER_RESOURCE, FALSE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1451,17 +1452,17 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         if (g_strcmp0(args[1], "group") == 0) {
             cons_show("Grouping roster by roster group");
             prefs_set_string(PREF_ROSTER_BY, "group");
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "presence") == 0) {
             cons_show("Grouping roster by presence");
             prefs_set_string(PREF_ROSTER_BY, "presence");
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "none") == 0) {
             cons_show("Roster grouping disabled");
             prefs_set_string(PREF_ROSTER_BY, "none");
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1556,6 +1557,8 @@ cmd_resource(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    ProfChatWin *chatwin = (ProfChatWin*)current;
+
     char *cmd = args[0];
 
     if (g_strcmp0(cmd, "set") == 0) {
@@ -1585,11 +1588,11 @@ cmd_resource(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        current->wins.chat.resource = strdup(resource);
+        chatwin->resource = strdup(resource);
         return TRUE;
 
     } else if (g_strcmp0(cmd, "off") == 0) {
-        FREE_SET_NULL(current->wins.chat.resource);
+        FREE_SET_NULL(chatwin->resource);
         return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);
@@ -2000,7 +2003,8 @@ cmd_form_field(char *tag, gchar **args)
         return TRUE;
     }
 
-    DataForm *form = current->wins.conf.form;
+    ProfMucConfWin *confwin = (ProfMucConfWin*)current;
+    DataForm *form = confwin->form;
     if (form) {
         if (!form_tag_exists(form, tag)) {
             ui_current_print_line("Form does not contain a field with tag %s", tag);
@@ -2236,11 +2240,12 @@ cmd_form(gchar **args, struct cmd_help_t help)
 
     char *recipient = ui_current_recipient();
     ProfWin *current = wins_get_current();
+    ProfMucConfWin *confwin = (ProfMucConfWin*)current;
     gchar **split_recipient = g_strsplit(recipient, " ", 2);
     char *room = split_recipient[0];
 
     if (g_strcmp0(args[0], "show") == 0) {
-        ui_show_form(current, room, current->wins.conf.form);
+        ui_show_form(current, room, confwin->form);
         g_strfreev(split_recipient);
         return TRUE;
     }
@@ -2248,9 +2253,9 @@ cmd_form(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "help") == 0) {
         char *tag = args[1];
         if (tag != NULL) {
-            ui_show_form_field_help(current, current->wins.conf.form, tag);
+            ui_show_form_field_help(current, confwin->form, tag);
         } else {
-            ui_show_form_help(current, current->wins.conf.form);
+            ui_show_form_help(current, confwin->form);
 
             const gchar **help_text = NULL;
             Command *command = g_hash_table_lookup(commands, "/form");
@@ -2267,7 +2272,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "submit") == 0) {
-        iq_submit_room_config(room, current->wins.conf.form);
+        iq_submit_room_config(room, confwin->form);
 
     }
 
@@ -2276,8 +2281,8 @@ cmd_form(gchar **args, struct cmd_help_t help)
     }
 
     if ((g_strcmp0(args[0], "submit") == 0) || (g_strcmp0(args[0], "cancel") == 0)) {
-        if (current->wins.conf.form) {
-            cmd_autocomplete_remove_form_fields(current->wins.conf.form);
+        if (confwin->form) {
+            cmd_autocomplete_remove_form_fields(confwin->form);
         }
         wins_close_current();
         current = wins_get_by_recipient(room);
@@ -2945,9 +2950,10 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                 char *recipient = ui_current_recipient();
                 GString *send_recipient = g_string_new(recipient);
                 ProfWin *current = wins_get_current();
-                if (current && current->wins.chat.resource) {
+                ProfChatWin *chatwin = (ProfChatWin*)current;
+                if (current && win_has_chat_resource(current)) {
                     g_string_append(send_recipient, "/");
-                    g_string_append(send_recipient, current->wins.chat.resource);
+                    g_string_append(send_recipient, chatwin->resource);
                 }
 
 #ifdef PROF_HAVE_LIBOTR

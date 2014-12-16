@@ -237,7 +237,7 @@ void
 wins_clear_current(void)
 {
     ProfWin *window = wins_get_current();
-    werase(window->win);
+    werase(window->layout->win);
     win_update_virtual(window);
 }
 
@@ -346,30 +346,22 @@ wins_resize_all(void)
         ProfWin *window = curr->data;
         int subwin_cols = 0;
 
-        switch (window->type) {
-        case WIN_CONSOLE:
-            if (window->wins.cons.subwin) {
-                subwin_cols = win_roster_cols();
-                wresize(window->win, PAD_SIZE, cols - subwin_cols);
-                wresize(window->wins.cons.subwin, PAD_SIZE, subwin_cols);
-                ui_roster();
+        if (window->layout->type == LAYOUT_SPLIT) {
+            ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+            if (layout->subwin) {
+                if (window->type == WIN_CONSOLE) {
+                    subwin_cols = win_roster_cols();
+                } else if (window->type == WIN_MUC) {
+                    subwin_cols = win_occpuants_cols();
+                }
+                wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
+                wresize(layout->subwin, PAD_SIZE, subwin_cols);
+                rosterwin_roster();
             } else {
-                wresize(window->win, PAD_SIZE, cols);
+                wresize(layout->super.win, PAD_SIZE, cols);
             }
-            break;
-        case WIN_MUC:
-            if (window->wins.muc.subwin) {
-                subwin_cols = win_occpuants_cols();
-                wresize(window->win, PAD_SIZE, cols - subwin_cols);
-                wresize(window->wins.muc.subwin, PAD_SIZE, subwin_cols);
-                ui_muc_roster(window->from);
-            } else {
-                wresize(window->win, PAD_SIZE, cols);
-            }
-            break;
-        default:
-            wresize(window->win, PAD_SIZE, cols);
-            break;
+        } else {
+            wresize(window->layout->win, PAD_SIZE, cols);
         }
 
         win_redraw(window);
@@ -391,7 +383,7 @@ wins_hide_subwin(ProfWin *window)
 
     ProfWin *current_win = wins_get_current();
     if ((current_win->type == WIN_MUC) || (current_win->type == WIN_CONSOLE)) {
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, cols-1);
+        pnoutrefresh(current_win->layout->win, current_win->layout->y_pos, 0, 1, 0, rows-3, cols-1);
     }
 }
 
@@ -406,13 +398,15 @@ wins_show_subwin(ProfWin *window)
 
     ProfWin *current_win = wins_get_current();
     if (current_win->type == WIN_MUC) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
         subwin_cols = win_occpuants_cols();
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(current_win->wins.muc.subwin, current_win->wins.muc.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     } else if (current_win->type == WIN_CONSOLE) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
         subwin_cols = win_roster_cols();
-        pnoutrefresh(current_win->win, current_win->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-        pnoutrefresh(current_win->wins.cons.subwin, current_win->wins.cons.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+        pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     }
 }
 
@@ -710,7 +704,7 @@ wins_create_summary(void)
             case WIN_MUC_CONFIG:
                 muc_config_string = g_string_new("");
                 g_string_printf(muc_config_string, "%d: %s", ui_index, window->from);
-                if ((window->wins.conf.form) && (window->wins.conf.form->modified)) {
+                if (win_has_modified_form(window)) {
                     g_string_append(muc_config_string, " *");
                 }
                 result = g_slist_append(result, strdup(muc_config_string->str));

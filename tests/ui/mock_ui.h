@@ -10,7 +10,7 @@
 #include "ui/window.h"
 
 void stub_cons_show(void);
-void stub_ui_roster(void);
+void stub_rosterwin_roster(void);
 
 void mock_cons_show(void);
 void expect_cons_show(char *output);

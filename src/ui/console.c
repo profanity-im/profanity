@@ -189,7 +189,7 @@ _cons_about(void)
         cons_check_version(FALSE);
     }
 
-    pnoutrefresh(console->win, 0, 0, 1, 0, rows-3, cols-1);
+    pnoutrefresh(console->layout->win, 0, 0, 1, 0, rows-3, cols-1);
 
     cons_alert();
 }

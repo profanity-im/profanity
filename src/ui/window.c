@@ -76,204 +76,176 @@ win_occpuants_cols(void)
     return CEILING( (((double)cols) / 100) * occupants_win_percent);
 }
 
+static ProfLayout*
+_win_create_simple_layout(void)
+{
+    int cols = getmaxx(stdscr);
+
+    ProfLayoutSimple *layout = malloc(sizeof(ProfLayoutSimple));
+    layout->super.type = LAYOUT_SIMPLE;
+    layout->super.win = newpad(PAD_SIZE, cols);
+    wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
+    layout->super.buffer = buffer_create();
+    layout->super.y_pos = 0;
+    layout->super.paged = 0;
+    scrollok(layout->super.win, TRUE);
+
+    return &layout->super;
+}
+
+static ProfLayout*
+_win_create_split_layout(void)
+{
+    int cols = getmaxx(stdscr);
+
+    ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
+    layout->super.type = LAYOUT_SPLIT;
+    layout->super.win = newpad(PAD_SIZE, cols);
+    wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
+    layout->super.buffer = buffer_create();
+    layout->super.y_pos = 0;
+    layout->super.paged = 0;
+    scrollok(layout->super.win, TRUE);
+    layout->subwin = NULL;
+    layout->sub_y_pos = 0;
+    layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
+
+    return &layout->super;
+}
+
 ProfWin*
 win_create_console(void)
 {
-    ProfWin *new_win = malloc(sizeof(ProfWin));
-    int cols = getmaxx(stdscr);
+    ProfConsoleWin *new_win = malloc(sizeof(ProfConsoleWin));
+    new_win->super.type = WIN_CONSOLE;
+    new_win->super.layout = _win_create_split_layout();
+    new_win->super.from = strdup(CONS_WIN_TITLE);
+    new_win->super.unread = 0;
 
-    new_win->type = WIN_CONSOLE;
-
-    new_win->win = newpad(PAD_SIZE, (cols));
-    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-    new_win->wins.cons.subwin = NULL;
-    new_win->wins.cons.sub_y_pos = 0;
-
-    new_win->from = strdup(CONS_WIN_TITLE);
-    new_win->buffer = buffer_create();
-    new_win->y_pos = 0;
-    new_win->paged = 0;
-    new_win->unread = 0;
-
-    scrollok(new_win->win, TRUE);
-
-    return new_win;
+    return &new_win->super;
 }
 
 ProfWin*
 win_create_chat(const char * const barejid)
 {
-    ProfWin *new_win = malloc(sizeof(ProfWin));
-    int cols = getmaxx(stdscr);
+    ProfChatWin *new_win = malloc(sizeof(ProfChatWin));
+    new_win->super.type = WIN_CHAT;
+    new_win->super.layout = _win_create_simple_layout();
+    new_win->super.from = strdup(barejid);
+    new_win->super.unread = 0;
 
-    new_win->type = WIN_CHAT;
+    new_win->resource = NULL;
+    new_win->is_otr = FALSE;
+    new_win->is_trusted = FALSE;
+    new_win->history_shown = FALSE;
 
-    new_win->win = newpad(PAD_SIZE, (cols));
-    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-
-    new_win->from = strdup(barejid);
-    new_win->buffer = buffer_create();
-    new_win->y_pos = 0;
-    new_win->paged = 0;
-    new_win->unread = 0;
-
-    new_win->wins.chat.resource = NULL;
-    new_win->wins.chat.is_otr = FALSE;
-    new_win->wins.chat.is_trusted = FALSE;
-    new_win->wins.chat.history_shown = FALSE;
-
-    scrollok(new_win->win, TRUE);
-
-    return new_win;
+    return &new_win->super;
 }
 
 ProfWin*
 win_create_muc(const char * const roomjid)
 {
-    ProfWin *new_win = malloc(sizeof(ProfWin));
+    ProfMucWin *new_win = malloc(sizeof(ProfMucWin));
     int cols = getmaxx(stdscr);
 
-    new_win->type = WIN_MUC;
+    new_win->super.type = WIN_MUC;
+
+    ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
+    layout->super.type = LAYOUT_SPLIT;
 
     if (prefs_get_boolean(PREF_OCCUPANTS)) {
         int subwin_cols = win_occpuants_cols();
-        new_win->win = newpad(PAD_SIZE, cols - subwin_cols);
-        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-        new_win->wins.muc.subwin = newpad(PAD_SIZE, subwin_cols);;
-        wbkgd(new_win->wins.muc.subwin, theme_attrs(THEME_TEXT));
+        layout->super.win = newpad(PAD_SIZE, cols - subwin_cols);
+        wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
+        layout->subwin = newpad(PAD_SIZE, subwin_cols);;
+        wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
     } else {
-        new_win->win = newpad(PAD_SIZE, (cols));
-        wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-        new_win->wins.muc.subwin = NULL;
+        layout->super.win = newpad(PAD_SIZE, (cols));
+        wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
+        layout->subwin = NULL;
     }
-    new_win->wins.muc.sub_y_pos = 0;
+    layout->sub_y_pos = 0;
+    layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
+    layout->super.buffer = buffer_create();
+    layout->super.y_pos = 0;
+    layout->super.paged = 0;
+    scrollok(layout->super.win, TRUE);
+    new_win->super.layout = (ProfLayout*)layout;
 
-    new_win->from = strdup(roomjid);
-    new_win->buffer = buffer_create();
-    new_win->y_pos = 0;
-    new_win->paged = 0;
-    new_win->unread = 0;
+    new_win->super.from = strdup(roomjid);
+    new_win->super.unread = 0;
 
-    scrollok(new_win->win, TRUE);
-
-    return new_win;
+    return &new_win->super;
 }
 
 ProfWin*
 win_create_muc_config(const char * const title, DataForm *form)
 {
-    ProfWin *new_win = malloc(sizeof(ProfWin));
-    int cols = getmaxx(stdscr);
+    ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
+    new_win->super.type = WIN_MUC_CONFIG;
+    new_win->super.layout = _win_create_simple_layout();
+    new_win->super.from = strdup(title);
+    new_win->super.unread = 0;
 
-    new_win->type = WIN_MUC_CONFIG;
+    new_win->form = form;
 
-    new_win->win = newpad(PAD_SIZE, (cols));
-    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-
-    new_win->wins.conf.form = form;
-
-    new_win->from = strdup(title);
-    new_win->buffer = buffer_create();
-    new_win->y_pos = 0;
-    new_win->paged = 0;
-    new_win->unread = 0;
-
-    scrollok(new_win->win, TRUE);
-
-    return new_win;
+    return &new_win->super;
 }
 
 ProfWin*
 win_create_private(const char * const fulljid)
 {
-    ProfWin *new_win = malloc(sizeof(ProfWin));
-    int cols = getmaxx(stdscr);
+    ProfPrivateWin *new_win = malloc(sizeof(ProfPrivateWin));
+    new_win->super.type = WIN_PRIVATE;
+    new_win->super.layout = _win_create_simple_layout();
+    new_win->super.from = strdup(fulljid);
+    new_win->super.unread = 0;
 
-    new_win->type = WIN_PRIVATE;
-
-    new_win->win = newpad(PAD_SIZE, (cols));
-    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-
-    new_win->from = strdup(fulljid);
-    new_win->buffer = buffer_create();
-    new_win->y_pos = 0;
-    new_win->paged = 0;
-    new_win->unread = 0;
-
-    scrollok(new_win->win, TRUE);
-
-    return new_win;
+    return &new_win->super;
 }
 
 ProfWin*
 win_create_xmlconsole(void)
 {
-    ProfWin *new_win = malloc(sizeof(ProfWin));
-    int cols = getmaxx(stdscr);
+    ProfXMLWin *new_win = malloc(sizeof(ProfXMLWin));
+    new_win->super.type = WIN_XML;
+    new_win->super.layout = _win_create_simple_layout();
+    new_win->super.from = strdup(XML_WIN_TITLE);
+    new_win->super.unread = 0;
 
-    new_win->type = WIN_XML;
-
-    new_win->win = newpad(PAD_SIZE, (cols));
-    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-
-    new_win->from = strdup(XML_WIN_TITLE);
-    new_win->buffer = buffer_create();
-    new_win->y_pos = 0;
-    new_win->paged = 0;
-    new_win->unread = 0;
-
-    scrollok(new_win->win, TRUE);
-
-    return new_win;
+    return &new_win->super;
 }
 
 ProfWin*
 win_create_plugin(const char * const tag)
 {
-    ProfWin *new_win = malloc(sizeof(ProfWin));
-    int cols = getmaxx(stdscr);
+    ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
+    new_win->super.type = WIN_PLUGIN;
+    new_win->super.layout = _win_create_simple_layout();
+    new_win->super.from = strdup(tag);
+    new_win->super.unread = 0;
 
-    new_win->type = WIN_PLUGIN;
-
-    new_win->win = newpad(PAD_SIZE, (cols));
-    wbkgd(new_win->win, theme_attrs(THEME_TEXT));
-
-    new_win->from = strdup(tag);
-    new_win->buffer = buffer_create();
-    new_win->y_pos = 0;
-    new_win->paged = 0;
-    new_win->unread = 0;
-
-    scrollok(new_win->win, TRUE);
-
-    return new_win;
+    return &new_win->super;
 }
 
 void
 win_hide_subwin(ProfWin *window)
 {
-    switch (window->type) {
-    case WIN_CONSOLE:
-        if (window->wins.cons.subwin) {
-            delwin(window->wins.cons.subwin);
+    if (window->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        if (layout->subwin) {
+            delwin(layout->subwin);
         }
-        window->wins.cons.subwin = NULL;
-        window->wins.cons.sub_y_pos = 0;
-        break;
-    case WIN_MUC:
-        if (window->wins.muc.subwin) {
-            delwin(window->wins.muc.subwin);
-        }
-        window->wins.muc.subwin = NULL;
-        window->wins.muc.sub_y_pos = 0;
-        break;
-    default:
-        break;
+        layout->subwin = NULL;
+        layout->sub_y_pos = 0;
+        int cols = getmaxx(stdscr);
+        wresize(layout->super.win, PAD_SIZE, cols);
+        win_redraw(window);
+    } else {
+        int cols = getmaxx(stdscr);
+        wresize(window->layout->win, PAD_SIZE, cols);
+        win_redraw(window);
     }
-
-    int cols = getmaxx(stdscr);
-    wresize(window->win, PAD_SIZE, cols);
-    win_redraw(window);
 }
 
 void
@@ -282,30 +254,21 @@ win_show_subwin(ProfWin *window)
     int cols = getmaxx(stdscr);
     int subwin_cols = 0;
 
-    switch (window->type) {
-    case WIN_CONSOLE:
+    if (window->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
         subwin_cols = win_roster_cols();
-        window->wins.cons.subwin = newpad(PAD_SIZE, subwin_cols);
-        wbkgd(window->wins.cons.subwin, theme_attrs(THEME_TEXT));
-        wresize(window->win, PAD_SIZE, cols - subwin_cols);
+        layout->subwin = newpad(PAD_SIZE, subwin_cols);
+        wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
+        wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
         win_redraw(window);
-        break;
-    case WIN_MUC:
-        subwin_cols = win_occpuants_cols();
-        window->wins.muc.subwin = newpad(PAD_SIZE, subwin_cols);
-        wbkgd(window->wins.muc.subwin, theme_attrs(THEME_TEXT));
-        wresize(window->win, PAD_SIZE, cols - subwin_cols);
-        win_redraw(window);
-        break;
-    default:
-        break;
     }
 }
 
 gboolean win_is_otr(ProfWin *window)
 {
     if (window->type == WIN_CHAT) {
-        return window->wins.chat.is_otr;
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        return chatwin->is_otr;
     } else {
         return FALSE;
     }
@@ -314,7 +277,8 @@ gboolean win_is_otr(ProfWin *window)
 gboolean win_is_trusted(ProfWin *window)
 {
     if (window->type == WIN_CHAT) {
-        return window->wins.chat.is_trusted;
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        return chatwin->is_trusted;
     } else {
         return FALSE;
     }
@@ -323,32 +287,28 @@ gboolean win_is_trusted(ProfWin *window)
 void
 win_free(ProfWin* window)
 {
-    buffer_free(window->buffer);
-    delwin(window->win);
-
-    switch (window->type) {
-    case WIN_CONSOLE:
-        if (window->wins.cons.subwin) {
-            delwin(window->wins.cons.subwin);
+    if (window->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        if (layout->subwin) {
+            delwin(layout->subwin);
         }
-        break;
-    case WIN_MUC:
-        if (window->wins.muc.subwin) {
-            delwin(window->wins.muc.subwin);
-        }
-        break;
-    default:
-        break;
+        buffer_free(layout->super.buffer);
+        delwin(layout->super.win);
+    } else {
+        buffer_free(window->layout->buffer);
+        delwin(window->layout->win);
     }
 
     if (window->type == WIN_CHAT) {
-        free(window->wins.chat.resource);
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        free(chatwin->resource);
     }
 
     free(window->from);
 
     if (window->type == WIN_MUC_CONFIG) {
-        form_destroy(window->wins.conf.form);
+        ProfMucConfWin *mucconf = (ProfMucConfWin*)window;
+        form_destroy(mucconf->form);
     }
 
     free(window);
@@ -361,43 +321,36 @@ win_update_virtual(ProfWin *window)
     getmaxyx(stdscr, rows, cols);
     int subwin_cols = 0;
 
-    switch (window->type) {
-    case WIN_CONSOLE:
-        if (window->wins.cons.subwin) {
-            subwin_cols = win_roster_cols();
-            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-            pnoutrefresh(window->wins.cons.subwin, window->wins.cons.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
+    if (window->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        if (layout->subwin) {
+            if (window->type == WIN_MUC) {
+                subwin_cols = win_occpuants_cols();
+            } else {
+                subwin_cols = win_roster_cols();
+            }
+            pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
         } else {
-            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
+            pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, cols-1);
         }
-        break;
-    case WIN_MUC:
-        if (window->wins.muc.subwin) {
-            subwin_cols = win_occpuants_cols();
-            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
-            pnoutrefresh(window->wins.muc.subwin, window->wins.muc.sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
-        } else {
-            pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
-        }
-        break;
-    default:
-        pnoutrefresh(window->win, window->y_pos, 0, 1, 0, rows-3, cols-1);
-        break;
+    } else {
+        pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);
     }
 }
 
 void
 win_move_to_end(ProfWin *window)
 {
-    window->paged = 0;
+    window->layout->paged = 0;
 
     int rows = getmaxy(stdscr);
-    int y = getcury(window->win);
+    int y = getcury(window->layout->win);
     int size = rows - 3;
 
-    window->y_pos = y - (size - 1);
-    if (window->y_pos < 0) {
-        window->y_pos = 0;
+    window->layout->y_pos = y - (size - 1);
+    if (window->layout->y_pos < 0) {
+        window->layout->y_pos = 0;
     }
 }
 
@@ -742,7 +695,7 @@ win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
         time = g_date_time_new_from_timeval_utc(tstamp);
     }
 
-    buffer_push(window->buffer, show_char, time, flags, theme_item, from, message);
+    buffer_push(window->layout->buffer, show_char, time, flags, theme_item, from, message);
     _win_print(window, show_char, time, flags, theme_item, from, message);
 }
 
@@ -783,11 +736,11 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
 
         if (date_fmt) {
             if ((flags & NO_COLOUR_DATE) == 0) {
-                wattron(window->win, theme_attrs(THEME_TIME));
+                wattron(window->layout->win, theme_attrs(THEME_TIME));
             }
-            wprintw(window->win, "%s %c ", date_fmt, show_char);
+            wprintw(window->layout->win, "%s %c ", date_fmt, show_char);
             if ((flags & NO_COLOUR_DATE) == 0) {
-                wattroff(window->win, theme_attrs(THEME_TIME));
+                wattroff(window->layout->win, theme_attrs(THEME_TIME));
             }
         }
         g_free(date_fmt);
@@ -802,35 +755,35 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
             colour = 0;
         }
 
-        wattron(window->win, colour);
+        wattron(window->layout->win, colour);
         if (strncmp(message, "/me ", 4) == 0) {
-            wprintw(window->win, "*%s ", from);
+            wprintw(window->layout->win, "*%s ", from);
             offset = 4;
             me_message = TRUE;
         } else {
-            wprintw(window->win, "%s: ", from);
-            wattroff(window->win, colour);
+            wprintw(window->layout->win, "%s: ", from);
+            wattroff(window->layout->win, colour);
         }
     }
 
     if (!me_message) {
-        wattron(window->win, theme_attrs(theme_item));
+        wattron(window->layout->win, theme_attrs(theme_item));
     }
 
     if (prefs_get_boolean(PREF_WRAP)) {
-        _win_print_wrapped(window->win, message+offset);
+        _win_print_wrapped(window->layout->win, message+offset);
     } else {
-        wprintw(window->win, "%s", message+offset);
+        wprintw(window->layout->win, "%s", message+offset);
     }
 
     if ((flags & NO_EOL) == 0) {
-        wprintw(window->win, "\n");
+        wprintw(window->layout->win, "\n");
     }
 
     if (me_message) {
-        wattroff(window->win, colour);
+        wattroff(window->layout->win, colour);
     } else {
-        wattroff(window->win, theme_attrs(theme_item));
+        wattroff(window->layout->win, theme_attrs(theme_item));
     }
 }
 
@@ -907,12 +860,56 @@ void
 win_redraw(ProfWin *window)
 {
     int i, size;
-    werase(window->win);
-    size = buffer_size(window->buffer);
+    werase(window->layout->win);
+    size = buffer_size(window->layout->buffer);
 
     for (i = 0; i < size; i++) {
-        ProfBuffEntry *e = buffer_yield_entry(window->buffer, i);
+        ProfBuffEntry *e = buffer_yield_entry(window->layout->buffer, i);
         _win_print(window, e->show_char, e->time, e->flags, e->theme_item, e->from, e->message);
+    }
+}
+
+gboolean
+win_has_active_subwin(ProfWin *window)
+{
+    if (window->layout->type == LAYOUT_SPLIT) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+        return (layout->subwin != NULL);
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+win_chat_history_shown(ProfWin *window)
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        return chatwin->history_shown;
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+win_has_chat_resource(ProfWin *window)
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        return (chatwin->resource != NULL);
+    } else {
+        return FALSE;
+    }
+}
+
+gboolean
+win_has_modified_form(ProfWin *window)
+{
+    if (window->type == WIN_MUC_CONFIG) {
+        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+        return confwin->form->modified;
+    } else {
+        return FALSE;
     }
 }
 
