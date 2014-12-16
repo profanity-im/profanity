@@ -464,7 +464,7 @@ handle_contact_offline(char *barejid, char *resource, char *status)
         jid_destroy(jid);
     }
 
-    ui_roster();
+    rosterwin_roster();
 }
 
 void
@@ -506,7 +506,7 @@ handle_contact_online(char *barejid, Resource *resource,
         prefs_free_string(show_chat_win);
     }
 
-    ui_roster();
+    rosterwin_roster();
 }
 
 void
@@ -638,7 +638,7 @@ handle_roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out)
 {
     roster_update(barejid, name, groups, subscription, pending_out);
-    ui_roster();
+    rosterwin_roster();
 }
 
 void

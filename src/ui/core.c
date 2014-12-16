@@ -69,7 +69,6 @@
 #include "ui/inputwin.h"
 #include "ui/window.h"
 #include "ui/windows.h"
-#include "ui/rosterwin.h"
 #include "xmpp/xmpp.h"
 
 static char *win_title;
@@ -466,42 +465,42 @@ _ui_roster_add(const char * const barejid, const char * const name)
     } else {
         cons_show("Roster item added: %s", barejid);
     }
-    ui_roster();
+    rosterwin_roster();
 }
 
 static void
 _ui_roster_remove(const char * const barejid)
 {
     cons_show("Roster item removed: %s", barejid);
-    ui_roster();
+    rosterwin_roster();
 }
 
 static void
 _ui_contact_already_in_group(const char * const contact, const char * const group)
 {
     cons_show("%s already in group %s", contact, group);
-    ui_roster();
+    rosterwin_roster();
 }
 
 static void
 _ui_contact_not_in_group(const char * const contact, const char * const group)
 {
     cons_show("%s is not currently in group %s", contact, group);
-    ui_roster();
+    rosterwin_roster();
 }
 
 static void
 _ui_group_added(const char * const contact, const char * const group)
 {
     cons_show("%s added to group %s", contact, group);
-    ui_roster();
+    rosterwin_roster();
 }
 
 static void
 _ui_group_removed(const char * const contact, const char * const group)
 {
     cons_show("%s removed from group %s", contact, group);
-    ui_roster();
+    rosterwin_roster();
 }
 
 static void
@@ -2939,119 +2938,6 @@ _ui_show_lines(ProfWin *window, const gchar** lines)
 }
 
 static void
-_ui_roster_contacts_by_presence(const char * const presence, char *title)
-{
-    ProfWin *window = wins_get_console();
-    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-
-    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-    win_printline_nowrap(layout->subwin, title);
-    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-    GSList *contacts = roster_get_contacts_by_presence(presence);
-    if (contacts) {
-        GSList *curr_contact = contacts;
-        while (curr_contact) {
-            PContact contact = curr_contact->data;
-            rosterwin_contact(contact);
-            curr_contact = g_slist_next(curr_contact);
-        }
-    }
-    g_slist_free(contacts);
-}
-
-static void
-_ui_roster_contacts_by_group(char *group)
-{
-    ProfWin *window = wins_get_console();
-    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-
-    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-    GString *title = g_string_new(" -");
-    g_string_append(title, group);
-    win_printline_nowrap(layout->subwin, title->str);
-    g_string_free(title, TRUE);
-    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-    GSList *contacts = roster_get_group(group);
-    if (contacts) {
-        GSList *curr_contact = contacts;
-        while (curr_contact) {
-            PContact contact = curr_contact->data;
-            rosterwin_contact(contact);
-            curr_contact = g_slist_next(curr_contact);
-        }
-    }
-    g_slist_free(contacts);
-}
-
-static void
-_ui_roster_contacts_by_no_group(void)
-{
-    ProfWin *window = wins_get_console();
-    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-
-    GSList *contacts = roster_get_nogroup();
-    if (contacts) {
-        wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        win_printline_nowrap(layout->subwin, " -no group");
-        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-        GSList *curr_contact = contacts;
-        while (curr_contact) {
-            PContact contact = curr_contact->data;
-            rosterwin_contact(contact);
-            curr_contact = g_slist_next(curr_contact);
-        }
-    }
-    g_slist_free(contacts);
-}
-
-static void
-_ui_roster(void)
-{
-    ProfWin *window = wins_get_console();
-    if (window) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-        char *by = prefs_get_string(PREF_ROSTER_BY);
-        if (g_strcmp0(by, "presence") == 0) {
-            werase(layout->subwin);
-            _ui_roster_contacts_by_presence("chat", " -Available for chat");
-            _ui_roster_contacts_by_presence("online", " -Online");
-            _ui_roster_contacts_by_presence("away", " -Away");
-            _ui_roster_contacts_by_presence("xa", " -Extended Away");
-            _ui_roster_contacts_by_presence("dnd", " -Do not disturb");
-            if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
-                _ui_roster_contacts_by_presence("offline", " -Offline");
-            }
-        } else if (g_strcmp0(by, "group") == 0) {
-            werase(layout->subwin);
-            GSList *groups = roster_get_groups();
-            GSList *curr_group = groups;
-            while (curr_group) {
-                _ui_roster_contacts_by_group(curr_group->data);
-                curr_group = g_slist_next(curr_group);
-            }
-            g_slist_free_full(groups, free);
-            _ui_roster_contacts_by_no_group();
-        } else {
-            GSList *contacts = roster_get_contacts();
-            if (contacts) {
-                werase(layout->subwin);
-                wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-                win_printline_nowrap(layout->subwin, " -Roster");
-                wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
-                GSList *curr_contact = contacts;
-                while (curr_contact) {
-                    PContact contact = curr_contact->data;
-                    rosterwin_contact(contact);
-                    curr_contact = g_slist_next(curr_contact);
-                }
-            }
-            g_slist_free(contacts);
-        }
-        free(by);
-    }
-}
-
-static void
 _ui_muc_roster(const char * const room)
 {
     ProfWin *window = wins_get_by_recipient(room);
@@ -3175,7 +3061,7 @@ _ui_show_roster(void)
     ProfWin *window = wins_get_console();
     if (window && !win_has_active_subwin(window)) {
         wins_show_subwin(window);
-        ui_roster();
+        rosterwin_roster();
     }
 }
 
@@ -3498,7 +3384,6 @@ ui_init_module(void)
     ui_handle_room_role_list_error = _ui_handle_room_role_list_error;
     ui_handle_room_role_list = _ui_handle_room_role_list;
     ui_muc_roster = _ui_muc_roster;
-    ui_roster = _ui_roster;
     ui_room_show_occupants = _ui_room_show_occupants;
     ui_room_hide_occupants = _ui_room_hide_occupants;
     ui_show_roster = _ui_show_roster;

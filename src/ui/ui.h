@@ -55,6 +55,7 @@
 
 void ui_init_module(void);
 void console_init_module(void);
+void rosterwin_init_module(void);
 void notifier_init_module(void);
 
 // ui startup and control
@@ -248,7 +249,6 @@ void (*ui_open_xmlconsole_win)(void);
 gboolean (*ui_win_has_unsaved_form)(int num);
 
 void (*ui_muc_roster)(const char * const room);
-void (*ui_roster)(void);
 
 // console window actions
 void (*cons_show)(const char * const msg, ...);
@@ -327,6 +327,9 @@ void (*cons_autoconnect_setting)(void);
 void (*cons_show_contact_online)(PContact contact, Resource *resource, GDateTime *last_activity);
 void (*cons_show_contact_offline)(PContact contact, char *resource, char *status);
 void (*cons_theme_colours)(void);
+
+// roster window
+void (*rosterwin_roster)(void);
 
 // desktop notifier actions
 void (*notifier_uninit)(void);

@@ -33,17 +33,20 @@
  */
 
 #include <assert.h>
+#include <stdlib.h>
 
 #include "contact.h"
+#include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "config/preferences.h"
+#include "roster_list.h"
 
-void
-rosterwin_contact(PContact contact)
+static void
+_rosterwin_contact(PContact contact)
 {
     if (p_contact_subscribed(contact)) {
-        ProfWin *window = wins_get_console();
+        ProfWin *console = wins_get_console();
         const char *name = p_contact_name_or_jid(contact);
         const char *presence = p_contact_presence(contact);
 
@@ -51,7 +54,7 @@ rosterwin_contact(PContact contact)
                 (prefs_get_boolean(PREF_ROSTER_OFFLINE)))) {
             theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
-            ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+            ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
             assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
             wattron(layout->subwin, theme_attrs(presence_colour));
@@ -85,4 +88,128 @@ rosterwin_contact(PContact contact)
             }
         }
     }
+}
+
+static void
+_rosterwin_contacts_by_presence(const char * const presence, char *title)
+{
+    ProfWin *window = wins_get_console();
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+    assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+
+    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    win_printline_nowrap(layout->subwin, title);
+    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    GSList *contacts = roster_get_contacts_by_presence(presence);
+    if (contacts) {
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _rosterwin_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_rosterwin_contacts_by_group(char *group)
+{
+    ProfWin *console = wins_get_console();
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
+    assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+
+    wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    GString *title = g_string_new(" -");
+    g_string_append(title, group);
+    win_printline_nowrap(layout->subwin, title->str);
+    g_string_free(title, TRUE);
+    wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+    GSList *contacts = roster_get_group(group);
+    if (contacts) {
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _rosterwin_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_rosterwin_contacts_by_no_group(void)
+{
+    ProfWin *console = wins_get_console();
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
+    assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+
+    GSList *contacts = roster_get_nogroup();
+    if (contacts) {
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        win_printline_nowrap(layout->subwin, " -no group");
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+        GSList *curr_contact = contacts;
+        while (curr_contact) {
+            PContact contact = curr_contact->data;
+            _rosterwin_contact(contact);
+            curr_contact = g_slist_next(curr_contact);
+        }
+    }
+    g_slist_free(contacts);
+}
+
+static void
+_rosterwin_roster(void)
+{
+    ProfWin *console = wins_get_console();
+    if (console) {
+        ProfLayoutSplit *layout = (ProfLayoutSplit*)console->layout;
+        assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+
+       char *by = prefs_get_string(PREF_ROSTER_BY);
+        if (g_strcmp0(by, "presence") == 0) {
+            werase(layout->subwin);
+            _rosterwin_contacts_by_presence("chat", " -Available for chat");
+            _rosterwin_contacts_by_presence("online", " -Online");
+            _rosterwin_contacts_by_presence("away", " -Away");
+            _rosterwin_contacts_by_presence("xa", " -Extended Away");
+            _rosterwin_contacts_by_presence("dnd", " -Do not disturb");
+            if (prefs_get_boolean(PREF_ROSTER_OFFLINE)) {
+                _rosterwin_contacts_by_presence("offline", " -Offline");
+            }
+        } else if (g_strcmp0(by, "group") == 0) {
+            werase(layout->subwin);
+            GSList *groups = roster_get_groups();
+            GSList *curr_group = groups;
+            while (curr_group) {
+                _rosterwin_contacts_by_group(curr_group->data);
+                curr_group = g_slist_next(curr_group);
+            }
+            g_slist_free_full(groups, free);
+            _rosterwin_contacts_by_no_group();
+        } else {
+            GSList *contacts = roster_get_contacts();
+            if (contacts) {
+                werase(layout->subwin);
+                wattron(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+                win_printline_nowrap(layout->subwin, " -Roster");
+                wattroff(layout->subwin, theme_attrs(THEME_ROSTER_HEADER));
+                GSList *curr_contact = contacts;
+                while (curr_contact) {
+                    PContact contact = curr_contact->data;
+                    _rosterwin_contact(contact);
+                    curr_contact = g_slist_next(curr_contact);
+                }
+            }
+            g_slist_free(contacts);
+        }
+        free(by);
+    }
+}
+
+void
+rosterwin_init_module(void)
+{
+    rosterwin_roster = _rosterwin_roster;
 }

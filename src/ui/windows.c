@@ -345,7 +345,7 @@ wins_resize_all(void)
                 }
                 wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
                 wresize(layout->subwin, PAD_SIZE, subwin_cols);
-                ui_roster();
+                rosterwin_roster();
             } else {
                 wresize(layout->super.win, PAD_SIZE, cols);
             }

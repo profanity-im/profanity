@@ -29,7 +29,7 @@ void _stub_cons_show(const char * const msg, ...)
 }
 
 static
-void _stub_ui_roster(void)
+void _stub_rosterwin_roster(void)
 {
 }
 
@@ -206,9 +206,9 @@ stub_ui_chat_win_contact_online(void)
 }
 
 void
-stub_ui_roster(void)
+stub_rosterwin_roster(void)
 {
-    ui_roster = _stub_ui_roster;
+    rosterwin_roster = _stub_rosterwin_roster;
 }
 
 void

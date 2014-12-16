@@ -1405,12 +1405,12 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         } else if (g_strcmp0(args[1], "offline") == 0) {
             cons_show("Roster offline enabled");
             prefs_set_boolean(PREF_ROSTER_OFFLINE, TRUE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "resource") == 0) {
             cons_show("Roster resource enabled");
             prefs_set_boolean(PREF_ROSTER_RESOURCE, TRUE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1425,12 +1425,12 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         } else if (g_strcmp0(args[1], "offline") == 0) {
             cons_show("Roster offline disabled");
             prefs_set_boolean(PREF_ROSTER_OFFLINE, FALSE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "resource") == 0) {
             cons_show("Roster resource disabled");
             prefs_set_boolean(PREF_ROSTER_RESOURCE, FALSE);
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -1441,17 +1441,17 @@ cmd_roster(gchar **args, struct cmd_help_t help)
         if (g_strcmp0(args[1], "group") == 0) {
             cons_show("Grouping roster by roster group");
             prefs_set_string(PREF_ROSTER_BY, "group");
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "presence") == 0) {
             cons_show("Grouping roster by presence");
             prefs_set_string(PREF_ROSTER_BY, "presence");
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else if (g_strcmp0(args[1], "none") == 0) {
             cons_show("Roster grouping disabled");
             prefs_set_string(PREF_ROSTER_BY, "none");
-            ui_roster();
+            rosterwin_roster();
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
