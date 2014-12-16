@@ -56,6 +56,7 @@
 void ui_init_module(void);
 void console_init_module(void);
 void rosterwin_init_module(void);
+void occupantswin_init_module(void);
 void notifier_init_module(void);
 
 // ui startup and control
@@ -248,8 +249,6 @@ void (*ui_open_xmlconsole_win)(void);
 
 gboolean (*ui_win_has_unsaved_form)(int num);
 
-void (*ui_muc_roster)(const char * const room);
-
 // console window actions
 void (*cons_show)(const char * const msg, ...);
 void (*cons_about)(void);
@@ -334,6 +333,9 @@ void (*ui_status_bar_new)(const int win);
 
 // roster window
 void (*rosterwin_roster)(void);
+
+// occupants window
+void (*occupantswin_occupants)(const char * const room);
 
 // desktop notifier actions
 void (*notifier_uninit)(void);

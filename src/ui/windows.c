@@ -183,6 +183,25 @@ wins_get_by_recipient(const char * const recipient)
     return NULL;
 }
 
+ProfMucWin *
+wins_get_muc_win(const char * const roomjid)
+{
+    GList *values = g_hash_table_get_values(windows);
+    GList *curr = values;
+
+    while (curr != NULL) {
+        ProfWin *window = curr->data;
+        if ((g_strcmp0(window->from, roomjid) == 0) && window->type == WIN_MUC) {
+            g_list_free(values);
+            return (ProfMucWin*)window;
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    return NULL;
+}
+
 int
 wins_get_num(ProfWin *window)
 {
