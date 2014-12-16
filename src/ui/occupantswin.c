@@ -40,6 +40,21 @@
 #include "config/preferences.h"
 
 static void
+_occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant)
+{
+    const char *presence_str = string_from_resource_presence(occupant->presence);
+    theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
+    wattron(layout->subwin, theme_attrs(presence_colour));
+
+    GString *msg = g_string_new("   ");
+    g_string_append(msg, occupant->nick);
+    win_printline_nowrap(layout->subwin, msg->str);
+    g_string_free(msg, TRUE);
+
+    wattroff(layout->subwin, theme_attrs(presence_colour));
+}
+
+static void
 _occupantswin_occupants(const char * const roomjid)
 {
     ProfMucWin *mucwin = wins_get_muc_win(roomjid);
@@ -59,16 +74,7 @@ _occupantswin_occupants(const char * const roomjid)
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
-                        const char *presence_str = string_from_resource_presence(occupant->presence);
-                        theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                        wattron(layout->subwin, theme_attrs(presence_colour));
-
-                        GString *msg = g_string_new("   ");
-                        g_string_append(msg, occupant->nick);
-                        win_printline_nowrap(layout->subwin, msg->str);
-                        g_string_free(msg, TRUE);
-
-                        wattroff(layout->subwin, theme_attrs(presence_colour));
+                        _occuptantswin_occupant(layout, occupant);
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
@@ -80,16 +86,7 @@ _occupantswin_occupants(const char * const roomjid)
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
-                        const char *presence_str = string_from_resource_presence(occupant->presence);
-                        theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                        wattron(layout->subwin, theme_attrs(presence_colour));
-
-                        GString *msg = g_string_new("   ");
-                        g_string_append(msg, occupant->nick);
-                        win_printline_nowrap(layout->subwin, msg->str);
-                        g_string_free(msg, TRUE);
-
-                        wattroff(layout->subwin, theme_attrs(presence_colour));
+                        _occuptantswin_occupant(layout, occupant);
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
@@ -101,16 +98,7 @@ _occupantswin_occupants(const char * const roomjid)
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
-                        const char *presence_str = string_from_resource_presence(occupant->presence);
-                        theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                        wattron(layout->subwin, theme_attrs(presence_colour));
-
-                        GString *msg = g_string_new("   ");
-                        g_string_append(msg, occupant->nick);
-                        win_printline_nowrap(layout->subwin, msg->str);
-                        g_string_free(msg, TRUE);
-
-                        wattroff(layout->subwin, theme_attrs(presence_colour));
+                        _occuptantswin_occupant(layout, occupant);
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
@@ -121,16 +109,7 @@ _occupantswin_occupants(const char * const roomjid)
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
-                    const char *presence_str = string_from_resource_presence(occupant->presence);
-                    theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
-                    wattron(layout->subwin, theme_attrs(presence_colour));
-
-                    GString *msg = g_string_new("   ");
-                    g_string_append(msg, occupant->nick);
-                    win_printline_nowrap(layout->subwin, msg->str);
-                    g_string_free(msg, TRUE);
-
-                    wattroff(layout->subwin, theme_attrs(presence_colour));
+                    _occuptantswin_occupant(layout, occupant);
                     roster_curr = g_list_next(roster_curr);
                 }
             }
