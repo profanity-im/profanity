@@ -336,9 +336,13 @@ wins_resize_all(void)
         int subwin_cols = 0;
 
         if (window->layout->type == LAYOUT_SPLIT) {
-            ProfLayoutSplit *layout = (ProfLayoutSplit*)window;
+            ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
             if (layout->subwin) {
-                subwin_cols = win_roster_cols();
+                if (window->type == WIN_CONSOLE) {
+                    subwin_cols = win_roster_cols();
+                } else if (window->type == WIN_MUC) {
+                    subwin_cols = win_occpuants_cols();
+                }
                 wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
                 wresize(layout->subwin, PAD_SIZE, subwin_cols);
                 ui_roster();
