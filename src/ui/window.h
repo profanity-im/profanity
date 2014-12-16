@@ -57,7 +57,7 @@
 #define PAD_SIZE 1000
 
 typedef enum {
-    LAYOUT_SINGLE,
+    LAYOUT_SIMPLE,
     LAYOUT_SPLIT
 } layout_type_t;
 
@@ -69,9 +69,9 @@ typedef struct prof_layout_t {
     int paged;
 } ProfLayout;
 
-typedef struct prof_layout_single_t {
+typedef struct prof_layout_simple_t {
     ProfLayout super;
-} ProfLayoutSingle;
+} ProfLayoutSimple;
 
 typedef struct prof_layout_split_t {
     ProfLayout super;
