@@ -61,6 +61,7 @@
 #include "resource.h"
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 
 static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
@@ -173,12 +174,12 @@ prof_handle_activity(void)
     jabber_conn_status_t status = jabber_get_connection_status();
 
     if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
-        char *recipient = ui_current_recipient();
-        if (chat_session_get_recipient_supports(recipient)) {
-            chat_session_set_composing(recipient);
-            if (!chat_session_get_sent(recipient) ||
-                    chat_session_is_paused(recipient)) {
-                message_send_composing(recipient);
+        ProfChatWin *chatwin = wins_get_current_chat();
+        if (chat_session_get_recipient_supports(chatwin->barejid)) {
+            chat_session_set_composing(chatwin->barejid);
+            if (!chat_session_get_sent(chatwin->barejid) ||
+                    chat_session_is_paused(chatwin->barejid)) {
+                message_send_composing(chatwin->barejid);
             }
         }
     }

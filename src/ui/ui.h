@@ -103,7 +103,7 @@ win_type_t (*ui_current_win_type)(void);
 int (*ui_current_win_index)(void);
 gboolean (*ui_current_win_is_otr)(void);
 void (*ui_current_set_otr)(gboolean value);
-char* (*ui_current_recipient)(void);
+
 void (*ui_current_print_line)(const char * const msg, ...);
 void (*ui_current_print_formatted_line)(const char show_char, int attrs, const char * const msg, ...);
 void (*ui_current_error_line)(const char * const msg);
@@ -112,7 +112,6 @@ void (*ui_otr_authenticating)(const char * const recipient);
 void (*ui_otr_authetication_waiting)(const char * const recipient);
 
 win_type_t (*ui_win_type)(int index);
-char * (*ui_recipient)(int index);
 void (*ui_close_win)(int index);
 gboolean (*ui_win_exists)(int index);
 int (*ui_win_unread)(int index);
@@ -151,9 +150,9 @@ void (*ui_room_message)(const char * const room_jid, const char * const nick,
 void (*ui_room_subject)(const char * const room, const char * const nick, const char * const subject);
 void (*ui_room_requires_config)(const char * const room_jid);
 void (*ui_room_destroy)(const char * const room_jid);
-void (*ui_show_room_info)(ProfWin *window, const char * const room);
-void (*ui_show_room_role_list)(ProfWin *window, const char * const room, muc_role_t role);
-void (*ui_show_room_affiliation_list)(ProfWin *window, const char * const room, muc_affiliation_t affiliation);
+void (*ui_show_room_info)(ProfMucWin *mucwin);
+void (*ui_show_room_role_list)(ProfMucWin *mucwin, muc_role_t role);
+void (*ui_show_room_affiliation_list)(ProfMucWin *mucwin, muc_affiliation_t affiliation);
 void (*ui_handle_room_info_error)(const char * const room, const char * const error);
 void (*ui_show_room_disco_info)(const char * const room, GSList *identities, GSList *features);
 void (*ui_room_destroyed)(const char * const room, const char * const reason, const char * const new_jid,
@@ -206,22 +205,14 @@ void (*ui_handle_room_role_set_error)(const char * const room, const char * cons
 void (*ui_handle_room_role_list_error)(const char * const room, const char * const role, const char * const error);
 void (*ui_handle_room_role_list)(const char * const room, const char * const role, GSList *nicks);
 void (*ui_handle_room_kick_error)(const char * const room, const char * const nick, const char * const error);
-void (*ui_show_form)(ProfWin *window, const char * const room, DataForm *form);
+void (*ui_show_form)(ProfMucConfWin *confwin);
 void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
-void (*ui_show_form_help)(ProfWin *window, DataForm *form);
-void (*ui_show_form_field_help)(ProfWin *window, DataForm *form, char *tag);
+void (*ui_show_form_help)(ProfMucConfWin *confwin);
+void (*ui_show_form_field_help)(ProfMucConfWin *confwin, char *tag);
 void (*ui_show_lines)(ProfWin *window, const gchar** lines);
 void (*ui_redraw_all_room_rosters)(void);
 void (*ui_show_all_room_rosters)(void);
 void (*ui_hide_all_room_rosters)(void);
-
-// contact status functions
-void (*ui_status_room)(const char * const contact);
-void (*ui_info_room)(const char * const room, Occupant *occupant);
-void (*ui_status)(void);
-void (*ui_info)(void);
-void (*ui_status_private)(void);
-void (*ui_info_private)(void);
 
 void (*ui_tidy_wins)(void);
 void (*ui_prune_wins)(void);

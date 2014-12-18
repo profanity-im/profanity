@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "config.h"
 
@@ -61,7 +62,7 @@ static void _title_bar_draw(void);
 static void _show_contact_presence(void);
 static void _show_self_presence(void);
 #ifdef HAVE_LIBOTR
-static void _show_privacy(void);
+static void _show_privacy(ProfChatWin *chatwin);
 #endif
 
 void
@@ -181,9 +182,11 @@ _title_bar_draw(void)
     mvwprintw(win, 0, 0, " %s", current_title);
 
     if (current && current->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*)current;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         _show_contact_presence();
 #ifdef HAVE_LIBOTR
-        _show_privacy();
+        _show_privacy(chatwin);
 #endif
         if (typing) {
             wprintw(win, " (typing...)");
@@ -258,12 +261,11 @@ _show_self_presence(void)
 
 #ifdef HAVE_LIBOTR
 static void
-_show_privacy(void)
+_show_privacy(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
-    ProfWin *current = wins_get_current();
-    if (!win_is_otr(current)) {
+    if (chatwin->is_otr) {
         if (prefs_get_boolean(PREF_OTR_WARN)) {
             int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
             wprintw(win, " ");
@@ -289,7 +291,7 @@ _show_privacy(void)
         wattron(win, bracket_attrs);
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
-        if (win_is_trusted(current)) {
+        if (chatwin->is_trusted) {
             int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
             wprintw(win, " ");
             wattron(win, bracket_attrs);

@@ -56,7 +56,11 @@
 
 #define PAD_SIZE 1000
 
-#define LAYOUT_SPLIT_MEMCHECK 1234567
+#define LAYOUT_SPLIT_MEMCHECK       12345671
+#define PROFCHATWIN_MEMCHECK        22374522
+#define PROFMUCWIN_MEMCHECK         52345276
+#define PROFPRIVATEWIN_MEMCHECK     77437483
+#define PROFCONFWIN_MEMCHECK        64334685
 
 typedef enum {
     LAYOUT_SIMPLE,
@@ -94,37 +98,46 @@ typedef enum {
 typedef struct prof_win_t {
     win_type_t type;
     ProfLayout *layout;
-    char *from;
     int unread;
 } ProfWin;
 
 typedef struct prof_console_win_t {
     ProfWin super;
+    char *from;
 } ProfConsoleWin;
 
 typedef struct prof_chat_win_t {
     ProfWin super;
+    char *barejid;
     gboolean is_otr;
     gboolean is_trusted;
     char *resource;
     gboolean history_shown;
+    unsigned long memcheck;
 } ProfChatWin;
 
 typedef struct prof_muc_win_t {
     ProfWin super;
+    char *roomjid;
+    unsigned long memcheck;
 } ProfMucWin;
 
 typedef struct prof_mucconf_win_t {
     ProfWin super;
+    char *from;
     DataForm *form;
+    unsigned long memcheck;
 } ProfMucConfWin;
 
 typedef struct prof_private_win_t {
     ProfWin super;
+    char *fulljid;
+    unsigned long memcheck;
 } ProfPrivateWin;
 
 typedef struct prof_xml_win_t {
     ProfWin super;
+    char *from;
 } ProfXMLWin;
 
 ProfWin* win_create_console(void);
@@ -157,8 +170,7 @@ void win_show_subwin(ProfWin *window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
-gboolean win_is_otr(ProfWin *window);
-gboolean win_is_trusted(ProfWin *window);
+GString* win_get_recipient_string(ProfWin *window);
 
 gboolean win_has_active_subwin(ProfWin *window);
 gboolean win_has_modified_form(ProfWin *window);
