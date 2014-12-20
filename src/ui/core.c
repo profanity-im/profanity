@@ -314,6 +314,12 @@ _ui_get_recipients(void)
     return recipients;
 }
 
+ProfChatWin *
+_ui_get_current_chat(void)
+{
+    return wins_get_current_chat();
+}
+
 static void
 _ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal *tv_stamp)
 {
@@ -3208,5 +3214,6 @@ ui_init_module(void)
     ui_redraw = _ui_redraw;
     ui_show_all_room_rosters = _ui_show_all_room_rosters;
     ui_hide_all_room_rosters = _ui_hide_all_room_rosters;
+    ui_get_current_chat = _ui_get_current_chat;
 }
 

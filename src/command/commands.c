@@ -3887,7 +3887,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
         } else if (!ui_current_win_is_otr()) {
             ui_current_print_formatted_line('!', 0, "You are not currently in an OTR session.");
         } else {
-            ProfChatWin *chatwin = wins_get_current_chat();
+            ProfChatWin *chatwin = ui_get_current_chat();
             char *fingerprint = otr_get_their_fingerprint(chatwin->barejid);
             ui_current_print_formatted_line('!', 0, "%s's OTR fingerprint: %s", chatwin->barejid, fingerprint);
             free(fingerprint);
@@ -3933,7 +3933,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 if (!otr_key_loaded()) {
                     ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else {
-                    ProfChatWin *chatwin = wins_get_current_chat();
+                    ProfChatWin *chatwin = ui_get_current_chat();
                     char *otr_query_message = otr_start_query();
                     message_send_chat(chatwin->barejid, otr_query_message);
                 }

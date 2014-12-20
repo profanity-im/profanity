@@ -47,6 +47,8 @@ void mock_ui_ask_password_returns(char *password);
 
 void mock_current_win_type(win_type_t type);
 
+void mock_ui_get_current_chat(ProfChatWin *chatwin);
+
 void mock_ui_current_recipient(void);
 void ui_current_recipient_returns(char *jid);
 

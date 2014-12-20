@@ -94,6 +94,12 @@ win_type_t _mock_ui_current_win_type(void)
 }
 
 static
+ProfChatWin * _mock_ui_get_current_chat(void)
+{
+    return (ProfChatWin*)mock();
+}
+
+static
 void _mock_ui_handle_error(const char * const err_msg)
 {
     check_expected(err_msg);
@@ -392,6 +398,13 @@ mock_current_win_type(win_type_t type)
 {
     ui_current_win_type = _mock_ui_current_win_type;
     will_return(_mock_ui_current_win_type, type);
+}
+
+void
+mock_ui_get_current_chat(ProfChatWin *chatwin)
+{
+    ui_get_current_chat = _mock_ui_get_current_chat;
+    will_return(_mock_ui_get_current_chat, chatwin);
 }
 
 void

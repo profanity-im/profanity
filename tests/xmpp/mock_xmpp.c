@@ -292,8 +292,8 @@ void
 message_send_chat_expect(char *recipient, char *message)
 {
     message_send_chat = _mock_message_send_chat;
-    expect_string(_mock_message_send, recipient, recipient);
-    expect_string(_mock_message_send, msg, message);
+    expect_string(_mock_message_send_chat, recipient, recipient);
+    expect_string(_mock_message_send_chat, msg, message);
 }
 
 void
