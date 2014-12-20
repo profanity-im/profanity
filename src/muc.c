@@ -42,6 +42,7 @@
 #include "jid.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 #include "muc.h"
 
 typedef struct _muc_room_t {
@@ -634,36 +635,39 @@ muc_roster_nick_change_complete(const char * const room,
 void
 muc_autocomplete(char *input, int *size)
 {
-    char *recipient = ui_current_recipient();
-    ChatRoom *chat_room = g_hash_table_lookup(rooms, recipient);
+    win_type_t wintype = ui_current_win_type();
+    if (wintype == WIN_MUC) {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        ChatRoom *chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
 
-    if (chat_room && chat_room->nick_ac) {
-        input[*size] = '\0';
-        char *search_str = NULL;
+        if (chat_room && chat_room->nick_ac) {
+            input[*size] = '\0';
+            char *search_str = NULL;
 
-        gchar *last_space = g_strrstr(input, " ");
-        if (!last_space) {
-            search_str = input;
-            if (!chat_room->autocomplete_prefix) {
-                chat_room->autocomplete_prefix = strdup("");
+            gchar *last_space = g_strrstr(input, " ");
+            if (!last_space) {
+                search_str = input;
+                if (!chat_room->autocomplete_prefix) {
+                    chat_room->autocomplete_prefix = strdup("");
+                }
+            } else {
+                search_str = last_space+1;
+                if (!chat_room->autocomplete_prefix) {
+                    chat_room->autocomplete_prefix = g_strndup(input, search_str - input);
+                }
             }
-        } else {
-            search_str = last_space+1;
-            if (!chat_room->autocomplete_prefix) {
-                chat_room->autocomplete_prefix = g_strndup(input, search_str - input);
-            }
-        }
 
-        char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE);
-        if (result) {
-            GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
-            g_string_append(replace_with, result);
-            if (!last_space || (*(last_space+1) == '\0')) {
-                g_string_append(replace_with, ": ");
+            char *result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE);
+            if (result) {
+                GString *replace_with = g_string_new(chat_room->autocomplete_prefix);
+                g_string_append(replace_with, result);
+                if (!last_space || (*(last_space+1) == '\0')) {
+                    g_string_append(replace_with, ": ");
+                }
+                ui_replace_input(input, replace_with->str, size);
+                g_string_free(replace_with, TRUE);
+                g_free(result);
             }
-            ui_replace_input(input, replace_with->str, size);
-            g_string_free(replace_with, TRUE);
-            g_free(result);
         }
     }
 }

@@ -47,14 +47,26 @@ ProfWin * wins_new_private(const char * const fulljid);
 ProfWin * wins_new_plugin(const char * const tag);
 
 ProfWin * wins_get_console(void);
-ProfMucWin * wins_get_muc_win(const char * const roomjid);
+ProfChatWin *wins_get_chat(const char * const barejid);
+ProfMucWin * wins_get_muc(const char * const roomjid);
+ProfMucConfWin * wins_get_muc_conf(const char * const title);
+ProfPrivateWin *wins_get_private(const char * const fulljid);
+ProfPluginWin * wins_get_plugin(const char * const tag);
 
 ProfWin * wins_get_current(void);
+ProfChatWin * wins_get_current_chat(void);
+ProfMucWin * wins_get_current_muc(void);
+ProfPrivateWin * wins_get_current_private(void);
+ProfMucConfWin * wins_get_current_muc_conf(void);
+
 void wins_set_current_by_num(int i);
+
 ProfWin * wins_get_by_num(int i);
+ProfChatWin * wins_get_chat_by_num(int i);
+ProfMucWin * wins_get_muc_by_num(int i);
+
 ProfWin * wins_get_next(void);
 ProfWin * wins_get_previous(void);
-ProfWin * wins_get_by_recipient(const char * const recipient);
 int wins_get_num(ProfWin *window);
 int wins_get_current_num(void);
 void wins_close_current(void);
@@ -64,7 +76,7 @@ gboolean wins_is_current(ProfWin *window);
 int wins_get_total_unread(void);
 void wins_resize_all(void);
 GSList * wins_get_chat_recipients(void);
-GSList * wins_get_prune_recipients(void);
+GSList * wins_get_prune_wins(void);
 void wins_lost_connection(void);
 gboolean wins_tidy(void);
 GSList * wins_create_summary(void);

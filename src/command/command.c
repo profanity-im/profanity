@@ -1621,12 +1621,6 @@ cmd_reset_autocomplete()
     autocomplete_reset(notify_typing_ac);
     autocomplete_reset(sub_ac);
 
-    if (ui_current_win_type() == WIN_MUC) {
-        char *recipient = ui_current_recipient();
-        muc_autocomplete_reset(recipient);
-        muc_jid_autocomplete_reset(recipient);
-    }
-
     autocomplete_reset(who_room_ac);
     autocomplete_reset(who_roster_ac);
     autocomplete_reset(prefs_ac);
@@ -1673,19 +1667,24 @@ cmd_reset_autocomplete()
     autocomplete_reset(time_ac);
     autocomplete_reset(resource_ac);
 
-    if (ui_current_win_type() == WIN_MUC_CONFIG) {
-        ProfWin *window = wins_get_current();
-        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-        if (window && confwin->form) {
-            form_reset_autocompleters(confwin->form);
+    if (ui_current_win_type() == WIN_CHAT) {
+        ProfChatWin *chatwin = wins_get_current_chat();
+        PContact contact = roster_get_contact(chatwin->barejid);
+        if (contact) {
+            p_contact_resource_ac_reset(contact);
         }
     }
 
-    if (ui_current_win_type() == WIN_CHAT) {
-        char *recipient = ui_current_recipient();
-        PContact contact = roster_get_contact(recipient);
-        if (contact) {
-            p_contact_resource_ac_reset(contact);
+    if (ui_current_win_type() == WIN_MUC) {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        muc_autocomplete_reset(mucwin->roomjid);
+        muc_jid_autocomplete_reset(mucwin->roomjid);
+    }
+
+    if (ui_current_win_type() == WIN_MUC_CONFIG) {
+        ProfMucConfWin *confwin = wins_get_current_muc_conf();
+        if (confwin->form) {
+            form_reset_autocompleters(confwin->form);
         }
     }
 
@@ -1764,9 +1763,7 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
 gboolean
 cmd_execute_default(const char * inp)
 {
-    win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
-    char *recipient = ui_current_recipient();
 
     // handle escaped commands - treat as normal message
     if (g_str_has_prefix(inp, "//")) {
@@ -1779,15 +1776,19 @@ cmd_execute_default(const char * inp)
         return TRUE;
     }
 
+    win_type_t win_type = ui_current_win_type();
+    ProfWin *current = wins_get_current();
+    ProfPluginWin *pluginwin = NULL;
     switch (win_type)
     {
         case WIN_MUC:
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                char *new_message = plugins_pre_room_message_send(recipient, inp);
-                message_send_groupchat(new_message, recipient);
-                plugins_post_room_message_send(recipient, new_message);
+                ProfMucWin *mucwin = wins_get_current_muc();
+                char *new_message = plugins_pre_room_message_send(mucwin->roomjid, inp);
+                message_send_groupchat(mucwin->roomjid, new_message);
+                plugins_post_room_message_send(mucwin->roomjid, new_message);
                 free(new_message);
             }
             break;
@@ -1796,55 +1797,54 @@ cmd_execute_default(const char * inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                GString *send_recipient = g_string_new(recipient);
-                ProfWin *current = wins_get_current();
                 ProfChatWin *chatwin = (ProfChatWin*)current;
+                GString *send_recipient = g_string_new(chatwin->barejid);
                 if (current && win_has_chat_resource(current)) {
                     g_string_append(send_recipient, "/");
                     g_string_append(send_recipient, chatwin->resource);
                 }
 
-                char *plugin_message = plugins_pre_chat_message_send(recipient, inp);
+                char *plugin_message = plugins_pre_chat_message_send(chatwin->barejid, inp);
 
 #ifdef PROF_HAVE_LIBOTR
-                prof_otrpolicy_t policy = otr_get_policy(recipient);
-                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(recipient)) {
+                prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
+                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(chatwin->barejid)) {
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
                 }
 
-                if (otr_is_secure(recipient)) {
-                    char *encrypted = otr_encrypt_message(recipient, plugin_message);
+                if (otr_is_secure(chatwin->barejid)) {
+                    char *encrypted = otr_encrypt_message(chatwin->barejid, plugin_message);
                     if (encrypted != NULL) {
-                        message_send(encrypted, recipient);
+                        message_send_chat(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
                             Jid *jidp = jid_create(jid);
                             char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
                             if (strcmp(pref_otr_log, "on") == 0) {
-                                chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
+                                chat_log_chat(jidp->barejid, chatwin->barejid, plugin_message, PROF_OUT_LOG, NULL);
                             } else if (strcmp(pref_otr_log, "redact") == 0) {
-                                chat_log_chat(jidp->barejid, recipient, "[redacted]", PROF_OUT_LOG, NULL);
+                                chat_log_chat(jidp->barejid, chatwin->barejid, "[redacted]", PROF_OUT_LOG, NULL);
                             }
                             prefs_free_string(pref_otr_log);
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_msg("me", recipient, plugin_message);
+                        ui_outgoing_chat_msg("me", chatwin->barejid, plugin_message);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send(plugin_message, send_recipient->str);
+                    message_send_chat(plugin_message, send_recipient->str);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
-                        chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
+                        chat_log_chat(jidp->barejid, chatwin->barejid, plugin_message, PROF_OUT_LOG, NULL);
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_msg("me", recipient, plugin_message);
+                    ui_outgoing_chat_msg("me", chatwin->barejid, plugin_message);
                 }
 
 #else
@@ -1852,14 +1852,14 @@ cmd_execute_default(const char * inp)
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, recipient, plugin_message, PROF_OUT_LOG, NULL);
+                    chat_log_chat(jidp->barejid, chatwin->barejid, plugin_message, PROF_OUT_LOG, NULL);
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_msg("me", recipient, plugin_message);
+                ui_outgoing_chat_msg("me", chatwin->barejid, plugin_message);
 
 #endif
-                plugins_post_chat_message_send(recipient, plugin_message);
+                plugins_post_chat_message_send(chatwin->barejid, plugin_message);
                 free(plugin_message);
                 g_string_free(send_recipient, TRUE);
             }
@@ -1869,12 +1869,13 @@ cmd_execute_default(const char * inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                char *new_message = plugins_pre_priv_message_send(recipient, inp);
+                ProfPrivateWin *privatewin = wins_get_current_private();
+                char *new_message = plugins_pre_priv_message_send(privatewin->fulljid, inp);
 
-                message_send(new_message, recipient);
-                ui_outgoing_msg("me", recipient, new_message);
+                message_send_private(privatewin->fulljid, new_message);
+                ui_outgoing_private_msg("me", privatewin->fulljid, new_message);
 
-                plugins_post_priv_message_send(recipient, new_message);
+                plugins_post_priv_message_send(privatewin->fulljid, new_message);
 
                 free(new_message);
             }
@@ -1886,7 +1887,8 @@ cmd_execute_default(const char * inp)
             break;
 
         case WIN_PLUGIN:
-            plugins_win_process_line(recipient, inp);
+            pluginwin = (ProfPluginWin*)current;
+            plugins_win_process_line(pluginwin->from, inp);
             break;
 
         default:
@@ -1919,8 +1921,8 @@ _cmd_complete_parameters(char *input, int *size)
 
     // autocomplete nickname in chat rooms
     if (ui_current_win_type() == WIN_MUC) {
-        char *recipient = ui_current_recipient();
-        Autocomplete nick_ac = muc_roster_ac(recipient);
+        ProfMucWin *mucwin = wins_get_current_muc();
+        Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
         if (nick_ac != NULL) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
@@ -2474,8 +2476,8 @@ _resource_autocomplete(char *input, int *size)
 
     ProfWin *current = wins_get_current();
     if (current && current->type == WIN_CHAT) {
-        char *recipient = ui_current_recipient();
-        PContact contact = roster_get_contact(recipient);
+        ProfChatWin *chatwin = wins_get_current_chat();
+        PContact contact = roster_get_contact(chatwin->barejid);
         if (contact) {
             Autocomplete ac = p_contact_resource_ac(contact);
             found = autocomplete_param_with_ac(input, size, "/resource set", ac, FALSE);
@@ -2614,62 +2616,71 @@ static char *
 _kick_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-    char *recipient = ui_current_recipient();
-    Autocomplete nick_ac = muc_roster_ac(recipient);
 
-    if (nick_ac != NULL) {
-        result = autocomplete_param_with_ac(input, size, "/kick", nick_ac, TRUE);
-        if (result != NULL) {
-            return result;
+    if (ui_current_win_type() == WIN_MUC) {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
+
+        if (nick_ac != NULL) {
+            result = autocomplete_param_with_ac(input, size, "/kick", nick_ac, TRUE);
+            if (result != NULL) {
+                return result;
+            }
         }
     }
 
-    return NULL;
+    return result;
 }
 
 static char *
 _ban_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-    char *recipient = ui_current_recipient();
-    Autocomplete jid_ac = muc_roster_jid_ac(recipient);
 
-    if (jid_ac != NULL) {
-        result = autocomplete_param_with_ac(input, size, "/ban", jid_ac, TRUE);
-        if (result != NULL) {
-            return result;
+    if (ui_current_win_type() == WIN_MUC) {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
+
+        if (jid_ac != NULL) {
+            result = autocomplete_param_with_ac(input, size, "/ban", jid_ac, TRUE);
+            if (result != NULL) {
+                return result;
+            }
         }
     }
 
-    return NULL;
+    return result;
 }
 
 static char *
 _affiliation_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-    char *recipient = ui_current_recipient();
-    gboolean parse_result;
-    Autocomplete jid_ac = muc_roster_jid_ac(recipient);
 
-    input[*size] = '\0';
-    gchar **args = parse_args(input, 3, 3, &parse_result);
+    if (ui_current_win_type() == WIN_MUC) {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        gboolean parse_result;
+        Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
 
-    if ((strncmp(input, "/affiliation", 12) == 0) && (parse_result == TRUE)) {
-        GString *beginning = g_string_new("/affiliation ");
-        g_string_append(beginning, args[0]);
-        g_string_append(beginning, " ");
-        g_string_append(beginning, args[1]);
+        input[*size] = '\0';
+        gchar **args = parse_args(input, 3, 3, &parse_result);
 
-        result = autocomplete_param_with_ac(input, size, beginning->str, jid_ac, TRUE);
-        g_string_free(beginning, TRUE);
-        if (result != NULL) {
-            g_strfreev(args);
-            return result;
+        if ((strncmp(input, "/affiliation", 12) == 0) && (parse_result == TRUE)) {
+            GString *beginning = g_string_new("/affiliation ");
+            g_string_append(beginning, args[0]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+
+            result = autocomplete_param_with_ac(input, size, beginning->str, jid_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (result != NULL) {
+                g_strfreev(args);
+                return result;
+            }
         }
-    }
 
-    g_strfreev(args);
+        g_strfreev(args);
+    }
 
     result = autocomplete_param_with_ac(input, size, "/affiliation set", affiliation_ac, TRUE);
     if (result != NULL) {
@@ -2686,35 +2697,38 @@ _affiliation_autocomplete(char *input, int *size)
         return result;
     }
 
-    return NULL;
+    return result;
 }
 
 static char *
 _role_autocomplete(char *input, int *size)
 {
     char *result = NULL;
-    char *recipient = ui_current_recipient();
-    gboolean parse_result;
-    Autocomplete nick_ac = muc_roster_ac(recipient);
 
-    input[*size] = '\0';
-    gchar **args = parse_args(input, 3, 3, &parse_result);
+    if (ui_current_win_type() == WIN_MUC) {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        gboolean parse_result;
+        Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
-    if ((strncmp(input, "/role", 5) == 0) && (parse_result == TRUE)) {
-        GString *beginning = g_string_new("/role ");
-        g_string_append(beginning, args[0]);
-        g_string_append(beginning, " ");
-        g_string_append(beginning, args[1]);
+        input[*size] = '\0';
+        gchar **args = parse_args(input, 3, 3, &parse_result);
 
-        result = autocomplete_param_with_ac(input, size, beginning->str, nick_ac, TRUE);
-        g_string_free(beginning, TRUE);
-        if (result != NULL) {
-            g_strfreev(args);
-            return result;
+        if ((strncmp(input, "/role", 5) == 0) && (parse_result == TRUE)) {
+            GString *beginning = g_string_new("/role ");
+            g_string_append(beginning, args[0]);
+            g_string_append(beginning, " ");
+            g_string_append(beginning, args[1]);
+
+            result = autocomplete_param_with_ac(input, size, beginning->str, nick_ac, TRUE);
+            g_string_free(beginning, TRUE);
+            if (result != NULL) {
+                g_strfreev(args);
+                return result;
+            }
         }
-    }
 
-    g_strfreev(args);
+        g_strfreev(args);
+    }
 
     result = autocomplete_param_with_ac(input, size, "/role set", role_ac, TRUE);
     if (result != NULL) {
@@ -2731,7 +2745,7 @@ _role_autocomplete(char *input, int *size)
         return result;
     }
 
-    return NULL;
+    return result;
 }
 
 static char *

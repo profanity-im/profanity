@@ -94,9 +94,9 @@ win_type_t _mock_ui_current_win_type(void)
 }
 
 static
-char * _mock_ui_current_recipeint(void)
+ProfChatWin * _mock_ui_get_current_chat(void)
 {
-    return mock_ptr_type(char *);
+    return (ProfChatWin*)mock();
 }
 
 static
@@ -245,12 +245,6 @@ void
 mock_ui_ask_password(void)
 {
     ui_ask_password = _mock_ui_ask_password;
-}
-
-void
-mock_ui_current_recipient(void)
-{
-    ui_current_recipient = _mock_ui_current_recipeint;
 }
 
 void
@@ -407,9 +401,10 @@ mock_current_win_type(win_type_t type)
 }
 
 void
-ui_current_recipient_returns(char *jid)
+mock_ui_get_current_chat(ProfChatWin *chatwin)
 {
-    will_return(_mock_ui_current_recipeint, jid);
+    ui_get_current_chat = _mock_ui_get_current_chat;
+    will_return(_mock_ui_get_current_chat, chatwin);
 }
 
 void

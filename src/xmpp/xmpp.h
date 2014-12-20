@@ -154,14 +154,16 @@ char* (*jabber_get_account_name)(void);
 GList * (*jabber_get_available_resources)(void);
 
 // message functions
-void (*message_send)(const char * const msg, const char * const recipient);
-void (*message_send_groupchat)(const char * const msg, const char * const recipient);
-void (*message_send_groupchat_subject)(const char * const room, const char * const subject);
+void (*message_send_chat)(const char * const barejid, const char * const msg);
+void (*message_send_private)(const char * const fulljid, const char * const msg);
+void (*message_send_groupchat)(const char * const roomjid, const char * const msg);
+void (*message_send_groupchat_subject)(const char * const roomjid, const char * const subject);
 
-void (*message_send_inactive)(const char * const recipient);
-void (*message_send_composing)(const char * const recipient);
-void (*message_send_paused)(const char * const recipient);
-void (*message_send_gone)(const char * const recipient);
+void (*message_send_inactive)(const char * const barejid);
+void (*message_send_composing)(const char * const barejid);
+void (*message_send_paused)(const char * const barejid);
+void (*message_send_gone)(const char * const barejid);
+
 void (*message_send_invite)(const char * const room, const char * const contact,
     const char * const reason);
 

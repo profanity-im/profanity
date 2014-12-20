@@ -82,10 +82,10 @@ _mock_bookmark_remove(const char *jid)
 }
 
 static void
-_mock_message_send(const char * const msg, const char * const recipient)
+_mock_message_send_chat(const char * const recipient, const char * const msg)
 {
-    check_expected(msg);
     check_expected(recipient);
+    check_expected(msg);
 }
 
 static void
@@ -289,11 +289,11 @@ expect_and_return_bookmark_remove(char *expected_jid, gboolean removed)
 }
 
 void
-message_send_expect(char *message, char *recipient)
+message_send_chat_expect(char *recipient, char *message)
 {
-    message_send = _mock_message_send;
-    expect_string(_mock_message_send, msg, message);
-    expect_string(_mock_message_send, recipient, recipient);
+    message_send_chat = _mock_message_send_chat;
+    expect_string(_mock_message_send_chat, recipient, recipient);
+    expect_string(_mock_message_send_chat, msg, message);
 }
 
 void

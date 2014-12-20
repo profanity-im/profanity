@@ -57,7 +57,7 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant)
 static void
 _occupantswin_occupants(const char * const roomjid)
 {
-    ProfMucWin *mucwin = wins_get_muc_win(roomjid);
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin) {
         GList *occupants = muc_roster(roomjid);
         if (occupants) {

@@ -112,8 +112,8 @@ api_get_current_recipient(void)
 {
     win_type_t win_type = ui_current_win_type();
     if (win_type == WIN_CHAT) {
-        char *recipient = ui_current_recipient();
-        return recipient;
+        ProfChatWin *chatwin = wins_get_current_chat();
+        return chatwin->barejid;
     } else {
         return NULL;
     }
@@ -146,7 +146,7 @@ api_log_error(const char *message)
 int
 api_win_exists(const char *tag)
 {
-    return (wins_get_by_recipient(tag) != NULL);
+    return (wins_get_plugin(tag) != NULL);
 }
 
 void
@@ -160,23 +160,24 @@ api_win_create(const char *tag, void *callback,
     wins_new_plugin(tag);
 
     // set status bar active
-    ProfWin *win = wins_get_by_recipient(tag);
-    int num = wins_get_num(win);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    int num = wins_get_num((ProfWin*)pluginwin);
     ui_status_bar_active(num);
 }
 
 void
 api_win_focus(const char *tag)
 {
-    ProfWin *win = wins_get_by_recipient(tag);
-    int num = wins_get_num(win);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    int num = wins_get_num((ProfWin*)pluginwin);
     ui_switch_win(num);
 }
 
 void
 api_win_show(const char *tag, const char *line)
 {
-    ProfWin *window = wins_get_by_recipient(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    ProfWin *window = (ProfWin*)pluginwin;
     win_save_print(window, '!', NULL, 0, 0, "", line);
 
     // refresh if current
@@ -189,7 +190,8 @@ api_win_show(const char *tag, const char *line)
 void
 api_win_show_green(const char *tag, const char *line)
 {
-    ProfWin *window = wins_get_by_recipient(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    ProfWin *window = (ProfWin*)pluginwin;
     win_save_print(window, '!', NULL, 0, theme_attrs(THEME_ONLINE), "", line);
 
     // refresh if current
@@ -202,7 +204,8 @@ api_win_show_green(const char *tag, const char *line)
 void
 api_win_show_red(const char *tag, const char *line)
 {
-    ProfWin *window = wins_get_by_recipient(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    ProfWin *window = (ProfWin*)pluginwin;
     win_save_print(window, '!', NULL, 0, theme_attrs(THEME_OFFLINE), "", line);
 
     // refresh if current
@@ -215,7 +218,8 @@ api_win_show_red(const char *tag, const char *line)
 void
 api_win_show_cyan(const char *tag, const char *line)
 {
-    ProfWin *window = wins_get_by_recipient(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    ProfWin *window = (ProfWin*)pluginwin;
     win_save_print(window, '!', NULL, 0, theme_attrs(THEME_AWAY), "", line);
 
     // refresh if current
@@ -228,7 +232,8 @@ api_win_show_cyan(const char *tag, const char *line)
 void
 api_win_show_yellow(const char *tag, const char *line)
 {
-    ProfWin *window = wins_get_by_recipient(tag);
+    ProfPluginWin *pluginwin = wins_get_plugin(tag);
+    ProfWin *window = (ProfWin*)pluginwin;
     win_save_print(window, '!', NULL, 0, theme_attrs(THEME_INCOMING), "", line);
 
     // refresh if current

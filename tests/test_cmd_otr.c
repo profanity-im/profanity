@@ -457,16 +457,18 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     gchar *args[] = { "theirfp", NULL };
     mock_connection_status(JABBER_CONNECTED);
     mock_current_win_type(WIN_CHAT);
+    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
+    chatwin->barejid = strdup(recipient);
+    mock_ui_get_current_chat(chatwin);
+
     ui_current_win_is_otr_returns(TRUE);
-    mock_ui_current_recipient();
-    ui_current_recipient_returns(recipient);
     mock_ui_current_print_formatted_line();
 
-    GString *message = g_string_new(recipient);
+    GString *message = g_string_new(chatwin->barejid);
     g_string_append(message, "'s OTR fingerprint: ");
     g_string_append(message, fingerprint);
 
-    otr_get_their_fingerprint_expect_and_return(recipient, strdup(fingerprint));
+    otr_get_their_fingerprint_expect_and_return(chatwin->barejid, strdup(fingerprint));
     ui_current_print_formatted_line_expect('!', 0, message->str);
 
     gboolean result = cmd_otr(args, *help);
@@ -474,6 +476,8 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
 
     g_string_free(message, TRUE);
     free(help);
+    free(chatwin->barejid);
+    free(chatwin);
 }
 
 static void
@@ -552,17 +556,22 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     gchar *args[] = { "start", NULL };
     mock_connection_status(JABBER_CONNECTED);
     mock_current_win_type(WIN_CHAT);
+    ProfChatWin *chatwin = malloc(sizeof(ProfChatWin));
+    chatwin->barejid = strdup(recipient);
+    mock_ui_get_current_chat(chatwin);
+
     ui_current_win_is_otr_returns(FALSE);
     otr_key_loaded_returns(TRUE);
-    ui_current_recipient_returns(recipient);
     otr_start_query_returns(query_message);
 
-    message_send_expect(query_message, recipient);
+    message_send_chat_expect(chatwin->barejid, query_message);
 
     gboolean result = cmd_otr(args, *help);
     assert_true(result);
 
     free(help);
+    free(chatwin->barejid);
+    free(chatwin);
 }
 
 #else
