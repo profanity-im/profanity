@@ -76,7 +76,6 @@ void (*ui_gone_secure)(const char * const barejid, gboolean trusted);
 void (*ui_gone_insecure)(const char * const barejid);
 void (*ui_trust)(const char * const barejid);
 void (*ui_untrust)(const char * const barejid);
-// TODO rename other recipients to barejid etc
 void (*ui_smp_recipient_initiated)(const char * const barejid);
 void (*ui_smp_recipient_initiated_q)(const char * const barejid, const char *question);
 
@@ -139,7 +138,6 @@ void (*ui_outgoing_private_msg)(const char * const from, const char * const full
 void (*ui_room_join)(const char * const roomjid, gboolean focus);
 void (*ui_switch_to_room)(const char * const roomjid);
 
-// TODO change all room -> roomjid
 void (*ui_room_role_change)(const char * const roomjid, const char * const role, const char * const actor,
     const char * const reason);
 void (*ui_room_affiliation_change)(const char * const roomjid, const char * const affiliation, const char * const actor,

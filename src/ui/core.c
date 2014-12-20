@@ -936,7 +936,6 @@ _ui_next_win(void)
     }
 }
 
-// TODO move OTR UI to new module
 static void
 _ui_gone_secure(const char * const barejid, gboolean trusted)
 {
@@ -1183,8 +1182,6 @@ _ui_prune_wins(void)
     GSList *curr = wins;
     while (curr != NULL) {
         ProfWin *window = curr->data;
-
-        // TODO move to ui_close_win
         if (window->type == WIN_CHAT) {
             if (conn_status == JABBER_CONNECTED) {
                 if (prefs_get_boolean(PREF_STATES)) {
@@ -1200,7 +1197,6 @@ _ui_prune_wins(void)
             }
         }
 
-        // TODO make one function
         int num = wins_get_num(window);
         ui_close_win(num);
 
@@ -1990,7 +1986,6 @@ _ui_leave_room(const char * const roomjid)
     }
 }
 
-// TODO move to muc ui module
 static void
 _ui_room_destroyed(const char * const roomjid, const char * const reason, const char * const new_jid,
     const char * const password)

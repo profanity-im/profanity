@@ -1130,11 +1130,9 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, usr);
 
             if (msg != NULL) {
-                // TODO use message send private
                 message_send_private(full_jid->str, msg);
                 ui_outgoing_private_msg("me", full_jid->str, msg);
             } else {
-                // TODO use new private win
                 ui_new_private_win(full_jid->str);
             }
 
@@ -1146,7 +1144,6 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 
         return TRUE;
 
-    // TODO handle different window types (OTR only for chat etc)
     } else {
         char *usr_jid = roster_barejid_from_name(usr);
         if (usr_jid == NULL) {
@@ -2943,7 +2940,6 @@ cmd_alias(gchar **args, struct cmd_help_t help)
     }
 }
 
-// TODO reuse cmd_msg
 gboolean
 cmd_tiny(gchar **args, struct cmd_help_t help)
 {

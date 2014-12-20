@@ -49,9 +49,6 @@ ProfMucWin * wins_get_muc(const char * const roomjid);
 ProfMucConfWin * wins_get_muc_conf(const char * const title);
 ProfPrivateWin *wins_get_private(const char * const fulljid);
 
-// TODO remove
-//ProfWin * wins_get_by_recipient(const char * const recipient);
-
 ProfWin * wins_get_current(void);
 ProfChatWin * wins_get_current_chat(void);
 ProfMucWin * wins_get_current_muc(void);

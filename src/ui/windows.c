@@ -345,26 +345,6 @@ wins_get_previous(void)
     }
 }
 
-// TODO REMOVE
-//ProfWin *
-//wins_get_by_recipient(const char * const recipient)
-//{
-//    GList *values = g_hash_table_get_values(windows);
-//    GList *curr = values;
-//
-//    while (curr != NULL) {
-//        ProfWin *window = curr->data;
-//        if (g_strcmp0(window->from, recipient) == 0) {
-//            g_list_free(values);
-//            return window;
-//        }
-//        curr = g_list_next(curr);
-//    }
-//
-//    g_list_free(values);
-//    return NULL;
-//}
-
 int
 wins_get_num(ProfWin *window)
 {
