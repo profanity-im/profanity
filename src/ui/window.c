@@ -254,14 +254,21 @@ win_show_subwin(ProfWin *window)
     int cols = getmaxx(stdscr);
     int subwin_cols = 0;
 
-    if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
-        subwin_cols = win_roster_cols();
-        layout->subwin = newpad(PAD_SIZE, subwin_cols);
-        wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
-        wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
-        win_redraw(window);
+    if (window->layout->type != LAYOUT_SPLIT) {
+        return;
     }
+
+    if (window->type == WIN_MUC) {
+        subwin_cols = win_occpuants_cols();
+    } else if (window->type == WIN_CONSOLE) {
+        subwin_cols = win_roster_cols();
+    }
+
+    ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
+    layout->subwin = newpad(PAD_SIZE, subwin_cols);
+    wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
+    wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
+    win_redraw(window);
 }
 
 void
