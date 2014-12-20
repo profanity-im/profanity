@@ -45,8 +45,8 @@ ProfWin * wins_new_private(const char * const fulljid);
 
 ProfWin * wins_get_console(void);
 ProfChatWin *wins_get_chat(const char * const barejid);
-ProfMucWin * wins_get_muc_win(const char * const roomjid);
-ProfMucConfWin * wins_get_muc_conf_win(const char * const title);
+ProfMucWin * wins_get_muc(const char * const roomjid);
+ProfMucConfWin * wins_get_muc_conf(const char * const title);
 ProfPrivateWin *wins_get_private(const char * const fulljid);
 
 // TODO remove
@@ -75,7 +75,7 @@ gboolean wins_is_current(ProfWin *window);
 int wins_get_total_unread(void);
 void wins_resize_all(void);
 GSList * wins_get_chat_recipients(void);
-GSList * wins_get_prune_recipients(void);
+GSList * wins_get_prune_wins(void);
 void wins_lost_connection(void);
 gboolean wins_tidy(void);
 GSList * wins_create_summary(void);

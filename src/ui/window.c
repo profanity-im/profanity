@@ -141,6 +141,8 @@ win_create_chat(const char * const barejid)
     new_win->is_trusted = FALSE;
     new_win->history_shown = FALSE;
 
+    new_win->memcheck = PROFCHATWIN_MEMCHECK;
+
     return &new_win->super;
 }
 
@@ -177,6 +179,8 @@ win_create_muc(const char * const roomjid)
     new_win->roomjid = strdup(roomjid);
     new_win->super.unread = 0;
 
+    new_win->memcheck = PROFMUCWIN_MEMCHECK;
+
     return &new_win->super;
 }
 
@@ -191,6 +195,8 @@ win_create_muc_config(const char * const title, DataForm *form)
     new_win->from = strdup(title);
     new_win->form = form;
 
+    new_win->memcheck = PROFCONFWIN_MEMCHECK;
+
     return &new_win->super;
 }
 
@@ -203,6 +209,8 @@ win_create_private(const char * const fulljid)
     new_win->super.unread = 0;
 
     new_win->fulljid = strdup(fulljid);
+
+    new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
 
     return &new_win->super;
 }

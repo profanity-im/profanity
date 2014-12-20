@@ -320,7 +320,7 @@ handle_incoming_message(char *barejid, char *message)
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send(otr_query_message, barejid);
+                message_send_chat(barejid, otr_query_message);
             }
         }
     }
@@ -334,7 +334,7 @@ handle_incoming_message(char *barejid, char *message)
     if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        message_send(otr_query_message, barejid);
+        message_send_chat(barejid, otr_query_message);
     }
 
     ui_incoming_msg(barejid, newmessage, NULL);
@@ -399,27 +399,27 @@ handle_gone(const char * const from)
 }
 
 void
-handle_subscription(const char *from, jabber_subscr_t type)
+handle_subscription(const char *barejid, jabber_subscr_t type)
 {
     switch (type) {
     case PRESENCE_SUBSCRIBE:
         /* TODO: auto-subscribe if needed */
-        cons_show("Received authorization request from %s", from);
-        log_info("Received authorization request from %s", from);
-        ui_print_system_msg_from_recipient(from, "Authorization request, type '/sub allow' to accept or '/sub deny' to reject");
+        cons_show("Received authorization request from %s", barejid);
+        log_info("Received authorization request from %s", barejid);
+        ui_print_system_msg_from_recipient(barejid, "Authorization request, type '/sub allow' to accept or '/sub deny' to reject");
         if (prefs_get_boolean(PREF_NOTIFY_SUB)) {
-            notify_subscription(from);
+            notify_subscription(barejid);
         }
         break;
     case PRESENCE_SUBSCRIBED:
-        cons_show("Subscription received from %s", from);
-        log_info("Subscription received from %s", from);
-        ui_print_system_msg_from_recipient(from, "Subscribed");
+        cons_show("Subscription received from %s", barejid);
+        log_info("Subscription received from %s", barejid);
+        ui_print_system_msg_from_recipient(barejid, "Subscribed");
         break;
     case PRESENCE_UNSUBSCRIBED:
-        cons_show("%s deleted subscription", from);
-        log_info("%s deleted subscription", from);
-        ui_print_system_msg_from_recipient(from, "Unsubscribed");
+        cons_show("%s deleted subscription", barejid);
+        log_info("%s deleted subscription", barejid);
+        ui_print_system_msg_from_recipient(barejid, "Unsubscribed");
         break;
     default:
         /* unknown type */

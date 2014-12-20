@@ -109,7 +109,7 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    message_send(message, recipient);
+    message_send_chat(recipient, message);
 }
 
 static void

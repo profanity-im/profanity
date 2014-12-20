@@ -73,23 +73,28 @@ void (*ui_next_win)(void);
 void (*ui_previous_win)(void);
 
 void (*ui_gone_secure)(const char * const barejid, gboolean trusted);
-void (*ui_gone_insecure)(const char * const recipient);
-void (*ui_trust)(const char * const recipient);
-void (*ui_untrust)(const char * const recipient);
-void (*ui_smp_recipient_initiated)(const char * const recipient);
-void (*ui_smp_recipient_initiated_q)(const char * const recipient, const char *question);
+void (*ui_gone_insecure)(const char * const barejid);
+void (*ui_trust)(const char * const barejid);
+void (*ui_untrust)(const char * const barejid);
+// TODO rename other recipients to barejid etc
+void (*ui_smp_recipient_initiated)(const char * const barejid);
+void (*ui_smp_recipient_initiated_q)(const char * const barejid, const char *question);
 
-void (*ui_smp_successful)(const char * const recipient);
-void (*ui_smp_unsuccessful_sender)(const char * const recipient);
-void (*ui_smp_unsuccessful_receiver)(const char * const recipient);
-void (*ui_smp_aborted)(const char * const recipient);
+void (*ui_smp_successful)(const char * const barejid);
+void (*ui_smp_unsuccessful_sender)(const char * const barejid);
+void (*ui_smp_unsuccessful_receiver)(const char * const barejid);
+void (*ui_smp_aborted)(const char * const barejid);
 
-void (*ui_smp_answer_success)(const char * const recipient);
-void (*ui_smp_answer_failure)(const char * const recipient);
+void (*ui_smp_answer_success)(const char * const barejid);
+void (*ui_smp_answer_failure)(const char * const barejid);
+
+void (*ui_otr_authenticating)(const char * const barejid);
+void (*ui_otr_authetication_waiting)(const char * const recipient);
 
 unsigned long (*ui_get_idle_time)(void);
 void (*ui_reset_idle_time)(void);
-void (*ui_new_chat_win)(const char * const to);
+void (*ui_new_chat_win)(const char * const barejid);
+void (*ui_new_private_win)(const char * const fulljid);
 void (*ui_print_system_msg_from_recipient)(const char * const barejid, const char *message);
 gint (*ui_unread)(void);
 void (*ui_close_connected_win)(int index);
@@ -108,9 +113,6 @@ void (*ui_current_print_line)(const char * const msg, ...);
 void (*ui_current_print_formatted_line)(const char show_char, int attrs, const char * const msg, ...);
 void (*ui_current_error_line)(const char * const msg);
 
-void (*ui_otr_authenticating)(const char * const recipient);
-void (*ui_otr_authetication_waiting)(const char * const recipient);
-
 win_type_t (*ui_win_type)(int index);
 void (*ui_close_win)(int index);
 gboolean (*ui_win_exists)(int index);
@@ -126,56 +128,62 @@ void (*ui_incoming_private_msg)(const char * const fulljid, const char * const m
 
 void (*ui_disconnected)(void);
 void (*ui_recipient_gone)(const char * const barejid);
-void (*ui_outgoing_msg)(const char * const from, const char * const to,
+
+void (*ui_outgoing_chat_msg)(const char * const from, const char * const barejid,
     const char * const message);
-void (*ui_room_join)(const char * const room, gboolean focus);
-void (*ui_switch_to_room)(const char * const room);
-void (*ui_room_role_change)(const char * const room, const char * const role, const char * const actor,
+void (*ui_outgoing_private_msg)(const char * const from, const char * const fulljid,
+    const char * const message);
+
+void (*ui_room_join)(const char * const roomjid, gboolean focus);
+void (*ui_switch_to_room)(const char * const roomjid);
+
+// TODO change all room -> roomjid
+void (*ui_room_role_change)(const char * const roomjid, const char * const role, const char * const actor,
     const char * const reason);
-void (*ui_room_affiliation_change)(const char * const room, const char * const affiliation, const char * const actor,
+void (*ui_room_affiliation_change)(const char * const roomjid, const char * const affiliation, const char * const actor,
     const char * const reason);
-void (*ui_room_role_and_affiliation_change)(const char * const room, const char * const role,
+void (*ui_room_role_and_affiliation_change)(const char * const roomjid, const char * const role,
     const char * const affiliation, const char * const actor, const char * const reason);
-void (*ui_room_occupant_role_change)(const char * const room, const char * const nick, const char * const role,
+void (*ui_room_occupant_role_change)(const char * const roomjid, const char * const nick, const char * const role,
     const char * const actor, const char * const reason);
-void (*ui_room_occupant_affiliation_change)(const char * const room, const char * const nick, const char * const affiliation,
+void (*ui_room_occupant_affiliation_change)(const char * const roomjid, const char * const nick, const char * const affiliation,
     const char * const actor, const char * const reason);
-void (*ui_room_occupant_role_and_affiliation_change)(const char * const room, const char * const nick, const char * const role,
+void (*ui_room_occupant_role_and_affiliation_change)(const char * const roomjid, const char * const nick, const char * const role,
     const char * const affiliation, const char * const actor, const char * const reason);
-void (*ui_room_roster)(const char * const room, GList *occupants, const char * const presence);
-void (*ui_room_history)(const char * const room_jid, const char * const nick,
+void (*ui_room_roster)(const char * const roomjid, GList *occupants, const char * const presence);
+void (*ui_room_history)(const char * const roomjid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
-void (*ui_room_message)(const char * const room_jid, const char * const nick,
+void (*ui_room_message)(const char * const roomjid, const char * const nick,
     const char * const message);
-void (*ui_room_subject)(const char * const room, const char * const nick, const char * const subject);
-void (*ui_room_requires_config)(const char * const room_jid);
-void (*ui_room_destroy)(const char * const room_jid);
+void (*ui_room_subject)(const char * const roomjid, const char * const nick, const char * const subject);
+void (*ui_room_requires_config)(const char * const roomjid);
+void (*ui_room_destroy)(const char * const roomjid);
 void (*ui_show_room_info)(ProfMucWin *mucwin);
 void (*ui_show_room_role_list)(ProfMucWin *mucwin, muc_role_t role);
 void (*ui_show_room_affiliation_list)(ProfMucWin *mucwin, muc_affiliation_t affiliation);
-void (*ui_handle_room_info_error)(const char * const room, const char * const error);
-void (*ui_show_room_disco_info)(const char * const room, GSList *identities, GSList *features);
-void (*ui_room_destroyed)(const char * const room, const char * const reason, const char * const new_jid,
+void (*ui_handle_room_info_error)(const char * const roomjid, const char * const error);
+void (*ui_show_room_disco_info)(const char * const roomjid, GSList *identities, GSList *features);
+void (*ui_room_destroyed)(const char * const roomjid, const char * const reason, const char * const new_jid,
     const char * const password);
-void (*ui_room_kicked)(const char * const room, const char * const actor, const char * const reason);
-void (*ui_room_member_kicked)(const char * const room, const char * const nick, const char * const actor,
+void (*ui_room_kicked)(const char * const roomjid, const char * const actor, const char * const reason);
+void (*ui_room_member_kicked)(const char * const roomjid, const char * const nick, const char * const actor,
     const char * const reason);
-void (*ui_room_banned)(const char * const room, const char * const actor, const char * const reason);
-void (*ui_room_member_banned)(const char * const room, const char * const nick, const char * const actor,
+void (*ui_room_banned)(const char * const roomjid, const char * const actor, const char * const reason);
+void (*ui_room_member_banned)(const char * const roomjid, const char * const nick, const char * const actor,
     const char * const reason);
-void (*ui_leave_room)(const char * const room);
-void (*ui_room_broadcast)(const char * const room_jid,
+void (*ui_leave_room)(const char * const roomjid);
+void (*ui_room_broadcast)(const char * const roomjid,
     const char * const message);
-void (*ui_room_member_offline)(const char * const room, const char * const nick);
-void (*ui_room_member_online)(const char * const room, const char * const nick, const char * const roles,
+void (*ui_room_member_offline)(const char * const roomjid, const char * const nick);
+void (*ui_room_member_online)(const char * const roomjid, const char * const nick, const char * const roles,
     const char * const affiliation, const char * const show, const char * const status);
-void (*ui_room_member_nick_change)(const char * const room,
+void (*ui_room_member_nick_change)(const char * const roomjid,
     const char * const old_nick, const char * const nick);
-void (*ui_room_nick_change)(const char * const room, const char * const nick);
-void (*ui_room_member_presence)(const char * const room,
+void (*ui_room_nick_change)(const char * const roomjid, const char * const nick);
+void (*ui_room_member_presence)(const char * const roomjid,
     const char * const nick, const char * const show, const char * const status);
-void (*ui_room_show_occupants)(const char * const room);
-void (*ui_room_hide_occupants)(const char * const room);
+void (*ui_room_show_occupants)(const char * const roomjid);
+void (*ui_room_hide_occupants)(const char * const roomjid);
 void (*ui_show_roster)(void);
 void (*ui_hide_roster)(void);
 void (*ui_roster_add)(const char * const barejid, const char * const name);
@@ -190,21 +198,21 @@ void (*ui_handle_recipient_not_found)(const char * const recipient, const char *
 void (*ui_handle_recipient_error)(const char * const recipient, const char * const err_msg);
 void (*ui_handle_error)(const char * const err_msg);
 void (*ui_clear_win_title)(void);
-void (*ui_handle_room_join_error)(const char * const room, const char * const err);
+void (*ui_handle_room_join_error)(const char * const roomjid, const char * const err);
 void (*ui_handle_room_configuration)(const char * const room, DataForm *form);
-void (*ui_handle_room_configuration_form_error)(const char * const room, const char * const message);
-void (*ui_handle_room_config_submit_result)(const char * const room);
-void (*ui_handle_room_config_submit_result_error)(const char * const room, const char * const message);
-void (*ui_handle_room_affiliation_list_error)(const char * const room, const char * const affiliation,
+void (*ui_handle_room_configuration_form_error)(const char * const roomjid, const char * const message);
+void (*ui_handle_room_config_submit_result)(const char * const roomjid);
+void (*ui_handle_room_config_submit_result_error)(const char * const roomjid, const char * const message);
+void (*ui_handle_room_affiliation_list_error)(const char * const roomjid, const char * const affiliation,
     const char * const error);
-void (*ui_handle_room_affiliation_list)(const char * const room, const char * const affiliation, GSList *jids);
-void (*ui_handle_room_affiliation_set_error)(const char * const room, const char * const jid,
+void (*ui_handle_room_affiliation_list)(const char * const roomjid, const char * const affiliation, GSList *jids);
+void (*ui_handle_room_affiliation_set_error)(const char * const roomjid, const char * const jid,
     const char * const affiliation, const char * const error);
-void (*ui_handle_room_role_set_error)(const char * const room, const char * const nick, const char * const role,
+void (*ui_handle_room_role_set_error)(const char * const roomjid, const char * const nick, const char * const role,
     const char * const error);
-void (*ui_handle_room_role_list_error)(const char * const room, const char * const role, const char * const error);
-void (*ui_handle_room_role_list)(const char * const room, const char * const role, GSList *nicks);
-void (*ui_handle_room_kick_error)(const char * const room, const char * const nick, const char * const error);
+void (*ui_handle_room_role_list_error)(const char * const roomjid, const char * const role, const char * const error);
+void (*ui_handle_room_role_list)(const char * const roomjid, const char * const role, GSList *nicks);
+void (*ui_handle_room_kick_error)(const char * const roomjid, const char * const nick, const char * const error);
 void (*ui_show_form)(ProfMucConfWin *confwin);
 void (*ui_show_form_field)(ProfWin *window, DataForm *form, char *tag);
 void (*ui_show_form_help)(ProfMucConfWin *confwin);

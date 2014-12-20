@@ -1751,7 +1751,6 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
 gboolean
 cmd_execute_default(const char * inp)
 {
-    win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
 
     // handle escaped commands - treat as normal message
@@ -1765,14 +1764,15 @@ cmd_execute_default(const char * inp)
         return TRUE;
     }
 
+    win_type_t win_type = ui_current_win_type();
     switch (win_type)
     {
         case WIN_MUC:
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                ProfWin
-                message_send_groupchat(inp, recipient);
+                ProfMucWin *mucwin = wins_get_current_muc();
+                message_send_groupchat(mucwin->roomjid, inp);
             }
             break;
 
@@ -1780,63 +1780,63 @@ cmd_execute_default(const char * inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                GString *send_recipient = g_string_new(recipient);
                 ProfWin *current = wins_get_current();
                 ProfChatWin *chatwin = (ProfChatWin*)current;
+                GString *send_recipient = g_string_new(chatwin->barejid);
                 if (current && win_has_chat_resource(current)) {
                     g_string_append(send_recipient, "/");
                     g_string_append(send_recipient, chatwin->resource);
                 }
 
 #ifdef HAVE_LIBOTR
-                prof_otrpolicy_t policy = otr_get_policy(recipient);
-                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(recipient)) {
+                prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
+                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(chatwin->barejid)) {
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
                 }
-                if (otr_is_secure(recipient)) {
-                    char *encrypted = otr_encrypt_message(recipient, inp);
+                if (otr_is_secure(chatwin->barejid)) {
+                    char *encrypted = otr_encrypt_message(chatwin->barejid, inp);
                     if (encrypted != NULL) {
-                        message_send(encrypted, recipient);
+                        message_send_chat(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
                             Jid *jidp = jid_create(jid);
                             char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
                             if (strcmp(pref_otr_log, "on") == 0) {
-                                chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                                chat_log_chat(jidp->barejid, chatwin->barejid, inp, PROF_OUT_LOG, NULL);
                             } else if (strcmp(pref_otr_log, "redact") == 0) {
-                                chat_log_chat(jidp->barejid, recipient, "[redacted]", PROF_OUT_LOG, NULL);
+                                chat_log_chat(jidp->barejid, chatwin->barejid, "[redacted]", PROF_OUT_LOG, NULL);
                             }
                             prefs_free_string(pref_otr_log);
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_msg("me", recipient, inp);
+                        ui_outgoing_chat_msg("me", chatwin->barejid, inp);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send(inp, send_recipient->str);
+                    message_send_chat(send_recipient->str, inp);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
-                        chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                        chat_log_chat(jidp->barejid, chatwin->barejid, inp, PROF_OUT_LOG, NULL);
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_msg("me", recipient, inp);
+                    ui_outgoing_chat_msg("me", chatwin->barejid, inp);
                 }
 #else
                 message_send(inp, send_recipient->str);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, recipient, inp, PROF_OUT_LOG, NULL);
+                    chat_log_chat(jidp->barejid, chatwin->barejid, inp, PROF_OUT_LOG, NULL);
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_msg("me", recipient, inp);
+                ui_outgoing_chat_msg("me", chatwin->barejid, inp);
 #endif
                 g_string_free(send_recipient, TRUE);
             }
@@ -1846,8 +1846,9 @@ cmd_execute_default(const char * inp)
             if (status != JABBER_CONNECTED) {
                 ui_current_print_line("You are not currently connected.");
             } else {
-                message_send(inp, recipient);
-                ui_outgoing_msg("me", recipient, inp);
+                ProfPrivateWin *privatewin = wins_get_current_private();
+                message_send_private(privatewin->fulljid, inp);
+                ui_outgoing_private_msg("me", privatewin->fulljid, inp);
             }
             break;
 

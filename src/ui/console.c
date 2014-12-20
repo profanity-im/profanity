@@ -469,7 +469,7 @@ _cons_show_bookmarks(const GList *list)
                 win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
             }
             if (muc_active(item->jid)) {
-                ProfWin *roomwin = wins_get_by_recipient(item->jid);
+                ProfWin *roomwin = (ProfWin*)wins_get_muc(item->jid);
                 if (roomwin != NULL) {
                     int num = wins_get_num(roomwin);
                     win_save_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%d)", num);

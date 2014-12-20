@@ -94,12 +94,6 @@ win_type_t _mock_ui_current_win_type(void)
 }
 
 static
-char * _mock_ui_current_recipeint(void)
-{
-    return mock_ptr_type(char *);
-}
-
-static
 void _mock_ui_handle_error(const char * const err_msg)
 {
     check_expected(err_msg);
@@ -245,12 +239,6 @@ void
 mock_ui_ask_password(void)
 {
     ui_ask_password = _mock_ui_ask_password;
-}
-
-void
-mock_ui_current_recipient(void)
-{
-    ui_current_recipient = _mock_ui_current_recipeint;
 }
 
 void
@@ -404,12 +392,6 @@ mock_current_win_type(win_type_t type)
 {
     ui_current_win_type = _mock_ui_current_win_type;
     will_return(_mock_ui_current_win_type, type);
-}
-
-void
-ui_current_recipient_returns(char *jid)
-{
-    will_return(_mock_ui_current_recipeint, jid);
 }
 
 void

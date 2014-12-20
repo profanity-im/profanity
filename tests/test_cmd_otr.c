@@ -458,8 +458,6 @@ void cmd_otr_theirfp_shows_fingerprint(void **state)
     mock_connection_status(JABBER_CONNECTED);
     mock_current_win_type(WIN_CHAT);
     ui_current_win_is_otr_returns(TRUE);
-    mock_ui_current_recipient();
-    ui_current_recipient_returns(recipient);
     mock_ui_current_print_formatted_line();
 
     GString *message = g_string_new(recipient);
@@ -554,10 +552,9 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     mock_current_win_type(WIN_CHAT);
     ui_current_win_is_otr_returns(FALSE);
     otr_key_loaded_returns(TRUE);
-    ui_current_recipient_returns(recipient);
     otr_start_query_returns(query_message);
 
-    message_send_expect(query_message, recipient);
+    message_send_chat_expect(query_message, recipient);
 
     gboolean result = cmd_otr(args, *help);
     assert_true(result);
