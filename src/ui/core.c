@@ -270,6 +270,7 @@ static void
 _ui_contact_typing(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
+    ProfWin *window = (ProfWin*) chatwin;
 
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
@@ -277,22 +278,22 @@ _ui_contact_typing(const char * const barejid)
             cons_show_typing(barejid);
 
         // have chat window but not currently in it
-        } else if (!wins_is_current(&chatwin->super)) {
+        } else if (!wins_is_current(window)) {
             cons_show_typing(barejid);
 
         // in chat window with user
         } else {
             title_bar_set_typing(TRUE);
 
-            int num = wins_get_num(&chatwin->super);
+            int num = wins_get_num(window);
             status_bar_active(num);
        }
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_TYPING)) {
         gboolean is_current = FALSE;
-        if (&chatwin->super != NULL) {
-            is_current = wins_is_current(&chatwin->super);
+        if (window) {
+            is_current = wins_is_current(window);
         }
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT)) ) {
             PContact contact = roster_get_contact(barejid);
@@ -349,11 +350,13 @@ _ui_incoming_msg(const char * const barejid, const char * const message, GTimeVa
         win_created = TRUE;
     }
 
-    int num = wins_get_num(&chatwin->super);
+    ProfWin *window = (ProfWin*) chatwin;
+
+    int num = wins_get_num(window);
 
     // currently viewing chat window with sender
-    if (wins_is_current(&chatwin->super)) {
-        win_print_incoming_message(&chatwin->super, tv_stamp, display_from, message);
+    if (wins_is_current(window)) {
+        win_print_incoming_message(window, tv_stamp, display_from, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -366,7 +369,7 @@ _ui_incoming_msg(const char * const barejid, const char * const message, GTimeVa
             flash();
         }
 
-        chatwin->super.unread++;
+        window->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _win_show_history(num, barejid);
         }
@@ -375,11 +378,11 @@ _ui_incoming_msg(const char * const barejid, const char * const message, GTimeVa
         if ((tv_stamp != NULL) && (win_created)) {
             PContact pcontact = roster_get_contact(barejid);
             if (pcontact != NULL) {
-                win_show_contact(&chatwin->super, pcontact);
+                win_show_contact(window, pcontact);
             }
         }
 
-        win_print_incoming_message(&chatwin->super, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, display_from, message);
     }
 
     int ui_index = num;
@@ -392,7 +395,7 @@ _ui_incoming_msg(const char * const barejid, const char * const message, GTimeVa
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        gboolean is_current = wins_is_current(&chatwin->super);
+        gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
             if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
                 notify_message(display_from, ui_index, message);
@@ -417,11 +420,12 @@ _ui_incoming_private_msg(const char * const fulljid, const char * const message,
         privatewin = (ProfPrivateWin*)window;
     }
 
-    int num = wins_get_num(&privatewin->super);
+    ProfWin *window = (ProfWin*) privatewin;
+    int num = wins_get_num(window);
 
     // currently viewing chat window with sender
-    if (wins_is_current(&privatewin->super)) {
-        win_print_incoming_message(&privatewin->super, tv_stamp, display_from, message);
+    if (wins_is_current(window)) {
+        win_print_incoming_message(window, tv_stamp, display_from, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -434,12 +438,12 @@ _ui_incoming_private_msg(const char * const fulljid, const char * const message,
             flash();
         }
 
-        privatewin->super.unread++;
+        window->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _win_show_history(num, fulljid);
         }
 
-        win_print_incoming_message(&privatewin->super, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, display_from, message);
     }
 
     int ui_index = num;
@@ -452,7 +456,7 @@ _ui_incoming_private_msg(const char * const fulljid, const char * const message,
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
-        gboolean is_current = wins_is_current(&privatewin->super);
+        gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
             if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
                 notify_message(display_from, ui_index, message);
@@ -580,8 +584,7 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
     ProfChatWin *chatwin = wins_get_chat(recipient);
     if (chatwin) {
         cons_show_error("Recipient %s not found: %s", recipient, err_msg);
-        // TODO change super references to superclass cast
-        win_save_vprint(&chatwin->super, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
+        win_save_vprint((ProfWin*) chatwin, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
         return;
     }
 
@@ -589,7 +592,7 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
     ProfMucWin *mucwin = wins_get_muc(recipient);
     if (mucwin) {
         cons_show_error("Room %s not found: %s", recipient, err_msg);
-        win_save_vprint(&mucwin->super, '!', NULL, 0, THEME_ERROR, "", "Room %s not found: %s", recipient, err_msg);
+        win_save_vprint((ProfWin*) mucwin, '!', NULL, 0, THEME_ERROR, "", "Room %s not found: %s", recipient, err_msg);
         return;
     }
 
@@ -597,7 +600,7 @@ _ui_handle_recipient_not_found(const char * const recipient, const char * const 
     ProfPrivateWin *privatewin = wins_get_private(recipient);
     if (privatewin) {
         cons_show_error("Recipient %s not found: %s", recipient, err_msg);
-        win_save_vprint(&privatewin->super, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
+        win_save_vprint((ProfWin*) privatewin, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
         return;
     }
 
@@ -2342,42 +2345,44 @@ _ui_show_room_info(ProfMucWin *mucwin)
     char *role = muc_role_str(mucwin->roomjid);
     char *affiliation = muc_affiliation_str(mucwin->roomjid);
 
-    win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "Room: %s", mucwin->roomjid);
-    win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "Affiliation: %s", affiliation);
-    win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "Role: %s", role);
-    win_save_print(&mucwin->super, '-', NULL, 0, 0, "", "");
+    ProfWin *window = (ProfWin*) mucwin;
+    win_save_vprint(window, '!', NULL, 0, 0, "", "Room: %s", mucwin->roomjid);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "Affiliation: %s", affiliation);
+    win_save_vprint(window, '!', NULL, 0, 0, "", "Role: %s", role);
+    win_save_print(window, '-', NULL, 0, 0, "", "");
 }
 
 static void
 _ui_show_room_role_list(ProfMucWin *mucwin, muc_role_t role)
 {
+    ProfWin *window = (ProfWin*) mucwin;
     GSList *occupants = muc_occupants_by_role(mucwin->roomjid, role);
 
     if (!occupants) {
         switch (role) {
             case MUC_ROLE_MODERATOR:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "No moderators found.");
+                win_save_print(window, '!', NULL, 0, 0, "", "No moderators found.");
                 break;
             case MUC_ROLE_PARTICIPANT:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "No participants found.");
+                win_save_print(window, '!', NULL, 0, 0, "", "No participants found.");
                 break;
             case MUC_ROLE_VISITOR:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "No visitors found.");
+                win_save_print(window, '!', NULL, 0, 0, "", "No visitors found.");
                 break;
             default:
                 break;
         }
-        win_save_print(&mucwin->super, '-', NULL, 0, 0, "", "");
+        win_save_print(window, '-', NULL, 0, 0, "", "");
     } else {
         switch (role) {
             case MUC_ROLE_MODERATOR:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Moderators:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Moderators:");
                 break;
             case MUC_ROLE_PARTICIPANT:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Participants:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Participants:");
                 break;
             case MUC_ROLE_VISITOR:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Visitors:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Visitors:");
                 break;
             default:
                 break;
@@ -2388,55 +2393,56 @@ _ui_show_room_role_list(ProfMucWin *mucwin, muc_role_t role)
             Occupant *occupant = curr_occupant->data;
             if (occupant->role == role) {
                 if (occupant->jid) {
-                    win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
                 } else {
-                    win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
                 }
             }
 
             curr_occupant = g_slist_next(curr_occupant);
         }
 
-        win_save_print(&mucwin->super, '-', NULL, 0, 0, "", "");
+        win_save_print(window, '-', NULL, 0, 0, "", "");
     }
 }
 
 static void
 _ui_show_room_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation)
 {
+    ProfWin *window = (ProfWin*) mucwin;
     GSList *occupants = muc_occupants_by_affiliation(mucwin->roomjid, affiliation);
 
     if (!occupants) {
         switch (affiliation) {
             case MUC_AFFILIATION_OWNER:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "No owners found.");
+                win_save_print(window, '!', NULL, 0, 0, "", "No owners found.");
                 break;
             case MUC_AFFILIATION_ADMIN:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "No admins found.");
+                win_save_print(window, '!', NULL, 0, 0, "", "No admins found.");
                 break;
             case MUC_AFFILIATION_MEMBER:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "No members found.");
+                win_save_print(window, '!', NULL, 0, 0, "", "No members found.");
                 break;
             case MUC_AFFILIATION_OUTCAST:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "No outcasts found.");
+                win_save_print(window, '!', NULL, 0, 0, "", "No outcasts found.");
                 break;
             default:
                 break;
         }
-        win_save_print(&mucwin->super, '-', NULL, 0, 0, "", "");
+        win_save_print(window, '-', NULL, 0, 0, "", "");
     } else {
         switch (affiliation) {
             case MUC_AFFILIATION_OWNER:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Owners:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Owners:");
                 break;
             case MUC_AFFILIATION_ADMIN:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Admins:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Admins:");
                 break;
             case MUC_AFFILIATION_MEMBER:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Members:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Members:");
                 break;
             case MUC_AFFILIATION_OUTCAST:
-                win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Outcasts:");
+                win_save_print(window, '!', NULL, 0, 0, "", "Outcasts:");
                 break;
             default:
                 break;
@@ -2447,16 +2453,16 @@ _ui_show_room_affiliation_list(ProfMucWin *mucwin, muc_affiliation_t affiliation
             Occupant *occupant = curr_occupant->data;
             if (occupant->affiliation == affiliation) {
                 if (occupant->jid) {
-                    win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s (%s)", occupant->nick, occupant->jid);
                 } else {
-                    win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "  %s", occupant->nick);
+                    win_save_vprint(window, '!', NULL, 0, 0, "", "  %s", occupant->nick);
                 }
             }
 
             curr_occupant = g_slist_next(curr_occupant);
         }
 
-        win_save_print(&mucwin->super, '-', NULL, 0, 0, "", "");
+        win_save_print(window, '-', NULL, 0, 0, "", "");
     }
 }
 
@@ -2594,16 +2600,17 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
 static void
 _ui_show_form(ProfMucConfWin *confwin)
 {
+    ProfWin *window = (ProfWin*) confwin;
     if (confwin->form->title != NULL) {
-        win_save_print(&confwin->super, '-', NULL, NO_EOL, 0, "", "Form title: ");
-        win_save_print(&confwin->super, '-', NULL, NO_DATE, 0, "", confwin->form->title);
+        win_save_print(window, '-', NULL, NO_EOL, 0, "", "Form title: ");
+        win_save_print(window, '-', NULL, NO_DATE, 0, "", confwin->form->title);
     } else {
         gchar **split_recipient = g_strsplit(confwin->from, " ", 2);
         char *roomjid = split_recipient[0];
-        win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "Configuration for room %s.", roomjid);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "Configuration for room %s.", roomjid);
         g_strfreev(split_recipient);
     }
-    win_save_print(&confwin->super, '-', NULL, 0, 0, "", "");
+    win_save_print(window, '-', NULL, 0, 0, "", "");
 
     ui_show_form_help(confwin);
 
@@ -2615,11 +2622,11 @@ _ui_show_form(ProfMucConfWin *confwin)
         if ((g_strcmp0(field->type, "fixed") == 0) && field->values) {
             if (field->values) {
                 char *value = field->values->data;
-                win_save_print(&confwin->super, '-', NULL, 0, 0, "", value);
+                win_save_print(window, '-', NULL, 0, 0, "", value);
             }
         } else if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
             char *tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
-            _ui_handle_form_field(&confwin->super, tag, field);
+            _ui_handle_form_field(window, tag, field);
         }
 
         curr_field = g_slist_next(curr_field);
@@ -2755,18 +2762,19 @@ _ui_handle_room_config_submit_result_error(const char * const roomjid, const cha
 static void
 _ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
 {
+    ProfWin *window = (ProfWin*) confwin;
     FormField *field = form_get_field_by_tag(confwin->form, tag);
     if (field != NULL) {
-        win_save_print(&confwin->super, '-', NULL, NO_EOL, 0, "", field->label);
+        win_save_print(window, '-', NULL, NO_EOL, 0, "", field->label);
         if (field->required) {
-            win_save_print(&confwin->super, '-', NULL, NO_DATE, 0, "", " (Required):");
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", " (Required):");
         } else {
-            win_save_print(&confwin->super, '-', NULL, NO_DATE, 0, "", ":");
+            win_save_print(window, '-', NULL, NO_DATE, 0, "", ":");
         }
         if (field->description != NULL) {
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Description : %s", field->description);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Description : %s", field->description);
         }
-        win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Type        : %s", field->type);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "  Type        : %s", field->type);
 
         int num_values = 0;
         GSList *curr_option = NULL;
@@ -2775,51 +2783,51 @@ _ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
         switch (field->type_t) {
         case FIELD_TEXT_SINGLE:
         case FIELD_TEXT_PRIVATE:
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_save_print(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
             break;
         case FIELD_TEXT_MULTI:
             num_values = form_get_value_count(confwin->form, tag);
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
-            win_save_print(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is any text");
             if (num_values > 0) {
-                win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
-                win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> between 'val1' and 'val%d'", num_values);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "  Where       : <value> between 'val1' and 'val%d'", num_values);
             }
             break;
         case FIELD_BOOLEAN:
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_save_print(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> is either 'on' or 'off'");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is either 'on' or 'off'");
             break;
         case FIELD_LIST_SINGLE:
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_save_print(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
             curr_option = field->options;
             while (curr_option != NULL) {
                 option = curr_option->data;
-                win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "                  %s", option->value);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
                 curr_option = g_slist_next(curr_option);
             }
             break;
         case FIELD_LIST_MULTI:
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
-            win_save_print(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is one of");
             curr_option = field->options;
             while (curr_option != NULL) {
                 option = curr_option->data;
-                win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "                  %s", option->value);
+                win_save_vprint(window, '-', NULL, 0, 0, "", "                  %s", option->value);
                 curr_option = g_slist_next(curr_option);
             }
             break;
         case FIELD_JID_SINGLE:
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
-            win_save_print(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Set         : /%s <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_JID_MULTI:
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
-            win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
-            win_save_print(&confwin->super, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Add         : /%s add <value>", tag);
+            win_save_vprint(window, '-', NULL, 0, 0, "", "  Remove      : /%s remove <value>", tag);
+            win_save_print(window, '-', NULL, 0, 0, "", "  Where       : <value> is a valid Jabber ID");
             break;
         case FIELD_FIXED:
         case FIELD_UNKNOWN:
@@ -2828,7 +2836,7 @@ _ui_show_form_field_help(ProfMucConfWin *confwin, char *tag)
             break;
         }
     } else {
-        win_save_vprint(&confwin->super, '-', NULL, 0, 0, "", "No such field %s", tag);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "No such field %s", tag);
     }
 }
 
@@ -2836,9 +2844,10 @@ static void
 _ui_show_form_help(ProfMucConfWin *confwin)
 {
     if (confwin->form->instructions != NULL) {
-        win_save_print(&confwin->super, '-', NULL, 0, 0, "", "Supplied instructions:");
-        win_save_print(&confwin->super, '-', NULL, 0, 0, "", confwin->form->instructions);
-        win_save_print(&confwin->super, '-', NULL, 0, 0, "", "");
+        ProfWin *window = (ProfWin*) confwin;
+        win_save_print(window, '-', NULL, 0, 0, "", "Supplied instructions:");
+        win_save_print(window, '-', NULL, 0, 0, "", confwin->form->instructions);
+        win_save_print(window, '-', NULL, 0, 0, "", "");
     }
 }
 

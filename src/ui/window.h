@@ -76,11 +76,11 @@ typedef struct prof_layout_t {
 } ProfLayout;
 
 typedef struct prof_layout_simple_t {
-    ProfLayout super;
+    ProfLayout base;
 } ProfLayoutSimple;
 
 typedef struct prof_layout_split_t {
-    ProfLayout super;
+    ProfLayout base;
     WINDOW *subwin;
     int sub_y_pos;
     unsigned long memcheck;
@@ -102,12 +102,12 @@ typedef struct prof_win_t {
 } ProfWin;
 
 typedef struct prof_console_win_t {
-    ProfWin super;
+    ProfWin window;
     char *from;
 } ProfConsoleWin;
 
 typedef struct prof_chat_win_t {
-    ProfWin super;
+    ProfWin window;
     char *barejid;
     gboolean is_otr;
     gboolean is_trusted;
@@ -117,26 +117,26 @@ typedef struct prof_chat_win_t {
 } ProfChatWin;
 
 typedef struct prof_muc_win_t {
-    ProfWin super;
+    ProfWin window;
     char *roomjid;
     unsigned long memcheck;
 } ProfMucWin;
 
 typedef struct prof_mucconf_win_t {
-    ProfWin super;
+    ProfWin window;
     char *from;
     DataForm *form;
     unsigned long memcheck;
 } ProfMucConfWin;
 
 typedef struct prof_private_win_t {
-    ProfWin super;
+    ProfWin window;
     char *fulljid;
     unsigned long memcheck;
 } ProfPrivateWin;
 
 typedef struct prof_xml_win_t {
-    ProfWin super;
+    ProfWin window;
     char *from;
 } ProfXMLWin;
 

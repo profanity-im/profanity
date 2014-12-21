@@ -1605,11 +1605,12 @@ cmd_status(gchar **args, struct cmd_help_t help)
         case WIN_MUC:
             if (usr != NULL) {
                 ProfMucWin *mucwin = wins_get_current_muc();
+                ProfWin *window = (ProfWin*) mucwin;
                 Occupant *occupant = muc_roster_item(mucwin->roomjid, usr);
                 if (occupant) {
-                    win_show_occupant(&mucwin->super, occupant);
+                    win_show_occupant(window, occupant);
                 } else {
-                    win_save_vprint(&mucwin->super, '-', NULL, 0, 0, "", "No such participant \"%s\" in room.", usr);
+                    win_save_vprint(window, '-', NULL, 0, 0, "", "No such participant \"%s\" in room.", usr);
                 }
             } else {
                 ui_current_print_line("You must specify a nickname.");
@@ -1620,11 +1621,12 @@ cmd_status(gchar **args, struct cmd_help_t help)
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ProfChatWin *chatwin = wins_get_current_chat();
+                ProfWin *window = (ProfWin*) chatwin;
                 PContact pcontact = roster_get_contact(chatwin->barejid);
                 if (pcontact != NULL) {
-                    win_show_contact(&chatwin->super, pcontact);
+                    win_show_contact(window, pcontact);
                 } else {
-                    win_save_println(&chatwin->super, "Error getting contact info.");
+                    win_save_println(window, "Error getting contact info.");
                 }
             }
             break;
@@ -1633,12 +1635,13 @@ cmd_status(gchar **args, struct cmd_help_t help)
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ProfPrivateWin *privatewin = wins_get_current_private();
+                ProfWin *window = (ProfWin*) privatewin;
                 Jid *jid = jid_create(privatewin->fulljid);
                 Occupant *occupant = muc_roster_item(jid->barejid, jid->resourcepart);
                 if (occupant) {
-                    win_show_occupant(&privatewin->super, occupant);
+                    win_show_occupant(window, occupant);
                 } else {
-                    win_save_println(&privatewin->super, "Error getting contact info.");
+                    win_save_println(window, "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -1700,11 +1703,12 @@ cmd_info(gchar **args, struct cmd_help_t help)
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ProfChatWin *chatwin = wins_get_current_chat();
+                ProfWin *window = (ProfWin*) chatwin;
                 PContact pcontact = roster_get_contact(chatwin->barejid);
                 if (pcontact != NULL) {
-                    win_show_info(&chatwin->super, pcontact);
+                    win_show_info(window, pcontact);
                 } else {
-                    win_save_println(&chatwin->super, "Error getting contact info.");
+                    win_save_println(window, "Error getting contact info.");
                 }
             }
             break;
@@ -1713,12 +1717,13 @@ cmd_info(gchar **args, struct cmd_help_t help)
                 ui_current_print_line("No parameter required when in chat.");
             } else {
                 ProfPrivateWin *privatewin = wins_get_current_private();
+                ProfWin *window = (ProfWin*) privatewin;
                 Jid *jid = jid_create(privatewin->fulljid);
                 Occupant *occupant = muc_roster_item(jid->barejid, jid->resourcepart);
                 if (occupant) {
-                    win_show_occupant_info(&privatewin->super, jid->barejid, occupant);
+                    win_show_occupant_info(window, jid->barejid, occupant);
                 } else {
-                    win_save_println(&privatewin->super, "Error getting contact info.");
+                    win_save_println(window, "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -2278,7 +2283,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
                 help_text = command->help.long_help;
             }
 
-            ui_show_lines(&confwin->super, help_text);
+            ui_show_lines((ProfWin*) confwin, help_text);
         }
         ui_current_print_line("");
         return TRUE;
@@ -2338,7 +2343,7 @@ cmd_kick(gchar **args, struct cmd_help_t help)
             char *reason = args[1];
             iq_room_kick_occupant(mucwin->roomjid, nick, reason);
         } else {
-            win_save_vprint(&mucwin->super, '!', NULL, 0, 0, "", "Occupant does not exist: %s", nick);
+            win_save_vprint((ProfWin*) mucwin, '!', NULL, 0, 0, "", "Occupant does not exist: %s", nick);
         }
     } else {
         cons_show("Usage: %s", help.usage);
@@ -2392,14 +2397,15 @@ cmd_subject(gchar **args, struct cmd_help_t help)
     }
 
     ProfMucWin *mucwin = wins_get_current_muc();
+    ProfWin *window = (ProfWin*) mucwin;
 
     if (args[0] == NULL) {
         char *subject = muc_subject(mucwin->roomjid);
         if (subject) {
-            win_save_vprint(&mucwin->super, '!', NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
-            win_save_vprint(&mucwin->super, '!', NULL, NO_DATE, 0, "", "%s", subject);
+            win_save_vprint(window, '!', NULL, NO_EOL, THEME_ROOMINFO, "", "Room subject: ");
+            win_save_vprint(window, '!', NULL, NO_DATE, 0, "", "%s", subject);
         } else {
-            win_save_print(&mucwin->super, '!', NULL, 0, THEME_ROOMINFO, "", "Room has no subject");
+            win_save_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Room has no subject");
         }
         return TRUE;
     }
@@ -2464,7 +2470,7 @@ cmd_affiliation(gchar **args, struct cmd_help_t help)
             iq_room_affiliation_list(mucwin->roomjid, "member");
             iq_room_affiliation_list(mucwin->roomjid, "outcast");
         } else if (g_strcmp0(affiliation, "none") == 0) {
-            win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
+            win_save_print((ProfWin*) mucwin, '!', NULL, 0, 0, "", "Cannot list users with no affiliation.");
         } else {
             iq_room_affiliation_list(mucwin->roomjid, affiliation);
         }
@@ -2532,7 +2538,7 @@ cmd_role(gchar **args, struct cmd_help_t help)
             iq_room_role_list(mucwin->roomjid, "participant");
             iq_room_role_list(mucwin->roomjid, "visitor");
         } else if (g_strcmp0(role, "none") == 0) {
-            win_save_print(&mucwin->super, '!', NULL, 0, 0, "", "Cannot list users with no role.");
+            win_save_print((ProfWin*) mucwin, '!', NULL, 0, 0, "", "Cannot list users with no role.");
         } else {
             iq_room_role_list(mucwin->roomjid, role);
         }
@@ -2584,7 +2590,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     ProfMucWin *mucwin = wins_get_current_muc();
-    int num = wins_get_num(&mucwin->super);
+    ProfWin *window = (ProfWin*) mucwin;
+    int num = wins_get_num(window);
 
     int ui_index = num;
     if (ui_index == 10) {
@@ -2594,12 +2601,12 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "accept") == 0) {
         gboolean requires_config = muc_requires_config(mucwin->roomjid);
         if (!requires_config) {
-            win_save_print(&mucwin->super, '!', NULL, 0, THEME_ROOMINFO, "", "Current room does not require configuration.");
+            win_save_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Current room does not require configuration.");
             return TRUE;
         } else {
             iq_confirm_instant_room(mucwin->roomjid);
             muc_set_requires_config(mucwin->roomjid, FALSE);
-            win_save_print(&mucwin->super, '!', NULL, 0, THEME_ROOMINFO, "", "Room unlocked.");
+            win_save_print(window, '!', NULL, 0, THEME_ROOMINFO, "", "Room unlocked.");
             return TRUE;
         }
     }
@@ -2616,7 +2623,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
         g_string_free(win_title, TRUE);
 
         if (confwin != NULL) {
-            num = wins_get_num(&confwin->super);
+            num = wins_get_num(window);
             ui_switch_win(num);
         } else {
             iq_request_room_config_form(mucwin->roomjid);

@@ -83,15 +83,15 @@ _win_create_simple_layout(void)
     int cols = getmaxx(stdscr);
 
     ProfLayoutSimple *layout = malloc(sizeof(ProfLayoutSimple));
-    layout->super.type = LAYOUT_SIMPLE;
-    layout->super.win = newpad(PAD_SIZE, cols);
-    wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
-    layout->super.buffer = buffer_create();
-    layout->super.y_pos = 0;
-    layout->super.paged = 0;
-    scrollok(layout->super.win, TRUE);
+    layout->base.type = LAYOUT_SIMPLE;
+    layout->base.win = newpad(PAD_SIZE, cols);
+    wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
+    layout->base.buffer = buffer_create();
+    layout->base.y_pos = 0;
+    layout->base.paged = 0;
+    scrollok(layout->base.win, TRUE);
 
-    return &layout->super;
+    return &layout->base;
 }
 
 static ProfLayout*
@@ -100,40 +100,40 @@ _win_create_split_layout(void)
     int cols = getmaxx(stdscr);
 
     ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
-    layout->super.type = LAYOUT_SPLIT;
-    layout->super.win = newpad(PAD_SIZE, cols);
-    wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
-    layout->super.buffer = buffer_create();
-    layout->super.y_pos = 0;
-    layout->super.paged = 0;
-    scrollok(layout->super.win, TRUE);
+    layout->base.type = LAYOUT_SPLIT;
+    layout->base.win = newpad(PAD_SIZE, cols);
+    wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
+    layout->base.buffer = buffer_create();
+    layout->base.y_pos = 0;
+    layout->base.paged = 0;
+    scrollok(layout->base.win, TRUE);
     layout->subwin = NULL;
     layout->sub_y_pos = 0;
     layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
 
-    return &layout->super;
+    return &layout->base;
 }
 
 ProfWin*
 win_create_console(void)
 {
     ProfConsoleWin *new_win = malloc(sizeof(ProfConsoleWin));
-    new_win->super.type = WIN_CONSOLE;
-    new_win->super.layout = _win_create_split_layout();
-    new_win->super.unread = 0;
+    new_win->window.type = WIN_CONSOLE;
+    new_win->window.layout = _win_create_split_layout();
+    new_win->window.unread = 0;
 
     new_win->from = strdup(CONS_WIN_TITLE);
 
-    return &new_win->super;
+    return &new_win->window;
 }
 
 ProfWin*
 win_create_chat(const char * const barejid)
 {
     ProfChatWin *new_win = malloc(sizeof(ProfChatWin));
-    new_win->super.type = WIN_CHAT;
-    new_win->super.layout = _win_create_simple_layout();
-    new_win->super.unread = 0;
+    new_win->window.type = WIN_CHAT;
+    new_win->window.layout = _win_create_simple_layout();
+    new_win->window.unread = 0;
 
     new_win->barejid = strdup(barejid);
     new_win->resource = NULL;
@@ -143,7 +143,7 @@ win_create_chat(const char * const barejid)
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
-    return &new_win->super;
+    return &new_win->window;
 }
 
 ProfWin*
@@ -152,80 +152,80 @@ win_create_muc(const char * const roomjid)
     ProfMucWin *new_win = malloc(sizeof(ProfMucWin));
     int cols = getmaxx(stdscr);
 
-    new_win->super.type = WIN_MUC;
+    new_win->window.type = WIN_MUC;
 
     ProfLayoutSplit *layout = malloc(sizeof(ProfLayoutSplit));
-    layout->super.type = LAYOUT_SPLIT;
+    layout->base.type = LAYOUT_SPLIT;
 
     if (prefs_get_boolean(PREF_OCCUPANTS)) {
         int subwin_cols = win_occpuants_cols();
-        layout->super.win = newpad(PAD_SIZE, cols - subwin_cols);
-        wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
+        layout->base.win = newpad(PAD_SIZE, cols - subwin_cols);
+        wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
         layout->subwin = newpad(PAD_SIZE, subwin_cols);;
         wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
     } else {
-        layout->super.win = newpad(PAD_SIZE, (cols));
-        wbkgd(layout->super.win, theme_attrs(THEME_TEXT));
+        layout->base.win = newpad(PAD_SIZE, (cols));
+        wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
         layout->subwin = NULL;
     }
     layout->sub_y_pos = 0;
     layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
-    layout->super.buffer = buffer_create();
-    layout->super.y_pos = 0;
-    layout->super.paged = 0;
-    scrollok(layout->super.win, TRUE);
-    new_win->super.layout = (ProfLayout*)layout;
+    layout->base.buffer = buffer_create();
+    layout->base.y_pos = 0;
+    layout->base.paged = 0;
+    scrollok(layout->base.win, TRUE);
+    new_win->window.layout = (ProfLayout*)layout;
 
     new_win->roomjid = strdup(roomjid);
-    new_win->super.unread = 0;
+    new_win->window.unread = 0;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
-    return &new_win->super;
+    return &new_win->window;
 }
 
 ProfWin*
 win_create_muc_config(const char * const title, DataForm *form)
 {
     ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
-    new_win->super.type = WIN_MUC_CONFIG;
-    new_win->super.layout = _win_create_simple_layout();
-    new_win->super.unread = 0;
+    new_win->window.type = WIN_MUC_CONFIG;
+    new_win->window.layout = _win_create_simple_layout();
+    new_win->window.unread = 0;
 
     new_win->from = strdup(title);
     new_win->form = form;
 
     new_win->memcheck = PROFCONFWIN_MEMCHECK;
 
-    return &new_win->super;
+    return &new_win->window;
 }
 
 ProfWin*
 win_create_private(const char * const fulljid)
 {
     ProfPrivateWin *new_win = malloc(sizeof(ProfPrivateWin));
-    new_win->super.type = WIN_PRIVATE;
-    new_win->super.layout = _win_create_simple_layout();
-    new_win->super.unread = 0;
+    new_win->window.type = WIN_PRIVATE;
+    new_win->window.layout = _win_create_simple_layout();
+    new_win->window.unread = 0;
 
     new_win->fulljid = strdup(fulljid);
 
     new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
 
-    return &new_win->super;
+    return &new_win->window;
 }
 
 ProfWin*
 win_create_xmlconsole(void)
 {
     ProfXMLWin *new_win = malloc(sizeof(ProfXMLWin));
-    new_win->super.type = WIN_XML;
-    new_win->super.layout = _win_create_simple_layout();
-    new_win->super.unread = 0;
+    new_win->window.type = WIN_XML;
+    new_win->window.layout = _win_create_simple_layout();
+    new_win->window.unread = 0;
 
     new_win->from = strdup(XML_WIN_TITLE);
 
-    return &new_win->super;
+    return &new_win->window;
 }
 
 void
@@ -239,7 +239,7 @@ win_hide_subwin(ProfWin *window)
         layout->subwin = NULL;
         layout->sub_y_pos = 0;
         int cols = getmaxx(stdscr);
-        wresize(layout->super.win, PAD_SIZE, cols);
+        wresize(layout->base.win, PAD_SIZE, cols);
         win_redraw(window);
     } else {
         int cols = getmaxx(stdscr);
@@ -267,7 +267,7 @@ win_show_subwin(ProfWin *window)
     ProfLayoutSplit *layout = (ProfLayoutSplit*)window->layout;
     layout->subwin = newpad(PAD_SIZE, subwin_cols);
     wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
-    wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
+    wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
     win_redraw(window);
 }
 
@@ -279,8 +279,8 @@ win_free(ProfWin* window)
         if (layout->subwin) {
             delwin(layout->subwin);
         }
-        buffer_free(layout->super.buffer);
-        delwin(layout->super.win);
+        buffer_free(layout->base.buffer);
+        delwin(layout->base.win);
     } else {
         buffer_free(window->layout->buffer);
         delwin(window->layout->win);
@@ -374,10 +374,10 @@ win_update_virtual(ProfWin *window)
             } else {
                 subwin_cols = win_roster_cols();
             }
-            pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
             pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
         } else {
-            pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, cols-1);
+            pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, cols-1);
         }
     } else {
         pnoutrefresh(window->layout->win, window->layout->y_pos, 0, 1, 0, rows-3, cols-1);

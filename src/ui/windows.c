@@ -505,11 +505,11 @@ wins_resize_all(void)
                 } else if (window->type == WIN_MUC) {
                     subwin_cols = win_occpuants_cols();
                 }
-                wresize(layout->super.win, PAD_SIZE, cols - subwin_cols);
+                wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
                 wresize(layout->subwin, PAD_SIZE, subwin_cols);
                 rosterwin_roster();
             } else {
-                wresize(layout->super.win, PAD_SIZE, cols);
+                wresize(layout->base.win, PAD_SIZE, cols);
             }
         } else {
             wresize(window->layout->win, PAD_SIZE, cols);
@@ -551,12 +551,12 @@ wins_show_subwin(ProfWin *window)
     if (current_win->type == WIN_MUC) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
         subwin_cols = win_occpuants_cols();
-        pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
         pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     } else if (current_win->type == WIN_CONSOLE) {
         ProfLayoutSplit *layout = (ProfLayoutSplit*)current_win->layout;
         subwin_cols = win_roster_cols();
-        pnoutrefresh(layout->super.win, layout->super.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
+        pnoutrefresh(layout->base.win, layout->base.y_pos, 0, 1, 0, rows-3, (cols-subwin_cols)-1);
         pnoutrefresh(layout->subwin, layout->sub_y_pos, 0, 1, (cols-subwin_cols), rows-3, cols-1);
     }
 }
