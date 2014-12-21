@@ -229,7 +229,6 @@ win_create_plugin(const char * const tag)
     ProfPluginWin *new_win = malloc(sizeof(ProfPluginWin));
     new_win->super.type = WIN_PLUGIN;
     new_win->super.layout = _win_create_simple_layout();
-    new_win->super.unread = 0;
 
     new_win->tag = strdup(tag);
 
