@@ -61,6 +61,8 @@
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
 
+#define INPBLOCK_DEFAULT 20
+
 static gchar *prefs_loc;
 static GKeyFile *prefs;
 gint log_maxsize = 0;
@@ -258,6 +260,22 @@ prefs_set_max_log_size(gint value)
 {
     log_maxsize = value;
     g_key_file_set_integer(prefs, PREF_GROUP_LOGGING, "maxsize", value);
+    _save_prefs();
+}
+
+gint prefs_get_inpblock(void)
+{
+    int val = g_key_file_get_integer(prefs, PREF_GROUP_UI, "inpblock", NULL);
+    if (val == 0) {
+        return INPBLOCK_DEFAULT;
+    } else {
+        return val;
+    }
+}
+
+void prefs_set_inpblock(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_UI, "inpblock", value);
     _save_prefs();
 }
 
