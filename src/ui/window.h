@@ -61,6 +61,8 @@
 #define PROFMUCWIN_MEMCHECK         52345276
 #define PROFPRIVATEWIN_MEMCHECK     77437483
 #define PROFCONFWIN_MEMCHECK        64334685
+#define PROFXMLWIN_MEMCHECK         87333463
+#define PROFPLUGINWIN_MEMCHECK      43434777
 
 typedef enum {
     LAYOUT_SIMPLE,
@@ -104,7 +106,6 @@ typedef struct prof_win_t {
 
 typedef struct prof_console_win_t {
     ProfWin window;
-    char *from;
 } ProfConsoleWin;
 
 typedef struct prof_chat_win_t {
@@ -125,7 +126,7 @@ typedef struct prof_muc_win_t {
 
 typedef struct prof_mucconf_win_t {
     ProfWin window;
-    char *from;
+    char *roomjid;
     DataForm *form;
     unsigned long memcheck;
 } ProfMucConfWin;
@@ -138,12 +139,13 @@ typedef struct prof_private_win_t {
 
 typedef struct prof_xml_win_t {
     ProfWin window;
-    char *from;
+    unsigned long memcheck;
 } ProfXMLWin;
 
 typedef struct prof_plugin_win_t {
     ProfWin super;
-    char *from;
+    char *tag;
+    unsigned long memcheck;
 } ProfPluginWin;
 
 ProfWin* win_create_console(void);
@@ -153,6 +155,8 @@ ProfWin* win_create_muc_config(const char * const title, DataForm *form);
 ProfWin* win_create_private(const char * const fulljid);
 ProfWin* win_create_xmlconsole(void);
 ProfWin* win_create_plugin(const char * const tag);
+
+char *win_get_title(ProfWin *window);
 
 void win_free(ProfWin *window);
 void win_update_virtual(ProfWin *window);
@@ -177,7 +181,6 @@ void win_show_subwin(ProfWin *window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
-GString* win_get_recipient_string(ProfWin *window);
 
 gboolean win_has_active_subwin(ProfWin *window);
 gboolean win_has_modified_form(ProfWin *window);

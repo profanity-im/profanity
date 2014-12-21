@@ -1899,7 +1899,7 @@ cmd_execute_default(const char * inp)
 
         case WIN_PLUGIN:
             pluginwin = (ProfPluginWin*)current;
-            plugins_win_process_line(pluginwin->from, inp);
+            plugins_win_process_line(pluginwin->tag, inp);
             break;
 
         default:

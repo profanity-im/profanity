@@ -48,19 +48,15 @@
 #include "ui/window.h"
 #include "roster_list.h"
 
-#define CONSOLE_TITLE "Profanity. Type /help for help information."
-
 static WINDOW *win;
-static char *current_title = NULL;
-static char *current_recipient = NULL;
 static contact_presence_t current_presence;
 
 static gboolean typing;
 static GTimer *typing_elapsed;
 
 static void _title_bar_draw(void);
-static void _show_contact_presence(void);
 static void _show_self_presence(void);
+static void _show_contact_presence(ProfChatWin *chatwin);
 #ifdef PROF_HAVE_LIBOTR
 static void _show_privacy(ProfChatWin *chatwin);
 #endif
@@ -81,8 +77,8 @@ create_title_bar(void)
 void
 title_bar_update_virtual(void)
 {
-    if (current_recipient != NULL) {
-
+    ProfWin *window = wins_get_current();
+    if (window->type != WIN_CONSOLE) {
         if (typing_elapsed != NULL) {
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
 
@@ -112,15 +108,8 @@ void
 title_bar_console(void)
 {
     werase(win);
-    if (current_recipient != NULL) {
-        free(current_recipient);
-    }
-    current_recipient = NULL;
     typing = FALSE;
     typing_elapsed = NULL;
-
-    free(current_title);
-    current_title = strdup(CONSOLE_TITLE);
 
     _title_bar_draw();
 }
@@ -132,20 +121,15 @@ title_bar_set_presence(contact_presence_t presence)
     _title_bar_draw();
 }
 
+// TODO remove
 void
-title_bar_set_recipient(const char * const recipient)
+title_bar_switch(void)
 {
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
         typing_elapsed = NULL;
         typing = FALSE;
     }
-
-    free(current_recipient);
-    current_recipient = strdup(recipient);
-
-    free(current_title);
-    current_title = strdup(recipient);
 
     _title_bar_draw();
 }
@@ -179,21 +163,21 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    mvwprintw(win, 0, 0, " %s", current_title);
+    char *title = win_get_title(current);
+    mvwprintw(win, 0, 0, " %s", title);
+    free(title);
 
     if (current && current->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*)current;
+        ProfChatWin *chatwin = (ProfChatWin*) current;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        _show_contact_presence();
+        _show_contact_presence(chatwin);
+
 #ifdef PROF_HAVE_LIBOTR
         _show_privacy(chatwin);
 #endif
+
         if (typing) {
             wprintw(win, " (typing...)");
-        }
-    } else if (current && current->type == WIN_MUC_CONFIG) {
-        if (win_has_modified_form(current)) {
-            wprintw(win, " *");
         }
     }
 
@@ -265,7 +249,7 @@ _show_privacy(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
-    if (chatwin->is_otr) {
+    if (!chatwin->is_otr) {
         if (prefs_get_boolean(PREF_OTR_WARN)) {
             int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
             wprintw(win, " ");
@@ -321,13 +305,10 @@ _show_privacy(ProfChatWin *chatwin)
 #endif
 
 static void
-_show_contact_presence(void)
+_show_contact_presence(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
-
-    ProfWin *current = wins_get_current();
-    ProfChatWin *chatwin = (ProfChatWin*)current;
-    if (current && win_has_chat_resource(current)) {
+    if (chatwin && chatwin->resource) {
         wprintw(win, "/");
         wprintw(win, chatwin->resource);
     }
@@ -336,24 +317,15 @@ _show_contact_presence(void)
         theme_item_t presence_colour = THEME_TITLE_OFFLINE;
         const char *presence = "offline";
 
-        if (current && win_has_chat_resource(current)) {
-            char *barejid = roster_barejid_from_name(current_recipient);
-            if (barejid) {
-                PContact contact = roster_get_contact(barejid);
-                if (contact) {
-                    Resource *resource = p_contact_get_resource(contact, chatwin->resource);
-                    if (resource) {
-                        presence = string_from_resource_presence(resource->presence);
-                    }
+        PContact contact = roster_get_contact(chatwin->barejid);
+        if (contact) {
+            if (chatwin && chatwin->resource) {
+                Resource *resource = p_contact_get_resource(contact, chatwin->resource);
+                if (resource) {
+                    presence = string_from_resource_presence(resource->presence);
                 }
-            }
-        } else {
-            char *barejid = roster_barejid_from_name(current_recipient);
-            if (barejid) {
-                PContact contact = roster_get_contact(barejid);
-                if (contact) {
-                    presence = p_contact_presence(contact);
-                }
+            } else {
+                presence = p_contact_presence(contact);
             }
         }
 
