@@ -370,7 +370,7 @@ _ui_incoming_msg(const char * const barejid, const char * const message, GTimeVa
             flash();
         }
 
-        window->unread++;
+        chatwin->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _win_show_history(num, barejid);
         }
@@ -439,7 +439,7 @@ _ui_incoming_private_msg(const char * const fulljid, const char * const message,
             flash();
         }
 
-        window->unread++;
+        privatewin->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
             _win_show_history(num, fulljid);
         }
@@ -855,8 +855,6 @@ _ui_switch_win(const int i)
 
         wins_set_current_by_num(i);
 
-        new_current->unread = 0;
-
         if (i == 1) {
             title_bar_console();
             status_bar_current(1);
@@ -890,8 +888,6 @@ _ui_previous_win(void)
     int i = wins_get_num(new_current);
     wins_set_current_by_num(i);
 
-    new_current->unread = 0;
-
     if (i == 1) {
         title_bar_console();
         status_bar_current(1);
@@ -920,8 +916,6 @@ _ui_next_win(void)
 
     int i = wins_get_num(new_current);
     wins_set_current_by_num(i);
-
-    new_current->unread = 0;
 
     if (i == 1) {
         title_bar_console();
@@ -1841,10 +1835,11 @@ static void
 _ui_room_message(const char * const roomjid, const char * const nick,
     const char * const message)
 {
-    ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    if (window == NULL) {
+    ProfMucWin *mucwin = wins_get_muc(roomjid);
+    if (mucwin == NULL) {
         log_error("Room message received from %s, but no window open for %s", nick, roomjid);
     } else {
+        ProfWin *window = (ProfWin*) mucwin;
         int num = wins_get_num(window);
         char *my_nick = muc_nick(roomjid);
 
@@ -1873,7 +1868,7 @@ _ui_room_message(const char * const roomjid, const char * const nick,
                 }
             }
 
-            window->unread++;
+            mucwin->unread++;
         }
 
         int ui_index = num;
@@ -2229,7 +2224,7 @@ _ui_win_unread(int index)
 {
     ProfWin *window = wins_get_by_num(index);
     if (window != NULL) {
-        return window->unread;
+        return win_unread(window);
     } else {
         return 0;
     }

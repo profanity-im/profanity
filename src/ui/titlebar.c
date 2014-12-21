@@ -121,7 +121,6 @@ title_bar_set_presence(contact_presence_t presence)
     _title_bar_draw();
 }
 
-// TODO remove
 void
 title_bar_switch(void)
 {
