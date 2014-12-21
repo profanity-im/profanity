@@ -123,6 +123,8 @@ void prefs_set_reconnect(gint value);
 gint prefs_get_reconnect(void);
 void prefs_set_autoping(gint value);
 gint prefs_get_autoping(void);
+gint prefs_get_inpblock(void);
+void prefs_set_inpblock(gint value);
 
 void prefs_set_occupants_size(gint value);
 gint prefs_get_occupants_size(void);

@@ -3396,6 +3396,19 @@ cmd_notify(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_inpblock(gchar **args, struct cmd_help_t help)
+{
+    char *value = args[0];
+    int intval;
+    if (_strtoi(value, &intval, 1, 1000) == 0) {
+        cons_show("Input blocking set to %d milliseconds.", intval);
+        prefs_set_inpblock(intval);
+        ui_input_nonblocking();
+    }
+    return TRUE;
+}
+
+gboolean
 cmd_log(gchar **args, struct cmd_help_t help)
 {
     char *subcmd = args[0];

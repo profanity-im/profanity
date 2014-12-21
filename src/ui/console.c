@@ -999,6 +999,7 @@ _cons_show_ui_prefs(void)
     cons_privileges_setting();
     cons_titlebar_setting();
     cons_presence_setting();
+    cons_inpblock_setting();
 
     cons_alert();
 }
@@ -1157,6 +1158,12 @@ _cons_show_chat_prefs(void)
     cons_history_setting();
 
     cons_alert();
+}
+
+static void
+_cons_inpblock_setting(void)
+{
+    cons_show("Input block (/inpblock)       : %d milliseconds", prefs_get_inpblock());
 }
 
 static void
@@ -1677,6 +1684,7 @@ console_init_module(void)
     cons_reconnect_setting = _cons_reconnect_setting;
     cons_autoping_setting = _cons_autoping_setting;
     cons_priority_setting = _cons_priority_setting;
+    cons_inpblock_setting = _cons_inpblock_setting;
     cons_show_connection_prefs = _cons_show_connection_prefs;
     cons_show_themes = _cons_show_themes;
     cons_prefs = _cons_prefs;

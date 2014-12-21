@@ -617,6 +617,17 @@ static struct cmd_t command_defs[] =
           "Configure time precision for the main window.",
           NULL } } },
 
+    { "/inpblock",
+        cmd_inpblock, parse_args, 1, 1, &cons_inpblock_setting,
+        { "/inpblock millis", "Input blocking delay.",
+        { "/inpblock millis",
+          "----------------",
+          "Time to wait in milliseconds before reading input from the terminal buffer, defaults to 20.",
+          "Valid values are 1-1000.",
+          "A higher value will result in less CPU usage, but a noticable delay for response to input.",
+          "A lower value will result in higher CPU usage, but faster response to input.",
+          NULL } } },
+
     { "/notify",
         cmd_notify, parse_args, 2, 3, &cons_notify_setting,
         { "/notify [type value]|[type setting value]", "Control various desktop noficiations.",

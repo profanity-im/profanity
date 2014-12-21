@@ -112,7 +112,7 @@ inp_win_resize(void)
 void
 inp_non_block(void)
 {
-    wtimeout(inp_win, 20);
+    wtimeout(inp_win, prefs_get_inpblock());
 }
 
 void
