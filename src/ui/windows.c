@@ -250,8 +250,21 @@ wins_get_nums(void)
 void
 wins_set_current_by_num(int i)
 {
-    if (g_hash_table_lookup(windows, GINT_TO_POINTER(i)) != NULL) {
+    ProfWin *window = g_hash_table_lookup(windows, GINT_TO_POINTER(i));
+    if (window) {
         current = i;
+        if (window->type == WIN_CHAT) {
+            ProfChatWin *chatwin = (ProfChatWin*) window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            chatwin->unread = 0;
+        } else if (window->type == WIN_MUC) {
+            ProfMucWin *mucwin = (ProfMucWin*) window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            mucwin->unread = 0;
+        } else if (window->type == WIN_PRIVATE) {
+            ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
+            privatewin->unread = 0;
+        }
     }
 }
 
@@ -480,7 +493,7 @@ wins_get_total_unread(void)
 
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        result += window->unread;
+        result += win_unread(window);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -628,7 +641,7 @@ wins_get_prune_wins(void)
 
     while (curr != NULL) {
         ProfWin *window = curr->data;
-        if (window->unread == 0 &&
+        if (win_unread(window) == 0 &&
                 window->type != WIN_MUC &&
                 window->type != WIN_MUC_CONFIG &&
                 window->type != WIN_XML &&
@@ -675,7 +688,7 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(source_win));
             status_bar_inactive(source_win);
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
-            if (source->unread > 0) {
+            if (win_unread(source) > 0) {
                 status_bar_new(target_win);
             } else {
                 status_bar_active(target_win);
@@ -691,12 +704,12 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(target_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(source_win), target);
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
-            if (source->unread > 0) {
+            if (win_unread(source) > 0) {
                 status_bar_new(target_win);
             } else {
                 status_bar_active(target_win);
             }
-            if (target->unread > 0) {
+            if (win_unread(target) > 0) {
                 status_bar_new(source_win);
             } else {
                 status_bar_active(source_win);
@@ -742,14 +755,14 @@ wins_tidy(void)
             ProfWin *window = g_hash_table_lookup(windows, curr->data);
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
-                if (window->unread > 0) {
+                if (win_unread(window) > 0) {
                     status_bar_new(0);
                 } else {
                     status_bar_active(0);
                 }
             } else {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(num), window);
-                if (window->unread > 0) {
+                if (win_unread(window) > 0) {
                     status_bar_new(num);
                 } else {
                     status_bar_active(num);
@@ -810,9 +823,9 @@ wins_create_summary(void)
                     g_string_free(chat_presence, TRUE);
                 }
 
-                if (window->unread > 0) {
+                if (chatwin->unread > 0) {
                     GString *chat_unread = g_string_new("");
-                    g_string_printf(chat_unread, ", %d unread", window->unread);
+                    g_string_printf(chat_unread, ", %d unread", chatwin->unread);
                     g_string_append(chat_string, chat_unread->str);
                     g_string_free(chat_unread, TRUE);
                 }
@@ -827,9 +840,9 @@ wins_create_summary(void)
                 ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
                 g_string_printf(priv_string, "%d: Private %s", ui_index, privatewin->fulljid);
 
-                if (window->unread > 0) {
+                if (privatewin->unread > 0) {
                     GString *priv_unread = g_string_new("");
-                    g_string_printf(priv_unread, ", %d unread", window->unread);
+                    g_string_printf(priv_unread, ", %d unread", privatewin->unread);
                     g_string_append(priv_string, priv_unread->str);
                     g_string_free(priv_unread, TRUE);
                 }
@@ -844,9 +857,9 @@ wins_create_summary(void)
                 ProfMucWin *mucwin = (ProfMucWin*)window;
                 g_string_printf(muc_string, "%d: Room %s", ui_index, mucwin->roomjid);
 
-                if (window->unread > 0) {
+                if (mucwin->unread > 0) {
                     GString *muc_unread = g_string_new("");
-                    g_string_printf(muc_unread, ", %d unread", window->unread);
+                    g_string_printf(muc_unread, ", %d unread", mucwin->unread);
                     g_string_append(muc_string, muc_unread->str);
                     g_string_free(muc_unread, TRUE);
                 }

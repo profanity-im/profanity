@@ -120,7 +120,6 @@ win_create_console(void)
     ProfConsoleWin *new_win = malloc(sizeof(ProfConsoleWin));
     new_win->window.type = WIN_CONSOLE;
     new_win->window.layout = _win_create_split_layout();
-    new_win->window.unread = 0;
 
     return &new_win->window;
 }
@@ -131,13 +130,13 @@ win_create_chat(const char * const barejid)
     ProfChatWin *new_win = malloc(sizeof(ProfChatWin));
     new_win->window.type = WIN_CHAT;
     new_win->window.layout = _win_create_simple_layout();
-    new_win->window.unread = 0;
 
     new_win->barejid = strdup(barejid);
     new_win->resource = NULL;
     new_win->is_otr = FALSE;
     new_win->is_trusted = FALSE;
     new_win->history_shown = FALSE;
+    new_win->unread = 0;
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
@@ -175,7 +174,7 @@ win_create_muc(const char * const roomjid)
     new_win->window.layout = (ProfLayout*)layout;
 
     new_win->roomjid = strdup(roomjid);
-    new_win->window.unread = 0;
+    new_win->unread = 0;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
@@ -188,7 +187,6 @@ win_create_muc_config(const char * const roomjid, DataForm *form)
     ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
     new_win->window.type = WIN_MUC_CONFIG;
     new_win->window.layout = _win_create_simple_layout();
-    new_win->window.unread = 0;
 
     new_win->roomjid = strdup(roomjid);
     new_win->form = form;
@@ -204,9 +202,9 @@ win_create_private(const char * const fulljid)
     ProfPrivateWin *new_win = malloc(sizeof(ProfPrivateWin));
     new_win->window.type = WIN_PRIVATE;
     new_win->window.layout = _win_create_simple_layout();
-    new_win->window.unread = 0;
 
     new_win->fulljid = strdup(fulljid);
+    new_win->unread = 0;
 
     new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
 
@@ -219,7 +217,6 @@ win_create_xmlconsole(void)
     ProfXMLWin *new_win = malloc(sizeof(ProfXMLWin));
     new_win->window.type = WIN_XML;
     new_win->window.layout = _win_create_simple_layout();
-    new_win->window.unread = 0;
 
     new_win->memcheck = PROFXMLWIN_MEMCHECK;
 
@@ -954,6 +951,26 @@ win_has_modified_form(ProfWin *window)
         return confwin->form->modified;
     } else {
         return FALSE;
+    }
+}
+
+int
+win_unread(ProfWin *window)
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*) window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        return chatwin->unread;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*) window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        return mucwin->unread;
+    } else if (window->type == WIN_PRIVATE) {
+        ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
+        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+        return privatewin->unread;
+    } else {
+        return 0;
     }
 }
 

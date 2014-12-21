@@ -99,7 +99,6 @@ typedef enum {
 typedef struct prof_win_t {
     win_type_t type;
     ProfLayout *layout;
-    int unread;
 } ProfWin;
 
 typedef struct prof_console_win_t {
@@ -109,6 +108,7 @@ typedef struct prof_console_win_t {
 typedef struct prof_chat_win_t {
     ProfWin window;
     char *barejid;
+    int unread;
     gboolean is_otr;
     gboolean is_trusted;
     char *resource;
@@ -119,6 +119,7 @@ typedef struct prof_chat_win_t {
 typedef struct prof_muc_win_t {
     ProfWin window;
     char *roomjid;
+    int unread;
     unsigned long memcheck;
 } ProfMucWin;
 
@@ -132,6 +133,7 @@ typedef struct prof_mucconf_win_t {
 typedef struct prof_private_win_t {
     ProfWin window;
     char *fulljid;
+    int unread;
     unsigned long memcheck;
 } ProfPrivateWin;
 
@@ -173,6 +175,7 @@ int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
 
+int win_unread(ProfWin *window);
 gboolean win_has_active_subwin(ProfWin *window);
 gboolean win_has_modified_form(ProfWin *window);
 gboolean win_chat_history_shown(ProfWin *window);
