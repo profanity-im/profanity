@@ -61,7 +61,7 @@ _occupantswin_occupants(const char * const roomjid)
     if (mucwin) {
         GList *occupants = muc_roster(roomjid);
         if (occupants) {
-            ProfLayoutSplit *layout = (ProfLayoutSplit*)mucwin->super.layout;
+            ProfLayoutSplit *layout = (ProfLayoutSplit*)mucwin->window.layout;
             assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
             werase(layout->subwin);
