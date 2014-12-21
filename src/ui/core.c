@@ -861,9 +861,7 @@ _ui_switch_win(const int i)
             status_bar_current(1);
             status_bar_active(1);
         } else {
-            GString *recipient_str = win_get_recipient_string(new_current);
-            title_bar_set_recipient(recipient_str->str);
-            g_string_free(recipient_str, TRUE);
+            title_bar_switch();
             status_bar_current(i);
             status_bar_active(i);
         }
@@ -898,9 +896,7 @@ _ui_previous_win(void)
         status_bar_current(1);
         status_bar_active(1);
     } else {
-        GString *recipient_str = win_get_recipient_string(new_current);
-        title_bar_set_recipient(recipient_str->str);
-        g_string_free(recipient_str, TRUE);
+        title_bar_switch();
         status_bar_current(i);
         status_bar_active(i);
     }
@@ -931,9 +927,7 @@ _ui_next_win(void)
         status_bar_current(1);
         status_bar_active(1);
     } else {
-        GString *recipient_str = win_get_recipient_string(new_current);
-        title_bar_set_recipient(recipient_str->str);
-        g_string_free(recipient_str, TRUE);
+        title_bar_switch();
         status_bar_current(i);
         status_bar_active(i);
     }
@@ -963,9 +957,7 @@ _ui_gone_secure(const char * const barejid, gboolean trusted)
     }
 
     if (wins_is_current(window)) {
-        GString *recipient_str = win_get_recipient_string(window);
-        title_bar_set_recipient(recipient_str->str);
-        g_string_free(recipient_str, TRUE);
+         title_bar_switch();
     } else {
         int num = wins_get_num(window);
         status_bar_new(num);
@@ -990,9 +982,7 @@ _ui_gone_insecure(const char * const barejid)
         ProfWin *window = (ProfWin*)chatwin;
         win_save_print(window, '!', NULL, 0, THEME_OTR_ENDED, "", "OTR session ended.");
         if (wins_is_current(window)) {
-            GString *recipient_str = win_get_recipient_string(window);
-            title_bar_set_recipient(recipient_str->str);
-            g_string_free(recipient_str, TRUE);
+            title_bar_switch();
         }
     }
 }
@@ -1100,9 +1090,7 @@ _ui_trust(const char * const barejid)
         ProfWin *window = (ProfWin*)chatwin;
         win_save_print(window, '!', NULL, 0, THEME_OTR_TRUSTED, "", "OTR session trusted.");
         if (wins_is_current(window)) {
-            GString *recipient_str = win_get_recipient_string(window);
-            title_bar_set_recipient(recipient_str->str);
-            g_string_free(recipient_str, TRUE);
+            title_bar_switch();
         }
     }
 }
@@ -1118,9 +1106,7 @@ _ui_untrust(const char * const barejid)
         ProfWin *window = (ProfWin*)chatwin;
         win_save_print(window, '!', NULL, 0, THEME_OTR_UNTRUSTED, "", "OTR session untrusted.");
         if (wins_is_current(window)) {
-            GString *recipient_str = win_get_recipient_string(window);
-            title_bar_set_recipient(recipient_str->str);
-            g_string_free(recipient_str, TRUE);
+            title_bar_switch();
         }
     }
 }
@@ -2605,10 +2591,7 @@ _ui_show_form(ProfMucConfWin *confwin)
         win_save_print(window, '-', NULL, NO_EOL, 0, "", "Form title: ");
         win_save_print(window, '-', NULL, NO_DATE, 0, "", confwin->form->title);
     } else {
-        gchar **split_recipient = g_strsplit(confwin->from, " ", 2);
-        char *roomjid = split_recipient[0];
-        win_save_vprint(window, '-', NULL, 0, 0, "", "Configuration for room %s.", roomjid);
-        g_strfreev(split_recipient);
+        win_save_vprint(window, '-', NULL, 0, 0, "", "Configuration for room %s.", confwin->roomjid);
     }
     win_save_print(window, '-', NULL, 0, 0, "", "");
 
@@ -2642,14 +2625,11 @@ _ui_show_form_field(ProfWin *window, DataForm *form, char *tag)
 }
 
 static void
-_ui_handle_room_configuration(const char * const room, DataForm *form)
+_ui_handle_room_configuration(const char * const roomjid, DataForm *form)
 {
-    GString *title = g_string_new(room);
-    g_string_append(title, " config");
-    ProfWin *window = wins_new_muc_config(title->str, form);
+    ProfWin *window = wins_new_muc_config(roomjid, form);
     ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     assert(confwin->memcheck = PROFCONFWIN_MEMCHECK);
-    g_string_free(title, TRUE);
 
     int num = wins_get_num(window);
     ui_switch_win(num);

@@ -48,11 +48,7 @@
 #include "ui/window.h"
 #include "roster_list.h"
 
-#define CONSOLE_TITLE "Profanity. Type /help for help information."
-
 static WINDOW *win;
-static char *current_title = NULL;
-static char *current_recipient = NULL;
 static contact_presence_t current_presence;
 
 static gboolean typing;
@@ -81,8 +77,8 @@ create_title_bar(void)
 void
 title_bar_update_virtual(void)
 {
-    if (current_recipient != NULL) {
-
+    ProfWin *window = wins_get_current();
+    if (window->type != WIN_CONSOLE) {
         if (typing_elapsed != NULL) {
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
 
@@ -112,15 +108,8 @@ void
 title_bar_console(void)
 {
     werase(win);
-    if (current_recipient != NULL) {
-        free(current_recipient);
-    }
-    current_recipient = NULL;
     typing = FALSE;
     typing_elapsed = NULL;
-
-    free(current_title);
-    current_title = strdup(CONSOLE_TITLE);
 
     _title_bar_draw();
 }
@@ -132,20 +121,15 @@ title_bar_set_presence(contact_presence_t presence)
     _title_bar_draw();
 }
 
+// TODO remove
 void
-title_bar_set_recipient(const char * const recipient)
+title_bar_switch(void)
 {
     if (typing_elapsed != NULL) {
         g_timer_destroy(typing_elapsed);
         typing_elapsed = NULL;
         typing = FALSE;
     }
-
-    free(current_recipient);
-    current_recipient = strdup(recipient);
-
-    free(current_title);
-    current_title = strdup(recipient);
 
     _title_bar_draw();
 }
@@ -179,7 +163,9 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    mvwprintw(win, 0, 0, " %s", current_title);
+    char *title = win_get_title(current);
+    mvwprintw(win, 0, 0, " %s", title);
+    free(title);
 
     if (current && current->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*) current;
@@ -192,12 +178,6 @@ _title_bar_draw(void)
 
         if (typing) {
             wprintw(win, " (typing...)");
-        }
-    } else if (current && current->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*) current;
-        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-        if (confwin->form->modified) {
-            wprintw(win, " *");
         }
     }
 
@@ -269,7 +249,7 @@ _show_privacy(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
-    if (chatwin->is_otr) {
+    if (!chatwin->is_otr) {
         if (prefs_get_boolean(PREF_OTR_WARN)) {
             int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
             wprintw(win, " ");

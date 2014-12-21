@@ -36,6 +36,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include <glib.h>
 
@@ -99,7 +100,7 @@ wins_get_chat(const char * const barejid)
 }
 
 ProfMucConfWin *
-wins_get_muc_conf(const char * const title)
+wins_get_muc_conf(const char * const roomjid)
 {
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
@@ -108,7 +109,7 @@ wins_get_muc_conf(const char * const title)
         ProfWin *window = curr->data;
         if (window->type == WIN_MUC_CONFIG) {
             ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-            if (g_strcmp0(confwin->from, title) == 0) {
+            if (g_strcmp0(confwin->roomjid, roomjid) == 0) {
                 g_list_free(values);
                 return confwin;
             }
@@ -449,11 +450,11 @@ wins_new_muc(const char * const roomjid)
 }
 
 ProfWin *
-wins_new_muc_config(const char * const title, DataForm *form)
+wins_new_muc_config(const char * const roomjid, DataForm *form)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
-    ProfWin *newwin = win_create_muc_config(title, form);
+    ProfWin *newwin = win_create_muc_config(roomjid, form);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
     g_list_free(keys);
     return newwin;
@@ -857,13 +858,11 @@ wins_create_summary(void)
 
             case WIN_MUC_CONFIG:
                 muc_config_string = g_string_new("");
-                ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-                g_string_printf(muc_config_string, "%d: %s", ui_index, confwin->from);
-                if (win_has_modified_form(window)) {
-                    g_string_append(muc_config_string, " *");
-                }
+                char *title = win_get_title(window);
+                g_string_printf(muc_config_string, "%d: %s", ui_index, title);
                 result = g_slist_append(result, strdup(muc_config_string->str));
                 g_string_free(muc_config_string, TRUE);
+                free(title);
 
                 break;
 

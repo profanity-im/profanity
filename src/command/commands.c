@@ -2289,16 +2289,13 @@ cmd_form(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    gchar **split_recipient = g_strsplit(confwin->from, " ", 2);
-    char *roomjid = split_recipient[0];
-
     if (g_strcmp0(args[0], "submit") == 0) {
-        iq_submit_room_config(roomjid, confwin->form);
+        iq_submit_room_config(confwin->roomjid, confwin->form);
 
     }
 
     if (g_strcmp0(args[0], "cancel") == 0) {
-        iq_room_config_cancel(roomjid);
+        iq_room_config_cancel(confwin->roomjid);
     }
 
     if ((g_strcmp0(args[0], "submit") == 0) || (g_strcmp0(args[0], "cancel") == 0)) {
@@ -2306,15 +2303,13 @@ cmd_form(gchar **args, struct cmd_help_t help)
             cmd_autocomplete_remove_form_fields(confwin->form);
         }
         wins_close_current();
-        ProfWin *current = (ProfWin*)wins_get_muc(roomjid);
+        ProfWin *current = (ProfWin*)wins_get_muc(confwin->roomjid);
         if (current == NULL) {
             current = wins_get_console();
         }
         int num = wins_get_num(current);
         ui_switch_win(num);
     }
-
-    g_strfreev(split_recipient);
 
     return TRUE;
 }
@@ -2617,10 +2612,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "config") == 0) {
-        GString *win_title = g_string_new(mucwin->roomjid);
-        g_string_append(win_title, " config");
-        ProfMucConfWin *confwin = wins_get_muc_conf(win_title->str);
-        g_string_free(win_title, TRUE);
+        ProfMucConfWin *confwin = wins_get_muc_conf(mucwin->roomjid);
 
         if (confwin != NULL) {
             num = wins_get_num(window);

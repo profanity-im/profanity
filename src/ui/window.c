@@ -52,7 +52,7 @@
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
-#define CONS_WIN_TITLE "_cons"
+#define CONS_WIN_TITLE "Profanity. Type /help for help information."
 #define XML_WIN_TITLE "XML Console"
 
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
@@ -122,8 +122,6 @@ win_create_console(void)
     new_win->window.layout = _win_create_split_layout();
     new_win->window.unread = 0;
 
-    new_win->from = strdup(CONS_WIN_TITLE);
-
     return &new_win->window;
 }
 
@@ -185,14 +183,14 @@ win_create_muc(const char * const roomjid)
 }
 
 ProfWin*
-win_create_muc_config(const char * const title, DataForm *form)
+win_create_muc_config(const char * const roomjid, DataForm *form)
 {
     ProfMucConfWin *new_win = malloc(sizeof(ProfMucConfWin));
     new_win->window.type = WIN_MUC_CONFIG;
     new_win->window.layout = _win_create_simple_layout();
     new_win->window.unread = 0;
 
-    new_win->from = strdup(title);
+    new_win->roomjid = strdup(roomjid);
     new_win->form = form;
 
     new_win->memcheck = PROFCONFWIN_MEMCHECK;
@@ -223,9 +221,52 @@ win_create_xmlconsole(void)
     new_win->window.layout = _win_create_simple_layout();
     new_win->window.unread = 0;
 
-    new_win->from = strdup(XML_WIN_TITLE);
+    new_win->memcheck = PROFXMLWIN_MEMCHECK;
 
     return &new_win->window;
+}
+
+char *
+win_get_title(ProfWin *window)
+{
+    if (window == NULL) {
+        return strdup(CONS_WIN_TITLE);
+    }
+    if (window->type == WIN_CONSOLE) {
+        return strdup(CONS_WIN_TITLE);
+    }
+    if (window->type == WIN_CHAT) {
+        ProfChatWin *chatwin = (ProfChatWin*) window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        return strdup(chatwin->barejid);
+    }
+    if (window->type == WIN_MUC) {
+        ProfMucWin *mucwin = (ProfMucWin*) window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        return strdup(mucwin->roomjid);
+    }
+    if (window->type == WIN_MUC_CONFIG) {
+        ProfMucConfWin *confwin = (ProfMucConfWin*) window;
+        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        GString *title = g_string_new(confwin->roomjid);
+        g_string_append(title, " config");
+        if (confwin->form->modified) {
+            g_string_append(title, " *");
+        }
+        char *title_str = title->str;
+        g_string_free(title, FALSE);
+        return title_str;
+    }
+    if (window->type == WIN_PRIVATE) {
+        ProfPrivateWin *privatewin = (ProfPrivateWin*) window;
+        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+        return strdup(privatewin->fulljid);
+    }
+    if (window->type == WIN_XML) {
+        return strdup(XML_WIN_TITLE);
+    }
+
+    return NULL;
 }
 
 void
@@ -292,11 +333,6 @@ win_free(ProfWin* window)
         free(chatwin->resource);
     }
 
-    if (window->type == WIN_CONSOLE) {
-        ProfConsoleWin *consolewin = (ProfConsoleWin*)window;
-        free(consolewin->from);
-    }
-
     if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = (ProfMucWin*)window;
         free(mucwin->roomjid);
@@ -304,7 +340,7 @@ win_free(ProfWin* window)
 
     if (window->type == WIN_MUC_CONFIG) {
         ProfMucConfWin *mucconf = (ProfMucConfWin*)window;
-        free(mucconf->from);
+        free(mucconf->roomjid);
         form_destroy(mucconf->form);
     }
 
@@ -313,50 +349,7 @@ win_free(ProfWin* window)
         free(privatewin->fulljid);
     }
 
-    if (window->type == WIN_XML) {
-        ProfXMLWin *xmlwin = (ProfXMLWin*)window;
-        free(xmlwin->from);
-    }
-
     free(window);
-}
-
-GString *
-win_get_recipient_string(ProfWin *window)
-{
-    GString *result = g_string_new("");
-
-    if (window->type == WIN_CONSOLE) {
-        ProfConsoleWin *conswin = (ProfConsoleWin*)window;
-        g_string_append(result, conswin->from);
-    }
-    if (window->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        PContact contact = roster_get_contact(chatwin->barejid);
-        if (p_contact_name(contact) != NULL) {
-            g_string_append(result, p_contact_name(contact));
-        } else {
-            g_string_append(result, chatwin->barejid);
-        }
-    }
-    if (window->type == WIN_MUC) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        g_string_append(result, mucwin->roomjid);
-    }
-    if (window->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-        g_string_append(result, confwin->from);
-    }
-    if (window->type == WIN_PRIVATE) {
-        ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
-        g_string_append(result, privatewin->fulljid);
-    }
-    if (window->type == WIN_XML) {
-        ProfXMLWin *xmlwin = (ProfXMLWin*)window;
-        g_string_append(result, xmlwin->from);
-    }
-
-    return result;
 }
 
 void
