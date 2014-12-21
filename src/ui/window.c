@@ -238,7 +238,13 @@ win_get_title(ProfWin *window)
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*) window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        return strdup(chatwin->barejid);
+        PContact contact = roster_get_contact(chatwin->barejid);
+        if (contact) {
+            const char *name = p_contact_name_or_jid(contact);
+            return strdup(name);
+        } else {
+            return strdup(chatwin->barejid);
+        }
     }
     if (window->type == WIN_MUC) {
         ProfMucWin *mucwin = (ProfMucWin*) window;
