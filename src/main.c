@@ -53,30 +53,6 @@ static gboolean version = FALSE;
 static char *log = "INFO";
 static char *account_name = NULL;
 
-static void
-_init_modules(void)
-{
-    jabber_init_module();
-    bookmark_init_module();
-    capabilities_init_module();
-    iq_init_module();
-    message_init_module();
-    presence_init_module();
-    roster_init_module();
-    form_init_module();
-
-    ui_init_module();
-    console_init_module();
-    notifier_init_module();
-    rosterwin_init_module();
-    occupantswin_init_module();
-
-    accounts_init_module();
-#ifdef HAVE_LIBOTR
-    otr_init_module();
-#endif
-}
-
 int
 main(int argc, char **argv)
 {
@@ -149,7 +125,6 @@ main(int argc, char **argv)
         return 0;
     }
 
-    _init_modules();
     prof_run(disable_tls, log, account_name);
 
     return 0;

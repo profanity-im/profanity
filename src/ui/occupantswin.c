@@ -54,8 +54,8 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant)
     wattroff(layout->subwin, theme_attrs(presence_colour));
 }
 
-static void
-_occupantswin_occupants(const char * const roomjid)
+void
+occupantswin_occupants(const char * const roomjid)
 {
     ProfMucWin *mucwin = wins_get_muc(roomjid);
     if (mucwin) {
@@ -117,10 +117,4 @@ _occupantswin_occupants(const char * const roomjid)
 
         g_list_free(occupants);
     }
-}
-
-void
-occupantswin_init_module(void)
-{
-    occupantswin_occupants = _occupantswin_occupants;
 }

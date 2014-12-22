@@ -58,7 +58,7 @@ typedef struct cmd_t {
     gchar** (*parser)(const char * const inp, int min, int max, gboolean *result);
     int min_args;
     int max_args;
-    void (**setting_func)(void);
+    void (*setting_func)(void);
     CommandHelp help;
 } Command;
 
