@@ -921,39 +921,6 @@ win_has_active_subwin(ProfWin *window)
     }
 }
 
-gboolean
-win_chat_history_shown(ProfWin *window)
-{
-    if (window->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        return chatwin->history_shown;
-    } else {
-        return FALSE;
-    }
-}
-
-gboolean
-win_has_chat_resource(ProfWin *window)
-{
-    if (window->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        return (chatwin->resource != NULL);
-    } else {
-        return FALSE;
-    }
-}
-
-gboolean
-win_has_modified_form(ProfWin *window)
-{
-    if (window->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-        return confwin->form->modified;
-    } else {
-        return FALSE;
-    }
-}
-
 int
 win_unread(ProfWin *window)
 {

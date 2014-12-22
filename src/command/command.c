@@ -1794,7 +1794,7 @@ cmd_execute_default(const char * inp)
                 ProfWin *current = wins_get_current();
                 ProfChatWin *chatwin = (ProfChatWin*)current;
                 GString *send_recipient = g_string_new(chatwin->barejid);
-                if (current && win_has_chat_resource(current)) {
+                if (current && chatwin->resource) {
                     g_string_append(send_recipient, "/");
                     g_string_append(send_recipient, chatwin->resource);
                 }

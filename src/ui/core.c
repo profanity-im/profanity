@@ -829,11 +829,13 @@ _ui_win_has_unsaved_form(int num)
 {
     ProfWin *window = wins_get_by_num(num);
 
-    if (window->type != WIN_MUC_CONFIG) {
+    if (window->type == WIN_MUC_CONFIG) {
+        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        return confwin->form->modified;
+    } else {
         return FALSE;
     }
-
-    return win_has_modified_form(window);
 }
 
 static gboolean
@@ -3017,7 +3019,9 @@ _win_show_history(int win_index, const char * const contact)
 {
     ProfWin *window = wins_get_by_num(win_index);
     if (window->type == WIN_CHAT) {
-        if (win_chat_history_shown(window)) {
+        ProfChatWin *chatwin = (ProfChatWin*) window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        if (!chatwin->history_shown) {
             Jid *jid = jid_create(jabber_get_fulljid());
             GSList *history = chat_log_get_previous(jid->barejid, contact);
             jid_destroy(jid);
@@ -3040,7 +3044,6 @@ _win_show_history(int win_index, const char * const contact)
                 }
                 curr = g_slist_next(curr);
             }
-            ProfChatWin *chatwin = (ProfChatWin*)window;
             chatwin->history_shown = TRUE;
 
             g_slist_free_full(history, free);

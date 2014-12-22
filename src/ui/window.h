@@ -177,8 +177,5 @@ void win_printline_nowrap(WINDOW *win, char *msg);
 
 int win_unread(ProfWin *window);
 gboolean win_has_active_subwin(ProfWin *window);
-gboolean win_has_modified_form(ProfWin *window);
-gboolean win_chat_history_shown(ProfWin *window);
-gboolean win_has_chat_resource(ProfWin *window);
 
 #endif

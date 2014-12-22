@@ -37,6 +37,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <assert.h>
 #include <glib.h>
 #ifdef HAVE_LIBOTR
 #include <libotr/proto.h>
@@ -1151,10 +1152,15 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
         GString *send_jid = g_string_new(usr_jid);
         ProfWin *current = wins_get_current();
-        if (current->type == WIN_CHAT && win_has_chat_resource(current)) {
-            ProfChatWin *chatwin = (ProfChatWin *)current;
-            g_string_append(send_jid, "/");
-            g_string_append(send_jid, chatwin->resource);
+
+        // if msg to current recipient, attach resource if set
+        if (current->type == WIN_CHAT) {
+            ProfChatWin *chatwin = (ProfChatWin*)current;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            if ((g_strcmp0(chatwin->barejid, usr_jid) == 0) && (chatwin->resource)) {
+                g_string_append(send_jid, "/");
+                g_string_append(send_jid, chatwin->resource);
+            }
         }
 
         if (msg != NULL) {
