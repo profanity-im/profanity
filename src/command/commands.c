@@ -113,8 +113,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             }
         }
 
-        options_destroy(options);
-
         char *user = args[0];
         if(!user){
             if(def){
@@ -135,6 +133,8 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
+            if(g_hash_table_contains(options, "port") || g_hash_table_contains(options, "server"))
+                cons_show("Ignoring extra connect options. Please set them with /account set");
             conn_status = jabber_connect_with_account(account);
             account_free(account);
         } else {
@@ -150,6 +150,8 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             cons_show_error("Connection attempt for %s failed.", jid);
             log_info("Connection attempt for %s failed", jid);
         }
+
+        options_destroy(options);
 
         free(jid);
 
