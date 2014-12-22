@@ -1124,17 +1124,6 @@ _ui_clear_current(void)
 }
 
 static void
-_ui_close_current(void)
-{
-    int current_index = wins_get_current_num();
-    status_bar_inactive(current_index);
-    wins_close_current();
-    title_bar_console();
-    status_bar_current(1);
-    status_bar_active(1);
-}
-
-static void
 _ui_close_win(int index)
 {
     ProfWin *window = wins_get_by_num(index);
@@ -3090,7 +3079,6 @@ ui_init_module(void)
     ui_next_win = _ui_next_win;
     ui_previous_win = _ui_previous_win;
     ui_clear_current = _ui_clear_current;
-    ui_close_current = _ui_close_current;
     ui_close_win = _ui_close_win;
     ui_tidy_wins = _ui_tidy_wins;
     ui_prune_wins = _ui_prune_wins;

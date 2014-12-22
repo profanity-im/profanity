@@ -101,7 +101,6 @@ int (*ui_close_all_wins)(void);
 int (*ui_close_read_wins)(void);
 
 // current window actions
-void (*ui_close_current)(void);
 void (*ui_clear_current)(void);
 win_type_t (*ui_current_win_type)(void);
 int (*ui_current_win_index)(void);
