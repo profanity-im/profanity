@@ -48,6 +48,7 @@ ProfChatWin *wins_get_chat(const char * const barejid);
 ProfMucWin * wins_get_muc(const char * const roomjid);
 ProfMucConfWin * wins_get_muc_conf(const char * const roomjid);
 ProfPrivateWin *wins_get_private(const char * const fulljid);
+ProfXMLWin * wins_get_xmlconsole(void);
 
 ProfWin * wins_get_current(void);
 ProfChatWin * wins_get_current_chat(void);
@@ -58,8 +59,6 @@ ProfMucConfWin * wins_get_current_muc_conf(void);
 void wins_set_current_by_num(int i);
 
 ProfWin * wins_get_by_num(int i);
-ProfChatWin * wins_get_chat_by_num(int i);
-ProfMucWin * wins_get_muc_by_num(int i);
 
 ProfWin * wins_get_next(void);
 ProfWin * wins_get_previous(void);
@@ -78,8 +77,6 @@ gboolean wins_tidy(void);
 GSList * wins_create_summary(void);
 void wins_destroy(void);
 GList * wins_get_nums(void);
-gboolean wins_xmlconsole_exists(void);
-ProfWin * wins_get_xmlconsole(void);
 gboolean wins_swap(int source_win, int target_win);
 void wins_hide_subwin(ProfWin *window);
 void wins_show_subwin(ProfWin *window);

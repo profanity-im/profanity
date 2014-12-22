@@ -274,32 +274,6 @@ wins_get_by_num(int i)
     return g_hash_table_lookup(windows, GINT_TO_POINTER(i));
 }
 
-ProfChatWin *
-wins_get_chat_by_num(int i)
-{
-    ProfWin *window = g_hash_table_lookup(windows, GINT_TO_POINTER(i));
-    if (window) {
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        return chatwin;
-    } else {
-        return NULL;
-    }
-}
-
-ProfMucWin *
-wins_get_muc_by_num(int i)
-{
-    ProfWin *window = g_hash_table_lookup(windows, GINT_TO_POINTER(i));
-    if (window) {
-        ProfMucWin *mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return mucwin;
-    } else {
-        return NULL;
-    }
-}
-
 ProfWin *
 wins_get_next(void)
 {
@@ -575,26 +549,7 @@ wins_show_subwin(ProfWin *window)
     }
 }
 
-gboolean
-wins_xmlconsole_exists(void)
-{
-    GList *values = g_hash_table_get_values(windows);
-    GList *curr = values;
-
-    while (curr != NULL) {
-        ProfWin *window = curr->data;
-        if (window->type == WIN_XML) {
-            g_list_free(values);
-            return TRUE;
-        }
-        curr = g_list_next(curr);
-    }
-
-    g_list_free(values);
-    return FALSE;
-}
-
-ProfWin *
+ProfXMLWin *
 wins_get_xmlconsole(void)
 {
     GList *values = g_hash_table_get_values(windows);
@@ -603,8 +558,10 @@ wins_get_xmlconsole(void)
     while (curr != NULL) {
         ProfWin *window = curr->data;
         if (window->type == WIN_XML) {
+            ProfXMLWin *xmlwin = (ProfXMLWin*)window;
+            assert(xmlwin->memcheck == PROFXMLWIN_MEMCHECK);
             g_list_free(values);
-            return window;
+            return xmlwin;
         }
         curr = g_list_next(curr);
     }
