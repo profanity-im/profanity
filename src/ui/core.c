@@ -1225,16 +1225,6 @@ _ui_current_win_is_otr(void)
     }
 }
 
-static void
-_ui_current_set_otr(gboolean value)
-{
-    ProfWin *current = wins_get_current();
-    if (current->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*)current;
-        chatwin->is_otr = value;
-    }
-}
-
 static int
 _ui_current_win_index(void)
 {
@@ -3109,7 +3099,6 @@ ui_init_module(void)
     ui_win_unread = _ui_win_unread;
     ui_ask_password = _ui_ask_password;
     ui_current_win_is_otr = _ui_current_win_is_otr;
-    ui_current_set_otr = _ui_current_set_otr;
     ui_otr_authenticating = _ui_otr_authenticating;
     ui_otr_authetication_waiting = _ui_otr_authetication_waiting;
     ui_gone_secure = _ui_gone_secure;
