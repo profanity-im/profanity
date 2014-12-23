@@ -60,11 +60,11 @@ tests_sources = \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/server_events.c src/server_events.h \
-	tests/xmpp/stub_xmpp.c tests/xmpp/stub_xmpp.h \
+	tests/xmpp/stub_xmpp.c \
 	tests/otr/stub_otr.c \
-	tests/ui/stub_ui.c tests/ui/stub_ui.h \
-	tests/config/stub_accounts.c \
+	tests/ui/stub_ui.c \
 	tests/log/stub_log.c \
+	tests/config/stub_accounts.c \
 	tests/helpers.c tests/helpers.h \
 	tests/test_cmd_account.c tests/test_cmd_account.h \
 	tests/testsuite.c

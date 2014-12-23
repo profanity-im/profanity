@@ -5,33 +5,18 @@
 #include <cmocka.h>
 
 #include "ui/window.h"
+#include "ui/ui.h"
 
 #include "tests/ui/stub_ui.h"
 
 // mock state
 
-static gboolean mock_cons_show = FALSE;
-static gboolean mock_cons_show_account = FALSE;
 static char output[256];
-
-void reset_ui_mocks(void)
-{
-    mock_cons_show = FALSE;
-    mock_cons_show_account = FALSE;
-}
 
 void
 expect_cons_show(char *expected)
 {
-    mock_cons_show = TRUE;
     expect_string(cons_show, output, expected);
-}
-
-void
-expect_cons_show_account(ProfAccount *account)
-{
-    mock_cons_show_account = TRUE;
-    expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
 }
 
 // stubs
@@ -292,13 +277,11 @@ gboolean ui_win_has_unsaved_form(int num)
 
 void cons_show(const char * const msg, ...)
 {
-    if (mock_cons_show) {
-        va_list args;
-        va_start(args, msg);
-        vsnprintf(output, sizeof(output), msg, args);
-        check_expected(output);
-        va_end(args);
-    }
+    va_list args;
+    va_start(args, msg);
+    vsnprintf(output, sizeof(output), msg, args);
+    check_expected(output);
+    va_end(args);
 }
 
 void cons_about(void) {}
@@ -315,9 +298,7 @@ void cons_show_otr_prefs(void) {}
 
 void cons_show_account(ProfAccount *account)
 {
-    if (mock_cons_show_account) {
         check_expected(account);
-    }
 }
 
 void cons_debug(const char * const msg, ...) {}

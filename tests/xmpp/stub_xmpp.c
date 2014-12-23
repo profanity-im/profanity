@@ -1,24 +1,9 @@
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+
 #include "xmpp/xmpp.h"
-
-// mock state
-
-static jabber_conn_status_t connection_status = JABBER_CONNECTED;
-static char *account_name = NULL;
-
-void
-reset_xmpp_mocks(void)
-{
-    connection_status = JABBER_CONNECTED;
-    account_name = NULL;
-}
-
-void
-mock_connection_account_name(char *given_account_name)
-{
-    account_name = given_account_name;
-}
-
-// stubs
 
 // connection functions
 void jabber_init(const int disable_tls) {}
@@ -47,15 +32,9 @@ const char * jabber_get_domain(void)
     return NULL;
 }
 
-void
-mock_connection_status(jabber_conn_status_t given_connection_status)
-{
-    connection_status = given_connection_status;
-}
-
 jabber_conn_status_t jabber_get_connection_status(void)
 {
-    return connection_status;
+    return (jabber_conn_status_t)mock();
 }
 
 char* jabber_get_presence_message(void)
@@ -65,7 +44,7 @@ char* jabber_get_presence_message(void)
 
 char* jabber_get_account_name(void)
 {
-    return account_name;
+    return (char*)mock();
 }
 
 GList * jabber_get_available_resources(void)

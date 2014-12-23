@@ -1,23 +1,10 @@
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+
 #include "common.h"
 #include "config/account.h"
-
-// mock state
-
-static ProfAccount *account = NULL;
-
-void
-reset_account_mocks(void)
-{
-    account = NULL;
-}
-
-void
-mock_accounts_get_account(ProfAccount *given_account)
-{
-    account = given_account;
-}
-
-// stubs
 
 void accounts_load(void) {}
 void accounts_close(void) {}
@@ -47,7 +34,7 @@ gchar** accounts_get_list(void)
 
 ProfAccount* accounts_get_account(const char * const name)
 {
-    return account;
+    return (ProfAccount*)mock();
 }
 
 gboolean accounts_enable(const char * const name)

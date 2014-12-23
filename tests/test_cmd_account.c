@@ -7,13 +7,11 @@
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
-#include "xmpp/stub_xmpp.h"
 
 #include "ui/ui.h"
 #include "ui/stub_ui.h"
 
 #include "config/accounts.h"
-#include "config/stub_accounts.h"
 
 #include "command/commands.h"
 
@@ -23,7 +21,7 @@ void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
     help->usage = "some usage";
     gchar *args[] = { NULL };
 
-    mock_connection_status(JABBER_DISCONNECTED);
+    will_return(jabber_get_connection_status, JABBER_DISCONNECTED);
 
     expect_cons_show("Usage: some usage");
 
@@ -41,11 +39,11 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
         TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
     gchar *args[] = { NULL };
 
-    mock_connection_status(JABBER_CONNECTED);
-    mock_connection_account_name("account_name");
-    mock_accounts_get_account(account);
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(jabber_get_account_name, "account_name");
+    will_return(accounts_get_account, account);
 
-    expect_cons_show_account(account);
+    expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);

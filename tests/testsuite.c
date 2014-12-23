@@ -239,13 +239,8 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_rooms_uses_account_default_when_no_arg),
         unit_test(cmd_rooms_arg_used_when_passed),
 */
-        unit_test_setup_teardown(cmd_account_shows_usage_when_not_connected_and_no_args,
-            pre_test,
-            post_test),
-
-        unit_test_setup_teardown(cmd_account_shows_account_when_connected_and_no_args,
-            pre_test,
-            post_test),
+        unit_test(cmd_account_shows_usage_when_not_connected_and_no_args),
+        unit_test(cmd_account_shows_account_when_connected_and_no_args),
 /*
         unit_test(cmd_account_list_shows_accounts),
         unit_test(cmd_account_show_shows_usage_when_no_arg),
