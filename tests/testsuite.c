@@ -35,6 +35,7 @@
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
+/*
         unit_test(replace_one_substr),
         unit_test(replace_one_substr_beginning),
         unit_test(replace_one_substr_end),
@@ -237,8 +238,11 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_rooms_shows_message_when_undefined),
         unit_test(cmd_rooms_uses_account_default_when_no_arg),
         unit_test(cmd_rooms_arg_used_when_passed),
-
-        unit_test(cmd_account_shows_usage_when_not_connected_and_no_args),
+*/
+        unit_test_setup_teardown(cmd_account_shows_usage_when_not_connected_and_no_args,
+            reset_mocks,
+            reset_mocks),
+/*
         unit_test(cmd_account_shows_account_when_connected_and_no_args),
         unit_test(cmd_account_list_shows_accounts),
         unit_test(cmd_account_show_shows_usage_when_no_arg),
@@ -552,6 +556,7 @@ int main(int argc, char* argv[]) {
         unit_test(remove_text_multi_value_does_nothing_when_doesnt_exist),
         unit_test(remove_text_multi_value_removes_when_one),
         unit_test(remove_text_multi_value_removes_when_many),
+*/
     };
 
     return run_tests(all_tests);

@@ -40,7 +40,6 @@ tests_sources = \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
-	src/xmpp/form.c src/xmpp/form.h \
 	src/xmpp/xmpp.h \
 	src/ui/ui.h \
 	src/command/command.h src/command/command.c src/command/history.c \
@@ -61,34 +60,13 @@ tests_sources = \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/server_events.c src/server_events.h \
-	tests/xmpp/mock_xmpp.h tests/xmpp/mock_xmpp.c \
-	tests/otr/mock_otr.h tests/otr/mock_otr.c \
-	tests/ui/mock_ui.h tests/ui/mock_ui.c \
-	tests/config/mock_accounts.h tests/config/mock_accounts.c \
+	tests/xmpp/stub_xmpp.c tests/xmpp/stub_xmpp.h \
+	tests/otr/stub_otr.c \
+	tests/ui/stub_ui.c tests/ui/stub_ui.h \
+	tests/config/stub_accounts.c \
+	tests/log/stub_log.c \
 	tests/helpers.c tests/helpers.h \
-	tests/log/mock_log.c \
-	tests/test_autocomplete.c tests/test_autocomplete.h \
-	tests/test_common.c tests/test_common.h \
-	tests/test_contact.c tests/test_contact.h \
-	tests/test_cmd_connect.c tests/test_cmd_connect.h \
 	tests/test_cmd_account.c tests/test_cmd_account.h \
-	tests/test_cmd_rooms.c tests/test_cmd_rooms.h \
-	tests/test_cmd_sub.c tests/test_cmd_sub.h \
-	tests/test_cmd_alias.c tests/test_cmd_alias.h \
-	tests/test_cmd_statuses.c tests/test_cmd_statuses.h \
-	tests/test_cmd_bookmark.c tests/test_cmd_bookmark.h \
-	tests/test_cmd_otr.c tests/test_cmd_otr.h \
-	tests/test_cmd_join.c tests/test_cmd_join.h \
-	tests/test_history.c tests/test_history.h \
-	tests/test_jid.c tests/test_jid.h \
-	tests/test_parser.c tests/test_parser.h \
-	tests/test_roster_list.c tests/test_roster_list.h \
-	tests/test_preferences.c tests/test_preferences.h \
-	tests/test_server_events.c tests/test_server_events.h \
-	tests/test_muc.c tests/test_muc.h \
-	tests/test_cmd_roster.c tests/test_cmd_roster.h \
-	tests/test_cmd_win.c tests/test_cmd_win.h \
-	tests/test_form.c tests/test_form.h \
 	tests/testsuite.c
 
 main_source = src/main.c

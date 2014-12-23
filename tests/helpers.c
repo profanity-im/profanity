@@ -11,6 +11,16 @@
 #include "helpers.h"
 #include "config/preferences.h"
 
+#include "ui/stub_ui.h"
+#include "xmpp/stub_xmpp.h"
+
+void
+reset_mocks(void **state)
+{
+    reset_ui_mocks();
+    reset_xmpp_mocks();
+}
+
 void create_config_dir(void **state)
 {
     setenv("XDG_CONFIG_HOME", "./tests/files/xdg_config_home", 1);
