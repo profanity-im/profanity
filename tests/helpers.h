@@ -6,4 +6,5 @@ void close_preferences(void **state);
 void glist_set_cmp(GCompareFunc func);
 int glist_contents_equal(const void *actual, const void *expected);
 
-void reset_mocks(void **state);
+void pre_test(void **state);
+void post_test(void **state);

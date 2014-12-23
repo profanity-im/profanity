@@ -13,6 +13,7 @@
 #include "ui/stub_ui.h"
 
 #include "config/accounts.h"
+#include "config/stub_accounts.h"
 
 #include "command/commands.h"
 
@@ -32,11 +33,9 @@ void cmd_account_shows_usage_when_not_connected_and_no_args(void **state)
     free(help);
 }
 
-/*
+
 void cmd_account_shows_account_when_connected_and_no_args(void **state)
 {
-    mock_cons_show_account();
-    mock_accounts_get_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL,
         TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -44,8 +43,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 
     mock_connection_status(JABBER_CONNECTED);
     mock_connection_account_name("account_name");
-
-    accounts_get_account_return(account);
+    mock_accounts_get_account(account);
 
     expect_cons_show_account(account);
 
@@ -54,7 +52,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 
     free(help);
 }
-
+/*
 void cmd_account_list_shows_accounts(void **state)
 {
     mock_cons_show_account_list();

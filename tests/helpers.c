@@ -13,12 +13,20 @@
 
 #include "ui/stub_ui.h"
 #include "xmpp/stub_xmpp.h"
+#include "config/stub_accounts.h"
 
 void
-reset_mocks(void **state)
+pre_test(void **state)
 {
     reset_ui_mocks();
     reset_xmpp_mocks();
+    reset_account_mocks();
+}
+
+void
+post_test(void **state)
+{
+    // nothing
 }
 
 void create_config_dir(void **state)

@@ -3,11 +3,19 @@
 // mock state
 
 static jabber_conn_status_t connection_status = JABBER_CONNECTED;
+static char *account_name = NULL;
 
 void
 reset_xmpp_mocks(void)
 {
     connection_status = JABBER_CONNECTED;
+    account_name = NULL;
+}
+
+void
+mock_connection_account_name(char *given_account_name)
+{
+    account_name = given_account_name;
 }
 
 // stubs
@@ -57,7 +65,7 @@ char* jabber_get_presence_message(void)
 
 char* jabber_get_account_name(void)
 {
-    return NULL;
+    return account_name;
 }
 
 GList * jabber_get_available_resources(void)

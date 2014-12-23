@@ -11,11 +11,13 @@
 // mock state
 
 static gboolean mock_cons_show = FALSE;
+static gboolean mock_cons_show_account = FALSE;
 static char output[256];
 
 void reset_ui_mocks(void)
 {
     mock_cons_show = FALSE;
+    mock_cons_show_account = FALSE;
 }
 
 void
@@ -23,6 +25,13 @@ expect_cons_show(char *expected)
 {
     mock_cons_show = TRUE;
     expect_string(cons_show, output, expected);
+}
+
+void
+expect_cons_show_account(ProfAccount *account)
+{
+    mock_cons_show_account = TRUE;
+    expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
 }
 
 // stubs
@@ -303,7 +312,14 @@ void cons_show_log_prefs(void) {}
 void cons_show_presence_prefs(void) {}
 void cons_show_connection_prefs(void) {}
 void cons_show_otr_prefs(void) {}
-void cons_show_account(ProfAccount *account) {}
+
+void cons_show_account(ProfAccount *account)
+{
+    if (mock_cons_show_account) {
+        check_expected(account);
+    }
+}
+
 void cons_debug(const char * const msg, ...) {}
 void cons_show_time(void) {}
 void cons_show_word(const char * const word) {}
