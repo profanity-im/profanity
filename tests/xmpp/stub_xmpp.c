@@ -39,7 +39,7 @@ jabber_conn_status_t jabber_get_connection_status(void)
 
 char* jabber_get_presence_message(void)
 {
-    return NULL;
+    return (char*)mock();
 }
 
 char* jabber_get_account_name(void)
@@ -89,8 +89,13 @@ char * presence_sub_request_find(char * search_str)
 void presence_join_room(char *room, char *nick, char * passwd) {}
 void presence_change_room_nick(const char * const room, const char * const nick) {}
 void presence_leave_chat_room(const char * const room_jid) {}
-void presence_update(resource_presence_t status, const char * const msg,
-    int idle) {}
+
+void presence_update(resource_presence_t status, const char * const msg, int idle)
+{
+    check_expected(status);
+    check_expected(msg);
+    check_expected(idle);
+}
 
 gboolean presence_sub_request_exists(const char * const bare_jid)
 {
