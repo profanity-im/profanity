@@ -21,7 +21,14 @@ char * accounts_find_enabled(char *prefix)
 
 void accounts_reset_all_search(void) {}
 void accounts_reset_enabled_search(void) {}
-void accounts_add(const char *jid, const char *altdomain, const int port) {}
+
+void accounts_add(const char *jid, const char *altdomain, const int port)
+{
+    check_expected(jid);
+    check_expected(altdomain);
+    check_expected(port);
+}
+
 int  accounts_remove(const char *jid)
 {
     return 0;
@@ -29,7 +36,7 @@ int  accounts_remove(const char *jid)
 
 gchar** accounts_get_list(void)
 {
-    return NULL;
+    return (gchar **)mock();
 }
 
 ProfAccount* accounts_get_account(const char * const name)
@@ -39,7 +46,8 @@ ProfAccount* accounts_get_account(const char * const name)
 
 gboolean accounts_enable(const char * const name)
 {
-    return FALSE;
+    check_expected(name);
+    return (gboolean)mock();
 }
 
 gboolean accounts_disable(const char * const name)

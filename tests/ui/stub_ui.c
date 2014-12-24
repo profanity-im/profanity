@@ -298,7 +298,7 @@ void cons_show_otr_prefs(void) {}
 
 void cons_show_account(ProfAccount *account)
 {
-        check_expected(account);
+    check_expected(account);
 }
 
 void cons_debug(const char * const msg, ...) {}
@@ -318,7 +318,12 @@ void cons_show_login_success(ProfAccount *account) {}
 void cons_show_software_version(const char * const jid,
     const char * const presence, const char * const name,
     const char * const version, const char * const os) {}
-void cons_show_account_list(gchar **accounts) {}
+
+void cons_show_account_list(gchar **accounts)
+{
+    check_expected(accounts);
+}
+
 void cons_show_room_list(GSList *room, const char * const conference_node) {}
 void cons_show_bookmarks(const GList *list) {}
 void cons_show_disco_items(GSList *items, const char * const jid) {}

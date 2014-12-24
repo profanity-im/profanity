@@ -50,11 +50,9 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 
     free(help);
 }
-/*
+
 void cmd_account_list_shows_accounts(void **state)
 {
-    mock_cons_show_account_list();
-    mock_accounts_get_list();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "list", NULL };
 
@@ -64,9 +62,9 @@ void cmd_account_list_shows_accounts(void **state)
     accounts[2] = strdup("account3");
     accounts[3] = NULL;
 
-    accounts_get_list_return(accounts);
+    will_return(accounts_get_list, accounts);
 
-    expect_cons_show_account_list(accounts);
+    expect_memory(cons_show_account_list, accounts, accounts, sizeof(accounts));
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -76,7 +74,6 @@ void cmd_account_list_shows_accounts(void **state)
 
 void cmd_account_show_shows_usage_when_no_arg(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "show", NULL };
@@ -91,12 +88,10 @@ void cmd_account_show_shows_usage_when_no_arg(void **state)
 
 void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
 {
-    mock_cons_show();
-    mock_accounts_get_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
 
-    accounts_get_account_return(NULL);
+    will_return(accounts_get_account, NULL);
 
     expect_cons_show("No such account.");
     expect_cons_show("");
@@ -109,16 +104,14 @@ void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
 
 void cmd_account_show_shows_account_when_exists(void **state)
 {
-    mock_cons_show_account();
-    mock_accounts_get_account();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL,
         TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
-    accounts_get_account_return(account);
+    will_return(accounts_get_account, account);
 
-    expect_cons_show_account(account);
+    expect_memory(cons_show_account, account, account, sizeof(account));
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -128,7 +121,6 @@ void cmd_account_show_shows_account_when_exists(void **state)
 
 void cmd_account_add_shows_usage_when_no_arg(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "add", NULL };
@@ -143,27 +135,13 @@ void cmd_account_add_shows_usage_when_no_arg(void **state)
 
 void cmd_account_add_adds_account(void **state)
 {
-    stub_cons_show();
-    mock_accounts_add();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", "new_account", NULL };
 
-    accounts_add_expect_account_name("new_account");
-
-    gboolean result = cmd_account(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
-void cmd_account_add_shows_message(void **state)
-{
-    mock_cons_show();
-    stub_accounts_add();
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    gchar *args[] = { "add", "new_account", NULL };
-
-    expect_cons_show("Account created.");;
+    expect_string(accounts_add, jid, "new_account");
+    expect_value(accounts_add, altdomain, NULL);
+    expect_value(accounts_add, port, 0);
+    expect_cons_show("Account created.");
     expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
@@ -174,7 +152,6 @@ void cmd_account_add_shows_message(void **state)
 
 void cmd_account_enable_shows_usage_when_no_arg(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "enable", NULL };
@@ -189,12 +166,14 @@ void cmd_account_enable_shows_usage_when_no_arg(void **state)
 
 void cmd_account_enable_enables_account(void **state)
 {
-    stub_cons_show();
-    mock_accounts_enable();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "enable", "account_name", NULL };
 
-    accounts_enable_expect("account_name");
+    will_return(accounts_enable, TRUE);
+
+    expect_string(accounts_enable, name, "account_name");
+    expect_cons_show("Account enabled.");
+    expect_cons_show("");
 
     gboolean result = cmd_account(args, *help);
     assert_true(result);
@@ -202,6 +181,7 @@ void cmd_account_enable_enables_account(void **state)
     free(help);
 }
 
+/*
 void cmd_account_enable_shows_message_when_enabled(void **state)
 {
     mock_cons_show();
