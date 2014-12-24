@@ -41,6 +41,7 @@ gchar** accounts_get_list(void)
 
 ProfAccount* accounts_get_account(const char * const name)
 {
+    check_expected(name);
     return (ProfAccount*)mock();
 }
 

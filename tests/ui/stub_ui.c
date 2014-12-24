@@ -19,6 +19,12 @@ expect_cons_show(char *expected)
     expect_string(cons_show, output, expected);
 }
 
+void
+expect_cons_show_error(char *expected)
+{
+    expect_string(cons_show_error, output, expected);
+}
+
 // stubs
 
 void ui_init(void) {}
@@ -129,7 +135,7 @@ int ui_win_unread(int index)
 
 char * ui_ask_password(void)
 {
-    return NULL;
+    return mock_ptr_type(char *);
 }
 
 void ui_handle_stanza(const char * const msg) {}
@@ -305,7 +311,16 @@ void cons_show_account(ProfAccount *account)
 void cons_debug(const char * const msg, ...) {}
 void cons_show_time(void) {}
 void cons_show_word(const char * const word) {}
-void cons_show_error(const char * const cmd, ...) {}
+
+void cons_show_error(const char * const cmd, ...)
+{
+    va_list args;
+    va_start(args, cmd);
+    vsnprintf(output, sizeof(output), cmd, args);
+    check_expected(output);
+    va_end(args);
+}
+
 void cons_show_contacts(GSList * list) {}
 void cons_show_roster(GSList * list) {}
 void cons_show_roster_group(const char * const group, GSList * list) {}

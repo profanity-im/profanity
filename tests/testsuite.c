@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
         unit_test(find_twice_returns_second_when_two_match),
         unit_test(find_five_times_finds_fifth),
         unit_test(find_twice_returns_first_when_two_match_and_reset),
-
+*/
         unit_test(cmd_connect_shows_message_when_disconnecting),
         unit_test(cmd_connect_shows_message_when_connecting),
         unit_test(cmd_connect_shows_message_when_connected),
@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_connect_shows_usage_when_port_provided_twice),
         unit_test(cmd_connect_shows_usage_when_invalid_first_property),
         unit_test(cmd_connect_shows_usage_when_invalid_second_property),
-
+/*
         unit_test(cmd_rooms_shows_message_when_disconnected),
         unit_test(cmd_rooms_shows_message_when_disconnecting),
         unit_test(cmd_rooms_shows_message_when_connecting),

@@ -41,6 +41,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(jabber_get_account_name, "account_name");
+    expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
     expect_memory(cons_show_account, account, account, sizeof(ProfAccount));
@@ -91,6 +92,7 @@ void cmd_account_show_shows_message_when_account_does_not_exist(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
 
+    expect_any(accounts_get_account, name);
     will_return(accounts_get_account, NULL);
 
     expect_cons_show("No such account.");
@@ -109,6 +111,7 @@ void cmd_account_show_shows_account_when_exists(void **state)
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL,
         TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
+    expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
     expect_memory(cons_show_account, account, account, sizeof(account));
