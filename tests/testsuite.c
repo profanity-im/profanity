@@ -390,7 +390,7 @@ int main(int argc, char* argv[]) {
         unit_test(handle_message_error_when_recipient_and_no_type),
         unit_test(handle_presence_error_when_no_recipient),
         unit_test(handle_presence_error_when_from_recipient),
-
+*/
         unit_test(cmd_alias_add_shows_usage_when_no_args),
         unit_test(cmd_alias_add_shows_usage_when_no_value),
         unit_test(cmd_alias_remove_shows_usage_when_no_args),
@@ -410,7 +410,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_alias_list_shows_all_aliases,
             load_preferences,
             close_preferences),
-
+/*
         unit_test_setup_teardown(test_muc_invites_add, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_remove_invite, muc_before_test, muc_after_test),
         unit_test_setup_teardown(test_muc_invites_count_0, muc_before_test, muc_after_test),

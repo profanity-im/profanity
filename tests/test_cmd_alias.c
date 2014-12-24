@@ -7,10 +7,9 @@
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
-#include "xmpp/mock_xmpp.h"
 
 #include "ui/ui.h"
-#include "ui/mock_ui.h"
+#include "ui/stub_ui.h"
 
 #include "config/preferences.h"
 
@@ -19,7 +18,6 @@
 
 void cmd_alias_add_shows_usage_when_no_args(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "add", NULL };
@@ -34,7 +32,6 @@ void cmd_alias_add_shows_usage_when_no_args(void **state)
 
 void cmd_alias_add_shows_usage_when_no_value(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "add", "alias", NULL };
@@ -49,7 +46,6 @@ void cmd_alias_add_shows_usage_when_no_value(void **state)
 
 void cmd_alias_remove_shows_usage_when_no_args(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "remove", NULL };
@@ -64,7 +60,6 @@ void cmd_alias_remove_shows_usage_when_no_args(void **state)
 
 void cmd_alias_show_usage_when_invalid_subcmd(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "blah", NULL };
@@ -79,7 +74,6 @@ void cmd_alias_show_usage_when_invalid_subcmd(void **state)
 
 void cmd_alias_add_adds_alias(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", "hc", "/help commands", NULL };
 
@@ -97,7 +91,6 @@ void cmd_alias_add_adds_alias(void **state)
 
 void cmd_alias_add_shows_message_when_exists(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "add", "hc", "/help commands", NULL };
 
@@ -115,7 +108,6 @@ void cmd_alias_add_shows_message_when_exists(void **state)
 
 void cmd_alias_remove_removes_alias(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "remove", "hn", NULL };
 
@@ -135,7 +127,6 @@ void cmd_alias_remove_removes_alias(void **state)
 
 void cmd_alias_remove_shows_message_when_no_alias(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "remove", "hn", NULL };
 
@@ -149,7 +140,6 @@ void cmd_alias_remove_shows_message_when_no_alias(void **state)
 
 void cmd_alias_list_shows_all_aliases(void **state)
 {
-    mock_cons_show_aliases();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "list", NULL };
 
@@ -160,7 +150,7 @@ void cmd_alias_list_shows_all_aliases(void **state)
     prefs_add_alias("vn", "/vercheck off");
 
     // write a custom checker to check the correct list is passed
-    expect_cons_show_aliases();
+    expect_any(cons_show_aliases, aliases);
 
     gboolean result = cmd_alias(args, *help);
     assert_true(result);
