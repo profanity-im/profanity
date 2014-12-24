@@ -73,6 +73,7 @@ tests_sources = \
 	tests/test_cmd_join.c tests/test_cmd_join.h \
 	tests/test_cmd_otr.c tests/test_cmd_otr.h \
 	tests/test_cmd_rooms.c tests/test_cmd_rooms.h \
+	tests/test_cmd_roster.c tests/test_cmd_roster.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 

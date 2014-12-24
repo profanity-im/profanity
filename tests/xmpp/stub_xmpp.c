@@ -196,11 +196,26 @@ char * bookmark_find(char *search_str)
 
 void bookmark_autocomplete_reset(void) {}
 
-void roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups) {}
+void roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups)
+{
+    check_expected(barejid);
+    check_expected(new_name);
+    check_expected(groups);
+}
+
 void roster_send_add_to_group(const char * const group, PContact contact) {}
 void roster_send_remove_from_group(const char * const group, PContact contact) {}
-void roster_send_add_new(const char * const barejid, const char * const name) {}
-void roster_send_remove(const char * const barejid) {}
+
+void roster_send_add_new(const char * const barejid, const char * const name)
+{
+    check_expected(barejid);
+    check_expected(name);
+}
+
+void roster_send_remove(const char * const barejid)
+{
+    check_expected(barejid);
+}
 
 void form_destroy(DataForm *form) {}
 

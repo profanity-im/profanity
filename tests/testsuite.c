@@ -501,7 +501,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_join_uses_supplied_nick),
         unit_test(cmd_join_uses_account_nick_when_not_supplied),
         unit_test(cmd_join_uses_password_when_supplied),
-/*
+
         unit_test(cmd_roster_shows_message_when_disconnecting),
         unit_test(cmd_roster_shows_message_when_connecting),
         unit_test(cmd_roster_shows_message_when_disconnected),
@@ -518,7 +518,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_roster_clearnick_shows_message_when_no_jid),
         unit_test(cmd_roster_clearnick_shows_message_when_no_contact_exists),
         unit_test(cmd_roster_clearnick_sends_name_change_request_with_empty_nick),
-
+/*
         unit_test(cmd_win_shows_message_when_win_doesnt_exist),
         unit_test(cmd_win_switches_to_given_win_when_exists),
 
