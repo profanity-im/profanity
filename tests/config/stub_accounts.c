@@ -52,7 +52,8 @@ gboolean accounts_enable(const char * const name)
 
 gboolean accounts_disable(const char * const name)
 {
-    return FALSE;
+    check_expected(name);
+    return (gboolean)mock();
 }
 
 gboolean accounts_rename(const char * const account_name,

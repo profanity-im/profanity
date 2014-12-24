@@ -249,15 +249,13 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_add_adds_account),
         unit_test(cmd_account_enable_shows_usage_when_no_arg),
         unit_test(cmd_account_enable_enables_account),
-/*
-        unit_test(cmd_account_enable_shows_message_when_enabled),
         unit_test(cmd_account_enable_shows_message_when_account_doesnt_exist),
         unit_test(cmd_account_disable_shows_usage_when_no_arg),
         unit_test(cmd_account_disable_disables_account),
-        unit_test(cmd_account_disable_shows_message_when_disabled),
         unit_test(cmd_account_disable_shows_message_when_account_doesnt_exist),
         unit_test(cmd_account_rename_shows_usage_when_no_args),
         unit_test(cmd_account_rename_shows_usage_when_one_arg),
+/*
         unit_test(cmd_account_rename_renames_account),
         unit_test(cmd_account_rename_shows_message_when_renamed),
         unit_test(cmd_account_rename_shows_message_when_not_renamed),
