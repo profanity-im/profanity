@@ -140,7 +140,11 @@ void caps_destroy(Capabilities *caps) {}
 
 gboolean bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
-    return FALSE;
+    check_expected(jid);
+    check_expected(nick);
+    check_expected(password);
+    check_expected(autojoin_str);
+    return (gboolean)mock();
 }
 
 gboolean bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str)
@@ -150,7 +154,8 @@ gboolean bookmark_update(const char *jid, const char *nick, const char *password
 
 gboolean bookmark_remove(const char *jid)
 {
-    return FALSE;
+    check_expected(jid);
+    return (gboolean)mock();
 }
 
 gboolean bookmark_join(const char *jid)
@@ -160,7 +165,7 @@ gboolean bookmark_join(const char *jid)
 
 const GList * bookmark_get_list(void)
 {
-    return NULL;
+    return (GList *)mock();
 }
 
 char * bookmark_find(char *search_str)

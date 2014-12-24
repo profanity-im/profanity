@@ -86,9 +86,10 @@ int ui_close_read_wins(void)
 
 // current window actions
 void ui_clear_current(void) {}
+
 win_type_t ui_current_win_type(void)
 {
-    return WIN_CONSOLE;
+    return (win_type_t)mock();
 }
 
 int ui_current_win_index(void)
@@ -330,7 +331,12 @@ void cons_show_account_list(gchar **accounts)
 }
 
 void cons_show_room_list(GSList *room, const char * const conference_node) {}
-void cons_show_bookmarks(const GList *list) {}
+
+void cons_show_bookmarks(const GList *list)
+{
+    check_expected(list);
+}
+
 void cons_show_disco_items(GSList *items, const char * const jid) {}
 void cons_show_disco_info(const char *from, GSList *identities, GSList *features) {}
 void cons_show_room_invite(const char * const invitor, const char * const room,

@@ -68,6 +68,7 @@ tests_sources = \
 	tests/helpers.c tests/helpers.h \
 	tests/test_cmd_account.c tests/test_cmd_account.h \
 	tests/test_cmd_alias.c tests/test_cmd_alias.h \
+	tests/test_cmd_bookmark.c tests/test_cmd_bookmark.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
