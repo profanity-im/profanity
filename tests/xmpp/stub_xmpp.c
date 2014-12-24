@@ -91,7 +91,13 @@ char * presence_sub_request_find(char * search_str)
     return  NULL;
 }
 
-void presence_join_room(char *room, char *nick, char * passwd) {}
+void presence_join_room(char *room, char *nick, char * passwd)
+{
+    check_expected(room);
+    check_expected(nick);
+    check_expected(passwd);
+}
+
 void presence_change_room_nick(const char * const room, const char * const nick) {}
 void presence_leave_chat_room(const char * const room_jid) {}
 

@@ -7,23 +7,20 @@
 #include <glib.h>
 
 #include "xmpp/xmpp.h"
-#include "xmpp/mock_xmpp.h"
 
 #include "ui/ui.h"
-#include "ui/mock_ui.h"
+#include "ui/stub_ui.h"
 
 #include "config/accounts.h"
-#include "config/mock_accounts.h"
 
 #include "command/commands.h"
 #include "muc.h"
 
 static void test_with_connection_status(jabber_conn_status_t status)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
 
-    mock_connection_status(status);
+    will_return(jabber_get_connection_status, status);
 
     expect_cons_show("You are not currently connected.");
 
@@ -55,12 +52,11 @@ void cmd_join_shows_message_when_undefined(void **state)
 
 void cmd_join_shows_usage_when_no_args(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { NULL };
 
-    mock_connection_status(JABBER_CONNECTED);
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
     expect_cons_show("Usage: some usage");
     expect_cons_show("");
@@ -73,11 +69,10 @@ void cmd_join_shows_usage_when_no_args(void **state)
 
 void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
 {
-    mock_cons_show_error();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "//@@/", NULL };
 
-    mock_connection_status(JABBER_CONNECTED);
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
 
     expect_cons_show_error("Specified room has incorrect format.");
     expect_cons_show("");
@@ -102,13 +97,15 @@ void cmd_join_uses_account_mucservice_when_no_service_specified(void **state)
 
     muc_init();
 
-    mock_connection_status(JABBER_CONNECTED);
-    mock_connection_account_name(account_name);
-    mock_accounts_get_account();
-    accounts_get_account_expect_and_return(account_name, account);
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(jabber_get_account_name, account_name);
 
-    mock_presence_join_room();
-    presence_join_room_expect(expected_room, nick, NULL);
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, expected_room);
+    expect_string(presence_join_room, nick, nick);
+    expect_value(presence_join_room, passwd, NULL);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -128,13 +125,15 @@ void cmd_join_uses_supplied_nick(void **state)
 
     muc_init();
 
-    mock_connection_status(JABBER_CONNECTED);
-    mock_connection_account_name(account_name);
-    mock_accounts_get_account();
-    accounts_get_account_expect_and_return(account_name, account);
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(jabber_get_account_name, account_name);
 
-    mock_presence_join_room();
-    presence_join_room_expect(room, nick, NULL);
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, room);
+    expect_string(presence_join_room, nick, nick);
+    expect_value(presence_join_room, passwd, NULL);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -154,13 +153,15 @@ void cmd_join_uses_account_nick_when_not_supplied(void **state)
 
     muc_init();
 
-    mock_connection_status(JABBER_CONNECTED);
-    mock_connection_account_name(account_name);
-    mock_accounts_get_account();
-    accounts_get_account_expect_and_return(account_name, account);
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(jabber_get_account_name, account_name);
 
-    mock_presence_join_room();
-    presence_join_room_expect(room, account_nick, NULL);
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, room);
+    expect_string(presence_join_room, nick, account_nick);
+    expect_value(presence_join_room, passwd, NULL);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);
@@ -183,13 +184,15 @@ void cmd_join_uses_password_when_supplied(void **state)
 
     muc_init();
 
-    mock_connection_status(JABBER_CONNECTED);
-    mock_connection_account_name(account_name);
-    mock_accounts_get_account();
-    accounts_get_account_expect_and_return(account_name, account);
+    will_return(jabber_get_connection_status, JABBER_CONNECTED);
+    will_return(jabber_get_account_name, account_name);
 
-    mock_presence_join_room();
-    presence_join_room_expect(expected_room, account_nick, password);
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, expected_room);
+    expect_string(presence_join_room, nick, account_nick);
+    expect_value(presence_join_room, passwd, password);
 
     gboolean result = cmd_join(args, *help);
     assert_true(result);

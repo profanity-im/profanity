@@ -491,6 +491,7 @@ int main(int argc, char* argv[]) {
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif
+*/
         unit_test(cmd_join_shows_message_when_disconnecting),
         unit_test(cmd_join_shows_message_when_connecting),
         unit_test(cmd_join_shows_message_when_disconnected),
@@ -501,7 +502,7 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_join_uses_supplied_nick),
         unit_test(cmd_join_uses_account_nick_when_not_supplied),
         unit_test(cmd_join_uses_password_when_supplied),
-
+/*
         unit_test(cmd_roster_shows_message_when_disconnecting),
         unit_test(cmd_roster_shows_message_when_connecting),
         unit_test(cmd_roster_shows_message_when_disconnected),

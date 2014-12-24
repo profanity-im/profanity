@@ -70,6 +70,7 @@ tests_sources = \
 	tests/test_cmd_alias.c tests/test_cmd_alias.h \
 	tests/test_cmd_bookmark.c tests/test_cmd_bookmark.h \
 	tests/test_cmd_connect.c tests/test_cmd_connect.h \
+	tests/test_cmd_join.c tests/test_cmd_join.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
