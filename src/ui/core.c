@@ -246,23 +246,29 @@ _ui_win_exists(int index)
 static gboolean
 _ui_xmlconsole_exists(void)
 {
-    return wins_xmlconsole_exists();
+    ProfXMLWin *xmlwin = wins_get_xmlconsole();
+    if (xmlwin) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 static void
 _ui_handle_stanza(const char * const msg)
 {
     if (ui_xmlconsole_exists()) {
-        ProfWin *xmlconsole = wins_get_xmlconsole();
+        ProfXMLWin *xmlconsole = wins_get_xmlconsole();
+        ProfWin *window = (ProfWin*) xmlconsole;
 
         if (g_str_has_prefix(msg, "SENT:")) {
-            win_save_print(xmlconsole, '-', NULL, 0, 0, "", "SENT:");
-            win_save_print(xmlconsole, '-', NULL, 0, THEME_ONLINE, "", &msg[6]);
-            win_save_print(xmlconsole, '-', NULL, 0, THEME_ONLINE, "", "");
+            win_save_print(window, '-', NULL, 0, 0, "", "SENT:");
+            win_save_print(window, '-', NULL, 0, THEME_ONLINE, "", &msg[6]);
+            win_save_print(window, '-', NULL, 0, THEME_ONLINE, "", "");
         } else if (g_str_has_prefix(msg, "RECV:")) {
-            win_save_print(xmlconsole, '-', NULL, 0, 0, "", "RECV:");
-            win_save_print(xmlconsole, '-', NULL, 0, THEME_AWAY, "", &msg[6]);
-            win_save_print(xmlconsole, '-', NULL, 0, THEME_AWAY, "", "");
+            win_save_print(window, '-', NULL, 0, 0, "", "RECV:");
+            win_save_print(window, '-', NULL, 0, THEME_AWAY, "", &msg[6]);
+            win_save_print(window, '-', NULL, 0, THEME_AWAY, "", "");
         }
     }
 }
@@ -686,23 +692,27 @@ _ui_handle_special_keys(const wint_t * const ch, const int result)
 static void
 _ui_close_connected_win(int index)
 {
-    win_type_t win_type = ui_win_type(index);
-    if (win_type == WIN_MUC) {
-        ProfMucWin *mucwin = wins_get_muc_by_num(index);
-        presence_leave_chat_room(mucwin->roomjid);
-    } else if (win_type == WIN_CHAT) {
+    ProfWin *window = wins_get_by_num(index);
+    if (window) {
+        if (window->type == WIN_MUC) {
+            ProfMucWin *mucwin = (ProfMucWin*) window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            presence_leave_chat_room(mucwin->roomjid);
+        } else if (window->type == WIN_CHAT) {
+            ProfChatWin *chatwin = (ProfChatWin*) window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 #ifdef PROF_HAVE_LIBOTR
-        ProfChatWin *chatwin = wins_get_chat_by_num(index);
-        if (chatwin->is_otr) {
-            otr_end_session(chatwin->barejid);
-        }
+            if (chatwin->is_otr) {
+                otr_end_session(chatwin->barejid);
+            }
 #endif
-        if (prefs_get_boolean(PREF_STATES)) {
-            // send <gone/> chat state before closing
-            if (chat_session_get_recipient_supports(chatwin->barejid)) {
-                chat_session_set_gone(chatwin->barejid);
-                message_send_gone(chatwin->barejid);
-                chat_session_end(chatwin->barejid);
+            if (prefs_get_boolean(PREF_STATES)) {
+                // send <gone/> chat state before closing
+                if (chat_session_get_recipient_supports(chatwin->barejid)) {
+                    chat_session_set_gone(chatwin->barejid);
+                    message_send_gone(chatwin->barejid);
+                    chat_session_end(chatwin->barejid);
+                }
             }
         }
     }
@@ -830,11 +840,13 @@ _ui_win_has_unsaved_form(int num)
 {
     ProfWin *window = wins_get_by_num(num);
 
-    if (window->type != WIN_MUC_CONFIG) {
+    if (window->type == WIN_MUC_CONFIG) {
+        ProfMucConfWin *confwin = (ProfMucConfWin*)window;
+        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        return confwin->form->modified;
+    } else {
         return FALSE;
     }
-
-    return win_has_modified_form(window);
 }
 
 static gboolean
@@ -1113,17 +1125,6 @@ _ui_clear_current(void)
 }
 
 static void
-_ui_close_current(void)
-{
-    int current_index = wins_get_current_num();
-    status_bar_inactive(current_index);
-    wins_close_current();
-    title_bar_console();
-    status_bar_current(1);
-    status_bar_active(1);
-}
-
-static void
 _ui_close_win(int index)
 {
     ProfWin *window = wins_get_by_num(index);
@@ -1222,16 +1223,6 @@ _ui_current_win_is_otr(void)
         return chatwin->is_otr;
     } else {
         return FALSE;
-    }
-}
-
-static void
-_ui_current_set_otr(gboolean value)
-{
-    ProfWin *current = wins_get_current();
-    if (current->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*)current;
-        chatwin->is_otr = value;
     }
 }
 
@@ -1388,9 +1379,9 @@ _ui_create_xmlconsole_win(void)
 static void
 _ui_open_xmlconsole_win(void)
 {
-    ProfWin *window = wins_get_xmlconsole();
-    if (window != NULL) {
-        int num = wins_get_num(window);
+    ProfXMLWin *xmlwin = wins_get_xmlconsole();
+    if (xmlwin != NULL) {
+        int num = wins_get_num((ProfWin*)xmlwin);
         ui_switch_win(num);
     }
 }
@@ -2625,7 +2616,7 @@ _ui_handle_room_configuration(const char * const roomjid, DataForm *form)
 {
     ProfWin *window = wins_new_muc_config(roomjid, form);
     ProfMucConfWin *confwin = (ProfMucConfWin*)window;
-    assert(confwin->memcheck = PROFCONFWIN_MEMCHECK);
+    assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
     int num = wins_get_num(window);
     ui_switch_win(num);
@@ -3018,7 +3009,9 @@ _win_show_history(int win_index, const char * const contact)
 {
     ProfWin *window = wins_get_by_num(win_index);
     if (window->type == WIN_CHAT) {
-        if (win_chat_history_shown(window)) {
+        ProfChatWin *chatwin = (ProfChatWin*) window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        if (!chatwin->history_shown) {
             Jid *jid = jid_create(jabber_get_fulljid());
             GSList *history = chat_log_get_previous(jid->barejid, contact);
             jid_destroy(jid);
@@ -3041,7 +3034,6 @@ _win_show_history(int win_index, const char * const contact)
                 }
                 curr = g_slist_next(curr);
             }
-            ProfChatWin *chatwin = (ProfChatWin*)window;
             chatwin->history_shown = TRUE;
 
             g_slist_free_full(history, free);
@@ -3096,7 +3088,6 @@ ui_init_module(void)
     ui_next_win = _ui_next_win;
     ui_previous_win = _ui_previous_win;
     ui_clear_current = _ui_clear_current;
-    ui_close_current = _ui_close_current;
     ui_close_win = _ui_close_win;
     ui_tidy_wins = _ui_tidy_wins;
     ui_prune_wins = _ui_prune_wins;
@@ -3127,7 +3118,6 @@ ui_init_module(void)
     ui_win_unread = _ui_win_unread;
     ui_ask_password = _ui_ask_password;
     ui_current_win_is_otr = _ui_current_win_is_otr;
-    ui_current_set_otr = _ui_current_set_otr;
     ui_otr_authenticating = _ui_otr_authenticating;
     ui_otr_authetication_waiting = _ui_otr_authetication_waiting;
     ui_gone_secure = _ui_gone_secure;
