@@ -67,6 +67,7 @@ tests_sources = \
 	tests/config/stub_accounts.c \
 	tests/helpers.c tests/helpers.h \
 	tests/test_cmd_account.c tests/test_cmd_account.h \
+	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
 main_source = src/main.c
