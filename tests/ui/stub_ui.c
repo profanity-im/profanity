@@ -25,6 +25,20 @@ expect_cons_show_error(char *expected)
     expect_string(cons_show_error, output, expected);
 }
 
+void
+expect_ui_current_print_line(char *message)
+{
+    expect_string(ui_current_print_line, output, message);
+}
+
+void
+expect_ui_current_print_formatted_line(char show_char, int attrs, char *message)
+{
+    expect_value(ui_current_print_formatted_line, show_char, show_char);
+    expect_value(ui_current_print_formatted_line, attrs, attrs);
+    expect_string(ui_current_print_formatted_line, output, message);
+}
+
 // stubs
 
 void ui_init(void) {}
@@ -105,16 +119,34 @@ int ui_current_win_index(void)
 
 gboolean ui_current_win_is_otr(void)
 {
-    return FALSE;
+    return (gboolean)mock();
 }
 
 ProfChatWin *ui_get_current_chat(void)
 {
-    return NULL;
+    return (ProfChatWin*)mock();
 }
 
-void ui_current_print_line(const char * const msg, ...) {}
-void ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...) {}
+void ui_current_print_line(const char * const msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    vsnprintf(output, sizeof(output), msg, args);
+    check_expected(output);
+    va_end(args);
+}
+
+void ui_current_print_formatted_line(const char show_char, int attrs, const char * const msg, ...)
+{
+    check_expected(show_char);
+    check_expected(attrs);
+    va_list args;
+    va_start(args, msg);
+    vsnprintf(output, sizeof(output), msg, args);
+    check_expected(output);
+    va_end(args);
+}
+
 void ui_current_error_line(const char * const msg) {}
 
 win_type_t ui_win_type(int index)

@@ -432,7 +432,6 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin),
         unit_test(cmd_bookmark_remove_removes_bookmark),
         unit_test(cmd_bookmark_remove_shows_message_when_no_bookmark),
-/*
 
 #ifdef HAVE_LIBOTR
         unit_test(cmd_otr_shows_usage_when_no_args),
@@ -491,7 +490,7 @@ int main(int argc, char* argv[]) {
 #else
         unit_test(cmd_otr_shows_message_when_otr_unsupported),
 #endif
-*/
+
         unit_test(cmd_join_shows_message_when_disconnecting),
         unit_test(cmd_join_shows_message_when_connecting),
         unit_test(cmd_join_shows_message_when_disconnected),

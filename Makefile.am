@@ -71,6 +71,7 @@ tests_sources = \
 	tests/test_cmd_bookmark.c tests/test_cmd_bookmark.h \
 	tests/test_cmd_connect.c tests/test_cmd_connect.h \
 	tests/test_cmd_join.c tests/test_cmd_join.h \
+	tests/test_cmd_otr.c tests/test_cmd_otr.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
@@ -93,11 +94,9 @@ man_sources = docs/profanity.1
 if BUILD_OTR
 if BUILD_OTR3
 core_sources += $(otr3_sources)
-tests_sources += $(otr3_sources)
 endif
 if BUILD_OTR4
 core_sources += $(otr4_sources)
-tests_sources += $(otr4_sources)
 endif
 endif
 
