@@ -520,9 +520,10 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_roster_clearnick_shows_message_when_no_jid),
         unit_test(cmd_roster_clearnick_shows_message_when_no_contact_exists),
         unit_test(cmd_roster_clearnick_sends_name_change_request_with_empty_nick),
-/*
+
         unit_test(cmd_win_shows_message_when_win_doesnt_exist),
         unit_test(cmd_win_switches_to_given_win_when_exists),
+/*
 
         unit_test(get_form_type_field_returns_null_no_fields),
         unit_test(get_form_type_field_returns_null_when_not_present),

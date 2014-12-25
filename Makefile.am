@@ -76,6 +76,7 @@ tests_sources = \
 	tests/test_cmd_roster.c tests/test_cmd_roster.h \
 	tests/test_cmd_statuses.c tests/test_cmd_statuses.h \
 	tests/test_cmd_sub.c tests/test_cmd_sub.h \
+	tests/test_cmd_win.c tests/test_cmd_win.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 

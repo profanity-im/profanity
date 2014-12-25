@@ -53,8 +53,11 @@ GSList* ui_get_recipients(void)
 }
 
 void ui_handle_special_keys(const wint_t * const ch, const int result) {}
+
 gboolean ui_switch_win(const int i)
 {
+    check_expected(i);
+    return (gboolean)mock();
     return FALSE;
 }
 
