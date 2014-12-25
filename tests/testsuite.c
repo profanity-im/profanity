@@ -185,7 +185,6 @@ int main(int argc, char* argv[]) {
         unit_test(parse_options_when_unknown_opt_sets_error),
         unit_test(parse_options_with_duplicated_option_sets_error),
 
-/*
         unit_test(empty_list_when_none_added),
         unit_test(contains_one_element),
         unit_test(first_element_correct),
@@ -204,7 +203,7 @@ int main(int argc, char* argv[]) {
         unit_test(find_twice_returns_second_when_two_match),
         unit_test(find_five_times_finds_fifth),
         unit_test(find_twice_returns_first_when_two_match_and_reset),
-*/
+
         unit_test(cmd_connect_shows_message_when_disconnecting),
         unit_test(cmd_connect_shows_message_when_connecting),
         unit_test(cmd_connect_shows_message_when_connected),
