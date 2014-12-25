@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "xmpp/form.h"
-#include "xmpp/mock_xmpp.h"
 
 xmpp_ctx_t* connection_get_ctx(void)
 {
