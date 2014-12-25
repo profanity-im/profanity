@@ -1839,7 +1839,7 @@ cmd_execute_default(const char * inp)
                     ui_outgoing_chat_msg("me", chatwin->barejid, inp);
                 }
 #else
-                message_send(inp, send_recipient->str);
+                message_send_chat(send_recipient->str, inp);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
