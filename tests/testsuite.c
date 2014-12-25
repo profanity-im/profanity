@@ -35,7 +35,6 @@
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
-/*
         unit_test(replace_one_substr),
         unit_test(replace_one_substr_beginning),
         unit_test(replace_one_substr_end),
@@ -83,7 +82,7 @@ int main(int argc, char* argv[]) {
         unit_test(test_p_sha1_hash5),
         unit_test(test_p_sha1_hash6),
         unit_test(test_p_sha1_hash7),
-*/
+
         unit_test(clear_empty),
         unit_test(reset_after_create),
         unit_test(find_after_create),
