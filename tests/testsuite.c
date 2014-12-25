@@ -291,9 +291,10 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_clear_shows_usage_when_one_arg),
         unit_test(cmd_account_clear_shows_message_when_account_doesnt_exist),
         unit_test(cmd_account_clear_shows_message_when_invalid_property),
-/*
+
         unit_test(cmd_sub_shows_message_when_not_connected),
         unit_test(cmd_sub_shows_usage_when_no_arg),
+/*
 
         unit_test(contact_in_group),
         unit_test(contact_not_in_group),
