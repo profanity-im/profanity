@@ -320,6 +320,7 @@ int main(int argc, char* argv[]) {
         unit_test(contact_available_when_highest_priority_online),
         unit_test(contact_available_when_highest_priority_chat),
 
+*/
         unit_test(cmd_statuses_shows_usage_when_bad_subcmd),
         unit_test(cmd_statuses_shows_usage_when_bad_console_setting),
         unit_test(cmd_statuses_shows_usage_when_bad_chat_setting),
@@ -351,7 +352,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_statuses_muc_sets_none,
             load_preferences,
             close_preferences),
-
+/*
         unit_test_setup_teardown(statuses_console_defaults_to_all,
             load_preferences,
             close_preferences),

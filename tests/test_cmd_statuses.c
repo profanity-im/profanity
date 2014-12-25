@@ -9,13 +9,12 @@
 #include "config/preferences.h"
 
 #include "ui/ui.h"
-#include "ui/mock_ui.h"
+#include "ui/stub_ui.h"
 
 #include "command/commands.h"
 
 void cmd_statuses_shows_usage_when_bad_subcmd(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "badcmd", NULL };
@@ -30,7 +29,6 @@ void cmd_statuses_shows_usage_when_bad_subcmd(void **state)
 
 void cmd_statuses_shows_usage_when_bad_console_setting(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "console", "badsetting", NULL };
@@ -45,7 +43,6 @@ void cmd_statuses_shows_usage_when_bad_console_setting(void **state)
 
 void cmd_statuses_shows_usage_when_bad_chat_setting(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "chat", "badsetting", NULL };
@@ -60,7 +57,6 @@ void cmd_statuses_shows_usage_when_bad_chat_setting(void **state)
 
 void cmd_statuses_shows_usage_when_bad_muc_setting(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     help->usage = "some usage";
     gchar *args[] = { "muc", "badsetting", NULL };
@@ -75,7 +71,6 @@ void cmd_statuses_shows_usage_when_bad_muc_setting(void **state)
 
 void cmd_statuses_console_sets_all(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "console", "all", NULL };
 
@@ -93,7 +88,6 @@ void cmd_statuses_console_sets_all(void **state)
 
 void cmd_statuses_console_sets_online(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "console", "online", NULL };
 
@@ -111,7 +105,6 @@ void cmd_statuses_console_sets_online(void **state)
 
 void cmd_statuses_console_sets_none(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "console", "none", NULL };
 
@@ -129,7 +122,6 @@ void cmd_statuses_console_sets_none(void **state)
 
 void cmd_statuses_chat_sets_all(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "chat", "all", NULL };
 
@@ -147,7 +139,6 @@ void cmd_statuses_chat_sets_all(void **state)
 
 void cmd_statuses_chat_sets_online(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "chat", "online", NULL };
 
@@ -165,7 +156,6 @@ void cmd_statuses_chat_sets_online(void **state)
 
 void cmd_statuses_chat_sets_none(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "chat", "none", NULL };
 
@@ -183,7 +173,6 @@ void cmd_statuses_chat_sets_none(void **state)
 
 void cmd_statuses_muc_sets_all(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "muc", "all", NULL };
 
@@ -201,7 +190,6 @@ void cmd_statuses_muc_sets_all(void **state)
 
 void cmd_statuses_muc_sets_online(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "muc", "online", NULL };
 
@@ -219,7 +207,6 @@ void cmd_statuses_muc_sets_online(void **state)
 
 void cmd_statuses_muc_sets_none(void **state)
 {
-    mock_cons_show();
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "muc", "none", NULL };
 
