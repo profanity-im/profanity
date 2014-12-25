@@ -82,6 +82,7 @@ tests_sources = \
 	tests/test_form.c tests/test_form.h \
 	tests/test_history.c tests/test_history.h \
 	tests/test_jid.c tests/test_jid.h \
+	tests/test_muc.c tests/test_muc.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
