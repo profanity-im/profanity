@@ -125,8 +125,8 @@ iq_add_handlers(void)
     }
 }
 
-static void
-_iq_set_autoping(const int seconds)
+void
+iq_set_autoping(const int seconds)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -142,8 +142,8 @@ _iq_set_autoping(const int seconds)
     }
 }
 
-static void
-_iq_room_list_request(gchar *conferencejid)
+void
+iq_room_list_request(gchar *conferencejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -152,8 +152,8 @@ _iq_room_list_request(gchar *conferencejid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_disco_info_request(gchar *jid)
+void
+iq_disco_info_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -168,8 +168,8 @@ _iq_disco_info_request(gchar *jid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_room_info_request(gchar *room)
+void
+iq_room_info_request(gchar *room)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -184,8 +184,8 @@ _iq_room_info_request(gchar *room)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_send_caps_request_for_jid(const char * const to, const char * const id,
+void
+iq_send_caps_request_for_jid(const char * const to, const char * const id,
     const char * const node, const char * const ver)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -211,8 +211,8 @@ _iq_send_caps_request_for_jid(const char * const to, const char * const id,
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_send_caps_request(const char * const to, const char * const id,
+void
+iq_send_caps_request(const char * const to, const char * const id,
     const char * const node, const char * const ver)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -238,8 +238,8 @@ _iq_send_caps_request(const char * const to, const char * const id,
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_send_caps_request_legacy(const char * const to, const char * const id,
+void
+iq_send_caps_request_legacy(const char * const to, const char * const id,
     const char * const node, const char * const ver)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -265,8 +265,8 @@ _iq_send_caps_request_legacy(const char * const to, const char * const id,
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_disco_items_request(gchar *jid)
+void
+iq_disco_items_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -275,8 +275,8 @@ _iq_disco_items_request(gchar *jid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_send_software_version(const char * const fulljid)
+void
+iq_send_software_version(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -285,8 +285,8 @@ _iq_send_software_version(const char * const fulljid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_confirm_instant_room(const char * const room_jid)
+void
+iq_confirm_instant_room(const char * const room_jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -295,8 +295,8 @@ _iq_confirm_instant_room(const char * const room_jid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_destroy_room(const char * const room_jid)
+void
+iq_destroy_room(const char * const room_jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -309,8 +309,8 @@ _iq_destroy_room(const char * const room_jid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_request_room_config_form(const char * const room_jid)
+void
+iq_request_room_config_form(const char * const room_jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -323,8 +323,8 @@ _iq_request_room_config_form(const char * const room_jid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_submit_room_config(const char * const room, DataForm *form)
+void
+iq_submit_room_config(const char * const room, DataForm *form)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -337,8 +337,8 @@ _iq_submit_room_config(const char * const room, DataForm *form)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_room_config_cancel(const char * const room_jid)
+void
+iq_room_config_cancel(const char * const room_jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -347,8 +347,8 @@ _iq_room_config_cancel(const char * const room_jid)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_room_affiliation_list(const char * const room, char *affiliation)
+void
+iq_room_affiliation_list(const char * const room, char *affiliation)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -361,8 +361,8 @@ _iq_room_affiliation_list(const char * const room, char *affiliation)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_room_kick_occupant(const char * const room, const char * const nick, const char * const reason)
+void
+iq_room_kick_occupant(const char * const room, const char * const nick, const char * const reason)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -380,8 +380,8 @@ struct privilege_set_t {
     char *privilege;
 };
 
-static void
-_iq_room_affiliation_set(const char * const room, const char * const jid, char *affiliation,
+void
+iq_room_affiliation_set(const char * const room, const char * const jid, char *affiliation,
     const char * const reason)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -400,8 +400,8 @@ _iq_room_affiliation_set(const char * const room, const char * const jid, char *
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_room_role_set(const char * const room, const char * const nick, char *role,
+void
+iq_room_role_set(const char * const room, const char * const nick, char *role,
     const char * const reason)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -420,8 +420,8 @@ _iq_room_role_set(const char * const room, const char * const nick, char *role,
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_room_role_list(const char * const room, char *role)
+void
+iq_room_role_list(const char * const room, char *role)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -434,8 +434,8 @@ _iq_room_role_list(const char * const room, char *role)
     xmpp_stanza_release(iq);
 }
 
-static void
-_iq_send_ping(const char * const target)
+void
+iq_send_ping(const char * const target)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -1422,29 +1422,4 @@ _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
 
     return 1;
-}
-
-void
-iq_init_module(void)
-{
-    iq_room_list_request = _iq_room_list_request;
-    iq_disco_info_request = _iq_disco_info_request;
-    iq_disco_items_request = _iq_disco_items_request;
-    iq_send_software_version = _iq_send_software_version;
-    iq_set_autoping = _iq_set_autoping;
-    iq_confirm_instant_room = _iq_confirm_instant_room;
-    iq_destroy_room = _iq_destroy_room;
-    iq_send_ping = _iq_send_ping;
-    iq_request_room_config_form = _iq_request_room_config_form;
-    iq_room_config_cancel = _iq_room_config_cancel;
-    iq_submit_room_config = _iq_submit_room_config;
-    iq_send_caps_request = _iq_send_caps_request;
-    iq_send_caps_request_for_jid = _iq_send_caps_request_for_jid;
-    iq_send_caps_request_legacy = _iq_send_caps_request_legacy;
-    iq_room_info_request = _iq_room_info_request;
-    iq_room_affiliation_set = _iq_room_affiliation_set;
-    iq_room_affiliation_list = _iq_room_affiliation_list;
-    iq_room_role_set = _iq_room_role_set;
-    iq_room_kick_occupant = _iq_room_kick_occupant;
-    iq_room_role_list = _iq_room_role_list;
 }

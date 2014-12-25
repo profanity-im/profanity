@@ -396,7 +396,7 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/occupants",
-        cmd_occupants, parse_args, 1, 2, &cons_occupants_setting,
+        cmd_occupants, parse_args, 1, 2, cons_occupants_setting,
         { "/occupants show|hide|default|size [show|hide] [percent]", "Show or hide room occupants.",
         { "/occupants show|hide|default|size [show|hide] [percent]",
           "-------------------------------------------------------",
@@ -1859,7 +1859,7 @@ cmd_execute_default(const char * inp)
                 }
 
 #else
-                message_send(plugin_message, send_recipient->str);
+                message_send_chat(send_recipient->str, plugin_message);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);

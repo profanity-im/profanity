@@ -88,8 +88,8 @@ bookmark_request(void)
     xmpp_stanza_release(iq);
 }
 
-static gboolean
-_bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
+gboolean
+bookmark_add(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
     if (autocomplete_contains(bookmark_ac, jid)) {
         return FALSE;
@@ -121,8 +121,8 @@ _bookmark_add(const char *jid, const char *nick, const char *password, const cha
     }
 }
 
-static gboolean
-_bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str)
+gboolean
+bookmark_update(const char *jid, const char *nick, const char *password, const char *autojoin_str)
 {
     Bookmark *item = malloc(sizeof(*item));
     item->jid = strdup(jid);
@@ -156,8 +156,8 @@ _bookmark_update(const char *jid, const char *nick, const char *password, const 
     }
 }
 
-static gboolean
-_bookmark_join(const char *jid)
+gboolean
+bookmark_join(const char *jid)
 {
     Bookmark *item = malloc(sizeof(*item));
     item->jid = strdup(jid);
@@ -188,8 +188,8 @@ _bookmark_join(const char *jid)
     }
 }
 
-static gboolean
-_bookmark_remove(const char *jid)
+gboolean
+bookmark_remove(const char *jid)
 {
     Bookmark *item = malloc(sizeof(*item));
     item->jid = strdup(jid);
@@ -213,20 +213,20 @@ _bookmark_remove(const char *jid)
     }
 }
 
-static const GList *
-_bookmark_get_list(void)
+const GList *
+bookmark_get_list(void)
 {
     return bookmark_list;
 }
 
-static char *
-_bookmark_find(char *search_str)
+char *
+bookmark_find(char *search_str)
 {
     return autocomplete_complete(bookmark_ac, search_str, TRUE);
 }
 
-static void
-_bookmark_autocomplete_reset(void)
+void
+bookmark_autocomplete_reset(void)
 {
     if (bookmark_ac != NULL) {
         autocomplete_reset(bookmark_ac);
@@ -468,16 +468,4 @@ _send_bookmarks(void)
 
     xmpp_send(conn, iq);
     xmpp_stanza_release(iq);
-}
-
-void
-bookmark_init_module(void)
-{
-    bookmark_add = _bookmark_add;
-    bookmark_update = _bookmark_update;
-    bookmark_remove = _bookmark_remove;
-    bookmark_join = _bookmark_join;
-    bookmark_get_list = _bookmark_get_list;
-    bookmark_find = _bookmark_find;
-    bookmark_autocomplete_reset = _bookmark_autocomplete_reset;
 }

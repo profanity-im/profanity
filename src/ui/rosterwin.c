@@ -143,8 +143,8 @@ _rosterwin_contacts_by_no_group(ProfLayoutSplit *layout)
     g_slist_free(contacts);
 }
 
-static void
-_rosterwin_roster(void)
+void
+rosterwin_roster(void)
 {
     ProfWin *console = wins_get_console();
     if (console) {
@@ -192,10 +192,4 @@ _rosterwin_roster(void)
         }
         free(by);
     }
-}
-
-void
-rosterwin_init_module(void)
-{
-    rosterwin_roster = _rosterwin_roster;
 }

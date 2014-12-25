@@ -79,8 +79,8 @@ message_add_handlers(void)
     HANDLE(STANZA_NS_CAPTCHA,    NULL,                   _captcha_handler);
 }
 
-static void
-_message_send_chat(const char * const barejid, const char * const msg)
+void
+message_send_chat(const char * const barejid, const char * const msg)
 {
     const char * jid = NULL;
 
@@ -112,8 +112,8 @@ _message_send_chat(const char * const barejid, const char * const msg)
     xmpp_stanza_release(message);
 }
 
-static void
-_message_send_private(const char * const fulljid, const char * const msg)
+void
+message_send_private(const char * const fulljid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -123,8 +123,8 @@ _message_send_private(const char * const fulljid, const char * const msg)
     xmpp_stanza_release(message);
 }
 
-static void
-_message_send_groupchat(const char * const roomjid, const char * const msg)
+void
+message_send_groupchat(const char * const roomjid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -134,8 +134,8 @@ _message_send_groupchat(const char * const roomjid, const char * const msg)
     xmpp_stanza_release(message);
 }
 
-static void
-_message_send_groupchat_subject(const char * const roomjid, const char * const subject)
+void
+message_send_groupchat_subject(const char * const roomjid, const char * const subject)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -145,8 +145,8 @@ _message_send_groupchat_subject(const char * const roomjid, const char * const s
     xmpp_stanza_release(message);
 }
 
-static void
-_message_send_invite(const char * const roomjid, const char * const contact,
+void
+message_send_invite(const char * const roomjid, const char * const contact,
     const char * const reason)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -157,8 +157,8 @@ _message_send_invite(const char * const roomjid, const char * const contact,
     xmpp_stanza_release(stanza);
 }
 
-static void
-_message_send_composing(const char * const barejid)
+void
+message_send_composing(const char * const barejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -170,8 +170,8 @@ _message_send_composing(const char * const barejid)
     chat_session_set_sent(barejid);
 }
 
-static void
-_message_send_paused(const char * const barejid)
+void
+message_send_paused(const char * const barejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -183,8 +183,8 @@ _message_send_paused(const char * const barejid)
     chat_session_set_sent(barejid);
 }
 
-static void
-_message_send_inactive(const char * const barejid)
+void
+message_send_inactive(const char * const barejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -196,8 +196,8 @@ _message_send_inactive(const char * const barejid)
     chat_session_set_sent(barejid);
 }
 
-static void
-_message_send_gone(const char * const barejid)
+void
+message_send_gone(const char * const barejid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
@@ -510,18 +510,4 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         jid_destroy(jid);
         return 1;
     }
-}
-
-void
-message_init_module(void)
-{
-    message_send_chat = _message_send_chat;
-    message_send_private = _message_send_private;
-    message_send_groupchat = _message_send_groupchat;
-    message_send_invite = _message_send_invite;
-    message_send_composing = _message_send_composing;
-    message_send_paused = _message_send_paused;
-    message_send_inactive = _message_send_inactive;
-    message_send_gone = _message_send_gone;
-    message_send_groupchat_subject = _message_send_groupchat_subject;
 }

@@ -60,7 +60,6 @@ static GHashTable *jid_to_caps;
 
 static char *my_sha1;
 
-static void _caps_destroy(Capabilities *caps);
 static gchar* _get_cache_file(void);
 static void _save_cache(void);
 static Capabilities * _caps_by_ver(const char * const ver);
@@ -82,7 +81,7 @@ caps_init(void)
         NULL);
 
     jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-    jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_caps_destroy);
+    jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)caps_destroy);
 
     my_sha1 = NULL;
 }
@@ -227,8 +226,8 @@ _caps_by_jid(const char * const jid)
     return g_hash_table_lookup(jid_to_caps, jid);
 }
 
-static Capabilities *
-_caps_lookup(const char * const jid)
+Capabilities *
+caps_lookup(const char * const jid)
 {
     char *ver = g_hash_table_lookup(jid_to_ver, jid);
     if (ver) {
@@ -624,8 +623,8 @@ caps_create_query_response_stanza(xmpp_ctx_t * const ctx)
     return query;
 }
 
-static void
-_caps_close(void)
+void
+caps_close(void)
 {
     g_key_file_free(cache);
     cache = NULL;
@@ -633,8 +632,8 @@ _caps_close(void)
     g_hash_table_destroy(jid_to_caps);
 }
 
-static void
-_caps_destroy(Capabilities *caps)
+void
+caps_destroy(Capabilities *caps)
 {
     if (caps != NULL) {
         free(caps->category);
@@ -672,12 +671,4 @@ _save_cache(void)
     g_file_set_contents(cache_loc, g_cache_data, g_data_size, NULL);
     g_chmod(cache_loc, S_IRUSR | S_IWUSR);
     g_free(g_cache_data);
-}
-
-void
-capabilities_init_module(void)
-{
-    caps_lookup = _caps_lookup;
-    caps_close = _caps_close;
-    caps_destroy = _caps_destroy;
 }
