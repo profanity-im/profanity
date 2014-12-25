@@ -247,9 +247,24 @@ void ui_group_added(const char * const contact, const char * const group) {}
 void ui_group_removed(const char * const contact, const char * const group) {}
 void ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity) {}
 void ui_chat_win_contact_offline(PContact contact, char *resource, char *status) {}
-void ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg) {}
-void ui_handle_recipient_error(const char * const recipient, const char * const err_msg) {}
-void ui_handle_error(const char * const err_msg) {}
+
+void ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
+{
+    check_expected(recipient);
+    check_expected(err_msg);
+}
+
+void ui_handle_recipient_error(const char * const recipient, const char * const err_msg)
+{
+    check_expected(recipient);
+    check_expected(err_msg);
+}
+
+void ui_handle_error(const char * const err_msg)
+{
+    check_expected(err_msg);
+}
+
 void ui_clear_win_title(void) {}
 void ui_handle_room_join_error(const char * const roomjid, const char * const err) {}
 void ui_handle_room_configuration(const char * const roomjid, DataForm *form) {}
@@ -432,7 +447,14 @@ void cons_autoping_setting(void) {}
 void cons_priority_setting(void) {}
 void cons_autoconnect_setting(void) {}
 void cons_inpblock_setting(void) {}
-void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity) {}
+
+void cons_show_contact_online(PContact contact, Resource *resource, GDateTime *last_activity)
+{
+    check_expected(contact);
+    check_expected(resource);
+    check_expected(last_activity);
+}
+
 void cons_show_contact_offline(PContact contact, char *resource, char *status) {}
 void cons_theme_colours(void) {}
 

@@ -361,7 +361,6 @@ int main(int argc, char* argv[]) {
             load_preferences,
             close_preferences),
 
-/*
         unit_test_setup_teardown(console_doesnt_show_online_presence_when_set_none,
             load_preferences,
             close_preferences),
@@ -390,7 +389,7 @@ int main(int argc, char* argv[]) {
         unit_test(handle_message_error_when_recipient_and_no_type),
         unit_test(handle_presence_error_when_no_recipient),
         unit_test(handle_presence_error_when_from_recipient),
-*/
+
         unit_test(cmd_alias_add_shows_usage_when_no_args),
         unit_test(cmd_alias_add_shows_usage_when_no_value),
         unit_test(cmd_alias_remove_shows_usage_when_no_args),

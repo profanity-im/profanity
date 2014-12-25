@@ -86,6 +86,7 @@ tests_sources = \
 	tests/test_parser.c tests/test_parser.h \
 	tests/test_preferences.c tests/test_preferences.h \
 	tests/test_roster_list.c tests/test_roster_list.h \
+	tests/test_server_events.c tests/test_server_events.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
