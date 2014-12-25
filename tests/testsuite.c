@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
         unit_test(add_two_same_updates),
-/*
+
         unit_test(previous_on_empty_returns_null),
         unit_test(next_on_empty_returns_null),
         unit_test(previous_once_returns_last),
@@ -108,6 +108,7 @@ int main(int argc, char* argv[]) {
         unit_test(edit_previous_and_append),
         unit_test(start_session_add_new_submit_previous),
 
+/*
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),
         unit_test(create_jid_from_full_returns_full),

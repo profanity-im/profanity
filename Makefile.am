@@ -80,6 +80,7 @@ tests_sources = \
 	tests/test_common.c tests/test_common.h \
 	tests/test_contact.c tests/test_contact.h \
 	tests/test_form.c tests/test_form.h \
+	tests/test_history.c tests/test_history.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
