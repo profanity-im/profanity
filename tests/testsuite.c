@@ -134,7 +134,6 @@ int main(int argc, char* argv[]) {
         unit_test(returns_fulljid_when_exists),
         unit_test(returns_barejid_when_fulljid_not_exists),
 
-/*
         unit_test(parse_null_returns_null),
         unit_test(parse_empty_returns_null),
         unit_test(parse_space_returns_null),
@@ -186,6 +185,7 @@ int main(int argc, char* argv[]) {
         unit_test(parse_options_when_unknown_opt_sets_error),
         unit_test(parse_options_with_duplicated_option_sets_error),
 
+/*
         unit_test(empty_list_when_none_added),
         unit_test(contains_one_element),
         unit_test(first_element_correct),
