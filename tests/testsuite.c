@@ -108,7 +108,6 @@ int main(int argc, char* argv[]) {
         unit_test(edit_previous_and_append),
         unit_test(start_session_add_new_submit_previous),
 
-/*
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),
         unit_test(create_jid_from_full_returns_full),
@@ -135,6 +134,7 @@ int main(int argc, char* argv[]) {
         unit_test(returns_fulljid_when_exists),
         unit_test(returns_barejid_when_fulljid_not_exists),
 
+/*
         unit_test(parse_null_returns_null),
         unit_test(parse_empty_returns_null),
         unit_test(parse_space_returns_null),
