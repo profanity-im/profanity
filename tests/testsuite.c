@@ -293,7 +293,6 @@ int main(int argc, char* argv[]) {
 
         unit_test(cmd_sub_shows_message_when_not_connected),
         unit_test(cmd_sub_shows_usage_when_no_arg),
-/*
 
         unit_test(contact_in_group),
         unit_test(contact_not_in_group),
@@ -320,7 +319,6 @@ int main(int argc, char* argv[]) {
         unit_test(contact_available_when_highest_priority_online),
         unit_test(contact_available_when_highest_priority_chat),
 
-*/
         unit_test(cmd_statuses_shows_usage_when_bad_subcmd),
         unit_test(cmd_statuses_shows_usage_when_bad_console_setting),
         unit_test(cmd_statuses_shows_usage_when_bad_chat_setting),
