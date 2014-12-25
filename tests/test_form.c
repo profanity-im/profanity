@@ -47,8 +47,6 @@ _new_field(void)
 
 void get_form_type_field_returns_null_no_fields(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
 
     char *result = form_get_form_type_field(form);
@@ -60,8 +58,6 @@ void get_form_type_field_returns_null_no_fields(void **state)
 
 void get_form_type_field_returns_null_when_not_present(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     FormField *field = _new_field();
     field->var = strdup("var1");
@@ -77,8 +73,6 @@ void get_form_type_field_returns_null_when_not_present(void **state)
 
 void get_form_type_field_returns_value_when_present(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
 
     FormField *field1 = _new_field();
@@ -105,8 +99,6 @@ void get_form_type_field_returns_value_when_present(void **state)
 
 void get_field_type_returns_unknown_when_no_fields(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
 
     form_field_type_t result = form_get_field_type(form, "tag");
@@ -118,8 +110,6 @@ void get_field_type_returns_unknown_when_no_fields(void **state)
 
 void get_field_type_returns_correct_type(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
@@ -145,8 +135,6 @@ void get_field_type_returns_correct_type(void **state)
 
 void set_value_adds_when_none(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
@@ -185,8 +173,6 @@ void set_value_adds_when_none(void **state)
 
 void set_value_updates_when_one(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
@@ -225,8 +211,6 @@ void set_value_updates_when_one(void **state)
 
 void add_unique_value_adds_when_none(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
@@ -266,8 +250,6 @@ void add_unique_value_adds_when_none(void **state)
 
 void add_unique_value_does_nothing_when_exists(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
@@ -308,8 +290,6 @@ void add_unique_value_does_nothing_when_exists(void **state)
 
 void add_unique_value_adds_when_doesnt_exist(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
     g_hash_table_insert(form->tag_to_var, strdup("tag2"), strdup("var2"));
@@ -358,8 +338,6 @@ void add_unique_value_adds_when_doesnt_exist(void **state)
 
 void add_value_adds_when_none(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -391,8 +369,6 @@ void add_value_adds_when_none(void **state)
 
 void add_value_adds_when_some(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -433,8 +409,6 @@ void add_value_adds_when_some(void **state)
 
 void add_value_adds_when_exists(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -476,8 +450,6 @@ void add_value_adds_when_exists(void **state)
 
 void remove_value_does_nothing_when_none(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -506,8 +478,6 @@ void remove_value_does_nothing_when_none(void **state)
 
 void remove_value_does_nothing_when_doesnt_exist(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -549,8 +519,6 @@ void remove_value_does_nothing_when_doesnt_exist(void **state)
 
 void remove_value_removes_when_one(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -580,8 +548,6 @@ void remove_value_removes_when_one(void **state)
 
 void remove_value_removes_when_many(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -623,8 +589,6 @@ void remove_value_removes_when_many(void **state)
 
 void remove_text_multi_value_does_nothing_when_none(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -653,8 +617,6 @@ void remove_text_multi_value_does_nothing_when_none(void **state)
 
 void remove_text_multi_value_does_nothing_when_doesnt_exist(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -696,8 +658,6 @@ void remove_text_multi_value_does_nothing_when_doesnt_exist(void **state)
 
 void remove_text_multi_value_removes_when_one(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 
@@ -727,8 +687,6 @@ void remove_text_multi_value_removes_when_one(void **state)
 
 void remove_text_multi_value_removes_when_many(void **state)
 {
-    form_init_module();
-
     DataForm *form = _new_form();
     g_hash_table_insert(form->tag_to_var, strdup("tag1"), strdup("var1"));
 

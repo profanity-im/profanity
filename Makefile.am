@@ -40,7 +40,7 @@ tests_sources = \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
-	src/xmpp/xmpp.h \
+	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \
 	src/command/command.h src/command/command.c src/command/history.c \
 	src/command/commands.h src/command/commands.c \
@@ -79,6 +79,7 @@ tests_sources = \
 	tests/test_cmd_win.c tests/test_cmd_win.h \
 	tests/test_common.c tests/test_common.h \
 	tests/test_contact.c tests/test_contact.h \
+	tests/test_form.c tests/test_form.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/testsuite.c
 
