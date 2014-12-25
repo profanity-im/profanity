@@ -351,7 +351,7 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(cmd_statuses_muc_sets_none,
             load_preferences,
             close_preferences),
-/*
+
         unit_test_setup_teardown(statuses_console_defaults_to_all,
             load_preferences,
             close_preferences),
@@ -362,6 +362,7 @@ int main(int argc, char* argv[]) {
             load_preferences,
             close_preferences),
 
+/*
         unit_test_setup_teardown(console_doesnt_show_online_presence_when_set_none,
             load_preferences,
             close_preferences),
