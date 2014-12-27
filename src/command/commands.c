@@ -1678,7 +1678,6 @@ cmd_info(gchar **args, struct cmd_help_t help)
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
     PContact pcontact = NULL;
-    char *room = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
@@ -1693,7 +1692,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
                 Occupant *occupant = muc_roster_item(mucwin->roomjid, usr);
                 if (occupant) {
                     ProfWin *current = wins_get_current();
-                    win_show_occupant_info(current, room, occupant);
+                    win_show_occupant_info(current, mucwin->roomjid, occupant);
                 } else {
                     ui_current_print_line("No such occupant \"%s\" in room.", usr);
                 }
