@@ -80,36 +80,27 @@ message_add_handlers(void)
 }
 
 void
-message_send_chat(const char * const barejid, const char * const msg)
+message_send_chat(const char * const barejid, const char * const resource, const char * const msg, gboolean send_state)
 {
-    const char * jid = NULL;
-
-    if (roster_barejid_from_name(barejid) != NULL) {
-        jid = roster_barejid_from_name(barejid);
-    } else {
-        jid = barejid;
-    }
-
-    if (prefs_get_boolean(PREF_STATES)) {
-        if (!chat_session_exists(jid)) {
-            chat_session_start(jid, TRUE);
-        }
-    }
-
     xmpp_stanza_t *message;
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    if (prefs_get_boolean(PREF_STATES) && chat_session_get_recipient_supports(jid)) {
-        chat_session_set_active(jid);
-        message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT,
-            msg, STANZA_NAME_ACTIVE);
+
+    GString *jid = g_string_new(barejid);
+    if (resource) {
+        g_string_append(jid, "/");
+        g_string_append(jid, resource);
+    }
+
+    if (send_state) {
+        message = stanza_create_message(ctx, jid->str, STANZA_TYPE_CHAT, msg, STANZA_NAME_ACTIVE);
     } else {
-        message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT,
-            msg, NULL);
+        message = stanza_create_message(ctx, jid->str, STANZA_TYPE_CHAT, msg, NULL);
     }
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
+    g_string_free(jid, TRUE);
 }
 
 void

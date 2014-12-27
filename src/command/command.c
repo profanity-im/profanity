@@ -1793,12 +1793,7 @@ cmd_execute_default(const char * inp)
             } else {
                 ProfWin *current = wins_get_current();
                 ProfChatWin *chatwin = (ProfChatWin*)current;
-                GString *send_recipient = g_string_new(chatwin->barejid);
-                if (current && chatwin->resource) {
-                    g_string_append(send_recipient, "/");
-                    g_string_append(send_recipient, chatwin->resource);
-                }
-
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 #ifdef HAVE_LIBOTR
                 prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
                 if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(chatwin->barejid)) {
@@ -1808,7 +1803,18 @@ cmd_execute_default(const char * inp)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, inp);
                     if (encrypted != NULL) {
-                        message_send_chat(chatwin->barejid, encrypted);
+                        gboolean send_state = FALSE;
+                        if (prefs_get_boolean(PREF_STATES)) {
+                            if (!chat_session_exists(chatwin->barejid)) {
+                                chat_session_start(chatwin->barejid, TRUE);
+                            }
+                            if (chat_session_get_recipient_supports(chatwin->barejid)) {
+                                chat_session_set_active(chatwin->barejid);
+                                send_state = TRUE;
+                            }
+                        }
+
+                        message_send_chat(chatwin->barejid, chatwin->barejid, encrypted, send_state);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -1828,7 +1834,17 @@ cmd_execute_default(const char * inp)
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send_chat(send_recipient->str, inp);
+                    gboolean send_state = FALSE;
+                    if (prefs_get_boolean(PREF_STATES)) {
+                        if (!chat_session_exists(chatwin->barejid)) {
+                            chat_session_start(chatwin->barejid, TRUE);
+                        }
+                        if (chat_session_get_recipient_supports(chatwin->barejid)) {
+                            chat_session_set_active(chatwin->barejid);
+                            send_state = TRUE;
+                        }
+                    }
+                    message_send_chat(chatwin->barejid, chatwin->resource, inp, send_state);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -1839,7 +1855,17 @@ cmd_execute_default(const char * inp)
                     ui_outgoing_chat_msg("me", chatwin->barejid, inp);
                 }
 #else
-                message_send_chat(send_recipient->str, inp);
+                gboolean send_state = FALSE;
+                if (prefs_get_boolean(PREF_STATES)) {
+                    if (!chat_session_exists(chatwin->barejid)) {
+                        chat_session_start(chatwin->barejid, TRUE);
+                    }
+                    if (chat_session_get_recipient_supports(chatwin->barejid)) {
+                        chat_session_set_active(chatwin->barejid);
+                        send_state = TRUE;
+                    }
+                }
+                message_send_chat(chatwin->barejid, chatwin->resource, inp, send_state);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -1849,7 +1875,6 @@ cmd_execute_default(const char * inp)
 
                 ui_outgoing_chat_msg("me", chatwin->barejid, inp);
 #endif
-                g_string_free(send_recipient, TRUE);
             }
             break;
 
