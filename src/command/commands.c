@@ -1231,12 +1231,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 #endif
 
         } else { // msg == NULL
-            if (prefs_get_boolean(PREF_STATES)) {
-                if (!chat_session_exists(barejid)) {
-                    chat_session_new(barejid, TRUE);
-                }
-            }
-
+            chat_session_on_window_open(barejid);
             ui_new_chat_win(barejid);
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -3905,12 +3900,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 barejid = contact;
             }
 
-            if (prefs_get_boolean(PREF_STATES)) {
-                if (!chat_session_exists(barejid)) {
-                    chat_session_new(barejid, TRUE);
-                }
-            }
-
+            chat_session_on_window_open(barejid);
             ui_new_chat_win(barejid);
 
             if (ui_current_win_is_otr()) {

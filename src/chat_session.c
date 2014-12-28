@@ -277,6 +277,16 @@ chat_session_on_message_send(const char * const barejid)
     return send_state;
 }
 
+void
+chat_session_on_window_open(const char * const barejid)
+{
+    if (prefs_get_boolean(PREF_STATES)) {
+        if (!chat_session_exists(barejid)) {
+            chat_session_new(barejid, TRUE);
+        }
+    }
+}
+
 static void
 _chat_session_free(ChatSession *session)
 {
