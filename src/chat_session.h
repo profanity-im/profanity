@@ -39,7 +39,7 @@
 
 void chat_sessions_init(void);
 void chat_sessions_clear(void);
-void chat_session_start(const char * const recipient,
+void chat_session_new(const char * const recipient,
     gboolean recipient_supports);
 gboolean chat_session_exists(const char * const recipient);
 void chat_session_end(const char * const recipient);
@@ -56,5 +56,6 @@ gboolean chat_session_is_gone(const char * const recipient);
 void chat_session_set_gone(const char * const recipient);
 void chat_session_set_sent(const char * const recipient);
 gboolean chat_session_get_sent(const char * const recipient);
+gboolean chat_session_on_message_send(const char * const barejid);
 
 #endif

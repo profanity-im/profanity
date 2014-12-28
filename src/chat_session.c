@@ -82,7 +82,7 @@ chat_sessions_clear(void)
 }
 
 void
-chat_session_start(const char * const recipient, gboolean recipient_supports)
+chat_session_new(const char * const recipient, gboolean recipient_supports)
 {
     ChatSession *new_session = malloc(sizeof(struct chat_session_t));
     new_session->recipient = strdup(recipient);
@@ -258,6 +258,23 @@ chat_session_set_recipient_supports(const char * const recipient,
     if (session != NULL) {
         session->recipient_supports = recipient_supports;
     }
+}
+
+gboolean
+chat_session_on_message_send(const char * const barejid)
+{
+    gboolean send_state = FALSE;
+    if (prefs_get_boolean(PREF_STATES)) {
+        if (!chat_session_exists(barejid)) {
+            chat_session_new(barejid, TRUE);
+        }
+        if (chat_session_get_recipient_supports(barejid)) {
+            chat_session_set_active(barejid);
+            send_state = TRUE;
+        }
+    }
+
+    return send_state;
 }
 
 static void

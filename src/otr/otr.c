@@ -110,16 +110,7 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    gboolean send_state = FALSE;
-    if (prefs_get_boolean(PREF_STATES)) {
-        if (!chat_session_exists(recipient)) {
-            chat_session_start(recipient, TRUE);
-        }
-        if (chat_session_get_recipient_supports(recipient)) {
-            chat_session_set_active(recipient);
-            send_state = TRUE;
-        }
-    }
+    gboolean send_state = chat_session_on_message_send(recipient);
     message_send_chat(recipient, NULL, message, send_state);
 }
 
