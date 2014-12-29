@@ -552,6 +552,7 @@ _get_group(preference_t pref)
         case PREF_AUTOAWAY_MESSAGE:
             return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
+        case PREF_DEFAULT_ACCOUNT:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_WARN:
         case PREF_OTR_LOG:
@@ -633,6 +634,8 @@ _get_key(preference_t pref)
             return "autoaway.message";
         case PREF_CONNECT_ACCOUNT:
             return "account";
+        case PREF_DEFAULT_ACCOUNT:
+            return "defaccount";
         case PREF_OTR_LOG:
             return "log";
         case PREF_OTR_WARN:
