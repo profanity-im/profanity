@@ -65,9 +65,9 @@ typedef struct chat_session_t {
 
 static GHashTable *sessions;
 
-static ChatSession* _chat_session_new(const char * const recipient, gboolean supported);
-static void _chat_session_set_composing(const char * const recipient);
-static void _chat_session_set_active(const char * const recipient);
+static ChatSession* _chat_session_new(const char * const barejid, gboolean supported);
+static void _chat_session_set_composing(const char * const barejid);
+static void _chat_session_set_active(const char * const barejid);
 static void _chat_session_free(ChatSession *session);
 
 void
@@ -99,9 +99,9 @@ _chat_session_new(const char * const barejid, gboolean supported)
 }
 
 static void
-_chat_session_set_composing(const char * const recipient)
+_chat_session_set_composing(const char * const barejid)
 {
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
 
     if (session != NULL) {
         if (session->state != CHAT_STATE_COMPOSING) {
@@ -113,9 +113,9 @@ _chat_session_set_composing(const char * const recipient)
 }
 
 static void
-_chat_session_set_active(const char * const recipient)
+_chat_session_set_active(const char * const barejid)
 {
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
 
     if (session != NULL) {
         session->state = CHAT_STATE_ACTIVE;
