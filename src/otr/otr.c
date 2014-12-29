@@ -45,6 +45,7 @@
 #include "contact.h"
 #include "ui/ui.h"
 #include "config/preferences.h"
+#include "chat_session.h"
 
 #define PRESENCE_ONLINE 1
 #define PRESENCE_OFFLINE 0
@@ -109,7 +110,8 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    message_send_chat(recipient, message);
+    gboolean send_state = chat_session_on_message_send(recipient);
+    message_send_chat(recipient, NULL, message, send_state);
 }
 
 static void

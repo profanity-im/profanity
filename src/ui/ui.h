@@ -60,7 +60,7 @@ void ui_update(void);
 void ui_close(void);
 void ui_redraw(void);
 void ui_resize(void);
-GSList* ui_get_recipients(void);
+GSList* ui_get_chat_recipients(void);
 void ui_handle_special_keys(const wint_t * const ch, const int result);
 gboolean ui_switch_win(const int i);
 void ui_next_win(void);

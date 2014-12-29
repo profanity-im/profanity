@@ -80,23 +80,21 @@ handle_presence_error(const char *from, const char * const type,
 
 // handle message stanza errors
 void
-handle_message_error(const char * const from, const char * const type,
+handle_message_error(const char * const jid, const char * const type,
     const char * const err_msg)
 {
     // handle errors from no recipient
-    if (from == NULL) {
+    if (jid == NULL) {
         ui_handle_error(err_msg);
 
     // handle recipient not found ('from' contains a value and type is 'cancel')
     } else if (type != NULL && (strcmp(type, "cancel") == 0)) {
-        ui_handle_recipient_not_found(from, err_msg);
-        if (prefs_get_boolean(PREF_STATES) && chat_session_exists(from)) {
-            chat_session_set_recipient_supports(from, FALSE);
-        }
+        ui_handle_recipient_not_found(jid, err_msg);
+        chat_session_on_cancel(jid);
 
     // handle any other error from recipient
     } else {
-        ui_handle_recipient_error(from, err_msg);
+        ui_handle_recipient_error(jid, err_msg);
     }
 }
 
@@ -334,7 +332,8 @@ handle_incoming_message(char *barejid, char *message)
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send_chat(barejid, otr_query_message);
+                gboolean send_state = chat_session_on_message_send(barejid);
+                message_send_chat(barejid, NULL, otr_query_message, send_state);
             }
         }
     }
@@ -348,7 +347,8 @@ handle_incoming_message(char *barejid, char *message)
     if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        message_send_chat(barejid, otr_query_message);
+        gboolean send_state = chat_session_on_message_send(barejid);
+        message_send_chat(barejid, NULL, otr_query_message, send_state);
     }
 
     plugin_message = plugins_pre_chat_message_display(barejid, newmessage);

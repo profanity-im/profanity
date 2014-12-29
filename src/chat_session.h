@@ -39,22 +39,13 @@
 
 void chat_sessions_init(void);
 void chat_sessions_clear(void);
-void chat_session_start(const char * const recipient,
-    gboolean recipient_supports);
-gboolean chat_session_exists(const char * const recipient);
-void chat_session_end(const char * const recipient);
-gboolean chat_session_get_recipient_supports(const char * const recipient);
-void chat_session_set_recipient_supports(const char * const recipient,
-    gboolean recipient_supports);
 
-void chat_session_set_composing(const char * const recipient);
-void chat_session_no_activity(const char * const recipient);
-gboolean chat_session_is_inactive(const char * const recipient);
-void chat_session_set_active(const char * const recipient);
-gboolean chat_session_is_paused(const char * const recipient);
-gboolean chat_session_is_gone(const char * const recipient);
-void chat_session_set_gone(const char * const recipient);
-void chat_session_set_sent(const char * const recipient);
-gboolean chat_session_get_sent(const char * const recipient);
+gboolean chat_session_on_message_send(const char * const barejid);
+void chat_session_on_window_open(const char * const barejid);
+void chat_session_on_window_close(const char * const barejid);
+void chat_session_on_incoming_message(const char * const barejid, gboolean supported);
+void chat_session_on_cancel(const char * const jid);
+void chat_session_on_activity(const char * const barejid);
+void chat_session_on_inactivity(const char * const recipient);
 
 #endif

@@ -316,7 +316,7 @@ ui_contact_typing(const char * const barejid)
 }
 
 GSList *
-ui_get_recipients(void)
+ui_get_chat_recipients(void)
 {
     GSList *recipients = wins_get_chat_recipients();
     return recipients;
@@ -706,14 +706,7 @@ ui_close_connected_win(int index)
                 otr_end_session(chatwin->barejid);
             }
 #endif
-            if (prefs_get_boolean(PREF_STATES)) {
-                // send <gone/> chat state before closing
-                if (chat_session_get_recipient_supports(chatwin->barejid)) {
-                    chat_session_set_gone(chatwin->barejid);
-                    message_send_gone(chatwin->barejid);
-                    chat_session_end(chatwin->barejid);
-                }
-            }
+            chat_session_on_window_close(chatwin->barejid);
         }
     }
 }
@@ -1169,16 +1162,8 @@ ui_prune_wins(void)
         ProfWin *window = curr->data;
         if (window->type == WIN_CHAT) {
             if (conn_status == JABBER_CONNECTED) {
-                if (prefs_get_boolean(PREF_STATES)) {
-                    ProfChatWin *chatwin = (ProfChatWin*)window;
-
-                    // send <gone/> chat state before closing
-                    if (chat_session_get_recipient_supports(chatwin->barejid)) {
-                        chat_session_set_gone(chatwin->barejid);
-                        message_send_gone(chatwin->barejid);
-                        chat_session_end(chatwin->barejid);
-                    }
-                }
+                ProfChatWin *chatwin = (ProfChatWin*)window;
+                chat_session_on_window_close(chatwin->barejid);
             }
         }
 

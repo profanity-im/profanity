@@ -1149,41 +1149,42 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         return TRUE;
 
     } else {
-        char *usr_jid = roster_barejid_from_name(usr);
-        if (usr_jid == NULL) {
-            usr_jid = usr;
+        // get barejid
+        char *barejid = roster_barejid_from_name(usr);
+        if (barejid == NULL) {
+            barejid = usr;
         }
-        GString *send_jid = g_string_new(usr_jid);
-        ProfWin *current = wins_get_current();
 
-        // if msg to current recipient, attach resource if set
+        // if msg to current recipient, and resource specified, set resource
+        char *resource = NULL;
+        ProfWin *current = wins_get_current();
         if (current->type == WIN_CHAT) {
             ProfChatWin *chatwin = (ProfChatWin*)current;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-            if ((g_strcmp0(chatwin->barejid, usr_jid) == 0) && (chatwin->resource)) {
-                g_string_append(send_jid, "/");
-                g_string_append(send_jid, chatwin->resource);
+            if ((g_strcmp0(chatwin->barejid, barejid) == 0) && (chatwin->resource)) {
+                resource = chatwin->resource;
             }
         }
 
         if (msg != NULL) {
-            char *plugin_message = plugins_pre_chat_message_send(usr_jid, msg);
+            char *plugin_message = plugins_pre_chat_message_send(barejid, msg);
 #ifdef PROF_HAVE_LIBOTR
-            if (otr_is_secure(usr_jid)) {
-                char *encrypted = otr_encrypt_message(usr_jid, plugin_message);
+            if (otr_is_secure(barejid)) {
+                char *encrypted = otr_encrypt_message(barejid, plugin_message);
                 if (encrypted != NULL) {
-                    message_send_chat(usr_jid, encrypted);
+                    gboolean send_state = chat_session_on_message_send(barejid);
+                    message_send_chat(barejid, resource, encrypted, send_state);
                     otr_free_message(encrypted);
-                    ui_outgoing_chat_msg("me", usr_jid, plugin_message);
+                    ui_outgoing_chat_msg("me", barejid, plugin_message);
 
                     if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
                         char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
                         if (strcmp(pref_otr_log, "on") == 0) {
-                            chat_log_chat(jidp->barejid, usr_jid, plugin_message, PROF_OUT_LOG, NULL);
+                            chat_log_chat(jidp->barejid, barejid, plugin_message, PROF_OUT_LOG, NULL);
                         } else if (strcmp(pref_otr_log, "redact") == 0) {
-                            chat_log_chat(jidp->barejid, usr_jid, "[redacted]", PROF_OUT_LOG, NULL);
+                            chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
                         }
                         prefs_free_string(pref_otr_log);
                         jid_destroy(jidp);
@@ -1192,7 +1193,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     cons_show_error("Failed to encrypt and send message,");
                 }
             } else {
-                prof_otrpolicy_t policy = otr_get_policy(usr_jid);
+                prof_otrpolicy_t policy = otr_get_policy(barejid);
 
                 if (policy == PROF_OTRPOLICY_ALWAYS) {
                     cons_show_error("Failed to send message. Please check OTR policy");
@@ -1201,66 +1202,55 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     GString *otr_message = g_string_new(plugin_message);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-                    message_send_chat(usr_jid, otr_message->str);
+                    gboolean send_state = chat_session_on_message_send(barejid);
+                    message_send_chat(barejid, resource, otr_message->str, send_state);
+
                     g_string_free(otr_message, TRUE);
                 } else {
-                    message_send_chat(send_jid->str, plugin_message);
+                    gboolean send_state = chat_session_on_message_send(barejid);
+                    message_send_chat(barejid, resource, plugin_message, send_state);
                 }
-                ui_outgoing_chat_msg("me", usr_jid, plugin_message);
+                ui_outgoing_chat_msg("me", barejid, plugin_message);
 
                 if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, usr_jid, plugin_message, PROF_OUT_LOG, NULL);
+                    chat_log_chat(jidp->barejid, barejid, plugin_message, PROF_OUT_LOG, NULL);
                     jid_destroy(jidp);
                 }
             }
 
-            plugins_post_chat_message_send(usr_jid, plugin_message);
+            plugins_post_chat_message_send(barejid, plugin_message);
             free(plugin_message);
 
             return TRUE;
 #else
-            message_send_chat(send_jid->str, plugin_message);
-            ui_outgoing_chat_msg("me", usr_jid, plugin_message);
+            gboolean send_state = chat_session_on_message_send(barejid);
+            message_send_chat(barejid, resource, plugin_message, send_state);
+            ui_outgoing_chat_msg("me", barejid, plugin_message);
 
             if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_fulljid();
                 Jid *jidp = jid_create(jid);
-                chat_log_chat(jidp->barejid, usr_jid, plugin_message, PROF_OUT_LOG, NULL);
+                chat_log_chat(jidp->barejid, barejid, plugin_message, PROF_OUT_LOG, NULL);
                 jid_destroy(jidp);
             }
 
-            plugins_post_chat_message_send(usr_jid, plugin_message);
+            plugins_post_chat_message_send(barejid, plugin_message);
             free(plugin_message);
             return TRUE;
 #endif
 
         } else { // msg == NULL
-            const char * jid = NULL;
-
-            if (roster_barejid_from_name(usr_jid) != NULL) {
-                jid = roster_barejid_from_name(usr_jid);
-            } else {
-                jid = usr_jid;
-            }
-
-            if (prefs_get_boolean(PREF_STATES)) {
-                if (!chat_session_exists(jid)) {
-                    chat_session_start(jid, TRUE);
-                }
-            }
-
-            ui_new_chat_win(usr_jid);
+            chat_session_on_window_open(barejid);
+            ui_new_chat_win(barejid);
 #ifdef PROF_HAVE_LIBOTR
-            if (otr_is_secure(jid)) {
-                ui_gone_secure(jid, otr_is_trusted(jid));
+            if (otr_is_secure(barejid)) {
+                ui_gone_secure(barejid, otr_is_trusted(barejid));
             }
 #endif
             return TRUE;
         }
-
-        g_string_free(send_jid, TRUE);
     }
 }
 
@@ -2975,17 +2965,12 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
         if (tiny != NULL) {
             if (win_type == WIN_CHAT) {
                 ProfChatWin *chatwin = wins_get_current_chat();
-                GString *send_recipient = g_string_new(chatwin->barejid);
-                if (chatwin->resource) {
-                    g_string_append(send_recipient, "/");
-                    g_string_append(send_recipient, chatwin->resource);
-                }
-
 #ifdef PROF_HAVE_LIBOTR
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, tiny);
                     if (encrypted != NULL) {
-                        message_send_chat(chatwin->barejid, encrypted);
+                        gboolean send_state = chat_session_on_message_send(chatwin->barejid);
+                        message_send_chat(chatwin->barejid, chatwin->resource, encrypted, send_state);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -3005,7 +2990,8 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send_chat(send_recipient->str, tiny);
+                    gboolean send_state = chat_session_on_message_send(chatwin->barejid);
+                    message_send_chat(chatwin->barejid, chatwin->resource, tiny, send_state);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -3016,7 +3002,8 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                     ui_outgoing_chat_msg("me", chatwin->barejid, tiny);
                 }
 #else
-                message_send_chat(send_recipient->str, tiny);
+                gboolean send_state = chat_session_on_message_send(chatwin->barejid);
+                message_send_chat(chatwin->barejid, chatwin->resource, tiny, send_state);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -3026,8 +3013,6 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
 
                 ui_outgoing_chat_msg("me", chatwin->barejid, tiny);
 #endif
-                g_string_free(send_recipient, TRUE);
-
             } else if (win_type == WIN_PRIVATE) {
                 ProfPrivateWin *privatewin = wins_get_current_private();
                 message_send_private(tiny, privatewin->fulljid);
@@ -3947,12 +3932,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 barejid = contact;
             }
 
-            if (prefs_get_boolean(PREF_STATES)) {
-                if (!chat_session_exists(barejid)) {
-                    chat_session_start(barejid, TRUE);
-                }
-            }
-
+            chat_session_on_window_open(barejid);
             ui_new_chat_win(barejid);
 
             if (ui_current_win_is_otr()) {
@@ -3962,7 +3942,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                     ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else if (!otr_is_secure(barejid)) {
                     char *otr_query_message = otr_start_query();
-                    message_send_chat(barejid, otr_query_message);
+                    gboolean send_state = chat_session_on_message_send(barejid);
+                    message_send_chat(barejid, NULL, otr_query_message, send_state);
                 } else {
                     ui_gone_secure(barejid, otr_is_trusted(barejid));
                 }
@@ -3980,7 +3961,8 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 } else {
                     ProfChatWin *chatwin = ui_get_current_chat();
                     char *otr_query_message = otr_start_query();
-                    message_send_chat(chatwin->barejid, otr_query_message);
+                    gboolean send_state = chat_session_on_message_send(chatwin->barejid);
+                    message_send_chat(chatwin->barejid, NULL, otr_query_message, send_state);
                 }
             }
         }
