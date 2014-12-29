@@ -1804,7 +1804,7 @@ cmd_execute_default(const char * inp)
                     char *encrypted = otr_encrypt_message(chatwin->barejid, inp);
                     if (encrypted != NULL) {
                         gboolean send_state = chat_session_on_message_send(chatwin->barejid);
-                        message_send_chat(chatwin->barejid, chatwin->barejid, encrypted, send_state);
+                        message_send_chat(chatwin->barejid, chatwin->resource, encrypted, send_state);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
