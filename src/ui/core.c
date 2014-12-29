@@ -178,7 +178,7 @@ wint_t
 ui_get_char(char *input, int *size, int *result)
 {
     wint_t ch = inp_get_char(input, size, result);
-    if (ch != ERR) {
+    if (ch != ERR && *result != ERR) {
         ui_reset_idle_time();
     }
     return ch;
