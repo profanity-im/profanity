@@ -57,7 +57,7 @@ typedef enum {
 typedef struct chat_session_t {
     char *barejid;
     char *resource;
-    gboolean recipient_supports;
+    gboolean supported;
     chat_state_t state;
     GTimer *active_timer;
     gboolean sent;
@@ -65,19 +65,9 @@ typedef struct chat_session_t {
 
 static GHashTable *sessions;
 
-static ChatSession* _chat_session_new(const char * const recipient, gboolean recipient_supports);
-static gboolean _chat_session_exists(const char * const recipient);
+static ChatSession* _chat_session_new(const char * const recipient, gboolean supported);
 static void _chat_session_set_composing(const char * const recipient);
-static void _chat_session_set_sent(const char * const recipient);
-static gboolean _chat_session_get_sent(const char * const recipient);
-static void _chat_session_end(const char * const recipient);
-static gboolean _chat_session_is_inactive(const char * const recipient);
 static void _chat_session_set_active(const char * const recipient);
-static gboolean _chat_session_is_paused(const char * const recipient);
-static gboolean _chat_session_is_gone(const char * const recipient);
-static void _chat_session_set_gone(const char * const recipient);
-static gboolean _chat_session_get_recipient_supports(const char * const recipient);
-static void _chat_session_set_recipient_supports(const char * const recipient, gboolean recipient_supports);
 static void _chat_session_free(ChatSession *session);
 
 void
@@ -95,28 +85,17 @@ chat_sessions_clear(void)
 }
 
 ChatSession*
-_chat_session_new(const char * const barejid, gboolean recipient_supports)
+_chat_session_new(const char * const barejid, gboolean supported)
 {
     ChatSession *new_session = malloc(sizeof(struct chat_session_t));
     new_session->barejid = strdup(barejid);
-    new_session->recipient_supports = recipient_supports;
+    new_session->resource = NULL;
+    new_session->supported = supported;
     new_session->state = CHAT_STATE_STARTED;
     new_session->active_timer = g_timer_new();
     new_session->sent = FALSE;
 
     return new_session;
-}
-
-static gboolean
-_chat_session_exists(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session != NULL) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
 }
 
 static void
@@ -134,46 +113,6 @@ _chat_session_set_composing(const char * const recipient)
 }
 
 static void
-_chat_session_set_sent(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session != NULL) {
-        session->sent = TRUE;
-    }
-}
-
-static gboolean
-_chat_session_get_sent(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session == NULL) {
-        return FALSE;
-    } else {
-        return session->sent;
-    }
-}
-
-static void
-_chat_session_end(const char * const recipient)
-{
-    g_hash_table_remove(sessions, recipient);
-}
-
-static gboolean
-_chat_session_is_inactive(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session == NULL) {
-        return FALSE;
-    } else {
-        return (session->state == CHAT_STATE_INACTIVE);
-    }
-}
-
-static void
 _chat_session_set_active(const char * const recipient)
 {
     ChatSession *session = g_hash_table_lookup(sessions, recipient);
@@ -185,73 +124,18 @@ _chat_session_set_active(const char * const recipient)
     }
 }
 
-static gboolean
-_chat_session_is_paused(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session == NULL) {
-        return FALSE;
-    } else {
-        return (session->state == CHAT_STATE_PAUSED);
-    }
-}
-
-static gboolean
-_chat_session_is_gone(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session == NULL) {
-        return FALSE;
-    } else {
-        return (session->state == CHAT_STATE_GONE);
-    }
-}
-
-static void
-_chat_session_set_gone(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session != NULL) {
-        session->state = CHAT_STATE_GONE;
-    }
-}
-
-static gboolean
-_chat_session_get_recipient_supports(const char * const recipient)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session == NULL) {
-        return FALSE;
-    } else {
-        return session->recipient_supports;
-    }
-}
-
-static void
-_chat_session_set_recipient_supports(const char * const recipient, gboolean recipient_supports)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, recipient);
-
-    if (session != NULL) {
-        session->recipient_supports = recipient_supports;
-    }
-}
-
 gboolean
 chat_session_on_message_send(const char * const barejid)
 {
     gboolean send_state = FALSE;
     if (prefs_get_boolean(PREF_STATES)) {
-        if (!_chat_session_exists(barejid)) {
-            ChatSession *session = _chat_session_new(barejid, TRUE);
+        ChatSession *session = g_hash_table_lookup(sessions, barejid);
+        if (!session) {
+            session = _chat_session_new(barejid, TRUE);
             g_hash_table_insert(sessions, strdup(barejid), session);
 
         }
-        if (_chat_session_get_recipient_supports(barejid)) {
+        if (session->supported) {
             _chat_session_set_active(barejid);
             send_state = TRUE;
         }
@@ -261,13 +145,14 @@ chat_session_on_message_send(const char * const barejid)
 }
 
 void
-chat_session_on_incoming_message(const char * const barejid, gboolean recipient_supports)
+chat_session_on_incoming_message(const char * const barejid, gboolean supported)
 {
-    if (!_chat_session_exists(barejid)) {
-        ChatSession *session = _chat_session_new(barejid, recipient_supports);
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
+    if (!session) {
+        session = _chat_session_new(barejid, supported);
         g_hash_table_insert(sessions, strdup(barejid), session);
     } else {
-        _chat_session_set_recipient_supports(barejid, recipient_supports);
+        session->supported = supported;
     }
 }
 
@@ -275,8 +160,9 @@ void
 chat_session_on_window_open(const char * const barejid)
 {
     if (prefs_get_boolean(PREF_STATES)) {
-        if (!_chat_session_exists(barejid)) {
-            ChatSession *session = _chat_session_new(barejid, TRUE);
+        ChatSession *session = g_hash_table_lookup(sessions, barejid);
+        if (!session) {
+            session = _chat_session_new(barejid, TRUE);
             g_hash_table_insert(sessions, strdup(barejid), session);
         }
     }
@@ -286,12 +172,13 @@ void
 chat_session_on_window_close(const char * const barejid)
 {
     if (prefs_get_boolean(PREF_STATES)) {
+        ChatSession *session = g_hash_table_lookup(sessions, barejid);
         // send <gone/> chat state before closing
-        if (_chat_session_get_recipient_supports(barejid)) {
-            _chat_session_set_gone(barejid);
+        if (session->supported) {
+            session->state = CHAT_STATE_GONE;
             message_send_gone(barejid);
-            _chat_session_set_sent(barejid);
-            _chat_session_end(barejid);
+            session->sent = TRUE;
+            g_hash_table_remove(sessions, barejid);
         }
     }
 }
@@ -299,19 +186,25 @@ chat_session_on_window_close(const char * const barejid)
 void
 chat_session_on_cancel(const char * const jid)
 {
-    if (prefs_get_boolean(PREF_STATES) && _chat_session_exists(jid)) {
-        _chat_session_set_recipient_supports(jid, FALSE);
+    if (prefs_get_boolean(PREF_STATES)) {
+        ChatSession *session = g_hash_table_lookup(sessions, jid);
+        if (session) {
+            session->supported = FALSE;
+        }
     }
 }
 
 void
 chat_session_on_activity(const char * const barejid)
 {
-    if (_chat_session_get_recipient_supports(barejid)) {
-        _chat_session_set_composing(barejid);
-        if (!_chat_session_get_sent(barejid) || _chat_session_is_paused(barejid)) {
-            message_send_composing(barejid);
-            _chat_session_set_sent(barejid);
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
+    if (session) {
+        if (session->supported) {
+            _chat_session_set_composing(barejid);
+            if (!session->sent || session->state == CHAT_STATE_PAUSED) {
+                message_send_composing(barejid);
+                session->sent = TRUE;
+            }
         }
     }
 }
@@ -319,43 +212,42 @@ chat_session_on_activity(const char * const barejid)
 void
 chat_session_on_inactivity(const char * const barejid)
 {
-    if (_chat_session_get_recipient_supports(barejid)) {
-        ChatSession *session = g_hash_table_lookup(sessions, barejid);
-        if (session != NULL) {
-            if (session->active_timer != NULL) {
-                gdouble elapsed = g_timer_elapsed(session->active_timer, NULL);
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
+    if (session && session->supported) {
+        if (session->active_timer != NULL) {
+            gdouble elapsed = g_timer_elapsed(session->active_timer, NULL);
 
-                if ((prefs_get_gone() != 0) && (elapsed > (prefs_get_gone() * 60.0))) {
-                    if (session->state != CHAT_STATE_GONE) {
-                        session->sent = FALSE;
-                    }
-                    session->state = CHAT_STATE_GONE;
+            if ((prefs_get_gone() != 0) && (elapsed > (prefs_get_gone() * 60.0))) {
+                if (session->state != CHAT_STATE_GONE) {
+                    session->sent = FALSE;
+                }
+                session->state = CHAT_STATE_GONE;
 
-                } else if (elapsed > INACTIVE_TIMOUT) {
-                    if (session->state != CHAT_STATE_INACTIVE) {
-                        session->sent = FALSE;
-                    }
-                    session->state = CHAT_STATE_INACTIVE;
+            } else if (elapsed > INACTIVE_TIMOUT) {
+                if (session->state != CHAT_STATE_INACTIVE) {
+                    session->sent = FALSE;
+                }
+                session->state = CHAT_STATE_INACTIVE;
 
-                } else if (elapsed > PAUSED_TIMOUT) {
-
-                    if (session->state == CHAT_STATE_COMPOSING) {
-                        session->sent = FALSE;
-                        session->state = CHAT_STATE_PAUSED;
-                    }
+            } else if (elapsed > PAUSED_TIMOUT) {
+                if (session->state == CHAT_STATE_COMPOSING) {
+                    session->sent = FALSE;
+                    session->state = CHAT_STATE_PAUSED;
                 }
             }
         }
 
-        if (_chat_session_is_gone(barejid) && !_chat_session_get_sent(barejid)) {
-            message_send_gone(barejid);
-            _chat_session_set_sent(barejid);
-        } else if (_chat_session_is_inactive(barejid) && !_chat_session_get_sent(barejid)) {
-            message_send_inactive(barejid);
-            _chat_session_set_sent(barejid);
-        } else if (prefs_get_boolean(PREF_OUTTYPE) && _chat_session_is_paused(barejid) && !_chat_session_get_sent(barejid)) {
-            message_send_paused(barejid);
-            _chat_session_set_sent(barejid);
+        if (session->sent == FALSE) {
+            if (session->state == CHAT_STATE_GONE) {
+                message_send_gone(barejid);
+                session->sent = TRUE;
+            } else if (session->state == CHAT_STATE_INACTIVE) {
+                message_send_inactive(barejid);
+                session->sent = TRUE;
+            } else if (session->state == CHAT_STATE_PAUSED && prefs_get_boolean(PREF_OUTTYPE)) {
+                message_send_paused(barejid);
+                session->sent = TRUE;
+            }
         }
     }
 }

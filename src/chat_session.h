@@ -39,10 +39,11 @@
 
 void chat_sessions_init(void);
 void chat_sessions_clear(void);
+
 gboolean chat_session_on_message_send(const char * const barejid);
 void chat_session_on_window_open(const char * const barejid);
 void chat_session_on_window_close(const char * const barejid);
-void chat_session_on_incoming_message(const char * const barejid, gboolean recipient_supports);
+void chat_session_on_incoming_message(const char * const barejid, gboolean supported);
 void chat_session_on_cancel(const char * const jid);
 void chat_session_on_activity(const char * const barejid);
 void chat_session_on_inactivity(const char * const recipient);
