@@ -47,7 +47,7 @@ void ui_update(void) {}
 void ui_close(void) {}
 void ui_redraw(void) {}
 void ui_resize(void) {}
-GSList* ui_get_recipients(void)
+GSList* ui_get_chat_recipients(void)
 {
     return NULL;
 }

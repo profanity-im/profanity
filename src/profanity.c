@@ -137,31 +137,12 @@ prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
-        // TODO get chat only recipients
-        GSList *recipients = ui_get_recipients();
+        GSList *recipients = ui_get_chat_recipients();
         GSList *curr = recipients;
 
         while (curr != NULL) {
-            char *recipient = curr->data;
-            if (chat_session_get_recipient_supports(recipient)) {
-                chat_session_no_activity(recipient);
-
-                if (chat_session_is_gone(recipient) &&
-                        !chat_session_get_sent(recipient)) {
-                    message_send_gone(recipient);
-                    chat_session_set_sent(recipient);
-                } else if (chat_session_is_inactive(recipient) &&
-                        !chat_session_get_sent(recipient)) {
-                    message_send_inactive(recipient);
-                    chat_session_set_sent(recipient);
-                } else if (prefs_get_boolean(PREF_OUTTYPE) &&
-                        chat_session_is_paused(recipient) &&
-                        !chat_session_get_sent(recipient)) {
-                    message_send_paused(recipient);
-                    chat_session_set_sent(recipient);
-                }
-            }
-
+            char *barejid = curr->data;
+            chat_session_on_inactivity(barejid);
             curr = g_slist_next(curr);
         }
 
@@ -179,14 +160,7 @@ prof_handle_activity(void)
 
     if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
         ProfChatWin *chatwin = wins_get_current_chat();
-        if (chat_session_get_recipient_supports(chatwin->barejid)) {
-            chat_session_set_composing(chatwin->barejid);
-            if (!chat_session_get_sent(chatwin->barejid) ||
-                    chat_session_is_paused(chatwin->barejid)) {
-                message_send_composing(chatwin->barejid);
-                chat_session_set_sent(chatwin->barejid);
-            }
-        }
+        chat_session_on_activity(chatwin->barejid);
     }
 }
 

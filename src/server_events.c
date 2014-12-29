@@ -77,23 +77,21 @@ handle_presence_error(const char *from, const char * const type,
 
 // handle message stanza errors
 void
-handle_message_error(const char * const from, const char * const type,
+handle_message_error(const char * const jid, const char * const type,
     const char * const err_msg)
 {
     // handle errors from no recipient
-    if (from == NULL) {
+    if (jid == NULL) {
         ui_handle_error(err_msg);
 
     // handle recipient not found ('from' contains a value and type is 'cancel')
     } else if (type != NULL && (strcmp(type, "cancel") == 0)) {
-        ui_handle_recipient_not_found(from, err_msg);
-        if (prefs_get_boolean(PREF_STATES) && chat_session_exists(from)) {
-            chat_session_set_recipient_supports(from, FALSE);
-        }
+        ui_handle_recipient_not_found(jid, err_msg);
+        chat_session_on_cancel(jid);
 
     // handle any other error from recipient
     } else {
-        ui_handle_recipient_error(from, err_msg);
+        ui_handle_recipient_error(jid, err_msg);
     }
 }
 

@@ -201,7 +201,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     char *id = xmpp_stanza_get_id(stanza);
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    char *jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     char *type = NULL;
     if (error_stanza != NULL) {
@@ -216,9 +216,9 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         g_string_append(log_msg, " id=");
         g_string_append(log_msg, id);
     }
-    if (from != NULL) {
+    if (jid != NULL) {
         g_string_append(log_msg, " from=");
-        g_string_append(log_msg, from);
+        g_string_append(log_msg, jid);
     }
     if (type != NULL) {
         g_string_append(log_msg, " type=");
@@ -231,7 +231,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    handle_message_error(from, type, err_msg);
+    handle_message_error(jid, type, err_msg);
 
     free(err_msg);
 
