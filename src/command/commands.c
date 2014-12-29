@@ -84,6 +84,7 @@ gboolean
 cmd_connect(gchar **args, struct cmd_help_t help)
 {
     gboolean result = FALSE;
+    char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
@@ -94,7 +95,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         gchar *opt_keys[] = { "server", "port", NULL };
         gboolean parsed;
 
-        GHashTable *options = parse_options(&args[1], opt_keys, &parsed);
+        GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
         if (!parsed) {
             cons_show("Usage: %s", help.usage);
             cons_show("");
@@ -113,9 +114,16 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             }
         }
 
-        options_destroy(options);
-
         char *user = args[0];
+        if(!user){
+            if(def){
+                user = def;
+                cons_show("Using default account %s.", user);
+            } else {
+                cons_show("No default account.");
+                return TRUE;
+            }
+        }
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
 
@@ -126,6 +134,8 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
+            if(g_hash_table_contains(options, "port") || g_hash_table_contains(options, "server"))
+                cons_show("Ignoring extra connect options. Please set them with /account set");
             conn_status = jabber_connect_with_account(account);
             account_free(account);
         } else {
@@ -142,10 +152,14 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             log_info("Connection attempt for %s failed", jid);
         }
 
+        options_destroy(options);
+
         free(jid);
 
         result = TRUE;
     }
+
+    g_free(def);
 
     return result;
 }
@@ -195,13 +209,19 @@ cmd_account(gchar **args, struct cmd_help_t help)
         if(!account_name) {
             cons_show("Usage: %s", help.usage);
         } else {
+            char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
             if(accounts_remove(account_name)){
                 cons_show("Account %s removed.", account_name);
+                if(def && strcmp(def, account_name) == 0){
+                    prefs_set_string(PREF_DEFAULT_ACCOUNT, NULL);
+                    cons_show("Default account removed because the corresponding account was removed.");
+                }
             } else {
                 cons_show("Failed to remove account %s.", account_name);
                 cons_show("Either the account does not exist, or an unknown error occurred.");
             }
             cons_show("");
+            g_free(def);
         }
     } else if (strcmp(command, "enable") == 0) {
         char *account_name = args[1];
@@ -243,6 +263,37 @@ cmd_account(gchar **args, struct cmd_help_t help)
                 cons_show("Either account %s doesn't exist, or account %s already exists.", account_name, new_name);
                 cons_show("");
             }
+        }
+    } else if (strcmp(command, "default") == 0) {
+        if(g_strv_length(args) == 1){
+            char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
+
+            if(def){
+                cons_show("The default account is %s.", def);
+                free(def);
+            } else {
+                cons_show("No default account.");
+            }
+        } else if(g_strv_length(args) == 2){
+            if(strcmp(args[1], "off") == 0){
+                prefs_set_string(PREF_DEFAULT_ACCOUNT, NULL);
+                cons_show("Removed default account.");
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+        } else if(g_strv_length(args) == 3) {
+            if(strcmp(args[1], "set") == 0){
+                if(accounts_get_account(args[2])){
+                    prefs_set_string(PREF_DEFAULT_ACCOUNT, args[2]);
+                    cons_show("Default account set to %s.", args[2]);
+                } else {
+                    cons_show("Account %s does not exist.", args[2]);
+                }
+            } else {
+                cons_show("Usage: %s", help.usage);
+            }
+        } else {
+            cons_show("Usage: %s", help.usage);
         }
     } else if (strcmp(command, "set") == 0) {
         if (g_strv_length(args) != 4) {
