@@ -278,6 +278,16 @@ chat_session_on_message_send(const char * const barejid)
 }
 
 void
+chat_session_on_incoming_message(const char * const barejid, gboolean recipient_supports)
+{
+    if (!chat_session_exists(barejid)) {
+        chat_session_new(barejid, recipient_supports);
+    } else {
+        chat_session_set_recipient_supports(barejid, recipient_supports);
+    }
+}
+
+void
 chat_session_on_window_open(const char * const barejid)
 {
     if (prefs_get_boolean(PREF_STATES)) {

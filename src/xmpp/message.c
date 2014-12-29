@@ -459,11 +459,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         // create or update chat session
-        if (!chat_session_exists(jid->barejid)) {
-            chat_session_new(jid->barejid, recipient_supports);
-        } else {
-            chat_session_set_recipient_supports(jid->barejid, recipient_supports);
-        }
+        chat_session_on_incoming_message(jid->barejid, recipient_supports);
 
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;

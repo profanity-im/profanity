@@ -58,5 +58,6 @@ void chat_session_set_sent(const char * const recipient);
 gboolean chat_session_get_sent(const char * const recipient);
 gboolean chat_session_on_message_send(const char * const barejid);
 void chat_session_on_window_open(const char * const barejid);
+void chat_session_on_incoming_message(const char * const barejid, gboolean recipient_supports);
 
 #endif
