@@ -710,6 +710,7 @@ ui_close_connected_win(int index)
                 if (chat_session_get_recipient_supports(chatwin->barejid)) {
                     chat_session_set_gone(chatwin->barejid);
                     message_send_gone(chatwin->barejid);
+                    chat_session_set_sent(chatwin->barejid);
                     chat_session_end(chatwin->barejid);
                 }
             }
@@ -1175,6 +1176,7 @@ ui_prune_wins(void)
                     if (chat_session_get_recipient_supports(chatwin->barejid)) {
                         chat_session_set_gone(chatwin->barejid);
                         message_send_gone(chatwin->barejid);
+                        chat_session_set_sent(chatwin->barejid);
                         chat_session_end(chatwin->barejid);
                     }
                 }

@@ -158,7 +158,6 @@ message_send_composing(const char * const barejid)
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
-    chat_session_set_sent(barejid);
 }
 
 void
@@ -171,7 +170,6 @@ message_send_paused(const char * const barejid)
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
-    chat_session_set_sent(barejid);
 }
 
 void
@@ -184,7 +182,6 @@ message_send_inactive(const char * const barejid)
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
-    chat_session_set_sent(barejid);
 }
 
 void
@@ -197,7 +194,6 @@ message_send_gone(const char * const barejid)
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
-    chat_session_set_sent(barejid);
 }
 
 static int

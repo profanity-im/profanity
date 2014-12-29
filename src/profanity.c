@@ -137,6 +137,7 @@ prof_handle_idle(void)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
+        // TODO get chat only recipients
         GSList *recipients = ui_get_recipients();
         GSList *curr = recipients;
 
@@ -148,13 +149,16 @@ prof_handle_idle(void)
                 if (chat_session_is_gone(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     message_send_gone(recipient);
+                    chat_session_set_sent(recipient);
                 } else if (chat_session_is_inactive(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     message_send_inactive(recipient);
+                    chat_session_set_sent(recipient);
                 } else if (prefs_get_boolean(PREF_OUTTYPE) &&
                         chat_session_is_paused(recipient) &&
                         !chat_session_get_sent(recipient)) {
                     message_send_paused(recipient);
+                    chat_session_set_sent(recipient);
                 }
             }
 
@@ -180,6 +184,7 @@ prof_handle_activity(void)
             if (!chat_session_get_sent(chatwin->barejid) ||
                     chat_session_is_paused(chatwin->barejid)) {
                 message_send_composing(chatwin->barejid);
+                chat_session_set_sent(chatwin->barejid);
             }
         }
     }
