@@ -2257,6 +2257,12 @@ ui_clear_win_title(void)
 }
 
 void
+ui_goodbye_title(void)
+{
+    printf("%c]0;Thanks for using Profanity%c", '\033', '\007');
+}
+
+void
 ui_statusbar_new(const int win)
 {
     status_bar_new(win);

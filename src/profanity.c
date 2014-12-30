@@ -288,7 +288,7 @@ _init(const int disable_tls, char *log_level)
 static void
 _shutdown(void)
 {
-    ui_clear_win_title();
+    ui_goodbye_title();
     ui_close_all_wins();
     jabber_disconnect();
     jabber_shutdown();
