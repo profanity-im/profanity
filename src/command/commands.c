@@ -80,6 +80,12 @@ static void _who_roster(gchar **args, struct cmd_help_t help);
 
 extern GHashTable *commands;
 
+// typedef for signal handlers
+typedef void (*sighandler)(int);
+
+void connect_sigint(int sig){}
+void connect_sigtstp(int sig){}
+
 gboolean
 cmd_connect(gchar **args, struct cmd_help_t help)
 {
@@ -131,7 +137,11 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         if (account != NULL) {
             jid = account_create_full_jid(account);
             if (account->password == NULL) {
+                sighandler oldint = signal(SIGINT, connect_sigint);
+                sighandler oldtstp = signal(SIGTSTP, connect_sigtstp);
                 account->password = ui_ask_password();
+                signal(SIGINT, oldint);
+                signal(SIGTSTP, oldtstp);
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
             if(g_hash_table_contains(options, "port") || g_hash_table_contains(options, "server"))
@@ -139,7 +149,11 @@ cmd_connect(gchar **args, struct cmd_help_t help)
             conn_status = jabber_connect_with_account(account);
             account_free(account);
         } else {
+            sighandler oldint = signal(SIGINT, connect_sigint);
+            sighandler oldtstp = signal(SIGTSTP, connect_sigtstp);
             char *passwd = ui_ask_password();
+            signal(SIGINT, oldint);
+            signal(SIGTSTP, oldtstp);
             jid = strdup(lower);
             cons_show("Connecting as %s", jid);
             conn_status = jabber_connect_with_details(jid, passwd, altdomain, port);
