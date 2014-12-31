@@ -35,6 +35,16 @@
 #ifndef UI_INPUTWIN_H
 #define UI_INPUTWIN_H
 
+#define KEY_CTRL_A 0001
+#define KEY_CTRL_B 0002
+#define KEY_CTRL_D 0004
+#define KEY_CTRL_E 0005
+#define KEY_CTRL_F 0006
+#define KEY_CTRL_N 0016
+#define KEY_CTRL_P 0020
+#define KEY_CTRL_U 0025
+#define KEY_CTRL_W 0027
+
 void create_input_window(void);
 wint_t inp_get_char(char *input, int *size, int *result);
 void inp_win_reset(void);
