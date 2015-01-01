@@ -62,6 +62,16 @@
 
 #define _inp_win_update_virtual() pnoutrefresh(inp_win, 0, pad_start, rows-1, 0, rows-1, cols-1)
 
+#define KEY_CTRL_A 0001
+#define KEY_CTRL_B 0002
+#define KEY_CTRL_D 0004
+#define KEY_CTRL_E 0005
+#define KEY_CTRL_F 0006
+#define KEY_CTRL_N 0016
+#define KEY_CTRL_P 0020
+#define KEY_CTRL_U 0025
+#define KEY_CTRL_W 0027
+
 static WINDOW *inp_win;
 static int pad_start = 0;
 static int rows, cols;
@@ -423,6 +433,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             if (result != KEY_CODE_YES) {
                 return 0;
             }
+        case KEY_CTRL_D:
             if (inp_x == display_size-1) {
                 gchar *start = g_utf8_substring(input, 0, inp_x);
                 for (*size = 0; *size < strlen(start); (*size)++) {
@@ -459,6 +470,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             if (result != KEY_CODE_YES) {
                 return 0;
             }
+        case KEY_CTRL_B:
             if (inp_x > 0) {
                 wmove(inp_win, 0, inp_x-1);
 
@@ -474,6 +486,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             if (result != KEY_CODE_YES) {
                 return 0;
             }
+        case KEY_CTRL_F:
             if (inp_x < display_size) {
                 wmove(inp_win, 0, inp_x+1);
 
@@ -489,6 +502,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             if (result != KEY_CODE_YES) {
                 return 0;
             }
+        case KEY_CTRL_P:
             prev = cmd_history_previous(input, size);
             if (prev) {
                 inp_replace_input(input, prev, size);
@@ -499,6 +513,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             if (result != KEY_CODE_YES) {
                 return 0;
             }
+        case KEY_CTRL_N:
             next = cmd_history_next(input, size);
             if (next) {
                 inp_replace_input(input, next, size);
@@ -513,6 +528,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             if (result != KEY_CODE_YES) {
                 return 0;
             }
+        case KEY_CTRL_A:
             wmove(inp_win, 0, 0);
             pad_start = 0;
             _inp_win_update_virtual();
@@ -522,6 +538,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             if (result != KEY_CODE_YES) {
                 return 0;
             }
+        case KEY_CTRL_E:
             _go_to_end(display_size);
             return 1;
 
@@ -535,10 +552,17 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             }
             return 1;
 
-        case 23: // ctrl-w
+        case KEY_CTRL_W:
             _delete_previous_word(input, size);
             return 1;
             break;
+
+        case KEY_CTRL_U:
+            *size = 0;
+            inp_win_reset();
+            return 1;
+            break;
+
         default:
             return 0;
         }
