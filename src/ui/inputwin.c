@@ -558,8 +558,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             break;
 
         case KEY_CTRL_U:
-            *size = 0;
-            inp_win_reset();
+            while (getcurx(inp_win) > 0) {
+                _delete_previous_word(input, size);
+            }
             return 1;
             break;
 
