@@ -2289,7 +2289,7 @@ _ui_draw_term_title(void)
         // print to x-window title bar
         int res = system(new_win_title);
         if (res == -1) {
-            log_error("Error printing title");
+            log_error("Error writing terminal window title.");
         }
         if (win_title != NULL) {
             free(win_title);
