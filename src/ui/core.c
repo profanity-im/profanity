@@ -2259,7 +2259,7 @@ ui_clear_win_title(void)
 void
 ui_goodbye_title(void)
 {
-    printf("%c]0;Thanks for using Profanity%c", '\033', '\007');
+    system("echo -ne \"\033]0;Thanks for using Profanity\007\"");
 }
 
 void
