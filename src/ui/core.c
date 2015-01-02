@@ -85,6 +85,12 @@ static void _win_handle_page(const wint_t * const ch, const int result);
 static void _win_show_history(int win_index, const char * const contact);
 static void _ui_draw_term_title(void);
 
+// typedef for signal handlers
+typedef void (*sighandler)(int);
+
+void connect_sigint(int sig){}
+void connect_sigtstp(int sig){}
+
 void
 ui_init(void)
 {
@@ -2212,7 +2218,11 @@ ui_ask_password(void)
   status_bar_get_password();
   status_bar_update_virtual();
   inp_block();
+  sighandler oldint = signal(SIGINT, connect_sigint);
+  sighandler oldtstp = signal(SIGTSTP, connect_sigtstp);
   inp_get_password(passwd);
+  signal(SIGINT, oldint);
+  signal(SIGTSTP, oldtstp);
   inp_non_block();
 
   return passwd;
