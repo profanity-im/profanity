@@ -2275,21 +2275,23 @@ _ui_draw_term_title(void)
 
         if (unread != 0) {
             snprintf(new_win_title, sizeof(new_win_title),
-                "%c]0;%s (%d) - %s%c", '\033', "Profanity",
+                "/bin/echo -n \"%c]0;%s (%d) - %s%c\"", '\033', "Profanity",
                 unread, jid, '\007');
         } else {
             snprintf(new_win_title, sizeof(new_win_title),
-                "%c]0;%s - %s%c", '\033', "Profanity", jid,
+                "/bin/echo -n \"%c]0;%s - %s%c\"", '\033', "Profanity", jid,
                 '\007');
         }
     } else {
-        snprintf(new_win_title, sizeof(new_win_title), "%c]0;%s%c", '\033',
+        snprintf(new_win_title, sizeof(new_win_title), "/bin/echo -n \"%c]0;%s%c\"", '\033',
             "Profanity", '\007');
     }
-
     if (g_strcmp0(win_title, new_win_title) != 0) {
         // print to x-window title bar
-        printf("%s", new_win_title);
+        int res = system(new_win_title);
+        if (res == -1) {
+            log_error("Error writing terminal window title.");
+        }
         if (win_title != NULL) {
             free(win_title);
         }
