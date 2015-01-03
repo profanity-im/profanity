@@ -657,7 +657,6 @@ _get_default_boolean(preference_t pref)
 {
     switch (pref)
     {
-        case PREF_TITLEBAR:
         case PREF_OTR_WARN:
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
