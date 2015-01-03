@@ -254,6 +254,8 @@ _init(const int disable_tls, char *log_level)
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
+    signal(SIGINT, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
     _create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();
