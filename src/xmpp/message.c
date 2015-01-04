@@ -80,11 +80,21 @@ message_add_handlers(void)
 }
 
 void
-message_send_chat(const char * const barejid, const char * const resource, const char * const msg, gboolean send_state)
+message_send_chat(const char * const barejid, const char * const msg)
 {
     xmpp_stanza_t *message;
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
+
+    char *resource = NULL;
+    gboolean send_state = FALSE;
+    if (chat_session_exists(barejid)) {
+        chat_session_on_message_send(barejid);
+        resource = chat_session_get_resource(barejid);
+        send_state = chat_session_send_states(barejid);
+    } else {
+        send_state = TRUE;
+    }
 
     GString *jid = g_string_new(barejid);
     if (resource) {
@@ -92,7 +102,7 @@ message_send_chat(const char * const barejid, const char * const resource, const
         g_string_append(jid, resource);
     }
 
-    if (send_state) {
+    if (prefs_get_boolean(PREF_STATES) && send_state) {
         message = stanza_create_message(ctx, jid->str, STANZA_TYPE_CHAT, msg, STANZA_NAME_ACTIVE);
     } else {
         message = stanza_create_message(ctx, jid->str, STANZA_TYPE_CHAT, msg, NULL);
@@ -149,22 +159,22 @@ message_send_invite(const char * const roomjid, const char * const contact,
 }
 
 void
-message_send_composing(const char * const fulljid)
+message_send_composing(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid, STANZA_NAME_COMPOSING);
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_COMPOSING);
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
 }
 
 void
-message_send_paused(const char * const fulljid)
+message_send_paused(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid,
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid,
         STANZA_NAME_PAUSED);
 
     xmpp_send(conn, stanza);
@@ -172,11 +182,11 @@ message_send_paused(const char * const fulljid)
 }
 
 void
-message_send_inactive(const char * const fulljid)
+message_send_inactive(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid,
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid,
         STANZA_NAME_INACTIVE);
 
     xmpp_send(conn, stanza);
@@ -184,11 +194,11 @@ message_send_inactive(const char * const fulljid)
 }
 
 void
-message_send_gone(const char * const fulljid)
+message_send_gone(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid,
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid,
         STANZA_NAME_GONE);
 
     xmpp_send(conn, stanza);

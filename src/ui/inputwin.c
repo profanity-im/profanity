@@ -151,17 +151,11 @@ inp_get_char(char *input, int *size, int *result)
         in_command = TRUE;
     }
 
-    if (prefs_get_boolean(PREF_STATES)) {
-        if (*result == ERR) {
-            prof_handle_idle();
-        }
-        if (prefs_get_boolean(PREF_OUTTYPE)
-                && (*result != ERR)
-                && (*result != KEY_CODE_YES)
-                && !in_command
-                && _printable(ch)) {
-            prof_handle_activity();
-        }
+    if (*result == ERR) {
+        prof_handle_idle();
+    }
+    if ((*result != ERR) && (*result != KEY_CODE_YES) && !in_command && _printable(ch)) {
+        prof_handle_activity();
     }
 
     // if it wasn't an arrow key etc

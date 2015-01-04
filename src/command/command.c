@@ -1814,15 +1814,7 @@ cmd_execute_default(const char * inp)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, inp);
                     if (encrypted != NULL) {
-                        char *resource = NULL;
-                        gboolean send_state = FALSE;
-                        if (chat_session_exists(chatwin->barejid)) {
-                            resource = chat_session_get_resource(chatwin->barejid);
-                            send_state = chat_session_on_message_send(chatwin->barejid);
-                        } else {
-                            send_state = TRUE;
-                        }
-                        message_send_chat(chatwin->barejid, resource, encrypted, send_state);
+                        message_send_chat(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -1842,15 +1834,7 @@ cmd_execute_default(const char * inp)
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    char *resource = NULL;
-                    gboolean send_state = FALSE;
-                    if (chat_session_exists(chatwin->barejid)) {
-                        resource = chat_session_get_resource(chatwin->barejid);
-                        send_state = chat_session_on_message_send(chatwin->barejid);
-                    } else {
-                        send_state = TRUE;
-                    }
-                    message_send_chat(chatwin->barejid, resource, inp, send_state);
+                    message_send_chat(chatwin->barejid, inp);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -1861,15 +1845,7 @@ cmd_execute_default(const char * inp)
                     ui_outgoing_chat_msg("me", chatwin->barejid, inp);
                 }
 #else
-                char *resource = NULL;
-                gboolean send_state = FALSE;
-                if (chat_session_exists(chatwin->barejid)) {
-                    resource = chat_session_get_resource(chatwin->barejid);
-                    send_state = chat_session_on_message_send(chatwin->barejid);
-                } else {
-                    send_state = TRUE;
-                }
-                message_send_chat(chatwin->barejid, resource, inp, send_state);
+                message_send_chat(chatwin->barejid, inp);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);

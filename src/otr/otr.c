@@ -110,15 +110,7 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    char *resource = NULL;
-    gboolean send_state = FALSE;
-    if (chat_session_exists(recipient)) {
-        resource = chat_session_get_resource(recipient);
-        send_state = chat_session_on_message_send(recipient);
-    } else {
-        send_state = TRUE;
-    }
-    message_send_chat(recipient, resource, message, send_state);
+    message_send_chat(recipient, message);
 }
 
 static void

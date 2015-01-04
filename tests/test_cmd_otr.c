@@ -552,9 +552,7 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     will_return(otr_start_query, query_message);
 
     expect_string(message_send_chat, barejid, chatwin->barejid);
-    expect_value(message_send_chat, resource, NULL);
     expect_string(message_send_chat, msg, query_message);
-    expect_any(message_send_chat, send_state);
 
     gboolean result = cmd_otr(args, *help);
     assert_true(result);
