@@ -149,23 +149,22 @@ message_send_invite(const char * const roomjid, const char * const contact,
 }
 
 void
-message_send_composing(const char * const barejid)
+message_send_composing(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
-        STANZA_NAME_COMPOSING);
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid, STANZA_NAME_COMPOSING);
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
 }
 
 void
-message_send_paused(const char * const barejid)
+message_send_paused(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid,
         STANZA_NAME_PAUSED);
 
     xmpp_send(conn, stanza);
@@ -173,11 +172,11 @@ message_send_paused(const char * const barejid)
 }
 
 void
-message_send_inactive(const char * const barejid)
+message_send_inactive(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid,
         STANZA_NAME_INACTIVE);
 
     xmpp_send(conn, stanza);
@@ -185,11 +184,11 @@ message_send_inactive(const char * const barejid)
 }
 
 void
-message_send_gone(const char * const barejid)
+message_send_gone(const char * const fulljid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, fulljid,
         STANZA_NAME_GONE);
 
     xmpp_send(conn, stanza);
@@ -469,7 +468,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         // create or update chat session
-        chat_session_on_incoming_message(jid->barejid, recipient_supports);
+        chat_session_on_incoming_message(jid->barejid, jid->resourcepart, recipient_supports);
 
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;

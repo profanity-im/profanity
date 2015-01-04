@@ -318,8 +318,15 @@ handle_incoming_message(char *barejid, char *message)
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                gboolean send_state = chat_session_on_message_send(barejid);
-                message_send_chat(barejid, NULL, otr_query_message, send_state);
+                char *resource = NULL;
+                gboolean send_state = FALSE;
+                if (chat_session_exists(barejid)) {
+                    resource = chat_session_get_resource(barejid);
+                    send_state = chat_session_on_message_send(barejid);
+                } else {
+                    send_state = TRUE;
+                }
+                message_send_chat(barejid, resource, otr_query_message, send_state);
             }
         }
     }
@@ -333,8 +340,15 @@ handle_incoming_message(char *barejid, char *message)
     if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        gboolean send_state = chat_session_on_message_send(barejid);
-        message_send_chat(barejid, NULL, otr_query_message, send_state);
+        char *resource = NULL;
+        gboolean send_state = FALSE;
+        if (chat_session_exists(barejid)) {
+            resource = chat_session_get_resource(barejid);
+            send_state = chat_session_on_message_send(barejid);
+        } else {
+            send_state = TRUE;
+        }
+        message_send_chat(barejid, resource, otr_query_message, send_state);
     }
 
     ui_incoming_msg(barejid, newmessage, NULL);

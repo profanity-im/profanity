@@ -1219,7 +1219,14 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             if (otr_is_secure(barejid)) {
                 char *encrypted = otr_encrypt_message(barejid, msg);
                 if (encrypted != NULL) {
-                    gboolean send_state = chat_session_on_message_send(barejid);
+                    resource = NULL;
+                    gboolean send_state = FALSE;
+                    if (chat_session_exists(barejid)) {
+                        resource = chat_session_get_resource(barejid);
+                        send_state = chat_session_on_message_send(barejid);
+                    } else {
+                        send_state = TRUE;
+                    }
                     message_send_chat(barejid, resource, encrypted, send_state);
                     otr_free_message(encrypted);
                     ui_outgoing_chat_msg("me", barejid, msg);
@@ -1249,12 +1256,26 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     GString *otr_message = g_string_new(msg);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-                    gboolean send_state = chat_session_on_message_send(barejid);
+                    resource = NULL;
+                    gboolean send_state = FALSE;
+                    if (chat_session_exists(barejid)) {
+                        resource = chat_session_get_resource(barejid);
+                        send_state = chat_session_on_message_send(barejid);
+                    } else {
+                        send_state = TRUE;
+                    }
                     message_send_chat(barejid, resource, otr_message->str, send_state);
 
                     g_string_free(otr_message, TRUE);
                 } else {
-                    gboolean send_state = chat_session_on_message_send(barejid);
+                    resource = NULL;
+                    gboolean send_state = FALSE;
+                    if (chat_session_exists(barejid)) {
+                        resource = chat_session_get_resource(barejid);
+                        send_state = chat_session_on_message_send(barejid);
+                    } else {
+                        send_state = TRUE;
+                    }
                     message_send_chat(barejid, resource, msg, send_state);
                 }
                 ui_outgoing_chat_msg("me", barejid, msg);
@@ -1268,7 +1289,14 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             }
             return TRUE;
 #else
-            gboolean send_state = chat_session_on_message_send(barejid);
+            resource = NULL;
+            gboolean send_state = FALSE;
+            if (chat_session_exists(barejid)) {
+                resource = chat_session_get_resource(barejid);
+                send_state = chat_session_on_message_send(barejid);
+            } else {
+                send_state = TRUE;
+            }
             message_send_chat(barejid, resource, msg, send_state);
             ui_outgoing_chat_msg("me", barejid, msg);
 
@@ -1282,7 +1310,6 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 #endif
 
         } else { // msg == NULL
-            chat_session_on_window_open(barejid);
             ui_new_chat_win(barejid);
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -3009,8 +3036,15 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, tiny);
                     if (encrypted != NULL) {
-                        gboolean send_state = chat_session_on_message_send(chatwin->barejid);
-                        message_send_chat(chatwin->barejid, chatwin->resource, encrypted, send_state);
+                        char *resource = NULL;
+                        gboolean send_state = FALSE;
+                        if (chat_session_exists(chatwin->barejid)) {
+                            resource = chat_session_get_resource(chatwin->barejid);
+                            send_state = chat_session_on_message_send(chatwin->barejid);
+                        } else {
+                            send_state = TRUE;
+                        }
+                        message_send_chat(chatwin->barejid, resource, encrypted, send_state);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -3030,8 +3064,15 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    gboolean send_state = chat_session_on_message_send(chatwin->barejid);
-                    message_send_chat(chatwin->barejid, chatwin->resource, tiny, send_state);
+                    char *resource = NULL;
+                    gboolean send_state = FALSE;
+                    if (chat_session_exists(chatwin->barejid)) {
+                        resource = chat_session_get_resource(chatwin->barejid);
+                        send_state = chat_session_on_message_send(chatwin->barejid);
+                    } else {
+                        send_state = TRUE;
+                    }
+                    message_send_chat(chatwin->barejid, resource, tiny, send_state);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -3042,8 +3083,15 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                     ui_outgoing_chat_msg("me", chatwin->barejid, tiny);
                 }
 #else
-                gboolean send_state = chat_session_on_message_send(chatwin->barejid);
-                message_send_chat(chatwin->barejid, chatwin->resource, tiny, send_state);
+                char *resource = NULL;
+                gboolean send_state = FALSE;
+                if (chat_session_exists(chatwin->barejid)) {
+                    resource = chat_session_get_resource(chatwin->barejid);
+                    send_state = chat_session_on_message_send(chatwin->barejid);
+                } else {
+                    send_state = TRUE;
+                }
+                message_send_chat(chatwin->barejid, resource, tiny, send_state);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -3951,7 +3999,6 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 barejid = contact;
             }
 
-            chat_session_on_window_open(barejid);
             ui_new_chat_win(barejid);
 
             if (ui_current_win_is_otr()) {
@@ -3961,8 +4008,15 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                     ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else if (!otr_is_secure(barejid)) {
                     char *otr_query_message = otr_start_query();
-                    gboolean send_state = chat_session_on_message_send(barejid);
-                    message_send_chat(barejid, NULL, otr_query_message, send_state);
+                    char *resource = NULL;
+                    gboolean send_state = FALSE;
+                    if (chat_session_exists(barejid)) {
+                        resource = chat_session_get_resource(barejid);
+                        send_state = chat_session_on_message_send(barejid);
+                    } else {
+                        send_state = TRUE;
+                    }
+                    message_send_chat(barejid, resource, otr_query_message, send_state);
                 } else {
                     ui_gone_secure(barejid, otr_is_trusted(barejid));
                 }
@@ -3980,8 +4034,15 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 } else {
                     ProfChatWin *chatwin = ui_get_current_chat();
                     char *otr_query_message = otr_start_query();
-                    gboolean send_state = chat_session_on_message_send(chatwin->barejid);
-                    message_send_chat(chatwin->barejid, NULL, otr_query_message, send_state);
+                    char *resource = NULL;
+                    gboolean send_state = FALSE;
+                    if (chat_session_exists(chatwin->barejid)) {
+                        resource = chat_session_get_resource(chatwin->barejid);
+                        send_state = chat_session_on_message_send(chatwin->barejid);
+                    } else {
+                        send_state = TRUE;
+                    }
+                    message_send_chat(chatwin->barejid, resource, otr_query_message, send_state);
                 }
             }
         }

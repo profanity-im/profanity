@@ -130,11 +130,12 @@ void handle_message_error_when_recipient_cancel_disables_chat_session(void **sta
 {
     char *err_msg = "Some error.";
     char *from = "bob@server.com";
+    char *resource = "resource";
     char *type = "cancel";
 
     prefs_set_boolean(PREF_STATES, TRUE);
     chat_sessions_init();
-    chat_session_on_incoming_message(from, TRUE);
+    chat_session_on_incoming_message(from, resource, TRUE);
 
     expect_any(ui_handle_recipient_not_found, recipient);
     expect_any(ui_handle_recipient_not_found, err_msg);
