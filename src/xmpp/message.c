@@ -73,7 +73,7 @@ message_add_handlers(void)
 
     HANDLE(NULL,                 STANZA_TYPE_ERROR,      _message_error_handler);
     HANDLE(NULL,                 STANZA_TYPE_GROUPCHAT,  _groupchat_handler);
-    HANDLE(NULL,                 STANZA_TYPE_CHAT,       _chat_handler);
+    HANDLE(NULL,                 NULL,                   _chat_handler);
     HANDLE(STANZA_NS_MUC_USER,   NULL,                   _muc_user_handler);
     HANDLE(STANZA_NS_CONFERENCE, NULL,                   _conference_handler);
     HANDLE(STANZA_NS_CAPTCHA,    NULL,                   _captcha_handler);
@@ -315,7 +315,6 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     jid_destroy(jidp);
 
-
     return 1;
 }
 
@@ -419,8 +418,23 @@ static int
 _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
+    // ignore if type not chat or absent
+    char *type = xmpp_stanza_get_type(stanza);
+    if (!(g_strcmp0(type, "chat") == 0 || type == NULL)) {
+        return 1;
+    }
+
+    // ignore handled namespaces
+    xmpp_stanza_t *conf = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
+    xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
+    xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
+    if (conf || mucuser || captcha) {
+        return 1;
+    }
+
     xmpp_ctx_t *ctx = connection_get_ctx();
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+
     Jid *jid = jid_create(from);
 
     // private message from chat room use full jid (room/nick)
