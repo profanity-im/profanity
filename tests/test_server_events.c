@@ -141,10 +141,9 @@ void handle_message_error_when_recipient_cancel_disables_chat_session(void **sta
     expect_any(ui_handle_recipient_not_found, err_msg);
 
     handle_message_error(from, type, err_msg);
-    chat_session_on_message_send(from);
-    gboolean send_states = chat_session_send_states(from);
+    gboolean session_exists = chat_session_exists(from);
 
-    assert_false(send_states);
+    assert_false(session_exists);
     chat_sessions_clear();
 }
 
