@@ -62,6 +62,7 @@ typedef struct chat_session_t {
     chat_state_t state;
     GTimer *active_timer;
     gboolean sent;
+    gboolean includes_message;
 } ChatSession;
 
 static GHashTable *sessions;
@@ -80,6 +81,7 @@ _chat_session_new(const char * const barejid, const char * const resource, gbool
     new_session->state = CHAT_STATE_STARTED;
     new_session->active_timer = g_timer_new();
     new_session->sent = FALSE;
+    new_session->includes_message = FALSE;
 
     return new_session;
 }
@@ -142,17 +144,57 @@ void
 chat_session_on_incoming_message(const char * const barejid, const char * const resource, gboolean send_states)
 {
     ChatSession *session = g_hash_table_lookup(sessions, barejid);
+    GString *log_msg = g_string_new("");
 
+    // no session exists, create one
     if (!session) {
+        g_string_append(log_msg, "Creating chat session for ");
+        g_string_append(log_msg, barejid);
+        if (resource) {
+            g_string_append(log_msg, "/");
+            g_string_append(log_msg, resource);
+        }
         session = _chat_session_new(barejid, resource, send_states);
         g_hash_table_insert(sessions, strdup(barejid), session);
+
+    // session exists for different resource, replace session
     } else if (g_strcmp0(session->resource, resource) != 0) {
+        g_string_append(log_msg, "Replacing chat session for ");
+        g_string_append(log_msg, barejid);
+        if (session->resource) {
+            g_string_append(log_msg, "/");
+            g_string_append(log_msg, session->resource);
+        }
+        g_string_append(log_msg, " with session for ");
+        g_string_append(log_msg, barejid);
+        if (resource) {
+            g_string_append(log_msg, "/");
+            g_string_append(log_msg, resource);
+        }
         g_hash_table_remove(sessions, session);
         session = _chat_session_new(barejid, resource, send_states);
+        session->includes_message = TRUE;
         g_hash_table_insert(sessions, strdup(barejid), session);
+
+    // session exists for resource, update state
     } else {
+        g_string_append(log_msg, "Updating chat session for ");
+        g_string_append(log_msg, session->barejid);
+        if (session->resource) {
+            g_string_append(log_msg, "/");
+            g_string_append(log_msg, session->resource);
+        }
         session->send_states = send_states;
+        session->includes_message = TRUE;
     }
+    if (send_states) {
+        g_string_append(log_msg, ", chat states supported");
+    } else {
+        g_string_append(log_msg, ", chat states not supported");
+    }
+
+    log_debug(log_msg->str);
+    g_string_free(log_msg, TRUE);
 }
 
 void
@@ -162,6 +204,7 @@ chat_session_on_message_send(const char * const barejid)
 
     // if no session exists, create one with no resource, and send states
     if (!session) {
+        log_debug("Creating chat session for %s, chat states supported", barejid);
         session = _chat_session_new(barejid, NULL, TRUE);
         g_hash_table_insert(sessions, strdup(barejid), session);
     }
@@ -169,44 +212,33 @@ chat_session_on_message_send(const char * const barejid)
     session->state = CHAT_STATE_ACTIVE;
     g_timer_start(session->active_timer);
     session->sent = TRUE;
-}
-
-void
-chat_session_on_window_open(const char * const barejid)
-{
-    ChatSession *session = g_hash_table_lookup(sessions, barejid);
-    if (!session) {
-        session = _chat_session_new(barejid, NULL, TRUE);
-        g_hash_table_insert(sessions, strdup(barejid), session);
-    }
+    session->includes_message = TRUE;
 }
 
 void
 chat_session_on_window_close(const char * const barejid)
 {
     ChatSession *session = g_hash_table_lookup(sessions, barejid);
-    assert(session != NULL);
 
-    if (prefs_get_boolean(PREF_STATES) && session->send_states) {
-        GString *jid = g_string_new(session->barejid);
+    if (session) {
+        if (prefs_get_boolean(PREF_STATES) && session->send_states && session->includes_message) {
+            GString *jid = g_string_new(session->barejid);
+            if (session->resource) {
+                g_string_append(jid, "/");
+                g_string_append(jid, session->resource);
+            }
+            message_send_gone(jid->str);
+            g_string_free(jid, TRUE);
+        }
+        GString *log_msg = g_string_new("Removing chat session for ");
+        g_string_append(log_msg, barejid);
         if (session->resource) {
-            g_string_append(jid, "/");
-            g_string_append(jid, session->resource);
+            g_string_append(log_msg, "/");
+            g_string_append(log_msg, session->resource);
         }
-        message_send_gone(jid->str);
-        g_string_free(jid, TRUE);
-    }
-}
-
-void
-chat_session_on_cancel(const char * const jid)
-{
-    Jid *jidp = jid_create(jid);
-    if (jidp) {
-        ChatSession *session = g_hash_table_lookup(sessions, jidp->barejid);
-        if (session) {
-            session->send_states = FALSE;
-        }
+        log_debug(log_msg->str);
+        g_string_free(log_msg, TRUE);
+        g_hash_table_remove(sessions, barejid);
     }
 }
 
@@ -214,8 +246,11 @@ void
 chat_session_on_activity(const char * const barejid)
 {
     ChatSession *session = g_hash_table_lookup(sessions, barejid);
+
     if (!session) {
-        return;
+        log_debug("Creating chat session for %s, chat states supported", barejid);
+        session = _chat_session_new(barejid, NULL, TRUE);
+        g_hash_table_insert(sessions, strdup(barejid), session);
     }
 
     if (session->state != CHAT_STATE_COMPOSING) {
@@ -277,10 +312,19 @@ chat_session_on_inactivity(const char * const barejid)
             g_string_append(jid, session->resource);
         }
         if (session->state == CHAT_STATE_GONE) {
-            if (prefs_get_boolean(PREF_STATES) && session->send_states) {
+            if (prefs_get_boolean(PREF_STATES) && session->send_states && session->includes_message) {
                 message_send_gone(jid->str);
             }
             session->sent = TRUE;
+            GString *log_msg = g_string_new("Removing chat session for ");
+            g_string_append(log_msg, barejid);
+            if (session->resource) {
+                g_string_append(log_msg, "/");
+                g_string_append(log_msg, session->resource);
+            }
+            log_debug(log_msg->str);
+            g_string_free(log_msg, TRUE);
+            g_hash_table_remove(sessions, barejid);
         } else if (session->state == CHAT_STATE_INACTIVE) {
             if (prefs_get_boolean(PREF_STATES) && session->send_states) {
                 message_send_inactive(jid->str);
@@ -293,5 +337,25 @@ chat_session_on_inactivity(const char * const barejid)
             session->sent = TRUE;
         }
         g_string_free(jid, TRUE);
+    }
+}
+
+void
+chat_session_on_cancel(const char * const jid)
+{
+    Jid *jidp = jid_create(jid);
+    if (jidp) {
+        ChatSession *session = g_hash_table_lookup(sessions, jidp->barejid);
+        if (session) {
+            GString *log_msg = g_string_new("Removing chat session for ");
+            g_string_append(log_msg, jidp->barejid);
+            if (session->resource) {
+                g_string_append(log_msg, "/");
+                g_string_append(log_msg, session->resource);
+            }
+            log_debug(log_msg->str);
+            g_string_free(log_msg, TRUE);
+            g_hash_table_remove(sessions, jidp->barejid);
+        }
     }
 }

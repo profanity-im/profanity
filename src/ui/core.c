@@ -1333,7 +1333,6 @@ ui_new_chat_win(const char * const barejid)
     // create new window
     if (window == NULL) {
         window = wins_new_chat(barejid);
-        chat_session_on_window_open(barejid);
 
         num = wins_get_num(window);
 
