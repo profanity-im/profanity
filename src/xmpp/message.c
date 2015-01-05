@@ -86,15 +86,9 @@ message_send_chat(const char * const barejid, const char * const msg)
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    char *resource = NULL;
-    gboolean send_state = FALSE;
-    if (chat_session_exists(barejid)) {
-        chat_session_on_message_send(barejid);
-        resource = chat_session_get_resource(barejid);
-        send_state = chat_session_send_states(barejid);
-    } else {
-        send_state = TRUE;
-    }
+    chat_session_on_message_send(barejid);
+    char *resource = chat_session_get_resource(barejid);
+    gboolean send_state = chat_session_send_states(barejid);
 
     GString *jid = g_string_new(barejid);
     if (resource) {
