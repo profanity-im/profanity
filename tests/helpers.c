@@ -75,12 +75,14 @@ void close_preferences(void **state)
 
 void init_chat_sessions(void **state)
 {
+    load_preferences(NULL);
     chat_sessions_init();
 }
 
 void close_chat_sessions(void **state)
 {
     chat_sessions_clear();
+    close_preferences(NULL);
 }
 
 static GCompareFunc cmp_func;

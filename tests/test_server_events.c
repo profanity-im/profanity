@@ -120,9 +120,6 @@ void handle_message_error_when_recipient_cancel(void **state)
     prefs_set_boolean(PREF_STATES, FALSE);
     chat_sessions_init();
 
-    expect_string(ui_handle_recipient_not_found, recipient, from);
-    expect_string(ui_handle_recipient_not_found, err_msg, err_msg);
-
     handle_message_error(from, type, err_msg);
 }
 
@@ -136,9 +133,6 @@ void handle_message_error_when_recipient_cancel_disables_chat_session(void **sta
     prefs_set_boolean(PREF_STATES, TRUE);
     chat_sessions_init();
     chat_session_on_incoming_message(from, resource, TRUE);
-
-    expect_any(ui_handle_recipient_not_found, recipient);
-    expect_any(ui_handle_recipient_not_found, err_msg);
 
     handle_message_error(from, type, err_msg);
     gboolean session_exists = chat_session_exists(from);
