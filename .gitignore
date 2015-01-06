@@ -68,3 +68,4 @@ profanity.mk
 profanity.project
 profanity.workspace
 m4/
+test.sh
