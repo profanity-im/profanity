@@ -586,14 +586,6 @@ ui_update_presence(const resource_presence_t resource_presence,
 void
 ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
 {
-    // unknown chat recipient
-    ProfChatWin *chatwin = wins_get_chat(recipient);
-    if (chatwin) {
-        cons_show_error("Recipient %s not found: %s", recipient, err_msg);
-        win_save_vprint((ProfWin*) chatwin, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
-        return;
-    }
-
     // intended recipient was invalid chat room
     ProfMucWin *mucwin = wins_get_muc(recipient);
     if (mucwin) {
@@ -601,17 +593,6 @@ ui_handle_recipient_not_found(const char * const recipient, const char * const e
         win_save_vprint((ProfWin*) mucwin, '!', NULL, 0, THEME_ERROR, "", "Room %s not found: %s", recipient, err_msg);
         return;
     }
-
-    // unknown private recipient
-    ProfPrivateWin *privatewin = wins_get_private(recipient);
-    if (privatewin) {
-        cons_show_error("Recipient %s not found: %s", recipient, err_msg);
-        win_save_vprint((ProfWin*) privatewin, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
-        return;
-    }
-
-    // no window
-    cons_show_error("Recipient %s not found: %s", recipient, err_msg);
 }
 
 void

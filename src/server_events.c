@@ -86,7 +86,7 @@ handle_message_error(const char * const jid, const char * const type,
 
     // handle recipient not found ('from' contains a value and type is 'cancel')
     } else if (type != NULL && (strcmp(type, "cancel") == 0)) {
-        ui_handle_recipient_not_found(jid, err_msg);
+        log_info("Recipient %s not found: %s", jid, err_msg);
         chat_session_on_cancel(jid);
 
     // handle any other error from recipient
