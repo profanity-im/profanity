@@ -9,3 +9,6 @@ void replaces_chat_session_when_new_resource(void **state);
 void removes_chat_session_on_window_close(void **state);
 void removes_chat_session_on_cancel_for_barejid(void **state);
 void removes_chat_session_on_cancel_for_fulljid(void **state);
+void removes_chat_session_on_offline_matching_resource(void **state);
+void does_not_remove_chat_session_on_offline_different_resource(void **state);
+void does_not_remove_chat_session_on_offline_null_resource(void **state);

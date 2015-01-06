@@ -123,3 +123,41 @@ void removes_chat_session_on_cancel_for_fulljid(void **state)
 
     assert_false(exists);
 }
+
+void removes_chat_session_on_offline_matching_resource(void **state)
+{
+    char *barejid = "myjid@server.org";
+    char *resource = "work";
+
+    chat_session_on_message_send(barejid);
+    chat_session_on_incoming_message(barejid, resource, TRUE);
+    chat_session_on_offline(barejid, resource);
+    gboolean exists = chat_session_exists(barejid);
+
+    assert_false(exists);
+}
+
+void does_not_remove_chat_session_on_offline_different_resource(void **state)
+{
+    char *barejid = "myjid@server.org";
+    char *resource = "work";
+    char *offline_resource = "home";
+
+    chat_session_on_message_send(barejid);
+    chat_session_on_incoming_message(barejid, resource, TRUE);
+    chat_session_on_offline(barejid, offline_resource);
+    gboolean exists = chat_session_exists(barejid);
+
+    assert_true(exists);
+}
+
+void does_not_remove_chat_session_on_offline_null_resource(void **state)
+{
+    char *barejid = "myjid@server.org";
+
+    chat_session_on_message_send(barejid);
+    chat_session_on_offline(barejid, NULL);
+    gboolean exists = chat_session_exists(barejid);
+
+    assert_true(exists);
+}

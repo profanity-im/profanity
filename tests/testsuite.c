@@ -239,6 +239,15 @@ int main(int argc, char* argv[]) {
         unit_test_setup_teardown(removes_chat_session_on_cancel_for_fulljid,
             init_chat_sessions,
             close_chat_sessions),
+        unit_test_setup_teardown(removes_chat_session_on_offline_matching_resource,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(does_not_remove_chat_session_on_offline_different_resource,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(does_not_remove_chat_session_on_offline_null_resource,
+            init_chat_sessions,
+            close_chat_sessions),
 
         unit_test_setup_teardown(cmd_connect_shows_message_when_disconnecting,
             load_preferences,
@@ -475,6 +484,7 @@ int main(int argc, char* argv[]) {
         unit_test(handle_message_error_when_recipient_and_no_type),
         unit_test(handle_presence_error_when_no_recipient),
         unit_test(handle_presence_error_when_from_recipient),
+        unit_test(handle_offline_removes_chat_session),
 
         unit_test(cmd_alias_add_shows_usage_when_no_args),
         unit_test(cmd_alias_add_shows_usage_when_no_value),

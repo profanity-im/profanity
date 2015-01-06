@@ -472,7 +472,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         // create or update chat session
-        chat_session_on_incoming_message(jid->barejid, jid->resourcepart, recipient_supports);
+        if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ACTIVE) != NULL) {
+            chat_session_on_incoming_message(jid->barejid, jid->resourcepart, recipient_supports);
+        }
 
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;
@@ -488,7 +490,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 // do something
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
                 // do something
-            } else { // handle <active/>
+            } else { // <active/>
                 // do something
             }
         }

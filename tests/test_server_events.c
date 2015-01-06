@@ -175,3 +175,22 @@ void handle_presence_error_when_from_recipient(void **state)
 
     handle_presence_error(from, type, err_msg);
 }
+
+void handle_offline_removes_chat_session(void **state)
+{
+    chat_sessions_init();
+    char *barejid = "friend@server.chat.com";
+    char *resource = "home";
+    roster_init();
+    roster_add(barejid, "bob", NULL, "both", FALSE);
+    Resource *resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
+    roster_update_presence(barejid, resourcep, NULL);
+    chat_session_on_incoming_message(barejid, resource, TRUE);
+    handle_contact_offline(barejid, resource, NULL);
+    gboolean exists = chat_session_exists(barejid);
+
+    assert_false(exists);
+
+    roster_clear();
+    chat_sessions_clear();
+}

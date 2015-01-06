@@ -393,6 +393,7 @@ handle_typing(char *from)
 void
 handle_gone(const char * const from)
 {
+    chat_session_on_gone(from);
     ui_recipient_gone(from);
 }
 
@@ -463,6 +464,7 @@ handle_contact_offline(char *barejid, char *resource, char *status)
     }
 
     rosterwin_roster();
+    chat_session_on_offline(barejid, resource);
 }
 
 void
