@@ -10,6 +10,7 @@
 #include "common.h"
 #include "helpers.h"
 #include "config/preferences.h"
+#include "chat_session.h"
 
 void create_config_dir(void **state)
 {
@@ -70,6 +71,16 @@ void close_preferences(void **state)
     remove("./tests/files/xdg_config_home/profanity/profrc");
     remove_config_dir(state);
     rmdir("./tests/files");
+}
+
+void init_chat_sessions(void **state)
+{
+    chat_sessions_init();
+}
+
+void close_chat_sessions(void **state)
+{
+    chat_sessions_clear();
 }
 
 static GCompareFunc cmp_func;

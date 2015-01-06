@@ -88,6 +88,7 @@ tests_sources = \
 	tests/test_roster_list.c tests/test_roster_list.h \
 	tests/test_server_events.c tests/test_server_events.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
+	tests/test_chat_session.c tests/test_chat_session.h \
 	tests/testsuite.c
 
 main_source = src/main.c

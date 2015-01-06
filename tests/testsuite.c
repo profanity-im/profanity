@@ -8,9 +8,11 @@
 #include <sys/stat.h>
 
 #include "config.h"
+#include "chat_session.h"
 
 #include "helpers.h"
 #include "test_autocomplete.h"
+#include "test_chat_session.h"
 #include "test_common.h"
 #include "test_contact.h"
 #include "test_cmd_connect.h"
@@ -203,6 +205,40 @@ int main(int argc, char* argv[]) {
         unit_test(find_twice_returns_second_when_two_match),
         unit_test(find_five_times_finds_fifth),
         unit_test(find_twice_returns_first_when_two_match_and_reset),
+
+        unit_test_setup_teardown(returns_false_when_chat_session_does_not_exist,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(creates_chat_session_on_message_send,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(creates_chat_session_on_activity,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(returns_null_resource_for_new_session,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(returns_true_send_states_for_new_session,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(sets_resource_on_incoming_message,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(sets_send_states_on_incoming_message,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(replaces_chat_session_when_new_resource,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(removes_chat_session_on_window_close,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(removes_chat_session_on_cancel_for_barejid,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(removes_chat_session_on_cancel_for_fulljid,
+            init_chat_sessions,
+            close_chat_sessions),
 
         unit_test_setup_teardown(cmd_connect_shows_message_when_disconnecting,
             load_preferences,
