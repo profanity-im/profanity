@@ -78,6 +78,7 @@ void accounts_set_priority_all(const char * const account_name, const gint value
 gint accounts_get_priority_for_presence_type(const char * const account_name,
     resource_presence_t presence_type);
 void accounts_clear_password(const char * const account_name);
+void accounts_clear_eval_password(const char * const account_name);
 void accounts_clear_server(const char * const account_name);
 void accounts_clear_port(const char * const account_name);
 void accounts_clear_otr(const char * const account_name);

@@ -1268,6 +1268,7 @@ cmd_init(void)
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
+    autocomplete_add(account_clear_ac, "eval_password");
     autocomplete_add(account_clear_ac, "server");
     autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");

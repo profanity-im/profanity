@@ -61,6 +61,7 @@ static gchar *string_keys[] = {
     "port",
     "resource",
     "password",
+    "eval_password",
     "presence.last",
     "presence.login",
     "muc.service",
@@ -227,8 +228,9 @@ accounts_get_account(const char * const name)
         gchar *password = g_key_file_get_string(accounts, name, "password", NULL);
         gchar *eval_password = g_key_file_get_string(accounts, name, "eval_password", NULL);
         if (eval_password != NULL) {
-            FILE *evaled_password = popen(eval_password, "r");
-            fscanf(evaled_password, "%s", password);
+            FILE *stream = popen(eval_password, "r");
+            password = g_malloc(100);
+            fgets(password, 100, stream);
         }
         gboolean enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
 
@@ -462,6 +464,15 @@ accounts_clear_password(const char * const account_name)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_remove_key(accounts, account_name, "password", NULL);
+        _save_accounts();
+    }
+}
+
+void
+accounts_clear_eval_password(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "eval_password", NULL);
         _save_accounts();
     }
 }
