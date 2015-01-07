@@ -931,6 +931,7 @@ static struct cmd_t command_defs[] =
           "|xa|dnd          : Priority for the specified presence.",
           "resource         : The resource to be used.",
           "password         : Password for the account, note this is currently stored in plaintext if set.",
+          "eval_password    : Shell command evaluated to retrieve password for the account.  Can be used to retrieve password from keyring.",
           "muc              : The default MUC chat service to use.",
           "nick             : The default nickname to use when joining chat rooms.",
           "otr              : Override global OTR policy for this account: manual, opportunistic or always.",
@@ -1260,6 +1261,7 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "dnd");
     autocomplete_add(account_set_ac, "resource");
     autocomplete_add(account_set_ac, "password");
+    autocomplete_add(account_set_ac, "eval_password");
     autocomplete_add(account_set_ac, "muc");
     autocomplete_add(account_set_ac, "nick");
     autocomplete_add(account_set_ac, "otr");

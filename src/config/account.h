@@ -41,6 +41,7 @@ typedef struct prof_account_t {
     gchar *name;
     gchar *jid;
     gchar *password;
+    gchar *eval_password;
     gchar *resource;
     gchar *server;
     int port;
@@ -61,7 +62,7 @@ typedef struct prof_account_t {
 } ProfAccount;
 
 ProfAccount* account_new(const gchar * const name, const gchar * const jid,
-    const gchar * const passord, gboolean enabled, const gchar * const server,
+    const gchar * const passord, const gchar * eval_password, gboolean enabled, const gchar * const server,
     int port, const gchar * const resource, const gchar * const last_presence,
     const gchar * const login_presence, int priority_online, int priority_chat,
     int priority_away, int priority_xa, int priority_dnd,

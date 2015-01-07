@@ -343,6 +343,10 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     accounts_set_password(account_name, value);
                     cons_show("Updated password for account %s", account_name);
                     cons_show("");
+                } else if (strcmp(property, "eval_password") == 0) {
+                    accounts_set_eval_password(account_name, value);
+                    cons_show("Updated eval_password for account %s", account_name);
+                    cons_show("");
                 } else if (strcmp(property, "muc") == 0) {
                     accounts_set_muc_service(account_name, value);
                     cons_show("Updated muc service for account %s: %s", account_name, value);

@@ -46,6 +46,7 @@
 #include "log.h"
 #include "tools/autocomplete.h"
 #include "xmpp/xmpp.h"
+#include "ui/ui.h"
 
 static gchar *accounts_loc;
 static GKeyFile *accounts;
@@ -224,6 +225,11 @@ accounts_get_account(const char * const name)
         }
 
         gchar *password = g_key_file_get_string(accounts, name, "password", NULL);
+        gchar *eval_password = g_key_file_get_string(accounts, name, "eval_password", NULL);
+        if (eval_password != NULL) {
+            FILE *evaled_password = popen(eval_password, "r");
+            fscanf(evaled_password, "%s", password);
+        }
         gboolean enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
 
         gchar *server = g_key_file_get_string(accounts, name, "server", NULL);
@@ -278,7 +284,7 @@ accounts_get_account(const char * const name)
             g_strfreev(always);
         }
 
-        ProfAccount *new_account = account_new(name, jid, password, enabled,
+        ProfAccount *new_account = account_new(name, jid, password, eval_password, enabled,
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
@@ -286,6 +292,7 @@ accounts_get_account(const char * const name)
 
         g_free(jid);
         g_free(password);
+        g_free(eval_password);
         g_free(server);
         g_free(resource);
         g_free(last_presence);
@@ -437,6 +444,15 @@ accounts_set_password(const char * const account_name, const char * const value)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_set_string(accounts, account_name, "password", value);
+        _save_accounts();
+    }
+}
+
+void
+accounts_set_eval_password(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "eval_password", value);
         _save_accounts();
     }
 }
