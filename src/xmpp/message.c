@@ -465,23 +465,19 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     // standard chat message, use jid without resource
     } else {
-        // determine chatstate support of recipient
-        gboolean recipient_supports = FALSE;
-        if (stanza_contains_chat_state(stanza)) {
-            recipient_supports = TRUE;
-        }
-
-        // create or update chat session
-        if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ACTIVE) != NULL) {
-            chat_session_on_incoming_message(jid->barejid, jid->resourcepart, recipient_supports);
-        }
-
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;
         gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
 
         // deal with chat states if recipient supports them
-        if (recipient_supports && (!delayed)) {
+        if (!delayed) {
+            // determine chatstate support of recipient
+            if (stanza_contains_chat_state(stanza)) {
+                chat_session_on_incoming_message(jid->barejid, jid->resourcepart, TRUE);
+            } else {
+                chat_session_on_incoming_message(jid->barejid, jid->resourcepart, FALSE);
+            }
+
             if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
                 handle_typing(jid->barejid);
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
@@ -490,7 +486,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 // do something
             } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
                 // do something
-            } else { // <active/>
+            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ACTIVE) != NULL) {
                 // do something
             }
         }
