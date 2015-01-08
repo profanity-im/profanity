@@ -50,9 +50,6 @@
 #include "log.h"
 #include "common.h"
 
-// assume malloc stores at most 8 bytes for size of allocated memory
-// and page size is at least 4KB
-#define READ_BUF_SIZE 4088
 
 struct curl_data_t
 {
