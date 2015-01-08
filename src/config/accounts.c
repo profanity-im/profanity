@@ -227,8 +227,10 @@ accounts_get_account(const char * const name)
 
         gchar *password = g_key_file_get_string(accounts, name, "password", NULL);
         gchar *eval_password = g_key_file_get_string(accounts, name, "eval_password", NULL);
+        // Evaluate as shell command to retrieve password
         if (eval_password != NULL) {
             FILE *stream = popen(eval_password, "r");
+            // Limit to 100 bytes to prevent overflows in the case of a poorly chosen command
             password = g_malloc(100);
             fgets(password, 100, stream);
         }
