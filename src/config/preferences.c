@@ -497,6 +497,7 @@ _get_group(preference_t pref)
         case PREF_THEME:
         case PREF_VERCHECK:
         case PREF_TITLEBAR:
+        case PREF_EXIT_TITLE:
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:

@@ -3255,6 +3255,12 @@ cmd_titlebar(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_exittitle(gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args[0], help, "Exit title", PREF_EXIT_TITLE);
+}
+
+gboolean
 cmd_outtype(gchar **args, struct cmd_help_t help)
 {
     gboolean result = _cmd_set_boolean_preference(args[0], help,

@@ -116,6 +116,7 @@ gboolean cmd_sub(gchar **args, struct cmd_help_t help);
 gboolean cmd_theme(gchar **args, struct cmd_help_t help);
 gboolean cmd_tiny(gchar **args, struct cmd_help_t help);
 gboolean cmd_titlebar(gchar **args, struct cmd_help_t help);
+gboolean cmd_exittitle(gchar **args, struct cmd_help_t help);
 gboolean cmd_vercheck(gchar **args, struct cmd_help_t help);
 gboolean cmd_who(gchar **args, struct cmd_help_t help);
 gboolean cmd_win(gchar **args, struct cmd_help_t help);

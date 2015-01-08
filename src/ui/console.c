@@ -959,6 +959,16 @@ cons_titlebar_setting(void)
 }
 
 void
+cons_exittitle_setting(void)
+{
+    if (prefs_get_boolean(PREF_EXIT_TITLE)) {
+        cons_show("Exit title display (/exittitle)  : ON");
+    } else {
+        cons_show("Exit title display (/exittitle)  : OFF");
+    }
+}
+
+void
 cons_roster_setting(void)
 {
     if (prefs_get_boolean(PREF_ROSTER))

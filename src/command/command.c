@@ -726,6 +726,14 @@ static struct cmd_t command_defs[] =
           "Show information in the window title bar.",
           NULL  } } },
 
+    { "/exittitle",
+        cmd_exittitle, parse_args, 1, 1, &cons_exittitle_setting,
+        { "/exittitle on|off", "Print a nice message upon exiting Profanity",
+        { "/exittitle on|off",
+          "----------------",
+          "Print a nice message upon exiting Profanity",
+          NULL  } } },
+
     { "/mouse",
         cmd_mouse, parse_args, 1, 1, &cons_mouse_setting,
         { "/mouse on|off", "Use profanity mouse handling.",
@@ -1074,6 +1082,7 @@ static Autocomplete autoaway_ac;
 static Autocomplete autoaway_mode_ac;
 static Autocomplete autoconnect_ac;
 static Autocomplete titlebar_ac;
+static Autocomplete exittitle_ac;
 static Autocomplete theme_ac;
 static Autocomplete theme_load_ac;
 static Autocomplete account_ac;
@@ -1205,6 +1214,9 @@ cmd_init(void)
 
     titlebar_ac = autocomplete_new();
     autocomplete_add(titlebar_ac, "version");
+
+    exittitle_ac = autocomplete_new();
+    autocomplete_add(exittitle_ac, "version");
 
     log_ac = autocomplete_new();
     autocomplete_add(log_ac, "maxsize");
@@ -1472,6 +1484,7 @@ cmd_uninit(void)
     autocomplete_free(notify_typing_ac);
     autocomplete_free(sub_ac);
     autocomplete_free(titlebar_ac);
+    autocomplete_free(exittitle_ac);
     autocomplete_free(log_ac);
     autocomplete_free(prefs_ac);
     autocomplete_free(autoaway_ac);
@@ -1892,7 +1905,7 @@ _cmd_complete_parameters(char *input, int *size)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history", "/titlebar",
-        "/vercheck", "/privileges", "/presence", "/wrap" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/exittitle", };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, size, boolean_choices[i],
