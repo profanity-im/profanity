@@ -686,9 +686,7 @@ ui_close_connected_win(int index)
                 otr_end_session(chatwin->barejid);
             }
 #endif
-            if (chat_session_exists(chatwin->barejid)) {
-                chat_session_on_window_close(chatwin->barejid);
-            }
+            chat_session_remove(chatwin->barejid);
         }
     }
 }
@@ -1145,9 +1143,7 @@ ui_prune_wins(void)
         if (window->type == WIN_CHAT) {
             if (conn_status == JABBER_CONNECTED) {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
-                if (chat_session_exists(chatwin->barejid)) {
-                    chat_session_on_window_close(chatwin->barejid);
-                }
+                chat_session_remove(chatwin->barejid);
             }
         }
 

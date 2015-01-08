@@ -87,7 +87,8 @@ handle_message_error(const char * const jid, const char * const type,
     // handle recipient not found ('from' contains a value and type is 'cancel')
     } else if (type != NULL && (strcmp(type, "cancel") == 0)) {
         log_info("Recipient %s not found: %s", jid, err_msg);
-        chat_session_on_cancel(jid);
+        Jid *jidp = jid_create(jid);
+        chat_session_remove(jidp->barejid);
 
     // handle any other error from recipient
     } else {
@@ -393,7 +394,7 @@ handle_typing(char *from)
 void
 handle_gone(const char * const from)
 {
-    chat_session_on_gone(from);
+    chat_session_remove(from);
     ui_recipient_gone(from);
 }
 
@@ -464,7 +465,7 @@ handle_contact_offline(char *barejid, char *resource, char *status)
     }
 
     rosterwin_roster();
-    chat_session_on_offline(barejid, resource);
+    chat_session_remove(barejid);
 }
 
 void
@@ -507,6 +508,7 @@ handle_contact_online(char *barejid, Resource *resource,
     }
 
     rosterwin_roster();
+    chat_session_remove(barejid);
 }
 
 void

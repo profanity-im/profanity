@@ -145,18 +145,18 @@ inp_get_char(char *input, int *size, int *result)
     noecho();
     *result = wget_wch(inp_win, &ch);
 
-    gboolean in_command = FALSE;
-    if ((display_size > 0 && input[0] == '/') ||
-            (display_size == 0 && ch == '/')) {
-        in_command = TRUE;
-    }
+//    gboolean in_command = FALSE;
+//    if ((display_size > 0 && input[0] == '/') ||
+//            (display_size == 0 && ch == '/')) {
+//        in_command = TRUE;
+//    }
 
-    if (*result == ERR) {
-        prof_handle_idle();
-    }
-    if ((*result != ERR) && (*result != KEY_CODE_YES) && !in_command && _printable(ch)) {
-        prof_handle_activity();
-    }
+//    if (*result == ERR) {
+//        prof_handle_idle();
+//    }
+//    if ((*result != ERR) && (*result != KEY_CODE_YES) && !in_command && _printable(ch)) {
+//        prof_handle_activity();
+//    }
 
     // if it wasn't an arrow key etc
     if (!_handle_edit(*result, ch, input, size)) {

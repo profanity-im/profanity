@@ -1,5 +1,5 @@
 /*
- * chat_session.h
+ * chat_state.h
  *
  * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
  *
@@ -32,22 +32,6 @@
  *
  */
 
-#ifndef CHAT_SESSION_H
-#define CHAT_SESSION_H
+#ifndef CHAT_STATE_H
+#define CHAT_STATE_H
 
-#include <glib.h>
-
-typedef struct chat_session_t {
-    char *barejid;
-    char *resource;
-    gboolean send_states;
-} ChatSession;
-
-void chat_sessions_init(void);
-void chat_sessions_clear(void);
-
-ChatSession* chat_session_get(const char * const barejid);
-void chat_session_on_recipient_activity(const char * const barejid, const char * const resourcepart);
-void chat_session_remove(const char * const barejid);
-
-#endif

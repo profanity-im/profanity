@@ -131,38 +131,38 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
     g_timer_destroy(timer);
 }
-
-void
-prof_handle_idle(void)
-{
-    jabber_conn_status_t status = jabber_get_connection_status();
-    if (status == JABBER_CONNECTED) {
-        GSList *recipients = ui_get_chat_recipients();
-        GSList *curr = recipients;
-
-        while (curr != NULL) {
-            char *barejid = curr->data;
-            chat_session_on_inactivity(barejid);
-            curr = g_slist_next(curr);
-        }
-
-        if (recipients != NULL) {
-            g_slist_free(recipients);
-        }
-    }
-}
-
-void
-prof_handle_activity(void)
-{
-    win_type_t win_type = ui_current_win_type();
-    jabber_conn_status_t status = jabber_get_connection_status();
-
-    if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
-        ProfChatWin *chatwin = wins_get_current_chat();
-        chat_session_on_activity(chatwin->barejid);
-    }
-}
+//
+//void
+//prof_handle_idle(void)
+//{
+//    jabber_conn_status_t status = jabber_get_connection_status();
+//    if (status == JABBER_CONNECTED) {
+//        GSList *recipients = ui_get_chat_recipients();
+//        GSList *curr = recipients;
+//
+//        while (curr != NULL) {
+//            char *barejid = curr->data;
+//            chat_session_on_inactivity(barejid);
+//            curr = g_slist_next(curr);
+//        }
+//
+//        if (recipients != NULL) {
+//            g_slist_free(recipients);
+//        }
+//    }
+//}
+//
+//void
+//prof_handle_activity(void)
+//{
+//    win_type_t win_type = ui_current_win_type();
+//    jabber_conn_status_t status = jabber_get_connection_status();
+//
+//    if ((status == JABBER_CONNECTED) && (win_type == WIN_CHAT)) {
+//        ProfChatWin *chatwin = wins_get_current_chat();
+//        chat_session_on_activity(chatwin->barejid);
+//    }
+//}
 
 /*
  * Take a line of input and process it, return TRUE if profanity is to
