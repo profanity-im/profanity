@@ -3455,7 +3455,7 @@ cmd_inpblock(gchar **args, struct cmd_help_t help)
     if (_strtoi(value, &intval, 1, 1000) == 0) {
         cons_show("Input blocking set to %d milliseconds.", intval);
         prefs_set_inpblock(intval);
-        ui_input_nonblocking();
+        ui_input_nonblocking(FALSE);
     }
     return TRUE;
 }

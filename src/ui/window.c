@@ -740,6 +740,8 @@ win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
 
     buffer_push(window->layout->buffer, show_char, time, flags, theme_item, from, message);
     _win_print(window, show_char, time, flags, theme_item, from, message);
+    // TODO: cross-reference.. this should be replaced by a real event-based system
+    ui_input_nonblocking(TRUE);
 }
 
 void
