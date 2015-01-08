@@ -290,7 +290,8 @@ _init(const int disable_tls, char *log_level)
 static void
 _shutdown(void)
 {
-    ui_goodbye_title();
+    if(prefs_get_boolean(PREF_TITLEBAR) && prefs_get_boolean(PREF_EXIT_TITLE))
+        ui_goodbye_title();
     ui_close_all_wins();
     jabber_disconnect();
     jabber_shutdown();
