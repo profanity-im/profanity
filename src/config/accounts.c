@@ -232,7 +232,7 @@ accounts_get_account(const char * const name)
             FILE *stream = popen(eval_password, "r");
             // Limit to 100 bytes to prevent overflows in the case of a poorly chosen command
             password = g_malloc(100);
-            fgets(password, 100, stream);
+            password = fgets(password, 100, stream);
         }
         gboolean enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
 
