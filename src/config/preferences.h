@@ -95,7 +95,8 @@ typedef enum {
     PREF_LOG_SHARED,
     PREF_OTR_LOG,
     PREF_OTR_WARN,
-    PREF_OTR_POLICY
+    PREF_OTR_POLICY,
+    PREF_EXIT_TITLE,
 } preference_t;
 
 typedef struct prof_alias_t {

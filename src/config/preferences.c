@@ -647,6 +647,8 @@ _get_key(preference_t pref)
             return "roster.resource";
         case PREF_ROSTER_BY:
             return "roster.by";
+        case PREF_EXIT_TITLE:
+            return "exit.title";
         default:
             return NULL;
     }
@@ -669,6 +671,7 @@ _get_default_boolean(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
+        case PREF_EXIT_TITLE:
             return TRUE;
         default:
             return FALSE;
