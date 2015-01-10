@@ -17,8 +17,9 @@ void clears_chat_sessions(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
 
     chat_sessions_init();
-    chat_session_on_recipient_activity("bob@server.org", "laptop");
     roster_init();
+    chat_session_on_recipient_activity("bob@server.org", "laptop");
+    chat_session_on_recipient_activity("mike@server.org", "work");
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(jabber_get_fulljid, "myjid@myserver.com");
@@ -28,7 +29,9 @@ void clears_chat_sessions(void **state)
 
     assert_true(result);
 
-    ChatSession *session = chat_session_get("bob@server.org");
-    assert_null(session);
+    ChatSession *session1 = chat_session_get("bob@server.org");
+    ChatSession *session2 = chat_session_get("mike@server.org");
+    assert_null(session1);
+    assert_null(session2);
     free(help);
 }

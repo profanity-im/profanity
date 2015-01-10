@@ -455,6 +455,7 @@ int main(int argc, char* argv[]) {
         unit_test(handle_presence_error_when_no_recipient),
         unit_test(handle_presence_error_when_from_recipient),
         unit_test(handle_offline_removes_chat_session),
+        unit_test(lost_connection_clears_chat_sessions),
 
         unit_test(cmd_alias_add_shows_usage_when_no_args),
         unit_test(cmd_alias_add_shows_usage_when_no_value),

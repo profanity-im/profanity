@@ -11,6 +11,7 @@
 #include "chat_session.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
+#include "ui/stub_ui.h"
 #include "muc.h"
 
 void console_doesnt_show_online_presence_when_set_none(void **state)
@@ -193,4 +194,19 @@ void handle_offline_removes_chat_session(void **state)
 
     roster_clear();
     chat_sessions_clear();
+}
+
+void lost_connection_clears_chat_sessions(void **state)
+{
+    chat_sessions_init();
+    chat_session_on_recipient_activity("bob@server.org", "laptop");
+    chat_session_on_recipient_activity("steve@server.org", "mobile");
+    expect_any_cons_show_error();
+
+    handle_lost_connection();
+
+    ChatSession *session1 = chat_session_get("bob@server.org");
+    ChatSession *session2 = chat_session_get("steve@server.org");
+    assert_null(session1);
+    assert_null(session2);
 }

@@ -32,6 +32,12 @@ expect_cons_show_error(char *expected)
 }
 
 void
+expect_any_cons_show_error(void)
+{
+    expect_any(cons_show_error, output);
+}
+
+void
 expect_ui_current_print_line(char *message)
 {
     expect_string(ui_current_print_line, output, message);
