@@ -111,7 +111,7 @@ typedef struct prof_chat_win_t {
     int unread;
     gboolean is_otr;
     gboolean is_trusted;
-    char *resource;
+    char *resource_override;
     gboolean history_shown;
     unsigned long memcheck;
 } ProfChatWin;

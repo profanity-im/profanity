@@ -132,7 +132,7 @@ win_create_chat(const char * const barejid)
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->barejid = strdup(barejid);
-    new_win->resource = NULL;
+    new_win->resource_override = NULL;
     new_win->is_otr = FALSE;
     new_win->is_trusted = FALSE;
     new_win->history_shown = FALSE;
@@ -333,7 +333,7 @@ win_free(ProfWin* window)
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
-        free(chatwin->resource);
+        free(chatwin->resource_override);
     }
 
     if (window->type == WIN_MUC) {

@@ -1617,11 +1617,11 @@ cmd_resource(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        chatwin->resource = strdup(resource);
+        chatwin->resource_override = strdup(resource);
         return TRUE;
 
     } else if (g_strcmp0(cmd, "off") == 0) {
-        FREE_SET_NULL(chatwin->resource);
+        FREE_SET_NULL(chatwin->resource_override);
         return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);

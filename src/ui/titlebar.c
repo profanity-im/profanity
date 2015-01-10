@@ -307,9 +307,9 @@ static void
 _show_contact_presence(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
-    if (chatwin && chatwin->resource) {
+    if (chatwin && chatwin->resource_override) {
         wprintw(win, "/");
-        wprintw(win, chatwin->resource);
+        wprintw(win, chatwin->resource_override);
     }
 
     if (prefs_get_boolean(PREF_PRESENCE)) {
@@ -318,8 +318,8 @@ _show_contact_presence(ProfChatWin *chatwin)
 
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact) {
-            if (chatwin && chatwin->resource) {
-                Resource *resource = p_contact_get_resource(contact, chatwin->resource);
+            if (chatwin && chatwin->resource_override) {
+                Resource *resource = p_contact_get_resource(contact, chatwin->resource_override);
                 if (resource) {
                     presence = string_from_resource_presence(resource->presence);
                 }
