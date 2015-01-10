@@ -20,6 +20,12 @@ expect_cons_show(char *expected)
 }
 
 void
+expect_any_cons_show(void)
+{
+    expect_any(cons_show, output);
+}
+
+void
 expect_cons_show_error(char *expected)
 {
     expect_string(cons_show_error, output, expected);

@@ -33,6 +33,7 @@
 #include "test_muc.h"
 #include "test_cmd_roster.h"
 #include "test_cmd_win.h"
+#include "test_cmd_disconnect.h"
 #include "test_form.h"
 
 int main(int argc, char* argv[]) {
@@ -609,6 +610,8 @@ int main(int argc, char* argv[]) {
         unit_test(remove_text_multi_value_does_nothing_when_doesnt_exist),
         unit_test(remove_text_multi_value_removes_when_one),
         unit_test(remove_text_multi_value_removes_when_many),
+
+        unit_test(clears_chat_sessions),
     };
 
     return run_tests(all_tests);

@@ -29,7 +29,7 @@ void jabber_shutdown(void) {}
 void jabber_process_events(void) {}
 const char * jabber_get_fulljid(void)
 {
-    return NULL;
+    return (char *)mock();
 }
 
 const char * jabber_get_domain(void)
