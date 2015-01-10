@@ -116,7 +116,7 @@ void ui_handle_stanza(const char * const msg);
 
 // ui events
 void ui_contact_typing(const char * const from);
-void ui_incoming_msg(const char * const from, const char * const message, GTimeVal *tv_stamp);
+void ui_incoming_msg(const char * const from, const char * const resource,  const char * const message, GTimeVal *tv_stamp);
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp);
 
 void ui_disconnected(void);

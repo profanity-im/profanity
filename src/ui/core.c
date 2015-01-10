@@ -328,20 +328,25 @@ ui_get_current_chat(void)
 }
 
 void
-ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal *tv_stamp)
+ui_incoming_msg(const char * const barejid, const char * const resource, const char * const message, GTimeVal *tv_stamp)
 {
     gboolean win_created = FALSE;
-    char *display_from = NULL;
+    GString *user = g_string_new("");
 
     PContact contact = roster_get_contact(barejid);
     if (contact != NULL) {
         if (p_contact_name(contact) != NULL) {
-            display_from = strdup(p_contact_name(contact));
+            g_string_append(user, p_contact_name(contact));
         } else {
-            display_from = strdup(barejid);
+            g_string_append(user, barejid);
         }
     } else {
-        display_from = strdup(barejid);
+        g_string_append(user,barejid);
+    }
+
+    if (resource) {
+        g_string_append(user, "/");
+        g_string_append(user, resource);
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
@@ -362,14 +367,14 @@ ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, user->str, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
     // not currently viewing chat window with sender
     } else {
         status_bar_new(num);
-        cons_show_incoming_message(display_from, num);
+        cons_show_incoming_message(user->str, num);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
@@ -388,7 +393,7 @@ ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal
             }
         }
 
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, user->str, message);
     }
 
     int ui_index = num;
@@ -404,14 +409,14 @@ ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal
         gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
             if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
-                notify_message(display_from, ui_index, message);
+                notify_message(user->str, ui_index, message);
             } else {
-                notify_message(display_from, ui_index, NULL);
+                notify_message(user->str, ui_index, NULL);
             }
         }
     }
 
-    free(display_from);
+    g_string_free(user, TRUE);
 }
 
 void

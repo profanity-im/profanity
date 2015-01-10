@@ -297,7 +297,7 @@ handle_incoming_private_message(char *fulljid, char *message)
 }
 
 void
-handle_incoming_message(char *barejid, char *message)
+handle_incoming_message(char *barejid, char *resource, char *message)
 {
 #ifdef HAVE_LIBOTR
     gboolean was_decrypted = FALSE;
@@ -336,7 +336,7 @@ handle_incoming_message(char *barejid, char *message)
         message_send_chat(barejid, otr_query_message);
     }
 
-    ui_incoming_msg(barejid, newmessage, NULL);
+    ui_incoming_msg(barejid, resource, newmessage, NULL);
 
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -355,7 +355,7 @@ handle_incoming_message(char *barejid, char *message)
 
     otr_free_message(newmessage);
 #else
-    ui_incoming_msg(barejid, message, NULL);
+    ui_incoming_msg(barejid, resource, message, NULL);
 
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();
@@ -375,7 +375,7 @@ handle_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp)
 void
 handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 {
-    ui_incoming_msg(barejid, message, &tv_stamp);
+    ui_incoming_msg(barejid, NULL, message, &tv_stamp);
 
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char *jid = jabber_get_fulljid();

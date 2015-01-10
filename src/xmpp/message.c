@@ -499,7 +499,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 if (delayed) {
                     handle_delayed_message(jid->barejid, message, tv_stamp);
                 } else {
-                    handle_incoming_message(jid->barejid, message);
+                    handle_incoming_message(jid->barejid, jid->resourcepart, message);
                 }
                 xmpp_free(ctx, message);
             }
