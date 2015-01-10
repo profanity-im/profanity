@@ -514,6 +514,8 @@ _get_group(preference_t pref)
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
         case PREF_ROSTER_BY:
+        case PREF_RESOURCE_TITLE:
+        case PREF_RESOURCE_MESSAGE:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -647,6 +649,10 @@ _get_key(preference_t pref)
             return "roster.resource";
         case PREF_ROSTER_BY:
             return "roster.by";
+        case PREF_RESOURCE_TITLE:
+            return "resource.title";
+        case PREF_RESOURCE_MESSAGE:
+            return "resource.message";
         default:
             return NULL;
     }

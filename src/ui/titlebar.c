@@ -316,7 +316,7 @@ _show_contact_presence(ProfChatWin *chatwin)
     } else if (session && session->resource) {
         resource = session->resource;
     }
-    if (resource) {
+    if (resource && prefs_get_boolean(PREF_RESOURCE_TITLE)) {
         wprintw(win, "/");
         wprintw(win, resource);
     }

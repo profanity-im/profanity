@@ -1582,15 +1582,32 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_resource(gchar **args, struct cmd_help_t help)
 {
-    ProfWin *current = wins_get_current();
-    if (current->type != WIN_CHAT) {
-        cons_show("The /resource command is only valid in chat windows.");
-        return TRUE;
+    char *cmd = args[0];
+    char *setting = NULL;
+    if (g_strcmp0(cmd, "message") == 0) {
+        setting = args[1];
+        if (!setting) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            return _cmd_set_boolean_preference(setting, help, "Message resource", PREF_RESOURCE_MESSAGE);
+        }
+    } else if (g_strcmp0(cmd, "title") == 0) {
+        setting = args[1];
+        if (!setting) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        } else {
+            return _cmd_set_boolean_preference(setting, help, "Title resource", PREF_RESOURCE_TITLE);
+        }
     }
 
+    ProfWin *current = wins_get_current();
+    if (current->type != WIN_CHAT) {
+        cons_show("Resource can only be changed in chat windows.");
+        return TRUE;
+    }
     ProfChatWin *chatwin = (ProfChatWin*)current;
-
-    char *cmd = args[0];
 
     if (g_strcmp0(cmd, "set") == 0) {
         char *resource = args[1];

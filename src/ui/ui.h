@@ -286,6 +286,7 @@ void cons_show_received_subs(void);
 void cons_show_sent_subs(void);
 void cons_alert(void);
 void cons_theme_setting(void);
+void cons_resource_setting(void);
 void cons_privileges_setting(void);
 void cons_beep_setting(void);
 void cons_flash_setting(void);

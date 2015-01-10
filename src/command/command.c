@@ -278,13 +278,15 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/resource",
-        cmd_resource, parse_args, 1, 2, NULL,
-        { "/resource set|off [resource]", "Set the contact's resource.",
-        { "/resource set|off [resource]",
-          "----------------------------",
-          "Set the resource to use when chatting to a contact.",
-          "set resource - Set the resource.",
-          "off          - Let the server choose which resource to route messages to.",
+        cmd_resource, parse_args, 1, 2, &cons_resource_setting,
+        { "/resource set|off|title|message [resource]", "Set the contact's resource.",
+        { "/resource set|off|title|message [resource]",
+          "------------------------------------------",
+          "Set the resource to use when chatting to a contact and manage resource display settings.",
+          "set resource   - Set the resource.",
+          "off            - Let the server choose which resource to route messages to.",
+          "title on|off   - Show or hide the current resource in the titlebar.",
+          "message on|off - Show or hide the resource from which a message was recieved.",
           NULL } } },
 
     { "/join",
@@ -1455,6 +1457,8 @@ cmd_init(void)
     resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
     autocomplete_add(resource_ac, "off");
+    autocomplete_add(resource_ac, "title");
+    autocomplete_add(resource_ac, "message");
 
     cmd_history_init();
 }
@@ -2460,6 +2464,16 @@ _resource_autocomplete(char *input, int *size)
                 return found;
             }
         }
+    }
+
+    found = autocomplete_param_with_func(input, size, "/resource title", prefs_autocomplete_boolean_choice);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, size, "/resource message", prefs_autocomplete_boolean_choice);
+    if (found != NULL) {
+        return found;
     }
 
     found = autocomplete_param_with_ac(input, size, "/resource", resource_ac, FALSE);

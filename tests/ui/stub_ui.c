@@ -436,6 +436,7 @@ void cons_beep_setting(void) {}
 void cons_flash_setting(void) {}
 void cons_splash_setting(void) {}
 void cons_vercheck_setting(void) {}
+void cons_resource_setting(void) {}
 void cons_occupants_setting(void) {}
 void cons_roster_setting(void) {}
 void cons_presence_setting(void) {}

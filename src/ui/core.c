@@ -341,10 +341,10 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
             g_string_append(user, barejid);
         }
     } else {
-        g_string_append(user,barejid);
+        g_string_append(user, barejid);
     }
 
-    if (resource) {
+    if (resource && prefs_get_boolean(PREF_RESOURCE_MESSAGE)) {
         g_string_append(user, "/");
         g_string_append(user, resource);
     }
