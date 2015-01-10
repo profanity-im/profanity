@@ -46,7 +46,8 @@
 static GHashTable *sessions;
 
 static void
-_chat_session_new(const char * const barejid, const char * const resource, gboolean send_states)
+_chat_session_new(const char * const barejid, const char * const resource,
+    gboolean resource_override, gboolean send_states)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
@@ -54,9 +55,10 @@ _chat_session_new(const char * const barejid, const char * const resource, gbool
     ChatSession *new_session = malloc(sizeof(struct chat_session_t));
     new_session->barejid = strdup(barejid);
     new_session->resource = strdup(resource);
+    new_session->resource_override = resource_override;
     new_session->send_states = send_states;
 
-    g_hash_table_insert(sessions, strdup(barejid), new_session);
+    g_hash_table_replace(sessions, strdup(barejid), new_session);
 }
 
 static void
@@ -83,6 +85,12 @@ chat_sessions_clear(void)
         g_hash_table_remove_all(sessions);
 }
 
+void
+chat_session_resource_override(const char * const barejid, const char * const resource)
+{
+    _chat_session_new(barejid, resource, TRUE, FALSE);
+}
+
 ChatSession*
 chat_session_get(const char * const barejid)
 {
@@ -100,15 +108,14 @@ chat_session_on_recipient_activity(const char * const barejid, const char * cons
         // session exists with resource, do nothing
         if (g_strcmp0(session->resource, resource) == 0) {
             return;
-        // session exists with differet resource, replace
-        } else {
-            g_hash_table_remove(sessions, barejid);
-            _chat_session_new(barejid, resource, FALSE);
+        // session exists with differet resource and no override, replace
+        } else if (!session->resource_override) {
+            _chat_session_new(barejid, resource, FALSE, FALSE);
         }
 
     // no session, create one
     } else {
-        _chat_session_new(barejid, resource, FALSE);
+        _chat_session_new(barejid, resource, FALSE, FALSE);
     }
 }
 

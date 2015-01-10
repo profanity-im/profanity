@@ -931,8 +931,6 @@ ui_gone_secure(const char * const barejid, gboolean trusted)
         chatwin = (ProfChatWin*)window;
     }
 
-    FREE_SET_NULL(chatwin->resource_override);
-
     chatwin->is_otr = TRUE;
     chatwin->is_trusted = trusted;
     if (trusted) {

@@ -1203,17 +1203,6 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             barejid = usr;
         }
 
-        // TODO if msg to current recipient, and resource specified, set resource
-//        char *resource = NULL;
-//        ProfWin *current = wins_get_current();
-//        if (current->type == WIN_CHAT) {
-//            ProfChatWin *chatwin = (ProfChatWin*)current;
-//            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-//            if ((g_strcmp0(chatwin->barejid, barejid) == 0) && (chatwin->resource)) {
-//                resource = chatwin->resource;
-//            }
-//        }
-
         if (msg != NULL) {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -1635,10 +1624,12 @@ cmd_resource(gchar **args, struct cmd_help_t help)
         }
 
         chatwin->resource_override = strdup(resource);
+        chat_session_resource_override(chatwin->barejid, resource);
         return TRUE;
 
     } else if (g_strcmp0(cmd, "off") == 0) {
         FREE_SET_NULL(chatwin->resource_override);
+        chat_session_remove(chatwin->barejid);
         return TRUE;
     } else {
         cons_show("Usage: %s", help.usage);

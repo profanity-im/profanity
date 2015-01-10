@@ -40,12 +40,15 @@
 typedef struct chat_session_t {
     char *barejid;
     char *resource;
+    gboolean resource_override;
     gboolean send_states;
+
 } ChatSession;
 
 void chat_sessions_init(void);
 void chat_sessions_clear(void);
 
+void chat_session_resource_override(const char * const barejid, const char * const resource);
 ChatSession* chat_session_get(const char * const barejid);
 void chat_session_on_recipient_activity(const char * const barejid, const char * const resourcepart);
 void chat_session_remove(const char * const barejid);
