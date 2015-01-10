@@ -1,14 +1,4 @@
 void returns_false_when_chat_session_does_not_exist(void **state);
-void creates_chat_session_on_message_send(void **state);
-void creates_chat_session_on_activity(void **state);
-void returns_null_resource_for_new_session(void **state);
-void returns_true_send_states_for_new_session(void **state);
-void sets_resource_on_incoming_message(void **state);
-void sets_send_states_on_incoming_message(void **state);
-void replaces_chat_session_when_new_resource(void **state);
-void removes_chat_session_on_window_close(void **state);
-void removes_chat_session_on_cancel_for_barejid(void **state);
-void removes_chat_session_on_cancel_for_fulljid(void **state);
-void removes_chat_session_on_offline_matching_resource(void **state);
-void does_not_remove_chat_session_on_offline_different_resource(void **state);
-void does_not_remove_chat_session_on_offline_null_resource(void **state);
+void creates_chat_session_on_recipient_activity(void **state);
+void replaces_chat_session_on_recipient_activity_with_different_resource(void **state);
+void removes_chat_session(void **state);

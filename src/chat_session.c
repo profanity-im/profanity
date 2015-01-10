@@ -92,6 +92,9 @@ chat_session_get(const char * const barejid)
 void
 chat_session_on_recipient_activity(const char * const barejid, const char * const resource)
 {
+    assert(barejid != NULL);
+    assert(resource != NULL);
+
     ChatSession *session = g_hash_table_lookup(sessions, barejid);
     if (session) {
         // session exists with resource, do nothing

@@ -126,18 +126,18 @@ void handle_message_error_when_recipient_cancel(void **state)
 void handle_message_error_when_recipient_cancel_disables_chat_session(void **state)
 {
     char *err_msg = "Some error.";
-    char *from = "bob@server.com";
+    char *barejid = "bob@server.com";
     char *resource = "resource";
     char *type = "cancel";
 
     prefs_set_boolean(PREF_STATES, TRUE);
     chat_sessions_init();
-    chat_session_on_incoming_message(from, resource, TRUE);
+    chat_session_on_recipient_activity(barejid, resource);
 
-    handle_message_error(from, type, err_msg);
-    gboolean session_exists = chat_session_exists(from);
+    handle_message_error(barejid, type, err_msg);
+    ChatSession *session = chat_session_get(barejid);
 
-    assert_false(session_exists);
+    assert_null(session);
     chat_sessions_clear();
 }
 
@@ -185,11 +185,11 @@ void handle_offline_removes_chat_session(void **state)
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource *resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
     roster_update_presence(barejid, resourcep, NULL);
-    chat_session_on_incoming_message(barejid, resource, TRUE);
+    chat_session_on_recipient_activity(barejid, resource);
     handle_contact_offline(barejid, resource, NULL);
-    gboolean exists = chat_session_exists(barejid);
+    ChatSession *session = chat_session_get(barejid);
 
-    assert_false(exists);
+    assert_null(session);
 
     roster_clear();
     chat_sessions_clear();
