@@ -52,6 +52,7 @@
 #include "preferences.h"
 #include "tools/autocomplete.h"
 
+// preference groups refer to the sections in .profrc, for example [ui]
 #define PREF_GROUP_LOGGING "logging"
 #define PREF_GROUP_CHATSTATES "chatstates"
 #define PREF_GROUP_UI "ui"
@@ -487,6 +488,9 @@ _get_preferences_file(void)
     return result;
 }
 
+// get the preference group for a specific preference
+// for example the PREF_BEEP setting ("beep" in .profrc, see _get_key) belongs
+// to the [ui] section.
 static const char *
 _get_group(preference_t pref)
 {
@@ -550,6 +554,8 @@ _get_group(preference_t pref)
     }
 }
 
+// get the key used in .profrc for the preference
+// for example the PREF_AUTOAWAY_MODE maps to "autoaway.mode" in .profrc
 static const char *
 _get_key(preference_t pref)
 {
@@ -652,6 +658,8 @@ _get_key(preference_t pref)
     }
 }
 
+// the default setting for a boolean type preference
+// if it is not specified in .profrc
 static gboolean
 _get_default_boolean(preference_t pref)
 {
@@ -675,6 +683,8 @@ _get_default_boolean(preference_t pref)
     }
 }
 
+// the default setting for a string type preference
+// if it is not specified in .profrc
 static char *
 _get_default_string(preference_t pref)
 {
