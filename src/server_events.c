@@ -392,10 +392,10 @@ handle_typing(char *from)
 }
 
 void
-handle_gone(const char * const from)
+handle_gone(const char * const barejid)
 {
-    chat_session_remove(from);
-    ui_recipient_gone(from);
+    chat_session_remove(barejid);
+    ui_recipient_gone(barejid);
 }
 
 void

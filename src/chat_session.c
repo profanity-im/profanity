@@ -98,24 +98,25 @@ chat_session_get(const char * const barejid)
 }
 
 void
-chat_session_on_recipient_activity(const char * const barejid, const char * const resource)
+chat_session_on_recipient_activity(const char * const barejid, const char * const resource,
+    gboolean send_states)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
 
     ChatSession *session = g_hash_table_lookup(sessions, barejid);
     if (session) {
-        // session exists with resource, do nothing
+        // session exists with resource, update chat_states
         if (g_strcmp0(session->resource, resource) == 0) {
-            return;
+            session->send_states = send_states;
         // session exists with differet resource and no override, replace
         } else if (!session->resource_override) {
-            _chat_session_new(barejid, resource, FALSE, FALSE);
+            _chat_session_new(barejid, resource, FALSE, send_states);
         }
 
     // no session, create one
     } else {
-        _chat_session_new(barejid, resource, FALSE, FALSE);
+        _chat_session_new(barejid, resource, FALSE, send_states);
     }
 }
 

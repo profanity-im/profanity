@@ -88,11 +88,19 @@ message_send_chat(const char * const barejid, const char * const msg)
 
     ChatSession *session = chat_session_get(barejid);
     if (session) {
+        char *state = NULL;
+        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
+            state = STANZA_NAME_ACTIVE;
+        }
         Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, NULL);
+        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, state);
         jid_destroy(jidp);
     } else {
-        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, NULL);
+        char *state = NULL;
+        if (prefs_get_boolean(PREF_STATES)) {
+            state = STANZA_NAME_ACTIVE;
+        }
+        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, state);
     }
 
     xmpp_send(conn, message);
@@ -461,35 +469,23 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         GTimeVal tv_stamp;
         gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
 
-        // handle chat sessions
+        // handle chat sessions and states
         if (!delayed && jid->resourcepart) {
             gboolean recipient_gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
             if (recipient_gone) {
-                chat_session_remove(jid->barejid);
+                handle_gone(jid->barejid);
             } else {
-                chat_session_on_recipient_activity(jid->barejid, jid->resourcepart);
+                gboolean send_states = FALSE;
+                if (stanza_contains_chat_state(stanza)) {
+                    send_states = TRUE;
+                    gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
+                    if (typing) {
+                        handle_typing(jid->barejid);
+                    }
+                }
+                chat_session_on_recipient_activity(jid->barejid, jid->resourcepart, send_states);
             }
         }
-
-//            // determine chatstate support of recipient
-//            if (stanza_contains_chat_state(stanza)) {
-//                chat_session_on_incoming_message(jid->barejid, jid->resourcepart, TRUE);
-//            } else {
-//                chat_session_on_incoming_message(jid->barejid, jid->resourcepart, FALSE);
-//            }
-//
-//            if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
-//                handle_typing(jid->barejid);
-//            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
-//                handle_gone(jid->barejid);
-//            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) {
-//                // do something
-//            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
-//                // do something
-//            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ACTIVE) != NULL) {
-//                // do something
-//            }
-//        }
 
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);

@@ -133,7 +133,7 @@ void handle_message_error_when_recipient_cancel_disables_chat_session(void **sta
 
     prefs_set_boolean(PREF_STATES, TRUE);
     chat_sessions_init();
-    chat_session_on_recipient_activity(barejid, resource);
+    chat_session_on_recipient_activity(barejid, resource, FALSE);
 
     handle_message_error(barejid, type, err_msg);
     ChatSession *session = chat_session_get(barejid);
@@ -186,7 +186,7 @@ void handle_offline_removes_chat_session(void **state)
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource *resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
     roster_update_presence(barejid, resourcep, NULL);
-    chat_session_on_recipient_activity(barejid, resource);
+    chat_session_on_recipient_activity(barejid, resource, FALSE);
     handle_contact_offline(barejid, resource, NULL);
     ChatSession *session = chat_session_get(barejid);
 
@@ -199,8 +199,8 @@ void handle_offline_removes_chat_session(void **state)
 void lost_connection_clears_chat_sessions(void **state)
 {
     chat_sessions_init();
-    chat_session_on_recipient_activity("bob@server.org", "laptop");
-    chat_session_on_recipient_activity("steve@server.org", "mobile");
+    chat_session_on_recipient_activity("bob@server.org", "laptop", FALSE);
+    chat_session_on_recipient_activity("steve@server.org", "mobile", FALSE);
     expect_any_cons_show_error();
 
     handle_lost_connection();
