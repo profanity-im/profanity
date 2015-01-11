@@ -18,8 +18,8 @@ void clears_chat_sessions(void **state)
 
     chat_sessions_init();
     roster_init();
-    chat_session_on_recipient_activity("bob@server.org", "laptop", FALSE);
-    chat_session_on_recipient_activity("mike@server.org", "work", FALSE);
+    chat_session_recipient_active("bob@server.org", "laptop", FALSE);
+    chat_session_recipient_active("mike@server.org", "work", FALSE);
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
     will_return(jabber_get_fulljid, "myjid@myserver.com");
