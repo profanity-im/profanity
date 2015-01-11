@@ -42,8 +42,7 @@
 #include "config/preferences.h"
 
 #define PAUSED_TIMEOUT 10.0
-#define INACTIVE_TIMEOUT 10.0
-#define GONE_TIMEOUT 10.0
+#define INACTIVE_TIMEOUT 30.0
 
 static void _send_if_supported(const char * const barejid, void(*send_func)(const char * const));
 
@@ -69,8 +68,10 @@ chat_state_free(ChatState *state)
 void
 chat_state_handle_idle(const char * const barejid, ChatState *state)
 {
+    gdouble elapsed = g_timer_elapsed(state->timer, NULL);
+
     // TYPING -> PAUSED
-    if (state->type == CHAT_STATE_COMPOSING && g_timer_elapsed(state->timer, NULL) > PAUSED_TIMEOUT) {
+    if (state->type == CHAT_STATE_COMPOSING && elapsed > PAUSED_TIMEOUT) {
         state->type = CHAT_STATE_PAUSED;
         g_timer_start(state->timer);
         if (prefs_get_boolean(PREF_STATES) && prefs_get_boolean(PREF_OUTTYPE)) {
@@ -80,7 +81,7 @@ chat_state_handle_idle(const char * const barejid, ChatState *state)
     }
 
     // PAUSED|ACTIVE -> INACTIVE
-    if ((state->type == CHAT_STATE_PAUSED || state->type == CHAT_STATE_ACTIVE) && g_timer_elapsed(state->timer, NULL) > INACTIVE_TIMEOUT) {
+    if ((state->type == CHAT_STATE_PAUSED || state->type == CHAT_STATE_ACTIVE) && elapsed > INACTIVE_TIMEOUT) {
         state->type = CHAT_STATE_INACTIVE;
         g_timer_start(state->timer);
         if (prefs_get_boolean(PREF_STATES)) {
@@ -91,26 +92,28 @@ chat_state_handle_idle(const char * const barejid, ChatState *state)
     }
 
     // INACTIVE -> GONE
-    if (state->type == CHAT_STATE_INACTIVE && g_timer_elapsed(state->timer, NULL) > GONE_TIMEOUT) {
-        ChatSession *session = chat_session_get(barejid);
-        if (session) {
-            // never move to GONE when resource override
-            if (!session->resource_override) {
-                if (prefs_get_boolean(PREF_STATES)) {
-                    _send_if_supported(barejid, message_send_gone);
+    if (state->type == CHAT_STATE_INACTIVE) {
+        if (prefs_get_gone() != 0 && (elapsed > (prefs_get_gone() * 60.0))) {
+            ChatSession *session = chat_session_get(barejid);
+            if (session) {
+                // never move to GONE when resource override
+                if (!session->resource_override) {
+                    if (prefs_get_boolean(PREF_STATES)) {
+                        _send_if_supported(barejid, message_send_gone);
+                    }
+                    chat_session_remove(barejid);
+                    state->type = CHAT_STATE_GONE;
+                    g_timer_start(state->timer);
                 }
-                chat_session_remove(barejid);
+            } else {
+                if (prefs_get_boolean(PREF_STATES)) {
+                    message_send_gone(barejid);
+                }
                 state->type = CHAT_STATE_GONE;
                 g_timer_start(state->timer);
             }
-        } else {
-            if (prefs_get_boolean(PREF_STATES)) {
-                message_send_gone(barejid);
-            }
-            state->type = CHAT_STATE_GONE;
-            g_timer_start(state->timer);
+            return;
         }
-        return;
     }
 }
 
