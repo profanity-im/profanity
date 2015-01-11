@@ -280,10 +280,11 @@ ui_chat_win_exists(const char * const barejid)
 }
 
 void
-ui_contact_typing(const char * const barejid)
+ui_contact_typing(const char * const barejid, const char * const resource)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     ProfWin *window = (ProfWin*) chatwin;
+    ChatSession *session = chat_session_get(barejid);
 
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
@@ -294,8 +295,8 @@ ui_contact_typing(const char * const barejid)
         } else if (!wins_is_current(window)) {
             cons_show_typing(barejid);
 
-        // in chat window with user
-        } else {
+        // in chat window with user, no session or session with resource
+        } else if (!session || (session && g_strcmp0(session->resource, resource) == 0)) {
             title_bar_set_typing(TRUE);
 
             int num = wins_get_num(window);
@@ -1272,26 +1273,36 @@ ui_print_system_msg_from_recipient(const char * const barejid, const char *messa
 }
 
 void
-ui_recipient_gone(const char * const barejid)
+ui_recipient_gone(const char * const barejid, const char * const resource)
 {
     if (barejid == NULL)
         return;
+    if (resource == NULL)
+        return;
 
-    const char * display_usr = NULL;
-    PContact contact = roster_get_contact(barejid);
-    if (contact != NULL) {
-        if (p_contact_name(contact) != NULL) {
-            display_usr = p_contact_name(contact);
-        } else {
-            display_usr = barejid;
+    gboolean show_message = TRUE;
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        ChatSession *session = chat_session_get(barejid);
+        if (session && g_strcmp0(session->resource, resource) != 0) {
+            show_message = FALSE;
         }
-    } else {
-        display_usr = barejid;
-    }
+        if (show_message) {
+            const char * display_usr = NULL;
+            PContact contact = roster_get_contact(barejid);
+            if (contact != NULL) {
+                if (p_contact_name(contact) != NULL) {
+                    display_usr = p_contact_name(contact);
+                } else {
+                    display_usr = barejid;
+                }
+            } else {
+                display_usr = barejid;
+            }
 
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window != NULL) {
-        win_save_vprint(window, '!', NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
+            win_save_vprint((ProfWin*)chatwin, '!', NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
+        }
     }
 }
 

@@ -88,7 +88,7 @@ chat_sessions_clear(void)
 void
 chat_session_resource_override(const char * const barejid, const char * const resource)
 {
-    _chat_session_new(barejid, resource, TRUE, FALSE);
+    _chat_session_new(barejid, resource, TRUE, TRUE);
 }
 
 ChatSession*
@@ -98,7 +98,39 @@ chat_session_get(const char * const barejid)
 }
 
 void
-chat_session_on_recipient_activity(const char * const barejid, const char * const resource,
+chat_session_recipient_gone(const char * const barejid, const char * const resource)
+{
+    assert(barejid != NULL);
+    assert(resource != NULL);
+
+    ChatSession *session = g_hash_table_lookup(sessions, barejid);
+    if (session && g_strcmp0(session->resource, resource) == 0) {
+        if (!session->resource_override) {
+            chat_session_remove(barejid);
+        }
+    }
+}
+
+void
+chat_session_recipient_typing(const char * const barejid, const char * const resource)
+{
+    chat_session_recipient_active(barejid, resource, TRUE);
+}
+
+void
+chat_session_recipient_paused(const char * const barejid, const char * const resource)
+{
+    chat_session_recipient_active(barejid, resource, TRUE);
+}
+
+void
+chat_session_recipient_inactive(const char * const barejid, const char * const resource)
+{
+    chat_session_recipient_active(barejid, resource, TRUE);
+}
+
+void
+chat_session_recipient_active(const char * const barejid, const char * const resource,
     gboolean send_states)
 {
     assert(barejid != NULL);

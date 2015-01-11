@@ -77,7 +77,7 @@ void handle_typing(char *barejid, char *resource);
 void handle_paused(char *barejid, char *resource);
 void handle_inactive(char *barejid, char *resource);
 void handle_activity(char *barejid, char *resource, gboolean send_states);
-void handle_gone(const char * const barejid);
+void handle_gone(const char * const barejid, const char * const resource);
 void handle_subscription(const char *from, jabber_subscr_t type);
 void handle_contact_offline(char *contact, char *resource, char *status);
 void handle_contact_online(char *contact, Resource *resource,

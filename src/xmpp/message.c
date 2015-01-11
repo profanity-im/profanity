@@ -486,7 +486,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
             gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
             if (gone) {
-                handle_gone(jid->barejid);
+                handle_gone(jid->barejid, jid->resourcepart);
             } else if (typing) {
                 handle_typing(jid->barejid, jid->resourcepart);
             } else if (paused) {

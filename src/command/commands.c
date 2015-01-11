@@ -1624,11 +1624,15 @@ cmd_resource(gchar **args, struct cmd_help_t help)
         }
 
         chatwin->resource_override = strdup(resource);
+        chat_state_free(chatwin->state);
+        chatwin->state = chat_state_new();
         chat_session_resource_override(chatwin->barejid, resource);
         return TRUE;
 
     } else if (g_strcmp0(cmd, "off") == 0) {
         FREE_SET_NULL(chatwin->resource_override);
+        chat_state_free(chatwin->state);
+        chatwin->state = chat_state_new();
         chat_session_remove(chatwin->barejid);
         return TRUE;
     } else {

@@ -388,17 +388,17 @@ handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 void
 handle_typing(char *barejid, char *resource)
 {
+    ui_contact_typing(barejid, resource);
     if (ui_chat_win_exists(barejid)) {
-        chat_session_on_recipient_activity(barejid, resource, TRUE);
+        chat_session_recipient_typing(barejid, resource);
     }
-    ui_contact_typing(barejid);
 }
 
 void
 handle_paused(char *barejid, char *resource)
 {
     if (ui_chat_win_exists(barejid)) {
-        chat_session_on_recipient_activity(barejid, resource, TRUE);
+        chat_session_recipient_paused(barejid, resource);
     }
 }
 
@@ -406,21 +406,25 @@ void
 handle_inactive(char *barejid, char *resource)
 {
     if (ui_chat_win_exists(barejid)) {
-        chat_session_on_recipient_activity(barejid, resource, TRUE);
+        chat_session_recipient_inactive(barejid, resource);
     }
 }
 
 void
-handle_gone(const char * const barejid)
+handle_gone(const char * const barejid, const char * const resource)
 {
-    chat_session_remove(barejid);
-    ui_recipient_gone(barejid);
+    ui_recipient_gone(barejid, resource);
+    if (ui_chat_win_exists(barejid)) {
+        chat_session_recipient_gone(barejid, resource);
+    }
 }
 
 void
 handle_activity(const char * const barejid, const char * const resource, gboolean send_states)
 {
-    chat_session_on_recipient_activity(barejid, resource, send_states);
+    if (ui_chat_win_exists(barejid)) {
+        chat_session_recipient_active(barejid, resource, send_states);
+    }
 }
 
 void
