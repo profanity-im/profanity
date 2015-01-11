@@ -841,6 +841,19 @@ cons_beep_setting(void)
 }
 
 void
+cons_resource_setting(void)
+{
+    if (prefs_get_boolean(PREF_RESOURCE_TITLE))
+        cons_show("Resource title (/resource)    : ON");
+    else
+        cons_show("Resource title (/resource)    : OFF");
+    if (prefs_get_boolean(PREF_RESOURCE_MESSAGE))
+        cons_show("Message title (/resource)     : ON");
+    else
+        cons_show("Message title (/resource)     : OFF");
+}
+
+void
 cons_wrap_setting(void)
 {
     if (prefs_get_boolean(PREF_WRAP))
@@ -991,6 +1004,7 @@ cons_show_ui_prefs(void)
     cons_splash_setting();
     cons_wrap_setting();
     cons_time_setting();
+    cons_resource_setting();
     cons_vercheck_setting();
     cons_mouse_setting();
     cons_statuses_setting();

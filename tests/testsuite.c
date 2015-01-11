@@ -8,9 +8,10 @@
 #include <sys/stat.h>
 
 #include "prof_config.h"
-
+#include "chat_session.h"
 #include "helpers.h"
 #include "test_autocomplete.h"
+#include "test_chat_session.h"
 #include "test_common.h"
 #include "test_contact.h"
 #include "test_cmd_connect.h"
@@ -31,6 +32,7 @@
 #include "test_muc.h"
 #include "test_cmd_roster.h"
 #include "test_cmd_win.h"
+#include "test_cmd_disconnect.h"
 #include "test_form.h"
 
 int main(int argc, char* argv[]) {
@@ -204,6 +206,18 @@ int main(int argc, char* argv[]) {
         unit_test(find_five_times_finds_fifth),
         unit_test(find_twice_returns_first_when_two_match_and_reset),
 
+        unit_test_setup_teardown(returns_false_when_chat_session_does_not_exist,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(creates_chat_session_on_recipient_activity,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(replaces_chat_session_on_recipient_activity_with_different_resource,
+            init_chat_sessions,
+            close_chat_sessions),
+        unit_test_setup_teardown(removes_chat_session,
+            init_chat_sessions,
+            close_chat_sessions),
         unit_test_setup_teardown(cmd_connect_shows_message_when_disconnecting,
             load_preferences,
             close_preferences),
@@ -439,6 +453,8 @@ int main(int argc, char* argv[]) {
         unit_test(handle_message_error_when_recipient_and_no_type),
         unit_test(handle_presence_error_when_no_recipient),
         unit_test(handle_presence_error_when_from_recipient),
+        unit_test(handle_offline_removes_chat_session),
+        unit_test(lost_connection_clears_chat_sessions),
 
         unit_test(cmd_alias_add_shows_usage_when_no_args),
         unit_test(cmd_alias_add_shows_usage_when_no_value),
@@ -594,6 +610,8 @@ int main(int argc, char* argv[]) {
         unit_test(remove_text_multi_value_does_nothing_when_doesnt_exist),
         unit_test(remove_text_multi_value_removes_when_one),
         unit_test(remove_text_multi_value_removes_when_many),
+
+        unit_test(clears_chat_sessions),
     };
 
     return run_tests(all_tests);

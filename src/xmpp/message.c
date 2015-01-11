@@ -80,27 +80,31 @@ message_add_handlers(void)
 }
 
 void
-message_send_chat(const char * const barejid, const char * const resource, const char * const msg, gboolean send_state)
+message_send_chat(const char * const barejid, const char * const msg)
 {
     xmpp_stanza_t *message;
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
-    GString *jid = g_string_new(barejid);
-    if (resource) {
-        g_string_append(jid, "/");
-        g_string_append(jid, resource);
-    }
-
-    if (send_state) {
-        message = stanza_create_message(ctx, jid->str, STANZA_TYPE_CHAT, msg, STANZA_NAME_ACTIVE);
+    ChatSession *session = chat_session_get(barejid);
+    if (session) {
+        char *state = NULL;
+        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
+            state = STANZA_NAME_ACTIVE;
+        }
+        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
+        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, state);
+        jid_destroy(jidp);
     } else {
-        message = stanza_create_message(ctx, jid->str, STANZA_TYPE_CHAT, msg, NULL);
+        char *state = NULL;
+        if (prefs_get_boolean(PREF_STATES)) {
+            state = STANZA_NAME_ACTIVE;
+        }
+        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, state);
     }
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
-    g_string_free(jid, TRUE);
 }
 
 void
@@ -149,49 +153,44 @@ message_send_invite(const char * const roomjid, const char * const contact,
 }
 
 void
-message_send_composing(const char * const barejid)
+message_send_composing(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
-        STANZA_NAME_COMPOSING);
+
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_COMPOSING);
+    xmpp_send(conn, stanza);
+    xmpp_stanza_release(stanza);
+
+}
+
+void
+message_send_paused(const char * const jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_PAUSED);
+    xmpp_send(conn, stanza);
+    xmpp_stanza_release(stanza);
+}
+
+void
+message_send_inactive(const char * const jid)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_INACTIVE);
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
 }
 
 void
-message_send_paused(const char * const barejid)
+message_send_gone(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
-        STANZA_NAME_PAUSED);
-
-    xmpp_send(conn, stanza);
-    xmpp_stanza_release(stanza);
-}
-
-void
-message_send_inactive(const char * const barejid)
-{
-    xmpp_conn_t * const conn = connection_get_conn();
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
-        STANZA_NAME_INACTIVE);
-
-    xmpp_send(conn, stanza);
-    xmpp_stanza_release(stanza);
-}
-
-void
-message_send_gone(const char * const barejid)
-{
-    xmpp_conn_t * const conn = connection_get_conn();
-    xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, barejid,
-        STANZA_NAME_GONE);
-
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_GONE);
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
 }
@@ -462,33 +461,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     // standard chat message, use jid without resource
     } else {
-        // determine chatstate support of recipient
-        gboolean recipient_supports = FALSE;
-        if (stanza_contains_chat_state(stanza)) {
-            recipient_supports = TRUE;
-        }
-
-        // create or update chat session
-        chat_session_on_incoming_message(jid->barejid, recipient_supports);
-
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;
         gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
-
-        // deal with chat states if recipient supports them
-        if (recipient_supports && (!delayed)) {
-            if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL) {
-                handle_typing(jid->barejid);
-            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL) {
-                handle_gone(jid->barejid);
-            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL) {
-                // do something
-            } else if (xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL) {
-                // do something
-            } else { // handle <active/>
-                // do something
-            }
-        }
 
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
@@ -498,9 +473,30 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 if (delayed) {
                     handle_delayed_message(jid->barejid, message, tv_stamp);
                 } else {
-                    handle_incoming_message(jid->barejid, message);
+                    handle_incoming_message(jid->barejid, jid->resourcepart, message);
                 }
                 xmpp_free(ctx, message);
+            }
+        }
+
+        // handle chat sessions and states
+        if (!delayed && jid->resourcepart) {
+            gboolean gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
+            gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
+            gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
+            gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
+            if (gone) {
+                handle_gone(jid->barejid, jid->resourcepart);
+            } else if (typing) {
+                handle_typing(jid->barejid, jid->resourcepart);
+            } else if (paused) {
+                handle_paused(jid->barejid, jid->resourcepart);
+            } else if (inactive) {
+                handle_inactive(jid->barejid, jid->resourcepart);
+            } else if (stanza_contains_chat_state(stanza)) {
+                handle_activity(jid->barejid, jid->resourcepart, TRUE);
+            } else {
+                handle_activity(jid->barejid, jid->resourcepart, FALSE);
             }
         }
 

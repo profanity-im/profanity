@@ -10,3 +10,5 @@ void handle_message_error_when_recipient_cancel_disables_chat_session(void **sta
 void handle_message_error_when_recipient_and_no_type(void **state);
 void handle_presence_error_when_no_recipient(void **state);
 void handle_presence_error_when_from_recipient(void **state);
+void handle_offline_removes_chat_session(void **state);
+void lost_connection_clears_chat_sessions(void **state);

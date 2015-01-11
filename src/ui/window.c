@@ -132,11 +132,12 @@ win_create_chat(const char * const barejid)
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->barejid = strdup(barejid);
-    new_win->resource = NULL;
+    new_win->resource_override = NULL;
     new_win->is_otr = FALSE;
     new_win->is_trusted = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
+    new_win->state = chat_state_new();
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
@@ -350,7 +351,8 @@ win_free(ProfWin* window)
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
-        free(chatwin->resource);
+        free(chatwin->resource_override);
+        free(chatwin->state);
     }
 
     if (window->type == WIN_MUC) {

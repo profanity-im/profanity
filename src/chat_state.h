@@ -1,5 +1,5 @@
 /*
- * chat_session.h
+ * chat_state.h
  *
  * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
  *
@@ -32,32 +32,30 @@
  *
  */
 
-#ifndef CHAT_SESSION_H
-#define CHAT_SESSION_H
+#ifndef CHAT_STATE_H
+#define CHAT_STATE_H
 
 #include <glib.h>
 
-typedef struct chat_session_t {
-    char *barejid;
-    char *resource;
-    gboolean resource_override;
-    gboolean send_states;
+typedef enum {
+    CHAT_STATE_ACTIVE,
+    CHAT_STATE_COMPOSING,
+    CHAT_STATE_PAUSED,
+    CHAT_STATE_INACTIVE,
+    CHAT_STATE_GONE
+} chat_state_type_t;
 
-} ChatSession;
+typedef struct prof_chat_state_t {
+    chat_state_type_t type;
+    GTimer *timer;
+} ChatState;
 
-void chat_sessions_init(void);
-void chat_sessions_clear(void);
+ChatState* chat_state_new(void);
+void chat_state_free(ChatState *state);
 
-void chat_session_resource_override(const char * const barejid, const char * const resource);
-ChatSession* chat_session_get(const char * const barejid);
-
-void chat_session_recipient_active(const char * const barejid, const char * const resource,
-    gboolean send_states);
-void chat_session_recipient_typing(const char * const barejid, const char * const resource);
-void chat_session_recipient_paused(const char * const barejid, const char * const resource);
-void chat_session_recipient_gone(const char * const barejid, const char * const resource);
-void chat_session_recipient_inactive(const char * const barejid, const char * const resource);
-
-void chat_session_remove(const char * const barejid);
+void chat_state_handle_idle(const char * const barejid, ChatState *state);
+void chat_state_handle_typing(const char * const barejid, ChatState *state);
+void chat_state_active(ChatState *state);
+void chat_state_gone(const char * const barejid, ChatState *state);
 
 #endif

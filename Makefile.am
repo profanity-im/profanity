@@ -3,6 +3,7 @@ core_sources = \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/chat_session.c \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
+	src/chat_state.h src/chat_state.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
@@ -44,6 +45,7 @@ tests_sources = \
 	src/profanity.h src/chat_session.c \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/resource.c src/resource.h \
+	src/chat_state.h src/chat_state.c \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/buffer.c \
@@ -85,6 +87,7 @@ tests_sources = \
 	tests/test_cmd_statuses.c tests/test_cmd_statuses.h \
 	tests/test_cmd_sub.c tests/test_cmd_sub.h \
 	tests/test_cmd_win.c tests/test_cmd_win.h \
+	tests/test_cmd_disconnect.c tests/test_cmd_disconnect.h \
 	tests/test_common.c tests/test_common.h \
 	tests/test_contact.c tests/test_contact.h \
 	tests/test_form.c tests/test_form.h \
@@ -96,6 +99,7 @@ tests_sources = \
 	tests/test_roster_list.c tests/test_roster_list.h \
 	tests/test_server_events.c tests/test_server_events.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
+	tests/test_chat_session.c tests/test_chat_session.h \
 	tests/testsuite.c
 
 main_source = src/main.c

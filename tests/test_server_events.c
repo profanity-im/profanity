@@ -11,6 +11,7 @@
 #include "chat_session.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
+#include "ui/stub_ui.h"
 #include "muc.h"
 
 void console_doesnt_show_online_presence_when_set_none(void **state)
@@ -120,29 +121,24 @@ void handle_message_error_when_recipient_cancel(void **state)
     prefs_set_boolean(PREF_STATES, FALSE);
     chat_sessions_init();
 
-    expect_string(ui_handle_recipient_not_found, recipient, from);
-    expect_string(ui_handle_recipient_not_found, err_msg, err_msg);
-
     handle_message_error(from, type, err_msg);
 }
 
 void handle_message_error_when_recipient_cancel_disables_chat_session(void **state)
 {
     char *err_msg = "Some error.";
-    char *from = "bob@server.com";
+    char *barejid = "bob@server.com";
+    char *resource = "resource";
     char *type = "cancel";
 
     prefs_set_boolean(PREF_STATES, TRUE);
     chat_sessions_init();
-    chat_session_on_incoming_message(from, TRUE);
+    chat_session_recipient_active(barejid, resource, FALSE);
 
-    expect_any(ui_handle_recipient_not_found, recipient);
-    expect_any(ui_handle_recipient_not_found, err_msg);
+    handle_message_error(barejid, type, err_msg);
+    ChatSession *session = chat_session_get(barejid);
 
-    handle_message_error(from, type, err_msg);
-    gboolean chat_session_supported = chat_session_on_message_send(from);
-
-    assert_false(chat_session_supported);
+    assert_null(session);
     chat_sessions_clear();
 }
 
@@ -179,4 +175,38 @@ void handle_presence_error_when_from_recipient(void **state)
     expect_string(ui_handle_recipient_error, err_msg, err_msg);
 
     handle_presence_error(from, type, err_msg);
+}
+
+void handle_offline_removes_chat_session(void **state)
+{
+    chat_sessions_init();
+    char *barejid = "friend@server.chat.com";
+    char *resource = "home";
+    roster_init();
+    roster_add(barejid, "bob", NULL, "both", FALSE);
+    Resource *resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
+    roster_update_presence(barejid, resourcep, NULL);
+    chat_session_recipient_active(barejid, resource, FALSE);
+    handle_contact_offline(barejid, resource, NULL);
+    ChatSession *session = chat_session_get(barejid);
+
+    assert_null(session);
+
+    roster_clear();
+    chat_sessions_clear();
+}
+
+void lost_connection_clears_chat_sessions(void **state)
+{
+    chat_sessions_init();
+    chat_session_recipient_active("bob@server.org", "laptop", FALSE);
+    chat_session_recipient_active("steve@server.org", "mobile", FALSE);
+    expect_any_cons_show_error();
+
+    handle_lost_connection();
+
+    ChatSession *session1 = chat_session_get("bob@server.org");
+    ChatSession *session2 = chat_session_get("steve@server.org");
+    assert_null(session1);
+    assert_null(session2);
 }

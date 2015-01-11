@@ -29,7 +29,7 @@ void jabber_shutdown(void) {}
 void jabber_process_events(void) {}
 const char * jabber_get_fulljid(void)
 {
-    return NULL;
+    return (char *)mock();
 }
 
 const char * jabber_get_domain(void)
@@ -58,13 +58,10 @@ GList * jabber_get_available_resources(void)
 }
 
 // message functions
-void message_send_chat(const char * const barejid, const char * const resource, const char * const msg,
-    gboolean send_state)
+void message_send_chat(const char * const barejid, const char * const msg)
 {
     check_expected(barejid);
-    check_expected(resource);
     check_expected(msg);
-    check_expected(send_state);
 }
 
 void message_send_private(const char * const fulljid, const char * const msg) {}

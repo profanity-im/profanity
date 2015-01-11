@@ -273,11 +273,19 @@ ui_handle_stanza(const char * const msg)
     }
 }
 
+gboolean
+ui_chat_win_exists(const char * const barejid)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    return (chatwin != NULL);
+}
+
 void
-ui_contact_typing(const char * const barejid)
+ui_contact_typing(const char * const barejid, const char * const resource)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     ProfWin *window = (ProfWin*) chatwin;
+    ChatSession *session = chat_session_get(barejid);
 
     if (prefs_get_boolean(PREF_INTYPE)) {
         // no chat window for user
@@ -288,8 +296,8 @@ ui_contact_typing(const char * const barejid)
         } else if (!wins_is_current(window)) {
             cons_show_typing(barejid);
 
-        // in chat window with user
-        } else {
+        // in chat window with user, no session or session with resource
+        } else if (!session || (session && g_strcmp0(session->resource, resource) == 0)) {
             title_bar_set_typing(TRUE);
 
             int num = wins_get_num(window);
@@ -329,20 +337,25 @@ ui_get_current_chat(void)
 }
 
 void
-ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal *tv_stamp)
+ui_incoming_msg(const char * const barejid, const char * const resource, const char * const message, GTimeVal *tv_stamp)
 {
     gboolean win_created = FALSE;
-    char *display_from = NULL;
+    GString *user = g_string_new("");
 
     PContact contact = roster_get_contact(barejid);
     if (contact != NULL) {
         if (p_contact_name(contact) != NULL) {
-            display_from = strdup(p_contact_name(contact));
+            g_string_append(user, p_contact_name(contact));
         } else {
-            display_from = strdup(barejid);
+            g_string_append(user, barejid);
         }
     } else {
-        display_from = strdup(barejid);
+        g_string_append(user, barejid);
+    }
+
+    if (resource && prefs_get_boolean(PREF_RESOURCE_MESSAGE)) {
+        g_string_append(user, "/");
+        g_string_append(user, resource);
     }
 
     ProfChatWin *chatwin = wins_get_chat(barejid);
@@ -363,14 +376,14 @@ ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, user->str, message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
     // not currently viewing chat window with sender
     } else {
         status_bar_new(num);
-        cons_show_incoming_message(display_from, num);
+        cons_show_incoming_message(user->str, num);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
@@ -389,7 +402,7 @@ ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal
             }
         }
 
-        win_print_incoming_message(window, tv_stamp, display_from, message);
+        win_print_incoming_message(window, tv_stamp, user->str, message);
     }
 
     int ui_index = num;
@@ -405,14 +418,14 @@ ui_incoming_msg(const char * const barejid, const char * const message, GTimeVal
         gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
             if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
-                notify_message(display_from, ui_index, message);
+                notify_message(user->str, ui_index, message);
             } else {
-                notify_message(display_from, ui_index, NULL);
+                notify_message(user->str, ui_index, NULL);
             }
         }
     }
 
-    free(display_from);
+    g_string_free(user, TRUE);
 }
 
 void
@@ -587,14 +600,6 @@ ui_update_presence(const resource_presence_t resource_presence,
 void
 ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
 {
-    // unknown chat recipient
-    ProfChatWin *chatwin = wins_get_chat(recipient);
-    if (chatwin) {
-        cons_show_error("Recipient %s not found: %s", recipient, err_msg);
-        win_save_vprint((ProfWin*) chatwin, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
-        return;
-    }
-
     // intended recipient was invalid chat room
     ProfMucWin *mucwin = wins_get_muc(recipient);
     if (mucwin) {
@@ -602,17 +607,6 @@ ui_handle_recipient_not_found(const char * const recipient, const char * const e
         win_save_vprint((ProfWin*) mucwin, '!', NULL, 0, THEME_ERROR, "", "Room %s not found: %s", recipient, err_msg);
         return;
     }
-
-    // unknown private recipient
-    ProfPrivateWin *privatewin = wins_get_private(recipient);
-    if (privatewin) {
-        cons_show_error("Recipient %s not found: %s", recipient, err_msg);
-        win_save_vprint((ProfWin*) privatewin, '!', NULL, 0, THEME_ERROR, "", "Recipient %s not found: %s", recipient, err_msg);
-        return;
-    }
-
-    // no window
-    cons_show_error("Recipient %s not found: %s", recipient, err_msg);
 }
 
 void
@@ -706,7 +700,8 @@ ui_close_connected_win(int index)
                 otr_end_session(chatwin->barejid);
             }
 #endif
-            chat_session_on_window_close(chatwin->barejid);
+            chat_state_gone(chatwin->barejid, chatwin->state);
+            chat_session_remove(chatwin->barejid);
         }
     }
 }
@@ -946,8 +941,6 @@ ui_gone_secure(const char * const barejid, gboolean trusted)
         chatwin = (ProfChatWin*)window;
     }
 
-    FREE_SET_NULL(chatwin->resource);
-
     chatwin->is_otr = TRUE;
     chatwin->is_trusted = trusted;
     if (trusted) {
@@ -1163,7 +1156,7 @@ ui_prune_wins(void)
         if (window->type == WIN_CHAT) {
             if (conn_status == JABBER_CONNECTED) {
                 ProfChatWin *chatwin = (ProfChatWin*)window;
-                chat_session_on_window_close(chatwin->barejid);
+                chat_session_remove(chatwin->barejid);
             }
         }
 
@@ -1281,26 +1274,36 @@ ui_print_system_msg_from_recipient(const char * const barejid, const char *messa
 }
 
 void
-ui_recipient_gone(const char * const barejid)
+ui_recipient_gone(const char * const barejid, const char * const resource)
 {
     if (barejid == NULL)
         return;
+    if (resource == NULL)
+        return;
 
-    const char * display_usr = NULL;
-    PContact contact = roster_get_contact(barejid);
-    if (contact != NULL) {
-        if (p_contact_name(contact) != NULL) {
-            display_usr = p_contact_name(contact);
-        } else {
-            display_usr = barejid;
+    gboolean show_message = TRUE;
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        ChatSession *session = chat_session_get(barejid);
+        if (session && g_strcmp0(session->resource, resource) != 0) {
+            show_message = FALSE;
         }
-    } else {
-        display_usr = barejid;
-    }
+        if (show_message) {
+            const char * display_usr = NULL;
+            PContact contact = roster_get_contact(barejid);
+            if (contact != NULL) {
+                if (p_contact_name(contact) != NULL) {
+                    display_usr = p_contact_name(contact);
+                } else {
+                    display_usr = barejid;
+                }
+            } else {
+                display_usr = barejid;
+            }
 
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    if (window != NULL) {
-        win_save_vprint(window, '!', NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
+            win_save_vprint((ProfWin*)chatwin, '!', NULL, 0, THEME_GONE, "", "<- %s has left the conversation.", display_usr);
+        }
     }
 }
 
@@ -1382,9 +1385,9 @@ ui_outgoing_chat_msg(const char * const from, const char * const barejid,
     // create new window
     if (window == NULL) {
         window = wins_new_chat(barejid);
+        ProfChatWin *chatwin = (ProfChatWin*)window;
 #ifdef PROF_HAVE_LIBOTR
         if (otr_is_secure(barejid)) {
-            ProfChatWin *chatwin = (ProfChatWin*)window;
             chatwin->is_otr = TRUE;
         }
 #endif
@@ -1406,6 +1409,8 @@ ui_outgoing_chat_msg(const char * const from, const char * const barejid,
     } else {
         num = wins_get_num(window);
     }
+    ProfChatWin *chatwin = (ProfChatWin*)window;
+    chat_state_active(chatwin->state);
 
     win_save_print(window, '-', NULL, 0, THEME_TEXT_ME, from, message);
     ui_switch_win(num);
@@ -2249,6 +2254,46 @@ ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
     }
 
     free(display_str);
+}
+
+void
+ui_contact_offline(char *barejid, char *resource, char *status)
+{
+    char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
+    Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
+    PContact contact = roster_get_contact(barejid);
+    if (p_contact_subscription(contact) != NULL) {
+        if (strcmp(p_contact_subscription(contact), "none") != 0) {
+
+            // show in console if "all"
+            if (g_strcmp0(show_console, "all") == 0) {
+                cons_show_contact_offline(contact, resource, status);
+
+            // show in console of "online"
+            } else if (g_strcmp0(show_console, "online") == 0) {
+                cons_show_contact_offline(contact, resource, status);
+            }
+
+            // show in chat win if "all"
+            if (g_strcmp0(show_chat_win, "all") == 0) {
+                ui_chat_win_contact_offline(contact, resource, status);
+
+            // show in char win if "online" and presence online
+            } else if (g_strcmp0(show_chat_win, "online") == 0) {
+                ui_chat_win_contact_offline(contact, resource, status);
+            }
+        }
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin && chatwin->resource_override && (g_strcmp0(resource, chatwin->resource_override) == 0)) {
+        FREE_SET_NULL(chatwin->resource_override);
+    }
+
+    prefs_free_string(show_console);
+    prefs_free_string(show_chat_win);
+    jid_destroy(jid);
 }
 
 void

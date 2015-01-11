@@ -20,9 +20,21 @@ expect_cons_show(char *expected)
 }
 
 void
+expect_any_cons_show(void)
+{
+    expect_any(cons_show, output);
+}
+
+void
 expect_cons_show_error(char *expected)
 {
     expect_string(cons_show_error, output, expected);
+}
+
+void
+expect_any_cons_show_error(void)
+{
+    expect_any(cons_show_error, output);
 }
 
 void
@@ -176,12 +188,12 @@ char * ui_ask_password(void)
 void ui_handle_stanza(const char * const msg) {}
 
 // ui events
-void ui_contact_typing(const char * const from) {}
-void ui_incoming_msg(const char * const from, const char * const message, GTimeVal *tv_stamp) {}
+void ui_contact_typing(const char * const barejid, const char * const resource) {}
+void ui_incoming_msg(const char * const from, const char * const resource, const char * const message, GTimeVal *tv_stamp) {}
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp) {}
 
 void ui_disconnected(void) {}
-void ui_recipient_gone(const char * const barejid) {}
+void ui_recipient_gone(const char * const barejid, const char * const resource) {}
 
 void ui_outgoing_chat_msg(const char * const from, const char * const barejid,
     const char * const message) {}
@@ -247,6 +259,12 @@ void ui_group_added(const char * const contact, const char * const group) {}
 void ui_group_removed(const char * const contact, const char * const group) {}
 void ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity) {}
 void ui_chat_win_contact_offline(PContact contact, char *resource, char *status) {}
+gboolean ui_chat_win_exists(const char * const barejid)
+{
+    return TRUE;
+}
+
+void ui_contact_offline(char *barejid, char *resource, char *status) {}
 
 void ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
 {
@@ -428,6 +446,7 @@ void cons_beep_setting(void) {}
 void cons_flash_setting(void) {}
 void cons_splash_setting(void) {}
 void cons_vercheck_setting(void) {}
+void cons_resource_setting(void) {}
 void cons_occupants_setting(void) {}
 void cons_roster_setting(void) {}
 void cons_presence_setting(void) {}

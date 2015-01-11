@@ -47,6 +47,7 @@
 #include "ui/windows.h"
 #include "ui/window.h"
 #include "roster_list.h"
+#include "chat_session.h"
 
 static WINDOW *win;
 static contact_presence_t current_presence;
@@ -307,9 +308,17 @@ static void
 _show_contact_presence(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
-    if (chatwin && chatwin->resource) {
+    char *resource = NULL;
+
+    ChatSession *session = chat_session_get(chatwin->barejid);
+    if (chatwin->resource_override) {
+        resource = chatwin->resource_override;
+    } else if (session && session->resource) {
+        resource = session->resource;
+    }
+    if (resource && prefs_get_boolean(PREF_RESOURCE_TITLE)) {
         wprintw(win, "/");
-        wprintw(win, chatwin->resource);
+        wprintw(win, resource);
     }
 
     if (prefs_get_boolean(PREF_PRESENCE)) {
@@ -318,10 +327,10 @@ _show_contact_presence(ProfChatWin *chatwin)
 
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact) {
-            if (chatwin && chatwin->resource) {
-                Resource *resource = p_contact_get_resource(contact, chatwin->resource);
-                if (resource) {
-                    presence = string_from_resource_presence(resource->presence);
+            if (resource) {
+                Resource *resourcep = p_contact_get_resource(contact, resource);
+                if (resourcep) {
+                    presence = string_from_resource_presence(resourcep->presence);
                 }
             } else {
                 presence = p_contact_presence(contact);

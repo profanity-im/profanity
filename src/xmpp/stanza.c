@@ -199,15 +199,14 @@ stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char * const jid,
 #endif
 
 xmpp_stanza_t *
-stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const recipient,
-    const char * const state)
+stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const fulljid, const char * const state)
 {
     xmpp_stanza_t *msg, *chat_state;
 
     msg = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, STANZA_TYPE_CHAT);
-    xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
+    xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, fulljid);
     char *id = create_unique_id(NULL);
     xmpp_stanza_set_id(msg, id);
     free(id);
