@@ -386,9 +386,28 @@ handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 }
 
 void
-handle_typing(char *from)
+handle_typing(char *barejid, char *resource)
 {
-    ui_contact_typing(from);
+    if (ui_chat_win_exists(barejid)) {
+        chat_session_on_recipient_activity(barejid, resource, TRUE);
+    }
+    ui_contact_typing(barejid);
+}
+
+void
+handle_paused(char *barejid, char *resource)
+{
+    if (ui_chat_win_exists(barejid)) {
+        chat_session_on_recipient_activity(barejid, resource, TRUE);
+    }
+}
+
+void
+handle_inactive(char *barejid, char *resource)
+{
+    if (ui_chat_win_exists(barejid)) {
+        chat_session_on_recipient_activity(barejid, resource, TRUE);
+    }
 }
 
 void
@@ -396,6 +415,12 @@ handle_gone(const char * const barejid)
 {
     chat_session_remove(barejid);
     ui_recipient_gone(barejid);
+}
+
+void
+handle_activity(const char * const barejid, const char * const resource, gboolean send_states)
+{
+    chat_session_on_recipient_activity(barejid, resource, send_states);
 }
 
 void
@@ -433,35 +458,7 @@ handle_contact_offline(char *barejid, char *resource, char *status)
     gboolean updated = roster_contact_offline(barejid, resource, status);
 
     if (resource != NULL && updated) {
-        char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
-        char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
-        Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
-        PContact contact = roster_get_contact(barejid);
-        if (p_contact_subscription(contact) != NULL) {
-            if (strcmp(p_contact_subscription(contact), "none") != 0) {
-
-                // show in console if "all"
-                if (g_strcmp0(show_console, "all") == 0) {
-                    cons_show_contact_offline(contact, resource, status);
-
-                // show in console of "online"
-                } else if (g_strcmp0(show_console, "online") == 0) {
-                    cons_show_contact_offline(contact, resource, status);
-                }
-
-                // show in chat win if "all"
-                if (g_strcmp0(show_chat_win, "all") == 0) {
-                    ui_chat_win_contact_offline(contact, resource, status);
-
-                // show in char win if "online" and presence online
-                } else if (g_strcmp0(show_chat_win, "online") == 0) {
-                    ui_chat_win_contact_offline(contact, resource, status);
-                }
-            }
-        }
-        prefs_free_string(show_console);
-        prefs_free_string(show_chat_win);
-        jid_destroy(jid);
+        ui_contact_offline(barejid, resource, status);
     }
 
     rosterwin_roster();

@@ -259,6 +259,12 @@ void ui_group_added(const char * const contact, const char * const group) {}
 void ui_group_removed(const char * const contact, const char * const group) {}
 void ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity) {}
 void ui_chat_win_contact_offline(PContact contact, char *resource, char *status) {}
+gboolean ui_chat_win_exists(const char * const barejid)
+{
+    return TRUE;
+}
+
+void ui_contact_offline(char *barejid, char *resource, char *status) {}
 
 void ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg)
 {

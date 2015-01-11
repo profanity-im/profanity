@@ -157,10 +157,11 @@ message_send_composing(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_COMPOSING);
 
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_COMPOSING);
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
+
 }
 
 void
@@ -168,9 +169,7 @@ message_send_paused(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid,
-        STANZA_NAME_PAUSED);
-
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_PAUSED);
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
 }
@@ -180,8 +179,7 @@ message_send_inactive(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid,
-        STANZA_NAME_INACTIVE);
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_INACTIVE);
 
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
@@ -192,9 +190,7 @@ message_send_gone(const char * const jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid,
-        STANZA_NAME_GONE);
-
+    xmpp_stanza_t *stanza = stanza_create_chat_state(ctx, jid, STANZA_NAME_GONE);
     xmpp_send(conn, stanza);
     xmpp_stanza_release(stanza);
 }
@@ -469,24 +465,6 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         GTimeVal tv_stamp;
         gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
 
-        // handle chat sessions and states
-        if (!delayed && jid->resourcepart) {
-            gboolean recipient_gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
-            if (recipient_gone) {
-                handle_gone(jid->barejid);
-            } else {
-                gboolean send_states = FALSE;
-                if (stanza_contains_chat_state(stanza)) {
-                    send_states = TRUE;
-                    gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
-                    if (typing) {
-                        handle_typing(jid->barejid);
-                    }
-                }
-                chat_session_on_recipient_activity(jid->barejid, jid->resourcepart, send_states);
-            }
-        }
-
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
         if (body != NULL) {
@@ -498,6 +476,27 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                     handle_incoming_message(jid->barejid, jid->resourcepart, message);
                 }
                 xmpp_free(ctx, message);
+            }
+        }
+
+        // handle chat sessions and states
+        if (!delayed && jid->resourcepart) {
+            gboolean gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
+            gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
+            gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
+            gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
+            if (gone) {
+                handle_gone(jid->barejid);
+            } else if (typing) {
+                handle_typing(jid->barejid, jid->resourcepart);
+            } else if (paused) {
+                handle_paused(jid->barejid, jid->resourcepart);
+            } else if (inactive) {
+                handle_inactive(jid->barejid, jid->resourcepart);
+            } else if (stanza_contains_chat_state(stanza)) {
+                handle_activity(jid->barejid, jid->resourcepart, TRUE);
+            } else {
+                handle_activity(jid->barejid, jid->resourcepart, FALSE);
             }
         }
 

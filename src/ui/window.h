@@ -47,6 +47,7 @@
 #include "muc.h"
 #include "ui/buffer.h"
 #include "xmpp/xmpp.h"
+#include "chat_state.h"
 
 #define NO_ME           1
 #define NO_DATE         2
@@ -109,6 +110,7 @@ typedef struct prof_chat_win_t {
     ProfWin window;
     char *barejid;
     int unread;
+    ChatState *state;
     gboolean is_otr;
     gboolean is_trusted;
     char *resource_override;

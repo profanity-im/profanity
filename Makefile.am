@@ -3,6 +3,7 @@ core_sources = \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/chat_session.c \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
+	src/chat_state.h src/chat_state.c \
 	src/resource.c src/resource.h \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/capabilities.c src/xmpp/connection.c \
@@ -39,6 +40,7 @@ tests_sources = \
 	src/profanity.h src/chat_session.c \
 	src/chat_session.h src/muc.c src/muc.h src/jid.h src/jid.c \
 	src/resource.c src/resource.h \
+	src/chat_state.h src/chat_state.c \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \

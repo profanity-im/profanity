@@ -137,6 +137,7 @@ win_create_chat(const char * const barejid)
     new_win->is_trusted = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
+    new_win->state = chat_state_new();
 
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
@@ -334,6 +335,7 @@ win_free(ProfWin* window)
         ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
         free(chatwin->resource_override);
+        free(chatwin->state);
     }
 
     if (window->type == WIN_MUC) {

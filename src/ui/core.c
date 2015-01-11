@@ -272,6 +272,13 @@ ui_handle_stanza(const char * const msg)
     }
 }
 
+gboolean
+ui_chat_win_exists(const char * const barejid)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    return (chatwin != NULL);
+}
+
 void
 ui_contact_typing(const char * const barejid)
 {
@@ -691,6 +698,7 @@ ui_close_connected_win(int index)
                 otr_end_session(chatwin->barejid);
             }
 #endif
+            chat_state_gone(chatwin->barejid, chatwin->state);
             chat_session_remove(chatwin->barejid);
         }
     }
@@ -1365,9 +1373,9 @@ ui_outgoing_chat_msg(const char * const from, const char * const barejid,
     // create new window
     if (window == NULL) {
         window = wins_new_chat(barejid);
+        ProfChatWin *chatwin = (ProfChatWin*)window;
 #ifdef HAVE_LIBOTR
         if (otr_is_secure(barejid)) {
-            ProfChatWin *chatwin = (ProfChatWin*)window;
             chatwin->is_otr = TRUE;
         }
 #endif
@@ -1389,6 +1397,8 @@ ui_outgoing_chat_msg(const char * const from, const char * const barejid,
     } else {
         num = wins_get_num(window);
     }
+    ProfChatWin *chatwin = (ProfChatWin*)window;
+    chat_state_active(chatwin->state);
 
     win_save_print(window, '-', NULL, 0, THEME_TEXT_ME, from, message);
     ui_switch_win(num);
@@ -2232,6 +2242,46 @@ ui_chat_win_contact_offline(PContact contact, char *resource, char *status)
     }
 
     free(display_str);
+}
+
+void
+ui_contact_offline(char *barejid, char *resource, char *status)
+{
+    char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
+    Jid *jid = jid_create_from_bare_and_resource(barejid, resource);
+    PContact contact = roster_get_contact(barejid);
+    if (p_contact_subscription(contact) != NULL) {
+        if (strcmp(p_contact_subscription(contact), "none") != 0) {
+
+            // show in console if "all"
+            if (g_strcmp0(show_console, "all") == 0) {
+                cons_show_contact_offline(contact, resource, status);
+
+            // show in console of "online"
+            } else if (g_strcmp0(show_console, "online") == 0) {
+                cons_show_contact_offline(contact, resource, status);
+            }
+
+            // show in chat win if "all"
+            if (g_strcmp0(show_chat_win, "all") == 0) {
+                ui_chat_win_contact_offline(contact, resource, status);
+
+            // show in char win if "online" and presence online
+            } else if (g_strcmp0(show_chat_win, "online") == 0) {
+                ui_chat_win_contact_offline(contact, resource, status);
+            }
+        }
+    }
+
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin && chatwin->resource_override && (g_strcmp0(resource, chatwin->resource_override) == 0)) {
+        FREE_SET_NULL(chatwin->resource_override);
+    }
+
+    prefs_free_string(show_console);
+    prefs_free_string(show_chat_win);
+    jid_destroy(jid);
 }
 
 void

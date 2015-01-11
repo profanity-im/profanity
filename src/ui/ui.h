@@ -186,6 +186,7 @@ void ui_group_added(const char * const contact, const char * const group);
 void ui_group_removed(const char * const contact, const char * const group);
 void ui_chat_win_contact_online(PContact contact, Resource *resource, GDateTime *last_activity);
 void ui_chat_win_contact_offline(PContact contact, char *resource, char *status);
+void ui_contact_offline(char *barejid, char *resource, char *status);
 void ui_handle_recipient_not_found(const char * const recipient, const char * const err_msg);
 void ui_handle_recipient_error(const char * const recipient, const char * const err_msg);
 void ui_handle_error(const char * const err_msg);
@@ -213,6 +214,7 @@ void ui_show_lines(ProfWin *window, const gchar** lines);
 void ui_redraw_all_room_rosters(void);
 void ui_show_all_room_rosters(void);
 void ui_hide_all_room_rosters(void);
+gboolean ui_chat_win_exists(const char * const barejid);
 
 void ui_tidy_wins(void);
 void ui_prune_wins(void);
