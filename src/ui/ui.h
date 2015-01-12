@@ -191,6 +191,7 @@ void ui_handle_recipient_not_found(const char * const recipient, const char * co
 void ui_handle_recipient_error(const char * const recipient, const char * const err_msg);
 void ui_handle_error(const char * const err_msg);
 void ui_clear_win_title(void);
+void ui_goodbye_title(void);
 void ui_handle_room_join_error(const char * const roomjid, const char * const err);
 void ui_handle_room_configuration(const char * const roomjid, DataForm *form);
 void ui_handle_room_configuration_form_error(const char * const roomjid, const char * const message);

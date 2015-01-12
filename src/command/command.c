@@ -97,6 +97,7 @@ static char * _ban_autocomplete(char *input, int *size);
 static char * _affiliation_autocomplete(char *input, int *size);
 static char * _role_autocomplete(char *input, int *size);
 static char * _resource_autocomplete(char *input, int *size);
+static char * _titlebar_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -722,11 +723,13 @@ static struct cmd_t command_defs[] =
           NULL  } } },
 
     { "/titlebar",
-        cmd_titlebar, parse_args, 1, 1, &cons_titlebar_setting,
-        { "/titlebar on|off", "Show information in the window title bar.",
-        { "/titlebar on|off",
-          "----------------",
-          "Show information in the window title bar.",
+        cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
+        { "/titlebar show|goodbye on|off", "Manage the terminal window title.",
+        { "/titlebar show|goodbye on|off",
+          "---------------------",
+          "Show or hide a title and exit message in the terminal window title.",
+          "show    - Show current logged in user, and unread messages in the title.",
+          "goodbye - Show a message in the title when exiting profanity.",
           NULL  } } },
 
     { "/mouse",
@@ -1215,7 +1218,8 @@ cmd_init(void)
     autocomplete_add(sub_ac, "received");
 
     titlebar_ac = autocomplete_new();
-    autocomplete_add(titlebar_ac, "version");
+    autocomplete_add(titlebar_ac, "show");
+    autocomplete_add(titlebar_ac, "goodbye");
 
     log_ac = autocomplete_new();
     autocomplete_add(log_ac, "maxsize");
@@ -1670,6 +1674,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(roster_option_ac);
     autocomplete_reset(roster_by_ac);
     autocomplete_reset(group_ac);
+    autocomplete_reset(titlebar_ac);
     autocomplete_reset(bookmark_ac);
     autocomplete_reset(bookmark_property_ac);
     autocomplete_reset(otr_ac);
@@ -1925,7 +1930,7 @@ _cmd_complete_parameters(char *input, int *size)
 
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
-        "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history", "/titlebar",
+        "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
         "/vercheck", "/privileges", "/presence", "/wrap" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
@@ -2035,6 +2040,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/affiliation",   _affiliation_autocomplete);
     g_hash_table_insert(ac_funcs, "/role",          _role_autocomplete);
     g_hash_table_insert(ac_funcs, "/resource",      _resource_autocomplete);
+    g_hash_table_insert(ac_funcs, "/titlebar",      _titlebar_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2517,6 +2523,29 @@ _resource_autocomplete(char *input, int *size)
     }
 
     found = autocomplete_param_with_ac(input, size, "/resource", resource_ac, FALSE);
+    if (found != NULL) {
+        return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_titlebar_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_func(input, size, "/titlebar show", prefs_autocomplete_boolean_choice);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, size, "/titlebar goodbye", prefs_autocomplete_boolean_choice);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, size, "/titlebar", titlebar_ac, FALSE);
     if (found != NULL) {
         return found;
     }

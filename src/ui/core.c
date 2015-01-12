@@ -123,7 +123,7 @@ ui_update(void)
 
     win_update_virtual(current);
 
-    if (prefs_get_boolean(PREF_TITLEBAR)) {
+    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
         _ui_draw_term_title();
     }
     title_bar_update_virtual();
@@ -2300,6 +2300,13 @@ void
 ui_clear_win_title(void)
 {
     printf("%c]0;%c", '\033', '\007');
+}
+
+void
+ui_goodbye_title(void)
+{
+    int result = system("/bin/echo -ne \"\033]0;Thanks for using Profanity\007\"");
+    if(result == -1) log_error("Error printing title on shutdown");
 }
 
 void

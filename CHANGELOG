@@ -9,3 +9,6 @@
 - /account remove
 - Added default account for /connect
 - Additional readline style shortcuts
+- Improved chat session handling
+- Override resource during chat and resource display settings (/resource)
+- Disable terminal title by default, additonal title on exit

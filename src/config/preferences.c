@@ -128,6 +128,16 @@ prefs_load(void)
         g_error_free(err);
     }
 
+    // move pre 0.4.6 titlebar preference
+    err = NULL;
+    gchar *old_titlebar = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar", &err);
+    if (err == NULL) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, _get_key(PREF_TITLEBAR_SHOW), old_titlebar);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar", NULL);
+    } else {
+        g_error_free(err);
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -513,7 +523,8 @@ _get_group(preference_t pref)
         case PREF_BEEP:
         case PREF_THEME:
         case PREF_VERCHECK:
-        case PREF_TITLEBAR:
+        case PREF_TITLEBAR_SHOW:
+        case PREF_TITLEBAR_GOODBYE:
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:
@@ -584,8 +595,10 @@ _get_key(preference_t pref)
             return "theme";
         case PREF_VERCHECK:
             return "vercheck";
-        case PREF_TITLEBAR:
-            return "titlebar";
+        case PREF_TITLEBAR_SHOW:
+            return "titlebar.show";
+        case PREF_TITLEBAR_GOODBYE:
+            return "titlebar.goodbye";
         case PREF_FLASH:
             return "flash";
         case PREF_INTYPE:
