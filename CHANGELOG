@@ -12,3 +12,4 @@
 - Improved chat session handling
 - Override resource during chat and resource display settings (/resource)
 - Disable terminal title by default, additonal title on exit
+- Dynamic input blocking timeout to use less CPU
