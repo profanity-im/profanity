@@ -964,10 +964,10 @@ cons_statuses_setting(void)
 void
 cons_titlebar_setting(void)
 {
-    if (prefs_get_boolean(PREF_TITLEBAR)) {
-        cons_show("Titlebar display (/titlebar)  : ON");
+    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
+        cons_show("Titlebar show (/titlebar)     : ON");
     } else {
-        cons_show("Titlebar display (/titlebar)  : OFF");
+        cons_show("Titlebar show (/titlebar)     : OFF");
     }
 }
 

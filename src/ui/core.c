@@ -122,7 +122,7 @@ ui_update(void)
 
     win_update_virtual(current);
 
-    if (prefs_get_boolean(PREF_TITLEBAR)) {
+    if (prefs_get_boolean(PREF_TITLEBAR_SHOW)) {
         _ui_draw_term_title();
     }
     title_bar_update_virtual();

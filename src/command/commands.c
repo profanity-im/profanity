@@ -3252,10 +3252,14 @@ cmd_states(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_titlebar(gchar **args, struct cmd_help_t help)
 {
-    if (g_strcmp0(args[0], "off") == 0) {
+    if (g_strcmp0(args[0], "show") != 0) {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
+    if (g_strcmp0(args[1], "off") == 0) {
         ui_clear_win_title();
     }
-    return _cmd_set_boolean_preference(args[0], help, "Titlebar", PREF_TITLEBAR);
+    return _cmd_set_boolean_preference(args[1], help, "Titlebar show", PREF_TITLEBAR_SHOW);
 }
 
 gboolean
