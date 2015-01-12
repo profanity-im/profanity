@@ -206,6 +206,11 @@ ui_input_nonblocking(gboolean reset)
     static gint timeout = 0;
     static gint no_input_count = 0;
 
+    if (! prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
+        inp_non_block(prefs_get_inpblock());
+        return;
+    }
+
     if (reset) {
       timeout = 0;
       no_input_count = 0;
