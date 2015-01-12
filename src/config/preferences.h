@@ -100,7 +100,8 @@ typedef enum {
     PREF_OTR_WARN,
     PREF_OTR_POLICY,
     PREF_RESOURCE_TITLE,
-    PREF_RESOURCE_MESSAGE
+    PREF_RESOURCE_MESSAGE,
+    PREF_INPBLOCK_DYNAMIC
 } preference_t;
 
 typedef struct prof_alias_t {

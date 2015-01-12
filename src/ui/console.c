@@ -1182,7 +1182,12 @@ cons_show_chat_prefs(void)
 void
 cons_inpblock_setting(void)
 {
-    cons_show("Input block (/inpblock)       : %d milliseconds", prefs_get_inpblock());
+    cons_show("Input timeout (/inpblock)     : %d milliseconds", prefs_get_inpblock());
+    if (prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
+        cons_show("Dynamic timeout (/inpblock)   : ON");
+    } else {
+        cons_show("Dynamic timeout (/inpblock)   : OFF");
+    }
 }
 
 void

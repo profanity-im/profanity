@@ -331,7 +331,7 @@ wint_t ui_get_char(char *input, int *size, int *result)
 }
 
 void ui_input_clear(void) {}
-void ui_input_nonblocking(void) {}
+void ui_input_nonblocking(gboolean reset) {}
 void ui_replace_input(char *input, const char * const new_input, int *size) {}
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}
