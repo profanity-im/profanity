@@ -3450,13 +3450,41 @@ cmd_notify(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_inpblock(gchar **args, struct cmd_help_t help)
 {
-    char *value = args[0];
+    char *subcmd = args[0];
+    char *value = args[1];
     int intval;
-    if (_strtoi(value, &intval, 1, 1000) == 0) {
-        cons_show("Input blocking set to %d milliseconds.", intval);
-        prefs_set_inpblock(intval);
-        ui_input_nonblocking();
+
+    if (g_strcmp0(subcmd, "timeout") == 0) {
+        if (value == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        if (_strtoi(value, &intval, 1, 1000) == 0) {
+            cons_show("Input blocking set to %d milliseconds.", intval);
+            prefs_set_inpblock(intval);
+            ui_input_nonblocking(FALSE);
+        }
+
+        return TRUE;
     }
+
+    if (g_strcmp0(subcmd, "dynamic") == 0) {
+        if (value == NULL) {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
+
+        if (g_strcmp0(value, "on") != 0 && g_strcmp0(value, "off") != 0) {
+            cons_show("Dynamic must be one of 'on' or 'off'");
+            return TRUE;
+        }
+
+        return _cmd_set_boolean_preference(value, help, "Dynamic input blocking", PREF_INPBLOCK_DYNAMIC);
+    }
+
+    cons_show("Usage: %s", help.usage);
+
     return TRUE;
 }
 

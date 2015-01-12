@@ -97,6 +97,7 @@ static char * _affiliation_autocomplete(char *input, int *size);
 static char * _role_autocomplete(char *input, int *size);
 static char * _resource_autocomplete(char *input, int *size);
 static char * _titlebar_autocomplete(char *input, int *size);
+static char * _inpblock_autocomplete(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -623,14 +624,18 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/inpblock",
-        cmd_inpblock, parse_args, 1, 1, &cons_inpblock_setting,
-        { "/inpblock millis", "Input blocking delay.",
-        { "/inpblock millis",
-          "----------------",
-          "Time to wait in milliseconds before reading input from the terminal buffer, defaults to 20.",
-          "Valid values are 1-1000.",
-          "A higher value will result in less CPU usage, but a noticable delay for response to input.",
-          "A lower value will result in higher CPU usage, but faster response to input.",
+        cmd_inpblock, parse_args, 2, 2, &cons_inpblock_setting,
+        { "/inpblock timeout|dynamic [millis|on|off]", "Input blocking delay (dynamic or static).",
+        { "/inpblock timeout|dynamic [millis|on|off]",
+          "-----------------------------------------",
+          "How long to wait for input before checking for new messages or checking for state changes such as 'idle'.",
+          "timeout : Time to wait in milliseconds before reading input from the terminal buffer, defaults to 500.",
+          "        : Valid values are 1-1000.",
+          "dynamic : Start with a 0 timeout and increase the value dynamically up to the specified 'timeout'.",
+          "        : on|off",
+          "A higher timeout will result in less CPU usage, but a noticable delay for response to input.",
+          "A lower timeout will result in higher CPU usage, but faster response to input.",
+          "Using the dynamic setting, higher CPU usage will occur during activity, but over time the CPU usage will decrease whilst there is no activity.",
           NULL } } },
 
     { "/notify",
@@ -1114,6 +1119,7 @@ static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
 static Autocomplete time_ac;
 static Autocomplete resource_ac;
+static Autocomplete inpblock_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1464,6 +1470,10 @@ cmd_init(void)
     autocomplete_add(resource_ac, "title");
     autocomplete_add(resource_ac, "message");
 
+    inpblock_ac = autocomplete_new();
+    autocomplete_add(inpblock_ac, "timeout");
+    autocomplete_add(inpblock_ac, "dynamic");
+
     cmd_history_init();
 }
 
@@ -1520,6 +1530,7 @@ cmd_uninit(void)
     autocomplete_free(occupants_default_ac);
     autocomplete_free(time_ac);
     autocomplete_free(resource_ac);
+    autocomplete_free(inpblock_ac);
 }
 
 gboolean
@@ -1688,6 +1699,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(occupants_default_ac);
     autocomplete_reset(time_ac);
     autocomplete_reset(resource_ac);
+    autocomplete_reset(inpblock_ac);
 
     if (ui_current_win_type() == WIN_CHAT) {
         ProfChatWin *chatwin = wins_get_current_chat();
@@ -2008,6 +2020,7 @@ _cmd_complete_parameters(char *input, int *size)
     g_hash_table_insert(ac_funcs, "/role",          _role_autocomplete);
     g_hash_table_insert(ac_funcs, "/resource",      _resource_autocomplete);
     g_hash_table_insert(ac_funcs, "/titlebar",      _titlebar_autocomplete);
+    g_hash_table_insert(ac_funcs, "/inpblock",      _inpblock_autocomplete);
 
     char parsed[*size+1];
     i = 0;
@@ -2506,6 +2519,24 @@ _titlebar_autocomplete(char *input, int *size)
     }
 
     found = autocomplete_param_with_ac(input, size, "/titlebar", titlebar_ac, FALSE);
+    if (found != NULL) {
+        return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_inpblock_autocomplete(char *input, int *size)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_func(input, size, "/inpblock dynamic", prefs_autocomplete_boolean_choice);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, size, "/inpblock", inpblock_ac, FALSE);
     if (found != NULL) {
         return found;
     }

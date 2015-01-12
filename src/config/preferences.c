@@ -531,6 +531,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_BY:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
+        case PREF_INPBLOCK_DYNAMIC:
             return PREF_GROUP_UI;
         case PREF_STATES:
         case PREF_OUTTYPE:
@@ -672,6 +673,8 @@ _get_key(preference_t pref)
             return "resource.title";
         case PREF_RESOURCE_MESSAGE:
             return "resource.message";
+        case PREF_INPBLOCK_DYNAMIC:
+            return "inpblock.dynamic";
         default:
             return NULL;
     }
@@ -696,6 +699,7 @@ _get_default_boolean(preference_t pref)
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
+        case PREF_INPBLOCK_DYNAMIC:
             return TRUE;
         default:
             return FALSE;

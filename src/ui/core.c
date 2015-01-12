@@ -180,7 +180,11 @@ ui_get_char(char *input, int *size, int *result)
     wint_t ch = inp_get_char(input, size, result);
     if (ch != ERR && *result != ERR) {
         ui_reset_idle_time();
+        ui_input_nonblocking(TRUE);
+    } else {
+        ui_input_nonblocking(FALSE);
     }
+
     return ch;
 }
 
@@ -197,9 +201,34 @@ ui_replace_input(char *input, const char * const new_input, int *size)
 }
 
 void
-ui_input_nonblocking(void)
+ui_input_nonblocking(gboolean reset)
 {
-    inp_non_block();
+    static gint timeout = 0;
+    static gint no_input_count = 0;
+
+    if (! prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
+        inp_non_block(prefs_get_inpblock());
+        return;
+    }
+
+    if (reset) {
+        timeout = 0;
+        no_input_count = 0;
+    }
+
+    if (timeout < prefs_get_inpblock()) {
+        no_input_count++;
+
+        if (no_input_count % 10 == 0) {
+            timeout += no_input_count;
+
+            if (timeout > prefs_get_inpblock()) {
+                timeout = prefs_get_inpblock();
+            }
+        }
+    }
+
+    inp_non_block(timeout);
 }
 
 void
@@ -2218,7 +2247,7 @@ ui_ask_password(void)
   status_bar_update_virtual();
   inp_block();
   inp_get_password(passwd);
-  inp_non_block();
+  inp_non_block(prefs_get_inpblock());
 
   return passwd;
 }
