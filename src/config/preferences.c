@@ -511,6 +511,7 @@ _get_group(preference_t pref)
         case PREF_THEME:
         case PREF_VERCHECK:
         case PREF_TITLEBAR_SHOW:
+        case PREF_TITLEBAR_GOODBYE:
         case PREF_FLASH:
         case PREF_INTYPE:
         case PREF_HISTORY:
@@ -583,6 +584,8 @@ _get_key(preference_t pref)
             return "vercheck";
         case PREF_TITLEBAR_SHOW:
             return "titlebar.show";
+        case PREF_TITLEBAR_GOODBYE:
+            return "titlebar.goodbye";
         case PREF_FLASH:
             return "flash";
         case PREF_INTYPE:

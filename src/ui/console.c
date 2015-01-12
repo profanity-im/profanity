@@ -969,6 +969,11 @@ cons_titlebar_setting(void)
     } else {
         cons_show("Titlebar show (/titlebar)     : OFF");
     }
+    if (prefs_get_boolean(PREF_TITLEBAR_GOODBYE)) {
+        cons_show("Titlebar goodbye (/titlebar)  : ON");
+    } else {
+        cons_show("Titlebar goodbye (/titlebar)  : OFF");
+    }
 }
 
 void

@@ -2302,6 +2302,13 @@ ui_clear_win_title(void)
 }
 
 void
+ui_goodbye_title(void)
+{
+    int result = system("/bin/echo -ne \"\033]0;Thanks for using Profanity\007\"");
+    if(result == -1) log_error("Error printing title on shutdown");
+}
+
+void
 ui_statusbar_new(const int win)
 {
     status_bar_new(win);

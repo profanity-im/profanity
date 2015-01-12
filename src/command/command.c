@@ -723,10 +723,12 @@ static struct cmd_t command_defs[] =
 
     { "/titlebar",
         cmd_titlebar, parse_args, 2, 2, &cons_titlebar_setting,
-        { "/titlebar show on|off", "Show information in the window title bar.",
-        { "/titlebar show on|off",
+        { "/titlebar show|goodbye on|off", "Manage the terminal window title.",
+        { "/titlebar show|goodbye on|off",
           "---------------------",
-          "Show information in the window title bar.",
+          "Show or hide a title and exit message in the terminal window title.",
+          "show    - Show current logged in user, and unread messages in the title.",
+          "goodbye - Show a message in the title when exiting profanity.",
           NULL  } } },
 
     { "/mouse",
@@ -1208,6 +1210,7 @@ cmd_init(void)
 
     titlebar_ac = autocomplete_new();
     autocomplete_add(titlebar_ac, "show");
+    autocomplete_add(titlebar_ac, "goodbye");
 
     log_ac = autocomplete_new();
     autocomplete_add(log_ac, "maxsize");
@@ -2493,6 +2496,11 @@ _titlebar_autocomplete(char *input, int *size)
     char *found = NULL;
 
     found = autocomplete_param_with_func(input, size, "/titlebar show", prefs_autocomplete_boolean_choice);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, size, "/titlebar goodbye", prefs_autocomplete_boolean_choice);
     if (found != NULL) {
         return found;
     }
