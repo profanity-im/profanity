@@ -499,6 +499,74 @@ void cmd_account_set_password_sets_password(void **state)
     free(help);
 }
 
+void cmd_account_set_eval_password_sets_eval_password(void **state)
+{
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
+    ProfAccount *account = account_new("a_account", NULL, NULL, NULL,
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_get_account, name, "a_account");
+    will_return(accounts_get_account, account);
+
+    expect_string(accounts_set_eval_password, account_name, "a_account");
+    expect_string(accounts_set_eval_password, value, "a_password");
+
+    expect_cons_show("Updated eval_password for account a_account");
+    expect_cons_show("");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_password_when_eval_password_set(void **state) {
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
+    ProfAccount *account = account_new("a_account", NULL, NULL, "a_password",
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_get_account, name, "a_account");
+    will_return(accounts_get_account, account);
+
+    expect_cons_show("Cannot set password when eval_password is set.");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
+void cmd_account_set_eval_password_when_password_set(void **state) {
+    CommandHelp *help = malloc(sizeof(CommandHelp));
+    gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
+    ProfAccount *account = account_new("a_account", NULL, "a_password", NULL,
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+
+
+    expect_any(accounts_account_exists, account_name);
+    will_return(accounts_account_exists, TRUE);
+
+    expect_string(accounts_get_account, name, "a_account");
+    will_return(accounts_get_account, account);
+
+    expect_cons_show("Cannot set eval_password when password is set.");
+
+    gboolean result = cmd_account(args, *help);
+    assert_true(result);
+
+    free(help);
+}
+
 void cmd_account_set_muc_sets_muc(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
