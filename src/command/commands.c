@@ -137,6 +137,10 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 if(stream){
                     // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
                     account->password = g_malloc(READ_BUF_SIZE);
+                    if(!account->password){
+                        log_error("Failed to allocate enough memory to read eval_password output");
+                        return TRUE;
+                    }
                     account->password = fgets(account->password, READ_BUF_SIZE, stream);
                     pclose(stream);
                 } else {
