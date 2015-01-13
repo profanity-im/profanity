@@ -130,7 +130,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
             jid = account_create_full_jid(account);
-            if (account->password == NULL) {
+            if (account->password == NULL && account->eval_password == NULL) {
                 account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
@@ -340,9 +340,21 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     cons_show("Updated resource for account %s: %s", account_name, value);
                     cons_show("");
                 } else if (strcmp(property, "password") == 0) {
-                    accounts_set_password(account_name, value);
-                    cons_show("Updated password for account %s", account_name);
-                    cons_show("");
+                    if(accounts_get_account(account_name)->eval_password != NULL) {
+                        cons_show("Cannot set password when eval_password is set.");
+                    } else {
+                        accounts_set_password(account_name, value);
+                        cons_show("Updated password for account %s", account_name);
+                        cons_show("");
+                    }
+                } else if (strcmp(property, "eval_password") == 0) {
+                    if(accounts_get_account(account_name)->password != NULL) {
+                        cons_show("Cannot set eval_password when password is set.");
+                    } else {
+                        accounts_set_eval_password(account_name, value);
+                        cons_show("Updated eval_password for account %s", account_name);
+                        cons_show("");
+                    }
                 } else if (strcmp(property, "muc") == 0) {
                     accounts_set_muc_service(account_name, value);
                     cons_show("Updated muc service for account %s: %s", account_name, value);
@@ -426,6 +438,10 @@ cmd_account(gchar **args, struct cmd_help_t help)
                 if (strcmp(property, "password") == 0) {
                     accounts_clear_password(account_name);
                     cons_show("Removed password for account %s", account_name);
+                    cons_show("");
+                } else if (strcmp(property, "eval_password") == 0) {
+                    accounts_clear_eval_password(account_name);
+                    cons_show("Removed eval password for account %s", account_name);
                     cons_show("");
                 } else if (strcmp(property, "server") == 0) {
                     accounts_clear_server(account_name);
