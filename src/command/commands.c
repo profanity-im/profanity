@@ -137,7 +137,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 if(stream){
                     // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
                     account->password = g_malloc(READ_BUF_SIZE);
-                    fgets(account->password, READ_BUF_SIZE, stream);
+                    account->password = fgets(account->password, READ_BUF_SIZE, stream);
                     pclose(stream);
                 } else {
                     log_error("popen failed when running eval_password.");
