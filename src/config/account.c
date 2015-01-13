@@ -43,7 +43,7 @@
 
 ProfAccount*
 account_new(const gchar * const name, const gchar * const jid,
-    const gchar * const password, gboolean enabled, const gchar * const server,
+    const gchar * const password, const gchar * eval_password, gboolean enabled, const gchar * const server,
     int port, const gchar * const resource, const gchar * const last_presence,
     const gchar * const login_presence, int priority_online, int priority_chat,
     int priority_away, int priority_xa, int priority_dnd,
@@ -65,6 +65,12 @@ account_new(const gchar * const name, const gchar * const jid,
         new_account->password = strdup(password);
     } else {
         new_account->password = NULL;
+    }
+
+    if (eval_password != NULL) {
+        new_account->eval_password = strdup(eval_password);
+    } else {
+        new_account->eval_password = NULL;
     }
 
     new_account->enabled = enabled;
@@ -156,6 +162,7 @@ account_free(ProfAccount *account)
         free(account->name);
         free(account->jid);
         free(account->password);
+        free(account->eval_password);
         free(account->resource);
         free(account->server);
         free(account->last_presence);

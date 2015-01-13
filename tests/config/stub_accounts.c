@@ -97,6 +97,12 @@ void accounts_set_password(const char * const account_name, const char * const v
     check_expected(value);
 }
 
+void accounts_set_eval_password(const char * const account_name, const char * const value)
+{
+    check_expected(account_name);
+    check_expected(value);
+}
+
 void accounts_set_muc_service(const char * const account_name, const char * const value)
 {
     check_expected(account_name);
@@ -172,6 +178,7 @@ gint accounts_get_priority_for_presence_type(const char * const account_name,
 }
 
 void accounts_clear_password(const char * const account_name) {}
+void accounts_clear_eval_password(const char * const account_name) {}
 void accounts_clear_server(const char * const account_name) {}
 void accounts_clear_port(const char * const account_name) {}
 void accounts_clear_otr(const char * const account_name) {}

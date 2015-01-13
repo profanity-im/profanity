@@ -638,32 +638,34 @@ cons_show_account(ProfAccount *account)
         cons_show   ("enabled           : FALSE");
     }
     cons_show       ("jid               : %s", account->jid);
-    if (account->password != NULL) {
+    if (account->eval_password) {
+        cons_show   ("eval_password     : %s", account->eval_password);
+    } else if (account->password) {
         cons_show   ("password          : [redacted]");
     }
-    if (account->resource != NULL) {
+    if (account->resource) {
         cons_show   ("resource          : %s", account->resource);
     }
-    if (account->server != NULL) {
+    if (account->server) {
         cons_show   ("server            : %s", account->server);
     }
     if (account->port != 0) {
         cons_show   ("port              : %d", account->port);
     }
-    if (account->muc_service != NULL) {
+    if (account->muc_service) {
         cons_show   ("muc service       : %s", account->muc_service);
     }
-    if (account->muc_nick != NULL) {
+    if (account->muc_nick) {
         cons_show   ("muc nick          : %s", account->muc_nick);
     }
-    if (account->last_presence != NULL) {
+    if (account->last_presence) {
         cons_show   ("Last presence     : %s", account->last_presence);
     }
-    if (account->login_presence != NULL) {
+    if (account->login_presence) {
         cons_show   ("Login presence    : %s", account->login_presence);
     }
 
-    if (account->otr_policy != NULL) {
+    if (account->otr_policy) {
         cons_show   ("OTR policy        : %s", account->otr_policy);
     }
     if (g_list_length(account->otr_manual) > 0) {

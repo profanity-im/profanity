@@ -59,6 +59,11 @@
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
+// assume malloc stores at most 8 bytes for size of allocated memory
+// and page size is at least 4KB
+#define READ_BUF_SIZE 4088
+
+
 #define FREE_SET_NULL(resource) \
 do { \
     free(resource); \
