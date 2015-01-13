@@ -162,6 +162,7 @@ account_free(ProfAccount *account)
         free(account->name);
         free(account->jid);
         free(account->password);
+        free(account->eval_password);
         free(account->resource);
         free(account->server);
         free(account->last_presence);

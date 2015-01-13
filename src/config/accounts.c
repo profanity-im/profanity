@@ -46,7 +46,6 @@
 #include "log.h"
 #include "tools/autocomplete.h"
 #include "xmpp/xmpp.h"
-#include "ui/ui.h"
 
 static gchar *accounts_loc;
 static GKeyFile *accounts;
