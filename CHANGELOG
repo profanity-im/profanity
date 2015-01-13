@@ -13,3 +13,4 @@
 - Override resource during chat and resource display settings (/resource)
 - Disable terminal title by default, additonal title on exit
 - Dynamic input blocking timeout to use less CPU
+- eval_password property on accounts for retrieving password from keyring/keychain
