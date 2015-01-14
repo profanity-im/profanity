@@ -98,6 +98,7 @@ static char * _role_autocomplete(char *input, int *size);
 static char * _resource_autocomplete(char *input, int *size);
 static char * _titlebar_autocomplete(char *input, int *size);
 static char * _inpblock_autocomplete(char *input, int *size);
+static char * _strip_quotes_from_names(char *input, int *size);
 
 GHashTable *commands = NULL;
 
@@ -1932,6 +1933,8 @@ _cmd_complete_parameters(char *input, int *size)
         if (nick_ac != NULL) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
+            // Remove quote character before and after names when doing autocomplete
+            input = _strip_quotes_from_names(input, size);
             for (i = 0; i < ARRAY_SIZE(nick_choices); i++) {
                 result = autocomplete_param_with_ac(input, size, nick_choices[i],
                     nick_ac, TRUE);
@@ -1946,6 +1949,8 @@ _cmd_complete_parameters(char *input, int *size)
     // otherwise autocomplete using roster
     } else {
         gchar *contact_choices[] = { "/msg", "/info", "/status" };
+        // Remove quote character before and after names when doing autocomplete
+        input = _strip_quotes_from_names(input, size);
         for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
             result = autocomplete_param_with_func(input, size, contact_choices[i],
                 roster_contact_autocomplete);
@@ -2983,4 +2988,22 @@ _account_autocomplete(char *input, int *size)
 
     found = autocomplete_param_with_ac(input, size, "/account", account_ac, TRUE);
     return found;
+}
+
+static char *
+_strip_quotes_from_names(char *input, int *size) {
+    // Remove starting quote if it exists
+    if(strchr(input, '"') != NULL) {
+        if(strchr(input, ' ') + 1 == strchr(input, '"')) {
+            memmove(strchr(input, '"'), strchr(input, '"')+1, strchr(input, '\0') - strchr(input, '"'));
+        }
+    }
+
+    // Remove ending quote if it exists
+    if(strchr(input, '"') != NULL) {
+        if(strchr(input, '\0') - 1 == strchr(input, '"')) {
+            memmove(strchr(input, '"'), strchr(input, '"')+1, strchr(input, '\0') - strchr(input, '"'));
+        }
+    }
+    return input;
 }
