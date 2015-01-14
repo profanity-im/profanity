@@ -80,8 +80,8 @@ static Display *display;
 
 static GTimer *ui_idle_time;
 
-static void _win_handle_switch(const wint_t * const ch);
-static void _win_handle_page(const wint_t * const ch, const int result);
+static void _win_handle_switch(const wint_t ch);
+static void _win_handle_page(const wint_t ch, const int result);
 static void _win_show_history(int win_index, const char * const contact);
 static void _ui_draw_term_title(void);
 
@@ -702,11 +702,11 @@ ui_disconnected(void)
 }
 
 void
-ui_handle_special_keys(const wint_t * const ch, const int result)
+ui_handle_special_keys(const wint_t ch, const int result)
 {
     _win_handle_switch(ch);
     _win_handle_page(ch, result);
-    if (*ch == KEY_RESIZE) {
+    if (ch == KEY_RESIZE) {
         ui_resize();
     }
 }
@@ -2935,33 +2935,33 @@ ui_hide_roster(void)
 }
 
 static void
-_win_handle_switch(const wint_t * const ch)
+_win_handle_switch(const wint_t ch)
 {
-    if (*ch == KEY_F(1)) {
+    if (ch == KEY_F(1)) {
         ui_switch_win(1);
-    } else if (*ch == KEY_F(2)) {
+    } else if (ch == KEY_F(2)) {
         ui_switch_win(2);
-    } else if (*ch == KEY_F(3)) {
+    } else if (ch == KEY_F(3)) {
         ui_switch_win(3);
-    } else if (*ch == KEY_F(4)) {
+    } else if (ch == KEY_F(4)) {
         ui_switch_win(4);
-    } else if (*ch == KEY_F(5)) {
+    } else if (ch == KEY_F(5)) {
         ui_switch_win(5);
-    } else if (*ch == KEY_F(6)) {
+    } else if (ch == KEY_F(6)) {
         ui_switch_win(6);
-    } else if (*ch == KEY_F(7)) {
+    } else if (ch == KEY_F(7)) {
         ui_switch_win(7);
-    } else if (*ch == KEY_F(8)) {
+    } else if (ch == KEY_F(8)) {
         ui_switch_win(8);
-    } else if (*ch == KEY_F(9)) {
+    } else if (ch == KEY_F(9)) {
         ui_switch_win(9);
-    } else if (*ch == KEY_F(10)) {
+    } else if (ch == KEY_F(10)) {
         ui_switch_win(0);
     }
 }
 
 static void
-_win_handle_page(const wint_t * const ch, const int result)
+_win_handle_page(const wint_t ch, const int result)
 {
     ProfWin *current = wins_get_current();
     int rows = getmaxy(stdscr);
@@ -2973,7 +2973,7 @@ _win_handle_page(const wint_t * const ch, const int result)
     if (prefs_get_boolean(PREF_MOUSE)) {
         MEVENT mouse_event;
 
-        if (*ch == KEY_MOUSE) {
+        if (ch == KEY_MOUSE) {
             if (getmouse(&mouse_event) == OK) {
 
 #ifdef PLATFORM_CYGWIN
@@ -3008,7 +3008,7 @@ _win_handle_page(const wint_t * const ch, const int result)
     }
 
     // page up
-    if (*ch == KEY_PPAGE) {
+    if (ch == KEY_PPAGE) {
         *page_start -= page_space;
 
         // went past beginning, show first page
@@ -3019,7 +3019,7 @@ _win_handle_page(const wint_t * const ch, const int result)
         win_update_virtual(current);
 
     // page down
-    } else if (*ch == KEY_NPAGE) {
+    } else if (ch == KEY_NPAGE) {
         *page_start += page_space;
 
         // only got half a screen, show full screen
@@ -3045,7 +3045,7 @@ _win_handle_page(const wint_t * const ch, const int result)
         int *sub_y_pos = &(split_layout->sub_y_pos);
 
         // alt up arrow
-        if ((result == KEY_CODE_YES) && ((*ch == 565) || (*ch == 337))) {
+        if ((result == KEY_CODE_YES) && ((ch == 565) || (ch == 337))) {
             *sub_y_pos -= page_space;
 
             // went past beginning, show first page
@@ -3055,7 +3055,7 @@ _win_handle_page(const wint_t * const ch, const int result)
             win_update_virtual(current);
 
         // alt down arrow
-        } else if ((result == KEY_CODE_YES) && ((*ch == 524) || (*ch == 336))) {
+        } else if ((result == KEY_CODE_YES) && ((ch == 524) || (ch == 336))) {
             *sub_y_pos += page_space;
 
             // only got half a screen, show full screen
