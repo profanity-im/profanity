@@ -63,3 +63,4 @@ profanity.project
 profanity.workspace
 m4/
 test.sh
+clean-test.sh
