@@ -226,16 +226,6 @@ accounts_get_account(const char * const name)
 
         gchar *password = g_key_file_get_string(accounts, name, "password", NULL);
         gchar *eval_password = g_key_file_get_string(accounts, name, "eval_password", NULL);
-        // Evaluate as shell command to retrieve password
-        if (eval_password != NULL) {
-            FILE *stream = popen(eval_password, "r");
-            // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
-            password = g_malloc(READ_BUF_SIZE);
-            gchar *result = fgets(password, READ_BUF_SIZE, stream);
-            if (result != NULL) {
-                password = result;
-            }
-        }
         gboolean enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
 
         gchar *server = g_key_file_get_string(accounts, name, "server", NULL);

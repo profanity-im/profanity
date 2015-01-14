@@ -61,6 +61,7 @@ void cmd_rooms_uses_account_default_when_no_arg(void **state)
     account->name = NULL;
     account->jid = NULL;
     account->password = NULL;
+    account->eval_password = NULL;
     account->resource = NULL;
     account->server = NULL;
     account->last_presence = NULL;
