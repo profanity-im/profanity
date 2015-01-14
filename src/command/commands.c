@@ -141,12 +141,20 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                     account->password = g_malloc(READ_BUF_SIZE);
                     if(!account->password){
                         log_error("Failed to allocate enough memory to read eval_password output");
+                        cons_show("Error evaluating password, see logs for details.");
                         return TRUE;
                     }
                     account->password = fgets(account->password, READ_BUF_SIZE, stream);
                     pclose(stream);
+                    if(!account->password){
+                        log_error("No result from eval_password.");
+                        cons_show("Error evaluating password, see logs for details.");
+                        return TRUE;
+                    }
                 } else {
                     log_error("popen failed when running eval_password.");
+                    cons_show("Error evaluating password, see logs for details.");
+                    return TRUE;
                 }
                 g_string_free(cmd, TRUE);
             } else if (!account->password) {
