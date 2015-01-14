@@ -125,11 +125,11 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 return TRUE;
             }
         }
-        g_free(def);
-        def = NULL;
 
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
+        g_free(def);
+        def = NULL;
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
