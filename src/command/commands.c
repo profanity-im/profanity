@@ -138,6 +138,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 // Evaluate as shell command to retrieve password
                 GString *cmd = g_string_append(g_string_new(account->eval_password), " 2>/dev/null");
                 FILE *stream = popen(cmd->str, "r");
+                g_string_free(cmd, TRUE);
                 if(stream){
                     // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
                     account->password = g_malloc(READ_BUF_SIZE);
@@ -158,7 +159,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                     cons_show("Error evaluating password, see logs for details.");
                     return TRUE;
                 }
-                g_string_free(cmd, TRUE);
             } else if (!account->password) {
                 account->password = ui_ask_password();
             }
