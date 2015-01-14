@@ -93,7 +93,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
     } else {
         gchar *opt_keys[] = { "server", "port", NULL };
         gboolean parsed;
-        char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
 
         GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
         if (!parsed) {
@@ -115,16 +114,19 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         }
 
         char *user = args[0];
+        char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
         if(!user){
             if(def){
                 user = def;
                 cons_show("Using default account %s.", user);
             } else {
                 cons_show("No default account.");
+                g_free(def);
                 return TRUE;
             }
         }
         g_free(def);
+        def = NULL;
 
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
