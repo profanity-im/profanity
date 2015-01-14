@@ -82,6 +82,7 @@ static void _handle_backspace(int display_size, int inp_x, int *size, char *inpu
 static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
+static int _get_display_length(char *input);
 static void _delete_previous_word(char *input, int *size);
 
 void
@@ -135,11 +136,7 @@ wint_t
 inp_get_char(char *input, int *size, int *result)
 {
     wint_t ch;
-    int display_size = 0;
-
-    if (*size != 0) {
-        display_size = g_utf8_strlen(input, *size);
-    }
+    int display_size = _get_display_length(input);
 
     // echo off, and get some more input
     noecho();
@@ -247,13 +244,30 @@ inp_put_back(void)
     _inp_win_update_virtual();
 }
 
+static int
+_get_display_length(char *input)
+{
+    int len = 0;
+    gchar *curr = g_utf8_offset_to_pointer(input, 0);
+    while (*curr != '\0') {
+        gunichar curru = g_utf8_get_char(curr);
+        if (g_unichar_iswide(curru)) {
+            len += 2;
+        } else {
+            len ++;
+        }
+        curr = g_utf8_next_char(curr);
+    }
+
+    return len;
+}
+
 void
 inp_replace_input(char *input, const char * const new_input, int *size)
 {
-    int display_size;
     strncpy(input, new_input, INP_WIN_MAX);
     *size = strlen(input);
-    display_size = g_utf8_strlen(input, *size);
+    int display_size = _get_display_length(input);
     inp_win_reset();
     input[*size] = '\0';
     waddstr(inp_win, input);
@@ -287,11 +301,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
     char *next = NULL;
     int inp_x = 0;
     int next_ch;
-    int display_size = 0;
-
-    if (*size != 0) {
-        display_size = g_utf8_strlen(input, *size);
-    }
+    int display_size = _get_display_length(input);
 
     inp_x = getcurx(inp_win);
 
