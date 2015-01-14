@@ -230,7 +230,7 @@ void ui_update_presence(const resource_presence_t resource_presence,
 void ui_about(void);
 void ui_statusbar_new(const int win);
 
-wint_t ui_get_char(char *input, int *size, int *result);
+wint_t ui_get_char(char *input, int *size);
 void ui_input_clear(void);
 void ui_input_nonblocking(gboolean);
 void ui_replace_input(char *input, const char * const new_input, int *size);

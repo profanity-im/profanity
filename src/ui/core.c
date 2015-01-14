@@ -175,15 +175,18 @@ ui_close(void)
 }
 
 wint_t
-ui_get_char(char *input, int *size, int *result)
+ui_get_char(char *input, int *size)
 {
-    wint_t ch = inp_get_char(input, size, result);
-    if (ch != ERR && *result != ERR) {
+    int result = 0;
+    wint_t ch = inp_get_char(input, size, &result);
+    if (ch != ERR && result != ERR) {
         ui_reset_idle_time();
         ui_input_nonblocking(TRUE);
     } else {
         ui_input_nonblocking(FALSE);
     }
+
+    ui_handle_special_keys(ch, result);
 
     return ch;
 }
