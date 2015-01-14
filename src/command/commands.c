@@ -84,7 +84,6 @@ gboolean
 cmd_connect(gchar **args, struct cmd_help_t help)
 {
     gboolean result = FALSE;
-    char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
@@ -94,6 +93,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
     } else {
         gchar *opt_keys[] = { "server", "port", NULL };
         gboolean parsed;
+        char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
 
         GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
         if (!parsed) {
@@ -124,13 +124,32 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                 return TRUE;
             }
         }
+        g_free(def);
+
         char *lower = g_utf8_strdown(user, -1);
         char *jid;
 
         ProfAccount *account = accounts_get_account(lower);
         if (account != NULL) {
             jid = account_create_full_jid(account);
-            if (account->password == NULL && account->eval_password == NULL) {
+            if(account->eval_password){
+                // Evaluate as shell command to retrieve password
+                GString *cmd = g_string_append(g_string_new(account->eval_password), " 2>/dev/null");
+                FILE *stream = popen(cmd->str, "r");
+                if(stream){
+                    // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
+                    account->password = g_malloc(READ_BUF_SIZE);
+                    if(!account->password){
+                        log_error("Failed to allocate enough memory to read eval_password output");
+                        return TRUE;
+                    }
+                    account->password = fgets(account->password, READ_BUF_SIZE, stream);
+                    pclose(stream);
+                } else {
+                    log_error("popen failed when running eval_password.");
+                }
+                g_string_free(cmd, TRUE);
+            } else if (!account->password) {
                 account->password = ui_ask_password();
             }
             cons_show("Connecting with account %s as %s", account->name, jid);
@@ -158,8 +177,6 @@ cmd_connect(gchar **args, struct cmd_help_t help)
 
         result = TRUE;
     }
-
-    g_free(def);
 
     return result;
 }
