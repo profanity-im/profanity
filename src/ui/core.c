@@ -74,7 +74,7 @@
 
 static char *win_title;
 
-static char input[INP_WIN_MAX];
+static char line[INP_WIN_MAX];
 static int inp_size;
 
 #ifdef HAVE_LIBXSS
@@ -182,7 +182,7 @@ char*
 ui_readline(void)
 {
     int result = 0;
-    wint_t ch = inp_get_char(input, &result);
+    wint_t ch = inp_get_char(line, &result);
 
     _win_handle_switch(ch);
 
@@ -201,7 +201,7 @@ ui_readline(void)
     }
 
     if (ch == '\n') {
-        return input;
+        return line;
     } else {
         return NULL;
     }
