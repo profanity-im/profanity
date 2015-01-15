@@ -37,6 +37,8 @@
 
 #include "config.h"
 
+#include <wchar.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -176,6 +178,7 @@ void win_show_subwin(ProfWin *window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
+void win_handle_page(ProfWin *current, const wint_t ch, const int result);
 
 int win_unread(ProfWin *window);
 gboolean win_has_active_subwin(ProfWin *window);
