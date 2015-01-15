@@ -116,7 +116,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             ui_update();
         }
 
-        inp[size++] = '\0';
         cmd_result = process_input(inp);
     }
 }

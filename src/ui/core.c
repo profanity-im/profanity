@@ -193,6 +193,10 @@ ui_get_char(char *input, int *size)
         ui_input_nonblocking(FALSE);
     }
 
+    if (ch == '\n') {
+        input[*size++] = '\0';
+    }
+
     return (ch != '\n');
 }
 
