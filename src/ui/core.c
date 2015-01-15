@@ -73,6 +73,8 @@
 #include "xmpp/xmpp.h"
 
 static char *win_title;
+
+static char input[INP_WIN_MAX];
 static int inp_size;
 
 #ifdef HAVE_LIBXSS
@@ -176,14 +178,24 @@ ui_close(void)
     endwin();
 }
 
-gboolean
-ui_get_char(char *input)
+char*
+ui_readline(void)
 {
     int result = 0;
+    gboolean return_line = FALSE;
+
     wint_t ch = inp_get_char(input, &inp_size, &result);
+    if (ch == '\n') {
+        input[inp_size++] = '\0';
+        inp_size = 0;
+        return_line = TRUE;
+    }
+
     _win_handle_switch(ch);
+
     ProfWin *current = wins_get_current();
     win_handle_page(current, ch, result);
+
     if (ch == KEY_RESIZE) {
         ui_resize();
     }
@@ -195,12 +207,11 @@ ui_get_char(char *input)
         ui_input_nonblocking(FALSE);
     }
 
-    if (ch == '\n') {
-        input[inp_size++] = '\0';
-        inp_size = 0;
+    if (return_line) {
+        return input;
+    } else {
+        return NULL;
     }
-
-    return (ch != '\n');
 }
 
 void
