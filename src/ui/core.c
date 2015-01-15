@@ -73,6 +73,7 @@
 #include "xmpp/xmpp.h"
 
 static char *win_title;
+static int inp_size;
 
 #ifdef HAVE_LIBXSS
 static Display *display;
@@ -108,6 +109,7 @@ ui_init(void)
     display = XOpenDisplay(0);
 #endif
     ui_idle_time = g_timer_new();
+    inp_size = 0;
     ProfWin *window = wins_get_current();
     win_update_virtual(window);
 }
@@ -175,10 +177,10 @@ ui_close(void)
 }
 
 gboolean
-ui_get_char(char *input, int *size)
+ui_get_char(char *input)
 {
     int result = 0;
-    wint_t ch = inp_get_char(input, size, &result);
+    wint_t ch = inp_get_char(input, &inp_size, &result);
     _win_handle_switch(ch);
     ProfWin *current = wins_get_current();
     win_handle_page(current, ch, result);
@@ -194,7 +196,8 @@ ui_get_char(char *input, int *size)
     }
 
     if (ch == '\n') {
-        input[*size++] = '\0';
+        input[inp_size++] = '\0';
+        inp_size = 0;
     }
 
     return (ch != '\n');
