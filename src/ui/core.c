@@ -103,6 +103,7 @@ ui_init(void)
     status_bar_active(1);
     create_input_window();
     wins_init();
+    notifier_initialise();
     cons_about();
 #ifdef PROF_HAVE_LIBXSS
     display = XOpenDisplay(0);
