@@ -1772,9 +1772,10 @@ cmd_process_input(char *inp)
 void
 cmd_execute_connect(const char * const account)
 {
-    char inp[INP_WIN_MAX];
-    snprintf(inp, sizeof(inp), "%s %s", "/connect", account);
-    cmd_process_input(inp);
+    GString *command = g_string_new("/connect ");
+    g_string_append(command, account);
+    cmd_process_input(command->str);
+    g_string_free(command, TRUE);
 }
 
 static gboolean
