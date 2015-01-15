@@ -136,7 +136,7 @@ inp_block(void)
 }
 
 char *
-inp_get_char(int *key_type, wint_t *ch)
+inp_read(int *key_type, wint_t *ch)
 {
     int display_size = 0;
 

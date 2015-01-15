@@ -183,7 +183,7 @@ ui_readline(void)
     int key_type;
     wint_t ch;
 
-    char *line = inp_get_char(&key_type, &ch);
+    char *line = inp_read(&key_type, &ch);
     _win_handle_switch(ch);
 
     ProfWin *current = wins_get_current();
