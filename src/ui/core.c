@@ -182,14 +182,7 @@ char*
 ui_readline(void)
 {
     int result = 0;
-    gboolean return_line = FALSE;
-
-    wint_t ch = inp_get_char(input, &inp_size, &result);
-    if (ch == '\n') {
-        input[inp_size++] = '\0';
-        inp_size = 0;
-        return_line = TRUE;
-    }
+    wint_t ch = inp_get_char(input, &result);
 
     _win_handle_switch(ch);
 
@@ -207,7 +200,7 @@ ui_readline(void)
         ui_input_nonblocking(FALSE);
     }
 
-    if (return_line) {
+    if (ch == '\n') {
         return input;
     } else {
         return NULL;
