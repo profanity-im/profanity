@@ -323,7 +323,7 @@ void ui_update_presence(const resource_presence_t resource_presence,
 void ui_about(void) {}
 void ui_statusbar_new(const int win) {}
 
-gboolean ui_get_char(char *input, int *size)
+gboolean ui_get_char(char *input)
 {
     return FALSE;
 }
