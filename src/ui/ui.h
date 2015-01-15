@@ -61,7 +61,6 @@ void ui_close(void);
 void ui_redraw(void);
 void ui_resize(void);
 GSList* ui_get_chat_recipients(void);
-void ui_handle_special_keys(const wint_t ch, const int result);
 gboolean ui_switch_win(const int i);
 void ui_next_win(void);
 void ui_previous_win(void);

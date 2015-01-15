@@ -64,8 +64,6 @@ GSList* ui_get_chat_recipients(void)
     return NULL;
 }
 
-void ui_handle_special_keys(const wint_t ch, const int result) {}
-
 gboolean ui_switch_win(const int i)
 {
     check_expected(i);

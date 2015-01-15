@@ -179,14 +179,18 @@ ui_get_char(char *input, int *size)
 {
     int result = 0;
     wint_t ch = inp_get_char(input, size, &result);
+    _win_handle_switch(ch);
+    _win_handle_page(ch, result);
+    if (ch == KEY_RESIZE) {
+        ui_resize();
+    }
+
     if (ch != ERR && result != ERR) {
         ui_reset_idle_time();
         ui_input_nonblocking(TRUE);
     } else {
         ui_input_nonblocking(FALSE);
     }
-
-    ui_handle_special_keys(ch, result);
 
     return ch;
 }
@@ -702,16 +706,6 @@ ui_disconnected(void)
     status_bar_clear_message();
     status_bar_update_virtual();
     ui_hide_roster();
-}
-
-void
-ui_handle_special_keys(const wint_t ch, const int result)
-{
-    _win_handle_switch(ch);
-    _win_handle_page(ch, result);
-    if (ch == KEY_RESIZE) {
-        ui_resize();
-    }
 }
 
 void
