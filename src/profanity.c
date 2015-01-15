@@ -64,7 +64,7 @@
 #include "ui/ui.h"
 #include "ui/windows.h"
 
-static void _handle_idle_time(void);
+static void _check_autoaway(void);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
 static void _create_directories(void);
@@ -80,21 +80,16 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     ui_update();
 
     char inp[INP_WIN_MAX];
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
     gboolean read_input = TRUE;
     gboolean cmd_result = TRUE;
 
     log_info("Starting main event loop");
+
     while(cmd_result == TRUE) {
         read_input = TRUE;
         while(read_input) {
-            conn_status = jabber_get_connection_status();
-            if (conn_status == JABBER_CONNECTED) {
-                _handle_idle_time();
-            }
-
+            _check_autoaway();
             read_input = ui_get_char(inp);
-
 #ifdef HAVE_LIBOTR
             otr_poll();
 #endif
@@ -102,7 +97,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             jabber_process_events();
             ui_update();
         }
-
         cmd_result = cmd_process_input(inp);
         ui_input_clear();
     }
@@ -156,8 +150,13 @@ _connect_default(const char * const account)
 }
 
 static void
-_handle_idle_time()
+_check_autoaway()
 {
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    if (conn_status != JABBER_CONNECTED) {
+        return;
+    }
+
     gint prefs_time = prefs_get_autoaway_time() * 60000;
     unsigned long idle_ms = ui_get_idle_time();
     char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
