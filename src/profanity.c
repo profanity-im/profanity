@@ -90,15 +90,12 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
     ui_update();
 
-    log_info("Starting main event loop");
-
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-    int size = 0;
     gboolean read_input = TRUE;
     gboolean cmd_result = TRUE;
 
+    log_info("Starting main event loop");
     while(cmd_result == TRUE) {
-        size = 0;
         read_input = TRUE;
         while(read_input) {
             conn_status = jabber_get_connection_status();
@@ -106,7 +103,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
                 _handle_idle_time();
             }
 
-            read_input = ui_get_char(inp, &size);
+            read_input = ui_get_char(inp);
 
 #ifdef HAVE_LIBOTR
             otr_poll();
