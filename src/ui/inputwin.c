@@ -132,38 +132,38 @@ inp_block(void)
     wtimeout(inp_win, -1);
 }
 
-wint_t
-inp_get_char(char *input, int *result)
+void
+inp_get_char(char *result, int *key_type, wint_t *ch)
 {
-    wint_t ch;
     int display_size = 0;
 
     if (inp_size != 0) {
-        display_size = g_utf8_strlen(input, inp_size);
+        display_size = g_utf8_strlen(result, inp_size);
     }
 
     // echo off, and get some more input
     noecho();
-    *result = wget_wch(inp_win, &ch);
+    *key_type = wget_wch(inp_win, ch);
 
     gboolean in_command = FALSE;
-    if ((display_size > 0 && input[0] == '/') ||
-            (display_size == 0 && ch == '/')) {
+    if ((display_size > 0 && result[0] == '/') ||
+            (display_size == 0 && *ch == '/')) {
         in_command = TRUE;
     }
 
-    if (*result == ERR) {
+    if (*key_type == ERR) {
         prof_handle_idle();
     }
-    if ((*result != ERR) && (*result != KEY_CODE_YES) && !in_command && _printable(ch)) {
+    if ((*key_type != ERR) && (*key_type != KEY_CODE_YES) && !in_command && _printable(*ch)) {
         prof_handle_activity();
     }
 
     // if it wasn't an arrow key etc
-    if (!_handle_edit(*result, ch, input)) {
-        if (_printable(ch) && *result != KEY_CODE_YES) {
+    if (!_handle_edit(*key_type, *ch, result)) {
+        if (_printable(*ch) && *key_type != KEY_CODE_YES) {
             if (inp_size >= INP_WIN_MAX) {
-                return ERR;
+                *ch = ERR;
+                return;
             }
 
             int inp_x = getcurx(inp_win);
@@ -171,11 +171,11 @@ inp_get_char(char *input, int *result)
             // handle insert if not at end of input
             if (inp_x < display_size) {
                 char bytes[MB_CUR_MAX];
-                size_t utf_len = wcrtomb(bytes, ch, NULL);
+                size_t utf_len = wcrtomb(bytes, *ch, NULL);
 
-                char *next_ch = g_utf8_offset_to_pointer(input, inp_x);
+                char *next_ch = g_utf8_offset_to_pointer(result, inp_x);
                 char *offset;
-                for (offset = &input[inp_size - 1]; offset >= next_ch; offset--) {
+                for (offset = &result[inp_size - 1]; offset >= next_ch; offset--) {
                     *(offset + utf_len) = *offset;
                 }
                 int i;
@@ -184,7 +184,7 @@ inp_get_char(char *input, int *result)
                 }
 
                 inp_size += utf_len;
-                input[inp_size] = '\0';
+                result[inp_size] = '\0';
                 waddstr(inp_win, next_ch);
                 wmove(inp_win, 0, inp_x + 1);
 
@@ -196,15 +196,15 @@ inp_get_char(char *input, int *result)
             // otherwise just append
             } else {
                 char bytes[MB_CUR_MAX+1];
-                size_t utf_len = wcrtomb(bytes, ch, NULL);
+                size_t utf_len = wcrtomb(bytes, *ch, NULL);
 
                 // wcrtomb can return (size_t) -1
                 if (utf_len < MB_CUR_MAX) {
                     int i;
                     for (i = 0 ; i < utf_len; i++) {
-                        input[inp_size++] = bytes[i];
+                        result[inp_size++] = bytes[i];
                     }
-                    input[inp_size] = '\0';
+                    result[inp_size] = '\0';
 
                     bytes[utf_len] = '\0';
                     waddstr(inp_win, bytes);
@@ -226,12 +226,10 @@ inp_get_char(char *input, int *result)
 
     echo();
 
-    if (ch == '\n') {
-        input[inp_size++] = '\0';
+    if (*ch == '\n') {
+        result[inp_size++] = '\0';
         inp_size = 0;
     }
-
-    return ch;
 }
 
 void

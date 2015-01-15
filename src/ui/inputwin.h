@@ -36,7 +36,7 @@
 #define UI_INPUTWIN_H
 
 void create_input_window(void);
-wint_t inp_get_char(char *input, int *result);
+void inp_get_char(char *result, int *key_type, wint_t *ch);
 void inp_win_reset(void);
 void inp_win_resize(void);
 void inp_put_back(void);

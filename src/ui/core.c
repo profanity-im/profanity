@@ -75,7 +75,7 @@
 
 static char *win_title;
 
-static char input[INP_WIN_MAX];
+static char line[INP_WIN_MAX];
 static int inp_size;
 
 #ifdef PROF_HAVE_LIBXSS
@@ -182,19 +182,20 @@ ui_close(void)
 char*
 ui_readline(void)
 {
-    int result = 0;
-    wint_t ch = inp_get_char(input, &result);
+    int key_type;
+    wint_t ch;
+    inp_get_char(line, &key_type, &ch);
 
     _win_handle_switch(ch);
 
     ProfWin *current = wins_get_current();
-    win_handle_page(current, ch, result);
+    win_handle_page(current, ch, key_type);
 
     if (ch == KEY_RESIZE) {
         ui_resize();
     }
 
-    if (ch != ERR && result != ERR) {
+    if (ch != ERR && key_type != ERR) {
         ui_reset_idle_time();
         ui_input_nonblocking(TRUE);
     } else {
@@ -202,7 +203,7 @@ ui_readline(void)
     }
 
     if (ch == '\n') {
-        return input;
+        return line;
     } else {
         return NULL;
     }
