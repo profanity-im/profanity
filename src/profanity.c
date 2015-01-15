@@ -79,17 +79,15 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     _connect_default(account_name);
     ui_update();
 
-    char inp[INP_WIN_MAX];
-    gboolean read_input = TRUE;
+    char *line = NULL;
     gboolean cmd_result = TRUE;
 
     log_info("Starting main event loop");
 
-    while(cmd_result == TRUE) {
-        read_input = TRUE;
-        while(read_input) {
+    while(cmd_result) {
+        while(!line) {
             _check_autoaway();
-            read_input = ui_get_char(inp);
+            line = ui_readline();
 #ifdef HAVE_LIBOTR
             otr_poll();
 #endif
@@ -97,8 +95,9 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             jabber_process_events();
             ui_update();
         }
-        cmd_result = cmd_process_input(inp);
+        cmd_result = cmd_process_input(line);
         ui_input_clear();
+        line = NULL;
     }
 }
 
