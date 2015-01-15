@@ -329,6 +329,7 @@ void rosterwin_roster(void);
 void occupantswin_occupants(const char * const room);
 
 // desktop notifier actions
+void notifier_initialise(void);
 void notifier_uninit(void);
 
 void notify_typing(const char * const handle);

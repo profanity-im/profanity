@@ -75,28 +75,26 @@ void
 prof_run(const int disable_tls, char *log_level, char *account_name)
 {
     _init(disable_tls, log_level);
-    log_info("Starting main event loop");
-    ui_input_nonblocking(TRUE);
-    GTimer *timer = g_timer_new();
-    gboolean cmd_result = TRUE;
-    jabber_conn_status_t conn_status = jabber_get_connection_status();
 
     char inp[INP_WIN_MAX];
     int size = 0;
 
     char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
     if (account_name != NULL) {
-        char *cmd = "/connect";
-        snprintf(inp, sizeof(inp), "%s %s", cmd, account_name);
+        snprintf(inp, sizeof(inp), "%s %s", "/connect", account_name);
         process_input(inp);
     } else if (pref_connect_account != NULL) {
-        char *cmd = "/connect";
-        snprintf(inp, sizeof(inp), "%s %s", cmd, pref_connect_account);
+        snprintf(inp, sizeof(inp), "%s %s", "/connect", pref_connect_account);
         process_input(inp);
     }
     prefs_free_string(pref_connect_account);
+
     ui_update();
 
+    log_info("Starting main event loop");
+
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+    gboolean cmd_result = TRUE;
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
         size = 0;
@@ -107,18 +105,12 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
                 _handle_idle_time();
             }
 
-            gdouble elapsed = g_timer_elapsed(timer, NULL);
-
-            gint remind_period = prefs_get_notify_remind();
-            if (remind_period > 0 && elapsed >= remind_period) {
-                notify_remind();
-                g_timer_start(timer);
-            }
-
             ch = ui_get_char(inp, &size);
+
 #ifdef HAVE_LIBOTR
             otr_poll();
 #endif
+            notify_remind();
             jabber_process_events();
             ui_update();
         }
@@ -126,8 +118,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         inp[size++] = '\0';
         cmd_result = process_input(inp);
     }
-
-    g_timer_destroy(timer);
 }
 
 void
@@ -205,15 +195,15 @@ static void
 _handle_idle_time()
 {
     gint prefs_time = prefs_get_autoaway_time() * 60000;
-    resource_presence_t current_presence = accounts_get_last_presence(jabber_get_account_name());
     unsigned long idle_ms = ui_get_idle_time();
     char *pref_autoaway_mode = prefs_get_string(PREF_AUTOAWAY_MODE);
-    char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
 
     if (!idle) {
+        resource_presence_t current_presence = accounts_get_last_presence(jabber_get_account_name());
         if ((current_presence == RESOURCE_ONLINE) || (current_presence == RESOURCE_CHAT)) {
             if (idle_ms >= prefs_time) {
                 idle = TRUE;
+                char *pref_autoaway_message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
 
                 // handle away mode
                 if (strcmp(pref_autoaway_mode, "away") == 0) {
@@ -224,6 +214,8 @@ _handle_idle_time()
                 } else if (strcmp(pref_autoaway_mode, "idle") == 0) {
                     presence_update(RESOURCE_ONLINE, pref_autoaway_message, idle_ms / 1000);
                 }
+
+                prefs_free_string(pref_autoaway_message);
             }
         }
 
@@ -243,8 +235,8 @@ _handle_idle_time()
             }
         }
     }
+
     prefs_free_string(pref_autoaway_mode);
-    prefs_free_string(pref_autoaway_message);
 }
 
 static void
@@ -284,6 +276,7 @@ _init(const int disable_tls, char *log_level)
     otr_init();
 #endif
     atexit(_shutdown);
+    ui_input_nonblocking(TRUE);
 }
 
 static void

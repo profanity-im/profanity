@@ -48,9 +48,18 @@
 #include "log.h"
 #include "muc.h"
 #include "ui/ui.h"
+#include "config/preferences.h"
 
 static void _notify(const char * const message, int timeout,
     const char * const category);
+
+static GTimer *remind_timer;
+
+void
+notifier_initialise(void)
+{
+    remind_timer = g_timer_new();
+}
 
 void
 notifier_uninit(void)
@@ -60,6 +69,7 @@ notifier_uninit(void)
         notify_uninit();
     }
 #endif
+    g_timer_destroy(remind_timer);
 }
 
 void
@@ -128,46 +138,52 @@ notify_subscription(const char * const from)
 void
 notify_remind(void)
 {
-    gint unread = ui_unread();
-    gint open = muc_invites_count();
-    gint subs = presence_sub_request_count();
+    gdouble elapsed = g_timer_elapsed(remind_timer, NULL);
+    gint remind_period = prefs_get_notify_remind();
+    if (remind_period > 0 && elapsed >= remind_period) {
+        gint unread = ui_unread();
+        gint open = muc_invites_count();
+        gint subs = presence_sub_request_count();
 
-    GString *text = g_string_new("");
+        GString *text = g_string_new("");
 
-    if (unread > 0) {
-        if (unread == 1) {
-            g_string_append(text, "1 unread message");
-        } else {
-            g_string_append_printf(text, "%d unread messages", unread);
-        }
-
-    }
-    if (open > 0) {
         if (unread > 0) {
-            g_string_append(text, "\n");
-        }
-        if (open == 1) {
-            g_string_append(text, "1 room invite");
-        } else {
-            g_string_append_printf(text, "%d room invites", open);
-        }
-    }
-    if (subs > 0) {
-        if ((unread > 0) || (open > 0)) {
-            g_string_append(text, "\n");
-        }
-        if (subs == 1) {
-            g_string_append(text, "1 subscription request");
-        } else {
-            g_string_append_printf(text, "%d subscription requests", subs);
-        }
-    }
+            if (unread == 1) {
+                g_string_append(text, "1 unread message");
+            } else {
+                g_string_append_printf(text, "%d unread messages", unread);
+            }
 
-    if ((unread > 0) || (open > 0) || (subs > 0)) {
-        _notify(text->str, 5000, "Incoming message");
-    }
+        }
+        if (open > 0) {
+            if (unread > 0) {
+                g_string_append(text, "\n");
+            }
+            if (open == 1) {
+                g_string_append(text, "1 room invite");
+            } else {
+                g_string_append_printf(text, "%d room invites", open);
+            }
+        }
+        if (subs > 0) {
+            if ((unread > 0) || (open > 0)) {
+                g_string_append(text, "\n");
+            }
+            if (subs == 1) {
+                g_string_append(text, "1 subscription request");
+            } else {
+                g_string_append_printf(text, "%d subscription requests", subs);
+            }
+        }
 
-    g_string_free(text, TRUE);
+        if ((unread > 0) || (open > 0) || (subs > 0)) {
+            _notify(text->str, 5000, "Incoming message");
+        }
+
+        g_string_free(text, TRUE);
+
+        g_timer_start(remind_timer);
+    }
 }
 
 static void
