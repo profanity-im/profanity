@@ -174,7 +174,7 @@ ui_close(void)
     endwin();
 }
 
-wint_t
+gboolean
 ui_get_char(char *input, int *size)
 {
     int result = 0;
@@ -193,7 +193,7 @@ ui_get_char(char *input, int *size)
         ui_input_nonblocking(FALSE);
     }
 
-    return ch;
+    return (ch != '\n');
 }
 
 void
