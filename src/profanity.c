@@ -97,7 +97,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         }
         cmd_result = cmd_process_input(line);
         ui_input_clear();
-        line = NULL;
+        FREE_SET_NULL(line);
     }
 }
 

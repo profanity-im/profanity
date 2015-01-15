@@ -51,8 +51,6 @@
 #include "ui/window.h"
 #include "xmpp/xmpp.h"
 
-#define INP_WIN_MAX 1000
-
 // ui startup and control
 void ui_init(void);
 void ui_load_colours(void);

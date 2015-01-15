@@ -74,7 +74,6 @@
 
 static char *win_title;
 
-static char line[INP_WIN_MAX];
 static int inp_size;
 
 #ifdef HAVE_LIBXSS
@@ -183,8 +182,8 @@ ui_readline(void)
 {
     int key_type;
     wint_t ch;
-    inp_get_char(line, &key_type, &ch);
 
+    char *line = inp_get_char(&key_type, &ch);
     _win_handle_switch(ch);
 
     ProfWin *current = wins_get_current();
@@ -201,11 +200,7 @@ ui_readline(void)
         ui_input_nonblocking(FALSE);
     }
 
-    if (ch == '\n') {
-        return line;
-    } else {
-        return NULL;
-    }
+    return line;
 }
 
 void

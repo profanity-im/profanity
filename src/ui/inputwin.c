@@ -72,9 +72,12 @@
 #define KEY_CTRL_U 0025
 #define KEY_CTRL_W 0027
 
+#define INP_WIN_MAX 1000
+
 static WINDOW *inp_win;
 static int pad_start = 0;
 static int rows, cols;
+static char line[INP_WIN_MAX];
 static int inp_size;
 
 static int _handle_edit(int result, const wint_t ch, char *input);
@@ -133,17 +136,17 @@ inp_block(void)
     wtimeout(inp_win, -1);
 }
 
-void
-inp_get_char(char *result, int *key_type, wint_t *ch)
+char *
+inp_get_char(int *key_type, wint_t *ch)
 {
-    int display_size = _get_display_length(input);
+    int display_size = _get_display_length(line);
 
     // echo off, and get some more input
     noecho();
     *key_type = wget_wch(inp_win, ch);
 
     gboolean in_command = FALSE;
-    if ((display_size > 0 && result[0] == '/') ||
+    if ((display_size > 0 && line[0] == '/') ||
             (display_size == 0 && *ch == '/')) {
         in_command = TRUE;
     }
@@ -156,11 +159,11 @@ inp_get_char(char *result, int *key_type, wint_t *ch)
     }
 
     // if it wasn't an arrow key etc
-    if (!_handle_edit(*key_type, *ch, result)) {
+    if (!_handle_edit(*key_type, *ch, line)) {
         if (_printable(*ch) && *key_type != KEY_CODE_YES) {
             if (inp_size >= INP_WIN_MAX) {
                 *ch = ERR;
-                return;
+                return NULL;
             }
 
             int inp_x = getcurx(inp_win);
@@ -170,9 +173,9 @@ inp_get_char(char *result, int *key_type, wint_t *ch)
                 char bytes[MB_CUR_MAX];
                 size_t utf_len = wcrtomb(bytes, *ch, NULL);
 
-                char *next_ch = g_utf8_offset_to_pointer(result, inp_x);
+                char *next_ch = g_utf8_offset_to_pointer(line, inp_x);
                 char *offset;
-                for (offset = &result[inp_size - 1]; offset >= next_ch; offset--) {
+                for (offset = &line[inp_size - 1]; offset >= next_ch; offset--) {
                     *(offset + utf_len) = *offset;
                 }
                 int i;
@@ -181,7 +184,7 @@ inp_get_char(char *result, int *key_type, wint_t *ch)
                 }
 
                 inp_size += utf_len;
-                result[inp_size] = '\0';
+                line[inp_size] = '\0';
                 waddstr(inp_win, next_ch);
                 wmove(inp_win, 0, inp_x + 1);
 
@@ -199,9 +202,9 @@ inp_get_char(char *result, int *key_type, wint_t *ch)
                 if (utf_len < MB_CUR_MAX) {
                     int i;
                     for (i = 0 ; i < utf_len; i++) {
-                        result[inp_size++] = bytes[i];
+                        line[inp_size++] = bytes[i];
                     }
-                    result[inp_size] = '\0';
+                    line[inp_size] = '\0';
 
                     bytes[utf_len] = '\0';
                     waddstr(inp_win, bytes);
@@ -224,8 +227,11 @@ inp_get_char(char *result, int *key_type, wint_t *ch)
     echo();
 
     if (*ch == '\n') {
-        result[inp_size++] = '\0';
+        line[inp_size++] = '\0';
         inp_size = 0;
+        return strdup(line);
+    } else {
+        return NULL;
     }
 }
 
