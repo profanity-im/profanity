@@ -77,7 +77,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     _init(disable_tls, log_level);
     log_info("Starting main event loop");
     ui_input_nonblocking(TRUE);
-    GTimer *timer = g_timer_new();
+    GTimer *remind_timer = g_timer_new();
     gboolean cmd_result = TRUE;
     jabber_conn_status_t conn_status = jabber_get_connection_status();
 
@@ -107,12 +107,12 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
                 _handle_idle_time();
             }
 
-            gdouble elapsed = g_timer_elapsed(timer, NULL);
+            gdouble elapsed = g_timer_elapsed(remind_timer, NULL);
 
             gint remind_period = prefs_get_notify_remind();
             if (remind_period > 0 && elapsed >= remind_period) {
                 notify_remind();
-                g_timer_start(timer);
+                g_timer_start(remind_timer);
             }
 
             ch = ui_get_char(inp, &size);
@@ -127,7 +127,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         cmd_result = process_input(inp);
     }
 
-    g_timer_destroy(timer);
+    g_timer_destroy(remind_timer);
 }
 
 void
