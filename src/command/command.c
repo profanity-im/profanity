@@ -71,6 +71,10 @@
 
 typedef char*(*autocompleter)(char*, int*);
 
+static gboolean _cmd_execute(const char * const command, const char * const inp);
+static gboolean _cmd_execute_default(const char * inp);
+static gboolean _cmd_execute_alias(const char * const inp, gboolean *ran);
+
 static void _cmd_complete_parameters(char *input, int *size);
 
 static char * _sub_autocomplete(char *input, int *size);
@@ -1738,10 +1742,53 @@ cmd_reset_autocomplete()
     plugins_reset_autocomplete();
 }
 
+/*
+ * Take a line of input and process it, return TRUE if profanity is to
+ * continue, FALSE otherwise
+ */
+gboolean
+cmd_process_input(char *inp)
+{
+    log_debug("Input received: %s", inp);
+    gboolean result = FALSE;
+    g_strstrip(inp);
+
+    // add line to history if something typed
+    if (strlen(inp) > 0) {
+        cmd_history_append(inp);
+    }
+
+    // just carry on if no input
+    if (strlen(inp) == 0) {
+        result = TRUE;
+
+    // handle command if input starts with a '/'
+    } else if (inp[0] == '/') {
+        char *inp_cpy = strdup(inp);
+        char *command = strtok(inp_cpy, " ");
+        result = _cmd_execute(command, inp);
+        free(inp_cpy);
+
+    // call a default handler if input didn't start with '/'
+    } else {
+        result = _cmd_execute_default(inp);
+    }
+
+    return result;
+}
+
 // Command execution
 
-gboolean
-cmd_execute(const char * const command, const char * const inp)
+void
+cmd_execute_connect(const char * const account)
+{
+    char inp[INP_WIN_MAX];
+    snprintf(inp, sizeof(inp), "%s %s", "/connect", account);
+    cmd_process_input(inp);
+}
+
+static gboolean
+_cmd_execute(const char * const command, const char * const inp)
 {
     if (g_str_has_prefix(command, "/field") && ui_current_win_type() == WIN_MUC_CONFIG) {
         gboolean result = FALSE;
@@ -1777,17 +1824,17 @@ cmd_execute(const char * const command, const char * const inp)
         return TRUE;
     } else {
         gboolean ran_alias = FALSE;
-        gboolean alias_result = cmd_execute_alias(inp, &ran_alias);
+        gboolean alias_result = _cmd_execute_alias(inp, &ran_alias);
         if (!ran_alias) {
-            return cmd_execute_default(inp);
+            return _cmd_execute_default(inp);
         } else {
             return alias_result;
         }
     }
 }
 
-gboolean
-cmd_execute_alias(const char * const inp, gboolean *ran)
+static gboolean
+_cmd_execute_alias(const char * const inp, gboolean *ran)
 {
     if (inp[0] != '/') {
         ran = FALSE;
@@ -1798,7 +1845,7 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
         free(alias);
         if (value != NULL) {
             *ran = TRUE;
-            return prof_process_input(value);
+            return cmd_process_input(value);
         } else {
             *ran = FALSE;
             return TRUE;
@@ -1806,8 +1853,8 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
     }
 }
 
-gboolean
-cmd_execute_default(const char * inp)
+static gboolean
+_cmd_execute_default(const char * inp)
 {
     jabber_conn_status_t status = jabber_get_connection_status();
 

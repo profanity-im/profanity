@@ -43,6 +43,7 @@
 #include "ui/windows.h"
 #include "ui/ui.h"
 #include "config/theme.h"
+#include "command/command.h"
 
 void
 api_cons_alert(void)
@@ -104,7 +105,7 @@ api_notify(const char *message, const char *category, int timeout_ms)
 void
 api_send_line(char *line)
 {
-    prof_process_input(line);
+    cmd_process_input(line);
 }
 
 char *

@@ -53,9 +53,8 @@ void cmd_autocomplete_remove_form_fields(DataForm *form);
 void cmd_alias_add(char *value);
 void cmd_alias_remove(char *value);
 
-gboolean cmd_execute(const char * const command, const char * const inp);
-gboolean cmd_execute_alias(const char * const inp, gboolean *ran);
-gboolean cmd_execute_default(const char * const inp);
+gboolean cmd_process_input(char *inp);
+void cmd_execute_connect(const char * const account);
 
 gboolean cmd_exists(char *cmd);
 
