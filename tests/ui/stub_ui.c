@@ -64,8 +64,6 @@ GSList* ui_get_chat_recipients(void)
     return NULL;
 }
 
-void ui_handle_special_keys(const wint_t * const ch, const int result) {}
-
 gboolean ui_switch_win(const int i)
 {
     check_expected(i);
@@ -325,7 +323,7 @@ void ui_update_presence(const resource_presence_t resource_presence,
 void ui_about(void) {}
 void ui_statusbar_new(const int win) {}
 
-wint_t ui_get_char(char *input, int *size, int *result)
+wint_t ui_get_char(char *input, int *size)
 {
     return 0;
 }

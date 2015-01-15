@@ -99,7 +99,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
     while(cmd_result == TRUE) {
         wint_t ch = ERR;
-        int result;
         size = 0;
 
         while(ch != '\n') {
@@ -116,9 +115,7 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
                 g_timer_start(timer);
             }
 
-            ch = ui_get_char(inp, &size, &result);
-
-            ui_handle_special_keys(&ch, result);
+            ch = ui_get_char(inp, &size);
 #ifdef HAVE_LIBOTR
             otr_poll();
 #endif

@@ -80,8 +80,7 @@ static Display *display;
 
 static GTimer *ui_idle_time;
 
-static void _win_handle_switch(const wint_t * const ch);
-static void _win_handle_page(const wint_t * const ch, const int result);
+static void _win_handle_switch(const wint_t ch);
 static void _win_show_history(int win_index, const char * const contact);
 static void _ui_draw_term_title(void);
 
@@ -175,10 +174,18 @@ ui_close(void)
 }
 
 wint_t
-ui_get_char(char *input, int *size, int *result)
+ui_get_char(char *input, int *size)
 {
-    wint_t ch = inp_get_char(input, size, result);
-    if (ch != ERR && *result != ERR) {
+    int result = 0;
+    wint_t ch = inp_get_char(input, size, &result);
+    _win_handle_switch(ch);
+    ProfWin *current = wins_get_current();
+    win_handle_page(current, ch, result);
+    if (ch == KEY_RESIZE) {
+        ui_resize();
+    }
+
+    if (ch != ERR && result != ERR) {
         ui_reset_idle_time();
         ui_input_nonblocking(TRUE);
     } else {
@@ -699,16 +706,6 @@ ui_disconnected(void)
     status_bar_clear_message();
     status_bar_update_virtual();
     ui_hide_roster();
-}
-
-void
-ui_handle_special_keys(const wint_t * const ch, const int result)
-{
-    _win_handle_switch(ch);
-    _win_handle_page(ch, result);
-    if (*ch == KEY_RESIZE) {
-        ui_resize();
-    }
 }
 
 void
@@ -2935,139 +2932,28 @@ ui_hide_roster(void)
 }
 
 static void
-_win_handle_switch(const wint_t * const ch)
+_win_handle_switch(const wint_t ch)
 {
-    if (*ch == KEY_F(1)) {
+    if (ch == KEY_F(1)) {
         ui_switch_win(1);
-    } else if (*ch == KEY_F(2)) {
+    } else if (ch == KEY_F(2)) {
         ui_switch_win(2);
-    } else if (*ch == KEY_F(3)) {
+    } else if (ch == KEY_F(3)) {
         ui_switch_win(3);
-    } else if (*ch == KEY_F(4)) {
+    } else if (ch == KEY_F(4)) {
         ui_switch_win(4);
-    } else if (*ch == KEY_F(5)) {
+    } else if (ch == KEY_F(5)) {
         ui_switch_win(5);
-    } else if (*ch == KEY_F(6)) {
+    } else if (ch == KEY_F(6)) {
         ui_switch_win(6);
-    } else if (*ch == KEY_F(7)) {
+    } else if (ch == KEY_F(7)) {
         ui_switch_win(7);
-    } else if (*ch == KEY_F(8)) {
+    } else if (ch == KEY_F(8)) {
         ui_switch_win(8);
-    } else if (*ch == KEY_F(9)) {
+    } else if (ch == KEY_F(9)) {
         ui_switch_win(9);
-    } else if (*ch == KEY_F(10)) {
+    } else if (ch == KEY_F(10)) {
         ui_switch_win(0);
-    }
-}
-
-static void
-_win_handle_page(const wint_t * const ch, const int result)
-{
-    ProfWin *current = wins_get_current();
-    int rows = getmaxy(stdscr);
-    int y = getcury(current->layout->win);
-
-    int page_space = rows - 4;
-    int *page_start = &(current->layout->y_pos);
-
-    if (prefs_get_boolean(PREF_MOUSE)) {
-        MEVENT mouse_event;
-
-        if (*ch == KEY_MOUSE) {
-            if (getmouse(&mouse_event) == OK) {
-
-#ifdef PLATFORM_CYGWIN
-                if (mouse_event.bstate & BUTTON5_PRESSED) { // mouse wheel down
-#else
-                if (mouse_event.bstate & BUTTON2_PRESSED) { // mouse wheel down
-#endif
-                    *page_start += 4;
-
-                    // only got half a screen, show full screen
-                    if ((y - (*page_start)) < page_space)
-                        *page_start = y - page_space;
-
-                    // went past end, show full screen
-                    else if (*page_start >= y)
-                        *page_start = y - page_space;
-
-                    current->layout->paged = 1;
-                    win_update_virtual(current);
-                } else if (mouse_event.bstate & BUTTON4_PRESSED) { // mouse wheel up
-                    *page_start -= 4;
-
-                    // went past beginning, show first page
-                    if (*page_start < 0)
-                        *page_start = 0;
-
-                    current->layout->paged = 1;
-                    win_update_virtual(current);
-                }
-            }
-        }
-    }
-
-    // page up
-    if (*ch == KEY_PPAGE) {
-        *page_start -= page_space;
-
-        // went past beginning, show first page
-        if (*page_start < 0)
-            *page_start = 0;
-
-        current->layout->paged = 1;
-        win_update_virtual(current);
-
-    // page down
-    } else if (*ch == KEY_NPAGE) {
-        *page_start += page_space;
-
-        // only got half a screen, show full screen
-        if ((y - (*page_start)) < page_space)
-            *page_start = y - page_space;
-
-        // went past end, show full screen
-        else if (*page_start >= y)
-            *page_start = y - page_space - 1;
-
-        current->layout->paged = 1;
-        win_update_virtual(current);
-    }
-
-    // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
-        current->layout->paged = 0;
-    }
-
-    if (current->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)current->layout;
-        int sub_y = getcury(split_layout->subwin);
-        int *sub_y_pos = &(split_layout->sub_y_pos);
-
-        // alt up arrow
-        if ((result == KEY_CODE_YES) && ((*ch == 565) || (*ch == 337))) {
-            *sub_y_pos -= page_space;
-
-            // went past beginning, show first page
-            if (*sub_y_pos < 0)
-                *sub_y_pos = 0;
-
-            win_update_virtual(current);
-
-        // alt down arrow
-        } else if ((result == KEY_CODE_YES) && ((*ch == 524) || (*ch == 336))) {
-            *sub_y_pos += page_space;
-
-            // only got half a screen, show full screen
-            if ((sub_y- (*sub_y_pos)) < page_space)
-                *sub_y_pos = sub_y - page_space;
-
-            // went past end, show full screen
-            else if (*sub_y_pos >= sub_y)
-                *sub_y_pos = sub_y - page_space - 1;
-
-            win_update_virtual(current);
-        }
     }
 }
 
