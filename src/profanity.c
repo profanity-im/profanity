@@ -78,7 +78,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     _init(disable_tls, log_level);
 
     char inp[INP_WIN_MAX];
-    int size = 0;
 
     plugins_on_start();
 
@@ -97,18 +96,20 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     log_info("Starting main event loop");
 
     jabber_conn_status_t conn_status = jabber_get_connection_status();
+    int size = 0;
+    gboolean read_input = TRUE;
     gboolean cmd_result = TRUE;
-    while(cmd_result == TRUE) {
-        wint_t ch = ERR;
-        size = 0;
 
-        while(ch != '\n') {
+    while(cmd_result == TRUE) {
+        size = 0;
+        read_input = TRUE;
+        while(read_input) {
             conn_status = jabber_get_connection_status();
             if (conn_status == JABBER_CONNECTED) {
                 _handle_idle_time();
             }
 
-            ch = ui_get_char(inp, &size);
+            read_input = ui_get_char(inp, &size);
 
             plugins_run_timed();
 
@@ -120,7 +121,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             ui_update();
         }
 
-        inp[size++] = '\0';
         cmd_result = prof_process_input(inp);
     }
 }
