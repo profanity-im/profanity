@@ -68,6 +68,7 @@ static void _handle_idle_time(void);
 static void _init(const int disable_tls, char *log_level);
 static void _shutdown(void);
 static void _create_directories(void);
+static void _connect_default(const char * const account);
 
 static gboolean idle = FALSE;
 
@@ -75,21 +76,10 @@ void
 prof_run(const int disable_tls, char *log_level, char *account_name)
 {
     _init(disable_tls, log_level);
-
-    char inp[INP_WIN_MAX];
-
-    char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
-    if (account_name != NULL) {
-        snprintf(inp, sizeof(inp), "%s %s", "/connect", account_name);
-        process_input(inp);
-    } else if (pref_connect_account != NULL) {
-        snprintf(inp, sizeof(inp), "%s %s", "/connect", pref_connect_account);
-        process_input(inp);
-    }
-    prefs_free_string(pref_connect_account);
-
+    _connect_default(account_name);
     ui_update();
 
+    char inp[INP_WIN_MAX];
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     gboolean read_input = TRUE;
     gboolean cmd_result = TRUE;
@@ -113,7 +103,8 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
             ui_update();
         }
 
-        cmd_result = process_input(inp);
+        cmd_result = cmd_process_input(inp);
+        ui_input_clear();
     }
 }
 
@@ -150,42 +141,18 @@ prof_handle_activity(void)
     }
 }
 
-/*
- * Take a line of input and process it, return TRUE if profanity is to
- * continue, FALSE otherwise
- */
-gboolean
-process_input(char *inp)
+static void
+_connect_default(const char * const account)
 {
-    log_debug("Input received: %s", inp);
-    gboolean result = FALSE;
-    g_strstrip(inp);
-
-    // add line to history if something typed
-    if (strlen(inp) > 0) {
-        cmd_history_append(inp);
-    }
-
-    // just carry on if no input
-    if (strlen(inp) == 0) {
-        result = TRUE;
-
-    // handle command if input starts with a '/'
-    } else if (inp[0] == '/') {
-        char *inp_cpy = strdup(inp);
-        char *command = strtok(inp_cpy, " ");
-        result = cmd_execute(command, inp);
-        free(inp_cpy);
-
-    // call a default handler if input didn't start with '/'
+    if (account) {
+        cmd_execute_connect(account);
     } else {
-        result = cmd_execute_default(inp);
+        char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
+        if (pref_connect_account) {
+            cmd_execute_connect(pref_connect_account);
+            prefs_free_string(pref_connect_account);
+        }
     }
-
-    ui_input_clear();
-    roster_reset_search_attempts();
-
-    return result;
 }
 
 static void
