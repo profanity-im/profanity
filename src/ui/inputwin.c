@@ -75,14 +75,15 @@
 static WINDOW *inp_win;
 static int pad_start = 0;
 static int rows, cols;
+static int inp_size;
 
-static int _handle_edit(int result, const wint_t ch, char *input, int *size);
-static int _handle_alt_key(char *input, int *size, int key);
-static void _handle_backspace(int display_size, int inp_x, int *size, char *input);
+static int _handle_edit(int result, const wint_t ch, char *input);
+static int _handle_alt_key(char *input, int key);
+static void _handle_backspace(int display_size, int inp_x, char *input);
 static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(int display_size);
-static void _delete_previous_word(char *input, int *size);
+static void _delete_previous_word(char *input);
 
 void
 create_input_window(void)
@@ -132,13 +133,13 @@ inp_block(void)
 }
 
 wint_t
-inp_get_char(char *input, int *size, int *result)
+inp_get_char(char *input, int *result)
 {
     wint_t ch;
     int display_size = 0;
 
-    if (*size != 0) {
-        display_size = g_utf8_strlen(input, *size);
+    if (inp_size != 0) {
+        display_size = g_utf8_strlen(input, inp_size);
     }
 
     // echo off, and get some more input
@@ -159,9 +160,9 @@ inp_get_char(char *input, int *size, int *result)
     }
 
     // if it wasn't an arrow key etc
-    if (!_handle_edit(*result, ch, input, size)) {
+    if (!_handle_edit(*result, ch, input)) {
         if (_printable(ch) && *result != KEY_CODE_YES) {
-            if (*size >= INP_WIN_MAX) {
+            if (inp_size >= INP_WIN_MAX) {
                 return ERR;
             }
 
@@ -174,7 +175,7 @@ inp_get_char(char *input, int *size, int *result)
 
                 char *next_ch = g_utf8_offset_to_pointer(input, inp_x);
                 char *offset;
-                for (offset = &input[*size - 1]; offset >= next_ch; offset--) {
+                for (offset = &input[inp_size - 1]; offset >= next_ch; offset--) {
                     *(offset + utf_len) = *offset;
                 }
                 int i;
@@ -182,8 +183,8 @@ inp_get_char(char *input, int *size, int *result)
                      *(next_ch + i) = bytes[i];
                 }
 
-                *size += utf_len;
-                input[*size] = '\0';
+                inp_size += utf_len;
+                input[inp_size] = '\0';
                 waddstr(inp_win, next_ch);
                 wmove(inp_win, 0, inp_x + 1);
 
@@ -201,9 +202,9 @@ inp_get_char(char *input, int *size, int *result)
                 if (utf_len < MB_CUR_MAX) {
                     int i;
                     for (i = 0 ; i < utf_len; i++) {
-                        input[(*size)++] = bytes[i];
+                        input[inp_size++] = bytes[i];
                     }
-                    input[*size] = '\0';
+                    input[inp_size] = '\0';
 
                     bytes[utf_len] = '\0';
                     waddstr(inp_win, bytes);
@@ -224,6 +225,11 @@ inp_get_char(char *input, int *size, int *result)
     }
 
     echo();
+
+    if (ch == '\n') {
+        input[inp_size++] = '\0';
+        inp_size = 0;
+    }
 
     return ch;
 }
@@ -281,7 +287,7 @@ _clear_input(void)
  * return 0 if it wasn't
  */
 static int
-_handle_edit(int result, const wint_t ch, char *input, int *size)
+_handle_edit(int result, const wint_t ch, char *input)
 {
     char *prev = NULL;
     char *next = NULL;
@@ -289,15 +295,15 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
     int next_ch;
     int display_size = 0;
 
-    if (*size != 0) {
-        display_size = g_utf8_strlen(input, *size);
+    if (inp_size != 0) {
+        display_size = g_utf8_strlen(input, inp_size);
     }
 
     inp_x = getcurx(inp_win);
 
     // CTRL-LEFT
     if ((result == KEY_CODE_YES) && (ch == 547 || ch == 545 || ch == 544 || ch == 540 || ch == 539) && (inp_x > 0)) {
-        input[*size] = '\0';
+        input[inp_size] = '\0';
         gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
         curr_ch = g_utf8_find_prev_char(input, curr_ch);
         gchar *prev_ch;
@@ -347,7 +353,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 
     // CTRL-RIGHT
     } else if ((result == KEY_CODE_YES) && (ch == 562 || ch == 560 || ch == 555 || ch == 559 || ch == 554) && (inp_x < display_size)) {
-        input[*size] = '\0';
+        input[inp_size] = '\0';
         gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
         gchar *next_ch = g_utf8_find_next_char(curr_ch, NULL);
         gunichar curr_uni;
@@ -406,21 +412,21 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             // check for ALT-key
             next_ch = wgetch(inp_win);
             if (next_ch != ERR) {
-                return _handle_alt_key(input, size, next_ch);
+                return _handle_alt_key(input, next_ch);
             } else {
-                *size = 0;
+                inp_size = 0;
                 inp_win_reset();
                 return 1;
             }
 
         case 127:
-            _handle_backspace(display_size, inp_x, size, input);
+            _handle_backspace(display_size, inp_x, input);
             return 1;
         case KEY_BACKSPACE:
             if (result != KEY_CODE_YES) {
                 return 0;
             }
-            _handle_backspace(display_size, inp_x, size, input);
+            _handle_backspace(display_size, inp_x, input);
             return 1;
 
         case KEY_DC: // DEL
@@ -430,10 +436,10 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
         case KEY_CTRL_D:
             if (inp_x == display_size-1) {
                 gchar *start = g_utf8_substring(input, 0, inp_x);
-                for (*size = 0; *size < strlen(start); (*size)++) {
-                    input[*size] = start[*size];
+                for (inp_size = 0; inp_size < strlen(start); inp_size++) {
+                    input[inp_size] = start[inp_size];
                 }
-                input[*size] = '\0';
+                input[inp_size] = '\0';
 
                 g_free(start);
 
@@ -441,14 +447,14 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 waddstr(inp_win, input);
             } else if (inp_x < display_size-1) {
                 gchar *start = g_utf8_substring(input, 0, inp_x);
-                gchar *end = g_utf8_substring(input, inp_x+1, *size);
+                gchar *end = g_utf8_substring(input, inp_x+1, inp_size);
                 GString *new = g_string_new(start);
                 g_string_append(new, end);
 
-                for (*size = 0; *size < strlen(new->str); (*size)++) {
-                    input[*size] = new->str[*size];
+                for (inp_size = 0; inp_size < strlen(new->str); inp_size++) {
+                    input[inp_size] = new->str[inp_size];
                 }
-                input[*size] = '\0';
+                input[inp_size] = '\0';
 
                 g_free(start);
                 g_free(end);
@@ -497,9 +503,9 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 return 0;
             }
         case KEY_CTRL_P:
-            prev = cmd_history_previous(input, size);
+            prev = cmd_history_previous(input, &inp_size);
             if (prev) {
-                inp_replace_input(input, prev, size);
+                inp_replace_input(input, prev, &inp_size);
             }
             return 1;
 
@@ -508,13 +514,13 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
                 return 0;
             }
         case KEY_CTRL_N:
-            next = cmd_history_next(input, size);
+            next = cmd_history_next(input, &inp_size);
             if (next) {
-                inp_replace_input(input, next, size);
-            } else if (*size != 0) {
-                input[*size] = '\0';
+                inp_replace_input(input, next, &inp_size);
+            } else if (inp_size != 0) {
+                input[inp_size] = '\0';
                 cmd_history_append(input);
-                inp_replace_input(input, "", size);
+                inp_replace_input(input, "", &inp_size);
             }
             return 1;
 
@@ -537,23 +543,23 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
             return 1;
 
         case 9: // tab
-            if (*size != 0) {
+            if (inp_size != 0) {
                 if ((strncmp(input, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
-                    muc_autocomplete(input, size);
+                    muc_autocomplete(input, &inp_size);
                 } else if (strncmp(input, "/", 1) == 0) {
-                    cmd_autocomplete(input, size);
+                    cmd_autocomplete(input, &inp_size);
                 }
             }
             return 1;
 
         case KEY_CTRL_W:
-            _delete_previous_word(input, size);
+            _delete_previous_word(input);
             return 1;
             break;
 
         case KEY_CTRL_U:
             while (getcurx(inp_win) > 0) {
-                _delete_previous_word(input, size);
+                _delete_previous_word(input);
             }
             return 1;
             break;
@@ -565,7 +571,7 @@ _handle_edit(int result, const wint_t ch, char *input, int *size)
 }
 
 static void
-_handle_backspace(int display_size, int inp_x, int *size, char *input)
+_handle_backspace(int display_size, int inp_x, char *input)
 {
     roster_reset_search_attempts();
     if (display_size > 0) {
@@ -573,10 +579,10 @@ _handle_backspace(int display_size, int inp_x, int *size, char *input)
         // if at end, delete last char
         if (inp_x >= display_size) {
             gchar *start = g_utf8_substring(input, 0, inp_x-1);
-            for (*size = 0; *size < strlen(start); (*size)++) {
-                input[*size] = start[*size];
+            for (inp_size = 0; inp_size < strlen(start); inp_size++) {
+                input[inp_size] = start[inp_size];
             }
-            input[*size] = '\0';
+            input[inp_size] = '\0';
 
             g_free(start);
 
@@ -587,14 +593,14 @@ _handle_backspace(int display_size, int inp_x, int *size, char *input)
         // if in middle, delete and shift chars left
         } else if (inp_x > 0 && inp_x < display_size) {
             gchar *start = g_utf8_substring(input, 0, inp_x - 1);
-            gchar *end = g_utf8_substring(input, inp_x, *size);
+            gchar *end = g_utf8_substring(input, inp_x, inp_size);
             GString *new = g_string_new(start);
             g_string_append(new, end);
 
-            for (*size = 0; *size < strlen(new->str); (*size)++) {
-                input[*size] = new->str[*size];
+            for (inp_size = 0; inp_size < strlen(new->str); inp_size++) {
+                input[inp_size] = new->str[inp_size];
             }
-            input[*size] = '\0';
+            input[inp_size] = '\0';
 
             g_free(start);
             g_free(end);
@@ -619,7 +625,7 @@ _handle_backspace(int display_size, int inp_x, int *size, char *input)
 }
 
 static int
-_handle_alt_key(char *input, int *size, int key)
+_handle_alt_key(char *input, int key)
 {
     switch (key)
     {
@@ -661,7 +667,7 @@ _handle_alt_key(char *input, int *size, int key)
             break;
         case 263:
         case 127:
-            _delete_previous_word(input, size);
+            _delete_previous_word(input);
             break;
         default:
             break;
@@ -670,12 +676,12 @@ _handle_alt_key(char *input, int *size, int key)
 }
 
 static void
-_delete_previous_word(char *input, int *size)
+_delete_previous_word(char *input)
 {
     int end_del = getcurx(inp_win);
     int start_del = end_del;
 
-    input[*size] = '\0';
+    input[inp_size] = '\0';
     gchar *curr_ch = g_utf8_offset_to_pointer(input, end_del);
     curr_ch = g_utf8_find_prev_char(input, curr_ch);
     gchar *prev_ch;
@@ -721,8 +727,8 @@ _delete_previous_word(char *input, int *size)
         input[strlen(start_string)+i] = end_string[i];
     }
 
-    *size = strlen(start_string)+i;
-    input[*size] = '\0';
+    inp_size = strlen(start_string)+i;
+    input[inp_size] = '\0';
 
     _clear_input();
     waddstr(inp_win, input);
