@@ -117,13 +117,13 @@ accounts_close(void)
 }
 
 char *
-accounts_find_enabled(char *prefix)
+accounts_find_enabled(const char * const prefix)
 {
     return autocomplete_complete(enabled_ac, prefix, TRUE);
 }
 
 char *
-accounts_find_all(char *prefix)
+accounts_find_all(const char * const prefix)
 {
     return autocomplete_complete(all_ac, prefix, TRUE);
 }

@@ -158,7 +158,7 @@ presence_clear_sub_requests(void)
 }
 
 char *
-presence_sub_request_find(char * search_str)
+presence_sub_request_find(const char * const search_str)
 {
     return autocomplete_complete(sub_requests_ac, search_str, TRUE);
 }

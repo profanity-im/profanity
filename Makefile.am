@@ -21,9 +21,9 @@ core_sources = \
 	src/ui/windows.c src/ui/windows.h \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
-	src/command/command.h src/command/command.c src/command/history.c \
+	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
-	src/command/history.h src/tools/parser.c \
+	src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
@@ -53,9 +53,9 @@ tests_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/windows.c src/ui/windows.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h \
-	src/command/command.h src/command/command.c src/command/history.c \
+	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
-	src/command/history.h src/tools/parser.c \
+	src/tools/parser.c \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \

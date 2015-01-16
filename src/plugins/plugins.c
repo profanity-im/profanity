@@ -172,9 +172,9 @@ plugins_get_lang_string(ProfPlugin *plugin)
 }
 
 char *
-plugins_autocomplete(char *input, int *size)
+plugins_autocomplete(const char * const input)
 {
-    return autocompleters_complete(input, size);
+    return autocompleters_complete(input);
 }
 
 void

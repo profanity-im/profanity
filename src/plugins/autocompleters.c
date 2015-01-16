@@ -58,14 +58,14 @@ autocompleters_add(const char *key, char **items)
 }
 
 char *
-autocompleters_complete(char *input, int *size)
+autocompleters_complete(const char * const input)
 {
     char *result = NULL;
 
     GList *keys = g_hash_table_get_keys(autocompleters);
     GList *curr = keys;
     while (curr != NULL) {
-        result = autocomplete_param_with_ac(input, size, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
+        result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
         if (result != NULL) {
             return result;
         }

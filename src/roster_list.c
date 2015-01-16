@@ -344,13 +344,13 @@ roster_has_pending_subscriptions(void)
 }
 
 char *
-roster_contact_autocomplete(char *search_str)
+roster_contact_autocomplete(const char * const search_str)
 {
     return autocomplete_complete(name_ac, search_str, TRUE);
 }
 
 char *
-roster_fulljid_autocomplete(char *search_str)
+roster_fulljid_autocomplete(const char * const search_str)
 {
     return autocomplete_complete(fulljid_ac, search_str, TRUE);
 }
@@ -406,13 +406,13 @@ roster_get_groups(void)
 }
 
 char *
-roster_group_autocomplete(char *search_str)
+roster_group_autocomplete(const char * const search_str)
 {
     return autocomplete_complete(groups_ac, search_str, TRUE);
 }
 
 char *
-roster_barejid_autocomplete(char *search_str)
+roster_barejid_autocomplete(const char * const search_str)
 {
     return autocomplete_complete(barejid_ac, search_str, TRUE);
 }

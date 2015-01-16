@@ -114,7 +114,7 @@ void prefs_close(void);
 
 char * prefs_find_login(char *prefix);
 void prefs_reset_login_search(void);
-char * prefs_autocomplete_boolean_choice(char *prefix);
+char * prefs_autocomplete_boolean_choice(const char * const prefix);
 void prefs_reset_boolean_choice(void);
 
 gint prefs_get_gone(void);

@@ -50,6 +50,7 @@
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "tools/history.h"
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
@@ -72,6 +73,7 @@
 #define KEY_CTRL_U 0025
 #define KEY_CTRL_W 0027
 
+#define MAX_HISTORY 100
 #define INP_WIN_MAX 1000
 
 static WINDOW *inp_win;
@@ -79,6 +81,7 @@ static int pad_start = 0;
 static int rows, cols;
 static char line[INP_WIN_MAX];
 static int inp_size;
+static History history;
 
 static int _handle_edit(int key_type, const wint_t ch);
 static int _handle_alt_key(int key);
@@ -103,6 +106,7 @@ create_input_window(void)
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
     _inp_win_update_virtual();
+    history = history_new(MAX_HISTORY);
 }
 
 void
@@ -227,7 +231,7 @@ inp_read(int *key_type, wint_t *ch)
     echo();
 
     if (*ch == '\n') {
-        line[inp_size++] = '\0';
+        line[inp_size] = '\0';
         inp_size = 0;
         return strdup(line);
     } else {
@@ -255,13 +259,13 @@ inp_put_back(void)
 }
 
 void
-inp_replace_input(char *input, const char * const new_input, int *size)
+inp_replace_input(const char * const new_input)
 {
-    strncpy(input, new_input, INP_WIN_MAX);
-    *size = strlen(input);
+    strncpy(line, new_input, INP_WIN_MAX);
+    inp_size = strlen(line);
     inp_win_reset();
-    input[*size] = '\0';
-    waddstr(inp_win, input);
+    line[inp_size] = '\0';
+    waddstr(inp_win, line);
     _go_to_end();
 }
 
@@ -271,6 +275,12 @@ inp_win_reset(void)
     _clear_input();
     pad_start = 0;
     _inp_win_update_virtual();
+}
+
+void
+inp_history_append(char *inp)
+{
+    history_append(history, inp);
 }
 
 static void
@@ -497,9 +507,10 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_P:
-            prev = cmd_history_previous(line, &inp_size);
+            line[inp_size] = '\0';
+            prev = history_previous(history, line);
             if (prev) {
-                inp_replace_input(line, prev, &inp_size);
+                inp_replace_input(prev);
             }
             return 1;
 
@@ -508,13 +519,14 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_N:
-            next = cmd_history_next(line, &inp_size);
+            line[inp_size] = '\0';
+            next = history_next(history, line);
             if (next) {
-                inp_replace_input(line, next, &inp_size);
+                inp_replace_input(next);
             } else if (inp_size != 0) {
                 line[inp_size] = '\0';
-                cmd_history_append(line);
-                inp_replace_input(line, "", &inp_size);
+                history_append(history, line);
+                inp_replace_input("");
             }
             return 1;
 
@@ -538,10 +550,21 @@ _handle_edit(int key_type, const wint_t ch)
 
         case 9: // tab
             if (inp_size != 0) {
+                line[inp_size] = '\0';
                 if ((strncmp(line, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
-                    muc_autocomplete(line, &inp_size);
+                    char *result = muc_autocomplete(line);
+                    if (result) {
+                        cons_debug("ac result = %s", result);
+                        inp_replace_input(result);
+                        free(result);
+                    }
                 } else if (strncmp(line, "/", 1) == 0) {
-                    cmd_autocomplete(line, &inp_size);
+                    char *result = cmd_autocomplete(line);
+                    if (result) {
+                        cons_debug("ac result = %s", result);
+                        inp_replace_input(result);
+                        free(result);
+                    }
                 }
             }
             return 1;

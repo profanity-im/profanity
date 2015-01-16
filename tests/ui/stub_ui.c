@@ -328,9 +328,10 @@ char * ui_readline(void)
     return NULL;
 }
 
+void ui_inp_history_append(char *inp) {}
+
 void ui_input_clear(void) {}
 void ui_input_nonblocking(gboolean reset) {}
-void ui_replace_input(char *input, const char * const new_input, int *size) {}
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void)) {}
 
