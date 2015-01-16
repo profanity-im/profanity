@@ -220,7 +220,7 @@ bookmark_get_list(void)
 }
 
 char *
-bookmark_find(char *search_str)
+bookmark_find(const char * const search_str)
 {
     return autocomplete_complete(bookmark_ac, search_str, TRUE);
 }

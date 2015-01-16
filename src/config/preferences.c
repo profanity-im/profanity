@@ -154,7 +154,7 @@ prefs_close(void)
 }
 
 char *
-prefs_autocomplete_boolean_choice(char *prefix)
+prefs_autocomplete_boolean_choice(const char * const prefix)
 {
     return autocomplete_complete(boolean_choice_ac, prefix, TRUE);
 }

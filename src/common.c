@@ -191,7 +191,7 @@ str_replace(const char *string, const char *substr,
 }
 
 int
-str_contains(char str[], int size, char ch)
+str_contains(const char str[], int size, char ch)
 {
     int i;
     for (i = 0; i < size; i++) {

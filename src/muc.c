@@ -141,7 +141,7 @@ muc_invites_reset_ac(void)
 }
 
 char *
-muc_invites_find(char *search_str)
+muc_invites_find(const char * const search_str)
 {
     return autocomplete_complete(invite_ac, search_str, TRUE);
 }
@@ -632,8 +632,8 @@ muc_roster_nick_change_complete(const char * const room,
     return NULL;
 }
 
-void
-muc_autocomplete(char *input, int *size)
+char *
+muc_autocomplete(const char * const input)
 {
     win_type_t wintype = ui_current_win_type();
     if (wintype == WIN_MUC) {
@@ -641,8 +641,7 @@ muc_autocomplete(char *input, int *size)
         ChatRoom *chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
 
         if (chat_room && chat_room->nick_ac) {
-            input[*size] = '\0';
-            char *search_str = NULL;
+            const char * search_str = NULL;
 
             gchar *last_space = g_strrstr(input, " ");
             if (!last_space) {
@@ -664,12 +663,15 @@ muc_autocomplete(char *input, int *size)
                 if (!last_space || (*(last_space+1) == '\0')) {
                     g_string_append(replace_with, ": ");
                 }
-                ui_replace_input(input, replace_with->str, size);
-                g_string_free(replace_with, TRUE);
                 g_free(result);
+                result = replace_with->str;
+                g_string_free(replace_with, FALSE);
+                return result;
             }
         }
     }
+
+    return NULL;
 }
 
 void

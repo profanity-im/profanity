@@ -230,7 +230,6 @@ void ui_statusbar_new(const int win);
 char * ui_readline(void);
 void ui_input_clear(void);
 void ui_input_nonblocking(gboolean);
-void ui_replace_input(char *input, const char * const new_input, int *size);
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void));
 
@@ -239,6 +238,8 @@ gboolean ui_xmlconsole_exists(void);
 void ui_open_xmlconsole_win(void);
 
 gboolean ui_win_has_unsaved_form(int num);
+
+void ui_inp_history_append(char *inp);
 
 // console window actions
 void cons_show(const char * const msg, ...);

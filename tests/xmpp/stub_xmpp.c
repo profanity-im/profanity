@@ -91,7 +91,7 @@ gint presence_sub_request_count(void)
 
 void presence_reset_sub_request_search(void) {}
 
-char * presence_sub_request_find(char * search_str)
+char * presence_sub_request_find(const char * const search_str)
 {
     return  NULL;
 }
@@ -189,7 +189,7 @@ const GList * bookmark_get_list(void)
     return (GList *)mock();
 }
 
-char * bookmark_find(char *search_str)
+char * bookmark_find(const char * const search_str)
 {
     return NULL;
 }

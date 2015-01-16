@@ -43,8 +43,8 @@
 void accounts_load(void);
 void accounts_close(void);
 
-char * accounts_find_all(char *prefix);
-char * accounts_find_enabled(char *prefix);
+char * accounts_find_all(const char * const prefix);
+char * accounts_find_enabled(const char * const prefix);
 void accounts_reset_all_search(void);
 void accounts_reset_enabled_search(void);
 void accounts_add(const char *jid, const char *altdomain, const int port);

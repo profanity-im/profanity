@@ -316,7 +316,7 @@ parse_args_with_freetext(const char * const inp, int min, int max, gboolean *res
 }
 
 int
-count_tokens(char *string)
+count_tokens(const char * const string)
 {
     int length = g_utf8_strlen(string, -1);
     gboolean in_quotes = FALSE;
@@ -347,7 +347,7 @@ count_tokens(char *string)
 }
 
 char *
-get_start(char *string, int tokens)
+get_start(const char * const string, int tokens)
 {
     GString *result = g_string_new("");
     int length = g_utf8_strlen(string, -1);
