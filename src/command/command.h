@@ -44,7 +44,7 @@ GHashTable *commands;
 void cmd_init(void);
 void cmd_uninit(void);
 
-void cmd_autocomplete(char *input, int *size);
+char* cmd_autocomplete(const char * const input);
 void cmd_reset_autocomplete(void);
 void cmd_autocomplete_add(char *value);
 void cmd_autocomplete_remove(char *value);
@@ -63,7 +63,7 @@ GSList * cmd_get_settings_help(void);
 GSList * cmd_get_presence_help(void);
 
 void cmd_history_append(char *inp);
-char *cmd_history_previous(char *inp, int *size);
-char *cmd_history_next(char *inp, int *size);
+char *cmd_history_previous(char *inp);
+char *cmd_history_next(char *inp);
 
 #endif

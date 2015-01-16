@@ -59,12 +59,12 @@ char * roster_barejid_from_name(const char * const name);
 GSList * roster_get_contacts(void);
 GSList * roster_get_contacts_online(void);
 gboolean roster_has_pending_subscriptions(void);
-char * roster_contact_autocomplete(char *search_str);
-char * roster_fulljid_autocomplete(char *search_str);
+char * roster_contact_autocomplete(const char * const search_str);
+char * roster_fulljid_autocomplete(const char * const search_str);
 GSList * roster_get_group(const char * const group);
 GSList * roster_get_groups(void);
-char * roster_group_autocomplete(char *search_str);
-char * roster_barejid_autocomplete(char *search_str);
+char * roster_group_autocomplete(const char * const search_str);
+char * roster_barejid_autocomplete(const char * const search_str);
 GSList * roster_get_contacts_by_presence(const char * const presence);
 GSList * roster_get_nogroup(void);
 

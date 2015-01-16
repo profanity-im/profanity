@@ -163,7 +163,7 @@ void presence_subscription(const char * const jid, const jabber_subscr_t action)
 GSList* presence_get_subscription_requests(void);
 gint presence_sub_request_count(void);
 void presence_reset_sub_request_search(void);
-char * presence_sub_request_find(char * search_str);
+char * presence_sub_request_find(const char * const search_str);
 void presence_join_room(char *room, char *nick, char * passwd);
 void presence_change_room_nick(const char * const room, const char * const nick);
 void presence_leave_chat_room(const char * const room_jid);
@@ -208,7 +208,7 @@ gboolean bookmark_update(const char *jid, const char *nick, const char *password
 gboolean bookmark_remove(const char *jid);
 gboolean bookmark_join(const char *jid);
 const GList * bookmark_get_list(void);
-char * bookmark_find(char *search_str);
+char * bookmark_find(const char * const search_str);
 void bookmark_autocomplete_reset(void);
 
 void roster_send_name_change(const char * const barejid, const char * const new_name, GSList *groups);

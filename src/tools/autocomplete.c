@@ -169,7 +169,7 @@ autocomplete_contains(Autocomplete ac, const char *value)
 }
 
 gchar *
-autocomplete_complete(Autocomplete ac, gchar *search_str, gboolean quote)
+autocomplete_complete(Autocomplete ac, const gchar *search_str, gboolean quote)
 {
     gchar *found = NULL;
 
@@ -216,8 +216,7 @@ autocomplete_complete(Autocomplete ac, gchar *search_str, gboolean quote)
 }
 
 char *
-autocomplete_param_with_func(char *input, int *size, char *command,
-    autocomplete_func func)
+autocomplete_param_with_func(const char * const input, char *command, autocomplete_func func)
 {
     GString *auto_msg = NULL;
     char *result = NULL;
@@ -225,15 +224,16 @@ autocomplete_param_with_func(char *input, int *size, char *command,
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
 
-    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+    if ((strncmp(input, command_cpy, len) == 0) && (strlen(input) > len)) {
         int i;
-        char inp_cpy[*size];
-        for(i = len; i < *size; i++) {
-            inp_cpy[i-len] = input[i];
+        int inp_len = strlen(input);
+        char prefix[inp_len];
+        for(i = len; i < inp_len; i++) {
+            prefix[i-len] = input[i];
         }
-        inp_cpy[(*size) - len] = '\0';
+        prefix[inp_len - len] = '\0';
 
-        char *found = func(inp_cpy);
+        char *found = func(prefix);
         if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -247,23 +247,23 @@ autocomplete_param_with_func(char *input, int *size, char *command,
 }
 
 char *
-autocomplete_param_with_ac(char *input, int *size, char *command,
-    Autocomplete ac, gboolean quote)
+autocomplete_param_with_ac(const char * const input, char *command, Autocomplete ac, gboolean quote)
 {
     GString *auto_msg = NULL;
     char *result = NULL;
     char *command_cpy = malloc(strlen(command) + 2);
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
-    if ((strncmp(input, command_cpy, len) == 0) && (*size > len)) {
+    int inp_len = strlen(input);
+    if ((strncmp(input, command_cpy, len) == 0) && (strlen(input) > len)) {
         int i;
-        char inp_cpy[*size];
-        for(i = len; i < *size; i++) {
-            inp_cpy[i-len] = input[i];
+        char prefix[inp_len];
+        for(i = len; i < inp_len; i++) {
+            prefix[i-len] = input[i];
         }
-        inp_cpy[(*size) - len] = '\0';
+        prefix[inp_len - len] = '\0';
 
-        char *found = autocomplete_complete(ac, inp_cpy, quote);
+        char *found = autocomplete_complete(ac, prefix, quote);
         if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -278,28 +278,18 @@ autocomplete_param_with_ac(char *input, int *size, char *command,
 }
 
 char *
-autocomplete_param_no_with_func(char *input, int *size, char *command,
-    int arg_number, autocomplete_func func)
+autocomplete_param_no_with_func(const char * const input, char *command, int arg_number, autocomplete_func func)
 {
-    if (strncmp(input, command, strlen(command)) == 0 && (*size > strlen(command))) {
-        int i = 0;
+    if (strncmp(input, command, strlen(command)) == 0 && (strlen(input) > strlen(command))) {
         GString *result_str = NULL;
 
-        // copy and null terminate input
-        gchar inp_cpy[*size];
-        for (i = 0; i < *size; i++) {
-            inp_cpy[i] = input[i];
-        }
-        inp_cpy[i] = '\0';
-        g_strstrip(inp_cpy);
-
         // count tokens properly
-        int num_tokens = count_tokens(inp_cpy);
+        int num_tokens = count_tokens(input);
 
         // if correct number of tokens, then candidate for autocompletion of last param
         if (num_tokens == arg_number) {
-            gchar *start_str = get_start(inp_cpy, arg_number);
-            gchar *comp_str = g_strdup(&inp_cpy[strlen(start_str)]);
+            gchar *start_str = get_start(input, arg_number);
+            gchar *comp_str = g_strdup(&input[strlen(start_str)]);
 
             // autocomplete param
             if (comp_str) {

@@ -103,7 +103,7 @@ gboolean create_dir(char *name);
 gboolean mkdir_recursive(const char *dir);
 char * str_replace(const char *string, const char *substr,
     const char *replacement);
-int str_contains(char str[], int size, char ch);
+int str_contains(const char str[], int size, char ch);
 char * prof_getline(FILE *stream);
 char* release_get_latest(void);
 gboolean release_is_new(char *found_version);

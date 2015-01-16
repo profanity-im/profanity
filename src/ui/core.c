@@ -204,15 +204,15 @@ ui_readline(void)
 }
 
 void
-ui_input_clear(void)
+ui_inp_history_append(char *inp)
 {
-    inp_win_reset();
+    inp_history_append(inp);
 }
 
 void
-ui_replace_input(char *input, const char * const new_input, int *size)
+ui_input_clear(void)
 {
-    inp_replace_input(input, new_input, size);
+    inp_win_reset();
 }
 
 void
