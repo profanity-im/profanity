@@ -556,14 +556,12 @@ _handle_edit(int key_type, const wint_t ch)
                 if ((strncmp(input, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
                     char *result = muc_autocomplete(input);
                     if (result) {
-                        cons_debug("ac result = %s", result);
                         inp_replace_input(result);
                         free(result);
                     }
                 } else if (strncmp(input, "/", 1) == 0) {
                     char *result = cmd_autocomplete(input);
                     if (result) {
-                        cons_debug("ac result = %s", result);
                         inp_replace_input(result);
                         free(result);
                     }
