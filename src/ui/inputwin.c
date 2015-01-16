@@ -77,11 +77,13 @@
 #define INP_WIN_MAX 1000
 
 static WINDOW *inp_win;
+static History history;
+
+static char input[INP_WIN_MAX];
+static int input_len_bytes;
+
 static int pad_start = 0;
 static int rows, cols;
-static char line[INP_WIN_MAX];
-static int inp_size;
-static History history;
 
 static int _handle_edit(int key_type, const wint_t ch);
 static int _handle_alt_key(int key);
@@ -150,7 +152,7 @@ inp_read(int *key_type, wint_t *ch)
     *key_type = wget_wch(inp_win, ch);
 
     gboolean in_command = FALSE;
-    if ((display_size > 0 && line[0] == '/') ||
+    if ((display_size > 0 && input[0] == '/') ||
             (display_size == 0 && *ch == '/')) {
         in_command = TRUE;
     }
@@ -165,7 +167,7 @@ inp_read(int *key_type, wint_t *ch)
     // if it wasn't an arrow key etc
     if (!_handle_edit(*key_type, *ch)) {
         if (_printable(*ch) && *key_type != KEY_CODE_YES) {
-            if (inp_size >= INP_WIN_MAX) {
+            if (input_len_bytes >= INP_WIN_MAX) {
                 *ch = ERR;
                 return NULL;
             }
@@ -177,9 +179,9 @@ inp_read(int *key_type, wint_t *ch)
                 char bytes[MB_CUR_MAX];
                 size_t utf_len = wcrtomb(bytes, *ch, NULL);
 
-                char *next_ch = g_utf8_offset_to_pointer(line, inp_x);
+                char *next_ch = g_utf8_offset_to_pointer(input, inp_x);
                 char *offset;
-                for (offset = &line[inp_size - 1]; offset >= next_ch; offset--) {
+                for (offset = &input[input_len_bytes - 1]; offset >= next_ch; offset--) {
                     *(offset + utf_len) = *offset;
                 }
                 int i;
@@ -187,8 +189,8 @@ inp_read(int *key_type, wint_t *ch)
                      *(next_ch + i) = bytes[i];
                 }
 
-                inp_size += utf_len;
-                line[inp_size] = '\0';
+                input_len_bytes += utf_len;
+                input[input_len_bytes] = '\0';
                 waddstr(inp_win, next_ch);
                 wmove(inp_win, 0, inp_x + 1);
 
@@ -206,9 +208,9 @@ inp_read(int *key_type, wint_t *ch)
                 if (utf_len < MB_CUR_MAX) {
                     int i;
                     for (i = 0 ; i < utf_len; i++) {
-                        line[inp_size++] = bytes[i];
+                        input[input_len_bytes++] = bytes[i];
                     }
-                    line[inp_size] = '\0';
+                    input[input_len_bytes] = '\0';
 
                     bytes[utf_len] = '\0';
                     waddstr(inp_win, bytes);
@@ -231,9 +233,9 @@ inp_read(int *key_type, wint_t *ch)
     echo();
 
     if (*ch == '\n') {
-        line[inp_size] = '\0';
-        inp_size = 0;
-        return strdup(line);
+        input[input_len_bytes] = '\0';
+        input_len_bytes = 0;
+        return strdup(input);
     } else {
         return NULL;
     }
@@ -261,11 +263,11 @@ inp_put_back(void)
 void
 inp_replace_input(const char * const new_input)
 {
-    strncpy(line, new_input, INP_WIN_MAX);
-    inp_size = strlen(line);
+    strncpy(input, new_input, INP_WIN_MAX);
+    input_len_bytes = strlen(input);
     inp_win_reset();
-    line[inp_size] = '\0';
-    waddstr(inp_win, line);
+    input[input_len_bytes] = '\0';
+    waddstr(inp_win, input);
     _go_to_end();
 }
 
@@ -307,9 +309,9 @@ _handle_edit(int key_type, const wint_t ch)
 
     // CTRL-LEFT
     if ((key_type == KEY_CODE_YES) && (ch == 547 || ch == 545 || ch == 544 || ch == 540 || ch == 539) && (inp_x > 0)) {
-        line[inp_size] = '\0';
-        gchar *curr_ch = g_utf8_offset_to_pointer(line, inp_x);
-        curr_ch = g_utf8_find_prev_char(line, curr_ch);
+        input[input_len_bytes] = '\0';
+        gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
+        curr_ch = g_utf8_find_prev_char(input, curr_ch);
         gchar *prev_ch;
         gunichar curr_uni;
         gunichar prev_uni;
@@ -318,9 +320,9 @@ _handle_edit(int key_type, const wint_t ch)
             curr_uni = g_utf8_get_char(curr_ch);
 
             if (g_unichar_isspace(curr_uni)) {
-                curr_ch = g_utf8_find_prev_char(line, curr_ch);
+                curr_ch = g_utf8_find_prev_char(input, curr_ch);
             } else {
-                prev_ch = g_utf8_find_prev_char(line, curr_ch);
+                prev_ch = g_utf8_find_prev_char(input, curr_ch);
                 if (prev_ch == NULL) {
                     curr_ch = NULL;
                     break;
@@ -339,7 +341,7 @@ _handle_edit(int key_type, const wint_t ch)
             inp_x = 0;
             wmove(inp_win, 0, inp_x);
         } else {
-            glong offset = g_utf8_pointer_to_offset(line, curr_ch);
+            glong offset = g_utf8_pointer_to_offset(input, curr_ch);
             inp_x = offset;
             wmove(inp_win, 0, inp_x);
         }
@@ -357,14 +359,14 @@ _handle_edit(int key_type, const wint_t ch)
 
     // CTRL-RIGHT
     } else if ((key_type == KEY_CODE_YES) && (ch == 562 || ch == 560 || ch == 555 || ch == 559 || ch == 554) && (inp_x < display_size)) {
-        line[inp_size] = '\0';
-        gchar *curr_ch = g_utf8_offset_to_pointer(line, inp_x);
+        input[input_len_bytes] = '\0';
+        gchar *curr_ch = g_utf8_offset_to_pointer(input, inp_x);
         gchar *next_ch = g_utf8_find_next_char(curr_ch, NULL);
         gunichar curr_uni;
         gunichar next_uni;
         gboolean moved = FALSE;
 
-        while (g_utf8_pointer_to_offset(line, next_ch) < display_size) {
+        while (g_utf8_pointer_to_offset(input, next_ch) < display_size) {
             curr_uni = g_utf8_get_char(curr_ch);
             next_uni = g_utf8_get_char(next_ch);
             curr_ch = next_ch;
@@ -381,7 +383,7 @@ _handle_edit(int key_type, const wint_t ch)
             inp_x = display_size;
             wmove(inp_win, 0, inp_x);
         } else {
-            glong offset = g_utf8_pointer_to_offset(line, curr_ch);
+            glong offset = g_utf8_pointer_to_offset(input, curr_ch);
             if (offset == display_size - 1) {
                 inp_x = offset + 1;
             } else {
@@ -418,7 +420,7 @@ _handle_edit(int key_type, const wint_t ch)
             if (next_ch != ERR) {
                 return _handle_alt_key(next_ch);
             } else {
-                inp_size = 0;
+                input_len_bytes = 0;
                 inp_win_reset();
                 return 1;
             }
@@ -439,33 +441,33 @@ _handle_edit(int key_type, const wint_t ch)
             }
         case KEY_CTRL_D:
             if (inp_x == display_size-1) {
-                gchar *start = g_utf8_substring(line, 0, inp_x);
-                for (inp_size = 0; inp_size < strlen(start); inp_size++) {
-                    line[inp_size] = start[inp_size];
+                gchar *start = g_utf8_substring(input, 0, inp_x);
+                for (input_len_bytes = 0; input_len_bytes < strlen(start); input_len_bytes++) {
+                    input[input_len_bytes] = start[input_len_bytes];
                 }
-                line[inp_size] = '\0';
+                input[input_len_bytes] = '\0';
 
                 g_free(start);
 
                 _clear_input();
-                waddstr(inp_win, line);
+                waddstr(inp_win, input);
             } else if (inp_x < display_size-1) {
-                gchar *start = g_utf8_substring(line, 0, inp_x);
-                gchar *end = g_utf8_substring(line, inp_x+1, inp_size);
+                gchar *start = g_utf8_substring(input, 0, inp_x);
+                gchar *end = g_utf8_substring(input, inp_x+1, input_len_bytes);
                 GString *new = g_string_new(start);
                 g_string_append(new, end);
 
-                for (inp_size = 0; inp_size < strlen(new->str); inp_size++) {
-                    line[inp_size] = new->str[inp_size];
+                for (input_len_bytes = 0; input_len_bytes < strlen(new->str); input_len_bytes++) {
+                    input[input_len_bytes] = new->str[input_len_bytes];
                 }
-                line[inp_size] = '\0';
+                input[input_len_bytes] = '\0';
 
                 g_free(start);
                 g_free(end);
                 g_string_free(new, FALSE);
 
                 _clear_input();
-                waddstr(inp_win, line);
+                waddstr(inp_win, input);
                 wmove(inp_win, 0, inp_x);
             }
             return 1;
@@ -507,8 +509,8 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_P:
-            line[inp_size] = '\0';
-            prev = history_previous(history, line);
+            input[input_len_bytes] = '\0';
+            prev = history_previous(history, input);
             if (prev) {
                 inp_replace_input(prev);
             }
@@ -519,13 +521,13 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_N:
-            line[inp_size] = '\0';
-            next = history_next(history, line);
+            input[input_len_bytes] = '\0';
+            next = history_next(history, input);
             if (next) {
                 inp_replace_input(next);
-            } else if (inp_size != 0) {
-                line[inp_size] = '\0';
-                history_append(history, line);
+            } else if (input_len_bytes != 0) {
+                input[input_len_bytes] = '\0';
+                history_append(history, input);
                 inp_replace_input("");
             }
             return 1;
@@ -549,17 +551,17 @@ _handle_edit(int key_type, const wint_t ch)
             return 1;
 
         case 9: // tab
-            if (inp_size != 0) {
-                line[inp_size] = '\0';
-                if ((strncmp(line, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
-                    char *result = muc_autocomplete(line);
+            if (input_len_bytes != 0) {
+                input[input_len_bytes] = '\0';
+                if ((strncmp(input, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
+                    char *result = muc_autocomplete(input);
                     if (result) {
                         cons_debug("ac result = %s", result);
                         inp_replace_input(result);
                         free(result);
                     }
-                } else if (strncmp(line, "/", 1) == 0) {
-                    char *result = cmd_autocomplete(line);
+                } else if (strncmp(input, "/", 1) == 0) {
+                    char *result = cmd_autocomplete(input);
                     if (result) {
                         cons_debug("ac result = %s", result);
                         inp_replace_input(result);
@@ -597,36 +599,36 @@ _handle_backspace(void)
 
         // if at end, delete last char
         if (inp_x >= display_size) {
-            gchar *start = g_utf8_substring(line, 0, inp_x-1);
-            for (inp_size = 0; inp_size < strlen(start); inp_size++) {
-                line[inp_size] = start[inp_size];
+            gchar *start = g_utf8_substring(input, 0, inp_x-1);
+            for (input_len_bytes = 0; input_len_bytes < strlen(start); input_len_bytes++) {
+                input[input_len_bytes] = start[input_len_bytes];
             }
-            line[inp_size] = '\0';
+            input[input_len_bytes] = '\0';
 
             g_free(start);
 
             _clear_input();
-            waddstr(inp_win, line);
+            waddstr(inp_win, input);
             wmove(inp_win, 0, inp_x -1);
 
         // if in middle, delete and shift chars left
         } else if (inp_x > 0 && inp_x < display_size) {
-            gchar *start = g_utf8_substring(line, 0, inp_x - 1);
-            gchar *end = g_utf8_substring(line, inp_x, inp_size);
+            gchar *start = g_utf8_substring(input, 0, inp_x - 1);
+            gchar *end = g_utf8_substring(input, inp_x, input_len_bytes);
             GString *new = g_string_new(start);
             g_string_append(new, end);
 
-            for (inp_size = 0; inp_size < strlen(new->str); inp_size++) {
-                line[inp_size] = new->str[inp_size];
+            for (input_len_bytes = 0; input_len_bytes < strlen(new->str); input_len_bytes++) {
+                input[input_len_bytes] = new->str[input_len_bytes];
             }
-            line[inp_size] = '\0';
+            input[input_len_bytes] = '\0';
 
             g_free(start);
             g_free(end);
             g_string_free(new, FALSE);
 
             _clear_input();
-            waddstr(inp_win, line);
+            waddstr(inp_win, input);
             wmove(inp_win, 0, inp_x -1);
         }
 
@@ -700,9 +702,9 @@ _delete_previous_word(void)
     int end_del = getcurx(inp_win);
     int start_del = end_del;
 
-    line[inp_size] = '\0';
-    gchar *curr_ch = g_utf8_offset_to_pointer(line, end_del);
-    curr_ch = g_utf8_find_prev_char(line, curr_ch);
+    input[input_len_bytes] = '\0';
+    gchar *curr_ch = g_utf8_offset_to_pointer(input, end_del);
+    curr_ch = g_utf8_find_prev_char(input, curr_ch);
     gchar *prev_ch;
     gunichar curr_uni;
     gunichar prev_uni;
@@ -711,9 +713,9 @@ _delete_previous_word(void)
         curr_uni = g_utf8_get_char(curr_ch);
 
         if (g_unichar_isspace(curr_uni)) {
-            curr_ch = g_utf8_find_prev_char(line, curr_ch);
+            curr_ch = g_utf8_find_prev_char(input, curr_ch);
         } else {
-            prev_ch = g_utf8_find_prev_char(line, curr_ch);
+            prev_ch = g_utf8_find_prev_char(input, curr_ch);
             if (prev_ch == NULL) {
                 curr_ch = NULL;
                 break;
@@ -731,26 +733,26 @@ _delete_previous_word(void)
     if (curr_ch == NULL) {
         start_del = 0;
     } else {
-        start_del = g_utf8_pointer_to_offset(line, curr_ch);
+        start_del = g_utf8_pointer_to_offset(input, curr_ch);
     }
 
-    gint len = g_utf8_strlen(line, -1);
-    gchar *start_string = g_utf8_substring(line, 0, start_del);
-    gchar *end_string = g_utf8_substring(line, end_del, len);
+    gint len = g_utf8_strlen(input, -1);
+    gchar *start_string = g_utf8_substring(input, 0, start_del);
+    gchar *end_string = g_utf8_substring(input, end_del, len);
 
     int i;
     for (i = 0; i < strlen(start_string); i++) {
-        line[i] = start_string[i];
+        input[i] = start_string[i];
     }
     for (i = 0; i < strlen(end_string); i++) {
-        line[strlen(start_string)+i] = end_string[i];
+        input[strlen(start_string)+i] = end_string[i];
     }
 
-    inp_size = strlen(start_string)+i;
-    line[inp_size] = '\0';
+    input_len_bytes = strlen(start_string)+i;
+    input[input_len_bytes] = '\0';
 
     _clear_input();
-    waddstr(inp_win, line);
+    waddstr(inp_win, input);
     wmove(inp_win, 0, start_del);
 
     // if gone off screen to left, jump left (half a screen worth)
@@ -788,8 +790,8 @@ _printable(const wint_t ch)
 static int
 _get_display_length(void)
 {
-    if (inp_size != 0) {
-        return g_utf8_strlen(line, inp_size);
+    if (input_len_bytes != 0) {
+        return g_utf8_strlen(input, input_len_bytes);
     } else {
         return 0;
     }
