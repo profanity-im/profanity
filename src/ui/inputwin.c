@@ -264,7 +264,7 @@ static int
 _get_display_length(void)
 {
     int len = 0;
-    gchar *curr = g_utf8_offset_to_pointer(line, 0);
+    gchar *curr = g_utf8_offset_to_pointer(input, 0);
     while (*curr != '\0') {
         gunichar curru = g_utf8_get_char(curr);
         if (g_unichar_iswide(curru)) {
