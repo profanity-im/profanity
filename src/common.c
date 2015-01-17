@@ -202,6 +202,28 @@ str_contains(const char str[], int size, char ch)
     return 0;
 }
 
+int
+utf8_display_len(const char * const str)
+{
+    if (!str) {
+        return 0;
+    }
+
+    int len = 0;
+    gchar *curr = g_utf8_offset_to_pointer(str, 0);
+    while (*curr != '\0') {
+        gunichar curru = g_utf8_get_char(curr);
+        if (g_unichar_iswide(curru)) {
+            len += 2;
+        } else {
+            len ++;
+        }
+        curr = g_utf8_next_char(curr);
+    }
+
+    return len;
+}
+
 char *
 prof_getline(FILE *stream)
 {

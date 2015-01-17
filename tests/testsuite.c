@@ -85,6 +85,12 @@ int main(int argc, char* argv[]) {
         unit_test(test_p_sha1_hash5),
         unit_test(test_p_sha1_hash6),
         unit_test(test_p_sha1_hash7),
+        unit_test(utf8_display_len_null_str),
+        unit_test(utf8_display_len_1_non_wide),
+        unit_test(utf8_display_len_1_wide),
+        unit_test(utf8_display_len_non_wide),
+        unit_test(utf8_display_len_wide),
+        unit_test(utf8_display_len_all_wide),
 
         unit_test(clear_empty),
         unit_test(reset_after_create),

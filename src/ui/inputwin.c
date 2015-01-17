@@ -92,7 +92,6 @@ static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(void);
 static void _delete_previous_word(void);
-static int _get_display_length(void);
 
 void
 create_input_window(void)
@@ -145,7 +144,7 @@ inp_block(void)
 char *
 inp_read(int *key_type, wint_t *ch)
 {
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
 
     // echo off, and get some more input
     noecho();
@@ -260,24 +259,6 @@ inp_put_back(void)
     _inp_win_update_virtual();
 }
 
-static int
-_get_display_length(void)
-{
-    int len = 0;
-    gchar *curr = g_utf8_offset_to_pointer(input, 0);
-    while (*curr != '\0') {
-        gunichar curru = g_utf8_get_char(curr);
-        if (g_unichar_iswide(curru)) {
-            len += 2;
-        } else {
-            len ++;
-        }
-        curr = g_utf8_next_char(curr);
-    }
-
-    return len;
-}
-
 void
 inp_replace_input(const char * const new_input)
 {
@@ -322,7 +303,7 @@ _handle_edit(int key_type, const wint_t ch)
     char *next = NULL;
     int inp_x = getcurx(inp_win);
     int next_ch;
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
 
     // CTRL-LEFT
     if ((key_type == KEY_CODE_YES) && (ch == 547 || ch == 545 || ch == 544 || ch == 540 || ch == 539) && (inp_x > 0)) {
@@ -608,7 +589,7 @@ static void
 _handle_backspace(void)
 {
     int inp_x = getcurx(inp_win);
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
     roster_reset_search_attempts();
     if (display_size > 0) {
 
@@ -784,7 +765,7 @@ _delete_previous_word(void)
 static void
 _go_to_end(void)
 {
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
     wmove(inp_win, 0, display_size);
     if (display_size > cols-2) {
         pad_start = display_size - cols + 1;
