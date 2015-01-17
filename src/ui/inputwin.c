@@ -588,29 +588,21 @@ _handle_edit(int key_type, const wint_t ch)
 static void
 _handle_backspace(void)
 {
-    int inp_x = getcurx(inp_win);
+    int col = getcurx(inp_win);
     int display_size = utf8_display_len(input);
+    int input_len_utf8 = g_utf8_strlen(input, -1);
     roster_reset_search_attempts();
+
     if (display_size > 0) {
-
         // if at end, delete last char
-        if (inp_x >= display_size) {
-            gchar *start = g_utf8_substring(input, 0, inp_x-1);
-            for (input_len_bytes = 0; input_len_bytes < strlen(start); input_len_bytes++) {
-                input[input_len_bytes] = start[input_len_bytes];
-            }
-            input[input_len_bytes] = '\0';
-
-            g_free(start);
-
-            _clear_input();
-            waddstr(inp_win, input);
-            wmove(inp_win, 0, inp_x -1);
+        if (col >= display_size) {
+            gchar *new_input = g_utf8_substring(input, 0, input_len_utf8-1);
+            inp_replace_input(new_input);
 
         // if in middle, delete and shift chars left
-        } else if (inp_x > 0 && inp_x < display_size) {
-            gchar *start = g_utf8_substring(input, 0, inp_x - 1);
-            gchar *end = g_utf8_substring(input, inp_x, input_len_bytes);
+        } else if (col > 0 && col < display_size) {
+            gchar *start = g_utf8_substring(input, 0, col - 1);
+            gchar *end = g_utf8_substring(input, col, input_len_bytes);
             GString *new = g_string_new(start);
             g_string_append(new, end);
 
@@ -625,11 +617,11 @@ _handle_backspace(void)
 
             _clear_input();
             waddstr(inp_win, input);
-            wmove(inp_win, 0, inp_x -1);
+            wmove(inp_win, 0, col -1);
         }
 
         // if gone off screen to left, jump left (half a screen worth)
-        if (inp_x <= pad_start) {
+        if (col <= pad_start) {
             pad_start = pad_start - (cols / 2);
             if (pad_start < 0) {
                 pad_start = 0;
