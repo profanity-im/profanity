@@ -92,7 +92,6 @@ static int _printable(const wint_t ch);
 static void _clear_input(void);
 static void _go_to_end(void);
 static void _delete_previous_word(void);
-static int _get_display_length(void);
 
 void
 create_input_window(void)
@@ -145,7 +144,7 @@ inp_block(void)
 char *
 inp_read(int *key_type, wint_t *ch)
 {
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
 
     // echo off, and get some more input
     noecho();
@@ -304,8 +303,7 @@ _handle_edit(int key_type, const wint_t ch)
     char *next = NULL;
     int inp_x = getcurx(inp_win);
     int next_ch;
-
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
 
     // CTRL-LEFT
     if ((key_type == KEY_CODE_YES) && (ch == 547 || ch == 545 || ch == 544 || ch == 540 || ch == 539) && (inp_x > 0)) {
@@ -591,7 +589,7 @@ static void
 _handle_backspace(void)
 {
     int inp_x = getcurx(inp_win);
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
     roster_reset_search_attempts();
     if (display_size > 0) {
 
@@ -767,7 +765,7 @@ _delete_previous_word(void)
 static void
 _go_to_end(void)
 {
-    int display_size = _get_display_length();
+    int display_size = utf8_display_len(input);
     wmove(inp_win, 0, display_size);
     if (display_size > cols-2) {
         pad_start = display_size - cols + 1;
@@ -783,14 +781,4 @@ _printable(const wint_t ch)
     bytes[utf_len] = '\0';
     gunichar unichar = g_utf8_get_char(bytes);
     return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
-}
-
-static int
-_get_display_length(void)
-{
-    if (input_len_bytes != 0) {
-        return g_utf8_strlen(input, input_len_bytes);
-    } else {
-        return 0;
-    }
 }

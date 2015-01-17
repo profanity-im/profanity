@@ -544,3 +544,46 @@ void test_p_sha1_hash7(void **state)
 
     assert_string_equal(result, "bNfKVfqEOGmzlH8M+e8FYTB46SU=");
 }
+
+void utf8_display_len_null_str(void **state)
+{
+    int result = utf8_display_len(NULL);
+
+    assert_int_equal(0, result);
+}
+
+void utf8_display_len_1_non_wide(void **state)
+{
+    int result = utf8_display_len("1");
+
+    assert_int_equal(1, result);
+}
+
+void utf8_display_len_1_wide(void **state)
+{
+    int result = utf8_display_len("四");
+
+    assert_int_equal(2, result);
+}
+
+void utf8_display_len_non_wide(void **state)
+{
+    int result = utf8_display_len("123456789abcdef");
+
+    assert_int_equal(15, result);
+}
+
+void utf8_display_len_wide(void **state)
+{
+    int result = utf8_display_len("12三四56");
+
+    assert_int_equal(8, result);
+}
+
+void utf8_display_len_all_wide(void **state)
+{
+    int result = utf8_display_len("ひらがな");
+
+    assert_int_equal(8, result);
+}
+
