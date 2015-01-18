@@ -79,8 +79,9 @@
 static WINDOW *inp_win;
 static History history;
 
+// input line
 static char line[INP_WIN_MAX];
-static int line_bytes_len;
+// current position in the utf8 string
 static int line_utf8_pos;
 
 static int pad_start = 0;
@@ -88,11 +89,15 @@ static int wrows, wcols;
 
 static int _handle_edit(int key_type, const wint_t ch);
 static int _handle_alt_key(int key);
+
+static void _handle_delete_previous_word(void);
 static void _handle_backspace(void);
-static int _printable(const wint_t ch);
+
 static void _clear_input(void);
 static void _go_to_end(void);
-static void _delete_previous_word(void);
+
+static gboolean _is_ctrl_left(int key_type, const wint_t ch);
+static gboolean _is_ctrl_right(int key_type, const wint_t ch);
 
 void
 create_input_window(void)
@@ -109,20 +114,20 @@ create_input_window(void)
     wmove(inp_win, 0, 0);
     _inp_win_update_virtual();
     history = history_new(MAX_HISTORY);
-    line_bytes_len = 0;
     line_utf8_pos = 0;
+    line[0] = '\0';
 }
 
 void
 inp_win_resize(void)
 {
-    int inp_x;
+    int col;
     getmaxyx(stdscr, wrows, wcols);
-    inp_x = getcurx(inp_win);
+    col = getcurx(inp_win);
 
     // if lost cursor off screen, move contents to show it
-    if (inp_x >= pad_start + wcols) {
-        pad_start = inp_x - (wcols / 2);
+    if (col >= pad_start + wcols) {
+        pad_start = col - (wcols / 2);
         if (pad_start < 0) {
             pad_start = 0;
         }
@@ -151,24 +156,25 @@ inp_read(int *key_type, wint_t *ch)
     noecho();
     *key_type = wget_wch(inp_win, ch);
 
-    int display_len = utf8_display_len(line);
+    int bytes_len = strlen(line);
+
     gboolean in_command = FALSE;
-    if ((display_len > 0 && line[0] == '/') ||
-            (display_len == 0 && *ch == '/')) {
+    if ((bytes_len > 0 && line[0] == '/') ||
+            (bytes_len == 0 && *ch == '/')) {
         in_command = TRUE;
     }
 
     if (*key_type == ERR) {
         prof_handle_idle();
     }
-    if ((*key_type != ERR) && (*key_type != KEY_CODE_YES) && !in_command && _printable(*ch)) {
+    if ((*key_type != ERR) && (*key_type != KEY_CODE_YES) && !in_command && utf8_is_printable(*ch)) {
         prof_handle_activity();
     }
 
     // if it wasn't an arrow key etc
     if (!_handle_edit(*key_type, *ch)) {
-        if (_printable(*ch) && *key_type != KEY_CODE_YES) {
-            if (line_bytes_len >= INP_WIN_MAX) {
+        if (utf8_is_printable(*ch) && *key_type != KEY_CODE_YES) {
+            if (bytes_len >= INP_WIN_MAX) {
                 *ch = ERR;
                 return NULL;
             }
@@ -205,7 +211,6 @@ inp_read(int *key_type, wint_t *ch)
 
             // otherwise just append
             } else {
-                int display_len = utf8_display_len(line);
                 char bytes[MB_CUR_MAX+1];
                 size_t utf8_ch_len = wcrtomb(bytes, *ch, NULL);
 
@@ -213,9 +218,9 @@ inp_read(int *key_type, wint_t *ch)
                 if (utf8_ch_len < MB_CUR_MAX) {
                     int i;
                     for (i = 0 ; i < utf8_ch_len; i++) {
-                        line[line_bytes_len++] = bytes[i];
+                        line[bytes_len++] = bytes[i];
                     }
-                    line[line_bytes_len] = '\0';
+                    line[bytes_len] = '\0';
 
                     bytes[utf8_ch_len] = '\0';
                     waddstr(inp_win, bytes);
@@ -232,7 +237,7 @@ inp_read(int *key_type, wint_t *ch)
                     // if gone over screen size follow input
                     int wrows, wcols;
                     getmaxyx(stdscr, wrows, wcols);
-                    if (display_len - pad_start > wcols-2) {
+                    if (col - pad_start > wcols-2) {
                         pad_start++;
                         _inp_win_update_virtual();
                     }
@@ -247,14 +252,14 @@ inp_read(int *key_type, wint_t *ch)
 
     char *result = NULL;
     if (*ch == '\n') {
-        line[line_bytes_len] = '\0';
         result = strdup(line);
         line[0] = '\0';
-        line_bytes_len = 0;
         line_utf8_pos = 0;
     }
 
     if (*ch != ERR && *key_type != ERR) {
+        cons_debug("BYTE LEN = %d", bytes_len);
+        cons_debug("UTF8 LEN = %d", utf8_display_len(line));
         cons_debug("CURR COL = %d", getcurx(inp_win));
         cons_debug("CURR UNI = %d", line_utf8_pos);
         cons_debug("");
@@ -285,11 +290,9 @@ inp_put_back(void)
 void
 inp_replace_input(const char * const new_input)
 {
+    _clear_input();
     strncpy(line, new_input, INP_WIN_MAX);
-    line_bytes_len = strlen(line);
-    inp_win_reset();
     waddstr(inp_win, line);
-
     _go_to_end();
 }
 
@@ -297,7 +300,6 @@ void
 inp_win_reset(void)
 {
     _clear_input();
-    pad_start = 0;
     _inp_win_update_virtual();
 }
 
@@ -312,6 +314,10 @@ _clear_input(void)
 {
     werase(inp_win);
     wmove(inp_win, 0, 0);
+    pad_start = 0;
+
+    line[0] = '\0';
+    line_utf8_pos = 0;
 }
 
 /*
@@ -322,27 +328,29 @@ _clear_input(void)
 static int
 _handle_edit(int key_type, const wint_t ch)
 {
-    char *prev = NULL;
-    char *next = NULL;
     int col = getcurx(inp_win);
-    int next_ch;
-    int display_size = utf8_display_len(line);
     int utf8_len = g_utf8_strlen(line, -1);
 
     // CTRL-LEFT
-    if ((key_type == KEY_CODE_YES) && (ch == 547 || ch == 545 || ch == 544 || ch == 540 || ch == 539) && (col > 0)) {
-        line[line_bytes_len] = '\0';
-        gchar *curr_ch = g_utf8_offset_to_pointer(line, col);
-        curr_ch = g_utf8_find_prev_char(line, curr_ch);
-        gchar *prev_ch;
-        gunichar curr_uni;
-        gunichar prev_uni;
+    if (line_utf8_pos > 0 && _is_ctrl_left(key_type, ch)) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(line, line_utf8_pos);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
+        line_utf8_pos--;
+        col--;
+        if (g_unichar_iswide(curr_uni)) {
+            col--;
+        }
 
+        curr_ch = g_utf8_find_prev_char(line, curr_ch);
+
+        gchar *prev_ch;
+        gunichar prev_uni;
         while (curr_ch != NULL) {
             curr_uni = g_utf8_get_char(curr_ch);
-
             if (g_unichar_isspace(curr_uni)) {
                 curr_ch = g_utf8_find_prev_char(line, curr_ch);
+                line_utf8_pos--;
+                col--;
             } else {
                 prev_ch = g_utf8_find_prev_char(line, curr_ch);
                 if (prev_ch == NULL) {
@@ -350,6 +358,11 @@ _handle_edit(int key_type, const wint_t ch)
                     break;
                 } else {
                     prev_uni = g_utf8_get_char(prev_ch);
+                    line_utf8_pos--;
+                    col--;
+                    if (g_unichar_iswide(prev_uni)) {
+                        col--;
+                    }
                     if (g_unichar_isspace(prev_uni)) {
                         break;
                     } else {
@@ -363,8 +376,8 @@ _handle_edit(int key_type, const wint_t ch)
             col = 0;
             wmove(inp_win, 0, col);
         } else {
-            glong offset = g_utf8_pointer_to_offset(line, curr_ch);
-            col = offset;
+            col++;
+            line_utf8_pos++;
             wmove(inp_win, 0, col);
         }
 
@@ -380,39 +393,37 @@ _handle_edit(int key_type, const wint_t ch)
         return 1;
 
     // CTRL-RIGHT
-    } else if ((key_type == KEY_CODE_YES) && (ch == 562 || ch == 560 || ch == 555 || ch == 559 || ch == 554) && (col < display_size)) {
-        line[line_bytes_len] = '\0';
-        gchar *curr_ch = g_utf8_offset_to_pointer(line, col);
-        gchar *next_ch = g_utf8_find_next_char(curr_ch, NULL);
-        gunichar curr_uni;
-        gunichar next_uni;
-        gboolean moved = FALSE;
+    } else if (line_utf8_pos < utf8_len && _is_ctrl_right(key_type, ch)) {
+        gchar *curr_ch = g_utf8_offset_to_pointer(line, line_utf8_pos);
+        gunichar curr_uni = g_utf8_get_char(curr_ch);
 
-        while (g_utf8_pointer_to_offset(line, next_ch) < display_size) {
-            curr_uni = g_utf8_get_char(curr_ch);
-            next_uni = g_utf8_get_char(next_ch);
-            curr_ch = next_ch;
-            next_ch = g_utf8_find_next_char(next_ch, NULL);
-
-            if (!g_unichar_isspace(curr_uni) && g_unichar_isspace(next_uni) && moved) {
+        // find next word if in whitespace
+        while (g_unichar_isspace(curr_uni)) {
+            col++;
+            line_utf8_pos++;
+            curr_ch = g_utf8_find_next_char(curr_ch, NULL);
+            if (!curr_ch) {
                 break;
-            } else {
-                moved = TRUE;
+            }
+            curr_uni = g_utf8_get_char(curr_ch);
+        }
+
+        if (curr_ch) {
+            while (!g_unichar_isspace(curr_uni)) {
+                line_utf8_pos++;
+                col++;
+                if (g_unichar_iswide(curr_uni)) {
+                    col++;
+                }
+                curr_ch = g_utf8_find_next_char(curr_ch, NULL);
+                if (!curr_ch || line_utf8_pos >= utf8_len) {
+                    break;
+                }
+                curr_uni = g_utf8_get_char(curr_ch);
             }
         }
 
-        if (next_ch == NULL) {
-            col = display_size;
-            wmove(inp_win, 0, col);
-        } else {
-            glong offset = g_utf8_pointer_to_offset(line, curr_ch);
-            if (offset == display_size - 1) {
-                col = offset + 1;
-            } else {
-                col = offset;
-            }
-            wmove(inp_win, 0, col);
-        }
+        wmove(inp_win, 0, col);
 
         // if gone off screen to right, jump right (half a screen worth)
         if (col > pad_start + wcols) {
@@ -434,6 +445,9 @@ _handle_edit(int key_type, const wint_t ch)
 
     // other editing keys
     } else {
+        int bytes_len = strlen(line);
+        int next_ch;
+
         switch(ch) {
 
         case 27: // ESC
@@ -442,7 +456,6 @@ _handle_edit(int key_type, const wint_t ch)
             if (next_ch != ERR) {
                 return _handle_alt_key(next_ch);
             } else {
-                line_bytes_len = 0;
                 inp_win_reset();
                 return 1;
             }
@@ -462,27 +475,27 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_D:
-            if (col == display_size-1) {
-                gchar *start = g_utf8_substring(line, 0, col);
-                for (line_bytes_len = 0; line_bytes_len < strlen(start); line_bytes_len++) {
-                    line[line_bytes_len] = start[line_bytes_len];
-                }
-                line[line_bytes_len] = '\0';
+            if (line_utf8_pos == utf8_len) {
+                return 1;
+            } else if (line_utf8_pos == utf8_len-1) {
+                gchar *curr_ch = g_utf8_offset_to_pointer(line, line_utf8_pos);
+                int bytes_len_ch = strlen(curr_ch);
+                bytes_len -= bytes_len_ch;
+                line[bytes_len] = '\0';
+                line_utf8_pos--;
+                wdelch(inp_win);
 
-                g_free(start);
-
-                _clear_input();
-                waddstr(inp_win, line);
-            } else if (col < display_size-1) {
+                return 1;
+            } else if (line_utf8_pos < utf8_len-1) {
                 gchar *start = g_utf8_substring(line, 0, col);
-                gchar *end = g_utf8_substring(line, col+1, line_bytes_len);
+                gchar *end = g_utf8_substring(line, col+1, bytes_len);
                 GString *new = g_string_new(start);
                 g_string_append(new, end);
 
-                for (line_bytes_len = 0; line_bytes_len < strlen(new->str); line_bytes_len++) {
-                    line[line_bytes_len] = new->str[line_bytes_len];
+                for (bytes_len = 0; bytes_len < strlen(new->str); bytes_len++) {
+                    line[bytes_len] = new->str[bytes_len];
                 }
-                line[line_bytes_len] = '\0';
+                line[bytes_len] = '\0';
 
                 g_free(start);
                 g_free(end);
@@ -550,8 +563,8 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_P:
-            line[line_bytes_len] = '\0';
-            prev = history_previous(history, line);
+            line[bytes_len] = '\0';
+            char *prev = history_previous(history, line);
             if (prev) {
                 inp_replace_input(prev);
             }
@@ -562,12 +575,12 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_N:
-            line[line_bytes_len] = '\0';
-            next = history_next(history, line);
+            line[bytes_len] = '\0';
+            char *next = history_next(history, line);
             if (next) {
                 inp_replace_input(next);
-            } else if (line_bytes_len != 0) {
-                line[line_bytes_len] = '\0';
+            } else if (bytes_len != 0) {
+                line[bytes_len] = '\0';
                 history_append(history, line);
                 inp_replace_input("");
             }
@@ -580,6 +593,7 @@ _handle_edit(int key_type, const wint_t ch)
         case KEY_CTRL_A:
             wmove(inp_win, 0, 0);
             pad_start = 0;
+            line_utf8_pos = 0;
             _inp_win_update_virtual();
             return 1;
 
@@ -592,8 +606,8 @@ _handle_edit(int key_type, const wint_t ch)
             return 1;
 
         case 9: // tab
-            if (line_bytes_len != 0) {
-                line[line_bytes_len] = '\0';
+            if (bytes_len != 0) {
+                line[bytes_len] = '\0';
                 if ((strncmp(line, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
                     char *result = muc_autocomplete(line);
                     if (result) {
@@ -611,13 +625,13 @@ _handle_edit(int key_type, const wint_t ch)
             return 1;
 
         case KEY_CTRL_W:
-            _delete_previous_word();
+            _handle_delete_previous_word();
             return 1;
             break;
 
         case KEY_CTRL_U:
             while (getcurx(inp_win) > 0) {
-                _delete_previous_word();
+                _handle_delete_previous_word();
             }
             return 1;
             break;
@@ -723,7 +737,7 @@ _handle_alt_key(int key)
             break;
         case 263:
         case 127:
-            _delete_previous_word();
+            _handle_delete_previous_word();
             break;
         default:
             break;
@@ -732,12 +746,11 @@ _handle_alt_key(int key)
 }
 
 static void
-_delete_previous_word(void)
+_handle_delete_previous_word(void)
 {
     int end_del = getcurx(inp_win);
     int start_del = end_del;
 
-    line[line_bytes_len] = '\0';
     gchar *curr_ch = g_utf8_offset_to_pointer(line, end_del);
     curr_ch = g_utf8_find_prev_char(line, curr_ch);
     gchar *prev_ch;
@@ -783,8 +796,8 @@ _delete_previous_word(void)
         line[strlen(start_string)+i] = end_string[i];
     }
 
-    line_bytes_len = strlen(start_string)+i;
-    line[line_bytes_len] = '\0';
+    int bytes_len = strlen(start_string)+i;
+    line[bytes_len] = '\0';
 
     _clear_input();
     waddstr(inp_win, line);
@@ -807,18 +820,23 @@ _go_to_end(void)
     int display_len = utf8_display_len(line);
     wmove(inp_win, 0, display_len);
     line_utf8_pos = g_utf8_strlen(line, -1);
+
     if (display_len > wcols-2) {
         pad_start = display_len - wcols + 1;
         _inp_win_update_virtual();
     }
 }
 
-static int
-_printable(const wint_t ch)
+static gboolean
+_is_ctrl_left(int key_type, const wint_t ch)
 {
-    char bytes[MB_CUR_MAX+1];
-    size_t utf_len = wcrtomb(bytes, ch, NULL);
-    bytes[utf_len] = '\0';
-    gunichar unichar = g_utf8_get_char(bytes);
-    return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
+    return ((key_type == KEY_CODE_YES)
+        && (ch == 547 || ch == 545 || ch == 544 || ch == 540 || ch == 539));
+}
+
+static gboolean
+_is_ctrl_right(int key_type, const wint_t ch)
+{
+    return ((key_type == KEY_CODE_YES)
+        && (ch == 562 || ch == 560 || ch == 555 || ch == 559 || ch == 554));
 }
