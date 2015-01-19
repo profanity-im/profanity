@@ -93,9 +93,6 @@ static int _handle_alt_key(int key);
 static void _handle_delete_previous_word(void);
 static void _handle_backspace(void);
 
-static void _clear_input(void);
-static void _go_to_end(void);
-
 static gboolean _is_ctrl_left(int key_type, const wint_t ch);
 static gboolean _is_ctrl_right(int key_type, const wint_t ch);
 
@@ -195,7 +192,23 @@ inp_read(int *key_type, wint_t *ch)
                 g_string_append(new_line, end);
 
                 int old_pos = line_utf8_pos;
-                inp_replace_input(new_line->str);
+                werase(inp_win);
+                wmove(inp_win, 0, 0);
+                pad_start = 0;
+                line[0] = '\0';
+                line_utf8_pos = 0;
+                strncpy(line, new_line->str, INP_WIN_MAX);
+                waddstr(inp_win, line);
+
+                int display_len = utf8_display_len(line);
+                wmove(inp_win, 0, display_len);
+                line_utf8_pos = g_utf8_strlen(line, -1);
+
+                if (display_len > wcols-2) {
+                    pad_start = display_len - wcols + 1;
+                    _inp_win_update_virtual();
+                }
+
                 line_utf8_pos = old_pos+1;
 
                 g_free(start);
@@ -271,7 +284,11 @@ inp_read(int *key_type, wint_t *ch)
 void
 inp_get_password(char *passwd)
 {
-    _clear_input();
+    werase(inp_win);
+    wmove(inp_win, 0, 0);
+    pad_start = 0;
+    line[0] = '\0';
+    line_utf8_pos = 0;
     _inp_win_update_virtual();
     doupdate();
     noecho();
@@ -288,18 +305,13 @@ inp_put_back(void)
 }
 
 void
-inp_replace_input(const char * const new_input)
-{
-    _clear_input();
-    strncpy(line, new_input, INP_WIN_MAX);
-    waddstr(inp_win, line);
-    _go_to_end();
-}
-
-void
 inp_win_reset(void)
 {
-    _clear_input();
+    werase(inp_win);
+    wmove(inp_win, 0, 0);
+    pad_start = 0;
+    line[0] = '\0';
+    line_utf8_pos = 0;
     _inp_win_update_virtual();
 }
 
@@ -307,17 +319,6 @@ void
 inp_history_append(char *inp)
 {
     history_append(history, inp);
-}
-
-static void
-_clear_input(void)
-{
-    werase(inp_win);
-    wmove(inp_win, 0, 0);
-    pad_start = 0;
-
-    line[0] = '\0';
-    line_utf8_pos = 0;
 }
 
 /*
@@ -445,6 +446,7 @@ _handle_edit(int key_type, const wint_t ch)
 
     // other editing keys
     } else {
+        int display_len;
         int bytes_len = strlen(line);
         int next_ch;
 
@@ -501,7 +503,11 @@ _handle_edit(int key_type, const wint_t ch)
                 g_free(end);
                 g_string_free(new, FALSE);
 
-                _clear_input();
+                werase(inp_win);
+                wmove(inp_win, 0, 0);
+                pad_start = 0;
+                line[0] = '\0';
+                line_utf8_pos = 0;
                 waddstr(inp_win, line);
                 wmove(inp_win, 0, col);
             }
@@ -566,7 +572,22 @@ _handle_edit(int key_type, const wint_t ch)
             line[bytes_len] = '\0';
             char *prev = history_previous(history, line);
             if (prev) {
-                inp_replace_input(prev);
+                werase(inp_win);
+                wmove(inp_win, 0, 0);
+                pad_start = 0;
+                line[0] = '\0';
+                line_utf8_pos = 0;
+                strncpy(line, prev, INP_WIN_MAX);
+                waddstr(inp_win, line);
+
+                int display_len = utf8_display_len(line);
+                wmove(inp_win, 0, display_len);
+                line_utf8_pos = g_utf8_strlen(line, -1);
+
+                if (display_len > wcols-2) {
+                    pad_start = display_len - wcols + 1;
+                    _inp_win_update_virtual();
+                }
             }
             return 1;
 
@@ -578,11 +599,41 @@ _handle_edit(int key_type, const wint_t ch)
             line[bytes_len] = '\0';
             char *next = history_next(history, line);
             if (next) {
-                inp_replace_input(next);
+                werase(inp_win);
+                wmove(inp_win, 0, 0);
+                pad_start = 0;
+                line[0] = '\0';
+                line_utf8_pos = 0;
+                strncpy(line, next, INP_WIN_MAX);
+                waddstr(inp_win, line);
+
+                int display_len = utf8_display_len(line);
+                wmove(inp_win, 0, display_len);
+                line_utf8_pos = g_utf8_strlen(line, -1);
+
+                if (display_len > wcols-2) {
+                    pad_start = display_len - wcols + 1;
+                    _inp_win_update_virtual();
+                }
             } else if (bytes_len != 0) {
                 line[bytes_len] = '\0';
                 history_append(history, line);
-                inp_replace_input("");
+                werase(inp_win);
+                wmove(inp_win, 0, 0);
+                pad_start = 0;
+                line[0] = '\0';
+                line_utf8_pos = 0;
+                strncpy(line, "", INP_WIN_MAX);
+                waddstr(inp_win, line);
+
+                int display_len = utf8_display_len(line);
+                wmove(inp_win, 0, display_len);
+                line_utf8_pos = g_utf8_strlen(line, -1);
+
+                if (display_len > wcols-2) {
+                    pad_start = display_len - wcols + 1;
+                    _inp_win_update_virtual();
+                }
             }
             return 1;
 
@@ -602,7 +653,14 @@ _handle_edit(int key_type, const wint_t ch)
                 return 0;
             }
         case KEY_CTRL_E:
-            _go_to_end();
+            display_len = utf8_display_len(line);
+            wmove(inp_win, 0, display_len);
+            line_utf8_pos = g_utf8_strlen(line, -1);
+
+            if (display_len > wcols-2) {
+                pad_start = display_len - wcols + 1;
+                _inp_win_update_virtual();
+            }
             return 1;
 
         case 9: // tab
@@ -611,13 +669,45 @@ _handle_edit(int key_type, const wint_t ch)
                 if ((strncmp(line, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
                     char *result = muc_autocomplete(line);
                     if (result) {
-                        inp_replace_input(result);
+                        werase(inp_win);
+                        wmove(inp_win, 0, 0);
+                        pad_start = 0;
+                        line[0] = '\0';
+                        line_utf8_pos = 0;
+                        strncpy(line, result, INP_WIN_MAX);
+                        waddstr(inp_win, line);
+
+                        int display_len = utf8_display_len(line);
+                        wmove(inp_win, 0, display_len);
+                        line_utf8_pos = g_utf8_strlen(line, -1);
+
+                        if (display_len > wcols-2) {
+                            pad_start = display_len - wcols + 1;
+                            _inp_win_update_virtual();
+                        }
+
                         free(result);
                     }
                 } else if (strncmp(line, "/", 1) == 0) {
                     char *result = cmd_autocomplete(line);
                     if (result) {
-                        inp_replace_input(result);
+                        werase(inp_win);
+                        wmove(inp_win, 0, 0);
+                        pad_start = 0;
+                        line[0] = '\0';
+                        line_utf8_pos = 0;
+                        strncpy(line, result, INP_WIN_MAX);
+                        waddstr(inp_win, line);
+
+                        int display_len = utf8_display_len(line);
+                        wmove(inp_win, 0, display_len);
+                        line_utf8_pos = g_utf8_strlen(line, -1);
+
+                        if (display_len > wcols-2) {
+                            pad_start = display_len - wcols + 1;
+                            _inp_win_update_virtual();
+                        }
+
                         free(result);
                     }
                 }
@@ -653,7 +743,22 @@ _handle_backspace(void)
         // if at end, delete last char
         if (line_utf8_pos >= utf8_len) {
             gchar *new_line = g_utf8_substring(line, 0, utf8_len-1);
-            inp_replace_input(new_line);
+            werase(inp_win);
+            wmove(inp_win, 0, 0);
+            pad_start = 0;
+            line[0] = '\0';
+            line_utf8_pos = 0;
+            strncpy(line, new_line, INP_WIN_MAX);
+            waddstr(inp_win, line);
+
+            int display_len = utf8_display_len(line);
+            wmove(inp_win, 0, display_len);
+            line_utf8_pos = g_utf8_strlen(line, -1);
+
+            if (display_len > wcols-2) {
+                pad_start = display_len - wcols + 1;
+                _inp_win_update_virtual();
+            }
 
         // if in middle, delete and shift chars left
         } else if (line_utf8_pos > 0 && line_utf8_pos < utf8_len) {
@@ -666,7 +771,23 @@ _handle_backspace(void)
             g_string_append(new_line, end);
 
             int old_pos = line_utf8_pos;
-            inp_replace_input(new_line->str);
+            werase(inp_win);
+            wmove(inp_win, 0, 0);
+            pad_start = 0;
+            line[0] = '\0';
+            line_utf8_pos = 0;
+            strncpy(line, new_line->str, INP_WIN_MAX);
+            waddstr(inp_win, line);
+
+            int display_len = utf8_display_len(line);
+            wmove(inp_win, 0, display_len);
+            line_utf8_pos = g_utf8_strlen(line, -1);
+
+            if (display_len > wcols-2) {
+                pad_start = display_len - wcols + 1;
+                _inp_win_update_virtual();
+            }
+
             line_utf8_pos = old_pos-1;
 
             g_free(start);
@@ -799,7 +920,12 @@ _handle_delete_previous_word(void)
     int bytes_len = strlen(start_string)+i;
     line[bytes_len] = '\0';
 
-    _clear_input();
+    werase(inp_win);
+    wmove(inp_win, 0, 0);
+    pad_start = 0;
+    line[0] = '\0';
+    line_utf8_pos = 0;
+
     waddstr(inp_win, line);
     wmove(inp_win, 0, start_del);
 
@@ -810,19 +936,6 @@ _handle_delete_previous_word(void)
             pad_start = 0;
         }
 
-        _inp_win_update_virtual();
-    }
-}
-
-static void
-_go_to_end(void)
-{
-    int display_len = utf8_display_len(line);
-    wmove(inp_win, 0, display_len);
-    line_utf8_pos = g_utf8_strlen(line, -1);
-
-    if (display_len > wcols-2) {
-        pad_start = display_len - wcols + 1;
         _inp_win_update_virtual();
     }
 }

@@ -43,7 +43,6 @@ void inp_put_back(void);
 void inp_non_block(gint);
 void inp_block(void);
 void inp_get_password(char *passwd);
-void inp_replace_input(const char * const new_input);
 void inp_history_append(char *inp);
 
 #endif
