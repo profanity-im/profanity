@@ -39,4 +39,6 @@
 
 void key_printable(char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const wint_t ch, const int wcols);
 
+void key_ctrl_left(const char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const int wcols);
+
 #endif

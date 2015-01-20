@@ -256,67 +256,12 @@ _handle_edit(int key_type, const wint_t ch)
 {
     int col = getcurx(inp_win);
     int utf8_len = g_utf8_strlen(line, -1);
+    int wcols = getmaxx(stdscr);
 
     // CTRL-LEFT
-    if (line_utf8_pos > 0 && _is_ctrl_left(key_type, ch)) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(line, line_utf8_pos);
-        gunichar curr_uni = g_utf8_get_char(curr_ch);
-        line_utf8_pos--;
-        col--;
-        if (g_unichar_iswide(curr_uni)) {
-            col--;
-        }
-
-        curr_ch = g_utf8_find_prev_char(line, curr_ch);
-
-        gchar *prev_ch;
-        gunichar prev_uni;
-        while (curr_ch != NULL) {
-            curr_uni = g_utf8_get_char(curr_ch);
-            if (g_unichar_isspace(curr_uni)) {
-                curr_ch = g_utf8_find_prev_char(line, curr_ch);
-                line_utf8_pos--;
-                col--;
-            } else {
-                prev_ch = g_utf8_find_prev_char(line, curr_ch);
-                if (prev_ch == NULL) {
-                    curr_ch = NULL;
-                    break;
-                } else {
-                    prev_uni = g_utf8_get_char(prev_ch);
-                    line_utf8_pos--;
-                    col--;
-                    if (g_unichar_iswide(prev_uni)) {
-                        col--;
-                    }
-                    if (g_unichar_isspace(prev_uni)) {
-                        break;
-                    } else {
-                        curr_ch = prev_ch;
-                    }
-                }
-            }
-        }
-
-        if (curr_ch == NULL) {
-            col = 0;
-            wmove(inp_win, 0, col);
-        } else {
-            col++;
-            line_utf8_pos++;
-            wmove(inp_win, 0, col);
-        }
-
-        // if gone off screen to left, jump left (half a screen worth)
-        int wcols = getmaxx(stdscr);
-        if (col <= pad_start) {
-            pad_start = pad_start - (wcols / 2);
-            if (pad_start < 0) {
-                pad_start = 0;
-            }
-
-            _inp_win_update_virtual();
-        }
+    if (_is_ctrl_left(key_type, ch)) {
+        key_ctrl_left(line, &line_utf8_pos, &col, &pad_start, wcols);
+        wmove(inp_win, 0, col);
         return 1;
 
     // CTRL-RIGHT
@@ -353,7 +298,6 @@ _handle_edit(int key_type, const wint_t ch)
         wmove(inp_win, 0, col);
 
         // if gone off screen to right, jump right (half a screen worth)
-        int wcols = getmaxx(stdscr);
         if (col > pad_start + wcols) {
             pad_start = pad_start + (wcols / 2);
             _inp_win_update_virtual();
@@ -464,7 +408,7 @@ _handle_edit(int key_type, const wint_t ch)
                 line_utf8_pos--;
 
                 // current position off screen to left
-                if (col - 1 < pad_start) {
+                if (col < pad_start) {
                     pad_start--;
                     _inp_win_update_virtual();
                 }
@@ -490,7 +434,7 @@ _handle_edit(int key_type, const wint_t ch)
 
                 // current position off screen to right
                 int wcols = getmaxx(stdscr);
-                if ((col + 1 - pad_start) >= wcols) {
+                if ((col - pad_start) >= wcols) {
                     pad_start++;
                     _inp_win_update_virtual();
                 }

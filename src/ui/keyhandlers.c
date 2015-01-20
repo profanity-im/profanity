@@ -48,7 +48,6 @@ key_printable(char * const line, int * const line_utf8_pos, int * const col, int
 
     // handle insert if not at end of input
     if (*line_utf8_pos < utf8_len) {
-        // create new line
         char bytes[MB_CUR_MAX];
         size_t utf8_ch_len = wcrtomb(bytes, ch, NULL);
         bytes[utf8_ch_len] = '\0';
@@ -62,35 +61,29 @@ key_printable(char * const line, int * const line_utf8_pos, int * const col, int
         g_free(end);
         g_string_free(new_line_str, FALSE);
 
-        // replace old line
         strncpy(line, new_line, INP_WIN_MAX);
         free(new_line);
 
-        // set utf8 position
-        (*line_utf8_pos)++;
-
-        // set col position
-        (*col)++;
         gunichar uni = g_utf8_get_char(bytes);
-        if (g_unichar_iswide(uni)) {
-            (*col)++;
+        if (*col == (*pad_start + wcols)) {
+            (*pad_start)++;
+            if (g_unichar_iswide(uni)) {
+                (*pad_start)++;
+            }
         }
 
-        // set pad_start
-        int display_len = utf8_display_len(line);
-        (*pad_start) = 0;
-        if (display_len > wcols-2) {
-            (*pad_start) = display_len - wcols + 1;
+        (*line_utf8_pos)++;
+
+        (*col)++;
+        if (g_unichar_iswide(uni)) {
+            (*col)++;
         }
 
     // otherwise just append
     } else {
         char bytes[MB_CUR_MAX+1];
         size_t utf8_ch_len = wcrtomb(bytes, ch, NULL);
-
-        // wcrtomb can return (size_t) -1
         if (utf8_ch_len < MB_CUR_MAX) {
-            // update old line
             int i;
             int bytes_len = strlen(line);
 
@@ -99,10 +92,8 @@ key_printable(char * const line, int * const line_utf8_pos, int * const col, int
             }
             line[bytes_len] = '\0';
 
-            // set utf8 position
             (*line_utf8_pos)++;
 
-            // set col position
             (*col)++;
             bytes[utf8_ch_len] = '\0';
             gunichar uni = g_utf8_get_char(bytes);
@@ -110,14 +101,71 @@ key_printable(char * const line, int * const line_utf8_pos, int * const col, int
                 (*col)++;
             }
 
-            // set pad_start
-            // if gone over screen size follow input
-            if (*col - *pad_start > wcols-2) {
+            if (*col - *pad_start > wcols-1) {
                 (*pad_start)++;
                 if (g_unichar_iswide(uni)) {
                     (*pad_start)++;
                 }
             }
         }
+    }
+}
+
+void
+key_ctrl_left(const char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const int wcols)
+{
+    if (*line_utf8_pos == 0) {
+        return;
+    }
+
+    gchar *curr_ch = g_utf8_offset_to_pointer(line, *line_utf8_pos);
+    gunichar curr_uni = g_utf8_get_char(curr_ch);
+    (*line_utf8_pos)--;
+    (*col)--;
+    if (g_unichar_iswide(curr_uni)) {
+        (*col)--;
+    }
+
+    curr_ch = g_utf8_find_prev_char(line, curr_ch);
+
+    gchar *prev_ch;
+    gunichar prev_uni;
+    while (curr_ch != NULL) {
+        curr_uni = g_utf8_get_char(curr_ch);
+        if (g_unichar_isspace(curr_uni)) {
+            curr_ch = g_utf8_find_prev_char(line, curr_ch);
+            (*line_utf8_pos)--;
+            (*col)--;
+        } else {
+            prev_ch = g_utf8_find_prev_char(line, curr_ch);
+            if (prev_ch == NULL) {
+                curr_ch = NULL;
+                break;
+            } else {
+                prev_uni = g_utf8_get_char(prev_ch);
+                (*line_utf8_pos)--;
+                (*col)--;
+                if (g_unichar_iswide(prev_uni)) {
+                    (*col)--;
+                }
+                if (g_unichar_isspace(prev_uni)) {
+                    break;
+                } else {
+                    curr_ch = prev_ch;
+                }
+            }
+        }
+    }
+
+    if (curr_ch == NULL) {
+        (*col) = 0;
+        (*line_utf8_pos) = 0;
+    } else {
+        (*col)++;
+        (*line_utf8_pos)++;
+    }
+
+    if (*col < *pad_start) {
+        *pad_start = *col;
     }
 }
