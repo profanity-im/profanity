@@ -35,6 +35,7 @@
 #include "test_cmd_win.h"
 #include "test_cmd_disconnect.h"
 #include "test_form.h"
+#include "test_keyhandlers.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
@@ -622,6 +623,15 @@ int main(int argc, char* argv[]) {
         unit_test(remove_text_multi_value_removes_when_many),
 
         unit_test(clears_chat_sessions),
+
+        unit_test(append_non_wide_to_empty),
+        unit_test(append_wide_to_empty),
+        unit_test(append_non_wide_to_non_wide),
+        unit_test(append_wide_to_non_wide),
+        unit_test(append_non_wide_to_wide),
+        unit_test(append_wide_to_wide),
+        unit_test(append_no_wide_when_overrun),
+        unit_test(append_wide_when_overrun),
     };
 
     return run_tests(all_tests);

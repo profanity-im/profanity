@@ -60,8 +60,7 @@
 #include "ui/inputwin.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
-
-#define _inp_win_update_virtual() pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-1)
+#include "ui/keyhandlers.h"
 
 #define KEY_CTRL_A 0001
 #define KEY_CTRL_B 0002
@@ -74,7 +73,6 @@
 #define KEY_CTRL_W 0027
 
 #define MAX_HISTORY 100
-#define INP_WIN_MAX 1000
 
 static WINDOW *inp_win;
 static History history;
@@ -85,7 +83,6 @@ static char line[INP_WIN_MAX];
 static int line_utf8_pos;
 
 static int pad_start = 0;
-static int wrows, wcols;
 
 static int _handle_edit(int key_type, const wint_t ch);
 static int _handle_alt_key(int key);
@@ -96,6 +93,8 @@ static void _handle_backspace(void);
 static gboolean _is_ctrl_left(int key_type, const wint_t ch);
 static gboolean _is_ctrl_right(int key_type, const wint_t ch);
 
+static void _inp_win_update_virtual(void);
+
 void
 create_input_window(void)
 {
@@ -104,7 +103,6 @@ create_input_window(void)
 #else
     ESCDELAY = 25;
 #endif
-    getmaxyx(stdscr, wrows, wcols);
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
@@ -118,9 +116,8 @@ create_input_window(void)
 void
 inp_win_resize(void)
 {
-    int col;
-    getmaxyx(stdscr, wrows, wcols);
-    col = getcurx(inp_win);
+    int col = getcurx(inp_win);
+    int wcols = getmaxx(stdscr);
 
     // if lost cursor off screen, move contents to show it
     if (col >= pad_start + wcols) {
@@ -177,85 +174,13 @@ inp_read(int *key_type, wint_t *ch)
             }
 
             int col = getcurx(inp_win);
-            int utf8_len = g_utf8_strlen(line, -1);
+            int wcols = getmaxx(stdscr);
+            key_printable(line, &line_utf8_pos, &col, &pad_start, *ch, wcols);
 
-            // handle insert if not at end of input
-            if (line_utf8_pos < utf8_len) {
-                char bytes[MB_CUR_MAX];
-                size_t utf8_ch_len = wcrtomb(bytes, *ch, NULL);
-                bytes[utf8_ch_len] = '\0';
-
-                gchar *start = g_utf8_substring(line, 0, line_utf8_pos);
-                gchar *end = g_utf8_substring(line, line_utf8_pos, utf8_len);
-                GString *new_line = g_string_new(start);
-                g_string_append(new_line, bytes);
-                g_string_append(new_line, end);
-
-                int old_pos = line_utf8_pos;
-                werase(inp_win);
-                wmove(inp_win, 0, 0);
-                pad_start = 0;
-                line[0] = '\0';
-                line_utf8_pos = 0;
-                strncpy(line, new_line->str, INP_WIN_MAX);
-                waddstr(inp_win, line);
-
-                int display_len = utf8_display_len(line);
-                wmove(inp_win, 0, display_len);
-                line_utf8_pos = g_utf8_strlen(line, -1);
-
-                if (display_len > wcols-2) {
-                    pad_start = display_len - wcols + 1;
-                    _inp_win_update_virtual();
-                }
-
-                line_utf8_pos = old_pos+1;
-
-                g_free(start);
-                g_free(end);
-                g_string_free(new_line, TRUE);
-
-                col++;
-                gunichar uni = g_utf8_get_char(bytes);
-                if (g_unichar_iswide(uni)) {
-                    col++;
-                }
-                wmove(inp_win, 0, col);
-
-            // otherwise just append
-            } else {
-                char bytes[MB_CUR_MAX+1];
-                size_t utf8_ch_len = wcrtomb(bytes, *ch, NULL);
-
-                // wcrtomb can return (size_t) -1
-                if (utf8_ch_len < MB_CUR_MAX) {
-                    int i;
-                    for (i = 0 ; i < utf8_ch_len; i++) {
-                        line[bytes_len++] = bytes[i];
-                    }
-                    line[bytes_len] = '\0';
-
-                    bytes[utf8_ch_len] = '\0';
-                    waddstr(inp_win, bytes);
-
-                    line_utf8_pos++;
-
-                    col++;
-                    gunichar uni = g_utf8_get_char(bytes);
-                    if (g_unichar_iswide(uni)) {
-                        col++;
-                    }
-                    wmove(inp_win, 0, col);
-
-                    // if gone over screen size follow input
-                    int wrows, wcols;
-                    getmaxyx(stdscr, wrows, wcols);
-                    if (col - pad_start > wcols-2) {
-                        pad_start++;
-                        _inp_win_update_virtual();
-                    }
-                }
-            }
+            werase(inp_win);
+            waddstr(inp_win, line);
+            wmove(inp_win, 0, col);
+            _inp_win_update_virtual();
 
             cmd_reset_autocomplete();
         }
@@ -271,7 +196,7 @@ inp_read(int *key_type, wint_t *ch)
     }
 
     if (*ch != ERR && *key_type != ERR) {
-        cons_debug("BYTE LEN = %d", bytes_len);
+        cons_debug("BYTE LEN = %d", strlen(line));
         cons_debug("UTF8 LEN = %d", utf8_display_len(line));
         cons_debug("CURR COL = %d", getcurx(inp_win));
         cons_debug("CURR UNI = %d", line_utf8_pos);
@@ -305,7 +230,7 @@ inp_put_back(void)
 }
 
 void
-inp_win_reset(void)
+inp_win_clear(void)
 {
     werase(inp_win);
     wmove(inp_win, 0, 0);
@@ -383,6 +308,7 @@ _handle_edit(int key_type, const wint_t ch)
         }
 
         // if gone off screen to left, jump left (half a screen worth)
+        int wcols = getmaxx(stdscr);
         if (col <= pad_start) {
             pad_start = pad_start - (wcols / 2);
             if (pad_start < 0) {
@@ -427,6 +353,7 @@ _handle_edit(int key_type, const wint_t ch)
         wmove(inp_win, 0, col);
 
         // if gone off screen to right, jump right (half a screen worth)
+        int wcols = getmaxx(stdscr);
         if (col > pad_start + wcols) {
             pad_start = pad_start + (wcols / 2);
             _inp_win_update_virtual();
@@ -458,7 +385,12 @@ _handle_edit(int key_type, const wint_t ch)
             if (next_ch != ERR) {
                 return _handle_alt_key(next_ch);
             } else {
-                inp_win_reset();
+                werase(inp_win);
+                wmove(inp_win, 0, 0);
+                pad_start = 0;
+                line[0] = '\0';
+                line_utf8_pos = 0;
+                _inp_win_update_virtual();
                 return 1;
             }
 
@@ -557,6 +489,7 @@ _handle_edit(int key_type, const wint_t ch)
                 line_utf8_pos++;
 
                 // current position off screen to right
+                int wcols = getmaxx(stdscr);
                 if ((col + 1 - pad_start) >= wcols) {
                     pad_start++;
                     _inp_win_update_virtual();
@@ -584,6 +517,7 @@ _handle_edit(int key_type, const wint_t ch)
                 wmove(inp_win, 0, display_len);
                 line_utf8_pos = g_utf8_strlen(line, -1);
 
+                int wcols = getmaxx(stdscr);
                 if (display_len > wcols-2) {
                     pad_start = display_len - wcols + 1;
                     _inp_win_update_virtual();
@@ -611,6 +545,7 @@ _handle_edit(int key_type, const wint_t ch)
                 wmove(inp_win, 0, display_len);
                 line_utf8_pos = g_utf8_strlen(line, -1);
 
+                int wcols = getmaxx(stdscr);
                 if (display_len > wcols-2) {
                     pad_start = display_len - wcols + 1;
                     _inp_win_update_virtual();
@@ -630,6 +565,7 @@ _handle_edit(int key_type, const wint_t ch)
                 wmove(inp_win, 0, display_len);
                 line_utf8_pos = g_utf8_strlen(line, -1);
 
+                int wcols = getmaxx(stdscr);
                 if (display_len > wcols-2) {
                     pad_start = display_len - wcols + 1;
                     _inp_win_update_virtual();
@@ -657,6 +593,7 @@ _handle_edit(int key_type, const wint_t ch)
             wmove(inp_win, 0, display_len);
             line_utf8_pos = g_utf8_strlen(line, -1);
 
+            int wcols = getmaxx(stdscr);
             if (display_len > wcols-2) {
                 pad_start = display_len - wcols + 1;
                 _inp_win_update_virtual();
@@ -681,6 +618,7 @@ _handle_edit(int key_type, const wint_t ch)
                         wmove(inp_win, 0, display_len);
                         line_utf8_pos = g_utf8_strlen(line, -1);
 
+                        int wcols = getmaxx(stdscr);
                         if (display_len > wcols-2) {
                             pad_start = display_len - wcols + 1;
                             _inp_win_update_virtual();
@@ -703,6 +641,7 @@ _handle_edit(int key_type, const wint_t ch)
                         wmove(inp_win, 0, display_len);
                         line_utf8_pos = g_utf8_strlen(line, -1);
 
+                        int wcols = getmaxx(stdscr);
                         if (display_len > wcols-2) {
                             pad_start = display_len - wcols + 1;
                             _inp_win_update_virtual();
@@ -755,6 +694,7 @@ _handle_backspace(void)
             wmove(inp_win, 0, display_len);
             line_utf8_pos = g_utf8_strlen(line, -1);
 
+            int wcols = getmaxx(stdscr);
             if (display_len > wcols-2) {
                 pad_start = display_len - wcols + 1;
                 _inp_win_update_virtual();
@@ -783,6 +723,7 @@ _handle_backspace(void)
             wmove(inp_win, 0, display_len);
             line_utf8_pos = g_utf8_strlen(line, -1);
 
+            int wcols = getmaxx(stdscr);
             if (display_len > wcols-2) {
                 pad_start = display_len - wcols + 1;
                 _inp_win_update_virtual();
@@ -804,6 +745,7 @@ _handle_backspace(void)
 
         // if gone off screen to left, jump left (half a screen worth)
         if (col <= pad_start) {
+            int wcols = getmaxx(stdscr);
             pad_start = pad_start - (wcols / 2);
             if (pad_start < 0) {
                 pad_start = 0;
@@ -931,6 +873,7 @@ _handle_delete_previous_word(void)
 
     // if gone off screen to left, jump left (half a screen worth)
     if (start_del <= pad_start) {
+        int wcols = getmaxx(stdscr);
         pad_start = pad_start - (wcols / 2);
         if (pad_start < 0) {
             pad_start = 0;
@@ -952,4 +895,12 @@ _is_ctrl_right(int key_type, const wint_t ch)
 {
     return ((key_type == KEY_CODE_YES)
         && (ch == 562 || ch == 560 || ch == 555 || ch == 559 || ch == 554));
+}
+
+static void
+_inp_win_update_virtual(void)
+{
+    int wrows, wcols;
+    getmaxyx(stdscr, wrows, wcols);
+    pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-1);
 }

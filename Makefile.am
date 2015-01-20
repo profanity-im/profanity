@@ -19,6 +19,7 @@ core_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/windows.c src/ui/windows.h \
+	src/ui/keyhandlers.c src/ui/keyhandlers.h \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
 	src/command/command.h src/command/command.c \
@@ -58,6 +59,7 @@ tests_sources = \
 	src/config/theme.c src/config/theme.h \
 	src/ui/windows.c src/ui/windows.h \
 	src/ui/window.c src/ui/window.h \
+	src/ui/keyhandlers.c src/ui/keyhandlers.h \
 	src/ui/buffer.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
@@ -92,6 +94,7 @@ tests_sources = \
 	tests/test_server_events.c tests/test_server_events.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/test_chat_session.c tests/test_chat_session.h \
+	tests/test_keyhandlers.c tests/test_keyhandlers.h \
 	tests/testsuite.c
 
 main_source = src/main.c

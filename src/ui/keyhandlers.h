@@ -1,5 +1,5 @@
 /*
- * inputwin.c
+ * keyhandlers.c
  *
  * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
  *
@@ -32,21 +32,11 @@
  *
  */
 
-#ifndef UI_INPUTWIN_H
-#define UI_INPUTWIN_H
+#ifndef UI_KEYHANDLERS_H
+#define UI_KEYHANDLERS_H
 
-#include <glib.h>
+#include <wchar.h>
 
-#define INP_WIN_MAX 1000
-
-void create_input_window(void);
-char* inp_read(int *key_type, wint_t *ch);
-void inp_win_clear(void);
-void inp_win_resize(void);
-void inp_put_back(void);
-void inp_non_block(gint);
-void inp_block(void);
-void inp_get_password(char *passwd);
-void inp_history_append(char *inp);
+void key_printable(char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const wint_t ch, const int wcols);
 
 #endif

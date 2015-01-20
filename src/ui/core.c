@@ -212,7 +212,7 @@ ui_inp_history_append(char *inp)
 void
 ui_input_clear(void)
 {
-    inp_win_reset();
+    inp_win_clear();
 }
 
 void
