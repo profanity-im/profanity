@@ -632,6 +632,10 @@ int main(int argc, char* argv[]) {
         unit_test(append_wide_to_wide),
         unit_test(append_no_wide_when_overrun),
         unit_test(append_wide_when_overrun),
+        unit_test(insert_non_wide_to_non_wide),
+        unit_test(insert_wide_to_non_wide),
+        unit_test(insert_non_wide_to_wide),
+        unit_test(insert_wide_to_wide),
     };
 
     return run_tests(all_tests);
