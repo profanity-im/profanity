@@ -131,6 +131,43 @@ inp_win_resize(void)
     _inp_win_update_virtual();
 }
 
+static int
+offset_to_col(char *str, int offset)
+{
+    int i = 0;
+    int col = 0;
+    mbstate_t internal;
+
+    while (i != offset && str[i] != '\n') {
+        gunichar uni = g_utf8_get_char(&str[i]);
+        size_t ch_len = mbrlen(&str[i], 4, &internal);
+        i += ch_len;
+        col++;
+        if (g_unichar_iswide(uni)) {
+            col++;
+        }
+    }
+
+    return col;
+}
+
+void
+inp_write(char *line, int offset)
+{
+    int col = offset_to_col(line, offset);
+
+    cons_debug("LEN BYTES: %d", strlen(line));
+    cons_debug("LEN UTF8 : %d", g_utf8_strlen(line, -1));
+    cons_debug("OFFSET   : %d", offset);
+    cons_debug("COL      : %d", col);
+    cons_debug("");
+
+    werase(inp_win);
+    waddstr(inp_win, line);
+    wmove(inp_win, 0, col);
+    _inp_win_update_virtual();
+}
+
 void
 inp_non_block(gint timeout)
 {
@@ -174,8 +211,8 @@ inp_read(int *key_type, wint_t *ch)
             }
 
             int col = getcurx(inp_win);
-            int wcols = getmaxx(stdscr);
-            key_printable(line, &line_utf8_pos, &col, &pad_start, *ch, wcols);
+            int maxx = getmaxx(stdscr);
+            key_printable(line, &line_utf8_pos, &col, &pad_start, *ch, maxx);
 
             werase(inp_win);
             waddstr(inp_win, line);
@@ -265,44 +302,9 @@ _handle_edit(int key_type, const wint_t ch)
         return 1;
 
     // CTRL-RIGHT
-    } else if (line_utf8_pos < utf8_len && _is_ctrl_right(key_type, ch)) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(line, line_utf8_pos);
-        gunichar curr_uni = g_utf8_get_char(curr_ch);
-
-        // find next word if in whitespace
-        while (g_unichar_isspace(curr_uni)) {
-            col++;
-            line_utf8_pos++;
-            curr_ch = g_utf8_find_next_char(curr_ch, NULL);
-            if (!curr_ch) {
-                break;
-            }
-            curr_uni = g_utf8_get_char(curr_ch);
-        }
-
-        if (curr_ch) {
-            while (!g_unichar_isspace(curr_uni)) {
-                line_utf8_pos++;
-                col++;
-                if (g_unichar_iswide(curr_uni)) {
-                    col++;
-                }
-                curr_ch = g_utf8_find_next_char(curr_ch, NULL);
-                if (!curr_ch || line_utf8_pos >= utf8_len) {
-                    break;
-                }
-                curr_uni = g_utf8_get_char(curr_ch);
-            }
-        }
-
+    } else if (_is_ctrl_right(key_type, ch)) {
+        key_ctrl_right(line, &line_utf8_pos, &col, &pad_start, wcols);
         wmove(inp_win, 0, col);
-
-        // if gone off screen to right, jump right (half a screen worth)
-        if (col > pad_start + wcols) {
-            pad_start = pad_start + (wcols / 2);
-            _inp_win_update_virtual();
-        }
-
         return 1;
 
     // ALT-LEFT

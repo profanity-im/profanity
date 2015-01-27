@@ -624,26 +624,23 @@ int main(int argc, char* argv[]) {
 
         unit_test(clears_chat_sessions),
 
-        unit_test(append_non_wide_to_empty),
+        unit_test(append_to_empty),
         unit_test(append_wide_to_empty),
-        unit_test(append_non_wide_to_non_wide),
-        unit_test(append_wide_to_non_wide),
-        unit_test(append_non_wide_to_wide),
-        unit_test(append_wide_to_wide),
+
+        unit_test(append_to_single),
+        unit_test(append_wide_to_single_non_wide),
+        unit_test(append_non_wide_to_single_wide),
+        unit_test(append_wide_to_single_wide),
+
         unit_test(append_non_wide_when_overrun),
-        unit_test(append_wide_when_overrun),
+
         unit_test(insert_non_wide_to_non_wide),
-        unit_test(insert_wide_to_non_wide),
-        unit_test(insert_non_wide_to_wide),
-        unit_test(insert_wide_to_wide),
         unit_test(insert_single_non_wide_when_pad_scrolled),
         unit_test(insert_many_non_wide_when_pad_scrolled),
-        unit_test(insert_single_wide_when_pad_scrolled),
-        unit_test(insert_many_wide_when_pad_scrolled),
         unit_test(insert_single_non_wide_last_column),
         unit_test(insert_many_non_wide_last_column),
-        unit_test(insert_single_wide_last_column),
-        unit_test(insert_many_wide_last_column),
+
+        unit_test(ctrl_left_when_no_input),
         unit_test(ctrl_left_when_at_start),
         unit_test(ctrl_left_when_in_first_word),
         unit_test(ctrl_left_when_in_first_space),
@@ -663,6 +660,19 @@ int main(int argc, char* argv[]) {
         unit_test(ctrl_left_in_whitespace_between_words_start_of_word),
         unit_test(ctrl_left_in_whitespace_between_words_middle_of_word),
         unit_test(ctrl_left_when_word_overrun_to_left),
+
+        unit_test(ctrl_right_when_no_input),
+        unit_test(ctrl_right_when_at_end),
+        unit_test(ctrl_right_one_word_at_start),
+        unit_test(ctrl_right_one_word_in_middle),
+        unit_test(ctrl_right_one_word_at_end),
+        unit_test(ctrl_right_two_words_from_middle_first),
+        unit_test(ctrl_right_two_words_from_end_first),
+        unit_test(ctrl_right_two_words_from_space),
+        unit_test(ctrl_right_two_words_from_start_second),
+        unit_test(ctrl_right_one_word_leading_whitespace),
+        unit_test(ctrl_right_two_words_in_whitespace),
+        unit_test(ctrl_right_trailing_whitespace_from_middle),
     };
 
     return run_tests(all_tests);

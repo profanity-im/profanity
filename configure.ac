@@ -133,6 +133,8 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
+AC_CHECK_LIB([readline], [main], [],
+    [AC_MSG_ERROR([libreadline is required for profanity])])
 
 AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 

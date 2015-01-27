@@ -48,5 +48,6 @@ void inp_non_block(gint);
 void inp_block(void);
 void inp_get_password(char *passwd);
 void inp_history_append(char *inp);
+void inp_write(char *line, int offset);
 
 #endif

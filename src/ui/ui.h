@@ -230,6 +230,7 @@ void ui_statusbar_new(const int win);
 char * ui_readline(void);
 void ui_input_clear(void);
 void ui_input_nonblocking(gboolean);
+void ui_write(char *line, int offset);
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void));
 

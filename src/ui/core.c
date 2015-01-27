@@ -177,6 +177,12 @@ ui_close(void)
     endwin();
 }
 
+void
+ui_write(char *line, int offset)
+{
+    inp_write(line, offset);
+}
+
 char*
 ui_readline(void)
 {

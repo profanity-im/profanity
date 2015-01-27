@@ -42,7 +42,7 @@
 #include "common.h"
 
 void
-key_printable(char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const wint_t ch, const int wcols)
+key_printable(char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const wint_t ch, const int maxx)
 {
     int utf8_len = g_utf8_strlen(line, -1);
 
@@ -65,7 +65,7 @@ key_printable(char * const line, int * const line_utf8_pos, int * const col, int
         free(new_line);
 
         gunichar uni = g_utf8_get_char(bytes);
-        if (*col == (*pad_start + wcols)) {
+        if (*col == (*pad_start + maxx)) {
             (*pad_start)++;
             if (g_unichar_iswide(uni)) {
                 (*pad_start)++;
@@ -101,7 +101,7 @@ key_printable(char * const line, int * const line_utf8_pos, int * const col, int
                 (*col)++;
             }
 
-            if (*col - *pad_start > wcols-1) {
+            if (*col - *pad_start > maxx-1) {
                 (*pad_start)++;
                 if (g_unichar_iswide(uni)) {
                     (*pad_start)++;
@@ -112,7 +112,7 @@ key_printable(char * const line, int * const line_utf8_pos, int * const col, int
 }
 
 void
-key_ctrl_left(const char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const int wcols)
+key_ctrl_left(const char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const int maxx)
 {
     if (*line_utf8_pos == 0) {
         return;
@@ -120,6 +120,7 @@ key_ctrl_left(const char * const line, int * const line_utf8_pos, int * const co
 
     gchar *curr_ch = g_utf8_offset_to_pointer(line, *line_utf8_pos);
     gunichar curr_uni = g_utf8_get_char(curr_ch);
+
     (*line_utf8_pos)--;
     (*col)--;
     if (g_unichar_iswide(curr_uni)) {
@@ -145,7 +146,7 @@ key_ctrl_left(const char * const line, int * const line_utf8_pos, int * const co
                 prev_uni = g_utf8_get_char(prev_ch);
                 (*line_utf8_pos)--;
                 (*col)--;
-                if (g_unichar_iswide(prev_uni)) {
+                if (g_unichar_iswide(curr_uni)) {
                     (*col)--;
                 }
                 if (g_unichar_isspace(prev_uni)) {
@@ -168,4 +169,48 @@ key_ctrl_left(const char * const line, int * const line_utf8_pos, int * const co
     if (*col < *pad_start) {
         *pad_start = *col;
     }
+}
+
+void
+key_ctrl_right(const char * const line, int * const line_utf8_pos, int * const col, int * const pad_start, const int maxx)
+{
+    int utf8_len = g_utf8_strlen(line, -1);
+    if (*line_utf8_pos >= utf8_len) {
+        return;
+    }
+
+    gchar *curr_ch = g_utf8_offset_to_pointer(line, *line_utf8_pos);
+    gunichar curr_uni = g_utf8_get_char(curr_ch);
+
+    // find next word if in whitespace
+    while (g_unichar_isspace(curr_uni)) {
+        (*col)++;
+        (*line_utf8_pos)++;
+        curr_ch = g_utf8_find_next_char(curr_ch, NULL);
+        if (!curr_ch) {
+            break;
+        }
+        curr_uni = g_utf8_get_char(curr_ch);
+    }
+
+    if (curr_ch) {
+        while (!g_unichar_isspace(curr_uni)) {
+            (*line_utf8_pos)++;
+            (*col)++;
+            if (g_unichar_iswide(curr_uni)) {
+                (*col)++;
+            }
+            curr_ch = g_utf8_find_next_char(curr_ch, NULL);
+            if (!curr_ch || *line_utf8_pos >= utf8_len) {
+                break;
+            }
+            curr_uni = g_utf8_get_char(curr_ch);
+        }
+    }
+
+    // if gone off screen to right, jump right (half a screen worth)
+//    if (col > pad_start + wcols) {
+//        pad_start = pad_start + (wcols / 2);
+//        _inp_win_update_virtual();
+//    }
 }

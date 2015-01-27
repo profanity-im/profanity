@@ -348,6 +348,9 @@ gboolean ui_win_has_unsaved_form(int num)
     return FALSE;
 }
 
+void
+ui_write(char *line, int offset) {}
+
 // console window actions
 
 void cons_show(const char * const msg, ...)
