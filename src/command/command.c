@@ -1141,7 +1141,7 @@ cmd_init(void)
     autocomplete_add(help_ac, "basic");
     autocomplete_add(help_ac, "chatting");
     autocomplete_add(help_ac, "groupchat");
-    autocomplete_add(help_ac, "presence");
+    autocomplete_add(help_ac, "presences");
     autocomplete_add(help_ac, "contacts");
     autocomplete_add(help_ac, "service");
     autocomplete_add(help_ac, "settings");
