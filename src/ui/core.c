@@ -1418,8 +1418,8 @@ ui_outgoing_chat_msg(const char * const from, const char * const barejid,
     // create new window
     if (window == NULL) {
         window = wins_new_chat(barejid);
-        ProfChatWin *chatwin = (ProfChatWin*)window;
 #ifdef HAVE_LIBOTR
+        ProfChatWin *chatwin = (ProfChatWin*)window;
         if (otr_is_secure(barejid)) {
             chatwin->is_otr = TRUE;
         }
