@@ -615,7 +615,7 @@ static struct cmd_t command_defs[] =
         { "/wrap on|off", "Word wrapping.",
         { "/wrap on|off",
           "------------",
-          "Enable or disable word wrapping.",
+          "Enable or disable word wrapping in the main window.",
           NULL } } },
 
     { "/time",
