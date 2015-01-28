@@ -620,10 +620,10 @@ static struct cmd_t command_defs[] =
 
     { "/time",
         cmd_time, parse_args, 1, 1, &cons_time_setting,
-        { "/time minutes|seconds", "Time display.",
-        { "/time minutes|seconds",
+        { "/time <format>", "Time display.",
+        { "/time <format>",
           "---------------------",
-          "Configure time precision for the main window.",
+          "Configure the time format for the main window.",
           NULL } } },
 
     { "/inpblock",
@@ -1121,7 +1121,6 @@ static Autocomplete form_ac;
 static Autocomplete form_field_multi_ac;
 static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
-static Autocomplete time_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 
@@ -1461,15 +1460,6 @@ cmd_init(void)
     autocomplete_add(occupants_default_ac, "show");
     autocomplete_add(occupants_default_ac, "hide");
 
-    time_ac = autocomplete_new();
-    autocomplete_add(time_ac, "minutes");
-    autocomplete_add(time_ac, "seconds");
-    autocomplete_add(time_ac, "off");
-
-    time_ac = autocomplete_new();
-    autocomplete_add(time_ac, "minutes");
-    autocomplete_add(time_ac, "seconds");
-
     resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
     autocomplete_add(resource_ac, "off");
@@ -1532,7 +1522,6 @@ cmd_uninit(void)
     autocomplete_free(form_field_multi_ac);
     autocomplete_free(occupants_ac);
     autocomplete_free(occupants_default_ac);
-    autocomplete_free(time_ac);
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
 }
@@ -1697,7 +1686,6 @@ cmd_reset_autocomplete()
     autocomplete_reset(form_field_multi_ac);
     autocomplete_reset(occupants_ac);
     autocomplete_reset(occupants_default_ac);
-    autocomplete_reset(time_ac);
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
 
@@ -2010,8 +1998,8 @@ _cmd_complete_parameters(const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", "/time" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, time_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);

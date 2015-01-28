@@ -36,6 +36,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <assert.h>
 
 #include <glib.h>
@@ -882,14 +883,10 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     if ((flags & NO_DATE) == 0) {
         gchar *date_fmt = NULL;
         char *time_pref = prefs_get_string(PREF_TIME);
-        if (g_strcmp0(time_pref, "minutes") == 0) {
-            date_fmt = g_date_time_format(time, "%H:%M");
-        } else if (g_strcmp0(time_pref, "seconds") == 0) {
-            date_fmt = g_date_time_format(time, "%H:%M:%S");
-        }
+        date_fmt = g_date_time_format(time, time_pref);
         free(time_pref);
 
-        if (date_fmt) {
+        if (date_fmt && strlen(date_fmt)) {
             if ((flags & NO_COLOUR_DATE) == 0) {
                 wattron(window->layout->win, theme_attrs(THEME_TIME));
             }

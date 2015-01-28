@@ -727,7 +727,7 @@ _get_default_string(preference_t pref)
         case PREF_ROSTER_BY:
             return "none";
         case PREF_TIME:
-            return "seconds";
+            return "%H:%M:%S";
         default:
             return NULL;
     }

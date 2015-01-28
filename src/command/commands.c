@@ -3257,25 +3257,10 @@ cmd_wrap(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_time(gchar **args, struct cmd_help_t help)
 {
-    if (g_strcmp0(args[0], "minutes") == 0) {
-        prefs_set_string(PREF_TIME, "minutes");
-        cons_show("Time precision set to minutes.");
-        wins_resize_all();
-        return TRUE;
-    } else if (g_strcmp0(args[0], "seconds") == 0) {
-        prefs_set_string(PREF_TIME, "seconds");
-        cons_show("Time precision set to seconds.");
-        wins_resize_all();
-        return TRUE;
-    } else if (g_strcmp0(args[0], "off") == 0) {
-        prefs_set_string(PREF_TIME, "off");
-        cons_show("Time display disabled.");
-        wins_resize_all();
-        return TRUE;
-    } else {
-        cons_show("Usage: %s", help.usage);
-        return TRUE;
-    }
+    prefs_set_string(PREF_TIME, args[0]);
+    cons_show("Time format set to '%s'", args[0]);
+    wins_resize_all();
+    return TRUE;
 }
 
 gboolean
