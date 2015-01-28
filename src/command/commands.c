@@ -154,6 +154,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                         cons_show("Error evaluating password, see logs for details.");
                         return TRUE;
                     }
+                    g_strstrip(account->password);
                 } else {
                     log_error("popen failed when running eval_password.");
                     cons_show("Error evaluating password, see logs for details.");
