@@ -207,12 +207,6 @@ ui_readline(void)
 }
 
 void
-ui_inp_history_append(char *inp)
-{
-    inp_history_append(inp);
-}
-
-void
 ui_input_clear(void)
 {
     inp_win_clear();

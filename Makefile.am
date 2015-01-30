@@ -19,7 +19,6 @@ core_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/ui/console.c src/ui/notifier.c \
 	src/ui/windows.c src/ui/windows.h \
-	src/ui/keyhandlers.c src/ui/keyhandlers.h \
 	src/ui/rosterwin.c src/ui/occupantswin.c \
 	src/ui/buffer.c src/ui/buffer.h \
 	src/command/command.h src/command/command.c \
@@ -28,7 +27,6 @@ core_sources = \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
-	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/account.c src/config/account.h \
@@ -51,7 +49,6 @@ tests_sources = \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
-	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
@@ -59,7 +56,6 @@ tests_sources = \
 	src/config/theme.c src/config/theme.h \
 	src/ui/windows.c src/ui/windows.h \
 	src/ui/window.c src/ui/window.h \
-	src/ui/keyhandlers.c src/ui/keyhandlers.h \
 	src/ui/buffer.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
@@ -85,7 +81,6 @@ tests_sources = \
 	tests/test_common.c tests/test_common.h \
 	tests/test_contact.c tests/test_contact.h \
 	tests/test_form.c tests/test_form.h \
-	tests/test_history.c tests/test_history.h \
 	tests/test_jid.c tests/test_jid.h \
 	tests/test_muc.c tests/test_muc.h \
 	tests/test_parser.c tests/test_parser.h \
@@ -94,7 +89,6 @@ tests_sources = \
 	tests/test_server_events.c tests/test_server_events.h \
 	tests/test_autocomplete.c tests/test_autocomplete.h \
 	tests/test_chat_session.c tests/test_chat_session.h \
-	tests/test_keyhandlers.c tests/test_keyhandlers.h \
 	tests/testsuite.c
 
 main_source = src/main.c

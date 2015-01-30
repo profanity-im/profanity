@@ -21,7 +21,6 @@
 #include "test_cmd_sub.h"
 #include "test_cmd_statuses.h"
 #include "test_cmd_otr.h"
-#include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
 #include "test_roster_list.h"
@@ -35,7 +34,6 @@
 #include "test_cmd_win.h"
 #include "test_cmd_disconnect.h"
 #include "test_form.h"
-#include "test_keyhandlers.h"
 
 int main(int argc, char* argv[]) {
     const UnitTest all_tests[] = {
@@ -103,20 +101,6 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
         unit_test(add_two_same_updates),
-
-        unit_test(previous_on_empty_returns_null),
-        unit_test(next_on_empty_returns_null),
-        unit_test(previous_once_returns_last),
-        unit_test(previous_twice_when_one_returns_first),
-        unit_test(previous_always_stops_at_first),
-        unit_test(previous_goes_to_correct_element),
-        unit_test(prev_then_next_returns_empty),
-        unit_test(prev_with_val_then_next_returns_val),
-        unit_test(prev_with_val_then_next_twice_returns_null),
-        unit_test(navigate_then_append_new),
-        unit_test(edit_item_mid_history),
-        unit_test(edit_previous_and_append),
-        unit_test(start_session_add_new_submit_previous),
 
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),
@@ -623,56 +607,6 @@ int main(int argc, char* argv[]) {
         unit_test(remove_text_multi_value_removes_when_many),
 
         unit_test(clears_chat_sessions),
-
-        unit_test(append_to_empty),
-        unit_test(append_wide_to_empty),
-
-        unit_test(append_to_single),
-        unit_test(append_wide_to_single_non_wide),
-        unit_test(append_non_wide_to_single_wide),
-        unit_test(append_wide_to_single_wide),
-
-        unit_test(append_non_wide_when_overrun),
-
-        unit_test(insert_non_wide_to_non_wide),
-        unit_test(insert_single_non_wide_when_pad_scrolled),
-        unit_test(insert_many_non_wide_when_pad_scrolled),
-        unit_test(insert_single_non_wide_last_column),
-        unit_test(insert_many_non_wide_last_column),
-
-        unit_test(ctrl_left_when_no_input),
-        unit_test(ctrl_left_when_at_start),
-        unit_test(ctrl_left_when_in_first_word),
-        unit_test(ctrl_left_when_in_first_space),
-        unit_test(ctrl_left_when_at_start_of_second_word),
-        unit_test(ctrl_left_when_in_second_word),
-        unit_test(ctrl_left_when_at_end_of_second_word),
-        unit_test(ctrl_left_when_in_second_space),
-        unit_test(ctrl_left_when_at_start_of_third_word),
-        unit_test(ctrl_left_when_in_third_word),
-        unit_test(ctrl_left_when_at_end_of_third_word),
-        unit_test(ctrl_left_when_in_third_space),
-        unit_test(ctrl_left_when_at_end),
-        unit_test(ctrl_left_when_in_only_whitespace),
-        unit_test(ctrl_left_when_start_whitespace_start_of_word),
-        unit_test(ctrl_left_when_start_whitespace_middle_of_word),
-        unit_test(ctrl_left_in_whitespace_between_words),
-        unit_test(ctrl_left_in_whitespace_between_words_start_of_word),
-        unit_test(ctrl_left_in_whitespace_between_words_middle_of_word),
-        unit_test(ctrl_left_when_word_overrun_to_left),
-
-        unit_test(ctrl_right_when_no_input),
-        unit_test(ctrl_right_when_at_end),
-        unit_test(ctrl_right_one_word_at_start),
-        unit_test(ctrl_right_one_word_in_middle),
-        unit_test(ctrl_right_one_word_at_end),
-        unit_test(ctrl_right_two_words_from_middle_first),
-        unit_test(ctrl_right_two_words_from_end_first),
-        unit_test(ctrl_right_two_words_from_space),
-        unit_test(ctrl_right_two_words_from_start_second),
-        unit_test(ctrl_right_one_word_leading_whitespace),
-        unit_test(ctrl_right_two_words_in_whitespace),
-        unit_test(ctrl_right_trailing_whitespace_from_middle),
     };
 
     return run_tests(all_tests);

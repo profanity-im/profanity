@@ -1736,11 +1736,6 @@ cmd_process_input(char *inp)
     gboolean result = FALSE;
     g_strstrip(inp);
 
-    // add line to history if something typed
-    if (strlen(inp) > 0) {
-        ui_inp_history_append(inp);
-    }
-
     // just carry on if no input
     if (strlen(inp) == 0) {
         result = TRUE;
