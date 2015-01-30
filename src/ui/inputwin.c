@@ -63,29 +63,12 @@
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
 
-#define KEY_CTRL_A 0001
-#define KEY_CTRL_B 0002
-#define KEY_CTRL_D 0004
-#define KEY_CTRL_E 0005
-#define KEY_CTRL_F 0006
-#define KEY_CTRL_N 0016
-#define KEY_CTRL_P 0020
-#define KEY_CTRL_U 0025
-#define KEY_CTRL_W 0027
-
-#define MAX_HISTORY 100
-
 static WINDOW *inp_win;
 
 static struct timeval p_rl_timeout;
 static fd_set fds;
 static int r;
 static gboolean cmd_result = TRUE;
-
-// input line
-static char line[INP_WIN_MAX];
-// current position in the utf8 string
-static int line_utf8_pos;
 
 static int pad_start = 0;
 
@@ -119,8 +102,6 @@ create_input_window(void)
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
     _inp_win_update_virtual();
-    line_utf8_pos = 0;
-    line[0] = '\0';
 }
 
 void
@@ -217,8 +198,6 @@ inp_get_password(char *passwd)
     werase(inp_win);
     wmove(inp_win, 0, 0);
     pad_start = 0;
-    line[0] = '\0';
-    line_utf8_pos = 0;
     _inp_win_update_virtual();
     doupdate();
     noecho();
@@ -240,8 +219,6 @@ inp_win_clear(void)
     werase(inp_win);
     wmove(inp_win, 0, 0);
     pad_start = 0;
-    line[0] = '\0';
-    line_utf8_pos = 0;
     _inp_win_update_virtual();
 }
 
