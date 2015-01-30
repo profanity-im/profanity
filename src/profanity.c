@@ -43,8 +43,6 @@
 #include <string.h>
 
 #include <glib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 
 #include "profanity.h"
 #include "chat_session.h"
@@ -73,20 +71,7 @@ static void _create_directories(void);
 static void _connect_default(const char * const account);
 
 static gboolean idle = FALSE;
-static void cb_linehandler(char *);
-static gboolean cmd_result = TRUE;
-
-static void
-cb_linehandler(char *line)
-{
-    /* Can use ^D (stty eof) or `exit' to exit. */
-    if (*line) {
-        add_history(line);
-    }
-    rl_redisplay();
-    cmd_result = cmd_process_input(line);
-    free(line);
-}
+static gboolean cont = TRUE;
 
 void
 prof_run(const int disable_tls, char *log_level, char *account_name)
@@ -95,35 +80,13 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
     _connect_default(account_name);
     ui_update();
 
-    fd_set fds;
-    int r;
-    rl_callback_handler_install(NULL, cb_linehandler);
-
     log_info("Starting main event loop");
 
-    struct timeval t;
-	t.tv_sec = 0;
-    t.tv_usec = 10000;
-
-    while(cmd_result) {
+    while(cont) {
         _check_autoaway();
 
-        FD_ZERO(&fds);
-        FD_SET(fileno (rl_instream), &fds);
-        r = select(FD_SETSIZE, &fds, NULL, NULL, &t);
-        if (r < 0) {
-            perror ("rltest: select");
-            rl_callback_handler_remove();
-            break;
-        }
+        cont = ui_readline();
 
-        if (FD_ISSET (fileno (rl_instream), &fds)) {
-            rl_callback_read_char();
-            ui_write(rl_line_buffer, rl_point);
-        }
-
-
-//            line = ui_readline();
 #ifdef HAVE_LIBOTR
         otr_poll();
 #endif
@@ -131,8 +94,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
         jabber_process_events();
         ui_update();
     }
-
-    rl_callback_handler_remove();
 }
 
 void

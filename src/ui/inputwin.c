@@ -39,6 +39,9 @@
 #include <string.h>
 #include <wchar.h>
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -77,6 +80,11 @@
 static WINDOW *inp_win;
 static History history;
 
+static struct timeval p_rl_timeout;
+static fd_set fds;
+static int r;
+static gboolean cmd_result = TRUE;
+
 // input line
 static char line[INP_WIN_MAX];
 // current position in the utf8 string
@@ -95,6 +103,17 @@ static gboolean _is_ctrl_right(int key_type, const wint_t ch);
 
 static void _inp_win_update_virtual(void);
 
+static void
+cb_linehandler(char *line)
+{
+    if (*line) {
+        add_history(line);
+    }
+    rl_redisplay();
+    cmd_result = cmd_process_input(line);
+    free(line);
+}
+
 void
 create_input_window(void)
 {
@@ -103,6 +122,10 @@ create_input_window(void)
 #else
     ESCDELAY = 25;
 #endif
+	p_rl_timeout.tv_sec = 0;
+    p_rl_timeout.tv_usec = 500000;
+    rl_callback_handler_install(NULL, cb_linehandler);
+
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
@@ -169,15 +192,44 @@ inp_write(char *line, int offset)
 }
 
 void
-inp_non_block(gint timeout)
+inp_non_block(gint block_timeout)
 {
-    wtimeout(inp_win, timeout);
+    wtimeout(inp_win, block_timeout);
 }
 
 void
 inp_block(void)
 {
     wtimeout(inp_win, -1);
+}
+
+gboolean
+inp_readline(void)
+{
+    FD_ZERO(&fds);
+    FD_SET(fileno (rl_instream), &fds);
+    r = select(FD_SETSIZE, &fds, NULL, NULL, &p_rl_timeout);
+    if (r < 0) {
+        log_error("Readline failed.");
+        rl_callback_handler_remove();
+        return false;
+    }
+
+    if (FD_ISSET (fileno (rl_instream), &fds)) {
+        rl_callback_read_char();
+        inp_write(rl_line_buffer, rl_point);
+    }
+
+    p_rl_timeout.tv_sec = 0;
+    p_rl_timeout.tv_usec = 500000;
+
+    return cmd_result;
+}
+
+void
+inp_close(void)
+{
+    rl_callback_handler_remove();
 }
 
 char *

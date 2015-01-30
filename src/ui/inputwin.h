@@ -40,6 +40,8 @@
 #define INP_WIN_MAX 1000
 
 void create_input_window(void);
+gboolean inp_readline(void);
+void inp_close(void);
 char* inp_read(int *key_type, wint_t *ch);
 void inp_win_clear(void);
 void inp_win_resize(void);

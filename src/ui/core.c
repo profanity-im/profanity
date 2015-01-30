@@ -82,7 +82,7 @@ static Display *display;
 
 static GTimer *ui_idle_time;
 
-static void _win_handle_switch(const wint_t ch);
+//static void _win_handle_switch(const wint_t ch);
 static void _win_show_history(int win_index, const char * const contact);
 static void _ui_draw_term_title(void);
 
@@ -174,39 +174,36 @@ ui_close(void)
 {
     notifier_uninit();
     wins_destroy();
+    inp_close();
     endwin();
 }
 
-void
-ui_write(char *line, int offset)
-{
-    inp_write(line, offset);
-}
-
-char*
+gboolean
 ui_readline(void)
 {
-    int key_type;
-    wint_t ch;
+    return inp_readline();
 
-    char *line = inp_read(&key_type, &ch);
-    _win_handle_switch(ch);
-
-    ProfWin *current = wins_get_current();
-    win_handle_page(current, ch, key_type);
-
-    if (ch == KEY_RESIZE) {
-        ui_resize();
-    }
-
-    if (ch != ERR && key_type != ERR) {
-        ui_reset_idle_time();
-        ui_input_nonblocking(TRUE);
-    } else {
-        ui_input_nonblocking(FALSE);
-    }
-
-    return line;
+//    int key_type;
+//    wint_t ch;
+//
+//    char *line = inp_read(&key_type, &ch);
+//    _win_handle_switch(ch);
+//
+//    ProfWin *current = wins_get_current();
+//    win_handle_page(current, ch, key_type);
+//
+//    if (ch == KEY_RESIZE) {
+//        ui_resize();
+//    }
+//
+//    if (ch != ERR && key_type != ERR) {
+//        ui_reset_idle_time();
+//        ui_input_nonblocking(TRUE);
+//    } else {
+//        ui_input_nonblocking(FALSE);
+//    }
+//
+//    return line;
 }
 
 void
@@ -2945,32 +2942,32 @@ ui_hide_roster(void)
     }
 }
 
-static void
-_win_handle_switch(const wint_t ch)
-{
-    if (ch == KEY_F(1)) {
-        ui_switch_win(1);
-    } else if (ch == KEY_F(2)) {
-        ui_switch_win(2);
-    } else if (ch == KEY_F(3)) {
-        ui_switch_win(3);
-    } else if (ch == KEY_F(4)) {
-        ui_switch_win(4);
-    } else if (ch == KEY_F(5)) {
-        ui_switch_win(5);
-    } else if (ch == KEY_F(6)) {
-        ui_switch_win(6);
-    } else if (ch == KEY_F(7)) {
-        ui_switch_win(7);
-    } else if (ch == KEY_F(8)) {
-        ui_switch_win(8);
-    } else if (ch == KEY_F(9)) {
-        ui_switch_win(9);
-    } else if (ch == KEY_F(10)) {
-        ui_switch_win(0);
-    }
-}
-
+//static void
+//_win_handle_switch(const wint_t ch)
+//{
+//    if (ch == KEY_F(1)) {
+//        ui_switch_win(1);
+//    } else if (ch == KEY_F(2)) {
+//        ui_switch_win(2);
+//    } else if (ch == KEY_F(3)) {
+//        ui_switch_win(3);
+//    } else if (ch == KEY_F(4)) {
+//        ui_switch_win(4);
+//    } else if (ch == KEY_F(5)) {
+//        ui_switch_win(5);
+//    } else if (ch == KEY_F(6)) {
+//        ui_switch_win(6);
+//    } else if (ch == KEY_F(7)) {
+//        ui_switch_win(7);
+//    } else if (ch == KEY_F(8)) {
+//        ui_switch_win(8);
+//    } else if (ch == KEY_F(9)) {
+//        ui_switch_win(9);
+//    } else if (ch == KEY_F(10)) {
+//        ui_switch_win(0);
+//    }
+//}
+//
 static void
 _win_show_history(int win_index, const char * const contact)
 {
