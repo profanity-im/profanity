@@ -240,6 +240,7 @@ ui_input_nonblocking(gboolean reset)
         }
     }
 
+    log_info("TIMEOUT: %d", timeout);
     inp_non_block(timeout);
 }
 

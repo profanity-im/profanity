@@ -66,6 +66,7 @@
 static WINDOW *inp_win;
 
 static struct timeval p_rl_timeout;
+static int timeout_millis = 0;
 static fd_set fds;
 static int r;
 static gboolean cmd_result = TRUE;
@@ -94,7 +95,7 @@ create_input_window(void)
     ESCDELAY = 25;
 #endif
 	p_rl_timeout.tv_sec = 0;
-    p_rl_timeout.tv_usec = 500000;
+    p_rl_timeout.tv_usec = timeout_millis * 1000;
     rl_callback_handler_install(NULL, cb_linehandler);
 
     inp_win = newpad(1, INP_WIN_MAX);
@@ -145,7 +146,7 @@ offset_to_col(char *str, int offset)
 void
 inp_non_block(gint block_timeout)
 {
-    wtimeout(inp_win, block_timeout);
+    timeout_millis = block_timeout;
 }
 
 void
@@ -186,7 +187,7 @@ inp_readline(void)
     }
 
     p_rl_timeout.tv_sec = 0;
-    p_rl_timeout.tv_usec = 500000;
+    p_rl_timeout.tv_usec = timeout_millis * 1000;
 
     return cmd_result;
 }
