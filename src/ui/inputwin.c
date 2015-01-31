@@ -143,16 +143,6 @@ offset_to_col(char *str, int offset)
 }
 
 void
-inp_write(char *line, int offset)
-{
-    int col = offset_to_col(line, offset);
-    werase(inp_win);
-    waddstr(inp_win, line);
-    wmove(inp_win, 0, col);
-    _inp_win_update_virtual();
-}
-
-void
 inp_non_block(gint block_timeout)
 {
     wtimeout(inp_win, block_timeout);
@@ -162,6 +152,16 @@ void
 inp_block(void)
 {
     wtimeout(inp_win, -1);
+}
+
+void
+inp_write(char *line, int offset)
+{
+    int col = offset_to_col(line, offset);
+    werase(inp_win);
+    waddstr(inp_win, line);
+    wmove(inp_win, 0, col);
+    _inp_win_update_virtual();
 }
 
 gboolean
@@ -177,7 +177,12 @@ inp_readline(void)
 
     if (FD_ISSET(fileno(rl_instream), &fds)) {
         rl_callback_read_char();
+        if (rl_line_buffer && rl_line_buffer[0] != '/') {
+            prof_handle_activity();
+        }
         inp_write(rl_line_buffer, rl_point);
+    } else {
+        prof_handle_idle();
     }
 
     p_rl_timeout.tv_sec = 0;
