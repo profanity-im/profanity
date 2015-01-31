@@ -88,6 +88,32 @@ cb_linehandler(char *line)
     free(line);
 }
 
+int
+tab_handler(int count, int key)
+{
+    if (rl_point != rl_end) {
+        return 0;
+    }
+
+    if ((strncmp(rl_line_buffer, "/", 1) != 0) && (ui_current_win_type() == WIN_MUC)) {
+        char *result = muc_autocomplete(rl_line_buffer);
+        if (result) {
+            rl_replace_line(result, 0);
+            rl_point = rl_end;
+            inp_write(result, rl_point);
+        }
+    } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
+        char *result = cmd_autocomplete(rl_line_buffer);
+        if (result) {
+            rl_replace_line(result, 0);
+            rl_point = rl_end;
+            inp_write(result, rl_point);
+        }
+    }
+
+    return 0;
+}
+
 void
 create_input_window(void)
 {
@@ -99,7 +125,7 @@ create_input_window(void)
 	p_rl_timeout.tv_sec = 0;
     p_rl_timeout.tv_usec = inp_timeout * 1000;
     rl_callback_handler_install(NULL, cb_linehandler);
-
+    rl_bind_key('\t', tab_handler);
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
@@ -205,6 +231,7 @@ inp_readline(void)
         }
         ui_reset_idle_time();
         inp_nonblocking(TRUE);
+        rl_redisplay();
         inp_write(rl_line_buffer, rl_point);
     } else {
         inp_nonblocking(FALSE);
