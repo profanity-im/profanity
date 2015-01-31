@@ -41,6 +41,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
 #ifdef HAVE_LIBXSS
 #include <X11/extensions/scrnsaver.h>
 #endif
@@ -91,7 +94,6 @@ ui_init(void)
 {
     log_info("Initialising UI");
     initscr();
-    raw();
     keypad(stdscr, TRUE);
     if (prefs_get_boolean(PREF_MOUSE)) {
         mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -221,9 +223,13 @@ ui_input_nonblocking(gboolean reset)
 void
 ui_resize(void)
 {
-    log_info("Resizing UI");
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     erase();
+    resizeterm(w.ws_row, w.ws_col);
     refresh();
+
+    log_info("Resizing UI");
     title_bar_resize();
     wins_resize_all();
     status_bar_resize();

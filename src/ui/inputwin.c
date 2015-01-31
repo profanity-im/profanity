@@ -115,6 +115,12 @@ tab_handler(int count, int key)
 }
 
 void
+resize_signal_handler(int signal)
+{
+    ui_resize();
+}
+
+void
 create_input_window(void)
 {
 #ifdef NCURSES_REENTRANT
@@ -127,10 +133,13 @@ create_input_window(void)
     rl_callback_handler_install(NULL, cb_linehandler);
     rl_bind_key('\t', tab_handler);
 
+    signal(SIGWINCH, resize_signal_handler);
+
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
+
     _inp_win_update_virtual();
 }
 
@@ -233,7 +242,7 @@ inp_readline(void)
     r = select(FD_SETSIZE, &fds, NULL, NULL, &p_rl_timeout);
     if (r < 0) {
         log_error("Readline failed.");
-        return false;
+        return TRUE;
     }
 
     if (FD_ISSET(fileno(rl_instream), &fds)) {
