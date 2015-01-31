@@ -121,70 +121,70 @@ tab_handler(int count, int key)
 }
 
 int
-alt1_handler(int count, int key)
+win1_handler(int count, int key)
 {
     ui_switch_win(1);
     return 0;
 }
 
 int
-alt2_handler(int count, int key)
+win2_handler(int count, int key)
 {
     ui_switch_win(2);
     return 0;
 }
 
 int
-alt3_handler(int count, int key)
+win3_handler(int count, int key)
 {
     ui_switch_win(3);
     return 0;
 }
 
 int
-alt4_handler(int count, int key)
+win4_handler(int count, int key)
 {
     ui_switch_win(4);
     return 0;
 }
 
 int
-alt5_handler(int count, int key)
+win5_handler(int count, int key)
 {
     ui_switch_win(5);
     return 0;
 }
 
 int
-alt6_handler(int count, int key)
+win6_handler(int count, int key)
 {
     ui_switch_win(6);
     return 0;
 }
 
 int
-alt7_handler(int count, int key)
+win7_handler(int count, int key)
 {
     ui_switch_win(7);
     return 0;
 }
 
 int
-alt8_handler(int count, int key)
+win8_handler(int count, int key)
 {
     ui_switch_win(8);
     return 0;
 }
 
 int
-alt9_handler(int count, int key)
+win9_handler(int count, int key)
 {
     ui_switch_win(9);
     return 0;
 }
 
 int
-alt0_handler(int count, int key)
+win0_handler(int count, int key)
 {
     ui_switch_win(0);
     return 0;
@@ -235,27 +235,27 @@ altpagedown_handler(int count, int key)
 int
 startup_hook(void)
 {
-    rl_bind_keyseq("\\e1", alt1_handler);
-    rl_bind_keyseq("\\e2", alt2_handler);
-    rl_bind_keyseq("\\e3", alt3_handler);
-    rl_bind_keyseq("\\e4", alt4_handler);
-    rl_bind_keyseq("\\e5", alt5_handler);
-    rl_bind_keyseq("\\e6", alt6_handler);
-    rl_bind_keyseq("\\e7", alt7_handler);
-    rl_bind_keyseq("\\e8", alt8_handler);
-    rl_bind_keyseq("\\e9", alt9_handler);
-    rl_bind_keyseq("\\e0", alt0_handler);
+    rl_bind_keyseq("\\e1", win1_handler);
+    rl_bind_keyseq("\\e2", win2_handler);
+    rl_bind_keyseq("\\e3", win3_handler);
+    rl_bind_keyseq("\\e4", win4_handler);
+    rl_bind_keyseq("\\e5", win5_handler);
+    rl_bind_keyseq("\\e6", win6_handler);
+    rl_bind_keyseq("\\e7", win7_handler);
+    rl_bind_keyseq("\\e8", win8_handler);
+    rl_bind_keyseq("\\e9", win9_handler);
+    rl_bind_keyseq("\\e0", win0_handler);
 
-    rl_bind_keyseq("\\eOP", alt1_handler);
-    rl_bind_keyseq("\\eOQ", alt2_handler);
-    rl_bind_keyseq("\\eOR", alt3_handler);
-    rl_bind_keyseq("\\eOS", alt4_handler);
-    rl_bind_keyseq("\\e[15~", alt5_handler);
-    rl_bind_keyseq("\\e[17~", alt6_handler);
-    rl_bind_keyseq("\\e[18~", alt7_handler);
-    rl_bind_keyseq("\\e[19~", alt8_handler);
-    rl_bind_keyseq("\\e[20~", alt9_handler);
-    rl_bind_keyseq("\\e[21~", alt0_handler);
+    rl_bind_keyseq("\\eOP", win1_handler);
+    rl_bind_keyseq("\\eOQ", win2_handler);
+    rl_bind_keyseq("\\eOR", win3_handler);
+    rl_bind_keyseq("\\eOS", win4_handler);
+    rl_bind_keyseq("\\e[15~", win5_handler);
+    rl_bind_keyseq("\\e[17~", win6_handler);
+    rl_bind_keyseq("\\e[18~", win7_handler);
+    rl_bind_keyseq("\\e[19~", win8_handler);
+    rl_bind_keyseq("\\e[20~", win9_handler);
+    rl_bind_keyseq("\\e[21~", win0_handler);
 
     rl_bind_keyseq("\\e[1;3D", altleft_handler);
     rl_bind_keyseq("\\e[1;3C", altright_handler);

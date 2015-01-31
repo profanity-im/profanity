@@ -184,28 +184,6 @@ gboolean
 ui_readline(void)
 {
     return inp_readline();
-
-//    int key_type;
-//    wint_t ch;
-//
-//    char *line = inp_read(&key_type, &ch);
-//    _win_handle_switch(ch);
-//
-//    ProfWin *current = wins_get_current();
-//    win_handle_page(current, ch, key_type);
-//
-//    if (ch == KEY_RESIZE) {
-//        ui_resize();
-//    }
-//
-//    if (ch != ERR && key_type != ERR) {
-//        ui_reset_idle_time();
-//        ui_input_nonblocking(TRUE);
-//    } else {
-//        ui_input_nonblocking(FALSE);
-//    }
-//
-//    return line;
 }
 
 void
