@@ -366,12 +366,34 @@ inp_block(void)
 }
 
 void
+inp_win_handle_scroll(void)
+{
+    int col = getcurx(inp_win);
+    int wcols = getmaxx(stdscr);
+
+    // if lost cursor off screen, move contents to show it
+    if (col >= pad_start + (wcols -2)) {
+        pad_start = col - (wcols / 2);
+        if (pad_start < 0) {
+            pad_start = 0;
+        }
+    } else if (col <= pad_start) {
+        pad_start = pad_start - (wcols / 2);
+        if (pad_start < 0) {
+            pad_start = 0;
+        }
+    }
+}
+
+void
 inp_write(char *line, int offset)
 {
     int col = offset_to_col(line, offset);
     werase(inp_win);
     waddstr(inp_win, line);
     wmove(inp_win, 0, col);
+    inp_win_handle_scroll();
+
     _inp_win_update_virtual();
 }
 
