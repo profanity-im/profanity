@@ -91,7 +91,7 @@ cb_linehandler(char *line)
 int
 tab_handler(int count, int key)
 {
-    if (rl_point != rl_end) {
+    if (rl_point != rl_end || !rl_line_buffer) {
         return 0;
     }
 
@@ -126,6 +126,7 @@ create_input_window(void)
     p_rl_timeout.tv_usec = inp_timeout * 1000;
     rl_callback_handler_install(NULL, cb_linehandler);
     rl_bind_key('\t', tab_handler);
+
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
@@ -213,6 +214,17 @@ inp_write(char *line, int offset)
     _inp_win_update_virtual();
 }
 
+static int
+_printable(const wint_t ch)
+{
+    char bytes[MB_CUR_MAX+1];
+    size_t utf_len = wcrtomb(bytes, ch, NULL);
+    bytes[utf_len] = '\0';
+    gunichar unichar = g_utf8_get_char(bytes);
+
+    return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
+}
+
 gboolean
 inp_readline(void)
 {
@@ -225,13 +237,18 @@ inp_readline(void)
     }
 
     if (FD_ISSET(fileno(rl_instream), &fds)) {
+        if (_printable(rl_executing_key)) {
+            cmd_reset_autocomplete();
+        }
+
         rl_callback_read_char();
+
         if (rl_line_buffer && rl_line_buffer[0] != '/') {
             prof_handle_activity();
         }
+
         ui_reset_idle_time();
         inp_nonblocking(TRUE);
-        rl_redisplay();
         inp_write(rl_line_buffer, rl_point);
     } else {
         inp_nonblocking(FALSE);
