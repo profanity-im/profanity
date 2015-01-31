@@ -209,6 +209,34 @@ ui_readline(void)
 }
 
 void
+ui_page_up(void)
+{
+    ProfWin *current = wins_get_current();
+    win_page_up(current);
+}
+
+void
+ui_page_down(void)
+{
+    ProfWin *current = wins_get_current();
+    win_page_down(current);
+}
+
+void
+ui_subwin_page_up(void)
+{
+    ProfWin *current = wins_get_current();
+    win_sub_page_up(current);
+}
+
+void
+ui_subwin_page_down(void)
+{
+    ProfWin *current = wins_get_current();
+    win_sub_page_down(current);
+}
+
+void
 ui_input_clear(void)
 {
     inp_win_clear();

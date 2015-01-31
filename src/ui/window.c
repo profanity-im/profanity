@@ -358,7 +358,101 @@ win_free(ProfWin* window)
 }
 
 void
-win_handle_page(ProfWin *window, const wint_t ch, const int result)
+win_page_up(ProfWin *window)
+{
+    int rows = getmaxy(stdscr);
+    int y = getcury(window->layout->win);
+    int page_space = rows - 4;
+    int *page_start = &(window->layout->y_pos);
+
+    *page_start -= page_space;
+
+    // went past beginning, show first page
+    if (*page_start < 0)
+        *page_start = 0;
+
+    window->layout->paged = 1;
+    win_update_virtual(window);
+
+    // switch off page if last line and space line visible
+    if ((y) - *page_start == page_space) {
+        window->layout->paged = 0;
+    }
+}
+
+void
+win_page_down(ProfWin *window)
+{
+    int rows = getmaxy(stdscr);
+    int y = getcury(window->layout->win);
+    int page_space = rows - 4;
+    int *page_start = &(window->layout->y_pos);
+
+    *page_start += page_space;
+
+    // only got half a screen, show full screen
+    if ((y - (*page_start)) < page_space)
+        *page_start = y - page_space;
+
+    // went past end, show full screen
+    else if (*page_start >= y)
+        *page_start = y - page_space - 1;
+
+    window->layout->paged = 1;
+    win_update_virtual(window);
+
+    // switch off page if last line and space line visible
+    if ((y) - *page_start == page_space) {
+        window->layout->paged = 0;
+    }
+}
+
+void
+win_sub_page_down(ProfWin *window)
+{
+
+    if (window->layout->type == LAYOUT_SPLIT) {
+        int rows = getmaxy(stdscr);
+        int page_space = rows - 4;
+        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
+        int sub_y = getcury(split_layout->subwin);
+        int *sub_y_pos = &(split_layout->sub_y_pos);
+
+        *sub_y_pos += page_space;
+
+        // only got half a screen, show full screen
+        if ((sub_y- (*sub_y_pos)) < page_space)
+            *sub_y_pos = sub_y - page_space;
+
+        // went past end, show full screen
+        else if (*sub_y_pos >= sub_y)
+            *sub_y_pos = sub_y - page_space - 1;
+
+        win_update_virtual(window);
+    }
+}
+
+void
+win_sub_page_up(ProfWin *window)
+{
+    if (window->layout->type == LAYOUT_SPLIT) {
+        int rows = getmaxy(stdscr);
+        int page_space = rows - 4;
+        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
+        int *sub_y_pos = &(split_layout->sub_y_pos);
+
+        *sub_y_pos -= page_space;
+
+        // went past beginning, show first page
+        if (*sub_y_pos < 0)
+            *sub_y_pos = 0;
+
+        win_update_virtual(window);
+    }
+}
+
+void
+win_mouse(ProfWin *window, const wint_t ch, const int result)
 {
     int rows = getmaxy(stdscr);
     int y = getcury(window->layout->win);
@@ -400,69 +494,6 @@ win_handle_page(ProfWin *window, const wint_t ch, const int result)
                     win_update_virtual(window);
                 }
             }
-        }
-    }
-
-    // page up
-    if (ch == KEY_PPAGE) {
-        *page_start -= page_space;
-
-        // went past beginning, show first page
-        if (*page_start < 0)
-            *page_start = 0;
-
-        window->layout->paged = 1;
-        win_update_virtual(window);
-
-    // page down
-    } else if (ch == KEY_NPAGE) {
-        *page_start += page_space;
-
-        // only got half a screen, show full screen
-        if ((y - (*page_start)) < page_space)
-            *page_start = y - page_space;
-
-        // went past end, show full screen
-        else if (*page_start >= y)
-            *page_start = y - page_space - 1;
-
-        window->layout->paged = 1;
-        win_update_virtual(window);
-    }
-
-    // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
-        window->layout->paged = 0;
-    }
-
-    if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
-        int sub_y = getcury(split_layout->subwin);
-        int *sub_y_pos = &(split_layout->sub_y_pos);
-
-        // alt up arrow
-        if ((result == KEY_CODE_YES) && ((ch == 565) || (ch == 337))) {
-            *sub_y_pos -= page_space;
-
-            // went past beginning, show first page
-            if (*sub_y_pos < 0)
-                *sub_y_pos = 0;
-
-            win_update_virtual(window);
-
-        // alt down arrow
-        } else if ((result == KEY_CODE_YES) && ((ch == 524) || (ch == 336))) {
-            *sub_y_pos += page_space;
-
-            // only got half a screen, show full screen
-            if ((sub_y- (*sub_y_pos)) < page_space)
-                *sub_y_pos = sub_y - page_space;
-
-            // went past end, show full screen
-            else if (*sub_y_pos >= sub_y)
-                *sub_y_pos = sub_y - page_space - 1;
-
-            win_update_virtual(window);
         }
     }
 }

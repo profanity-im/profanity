@@ -88,6 +88,12 @@ cb_linehandler(char *line)
     free(line);
 }
 
+void
+resize_signal_handler(int signal)
+{
+    ui_resize();
+}
+
 int
 tab_handler(int count, int key)
 {
@@ -114,10 +120,144 @@ tab_handler(int count, int key)
     return 0;
 }
 
-void
-resize_signal_handler(int signal)
+int
+alt1_handler(int count, int key)
 {
-    ui_resize();
+    ui_switch_win(1);
+    return 0;
+}
+
+int
+alt2_handler(int count, int key)
+{
+    ui_switch_win(2);
+    return 0;
+}
+
+int
+alt3_handler(int count, int key)
+{
+    ui_switch_win(3);
+    return 0;
+}
+
+int
+alt4_handler(int count, int key)
+{
+    ui_switch_win(4);
+    return 0;
+}
+
+int
+alt5_handler(int count, int key)
+{
+    ui_switch_win(5);
+    return 0;
+}
+
+int
+alt6_handler(int count, int key)
+{
+    ui_switch_win(6);
+    return 0;
+}
+
+int
+alt7_handler(int count, int key)
+{
+    ui_switch_win(7);
+    return 0;
+}
+
+int
+alt8_handler(int count, int key)
+{
+    ui_switch_win(8);
+    return 0;
+}
+
+int
+alt9_handler(int count, int key)
+{
+    ui_switch_win(9);
+    return 0;
+}
+
+int
+alt0_handler(int count, int key)
+{
+    ui_switch_win(0);
+    return 0;
+}
+
+int
+altleft_handler(int count, int key)
+{
+    ui_previous_win();
+    return 0;
+}
+
+int
+altright_handler(int count, int key)
+{
+    ui_next_win();
+    return 0;
+}
+
+int
+pageup_handler(int count, int key)
+{
+    ui_page_up();
+    return 0;
+}
+
+int
+pagedown_handler(int count, int key)
+{
+    ui_page_down();
+    return 0;
+}
+
+int
+altpageup_handler(int count, int key)
+{
+    ui_subwin_page_up();
+    return 0;
+}
+
+int
+altpagedown_handler(int count, int key)
+{
+    ui_subwin_page_down();
+    return 0;
+}
+
+int
+startup_hook(void)
+{
+    rl_bind_keyseq("\\e1", alt1_handler);
+    rl_bind_keyseq("\\e2", alt2_handler);
+    rl_bind_keyseq("\\e3", alt3_handler);
+    rl_bind_keyseq("\\e4", alt4_handler);
+    rl_bind_keyseq("\\e5", alt5_handler);
+    rl_bind_keyseq("\\e6", alt6_handler);
+    rl_bind_keyseq("\\e7", alt7_handler);
+    rl_bind_keyseq("\\e8", alt8_handler);
+    rl_bind_keyseq("\\e9", alt9_handler);
+    rl_bind_keyseq("\\e0", alt0_handler);
+
+    rl_bind_keyseq("\\e[1;3D", altleft_handler);
+    rl_bind_keyseq("\\e[1;3C", altright_handler);
+
+    rl_bind_keyseq("\\e[5~", pageup_handler);
+    rl_bind_keyseq("\\e[6~", pagedown_handler);
+
+    rl_bind_keyseq("\\e[5;3~", altpageup_handler);
+    rl_bind_keyseq("\\e[6;3~", altpagedown_handler);
+
+    rl_bind_key('\t', tab_handler);
+
+    return 0;
 }
 
 void
@@ -130,8 +270,8 @@ create_input_window(void)
 #endif
 	p_rl_timeout.tv_sec = 0;
     p_rl_timeout.tv_usec = inp_timeout * 1000;
+    rl_startup_hook = startup_hook;
     rl_callback_handler_install(NULL, cb_linehandler);
-    rl_bind_key('\t', tab_handler);
 
     signal(SIGWINCH, resize_signal_handler);
 
@@ -139,6 +279,7 @@ create_input_window(void)
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
+
 
     _inp_win_update_virtual();
 }

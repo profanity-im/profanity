@@ -178,9 +178,14 @@ void win_show_subwin(ProfWin *window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_printline_nowrap(WINDOW *win, char *msg);
-void win_handle_page(ProfWin *current, const wint_t ch, const int result);
+void win_mouse(ProfWin *current, const wint_t ch, const int result);
 
 int win_unread(ProfWin *window);
 gboolean win_has_active_subwin(ProfWin *window);
+
+void win_page_up(ProfWin *window);
+void win_page_down(ProfWin *window);
+void win_sub_page_down(ProfWin *window);
+void win_sub_page_up(ProfWin *window);
 
 #endif
