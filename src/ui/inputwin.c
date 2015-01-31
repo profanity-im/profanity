@@ -66,7 +66,9 @@
 static WINDOW *inp_win;
 
 static struct timeval p_rl_timeout;
-static int timeout_millis = 0;
+static gint inp_timeout = 0;
+static gint no_input_count = 0;
+
 static fd_set fds;
 static int r;
 static gboolean cmd_result = TRUE;
@@ -95,7 +97,7 @@ create_input_window(void)
     ESCDELAY = 25;
 #endif
 	p_rl_timeout.tv_sec = 0;
-    p_rl_timeout.tv_usec = timeout_millis * 1000;
+    p_rl_timeout.tv_usec = inp_timeout * 1000;
     rl_callback_handler_install(NULL, cb_linehandler);
 
     inp_win = newpad(1, INP_WIN_MAX);
@@ -144,9 +146,29 @@ offset_to_col(char *str, int offset)
 }
 
 void
-inp_non_block(gint block_timeout)
+inp_nonblocking(gboolean reset)
 {
-    timeout_millis = block_timeout;
+    if (! prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
+        inp_timeout = prefs_get_inpblock();
+        return;
+    }
+
+    if (reset) {
+        inp_timeout = 0;
+        no_input_count = 0;
+    }
+
+    if (inp_timeout < prefs_get_inpblock()) {
+        no_input_count++;
+
+        if (no_input_count % 10 == 0) {
+            inp_timeout += no_input_count;
+
+            if (inp_timeout > prefs_get_inpblock()) {
+                inp_timeout = prefs_get_inpblock();
+            }
+        }
+    }
 }
 
 void
@@ -181,13 +203,16 @@ inp_readline(void)
         if (rl_line_buffer && rl_line_buffer[0] != '/') {
             prof_handle_activity();
         }
+        ui_reset_idle_time();
+        inp_nonblocking(TRUE);
         inp_write(rl_line_buffer, rl_point);
     } else {
+        inp_nonblocking(FALSE);
         prof_handle_idle();
     }
 
     p_rl_timeout.tv_sec = 0;
-    p_rl_timeout.tv_usec = timeout_millis * 1000;
+    p_rl_timeout.tv_usec = inp_timeout * 1000;
 
     return cmd_result;
 }

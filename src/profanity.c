@@ -99,7 +99,6 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 void
 prof_handle_idle(void)
 {
-    cons_debug("IDLE");
     jabber_conn_status_t status = jabber_get_connection_status();
     if (status == JABBER_CONNECTED) {
         GSList *recipients = ui_get_chat_recipients();
@@ -121,7 +120,6 @@ prof_handle_idle(void)
 void
 prof_handle_activity(void)
 {
-    cons_debug("ACTIVITY");
     win_type_t win_type = ui_current_win_type();
     jabber_conn_status_t status = jabber_get_connection_status();
 

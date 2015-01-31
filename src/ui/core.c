@@ -215,33 +215,7 @@ ui_input_clear(void)
 void
 ui_input_nonblocking(gboolean reset)
 {
-    static gint timeout = 0;
-    static gint no_input_count = 0;
-
-    if (! prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
-        inp_non_block(prefs_get_inpblock());
-        return;
-    }
-
-    if (reset) {
-        timeout = 0;
-        no_input_count = 0;
-    }
-
-    if (timeout < prefs_get_inpblock()) {
-        no_input_count++;
-
-        if (no_input_count % 10 == 0) {
-            timeout += no_input_count;
-
-            if (timeout > prefs_get_inpblock()) {
-                timeout = prefs_get_inpblock();
-            }
-        }
-    }
-
-    log_info("TIMEOUT: %d", timeout);
-    inp_non_block(timeout);
+    inp_nonblocking(reset);
 }
 
 void
@@ -2250,7 +2224,8 @@ ui_ask_password(void)
   status_bar_update_virtual();
   inp_block();
   inp_get_password(passwd);
-  inp_non_block(prefs_get_inpblock());
+//  inp_non_block(prefs_get_inpblock());
+  inp_nonblocking(TRUE);
 
   return passwd;
 }
