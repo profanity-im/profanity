@@ -246,6 +246,17 @@ startup_hook(void)
     rl_bind_keyseq("\\e9", alt9_handler);
     rl_bind_keyseq("\\e0", alt0_handler);
 
+    rl_bind_keyseq("\\eOP", alt1_handler);
+    rl_bind_keyseq("\\eOQ", alt2_handler);
+    rl_bind_keyseq("\\eOR", alt3_handler);
+    rl_bind_keyseq("\\eOS", alt4_handler);
+    rl_bind_keyseq("\\e[15~", alt5_handler);
+    rl_bind_keyseq("\\e[17~", alt6_handler);
+    rl_bind_keyseq("\\e[18~", alt7_handler);
+    rl_bind_keyseq("\\e[19~", alt8_handler);
+    rl_bind_keyseq("\\e[20~", alt9_handler);
+    rl_bind_keyseq("\\e[21~", alt0_handler);
+
     rl_bind_keyseq("\\e[1;3D", altleft_handler);
     rl_bind_keyseq("\\e[1;3C", altright_handler);
 
