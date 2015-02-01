@@ -77,6 +77,17 @@ static int pad_start = 0;
 
 static void _inp_win_update_virtual(void);
 
+static int
+_printable(const wint_t ch)
+{
+    char bytes[MB_CUR_MAX+1];
+    size_t utf_len = wcrtomb(bytes, ch, NULL);
+    bytes[utf_len] = '\0';
+    gunichar unichar = g_utf8_get_char(bytes);
+
+    return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
+}
+
 static void
 cb_linehandler(char *line)
 {
@@ -86,6 +97,16 @@ cb_linehandler(char *line)
     rl_redisplay();
     cmd_result = cmd_process_input(line);
     free(line);
+}
+
+int
+prof_rl_getc(FILE *filein)
+{
+    int ch = rl_getc(filein);
+    if (_printable(ch)) {
+        cmd_reset_autocomplete();
+    }
+    return ch;
 }
 
 void
@@ -282,6 +303,7 @@ create_input_window(void)
 	p_rl_timeout.tv_sec = 0;
     p_rl_timeout.tv_usec = inp_timeout * 1000;
     rl_startup_hook = startup_hook;
+    rl_getc_function = prof_rl_getc;
     rl_callback_handler_install(NULL, cb_linehandler);
 
     signal(SIGWINCH, resize_signal_handler);
@@ -397,17 +419,6 @@ inp_write(char *line, int offset)
     _inp_win_update_virtual();
 }
 
-static int
-_printable(const wint_t ch)
-{
-    char bytes[MB_CUR_MAX+1];
-    size_t utf_len = wcrtomb(bytes, ch, NULL);
-    bytes[utf_len] = '\0';
-    gunichar unichar = g_utf8_get_char(bytes);
-
-    return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
-}
-
 gboolean
 inp_readline(void)
 {
@@ -420,10 +431,6 @@ inp_readline(void)
     }
 
     if (FD_ISSET(fileno(rl_instream), &fds)) {
-        if (_printable(rl_executing_key)) {
-            cmd_reset_autocomplete();
-        }
-
         rl_callback_read_char();
 
         if (rl_line_buffer && rl_line_buffer[0] != '/' && rl_line_buffer[0] != '\0' && rl_line_buffer[0] != '\n') {
