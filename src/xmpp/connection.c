@@ -170,7 +170,10 @@ jabber_connect_with_details(const char * const jid,
 
     // use 'profanity' when no resourcepart in provided jid
     Jid *jidp = jid_create(jid);
-    if (jidp->resourcepart == NULL) {
+    if(!jidp){
+        // don't connect
+        return JABBER_DISCONNECTED;
+    } else if (jidp->resourcepart == NULL) {
         jid_destroy(jidp);
         jidp = jid_create_from_bare_and_resource(jid, "profanity");
         saved_details.jid = strdup(jidp->fulljid);
