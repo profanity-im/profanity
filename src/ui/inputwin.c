@@ -485,5 +485,5 @@ _inp_win_update_virtual(void)
 {
     int wrows, wcols;
     getmaxyx(stdscr, wrows, wcols);
-    pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-1);
+    pnoutrefresh(inp_win, 0, pad_start, wrows-1, 0, wrows-1, wcols-2);
 }
