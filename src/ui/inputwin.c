@@ -426,7 +426,7 @@ inp_readline(void)
 
         rl_callback_read_char();
 
-        if (rl_line_buffer && rl_line_buffer[0] != '/') {
+        if (rl_line_buffer && rl_line_buffer[0] != '/' && rl_line_buffer[0] != '\0' && rl_line_buffer[0] != '\n') {
             prof_handle_activity();
         }
 
