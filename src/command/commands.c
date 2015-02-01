@@ -154,6 +154,10 @@ cmd_connect(gchar **args, struct cmd_help_t help)
                         cons_show("Error evaluating password, see logs for details.");
                         return TRUE;
                     }
+                    // strip trailing newline
+                    if (g_str_has_suffix(account->password, "\n")) {
+                        account->password[strlen(account->password)-1] = '\0';
+                    }
                 } else {
                     log_error("popen failed when running eval_password.");
                     cons_show("Error evaluating password, see logs for details.");
@@ -710,7 +714,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
             "/rooms", "/tiny", "/who", "/nick", "/privileges", "/info", "/occupants" };
         _cmd_show_filtered_help("Groupchat commands", filter, ARRAY_SIZE(filter));
 
-    } else if (strcmp(args[0], "presence") == 0) {
+    } else if (strcmp(args[0], "presences") == 0) {
         gchar *filter[] = { "/autoaway", "/away", "/chat", "/dnd",
             "/online", "/priority", "/account", "/status", "/statuses", "/who",
             "/xa" };

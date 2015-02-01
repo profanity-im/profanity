@@ -615,7 +615,7 @@ static struct cmd_t command_defs[] =
         { "/wrap on|off", "Word wrapping.",
         { "/wrap on|off",
           "------------",
-          "Enable or disable word wrapping.",
+          "Enable or disable word wrapping in the main window.",
           NULL } } },
 
     { "/time",
@@ -1141,7 +1141,7 @@ cmd_init(void)
     autocomplete_add(help_ac, "basic");
     autocomplete_add(help_ac, "chatting");
     autocomplete_add(help_ac, "groupchat");
-    autocomplete_add(help_ac, "presence");
+    autocomplete_add(help_ac, "presences");
     autocomplete_add(help_ac, "contacts");
     autocomplete_add(help_ac, "service");
     autocomplete_add(help_ac, "settings");
