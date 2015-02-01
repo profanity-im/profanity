@@ -51,7 +51,10 @@
  *     printf("%s\n", c);
  *     free(c);
  *     c = nextarg(NULL);
- * } */
+ * }
+ * This code is maintained by incertia at incertia.net.
+ * The OP can be found at
+ * http://www.incertia.net/blog/simple-argument-parser-in-c/ */
 char *cur = NULL;
 char *s = NULL;
 char * nextarg(const char *cmd){
