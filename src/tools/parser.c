@@ -32,12 +32,123 @@
  *
  */
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
 
 #include "common.h"
+
+/* nextarg is like strtok, but it has its own delimiter set.
+ * nextarg will never return NULL when cmd is non-NULL.
+ * if cmd == NULL, then nextarg returns the next argument from the
+ * previous call to nextarg.
+ * the pointer returned from nextarg should be freed by the caller.
+ * char *s = "a bc \"def' `ghi\"";
+ * char *c = nextarg(s);
+ * while(c){
+ *     printf("%s\n", c);
+ *     free(c);
+ *     c = nextarg(NULL);
+ * } */
+char *cur = NULL;
+char *s = NULL;
+char * nextarg(const char *cmd){
+    int i = 0, j = 0;
+    gboolean in_token = FALSE;
+    char *r, *b, quote = '\0';
+
+    /* we operate on our own local copy cur */
+    if(cmd){
+        if(cur) free(cur);
+        s = cur = strdup(cmd);
+    }
+    if(!cur || !s) return NULL;
+
+    /* search s, which will point to the end of the current token */
+    b = s;
+    while(*s){
+        if(!in_token){
+            /* we encountered what might not be a token */
+            if(!isspace(*s)){
+                in_token = TRUE;
+                if(*s == '"' || *s == '\'' || *s == '`') quote = *s, b = s;
+                else i++, b = s; /* increment char count */
+                if(*s == '\\'){
+                    /* fix edge case where the last char is \ */
+                    if(!*(s + 1)){
+                        *s = '\0';
+                        if(i > 1) break;
+                        else {
+                            free(cur);
+                            return cur = s = NULL;
+                        }
+                    }
+                    s++; /* skip the escaped character */
+                }
+            }
+        } else {
+            /* we are inside a token */
+            if(quote){
+                if(quote == *s){
+                    // we found the end
+                    quote = '\0';
+                    s++;
+                    continue;
+                }
+            } else {
+                if(isspace(*s)){
+                    // this is the end
+                    break;
+                } else if(*s == '"' || *s == '\'' || *s == '`'){
+                    quote = *s++;
+                    continue;
+                }
+            }
+            if(*s == '\\'){
+                /* this covers the other edge case where last char is \ */
+                if(!*(s + 1)){
+                    *s = '\0';
+                    if(i) break;
+                    else {
+                        free(cur);
+                        return cur = s = NULL;
+                    }
+                }
+                s++; /* skip the escaped character */
+            }
+            i++;
+        }
+        s++;
+    }
+
+    /* allocate the string */
+    r = malloc((i + 1) * sizeof(char));
+
+    /* fill the string */
+    r[i] = '\0';
+    quote = '\0';
+    while(j < i){
+        if(*b == '\\'){
+            b++;
+            r[j++] = *b++;
+        } else if(*b == '"' || *b == '\'' || *b == '`')
+            if(!quote) quote = *b++;
+            else if(quote == *b) quote = '\0', b++;
+            else r[j++] = *b++;
+        else r[j++] = *b++;
+    }
+
+    while(*s && isspace(*s)) s++;
+    if(!*s){
+        free(cur);
+        s = cur = NULL;
+    }
+
+    return r;
+}
+
 
 /*
  * Take a full line of input and return an array of strings representing
@@ -69,74 +180,15 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
         return NULL;
     }
 
-    // copy and strip input of leading/trailing whitepsace
-    char *copy = strdup(inp);
-    g_strstrip(copy);
-
-    int inp_size = g_utf8_strlen(copy, -1);
-    gboolean in_token = FALSE;
-    gboolean in_quotes = FALSE;
-    char *token_start = &copy[0];
-    int token_size = 0;
-    GSList *tokens = NULL;
-
-    // add tokens to GSList
-    int i;
-    for (i = 0; i < inp_size; i++) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
-        gunichar curr_uni = g_utf8_get_char(curr_ch);
-
-        if (!in_token) {
-            if (curr_uni  == ' ') {
-                continue;
-            } else {
-                in_token = TRUE;
-                if (curr_uni == '"') {
-                    in_quotes = TRUE;
-                    i++;
-                    gchar *next_ch = g_utf8_next_char(curr_ch);
-                    gunichar next_uni = g_utf8_get_char(next_ch);
-                    token_start = next_ch;
-                    token_size += g_unichar_to_utf8(next_uni, NULL);
-                } else {
-                    token_start = curr_ch;
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            }
-        } else {
-            if (in_quotes) {
-                if (curr_uni == '"') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
-                    token_size = 0;
-                    in_token = FALSE;
-                    in_quotes = FALSE;
-                } else {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            } else {
-                if (curr_uni == ' ') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
-                    token_size = 0;
-                    in_token = FALSE;
-                } else {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            }
-        }
-    }
-
-    if (in_token) {
-        tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
-    }
+    char *token = nextarg(inp);
+    GSList *tokens = g_slist_append(NULL, token);
+    while((token = nextarg(NULL))) tokens = g_slist_append(tokens, token);
 
     int num = g_slist_length(tokens) - 1;
 
     // if num args not valid return NULL
     if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
-        g_free(copy);
         *result = FALSE;
         return NULL;
 
@@ -145,7 +197,6 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
         g_slist_free_full(tokens, free);
         gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
-        g_free(copy);
         *result = TRUE;
         return args;
 
@@ -163,7 +214,6 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
 
         args[arg_count] = NULL;
         g_slist_free_full(tokens, free);
-        g_free(copy);
         *result = TRUE;
         return args;
     }
