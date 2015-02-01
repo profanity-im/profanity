@@ -592,7 +592,7 @@ theme_attrs(theme_item_t attrs)
     case THEME_BLACK_BOLD:              result = COLOR_PAIR(52); break;
     case THEME_MAGENTA:                 result = COLOR_PAIR(53); break;
     case THEME_MAGENTA_BOLD:            result = COLOR_PAIR(53); break;
-    default:                           break;
+    default:                            break;
     }
 
     if (g_hash_table_lookup(bold_items, GINT_TO_POINTER(attrs))) {

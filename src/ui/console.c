@@ -1402,7 +1402,7 @@ cons_help(void)
     cons_show("/help basic      - List basic commands for getting started.");
     cons_show("/help chatting   - List chat commands.");
     cons_show("/help groupchat  - List groupchat commands.");
-    cons_show("/help presence   - List commands to change presence.");
+    cons_show("/help presences  - List commands to change presence.");
     cons_show("/help contacts   - List commands for manipulating your roster.");
     cons_show("/help service    - List service discovery commands.");
     cons_show("/help settings   - List commands for changing settings.");
