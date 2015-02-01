@@ -60,7 +60,8 @@ char *s = NULL;
 char * nextarg(const char *cmd){
     int i = 0, j = 0;
     gboolean in_token = FALSE;
-    char *r, *b, quote = '\0';
+    char *r, *b;
+    gunichar quote = '\0';
 
     /* we operate on our own local copy cur */
     if(cmd){
@@ -71,16 +72,17 @@ char * nextarg(const char *cmd){
 
     /* search s, which will point to the end of the current token */
     b = s;
-    while(*s){
+    gunichar c;
+    while((c = g_utf8_get_char(s))){
         if(!in_token){
             /* we encountered what might not be a token */
-            if(!isspace(*s)){
+            if(!g_unichar_isspace(c)){
                 in_token = TRUE;
-                if(*s == '"' || *s == '\'' || *s == '`') quote = *s, b = s;
-                else i++, b = s; /* increment char count */
-                if(*s == '\\'){
+                if(c == '"' || c == '\'' || c == '`') quote = c, b = s;
+                else i += g_unichar_to_utf8(c, NULL), b = s; /* increment char count */
+                if(c == '\\'){
                     /* fix edge case where the last char is \ */
-                    if(!*(s + 1)){
+                    if(!g_utf8_next_char(s)){
                         *s = '\0';
                         if(i > 1) break;
                         else {
@@ -88,30 +90,31 @@ char * nextarg(const char *cmd){
                             return cur = s = NULL;
                         }
                     }
-                    s++; /* skip the escaped character */
+                    s += g_unichar_to_utf8(c, NULL); /* skip the escaped character */
                 }
             }
         } else {
             /* we are inside a token */
             if(quote){
-                if(quote == *s){
+                if(quote == c){
                     // we found the end
                     quote = '\0';
-                    s++;
+                    s += g_unichar_to_utf8(c, NULL);
                     continue;
                 }
             } else {
-                if(isspace(*s)){
+                if(g_unichar_isspace(c)){
                     // this is the end
                     break;
-                } else if(*s == '"' || *s == '\'' || *s == '`'){
-                    quote = *s++;
+                } else if(c == '"' || c == '\'' || c == '`'){
+                    quote = c;
+                    s += g_unichar_to_utf8(c, NULL);
                     continue;
                 }
             }
-            if(*s == '\\'){
+            if(c == '\\'){
                 /* this covers the other edge case where last char is \ */
-                if(!*(s + 1)){
+                if(!g_utf8_next_char(s)){
                     *s = '\0';
                     if(i) break;
                     else {
@@ -121,9 +124,9 @@ char * nextarg(const char *cmd){
                 }
                 s++; /* skip the escaped character */
             }
-            i++;
+            i += g_unichar_to_utf8(c, NULL);
         }
-        s++;
+        s += g_unichar_to_utf8(c, NULL);;
     }
 
     /* allocate the string */
@@ -133,17 +136,32 @@ char * nextarg(const char *cmd){
     r[i] = '\0';
     quote = '\0';
     while(j < i){
-        if(*b == '\\'){
-            b++;
-            r[j++] = *b++;
-        } else if(*b == '"' || *b == '\'' || *b == '`')
-            if(!quote) quote = *b++;
-            else if(quote == *b) quote = '\0', b++;
-            else r[j++] = *b++;
-        else r[j++] = *b++;
+        c = g_utf8_get_char(b);
+        if(c == '\\'){
+            b += g_unichar_to_utf8(c, NULL);
+            int x = 0;
+            for(; x < g_unichar_to_utf8(g_utf8_get_char(b), NULL); x++) r[j++] = *b++;
+        } else if(c == '"' || c == '\'' || c == '`'){
+            if(!quote){
+                quote = c;
+                b += g_unichar_to_utf8(c, NULL);
+            } else if(quote == c){
+                quote = '\0', b += g_unichar_to_utf8(c, NULL);
+            } else {
+                int x = 0;
+                for(; x < g_unichar_to_utf8(c, NULL); x++) r[j++] = *b++;
+            }
+        } else {
+            int x = 0;
+            for(; x < g_unichar_to_utf8(c, NULL); x++) r[j++] = *b++;
+        }
     }
 
-    while(*s && isspace(*s)) s++;
+    c = g_utf8_get_char(s);
+    while(c && g_unichar_isspace(c)){
+        s += g_unichar_to_utf8(c, NULL);
+        c = g_utf8_get_char(s);
+    }
     if(!*s){
         free(cur);
         s = cur = NULL;
