@@ -466,6 +466,11 @@ _connection_handler(xmpp_conn_t * const conn,
 
         roster_request();
         bookmark_request();
+
+        if (prefs_get_boolean(PREF_CARBONS)){
+            iq_enable_carbons();
+        }
+        
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {
