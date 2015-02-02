@@ -102,7 +102,7 @@ cb_linehandler(char *line)
 int
 prof_rl_getc(FILE *filein)
 {
-    int ch = getc(stdin);
+    int ch = rl_getc(filein);
     if (_printable(ch)) {
         cmd_reset_autocomplete();
     }
@@ -293,13 +293,11 @@ startup_hook(void)
 void
 create_input_window(void)
 {
-/*
 #ifdef NCURSES_REENTRANT
     set_escdelay(25);
 #else
     ESCDELAY = 25;
 #endif
-*/
 	p_rl_timeout.tv_sec = 0;
     p_rl_timeout.tv_usec = inp_timeout * 1000;
 
@@ -433,16 +431,15 @@ inp_readline(void)
 
     if (FD_ISSET(fileno(rl_instream), &fds)) {
         rl_callback_read_char();
-        cons_debug("LINE: %s", rl_line_buffer);
-        cons_debug("POS : %d", rl_point);
 
         if (rl_line_buffer && rl_line_buffer[0] != '/' && rl_line_buffer[0] != '\0' && rl_line_buffer[0] != '\n') {
             prof_handle_activity();
         }
 
         ui_reset_idle_time();
-        inp_nonblocking(TRUE);
+        cons_show("");
         inp_write(rl_line_buffer, rl_point);
+        inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
         prof_handle_idle();
