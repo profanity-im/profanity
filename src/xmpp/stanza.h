@@ -77,6 +77,7 @@
 #define STANZA_NAME_VALUE "value"
 #define STANZA_NAME_DESTROY "destroy"
 #define STANZA_NAME_ACTOR "actor"
+#define STANZA_NAME_ENABLE "enable"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -154,6 +155,8 @@
 #define STANZA_NS_CONFERENCE "jabber:x:conference"
 #define STANZA_NS_CAPTCHA "urn:xmpp:captcha"
 #define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
+#define STANZA_NS_CARBONS "urn:xmpp:carbons:2"
+#define STANZA_NS_FORWARD "urn:xmpp:forward:0"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -177,6 +180,8 @@ typedef enum {
 } stanza_parse_error_t;
 
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
+
+xmpp_stanza_t * stanza_enable_carbons(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const fulljid, const char * const state);

@@ -153,6 +153,16 @@ iq_room_list_request(gchar *conferencejid)
 }
 
 void
+iq_enable_carbons()
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *iq = stanza_enable_carbons(ctx);
+    xmpp_send(conn, iq);
+    xmpp_stanza_release(iq);
+}
+
+void
 iq_disco_info_request(gchar *jid)
 {
     xmpp_conn_t * const conn = connection_get_conn();

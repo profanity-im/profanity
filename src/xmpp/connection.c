@@ -463,6 +463,7 @@ _connection_handler(xmpp_conn_t * const conn,
         message_add_handlers();
         presence_add_handlers();
         iq_add_handlers();
+        iq_enable_carbons();
 
         roster_request();
         bookmark_request();
