@@ -92,10 +92,9 @@ _printable(const wint_t ch)
 static void
 cb_linehandler(char *line)
 {
-    if (*line) {
+    if (line && *line) {
         add_history(line);
     }
-    rl_redisplay();
     cmd_result = cmd_process_input(line);
     free(line);
 }
@@ -103,7 +102,7 @@ cb_linehandler(char *line)
 int
 prof_rl_getc(FILE *filein)
 {
-    int ch = rl_getc(filein);
+    int ch = getc(stdin);
     if (_printable(ch)) {
         cmd_reset_autocomplete();
     }
@@ -128,14 +127,12 @@ tab_handler(int count, int key)
         if (result) {
             rl_replace_line(result, 0);
             rl_point = rl_end;
-            inp_write(result, rl_point);
         }
     } else if (strncmp(rl_line_buffer, "/", 1) == 0) {
         char *result = cmd_autocomplete(rl_line_buffer);
         if (result) {
             rl_replace_line(result, 0);
             rl_point = rl_end;
-            inp_write(result, rl_point);
         }
     }
 
@@ -296,15 +293,19 @@ startup_hook(void)
 void
 create_input_window(void)
 {
+/*
 #ifdef NCURSES_REENTRANT
     set_escdelay(25);
 #else
     ESCDELAY = 25;
 #endif
+*/
 	p_rl_timeout.tv_sec = 0;
     p_rl_timeout.tv_usec = inp_timeout * 1000;
-    rl_startup_hook = startup_hook;
+
+    rl_readline_name = "profanity";
     rl_getc_function = prof_rl_getc;
+    rl_startup_hook = startup_hook;
     rl_callback_handler_install(NULL, cb_linehandler);
 
     signal(SIGWINCH, resize_signal_handler);
@@ -313,7 +314,6 @@ create_input_window(void)
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
-
 
     _inp_win_update_virtual();
 }
@@ -433,6 +433,8 @@ inp_readline(void)
 
     if (FD_ISSET(fileno(rl_instream), &fds)) {
         rl_callback_read_char();
+        cons_debug("LINE: %s", rl_line_buffer);
+        cons_debug("POS : %d", rl_point);
 
         if (rl_line_buffer && rl_line_buffer[0] != '/' && rl_line_buffer[0] != '\0' && rl_line_buffer[0] != '\n') {
             prof_handle_activity();

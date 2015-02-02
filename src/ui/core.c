@@ -94,6 +94,10 @@ ui_init(void)
 {
     log_info("Initialising UI");
     initscr();
+    nonl();
+    cbreak();
+    noecho();
+    leaveok(stdscr, FALSE);
     keypad(stdscr, TRUE);
     if (prefs_get_boolean(PREF_MOUSE)) {
         mousemask(ALL_MOUSE_EVENTS, NULL);
