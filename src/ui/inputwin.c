@@ -276,14 +276,19 @@ startup_hook(void)
     rl_bind_keyseq("\\e[20~", win9_handler);
     rl_bind_keyseq("\\e[21~", win0_handler);
 
+#ifdef PLATFORM_OSX
+    rl_bind_keyseq("\\e[1;9D", altleft_handler);
+    rl_bind_keyseq("\\e[1;9C", altright_handler);
+    rl_bind_keyseq("\\e\\e[5~", altpageup_handler);
+    rl_bind_keyseq("\\e\\e[6~", altpagedown_handler);
+#else
     rl_bind_keyseq("\\e[1;3D", altleft_handler);
     rl_bind_keyseq("\\e[1;3C", altright_handler);
-
-    rl_bind_keyseq("\\e[5~", pageup_handler);
-    rl_bind_keyseq("\\e[6~", pagedown_handler);
-
     rl_bind_keyseq("\\e[5;3~", altpageup_handler);
     rl_bind_keyseq("\\e[6;3~", altpagedown_handler);
+#endif
+    rl_bind_keyseq("\\e[5~", pageup_handler);
+    rl_bind_keyseq("\\e[6~", pagedown_handler);
 
     rl_bind_key('\t', tab_handler);
 

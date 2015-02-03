@@ -34,6 +34,8 @@ AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build]
 
 AS_IF([test "x$PLATFORM" = xcygwin],
     [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
+AS_IF([test "x$PLATFORM" = xosx],
+    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
 ### Options
 AC_ARG_ENABLE([notifications],
