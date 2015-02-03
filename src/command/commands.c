@@ -730,7 +730,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
 
     } else if (strcmp(args[0], "settings") == 0) {
         gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
-            "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
+            "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
             "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap" };
