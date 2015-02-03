@@ -334,26 +334,6 @@ inp_win_resize(void)
     _inp_win_update_virtual();
 }
 
-static int
-offset_to_col(char *str, int offset)
-{
-    int i = 0;
-    int col = 0;
-    mbstate_t internal;
-
-    while (i != offset && str[i] != '\n') {
-        gunichar uni = g_utf8_get_char(&str[i]);
-        size_t ch_len = mbrlen(&str[i], 4, &internal);
-        i += ch_len;
-        col++;
-        if (g_unichar_iswide(uni)) {
-            col++;
-        }
-    }
-
-    return col;
-}
-
 void
 inp_nonblocking(gboolean reset)
 {
@@ -406,6 +386,25 @@ inp_win_handle_scroll(void)
     }
 }
 
+int
+offset_to_col(char *str, int offset)
+{
+    int i = 0;
+    int col = 0;
+
+    while (i < offset && str[i] != '\0') {
+        gunichar uni = g_utf8_get_char(&str[i]);
+        size_t ch_len = mbrlen(&str[i], 4, NULL);
+        i += ch_len;
+        col++;
+        if (g_unichar_iswide(uni)) {
+            col++;
+        }
+    }
+
+    return col;
+}
+
 void
 inp_write(char *line, int offset)
 {
@@ -437,7 +436,6 @@ inp_readline(void)
         }
 
         ui_reset_idle_time();
-        cons_show("");
         inp_write(rl_line_buffer, rl_point);
         inp_nonblocking(TRUE);
     } else {
