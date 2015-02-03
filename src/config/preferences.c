@@ -701,7 +701,7 @@ _get_default_boolean(preference_t pref)
         case PREF_OCCUPANTS:
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
-        case PREF_WRAP:        
+        case PREF_WRAP:
         case PREF_INPBLOCK_DYNAMIC:
             return TRUE;
         default:

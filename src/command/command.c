@@ -864,8 +864,7 @@ static struct cmd_t command_defs[] =
       { "/carbons on|off",
         "---------------",
         "Enable or disable message carbons.",
-        "",
-        "Example : /carbons on",
+        "The message carbons feature ensures that both sides of all conversations are shared with all the user's clients that implement this protocol.",
         NULL  } } },
 
     { "/reconnect",
