@@ -326,6 +326,50 @@ _inp_win_handle_scroll(void)
 
 // Readline callbacks
 
+static int
+_inp_rl_startup_hook(void)
+{
+    rl_bind_keyseq("\\e1", _inp_rl_win1_handler);
+    rl_bind_keyseq("\\e2", _inp_rl_win2_handler);
+    rl_bind_keyseq("\\e3", _inp_rl_win3_handler);
+    rl_bind_keyseq("\\e4", _inp_rl_win4_handler);
+    rl_bind_keyseq("\\e5", _inp_rl_win5_handler);
+    rl_bind_keyseq("\\e6", _inp_rl_win6_handler);
+    rl_bind_keyseq("\\e7", _inp_rl_win7_handler);
+    rl_bind_keyseq("\\e8", _inp_rl_win8_handler);
+    rl_bind_keyseq("\\e9", _inp_rl_win9_handler);
+    rl_bind_keyseq("\\e0", _inp_rl_win0_handler);
+
+    rl_bind_keyseq("\\eOP", _inp_rl_win1_handler);
+    rl_bind_keyseq("\\eOQ", _inp_rl_win2_handler);
+    rl_bind_keyseq("\\eOR", _inp_rl_win3_handler);
+    rl_bind_keyseq("\\eOS", _inp_rl_win4_handler);
+    rl_bind_keyseq("\\e[15~", _inp_rl_win5_handler);
+    rl_bind_keyseq("\\e[17~", _inp_rl_win6_handler);
+    rl_bind_keyseq("\\e[18~", _inp_rl_win7_handler);
+    rl_bind_keyseq("\\e[19~", _inp_rl_win8_handler);
+    rl_bind_keyseq("\\e[20~", _inp_rl_win9_handler);
+    rl_bind_keyseq("\\e[21~", _inp_rl_win0_handler);
+
+#ifdef PLATFORM_OSX
+    rl_bind_keyseq("\\e[1;9D", _inp_rl_altleft_handler);
+    rl_bind_keyseq("\\e[1;9C", _inp_rl_altright_handler);
+    rl_bind_keyseq("\\e\\e[5~", _inp_rl_altpageup_handler);
+    rl_bind_keyseq("\\e\\e[6~", _inp_rl_altpagedown_handler);
+#else
+    rl_bind_keyseq("\\e[1;3D", _inp_rl_altleft_handler);
+    rl_bind_keyseq("\\e[1;3C", _inp_rl_altright_handler);
+    rl_bind_keyseq("\\e[5;3~", _inp_rl_altpageup_handler);
+    rl_bind_keyseq("\\e[6;3~", _inp_rl_altpagedown_handler);
+#endif
+    rl_bind_keyseq("\\e[5~", _inp_rl_pageup_handler);
+    rl_bind_keyseq("\\e[6~", _inp_rl_pagedown_handler);
+
+    rl_bind_key('\t', _inp_rl_tab_handler);
+
+    return 0;
+}
+
 static void
 _inp_rl_linehandler(char *line)
 {
@@ -479,49 +523,5 @@ static int
 _inp_rl_altpagedown_handler(int count, int key)
 {
     ui_subwin_page_down();
-    return 0;
-}
-
-static int
-_inp_rl_startup_hook(void)
-{
-    rl_bind_keyseq("\\e1", _inp_rl_win1_handler);
-    rl_bind_keyseq("\\e2", _inp_rl_win2_handler);
-    rl_bind_keyseq("\\e3", _inp_rl_win3_handler);
-    rl_bind_keyseq("\\e4", _inp_rl_win4_handler);
-    rl_bind_keyseq("\\e5", _inp_rl_win5_handler);
-    rl_bind_keyseq("\\e6", _inp_rl_win6_handler);
-    rl_bind_keyseq("\\e7", _inp_rl_win7_handler);
-    rl_bind_keyseq("\\e8", _inp_rl_win8_handler);
-    rl_bind_keyseq("\\e9", _inp_rl_win9_handler);
-    rl_bind_keyseq("\\e0", _inp_rl_win0_handler);
-
-    rl_bind_keyseq("\\eOP", _inp_rl_win1_handler);
-    rl_bind_keyseq("\\eOQ", _inp_rl_win2_handler);
-    rl_bind_keyseq("\\eOR", _inp_rl_win3_handler);
-    rl_bind_keyseq("\\eOS", _inp_rl_win4_handler);
-    rl_bind_keyseq("\\e[15~", _inp_rl_win5_handler);
-    rl_bind_keyseq("\\e[17~", _inp_rl_win6_handler);
-    rl_bind_keyseq("\\e[18~", _inp_rl_win7_handler);
-    rl_bind_keyseq("\\e[19~", _inp_rl_win8_handler);
-    rl_bind_keyseq("\\e[20~", _inp_rl_win9_handler);
-    rl_bind_keyseq("\\e[21~", _inp_rl_win0_handler);
-
-#ifdef PLATFORM_OSX
-    rl_bind_keyseq("\\e[1;9D", _inp_rl_altleft_handler);
-    rl_bind_keyseq("\\e[1;9C", _inp_rl_altright_handler);
-    rl_bind_keyseq("\\e\\e[5~", _inp_rl_altpageup_handler);
-    rl_bind_keyseq("\\e\\e[6~", _inp_rl_altpagedown_handler);
-#else
-    rl_bind_keyseq("\\e[1;3D", _inp_rl_altleft_handler);
-    rl_bind_keyseq("\\e[1;3C", _inp_rl_altright_handler);
-    rl_bind_keyseq("\\e[5;3~", _inp_rl_altpageup_handler);
-    rl_bind_keyseq("\\e[6;3~", _inp_rl_altpagedown_handler);
-#endif
-    rl_bind_keyseq("\\e[5~", _inp_rl_pageup_handler);
-    rl_bind_keyseq("\\e[6~", _inp_rl_pagedown_handler);
-
-    rl_bind_key('\t', _inp_rl_tab_handler);
-
     return 0;
 }
