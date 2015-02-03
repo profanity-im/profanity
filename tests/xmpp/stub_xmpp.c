@@ -119,8 +119,8 @@ gboolean presence_sub_request_exists(const char * const bare_jid)
 }
 
 // iq functions
-void iq_disable_carbons();
-void iq_enable_carbons();
+void iq_disable_carbons() {};
+void iq_enable_carbons() {};
 void iq_send_software_version(const char * const fulljid) {}
 
 void iq_room_list_request(gchar *conferencejid)
