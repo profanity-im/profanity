@@ -3883,6 +3883,22 @@ cmd_history(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_carbons(gchar **args, struct cmd_help_t help)
+{
+    gboolean result = _cmd_set_boolean_preference(args[0], help,
+        "Carbons message", PREF_CARBONS);
+
+    // enable carbons
+    if (strcmp(args[0], "on") == 0) {
+        iq_enable_carbons();
+    }
+    else if (strcmp(args[0], "off") == 0){
+        iq_disable_carbons();
+    }
+    return result;
+}
+
+gboolean
 cmd_away(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_AWAY, "away", args);

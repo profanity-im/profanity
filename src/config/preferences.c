@@ -558,6 +558,7 @@ _get_group(preference_t pref)
             return PREF_GROUP_PRESENCE;
         case PREF_CONNECT_ACCOUNT:
         case PREF_DEFAULT_ACCOUNT:
+        case PREF_CARBONS:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_WARN:
         case PREF_OTR_LOG:
@@ -593,6 +594,8 @@ _get_key(preference_t pref)
             return "intype";
         case PREF_HISTORY:
             return "history";
+        case PREF_CARBONS:
+            return "carbons";
         case PREF_MOUSE:
             return "mouse";
         case PREF_OCCUPANTS:
@@ -698,7 +701,7 @@ _get_default_boolean(preference_t pref)
         case PREF_OCCUPANTS:
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
-        case PREF_WRAP:
+        case PREF_WRAP:        
         case PREF_INPBLOCK_DYNAMIC:
             return TRUE;
         default:

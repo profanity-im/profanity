@@ -78,6 +78,7 @@
 #define STANZA_NAME_DESTROY "destroy"
 #define STANZA_NAME_ACTOR "actor"
 #define STANZA_NAME_ENABLE "enable"
+#define STANZA_NAME_DISABLE "disable"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST "bad-request"
@@ -182,6 +183,8 @@ typedef enum {
 xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t * stanza_enable_carbons(xmpp_ctx_t *ctx);
+
+xmpp_stanza_t * stanza_disable_carbons(xmpp_ctx_t *ctx);
 
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const fulljid, const char * const state);

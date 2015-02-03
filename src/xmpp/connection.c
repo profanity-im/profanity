@@ -463,10 +463,14 @@ _connection_handler(xmpp_conn_t * const conn,
         message_add_handlers();
         presence_add_handlers();
         iq_add_handlers();
-        iq_enable_carbons();
 
         roster_request();
         bookmark_request();
+
+        if (prefs_get_boolean(PREF_CARBONS)){
+            iq_enable_carbons();
+        }
+        
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {
