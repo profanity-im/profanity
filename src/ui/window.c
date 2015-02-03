@@ -1011,9 +1011,8 @@ _win_print_wrapped(WINDOW *win, const char * const message)
         } else {
             // get word
             wordi = 0;
-            mbstate_t internal;
             while (*curr_ch != ' ' && *curr_ch != '\n' && *curr_ch != '\0') {
-                size_t ch_len = mbrlen(curr_ch, 4, &internal);
+                size_t ch_len = mbrlen(curr_ch, 4, NULL);
                 int offset = 0;
                 while (offset < ch_len) {
                     word[wordi++] = curr_ch[offset++];
