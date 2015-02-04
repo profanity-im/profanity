@@ -43,14 +43,10 @@ void create_input_window(void);
 gboolean inp_readline(void);
 void inp_nonblocking(gboolean reset);
 void inp_close(void);
-char* inp_read(int *key_type, wint_t *ch);
 void inp_win_clear(void);
 void inp_win_resize(void);
 void inp_put_back(void);
-void inp_non_block(gint);
 void inp_block(void);
 void inp_get_password(char *passwd);
-void inp_history_append(char *inp);
-void inp_write(char *line, int offset);
 
 #endif
