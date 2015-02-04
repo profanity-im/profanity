@@ -39,6 +39,7 @@
 #include <string.h>
 #include <wchar.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -111,8 +112,13 @@ create_input_window(void)
 #else
     ESCDELAY = 25;
 #endif
-	p_rl_timeout.tv_sec = 0;
-    p_rl_timeout.tv_usec = inp_timeout * 1000;
+    if (inp_timeout == 1000) {
+        p_rl_timeout.tv_sec = 1;
+        p_rl_timeout.tv_usec = 0;
+    } else {
+        p_rl_timeout.tv_sec = 0;
+        p_rl_timeout.tv_usec = inp_timeout * 1000;
+    }
 
     rl_readline_name = "profanity";
     rl_getc_function = _inp_rl_getc;
@@ -134,9 +140,11 @@ inp_readline(void)
 {
     FD_ZERO(&fds);
     FD_SET(fileno(rl_instream), &fds);
+    errno = 0;
     r = select(FD_SETSIZE, &fds, NULL, NULL, &p_rl_timeout);
     if (r < 0) {
-        log_error("Readline failed.");
+        char *err_msg = strerror(errno);
+        log_error("Readline failed: %s", err_msg);
         return TRUE;
     }
 
@@ -155,8 +163,13 @@ inp_readline(void)
         prof_handle_idle();
     }
 
-    p_rl_timeout.tv_sec = 0;
-    p_rl_timeout.tv_usec = inp_timeout * 1000;
+    if (inp_timeout == 1000) {
+        p_rl_timeout.tv_sec = 1;
+        p_rl_timeout.tv_usec = 0;
+    } else {
+        p_rl_timeout.tv_sec = 0;
+        p_rl_timeout.tv_usec = inp_timeout * 1000;
+    }
 
     return cmd_result;
 }
