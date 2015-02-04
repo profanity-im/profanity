@@ -79,7 +79,6 @@ static gboolean cmd_result = TRUE;
 static void _inp_win_update_virtual(void);
 static int _inp_printable(const wint_t ch);
 static void _inp_win_handle_scroll(void);
-static void _inp_resize_signal_handler(int signal);
 static int _inp_offset_to_col(char *str, int offset);
 static void _inp_write(char *line, int offset);
 
@@ -124,8 +123,6 @@ create_input_window(void)
     rl_getc_function = _inp_rl_getc;
     rl_startup_hook = _inp_rl_startup_hook;
     rl_callback_handler_install(NULL, _inp_rl_linehandler);
-
-    signal(SIGWINCH, _inp_resize_signal_handler);
 
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));;
@@ -309,12 +306,6 @@ _inp_offset_to_col(char *str, int offset)
     }
 
     return col;
-}
-
-static void
-_inp_resize_signal_handler(int signal)
-{
-    ui_resize();
 }
 
 static void

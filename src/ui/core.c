@@ -79,6 +79,8 @@ static char *win_title;
 
 static int inp_size;
 
+static gboolean perform_resize = FALSE;
+
 #ifdef HAVE_LIBXSS
 static Display *display;
 #endif
@@ -121,6 +123,12 @@ ui_init(void)
 }
 
 void
+ui_sigwinch_handler(int sig)
+{
+    perform_resize = TRUE;
+}
+
+void
 ui_update(void)
 {
     ProfWin *current = wins_get_current();
@@ -137,6 +145,13 @@ ui_update(void)
     status_bar_update_virtual();
     inp_put_back();
     doupdate();
+
+    if (perform_resize) {
+        signal(SIGWINCH, SIG_IGN);
+        ui_resize();
+        perform_resize = FALSE;
+        signal(SIGWINCH, ui_sigwinch_handler);
+    }
 }
 
 void

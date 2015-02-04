@@ -204,6 +204,7 @@ _init(const int disable_tls, char *log_level)
     signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
+    signal(SIGWINCH, ui_sigwinch_handler);
     _create_directories();
     log_level_t prof_log_level = log_level_from_string(log_level);
     prefs_load();
