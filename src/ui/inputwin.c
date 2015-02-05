@@ -223,8 +223,6 @@ inp_nonblocking(gboolean reset)
             }
         }
     }
-
-    log_info("Timeout: %d", inp_timeout);
 }
 
 void
