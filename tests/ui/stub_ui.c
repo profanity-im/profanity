@@ -329,9 +329,9 @@ void ui_update_presence(const resource_presence_t resource_presence,
 void ui_about(void) {}
 void ui_statusbar_new(const int win) {}
 
-gboolean ui_readline(void)
+char*  ui_readline(void)
 {
-    return TRUE;
+    return NULL;
 }
 
 void ui_inp_history_append(char *inp) {}

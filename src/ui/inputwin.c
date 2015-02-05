@@ -74,7 +74,8 @@ static gint no_input_count = 0;
 
 static fd_set fds;
 static int r;
-static gboolean cmd_result = TRUE;
+static char *inp_line = NULL;
+static gboolean get_password = FALSE;
 
 static void _inp_win_update_virtual(void);
 static int _inp_printable(const wint_t ch);
@@ -132,9 +133,11 @@ create_input_window(void)
     _inp_win_update_virtual();
 }
 
-gboolean
+char *
 inp_readline(void)
 {
+    free(inp_line);
+    inp_line = NULL;
     FD_ZERO(&fds);
     FD_SET(fileno(rl_instream), &fds);
     errno = 0;
@@ -142,13 +145,16 @@ inp_readline(void)
     if (r < 0) {
         char *err_msg = strerror(errno);
         log_error("Readline failed: %s", err_msg);
-        return TRUE;
+        return NULL;
     }
 
     if (FD_ISSET(fileno(rl_instream), &fds)) {
         rl_callback_read_char();
 
-        if (rl_line_buffer && rl_line_buffer[0] != '/' && rl_line_buffer[0] != '\0' && rl_line_buffer[0] != '\n') {
+        if (rl_line_buffer &&
+                rl_line_buffer[0] != '/' &&
+                rl_line_buffer[0] != '\0' &&
+                rl_line_buffer[0] != '\n') {
             prof_handle_activity();
         }
 
@@ -168,7 +174,11 @@ inp_readline(void)
         p_rl_timeout.tv_usec = inp_timeout * 1000;
     }
 
-    return cmd_result;
+    if (inp_line) {
+        return strdup(inp_line);
+    } else {
+        return NULL;
+    }
 }
 
 void
@@ -213,6 +223,8 @@ inp_nonblocking(gboolean reset)
             }
         }
     }
+
+    log_info("Timeout: %d", inp_timeout);
 }
 
 void
@@ -228,19 +240,29 @@ inp_close(void)
     rl_callback_handler_remove();
 }
 
-void
-inp_get_password(char *passwd)
+char*
+inp_get_password(void)
 {
     werase(inp_win);
     wmove(inp_win, 0, 0);
     pad_start = 0;
     _inp_win_update_virtual();
     doupdate();
-    noecho();
-    mvwgetnstr(inp_win, 0, 1, passwd, MAX_PASSWORD_SIZE);
-    wmove(inp_win, 0, 0);
-    echo();
+    char *password = NULL;
+    get_password = TRUE;
+    while (!password) {
+        password = inp_readline();
+        ui_update();
+        werase(inp_win);
+        wmove(inp_win, 0, 0);
+        pad_start = 0;
+        _inp_win_update_virtual();
+        doupdate();
+    }
+    get_password = FALSE;
+
     status_bar_clear();
+    return password;
 }
 
 void
@@ -378,10 +400,11 @@ static void
 _inp_rl_linehandler(char *line)
 {
     if (line && *line) {
-        add_history(line);
+        if (!get_password) {
+            add_history(line);
+        }
     }
-    cmd_result = cmd_process_input(line);
-    free(line);
+    inp_line = line;
 }
 
 static int

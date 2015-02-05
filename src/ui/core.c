@@ -198,7 +198,7 @@ ui_close(void)
     endwin();
 }
 
-gboolean
+char *
 ui_readline(void)
 {
     return inp_readline();
@@ -2249,15 +2249,9 @@ ui_win_unread(int index)
 char *
 ui_ask_password(void)
 {
-  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
   status_bar_get_password();
   status_bar_update_virtual();
-  inp_block();
-  inp_get_password(passwd);
-//  inp_non_block(prefs_get_inpblock());
-  inp_nonblocking(TRUE);
-
-  return passwd;
+  return inp_get_password();
 }
 
 void

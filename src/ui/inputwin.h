@@ -40,13 +40,13 @@
 #define INP_WIN_MAX 1000
 
 void create_input_window(void);
-gboolean inp_readline(void);
+char* inp_readline(void);
 void inp_nonblocking(gboolean reset);
 void inp_close(void);
 void inp_win_clear(void);
 void inp_win_resize(void);
 void inp_put_back(void);
 void inp_block(void);
-void inp_get_password(char *passwd);
+char* inp_get_password(void);
 
 #endif

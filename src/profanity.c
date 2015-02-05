@@ -82,10 +82,18 @@ prof_run(const int disable_tls, char *log_level, char *account_name)
 
     log_info("Starting main event loop");
 
+    char *line = NULL;
     while(cont) {
         _check_autoaway();
 
-        cont = ui_readline();
+        line = ui_readline();
+        if (line) {
+            cont = cmd_process_input(line);
+            free(line);
+            line = NULL;
+        } else {
+            cont = TRUE;
+        }
 
 #ifdef HAVE_LIBOTR
         otr_poll();
