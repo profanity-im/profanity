@@ -1466,10 +1466,6 @@ cmd_init(void)
     autocomplete_add(time_ac, "seconds");
     autocomplete_add(time_ac, "off");
 
-    time_ac = autocomplete_new();
-    autocomplete_add(time_ac, "minutes");
-    autocomplete_add(time_ac, "seconds");
-
     resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
     autocomplete_add(resource_ac, "off");
