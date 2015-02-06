@@ -381,7 +381,7 @@ void
 p_contact_set_presence(const PContact contact, Resource *resource)
 {
     g_hash_table_replace(contact->available_resources, strdup(resource->name), resource);
-    autocomplete_add(contact->resource_ac, strdup(resource->name));
+    autocomplete_add(contact->resource_ac, resource->name);
 }
 
 void
