@@ -327,8 +327,9 @@ _inp_win_handle_scroll(void)
     int col = getcurx(inp_win);
     int wcols = getmaxx(stdscr);
 
-    // if lost cursor off screen, move contents to show it
-    if (col >= pad_start + (wcols -2)) {
+    if (col == 0) {
+        pad_start = 0;
+    } else if (col >= pad_start + (wcols -2)) {
         pad_start = col - (wcols / 2);
         if (pad_start < 0) {
             pad_start = 0;
