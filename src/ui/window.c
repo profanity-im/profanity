@@ -330,6 +330,7 @@ win_free(ProfWin* window)
         buffer_free(window->layout->buffer);
         delwin(window->layout->win);
     }
+    free(window->layout);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)window;
