@@ -46,7 +46,6 @@ void inp_close(void);
 void inp_win_clear(void);
 void inp_win_resize(void);
 void inp_put_back(void);
-void inp_block(void);
 char* inp_get_password(void);
 
 #endif

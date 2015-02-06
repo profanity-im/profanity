@@ -226,13 +226,6 @@ inp_nonblocking(gboolean reset)
 }
 
 void
-inp_block(void)
-{
-    wtimeout(inp_win, -1);
-}
-
-
-void
 inp_close(void)
 {
     rl_callback_handler_remove();
