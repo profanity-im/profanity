@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <glib.h>
@@ -2989,4 +2990,56 @@ _account_autocomplete(const char * const input)
 
     found = autocomplete_param_with_ac(input, "/account", account_ac, TRUE);
     return found;
+}
+
+static int
+_cmp_command(Command *cmd1, Command *cmd2)
+{
+    return g_strcmp0(cmd1->cmd, cmd2->cmd);
+}
+
+void
+command_docgen(void)
+{
+    GList *cmds = NULL;
+    unsigned int i;
+    for (i = 0; i < ARRAY_SIZE(command_defs); i++) {
+        Command *pcmd = command_defs+i;
+        cmds = g_list_insert_sorted(cmds, pcmd, (GCompareFunc)_cmp_command);
+    }
+
+    FILE *toc_fragment = fopen("toc_fragment.html", "w");
+    FILE *main_fragment = fopen("main_fragment.html", "w");
+
+    fputs("<ul><li><ul><li>\n", toc_fragment);
+    fputs("<hr>\n", main_fragment);
+
+    GList *curr = cmds;
+    while (curr) {
+        Command *pcmd = curr->data;
+
+        fprintf(toc_fragment, "<a href=\"#%s\">%s</a>,\n", &pcmd->cmd[1], pcmd->cmd);
+
+        fprintf(main_fragment, "<a name=\"%s\"></a>\n", &pcmd->cmd[1]);
+        fprintf(main_fragment, "<h4>%s</h4>\n", pcmd->cmd);
+        fputs("<p>Usage:</p>\n", main_fragment);
+        fprintf(main_fragment, "<p><pre><code>%s</code></pre></p>\n", pcmd->help.usage);
+
+        fputs("<p>Details:</p>\n", main_fragment);
+        fputs("<p><pre><code>", main_fragment);
+        int i = 2;
+        while (pcmd->help.long_help[i] != NULL) {
+            fprintf(main_fragment, "%s\n", pcmd->help.long_help[i++]);
+        }
+        fputs("</code></pre></p>\n<a href=\"#top\"><h5>back to top</h5></a><br><hr>\n", main_fragment);
+        fputs("\n", main_fragment);
+
+        curr = g_list_next(curr);
+    }
+
+    fputs("</ul></ul>\n", toc_fragment);
+
+    fclose(toc_fragment);
+    fclose(main_fragment);
+    g_list_free(cmds);
 }

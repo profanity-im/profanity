@@ -66,4 +66,6 @@ void cmd_history_append(char *inp);
 char *cmd_history_previous(char *inp);
 char *cmd_history_next(char *inp);
 
+void command_docgen(void);
+
 #endif
