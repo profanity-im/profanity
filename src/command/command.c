@@ -76,6 +76,8 @@ static gboolean _cmd_execute_alias(const char * const inp, gboolean *ran);
 
 static char * _cmd_complete_parameters(const char * const input);
 
+static char * _strip_quotes_from_names(const char * const input);
+
 static char * _sub_autocomplete(const char * const input);
 static char * _notify_autocomplete(const char * const input);
 static char * _theme_autocomplete(const char * const input);
@@ -1967,23 +1969,31 @@ _cmd_complete_parameters(const char * const input)
         if (nick_ac) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
+            // Remove quote character before and after names when doing autocomplete
+            char *unquoted = _strip_quotes_from_names(input);
             for (i = 0; i < ARRAY_SIZE(nick_choices); i++) {
-                result = autocomplete_param_with_ac(input, nick_choices[i], nick_ac, TRUE);
+                result = autocomplete_param_with_ac(unquoted, nick_choices[i], nick_ac, TRUE);
                 if (result) {
+                    free(unquoted);
                     return result;
                 }
             }
+            free(unquoted);
         }
 
     // otherwise autocomplete using roster
     } else {
         gchar *contact_choices[] = { "/msg", "/info", "/status" };
+        // Remove quote character before and after names when doing autocomplete
+        char *unquoted = _strip_quotes_from_names(input);
         for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
-            result = autocomplete_param_with_func(input, contact_choices[i], roster_contact_autocomplete);
+            result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete);
             if (result) {
+                free(unquoted);
                 return result;
             }
         }
+        free(unquoted);
 
         gchar *resource_choices[] = { "/caps", "/software", "/ping" };
         for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {
@@ -3042,4 +3052,25 @@ command_docgen(void)
     fclose(toc_fragment);
     fclose(main_fragment);
     g_list_free(cmds);
+}
+
+static char *
+_strip_quotes_from_names(const char * const input) {
+    char *unquoted = strdup(input);
+
+    // Remove starting quote if it exists
+    if(strchr(unquoted, '"') != NULL) {
+        if(strchr(unquoted, ' ') + 1 == strchr(unquoted, '"')) {
+            memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
+        }
+    }
+
+    // Remove ending quote if it exists
+    if(strchr(unquoted, '"') != NULL) {
+        if(strchr(unquoted, '\0') - 1 == strchr(unquoted, '"')) {
+            memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
+        }
+    }
+
+    return unquoted;
 }
