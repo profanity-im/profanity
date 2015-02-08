@@ -2000,23 +2000,31 @@ _cmd_complete_parameters(const char * const input)
         if (nick_ac) {
             gchar *nick_choices[] = { "/msg", "/info", "/caps", "/status", "/software" } ;
 
+            // Remove quote character before and after names when doing autocomplete
+            char *unquoted = strip_arg_quotes(input);
             for (i = 0; i < ARRAY_SIZE(nick_choices); i++) {
-                result = autocomplete_param_with_ac(input, nick_choices[i], nick_ac, TRUE);
+                result = autocomplete_param_with_ac(unquoted, nick_choices[i], nick_ac, TRUE);
                 if (result) {
+                    free(unquoted);
                     return result;
                 }
             }
+            free(unquoted);
         }
 
     // otherwise autocomplete using roster
     } else {
         gchar *contact_choices[] = { "/msg", "/info", "/status" };
+        // Remove quote character before and after names when doing autocomplete
+        char *unquoted = strip_arg_quotes(input);
         for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
-            result = autocomplete_param_with_func(input, contact_choices[i], roster_contact_autocomplete);
+            result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete);
             if (result) {
+                free(unquoted);
                 return result;
             }
         }
+        free(unquoted);
 
         gchar *resource_choices[] = { "/caps", "/software", "/ping" };
         for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {

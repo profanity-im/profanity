@@ -587,3 +587,47 @@ void utf8_display_len_all_wide(void **state)
     assert_int_equal(8, result);
 }
 
+void strip_quotes_does_nothing_when_no_quoted(void **state)
+{
+    char *input = "/cmd test string";
+
+    char *result = strip_arg_quotes(input);
+
+    assert_string_equal("/cmd test string", result);
+
+    free(result);
+}
+
+void strip_quotes_strips_first(void **state)
+{
+    char *input = "/cmd \"test string";
+
+    char *result = strip_arg_quotes(input);
+
+    assert_string_equal("/cmd test string", result);
+    
+    free(result);
+}
+
+void strip_quotes_strips_last(void **state)
+{
+    char *input = "/cmd test string\"";
+
+    char *result = strip_arg_quotes(input);
+
+    assert_string_equal("/cmd test string", result);
+
+    free(result);
+}
+
+void strip_quotes_strips_both(void **state)
+{
+    char *input = "/cmd \"test string\"";
+
+    char *result = strip_arg_quotes(input);
+
+    assert_string_equal("/cmd test string", result);
+
+    free(result);
+}
+
