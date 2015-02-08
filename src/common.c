@@ -566,3 +566,25 @@ get_file_or_linked(char *loc, char *basedir)
 
     return true_loc;
 }
+
+char *
+strip_arg_quotes(const char * const input)
+{
+    char *unquoted = strdup(input);
+
+    // Remove starting quote if it exists
+    if(strchr(unquoted, '"') != NULL) {
+        if(strchr(unquoted, ' ') + 1 == strchr(unquoted, '"')) {
+            memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
+        }
+    }
+
+    // Remove ending quote if it exists
+    if(strchr(unquoted, '"') != NULL) {
+        if(strchr(unquoted, '\0') - 1 == strchr(unquoted, '"')) {
+            memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
+        }
+    }
+
+    return unquoted;
+}

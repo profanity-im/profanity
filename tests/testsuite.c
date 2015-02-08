@@ -91,6 +91,10 @@ int main(int argc, char* argv[]) {
         unit_test(utf8_display_len_non_wide),
         unit_test(utf8_display_len_wide),
         unit_test(utf8_display_len_all_wide),
+        unit_test(strip_quotes_does_nothing_when_no_quoted),
+        unit_test(strip_quotes_strips_first),
+        unit_test(strip_quotes_strips_last),
+        unit_test(strip_quotes_strips_both),
 
         unit_test(clear_empty),
         unit_test(reset_after_create),

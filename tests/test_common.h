@@ -52,3 +52,7 @@ void utf8_display_len_1_wide(void **state);
 void utf8_display_len_non_wide(void **state);
 void utf8_display_len_wide(void **state);
 void utf8_display_len_all_wide(void **state);
+void strip_quotes_does_nothing_when_no_quoted(void **state);
+void strip_quotes_strips_first(void **state);
+void strip_quotes_strips_last(void **state);
+void strip_quotes_strips_both(void **state);
