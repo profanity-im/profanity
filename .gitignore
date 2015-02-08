@@ -65,3 +65,6 @@ m4/
 test.sh
 clean-test.sh
 callgrind.out.*
+gen_docs.sh
+main_fragment.html
+toc_fragment.html
