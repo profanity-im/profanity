@@ -86,6 +86,7 @@ static void _inp_write(char *line, int offset);
 static int _inp_rl_getc(FILE *stream);
 static void _inp_rl_linehandler(char *line);
 static int _inp_rl_tab_handler(int count, int key);
+static int _inp_rl_clear_handler(int count, int key);
 static int _inp_rl_win1_handler(int count, int key);
 static int _inp_rl_win2_handler(int count, int key);
 static int _inp_rl_win3_handler(int count, int key);
@@ -384,6 +385,7 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e[6~", _inp_rl_pagedown_handler);
 
     rl_bind_key('\t', _inp_rl_tab_handler);
+    rl_bind_key(CTRL('L'), _inp_rl_clear_handler);
 
     return 0;
 }
@@ -407,6 +409,13 @@ _inp_rl_getc(FILE *stream)
         cmd_reset_autocomplete();
     }
     return ch;
+}
+
+static int
+_inp_rl_clear_handler(int count, int key)
+{
+    ui_clear_current();
+    return 0;
 }
 
 static int
