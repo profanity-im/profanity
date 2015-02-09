@@ -650,8 +650,6 @@ win_show_info(ProfWin *window, PContact contact)
     const char *name = p_contact_name(contact);
     const char *presence = p_contact_presence(contact);
     const char *sub = p_contact_subscription(contact);
-    GList *resources = p_contact_get_available_resources(contact);
-    GList *ordered_resources = NULL;
     GDateTime *last_activity = p_contact_last_activity(contact);
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
@@ -687,20 +685,25 @@ win_show_info(ProfWin *window, PContact contact)
         g_date_time_unref(now);
     }
 
+    GList *resources = p_contact_get_available_resources(contact);
+    GList *ordered_resources = NULL;
     if (resources != NULL) {
         win_save_print(window, '-', NULL, 0, 0, "", "Resources:");
 
         // sort in order of availabiltiy
-        while (resources != NULL) {
-            Resource *resource = resources->data;
+        GList *curr = resources;
+        while (curr != NULL) {
+            Resource *resource = curr->data;
             ordered_resources = g_list_insert_sorted(ordered_resources,
                 resource, (GCompareFunc)resource_compare_availability);
-            resources = g_list_next(resources);
+            curr = g_list_next(curr);
         }
     }
+    g_list_free(resources);
 
-    while (ordered_resources != NULL) {
-        Resource *resource = ordered_resources->data;
+    GList *curr = ordered_resources;
+    while (curr != NULL) {
+        Resource *resource = curr->data;
         const char *resource_presence = string_from_resource_presence(resource->presence);
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_save_vprint(window, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
@@ -755,8 +758,9 @@ win_show_info(ProfWin *window, PContact contact)
             caps_destroy(caps);
         }
 
-        ordered_resources = g_list_next(ordered_resources);
+        curr = g_list_next(curr);
     }
+    g_list_free(ordered_resources);
 }
 
 void
