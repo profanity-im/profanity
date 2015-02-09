@@ -336,7 +336,7 @@ win_free(ProfWin* window)
         ProfChatWin *chatwin = (ProfChatWin*)window;
         free(chatwin->barejid);
         free(chatwin->resource_override);
-        free(chatwin->state);
+        chat_state_free(chatwin->state);
     }
 
     if (window->type == WIN_MUC) {
