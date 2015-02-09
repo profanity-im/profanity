@@ -631,6 +631,8 @@ _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t * const st
     Capabilities *capabilities = caps_create(query);
     caps_add_by_jid(jid, capabilities);
 
+    free(jid);
+
     return 0;
 }
 
@@ -640,10 +642,12 @@ _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t * const sta
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    char *expected_node = (char *)userdata;
 
     char *type = xmpp_stanza_get_type(stanza);
     // ignore non result
     if ((g_strcmp0(type, "get") == 0) || (g_strcmp0(type, "set") == 0)) {
+        free(expected_node);
         return 1;
     }
 
@@ -656,6 +660,7 @@ _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t * const sta
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (!from) {
         log_info("No from attribute");
+        free(expected_node);
         return 0;
     }
 
@@ -664,21 +669,22 @@ _caps_response_handler_legacy(xmpp_conn_t *const conn, xmpp_stanza_t * const sta
         char *error_message = stanza_get_error_message(stanza);
         log_warning("Error received for capabilities response from %s: ", from, error_message);
         free(error_message);
+        free(expected_node);
         return 0;
     }
 
     if (query == NULL) {
         log_warning("No query element found.");
+        free(expected_node);
         return 0;
     }
 
     char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
         log_warning("No node attribute found");
+        free(expected_node);
         return 0;
     }
-
-    char *expected_node = (char *)userdata;
 
     // nodes match
     if (g_strcmp0(expected_node, node) == 0) {
