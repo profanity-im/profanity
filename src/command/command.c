@@ -1659,7 +1659,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(autoconnect_ac);
     autocomplete_reset(theme_ac);
     if (theme_load_ac != NULL) {
-        autocomplete_reset(theme_load_ac);
+        autocomplete_free(theme_load_ac);
         theme_load_ac = NULL;
     }
     autocomplete_reset(account_ac);
@@ -2473,11 +2473,12 @@ _theme_autocomplete(const char * const input)
         if (theme_load_ac == NULL) {
             theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
-            while (themes != NULL) {
-                autocomplete_add(theme_load_ac, themes->data);
-                themes = g_slist_next(themes);
+            GSList *curr = themes;
+            while (curr != NULL) {
+                autocomplete_add(theme_load_ac, curr->data);
+                curr = g_slist_next(curr);
             }
-            g_slist_free(themes);
+            g_slist_free_full(themes, g_free);
             autocomplete_add(theme_load_ac, "default");
         }
         result = autocomplete_param_with_ac(input, "/theme set", theme_load_ac, TRUE);
