@@ -25,7 +25,7 @@ configure.scan
 stamp-h1
 *~
 *dirstamp
-valgrind.out
+valgrind*.out*
 core
 bugs/
 TODO
