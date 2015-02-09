@@ -132,6 +132,7 @@ wins_get_muc(const char * const roomjid)
         if (window->type == WIN_MUC) {
             ProfMucWin *mucwin = (ProfMucWin*)window;
             if (g_strcmp0(mucwin->roomjid, roomjid) == 0) {
+                g_list_free(values);
                 return mucwin;
             }
         }
@@ -153,6 +154,7 @@ wins_get_private(const char * const fulljid)
         if (window->type == WIN_PRIVATE) {
             ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
             if (g_strcmp0(privatewin->fulljid, fulljid) == 0) {
+                g_list_free(values);
                 return privatewin;
             }
         }
@@ -408,9 +410,9 @@ wins_new_xmlconsole(void)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
+    g_list_free(keys);
     ProfWin *newwin = win_create_xmlconsole();
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
-    g_list_free(keys);
     return newwin;
 }
 
@@ -419,9 +421,9 @@ wins_new_chat(const char * const barejid)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
+    g_list_free(keys);
     ProfWin *newwin = win_create_chat(barejid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
-    g_list_free(keys);
     return newwin;
 }
 
@@ -430,9 +432,9 @@ wins_new_muc(const char * const roomjid)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
+    g_list_free(keys);
     ProfWin *newwin = win_create_muc(roomjid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
-    g_list_free(keys);
     return newwin;
 }
 
@@ -441,9 +443,9 @@ wins_new_muc_config(const char * const roomjid, DataForm *form)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
+    g_list_free(keys);
     ProfWin *newwin = win_create_muc_config(roomjid, form);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
-    g_list_free(keys);
     return newwin;
 }
 
@@ -452,9 +454,9 @@ wins_new_private(const char * const fulljid)
 {
     GList *keys = g_hash_table_get_keys(windows);
     int result = get_next_available_win_num(keys);
+    g_list_free(keys);
     ProfWin *newwin = win_create_private(fulljid);
     g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
-    g_list_free(keys);
     return newwin;
 }
 

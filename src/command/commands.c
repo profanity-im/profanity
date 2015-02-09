@@ -1069,6 +1069,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
                 cons_show_contacts(filtered);
             }
         }
+        g_slist_free(filtered);
 
     // unavailable
     } else if (strcmp("unavailable", presence) == 0) {
@@ -1097,6 +1098,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
                 cons_show_contacts(filtered);
             }
         }
+        g_slist_free(filtered);
 
     // online, available resources
     } else if (strcmp("online", presence) == 0) {
@@ -1125,6 +1127,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
                 cons_show_contacts(filtered);
             }
         }
+        g_slist_free(filtered);
 
     // offline, no available resources
     } else if (strcmp("offline", presence) == 0) {
@@ -1153,6 +1156,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
                 cons_show_contacts(filtered);
             }
         }
+        g_slist_free(filtered);
 
     // show specific status
     } else {
@@ -1181,6 +1185,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
                 cons_show_contacts(filtered);
             }
         }
+        g_slist_free(filtered);
     }
 
     g_slist_free(list);

@@ -154,49 +154,49 @@ _caps_by_ver(const char * const ver)
 
         char *category = g_key_file_get_string(cache, ver, "category", NULL);
         if (category) {
-            new_caps->category = strdup(category);
+            new_caps->category = category;
         } else {
             new_caps->category = NULL;
         }
 
         char *type = g_key_file_get_string(cache, ver, "type", NULL);
         if (type) {
-            new_caps->type = strdup(type);
+            new_caps->type = type;
         } else {
             new_caps->type = NULL;
         }
 
         char *name = g_key_file_get_string(cache, ver, "name", NULL);
         if (name) {
-            new_caps->name = strdup(name);
+            new_caps->name = name;
         } else {
             new_caps->name = NULL;
         }
 
         char *software = g_key_file_get_string(cache, ver, "software", NULL);
         if (software) {
-            new_caps->software = strdup(software);
+            new_caps->software = software;
         } else {
             new_caps->software = NULL;
         }
 
         char *software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
         if (software_version) {
-            new_caps->software_version = strdup(software_version);
+            new_caps->software_version = software_version;
         } else {
             new_caps->software_version = NULL;
         }
 
         char *os = g_key_file_get_string(cache, ver, "os", NULL);
         if (os) {
-            new_caps->os = strdup(os);
+            new_caps->os = os;
         } else {
             new_caps->os = NULL;
         }
 
         char *os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
         if (os_version) {
-            new_caps->os_version = strdup(os_version);
+            new_caps->os_version = os_version;
         } else {
             new_caps->os_version = NULL;
         }
