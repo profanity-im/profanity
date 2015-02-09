@@ -132,6 +132,7 @@ wins_get_muc(const char * const roomjid)
         if (window->type == WIN_MUC) {
             ProfMucWin *mucwin = (ProfMucWin*)window;
             if (g_strcmp0(mucwin->roomjid, roomjid) == 0) {
+                g_list_free(values);
                 return mucwin;
             }
         }
@@ -153,6 +154,7 @@ wins_get_private(const char * const fulljid)
         if (window->type == WIN_PRIVATE) {
             ProfPrivateWin *privatewin = (ProfPrivateWin*)window;
             if (g_strcmp0(privatewin->fulljid, fulljid) == 0) {
+                g_list_free(values);
                 return privatewin;
             }
         }
