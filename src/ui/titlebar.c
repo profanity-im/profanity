@@ -109,8 +109,11 @@ void
 title_bar_console(void)
 {
     werase(win);
-    typing = FALSE;
+    if (typing_elapsed) {
+        g_timer_destroy(typing_elapsed);
+    }
     typing_elapsed = NULL;
+    typing = FALSE;
 
     _title_bar_draw();
 }

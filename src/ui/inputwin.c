@@ -747,6 +747,9 @@ _delete_previous_word(void)
     input_len_bytes = strlen(start_string)+i;
     input[input_len_bytes] = '\0';
 
+    g_free(start_string);
+    g_free(end_string);
+
     _clear_input();
     waddstr(inp_win, input);
     wmove(inp_win, 0, start_del);

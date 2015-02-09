@@ -192,7 +192,9 @@ GSList *
 theme_list(void)
 {
     GSList *result = NULL;
-    _theme_list_dir(_get_themes_dir(), &result);
+    char *themes_dir = _get_themes_dir();
+    _theme_list_dir(themes_dir, &result);
+    free(themes_dir);
 #ifdef THEMES_PATH
     _theme_list_dir(THEMES_PATH, &result);
 #endif

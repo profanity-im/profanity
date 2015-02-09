@@ -26,9 +26,8 @@ configure.scan
 stamp-h1
 *~
 *dirstamp
-valgrind.out
 runvalgrind.sh
-valgrind.out.*
+valgrind*.out*
 core
 bugs/
 *.pyc

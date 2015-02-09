@@ -717,20 +717,24 @@ cons_show_account(ProfAccount *account)
         GList *resources = jabber_get_available_resources();
         GList *ordered_resources = NULL;
 
-        if (resources != NULL) {
+        GList *curr = resources;
+        if (curr != NULL) {
             win_save_println(console, "Resources:");
 
             // sort in order of availabiltiy
-            while (resources != NULL) {
-                Resource *resource = resources->data;
+            while (curr != NULL) {
+                Resource *resource = curr->data;
                 ordered_resources = g_list_insert_sorted(ordered_resources,
                     resource, (GCompareFunc)resource_compare_availability);
-                resources = g_list_next(resources);
+                curr = g_list_next(curr);
             }
         }
 
-        while (ordered_resources != NULL) {
-            Resource *resource = ordered_resources->data;
+        g_list_free(resources);
+
+        curr = ordered_resources;
+        while (curr != NULL) {
+            Resource *resource = curr->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
             theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
             win_save_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
@@ -785,8 +789,9 @@ cons_show_account(ProfAccount *account)
                 caps_destroy(caps);
             }
 
-            ordered_resources = g_list_next(ordered_resources);
+            curr = g_list_next(curr);
         }
+        g_list_free(ordered_resources);
     }
 
     cons_alert();
