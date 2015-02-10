@@ -251,6 +251,7 @@ cons_show_wins(void)
         win_save_println(console, curr->data);
         curr = g_slist_next(curr);
     }
+    g_slist_free_full(window_strings, free);
 
     cons_show("");
     cons_alert();
