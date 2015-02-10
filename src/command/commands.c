@@ -3116,11 +3116,11 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
 #endif
             } else if (win_type == WIN_PRIVATE) {
                 ProfPrivateWin *privatewin = wins_get_current_private();
-                message_send_private(tiny, privatewin->fulljid);
+                message_send_private(privatewin->fulljid, tiny);
                 ui_outgoing_private_msg("me", privatewin->fulljid, tiny);
             } else if (win_type == WIN_MUC) {
                 ProfMucWin *mucwin = wins_get_current_muc();
-                message_send_groupchat(tiny, mucwin->roomjid);
+                message_send_groupchat(mucwin->roomjid, tiny);
             }
             free(tiny);
         } else {
