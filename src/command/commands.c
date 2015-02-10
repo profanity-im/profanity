@@ -1188,6 +1188,7 @@ _who_roster(gchar **args, struct cmd_help_t help)
         g_slist_free(filtered);
     }
 
+    list = g_slist_nth(list, 0);
     g_slist_free(list);
 }
 

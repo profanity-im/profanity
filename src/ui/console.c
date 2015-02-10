@@ -402,17 +402,18 @@ cons_show_sent_subs(void)
         GSList *contacts = roster_get_contacts();
         PContact contact = NULL;
         cons_show("Awaiting subscription responses from:");
-        while (contacts != NULL) {
-            contact = (PContact) contacts->data;
+        GSList *curr = contacts;
+        while (curr != NULL) {
+            contact = (PContact) curr->data;
             if (p_contact_pending_out(contact)) {
                 cons_show("  %s", p_contact_barejid(contact));
             }
-            contacts = g_slist_next(contacts);
+            curr = g_slist_next(curr);
         }
+        g_slist_free(contacts);
     } else {
         cons_show("No pending requests sent.");
     }
-
     cons_alert();
 }
 
