@@ -611,17 +611,17 @@ _handle_backspace(void)
         } else if (inp_x > 0 && inp_x < display_size) {
             gchar *start = g_utf8_substring(input, 0, inp_x - 1);
             gchar *end = g_utf8_substring(input, inp_x, input_len_bytes);
-            GString *new = g_string_new(start);
-            g_string_append(new, end);
+            GString *new_str = g_string_new(start);
+            g_string_append(new_str, end);
 
-            for (input_len_bytes = 0; input_len_bytes < strlen(new->str); input_len_bytes++) {
-                input[input_len_bytes] = new->str[input_len_bytes];
+            for (input_len_bytes = 0; input_len_bytes < strlen(new_str->str); input_len_bytes++) {
+                input[input_len_bytes] = new_str->str[input_len_bytes];
             }
             input[input_len_bytes] = '\0';
 
             g_free(start);
             g_free(end);
-            g_string_free(new, FALSE);
+            g_string_free(new_str, TRUE);
 
             _clear_input();
             waddstr(inp_win, input);
