@@ -488,25 +488,34 @@ cmp_win_num(gconstpointer a, gconstpointer b)
 int
 get_next_available_win_num(GList *used)
 {
-    used = g_list_sort(used, cmp_win_num);
     // only console used
     if (g_list_length(used) == 1) {
         return 2;
     } else {
+        GList *sorted = NULL;
+        GList *curr = used;
+        while (curr) {
+            sorted = g_list_insert_sorted(sorted, curr->data, cmp_win_num);
+            curr = g_list_next(curr);
+        }
+
         int result = 0;
         int last_num = 1;
-        GList *curr = used;
+        curr = sorted;
         // skip console
         curr = g_list_next(curr);
         while (curr != NULL) {
             int curr_num = GPOINTER_TO_INT(curr->data);
+
             if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
                     ((last_num == 9) && (curr_num != 0))) {
                 result = last_num + 1;
                 if (result == 10) {
                     result = 0;
                 }
+                g_list_free(sorted);
                 return (result);
+
             } else {
                 last_num = curr_num;
                 if (last_num == 0) {
@@ -520,6 +529,7 @@ get_next_available_win_num(GList *used)
             result = 0;
         }
 
+        g_list_free(sorted);
         return result;
     }
 }
