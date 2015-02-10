@@ -1046,12 +1046,13 @@ _who_roster(gchar **args, struct cmd_help_t help)
     } else if (strcmp("available", presence) == 0) {
         GSList *filtered = NULL;
 
-        while (list != NULL) {
-            PContact contact = list->data;
+        GSList *curr = list;
+        while (curr != NULL) {
+            PContact contact = curr->data;
             if (p_contact_is_available(contact)) {
                 filtered = g_slist_append(filtered, contact);
             }
-            list = g_slist_next(list);
+            curr = g_slist_next(curr);
         }
 
         if (group != NULL) {
@@ -1075,12 +1076,13 @@ _who_roster(gchar **args, struct cmd_help_t help)
     } else if (strcmp("unavailable", presence) == 0) {
         GSList *filtered = NULL;
 
-        while (list != NULL) {
-            PContact contact = list->data;
+        GSList *curr = list;
+        while (curr != NULL) {
+            PContact contact = curr->data;
             if (!p_contact_is_available(contact)) {
                 filtered = g_slist_append(filtered, contact);
             }
-            list = g_slist_next(list);
+            curr = g_slist_next(curr);
         }
 
         if (group != NULL) {
@@ -1104,12 +1106,13 @@ _who_roster(gchar **args, struct cmd_help_t help)
     } else if (strcmp("online", presence) == 0) {
         GSList *filtered = NULL;
 
-        while (list != NULL) {
-            PContact contact = list->data;
+        GSList *curr = list;
+        while (curr != NULL) {
+            PContact contact = curr->data;
             if (p_contact_has_available_resource(contact)) {
                 filtered = g_slist_append(filtered, contact);
             }
-            list = g_slist_next(list);
+            curr = g_slist_next(curr);
         }
 
         if (group != NULL) {
@@ -1133,12 +1136,13 @@ _who_roster(gchar **args, struct cmd_help_t help)
     } else if (strcmp("offline", presence) == 0) {
         GSList *filtered = NULL;
 
-        while (list != NULL) {
-            PContact contact = list->data;
+        GSList *curr = list;
+        while (curr != NULL) {
+            PContact contact = curr->data;
             if (!p_contact_has_available_resource(contact)) {
                 filtered = g_slist_append(filtered, contact);
             }
-            list = g_slist_next(list);
+            curr = g_slist_next(curr);
         }
 
         if (group != NULL) {
@@ -1162,12 +1166,13 @@ _who_roster(gchar **args, struct cmd_help_t help)
     } else {
         GSList *filtered = NULL;
 
-        while (list != NULL) {
-            PContact contact = list->data;
+        GSList *curr = list;
+        while (curr != NULL) {
+            PContact contact = curr->data;
             if (strcmp(p_contact_presence(contact), presence) == 0) {
                 filtered = g_slist_append(filtered, contact);
             }
-            list = g_slist_next(list);
+            curr = g_slist_next(curr);
         }
 
         if (group != NULL) {
