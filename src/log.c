@@ -236,7 +236,7 @@ chat_log_init(void)
 {
     session_started = g_date_time_new_now_local();
     log_info("Initialising chat logs");
-    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
+    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, free,
         (GDestroyNotify)_free_chat_log);
 }
 
@@ -244,7 +244,7 @@ void
 groupchat_log_init(void)
 {
     log_info("Initialising groupchat logs");
-    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, g_free,
+    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc) _key_equals, free,
         (GDestroyNotify)_free_chat_log);
 }
 
@@ -396,8 +396,8 @@ chat_log_get_previous(const gchar * const login, const gchar * const recipient)
 void
 chat_log_close(void)
 {
-    g_hash_table_remove_all(logs);
-    g_hash_table_remove_all(groupchat_logs);
+    g_hash_table_destroy(logs);
+    g_hash_table_destroy(groupchat_logs);
     g_date_time_unref(session_started);
 }
 
