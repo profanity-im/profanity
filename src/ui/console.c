@@ -1,7 +1,7 @@
 /*
  * console.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -176,7 +176,7 @@ cons_about(void)
         }
     }
 
-    win_save_vprint(console, '-', NULL, 0, 0, "", "Copyright (C) 2012 - 2014 James Booth <%s>.", PACKAGE_BUGREPORT);
+    win_save_vprint(console, '-', NULL, 0, 0, "", "Copyright (C) 2012 - 2015 James Booth <%s>.", PACKAGE_BUGREPORT);
     win_save_println(console, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
     win_save_println(console, "");
     win_save_println(console, "This is free software; you are free to change and redistribute it.");
