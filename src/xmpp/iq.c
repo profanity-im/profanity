@@ -586,12 +586,14 @@ static int
 _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
+    char *jid = (char *)userdata;
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
     char *type = xmpp_stanza_get_type(stanza);
     // ignore non result
     if ((g_strcmp0(type, "get") == 0) || (g_strcmp0(type, "set") == 0)) {
+        free(jid);
         return 1;
     }
 
@@ -604,6 +606,7 @@ _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t * const st
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (!from) {
         log_info("No from attribute");
+        free(jid);
         return 0;
     }
 
@@ -612,21 +615,23 @@ _caps_response_handler_for_jid(xmpp_conn_t *const conn, xmpp_stanza_t * const st
         char *error_message = stanza_get_error_message(stanza);
         log_warning("Error received for capabilities response from %s: ", from, error_message);
         free(error_message);
+        free(jid);
         return 0;
     }
 
     if (query == NULL) {
         log_warning("No query element found.");
+        free(jid);
         return 0;
     }
 
     char *node = xmpp_stanza_get_attribute(query, STANZA_ATTR_NODE);
     if (node == NULL) {
         log_warning("No node attribute found");
+        free(jid);
         return 0;
     }
 
-    char *jid = (char *)userdata;
     log_info("Associating capabilities with: %s", jid);
     Capabilities *capabilities = caps_create(query);
     caps_add_by_jid(jid, capabilities);
