@@ -1,16 +1,17 @@
 0.4.6
 =====
 
-- 16 colour support
+- 16 colour support (/theme colours)
 - UI preferences included in themes
-- Word wrapping (/wrap)
-- Show hide time (/time)
-- Show or hide and customise roster panel (/roster)
+- /wrap - Word wrapping
+- /time - Show/hide time in main window, and configure precision
+- /roster - Show/hide and customise roster panel
+- /roster and /occupants panel size settings (% of screen width)
+- /account default - Set default account for /connect
 - /account remove
-- Added default account for /connect
-- Additional readline style shortcuts
-- Improved chat session handling
-- Override resource during chat and resource display settings (/resource)
-- Disable terminal title by default, additonal title on exit
-- Dynamic input blocking timeout to use less CPU
-- eval_password property on accounts for retrieving password from keyring/keychain
+- /presence - Show/hide contact presence in titlebar 
+- /resource - Override resource during chat, resource display settings
+- Improved chat session handling <http://xmpp.org/rfcs/rfc6121.html#message-chat>
+- Lower CPU usage with dynamic input blocking timeout
+- Keychain/keyring integration using account eval_password property
+- Disable term window title by default
