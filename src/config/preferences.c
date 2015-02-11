@@ -1,7 +1,7 @@
 /*
  * preferences.c
  *
- * Copyright (C) 2012 - 2014 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -62,7 +62,7 @@
 #define PREF_GROUP_ALIAS "alias"
 #define PREF_GROUP_OTR "otr"
 
-#define INPBLOCK_DEFAULT 20
+#define INPBLOCK_DEFAULT 1000
 
 static gchar *prefs_loc;
 static GKeyFile *prefs;

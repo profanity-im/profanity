@@ -1,9 +1,9 @@
-.TH Profanity 1 "March 2014" "Profanity XMPP client"
+.TH Profanity 1 "February 2015" "Profanity XMPP client"
 .SH NAME
 Profanity \- a simple console based XMPP chat client.
 .SH SYNOPSIS
 .B profanity
-[\-vhd] [\-l level]
+[\-vhd] [\-l level] [\-a account]
 .SH DESCRIPTION
 .B Profanity
 is a simple lightweight console based XMPP chat client. Its emphasis is 
@@ -15,19 +15,21 @@ at:
 .SH OPTIONS
 .TP
 .BI "\-v, \-\-version"
-Show version information.
+Show version and build information.
 .TP
 .BI "\-h, \-\-help"
 Show help on command line arguments.
 .TP
-.BI "\-a, \-\-account"
-Auto connect to an account on startup.
+.BI "\-a, \-\-account "ACCOUNT
+Auto connect to an account on startup,
+.I ACCOUNT
+must be an existing account.
 .TP
 .BI "\-d, \-\-disable\-tls"
 Disable TLS for servers that either don't support it, or claim to but do not
 complete the handshake.
 .TP
-.BI "\-l, \-\-log="LEVEL
+.BI "\-l, \-\-log "LEVEL
 Set the logging level,
 .I LEVEL
 may be set to DEBUG, INFO (the default), WARN or ERROR.
@@ -45,10 +47,10 @@ is stored in
 , details on configuring Profanity can be found at <http://www.profanity.im/configuration.html>.
 .PP
 .SH BUGS
-Bugs can either be reported by sending a mail directly to:
+Bugs can either be reported by raising an issue at the Github issue tracker:
 .br
 .PP
-<boothj5web@gmail.com>
+<https://github.com/boothj5/profanity/issues>
 .br
 .PP
 or to the mailing list at:
@@ -57,12 +59,14 @@ or to the mailing list at:
 <https://groups.google.com/forum/#!forum/profanitydev>
 .br
 .PP
-or with a Github account by logging issues on the issue tracker at:
+or by sending a mail directly to:
 .br
 .PP
-<https://github.com/boothj5/profanity>
+<boothj5web@gmail.com>
+.br
+.PP
 .SH LICENSE
-Copyright (C) 2012 \- 2014 James Booth <boothj5web@gmail.com>.
+Copyright (C) 2012 \- 2015 James Booth <boothj5web@gmail.com>.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software; you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
