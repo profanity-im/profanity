@@ -243,10 +243,9 @@ _notify(const char * const message, int timeout,
     Shell_NotifyIcon(NIM_MODIFY, &nid);
 #endif
 #ifdef HAVE_OSXNOTIFY
-    GString *notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message \"");
+    GString *notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
 
-    char *escaped_double = str_replace(message, "\"", "\\\"");
-    char *escaped_single = str_replace(escaped_double, "`", "\\`");
+    char *escaped_single = str_replace(message, "'", "'\\''");
 
     if (escaped_single[0] == '<') {
         g_string_append(notify_command, "\\<");
@@ -264,8 +263,7 @@ _notify(const char * const message, int timeout,
         g_string_append(notify_command, escaped_single);
     }
 
-    g_string_append(notify_command, "\"");
-    free(escaped_double);
+    g_string_append(notify_command, "'");
     free(escaped_single);
 
     char *term_name = getenv("TERM_PROGRAM");
