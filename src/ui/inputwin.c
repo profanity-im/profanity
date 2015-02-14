@@ -397,6 +397,13 @@ _inp_rl_linehandler(char *line)
         if (!get_password) {
             add_history(line);
         }
+    } else if (!line) {
+        int index = ui_current_win_index();
+        if (index > 1 && ui_win_exists(index)) {
+            line = strdup("/close");
+        } else {
+            line = strdup("/quit");
+        }
     }
     inp_line = line;
 }
