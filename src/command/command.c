@@ -428,7 +428,7 @@ static struct cmd_t command_defs[] =
           "help [tag]       - Display help for form, or a specific field.",
           NULL } } },
 
-    { "/rooms", // TODO help review
+    { "/rooms",
         cmd_rooms, parse_args, 0, 1, NULL,
         { "/rooms [conference-service]", "List chat rooms.",
         { "/rooms [conference-service]",
