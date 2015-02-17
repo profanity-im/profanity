@@ -690,7 +690,7 @@ win_show_info(ProfWin *window, PContact contact)
     if (resources != NULL) {
         win_save_print(window, '-', NULL, 0, 0, "", "Resources:");
 
-        // sort in order of availabiltiy
+        // sort in order of availability
         GList *curr = resources;
         while (curr != NULL) {
             Resource *resource = curr->data;

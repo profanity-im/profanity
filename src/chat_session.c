@@ -141,7 +141,7 @@ chat_session_recipient_active(const char * const barejid, const char * const res
         // session exists with resource, update chat_states
         if (g_strcmp0(session->resource, resource) == 0) {
             session->send_states = send_states;
-        // session exists with differet resource and no override, replace
+        // session exists with different resource and no override, replace
         } else if (!session->resource_override) {
             _chat_session_new(barejid, resource, FALSE, send_states);
         }
