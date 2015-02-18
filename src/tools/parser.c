@@ -32,12 +32,144 @@
  *
  */
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
 
 #include "common.h"
+
+/* nextarg is like strtok, but it has its own delimiter set.
+ * nextarg will never return NULL when cmd is non-NULL.
+ * if cmd == NULL, then nextarg returns the next argument from the
+ * previous call to nextarg.
+ * the pointer returned from nextarg should be freed by the caller.
+ * char *s = "a bc \"def' `ghi\"";
+ * char *c = nextarg(s);
+ * while(c){
+ *     printf("%s\n", c);
+ *     free(c);
+ *     c = nextarg(NULL);
+ * }
+ * This code is maintained by incertia at incertia.net.
+ * The OP can be found at
+ * http://www.incertia.net/blog/simple-argument-parser-in-c/ */
+char *cur = NULL;
+char *s = NULL;
+char * nextarg(const char *cmd){
+    int i = 0, j = 0;
+    gboolean in_token = FALSE;
+    char *r, *b;
+    gunichar quote = '\0';
+
+    /* we operate on our own local copy cur */
+    if(cmd){
+        if(cur) free(cur);
+        s = cur = strdup(cmd);
+    }
+    if(!cur || !s) return NULL;
+
+    /* search s, which will point to the end of the current token */
+    b = s;
+    gunichar c;
+    while((c = g_utf8_get_char(s))){
+        if(!in_token){
+            /* we encountered what might not be a token */
+            if(!g_unichar_isspace(c)){
+                in_token = TRUE;
+                if(c == '"' || c == '\'' || c == '`') quote = c, b = s;
+                else i += g_unichar_to_utf8(c, NULL), b = s; /* increment char count */
+                if(c == '\\'){
+                    /* fix edge case where the last char is \ */
+                    if(!g_utf8_next_char(s)){
+                        *s = '\0';
+                        if(i > 1) break;
+                        else {
+                            free(cur);
+                            return cur = s = NULL;
+                        }
+                    }
+                    s += g_unichar_to_utf8(c, NULL); /* skip the escaped character */
+                }
+            }
+        } else {
+            /* we are inside a token */
+            if(quote){
+                if(quote == c){
+                    // we found the end
+                    quote = '\0';
+                    s += g_unichar_to_utf8(c, NULL);
+                    continue;
+                }
+            } else {
+                if(g_unichar_isspace(c)){
+                    // this is the end
+                    break;
+                } else if(c == '"' || c == '\'' || c == '`'){
+                    quote = c;
+                    s += g_unichar_to_utf8(c, NULL);
+                    continue;
+                }
+            }
+            if(c == '\\'){
+                /* this covers the other edge case where last char is \ */
+                if(!g_utf8_next_char(s)){
+                    *s = '\0';
+                    if(i) break;
+                    else {
+                        free(cur);
+                        return cur = s = NULL;
+                    }
+                }
+                s++; /* skip the escaped character */
+            }
+            i += g_unichar_to_utf8(c, NULL);
+        }
+        s += g_unichar_to_utf8(c, NULL);;
+    }
+
+    /* allocate the string */
+    r = malloc((i + 1) * sizeof(char));
+
+    /* fill the string */
+    r[i] = '\0';
+    quote = '\0';
+    while(j < i){
+        c = g_utf8_get_char(b);
+        if(c == '\\'){
+            b += g_unichar_to_utf8(c, NULL);
+            int x = 0;
+            for(; x < g_unichar_to_utf8(g_utf8_get_char(b), NULL); x++) r[j++] = *b++;
+        } else if(c == '"' || c == '\'' || c == '`'){
+            if(!quote){
+                quote = c;
+                b += g_unichar_to_utf8(c, NULL);
+            } else if(quote == c){
+                quote = '\0', b += g_unichar_to_utf8(c, NULL);
+            } else {
+                int x = 0;
+                for(; x < g_unichar_to_utf8(c, NULL); x++) r[j++] = *b++;
+            }
+        } else {
+            int x = 0;
+            for(; x < g_unichar_to_utf8(c, NULL); x++) r[j++] = *b++;
+        }
+    }
+
+    c = g_utf8_get_char(s);
+    while(c && g_unichar_isspace(c)){
+        s += g_unichar_to_utf8(c, NULL);
+        c = g_utf8_get_char(s);
+    }
+    if(!*s){
+        free(cur);
+        s = cur = NULL;
+    }
+
+    return r;
+}
+
 
 /*
  * Take a full line of input and return an array of strings representing
@@ -69,74 +201,15 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
         return NULL;
     }
 
-    // copy and strip input of leading/trailing whitepsace
-    char *copy = strdup(inp);
-    g_strstrip(copy);
-
-    int inp_size = g_utf8_strlen(copy, -1);
-    gboolean in_token = FALSE;
-    gboolean in_quotes = FALSE;
-    char *token_start = &copy[0];
-    int token_size = 0;
-    GSList *tokens = NULL;
-
-    // add tokens to GSList
-    int i;
-    for (i = 0; i < inp_size; i++) {
-        gchar *curr_ch = g_utf8_offset_to_pointer(copy, i);
-        gunichar curr_uni = g_utf8_get_char(curr_ch);
-
-        if (!in_token) {
-            if (curr_uni  == ' ') {
-                continue;
-            } else {
-                in_token = TRUE;
-                if (curr_uni == '"') {
-                    in_quotes = TRUE;
-                    i++;
-                    gchar *next_ch = g_utf8_next_char(curr_ch);
-                    gunichar next_uni = g_utf8_get_char(next_ch);
-                    token_start = next_ch;
-                    token_size += g_unichar_to_utf8(next_uni, NULL);
-                } else {
-                    token_start = curr_ch;
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            }
-        } else {
-            if (in_quotes) {
-                if (curr_uni == '"') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
-                    token_size = 0;
-                    in_token = FALSE;
-                    in_quotes = FALSE;
-                } else {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            } else {
-                if (curr_uni == ' ') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                        token_size));
-                    token_size = 0;
-                    in_token = FALSE;
-                } else {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            }
-        }
-    }
-
-    if (in_token) {
-        tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
-    }
+    char *token = nextarg(inp);
+    GSList *tokens = g_slist_append(NULL, token);
+    while((token = nextarg(NULL))) tokens = g_slist_append(tokens, token);
 
     int num = g_slist_length(tokens) - 1;
 
     // if num args not valid return NULL
     if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
-        g_free(copy);
         *result = FALSE;
         return NULL;
 
@@ -145,7 +218,6 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
         g_slist_free_full(tokens, free);
         gchar **args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
-        g_free(copy);
         *result = TRUE;
         return args;
 
@@ -163,7 +235,6 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
 
         args[arg_count] = NULL;
         g_slist_free_full(tokens, free);
-        g_free(copy);
         *result = TRUE;
         return args;
     }
