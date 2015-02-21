@@ -434,6 +434,11 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         gchar *to = xmpp_stanza_get_attribute(message, STANZA_ATTR_TO);
         gchar *from = xmpp_stanza_get_attribute(message, STANZA_ATTR_FROM);
 
+        // happens when receive a carbon of a self sent message 
+        if(to == NULL) {
+            to = from;
+        }
+
         Jid *jid_from = jid_create(from);
         Jid *jid_to = jid_create(to);
         Jid *my_jid = jid_create(jabber_get_fulljid());
