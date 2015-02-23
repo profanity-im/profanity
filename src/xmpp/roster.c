@@ -241,6 +241,7 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     jid_destroy(my_jid);
 
     const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+    gchar *barejid_lower = g_utf8_strdown(barejid, -1);
     const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
     const char *ask = xmpp_stanza_get_attribute(item, STANZA_ATTR_ASK);
@@ -254,12 +255,12 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     if (g_strcmp0(sub, "remove") == 0) {
         // remove barejid and name
         if (name == NULL) {
-            name = barejid;
+            name = barejid_lower;
         }
 
-        roster_remove(name, barejid);
+        roster_remove(name, barejid_lower);
 
-        handle_roster_remove(barejid);
+        handle_roster_remove(barejid_lower);
 
     // otherwise update local roster
     } else {
@@ -273,14 +274,14 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         GSList *groups = _get_groups_from_item(item);
 
         // update the local roster
-        PContact contact = roster_get_contact(barejid);
+        PContact contact = roster_get_contact(barejid_lower);
         if (contact == NULL) {
-            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
+            gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
             if (added) {
-                handle_roster_add(barejid, name);
+                handle_roster_add(barejid_lower, name);
             }
         } else {
-            handle_roster_update(barejid, name, groups, sub, pending_out);
+            handle_roster_update(barejid_lower, name, groups, sub, pending_out);
         }
     }
 
@@ -300,6 +301,7 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         while (item != NULL) {
             const char *barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+            gchar *barejid_lower = g_utf8_strdown(barejid, -1);
             const char *name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
             const char *sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
 
@@ -316,10 +318,10 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             GSList *groups = _get_groups_from_item(item);
 
-            gboolean added = roster_add(barejid, name, groups, sub, pending_out);
+            gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
 
             if (!added) {
-                log_warning("Attempt to add contact twice: %s", barejid);
+                log_warning("Attempt to add contact twice: %s", barejid_lower);
             }
 
             item = xmpp_stanza_get_next(item);
