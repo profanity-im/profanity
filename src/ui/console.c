@@ -723,7 +723,7 @@ cons_show_account(ProfAccount *account)
         if (curr != NULL) {
             win_save_println(console, "Resources:");
 
-            // sort in order of availabiltiy
+            // sort in order of availability
             while (curr != NULL) {
                 Resource *resource = curr->data;
                 ordered_resources = g_list_insert_sorted(ordered_resources,

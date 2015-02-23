@@ -315,7 +315,7 @@ muc_nick_change_pending(const char * const room)
 }
 
 /*
- * Change the current nuck name for the room, call once
+ * Change the current nick name for the room, call once
  * the service has responded
  */
 void

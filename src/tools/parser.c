@@ -47,9 +47,9 @@
  *
  * inp - The line of input
  * min - The minimum allowed number of arguments
- * max - The maxmimum allowed number of arguments
+ * max - The maximum allowed number of arguments
  *
- * Returns - An NULL terminated array of strings representing the aguments
+ * Returns - An NULL terminated array of strings representing the arguments
  * of the command, or NULL if the validation fails.
  *
  * E.g. the following input line:
@@ -69,7 +69,7 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
         return NULL;
     }
 
-    // copy and strip input of leading/trailing whitepsace
+    // copy and strip input of leading/trailing whitespace
     char *copy = strdup(inp);
     g_strstrip(copy);
 
@@ -181,9 +181,9 @@ parse_args(const char * const inp, int min, int max, gboolean *result)
  *
  * inp - The line of input
  * min - The minimum allowed number of arguments
- * max - The maxmimum allowed number of arguments
+ * max - The maximum allowed number of arguments
  *
- * Returns - An NULL terminated array of strings representing the aguments
+ * Returns - An NULL terminated array of strings representing the arguments
  * of the command, or NULL if the validation fails.
  *
  * E.g. the following input line:

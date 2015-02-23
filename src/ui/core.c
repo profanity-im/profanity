@@ -1872,7 +1872,7 @@ ui_room_message(const char * const roomjid, const char * const nick,
         if (wins_is_current(window)) {
             status_bar_active(num);
 
-        // not currenlty on groupchat window
+        // not currently on groupchat window
         } else {
             status_bar_new(num);
             cons_show_incoming_message(nick, num);
@@ -1956,7 +1956,7 @@ ui_room_requires_config(const char * const roomjid)
         if (wins_is_current(window)) {
             status_bar_active(num);
 
-        // not currenlty on groupchat window
+        // not currently on groupchat window
         } else {
             status_bar_new(num);
         }
@@ -2097,7 +2097,7 @@ ui_room_subject(const char * const roomjid, const char * const nick, const char 
         if (wins_is_current(window)) {
             status_bar_active(num);
 
-        // not currenlty on groupchat window
+        // not currently on groupchat window
         } else {
             status_bar_active(num);
         }
@@ -2131,7 +2131,7 @@ ui_room_broadcast(const char * const roomjid, const char * const message)
         if (wins_is_current(window)) {
             status_bar_active(num);
 
-        // not currenlty on groupchat window
+        // not currently on groupchat window
         } else {
             status_bar_new(num);
         }
