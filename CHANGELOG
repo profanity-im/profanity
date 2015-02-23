@@ -15,3 +15,4 @@
 - Lower CPU usage with dynamic input blocking timeout
 - Keychain/keyring integration using account eval_password property
 - Disable term window title by default
+- Fixed remote code execution bug on OSX when desktop notifications configured to show message text
