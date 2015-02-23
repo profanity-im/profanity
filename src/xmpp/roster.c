@@ -285,6 +285,8 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
     }
 
+    g_free(barejid_lower);
+
     return 1;
 }
 
@@ -324,6 +326,7 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 log_warning("Attempt to add contact twice: %s", barejid_lower);
             }
 
+            g_free(barejid_lower);
             item = xmpp_stanza_get_next(item);
         }
 
