@@ -146,7 +146,7 @@ char *
 create_fulljid(const char * const barejid, const char * const resource)
 {
     gchar *barejidlower = g_utf8_strdown(barejid, -1);
-    GString *full_jid = g_string_new(barejid);
+    GString *full_jid = g_string_new(barejidlower);
     g_free(barejidlower);
     g_string_append(full_jid, "/");
     g_string_append(full_jid, resource);
