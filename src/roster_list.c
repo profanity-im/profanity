@@ -286,7 +286,7 @@ roster_get_contacts_by_presence(const char * const presence)
         }
     }
 
-    // resturn all contact structs
+    // return all contact structs
     return result;
 }
 
@@ -303,7 +303,7 @@ roster_get_contacts(void)
         result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
     }
 
-    // resturn all contact structs
+    // return all contact structs
     return result;
 }
 
@@ -321,7 +321,7 @@ roster_get_contacts_online(void)
             result = g_slist_insert_sorted(result, value, (GCompareFunc)_compare_contacts);
     }
 
-    // resturn all contact structs
+    // return all contact structs
     return result;
 }
 
@@ -371,7 +371,7 @@ roster_get_nogroup(void)
         }
     }
 
-    // resturn all contact structs
+    // return all contact structs
     return result;
 }
 
@@ -395,7 +395,7 @@ roster_get_group(const char * const group)
         }
     }
 
-    // resturn all contact structs
+    // return all contact structs
     return result;
 }
 

@@ -828,7 +828,7 @@ _fix_legacy_accounts(const char * const account_name)
         _save_accounts();
     }
 
-    // acounts with no muc service or nick
+    // accounts with no muc service or nick
     if (!g_key_file_has_key(accounts, account_name, "muc.service", NULL)) {
         gchar *account_jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
         Jid *jidp = jid_create(account_jid);

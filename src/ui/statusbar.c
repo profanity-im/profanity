@@ -192,7 +192,7 @@ status_bar_inactive(const int win)
             is_new[11] = TRUE;
             _mark_new(11);
 
-        // still have active winsows
+        // still have active windows
         } else if (g_hash_table_size(remaining_active) != 0) {
             is_active[11] = TRUE;
             is_new[11] = FALSE;
@@ -241,7 +241,7 @@ status_bar_active(const int win)
             _mark_active(11);
         }
 
-    // visible winsow indicators
+    // visible window indicators
     } else {
         is_active[true_win] = TRUE;
         is_new[true_win] = FALSE;
