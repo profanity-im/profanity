@@ -91,7 +91,7 @@ roster_update_presence(const char * const barejid, Resource *resource,
     assert(barejid != NULL);
     assert(resource != NULL);
 
-    PContact contact = g_hash_table_lookup(contacts, barejid);
+    PContact contact = roster_get_contact(barejid);
     if (contact == NULL) {
         return FALSE;
     }
@@ -109,14 +109,18 @@ roster_update_presence(const char * const barejid, Resource *resource,
 PContact
 roster_get_contact(const char * const barejid)
 {
-    return g_hash_table_lookup(contacts, barejid);
+    gchar *barejidlower = g_utf8_strdown(barejid, -1);
+    PContact contact = g_hash_table_lookup(contacts, barejidlower);
+    g_free(barejidlower);
+
+    return contact;
 }
 
 gboolean
 roster_contact_offline(const char * const barejid,
     const char * const resource, const char * const status)
 {
-    PContact contact = g_hash_table_lookup(contacts, barejid);
+    PContact contact = roster_get_contact(barejid);
 
     if (contact == NULL) {
         return FALSE;
@@ -212,7 +216,7 @@ void
 roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out)
 {
-    PContact contact = g_hash_table_lookup(contacts, barejid);
+    PContact contact = roster_get_contact(barejid);
     assert(contact != NULL);
 
     p_contact_set_subscription(contact, subscription);
@@ -239,7 +243,7 @@ gboolean
 roster_add(const char * const barejid, const char * const name, GSList *groups,
     const char * const subscription, gboolean pending_out)
 {
-    PContact contact = g_hash_table_lookup(contacts, barejid);
+    PContact contact = roster_get_contact(barejid);
     if (contact != NULL) {
         return FALSE;
     }
