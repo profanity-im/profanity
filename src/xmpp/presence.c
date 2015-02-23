@@ -517,7 +517,7 @@ _handle_caps(char *jid, XMPPCaps *caps)
             }
         }
 
-    // unsupported hash, xep-0115, assoiciate with JID, no cache
+    // unsupported hash, xep-0115, associate with JID, no cache
     } else if (caps->hash) {
         log_info("Hash %s not supported: %s, sending service discovery request", caps->hash, jid);
         char *id = create_unique_id("caps");
