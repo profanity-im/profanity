@@ -358,7 +358,7 @@ prefs_get_occupants_size(void)
     gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "occupants.size", NULL);
 
     if (result > 99 || result < 1) {
-        return 20;
+        return 15;
     } else {
         return result;
     }
@@ -377,7 +377,7 @@ prefs_get_roster_size(void)
     gint result = g_key_file_get_integer(prefs, PREF_GROUP_UI, "roster.size", NULL);
 
     if (result > 99 || result < 1) {
-        return 20;
+        return 25;
     } else {
         return result;
     }
@@ -691,15 +691,24 @@ _get_default_boolean(preference_t pref)
         case PREF_AUTOAWAY_CHECK:
         case PREF_LOG_ROTATE:
         case PREF_LOG_SHARED:
+        case PREF_NOTIFY_MESSAGE:
         case PREF_NOTIFY_MESSAGE_CURRENT:
         case PREF_NOTIFY_ROOM_CURRENT:
+        case PREF_NOTIFY_TYPING:
         case PREF_NOTIFY_TYPING_CURRENT:
+        case PREF_NOTIFY_SUB:
+        case PREF_NOTIFY_INVITE:
         case PREF_SPLASH:
         case PREF_OCCUPANTS:
         case PREF_MUC_PRIVILEGES:
         case PREF_PRESENCE:
         case PREF_WRAP:
         case PREF_INPBLOCK_DYNAMIC:
+        case PREF_RESOURCE_TITLE:
+        case PREF_RESOURCE_MESSAGE:
+        case PREF_ROSTER:
+        case PREF_ROSTER_OFFLINE:
+        case PREF_ROSTER_RESOURCE:
             return TRUE;
         default:
             return FALSE;
@@ -715,7 +724,7 @@ _get_default_string(preference_t pref)
     {
         case PREF_AUTOAWAY_MODE:
         case PREF_NOTIFY_ROOM:
-            return "off";
+            return "on";
         case PREF_OTR_LOG:
             return "redact";
         case PREF_OTR_POLICY:
@@ -725,7 +734,7 @@ _get_default_string(preference_t pref)
         case PREF_STATUSES_MUC:
             return "all";
         case PREF_ROSTER_BY:
-            return "none";
+            return "presence";
         case PREF_TIME:
             return "seconds";
         default:
