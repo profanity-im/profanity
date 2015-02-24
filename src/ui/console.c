@@ -857,9 +857,9 @@ cons_resource_setting(void)
     else
         cons_show("Resource title (/resource)    : OFF");
     if (prefs_get_boolean(PREF_RESOURCE_MESSAGE))
-        cons_show("Message title (/resource)     : ON");
+        cons_show("Resource message (/resource)  : ON");
     else
-        cons_show("Message title (/resource)     : OFF");
+        cons_show("Resource message (/resource)  : OFF");
 }
 
 void
