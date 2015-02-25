@@ -100,30 +100,12 @@ prefs_load(void)
         g_error_free(err);
     }
 
-    // move pre 0.4.1 OTR preferences to [otr] group
+    // move pre 0.4.6 OTR warn preferences to [ui] group
     err = NULL;
-    gboolean ui_otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "otr.warn", &err);
+    gboolean otr_warn = g_key_file_get_boolean(prefs, PREF_GROUP_OTR, "warn", &err);
     if (err == NULL) {
-        g_key_file_set_boolean(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_WARN), ui_otr_warn);
-        g_key_file_remove_key(prefs, PREF_GROUP_UI, "otr.warn", NULL);
-    } else {
-        g_error_free(err);
-    }
-
-    err = NULL;
-    gchar *ui_otr_log = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "otr", &err);
-    if (err == NULL) {
-        g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_LOG), ui_otr_log);
-        g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "otr", NULL);
-    } else {
-        g_error_free(err);
-    }
-
-    err = NULL;
-    gchar *ui_otr_policy = g_key_file_get_string(prefs, "policy", "otr.policy", &err);
-    if (err == NULL) {
-        g_key_file_set_string(prefs, PREF_GROUP_OTR, _get_key(PREF_OTR_POLICY), ui_otr_policy);
-        g_key_file_remove_group(prefs, "policy", NULL);
+        g_key_file_set_boolean(prefs, PREF_GROUP_UI, _get_key(PREF_OTR_WARN), otr_warn);
+        g_key_file_remove_key(prefs, PREF_GROUP_OTR, "warn", NULL);
     } else {
         g_error_free(err);
     }
@@ -531,6 +513,7 @@ _get_group(preference_t pref)
         case PREF_ROSTER_BY:
         case PREF_RESOURCE_TITLE:
         case PREF_RESOURCE_MESSAGE:
+        case PREF_OTR_WARN:
         case PREF_INPBLOCK_DYNAMIC:
             return PREF_GROUP_UI;
         case PREF_STATES:
@@ -559,7 +542,6 @@ _get_group(preference_t pref)
         case PREF_CONNECT_ACCOUNT:
         case PREF_DEFAULT_ACCOUNT:
             return PREF_GROUP_CONNECTION;
-        case PREF_OTR_WARN:
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
             return PREF_GROUP_OTR;
@@ -648,7 +630,7 @@ _get_key(preference_t pref)
         case PREF_OTR_LOG:
             return "log";
         case PREF_OTR_WARN:
-            return "warn";
+            return "otr.warn";
         case PREF_OTR_POLICY:
             return "policy";
         case PREF_LOG_ROTATE:
