@@ -421,20 +421,20 @@ _set_boolean_preference(char *prefstr, preference_t pref)
 static void
 _load_preferences(void)
 {
-    _set_boolean_preference("intype", PREF_INTYPE);
     _set_boolean_preference("beep", PREF_BEEP);
     _set_boolean_preference("flash", PREF_FLASH);
-    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
-    _set_boolean_preference("presence", PREF_PRESENCE);
+    _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
-
     _set_string_preference("time", PREF_TIME);
-    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
+
+    _set_boolean_preference("resource.title", PREF_RESOURCE_TITLE);
+    _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);
+
     _set_string_preference("statuses.console", PREF_STATUSES_CONSOLE);
     _set_string_preference("statuses.chat", PREF_STATUSES_CHAT);
+    _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
 
     _set_boolean_preference("occupants", PREF_OCCUPANTS);
-
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
         prefs_set_occupants_size(occupants_size);
@@ -444,11 +444,15 @@ _load_preferences(void)
     _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);
     _set_boolean_preference("roster.resource", PREF_ROSTER_RESOURCE);
     _set_string_preference("roster.by", PREF_ROSTER_BY);
-
     if (g_key_file_has_key(theme, "ui", "roster.size", NULL)) {
         gint roster_size = g_key_file_get_integer(theme, "ui", "roster.size", NULL);
         prefs_set_roster_size(roster_size);
     }
+
+    _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
+
+    _set_boolean_preference("presence", PREF_PRESENCE);
+    _set_boolean_preference("intype", PREF_INTYPE);
 
     _set_boolean_preference("otr.warn", PREF_OTR_WARN);
 }
