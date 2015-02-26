@@ -822,7 +822,7 @@ cmd_theme(gchar **args, struct cmd_help_t help)
         g_slist_free_full(themes, g_free);
 
     // load a theme
-    } else if (g_strcmp0(args[0], "set") == 0) {
+    } else if (g_strcmp0(args[0], "load") == 0) {
         if (args[1] == NULL) {
             cons_show("Usage: %s", help.usage);
         } else if (theme_load(args[1])) {
