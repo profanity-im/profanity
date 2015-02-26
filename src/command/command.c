@@ -1025,17 +1025,17 @@ static struct cmd_t command_defs[] =
 
     { "/theme",
         cmd_theme, parse_args, 1, 2, &cons_theme_setting,
-        { "/theme list|set|colours [theme-name]", "Change colour theme.",
-        { "/theme list|set|colours [theme-name]",
-          "------------------------------------",
+        { "/theme list|load|colours [theme-name]", "Change colour theme.",
+        { "/theme list|load|colours [theme-name]",
+          "-------------------------------------",
           "Load a theme, includes colours and UI options.",
           "",
-          "list           : List all available themes.",
-          "set theme-name : Load the named theme. 'default' will reset to the default theme.",
-          "colours        : Show the colour values as rendered by the terminal.",
+          "list            : List all available themes.",
+          "load theme-name : Load the named theme. 'default' will reset to the default theme.",
+          "colours         : Show the colour values as rendered by the terminal.",
           "",
           "Example: /theme list",
-          "Example: /theme set mycooltheme",
+          "Example: /theme load mycooltheme",
           NULL } } },
 
 
@@ -1293,8 +1293,8 @@ cmd_init(void)
     autocomplete_add(autoconnect_ac, "off");
 
     theme_ac = autocomplete_new();
+    autocomplete_add(theme_ac, "load");
     autocomplete_add(theme_ac, "list");
-    autocomplete_add(theme_ac, "set");
     autocomplete_add(theme_ac, "colours");
 
     disco_ac = autocomplete_new();
@@ -2517,7 +2517,7 @@ static char *
 _theme_autocomplete(const char * const input)
 {
     char *result = NULL;
-    if ((strncmp(input, "/theme set ", 11) == 0) && (strlen(input) > 11)) {
+    if ((strncmp(input, "/theme load ", 12) == 0) && (strlen(input) > 12)) {
         if (theme_load_ac == NULL) {
             theme_load_ac = autocomplete_new();
             GSList *themes = theme_list();
@@ -2529,7 +2529,7 @@ _theme_autocomplete(const char * const input)
             g_slist_free_full(themes, g_free);
             autocomplete_add(theme_load_ac, "default");
         }
-        result = autocomplete_param_with_ac(input, "/theme set", theme_load_ac, TRUE);
+        result = autocomplete_param_with_ac(input, "/theme load", theme_load_ac, TRUE);
         if (result != NULL) {
             return result;
         }
