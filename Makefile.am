@@ -44,6 +44,7 @@ tests_sources = \
 	src/roster_list.c src/roster_list.h \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \
+	src/otr/otr.h \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
 	src/tools/parser.c \
@@ -63,7 +64,6 @@ tests_sources = \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/server_events.c src/server_events.h \
 	tests/xmpp/stub_xmpp.c \
-	tests/otr/stub_otr.c \
 	tests/ui/stub_ui.c \
 	tests/log/stub_log.c \
 	tests/config/stub_accounts.c \
@@ -104,6 +104,9 @@ otr3_sources = \
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
+otr_test_sources = \
+	tests/otr/stub_otr.c
+
 themes_sources = themes/*
 
 script_sources = bootstrap.sh configure-debug install-all.sh
@@ -111,6 +114,7 @@ script_sources = bootstrap.sh configure-debug install-all.sh
 man_sources = docs/profanity.1
 
 if BUILD_OTR
+tests_sources += $(otr_test_sources)
 if BUILD_OTR3
 core_sources += $(otr3_sources)
 endif

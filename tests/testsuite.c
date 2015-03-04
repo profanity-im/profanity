@@ -346,9 +346,11 @@ int main(int argc, char* argv[]) {
         unit_test(cmd_account_set_eval_password_when_password_set),
         unit_test(cmd_account_set_muc_sets_muc),
         unit_test(cmd_account_set_nick_sets_nick),
+#ifdef HAVE_LIBOTR
         unit_test(cmd_account_show_message_for_missing_otr_policy),
         unit_test(cmd_account_show_message_for_invalid_otr_policy),
         unit_test(cmd_account_set_otr_sets_otr),
+#endif
         unit_test(cmd_account_set_status_shows_message_when_invalid_status),
         unit_test(cmd_account_set_status_sets_status_when_valid),
         unit_test(cmd_account_set_status_sets_status_when_last),
