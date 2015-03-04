@@ -5,6 +5,7 @@
 # *.[oa]
 # *~
 profanity
+profanity.sh
 *.o
 *.log
 *.swp
