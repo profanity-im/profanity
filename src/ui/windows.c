@@ -639,20 +639,21 @@ wins_swap(int source_win, int target_win)
 {
     ProfWin *source = g_hash_table_lookup(windows, GINT_TO_POINTER(source_win));
 
-    if (source != NULL) {
+    if (source) {
         ProfWin *target = g_hash_table_lookup(windows, GINT_TO_POINTER(target_win));
 
         // target window empty
-        if (target == NULL) {
+        if (!target) {
             g_hash_table_steal(windows, GINT_TO_POINTER(source_win));
-            status_bar_inactive(source_win);
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
+            status_bar_inactive(source_win);
             if (win_unread(source) > 0) {
                 status_bar_new(target_win);
             } else {
                 status_bar_active(target_win);
             }
-            if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
+            if (wins_get_current_num() == source_win) {
+                wins_set_current_by_num(target_win);
                 ui_switch_win(1);
             }
             return TRUE;
