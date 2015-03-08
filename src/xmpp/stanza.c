@@ -199,6 +199,44 @@ stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char * const jid,
 #endif
 
 xmpp_stanza_t *
+stanza_enable_carbons(xmpp_ctx_t *ctx){
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    char *id = create_unique_id(NULL);
+
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);   
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *carbons_enable = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(carbons_enable, STANZA_NAME_ENABLE);
+    xmpp_stanza_set_ns(carbons_enable, STANZA_NS_CARBONS);
+
+    xmpp_stanza_add_child(iq, carbons_enable);
+
+    return iq;
+}
+
+xmpp_stanza_t *
+stanza_disable_carbons(xmpp_ctx_t *ctx){
+    xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
+    char *id = create_unique_id(NULL);
+
+    xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);   
+    xmpp_stanza_set_id(iq, id);
+    free(id);
+
+    xmpp_stanza_t *carbons_disable = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(carbons_disable, STANZA_NAME_DISABLE);
+    xmpp_stanza_set_ns(carbons_disable, STANZA_NS_CARBONS);
+
+    xmpp_stanza_add_child(iq, carbons_disable);
+
+    return iq;
+}
+
+xmpp_stanza_t *
 stanza_create_chat_state(xmpp_ctx_t *ctx, const char * const fulljid, const char * const state)
 {
     xmpp_stanza_t *msg, *chat_state;

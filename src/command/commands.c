@@ -730,7 +730,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
 
     } else if (strcmp(args[0], "settings") == 0) {
         gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
-            "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
+            "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
             "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap" };
@@ -3889,6 +3889,22 @@ cmd_history(gchar **args, struct cmd_help_t help)
         prefs_set_boolean(PREF_CHLOG, TRUE);
     }
 
+    return result;
+}
+
+gboolean
+cmd_carbons(gchar **args, struct cmd_help_t help)
+{
+    gboolean result = _cmd_set_boolean_preference(args[0], help,
+        "Carbons message", PREF_CARBONS);
+
+    // enable carbons
+    if (strcmp(args[0], "on") == 0) {
+        iq_enable_carbons();
+    }
+    else if (strcmp(args[0], "off") == 0){
+        iq_disable_carbons();
+    }
     return result;
 }
 

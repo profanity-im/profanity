@@ -904,6 +904,15 @@ static struct cmd_t command_defs[] =
           "shared on|off : Share logs between all instances, default: on.",
           NULL } } },
 
+    { "/carbons",
+      cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
+      { "/carbons on|off", "Message carbons.",
+      { "/carbons on|off",
+        "---------------",
+        "Enable or disable message carbons.",
+        "The message carbons feature ensures that both sides of all conversations are shared with all the user's clients that implement this protocol.",
+        NULL  } } },
+
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
         { "/reconnect seconds", "Set reconnect interval.",

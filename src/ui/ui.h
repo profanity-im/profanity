@@ -315,6 +315,7 @@ void cons_outtype_setting(void);
 void cons_intype_setting(void);
 void cons_gone_setting(void);
 void cons_history_setting(void);
+void cons_carbons_setting(void);
 void cons_log_setting(void);
 void cons_chlog_setting(void);
 void cons_grlog_setting(void);

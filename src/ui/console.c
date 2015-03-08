@@ -1178,6 +1178,15 @@ cons_history_setting(void)
 }
 
 void
+cons_carbons_setting(void)
+{
+    if (prefs_get_boolean(PREF_CARBONS))
+        cons_show("Message carbons (/carbons)    : ON");
+    else
+        cons_show("Message carbons (/carbons)    : OFF");
+}
+
+void
 cons_show_chat_prefs(void)
 {
     cons_show("Chat preferences:");
