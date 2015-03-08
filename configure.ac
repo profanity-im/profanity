@@ -36,6 +36,8 @@ AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build]
 
 AS_IF([test "x$PLATFORM" = xcygwin],
     [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
+AS_IF([test "x$PLATFORM" = xosx],
+    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
 ### Options
 AC_ARG_ENABLE([notifications],
@@ -259,6 +261,16 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.26], [],
     [AC_MSG_ERROR([glib 2.26 or higher is required for profanity])])
 PKG_CHECK_MODULES([curl], [libcurl], [],
     [AC_MSG_ERROR([libcurl is required for profanity])])
+
+AS_IF([test "x$PLATFORM" != xosx],
+    [AC_CHECK_LIB([readline], [main], [],
+        [AC_MSG_ERROR([libreadline is required for profanity])])],
+    [AC_CHECK_FILE([/usr/local/opt/readline/lib],
+        [LIBS="-lreadline $LIBS"
+            AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
+            AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
+            AC_SUBST(AM_LDFLAGS)],
+        [AC_MSG_ERROR([libreadline is required for profanity])])])
 
 AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 

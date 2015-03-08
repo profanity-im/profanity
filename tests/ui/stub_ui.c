@@ -91,6 +91,7 @@ void ui_smp_answer_failure(const char * const barejid) {}
 
 void ui_otr_authenticating(const char * const barejid) {}
 void ui_otr_authetication_waiting(const char * const recipient) {}
+void ui_sigwinch_handler(int sig) {}
 
 unsigned long ui_get_idle_time(void)
 {
@@ -177,6 +178,11 @@ int ui_win_unread(int index)
 {
     return 0;
 }
+
+void ui_page_up(void) {}
+void ui_page_down(void) {}
+void ui_subwin_page_up(void) {}
+void ui_subwin_page_down(void) {}
 
 char * ui_ask_password(void)
 {
@@ -323,7 +329,7 @@ void ui_update_presence(const resource_presence_t resource_presence,
 void ui_about(void) {}
 void ui_statusbar_new(const int win) {}
 
-char * ui_readline(void)
+char*  ui_readline(void)
 {
     return NULL;
 }
@@ -351,6 +357,7 @@ gboolean ui_win_has_unsaved_form(int num)
 void ui_status_bar_inactive(const int win) {}
 void ui_status_bar_active(const int win) {}
 void ui_status_bar_new(const int win) {}
+void ui_write(char *line, int offset) {}
 
 // console window actions
 

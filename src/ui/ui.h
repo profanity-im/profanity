@@ -62,6 +62,7 @@ GSList* ui_get_chat_recipients(void);
 gboolean ui_switch_win(const int i);
 void ui_next_win(void);
 void ui_previous_win(void);
+void ui_sigwinch_handler(int sig);
 
 void ui_gone_secure(const char * const barejid, gboolean trusted);
 void ui_gone_insecure(const char * const barejid);
@@ -218,6 +219,11 @@ void ui_tidy_wins(void);
 void ui_prune_wins(void);
 gboolean ui_swap_wins(int source_win, int target_win);
 
+void ui_page_up(void);
+void ui_page_down(void);
+void ui_subwin_page_up(void);
+void ui_subwin_page_down(void);
+
 void ui_auto_away(void);
 void ui_end_auto_away(void);
 void ui_titlebar_presence(contact_presence_t presence);
@@ -227,9 +233,10 @@ void ui_update_presence(const resource_presence_t resource_presence,
 void ui_about(void);
 void ui_statusbar_new(const int win);
 
-char * ui_readline(void);
+char* ui_readline(void);
 void ui_input_clear(void);
 void ui_input_nonblocking(gboolean);
+void ui_write(char *line, int offset);
 
 void ui_invalid_command_usage(const char * const usage, void (*setting_func)(void));
 

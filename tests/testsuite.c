@@ -20,7 +20,6 @@
 #include "test_cmd_sub.h"
 #include "test_cmd_statuses.h"
 #include "test_cmd_otr.h"
-#include "test_history.h"
 #include "test_jid.h"
 #include "test_parser.h"
 #include "test_roster_list.h"
@@ -105,20 +104,6 @@ int main(int argc, char* argv[]) {
         unit_test(add_two_adds_two),
         unit_test(add_two_same_adds_one),
         unit_test(add_two_same_updates),
-
-        unit_test(previous_on_empty_returns_null),
-        unit_test(next_on_empty_returns_null),
-        unit_test(previous_once_returns_last),
-        unit_test(previous_twice_when_one_returns_first),
-        unit_test(previous_always_stops_at_first),
-        unit_test(previous_goes_to_correct_element),
-        unit_test(prev_then_next_returns_empty),
-        unit_test(prev_with_val_then_next_returns_val),
-        unit_test(prev_with_val_then_next_twice_returns_null),
-        unit_test(navigate_then_append_new),
-        unit_test(edit_item_mid_history),
-        unit_test(edit_previous_and_append),
-        unit_test(start_session_add_new_submit_previous),
 
         unit_test(create_jid_from_null_returns_null),
         unit_test(create_jid_from_empty_string_returns_null),

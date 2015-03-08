@@ -35,15 +35,17 @@
 #ifndef UI_INPUTWIN_H
 #define UI_INPUTWIN_H
 
+#include <glib.h>
+
+#define INP_WIN_MAX 1000
+
 void create_input_window(void);
-char* inp_read(int *key_type, wint_t *ch);
-void inp_win_reset(void);
+char* inp_readline(void);
+void inp_nonblocking(gboolean reset);
+void inp_close(void);
+void inp_win_clear(void);
 void inp_win_resize(void);
 void inp_put_back(void);
-void inp_non_block(gint);
-void inp_block(void);
-void inp_get_password(char *passwd);
-void inp_replace_input(const char * const new_input);
-void inp_history_append(char *inp);
+char* inp_get_password(void);
 
 #endif

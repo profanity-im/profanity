@@ -27,7 +27,6 @@ core_sources = \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
-	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.c src/config/accounts.h \
 	src/config/account.c src/config/account.h \
@@ -60,7 +59,6 @@ tests_sources = \
 	src/tools/parser.h \
 	src/tools/p_sha1.h src/tools/p_sha1.c \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
-	src/tools/history.c src/tools/history.h \
 	src/tools/tinyurl.c src/tools/tinyurl.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
@@ -91,7 +89,6 @@ tests_sources = \
 	tests/test_common.c tests/test_common.h \
 	tests/test_contact.c tests/test_contact.h \
 	tests/test_form.c tests/test_form.h \
-	tests/test_history.c tests/test_history.h \
 	tests/test_jid.c tests/test_jid.h \
 	tests/test_muc.c tests/test_muc.h \
 	tests/test_parser.c tests/test_parser.h \

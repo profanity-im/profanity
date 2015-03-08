@@ -45,6 +45,12 @@
 #include <curl/easy.h>
 #include <glib.h>
 
+#ifdef PROF_HAVE_NCURSESW_NCURSES_H
+#include <ncursesw/ncurses.h>
+#elif PROF_HAVE_NCURSES_H
+#include <ncurses.h>
+#endif
+
 #include "tools/p_sha1.h"
 
 #include "log.h"
@@ -222,6 +228,18 @@ utf8_display_len(const char * const str)
     }
 
     return len;
+}
+
+gboolean
+utf8_is_printable(const wint_t ch)
+{
+    char bytes[MB_CUR_MAX+1];
+    size_t utf_len = wcrtomb(bytes, ch, NULL);
+    bytes[utf_len] = '\0';
+
+    gunichar unichar = g_utf8_get_char(bytes);
+
+    return g_unichar_isprint(unichar) && (ch != KEY_MOUSE);
 }
 
 char *

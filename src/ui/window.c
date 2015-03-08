@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <wchar.h>
 
 #include <glib.h>
 #ifdef PROF_HAVE_NCURSESW_NCURSES_H
@@ -376,7 +377,101 @@ win_free(ProfWin* window)
 }
 
 void
-win_handle_page(ProfWin *window, const wint_t ch, const int result)
+win_page_up(ProfWin *window)
+{
+    int rows = getmaxy(stdscr);
+    int y = getcury(window->layout->win);
+    int page_space = rows - 4;
+    int *page_start = &(window->layout->y_pos);
+
+    *page_start -= page_space;
+
+    // went past beginning, show first page
+    if (*page_start < 0)
+        *page_start = 0;
+
+    window->layout->paged = 1;
+    win_update_virtual(window);
+
+    // switch off page if last line and space line visible
+    if ((y) - *page_start == page_space) {
+        window->layout->paged = 0;
+    }
+}
+
+void
+win_page_down(ProfWin *window)
+{
+    int rows = getmaxy(stdscr);
+    int y = getcury(window->layout->win);
+    int page_space = rows - 4;
+    int *page_start = &(window->layout->y_pos);
+
+    *page_start += page_space;
+
+    // only got half a screen, show full screen
+    if ((y - (*page_start)) < page_space)
+        *page_start = y - page_space;
+
+    // went past end, show full screen
+    else if (*page_start >= y)
+        *page_start = y - page_space - 1;
+
+    window->layout->paged = 1;
+    win_update_virtual(window);
+
+    // switch off page if last line and space line visible
+    if ((y) - *page_start == page_space) {
+        window->layout->paged = 0;
+    }
+}
+
+void
+win_sub_page_down(ProfWin *window)
+{
+
+    if (window->layout->type == LAYOUT_SPLIT) {
+        int rows = getmaxy(stdscr);
+        int page_space = rows - 4;
+        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
+        int sub_y = getcury(split_layout->subwin);
+        int *sub_y_pos = &(split_layout->sub_y_pos);
+
+        *sub_y_pos += page_space;
+
+        // only got half a screen, show full screen
+        if ((sub_y- (*sub_y_pos)) < page_space)
+            *sub_y_pos = sub_y - page_space;
+
+        // went past end, show full screen
+        else if (*sub_y_pos >= sub_y)
+            *sub_y_pos = sub_y - page_space - 1;
+
+        win_update_virtual(window);
+    }
+}
+
+void
+win_sub_page_up(ProfWin *window)
+{
+    if (window->layout->type == LAYOUT_SPLIT) {
+        int rows = getmaxy(stdscr);
+        int page_space = rows - 4;
+        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
+        int *sub_y_pos = &(split_layout->sub_y_pos);
+
+        *sub_y_pos -= page_space;
+
+        // went past beginning, show first page
+        if (*sub_y_pos < 0)
+            *sub_y_pos = 0;
+
+        win_update_virtual(window);
+    }
+}
+
+void
+win_mouse(ProfWin *window, const wint_t ch, const int result)
 {
     int rows = getmaxy(stdscr);
     int y = getcury(window->layout->win);
@@ -418,69 +513,6 @@ win_handle_page(ProfWin *window, const wint_t ch, const int result)
                     win_update_virtual(window);
                 }
             }
-        }
-    }
-
-    // page up
-    if (ch == KEY_PPAGE) {
-        *page_start -= page_space;
-
-        // went past beginning, show first page
-        if (*page_start < 0)
-            *page_start = 0;
-
-        window->layout->paged = 1;
-        win_update_virtual(window);
-
-    // page down
-    } else if (ch == KEY_NPAGE) {
-        *page_start += page_space;
-
-        // only got half a screen, show full screen
-        if ((y - (*page_start)) < page_space)
-            *page_start = y - page_space;
-
-        // went past end, show full screen
-        else if (*page_start >= y)
-            *page_start = y - page_space - 1;
-
-        window->layout->paged = 1;
-        win_update_virtual(window);
-    }
-
-    // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
-        window->layout->paged = 0;
-    }
-
-    if (window->layout->type == LAYOUT_SPLIT) {
-        ProfLayoutSplit *split_layout = (ProfLayoutSplit*)window->layout;
-        int sub_y = getcury(split_layout->subwin);
-        int *sub_y_pos = &(split_layout->sub_y_pos);
-
-        // alt up arrow
-        if ((result == KEY_CODE_YES) && ((ch == 565) || (ch == 337))) {
-            *sub_y_pos -= page_space;
-
-            // went past beginning, show first page
-            if (*sub_y_pos < 0)
-                *sub_y_pos = 0;
-
-            win_update_virtual(window);
-
-        // alt down arrow
-        } else if ((result == KEY_CODE_YES) && ((ch == 524) || (ch == 336))) {
-            *sub_y_pos += page_space;
-
-            // only got half a screen, show full screen
-            if ((sub_y- (*sub_y_pos)) < page_space)
-                *sub_y_pos = sub_y - page_space;
-
-            // went past end, show full screen
-            else if (*sub_y_pos >= sub_y)
-                *sub_y_pos = sub_y - page_space - 1;
-
-            win_update_virtual(window);
         }
     }
 }
@@ -976,7 +1008,6 @@ _win_indent(WINDOW *win, int size)
 static void
 _win_print_wrapped(WINDOW *win, const char * const message)
 {
-    int linei = 0;
     int wordi = 0;
     char *word = malloc(strlen(message) + 1);
 
@@ -989,18 +1020,26 @@ _win_print_wrapped(WINDOW *win, const char * const message)
     }
     free(time_pref);
 
-    while (message[linei] != '\0') {
-        if (message[linei] == ' ') {
+    gchar *curr_ch = g_utf8_offset_to_pointer(message, 0);
+
+    while (*curr_ch != '\0') {
+        if (*curr_ch == ' ') {
             waddch(win, ' ');
-            linei++;
-        } else if (message[linei] == '\n') {
+            curr_ch = g_utf8_next_char(curr_ch);
+        } else if (*curr_ch == '\n') {
             waddch(win, '\n');
             _win_indent(win, indent);
-            linei++;
+            curr_ch = g_utf8_next_char(curr_ch);
         } else {
+            // get word
             wordi = 0;
-            while (message[linei] != ' ' && message[linei] != '\n' && message[linei] != '\0') {
-                word[wordi++] = message[linei++];
+            while (*curr_ch != ' ' && *curr_ch != '\n' && *curr_ch != '\0') {
+                size_t ch_len = mbrlen(curr_ch, 4, NULL);
+                int offset = 0;
+                while (offset < ch_len) {
+                    word[wordi++] = curr_ch[offset++];
+                }
+                curr_ch = g_utf8_next_char(curr_ch);
             }
             word[wordi] = '\0';
 
@@ -1008,17 +1047,27 @@ _win_print_wrapped(WINDOW *win, const char * const message)
             int maxx = getmaxx(win);
 
             // word larger than line
-            if (strlen(word) > (maxx - indent)) {
-                int i;
-                for (i = 0; i < wordi; i++) {
+            if (utf8_display_len(word) > (maxx - indent)) {
+                gchar *word_ch = g_utf8_offset_to_pointer(word, 0);
+                while(*word_ch != '\0') {
                     curx = getcurx(win);
                     if (curx < indent) {
                         _win_indent(win, indent);
                     }
-                    waddch(win, word[i]);
+
+                    gchar copy[wordi++];
+                    g_utf8_strncpy(copy, word_ch, 1);
+
+                    if (curx + utf8_display_len(copy) > maxx) {
+                        waddch(win, '\n');
+                        _win_indent(win, indent);
+                    }
+                    waddstr(win, copy);
+
+                    word_ch = g_utf8_next_char(word_ch);
                 }
             } else {
-                if (curx + strlen(word) > maxx) {
+                if (curx + utf8_display_len(word) > maxx) {
                     waddch(win, '\n');
                     _win_indent(win, indent);
                 }

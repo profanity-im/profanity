@@ -41,6 +41,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
 #ifdef PROF_HAVE_LIBXSS
 #include <X11/extensions/scrnsaver.h>
 #endif
@@ -77,13 +80,14 @@ static char *win_title;
 
 static int inp_size;
 
+static gboolean perform_resize = FALSE;
 #ifdef PROF_HAVE_LIBXSS
 static Display *display;
 #endif
 
 static GTimer *ui_idle_time;
 
-static void _win_handle_switch(const wint_t ch);
+//static void _win_handle_switch(const wint_t ch);
 static void _win_show_history(int win_index, const char * const contact);
 static void _ui_draw_term_title(void);
 
@@ -92,7 +96,9 @@ ui_init(void)
 {
     log_info("Initialising UI");
     initscr();
-    raw();
+    nonl();
+    cbreak();
+    noecho();
     keypad(stdscr, TRUE);
     if (prefs_get_boolean(PREF_MOUSE)) {
         mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -117,6 +123,12 @@ ui_init(void)
 }
 
 void
+ui_sigwinch_handler(int sig)
+{
+    perform_resize = TRUE;
+}
+
+void
 ui_update(void)
 {
     ProfWin *current = wins_get_current();
@@ -133,6 +145,13 @@ ui_update(void)
     status_bar_update_virtual();
     inp_put_back();
     doupdate();
+
+    if (perform_resize) {
+        signal(SIGWINCH, SIG_IGN);
+        ui_resize();
+        perform_resize = FALSE;
+        signal(SIGWINCH, ui_sigwinch_handler);
+    }
 }
 
 void
@@ -175,84 +194,66 @@ ui_close(void)
 {
     notifier_uninit();
     wins_destroy();
+    inp_close();
     endwin();
 }
 
-char*
+char *
 ui_readline(void)
 {
-    int key_type;
-    wint_t ch;
-
-    char *line = inp_read(&key_type, &ch);
-    _win_handle_switch(ch);
-
-    ProfWin *current = wins_get_current();
-    win_handle_page(current, ch, key_type);
-
-    if (ch == KEY_RESIZE) {
-        ui_resize();
-    }
-
-    if (ch != ERR && key_type != ERR) {
-        ui_reset_idle_time();
-        ui_input_nonblocking(TRUE);
-    } else {
-        ui_input_nonblocking(FALSE);
-    }
-
-    return line;
+    return inp_readline();
 }
 
 void
-ui_inp_history_append(char *inp)
+ui_page_up(void)
 {
-    inp_history_append(inp);
+    ProfWin *current = wins_get_current();
+    win_page_up(current);
+}
+
+void
+ui_page_down(void)
+{
+    ProfWin *current = wins_get_current();
+    win_page_down(current);
+}
+
+void
+ui_subwin_page_up(void)
+{
+    ProfWin *current = wins_get_current();
+    win_sub_page_up(current);
+}
+
+void
+ui_subwin_page_down(void)
+{
+    ProfWin *current = wins_get_current();
+    win_sub_page_down(current);
 }
 
 void
 ui_input_clear(void)
 {
-    inp_win_reset();
+    inp_win_clear();
 }
 
 void
 ui_input_nonblocking(gboolean reset)
 {
-    static gint timeout = 0;
-    static gint no_input_count = 0;
-
-    if (! prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
-        inp_non_block(prefs_get_inpblock());
-        return;
-    }
-
-    if (reset) {
-        timeout = 0;
-        no_input_count = 0;
-    }
-
-    if (timeout < prefs_get_inpblock()) {
-        no_input_count++;
-
-        if (no_input_count % 10 == 0) {
-            timeout += no_input_count;
-
-            if (timeout > prefs_get_inpblock()) {
-                timeout = prefs_get_inpblock();
-            }
-        }
-    }
-
-    inp_non_block(timeout);
+    inp_nonblocking(reset);
 }
 
 void
 ui_resize(void)
 {
-    log_info("Resizing UI");
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     erase();
+    resizeterm(w.ws_row, w.ws_col);
     refresh();
+
+    log_info("Resizing UI");
     title_bar_resize();
     wins_resize_all();
     status_bar_resize();
@@ -2248,14 +2249,9 @@ ui_win_unread(int index)
 char *
 ui_ask_password(void)
 {
-  char *passwd = malloc(sizeof(char) * (MAX_PASSWORD_SIZE + 1));
   status_bar_get_password();
   status_bar_update_virtual();
-  inp_block();
-  inp_get_password(passwd);
-  inp_non_block(prefs_get_inpblock());
-
-  return passwd;
+  return inp_get_password();
 }
 
 void
@@ -2940,32 +2936,32 @@ ui_hide_roster(void)
     }
 }
 
-static void
-_win_handle_switch(const wint_t ch)
-{
-    if (ch == KEY_F(1)) {
-        ui_switch_win(1);
-    } else if (ch == KEY_F(2)) {
-        ui_switch_win(2);
-    } else if (ch == KEY_F(3)) {
-        ui_switch_win(3);
-    } else if (ch == KEY_F(4)) {
-        ui_switch_win(4);
-    } else if (ch == KEY_F(5)) {
-        ui_switch_win(5);
-    } else if (ch == KEY_F(6)) {
-        ui_switch_win(6);
-    } else if (ch == KEY_F(7)) {
-        ui_switch_win(7);
-    } else if (ch == KEY_F(8)) {
-        ui_switch_win(8);
-    } else if (ch == KEY_F(9)) {
-        ui_switch_win(9);
-    } else if (ch == KEY_F(10)) {
-        ui_switch_win(0);
-    }
-}
-
+//static void
+//_win_handle_switch(const wint_t ch)
+//{
+//    if (ch == KEY_F(1)) {
+//        ui_switch_win(1);
+//    } else if (ch == KEY_F(2)) {
+//        ui_switch_win(2);
+//    } else if (ch == KEY_F(3)) {
+//        ui_switch_win(3);
+//    } else if (ch == KEY_F(4)) {
+//        ui_switch_win(4);
+//    } else if (ch == KEY_F(5)) {
+//        ui_switch_win(5);
+//    } else if (ch == KEY_F(6)) {
+//        ui_switch_win(6);
+//    } else if (ch == KEY_F(7)) {
+//        ui_switch_win(7);
+//    } else if (ch == KEY_F(8)) {
+//        ui_switch_win(8);
+//    } else if (ch == KEY_F(9)) {
+//        ui_switch_win(9);
+//    } else if (ch == KEY_F(10)) {
+//        ui_switch_win(0);
+//    }
+//}
+//
 static void
 _win_show_history(int win_index, const char * const contact)
 {
