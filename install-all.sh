@@ -36,7 +36,7 @@ fedora_prepare()
 
     ARCH=`arch`
 
-    sudo yum -y install gcc git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH libXScrnSaver-devel.$ARCH libotr3-devel.$ARCH libtool
+    sudo yum -y install gcc git autoconf automake openssl-devel.$ARCH expat-devel.$ARCH ncurses-devel.$ARCH  glib2-devel.$ARCH libnotify-devel.$ARCH libcurl-devel.$ARCH libXScrnSaver-devel.$ARCH libotr3-devel.$ARCH readline-devel.$ARCH libtool
 }
 
 opensuse_prepare()
