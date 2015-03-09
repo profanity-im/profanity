@@ -178,6 +178,18 @@ handle_disco_info_error(const char * const from, const char * const error)
 }
 
 void
+handle_enable_carbons_error(const char * const error)
+{
+    cons_show_error("Server error enabling message carbons: %s", error);
+}
+
+void
+handle_disable_carbons_error(const char * const error)
+{
+    cons_show_error("Server error disabling message carbons: %s", error);
+}
+
+void
 handle_room_info_error(const char * const room, const char * const error)
 {
     ui_handle_room_info_error(room, error);

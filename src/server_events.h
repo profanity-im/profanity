@@ -122,5 +122,7 @@ void handle_muc_occupant_online(const char * const room, const char * const nick
 void handle_roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out);
 void handle_roster_received(void);
+void handle_enable_carbons_error(const char * const error);
+void handle_disable_carbons_error(const char * const error);
 
 #endif

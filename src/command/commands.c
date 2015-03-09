@@ -3903,7 +3903,7 @@ cmd_carbons(gchar **args, struct cmd_help_t help)
     }
 
     gboolean result = _cmd_set_boolean_preference(args[0], help,
-        "Carbons message", PREF_CARBONS);
+        "Message carbons preference", PREF_CARBONS);
 
     // enable carbons
     if (strcmp(args[0], "on") == 0) {

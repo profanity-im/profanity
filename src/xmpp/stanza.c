@@ -201,10 +201,10 @@ stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char * const jid,
 xmpp_stanza_t *
 stanza_enable_carbons(xmpp_ctx_t *ctx){
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
-    char *id = create_unique_id(NULL);
+    char *id = create_unique_id("carbons");
 
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
-    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);   
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
     xmpp_stanza_set_id(iq, id);
     free(id);
 
@@ -220,10 +220,10 @@ stanza_enable_carbons(xmpp_ctx_t *ctx){
 xmpp_stanza_t *
 stanza_disable_carbons(xmpp_ctx_t *ctx){
     xmpp_stanza_t *iq = xmpp_stanza_new(ctx);
-    char *id = create_unique_id(NULL);
+    char *id = create_unique_id("carbons");
 
     xmpp_stanza_set_name(iq, STANZA_NAME_IQ);
-    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);   
+    xmpp_stanza_set_type(iq, STANZA_TYPE_SET);
     xmpp_stanza_set_id(iq, id);
     free(id);
 
