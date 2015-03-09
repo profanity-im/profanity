@@ -3895,6 +3895,13 @@ cmd_history(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_carbons(gchar **args, struct cmd_help_t help)
 {
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
     gboolean result = _cmd_set_boolean_preference(args[0], help,
         "Carbons message", PREF_CARBONS);
 
