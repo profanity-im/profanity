@@ -2003,7 +2003,7 @@ _cmd_complete_parameters(const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
