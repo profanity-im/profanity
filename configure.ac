@@ -153,22 +153,21 @@ AS_IF([test "x$PLATFORM" = xosx], [LIBS="-lcurl $LIBS"])
 ### Windows uses native OS calls
 ### OSX requires terminal-notifier
 
-AS_IF([test "x$PLATFORM" = xosx],
-        [AS_IF([test "x$enable_notifications" != xno],
+AS_IF([test "x$enable_notifications" != xno],
             [NOTIFIER_PATH="no"
             AC_PATH_PROG(NOTIFIER_PATH, terminal-notifier, no)
             AS_IF([test "x$NOTIFIER_PATH" = xno],
                 [AS_IF([test "x$enable_notifications" = xyes],
-                    [AC_MSG_ERROR([terminal-notifier not found, required for desktop notifications.])],
+                    [AC_MSG_WARN([terminal-notifier not found, required for desktop notifications on OS X.])],
                     [AC_MSG_NOTICE([Desktop notifications not supported.])])],
-                [AC_DEFINE([HAVE_OSXNOTIFY], [1], [terminal notifier])])])],
-    [test "x$PLATFORM" = xnix],
-        [AS_IF([test "x$enable_notifications" != xno],
+                [AC_DEFINE([HAVE_OSXNOTIFY], [1], [terminal notifier])])])
+
+AS_IF([test "x$enable_notifications" != xno],
             [PKG_CHECK_MODULES([libnotify], [libnotify],
                 [AC_DEFINE([HAVE_LIBNOTIFY], [1], [libnotify module])],
                 [AS_IF([test "x$enable_notifications" = xyes],
-                    [AC_MSG_ERROR([libnotify is required but does not exist])],
-                    [AC_MSG_NOTICE([libnotify support will be disabled])])])])])
+                    [AC_MSG_WARN([libnotify is required but does not exist])],
+                    [AC_MSG_NOTICE([libnotify support will be disabled])])])])
 
 # TODO: rewrite this
 if test "x$with_xscreensaver" = xyes; then
