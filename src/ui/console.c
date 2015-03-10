@@ -934,6 +934,16 @@ cons_time_setting(void)
         cons_show("Time (/time)                  : seconds");
 
     prefs_free_string(pref_time);
+
+    char *pref_time_statusbar = prefs_get_string(PREF_TIME_STATUSBAR);
+    if (g_strcmp0(pref_time_statusbar, "minutes") == 0)
+        cons_show("Time statusbar (/time)        : minutes");
+    else if (g_strcmp0(pref_time_statusbar, "off") == 0)
+        cons_show("Time statusbar (/time)        : OFF");
+    else
+        cons_show("Time statusbar (/time)        : seconds");
+
+    prefs_free_string(pref_time_statusbar);
 }
 
 void

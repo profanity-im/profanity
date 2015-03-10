@@ -54,6 +54,7 @@ flash=false
 splash=true
 wrap=true
 time=seconds
+time.statusbar=seconds
 privileges=true
 presence=true
 intype=true

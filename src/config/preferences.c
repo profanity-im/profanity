@@ -507,6 +507,7 @@ _get_group(preference_t pref)
         case PREF_PRESENCE:
         case PREF_WRAP:
         case PREF_TIME:
+        case PREF_TIME_STATUSBAR:
         case PREF_ROSTER:
         case PREF_ROSTER_OFFLINE:
         case PREF_ROSTER_RESOURCE:
@@ -646,6 +647,8 @@ _get_key(preference_t pref)
             return "wrap";
         case PREF_TIME:
             return "time";
+        case PREF_TIME_STATUSBAR:
+            return "time.statusbar";
         case PREF_ROSTER:
             return "roster";
         case PREF_ROSTER_OFFLINE:
@@ -722,6 +725,8 @@ _get_default_string(preference_t pref)
             return "presence";
         case PREF_TIME:
             return "seconds";
+        case PREF_TIME_STATUSBAR:
+            return "minutes";
         default:
             return NULL;
     }

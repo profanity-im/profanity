@@ -3270,24 +3270,46 @@ cmd_wrap(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_time(gchar **args, struct cmd_help_t help)
 {
-    if (g_strcmp0(args[0], "minutes") == 0) {
-        prefs_set_string(PREF_TIME, "minutes");
-        cons_show("Time precision set to minutes.");
-        wins_resize_all();
-        return TRUE;
-    } else if (g_strcmp0(args[0], "seconds") == 0) {
-        prefs_set_string(PREF_TIME, "seconds");
-        cons_show("Time precision set to seconds.");
-        wins_resize_all();
-        return TRUE;
-    } else if (g_strcmp0(args[0], "off") == 0) {
-        prefs_set_string(PREF_TIME, "off");
-        cons_show("Time display disabled.");
-        wins_resize_all();
-        return TRUE;
+    if (g_strcmp0(args[0], "statusbar") == 0) {
+        if (g_strcmp0(args[1], "minutes") == 0) {
+            prefs_set_string(PREF_TIME_STATUSBAR, "minutes");
+            cons_show("Status bar time precision set to minutes.");
+            ui_redraw();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "seconds") == 0) {
+            prefs_set_string(PREF_TIME_STATUSBAR, "seconds");
+            cons_show("Status bar time precision set to seconds.");
+            ui_redraw();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            prefs_set_string(PREF_TIME_STATUSBAR, "off");
+            cons_show("Status bar time display disabled.");
+            ui_redraw();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
     } else {
-        cons_show("Usage: %s", help.usage);
-        return TRUE;
+        if (g_strcmp0(args[0], "minutes") == 0) {
+            prefs_set_string(PREF_TIME, "minutes");
+            cons_show("Time precision set to minutes.");
+            wins_resize_all();
+            return TRUE;
+        } else if (g_strcmp0(args[0], "seconds") == 0) {
+            prefs_set_string(PREF_TIME, "seconds");
+            cons_show("Time precision set to seconds.");
+            wins_resize_all();
+            return TRUE;
+        } else if (g_strcmp0(args[0], "off") == 0) {
+            prefs_set_string(PREF_TIME, "off");
+            cons_show("Time display disabled.");
+            wins_resize_all();
+            return TRUE;
+        } else {
+            cons_show("Usage: %s", help.usage);
+            return TRUE;
+        }
     }
 }
 

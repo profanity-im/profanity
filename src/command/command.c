@@ -102,6 +102,7 @@ static char * _role_autocomplete(const char * const input);
 static char * _resource_autocomplete(const char * const input);
 static char * _titlebar_autocomplete(const char * const input);
 static char * _inpblock_autocomplete(const char * const input);
+static char * _time_autocomplete(const char * const input);
 
 GHashTable *commands = NULL;
 
@@ -681,11 +682,18 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/time",
-        cmd_time, parse_args, 1, 1, &cons_time_setting,
-        { "/time minutes|seconds", "Time display.",
-        { "/time minutes|seconds",
-          "---------------------",
-          "Configure time precision for the main window.",
+        cmd_time, parse_args, 1, 2, &cons_time_setting,
+        { "/time setting|statusbar [setting]", "Time display.",
+        { "/time setting|statusbar [setting]",
+          "---------------------------------",
+          "Configure time display preferences.",
+          "",
+          "minutes           : Use minutes precision in main window.",
+          "seconds           : Use seconds precision in main window.",
+          "off               : Do not show time in main window.",
+          "statusbar minutes : Show minutes precision in status bar.",
+          "statusbar seconds : Show seconds precision in status bar.",
+          "statusbar off     : Do not show time in status bar.",
           NULL } } },
 
     { "/inpblock",
@@ -1180,6 +1188,7 @@ static Autocomplete form_field_multi_ac;
 static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
 static Autocomplete time_ac;
+static Autocomplete time_statusbar_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 
@@ -1523,6 +1532,12 @@ cmd_init(void)
     autocomplete_add(time_ac, "minutes");
     autocomplete_add(time_ac, "seconds");
     autocomplete_add(time_ac, "off");
+    autocomplete_add(time_ac, "statusbar");
+
+    time_statusbar_ac = autocomplete_new();
+    autocomplete_add(time_statusbar_ac, "minutes");
+    autocomplete_add(time_statusbar_ac, "seconds");
+    autocomplete_add(time_statusbar_ac, "off");
 
     resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
@@ -1587,6 +1602,7 @@ cmd_uninit(void)
     autocomplete_free(occupants_ac);
     autocomplete_free(occupants_default_ac);
     autocomplete_free(time_ac);
+    autocomplete_free(time_statusbar_ac);
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
 }
@@ -1752,6 +1768,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(occupants_ac);
     autocomplete_reset(occupants_default_ac);
     autocomplete_reset(time_ac);
+    autocomplete_reset(time_statusbar_ac);
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
 
@@ -2067,8 +2084,8 @@ _cmd_complete_parameters(const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", "/time" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, time_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);
@@ -2103,6 +2120,7 @@ _cmd_complete_parameters(const char * const input)
     g_hash_table_insert(ac_funcs, "/resource",      _resource_autocomplete);
     g_hash_table_insert(ac_funcs, "/titlebar",      _titlebar_autocomplete);
     g_hash_table_insert(ac_funcs, "/inpblock",      _inpblock_autocomplete);
+    g_hash_table_insert(ac_funcs, "/time",          _time_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -2732,6 +2750,24 @@ _occupants_autocomplete(const char * const input)
     }
 
     found = autocomplete_param_with_ac(input, "/occupants", occupants_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
+    return NULL;
+}
+
+static char *
+_time_autocomplete(const char * const input)
+{
+    char *found = NULL;
+
+    found = autocomplete_param_with_ac(input, "/time statusbar", time_statusbar_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/time", time_ac, TRUE);
     if (found != NULL) {
         return found;
     }
