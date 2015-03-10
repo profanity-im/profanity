@@ -336,7 +336,7 @@ handle_incoming_message(char *barejid, char *resource, char *message)
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send_chat(barejid, otr_query_message);
+                message_send_chat_encrypted(barejid, otr_query_message);
             }
         }
     }
@@ -350,7 +350,7 @@ handle_incoming_message(char *barejid, char *resource, char *message)
     if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        message_send_chat(barejid, otr_query_message);
+        message_send_chat_encrypted(barejid, otr_query_message);
     }
 
     ui_incoming_msg(barejid, resource, newmessage, NULL);

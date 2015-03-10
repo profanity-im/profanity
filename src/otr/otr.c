@@ -110,7 +110,7 @@ static void
 cb_inject_message(void *opdata, const char *accountname,
     const char *protocol, const char *recipient, const char *message)
 {
-    message_send_chat(recipient, message);
+    message_send_chat_encrypted(recipient, message);
 }
 
 static void
