@@ -426,6 +426,7 @@ _load_preferences(void)
     _set_boolean_preference("splash", PREF_SPLASH);
     _set_boolean_preference("wrap", PREF_WRAP);
     _set_string_preference("time", PREF_TIME);
+    _set_string_preference("time.statusbar", PREF_TIME_STATUSBAR);
 
     _set_boolean_preference("resource.title", PREF_RESOURCE_TITLE);
     _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);

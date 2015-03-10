@@ -4,6 +4,7 @@ flash=false
 splash=true
 wrap=true
 time=minutes
+time.statusbar=off
 resource.title=false
 resource.message=false
 statuses.console=none
