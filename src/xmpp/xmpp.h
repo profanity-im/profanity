@@ -146,6 +146,7 @@ GList * jabber_get_available_resources(void);
 
 // message functions
 void message_send_chat(const char * const barejid, const char * const msg);
+void message_send_chat_encrypted(const char * const barejid, const char * const msg);
 void message_send_private(const char * const fulljid, const char * const msg);
 void message_send_groupchat(const char * const roomjid, const char * const msg);
 void message_send_groupchat_subject(const char * const roomjid, const char * const subject);
@@ -172,6 +173,8 @@ void presence_update(resource_presence_t status, const char * const msg,
 gboolean presence_sub_request_exists(const char * const bare_jid);
 
 // iq functions
+void iq_enable_carbons();
+void iq_disable_carbons();
 void iq_send_software_version(const char * const fulljid);
 void iq_room_list_request(gchar *conferencejid);
 void iq_disco_info_request(gchar *jid);

@@ -85,6 +85,7 @@ gboolean cmd_grlog(gchar **args, struct cmd_help_t help);
 gboolean cmd_group(gchar **args, struct cmd_help_t help);
 gboolean cmd_help(gchar **args, struct cmd_help_t help);
 gboolean cmd_history(gchar **args, struct cmd_help_t help);
+gboolean cmd_carbons(gchar **args, struct cmd_help_t help);
 gboolean cmd_info(gchar **args, struct cmd_help_t help);
 gboolean cmd_intype(gchar **args, struct cmd_help_t help);
 gboolean cmd_invite(gchar **args, struct cmd_help_t help);

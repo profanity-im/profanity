@@ -551,8 +551,8 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void **state)
     will_return(otr_key_loaded, TRUE);
     will_return(otr_start_query, query_message);
 
-    expect_string(message_send_chat, barejid, chatwin->barejid);
-    expect_string(message_send_chat, msg, query_message);
+    expect_string(message_send_chat_encrypted, barejid, chatwin->barejid);
+    expect_string(message_send_chat_encrypted, msg, query_message);
 
     gboolean result = cmd_otr(args, *help);
     assert_true(result);

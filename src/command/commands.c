@@ -731,7 +731,7 @@ cmd_help(gchar **args, struct cmd_help_t help)
 
     } else if (strcmp(args[0], "settings") == 0) {
         gchar *filter[] = { "/account", "/autoaway", "/autoping", "/autoconnect", "/beep",
-            "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
+            "/carbons", "/chlog", "/flash", "/gone", "/grlog", "/history", "/intype",
             "/log", "/mouse", "/notify", "/outtype", "/prefs", "/priority",
             "/reconnect", "/roster", "/splash", "/states", "/statuses", "/theme",
             "/titlebar", "/vercheck", "/privileges", "/occupants", "/presence", "/wrap" };
@@ -1269,7 +1269,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             if (otr_is_secure(barejid)) {
                 char *encrypted = otr_encrypt_message(barejid, plugin_message);
                 if (encrypted != NULL) {
-                    message_send_chat(barejid, encrypted);
+                    message_send_chat_encrypted(barejid, encrypted);
                     otr_free_message(encrypted);
                     ui_outgoing_chat_msg("me", barejid, plugin_message);
 
@@ -1298,7 +1298,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     GString *otr_message = g_string_new(plugin_message);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-                    message_send_chat(barejid, otr_message->str);
+                    message_send_chat_encrypted(barejid, otr_message->str);
 
                     g_string_free(otr_message, TRUE);
                 } else {
@@ -3084,7 +3084,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, tiny);
                     if (encrypted != NULL) {
-                        message_send_chat(chatwin->barejid, encrypted);
+                        message_send_chat_encrypted(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -3904,6 +3904,29 @@ cmd_history(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_carbons(gchar **args, struct cmd_help_t help)
+{
+    jabber_conn_status_t conn_status = jabber_get_connection_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    gboolean result = _cmd_set_boolean_preference(args[0], help,
+        "Message carbons preference", PREF_CARBONS);
+
+    // enable carbons
+    if (strcmp(args[0], "on") == 0) {
+        iq_enable_carbons();
+    }
+    else if (strcmp(args[0], "off") == 0){
+        iq_disable_carbons();
+    }
+    return result;
+}
+
+gboolean
 cmd_away(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_AWAY, "away", args);
@@ -4089,7 +4112,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                     ui_current_print_formatted_line('!', 0, "You have not generated or loaded a private key, use '/otr gen'");
                 } else if (!otr_is_secure(barejid)) {
                     char *otr_query_message = otr_start_query();
-                    message_send_chat(barejid, otr_query_message);
+                    message_send_chat_encrypted(barejid, otr_query_message);
                 } else {
                     ui_gone_secure(barejid, otr_is_trusted(barejid));
                 }
@@ -4107,7 +4130,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 } else {
                     ProfChatWin *chatwin = ui_get_current_chat();
                     char *otr_query_message = otr_start_query();
-                    message_send_chat(chatwin->barejid, otr_query_message);
+                    message_send_chat_encrypted(chatwin->barejid, otr_query_message);
                 }
             }
         }

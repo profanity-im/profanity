@@ -180,6 +180,18 @@ handle_disco_info_error(const char * const from, const char * const error)
 }
 
 void
+handle_enable_carbons_error(const char * const error)
+{
+    cons_show_error("Server error enabling message carbons: %s", error);
+}
+
+void
+handle_disable_carbons_error(const char * const error)
+{
+    cons_show_error("Server error disabling message carbons: %s", error);
+}
+
+void
 handle_room_info_error(const char * const room, const char * const error)
 {
     ui_handle_room_info_error(room, error);
@@ -309,6 +321,11 @@ handle_incoming_private_message(char *fulljid, char *message)
 }
 
 void
+handle_carbon(char *barejid, char *message){
+    ui_outgoing_chat_msg("me", barejid, message);
+}
+
+void
 handle_incoming_message(char *barejid, char *resource, char *message)
 {
     char *plugin_message = NULL;
@@ -333,7 +350,7 @@ handle_incoming_message(char *barejid, char *resource, char *message)
                 memmove(whitespace_base, whitespace_base+tag_length, tag_length);
                 char *otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send_chat(barejid, otr_query_message);
+                message_send_chat_encrypted(barejid, otr_query_message);
             }
         }
     }
@@ -347,7 +364,7 @@ handle_incoming_message(char *barejid, char *resource, char *message)
     if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
         char *otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session...");
-        message_send_chat(barejid, otr_query_message);
+        message_send_chat_encrypted(barejid, otr_query_message);
     }
 
     plugin_message = plugins_pre_chat_message_display(barejid, newmessage);

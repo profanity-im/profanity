@@ -905,6 +905,15 @@ static struct cmd_t command_defs[] =
           "shared on|off : Share logs between all instances, default: on.",
           NULL } } },
 
+    { "/carbons",
+      cmd_carbons, parse_args, 1, 1, &cons_carbons_setting,
+      { "/carbons on|off", "Message carbons.",
+      { "/carbons on|off",
+        "---------------",
+        "Enable or disable message carbons.",
+        "The message carbons feature ensures that both sides of all conversations are shared with all the user's clients that implement this protocol.",
+        NULL  } } },
+
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
         { "/reconnect seconds", "Set reconnect interval.",
@@ -1937,7 +1946,7 @@ _cmd_execute_default(const char * inp)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, plugin_message);
                     if (encrypted != NULL) {
-                        message_send_chat(chatwin->barejid, encrypted);
+                        message_send_chat_encrypted(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -2027,7 +2036,7 @@ _cmd_complete_parameters(const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);

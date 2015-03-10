@@ -93,14 +93,42 @@ message_send_chat(const char * const barejid, const char * const msg)
             state = STANZA_NAME_ACTIVE;
         }
         Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, state);
+        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, state, false);
         jid_destroy(jidp);
     } else {
         char *state = NULL;
         if (prefs_get_boolean(PREF_STATES)) {
             state = STANZA_NAME_ACTIVE;
         }
-        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, state);
+        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, state, false);
+    }
+
+    xmpp_send(conn, message);
+    xmpp_stanza_release(message);
+}
+
+void
+message_send_chat_encrypted(const char * const barejid, const char * const msg)
+{
+    xmpp_stanza_t *message;
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+
+    ChatSession *session = chat_session_get(barejid);
+    if (session) {
+        char *state = NULL;
+        if (prefs_get_boolean(PREF_STATES) && session->send_states) {
+            state = STANZA_NAME_ACTIVE;
+        }
+        Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
+        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, state, true);
+        jid_destroy(jidp);
+    } else {
+        char *state = NULL;
+        if (prefs_get_boolean(PREF_STATES)) {
+            state = STANZA_NAME_ACTIVE;
+        }
+        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, state, true);
     }
 
     xmpp_send(conn, message);
@@ -112,7 +140,7 @@ message_send_private(const char * const fulljid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *message = stanza_create_message(ctx, fulljid, STANZA_TYPE_CHAT, msg, NULL);
+    xmpp_stanza_t *message = stanza_create_message(ctx, fulljid, STANZA_TYPE_CHAT, msg, NULL, false);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
@@ -123,7 +151,7 @@ message_send_groupchat(const char * const roomjid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *message = stanza_create_message(ctx, roomjid, STANZA_TYPE_GROUPCHAT, msg, NULL);
+    xmpp_stanza_t *message = stanza_create_message(ctx, roomjid, STANZA_TYPE_GROUPCHAT, msg, NULL, false);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
@@ -420,6 +448,49 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // ignore if type not chat or absent
     char *type = xmpp_stanza_get_type(stanza);
     if (!(g_strcmp0(type, "chat") == 0 || type == NULL)) {
+        return 1;
+    }
+
+    // check if carbon message
+    xmpp_stanza_t *received = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
+    if(received != NULL){
+        xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(received, STANZA_NS_FORWARD);
+        xmpp_stanza_t *message = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
+
+        xmpp_ctx_t *ctx = connection_get_ctx();
+
+        gchar *to = xmpp_stanza_get_attribute(message, STANZA_ATTR_TO);
+        gchar *from = xmpp_stanza_get_attribute(message, STANZA_ATTR_FROM);
+
+        // happens when receive a carbon of a self sent message
+        if(to == NULL) {
+            to = from;
+        }
+
+        Jid *jid_from = jid_create(from);
+        Jid *jid_to = jid_create(to);
+        Jid *my_jid = jid_create(jabber_get_fulljid());
+
+        // check for and deal with message
+        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
+        if (body != NULL) {
+            char *message = xmpp_stanza_get_text(body);
+            if (message != NULL) {
+                // if we are the recipient, treat as standard incoming message
+                if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
+                    handle_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
+                }
+                // else treat as a sent message
+                else{
+                    handle_carbon(jid_to->barejid, message);
+                }
+                xmpp_free(ctx, message);
+            }
+        }
+
+        jid_destroy(jid_from);
+        jid_destroy(jid_to);
+        jid_destroy(my_jid);
         return 1;
     }
 
