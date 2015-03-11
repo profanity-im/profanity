@@ -318,7 +318,7 @@ stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
 }
 
 xmpp_stanza_t *
-stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
+stanza_create_message(xmpp_ctx_t *ctx, char *id, const char * const recipient,
     const char * const type, const char * const message)
 {
     xmpp_stanza_t *msg, *body, *text;
@@ -327,9 +327,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, type);
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
-    char *id = create_unique_id(NULL);
     xmpp_stanza_set_id(msg, id);
-    free(id);
 
     body = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(body, STANZA_NAME_BODY);

@@ -1945,7 +1945,7 @@ _cmd_execute_default(const char * inp)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, inp);
                     if (encrypted != NULL) {
-                        message_send_chat_encrypted(chatwin->barejid, encrypted);
+                        char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -1960,12 +1960,12 @@ _cmd_execute_default(const char * inp)
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_chat_msg("me", chatwin->barejid, inp);
+                        ui_outgoing_chat_msg("me", chatwin->barejid, inp, id);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send_chat(chatwin->barejid, inp);
+                    char *id = message_send_chat(chatwin->barejid, inp);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -1973,10 +1973,10 @@ _cmd_execute_default(const char * inp)
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_chat_msg("me", chatwin->barejid, inp);
+                    ui_outgoing_chat_msg("me", chatwin->barejid, inp, id);
                 }
 #else
-                message_send_chat(chatwin->barejid, inp);
+                char *id = message_send_chat(chatwin->barejid, inp);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -1984,7 +1984,7 @@ _cmd_execute_default(const char * inp)
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_chat_msg("me", chatwin->barejid, inp);
+                ui_outgoing_chat_msg("me", chatwin->barejid, inp, id);
 #endif
             }
             break;

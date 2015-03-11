@@ -79,7 +79,7 @@ message_add_handlers(void)
     HANDLE(STANZA_NS_CAPTCHA,    NULL,                   _captcha_handler);
 }
 
-void
+char *
 message_send_chat(const char * const barejid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -103,7 +103,8 @@ message_send_chat(const char * const barejid, const char * const msg)
         jid = strdup(barejid);
     }
 
-    xmpp_stanza_t *message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT, msg);
+    char *id = create_unique_id("msg");
+    xmpp_stanza_t *message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
     free(jid);
 
     if (state) {
@@ -115,9 +116,11 @@ message_send_chat(const char * const barejid, const char * const msg)
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
+
+    return id;
 }
 
-void
+char *
 message_send_chat_encrypted(const char * const barejid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
@@ -140,7 +143,8 @@ message_send_chat_encrypted(const char * const barejid, const char * const msg)
         jid = strdup(barejid);
     }
 
-    xmpp_stanza_t *message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg);
+    char *id = create_unique_id("msg");
+    xmpp_stanza_t *message = stanza_create_message(ctx, id, barejid, STANZA_TYPE_CHAT, msg);
     free(jid);
 
     if (state) {
@@ -153,6 +157,8 @@ message_send_chat_encrypted(const char * const barejid, const char * const msg)
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
+
+    return id;
 }
 
 void
@@ -160,7 +166,9 @@ message_send_private(const char * const fulljid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *message = stanza_create_message(ctx, fulljid, STANZA_TYPE_CHAT, msg);
+    char *id = create_unique_id("prv");
+    xmpp_stanza_t *message = stanza_create_message(ctx, id, fulljid, STANZA_TYPE_CHAT, msg);
+    free(id);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
@@ -171,7 +179,9 @@ message_send_groupchat(const char * const roomjid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *message = stanza_create_message(ctx, roomjid, STANZA_TYPE_GROUPCHAT, msg);
+    char *id = create_unique_id("muc");
+    xmpp_stanza_t *message = stanza_create_message(ctx, id, roomjid, STANZA_TYPE_GROUPCHAT, msg);
+    free(id);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);

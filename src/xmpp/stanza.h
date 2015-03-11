@@ -194,7 +194,7 @@ xmpp_stanza_t * stanza_attach_state(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, cons
 xmpp_stanza_t * stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 xmpp_stanza_t * stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
 
-xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx,
+xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx, char *id,
     const char * const recipient, const char * const type, const char * const message);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t * const ctx,

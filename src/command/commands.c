@@ -1265,9 +1265,9 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             if (otr_is_secure(barejid)) {
                 char *encrypted = otr_encrypt_message(barejid, msg);
                 if (encrypted != NULL) {
-                    message_send_chat_encrypted(barejid, encrypted);
+                    char *id = message_send_chat_encrypted(barejid, encrypted);
                     otr_free_message(encrypted);
-                    ui_outgoing_chat_msg("me", barejid, msg);
+                    ui_outgoing_chat_msg("me", barejid, msg, id);
 
                     if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
@@ -1286,6 +1286,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                 }
             } else {
                 prof_otrpolicy_t policy = otr_get_policy(barejid);
+                char *id = NULL;
 
                 if (policy == PROF_OTRPOLICY_ALWAYS) {
                     cons_show_error("Failed to send message. Please check OTR policy");
@@ -1294,13 +1295,13 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     GString *otr_message = g_string_new(msg);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-                    message_send_chat_encrypted(barejid, otr_message->str);
+                    id = message_send_chat_encrypted(barejid, otr_message->str);
 
                     g_string_free(otr_message, TRUE);
                 } else {
-                    message_send_chat(barejid, msg);
+                    id = message_send_chat(barejid, msg);
                 }
-                ui_outgoing_chat_msg("me", barejid, msg);
+                ui_outgoing_chat_msg("me", barejid, msg, id);
 
                 if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
@@ -3073,7 +3074,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, tiny);
                     if (encrypted != NULL) {
-                        message_send_chat_encrypted(chatwin->barejid, encrypted);
+                        char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -3088,12 +3089,12 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_chat_msg("me", chatwin->barejid, tiny);
+                        ui_outgoing_chat_msg("me", chatwin->barejid, tiny, id);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send_chat(chatwin->barejid, tiny);
+                    char *id = message_send_chat(chatwin->barejid, tiny);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -3101,7 +3102,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_chat_msg("me", chatwin->barejid, tiny);
+                    ui_outgoing_chat_msg("me", chatwin->barejid, tiny, id);
                 }
 #else
                 message_send_chat(chatwin->barejid, tiny);
