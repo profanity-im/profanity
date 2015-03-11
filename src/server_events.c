@@ -403,6 +403,12 @@ handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 }
 
 void
+handle_message_receipt(char *barejid, char *id)
+{
+    ui_message_receipt(barejid, id);
+}
+
+void
 handle_typing(char *barejid, char *resource)
 {
     ui_contact_typing(barejid, resource);

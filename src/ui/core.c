@@ -382,6 +382,19 @@ ui_get_current_chat(void)
 }
 
 void
+ui_message_receipt(const char * const barejid, const char * const id)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        ProfWin *win = (ProfWin*) chatwin;
+        GString *message = g_string_new("Message received: ");
+        g_string_append(message, id);
+        win_save_println(win, message->str);
+        g_string_free(message, TRUE);
+    }
+}
+
+void
 ui_incoming_msg(const char * const barejid, const char * const resource, const char * const message, GTimeVal *tv_stamp)
 {
     gboolean win_created = FALSE;

@@ -82,25 +82,35 @@ message_add_handlers(void)
 void
 message_send_chat(const char * const barejid, const char * const msg)
 {
-    xmpp_stanza_t *message;
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     ChatSession *session = chat_session_get(barejid);
+    char *state = NULL;
+    char *jid = NULL;
     if (session) {
-        char *state = NULL;
         if (prefs_get_boolean(PREF_STATES) && session->send_states) {
             state = STANZA_NAME_ACTIVE;
         }
         Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, state, false);
+        jid = strdup(jidp->fulljid);
         jid_destroy(jidp);
+
     } else {
-        char *state = NULL;
         if (prefs_get_boolean(PREF_STATES)) {
             state = STANZA_NAME_ACTIVE;
         }
-        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, state, false);
+        jid = strdup(barejid);
+    }
+
+    xmpp_stanza_t *message = stanza_create_message(ctx, jid, STANZA_TYPE_CHAT, msg);
+    free(jid);
+
+    if (state) {
+        stanza_attach_state(ctx, message, state);
+    }
+    if (prefs_get_boolean(PREF_RECEIPTS)) {
+        stanza_attach_receipt_request(ctx, message);
     }
 
     xmpp_send(conn, message);
@@ -110,25 +120,35 @@ message_send_chat(const char * const barejid, const char * const msg)
 void
 message_send_chat_encrypted(const char * const barejid, const char * const msg)
 {
-    xmpp_stanza_t *message;
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
 
     ChatSession *session = chat_session_get(barejid);
+    char *state = NULL;
+    char *jid = NULL;
     if (session) {
-        char *state = NULL;
         if (prefs_get_boolean(PREF_STATES) && session->send_states) {
             state = STANZA_NAME_ACTIVE;
         }
         Jid *jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        message = stanza_create_message(ctx, jidp->fulljid, STANZA_TYPE_CHAT, msg, state, true);
+        jid = strdup(jidp->fulljid);
         jid_destroy(jidp);
     } else {
-        char *state = NULL;
         if (prefs_get_boolean(PREF_STATES)) {
             state = STANZA_NAME_ACTIVE;
         }
-        message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg, state, true);
+        jid = strdup(barejid);
+    }
+
+    xmpp_stanza_t *message = stanza_create_message(ctx, barejid, STANZA_TYPE_CHAT, msg);
+    free(jid);
+
+    if (state) {
+        stanza_attach_state(ctx, message, state);
+    }
+    stanza_attach_carbons_private(ctx, message);
+    if (prefs_get_boolean(PREF_RECEIPTS)) {
+        stanza_attach_receipt_request(ctx, message);
     }
 
     xmpp_send(conn, message);
@@ -140,7 +160,7 @@ message_send_private(const char * const fulljid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *message = stanza_create_message(ctx, fulljid, STANZA_TYPE_CHAT, msg, NULL, false);
+    xmpp_stanza_t *message = stanza_create_message(ctx, fulljid, STANZA_TYPE_CHAT, msg);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
@@ -151,7 +171,7 @@ message_send_groupchat(const char * const roomjid, const char * const msg)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
-    xmpp_stanza_t *message = stanza_create_message(ctx, roomjid, STANZA_TYPE_GROUPCHAT, msg, NULL, false);
+    xmpp_stanza_t *message = stanza_create_message(ctx, roomjid, STANZA_TYPE_GROUPCHAT, msg);
 
     xmpp_send(conn, message);
     xmpp_stanza_release(message);
@@ -441,6 +461,29 @@ _groupchat_handler(xmpp_conn_t * const conn,
     return 1;
 }
 
+void
+_message_send_receipt(const char * const fulljid, const char * const message_id)
+{
+    xmpp_conn_t * const conn = connection_get_conn();
+    xmpp_ctx_t * const ctx = connection_get_ctx();
+    xmpp_stanza_t *message = xmpp_stanza_new(ctx);
+    char *id = create_unique_id("receipt");
+    xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
+    xmpp_stanza_set_id(message, id);
+    xmpp_stanza_set_attribute(message, STANZA_ATTR_TO, fulljid);
+
+    xmpp_stanza_t *receipt = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(receipt, "received");
+    xmpp_stanza_set_ns(receipt, STANZA_NS_RECEIPTS);
+    xmpp_stanza_set_attribute(receipt, STANZA_ATTR_ID, message_id);
+
+    xmpp_stanza_add_child(message, receipt);
+    xmpp_stanza_release(receipt);
+
+    xmpp_send(conn, message);
+    xmpp_stanza_release(message);
+}
+
 static int
 _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
@@ -451,10 +494,28 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         return 1;
     }
 
+    // check if message receipt
+    xmpp_stanza_t *receipt = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
+    if (receipt) {
+        char *name = xmpp_stanza_get_name(receipt);
+        if (g_strcmp0(name, "received") == 0) {
+            char *id = xmpp_stanza_get_attribute(receipt, STANZA_ATTR_ID);
+            if (id) {
+                char *fulljid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+                if (fulljid) {
+                    Jid *jidp = jid_create(fulljid);
+                    handle_message_receipt(jidp->barejid, id);
+                    jid_destroy(jidp);
+                }
+
+            }
+        }
+    }
+
     // check if carbon message
-    xmpp_stanza_t *received = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
-    if(received != NULL){
-        xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(received, STANZA_NS_FORWARD);
+    xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
+    if (carbons){
+        xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
         xmpp_stanza_t *message = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
 
         xmpp_ctx_t *ctx = connection_get_ctx();
@@ -535,6 +596,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         // determine if the notifications happened whilst offline
         GTimeVal tv_stamp;
         gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
+        char *id = xmpp_stanza_get_id(stanza);
 
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
@@ -545,6 +607,15 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                     handle_delayed_message(jid->barejid, message, tv_stamp);
                 } else {
                     handle_incoming_message(jid->barejid, jid->resourcepart, message);
+                }
+                if (id) {
+                    xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
+                    if (receipts) {
+                        char *receipts_name = xmpp_stanza_get_name(receipts);
+                        if (g_strcmp0(receipts_name, "request") == 0) {
+                            _message_send_receipt(jid->fulljid, id);
+                        }
+                    }
                 }
                 xmpp_free(ctx, message);
             }
