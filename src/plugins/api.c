@@ -120,6 +120,18 @@ api_get_current_recipient(void)
     }
 }
 
+char *
+api_get_current_muc(void)
+{
+    win_type_t win_type = ui_current_win_type();
+    if (win_type == WIN_MUC) {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        return mucwin->roomjid;
+    } else {
+        return NULL;
+    }
+}
+
 void
 api_log_debug(const char *message)
 {
