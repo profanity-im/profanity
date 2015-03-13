@@ -109,6 +109,12 @@ c_api_get_current_recipient(void)
     return api_get_current_recipient();
 }
 
+static char *
+c_api_get_current_muc(void)
+{
+    return api_get_current_muc();
+}
+
 static void
 c_api_log_debug(const char *message)
 {
@@ -218,6 +224,7 @@ c_api_init(void)
     prof_notify = c_api_notify;
     prof_send_line = c_api_send_line;
     prof_get_current_recipient = c_api_get_current_recipient;
+    prof_get_current_muc = c_api_get_current_muc;
     prof_log_debug = c_api_log_debug;
     prof_log_info = c_api_log_info;
     prof_log_warning = c_api_log_warning;
