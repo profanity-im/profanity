@@ -526,7 +526,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
     if(carbons) {
         char *name = xmpp_stanza_get_name(carbons);
-        if (g_strcmp0(name, "received") == 0) {
+        if ((g_strcmp0(name, "received") == 0) || (g_strcmp0(name, "sent")) == 0){
             xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
             xmpp_stanza_t *message = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
 
