@@ -516,8 +516,8 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                     Jid *jidp = jid_create(fulljid);
                     handle_message_receipt(jidp->barejid, id);
                     jid_destroy(jidp);
+                    return 1;
                 }
-
             }
         }
     }
