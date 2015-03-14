@@ -67,14 +67,14 @@ void
 cons_show_time(void)
 {
     ProfWin *console = wins_get_console();
-    win_save_print(console, '-', NULL, NO_EOL, 0, "", "");
+    win_print(console, '-', NULL, NO_EOL, 0, "", "");
 }
 
 void
 cons_show_word(const char * const word)
 {
     ProfWin *console = wins_get_console();
-    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", word);
+    win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", word);
 }
 
 void
@@ -113,7 +113,7 @@ cons_show_error(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_save_print(console, '-', NULL, 0, THEME_ERROR, "", fmt_msg->str);
+    win_print(console, '-', NULL, 0, THEME_ERROR, "", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 
@@ -234,7 +234,7 @@ cons_show_login_success(ProfAccount *account)
     win_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "%s", presence_str);
     win_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " (priority %d)",
         accounts_get_priority_for_presence_type(account->name, presence));
-    win_save_print(console, '-', NULL, NO_DATE, 0, "", ".");
+    win_print(console, '-', NULL, NO_DATE, 0, "", ".");
     cons_alert();
 }
 
@@ -295,25 +295,25 @@ cons_show_caps(const char * const fulljid, resource_presence_t presence)
 
         theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
         win_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", fulljid);
-        win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
+        win_print(console, '-', NULL, NO_DATE, 0, "", ":");
 
         // show identity
         if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-            win_save_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
+            win_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
             if (caps->name != NULL) {
-                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                 if ((caps->category != NULL) || (caps->type != NULL)) {
-                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (caps->type != NULL) {
-                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
+                win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                 if (caps->category != NULL) {
-                    win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (caps->category != NULL) {
-                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
             }
             win_save_newline(console);
         }
@@ -362,7 +362,7 @@ cons_show_software_version(const char * const jid, const char * const  presence,
         cons_show("");
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
         win_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", jid);
-        win_save_print(console, '-', NULL, NO_DATE, 0, "", ":");
+        win_print(console, '-', NULL, NO_DATE, 0, "", ":");
     }
     if (name != NULL) {
         cons_show("Name    : %s", name);
@@ -465,10 +465,10 @@ cons_show_bookmarks(const GList *list)
                 win_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "/%s", item->nick);
             }
             if (item->autojoin) {
-                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (autojoin)");
+                win_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (autojoin)");
             }
             if (item->password != NULL) {
-                win_save_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
+                win_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
             }
             if (muc_active(item->jid)) {
                 ProfWin *roomwin = (ProfWin*)wins_get_muc(item->jid);
@@ -752,21 +752,21 @@ cons_show_account(ProfAccount *account)
             if (caps != NULL) {
                 // show identity
                 if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                    win_save_print(console, '-', NULL, NO_EOL, 0, "", "    Identity: ");
+                    win_print(console, '-', NULL, NO_EOL, 0, "", "    Identity: ");
                     if (caps->name != NULL) {
-                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                        win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                         if ((caps->category != NULL) || (caps->type != NULL)) {
-                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                            win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
                     if (caps->type != NULL) {
-                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
+                        win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                         if (caps->category != NULL) {
-                            win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                            win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
                     if (caps->category != NULL) {
-                        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                        win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                     }
                     win_save_newline(console);
                 }
@@ -1551,22 +1551,22 @@ cons_theme_colours(void)
 
     ProfWin *console = wins_get_console();
     cons_show("Theme colours:");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_WHITE, "",         " white   ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_WHITE_BOLD, "",   " bold_white");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_GREEN, "",         " green   ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_GREEN_BOLD, "",   " bold_green");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_RED, "",           " red     ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_RED_BOLD, "",     " bold_red");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_YELLOW, "",        " yellow  ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_YELLOW_BOLD, "",  " bold_yellow");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_BLUE, "",          " blue    ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_BLUE_BOLD, "",    " bold_blue");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_CYAN, "",          " cyan    ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_CYAN_BOLD, "",    " bold_cyan");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_MAGENTA, "",       " magenta ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_MAGENTA_BOLD, "", " bold_magenta");
-    win_save_print(console, '-', NULL, NO_EOL, THEME_BLACK, "",         " black   ");
-    win_save_print(console, '-', NULL, NO_DATE, THEME_BLACK_BOLD, "",   " bold_black");
+    win_print(console, '-', NULL, NO_EOL, THEME_WHITE, "",         " white   ");
+    win_print(console, '-', NULL, NO_DATE, THEME_WHITE_BOLD, "",   " bold_white");
+    win_print(console, '-', NULL, NO_EOL, THEME_GREEN, "",         " green   ");
+    win_print(console, '-', NULL, NO_DATE, THEME_GREEN_BOLD, "",   " bold_green");
+    win_print(console, '-', NULL, NO_EOL, THEME_RED, "",           " red     ");
+    win_print(console, '-', NULL, NO_DATE, THEME_RED_BOLD, "",     " bold_red");
+    win_print(console, '-', NULL, NO_EOL, THEME_YELLOW, "",        " yellow  ");
+    win_print(console, '-', NULL, NO_DATE, THEME_YELLOW_BOLD, "",  " bold_yellow");
+    win_print(console, '-', NULL, NO_EOL, THEME_BLUE, "",          " blue    ");
+    win_print(console, '-', NULL, NO_DATE, THEME_BLUE_BOLD, "",    " bold_blue");
+    win_print(console, '-', NULL, NO_EOL, THEME_CYAN, "",          " cyan    ");
+    win_print(console, '-', NULL, NO_DATE, THEME_CYAN_BOLD, "",    " bold_cyan");
+    win_print(console, '-', NULL, NO_EOL, THEME_MAGENTA, "",       " magenta ");
+    win_print(console, '-', NULL, NO_DATE, THEME_MAGENTA_BOLD, "", " bold_magenta");
+    win_print(console, '-', NULL, NO_EOL, THEME_BLACK, "",         " black   ");
+    win_print(console, '-', NULL, NO_DATE, THEME_BLACK_BOLD, "",   " bold_black");
     cons_show("");
 }
 
@@ -1576,14 +1576,14 @@ _cons_splash_logo(void)
     ProfWin *console = wins_get_console();
     win_save_println(console, "Welcome to");
 
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "                   ___            _           ");
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "                  / __)          (_)_         ");
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "|_|                                    (____/ ");
-    win_save_print(console, '-', NULL, 0, THEME_SPLASH, "", "");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", "                   ___            _           ");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", "                  / __)          (_)_         ");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", " ____   ____ ___ | |__ ____ ____  _| |_ _   _ ");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", "|  _ \\ / ___) _ \\|  __) _  |  _ \\| |  _) | | |");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", "| | | | |  | |_| | | ( ( | | | | | | |_| |_| |");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", "| ||_/|_|   \\___/|_|  \\_||_|_| |_|_|\\___)__  |");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", "|_|                                    (____/ ");
+    win_print(console, '-', NULL, 0, THEME_SPLASH, "", "");
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
@@ -1623,7 +1623,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
 
         g_string_free(title, TRUE);
 
-        win_save_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " - ");
+        win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " - ");
         GString *sub = g_string_new("");
         sub = g_string_append(sub, p_contact_subscription(contact));
         if (p_contact_pending_out(contact)) {
@@ -1660,7 +1660,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
                 win_vprint(console, '-', NULL, NO_DATE, 0, "", "%s", groups_str->str);
                 g_string_free(groups_str, TRUE);
             } else {
-                 win_save_print(console, '-', NULL, NO_DATE, 0, "", " ");
+                 win_print(console, '-', NULL, NO_DATE, 0, "", " ");
             }
         }
 

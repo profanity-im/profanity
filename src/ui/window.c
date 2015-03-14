@@ -547,14 +547,14 @@ win_show_occupant(ProfWin *window, Occupant *occupant)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
-    win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", occupant->nick);
+    win_print(window, '-', NULL, NO_EOL, presence_colour, "", occupant->nick);
     win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
 
     if (occupant->status) {
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
     }
 
-    win_save_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
+    win_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
 }
 
 void
@@ -569,9 +569,9 @@ win_show_contact(ProfWin *window, PContact contact)
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
     if (name != NULL) {
-        win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", name);
+        win_print(window, '-', NULL, NO_EOL, presence_colour, "", name);
     } else {
-        win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
+        win_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
     }
 
     win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence);
@@ -598,7 +598,7 @@ win_show_contact(ProfWin *window, PContact contact)
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", p_contact_status(contact));
     }
 
-    win_save_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
+    win_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
 }
 
 void
@@ -610,7 +610,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
 
-    win_save_print(window, '!', NULL, NO_EOL, presence_colour, "", occupant->nick);
+    win_print(window, '!', NULL, NO_EOL, presence_colour, "", occupant->nick);
     win_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", " is %s", presence_str);
 
     if (occupant->status) {
@@ -633,21 +633,21 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
     if (caps) {
         // show identity
         if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-            win_save_print(window, '!', NULL, NO_EOL, 0, "", "  Identity: ");
+            win_print(window, '!', NULL, NO_EOL, 0, "", "  Identity: ");
             if (caps->name != NULL) {
-                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                 if ((caps->category != NULL) || (caps->type != NULL)) {
-                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (caps->type != NULL) {
-                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
+                win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                 if (caps->category != NULL) {
-                    win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                    win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
             if (caps->category != NULL) {
-                win_save_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
             }
             win_save_newline(window);
         }
@@ -672,7 +672,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
         caps_destroy(caps);
     }
 
-    win_save_print(window, '-', NULL, 0, 0, "", "");
+    win_print(window, '-', NULL, 0, 0, "", "");
 }
 
 void
@@ -686,12 +686,12 @@ win_show_info(ProfWin *window, PContact contact)
 
     theme_item_t presence_colour = theme_main_presence_attrs(presence);
 
-    win_save_print(window, '-', NULL, 0, 0, "", "");
-    win_save_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
+    win_print(window, '-', NULL, 0, 0, "", "");
+    win_print(window, '-', NULL, NO_EOL, presence_colour, "", barejid);
     if (name != NULL) {
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%s)", name);
     }
-    win_save_print(window, '-', NULL, NO_DATE, 0, "", ":");
+    win_print(window, '-', NULL, NO_DATE, 0, "", ":");
 
     if (sub != NULL) {
         win_vprint(window, '-', NULL, 0, 0, "", "Subscription: %s", sub);
@@ -720,7 +720,7 @@ win_show_info(ProfWin *window, PContact contact)
     GList *resources = p_contact_get_available_resources(contact);
     GList *ordered_resources = NULL;
     if (resources != NULL) {
-        win_save_print(window, '-', NULL, 0, 0, "", "Resources:");
+        win_print(window, '-', NULL, 0, 0, "", "Resources:");
 
         // sort in order of availability
         GList *curr = resources;
@@ -751,21 +751,21 @@ win_show_info(ProfWin *window, PContact contact)
         if (caps) {
             // show identity
             if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
-                win_save_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
+                win_print(window, '-', NULL, NO_EOL, 0, "", "    Identity: ");
                 if (caps->name != NULL) {
-                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
+                    win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
                     if ((caps->category != NULL) || (caps->type != NULL)) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                        win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (caps->type != NULL) {
-                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
+                    win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
                     if (caps->category != NULL) {
-                        win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
+                        win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                     }
                 }
                 if (caps->category != NULL) {
-                    win_save_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
+                    win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                 }
                 win_save_newline(window);
             }
@@ -841,7 +841,7 @@ win_show_status_string(ProfWin *window, const char * const from,
     if (status != NULL)
         win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", status);
 
-    win_save_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
+    win_print(window, '-', NULL, NO_DATE, presence_colour, "", "");
 
 }
 
@@ -853,7 +853,7 @@ win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     {
         case WIN_CHAT:
         case WIN_PRIVATE:
-            win_save_print(window, '-', tv_stamp, NO_ME, THEME_TEXT_THEM, from, message);
+            win_print(window, '-', tv_stamp, NO_ME, THEME_TEXT_THEM, from, message);
             break;
         default:
             assert(FALSE);
@@ -869,12 +869,12 @@ win_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp,
     va_start(arg, message);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
-    win_save_print(window, show_char, tstamp, flags, theme_item, from, fmt_msg->str);
+    win_print(window, show_char, tstamp, flags, theme_item, from, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
 }
 
 void
-win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
+win_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
     int flags, theme_item_t theme_item, const char * const from, const char * const message)
 {
     GDateTime *time;
@@ -894,13 +894,13 @@ win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
 void
 win_save_println(ProfWin *window, const char * const message)
 {
-    win_save_print(window, '-', NULL, 0, 0, "", message);
+    win_print(window, '-', NULL, 0, 0, "", message);
 }
 
 void
 win_save_newline(ProfWin *window)
 {
-    win_save_print(window, '-', NULL, NO_DATE, 0, "", "");
+    win_print(window, '-', NULL, NO_DATE, 0, "", "");
 }
 
 static void
