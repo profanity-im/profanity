@@ -59,7 +59,7 @@
 #define CEILING(X) (X-(int)(X) > 0 ? (int)(X+1) : (int)(X))
 
 static void _win_print(ProfWin *window, const char show_char, GDateTime *time,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message);
+    int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt);
 static void _win_print_wrapped(WINDOW *win, const char * const message);
 
 int
@@ -885,10 +885,42 @@ win_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
         time = g_date_time_new_from_timeval_utc(tstamp);
     }
 
-    buffer_push(window->layout->buffer, show_char, time, flags, theme_item, from, message);
-    _win_print(window, show_char, time, flags, theme_item, from, message);
+    buffer_push(window->layout->buffer, show_char, time, flags, theme_item, from, message, NULL);
+    _win_print(window, show_char, time, flags, theme_item, from, message, NULL);
     // TODO: cross-reference.. this should be replaced by a real event-based system
     ui_input_nonblocking(TRUE);
+}
+
+void
+win_print_with_receipt(ProfWin *window, const char show_char, GTimeVal *tstamp,
+    int flags, theme_item_t theme_item, const char * const from, const char * const message, char *id)
+{
+    GDateTime *time;
+
+    if (tstamp == NULL) {
+        time = g_date_time_new_now_local();
+    } else {
+        time = g_date_time_new_from_timeval_utc(tstamp);
+    }
+
+    DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
+    receipt->id = strdup(id);
+    receipt->received = FALSE;
+    free(id);
+
+    buffer_push(window->layout->buffer, show_char, time, flags, theme_item, from, message, receipt);
+    _win_print(window, show_char, time, flags, theme_item, from, message, receipt);
+    // TODO: cross-reference.. this should be replaced by a real event-based system
+    ui_input_nonblocking(TRUE);
+}
+
+void
+win_mark_received(ProfWin *window, const char * const id)
+{
+    gboolean received = buffer_mark_received(window->layout->buffer, id);
+    if (received) {
+        win_redraw(window);
+    }
 }
 
 void
@@ -905,7 +937,7 @@ win_newline(ProfWin *window)
 
 static void
 _win_print(ProfWin *window, const char show_char, GDateTime *time,
-    int flags, theme_item_t theme_item, const char * const from, const char * const message)
+    int flags, theme_item_t theme_item, const char * const from, const char * const message, DeliveryReceipt *receipt)
 {
     // flags : 1st bit =  0/1 - me/not me
     //         2nd bit =  0/1 - date/no date
@@ -947,6 +979,10 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
             colour = 0;
         }
 
+        if (receipt && !receipt->received) {
+            colour = theme_attrs(THEME_BLACK_BOLD);
+        }
+
         wattron(window->layout->win, colour);
         if (strncmp(message, "/me ", 4) == 0) {
             wprintw(window->layout->win, "*%s ", from);
@@ -959,7 +995,11 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     }
 
     if (!me_message) {
-        wattron(window->layout->win, theme_attrs(theme_item));
+        if (receipt && !receipt->received) {
+            wattron(window->layout->win, theme_attrs(THEME_BLACK_BOLD));
+        } else {
+            wattron(window->layout->win, theme_attrs(theme_item));
+        }
     }
 
     if (prefs_get_boolean(PREF_WRAP)) {
@@ -975,7 +1015,11 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
     if (me_message) {
         wattroff(window->layout->win, colour);
     } else {
-        wattroff(window->layout->win, theme_attrs(theme_item));
+        if (receipt && !receipt->received) {
+            wattroff(window->layout->win, theme_attrs(THEME_BLACK_BOLD));
+        } else {
+            wattroff(window->layout->win, theme_attrs(theme_item));
+        }
     }
 }
 
@@ -1074,7 +1118,7 @@ win_redraw(ProfWin *window)
 
     for (i = 0; i < size; i++) {
         ProfBuffEntry *e = buffer_yield_entry(window->layout->buffer, i);
-        _win_print(window, e->show_char, e->time, e->flags, e->theme_item, e->from, e->message);
+        _win_print(window, e->show_char, e->time, e->flags, e->theme_item, e->from, e->message, e->receipt);
     }
 }
 

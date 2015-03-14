@@ -387,10 +387,7 @@ ui_message_receipt(const char * const barejid, const char * const id)
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
         ProfWin *win = (ProfWin*) chatwin;
-        GString *message = g_string_new("Message received: ");
-        g_string_append(message, id);
-        win_println(win, message->str);
-        g_string_free(message, TRUE);
+        win_mark_received(win, id);
     }
 }
 
@@ -1459,13 +1456,8 @@ ui_outgoing_chat_msg(const char * const barejid, const char * const message, cha
     ProfChatWin *chatwin = (ProfChatWin*)window;
     chat_state_active(chatwin->state);
 
-    if (id) {
-        GString *message_with_id = g_string_new(id);
-        g_string_append(message_with_id, ": ");
-        g_string_append(message_with_id, message);
-        win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message_with_id->str);
-        g_string_free(message_with_id, TRUE);
-        free(id);
+    if (prefs_get_boolean(PREF_RECEIPTS) && id) {
+        win_print_with_receipt(window, '-', NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
         win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     }
