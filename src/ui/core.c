@@ -1452,6 +1452,48 @@ ui_outgoing_chat_msg(const char * const from, const char * const barejid,
 }
 
 void
+ui_outgoing_chat_msg_carbon(const char * const from, const char * const barejid,
+    const char * const message)
+{
+    PContact contact = roster_get_contact(barejid);
+    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
+    int num = 0;
+
+    // create new window
+    if (window == NULL) {
+        window = wins_new_chat(barejid);
+#ifdef HAVE_LIBOTR
+        ProfChatWin *chatwin = (ProfChatWin*)window;
+        if (otr_is_secure(barejid)) {
+            chatwin->is_otr = TRUE;
+        }
+#endif
+        num = wins_get_num(window);
+
+        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+            _win_show_history(num, barejid);
+        }
+
+        if (contact != NULL) {
+            if (strcmp(p_contact_presence(contact), "offline") == 0) {
+                const char *show = p_contact_presence(contact);
+                const char *status = p_contact_status(contact);
+                win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
+            }
+        }
+
+    // use existing window
+    } else {
+        num = wins_get_num(window);
+    }
+    ProfChatWin *chatwin = (ProfChatWin*)window;
+    chat_state_active(chatwin->state);
+
+    win_save_print(window, '-', NULL, 0, THEME_TEXT_ME, from, message);
+    status_bar_active(num);
+}
+
+void
 ui_outgoing_private_msg(const char * const from, const char * const fulljid,
     const char * const message)
 {

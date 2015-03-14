@@ -201,6 +201,8 @@ void ui_recipient_gone(const char * const barejid, const char * const resource) 
 
 void ui_outgoing_chat_msg(const char * const from, const char * const barejid,
     const char * const message) {}
+void ui_outgoing_chat_msg_carbon(const char * const from, const char * const barejid,
+    const char * const message) {}
 void ui_outgoing_private_msg(const char * const from, const char * const fulljid,
     const char * const message) {}
 
