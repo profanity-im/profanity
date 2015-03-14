@@ -168,7 +168,7 @@ void win_print_incoming_message(ProfWin *window, GTimeVal *tv_stamp,
     const char * const from, const char * const message);
 void win_show_info(ProfWin *window, PContact contact);
 void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occupant);
-void win_save_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...);
+void win_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...);
 void win_save_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message);
 void win_save_println(ProfWin *window, const char * const message);
 void win_save_newline(ProfWin *window);
