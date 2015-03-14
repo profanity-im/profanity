@@ -1960,7 +1960,7 @@ _cmd_execute_default(const char * inp)
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_chat_msg("me", chatwin->barejid, inp, id);
+                        ui_outgoing_chat_msg(chatwin->barejid, inp, id);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
@@ -1973,7 +1973,7 @@ _cmd_execute_default(const char * inp)
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_chat_msg("me", chatwin->barejid, inp, id);
+                    ui_outgoing_chat_msg(chatwin->barejid, inp, id);
                 }
 #else
                 char *id = message_send_chat(chatwin->barejid, inp);
@@ -1984,7 +1984,7 @@ _cmd_execute_default(const char * inp)
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_chat_msg("me", chatwin->barejid, inp, id);
+                ui_outgoing_chat_msg(chatwin->barejid, inp, id);
 #endif
             }
             break;
@@ -1995,7 +1995,7 @@ _cmd_execute_default(const char * inp)
             } else {
                 ProfPrivateWin *privatewin = wins_get_current_private();
                 message_send_private(privatewin->fulljid, inp);
-                ui_outgoing_private_msg("me", privatewin->fulljid, inp);
+                ui_outgoing_private_msg(privatewin->fulljid, inp);
             }
             break;
 

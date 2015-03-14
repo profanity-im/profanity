@@ -310,7 +310,7 @@ handle_incoming_private_message(char *fulljid, char *message)
 
 void
 handle_carbon(char *barejid, char *message){
-    ui_outgoing_chat_msg("me", barejid, message, NULL);
+    ui_outgoing_chat_msg(barejid, message, NULL);
 }
 
 void

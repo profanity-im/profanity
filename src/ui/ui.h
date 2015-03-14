@@ -121,10 +121,8 @@ void ui_message_receipt(const char * const barejid, const char * const id);
 void ui_disconnected(void);
 void ui_recipient_gone(const char * const barejid, const char * const resource);
 
-void ui_outgoing_chat_msg(const char * const from, const char * const barejid,
-    const char * const message, char *id);
-void ui_outgoing_private_msg(const char * const from, const char * const fulljid,
-    const char * const message);
+void ui_outgoing_chat_msg(const char * const barejid, const char * const message, char *id);
+void ui_outgoing_private_msg(const char * const fulljid, const char * const message);
 
 void ui_room_join(const char * const roomjid, gboolean focus);
 void ui_switch_to_room(const char * const roomjid);

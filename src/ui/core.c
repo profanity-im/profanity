@@ -1423,8 +1423,7 @@ ui_open_xmlconsole_win(void)
 }
 
 void
-ui_outgoing_chat_msg(const char * const from, const char * const barejid,
-    const char * const message, char *id)
+ui_outgoing_chat_msg(const char * const barejid, const char * const message, char *id)
 {
     PContact contact = roster_get_contact(barejid);
     ProfWin *window = (ProfWin*)wins_get_chat(barejid);
@@ -1464,18 +1463,17 @@ ui_outgoing_chat_msg(const char * const from, const char * const barejid,
         GString *message_with_id = g_string_new(id);
         g_string_append(message_with_id, ": ");
         g_string_append(message_with_id, message);
-        win_print(window, '-', NULL, 0, THEME_TEXT_ME, from, message_with_id->str);
+        win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message_with_id->str);
         g_string_free(message_with_id, TRUE);
         free(id);
     } else {
-        win_print(window, '-', NULL, 0, THEME_TEXT_ME, from, message);
+        win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     }
     ui_switch_win(num);
 }
 
 void
-ui_outgoing_private_msg(const char * const from, const char * const fulljid,
-    const char * const message)
+ui_outgoing_private_msg(const char * const fulljid, const char * const message)
 {
     ProfWin *window = (ProfWin*)wins_get_private(fulljid);
     int num = 0;
@@ -1490,7 +1488,7 @@ ui_outgoing_private_msg(const char * const from, const char * const fulljid,
         num = wins_get_num(window);
     }
 
-    win_print(window, '-', NULL, 0, THEME_TEXT_ME, from, message);
+    win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     ui_switch_win(num);
 }
 

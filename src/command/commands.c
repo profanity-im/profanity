@@ -1240,7 +1240,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 
             if (msg != NULL) {
                 message_send_private(full_jid->str, msg);
-                ui_outgoing_private_msg("me", full_jid->str, msg);
+                ui_outgoing_private_msg(full_jid->str, msg);
             } else {
                 ui_new_private_win(full_jid->str);
             }
@@ -1267,7 +1267,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                 if (encrypted != NULL) {
                     char *id = message_send_chat_encrypted(barejid, encrypted);
                     otr_free_message(encrypted);
-                    ui_outgoing_chat_msg("me", barejid, msg, id);
+                    ui_outgoing_chat_msg(barejid, msg, id);
 
                     if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
@@ -1301,7 +1301,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                 } else {
                     id = message_send_chat(barejid, msg);
                 }
-                ui_outgoing_chat_msg("me", barejid, msg, id);
+                ui_outgoing_chat_msg(barejid, msg, id);
 
                 if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
@@ -1313,7 +1313,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             return TRUE;
 #else
             char *id = message_send_chat(barejid, msg);
-            ui_outgoing_chat_msg("me", barejid, msg, id);
+            ui_outgoing_chat_msg(barejid, msg, id);
 
             if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
                 const char *jid = jabber_get_fulljid();
@@ -3089,7 +3089,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_chat_msg("me", chatwin->barejid, tiny, id);
+                        ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
@@ -3102,7 +3102,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_chat_msg("me", chatwin->barejid, tiny, id);
+                    ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
                 }
 #else
                 char *id = message_send_chat(chatwin->barejid, tiny);
@@ -3113,12 +3113,12 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_chat_msg("me", chatwin->barejid, tiny, id);
+                ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
 #endif
             } else if (win_type == WIN_PRIVATE) {
                 ProfPrivateWin *privatewin = wins_get_current_private();
                 message_send_private(privatewin->fulljid, tiny);
-                ui_outgoing_private_msg("me", privatewin->fulljid, tiny);
+                ui_outgoing_private_msg(privatewin->fulljid, tiny);
             } else if (win_type == WIN_MUC) {
                 ProfMucWin *mucwin = wins_get_current_muc();
                 message_send_groupchat(mucwin->roomjid, tiny);
