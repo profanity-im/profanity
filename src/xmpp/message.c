@@ -524,45 +524,48 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     // check if carbon message
     xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
-    if (carbons){
-        xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
-        xmpp_stanza_t *message = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
+    if(carbons) {
+        char *name = xmpp_stanza_get_name(carbons);
+        if (g_strcmp0(name, "received") == 0) {
+            xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
+            xmpp_stanza_t *message = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
 
-        xmpp_ctx_t *ctx = connection_get_ctx();
+            xmpp_ctx_t *ctx = connection_get_ctx();
 
-        gchar *to = xmpp_stanza_get_attribute(message, STANZA_ATTR_TO);
-        gchar *from = xmpp_stanza_get_attribute(message, STANZA_ATTR_FROM);
+            gchar *to = xmpp_stanza_get_attribute(message, STANZA_ATTR_TO);
+            gchar *from = xmpp_stanza_get_attribute(message, STANZA_ATTR_FROM);
 
-        // happens when receive a carbon of a self sent message
-        if(to == NULL) {
-            to = from;
-        }
-
-        Jid *jid_from = jid_create(from);
-        Jid *jid_to = jid_create(to);
-        Jid *my_jid = jid_create(jabber_get_fulljid());
-
-        // check for and deal with message
-        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
-        if (body != NULL) {
-            char *message = xmpp_stanza_get_text(body);
-            if (message != NULL) {
-                // if we are the recipient, treat as standard incoming message
-                if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
-                    handle_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
-                }
-                // else treat as a sent message
-                else{
-                    handle_carbon(jid_to->barejid, message);
-                }
-                xmpp_free(ctx, message);
+            // happens when receive a carbon of a self sent message
+            if(to == NULL) {
+                to = from;
             }
-        }
 
-        jid_destroy(jid_from);
-        jid_destroy(jid_to);
-        jid_destroy(my_jid);
-        return 1;
+            Jid *jid_from = jid_create(from);
+            Jid *jid_to = jid_create(to);
+            Jid *my_jid = jid_create(jabber_get_fulljid());
+
+            // check for and deal with message
+            xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
+            if (body != NULL) {
+                char *message = xmpp_stanza_get_text(body);
+                if (message != NULL) {
+                    // if we are the recipient, treat as standard incoming message
+                    if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
+                        handle_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
+                    }
+                    // else treat as a sent message
+                    else{
+                        handle_carbon(jid_to->barejid, message);
+                    }
+                    xmpp_free(ctx, message);
+                }
+            }
+
+            jid_destroy(jid_from);
+            jid_destroy(jid_to);
+            jid_destroy(my_jid);
+            return 1;
+        }
     }
 
     // ignore handled namespaces
