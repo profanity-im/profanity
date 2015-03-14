@@ -389,7 +389,7 @@ ui_message_receipt(const char * const barejid, const char * const id)
         ProfWin *win = (ProfWin*) chatwin;
         GString *message = g_string_new("Message received: ");
         g_string_append(message, id);
-        win_save_println(win, message->str);
+        win_println(win, message->str);
         g_string_free(message, TRUE);
     }
 }
@@ -1273,7 +1273,7 @@ ui_current_print_line(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_save_println(window, fmt_msg->str);
+    win_println(window, fmt_msg->str);
     va_end(arg);
     g_string_free(fmt_msg, TRUE);
 }
@@ -2699,7 +2699,7 @@ ui_show_form_field(ProfWin *window, DataForm *form, char *tag)
 {
     FormField *field = form_get_field_by_tag(form, tag);
     _ui_handle_form_field(window, tag, field);
-    win_save_println(window, "");
+    win_println(window, "");
 }
 
 void

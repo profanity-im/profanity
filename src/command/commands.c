@@ -1738,7 +1738,7 @@ cmd_status(gchar **args, struct cmd_help_t help)
                 if (pcontact != NULL) {
                     win_show_contact(window, pcontact);
                 } else {
-                    win_save_println(window, "Error getting contact info.");
+                    win_println(window, "Error getting contact info.");
                 }
             }
             break;
@@ -1753,7 +1753,7 @@ cmd_status(gchar **args, struct cmd_help_t help)
                 if (occupant) {
                     win_show_occupant(window, occupant);
                 } else {
-                    win_save_println(window, "Error getting contact info.");
+                    win_println(window, "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }
@@ -1819,7 +1819,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
                 if (pcontact != NULL) {
                     win_show_info(window, pcontact);
                 } else {
-                    win_save_println(window, "Error getting contact info.");
+                    win_println(window, "Error getting contact info.");
                 }
             }
             break;
@@ -1834,7 +1834,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
                 if (occupant) {
                     win_show_occupant_info(window, jid->barejid, occupant);
                 } else {
-                    win_save_println(window, "Error getting contact info.");
+                    win_println(window, "Error getting contact info.");
                 }
                 jid_destroy(jid);
             }

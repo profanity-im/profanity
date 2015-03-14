@@ -892,7 +892,7 @@ win_print(ProfWin *window, const char show_char, GTimeVal *tstamp,
 }
 
 void
-win_save_println(ProfWin *window, const char * const message)
+win_println(ProfWin *window, const char * const message)
 {
     win_print(window, '-', NULL, 0, 0, "", message);
 }

@@ -86,7 +86,7 @@ cons_debug(const char * const msg, ...)
         va_start(arg, msg);
         GString *fmt_msg = g_string_new(NULL);
         g_string_vprintf(fmt_msg, msg, arg);
-        win_save_println(console, fmt_msg->str);
+        win_println(console, fmt_msg->str);
         g_string_free(fmt_msg, TRUE);
         va_end(arg);
     }
@@ -100,7 +100,7 @@ cons_show(const char * const msg, ...)
     va_start(arg, msg);
     GString *fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_save_println(console, fmt_msg->str);
+    win_println(console, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -177,13 +177,13 @@ cons_about(void)
     }
 
     win_vprint(console, '-', NULL, 0, 0, "", "Copyright (C) 2012 - 2015 James Booth <%s>.", PACKAGE_BUGREPORT);
-    win_save_println(console, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
-    win_save_println(console, "");
-    win_save_println(console, "This is free software; you are free to change and redistribute it.");
-    win_save_println(console, "There is NO WARRANTY, to the extent permitted by law.");
-    win_save_println(console, "");
-    win_save_println(console, "Type '/help' to show complete help.");
-    win_save_println(console, "");
+    win_println(console, "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>");
+    win_println(console, "");
+    win_println(console, "This is free software; you are free to change and redistribute it.");
+    win_println(console, "There is NO WARRANTY, to the extent permitted by law.");
+    win_println(console, "");
+    win_println(console, "Type '/help' to show complete help.");
+    win_println(console, "");
 
     if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
@@ -206,12 +206,12 @@ cons_check_version(gboolean not_available_msg)
         if (relase_valid) {
             if (release_is_new(latest_release)) {
                 win_vprint(console, '-', NULL, 0, 0, "", "A new version of Profanity is available: %s", latest_release);
-                win_save_println(console, "Check <http://www.profanity.im> for details.");
-                win_save_println(console, "");
+                win_println(console, "Check <http://www.profanity.im> for details.");
+                win_println(console, "");
             } else {
                 if (not_available_msg) {
-                    win_save_println(console, "No new version available.");
-                    win_save_println(console, "");
+                    win_println(console, "No new version available.");
+                    win_println(console, "");
                 }
             }
 
@@ -248,7 +248,7 @@ cons_show_wins(void)
 
     GSList *curr = window_strings;
     while (curr != NULL) {
-        win_save_println(console, curr->data);
+        win_println(console, curr->data);
         curr = g_slist_next(curr);
     }
     g_slist_free_full(window_strings, free);
@@ -337,7 +337,7 @@ cons_show_caps(const char * const fulljid, resource_presence_t presence)
         }
 
         if (caps->features != NULL) {
-            win_save_println(console, "Features:");
+            win_println(console, "Features:");
             GSList *feature = caps->features;
             while (feature != NULL) {
                 win_vprint(console, '-', NULL, 0, 0, "", " %s", feature->data);
@@ -721,7 +721,7 @@ cons_show_account(ProfAccount *account)
 
         GList *curr = resources;
         if (curr != NULL) {
-            win_save_println(console, "Resources:");
+            win_println(console, "Resources:");
 
             // sort in order of availability
             while (curr != NULL) {
@@ -1574,7 +1574,7 @@ static void
 _cons_splash_logo(void)
 {
     ProfWin *console = wins_get_console();
-    win_save_println(console, "Welcome to");
+    win_println(console, "Welcome to");
 
     win_print(console, '-', NULL, 0, THEME_SPLASH, "", "                   ___            _           ");
     win_print(console, '-', NULL, 0, THEME_SPLASH, "", "                  / __)          (_)_         ");
