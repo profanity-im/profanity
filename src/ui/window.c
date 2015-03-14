@@ -617,7 +617,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
         win_vprint(window, '!', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", occupant->status);
     }
 
-    win_save_newline(window);
+    win_newline(window);
 
     if (occupant->jid) {
         win_vprint(window, '!', NULL, 0, 0, "", "  Jid: %s", occupant->jid);
@@ -649,7 +649,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
             if (caps->category != NULL) {
                 win_print(window, '!', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
             }
-            win_save_newline(window);
+            win_newline(window);
         }
         if (caps->software != NULL) {
             win_vprint(window, '!', NULL, NO_EOL, 0, "", "  Software: %s", caps->software);
@@ -658,7 +658,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
             win_vprint(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
         }
         if ((caps->software != NULL) || (caps->software_version != NULL)) {
-            win_save_newline(window);
+            win_newline(window);
         }
         if (caps->os != NULL) {
             win_vprint(window, '!', NULL, NO_EOL, 0, "", "  OS: %s", caps->os);
@@ -667,7 +667,7 @@ win_show_occupant_info(ProfWin *window, const char * const room, Occupant *occup
             win_vprint(window, '!', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
         }
         if ((caps->os != NULL) || (caps->os_version != NULL)) {
-            win_save_newline(window);
+            win_newline(window);
         }
         caps_destroy(caps);
     }
@@ -742,7 +742,7 @@ win_show_info(ProfWin *window, PContact contact)
         if (resource->status != NULL) {
             win_vprint(window, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
         }
-        win_save_newline(window);
+        win_newline(window);
 
         Jid *jidp = jid_create_from_bare_and_resource(barejid, resource->name);
         Capabilities *caps = caps_lookup(jidp->fulljid);
@@ -767,7 +767,7 @@ win_show_info(ProfWin *window, PContact contact)
                 if (caps->category != NULL) {
                     win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                 }
-                win_save_newline(window);
+                win_newline(window);
             }
             if (caps->software != NULL) {
                 win_vprint(window, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
@@ -776,7 +776,7 @@ win_show_info(ProfWin *window, PContact contact)
                 win_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
             }
             if ((caps->software != NULL) || (caps->software_version != NULL)) {
-                win_save_newline(window);
+                win_newline(window);
             }
             if (caps->os != NULL) {
                 win_vprint(window, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
@@ -785,7 +785,7 @@ win_show_info(ProfWin *window, PContact contact)
                 win_vprint(window, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
             }
             if ((caps->os != NULL) || (caps->os_version != NULL)) {
-                win_save_newline(window);
+                win_newline(window);
             }
             caps_destroy(caps);
         }
@@ -898,7 +898,7 @@ win_println(ProfWin *window, const char * const message)
 }
 
 void
-win_save_newline(ProfWin *window)
+win_newline(ProfWin *window)
 {
     win_print(window, '-', NULL, NO_DATE, 0, "", "");
 }

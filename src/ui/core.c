@@ -2558,7 +2558,7 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
                 }
             }
         }
-        win_save_newline(window);
+        win_newline(window);
         break;
     case FIELD_TEXT_PRIVATE:
         if (curr_value != NULL) {
@@ -2567,10 +2567,10 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
                 win_print(window, '-', NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", "[hidden]");
             }
         }
-        win_save_newline(window);
+        win_newline(window);
         break;
     case FIELD_TEXT_MULTI:
-        win_save_newline(window);
+        win_newline(window);
         int index = 1;
         while (curr_value != NULL) {
             char *value = curr_value->data;
@@ -2599,7 +2599,7 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         break;
     case FIELD_LIST_SINGLE:
         if (curr_value != NULL) {
-            win_save_newline(window);
+            win_newline(window);
             char *value = curr_value->data;
             GSList *options = field->options;
             GSList *curr_option = options;
@@ -2616,7 +2616,7 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
         break;
     case FIELD_LIST_MULTI:
         if (curr_value != NULL) {
-            win_save_newline(window);
+            win_newline(window);
             GSList *options = field->options;
             GSList *curr_option = options;
             while (curr_option != NULL) {
@@ -2637,10 +2637,10 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
                 win_print(window, '-', NULL, NO_DATE | NO_EOL, THEME_ONLINE, "", value);
             }
         }
-        win_save_newline(window);
+        win_newline(window);
         break;
     case FIELD_JID_MULTI:
-        win_save_newline(window);
+        win_newline(window);
         while (curr_value != NULL) {
             char *value = curr_value->data;
             win_vprint(window, '-', NULL, 0, THEME_ONLINE, "", "  %s", value);
@@ -2654,7 +2654,7 @@ _ui_handle_form_field(ProfWin *window, char *tag, FormField *field)
                 win_print(window, '-', NULL, NO_DATE | NO_EOL, 0, "", value);
             }
         }
-        win_save_newline(window);
+        win_newline(window);
         break;
     default:
         break;

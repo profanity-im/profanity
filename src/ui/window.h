@@ -171,7 +171,7 @@ void win_show_occupant_info(ProfWin *window, const char * const room, Occupant *
 void win_vprint(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message, ...);
 void win_print(ProfWin *window, const char show_char, GTimeVal *tstamp, int flags, theme_item_t theme_item, const char * const from, const char * const message);
 void win_println(ProfWin *window, const char * const message);
-void win_save_newline(ProfWin *window);
+void win_newline(ProfWin *window);
 void win_redraw(ProfWin *window);
 void win_hide_subwin(ProfWin *window);
 void win_show_subwin(ProfWin *window);
