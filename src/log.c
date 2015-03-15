@@ -46,6 +46,7 @@
 
 #include "common.h"
 #include "config/preferences.h"
+#include "xmpp/xmpp.h"
 
 #define PROF "prof"
 
@@ -66,7 +67,7 @@ struct dated_chat_log {
 };
 
 static gboolean _log_roll_needed(struct dated_chat_log *dated_log);
-static struct dated_chat_log * _create_log(char *other, const  char * const login);
+static struct dated_chat_log * _create_log(const char * const other, const  char * const login);
 static struct dated_chat_log * _create_groupchat_log(char *room, const char * const login);
 static void _free_chat_log(struct dated_chat_log *dated_log);
 static gboolean _key_equals(void *key1, void *key2);
@@ -78,6 +79,8 @@ static gchar * _get_chatlog_dir(void);
 static gchar * _get_main_log_file(void);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
+static void _chat_log_chat(const char * const login, const char * const other,
+    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp);
 
 void
 log_debug(const char * const msg, ...)
@@ -249,8 +252,75 @@ groupchat_log_init(void)
 }
 
 void
-chat_log_chat(const gchar * const login, gchar *other,
-    const gchar * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
+chat_log_msg_out(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_otr_msg_out(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+        if (strcmp(pref_otr_log, "on") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_OUT_LOG, NULL);
+        } else if (strcmp(pref_otr_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
+        }
+        prefs_free_string(pref_otr_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_otr_msg_in(const char * const barejid, const char * const msg, gboolean was_decrypted)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+        if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
+            _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, NULL);
+        } else if (strcmp(pref_otr_log, "redact") == 0) {
+            _chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, NULL);
+        }
+        prefs_free_string(pref_otr_log);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_msg_in(const char * const barejid, const char * const msg)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, NULL);
+        jid_destroy(jidp);
+    }
+}
+
+void
+chat_log_msg_in_delayed(const char * const barejid, const char * msg, GTimeVal *tv_stamp)
+{
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        const char *jid = jabber_get_fulljid();
+        Jid *jidp = jid_create(jid);
+        _chat_log_chat(jidp->barejid, barejid, msg, PROF_IN_LOG, tv_stamp);
+        jid_destroy(jidp);
+    }
+}
+
+static void
+_chat_log_chat(const char * const login, const char * const other,
+    const char * const msg, chat_log_direction_t direction, GTimeVal *tv_stamp)
 {
     struct dated_chat_log *dated_log = g_hash_table_lookup(logs, other);
 
@@ -402,7 +472,7 @@ chat_log_close(void)
 }
 
 static struct dated_chat_log *
-_create_log(char *other, const char * const login)
+_create_log(const char * const other, const char * const login)
 {
     GDateTime *now = g_date_time_new_now_local();
     char *filename = _get_log_filename(other, login, now, TRUE);

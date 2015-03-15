@@ -1272,18 +1272,8 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     char *id = message_send_chat_encrypted(barejid, encrypted);
                     otr_free_message(encrypted);
                     ui_outgoing_chat_msg(barejid, plugin_message, id);
-
-                    if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
-                        const char *jid = jabber_get_fulljid();
-                        Jid *jidp = jid_create(jid);
-                        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
-                        if (strcmp(pref_otr_log, "on") == 0) {
-                            chat_log_chat(jidp->barejid, barejid, plugin_message, PROF_OUT_LOG, NULL);
-                        } else if (strcmp(pref_otr_log, "redact") == 0) {
-                            chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_OUT_LOG, NULL);
-                        }
-                        prefs_free_string(pref_otr_log);
-                        jid_destroy(jidp);
+                    if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
+                        chat_log_otr_msg_out(barejid, plugin_message);
                     }
                 } else {
                     cons_show_error("Failed to encrypt and send message,");
@@ -1306,12 +1296,8 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     id = message_send_chat(barejid, plugin_message);
                 }
                 ui_outgoing_chat_msg(barejid, plugin_message, id);
-
-                if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
-                    const char *jid = jabber_get_fulljid();
-                    Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, barejid, plugin_message, PROF_OUT_LOG, NULL);
-                    jid_destroy(jidp);
+                if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
+                    chat_log_msg_out(barejid, plugin_message);
                 }
             }
 
@@ -1322,12 +1308,8 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 #else
             char *id = message_send_chat(barejid, plugin_message);
             ui_outgoing_chat_msg(barejid, plugin_message, id);
-
-            if (((win_type == WIN_CHAT) || (win_type == WIN_CONSOLE)) && prefs_get_boolean(PREF_CHLOG)) {
-                const char *jid = jabber_get_fulljid();
-                Jid *jidp = jid_create(jid);
-                chat_log_chat(jidp->barejid, barejid, plugin_message, PROF_OUT_LOG, NULL);
-                jid_destroy(jidp);
+            if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
+                chat_log_msg_out(barejid, plugin_message);
             }
 
             plugins_post_chat_message_send(barejid, plugin_message);
@@ -3087,43 +3069,19 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                     if (encrypted != NULL) {
                         char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
-                        if (prefs_get_boolean(PREF_CHLOG)) {
-                            const char *jid = jabber_get_fulljid();
-                            Jid *jidp = jid_create(jid);
-                            char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
-                            if (strcmp(pref_otr_log, "on") == 0) {
-                                chat_log_chat(jidp->barejid, chatwin->barejid, tiny, PROF_OUT_LOG, NULL);
-                            } else if (strcmp(pref_otr_log, "redact") == 0) {
-                                chat_log_chat(jidp->barejid, chatwin->barejid, "[redacted]", PROF_OUT_LOG, NULL);
-                            }
-                            prefs_free_string(pref_otr_log);
-                            jid_destroy(jidp);
-                        }
-
+                        chat_log_otr_msg_out(chatwin->barejid, tiny);
                         ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
                     char *id = message_send_chat(chatwin->barejid, tiny);
-                    if (prefs_get_boolean(PREF_CHLOG)) {
-                        const char *jid = jabber_get_fulljid();
-                        Jid *jidp = jid_create(jid);
-                        chat_log_chat(jidp->barejid, chatwin->barejid, tiny, PROF_OUT_LOG, NULL);
-                        jid_destroy(jidp);
-                    }
-
+                    chat_log_msg_out(chatwin->barejid, tiny);
                     ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
                 }
 #else
                 char *id = message_send_chat(chatwin->barejid, tiny);
-                if (prefs_get_boolean(PREF_CHLOG)) {
-                    const char *jid = jabber_get_fulljid();
-                    Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, chatwin->barejid, tiny, PROF_OUT_LOG, NULL);
-                    jid_destroy(jidp);
-                }
-
+                chat_log_msg_out(chatwin->barejid, tiny);
                 ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
 #endif
             } else if (win_type == WIN_PRIVATE) {

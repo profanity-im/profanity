@@ -1974,44 +1974,20 @@ _cmd_execute_default(const char * inp)
                     if (encrypted != NULL) {
                         char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
-                        if (prefs_get_boolean(PREF_CHLOG)) {
-                            const char *jid = jabber_get_fulljid();
-                            Jid *jidp = jid_create(jid);
-                            char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
-                            if (strcmp(pref_otr_log, "on") == 0) {
-                                chat_log_chat(jidp->barejid, chatwin->barejid, plugin_message, PROF_OUT_LOG, NULL);
-                            } else if (strcmp(pref_otr_log, "redact") == 0) {
-                                chat_log_chat(jidp->barejid, chatwin->barejid, "[redacted]", PROF_OUT_LOG, NULL);
-                            }
-                            prefs_free_string(pref_otr_log);
-                            jid_destroy(jidp);
-                        }
-
+                        chat_log_otr_msg_out(chatwin->barejid, plugin_message);
                         ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
                     char *id = message_send_chat(chatwin->barejid, plugin_message);
-                    if (prefs_get_boolean(PREF_CHLOG)) {
-                        const char *jid = jabber_get_fulljid();
-                        Jid *jidp = jid_create(jid);
-                        chat_log_chat(jidp->barejid, chatwin->barejid, plugin_message, PROF_OUT_LOG, NULL);
-                        jid_destroy(jidp);
-                    }
-
+                    chat_log_msg_out(chatwin->barejid, plugin_message);
                     ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
                 }
 
 #else
                 char *id = message_send_chat(chatwin->barejid, plugin_message);
-                if (prefs_get_boolean(PREF_CHLOG)) {
-                    const char *jid = jabber_get_fulljid();
-                    Jid *jidp = jid_create(jid);
-                    chat_log_chat(jidp->barejid, chatwin->barejid, plugin_message, PROF_OUT_LOG, NULL);
-                    jid_destroy(jidp);
-                }
-
+                chat_log_msg_out(chatwin->barejid, plugin_message);
                 ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
 #endif
                 plugins_post_chat_message_send(chatwin->barejid, plugin_message);
