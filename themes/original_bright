@@ -47,3 +47,4 @@ me=bold_yellow
 them=bold_green
 roster.header=bold_yellow
 occupants.header=bold_yellow
+receipt.sent=bold_red

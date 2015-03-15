@@ -282,9 +282,44 @@ stanza_create_room_subject_message(xmpp_ctx_t *ctx, const char * const room, con
 }
 
 xmpp_stanza_t *
-stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
-    const char * const type, const char * const message,
-    const char * const state, gboolean encrypted)
+stanza_attach_state(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char * const state)
+{
+    xmpp_stanza_t *chat_state = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(chat_state, state);
+    xmpp_stanza_set_ns(chat_state, STANZA_NS_CHATSTATES);
+    xmpp_stanza_add_child(stanza, chat_state);
+    xmpp_stanza_release(chat_state);
+
+    return stanza;
+}
+
+xmpp_stanza_t *
+stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
+{
+    xmpp_stanza_t *private_carbon = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(private_carbon, "private");
+    xmpp_stanza_set_ns(private_carbon, STANZA_NS_CARBONS);
+    xmpp_stanza_add_child(stanza, private_carbon);
+    xmpp_stanza_release(private_carbon);
+
+    return stanza;
+}
+
+xmpp_stanza_t *
+stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza)
+{
+    xmpp_stanza_t *receipet_request = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(receipet_request, "request");
+    xmpp_stanza_set_ns(receipet_request, STANZA_NS_RECEIPTS);
+    xmpp_stanza_add_child(stanza, receipet_request);
+    xmpp_stanza_release(receipet_request);
+
+    return stanza;
+}
+
+xmpp_stanza_t *
+stanza_create_message(xmpp_ctx_t *ctx, char *id, const char * const recipient,
+    const char * const type, const char * const message)
 {
     xmpp_stanza_t *msg, *body, *text;
 
@@ -292,9 +327,7 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_set_name(msg, STANZA_NAME_MESSAGE);
     xmpp_stanza_set_type(msg, type);
     xmpp_stanza_set_attribute(msg, STANZA_ATTR_TO, recipient);
-    char *id = create_unique_id(NULL);
     xmpp_stanza_set_id(msg, id);
-    free(id);
 
     body = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(body, STANZA_NAME_BODY);
@@ -305,22 +338,6 @@ stanza_create_message(xmpp_ctx_t *ctx, const char * const recipient,
     xmpp_stanza_release(text);
     xmpp_stanza_add_child(msg, body);
     xmpp_stanza_release(body);
-
-    if (state != NULL) {
-        xmpp_stanza_t *chat_state = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(chat_state, state);
-        xmpp_stanza_set_ns(chat_state, STANZA_NS_CHATSTATES);
-        xmpp_stanza_add_child(msg, chat_state);
-        xmpp_stanza_release(chat_state);
-    }
-
-    if (encrypted) {
-        xmpp_stanza_t *private_carbon = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(private_carbon, "private");
-        xmpp_stanza_set_ns(private_carbon, STANZA_NS_CARBONS);
-        xmpp_stanza_add_child(msg, private_carbon);
-        xmpp_stanza_release(private_carbon);
-    }
 
     return msg;
 }

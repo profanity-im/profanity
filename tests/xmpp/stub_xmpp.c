@@ -58,16 +58,18 @@ GList * jabber_get_available_resources(void)
 }
 
 // message functions
-void message_send_chat(const char * const barejid, const char * const msg)
+char* message_send_chat(const char * const barejid, const char * const msg)
 {
     check_expected(barejid);
     check_expected(msg);
+    return NULL;
 }
 
-void message_send_chat_encrypted(const char * const barejid, const char * const msg)
+char* message_send_chat_encrypted(const char * const barejid, const char * const msg)
 {
     check_expected(barejid);
     check_expected(msg);
+    return NULL;
 }
 
 void message_send_private(const char * const fulljid, const char * const msg) {}

@@ -321,8 +321,9 @@ handle_incoming_private_message(char *fulljid, char *message)
 }
 
 void
-handle_carbon(char *barejid, char *message){
-    ui_outgoing_chat_msg_carbon("me", barejid, message);
+handle_carbon(char *barejid, char *message)
+{
+    ui_outgoing_chat_msg_carbon(barejid, message);
 }
 
 void
@@ -428,6 +429,12 @@ handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
     }
 
     free(new_message);
+}
+
+void
+handle_message_receipt(char *barejid, char *id)
+{
+    ui_message_receipt(barejid, id);
 }
 
 void

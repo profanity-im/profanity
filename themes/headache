@@ -47,3 +47,4 @@ me=white
 them=white
 roster.header=bold_cyan
 occupants.header=bold_cyan
+receipt.sent=red

@@ -47,3 +47,4 @@ me=black
 them=black
 roster.header=black
 occupants.header=black
+receipt.sent=red

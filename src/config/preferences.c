@@ -556,6 +556,7 @@ _get_group(preference_t pref)
         case PREF_CONNECT_ACCOUNT:
         case PREF_DEFAULT_ACCOUNT:
         case PREF_CARBONS:
+        case PREF_RECEIPTS:
             return PREF_GROUP_CONNECTION;
         case PREF_OTR_LOG:
         case PREF_OTR_POLICY:
@@ -592,6 +593,8 @@ _get_key(preference_t pref)
             return "history";
         case PREF_CARBONS:
             return "carbons";
+        case PREF_RECEIPTS:
+            return "receipts";
         case PREF_MOUSE:
             return "mouse";
         case PREF_OCCUPANTS:

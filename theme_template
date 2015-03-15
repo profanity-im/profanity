@@ -47,6 +47,7 @@ me=
 them=
 roster.header=
 occupants.header=
+receipt.sent=
 
 [ui]
 beep=

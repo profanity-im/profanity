@@ -922,6 +922,15 @@ static struct cmd_t command_defs[] =
         "The message carbons feature ensures that both sides of all conversations are shared with all the user's clients that implement this protocol.",
         NULL  } } },
 
+    { "/receipts",
+      cmd_receipts, parse_args, 1, 1, &cons_receipts_setting,
+      { "/receipts on|off", "Message delivery receipts.",
+      { "/receipts on|off",
+        "----------------",
+        "Enable or disable message delivery receipts.",
+        "The user interface will indicate when a message has been received.",
+        NULL  } } },
+
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
         { "/reconnect seconds", "Set reconnect interval.",
@@ -1963,7 +1972,7 @@ _cmd_execute_default(const char * inp)
                 if (otr_is_secure(chatwin->barejid)) {
                     char *encrypted = otr_encrypt_message(chatwin->barejid, plugin_message);
                     if (encrypted != NULL) {
-                        message_send_chat_encrypted(chatwin->barejid, encrypted);
+                        char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
                         otr_free_message(encrypted);
                         if (prefs_get_boolean(PREF_CHLOG)) {
                             const char *jid = jabber_get_fulljid();
@@ -1978,12 +1987,12 @@ _cmd_execute_default(const char * inp)
                             jid_destroy(jidp);
                         }
 
-                        ui_outgoing_chat_msg("me", chatwin->barejid, plugin_message);
+                        ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
                     } else {
                         cons_show_error("Failed to send message.");
                     }
                 } else {
-                    message_send_chat(chatwin->barejid, plugin_message);
+                    char *id = message_send_chat(chatwin->barejid, plugin_message);
                     if (prefs_get_boolean(PREF_CHLOG)) {
                         const char *jid = jabber_get_fulljid();
                         Jid *jidp = jid_create(jid);
@@ -1991,11 +2000,11 @@ _cmd_execute_default(const char * inp)
                         jid_destroy(jidp);
                     }
 
-                    ui_outgoing_chat_msg("me", chatwin->barejid, plugin_message);
+                    ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
                 }
 
 #else
-                message_send_chat(chatwin->barejid, plugin_message);
+                char *id = message_send_chat(chatwin->barejid, plugin_message);
                 if (prefs_get_boolean(PREF_CHLOG)) {
                     const char *jid = jabber_get_fulljid();
                     Jid *jidp = jid_create(jid);
@@ -2003,8 +2012,7 @@ _cmd_execute_default(const char * inp)
                     jid_destroy(jidp);
                 }
 
-                ui_outgoing_chat_msg("me", chatwin->barejid, plugin_message);
-
+                ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
 #endif
                 plugins_post_chat_message_send(chatwin->barejid, plugin_message);
                 free(plugin_message);
@@ -2019,7 +2027,7 @@ _cmd_execute_default(const char * inp)
                 char *new_message = plugins_pre_priv_message_send(privatewin->fulljid, inp);
 
                 message_send_private(privatewin->fulljid, new_message);
-                ui_outgoing_private_msg("me", privatewin->fulljid, new_message);
+                ui_outgoing_private_msg(privatewin->fulljid, new_message);
 
                 plugins_post_priv_message_send(privatewin->fulljid, new_message);
 
@@ -2053,7 +2061,7 @@ _cmd_complete_parameters(const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons", "/receipts" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);

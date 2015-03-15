@@ -118,16 +118,14 @@ void ui_handle_stanza(const char * const msg);
 void ui_contact_typing(const char * const barejid, const char * const resource);
 void ui_incoming_msg(const char * const from, const char * const resource,  const char * const message, GTimeVal *tv_stamp);
 void ui_incoming_private_msg(const char * const fulljid, const char * const message, GTimeVal *tv_stamp);
+void ui_message_receipt(const char * const barejid, const char * const id);
 
 void ui_disconnected(void);
 void ui_recipient_gone(const char * const barejid, const char * const resource);
 
-void ui_outgoing_chat_msg(const char * const from, const char * const barejid,
-    const char * const message);
-void ui_outgoing_chat_msg_carbon(const char * const from, const char * const barejid,
-    const char * const message);
-void ui_outgoing_private_msg(const char * const from, const char * const fulljid,
-    const char * const message);
+void ui_outgoing_chat_msg(const char * const barejid, const char * const message, char *id);
+void ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message);
+void ui_outgoing_private_msg(const char * const fulljid, const char * const message);
 
 void ui_room_join(const char * const roomjid, gboolean focus);
 void ui_switch_to_room(const char * const roomjid);
@@ -320,6 +318,7 @@ void cons_intype_setting(void);
 void cons_gone_setting(void);
 void cons_history_setting(void);
 void cons_carbons_setting(void);
+void cons_receipts_setting(void);
 void cons_log_setting(void);
 void cons_chlog_setting(void);
 void cons_grlog_setting(void);

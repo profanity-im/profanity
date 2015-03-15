@@ -158,6 +158,7 @@
 #define STANZA_NS_PUBSUB "http://jabber.org/protocol/pubsub"
 #define STANZA_NS_CARBONS "urn:xmpp:carbons:2"
 #define STANZA_NS_FORWARD "urn:xmpp:forward:0"
+#define STANZA_NS_RECEIPTS "urn:xmpp:receipts"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -189,9 +190,12 @@ xmpp_stanza_t * stanza_disable_carbons(xmpp_ctx_t *ctx);
 xmpp_stanza_t* stanza_create_chat_state(xmpp_ctx_t *ctx,
     const char * const fulljid, const char * const state);
 
-xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx,
-    const char * const recipient, const char * const type,
-    const char * const message, const char * const state, gboolean encrypted);
+xmpp_stanza_t * stanza_attach_state(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza, const char * const state);
+xmpp_stanza_t * stanza_attach_carbons_private(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
+xmpp_stanza_t * stanza_attach_receipt_request(xmpp_ctx_t *ctx, xmpp_stanza_t *stanza);
+
+xmpp_stanza_t* stanza_create_message(xmpp_ctx_t *ctx, char *id,
+    const char * const recipient, const char * const type, const char * const message);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     const char * const full_room_jid, const char * const passwd);

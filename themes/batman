@@ -34,7 +34,6 @@ otr.started.untrusted=red
 otr.ended=yellow
 otr.trusted=green
 otr.untrusted=red
-
 titlebar.online=magenta
 titlebar.offline=black
 titlebar.away=magenta
@@ -48,3 +47,4 @@ unsubscribed=black_bold
 roommention=cyan
 roster.header=yellow
 occupants.header=yellow
+receipt.sent=red
