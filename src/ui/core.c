@@ -1108,6 +1108,17 @@ ui_otr_authetication_waiting(const char * const barejid)
 }
 
 void
+ui_handle_otr_error(const char * const barejid, const char * const message)
+{
+    ProfChatWin *chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        win_save_print((ProfWin*)chatwin, '!', NULL, 0, THEME_ERROR, "", message);
+    } else {
+        cons_show_error(message);
+    }
+}
+
+void
 ui_trust(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
