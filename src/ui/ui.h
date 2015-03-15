@@ -82,6 +82,8 @@ void ui_smp_answer_failure(const char * const barejid);
 void ui_otr_authenticating(const char * const barejid);
 void ui_otr_authetication_waiting(const char * const recipient);
 
+void ui_handle_otr_error(const char * const barejid, const char * const message);
+
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
 void ui_new_chat_win(const char * const barejid);
