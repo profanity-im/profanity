@@ -3,6 +3,7 @@
 
 - GNU Readline
 - Message Carbons (xep-0280)
+- Message Delivery Receipts (xep-0184)
 
 0.4.6
 =====
