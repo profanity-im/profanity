@@ -923,8 +923,8 @@ static struct cmd_t command_defs[] =
 
     { "/receipts",
       cmd_receipts, parse_args, 1, 1, &cons_receipts_setting,
-      { "/reciepts on|off", "Message delivery receipts.",
-      { "/reciepts on|off",
+      { "/receipts on|off", "Message delivery receipts.",
+      { "/receipts on|off",
         "----------------",
         "Enable or disable message delivery receipts.",
         "The user interface will indicate when a message has been received.",

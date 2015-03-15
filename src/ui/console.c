@@ -1142,27 +1142,27 @@ void
 cons_states_setting(void)
 {
     if (prefs_get_boolean(PREF_STATES))
-        cons_show("Send chat states (/states) : ON");
+        cons_show("Send chat states (/states)    : ON");
     else
-        cons_show("Send chat states (/states) : OFF");
+        cons_show("Send chat states (/states)    : OFF");
 }
 
 void
 cons_outtype_setting(void)
 {
     if (prefs_get_boolean(PREF_OUTTYPE))
-        cons_show("Send composing (/outtype)  : ON");
+        cons_show("Send composing (/outtype)     : ON");
     else
-        cons_show("Send composing (/outtype)  : OFF");
+        cons_show("Send composing (/outtype)     : OFF");
 }
 
 void
 cons_intype_setting(void)
 {
     if (prefs_get_boolean(PREF_INTYPE))
-        cons_show("Show typing (/intype)      : ON");
+        cons_show("Show typing (/intype)         : ON");
     else
-        cons_show("Show typing (/intype)      : OFF");
+        cons_show("Show typing (/intype)         : OFF");
 }
 
 void
@@ -1170,11 +1170,11 @@ cons_gone_setting(void)
 {
     gint gone_time = prefs_get_gone();
     if (gone_time == 0) {
-        cons_show("Leave conversation (/gone) : OFF");
+        cons_show("Leave conversation (/gone)    : OFF");
     } else if (gone_time == 1) {
-        cons_show("Leave conversation (/gone) : 1 minute");
+        cons_show("Leave conversation (/gone)    : 1 minute");
     } else {
-        cons_show("Leave conversation (/gone) : %d minutes", gone_time);
+        cons_show("Leave conversation (/gone)    : %d minutes", gone_time);
     }
 }
 
@@ -1182,9 +1182,9 @@ void
 cons_history_setting(void)
 {
     if (prefs_get_boolean(PREF_HISTORY))
-        cons_show("Chat history (/history)    : ON");
+        cons_show("Chat history (/history)       : ON");
     else
-        cons_show("Chat history (/history)    : OFF");
+        cons_show("Chat history (/history)       : OFF");
 }
 
 void
@@ -1200,7 +1200,7 @@ void
 cons_receipts_setting(void)
 {
     if (prefs_get_boolean(PREF_RECEIPTS))
-        cons_show("Message receipts (/reciepts)  : ON");
+        cons_show("Message receipts (/receipts)  : ON");
     else
         cons_show("Message receipts (/receipts)  : OFF");
 }
@@ -1215,6 +1215,8 @@ cons_show_chat_prefs(void)
     cons_intype_setting();
     cons_gone_setting();
     cons_history_setting();
+    cons_carbons_setting();
+    cons_receipts_setting();
 
     cons_alert();
 }
