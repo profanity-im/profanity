@@ -980,7 +980,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
         }
 
         if (receipt && !receipt->received) {
-            colour = theme_attrs(THEME_BLACK_BOLD);
+            colour = theme_attrs(THEME_RECEIPT_SENT);
         }
 
         wattron(window->layout->win, colour);
@@ -996,7 +996,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
 
     if (!me_message) {
         if (receipt && !receipt->received) {
-            wattron(window->layout->win, theme_attrs(THEME_BLACK_BOLD));
+            wattron(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
         } else {
             wattron(window->layout->win, theme_attrs(theme_item));
         }
@@ -1016,7 +1016,7 @@ _win_print(ProfWin *window, const char show_char, GDateTime *time,
         wattroff(window->layout->win, colour);
     } else {
         if (receipt && !receipt->received) {
-            wattroff(window->layout->win, theme_attrs(THEME_BLACK_BOLD));
+            wattroff(window->layout->win, theme_attrs(THEME_RECEIPT_SENT));
         } else {
             wattroff(window->layout->win, theme_attrs(theme_item));
         }

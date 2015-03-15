@@ -47,3 +47,4 @@ me=green
 them=yellow
 roster.header=white
 occupants.header=white
+receipt.sent=red

@@ -47,3 +47,4 @@ me=green
 them=bold_green
 roster.header=bold_green
 occupants.header=bold_green
+receipt.sent=bold_black

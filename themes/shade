@@ -47,3 +47,4 @@ me=bold_black
 them=magenta
 roster.header=magenta
 occupants.header=magenta
+receipt.sent=red

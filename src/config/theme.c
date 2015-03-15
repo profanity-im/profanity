@@ -121,6 +121,7 @@ static struct colours_t {
         NCURSES_COLOR_T otruntrusted;
         NCURSES_COLOR_T rosterheader;
         NCURSES_COLOR_T occupantsheader;
+        NCURSES_COLOR_T receiptsent;
 } colour_prefs;
 
 static NCURSES_COLOR_T _lookup_colour(const char * const colour);
@@ -251,47 +252,48 @@ theme_init_colours(void)
     // chat
     init_pair(25, colour_prefs.me, colour_prefs.bkgnd);
     init_pair(26, colour_prefs.them, colour_prefs.bkgnd);
+    init_pair(27, colour_prefs.receiptsent, colour_prefs.bkgnd);
 
     // room chat
-    init_pair(27, colour_prefs.roominfo, colour_prefs.bkgnd);
-    init_pair(28, colour_prefs.roommention, colour_prefs.bkgnd);
+    init_pair(28, colour_prefs.roominfo, colour_prefs.bkgnd);
+    init_pair(29, colour_prefs.roommention, colour_prefs.bkgnd);
 
     // statuses
-    init_pair(29, colour_prefs.online, colour_prefs.bkgnd);
-    init_pair(30, colour_prefs.offline, colour_prefs.bkgnd);
-    init_pair(31, colour_prefs.away, colour_prefs.bkgnd);
-    init_pair(32, colour_prefs.chat, colour_prefs.bkgnd);
-    init_pair(33, colour_prefs.dnd, colour_prefs.bkgnd);
-    init_pair(34, colour_prefs.xa, colour_prefs.bkgnd);
+    init_pair(30, colour_prefs.online, colour_prefs.bkgnd);
+    init_pair(31, colour_prefs.offline, colour_prefs.bkgnd);
+    init_pair(32, colour_prefs.away, colour_prefs.bkgnd);
+    init_pair(33, colour_prefs.chat, colour_prefs.bkgnd);
+    init_pair(34, colour_prefs.dnd, colour_prefs.bkgnd);
+    init_pair(35, colour_prefs.xa, colour_prefs.bkgnd);
 
     // states
-    init_pair(35, colour_prefs.typing, colour_prefs.bkgnd);
-    init_pair(36, colour_prefs.gone, colour_prefs.bkgnd);
+    init_pair(36, colour_prefs.typing, colour_prefs.bkgnd);
+    init_pair(37, colour_prefs.gone, colour_prefs.bkgnd);
 
     // subscription status
-    init_pair(37, colour_prefs.subscribed, colour_prefs.bkgnd);
-    init_pair(38, colour_prefs.unsubscribed, colour_prefs.bkgnd);
+    init_pair(38, colour_prefs.subscribed, colour_prefs.bkgnd);
+    init_pair(39, colour_prefs.unsubscribed, colour_prefs.bkgnd);
 
     // otr messages
-    init_pair(39, colour_prefs.otrstartedtrusted, colour_prefs.bkgnd);
-    init_pair(40, colour_prefs.otrstarteduntrusted, colour_prefs.bkgnd);
-    init_pair(41, colour_prefs.otrended, colour_prefs.bkgnd);
-    init_pair(42, colour_prefs.otrtrusted, colour_prefs.bkgnd);
-    init_pair(43, colour_prefs.otruntrusted, colour_prefs.bkgnd);
+    init_pair(40, colour_prefs.otrstartedtrusted, colour_prefs.bkgnd);
+    init_pair(41, colour_prefs.otrstarteduntrusted, colour_prefs.bkgnd);
+    init_pair(42, colour_prefs.otrended, colour_prefs.bkgnd);
+    init_pair(43, colour_prefs.otrtrusted, colour_prefs.bkgnd);
+    init_pair(44, colour_prefs.otruntrusted, colour_prefs.bkgnd);
 
     // subwin headers
-    init_pair(44, colour_prefs.rosterheader, colour_prefs.bkgnd);
-    init_pair(45, colour_prefs.occupantsheader, colour_prefs.bkgnd);
+    init_pair(45, colour_prefs.rosterheader, colour_prefs.bkgnd);
+    init_pair(46, colour_prefs.occupantsheader, colour_prefs.bkgnd);
 
     // raw
-    init_pair(46, COLOR_WHITE, colour_prefs.bkgnd);
-    init_pair(47, COLOR_GREEN, colour_prefs.bkgnd);
-    init_pair(48, COLOR_RED, colour_prefs.bkgnd);
-    init_pair(49, COLOR_YELLOW, colour_prefs.bkgnd);
-    init_pair(50, COLOR_BLUE, colour_prefs.bkgnd);
-    init_pair(51, COLOR_CYAN, colour_prefs.bkgnd);
-    init_pair(52, COLOR_BLACK, colour_prefs.bkgnd);
-    init_pair(53, COLOR_MAGENTA, colour_prefs.bkgnd);
+    init_pair(47, COLOR_WHITE, colour_prefs.bkgnd);
+    init_pair(48, COLOR_GREEN, colour_prefs.bkgnd);
+    init_pair(49, COLOR_RED, colour_prefs.bkgnd);
+    init_pair(50, COLOR_YELLOW, colour_prefs.bkgnd);
+    init_pair(51, COLOR_BLUE, colour_prefs.bkgnd);
+    init_pair(52, COLOR_CYAN, colour_prefs.bkgnd);
+    init_pair(53, COLOR_BLACK, colour_prefs.bkgnd);
+    init_pair(54, COLOR_MAGENTA, colour_prefs.bkgnd);
 }
 
 static NCURSES_COLOR_T
@@ -397,6 +399,7 @@ _load_colours(void)
     _set_colour("them",                     &colour_prefs.them,                 COLOR_GREEN,    THEME_THEM);
     _set_colour("roster.header",            &colour_prefs.rosterheader,         COLOR_YELLOW,   THEME_ROSTER_HEADER);
     _set_colour("occupants.header",         &colour_prefs.occupantsheader,      COLOR_YELLOW,   THEME_OCCUPANTS_HEADER);
+    _set_colour("receipt.sent",             &colour_prefs.receiptsent,          COLOR_RED,      THEME_RECEIPT_SENT);
 }
 
 static void
@@ -564,41 +567,42 @@ theme_attrs(theme_item_t attrs)
     case THEME_STATUS_NEW:              result = COLOR_PAIR(24); break;
     case THEME_ME:                      result = COLOR_PAIR(25); break;
     case THEME_THEM:                    result = COLOR_PAIR(26); break;
-    case THEME_ROOMINFO:                result = COLOR_PAIR(27); break;
-    case THEME_ROOMMENTION:             result = COLOR_PAIR(28); break;
-    case THEME_ONLINE:                  result = COLOR_PAIR(29); break;
-    case THEME_OFFLINE:                 result = COLOR_PAIR(30); break;
-    case THEME_AWAY:                    result = COLOR_PAIR(31); break;
-    case THEME_CHAT:                    result = COLOR_PAIR(32); break;
-    case THEME_DND:                     result = COLOR_PAIR(33); break;
-    case THEME_XA:                      result = COLOR_PAIR(34); break;
-    case THEME_TYPING:                  result = COLOR_PAIR(35); break;
-    case THEME_GONE:                    result = COLOR_PAIR(36); break;
-    case THEME_SUBSCRIBED:              result = COLOR_PAIR(37); break;
-    case THEME_UNSUBSCRIBED:            result = COLOR_PAIR(38); break;
-    case THEME_OTR_STARTED_TRUSTED:     result = COLOR_PAIR(39); break;
-    case THEME_OTR_STARTED_UNTRUSTED:   result = COLOR_PAIR(40); break;
-    case THEME_OTR_ENDED:               result = COLOR_PAIR(41); break;
-    case THEME_OTR_TRUSTED:             result = COLOR_PAIR(42); break;
-    case THEME_OTR_UNTRUSTED:           result = COLOR_PAIR(43); break;
-    case THEME_ROSTER_HEADER:           result = COLOR_PAIR(44); break;
-    case THEME_OCCUPANTS_HEADER:        result = COLOR_PAIR(45); break;
-    case THEME_WHITE:                   result = COLOR_PAIR(46); break;
-    case THEME_WHITE_BOLD:              result = COLOR_PAIR(46); break;
-    case THEME_GREEN:                   result = COLOR_PAIR(47); break;
-    case THEME_GREEN_BOLD:              result = COLOR_PAIR(47); break;
-    case THEME_RED:                     result = COLOR_PAIR(48); break;
-    case THEME_RED_BOLD:                result = COLOR_PAIR(48); break;
-    case THEME_YELLOW:                  result = COLOR_PAIR(49); break;
-    case THEME_YELLOW_BOLD:             result = COLOR_PAIR(49); break;
-    case THEME_BLUE:                    result = COLOR_PAIR(50); break;
-    case THEME_BLUE_BOLD:               result = COLOR_PAIR(50); break;
-    case THEME_CYAN:                    result = COLOR_PAIR(51); break;
-    case THEME_CYAN_BOLD:               result = COLOR_PAIR(51); break;
-    case THEME_BLACK:                   result = COLOR_PAIR(52); break;
-    case THEME_BLACK_BOLD:              result = COLOR_PAIR(52); break;
-    case THEME_MAGENTA:                 result = COLOR_PAIR(53); break;
-    case THEME_MAGENTA_BOLD:            result = COLOR_PAIR(53); break;
+    case THEME_RECEIPT_SENT:            result = COLOR_PAIR(27); break;
+    case THEME_ROOMINFO:                result = COLOR_PAIR(28); break;
+    case THEME_ROOMMENTION:             result = COLOR_PAIR(29); break;
+    case THEME_ONLINE:                  result = COLOR_PAIR(30); break;
+    case THEME_OFFLINE:                 result = COLOR_PAIR(31); break;
+    case THEME_AWAY:                    result = COLOR_PAIR(32); break;
+    case THEME_CHAT:                    result = COLOR_PAIR(33); break;
+    case THEME_DND:                     result = COLOR_PAIR(34); break;
+    case THEME_XA:                      result = COLOR_PAIR(35); break;
+    case THEME_TYPING:                  result = COLOR_PAIR(36); break;
+    case THEME_GONE:                    result = COLOR_PAIR(37); break;
+    case THEME_SUBSCRIBED:              result = COLOR_PAIR(38); break;
+    case THEME_UNSUBSCRIBED:            result = COLOR_PAIR(39); break;
+    case THEME_OTR_STARTED_TRUSTED:     result = COLOR_PAIR(40); break;
+    case THEME_OTR_STARTED_UNTRUSTED:   result = COLOR_PAIR(41); break;
+    case THEME_OTR_ENDED:               result = COLOR_PAIR(42); break;
+    case THEME_OTR_TRUSTED:             result = COLOR_PAIR(43); break;
+    case THEME_OTR_UNTRUSTED:           result = COLOR_PAIR(44); break;
+    case THEME_ROSTER_HEADER:           result = COLOR_PAIR(45); break;
+    case THEME_OCCUPANTS_HEADER:        result = COLOR_PAIR(46); break;
+    case THEME_WHITE:                   result = COLOR_PAIR(47); break;
+    case THEME_WHITE_BOLD:              result = COLOR_PAIR(47); break;
+    case THEME_GREEN:                   result = COLOR_PAIR(48); break;
+    case THEME_GREEN_BOLD:              result = COLOR_PAIR(48); break;
+    case THEME_RED:                     result = COLOR_PAIR(49); break;
+    case THEME_RED_BOLD:                result = COLOR_PAIR(49); break;
+    case THEME_YELLOW:                  result = COLOR_PAIR(50); break;
+    case THEME_YELLOW_BOLD:             result = COLOR_PAIR(50); break;
+    case THEME_BLUE:                    result = COLOR_PAIR(51); break;
+    case THEME_BLUE_BOLD:               result = COLOR_PAIR(51); break;
+    case THEME_CYAN:                    result = COLOR_PAIR(52); break;
+    case THEME_CYAN_BOLD:               result = COLOR_PAIR(52); break;
+    case THEME_BLACK:                   result = COLOR_PAIR(53); break;
+    case THEME_BLACK_BOLD:              result = COLOR_PAIR(53); break;
+    case THEME_MAGENTA:                 result = COLOR_PAIR(54); break;
+    case THEME_MAGENTA_BOLD:            result = COLOR_PAIR(54); break;
     default:                            break;
     }
 
