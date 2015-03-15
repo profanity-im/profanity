@@ -355,32 +355,11 @@ handle_incoming_message(char *barejid, char *resource, char *message)
     }
 
     ui_incoming_msg(barejid, resource, newmessage, NULL);
-
-    if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
-        Jid *jidp = jid_create(jid);
-
-        char *pref_otr_log = prefs_get_string(PREF_OTR_LOG);
-        if (!was_decrypted || (strcmp(pref_otr_log, "on") == 0)) {
-            chat_log_chat(jidp->barejid, barejid, newmessage, PROF_IN_LOG, NULL);
-        } else if (strcmp(pref_otr_log, "redact") == 0) {
-            chat_log_chat(jidp->barejid, barejid, "[redacted]", PROF_IN_LOG, NULL);
-        }
-        prefs_free_string(pref_otr_log);
-
-        jid_destroy(jidp);
-    }
-
+    chat_log_otr_msg_in(barejid, newmessage, was_decrypted);
     otr_free_message(newmessage);
 #else
     ui_incoming_msg(barejid, resource, message, NULL);
-
-    if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
-        Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, barejid, message, PROF_IN_LOG, NULL);
-        jid_destroy(jidp);
-    }
+    chat_log_msg_in(barejid, message);
 #endif
 }
 
@@ -394,13 +373,7 @@ void
 handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 {
     ui_incoming_msg(barejid, NULL, message, &tv_stamp);
-
-    if (prefs_get_boolean(PREF_CHLOG)) {
-        const char *jid = jabber_get_fulljid();
-        Jid *jidp = jid_create(jid);
-        chat_log_chat(jidp->barejid, barejid, message, PROF_IN_LOG, &tv_stamp);
-        jid_destroy(jidp);
-    }
+    chat_log_msg_in_delayed(barejid, message, &tv_stamp);
 }
 
 void
