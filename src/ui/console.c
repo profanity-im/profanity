@@ -1197,6 +1197,15 @@ cons_carbons_setting(void)
 }
 
 void
+cons_receipts_setting(void)
+{
+    if (prefs_get_boolean(PREF_RECEIPTS))
+        cons_show("Message receipts (/reciepts)  : ON");
+    else
+        cons_show("Message receipts (/receipts)  : OFF");
+}
+
+void
 cons_show_chat_prefs(void)
 {
     cons_show("Chat preferences:");

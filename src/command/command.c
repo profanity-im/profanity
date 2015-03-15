@@ -921,6 +921,15 @@ static struct cmd_t command_defs[] =
         "The message carbons feature ensures that both sides of all conversations are shared with all the user's clients that implement this protocol.",
         NULL  } } },
 
+    { "/receipts",
+      cmd_receipts, parse_args, 1, 1, &cons_receipts_setting,
+      { "/reciepts on|off", "Message delivery receipts.",
+      { "/reciepts on|off",
+        "----------------",
+        "Enable or disable message delivery receipts.",
+        "The user interface will indicate when a message has been received.",
+        NULL  } } },
+
     { "/reconnect",
         cmd_reconnect, parse_args, 1, 1, &cons_reconnect_setting,
         { "/reconnect seconds", "Set reconnect interval.",
@@ -2020,7 +2029,7 @@ _cmd_complete_parameters(const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons", "/receipts" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);

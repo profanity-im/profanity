@@ -3939,6 +3939,13 @@ cmd_carbons(gchar **args, struct cmd_help_t help)
 }
 
 gboolean
+cmd_receipts(gchar **args, struct cmd_help_t help)
+{
+    return _cmd_set_boolean_preference(args[0], help,
+        "Message delivery receipts", PREF_RECEIPTS);
+}
+
+gboolean
 cmd_away(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_AWAY, "away", args);
