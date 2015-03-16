@@ -1375,9 +1375,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     char *id = message_send_chat_encrypted(barejid, encrypted);
                     otr_free_message(encrypted);
                     ui_outgoing_chat_msg(barejid, msg, id);
-                    if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
-                        chat_log_otr_msg_out(barejid, msg);
-                    }
+                    chat_log_otr_msg_out(barejid, msg);
                     free(id);
                 } else {
                     cons_show_error("Failed to encrypt and send message,");
@@ -1400,18 +1398,14 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     id = message_send_chat(barejid, msg);
                 }
                 ui_outgoing_chat_msg(barejid, msg, id);
-                if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
-                    chat_log_msg_out(barejid, msg);
-                }
+                chat_log_msg_out(barejid, msg);
                 free(id);
             }
             return TRUE;
 #else
             char *id = message_send_chat(barejid, msg);
             ui_outgoing_chat_msg(barejid, msg, id);
-            if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
-                chat_log_msg_out(barejid, msg);
-            }
+            chat_log_msg_out(barejid, msg);
             free(id);
             return TRUE;
 #endif
