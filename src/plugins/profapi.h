@@ -53,6 +53,7 @@ void (*prof_notify)(const char *message, int timeout_ms, const char *category);
 void (*prof_send_line)(char *line);
 
 char* (*prof_get_current_recipient)(void);
+char* (*prof_get_current_muc)(void);
 
 void (*prof_log_debug)(const char *message);
 void (*prof_log_info)(const char *message);

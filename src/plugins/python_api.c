@@ -167,6 +167,17 @@ python_api_get_current_recipient(PyObject *self, PyObject *args)
 }
 
 static PyObject *
+python_api_get_current_muc(PyObject *self, PyObject *args)
+{
+    char *room = api_get_current_muc();
+    if (room != NULL) {
+        return Py_BuildValue("s", room);
+    } else {
+        return Py_BuildValue("");
+    }
+}
+
+static PyObject *
 python_api_log_debug(PyObject *self, PyObject *args)
 {
     const char *message = NULL;
@@ -401,6 +412,7 @@ static PyMethodDef apiMethods[] = {
     { "send_line", python_api_send_line, METH_VARARGS, "Send a line of input." },
     { "notify", python_api_notify, METH_VARARGS, "Send desktop notification." },
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
+    { "get_current_muc", python_api_get_current_muc, METH_VARARGS, "Return the jid of the room of the current window." },
     { "log_debug", python_api_log_debug, METH_VARARGS, "Log a debug message" },
     { "log_info", python_api_log_info, METH_VARARGS, "Log an info message" },
     { "log_warning", python_api_log_warning, METH_VARARGS, "Log a warning message" },

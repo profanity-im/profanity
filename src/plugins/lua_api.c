@@ -161,6 +161,20 @@ lua_api_get_current_recipient(lua_State *L)
 }
 
 static int
+lua_api_get_current_muc(lua_State *L)
+{
+    const char *room = api_get_current_muc();
+
+    if (room != NULL) {
+        lua_pushstring(L, room);
+    } else {
+        lua_pushnil(L);
+    }
+
+    return 1;
+}
+
+static int
 lua_api_log_debug(lua_State *L)
 {
     const char *message = lua_tostring(L, -1);
@@ -361,6 +375,8 @@ lua_api_init(lua_State *L)
     lua_setglobal(L, "prof_notify");
     lua_pushcfunction(L, lua_api_get_current_recipient);
     lua_setglobal(L, "prof_get_current_recipient");
+    lua_pushcfunction(L, lua_api_get_current_muc);
+    lua_setglobal(L, "prof_get_current_muc");
     lua_pushcfunction(L, lua_api_log_debug);
     lua_setglobal(L, "prof_log_debug");
     lua_pushcfunction(L, lua_api_log_info);
