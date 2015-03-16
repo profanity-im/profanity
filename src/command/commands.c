@@ -76,6 +76,7 @@ static void _who_room(gchar **args, struct cmd_help_t help);
 static void _who_roster(gchar **args, struct cmd_help_t help);
 static void _send_chat_message(const char * const barejid, const char * const message);
 static void _send_otr_chat_message(const char * const barejid, const char * const message);
+static void _send_otr_tagged_chat_message(const char * const barejid, const char * const message);
 
 extern GHashTable *commands;
 
@@ -1381,32 +1382,24 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         return TRUE;
 
     } else {
-        // get barejid
         char *barejid = roster_barejid_from_name(usr);
         if (barejid == NULL) {
             barejid = usr;
         }
 
-        if (msg != NULL) {
-            char *plugin_message = plugins_pre_chat_message_send(barejid, msg);
+        if (msg) {
 #ifdef PROF_HAVE_LIBOTR
+            char *plugin_message = plugins_pre_chat_message_send(barejid, msg);
+
+            prof_otrpolicy_t policy = otr_get_policy(barejid);
             if (otr_is_secure(barejid)) {
                 _send_otr_chat_message(barejid, plugin_message);
+            } else if (policy == PROF_OTRPOLICY_ALWAYS) {
+                cons_show_error("Failed to send message. Please check OTR policy");
+            } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
+                _send_otr_tagged_chat_message(barejid, plugin_message);
             } else {
-                prof_otrpolicy_t policy = otr_get_policy(barejid);
-                if (policy == PROF_OTRPOLICY_ALWAYS) {
-                    cons_show_error("Failed to send message. Please check OTR policy");
-                    return TRUE;
-                } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
-                    char *otr_tagged_msg = otr_tag_message(plugin_message);
-                    char *id = message_send_chat_encrypted(barejid, otr_tagged_msg);
-                    ui_outgoing_chat_msg(barejid, msg, id);
-                    chat_log_msg_out(barejid, msg);
-                    free(id);
-                    free(otr_tagged_msg);
-                } else {
-                    _send_chat_message(barejid, plugin_message);
-                }
+                _send_chat_message(barejid, plugin_message);
             }
 
             plugins_post_chat_message_send(barejid, plugin_message);
@@ -1422,7 +1415,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             return TRUE;
 #endif
 
-        } else { // msg == NULL
+        } else {
             ui_new_chat_win(barejid);
 #ifdef PROF_HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -4486,4 +4479,15 @@ _send_otr_chat_message(const char * const barejid, const char * const message)
     } else {
         cons_show_error("Failed to encrypt and send message.");
     }
+}
+
+static void
+_send_otr_tagged_chat_message(const char * const barejid, const char * const message)
+{
+    char *otr_tagged_msg = otr_tag_message(message);
+    char *id = message_send_chat_encrypted(barejid, otr_tagged_msg);
+    ui_outgoing_chat_msg(barejid, message, id);
+    chat_log_msg_out(barejid, message);
+    free(id);
+    free(otr_tagged_msg);
 }
