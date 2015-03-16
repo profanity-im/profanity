@@ -202,6 +202,33 @@ str_contains(const char str[], int size, char ch)
     return 0;
 }
 
+gboolean
+strtoi_range(char *str, int *saveptr, int min, int max, char **err_msg)
+{
+    char *ptr;
+    int val;
+
+    errno = 0;
+    val = (int)strtol(str, &ptr, 0);
+    if (errno != 0 || *str == '\0' || *ptr != '\0') {
+        GString *err_str = g_string_new("");
+        g_string_printf(err_str, "Could not convert \"%s\" to a number.", str);
+        *err_msg = err_str->str;
+        g_string_free(err_str, FALSE);
+        return FALSE;
+    } else if (val < min || val > max) {
+        GString *err_str = g_string_new("");
+        g_string_printf(err_str, "Value %s out of range. Must be in %d..%d.", str, min, max);
+        *err_msg = err_str->str;
+        g_string_free(err_str, FALSE);
+        return FALSE;
+    }
+
+    *saveptr = val;
+
+    return TRUE;
+}
+
 int
 utf8_display_len(const char * const str)
 {
