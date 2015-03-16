@@ -365,6 +365,18 @@ otr_key_loaded(void)
     return data_loaded;
 }
 
+char *
+otr_tag_message(const char * const msg)
+{
+    GString *otr_message = g_string_new(msg);
+    g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
+    g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
+    char *result = otr_message->str;
+    g_string_free(otr_message, FALSE);
+
+    return result;
+}
+
 gboolean
 otr_is_secure(const char * const recipient)
 {

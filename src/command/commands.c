@@ -39,9 +39,6 @@
 #include <errno.h>
 #include <assert.h>
 #include <glib.h>
-#ifdef HAVE_LIBOTR
-#include <libotr/proto.h>
-#endif
 
 #include "chat_session.h"
 #include "command/commands.h"
@@ -1377,16 +1374,12 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
                 } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
-                    GString *otr_message = g_string_new(msg);
-                    g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
-                    g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-
-                    char *id = message_send_chat_encrypted(barejid, otr_message->str);
+                    char *otr_tagged_msg = otr_tag_message(msg);
+                    char *id = message_send_chat_encrypted(barejid, otr_tagged_msg);
                     ui_outgoing_chat_msg(barejid, msg, id);
                     chat_log_msg_out(barejid, msg);
                     free(id);
-
-                    g_string_free(otr_message, TRUE);
+                    free(otr_tagged_msg);
                 } else {
                     _send_chat_message(barejid, msg);
                 }
