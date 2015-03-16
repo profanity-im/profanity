@@ -52,6 +52,11 @@ gboolean otr_key_loaded(void)
     return (gboolean)mock();
 }
 
+char* otr_tag_message(const char * const msg)
+{ 
+    return NULL;
+}
+
 gboolean otr_is_secure(const char * const recipient)
 {
     return FALSE;

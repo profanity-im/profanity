@@ -58,6 +58,8 @@ void otr_poll(void);
 void otr_on_connect(ProfAccount *account);
 void otr_keygen(ProfAccount *account);
 
+char* otr_tag_message(const char * const msg);
+
 gboolean otr_key_loaded(void);
 gboolean otr_is_secure(const char * const recipient);
 
