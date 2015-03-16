@@ -81,6 +81,112 @@ static void _who_roster(gchar **args, struct cmd_help_t help);
 extern GHashTable *commands;
 
 gboolean
+cmd_execute_default(const char * inp)
+{
+    jabber_conn_status_t status = jabber_get_connection_status();
+
+    // handle escaped commands - treat as normal message
+    if (g_str_has_prefix(inp, "//")) {
+        inp++;
+
+    // handle unknown commands
+    } else if ((inp[0] == '/') && (!g_str_has_prefix(inp, "/me "))) {
+        cons_show("Unknown command: %s", inp);
+        cons_alert();
+        return TRUE;
+    }
+
+    win_type_t win_type = ui_current_win_type();
+    switch (win_type)
+    {
+        case WIN_MUC:
+            if (status != JABBER_CONNECTED) {
+                ui_current_print_line("You are not currently connected.");
+            } else {
+                ProfMucWin *mucwin = wins_get_current_muc();
+                message_send_groupchat(mucwin->roomjid, inp);
+            }
+            break;
+
+        case WIN_CHAT:
+            if (status != JABBER_CONNECTED) {
+                ui_current_print_line("You are not currently connected.");
+            } else {
+                ProfWin *current = wins_get_current();
+                ProfChatWin *chatwin = (ProfChatWin*)current;
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+#ifdef HAVE_LIBOTR
+                prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
+                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(chatwin->barejid)) {
+                    cons_show_error("Failed to send message. Please check OTR policy");
+                    return TRUE;
+                }
+                if (otr_is_secure(chatwin->barejid)) {
+                    char *encrypted = otr_encrypt_message(chatwin->barejid, inp);
+                    if (encrypted != NULL) {
+                        char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
+                        otr_free_message(encrypted);
+                        chat_log_otr_msg_out(chatwin->barejid, inp);
+                        ui_outgoing_chat_msg(chatwin->barejid, inp, id);
+                    } else {
+                        cons_show_error("Failed to send message.");
+                    }
+                } else {
+                    char *id = message_send_chat(chatwin->barejid, inp);
+                    chat_log_msg_out(chatwin->barejid, inp);
+                    ui_outgoing_chat_msg(chatwin->barejid, inp, id);
+                }
+#else
+                char *id = message_send_chat(chatwin->barejid, inp);
+                chat_log_msg_out(chatwin->barejid, inp);
+                ui_outgoing_chat_msg(chatwin->barejid, inp, id);
+#endif
+            }
+            break;
+
+        case WIN_PRIVATE:
+            if (status != JABBER_CONNECTED) {
+                ui_current_print_line("You are not currently connected.");
+            } else {
+                ProfPrivateWin *privatewin = wins_get_current_private();
+                message_send_private(privatewin->fulljid, inp);
+                ui_outgoing_private_msg(privatewin->fulljid, inp);
+            }
+            break;
+
+        case WIN_CONSOLE:
+        case WIN_XML:
+            cons_show("Unknown command: %s", inp);
+            break;
+
+        default:
+            break;
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_execute_alias(const char * const inp, gboolean *ran)
+{
+    if (inp[0] != '/') {
+        ran = FALSE;
+        return TRUE;
+    } else {
+        char *alias = strdup(inp+1);
+        char *value = prefs_get_alias(alias);
+        free(alias);
+        if (value != NULL) {
+            *ran = TRUE;
+            return cmd_process_input(value);
+        } else {
+            *ran = FALSE;
+            return TRUE;
+        }
+    }
+}
+
+gboolean
 cmd_connect(gchar **args, struct cmd_help_t help)
 {
     gboolean result = FALSE;
@@ -3057,9 +3163,9 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                     char *encrypted = otr_encrypt_message(chatwin->barejid, tiny);
                     if (encrypted != NULL) {
                         char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
-                        otr_free_message(encrypted);
                         chat_log_otr_msg_out(chatwin->barejid, tiny);
                         ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
+                        otr_free_message(encrypted);
                     } else {
                         cons_show_error("Failed to send message.");
                     }

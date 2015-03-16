@@ -62,6 +62,9 @@ typedef struct cmd_t {
     CommandHelp help;
 } Command;
 
+gboolean cmd_execute_alias(const char * const inp, gboolean *ran);
+gboolean cmd_execute_default(const char * inp);
+
 gboolean cmd_about(gchar **args, struct cmd_help_t help);
 gboolean cmd_account(gchar **args, struct cmd_help_t help);
 gboolean cmd_autoaway(gchar **args, struct cmd_help_t help);
