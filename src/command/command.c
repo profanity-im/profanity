@@ -72,8 +72,6 @@
 typedef char*(*autocompleter)(char*, int*);
 
 static gboolean _cmd_execute(const char * const command, const char * const inp);
-static gboolean _cmd_execute_default(const char * inp);
-static gboolean _cmd_execute_alias(const char * const inp, gboolean *ran);
 
 static char * _cmd_complete_parameters(const char * const input);
 
@@ -1839,7 +1837,7 @@ cmd_process_input(char *inp)
 
     // call a default handler if input didn't start with '/'
     } else {
-        result = _cmd_execute_default(inp);
+        result = cmd_execute_default(inp);
     }
 
     return result;
@@ -1893,139 +1891,13 @@ _cmd_execute(const char * const command, const char * const inp)
         return TRUE;
     } else {
         gboolean ran_alias = FALSE;
-        gboolean alias_result = _cmd_execute_alias(inp, &ran_alias);
+        gboolean alias_result = cmd_execute_alias(inp, &ran_alias);
         if (!ran_alias) {
-            return _cmd_execute_default(inp);
+            return cmd_execute_default(inp);
         } else {
             return alias_result;
         }
     }
-}
-
-static gboolean
-_cmd_execute_alias(const char * const inp, gboolean *ran)
-{
-    if (inp[0] != '/') {
-        ran = FALSE;
-        return TRUE;
-    } else {
-        char *alias = strdup(inp+1);
-        char *value = prefs_get_alias(alias);
-        free(alias);
-        if (value != NULL) {
-            *ran = TRUE;
-            return cmd_process_input(value);
-        } else {
-            *ran = FALSE;
-            return TRUE;
-        }
-    }
-}
-
-static gboolean
-_cmd_execute_default(const char * inp)
-{
-    jabber_conn_status_t status = jabber_get_connection_status();
-
-    // handle escaped commands - treat as normal message
-    if (g_str_has_prefix(inp, "//")) {
-        inp++;
-
-    // handle unknown commands
-    } else if ((inp[0] == '/') && (!g_str_has_prefix(inp, "/me "))) {
-        cons_show("Unknown command: %s", inp);
-        cons_alert();
-        return TRUE;
-    }
-
-    win_type_t win_type = ui_current_win_type();
-    ProfWin *current = wins_get_current();
-    ProfPluginWin *pluginwin = NULL;
-    switch (win_type)
-    {
-        case WIN_MUC:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                ProfMucWin *mucwin = wins_get_current_muc();
-                char *new_message = plugins_pre_room_message_send(mucwin->roomjid, inp);
-                message_send_groupchat(mucwin->roomjid, new_message);
-                plugins_post_room_message_send(mucwin->roomjid, new_message);
-                free(new_message);
-            }
-            break;
-
-        case WIN_CHAT:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                ProfChatWin *chatwin = (ProfChatWin*)current;
-                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-                char *plugin_message = plugins_pre_chat_message_send(chatwin->barejid, inp);
-#ifdef PROF_HAVE_LIBOTR
-                prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
-                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(chatwin->barejid)) {
-                    cons_show_error("Failed to send message. Please check OTR policy");
-                    return TRUE;
-                }
-
-                if (otr_is_secure(chatwin->barejid)) {
-                    char *encrypted = otr_encrypt_message(chatwin->barejid, plugin_message);
-                    if (encrypted != NULL) {
-                        char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
-                        otr_free_message(encrypted);
-                        chat_log_otr_msg_out(chatwin->barejid, plugin_message);
-                        ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
-                    } else {
-                        cons_show_error("Failed to send message.");
-                    }
-                } else {
-                    char *id = message_send_chat(chatwin->barejid, plugin_message);
-                    chat_log_msg_out(chatwin->barejid, plugin_message);
-                    ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
-                }
-
-#else
-                char *id = message_send_chat(chatwin->barejid, plugin_message);
-                chat_log_msg_out(chatwin->barejid, plugin_message);
-                ui_outgoing_chat_msg(chatwin->barejid, plugin_message, id);
-#endif
-                plugins_post_chat_message_send(chatwin->barejid, plugin_message);
-                free(plugin_message);
-            }
-            break;
-
-        case WIN_PRIVATE:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                ProfPrivateWin *privatewin = wins_get_current_private();
-                char *new_message = plugins_pre_priv_message_send(privatewin->fulljid, inp);
-
-                message_send_private(privatewin->fulljid, new_message);
-                ui_outgoing_private_msg(privatewin->fulljid, new_message);
-
-                plugins_post_priv_message_send(privatewin->fulljid, new_message);
-
-                free(new_message);
-            }
-            break;
-
-        case WIN_CONSOLE:
-        case WIN_XML:
-            cons_show("Unknown command: %s", inp);
-            break;
-
-        case WIN_PLUGIN:
-            pluginwin = (ProfPluginWin*)current;
-            plugins_win_process_line(pluginwin->tag, inp);
-            break;
-
-        default:
-            break;
-    }
-
-    return TRUE;
 }
 
 static char *
