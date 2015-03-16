@@ -923,7 +923,6 @@ win_print_with_receipt(ProfWin *window, const char show_char, GTimeVal *tstamp,
     DeliveryReceipt *receipt = malloc(sizeof(struct delivery_receipt_t));
     receipt->id = strdup(id);
     receipt->received = FALSE;
-    free(id);
 
     buffer_push(window->layout->buffer, show_char, time, flags, theme_item, from, message, receipt);
     _win_print(window, show_char, time, flags, theme_item, from, message, receipt);
