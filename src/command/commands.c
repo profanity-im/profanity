@@ -76,6 +76,8 @@ static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filt
 static gint _compare_commands(Command *a, Command *b);
 static void _who_room(gchar **args, struct cmd_help_t help);
 static void _who_roster(gchar **args, struct cmd_help_t help);
+static void _send_chat_message(const char * const barejid, const char * const message);
+static void _send_otr_chat_message(const char * const barejid, const char * const message);
 
 extern GHashTable *commands;
 
@@ -121,24 +123,12 @@ cmd_execute_default(const char * inp)
                     return TRUE;
                 }
                 if (otr_is_secure(chatwin->barejid)) {
-                    char *encrypted = otr_encrypt_message(chatwin->barejid, inp);
-                    if (encrypted != NULL) {
-                        char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
-                        otr_free_message(encrypted);
-                        chat_log_otr_msg_out(chatwin->barejid, inp);
-                        ui_outgoing_chat_msg(chatwin->barejid, inp, id);
-                    } else {
-                        cons_show_error("Failed to send message.");
-                    }
+                    _send_otr_chat_message(chatwin->barejid, inp);
                 } else {
-                    char *id = message_send_chat(chatwin->barejid, inp);
-                    chat_log_msg_out(chatwin->barejid, inp);
-                    ui_outgoing_chat_msg(chatwin->barejid, inp, id);
+                    _send_chat_message(chatwin->barejid, inp);
                 }
 #else
-                char *id = message_send_chat(chatwin->barejid, inp);
-                chat_log_msg_out(chatwin->barejid, inp);
-                ui_outgoing_chat_msg(chatwin->barejid, inp, id);
+                _send_chat_message(chatwin->barejid, inp);
 #endif
             }
             break;
@@ -1388,6 +1378,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
                         chat_log_otr_msg_out(barejid, msg);
                     }
+                    free(id);
                 } else {
                     cons_show_error("Failed to encrypt and send message,");
                 }
@@ -1412,6 +1403,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                 if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
                     chat_log_msg_out(barejid, msg);
                 }
+                free(id);
             }
             return TRUE;
 #else
@@ -1420,6 +1412,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             if (win_type == WIN_CHAT || win_type == WIN_CONSOLE) {
                 chat_log_msg_out(barejid, msg);
             }
+            free(id);
             return TRUE;
 #endif
 
@@ -3184,24 +3177,12 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
                 ProfChatWin *chatwin = wins_get_current_chat();
 #ifdef HAVE_LIBOTR
                 if (otr_is_secure(chatwin->barejid)) {
-                    char *encrypted = otr_encrypt_message(chatwin->barejid, tiny);
-                    if (encrypted != NULL) {
-                        char *id = message_send_chat_encrypted(chatwin->barejid, encrypted);
-                        chat_log_otr_msg_out(chatwin->barejid, tiny);
-                        ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
-                        otr_free_message(encrypted);
-                    } else {
-                        cons_show_error("Failed to send message.");
-                    }
+                    _send_otr_chat_message(chatwin->barejid, tiny);
                 } else {
-                    char *id = message_send_chat(chatwin->barejid, tiny);
-                    chat_log_msg_out(chatwin->barejid, tiny);
-                    ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
+                    _send_chat_message(chatwin->barejid, tiny);
                 }
 #else
-                char *id = message_send_chat(chatwin->barejid, tiny);
-                chat_log_msg_out(chatwin->barejid, tiny);
-                ui_outgoing_chat_msg(chatwin->barejid, tiny, id);
+                _send_chat_message(chatwin->barejid, tiny);
 #endif
             } else if (win_type == WIN_PRIVATE) {
                 ProfPrivateWin *privatewin = wins_get_current_private();
@@ -4454,4 +4435,28 @@ gint _compare_commands(Command *a, Command *b)
     g_free(key_b);
 
     return result;
+}
+
+static void
+_send_chat_message(const char * const barejid, const char * const message)
+{
+    char *id = message_send_chat(barejid, message);
+    chat_log_msg_out(barejid, message);
+    ui_outgoing_chat_msg(barejid, message, id);
+    free(id);
+}
+
+static void
+_send_otr_chat_message(const char * const barejid, const char * const message)
+{
+    char *encrypted = otr_encrypt_message(barejid, message);
+    if (encrypted != NULL) {
+        char *id = message_send_chat_encrypted(barejid, encrypted);
+        chat_log_otr_msg_out(barejid, message);
+        ui_outgoing_chat_msg(barejid, message, id);
+        otr_free_message(encrypted);
+        free(id);
+    } else {
+        cons_show_error("Failed to encrypt and send message.");
+    }
 }
