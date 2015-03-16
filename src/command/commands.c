@@ -3158,46 +3158,57 @@ gboolean
 cmd_tiny(gchar **args, struct cmd_help_t help)
 {
     char *url = args[0];
-    win_type_t win_type = ui_current_win_type();
+    ProfWin *current = wins_get_current();
+
+    if (current->type != WIN_CHAT && current->type != WIN_MUC && current->type != WIN_PRIVATE) {
+        cons_show("/tiny can only be used in chat windows");
+        return TRUE;
+    }
 
     if (!tinyurl_valid(url)) {
-        GString *error = g_string_new("/tiny, badly formed URL: ");
-        g_string_append(error, url);
-        cons_show_error(error->str);
-        if (win_type != WIN_CONSOLE) {
-            ui_current_error_line(error->str);
-        }
-        g_string_free(error, TRUE);
-    } else if (win_type != WIN_CONSOLE) {
-        char *tiny = tinyurl_get(url);
-
-        if (tiny != NULL) {
-            if (win_type == WIN_CHAT) {
-                ProfChatWin *chatwin = wins_get_current_chat();
-#ifdef PROF_HAVE_LIBOTR
-                if (otr_is_secure(chatwin->barejid)) {
-                    _send_otr_chat_message(chatwin->barejid, tiny);
-                } else {
-                    _send_chat_message(chatwin->barejid, tiny);
-                }
-#else
-                _send_chat_message(chatwin->barejid, tiny);
-#endif
-            } else if (win_type == WIN_PRIVATE) {
-                ProfPrivateWin *privatewin = wins_get_current_private();
-                message_send_private(privatewin->fulljid, tiny);
-                ui_outgoing_private_msg(privatewin->fulljid, tiny);
-            } else if (win_type == WIN_MUC) {
-                ProfMucWin *mucwin = wins_get_current_muc();
-                message_send_groupchat(mucwin->roomjid, tiny);
-            }
-            free(tiny);
-        } else {
-            cons_show_error("Couldn't get tinyurl.");
-        }
-    } else {
-        cons_show("/tiny can only be used in chat windows");
+        win_vprint(current, '-', NULL, 0, THEME_ERROR, "", "/tiny, badly formed URL: %s", url);
+        return TRUE;
     }
+
+    char *tiny = tinyurl_get(url);
+    if (!tiny) {
+        win_print(current, '-', NULL, 0, THEME_ERROR, "", "Couldn't create tinyurl.");
+        return TRUE;
+    }
+
+    switch (current->type){
+    case WIN_CHAT:
+    {
+        ProfChatWin *chatwin = wins_get_current_chat();
+#ifdef PROF_HAVE_LIBOTR
+        if (otr_is_secure(chatwin->barejid)) {
+            _send_otr_chat_message(chatwin->barejid, tiny);
+        } else {
+            _send_chat_message(chatwin->barejid, tiny);
+        }
+#else
+        _send_chat_message(chatwin->barejid, tiny);
+#endif
+        break;
+    }
+    case WIN_PRIVATE:
+    {
+        ProfPrivateWin *privatewin = wins_get_current_private();
+        message_send_private(privatewin->fulljid, tiny);
+        ui_outgoing_private_msg(privatewin->fulljid, tiny);
+        break;
+    }
+    case WIN_MUC:
+    {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        message_send_groupchat(mucwin->roomjid, tiny);
+        break;
+    }
+    default:
+        break;
+    }
+
+    free(tiny);
 
     return TRUE;
 }
