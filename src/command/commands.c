@@ -72,7 +72,7 @@ static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
 static gboolean _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     const char * const display, preference_t pref);
-static int _strtoi(char *str, int *saveptr, int min, int max);
+static gboolean _strtoi(char *str, int *saveptr, int min, int max, char **err_msg);
 static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filter_size);
 static gint _compare_commands(Command *a, Command *b);
 static void _who_room(gchar **args, struct cmd_help_t help);
@@ -212,9 +212,13 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         int port = 0;
         if (g_hash_table_contains(options, "port")) {
             char *port_str = g_hash_table_lookup(options, "port");
-            if (_strtoi(port_str, &port, 1, 65535) != 0) {
-                port = 0;
+            char *err_msg = NULL;
+            gboolean res = _strtoi(port_str, &port, 1, 65535, &err_msg);
+            if (!res) {
+                cons_show(err_msg);
                 cons_show("");
+                free(err_msg);
+                port = 0;
                 return TRUE;
             }
         }
@@ -464,8 +468,12 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     cons_show("");
                 } else if (strcmp(property, "port") == 0) {
                     int port;
-                    if (_strtoi(value, &port, 1, 65535) != 0) {
+                    char *err_msg = NULL;
+                    gboolean res = _strtoi(value, &port, 1, 65535, &err_msg);
+                    if (!res) {
+                        cons_show(err_msg);
                         cons_show("");
+                        free(err_msg);
                         return TRUE;
                     } else {
                         accounts_set_port(account_name, port);
@@ -519,42 +527,46 @@ cmd_account(gchar **args, struct cmd_help_t help)
                     }
                     cons_show("");
                 } else if (valid_resource_presence_string(property)) {
-                        int intval;
-
-                        if (_strtoi(value, &intval, -128, 127) == 0) {
-                            resource_presence_t presence_type = resource_presence_from_string(property);
-                            switch (presence_type)
-                            {
-                                case (RESOURCE_ONLINE):
-                                    accounts_set_priority_online(account_name, intval);
-                                    break;
-                                case (RESOURCE_CHAT):
-                                    accounts_set_priority_chat(account_name, intval);
-                                    break;
-                                case (RESOURCE_AWAY):
-                                    accounts_set_priority_away(account_name, intval);
-                                    break;
-                                case (RESOURCE_XA):
-                                    accounts_set_priority_xa(account_name, intval);
-                                    break;
-                                case (RESOURCE_DND):
-                                    accounts_set_priority_dnd(account_name, intval);
-                                    break;
-                            }
-
-                            jabber_conn_status_t conn_status = jabber_get_connection_status();
-                            if (conn_status == JABBER_CONNECTED) {
-                                char *connected_account = jabber_get_account_name();
-                                resource_presence_t last_presence = accounts_get_last_presence(connected_account);
-
-                                if (presence_type == last_presence) {
-                                    char *message = jabber_get_presence_message();
-                                    presence_update(last_presence, message, 0);
-                                }
-                            }
-                            cons_show("Updated %s priority for account %s: %s", property, account_name, value);
-                            cons_show("");
+                    int intval;
+                    char *err_msg = NULL;
+                    gboolean res = _strtoi(value, &intval, -128, 127, &err_msg);
+                    if (res) {
+                        resource_presence_t presence_type = resource_presence_from_string(property);
+                        switch (presence_type)
+                        {
+                            case (RESOURCE_ONLINE):
+                                accounts_set_priority_online(account_name, intval);
+                                break;
+                            case (RESOURCE_CHAT):
+                                accounts_set_priority_chat(account_name, intval);
+                                break;
+                            case (RESOURCE_AWAY):
+                                accounts_set_priority_away(account_name, intval);
+                                break;
+                            case (RESOURCE_XA):
+                                accounts_set_priority_xa(account_name, intval);
+                                break;
+                            case (RESOURCE_DND):
+                                accounts_set_priority_dnd(account_name, intval);
+                                break;
                         }
+
+                        jabber_conn_status_t conn_status = jabber_get_connection_status();
+                        if (conn_status == JABBER_CONNECTED) {
+                            char *connected_account = jabber_get_account_name();
+                            resource_presence_t last_presence = accounts_get_last_presence(connected_account);
+
+                            if (presence_type == last_presence) {
+                                char *message = jabber_get_presence_message();
+                                presence_update(last_presence, message, 0);
+                            }
+                        }
+                        cons_show("Updated %s priority for account %s: %s", property, account_name, value);
+                        cons_show("");
+                    } else {
+                        cons_show(err_msg);
+                        free(err_msg);
+                    }
                 } else {
                     cons_show("Invalid property: %s", property);
                     cons_show("");
@@ -1557,11 +1569,14 @@ cmd_roster(gchar **args, struct cmd_help_t help)
 
     // set roster size
     } else if (g_strcmp0(args[0], "size") == 0) {
-        int intval = 0;
         if (!args[1]) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
-        } else if (_strtoi(args[1], &intval, 1, 99) == 0) {
+        }
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = _strtoi(args[1], &intval, 1, 99, &err_msg);
+        if (res) {
             prefs_set_roster_size(intval);
             cons_show("Roster screen size set to: %d%%", intval);
             if (prefs_get_boolean(PREF_ROSTER)) {
@@ -1569,6 +1584,8 @@ cmd_roster(gchar **args, struct cmd_help_t help)
             }
             return TRUE;
         } else {
+            cons_show(err_msg);
+            free(err_msg);
             return TRUE;
         }
 
@@ -2836,15 +2853,23 @@ cmd_occupants(gchar **args, struct cmd_help_t help)
     }
 
     if (g_strcmp0(args[0], "size") == 0) {
-        int intval = 0;
         if (!args[1]) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
-        } else if (_strtoi(args[1], &intval, 1, 99) == 0) {
-            prefs_set_occupants_size(intval);
-            cons_show("Occupants screen size set to: %d%%", intval);
-            wins_resize_all();
-            return TRUE;
+        } else {
+            int intval = 0;
+            char *err_msg = NULL;
+            gboolean res = _strtoi(args[1], &intval, 1, 99, &err_msg);
+            if (res) {
+                prefs_set_occupants_size(intval);
+                cons_show("Occupants screen size set to: %d%%", intval);
+                wins_resize_all();
+                return TRUE;
+            } else {
+                cons_show(err_msg);
+                free(err_msg);
+                return TRUE;
+            }
         }
     }
 
@@ -3596,7 +3621,6 @@ cmd_inpblock(gchar **args, struct cmd_help_t help)
 {
     char *subcmd = args[0];
     char *value = args[1];
-    int intval;
 
     if (g_strcmp0(subcmd, "timeout") == 0) {
         if (value == NULL) {
@@ -3604,10 +3628,16 @@ cmd_inpblock(gchar **args, struct cmd_help_t help)
             return TRUE;
         }
 
-        if (_strtoi(value, &intval, 1, 1000) == 0) {
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = _strtoi(value, &intval, 1, 1000, &err_msg);
+        if (res) {
             cons_show("Input blocking set to %d milliseconds.", intval);
             prefs_set_inpblock(intval);
             ui_input_nonblocking(FALSE);
+        } else {
+            cons_show(err_msg);
+            free(err_msg);
         }
 
         return TRUE;
@@ -3637,16 +3667,22 @@ cmd_log(gchar **args, struct cmd_help_t help)
 {
     char *subcmd = args[0];
     char *value = args[1];
-    int intval;
 
     if (strcmp(subcmd, "maxsize") == 0) {
         if (value == NULL) {
             cons_show("Usage: %s", help.usage);
             return TRUE;
         }
-        if (_strtoi(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX) == 0) {
+
+        int intval = 0;
+        char *err_msg = NULL;
+        gboolean res = _strtoi(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX, &err_msg);
+        if (res) {
             prefs_set_max_log_size(intval);
             cons_show("Log maxinum size set to %d bytes", intval);
+        } else {
+            cons_show(err_msg);
+            free(err_msg);
         }
         return TRUE;
     }
@@ -3686,9 +3722,11 @@ gboolean
 cmd_reconnect(gchar **args, struct cmd_help_t help)
 {
     char *value = args[0];
-    int intval;
 
-    if (_strtoi(value, &intval, 0, INT_MAX) == 0) {
+    int intval = 0;
+    char *err_msg = NULL;
+    gboolean res = _strtoi(value, &intval, 0, INT_MAX, &err_msg);
+    if (res) {
         prefs_set_reconnect(intval);
         if (intval == 0) {
             cons_show("Reconnect disabled.", intval);
@@ -3696,7 +3734,9 @@ cmd_reconnect(gchar **args, struct cmd_help_t help)
             cons_show("Reconnect interval set to %d seconds.", intval);
         }
     } else {
+        cons_show(err_msg);
         cons_show("Usage: %s", help.usage);
+        free(err_msg);
     }
 
     return TRUE;
@@ -3706,9 +3746,11 @@ gboolean
 cmd_autoping(gchar **args, struct cmd_help_t help)
 {
     char *value = args[0];
-    int intval;
 
-    if (_strtoi(value, &intval, 0, INT_MAX) == 0) {
+    int intval = 0;
+    char *err_msg = NULL;
+    gboolean res = _strtoi(value, &intval, 0, INT_MAX, &err_msg);
+    if (res) {
         prefs_set_autoping(intval);
         iq_set_autoping(intval);
         if (intval == 0) {
@@ -3717,7 +3759,9 @@ cmd_autoping(gchar **args, struct cmd_help_t help)
             cons_show("Autoping interval set to %d seconds.", intval);
         }
     } else {
+        cons_show(err_msg);
         cons_show("Usage: %s", help.usage);
+        free(err_msg);
     }
 
     return TRUE;
@@ -3748,7 +3792,6 @@ cmd_autoaway(gchar **args, struct cmd_help_t help)
 {
     char *setting = args[0];
     char *value = args[1];
-    int minutesval;
 
     if ((strcmp(setting, "mode") != 0) && (strcmp(setting, "time") != 0) &&
             (strcmp(setting, "message") != 0) && (strcmp(setting, "check") != 0)) {
@@ -3769,9 +3812,15 @@ cmd_autoaway(gchar **args, struct cmd_help_t help)
     }
 
     if (strcmp(setting, "time") == 0) {
-        if (_strtoi(value, &minutesval, 1, INT_MAX) == 0) {
+        int minutesval = 0;
+        char *err_msg = NULL;
+        gboolean res = _strtoi(value, &minutesval, 1, INT_MAX, &err_msg);
+        if (res) {
             prefs_set_autoaway_time(minutesval);
             cons_show("Auto away time set to: %d minutes.", minutesval);
+        } else {
+            cons_show(err_msg);
+            free(err_msg);
         }
 
         return TRUE;
@@ -3808,13 +3857,18 @@ cmd_priority(gchar **args, struct cmd_help_t help)
     }
 
     char *value = args[0];
-    int intval;
 
-    if (_strtoi(value, &intval, -128, 127) == 0) {
+    int intval = 0;
+    char *err_msg = NULL;
+    gboolean res = _strtoi(value, &intval, -128, 127, &err_msg);
+    if (res) {
         accounts_set_priority_all(jabber_get_account_name(), intval);
         resource_presence_t last_presence = accounts_get_last_presence(jabber_get_account_name());
         presence_update(last_presence, jabber_get_presence_message(), 0);
         cons_show("Priority set to %d.", intval);
+    } else {
+        cons_show(err_msg);
+        free(err_msg);
     }
 
     return TRUE;
@@ -4358,8 +4412,8 @@ _cmd_set_boolean_preference(gchar *arg, struct cmd_help_t help,
     return TRUE;
 }
 
-static int
-_strtoi(char *str, int *saveptr, int min, int max)
+static gboolean
+_strtoi(char *str, int *saveptr, int min, int max, char **err_msg)
 {
     char *ptr;
     int val;
@@ -4367,16 +4421,22 @@ _strtoi(char *str, int *saveptr, int min, int max)
     errno = 0;
     val = (int)strtol(str, &ptr, 0);
     if (errno != 0 || *str == '\0' || *ptr != '\0') {
-        cons_show("Could not convert \"%s\" to a number.", str);
-        return -1;
+        GString *err_str = g_string_new("");
+        g_string_printf(err_str, "Could not convert \"%s\" to a number.", str);
+        *err_msg = err_str->str;
+        g_string_free(err_str, FALSE);
+        return FALSE;
     } else if (val < min || val > max) {
-        cons_show("Value %s out of range. Must be in %d..%d.", str, min, max);
-        return -1;
+        GString *err_str = g_string_new("");
+        g_string_printf(err_str, "Value %s out of range. Must be in %d..%d.", str, min, max);
+        *err_msg = err_str->str;
+        g_string_free(err_str, FALSE);
+        return FALSE;
     }
 
     *saveptr = val;
 
-    return 0;
+    return TRUE;
 }
 
 static void
