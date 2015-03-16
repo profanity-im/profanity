@@ -1370,20 +1370,9 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         if (msg != NULL) {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
-                char *encrypted = otr_encrypt_message(barejid, msg);
-                if (encrypted != NULL) {
-                    char *id = message_send_chat_encrypted(barejid, encrypted);
-                    otr_free_message(encrypted);
-                    ui_outgoing_chat_msg(barejid, msg, id);
-                    chat_log_otr_msg_out(barejid, msg);
-                    free(id);
-                } else {
-                    cons_show_error("Failed to encrypt and send message,");
-                }
+                _send_otr_chat_message(barejid, msg);
             } else {
                 prof_otrpolicy_t policy = otr_get_policy(barejid);
-                char *id = NULL;
-
                 if (policy == PROF_OTRPOLICY_ALWAYS) {
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
@@ -1391,22 +1380,20 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     GString *otr_message = g_string_new(msg);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-                    id = message_send_chat_encrypted(barejid, otr_message->str);
+
+                    char *id = message_send_chat_encrypted(barejid, otr_message->str);
+                    ui_outgoing_chat_msg(barejid, msg, id);
+                    chat_log_msg_out(barejid, msg);
+                    free(id);
 
                     g_string_free(otr_message, TRUE);
                 } else {
-                    id = message_send_chat(barejid, msg);
+                    _send_chat_message(barejid, msg);
                 }
-                ui_outgoing_chat_msg(barejid, msg, id);
-                chat_log_msg_out(barejid, msg);
-                free(id);
             }
             return TRUE;
 #else
-            char *id = message_send_chat(barejid, msg);
-            ui_outgoing_chat_msg(barejid, msg, id);
-            chat_log_msg_out(barejid, msg);
-            free(id);
+            _send_chat_message(barejid, msg);
             return TRUE;
 #endif
 
