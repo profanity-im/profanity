@@ -1394,20 +1394,9 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             char *plugin_message = plugins_pre_chat_message_send(barejid, msg);
 #ifdef PROF_HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
-                char *encrypted = otr_encrypt_message(barejid, plugin_message);
-                if (encrypted != NULL) {
-                    char *id = message_send_chat_encrypted(barejid, encrypted);
-                    otr_free_message(encrypted);
-                    ui_outgoing_chat_msg(barejid, plugin_message, id);
-                    chat_log_otr_msg_out(barejid, plugin_message);
-                    free(id);
-                } else {
-                    cons_show_error("Failed to encrypt and send message,");
-                }
+                _send_otr_chat_message(barejid, plugin_message);
             } else {
                 prof_otrpolicy_t policy = otr_get_policy(barejid);
-                char *id = NULL;
-
                 if (policy == PROF_OTRPOLICY_ALWAYS) {
                     cons_show_error("Failed to send message. Please check OTR policy");
                     return TRUE;
@@ -1415,15 +1404,16 @@ cmd_msg(gchar **args, struct cmd_help_t help)
                     GString *otr_message = g_string_new(plugin_message);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
                     g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-                    id = message_send_chat_encrypted(barejid, otr_message->str);
+
+                    char *id = message_send_chat_encrypted(barejid, otr_message->str);
+                    ui_outgoing_chat_msg(barejid, msg, id);
+                    chat_log_msg_out(barejid, msg);
+                    free(id);
 
                     g_string_free(otr_message, TRUE);
                 } else {
-                    id = message_send_chat(barejid, plugin_message);
+                    _send_chat_message(barejid, plugin_message);
                 }
-                ui_outgoing_chat_msg(barejid, plugin_message, id);
-                chat_log_msg_out(barejid, plugin_message);
-                free(id);
             }
 
             plugins_post_chat_message_send(barejid, plugin_message);
@@ -1431,13 +1421,10 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 
             return TRUE;
 #else
-            char *id = message_send_chat(barejid, plugin_message);
-            ui_outgoing_chat_msg(barejid, plugin_message, id);
-            chat_log_msg_out(barejid, plugin_message);
+            _send_chat_message(barejid, plugin_message);
 
             plugins_post_chat_message_send(barejid, plugin_message);
             free(plugin_message);
-            free(id);
 
             return TRUE;
 #endif
