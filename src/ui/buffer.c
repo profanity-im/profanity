@@ -131,9 +131,9 @@ _free_entry(ProfBuffEntry *entry)
     free(entry->message);
     free(entry->from);
     g_date_time_unref(entry->time);
-    free(entry);
     if (entry->receipt) {
         free(entry->receipt->id);
         free(entry->receipt);
     }
+    free(entry);
 }

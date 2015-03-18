@@ -370,19 +370,26 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e[20~", _inp_rl_win9_handler);
     rl_bind_keyseq("\\e[21~", _inp_rl_win0_handler);
 
-#ifdef PLATFORM_OSX
     rl_bind_keyseq("\\e[1;9D", _inp_rl_altleft_handler);
-    rl_bind_keyseq("\\e[1;9C", _inp_rl_altright_handler);
-    rl_bind_keyseq("\\e\\e[5~", _inp_rl_altpageup_handler);
-    rl_bind_keyseq("\\e\\e[6~", _inp_rl_altpagedown_handler);
-#else
     rl_bind_keyseq("\\e[1;3D", _inp_rl_altleft_handler);
+    rl_bind_keyseq("\\e\\e[D", _inp_rl_altleft_handler);
+
+    rl_bind_keyseq("\\e[1;9C", _inp_rl_altright_handler);
     rl_bind_keyseq("\\e[1;3C", _inp_rl_altright_handler);
+    rl_bind_keyseq("\\e\\e[C", _inp_rl_altright_handler);
+
+    rl_bind_keyseq("\\e\\e[5~", _inp_rl_altpageup_handler);
     rl_bind_keyseq("\\e[5;3~", _inp_rl_altpageup_handler);
+    rl_bind_keyseq("\\e\\eOy", _inp_rl_altpageup_handler);
+
+    rl_bind_keyseq("\\e\\e[6~", _inp_rl_altpagedown_handler);
     rl_bind_keyseq("\\e[6;3~", _inp_rl_altpagedown_handler);
-#endif
+    rl_bind_keyseq("\\e\\eOs", _inp_rl_altpagedown_handler);
+
     rl_bind_keyseq("\\e[5~", _inp_rl_pageup_handler);
+    rl_bind_keyseq("\\eOy", _inp_rl_pageup_handler);
     rl_bind_keyseq("\\e[6~", _inp_rl_pagedown_handler);
+    rl_bind_keyseq("\\eOs", _inp_rl_pagedown_handler);
 
     rl_bind_key('\t', _inp_rl_tab_handler);
     rl_bind_key(CTRL('L'), _inp_rl_clear_handler);
