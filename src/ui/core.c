@@ -1467,7 +1467,7 @@ ui_outgoing_chat_msg(const char * const barejid, const char * const message, cha
     ProfChatWin *chatwin = (ProfChatWin*)window;
     chat_state_active(chatwin->state);
 
-    if (prefs_get_boolean(PREF_RECEIPTS) && id) {
+    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
         win_print_with_receipt(window, '-', NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
         win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);

@@ -4016,8 +4016,16 @@ cmd_carbons(gchar **args, struct cmd_help_t help)
 gboolean
 cmd_receipts(gchar **args, struct cmd_help_t help)
 {
-    return _cmd_set_boolean_preference(args[0], help,
-        "Message delivery receipts", PREF_RECEIPTS);
+    if (g_strcmp0(args[0], "send") == 0) {
+        return _cmd_set_boolean_preference(args[1], help,
+            "Send delivery receipts", PREF_RECEIPTS_SEND);
+    } else if (g_strcmp0(args[0], "request") == 0) {
+        return _cmd_set_boolean_preference(args[1], help,
+            "Request delivery receipets", PREF_RECEIPTS_REQUEST);
+    } else {
+        cons_show("Usage: %s", help.usage);
+        return TRUE;
+    }
 }
 
 gboolean
