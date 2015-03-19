@@ -102,6 +102,7 @@ static char * _resource_autocomplete(const char * const input);
 static char * _titlebar_autocomplete(const char * const input);
 static char * _inpblock_autocomplete(const char * const input);
 static char * _time_autocomplete(const char * const input);
+static char * _receipts_autocomplete(const char * const input);
 
 GHashTable *commands = NULL;
 
@@ -921,12 +922,14 @@ static struct cmd_t command_defs[] =
         NULL  } } },
 
     { "/receipts",
-      cmd_receipts, parse_args, 1, 1, &cons_receipts_setting,
-      { "/receipts on|off", "Message delivery receipts.",
-      { "/receipts on|off",
-        "----------------",
-        "Enable or disable message delivery receipts.",
-        "The user interface will indicate when a message has been received.",
+      cmd_receipts, parse_args, 2, 2, &cons_receipts_setting,
+      { "/receipts send|request on|off", "Message delivery receipts.",
+      { "/receipts send|request on|off",
+        "-----------------------------",
+        "Enable or disable message delivery receipts. The interface will indicate when a message has been received.",
+        "",
+        "send on|off    : Enable or disable sending of delivery receipts.",
+        "request on|off : Enable or disable sending of delivery receipt requests.",
         NULL  } } },
 
     { "/reconnect",
@@ -1207,6 +1210,7 @@ static Autocomplete time_ac;
 static Autocomplete time_statusbar_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
+static Autocomplete receipts_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1564,6 +1568,10 @@ cmd_init(void)
     inpblock_ac = autocomplete_new();
     autocomplete_add(inpblock_ac, "timeout");
     autocomplete_add(inpblock_ac, "dynamic");
+
+    receipts_ac = autocomplete_new();
+    autocomplete_add(receipts_ac, "send");
+    autocomplete_add(receipts_ac, "request");
 }
 
 void
@@ -1621,6 +1629,7 @@ cmd_uninit(void)
     autocomplete_free(time_statusbar_ac);
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
+    autocomplete_free(receipts_ac);
 }
 
 gboolean
@@ -1787,6 +1796,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(time_statusbar_ac);
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
+    autocomplete_reset(receipts_ac);
 
     if (ui_current_win_type() == WIN_CHAT) {
         ProfChatWin *chatwin = wins_get_current_chat();
@@ -1909,7 +1919,7 @@ _cmd_complete_parameters(const char * const input)
     // autocomplete boolean settings
     gchar *boolean_choices[] = { "/beep", "/intype", "/states", "/outtype",
         "/flash", "/splash", "/chlog", "/grlog", "/mouse", "/history",
-        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons", "/receipts" };
+        "/vercheck", "/privileges", "/presence", "/wrap", "/carbons" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice);
@@ -2010,6 +2020,7 @@ _cmd_complete_parameters(const char * const input)
     g_hash_table_insert(ac_funcs, "/titlebar",      _titlebar_autocomplete);
     g_hash_table_insert(ac_funcs, "/inpblock",      _inpblock_autocomplete);
     g_hash_table_insert(ac_funcs, "/time",          _time_autocomplete);
+    g_hash_table_insert(ac_funcs, "/receipts",      _receipts_autocomplete);
 
     int len = strlen(input);
     char parsed[len+1];
@@ -2826,6 +2837,29 @@ _statuses_autocomplete(const char * const input)
     }
 
     result = autocomplete_param_with_ac(input, "/statuses", statuses_ac, TRUE);
+    if (result != NULL) {
+        return result;
+    }
+
+    return NULL;
+}
+
+static char *
+_receipts_autocomplete(const char * const input)
+{
+    char *result = NULL;
+
+    result = autocomplete_param_with_func(input, "/receipts send", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/receipts request", prefs_autocomplete_boolean_choice);
+    if (result != NULL) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/receipts", receipts_ac, TRUE);
     if (result != NULL) {
         return result;
     }

@@ -1199,10 +1199,16 @@ cons_carbons_setting(void)
 void
 cons_receipts_setting(void)
 {
-    if (prefs_get_boolean(PREF_RECEIPTS))
-        cons_show("Message receipts (/receipts)  : ON");
+    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST))
+        cons_show("Request receipts (/receipts)  : ON");
     else
-        cons_show("Message receipts (/receipts)  : OFF");
+        cons_show("Request receipts (/receipts)  : OFF");
+
+    if (prefs_get_boolean(PREF_RECEIPTS_SEND))
+        cons_show("Send receipts (/receipts)     : ON");
+    else
+        cons_show("Send receipts (/receipts)     : OFF");
+
 }
 
 void

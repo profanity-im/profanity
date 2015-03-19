@@ -110,7 +110,7 @@ message_send_chat(const char * const barejid, const char * const msg)
     if (state) {
         stanza_attach_state(ctx, message, state);
     }
-    if (prefs_get_boolean(PREF_RECEIPTS)) {
+    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
 
@@ -151,7 +151,7 @@ message_send_chat_encrypted(const char * const barejid, const char * const msg)
         stanza_attach_state(ctx, message, state);
     }
     stanza_attach_carbons_private(ctx, message);
-    if (prefs_get_boolean(PREF_RECEIPTS)) {
+    if (prefs_get_boolean(PREF_RECEIPTS_REQUEST)) {
         stanza_attach_receipt_request(ctx, message);
     }
 
@@ -621,7 +621,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 } else {
                     handle_incoming_message(jid->barejid, jid->resourcepart, message);
                 }
-                if (id) {
+                if (id && prefs_get_boolean(PREF_RECEIPTS_SEND)) {
                     xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
                     if (receipts) {
                         char *receipts_name = xmpp_stanza_get_name(receipts);

@@ -106,7 +106,7 @@ buffer_mark_received(ProfBuff buffer, const char * const id)
     GSList *entries = buffer->entries;
     while (entries) {
         ProfBuffEntry *entry = entries->data;
-        if (entry->receipt) {
+        if (entry->receipt && g_strcmp0(entry->receipt->id, id) == 0) {
             if (!entry->receipt->received) {
                 entry->receipt->received = TRUE;
                 return TRUE;
