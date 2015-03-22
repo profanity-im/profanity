@@ -44,6 +44,7 @@ tests_sources = \
 	src/xmpp/xmpp.h src/xmpp/form.c \
 	src/ui/ui.h \
 	src/otr/otr.h \
+	src/pgp/gpg.h \
 	src/command/command.h src/command/command.c \
 	src/command/commands.h src/command/commands.c \
 	src/tools/parser.c \
@@ -63,6 +64,7 @@ tests_sources = \
 	src/server_events.c src/server_events.h \
 	tests/xmpp/stub_xmpp.c \
 	tests/ui/stub_ui.c \
+	tests/pgp/stub_gpg.c \
 	tests/log/stub_log.c \
 	tests/config/stub_accounts.c \
 	tests/helpers.c tests/helpers.h \
@@ -95,6 +97,9 @@ main_source = src/main.c
 
 git_include = src/gitversion.h
 
+pgp_sources = \
+	src/pgp/gpg.h src/pgp/gpg.c
+
 otr3_sources = \
 	src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
 
@@ -109,6 +114,10 @@ themes_sources = themes/*
 script_sources = bootstrap.sh configure-debug install-all.sh
 
 man_sources = docs/profanity.1
+
+if BUILD_PGP
+core_sources += $(pgp_sources)
+endif
 
 if BUILD_OTR
 tests_sources += $(otr_test_sources)

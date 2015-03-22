@@ -56,6 +56,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 #include "profanity.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -4061,6 +4064,31 @@ cmd_xa(gchar **args, struct cmd_help_t help)
 {
     _update_presence(RESOURCE_XA, "xa", args);
     return TRUE;
+}
+
+gboolean
+cmd_pgp(gchar **args, struct cmd_help_t help)
+{
+#ifdef HAVE_LIBGPGME
+    if (g_strcmp0(args[0], "keys") == 0) {
+        GSList *keys = p_gpg_list_keys();
+        if (keys) {
+            while (keys) {
+                cons_debug("Key: %s", keys->data);
+                keys = g_slist_next(keys);
+            }
+        } else {
+            cons_debug("No keys found");
+        }
+        g_slist_free_full(keys, (GDestroyNotify)free);
+    }
+
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with PGP support enabled");
+    return TRUE;
+#endif
+
 }
 
 gboolean

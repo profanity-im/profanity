@@ -42,6 +42,8 @@ AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
 AC_ARG_ENABLE([otr],
     [AS_HELP_STRING([--enable-otr], [enable otr encryption])])
+AC_ARG_ENABLE([pgp],
+    [AS_HELP_STRING([--enable-pgp], [enable pgp])])
 AC_ARG_WITH([libxml2],
     [AS_HELP_STRING([--with-libxml2], [link with libxml2 instead of expat])])
 AC_ARG_WITH([xscreensaver],
@@ -181,6 +183,17 @@ elif test "x$with_xscreensaver" = x; then
         [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
     AC_CHECK_LIB([X11], [main], [],
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
+fi
+
+AM_CONDITIONAL([BUILD_PGP], [false])
+if test "x$enable_pgp" = xyes; then
+    AC_CHECK_LIB([gpgme], [main],
+        [AM_CONDITIONAL([BUILD_PGP], [true]) LIBS="-lgpgme $LIBS" AC_DEFINE([HAVE_LIBGPGME], [1], [Have libgpgme])],
+        [AC_MSG_ERROR([libgpgme is required for profanity])])
+elif test "x$enable_pgp" = x; then
+    AC_CHECK_LIB([gpgme], [main],
+        [AM_CONDITIONAL([BUILD_PGP], [true]) LIBS="-lgpgme $LIBS" AC_DEFINE([HAVE_LIBGPGME], [1], [Have libgpgme])],
+        [AC_MSG_NOTICE([libgpgme not found, pgp support not included.])])
 fi
 
 AM_CONDITIONAL([BUILD_OTR], [false])

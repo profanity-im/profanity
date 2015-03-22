@@ -848,6 +848,14 @@ static struct cmd_t command_defs[] =
           "Send chat state notifications during chat sessions.",
           NULL } } },
 
+    { "/pgp",
+        cmd_pgp, parse_args, 1, 1, NULL,
+        { "/pgp keys", "Open PGP.",
+        { "/pgp keys",
+          "---------",
+          "Open PGP.",
+          NULL } } },
+
     { "/otr",
         cmd_otr, parse_args, 1, 3, NULL,
         { "/otr command [args..]", "Off The Record encryption commands.",
@@ -1202,6 +1210,7 @@ static Autocomplete time_statusbar_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
+static Autocomplete pgp_ac;
 
 /*
  * Initialise command autocompleter and history
@@ -1563,6 +1572,9 @@ cmd_init(void)
     receipts_ac = autocomplete_new();
     autocomplete_add(receipts_ac, "send");
     autocomplete_add(receipts_ac, "request");
+
+    pgp_ac = autocomplete_new();
+    autocomplete_add(pgp_ac, "keys");
 }
 
 void
@@ -1621,6 +1633,7 @@ cmd_uninit(void)
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
     autocomplete_free(receipts_ac);
+    autocomplete_free(pgp_ac);
 }
 
 gboolean
@@ -1788,6 +1801,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
+    autocomplete_reset(pgp_ac);
 
     if (ui_current_win_type() == WIN_CHAT) {
         ProfChatWin *chatwin = wins_get_current_chat();
@@ -1971,8 +1985,8 @@ _cmd_complete_parameters(const char * const input)
         }
     }
 
-    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room" };
-    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac };
+    gchar *cmds[] = { "/help", "/prefs", "/disco", "/close", "/wins", "/subject", "/room", "/pgp" };
+    Autocomplete completers[] = { help_ac, prefs_ac, disco_ac, close_ac, wins_ac, subject_ac, room_ac, pgp_ac };
 
     for (i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE);

@@ -59,6 +59,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 #include "resource.h"
 #include "xmpp/xmpp.h"
 #include "ui/ui.h"
@@ -240,6 +243,9 @@ _init(const int disable_tls, char *log_level)
     muc_init();
 #ifdef HAVE_LIBOTR
     otr_init();
+#endif
+#ifdef HAVE_LIBGPGME
+    p_gpg_init();
 #endif
     atexit(_shutdown);
     ui_input_nonblocking(TRUE);
