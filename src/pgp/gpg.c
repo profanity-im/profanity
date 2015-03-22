@@ -39,11 +39,13 @@
 
 #include "log.h"
 
+static const char *libversion;
+
 void
 p_gpg_init(void)
 {
-    char *version = gpgme_check_version (NULL);
-    log_debug("GPG: Found gpgme version: %s",version);
+    libversion = gpgme_check_version(NULL);
+    log_debug("GPG: Found gpgme version: %s", libversion);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
 }
 
@@ -79,3 +81,10 @@ p_gpg_list_keys(void)
 
     return result;
 }
+
+const char*
+p_gpg_libver(void)
+{
+    return libversion;
+}
+

@@ -4081,6 +4081,16 @@ cmd_pgp(gchar **args, struct cmd_help_t help)
             cons_debug("No keys found");
         }
         g_slist_free_full(keys, (GDestroyNotify)free);
+    } else if (g_strcmp0(args[0], "libver") == 0) {
+        const char *libver = p_gpg_libver();
+        if (libver) {
+            GString *fullstr = g_string_new("Using libgpgme version ");
+            g_string_append(fullstr, libver);
+            cons_show("%s", fullstr->str);
+            g_string_free(fullstr, TRUE);
+        } else {
+            cons_show("Could not get libgpgme version");
+        }
     }
 
     return TRUE;

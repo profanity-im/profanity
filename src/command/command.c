@@ -850,10 +850,12 @@ static struct cmd_t command_defs[] =
 
     { "/pgp",
         cmd_pgp, parse_args, 1, 1, NULL,
-        { "/pgp keys", "Open PGP.",
-        { "/pgp keys",
-          "---------",
+        { "/pgp keys|libver", "Open PGP.",
+        { "/pgp keys|libver",
+          "----------------",
           "Open PGP.",
+          "keys   : List private keys."
+          "libver : Show which version of the libgpgme library is being used.",
           NULL } } },
 
     { "/otr",
@@ -1575,6 +1577,7 @@ cmd_init(void)
 
     pgp_ac = autocomplete_new();
     autocomplete_add(pgp_ac, "keys");
+    autocomplete_add(pgp_ac, "libver");
 }
 
 void
