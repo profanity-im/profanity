@@ -34,9 +34,12 @@
 
 #include <locale.h>
 #include <string.h>
+#include <stdlib.h>
 
+#include <glib.h>
 #include <gpgme.h>
 
+#include "pgp/gpg.h"
 #include "log.h"
 
 static const char *libversion;
@@ -70,7 +73,14 @@ p_gpg_list_keys(void)
             if (error) {
                 break;
             }
-            result = g_slist_append(result, strdup(key->uids->uid));
+
+            ProfPGPKey *p_pgpkey = malloc(sizeof(ProfPGPKey));
+            p_pgpkey->id = strdup(key->subkeys->keyid);
+            p_pgpkey->name = strdup(key->uids->uid);
+            p_pgpkey->fp = strdup(key->subkeys->fpr);
+
+            result = g_slist_append(result, p_pgpkey);
+
             gpgme_key_release(key);
         }
     } else {
@@ -88,3 +98,13 @@ p_gpg_libver(void)
     return libversion;
 }
 
+void
+p_gpg_free_key(ProfPGPKey *key)
+{
+    if (key) {
+        free(key->id);
+        free(key->name);
+        free(key->fp);
+        free(key);
+    }
+}

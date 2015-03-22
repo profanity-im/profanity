@@ -35,8 +35,15 @@
 #ifndef GPG_H
 #define GPG_H
 
+typedef struct pgp_key_t {
+    char *id;
+    char *name;
+    char *fp;
+} ProfPGPKey;
+
 void p_gpg_init(void);
 GSList* p_gpg_list_keys(void);
-char* p_gpg_libver(void);
+const char* p_gpg_libver(void);
+void p_gpg_free_key(ProfPGPKey *key);
 
 #endif

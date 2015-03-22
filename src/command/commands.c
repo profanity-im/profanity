@@ -4073,14 +4073,18 @@ cmd_pgp(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "keys") == 0) {
         GSList *keys = p_gpg_list_keys();
         if (keys) {
+            cons_show("PGP keys:");
             while (keys) {
-                cons_debug("Key: %s", keys->data);
+                ProfPGPKey *key = keys->data;
+                cons_show("  %s", key->name);
+                cons_show("    ID          : %s", key->id);
+                cons_show("    Fingerprint : %s", key->fp);
                 keys = g_slist_next(keys);
             }
         } else {
-            cons_debug("No keys found");
+            cons_show("No keys found");
         }
-        g_slist_free_full(keys, (GDestroyNotify)free);
+        g_slist_free_full(keys, (GDestroyNotify)p_gpg_free_key);
     } else if (g_strcmp0(args[0], "libver") == 0) {
         const char *libver = p_gpg_libver();
         if (libver) {
