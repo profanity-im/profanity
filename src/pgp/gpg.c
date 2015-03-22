@@ -42,7 +42,7 @@
 void
 p_gpg_init(void)
 {
-	char *version = gpgme_check_version (NULL);
+    char *version = gpgme_check_version (NULL);
     log_debug("GPG: Found gpgme version: %s",version);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
 }
