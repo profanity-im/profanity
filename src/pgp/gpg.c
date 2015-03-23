@@ -116,62 +116,62 @@ p_gpg_free_key(ProfPGPKey *key)
 char*
 p_gpg_sign_str(const char * const str, const char * const fp)
 {
-	gpgme_ctx_t ctx;
-	gpgme_error_t error = gpgme_new(&ctx);
-	if (error) {
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error) {
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-		return NULL;
-	}
+        return NULL;
+    }
 
-	gpgme_key_t key = NULL;
-	error = gpgme_get_key(ctx, fp, &key, 1);
-	if (error || key == NULL) {
+    gpgme_key_t key = NULL;
+    error = gpgme_get_key(ctx, fp, &key, 1);
+    if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-		gpgme_release (ctx);
-		return NULL;
-	}
+        gpgme_release (ctx);
+        return NULL;
+    }
 
-	gpgme_signers_clear(ctx);
-	error = gpgme_signers_add(ctx, key);
-	if (error) {
+    gpgme_signers_clear(ctx);
+    error = gpgme_signers_add(ctx, key);
+    if (error) {
         log_error("GPG: Failed to load signer. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-		gpgme_release(ctx);
-		return NULL;
-	}
+        gpgme_release(ctx);
+        return NULL;
+    }
 
-	gpgme_data_t str_data;
-	gpgme_data_t signed_data;
+    gpgme_data_t str_data;
+    gpgme_data_t signed_data;
     char *str_or_empty = NULL;
     if (str) {
         str_or_empty = strdup(str);
     } else {
         str_or_empty = strdup("");
     }
-	gpgme_data_new_from_mem(&str_data, str_or_empty, strlen(str_or_empty), 1);
-	gpgme_data_new(&signed_data);
+    gpgme_data_new_from_mem(&str_data, str_or_empty, strlen(str_or_empty), 1);
+    gpgme_data_new(&signed_data);
 
-	gpgme_set_armor(ctx,1);
-	error = gpgme_op_sign(ctx,str_data,signed_data,GPGME_SIG_MODE_DETACH);
-	if (error) {
+    gpgme_set_armor(ctx,1);
+    error = gpgme_op_sign(ctx,str_data,signed_data,GPGME_SIG_MODE_DETACH);
+    if (error) {
         log_error("GPG: Failed to sign string. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-		gpgme_release(ctx);
-		return NULL;
-	}
+        gpgme_release(ctx);
+        return NULL;
+    }
 
     char *result = NULL;
-	gpgme_data_release(str_data);
+    gpgme_data_release(str_data);
 
     size_t len = 0;
-	char *signed_str = gpgme_data_release_and_get_mem(signed_data, &len);
-	if (signed_str != NULL) {
-		signed_str[len] = 0;
-		result = _remove_header_footer(signed_str);
-	}
-	gpgme_free(signed_str);
-	gpgme_release(ctx);
+    char *signed_str = gpgme_data_release_and_get_mem(signed_data, &len);
+    if (signed_str != NULL) {
+        signed_str[len] = 0;
+        result = _remove_header_footer(signed_str);
+    }
+    gpgme_free(signed_str);
+    gpgme_release(ctx);
     free(str_or_empty);
 
-	return result;
+    return result;
 }
 
 static char*
