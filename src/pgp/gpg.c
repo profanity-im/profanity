@@ -177,23 +177,23 @@ p_gpg_sign_str(const char * const str, const char * const fp)
 static char*
 _remove_header_footer(char *str)
 {
-	char *pointer = str;
+    char *pointer = str;
 
-	int newlines = 0;
-	while (newlines < 3) {
-		if (pointer[0] == '\n') {
-			newlines++;
+    int newlines = 0;
+    while (newlines < 3) {
+        if (pointer[0] == '\n') {
+            newlines++;
         }
-		pointer++;
+        pointer++;
 
-		if (strlen(pointer) == 0) {
-			return NULL;
+        if (strlen(pointer) == 0) {
+            return NULL;
         }
-	}
+    }
 
-	char *stripped = malloc(strlen(pointer)+1-strlen(PGP_FOOTER));
-	strncpy(stripped,pointer,strlen(pointer)-strlen(PGP_FOOTER));
-	stripped[strlen(pointer)-strlen(PGP_FOOTER)] = '\0';
+    char *stripped = malloc(strlen(pointer)+1-strlen(PGP_FOOTER));
+    strncpy(stripped,pointer,strlen(pointer)-strlen(PGP_FOOTER));
+    stripped[strlen(pointer)-strlen(PGP_FOOTER)] = '\0';
 
-	return stripped;
+    return stripped;
 }
