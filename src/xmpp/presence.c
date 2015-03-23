@@ -49,7 +49,9 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
+#endif
 
 static Autocomplete sub_requests_ac;
 
@@ -226,6 +228,7 @@ presence_update(const resource_presence_t presence_type, const char * const msg,
 
     stanza_attach_status(ctx, presence, msg);
 
+#ifdef HAVE_LIBGPGME
     char *account_name = jabber_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
@@ -244,6 +247,7 @@ presence_update(const resource_presence_t presence_type, const char * const msg,
 
         free(signed_status);
     }
+#endif
 
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_last_activity(ctx, presence, idle);
