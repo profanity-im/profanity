@@ -45,5 +45,6 @@ void p_gpg_init(void);
 GSList* p_gpg_list_keys(void);
 const char* p_gpg_libver(void);
 void p_gpg_free_key(ProfPGPKey *key);
+char* p_gpg_sign_str(const char * const str, const char * const fp);
 
 #endif

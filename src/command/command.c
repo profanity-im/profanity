@@ -1369,6 +1369,7 @@ cmd_init(void)
     autocomplete_add(account_set_ac, "muc");
     autocomplete_add(account_set_ac, "nick");
     autocomplete_add(account_set_ac, "otr");
+    autocomplete_add(account_set_ac, "pgpkeyid");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -1376,6 +1377,7 @@ cmd_init(void)
     autocomplete_add(account_clear_ac, "server");
     autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");
+    autocomplete_add(account_clear_ac, "pgpkeyid");
 
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");

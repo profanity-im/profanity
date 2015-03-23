@@ -159,6 +159,7 @@
 #define STANZA_NS_CARBONS "urn:xmpp:carbons:2"
 #define STANZA_NS_FORWARD "urn:xmpp:forward:0"
 #define STANZA_NS_RECEIPTS "urn:xmpp:receipts"
+#define STANZA_NS_SIGNED "jabber:x:signed"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 

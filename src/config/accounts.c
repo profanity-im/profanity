@@ -280,11 +280,16 @@ accounts_get_account(const char * const name)
             g_strfreev(always);
         }
 
+        gchar *pgp_keyid = NULL;
+        if (g_key_file_has_key(accounts, name, "pgp.keyid", NULL)) {
+            pgp_keyid = g_key_file_get_string(accounts, name, "pgp.keyid", NULL);
+        }
+
         ProfAccount *new_account = account_new(name, jid, password, eval_password, enabled,
             server, port, resource, last_presence, login_presence,
             priority_online, priority_chat, priority_away, priority_xa,
             priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-            otr_opportunistic, otr_always);
+            otr_opportunistic, otr_always, pgp_keyid);
 
         g_free(jid);
         g_free(password);
@@ -296,6 +301,7 @@ accounts_get_account(const char * const name)
         g_free(muc_service);
         g_free(muc_nick);
         g_free(otr_policy);
+        g_free(pgp_keyid);
 
         return new_account;
     }
@@ -454,6 +460,15 @@ accounts_set_eval_password(const char * const account_name, const char * const v
 }
 
 void
+accounts_set_pgp_keyid(const char * const account_name, const char * const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, "pgp.keyid", value);
+        _save_accounts();
+    }
+}
+
+void
 accounts_clear_password(const char * const account_name)
 {
     if (accounts_account_exists(account_name)) {
@@ -485,6 +500,15 @@ accounts_clear_port(const char * const account_name)
 {
     if (accounts_account_exists(account_name)) {
         g_key_file_remove_key(accounts, account_name, "port", NULL);
+        _save_accounts();
+    }
+}
+
+void
+accounts_clear_pgp_keyid(const char * const account_name)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, "pgp.keyid", NULL);
         _save_accounts();
     }
 }

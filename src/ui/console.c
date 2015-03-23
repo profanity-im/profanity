@@ -710,6 +710,10 @@ cons_show_account(ProfAccount *account)
         g_string_free(always, TRUE);
     }
 
+    if (account->pgp_keyid) {
+        cons_show   ("PGP Key ID        : %s", account->pgp_keyid);
+    }
+
     cons_show       ("Priority          : chat:%d, online:%d, away:%d, xa:%d, dnd:%d",
         account->priority_chat, account->priority_online, account->priority_away,
         account->priority_xa, account->priority_dnd);

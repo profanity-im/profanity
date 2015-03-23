@@ -36,7 +36,7 @@ void cmd_account_shows_account_when_connected_and_no_args(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     gchar *args[] = { NULL };
 
     will_return(jabber_get_connection_status, JABBER_CONNECTED);
@@ -109,7 +109,7 @@ void cmd_account_show_shows_account_when_exists(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "show", "account_name", NULL };
     ProfAccount *account = account_new("jabber_org", "me@jabber.org", NULL, NULL,
-        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
@@ -478,7 +478,7 @@ void cmd_account_set_password_sets_password(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, NULL, NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
     expect_any(accounts_account_exists, account_name);
@@ -504,7 +504,7 @@ void cmd_account_set_eval_password_sets_eval_password(void **state)
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, NULL, NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
     expect_any(accounts_account_exists, account_name);
@@ -529,7 +529,7 @@ void cmd_account_set_password_when_eval_password_set(void **state) {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, NULL, "a_password",
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
     expect_any(accounts_account_exists, account_name);
@@ -550,7 +550,7 @@ void cmd_account_set_eval_password_when_password_set(void **state) {
     CommandHelp *help = malloc(sizeof(CommandHelp));
     gchar *args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount *account = account_new("a_account", NULL, "a_password", NULL,
-    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
     expect_any(accounts_account_exists, account_name);

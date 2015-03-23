@@ -516,6 +516,10 @@ cmd_account(gchar **args, struct cmd_help_t help)
                         cons_show("Updated login status for account %s: %s", account_name, value);
                     }
                     cons_show("");
+                } else if (strcmp(property, "pgpkeyid") == 0) {
+                    accounts_set_pgp_keyid(account_name, value);
+                    cons_show("Updated PGP key ID for account %s: %s", account_name, value);
+                    cons_show("");
                 } else if (valid_resource_presence_string(property)) {
                     int intval;
                     char *err_msg = NULL;
@@ -593,6 +597,10 @@ cmd_account(gchar **args, struct cmd_help_t help)
                 } else if (strcmp(property, "otr") == 0) {
                     accounts_clear_otr(account_name);
                     cons_show("OTR policy removed for account %s", account_name);
+                    cons_show("");
+                } else if (strcmp(property, "pgpkeyid") == 0) {
+                    accounts_clear_pgp_keyid(account_name);
+                    cons_show("Removed PGP key ID for account %s", account_name);
                     cons_show("");
                 } else {
                     cons_show("Invalid property: %s", property);

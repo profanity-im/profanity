@@ -49,6 +49,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#include "pgp/gpg.h"
 
 static Autocomplete sub_requests_ac;
 
@@ -222,7 +223,28 @@ presence_update(const resource_presence_t presence_type, const char * const msg,
     char *id = create_unique_id("presence");
     xmpp_stanza_set_id(presence, id);
     stanza_attach_show(ctx, presence, show);
+
     stanza_attach_status(ctx, presence, msg);
+
+    char *account_name = jabber_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
+    if (account->pgp_keyid) {
+        xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(x, STANZA_NAME_X);
+        xmpp_stanza_set_ns(x, STANZA_NS_SIGNED);
+        xmpp_stanza_t *signed_text = xmpp_stanza_new(ctx);
+
+        char *signed_status = p_gpg_sign_str(msg, account->pgp_keyid);
+
+        xmpp_stanza_set_text(signed_text, signed_status);
+        xmpp_stanza_add_child(x, signed_text);
+        xmpp_stanza_release(signed_text);
+        xmpp_stanza_add_child(presence, x);
+        xmpp_stanza_release(x);
+
+        free(signed_status);
+    }
+
     stanza_attach_priority(ctx, presence, pri);
     stanza_attach_last_activity(ctx, presence, idle);
     stanza_attach_caps(ctx, presence);
