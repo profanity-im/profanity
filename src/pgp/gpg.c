@@ -42,13 +42,14 @@
 #include "pgp/gpg.h"
 #include "log.h"
 
-#define PGP_HEADER "-----BEGIN PGP SIGNATURE-----"
-#define PGP_FOOTER "-----END PGP SIGNATURE-----"
+#define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
+#define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
+#define PGP_MESSAGE_FOOTER "-----END PGP MESSAGE-----"
 
 static const char *libversion;
 static GHashTable *fingerprints;
 
-static char* _remove_header_footer(char *str);
+static char* _remove_header_footer(char *str, const char * const footer);
 static char* _add_header_footer(const char * const str);
 
 void
@@ -171,7 +172,7 @@ p_gpg_verify(const char * const barejid, const char *const sign)
 }
 
 char*
-p_gpg_sign_str(const char * const str, const char * const fp)
+p_gpg_sign(const char * const str, const char * const fp)
 {
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
@@ -222,7 +223,7 @@ p_gpg_sign_str(const char * const str, const char * const fp)
     char *signed_str = gpgme_data_release_and_get_mem(signed_data, &len);
     if (signed_str != NULL) {
         signed_str[len] = 0;
-        result = _remove_header_footer(signed_str);
+        result = _remove_header_footer(signed_str, PGP_SIGNATURE_FOOTER);
     }
     gpgme_free(signed_str);
     gpgme_release(ctx);
@@ -231,26 +232,85 @@ p_gpg_sign_str(const char * const str, const char * const fp)
     return result;
 }
 
-static char*
-_remove_header_footer(char *str)
+char *
+p_gpg_encrypt(const char * const barejid, const char * const message)
 {
-    char *pointer = str;
+    char *fp = g_hash_table_lookup(fingerprints, barejid);
 
+    if (!fp) {
+        return NULL;
+    }
+
+    gpgme_key_t keys[2];
+
+    keys[0] = NULL;
+    keys[1] = NULL;
+
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error) {
+        log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        return NULL;
+    }
+
+    gpgme_key_t key;
+    error = gpgme_get_key(ctx, fp, &key, 0);
+    if (error || key == NULL) {
+        log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        gpgme_release(ctx);
+        return NULL;
+    }
+
+    keys[0] = key;
+
+    gpgme_data_t plain;
+    gpgme_data_t cipher;
+    gpgme_data_new_from_mem(&plain, message, strlen(message), 1);
+    gpgme_data_new(&cipher);
+
+    gpgme_set_armor(ctx, 1);
+    error = gpgme_op_encrypt(ctx, keys, GPGME_ENCRYPT_ALWAYS_TRUST, plain, cipher);
+    if (error) {
+        log_error("GPG: Failed to encrypt message. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        gpgme_release(ctx);
+        return NULL;
+    }
+    gpgme_data_release(plain);
+
+    char *cipher_str = NULL;
+    char *result = NULL;
+    size_t len;
+    cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
+    if (cipher_str) {
+        result = _remove_header_footer(cipher_str, PGP_MESSAGE_FOOTER);
+    }
+
+    gpgme_free(cipher_str);
+    gpgme_release(ctx);
+
+    return result;
+}
+
+static char*
+_remove_header_footer(char *str, const char * const footer)
+{
+    int pos = 0;
     int newlines = 0;
+
     while (newlines < 3) {
-        if (pointer[0] == '\n') {
+        if (str[pos] == '\n') {
             newlines++;
         }
-        pointer++;
+        pos++;
 
-        if (strlen(pointer) == 0) {
+        if (str[pos] == '\0') {
             return NULL;
         }
     }
 
-    char *stripped = malloc(strlen(pointer)+1-strlen(PGP_FOOTER));
-    strncpy(stripped,pointer,strlen(pointer)-strlen(PGP_FOOTER));
-    stripped[strlen(pointer)-strlen(PGP_FOOTER)] = '\0';
+    char *stripped = strdup(&str[pos]);
+    char *footer_start = g_strrstr(stripped, footer);
+    footer_start[0] = '\0';
 
     return stripped;
 }
@@ -260,11 +320,11 @@ _add_header_footer(const char * const str)
 {
     GString *result_str = g_string_new("");
 
-    g_string_append(result_str, PGP_HEADER);
+    g_string_append(result_str, PGP_SIGNATURE_HEADER);
     g_string_append(result_str, "\n\n");
     g_string_append(result_str, str);
     g_string_append(result_str, "\n");
-    g_string_append(result_str, PGP_FOOTER);
+    g_string_append(result_str, PGP_SIGNATURE_FOOTER);
 
     char *result = result_str->str;
     g_string_free(result_str, FALSE);

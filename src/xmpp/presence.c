@@ -232,7 +232,7 @@ presence_update(const resource_presence_t presence_type, const char * const msg,
     char *account_name = jabber_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
-        char *signed_status = p_gpg_sign_str(msg, account->pgp_keyid);
+        char *signed_status = p_gpg_sign(msg, account->pgp_keyid);
 
         if (signed_status) {
             xmpp_stanza_t *x = xmpp_stanza_new(ctx);

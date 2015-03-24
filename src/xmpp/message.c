@@ -49,6 +49,7 @@
 #include "roster_list.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"
+#include "pgp/gpg.h"
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 
@@ -104,7 +105,34 @@ message_send_chat(const char * const barejid, const char * const msg)
     }
 
     char *id = create_unique_id("msg");
-    xmpp_stanza_t *message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+    xmpp_stanza_t *message = NULL;
+
+#ifdef HAVE_LIBGPGME
+    char *account_name = jabber_get_account_name();
+    ProfAccount *account = accounts_get_account(account_name);
+    if (account->pgp_keyid) {
+        Jid *jidp = jid_create(jid);
+        char *encrypted = p_gpg_encrypt(jidp->barejid, msg);
+        if (encrypted) {
+            message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, "This message is encrypted.");
+            xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(x, STANZA_NAME_X);
+            xmpp_stanza_set_ns(x, STANZA_NS_ENCRYPTED);
+            xmpp_stanza_t *enc_st = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_text(enc_st, encrypted);
+            xmpp_stanza_add_child(x, enc_st);
+            xmpp_stanza_release(enc_st);
+            xmpp_stanza_add_child(message, x);
+            xmpp_stanza_release(x);
+            free(encrypted);
+        } else {
+            message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+        }
+    }
+#else
+    message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
+#endif
+
     free(jid);
 
     if (state) {
