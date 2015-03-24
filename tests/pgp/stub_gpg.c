@@ -3,13 +3,21 @@
 #include "pgp/gpg.h"
 
 void p_gpg_init(void) {}
+void p_gpg_close(void) {}
 
 GSList* p_gpg_list_keys(void)
 {
     return NULL;
 }
 
-const char* p_gpg_libver(void) {
+GHashTable*
+p_gpg_fingerprints(void)
+{
+    return NULL;
+}
+
+const char* p_gpg_libver(void)
+{
     return NULL;
 }
 

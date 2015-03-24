@@ -271,6 +271,9 @@ _shutdown(void)
 #ifdef HAVE_LIBOTR
     otr_shutdown();
 #endif
+#ifdef HAVE_LIBGPGME
+    p_gpg_close();
+#endif
     chat_log_close();
     prefs_close();
     theme_close();

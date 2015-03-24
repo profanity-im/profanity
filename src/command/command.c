@@ -1579,6 +1579,7 @@ cmd_init(void)
 
     pgp_ac = autocomplete_new();
     autocomplete_add(pgp_ac, "keys");
+    autocomplete_add(pgp_ac, "fps");
     autocomplete_add(pgp_ac, "libver");
 }
 

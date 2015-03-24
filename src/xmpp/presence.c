@@ -232,20 +232,21 @@ presence_update(const resource_presence_t presence_type, const char * const msg,
     char *account_name = jabber_get_account_name();
     ProfAccount *account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
-        xmpp_stanza_t *x = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(x, STANZA_NAME_X);
-        xmpp_stanza_set_ns(x, STANZA_NS_SIGNED);
-        xmpp_stanza_t *signed_text = xmpp_stanza_new(ctx);
-
         char *signed_status = p_gpg_sign_str(msg, account->pgp_keyid);
 
-        xmpp_stanza_set_text(signed_text, signed_status);
-        xmpp_stanza_add_child(x, signed_text);
-        xmpp_stanza_release(signed_text);
-        xmpp_stanza_add_child(presence, x);
-        xmpp_stanza_release(x);
+        if (signed_status) {
+            xmpp_stanza_t *x = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(x, STANZA_NAME_X);
+            xmpp_stanza_set_ns(x, STANZA_NS_SIGNED);
+            xmpp_stanza_t *signed_text = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_text(signed_text, signed_status);
+            xmpp_stanza_add_child(x, signed_text);
+            xmpp_stanza_release(signed_text);
+            xmpp_stanza_add_child(presence, x);
+            xmpp_stanza_release(x);
 
-        free(signed_status);
+            free(signed_status);
+        }
     }
 #endif
 
@@ -605,6 +606,16 @@ _available_handler(xmpp_conn_t * const conn,
         char *jid = jid_fulljid_or_barejid(xmpp_presence->jid);
         log_debug("Presence available handler fired for: %s", jid);
     }
+
+#ifdef HAVE_LIBGPGME
+    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);
+    if (x) {
+        char *sign = xmpp_stanza_get_text(x);
+        if (sign) {
+            p_gpg_verify(xmpp_presence->jid->barejid, sign);
+        }
+    }
+#endif
 
     const char *my_jid_str = xmpp_conn_get_jid(conn);
     Jid *my_jid = jid_create(my_jid_str);

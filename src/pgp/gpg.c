@@ -42,11 +42,14 @@
 #include "pgp/gpg.h"
 #include "log.h"
 
+#define PGP_HEADER "-----BEGIN PGP SIGNATURE-----"
 #define PGP_FOOTER "-----END PGP SIGNATURE-----"
 
 static const char *libversion;
+static GHashTable *fingerprints;
 
 static char* _remove_header_footer(char *str);
+static char* _add_header_footer(const char * const str);
 
 void
 p_gpg_init(void)
@@ -54,6 +57,15 @@ p_gpg_init(void)
     libversion = gpgme_check_version(NULL);
     log_debug("GPG: Found gpgme version: %s", libversion);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
+
+    // TODO add close function to clean up
+    fingerprints = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+}
+
+void
+p_gpg_close(void)
+{
+    g_hash_table_destroy(fingerprints);
 }
 
 GSList *
@@ -96,6 +108,12 @@ p_gpg_list_keys(void)
     return result;
 }
 
+GHashTable *
+p_gpg_fingerprints(void)
+{
+    return fingerprints;
+}
+
 const char*
 p_gpg_libver(void)
 {
@@ -111,6 +129,45 @@ p_gpg_free_key(ProfPGPKey *key)
         free(key->fp);
         free(key);
     }
+}
+
+void
+p_gpg_verify(const char * const barejid, const char *const sign)
+{
+    if (!sign) {
+        return;
+    }
+
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error) {
+        log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        return;
+    }
+
+    gpgme_data_t sign_data;
+    gpgme_data_t plain_data;
+    char *sign_with_header_footer = _add_header_footer(sign);
+    gpgme_data_new_from_mem(&sign_data, sign_with_header_footer, strlen(sign_with_header_footer), 1);
+    gpgme_data_new(&plain_data);
+
+    error = gpgme_op_verify(ctx, sign_data, NULL, plain_data);
+    if (error) {
+        log_error("GPG: Failed to verify. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        gpgme_release(ctx);
+        return;
+    }
+
+    gpgme_verify_result_t result = gpgme_op_verify_result(ctx);
+    if (result) {
+        if (result->signatures) {
+            log_debug("Fingerprint found for %s: %s ", barejid, result->signatures->fpr);
+            g_hash_table_replace(fingerprints, strdup(barejid), strdup(result->signatures->fpr));
+        }
+    }
+
+    gpgme_data_release(sign_data);
+    gpgme_data_release(plain_data);
 }
 
 char*
@@ -196,4 +253,21 @@ _remove_header_footer(char *str)
     stripped[strlen(pointer)-strlen(PGP_FOOTER)] = '\0';
 
     return stripped;
+}
+
+static char*
+_add_header_footer(const char * const str)
+{
+    GString *result_str = g_string_new("");
+
+    g_string_append(result_str, PGP_HEADER);
+    g_string_append(result_str, "\n\n");
+    g_string_append(result_str, str);
+    g_string_append(result_str, "\n");
+    g_string_append(result_str, PGP_FOOTER);
+
+    char *result = result_str->str;
+    g_string_free(result_str, FALSE);
+
+    return result;
 }
