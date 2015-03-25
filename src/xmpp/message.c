@@ -647,7 +647,23 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 if (delayed) {
                     handle_delayed_message(jid->barejid, message, tv_stamp);
                 } else {
+#ifdef HAVE_LIBGPGME
+                    gboolean handled = FALSE;
+                    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
+                    if (x) {
+                        char *enc_message = xmpp_stanza_get_text(x);
+                        char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
+                        if (decrypted) {
+                            handle_incoming_message(jid->barejid, jid->resourcepart, decrypted);
+                            handled = TRUE;
+                        }
+                    }
+                    if (!handled) {
+                        handle_incoming_message(jid->barejid, jid->resourcepart, message);
+                    }
+#else
                     handle_incoming_message(jid->barejid, jid->resourcepart, message);
+#endif
                 }
                 if (id && prefs_get_boolean(PREF_RECEIPTS_SEND)) {
                     xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);

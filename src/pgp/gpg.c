@@ -44,13 +44,14 @@
 
 #define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
 #define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
+#define PGP_MESSAGE_HEADER "-----BEGIN PGP MESSAGE-----"
 #define PGP_MESSAGE_FOOTER "-----END PGP MESSAGE-----"
 
 static const char *libversion;
 static GHashTable *fingerprints;
 
 static char* _remove_header_footer(char *str, const char * const footer);
-static char* _add_header_footer(const char * const str);
+static char* _add_header_footer(const char * const str, const char * const header, const char * const footer);
 
 void
 p_gpg_init(void)
@@ -148,7 +149,7 @@ p_gpg_verify(const char * const barejid, const char *const sign)
 
     gpgme_data_t sign_data;
     gpgme_data_t plain_data;
-    char *sign_with_header_footer = _add_header_footer(sign);
+    char *sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
     gpgme_data_new_from_mem(&sign_data, sign_with_header_footer, strlen(sign_with_header_footer), 1);
     gpgme_data_new(&plain_data);
 
@@ -291,6 +292,46 @@ p_gpg_encrypt(const char * const barejid, const char * const message)
     return result;
 }
 
+char *
+p_gpg_decrypt(const char * const barejid, const char * const cipher)
+{
+    char *cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
+
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error) {
+        log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        return NULL;
+    }
+
+    gpgme_data_t plain_data;
+    gpgme_data_t cipher_data;
+    gpgme_data_new_from_mem (&cipher_data, cipher_with_headers, strlen(cipher_with_headers), 1);
+    gpgme_data_new(&plain_data);
+
+    error = gpgme_op_decrypt(ctx, cipher_data, plain_data);
+    if (error) {
+        log_error("GPG: Failed to encrypt message. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        gpgme_release(ctx);
+        return NULL;
+    }
+
+    gpgme_data_release(cipher_data);
+
+    size_t len = 0;
+    char *plain_str = gpgme_data_release_and_get_mem(plain_data, &len);
+    char *result = NULL;
+    if (plain_str) {
+        plain_str[len] = 0;
+        result = g_strdup(plain_str);
+    }
+    gpgme_free(plain_str);
+
+    gpgme_release(ctx);
+
+    return result;
+}
+
 static char*
 _remove_header_footer(char *str, const char * const footer)
 {
@@ -316,15 +357,15 @@ _remove_header_footer(char *str, const char * const footer)
 }
 
 static char*
-_add_header_footer(const char * const str)
+_add_header_footer(const char * const str, const char * const header, const char * const footer)
 {
     GString *result_str = g_string_new("");
 
-    g_string_append(result_str, PGP_SIGNATURE_HEADER);
+    g_string_append(result_str, header);
     g_string_append(result_str, "\n\n");
     g_string_append(result_str, str);
     g_string_append(result_str, "\n");
-    g_string_append(result_str, PGP_SIGNATURE_FOOTER);
+    g_string_append(result_str, footer);
 
     char *result = result_str->str;
     g_string_free(result_str, FALSE);
