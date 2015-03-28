@@ -56,6 +56,12 @@ typedef enum {
     MUC_AFFILIATION_OWNER
 } muc_affiliation_t;
 
+typedef enum {
+    MUC_MEMBER_TYPE_UNKNOWN,
+    MUC_MEMBER_TYPE_PUBLIC,
+    MUC_MEMBER_TYPE_MEMBERS_ONLY
+} muc_member_type_t;
+
 typedef struct _muc_occupant_t {
     char *nick;
     char *jid;
@@ -133,5 +139,7 @@ void muc_set_role(const char * const room, const char * const role);
 void muc_set_affiliation(const char * const room, const char * const affiliation);
 char *muc_role_str(const char * const room);
 char *muc_affiliation_str(const char * const room);
+
+muc_member_type_t muc_member_type(const char * const room);
 
 #endif

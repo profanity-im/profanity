@@ -697,6 +697,9 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
         } else {
             ui_room_join(room, TRUE);
         }
+
+        // TODO send disco info request to room
+
         muc_invites_remove(room);
         muc_roster_set_complete(room);
 
