@@ -414,7 +414,7 @@ stanza_create_roster_set(xmpp_ctx_t *ctx, const char * const id,
 
 xmpp_stanza_t *
 stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
-    const char * const contact, const char * const reason)
+    const char * const contact, const char * const reason, const char * const password)
 {
     xmpp_stanza_t *message, *x;
 
@@ -430,8 +430,11 @@ stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     xmpp_stanza_set_ns(x, STANZA_NS_CONFERENCE);
 
     xmpp_stanza_set_attribute(x, STANZA_ATTR_JID, room);
-    if (reason != NULL) {
+    if (reason) {
         xmpp_stanza_set_attribute(x, STANZA_ATTR_REASON, reason);
+    }
+    if (password) {
+        xmpp_stanza_set_attribute(x, STANZA_ATTR_PASSWORD, password);
     }
 
     xmpp_stanza_add_child(message, x);
