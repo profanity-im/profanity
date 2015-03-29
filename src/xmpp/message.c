@@ -340,10 +340,17 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             reason = xmpp_stanza_get_text(reason_st);
         }
 
-        handle_room_invite(INVITE_MEDIATED, invitor, room, reason);
+        char *password = NULL;
+        xmpp_stanza_t *password_st = xmpp_stanza_get_child_by_name(xns_muc_user, STANZA_NAME_PASSWORD);
+        password = xmpp_stanza_get_text(password_st);
+
+        handle_room_invite(INVITE_MEDIATED, invitor, room, reason, password);
         jid_destroy(jidp);
-        if (reason != NULL) {
+        if (reason) {
             xmpp_free(ctx, reason);
+        }
+        if (password) {
+            xmpp_free(ctx, password);
         }
     }
 
@@ -359,13 +366,14 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *room = NULL;
     char *invitor = NULL;
     char *reason = NULL;
+    char *password = NULL;
 
     if (from == NULL) {
         log_warning("Message received with no from attribute, ignoring");
         return 1;
     }
 
-    // XEP-0429
+    // XEP-0249
     room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
     if (room == NULL) {
         return 1;
@@ -378,8 +386,9 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     invitor = jidp->barejid;
 
     reason = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_REASON);
+    password = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_PASSWORD);
 
-    handle_room_invite(INVITE_DIRECT, invitor, room, reason);
+    handle_room_invite(INVITE_DIRECT, invitor, room, reason, password);
 
     jid_destroy(jidp);
 

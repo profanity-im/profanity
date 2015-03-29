@@ -259,11 +259,11 @@ handle_disco_items(GSList *items, const char *jid)
 void
 handle_room_invite(jabber_invite_t invite_type,
     const char * const invitor, const char * const room,
-    const char * const reason)
+    const char * const reason, const char * const password)
 {
     if (!muc_active(room) && !muc_invites_contain(room)) {
         cons_show_room_invite(invitor, room, reason);
-        muc_invites_add(room);
+        muc_invites_add(room, password);
     }
 }
 

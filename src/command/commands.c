@@ -2151,8 +2151,13 @@ cmd_join(gchar **args, struct cmd_help_t help)
     options_destroy(options);
 
     // In the case that a nick wasn't provided by the optional args...
-    if (nick == NULL) {
+    if (!nick) {
         nick = account->muc_nick;
+    }
+
+    // When no password, check for invite with password
+    if (!passwd) {
+        passwd = muc_invite_password(room);
     }
 
     if (!muc_active(room)) {
