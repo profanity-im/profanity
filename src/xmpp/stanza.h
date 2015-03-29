@@ -217,6 +217,8 @@ xmpp_stanza_t* stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char * const i
 
 xmpp_stanza_t* stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
     const char * const contact, const char * const reason);
+xmpp_stanza_t* stanza_create_mediated_invite(xmpp_ctx_t *ctx, const char * const room,
+    const char * const contact, const char * const reason);
 
 gboolean stanza_contains_chat_state(xmpp_stanza_t *stanza);
 

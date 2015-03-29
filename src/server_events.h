@@ -58,7 +58,7 @@ void handle_room_message(const char * const room_jid, const char * const nick,
     const char * const message);
 void handle_room_join_error(const char * const room, const char * const err);
 void handle_room_info_error(const char * const room, const char * const error);
-void handle_room_disco_info(const char * const room, GSList *identities, GSList *features);
+void handle_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display);
 void handle_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
     const char * const error);
 void handle_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids);

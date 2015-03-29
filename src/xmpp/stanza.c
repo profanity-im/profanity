@@ -441,6 +441,46 @@ stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
 }
 
 xmpp_stanza_t *
+stanza_create_mediated_invite(xmpp_ctx_t *ctx, const char * const room,
+    const char * const contact, const char * const reason)
+{
+    xmpp_stanza_t *message, *x, *invite;
+
+    message = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(message, STANZA_NAME_MESSAGE);
+    xmpp_stanza_set_attribute(message, STANZA_ATTR_TO, room);
+    char *id = create_unique_id(NULL);
+    xmpp_stanza_set_id(message, id);
+    free(id);
+
+    x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x, STANZA_NS_MUC_USER);
+
+    invite = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(invite, STANZA_NAME_INVITE);
+    xmpp_stanza_set_attribute(invite, STANZA_ATTR_TO, contact);
+
+    if (reason != NULL) {
+        xmpp_stanza_t *reason_st = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(reason_st, STANZA_NAME_REASON);
+        xmpp_stanza_t *reason_txt = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(reason_txt, reason);
+        xmpp_stanza_add_child(reason_st, reason_txt);
+        xmpp_stanza_release(reason_txt);
+        xmpp_stanza_add_child(invite, reason_st);
+        xmpp_stanza_release(reason_st);
+    }
+
+    xmpp_stanza_add_child(x, invite);
+    xmpp_stanza_release(invite);
+    xmpp_stanza_add_child(message, x);
+    xmpp_stanza_release(x);
+
+    return message;
+}
+
+xmpp_stanza_t *
 stanza_create_room_join_presence(xmpp_ctx_t * const ctx,
     const char * const full_room_jid, const char * const passwd)
 {

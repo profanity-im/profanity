@@ -58,11 +58,17 @@
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_IQ, type, ctx)
 
+typedef struct p_room_info_data_t {
+    char *room;
+    gboolean display;
+} ProfRoomInfoData;
+
 static int _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _ping_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _version_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _disco_items_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
@@ -178,14 +184,18 @@ iq_disco_info_request(gchar *jid)
 }
 
 void
-iq_room_info_request(gchar *room)
+iq_room_info_request(const char * const room, gboolean display_result)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("room_disco_info");
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
 
-    xmpp_id_handler_add(conn, _disco_info_response_handler, id, room);
+    ProfRoomInfoData *cb_data = malloc(sizeof(ProfRoomInfoData));
+    cb_data->room = strdup(room);
+    cb_data->display = display_result;
+
+    xmpp_id_handler_add(conn, _room_info_response_handler, id, cb_data);
 
     free(id);
 
@@ -1338,33 +1348,98 @@ _item_destroy(DiscoItem *item)
 }
 
 static int
+_room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
+    void * const userdata)
+{
+    const char *type = xmpp_stanza_get_type(stanza);
+    ProfRoomInfoData *cb_data = (ProfRoomInfoData *)userdata;
+    log_info("Received diso#info response for room: %s", cb_data->room);
+
+    // handle error responses
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        if (cb_data->display) {
+            char *error_message = stanza_get_error_message(stanza);
+            handle_room_info_error(cb_data->room, error_message);
+            free(error_message);
+        }
+        free(cb_data->room);
+        free(cb_data);
+        return 0;
+    }
+
+    xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+
+    if (query != NULL) {
+        xmpp_stanza_t *child = xmpp_stanza_get_children(query);
+        GSList *identities = NULL;
+        GSList *features = NULL;
+        while (child != NULL) {
+            const char *stanza_name = xmpp_stanza_get_name(child);
+            if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
+                const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
+                if (var != NULL) {
+                    features = g_slist_append(features, strdup(var));
+                }
+            } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
+                const char *name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                const char *type = xmpp_stanza_get_attribute(child, STANZA_ATTR_TYPE);
+                const char *category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
+
+                if ((name != NULL) || (category != NULL) || (type != NULL)) {
+                    DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
+
+                    if (name != NULL) {
+                        identity->name = strdup(name);
+                    } else {
+                        identity->name = NULL;
+                    }
+                    if (category != NULL) {
+                        identity->category = strdup(category);
+                    } else {
+                        identity->category = NULL;
+                    }
+                    if (type != NULL) {
+                        identity->type = strdup(type);
+                    } else {
+                        identity->type = NULL;
+                    }
+
+                    identities = g_slist_append(identities, identity);
+                }
+            }
+
+            child = xmpp_stanza_get_next(child);
+        }
+
+        handle_room_disco_info(cb_data->room, identities, features, cb_data->display);
+
+        g_slist_free_full(features, free);
+        g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
+    }
+
+    free(cb_data->room);
+    free(cb_data);
+
+    return 0;
+}
+
+static int
 _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     void * const userdata)
 {
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     const char *type = xmpp_stanza_get_type(stanza);
 
-    char *room = NULL;
-    if (userdata) {
-        room = (char *) userdata;
-        log_info("Received diso#info response for room: %s", room);
+    if (from) {
+        log_info("Received diso#info response from: %s", from);
     } else {
-        room = NULL;
-        if (from) {
-            log_info("Received diso#info response from: %s", from);
-        } else {
-            log_info("Received diso#info response");
-        }
+        log_info("Received diso#info response");
     }
 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        if (room) {
-            handle_room_info_error(room, error_message);
-        } else {
-            handle_disco_info_error(from, error_message);
-        }
+        handle_disco_info_error(from, error_message);
         free(error_message);
         return 0;
     }
@@ -1413,16 +1488,13 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
             child = xmpp_stanza_get_next(child);
         }
 
-        if (room) {
-            handle_room_disco_info(room, identities, features);
-        } else {
-            handle_disco_info(from, identities, features);
-        }
+        handle_disco_info(from, identities, features);
 
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
     }
-    return 1;
+
+    return 0;
 }
 
 static int
