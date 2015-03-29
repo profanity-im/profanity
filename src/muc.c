@@ -210,6 +210,19 @@ muc_set_requires_config(const char * const room, gboolean val)
     }
 }
 
+void
+muc_set_features(const char * const room, GSList *features)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room && features) {
+        if (g_slist_find_custom(features, "muc_membersonly", (GCompareFunc)g_strcmp0)) {
+            chat_room->member_type = MUC_MEMBER_TYPE_MEMBERS_ONLY;
+        } else {
+            chat_room->member_type = MUC_MEMBER_TYPE_PUBLIC;
+        }
+    }
+}
+
 /*
  * Returns TRUE if the user is currently in the room
  */

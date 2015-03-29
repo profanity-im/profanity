@@ -164,6 +164,7 @@ handle_disco_info(const char *from, GSList *identities, GSList *features)
 void
 handle_room_disco_info(const char * const room, GSList *identities, GSList *features)
 {
+    muc_set_features(room, features);
     ui_show_room_disco_info(room, identities, features);
 }
 
@@ -699,6 +700,7 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
         }
 
         // TODO send disco info request to room
+        iq_room_info_request(room);
 
         muc_invites_remove(room);
         muc_roster_set_complete(room);

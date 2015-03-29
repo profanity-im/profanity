@@ -178,14 +178,14 @@ iq_disco_info_request(gchar *jid)
 }
 
 void
-iq_room_info_request(gchar *room)
+iq_room_info_request(const char * const room)
 {
     xmpp_conn_t * const conn = connection_get_conn();
     xmpp_ctx_t * const ctx = connection_get_ctx();
     char *id = create_unique_id("room_disco_info");
     xmpp_stanza_t *iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
 
-    xmpp_id_handler_add(conn, _disco_info_response_handler, id, room);
+    xmpp_id_handler_add(conn, _disco_info_response_handler, id, strdup(room));
 
     free(id);
 
@@ -1362,6 +1362,7 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
         char *error_message = stanza_get_error_message(stanza);
         if (room) {
             handle_room_info_error(room, error_message);
+            free(room);
         } else {
             handle_disco_info_error(from, error_message);
         }
@@ -1421,6 +1422,10 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
 
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
+    }
+
+    if (room) {
+        free(room);
     }
     return 1;
 }
