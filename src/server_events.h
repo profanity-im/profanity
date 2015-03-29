@@ -48,7 +48,7 @@ void handle_room_list(GSList *rooms, const char *conference_node);
 void handle_disco_items(GSList *items, const char *jid);
 void handle_room_invite(jabber_invite_t invite_type,
     const char * const invitor, const char * const room,
-    const char * const reason);
+    const char * const reason, const char * const password);
 void handle_room_broadcast(const char *const room_jid,
     const char * const message);
 void handle_room_subject(const char * const room, const char * const nick, const char * const subject);

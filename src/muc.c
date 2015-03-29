@@ -66,6 +66,7 @@ typedef struct _muc_room_t {
 } ChatRoom;
 
 GHashTable *rooms = NULL;
+GHashTable *invite_passwords = NULL;
 Autocomplete invite_ac;
 
 static void _free_room(ChatRoom *room);
@@ -83,6 +84,7 @@ muc_init(void)
 {
     invite_ac = autocomplete_new();
     rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_room);
+    invite_passwords = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 void
@@ -90,19 +92,25 @@ muc_close(void)
 {
     autocomplete_free(invite_ac);
     g_hash_table_destroy(rooms);
+    g_hash_table_destroy(invite_passwords);
     rooms = NULL;
+    invite_passwords = NULL;
 }
 
 void
-muc_invites_add(const char * const room)
+muc_invites_add(const char * const room, const char * const password)
 {
     autocomplete_add(invite_ac, room);
+    if (password) {
+        g_hash_table_replace(invite_passwords, strdup(room), strdup(password));
+    }
 }
 
 void
 muc_invites_remove(const char * const room)
 {
     autocomplete_remove(invite_ac, room);
+    g_hash_table_remove(invite_passwords, room);
 }
 
 gint
@@ -115,6 +123,12 @@ GSList *
 muc_invites(void)
 {
     return autocomplete_create_list(invite_ac);
+}
+
+char *
+muc_invite_password(const char * const room)
+{
+    return g_hash_table_lookup(invite_passwords, room);
 }
 
 gboolean
@@ -151,6 +165,7 @@ void
 muc_invites_clear(void)
 {
     autocomplete_clear(invite_ac);
+    g_hash_table_remove_all(invite_passwords);
 }
 
 void

@@ -19,7 +19,7 @@ void muc_after_test(void **state)
 void test_muc_invites_add(void **state)
 {
     char *room = "room@conf.server";
-    muc_invites_add(room);
+    muc_invites_add(room, NULL);
 
     gboolean invite_exists = muc_invites_contain(room);
 
@@ -29,7 +29,7 @@ void test_muc_invites_add(void **state)
 void test_muc_remove_invite(void **state)
 {
     char *room = "room@conf.server";
-    muc_invites_add(room);
+    muc_invites_add(room, NULL);
     muc_invites_remove(room);
 
     gboolean invite_exists = muc_invites_contain(room);
@@ -46,11 +46,11 @@ void test_muc_invites_count_0(void **state)
 
 void test_muc_invites_count_5(void **state)
 {
-    muc_invites_add("room1@conf.server");
-    muc_invites_add("room2@conf.server");
-    muc_invites_add("room3@conf.server");
-    muc_invites_add("room4@conf.server");
-    muc_invites_add("room5@conf.server");
+    muc_invites_add("room1@conf.server", NULL);
+    muc_invites_add("room2@conf.server", NULL);
+    muc_invites_add("room3@conf.server", NULL);
+    muc_invites_add("room4@conf.server", NULL);
+    muc_invites_add("room5@conf.server", NULL);
 
     int invite_count = muc_invites_count();
 
