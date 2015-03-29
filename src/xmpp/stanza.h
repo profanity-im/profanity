@@ -135,6 +135,7 @@
 #define STANZA_ATTR_CATEGORY "category"
 #define STANZA_ATTR_REASON "reason"
 #define STANZA_ATTR_AUTOJOIN "autojoin"
+#define STANZA_ATTR_PASSWORD "password"
 
 #define STANZA_TEXT_AWAY "away"
 #define STANZA_TEXT_DND "dnd"
@@ -216,7 +217,7 @@ xmpp_stanza_t* stanza_create_disco_info_iq(xmpp_ctx_t *ctx, const char * const i
     const char * const to, const char * const node);
 
 xmpp_stanza_t* stanza_create_invite(xmpp_ctx_t *ctx, const char * const room,
-    const char * const contact, const char * const reason);
+    const char * const contact, const char * const reason, const char * const password);
 xmpp_stanza_t* stanza_create_mediated_invite(xmpp_ctx_t *ctx, const char * const room,
     const char * const contact, const char * const reason);
 
