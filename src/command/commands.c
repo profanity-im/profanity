@@ -1900,7 +1900,7 @@ cmd_info(gchar **args, struct cmd_help_t help)
                 }
             } else {
                 ProfMucWin *mucwin = wins_get_current_muc();
-                iq_room_info_request(mucwin->roomjid);
+                iq_room_info_request(mucwin->roomjid, TRUE);
                 ui_show_room_info(mucwin);
                 return TRUE;
             }

@@ -62,6 +62,7 @@ typedef struct _muc_room_t {
     Autocomplete jid_ac;
     GHashTable *nick_changes;
     gboolean roster_received;
+    muc_member_type_t member_type;
 } ChatRoom;
 
 GHashTable *rooms = NULL;
@@ -177,6 +178,7 @@ muc_join(const char * const room, const char * const nick,
     new_room->roster_received = FALSE;
     new_room->pending_nick_change = FALSE;
     new_room->autojoin = autojoin;
+    new_room->member_type = MUC_MEMBER_TYPE_UNKNOWN;
 
     g_hash_table_insert(rooms, strdup(room), new_room);
 }
@@ -205,6 +207,19 @@ muc_set_requires_config(const char * const room, gboolean val)
     ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
     if (chat_room) {
         chat_room->pending_config = val;
+    }
+}
+
+void
+muc_set_features(const char * const room, GSList *features)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room && features) {
+        if (g_slist_find_custom(features, "muc_membersonly", (GCompareFunc)g_strcmp0)) {
+            chat_room->member_type = MUC_MEMBER_TYPE_MEMBERS_ONLY;
+        } else {
+            chat_room->member_type = MUC_MEMBER_TYPE_PUBLIC;
+        }
     }
 }
 
@@ -762,6 +777,18 @@ muc_set_affiliation(const char * const room, const char * const affiliation)
         chat_room->affiliation = _affiliation_from_string(affiliation);
     }
 }
+
+muc_member_type_t
+muc_member_type(const char * const room)
+{
+    ChatRoom *chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return chat_room->member_type;
+    } else {
+        return MUC_MEMBER_TYPE_UNKNOWN;
+    }
+}
+
 
 static void
 _free_room(ChatRoom *room)

@@ -164,9 +164,12 @@ handle_disco_info(const char *from, GSList *identities, GSList *features)
 }
 
 void
-handle_room_disco_info(const char * const room, GSList *identities, GSList *features)
+handle_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display)
 {
-    ui_show_room_disco_info(room, identities, features);
+    muc_set_features(room, features);
+    if (display) {
+        ui_show_room_disco_info(room, identities, features);
+    }
 }
 
 void
@@ -723,6 +726,9 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
         } else {
             ui_room_join(room, TRUE);
         }
+
+        iq_room_info_request(room, FALSE);
+
         muc_invites_remove(room);
         muc_roster_set_complete(room);
 
