@@ -128,6 +128,8 @@ message_send_chat(const char * const barejid, const char * const msg)
         } else {
             message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
         }
+    } else {
+        message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
     }
 #else
     message = stanza_create_message(ctx, id, jid, STANZA_TYPE_CHAT, msg);
