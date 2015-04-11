@@ -372,7 +372,9 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         char *password = NULL;
         xmpp_stanza_t *password_st = xmpp_stanza_get_child_by_name(xns_muc_user, STANZA_NAME_PASSWORD);
-        password = xmpp_stanza_get_text(password_st);
+        if (password_st) {
+            password = xmpp_stanza_get_text(password_st);
+        }
 
         handle_room_invite(INVITE_MEDIATED, invitor, room, reason, password);
         jid_destroy(jidp);

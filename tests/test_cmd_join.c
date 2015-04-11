@@ -50,23 +50,6 @@ void cmd_join_shows_message_when_undefined(void **state)
     test_with_connection_status(JABBER_UNDEFINED);
 }
 
-void cmd_join_shows_usage_when_no_args(void **state)
-{
-    CommandHelp *help = malloc(sizeof(CommandHelp));
-    help->usage = "some usage";
-    gchar *args[] = { NULL };
-
-    will_return(jabber_get_connection_status, JABBER_CONNECTED);
-
-    expect_cons_show("Usage: some usage");
-    expect_cons_show("");
-
-    gboolean result = cmd_join(args, *help);
-    assert_true(result);
-
-    free(help);
-}
-
 void cmd_join_shows_error_message_when_invalid_room_jid(void **state)
 {
     CommandHelp *help = malloc(sizeof(CommandHelp));
