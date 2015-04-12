@@ -2888,12 +2888,22 @@ cmd_occupants(gchar **args, struct cmd_help_t help)
 
     if (g_strcmp0(args[0], "default") == 0) {
         if (g_strcmp0(args[1], "show") == 0) {
-            cons_show("Occupant list enabled.");
-            prefs_set_boolean(PREF_OCCUPANTS, TRUE);
+            if (g_strcmp0(args[2], "jid") == 0) {
+                cons_show("Occupant jids enabled.");
+                prefs_set_boolean(PREF_OCCUPANTS_JID, TRUE);
+            } else {
+                cons_show("Occupant list enabled.");
+                prefs_set_boolean(PREF_OCCUPANTS, TRUE);
+            }
             return TRUE;
         } else if (g_strcmp0(args[1], "hide") == 0) {
-            cons_show("Occupant list disabled.");
-            prefs_set_boolean(PREF_OCCUPANTS, FALSE);
+            if (g_strcmp0(args[2], "jid") == 0) {
+                cons_show("Occupant jids disabled.");
+                prefs_set_boolean(PREF_OCCUPANTS_JID, FALSE);
+            } else {
+                cons_show("Occupant list disabled.");
+                prefs_set_boolean(PREF_OCCUPANTS, FALSE);
+            }
             return TRUE;
         } else {
             cons_show("Usage: %s", help.usage);
@@ -2903,16 +2913,26 @@ cmd_occupants(gchar **args, struct cmd_help_t help)
 
     win_type_t win_type = ui_current_win_type();
     if (win_type != WIN_MUC) {
-        cons_show("Cannot show/hide occupant list when not in chat room.");
+        cons_show("Cannot apply setting when not in chat room.");
         return TRUE;
     }
 
     ProfMucWin *mucwin = wins_get_current_muc();
 
     if (g_strcmp0(args[0], "show") == 0) {
-        ui_room_show_occupants(mucwin->roomjid);
+        if (g_strcmp0(args[1], "jid") == 0) {
+            mucwin->showjid = TRUE;
+            ui_room_update_occupants(mucwin->roomjid);
+        } else {
+            ui_room_show_occupants(mucwin->roomjid);
+        }
     } else if (g_strcmp0(args[0], "hide") == 0) {
-        ui_room_hide_occupants(mucwin->roomjid);
+        if (g_strcmp0(args[1], "jid") == 0) {
+            mucwin->showjid = FALSE;
+            ui_room_update_occupants(mucwin->roomjid);
+        } else {
+            ui_room_hide_occupants(mucwin->roomjid);
+        }
     } else {
         cons_show("Usage: %s", help.usage);
     }
