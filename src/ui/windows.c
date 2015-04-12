@@ -497,7 +497,13 @@ wins_resize_all(void)
                 }
                 wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
                 wresize(layout->subwin, PAD_SIZE, subwin_cols);
-                rosterwin_roster();
+                if (window->type == WIN_CONSOLE) {
+                    rosterwin_roster();
+                } else if (window->type == WIN_MUC) {
+                    ProfMucWin *mucwin = (ProfMucWin *)window;
+                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                    occupantswin_occupants(mucwin->roomjid);
+                }
             } else {
                 wresize(layout->base.win, PAD_SIZE, cols);
             }

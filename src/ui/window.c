@@ -177,6 +177,11 @@ win_create_muc(const char * const roomjid)
 
     new_win->roomjid = strdup(roomjid);
     new_win->unread = 0;
+    if (prefs_get_boolean(PREF_OCCUPANTS_JID)) {
+        new_win->showjid = TRUE;
+    } else {
+        new_win->showjid = FALSE;
+    }
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 

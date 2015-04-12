@@ -252,6 +252,7 @@ void ui_room_member_nick_change(const char * const roomjid,
 void ui_room_nick_change(const char * const roomjid, const char * const nick) {}
 void ui_room_member_presence(const char * const roomjid,
     const char * const nick, const char * const show, const char * const status) {}
+void ui_room_update_occupants(const char * const roomjid) {}
 void ui_room_show_occupants(const char * const roomjid) {}
 void ui_room_hide_occupants(const char * const roomjid) {}
 void ui_show_roster(void) {}

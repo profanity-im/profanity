@@ -910,6 +910,11 @@ cons_occupants_setting(void)
     else
         cons_show("Occupants (/occupants)        : hide");
 
+    if (prefs_get_boolean(PREF_OCCUPANTS_JID))
+        cons_show("Occupant jids (/occupants)    : show");
+    else
+        cons_show("Occupant jids (/occupants)    : hide");
+
     int size = prefs_get_occupants_size();
     cons_show("Occupants size (/occupants)   : %d", size);
 }
