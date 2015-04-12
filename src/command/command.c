@@ -451,16 +451,19 @@ static struct cmd_t command_defs[] =
           NULL } } },
 
     { "/occupants",
-        cmd_occupants, parse_args, 1, 2, cons_occupants_setting,
-        { "/occupants show|hide|default|size [show|hide] [percent]", "Show or hide room occupants.",
-        { "/occupants show|hide|default|size [show|hide] [percent]",
-          "-------------------------------------------------------",
+        cmd_occupants, parse_args, 1, 3, cons_occupants_setting,
+        { "/occupants show|hide|default|size [jid|show|hide|percent] [jid]", "Show or hide room occupants.",
+        { "/occupants show|hide|default|size [jid|show|hide|percent] [jid]",
+          "---------------------------------------------------------------",
           "Show or hide room occupants, and occupants panel display settings.",
           "",
-          "show              : Show the occupants panel in chat rooms.",
-          "hide              : Hide the occupants panel in chat rooms.",
-          "default show|hide : Whether occupants are shown by default in new rooms, 'show' or 'hide'",
-          "size percent      : Percentage of the screen taken by the occupants list in rooms (1-99).",
+          "show                    : Show the occupants panel in current room.",
+          "hide                    : Hide the occupants panel in current room.",
+          "show jid                : Show jid in the occupants panel in current room.",
+          "hide jid                : Hide jid in the occupants panel in current room.",
+          "default show|hide       : Whether occupants are shown by default in new rooms.",
+          "default show|hide jid   : Whether occupants jids are shown by default in new rooms.",
+          "size percent            : Percentage of the screen taken by the occupants list in rooms (1-99).",
           NULL } } },
 
     { "/form",
@@ -1198,6 +1201,7 @@ static Autocomplete form_ac;
 static Autocomplete form_field_multi_ac;
 static Autocomplete occupants_ac;
 static Autocomplete occupants_default_ac;
+static Autocomplete occupants_show_ac;
 static Autocomplete time_ac;
 static Autocomplete time_statusbar_ac;
 static Autocomplete resource_ac;
@@ -1540,6 +1544,9 @@ cmd_init(void)
     autocomplete_add(occupants_default_ac, "show");
     autocomplete_add(occupants_default_ac, "hide");
 
+    occupants_show_ac = autocomplete_new();
+    autocomplete_add(occupants_show_ac, "jid");
+
     time_ac = autocomplete_new();
     autocomplete_add(time_ac, "minutes");
     autocomplete_add(time_ac, "seconds");
@@ -1617,6 +1624,7 @@ cmd_uninit(void)
     autocomplete_free(form_field_multi_ac);
     autocomplete_free(occupants_ac);
     autocomplete_free(occupants_default_ac);
+    autocomplete_free(occupants_show_ac);
     autocomplete_free(time_ac);
     autocomplete_free(time_statusbar_ac);
     autocomplete_free(resource_ac);
@@ -1784,6 +1792,7 @@ cmd_reset_autocomplete()
     autocomplete_reset(form_field_multi_ac);
     autocomplete_reset(occupants_ac);
     autocomplete_reset(occupants_default_ac);
+    autocomplete_reset(occupants_show_ac);
     autocomplete_reset(time_ac);
     autocomplete_reset(time_statusbar_ac);
     autocomplete_reset(resource_ac);
@@ -2633,7 +2642,27 @@ _occupants_autocomplete(const char * const input)
 {
     char *found = NULL;
 
+    found = autocomplete_param_with_ac(input, "/occupants default show", occupants_show_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/occupants default hide", occupants_show_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
     found = autocomplete_param_with_ac(input, "/occupants default", occupants_default_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/occupants show", occupants_show_ac, TRUE);
+    if (found != NULL) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/occupants hide", occupants_show_ac, TRUE);
     if (found != NULL) {
         return found;
     }

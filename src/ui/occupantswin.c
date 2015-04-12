@@ -40,7 +40,7 @@
 #include "config/preferences.h"
 
 static void
-_occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant)
+_occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant, gboolean showjid)
 {
     const char *presence_str = string_from_resource_presence(occupant->presence);
     theme_item_t presence_colour = theme_main_presence_attrs(presence_str);
@@ -50,6 +50,13 @@ _occuptantswin_occupant(ProfLayoutSplit *layout, Occupant *occupant)
     g_string_append(msg, occupant->nick);
     win_printline_nowrap(layout->subwin, msg->str);
     g_string_free(msg, TRUE);
+
+    if (showjid && occupant->jid) {
+        GString *msg = g_string_new("     ");
+        g_string_append(msg, occupant->jid);
+        win_printline_nowrap(layout->subwin, msg->str);
+        g_string_free(msg, TRUE);
+    }
 
     wattroff(layout->subwin, theme_attrs(presence_colour));
 }
@@ -74,7 +81,7 @@ occupantswin_occupants(const char * const roomjid)
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
-                        _occuptantswin_occupant(layout, occupant);
+                        _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
@@ -86,7 +93,7 @@ occupantswin_occupants(const char * const roomjid)
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
-                        _occuptantswin_occupant(layout, occupant);
+                        _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
@@ -98,7 +105,7 @@ occupantswin_occupants(const char * const roomjid)
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
-                        _occuptantswin_occupant(layout, occupant);
+                        _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     }
                     roster_curr = g_list_next(roster_curr);
                 }
@@ -109,7 +116,7 @@ occupantswin_occupants(const char * const roomjid)
                 GList *roster_curr = occupants;
                 while (roster_curr) {
                     Occupant *occupant = roster_curr->data;
-                    _occuptantswin_occupant(layout, occupant);
+                    _occuptantswin_occupant(layout, occupant, mucwin->showjid);
                     roster_curr = g_list_next(roster_curr);
                 }
             }

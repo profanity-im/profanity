@@ -12,6 +12,7 @@ statuses.chat=all
 statuses.muc=all
 occupants=true
 occupants.size=15
+occupants.jid=true
 roster=true
 roster.offline=true
 roster.resource=true

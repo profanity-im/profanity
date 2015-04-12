@@ -72,5 +72,4 @@ roster.by=presence
 roster.size=25
 occupants=true
 occupants.size=15
-
-
+occupants.jid=true

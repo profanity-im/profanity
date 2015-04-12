@@ -439,6 +439,7 @@ _load_preferences(void)
     _set_string_preference("statuses.muc", PREF_STATUSES_MUC);
 
     _set_boolean_preference("occupants", PREF_OCCUPANTS);
+    _set_boolean_preference("occupants.jid", PREF_OCCUPANTS_JID);
     if (g_key_file_has_key(theme, "ui", "occupants.size", NULL)) {
         gint occupants_size = g_key_file_get_integer(theme, "ui", "occupants.size", NULL);
         prefs_set_occupants_size(occupants_size);
