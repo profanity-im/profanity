@@ -42,7 +42,7 @@
 #include "common.h"
 #include "log.h"
 #include "muc.h"
-#include "server_events.h"
+#include "event/server_events.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/xmpp.h"

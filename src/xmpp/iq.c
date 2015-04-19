@@ -48,7 +48,7 @@
 #include "muc.h"
 #include "profanity.h"
 #include "config/preferences.h"
-#include "server_events.h"
+#include "event/server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"

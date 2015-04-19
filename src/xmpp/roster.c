@@ -41,7 +41,7 @@
 
 #include "log.h"
 #include "profanity.h"
-#include "server_events.h"
+#include "event/server_events.h"
 #include "tools/autocomplete.h"
 #include "xmpp/connection.h"
 #include "xmpp/roster.h"
