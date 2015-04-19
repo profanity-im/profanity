@@ -46,7 +46,7 @@
 #include "muc.h"
 #include "plugins/plugins.h"
 #include "profanity.h"
-#include "server_events.h"
+#include "event/server_events.h"
 #include "xmpp/bookmark.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
@@ -474,7 +474,7 @@ _connection_handler(xmpp_conn_t * const conn,
         if (prefs_get_boolean(PREF_CARBONS)){
             iq_enable_carbons();
         }
-        
+
         jabber_conn.conn_status = JABBER_CONNECTED;
 
         if (prefs_get_reconnect() != 0) {

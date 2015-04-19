@@ -6,7 +6,7 @@
 #include <string.h>
 #include <glib.h>
 
-#include "server_events.h"
+#include "event/server_events.h"
 #include "roster_list.h"
 #include "chat_session.h"
 #include "config/preferences.h"
