@@ -399,7 +399,7 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         log_info("Error joining room: %s, reason: %s", fulljid->barejid, error_cond);
-        handle_room_join_error(fulljid->barejid, error_cond);
+        srv_room_join_error(fulljid->barejid, error_cond);
         jid_destroy(fulljid);
         return 1;
     }
@@ -427,7 +427,7 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    handle_presence_error(from, type, err_msg);
+    srv_presence_error(from, type, err_msg);
 
     free(err_msg);
 
@@ -443,7 +443,7 @@ _unsubscribed_handler(xmpp_conn_t * const conn,
     Jid *from_jid = jid_create(from);
     log_debug("Unsubscribed presence handler fired for %s", from);
 
-    handle_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
+    srv_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -459,7 +459,7 @@ _subscribed_handler(xmpp_conn_t * const conn,
     Jid *from_jid = jid_create(from);
     log_debug("Subscribed presence handler fired for %s", from);
 
-    handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
+    srv_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -479,7 +479,7 @@ _subscribe_handler(xmpp_conn_t * const conn,
         return 1;
     }
 
-    handle_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
+    srv_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
     autocomplete_add(sub_requests_ac, from_jid->barejid);
 
     jid_destroy(from_jid);
@@ -507,11 +507,11 @@ _unavailable_handler(xmpp_conn_t * const conn,
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
         if (from_jid->resourcepart != NULL) {
-            handle_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
+            srv_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
 
         // hack for servers that do not send full jid with unavailable presence
         } else {
-            handle_contact_offline(from_jid->barejid, "__prof_default", status_str);
+            srv_contact_offline(from_jid->barejid, "__prof_default", status_str);
         }
     } else {
         if (from_jid->resourcepart != NULL) {
@@ -633,7 +633,7 @@ _available_handler(xmpp_conn_t * const conn,
     if (g_strcmp0(xmpp_presence->jid->barejid, my_jid->barejid) == 0) {
         connection_add_available_resource(resource);
     } else {
-        handle_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity);
+        srv_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity);
     }
 
     jid_destroy(my_jid);
@@ -719,7 +719,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                     char *new_jid = stanza_get_muc_destroy_alternative_room(stanza);
                     char *password = stanza_get_muc_destroy_alternative_password(stanza);
                     char *reason = stanza_get_muc_destroy_reason(stanza);
-                    handle_room_destroyed(room, new_jid, password, reason);
+                    srv_room_destroyed(room, new_jid, password, reason);
                     free(password);
                     free(reason);
 
@@ -727,19 +727,19 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                 } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_kicked(room, actor, reason);
+                    srv_room_kicked(room, actor, reason);
                     free(reason);
 
                 // banned from room
                 } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_banned(room, actor, reason);
+                    srv_room_banned(room, actor, reason);
                     free(reason);
 
                 // normal exit
                 } else {
-                    handle_leave_room(room);
+                    srv_leave_room(room);
                 }
 
                 g_slist_free_full(status_codes, free);
@@ -750,7 +750,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
             gboolean config_required = stanza_muc_requires_config(stanza);
             char *actor = stanza_get_actor(stanza);
             char *reason = stanza_get_reason(stanza);
-            handle_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
+            srv_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
         }
 
     // handle presence from room members
@@ -772,19 +772,19 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                 if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_occupent_kicked(room, nick, actor, reason);
+                    srv_room_occupent_kicked(room, nick, actor, reason);
                     free(reason);
 
                 // banned from room
                 } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
-                    handle_room_occupent_banned(room, nick, actor, reason);
+                    srv_room_occupent_banned(room, nick, actor, reason);
                     free(reason);
 
                 // normal exit
                 } else {
-                    handle_room_occupant_offline(room, nick, "offline", status_str);
+                    srv_room_occupant_offline(room, nick, "offline", status_str);
                 }
 
                 g_slist_free_full(status_codes, free);
@@ -802,7 +802,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
 
             char *actor = stanza_get_actor(stanza);
             char *reason = stanza_get_reason(stanza);
-            handle_muc_occupant_online(room, nick, jid, role, affiliation, actor, reason, show_str, status_str);
+            srv_muc_occupant_online(room, nick, jid, role, affiliation, actor, reason, show_str, status_str);
         }
     }
 

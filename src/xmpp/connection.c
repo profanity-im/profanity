@@ -438,7 +438,7 @@ _connection_handler(xmpp_conn_t * const conn,
         // logged in with account
         if (saved_account.name != NULL) {
             log_debug("Connection handler: logged in with account name: %s", saved_account.name);
-            handle_login_account_success(saved_account.name);
+            srv_login_account_success(saved_account.name);
 
         // logged in without account, use details to create new account
         } else {
@@ -446,7 +446,7 @@ _connection_handler(xmpp_conn_t * const conn,
             accounts_add(saved_details.name, saved_details.altdomain, saved_details.port);
             accounts_set_jid(saved_details.name, saved_details.jid);
 
-            handle_login_account_success(saved_details.name);
+            srv_login_account_success(saved_details.name);
             saved_account.name = strdup(saved_details.name);
             saved_account.passwd = strdup(saved_details.passwd);
 
@@ -486,7 +486,7 @@ _connection_handler(xmpp_conn_t * const conn,
         // lost connection for unknown reason
         if (jabber_conn.conn_status == JABBER_CONNECTED) {
             log_debug("Connection handler: Lost connection for unknown reason");
-            handle_lost_connection();
+            srv_lost_connection();
             if (prefs_get_reconnect() != 0) {
                 assert(reconnect_timer == NULL);
                 reconnect_timer = g_timer_new();
@@ -503,7 +503,7 @@ _connection_handler(xmpp_conn_t * const conn,
             log_debug("Connection handler: Login failed");
             if (reconnect_timer == NULL) {
                 log_debug("Connection handler: No reconnect timer");
-                handle_failed_login();
+                srv_failed_login();
                 _connection_free_saved_account();
                 _connection_free_saved_details();
                 _connection_free_session_data();
@@ -563,7 +563,7 @@ _xmpp_file_logger(void * const userdata, const xmpp_log_level_t level,
     log_level_t prof_level = _get_log_level(level);
     log_msg(prof_level, area, msg);
     if ((g_strcmp0(area, "xmpp") == 0) || (g_strcmp0(area, "conn")) == 0) {
-        handle_xmpp_stanza(msg);
+        srv_xmpp_stanza(msg);
     }
 }
 
