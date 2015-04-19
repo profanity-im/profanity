@@ -14,6 +14,7 @@ core_sources = \
 	src/xmpp/bookmark.c src/xmpp/bookmark.h \
 	src/xmpp/form.c src/xmpp/form.h \
 	src/event/server_events.c src/event/server_events.h \
+	src/event/client_events.c src/event/client_events.h \
 	src/ui/ui.h src/ui/window.c src/ui/window.h src/ui/core.c \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
@@ -61,6 +62,7 @@ tests_sources = \
 	src/ui/titlebar.c src/ui/statusbar.c src/ui/inputwin.c \
 	src/ui/titlebar.h src/ui/statusbar.h src/ui/inputwin.h \
 	src/event/server_events.c src/event/server_events.h \
+	src/event/client_events.c src/event/client_events.h \
 	tests/xmpp/stub_xmpp.c \
 	tests/ui/stub_ui.c \
 	tests/log/stub_log.c \
