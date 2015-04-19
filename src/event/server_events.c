@@ -55,7 +55,7 @@
 #include "ui/ui.h"
 
 void
-handle_room_join_error(const char * const room, const char * const err)
+srv_room_join_error(const char * const room, const char * const err)
 {
     if (muc_active(room)) {
         muc_leave(room);
@@ -65,7 +65,7 @@ handle_room_join_error(const char * const room, const char * const err)
 
 // handle presence stanza errors
 void
-handle_presence_error(const char *from, const char * const type,
+srv_presence_error(const char *from, const char * const type,
     const char *err_msg)
 {
     // handle error from recipient
@@ -80,7 +80,7 @@ handle_presence_error(const char *from, const char * const type,
 
 // handle message stanza errors
 void
-handle_message_error(const char * const jid, const char * const type,
+srv_message_error(const char * const jid, const char * const type,
     const char * const err_msg)
 {
     // handle errors from no recipient
@@ -100,7 +100,7 @@ handle_message_error(const char * const jid, const char * const type,
 }
 
 void
-handle_login_account_success(char *account_name)
+srv_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
 #ifdef PROF_HAVE_LIBOTR
@@ -126,7 +126,7 @@ handle_login_account_success(char *account_name)
 }
 
 void
-handle_roster_received(void)
+srv_roster_received(void)
 {
     if (prefs_get_boolean(PREF_ROSTER)) {
         ui_show_roster();
@@ -134,7 +134,7 @@ handle_roster_received(void)
 }
 
 void
-handle_lost_connection(void)
+srv_lost_connection(void)
 {
     cons_show_error("Lost connection.");
     roster_clear();
@@ -144,27 +144,27 @@ handle_lost_connection(void)
 }
 
 void
-handle_failed_login(void)
+srv_failed_login(void)
 {
     cons_show_error("Login failed.");
     log_info("Login failed");
 }
 
 void
-handle_software_version_result(const char * const jid, const char * const  presence,
+srv_software_version_result(const char * const jid, const char * const  presence,
     const char * const name, const char * const version, const char * const os)
 {
     cons_show_software_version(jid, presence, name, version, os);
 }
 
 void
-handle_disco_info(const char *from, GSList *identities, GSList *features)
+srv_disco_info(const char *from, GSList *identities, GSList *features)
 {
     cons_show_disco_info(from, identities, features);
 }
 
 void
-handle_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display)
+srv_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display)
 {
     muc_set_features(room, features);
     if (display) {
@@ -173,7 +173,7 @@ handle_room_disco_info(const char * const room, GSList *identities, GSList *feat
 }
 
 void
-handle_disco_info_error(const char * const from, const char * const error)
+srv_disco_info_error(const char * const from, const char * const error)
 {
     if (from) {
         cons_show_error("Service discovery failed for %s: %s", from, error);
@@ -183,31 +183,31 @@ handle_disco_info_error(const char * const from, const char * const error)
 }
 
 void
-handle_enable_carbons_error(const char * const error)
+srv_enable_carbons_error(const char * const error)
 {
     cons_show_error("Server error enabling message carbons: %s", error);
 }
 
 void
-handle_disable_carbons_error(const char * const error)
+srv_disable_carbons_error(const char * const error)
 {
     cons_show_error("Server error disabling message carbons: %s", error);
 }
 
 void
-handle_room_info_error(const char * const room, const char * const error)
+srv_room_info_error(const char * const room, const char * const error)
 {
     ui_handle_room_info_error(room, error);
 }
 
 void
-handle_room_list(GSList *rooms, const char *conference_node)
+srv_room_list(GSList *rooms, const char *conference_node)
 {
     cons_show_room_list(rooms, conference_node);
 }
 
 void
-handle_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
+srv_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
     const char * const error)
 {
     log_debug("Error retrieving %s list for room %s: %s", affiliation, room, error);
@@ -215,14 +215,14 @@ handle_room_affiliation_list_result_error(const char * const room, const char * 
 }
 
 void
-handle_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids)
+srv_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids)
 {
     muc_jid_autocomplete_add_all(room, jids);
     ui_handle_room_affiliation_list(room, affiliation, jids);
 }
 
 void
-handle_room_role_set_error(const char * const room, const char * const nick, const char * const role,
+srv_room_role_set_error(const char * const room, const char * const nick, const char * const role,
     const char * const error)
 {
     log_debug("Error setting role %s list for room %s, user %s: %s", role, room, nick, error);
@@ -230,20 +230,20 @@ handle_room_role_set_error(const char * const room, const char * const nick, con
 }
 
 void
-handle_room_role_list_result_error(const char * const room, const char * const role, const char * const error)
+srv_room_role_list_result_error(const char * const room, const char * const role, const char * const error)
 {
     log_debug("Error retrieving %s list for room %s: %s", role, room, error);
     ui_handle_room_role_list_error(room, role, error);
 }
 
 void
-handle_room_role_list(const char * const room, const char * const role, GSList *nicks)
+srv_room_role_list(const char * const room, const char * const role, GSList *nicks)
 {
     ui_handle_room_role_list(room, role, nicks);
 }
 
 void
-handle_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
+srv_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
     const char * const error)
 {
     log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation, room, jid, error);
@@ -251,13 +251,13 @@ handle_room_affiliation_set_error(const char * const room, const char * const ji
 }
 
 void
-handle_disco_items(GSList *items, const char *jid)
+srv_disco_items(GSList *items, const char *jid)
 {
     cons_show_disco_items(items, jid);
 }
 
 void
-handle_room_invite(jabber_invite_t invite_type,
+srv_room_invite(jabber_invite_t invite_type,
     const char * const invitor, const char * const room,
     const char * const reason, const char * const password)
 {
@@ -268,7 +268,7 @@ handle_room_invite(jabber_invite_t invite_type,
 }
 
 void
-handle_room_broadcast(const char *const room_jid,
+srv_room_broadcast(const char *const room_jid,
     const char * const message)
 {
     if (muc_roster_complete(room_jid)) {
@@ -279,7 +279,7 @@ handle_room_broadcast(const char *const room_jid,
 }
 
 void
-handle_room_subject(const char * const room, const char * const nick, const char * const subject)
+srv_room_subject(const char * const room, const char * const nick, const char * const subject)
 {
     muc_set_subject(room, subject);
     if (muc_roster_complete(room)) {
@@ -288,7 +288,7 @@ handle_room_subject(const char * const room, const char * const nick, const char
 }
 
 void
-handle_room_history(const char * const room_jid, const char * const nick,
+srv_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message)
 {
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
@@ -297,7 +297,7 @@ handle_room_history(const char * const room_jid, const char * const nick,
 }
 
 void
-handle_room_message(const char * const room_jid, const char * const nick,
+srv_room_message(const char * const room_jid, const char * const nick,
     const char * const message)
 {
     char *new_message = plugins_pre_room_message_display(room_jid, nick, message);
@@ -314,7 +314,7 @@ handle_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-handle_incoming_private_message(char *fulljid, char *message)
+srv_incoming_private_message(char *fulljid, char *message)
 {
     char *plugin_message =  plugins_pre_priv_message_display(fulljid, message);
     ui_incoming_private_msg(fulljid, plugin_message, NULL);
@@ -324,13 +324,13 @@ handle_incoming_private_message(char *fulljid, char *message)
 }
 
 void
-handle_carbon(char *barejid, char *message)
+srv_carbon(char *barejid, char *message)
 {
     ui_outgoing_chat_msg_carbon(barejid, message);
 }
 
 void
-handle_incoming_message(char *barejid, char *resource, char *message)
+srv_incoming_message(char *barejid, char *resource, char *message)
 {
     char *plugin_message = NULL;
 
@@ -386,7 +386,7 @@ handle_incoming_message(char *barejid, char *resource, char *message)
 }
 
 void
-handle_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp)
+srv_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp)
 {
     char *new_message = plugins_pre_priv_message_display(fulljid, message);
     ui_incoming_private_msg(fulljid, new_message, &tv_stamp);
@@ -396,7 +396,7 @@ handle_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp)
 }
 
 void
-handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
+srv_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 {
     char *new_message = plugins_pre_chat_message_display(barejid, message);
     ui_incoming_msg(barejid, NULL, new_message, &tv_stamp);
@@ -406,13 +406,13 @@ handle_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 }
 
 void
-handle_message_receipt(char *barejid, char *id)
+srv_message_receipt(char *barejid, char *id)
 {
     ui_message_receipt(barejid, id);
 }
 
 void
-handle_typing(char *barejid, char *resource)
+srv_typing(char *barejid, char *resource)
 {
     ui_contact_typing(barejid, resource);
     if (ui_chat_win_exists(barejid)) {
@@ -421,7 +421,7 @@ handle_typing(char *barejid, char *resource)
 }
 
 void
-handle_paused(char *barejid, char *resource)
+srv_paused(char *barejid, char *resource)
 {
     if (ui_chat_win_exists(barejid)) {
         chat_session_recipient_paused(barejid, resource);
@@ -429,7 +429,7 @@ handle_paused(char *barejid, char *resource)
 }
 
 void
-handle_inactive(char *barejid, char *resource)
+srv_inactive(char *barejid, char *resource)
 {
     if (ui_chat_win_exists(barejid)) {
         chat_session_recipient_inactive(barejid, resource);
@@ -437,7 +437,7 @@ handle_inactive(char *barejid, char *resource)
 }
 
 void
-handle_gone(const char * const barejid, const char * const resource)
+srv_gone(const char * const barejid, const char * const resource)
 {
     ui_recipient_gone(barejid, resource);
     if (ui_chat_win_exists(barejid)) {
@@ -446,7 +446,7 @@ handle_gone(const char * const barejid, const char * const resource)
 }
 
 void
-handle_activity(const char * const barejid, const char * const resource, gboolean send_states)
+srv_activity(const char * const barejid, const char * const resource, gboolean send_states)
 {
     if (ui_chat_win_exists(barejid)) {
         chat_session_recipient_active(barejid, resource, send_states);
@@ -454,7 +454,7 @@ handle_activity(const char * const barejid, const char * const resource, gboolea
 }
 
 void
-handle_subscription(const char *barejid, jabber_subscr_t type)
+srv_subscription(const char *barejid, jabber_subscr_t type)
 {
     switch (type) {
     case PRESENCE_SUBSCRIBE:
@@ -483,7 +483,7 @@ handle_subscription(const char *barejid, jabber_subscr_t type)
 }
 
 void
-handle_contact_offline(char *barejid, char *resource, char *status)
+srv_contact_offline(char *barejid, char *resource, char *status)
 {
     gboolean updated = roster_contact_offline(barejid, resource, status);
 
@@ -496,7 +496,7 @@ handle_contact_offline(char *barejid, char *resource, char *status)
 }
 
 void
-handle_contact_online(char *barejid, Resource *resource,
+srv_contact_online(char *barejid, Resource *resource,
     GDateTime *last_activity)
 {
     gboolean updated = roster_update_presence(barejid, resource, last_activity);
@@ -539,21 +539,21 @@ handle_contact_online(char *barejid, Resource *resource,
 }
 
 void
-handle_leave_room(const char * const room)
+srv_leave_room(const char * const room)
 {
     muc_leave(room);
     ui_leave_room(room);
 }
 
 void
-handle_room_destroy(const char * const room)
+srv_room_destroy(const char * const room)
 {
     muc_leave(room);
     ui_room_destroy(room);
 }
 
 void
-handle_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
+srv_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
     const char * const reason)
 {
     muc_leave(room);
@@ -561,51 +561,51 @@ handle_room_destroyed(const char * const room, const char * const new_jid, const
 }
 
 void
-handle_room_kicked(const char * const room, const char * const actor, const char * const reason)
+srv_room_kicked(const char * const room, const char * const actor, const char * const reason)
 {
     muc_leave(room);
     ui_room_kicked(room, actor, reason);
 }
 
 void
-handle_room_banned(const char * const room, const char * const actor, const char * const reason)
+srv_room_banned(const char * const room, const char * const actor, const char * const reason)
 {
     muc_leave(room);
     ui_room_banned(room, actor, reason);
 }
 
 void
-handle_room_configure(const char * const room, DataForm *form)
+srv_room_configure(const char * const room, DataForm *form)
 {
     ui_handle_room_configuration(room, form);
 }
 
 void
-handle_room_configuration_form_error(const char * const room, const char * const message)
+srv_room_configuration_form_error(const char * const room, const char * const message)
 {
     ui_handle_room_configuration_form_error(room, message);
 }
 
 void
-handle_room_config_submit_result(const char * const room)
+srv_room_config_submit_result(const char * const room)
 {
     ui_handle_room_config_submit_result(room);
 }
 
 void
-handle_room_config_submit_result_error(const char * const room, const char * const message)
+srv_room_config_submit_result_error(const char * const room, const char * const message)
 {
     ui_handle_room_config_submit_result_error(room, message);
 }
 
 void
-handle_room_kick_result_error(const char * const room, const char * const nick, const char * const error)
+srv_room_kick_result_error(const char * const room, const char * const nick, const char * const error)
 {
     ui_handle_room_kick_error(room, nick, error);
 }
 
 void
-handle_room_occupant_offline(const char * const room, const char * const nick,
+srv_room_occupant_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
     muc_roster_remove(room, nick);
@@ -619,7 +619,7 @@ handle_room_occupant_offline(const char * const room, const char * const nick,
 }
 
 void
-handle_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
+srv_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
     const char * const reason)
 {
     muc_roster_remove(room, nick);
@@ -628,7 +628,7 @@ handle_room_occupent_kicked(const char * const room, const char * const nick, co
 }
 
 void
-handle_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
+srv_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
     const char * const reason)
 {
     muc_roster_remove(room, nick);
@@ -637,33 +637,33 @@ handle_room_occupent_banned(const char * const room, const char * const nick, co
 }
 
 void
-handle_group_add(const char * const contact,
+srv_group_add(const char * const contact,
     const char * const group)
 {
     ui_group_added(contact, group);
 }
 
 void
-handle_group_remove(const char * const contact,
+srv_group_remove(const char * const contact,
     const char * const group)
 {
     ui_group_removed(contact, group);
 }
 
 void
-handle_roster_remove(const char * const barejid)
+srv_roster_remove(const char * const barejid)
 {
     ui_roster_remove(barejid);
 }
 
 void
-handle_roster_add(const char * const barejid, const char * const name)
+srv_roster_add(const char * const barejid, const char * const name)
 {
     ui_roster_add(barejid, name);
 }
 
 void
-handle_roster_update(const char * const barejid, const char * const name,
+srv_roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out)
 {
     roster_update(barejid, name, groups, subscription, pending_out);
@@ -671,20 +671,20 @@ handle_roster_update(const char * const barejid, const char * const name,
 }
 
 void
-handle_autoping_cancel(void)
+srv_autoping_cancel(void)
 {
     prefs_set_autoping(0);
     cons_show_error("Server ping not supported, autoping disabled.");
 }
 
 void
-handle_xmpp_stanza(const char * const msg)
+srv_xmpp_stanza(const char * const msg)
 {
     ui_handle_stanza(msg);
 }
 
 void
-handle_ping_result(const char * const from, int millis)
+srv_ping_result(const char * const from, int millis)
 {
     if (from == NULL) {
         cons_show("Ping response from server: %dms.", millis);
@@ -694,7 +694,7 @@ handle_ping_result(const char * const from, int millis)
 }
 
 void
-handle_ping_error_result(const char * const from, const char * const error)
+srv_ping_error_result(const char * const from, const char * const error)
 {
     if (error == NULL) {
         cons_show_error("Error returned from pinging %s.", from);
@@ -704,7 +704,7 @@ handle_ping_error_result(const char * const from, const char * const error)
 }
 
 void
-handle_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
+srv_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const jid, const char * const show, const char * const status)
 {
@@ -781,7 +781,7 @@ handle_muc_self_online(const char * const room, const char * const nick, gboolea
 }
 
 void
-handle_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
+srv_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const show, const char * const status)
 {

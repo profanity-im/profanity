@@ -299,7 +299,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    handle_message_error(jid, type, err_msg);
+    srv_message_error(jid, type, err_msg);
 
     free(err_msg);
 
@@ -346,7 +346,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             password = xmpp_stanza_get_text(password_st);
         }
 
-        handle_room_invite(INVITE_MEDIATED, invitor, room, reason, password);
+        srv_room_invite(INVITE_MEDIATED, invitor, room, reason, password);
         jid_destroy(jidp);
         if (reason) {
             xmpp_free(ctx, reason);
@@ -390,7 +390,7 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     reason = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_REASON);
     password = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_PASSWORD);
 
-    handle_room_invite(INVITE_DIRECT, invitor, room, reason, password);
+    srv_room_invite(INVITE_DIRECT, invitor, room, reason, password);
 
     jid_destroy(jidp);
 
@@ -414,7 +414,7 @@ _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     if (body != NULL) {
         char *message = xmpp_stanza_get_text(body);
         if (message != NULL) {
-            handle_room_broadcast(from, message);
+            srv_room_broadcast(from, message);
             xmpp_free(ctx, message);
         }
     }
@@ -435,7 +435,7 @@ _groupchat_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
     if (subject != NULL) {
         message = xmpp_stanza_get_text(subject);
-        handle_room_subject(jid->barejid, jid->resourcepart, message);
+        srv_room_subject(jid->barejid, jid->resourcepart, message);
         xmpp_free(ctx, message);
 
         jid_destroy(jid);
@@ -448,7 +448,7 @@ _groupchat_handler(xmpp_conn_t * const conn,
         if (body != NULL) {
             message = xmpp_stanza_get_text(body);
             if (message != NULL) {
-                handle_room_broadcast(room_jid, message);
+                srv_room_broadcast(room_jid, message);
                 xmpp_free(ctx, message);
             }
         }
@@ -480,9 +480,9 @@ _groupchat_handler(xmpp_conn_t * const conn,
         message = xmpp_stanza_get_text(body);
         if (message != NULL) {
             if (delayed) {
-                handle_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
+                srv_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
             } else {
-                handle_room_message(jid->barejid, jid->resourcepart, message);
+                srv_room_message(jid->barejid, jid->resourcepart, message);
             }
             xmpp_free(ctx, message);
         }
@@ -536,7 +536,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 char *fulljid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
                 if (fulljid) {
                     Jid *jidp = jid_create(fulljid);
-                    handle_message_receipt(jidp->barejid, id);
+                    srv_message_receipt(jidp->barejid, id);
                     jid_destroy(jidp);
                     return 1;
                 }
@@ -573,11 +573,11 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
                 if (message != NULL) {
                     // if we are the recipient, treat as standard incoming message
                     if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
-                        handle_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
+                        srv_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
                     }
                     // else treat as a sent message
                     else{
-                        handle_carbon(jid_to->barejid, message);
+                        srv_carbon(jid_to->barejid, message);
                     }
                     xmpp_free(ctx, message);
                 }
@@ -615,9 +615,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
                 if (delayed) {
-                    handle_delayed_private_message(jid->str, message, tv_stamp);
+                    srv_delayed_private_message(jid->str, message, tv_stamp);
                 } else {
-                    handle_incoming_private_message(jid->str, message);
+                    srv_incoming_private_message(jid->str, message);
                 }
                 xmpp_free(ctx, message);
             }
@@ -639,9 +639,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             char *message = xmpp_stanza_get_text(body);
             if (message != NULL) {
                 if (delayed) {
-                    handle_delayed_message(jid->barejid, message, tv_stamp);
+                    srv_delayed_message(jid->barejid, message, tv_stamp);
                 } else {
-                    handle_incoming_message(jid->barejid, jid->resourcepart, message);
+                    srv_incoming_message(jid->barejid, jid->resourcepart, message);
                 }
                 if (id && prefs_get_boolean(PREF_RECEIPTS_SEND)) {
                     xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
@@ -663,17 +663,17 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
             gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
             if (gone) {
-                handle_gone(jid->barejid, jid->resourcepart);
+                srv_gone(jid->barejid, jid->resourcepart);
             } else if (typing) {
-                handle_typing(jid->barejid, jid->resourcepart);
+                srv_typing(jid->barejid, jid->resourcepart);
             } else if (paused) {
-                handle_paused(jid->barejid, jid->resourcepart);
+                srv_paused(jid->barejid, jid->resourcepart);
             } else if (inactive) {
-                handle_inactive(jid->barejid, jid->resourcepart);
+                srv_inactive(jid->barejid, jid->resourcepart);
             } else if (stanza_contains_chat_state(stanza)) {
-                handle_activity(jid->barejid, jid->resourcepart, TRUE);
+                srv_activity(jid->barejid, jid->resourcepart, TRUE);
             } else {
-                handle_activity(jid->barejid, jid->resourcepart, FALSE);
+                srv_activity(jid->barejid, jid->resourcepart, FALSE);
             }
         }
 

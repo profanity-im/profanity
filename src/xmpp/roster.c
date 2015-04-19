@@ -164,7 +164,7 @@ _group_add_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     if (userdata != NULL) {
         GroupData *data = userdata;
-        handle_group_add(data->name, data->group);
+        srv_group_add(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -211,7 +211,7 @@ _group_remove_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     if (userdata != NULL) {
         GroupData *data = userdata;
-        handle_group_remove(data->name, data->group);
+        srv_group_remove(data->name, data->group);
         free(data->name);
         free(data->group);
         free(userdata);
@@ -261,7 +261,7 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         roster_remove(name, barejid_lower);
 
-        handle_roster_remove(barejid_lower);
+        srv_roster_remove(barejid_lower);
 
     // otherwise update local roster
     } else {
@@ -279,10 +279,10 @@ _roster_set_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         if (contact == NULL) {
             gboolean added = roster_add(barejid_lower, name, groups, sub, pending_out);
             if (added) {
-                handle_roster_add(barejid_lower, name);
+                srv_roster_add(barejid_lower, name);
             }
         } else {
-            handle_roster_update(barejid_lower, name, groups, sub, pending_out);
+            srv_roster_update(barejid_lower, name, groups, sub, pending_out);
         }
     }
 
@@ -331,7 +331,7 @@ _roster_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             item = xmpp_stanza_get_next(item);
         }
 
-        handle_roster_received();
+        srv_roster_received();
 
         char *account_name = jabber_get_account_name();
         const char *fulljid = jabber_get_fulljid();
