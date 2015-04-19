@@ -68,6 +68,7 @@
 #include "xmpp/bookmark.h"
 #include "ui/ui.h"
 #include "ui/windows.h"
+#include "event/client_events.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
@@ -77,9 +78,6 @@ static void _cmd_show_filtered_help(char *heading, gchar *cmd_filter[], int filt
 static gint _compare_commands(Command *a, Command *b);
 static void _who_room(gchar **args, struct cmd_help_t help);
 static void _who_roster(gchar **args, struct cmd_help_t help);
-static void _send_chat_message(const char * const barejid, const char * const message);
-static void _send_otr_chat_message(const char * const barejid, const char * const message);
-static void _send_otr_tagged_chat_message(const char * const barejid, const char * const message);
 
 extern GHashTable *commands;
 
@@ -118,20 +116,7 @@ cmd_execute_default(const char * inp)
                 ProfWin *current = wins_get_current();
                 ProfChatWin *chatwin = (ProfChatWin*)current;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-#ifdef HAVE_LIBOTR
-                prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
-                if (policy == PROF_OTRPOLICY_ALWAYS && !otr_is_secure(chatwin->barejid)) {
-                    cons_show_error("Failed to send message. Please check OTR policy");
-                    return TRUE;
-                }
-                if (otr_is_secure(chatwin->barejid)) {
-                    _send_otr_chat_message(chatwin->barejid, inp);
-                } else {
-                    _send_chat_message(chatwin->barejid, inp);
-                }
-#else
-                _send_chat_message(chatwin->barejid, inp);
-#endif
+                client_msg_send(chatwin->barejid, inp);
             }
             break;
 
@@ -1377,23 +1362,8 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
 
         if (msg) {
-#ifdef HAVE_LIBOTR
-            prof_otrpolicy_t policy = otr_get_policy(barejid);
-            if (otr_is_secure(barejid)) {
-                _send_otr_chat_message(barejid, msg);
-            } else if (policy == PROF_OTRPOLICY_ALWAYS) {
-                cons_show_error("Failed to send message. Please check OTR policy");
-            } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
-                _send_otr_tagged_chat_message(barejid, msg);
-            } else {
-                _send_chat_message(barejid, msg);
-            }
+            client_msg_send(barejid, msg);
             return TRUE;
-#else
-            _send_chat_message(barejid, msg);
-            return TRUE;
-#endif
-
         } else {
             ui_new_chat_win(barejid);
 #ifdef HAVE_LIBOTR
@@ -3200,15 +3170,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
     case WIN_CHAT:
     {
         ProfChatWin *chatwin = wins_get_current_chat();
-#ifdef HAVE_LIBOTR
-        if (otr_is_secure(chatwin->barejid)) {
-            _send_otr_chat_message(chatwin->barejid, tiny);
-        } else {
-            _send_chat_message(chatwin->barejid, tiny);
-        }
-#else
-        _send_chat_message(chatwin->barejid, tiny);
-#endif
+        client_msg_send(chatwin->barejid, tiny);
         break;
     }
     case WIN_PRIVATE:
@@ -4528,39 +4490,4 @@ gint _compare_commands(Command *a, Command *b)
     g_free(key_b);
 
     return result;
-}
-
-static void
-_send_chat_message(const char * const barejid, const char * const message)
-{
-    char *id = message_send_chat(barejid, message);
-    chat_log_msg_out(barejid, message);
-    ui_outgoing_chat_msg(barejid, message, id);
-    free(id);
-}
-
-static void
-_send_otr_chat_message(const char * const barejid, const char * const message)
-{
-    char *encrypted = otr_encrypt_message(barejid, message);
-    if (encrypted != NULL) {
-        char *id = message_send_chat_encrypted(barejid, encrypted);
-        chat_log_otr_msg_out(barejid, message);
-        ui_outgoing_chat_msg(barejid, message, id);
-        otr_free_message(encrypted);
-        free(id);
-    } else {
-        cons_show_error("Failed to encrypt and send message.");
-    }
-}
-
-static void
-_send_otr_tagged_chat_message(const char * const barejid, const char * const message)
-{
-    char *otr_tagged_msg = otr_tag_message(message);
-    char *id = message_send_chat_encrypted(barejid, otr_tagged_msg);
-    ui_outgoing_chat_msg(barejid, message, id);
-    chat_log_msg_out(barejid, message);
-    free(id);
-    free(otr_tagged_msg);
 }
