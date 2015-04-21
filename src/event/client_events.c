@@ -38,7 +38,7 @@
 #include "log.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
 #include "plugins/plugins.h"
@@ -50,7 +50,7 @@ client_send_msg(const char * const barejid, const char * const msg)
 
     char *plugin_msg = plugins_pre_chat_message_send(barejid, msg);
 
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     prof_otrpolicy_t policy = otr_get_policy(barejid);
 
     if (otr_is_secure(barejid)) {
@@ -112,4 +112,17 @@ client_send_priv_msg(const char * const fulljid, const char * const msg)
 
     plugins_post_priv_message_send(fulljid, plugin_msg);
     free(plugin_msg);
+}
+
+void
+client_focus_win(ProfWin *win)
+{
+    ui_switch_win(win);
+}
+
+void
+client_new_chat_win(const char * const barejid)
+{
+    ProfWin *win = ui_new_chat_win(barejid);
+    ui_switch_win(win);
 }

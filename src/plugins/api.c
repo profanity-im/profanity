@@ -183,7 +183,7 @@ api_win_focus(const char *tag)
 {
     ProfPluginWin *pluginwin = wins_get_plugin(tag);
     int num = wins_get_num((ProfWin*)pluginwin);
-    ui_switch_win(num);
+    ui_switch_win_num(num);
 }
 
 void
@@ -196,7 +196,7 @@ api_win_show(const char *tag, const char *line)
     // refresh if current
     if (wins_is_current(window)) {
         int num = wins_get_num(window);
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     }
 }
 
@@ -210,7 +210,7 @@ api_win_show_green(const char *tag, const char *line)
     // refresh if current
     if (wins_is_current(window)) {
         int num = wins_get_num(window);
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     }
 }
 
@@ -224,7 +224,7 @@ api_win_show_red(const char *tag, const char *line)
     // refresh if current
     if (wins_is_current(window)) {
         int num = wins_get_num(window);
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     }
 }
 
@@ -238,7 +238,7 @@ api_win_show_cyan(const char *tag, const char *line)
     // refresh if current
     if (wins_is_current(window)) {
         int num = wins_get_num(window);
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     }
 }
 
@@ -252,6 +252,6 @@ api_win_show_yellow(const char *tag, const char *line)
     // refresh if current
     if (wins_is_current(window)) {
         int num = wins_get_num(window);
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     }
 }

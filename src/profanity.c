@@ -268,7 +268,7 @@ _shutdown(void)
     muc_close();
     caps_close();
     ui_close();
-#ifdef HAVE_LIBOTR
+#ifdef PROF_HAVE_LIBOTR
     otr_shutdown();
 #endif
     chat_log_close();
