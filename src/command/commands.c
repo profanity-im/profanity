@@ -145,137 +145,95 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
     if (inp[0] != '/') {
         ran = FALSE;
         return TRUE;
-    } else {
-        char *alias = strdup(inp+1);
-        char *value = prefs_get_alias(alias);
-        free(alias);
-        if (value != NULL) {
-            *ran = TRUE;
-            return cmd_process_input(value);
-        } else {
-            *ran = FALSE;
-            return TRUE;
-        }
     }
+
+    char *alias = strdup(inp+1);
+    char *value = prefs_get_alias(alias);
+    free(alias);
+    if (value) {
+        *ran = TRUE;
+        return cmd_process_input(value);
+    }
+
+    *ran = FALSE;
+    return TRUE;
 }
 
 gboolean
 cmd_connect(gchar **args, struct cmd_help_t help)
 {
-    gboolean result = FALSE;
-
     jabber_conn_status_t conn_status = jabber_get_connection_status();
-
     if ((conn_status != JABBER_DISCONNECTED) && (conn_status != JABBER_STARTED)) {
         cons_show("You are either connected already, or a login is in process.");
-        result = TRUE;
-    } else {
-        gchar *opt_keys[] = { "server", "port", NULL };
-        gboolean parsed;
-
-        GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
-        if (!parsed) {
-            cons_show("Usage: %s", help.usage);
-            cons_show("");
-            return TRUE;
-        }
-
-        char *altdomain = g_hash_table_lookup(options, "server");
-
-        int port = 0;
-        if (g_hash_table_contains(options, "port")) {
-            char *port_str = g_hash_table_lookup(options, "port");
-            char *err_msg = NULL;
-            gboolean res = strtoi_range(port_str, &port, 1, 65535, &err_msg);
-            if (!res) {
-                cons_show(err_msg);
-                cons_show("");
-                free(err_msg);
-                port = 0;
-                return TRUE;
-            }
-        }
-
-        char *user = args[0];
-        char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
-        if(!user){
-            if(def){
-                user = def;
-                cons_show("Using default account %s.", user);
-            } else {
-                cons_show("No default account.");
-                g_free(def);
-                return TRUE;
-            }
-        }
-
-        char *lower = g_utf8_strdown(user, -1);
-        char *jid;
-        g_free(def);
-        def = NULL;
-
-        ProfAccount *account = accounts_get_account(lower);
-        if (account != NULL) {
-            jid = account_create_full_jid(account);
-            if(account->eval_password){
-                // Evaluate as shell command to retrieve password
-                GString *cmd = g_string_append(g_string_new(account->eval_password), " 2>/dev/null");
-                FILE *stream = popen(cmd->str, "r");
-                g_string_free(cmd, TRUE);
-                if(stream){
-                    // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
-                    account->password = g_malloc(READ_BUF_SIZE);
-                    if(!account->password){
-                        log_error("Failed to allocate enough memory to read eval_password output");
-                        cons_show("Error evaluating password, see logs for details.");
-                        return TRUE;
-                    }
-                    account->password = fgets(account->password, READ_BUF_SIZE, stream);
-                    pclose(stream);
-                    if(!account->password){
-                        log_error("No result from eval_password.");
-                        cons_show("Error evaluating password, see logs for details.");
-                        return TRUE;
-                    }
-                    // strip trailing newline
-                    if (g_str_has_suffix(account->password, "\n")) {
-                        account->password[strlen(account->password)-1] = '\0';
-                    }
-                } else {
-                    log_error("popen failed when running eval_password.");
-                    cons_show("Error evaluating password, see logs for details.");
-                    return TRUE;
-                }
-            } else if (!account->password) {
-                account->password = ui_ask_password();
-            }
-            cons_show("Connecting with account %s as %s", account->name, jid);
-            if(g_hash_table_contains(options, "port") || g_hash_table_contains(options, "server"))
-                cons_show("Ignoring extra connect options. Please set them with /account set");
-            conn_status = jabber_connect_with_account(account);
-            account_free(account);
-        } else {
-            char *passwd = ui_ask_password();
-            jid = strdup(lower);
-            cons_show("Connecting as %s", jid);
-            conn_status = jabber_connect_with_details(jid, passwd, altdomain, port);
-            free(passwd);
-        }
-        g_free(lower);
-
-        if (conn_status == JABBER_DISCONNECTED) {
-            cons_show_error("Connection attempt for %s failed.", jid);
-            log_info("Connection attempt for %s failed", jid);
-        }
-
-        options_destroy(options);
-
-        free(jid);
-
-        result = TRUE;
+        return TRUE;
     }
 
-    return result;
+    gchar *opt_keys[] = { "server", "port", NULL };
+    gboolean parsed;
+
+    GHashTable *options = parse_options(&args[args[0] ? 1 : 0], opt_keys, &parsed);
+    if (!parsed) {
+        cons_show("Usage: %s", help.usage);
+        cons_show("");
+        return TRUE;
+    }
+
+    char *altdomain = g_hash_table_lookup(options, "server");
+
+    int port = 0;
+    if (g_hash_table_contains(options, "port")) {
+        char *port_str = g_hash_table_lookup(options, "port");
+        char *err_msg = NULL;
+        gboolean res = strtoi_range(port_str, &port, 1, 65535, &err_msg);
+        if (!res) {
+            cons_show(err_msg);
+            cons_show("");
+            free(err_msg);
+            port = 0;
+            return TRUE;
+        }
+    }
+
+    char *user = args[0];
+    char *def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
+    if (!user) {
+        if (def) {
+            user = def;
+            cons_show("Using default account %s.", user);
+        } else {
+            cons_show("No default account.");
+            g_free(def);
+            return TRUE;
+        }
+    }
+
+    char *lower = g_utf8_strdown(user, -1);
+    char *jid;
+    g_free(def);
+
+    ProfAccount *account = accounts_get_account(lower);
+    if (account) {
+        jid = account_create_full_jid(account);
+        gboolean res = client_connect_account(account, &conn_status);
+        if (!res) {
+            g_free(lower);
+            return TRUE;
+        }
+    } else {
+        jid = strdup(lower);
+        conn_status = client_connect_jid(jid, altdomain, port);
+    }
+
+    if (conn_status == JABBER_DISCONNECTED) {
+        cons_show_error("Connection attempt for %s failed.", jid);
+        log_info("Connection attempt for %s failed", jid);
+    }
+
+    options_destroy(options);
+    g_free(lower);
+    free(jid);
+
+    return TRUE;
 }
 
 gboolean
