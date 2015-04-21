@@ -44,7 +44,7 @@
 #include "plugins/plugins.h"
 
 void
-client_msg_send(const char * const barejid, const char * const msg)
+client_send_msg(const char * const barejid, const char * const msg)
 {
     char *id = NULL;
 
@@ -89,4 +89,27 @@ client_msg_send(const char * const barejid, const char * const msg)
     free(plugin_msg);
 
     free(id);
+}
+
+void
+client_send_muc_msg(const char * const roomjid, const char * const msg)
+{
+    char *plugin_msg = plugins_pre_room_message_send(roomjid, msg);
+
+    message_send_groupchat(roomjid, msg);
+
+    plugins_post_room_message_send(roomjid, plugin_msg);
+    free(plugin_msg);
+}
+
+void
+client_send_priv_msg(const char * const fulljid, const char * const msg)
+{
+    char *plugin_msg = plugins_pre_priv_message_send(fulljid, msg);
+
+    message_send_private(fulljid, plugin_msg);
+    ui_outgoing_private_msg(fulljid, plugin_msg);
+
+    plugins_post_priv_message_send(fulljid, plugin_msg);
+    free(plugin_msg);
 }
