@@ -97,3 +97,16 @@ client_send_priv_msg(const char * const fulljid, const char * const msg)
     message_send_private(fulljid, msg);
     ui_outgoing_private_msg(fulljid, msg);
 }
+
+void
+client_focus_win(ProfWin *win)
+{
+    ui_switch_win(win);
+}
+
+void
+client_new_chat_win(const char * const barejid)
+{
+    ProfWin *win = ui_new_chat_win(barejid);
+    ui_switch_win(win);
+}

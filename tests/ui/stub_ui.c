@@ -64,7 +64,12 @@ GSList* ui_get_chat_recipients(void)
     return NULL;
 }
 
-gboolean ui_switch_win(const int i)
+gboolean ui_switch_win(ProfWin *win)
+{
+    return FALSE;
+}
+
+gboolean ui_switch_win_num(const int i)
 {
     check_expected(i);
     return (gboolean)mock();
@@ -99,8 +104,12 @@ unsigned long ui_get_idle_time(void)
 }
 
 void ui_reset_idle_time(void) {}
-void ui_new_chat_win(const char * const barejid) {}
 void ui_new_private_win(const char * const fulljid) {}
+ProfWin* ui_new_chat_win(const char * const barejid)
+{
+    return NULL;
+}
+
 void ui_print_system_msg_from_recipient(const char * const barejid, const char *message) {}
 gint ui_unread(void)
 {
