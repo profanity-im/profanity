@@ -738,7 +738,7 @@ gboolean
 cmd_win(gchar **args, struct cmd_help_t help)
 {
     int num = atoi(args[0]);
-    gboolean switched = ui_switch_win(num);
+    gboolean switched = ui_switch_win_num(num);
     if (switched == FALSE) {
         cons_show("Window %d does not exist.", num);
     }
@@ -1347,7 +1347,13 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             client_send_msg(barejid, msg);
             return TRUE;
         } else {
-            ui_new_chat_win(barejid);
+            ProfWin *window = (ProfWin*)wins_get_chat(barejid);
+            if (window) {
+                client_focus_win(window);
+            } else {
+                client_new_chat_win(barejid);
+            }
+
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
                 ui_gone_secure(barejid, otr_is_trusted(barejid));
@@ -2467,7 +2473,7 @@ cmd_form(gchar **args, struct cmd_help_t help)
             current = wins_get_console();
         }
         int num = wins_get_num(current);
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     }
 
     return TRUE;
@@ -2775,7 +2781,7 @@ cmd_room(gchar **args, struct cmd_help_t help)
 
         if (confwin != NULL) {
             num = wins_get_num(window);
-            ui_switch_win(num);
+            ui_switch_win_num(num);
         } else {
             iq_request_room_config_form(mucwin->roomjid);
         }
@@ -4180,7 +4186,12 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 barejid = contact;
             }
 
-            ui_new_chat_win(barejid);
+            ProfWin *window = (ProfWin*)wins_get_chat(barejid);
+            if (window) {
+                client_focus_win(window);
+            } else {
+                client_new_chat_win(barejid);
+            }
 
             if (ui_current_win_is_otr()) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");

@@ -452,70 +452,70 @@ _inp_rl_tab_handler(int count, int key)
 static int
 _inp_rl_win1_handler(int count, int key)
 {
-    ui_switch_win(1);
+    ui_switch_win_num(1);
     return 0;
 }
 
 static int
 _inp_rl_win2_handler(int count, int key)
 {
-    ui_switch_win(2);
+    ui_switch_win_num(2);
     return 0;
 }
 
 static int
 _inp_rl_win3_handler(int count, int key)
 {
-    ui_switch_win(3);
+    ui_switch_win_num(3);
     return 0;
 }
 
 static int
 _inp_rl_win4_handler(int count, int key)
 {
-    ui_switch_win(4);
+    ui_switch_win_num(4);
     return 0;
 }
 
 static int
 _inp_rl_win5_handler(int count, int key)
 {
-    ui_switch_win(5);
+    ui_switch_win_num(5);
     return 0;
 }
 
 static int
 _inp_rl_win6_handler(int count, int key)
 {
-    ui_switch_win(6);
+    ui_switch_win_num(6);
     return 0;
 }
 
 static int
 _inp_rl_win7_handler(int count, int key)
 {
-    ui_switch_win(7);
+    ui_switch_win_num(7);
     return 0;
 }
 
 static int
 _inp_rl_win8_handler(int count, int key)
 {
-    ui_switch_win(8);
+    ui_switch_win_num(8);
     return 0;
 }
 
 static int
 _inp_rl_win9_handler(int count, int key)
 {
-    ui_switch_win(9);
+    ui_switch_win_num(9);
     return 0;
 }
 
 static int
 _inp_rl_win0_handler(int count, int key)
 {
-    ui_switch_win(0);
+    ui_switch_win_num(0);
     return 0;
 }
 

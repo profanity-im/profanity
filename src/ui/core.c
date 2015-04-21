@@ -878,7 +878,14 @@ ui_win_has_unsaved_form(int num)
 }
 
 gboolean
-ui_switch_win(const int i)
+ui_switch_win(ProfWin *win)
+{
+    int num = wins_get_num(win);
+    return ui_switch_win_num(num);
+}
+
+gboolean
+ui_switch_win_num(const int i)
 {
     if (ui_win_exists(i)) {
         ProfWin *old_current = wins_get_current();
@@ -1358,6 +1365,30 @@ ui_recipient_gone(const char * const barejid, const char * const resource)
     }
 }
 
+ProfWin*
+ui_new_chat_win(const char * const barejid)
+{
+    ProfWin* window = wins_new_chat(barejid);
+
+    int num = wins_get_num(window);
+
+    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+        _win_show_history(num, barejid);
+    }
+
+    // if the contact is offline, show a message
+    PContact contact = roster_get_contact(barejid);
+    if (contact != NULL) {
+        if (strcmp(p_contact_presence(contact), "offline") == 0) {
+            const char * const show = p_contact_presence(contact);
+            const char * const status = p_contact_status(contact);
+            win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
+        }
+    }
+
+    return window;
+}
+
 void
 ui_new_private_win(const char * const fulljid)
 {
@@ -1372,39 +1403,7 @@ ui_new_private_win(const char * const fulljid)
         num = wins_get_num(window);
     }
 
-    ui_switch_win(num);
-}
-
-void
-ui_new_chat_win(const char * const barejid)
-{
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    int num = 0;
-
-    // create new window
-    if (window == NULL) {
-        window = wins_new_chat(barejid);
-
-        num = wins_get_num(window);
-
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(num, barejid);
-        }
-
-        // if the contact is offline, show a message
-        PContact contact = roster_get_contact(barejid);
-        if (contact != NULL) {
-            if (strcmp(p_contact_presence(contact), "offline") == 0) {
-                const char * const show = p_contact_presence(contact);
-                const char * const status = p_contact_status(contact);
-                win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-            }
-        }
-    } else {
-        num = wins_get_num(window);
-    }
-
-    ui_switch_win(num);
+    ui_switch_win_num(num);
 }
 
 void
@@ -1412,7 +1411,7 @@ ui_create_xmlconsole_win(void)
 {
     ProfWin *window = wins_new_xmlconsole();
     int num = wins_get_num(window);
-    ui_switch_win(num);
+    ui_switch_win_num(num);
 }
 
 void
@@ -1421,7 +1420,7 @@ ui_open_xmlconsole_win(void)
     ProfXMLWin *xmlwin = wins_get_xmlconsole();
     if (xmlwin != NULL) {
         int num = wins_get_num((ProfWin*)xmlwin);
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     }
 }
 
@@ -1467,7 +1466,7 @@ ui_outgoing_chat_msg(const char * const barejid, const char * const message, cha
     } else {
         win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     }
-    ui_switch_win(num);
+    ui_switch_win_num(num);
 }
 
 void
@@ -1528,7 +1527,7 @@ ui_outgoing_private_msg(const char * const fulljid, const char * const message)
     }
 
     win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
-    ui_switch_win(num);
+    ui_switch_win_num(num);
 }
 
 void
@@ -1559,7 +1558,7 @@ ui_room_join(const char * const roomjid, gboolean focus)
     num = wins_get_num(window);
 
     if (focus) {
-        ui_switch_win(num);
+        ui_switch_win_num(num);
     } else {
         status_bar_active(num);
         ProfWin *console = wins_get_console();
@@ -1573,8 +1572,7 @@ ui_switch_to_room(const char * const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
     int num = wins_get_num(window);
-    num = wins_get_num(window);
-    ui_switch_win(num);
+    ui_switch_win_num(num);
 }
 
 void
@@ -2747,7 +2745,7 @@ ui_handle_room_configuration(const char * const roomjid, DataForm *form)
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
     int num = wins_get_num(window);
-    ui_switch_win(num);
+    ui_switch_win_num(num);
 
     ui_show_form(confwin);
 
@@ -2804,10 +2802,10 @@ ui_handle_room_config_submit_result(const char * const roomjid)
 
         if (muc_window) {
             int num = wins_get_num(muc_window);
-            ui_switch_win(num);
+            ui_switch_win_num(num);
             win_print(muc_window, '!', NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
         } else {
-            ui_switch_win(1);
+            ui_switch_win_num(1);
             cons_show("Room configuration successful: %s", roomjid);
         }
     } else {

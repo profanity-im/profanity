@@ -59,7 +59,8 @@ void ui_close(void);
 void ui_redraw(void);
 void ui_resize(void);
 GSList* ui_get_chat_recipients(void);
-gboolean ui_switch_win(const int i);
+gboolean ui_switch_win_num(const int i);
+gboolean ui_switch_win(ProfWin *win);
 void ui_next_win(void);
 void ui_previous_win(void);
 void ui_sigwinch_handler(int sig);
@@ -86,8 +87,8 @@ void ui_handle_otr_error(const char * const barejid, const char * const message)
 
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
-void ui_new_chat_win(const char * const barejid);
 void ui_new_private_win(const char * const fulljid);
+ProfWin* ui_new_chat_win(const char * const barejid);
 void ui_print_system_msg_from_recipient(const char * const barejid, const char *message);
 gint ui_unread(void);
 void ui_close_connected_win(int index);

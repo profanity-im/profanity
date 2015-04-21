@@ -660,7 +660,7 @@ wins_swap(int source_win, int target_win)
             }
             if (wins_get_current_num() == source_win) {
                 wins_set_current_by_num(target_win);
-                ui_switch_win(1);
+                ui_switch_win_num(1);
             }
             return TRUE;
 
@@ -681,7 +681,7 @@ wins_swap(int source_win, int target_win)
                 status_bar_active(source_win);
             }
             if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
-                ui_switch_win(1);
+                ui_switch_win_num(1);
             }
             return TRUE;
         }
@@ -740,7 +740,7 @@ wins_tidy(void)
 
         windows = new_windows;
         current = 1;
-        ui_switch_win(1);
+        ui_switch_win_num(1);
         g_list_free(keys);
         return TRUE;
     } else {
