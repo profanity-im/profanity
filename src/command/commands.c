@@ -137,18 +137,18 @@ cmd_execute_alias(const char * const inp, gboolean *ran)
     if (inp[0] != '/') {
         ran = FALSE;
         return TRUE;
-    } else {
-        char *alias = strdup(inp+1);
-        char *value = prefs_get_alias(alias);
-        free(alias);
-        if (value != NULL) {
-            *ran = TRUE;
-            return cmd_process_input(value);
-        } else {
-            *ran = FALSE;
-            return TRUE;
-        }
     }
+
+    char *alias = strdup(inp+1);
+    char *value = prefs_get_alias(alias);
+    free(alias);
+    if (value) {
+        *ran = TRUE;
+        return cmd_process_input(value);
+    }
+
+    *ran = FALSE;
+    return TRUE;
 }
 
 gboolean
