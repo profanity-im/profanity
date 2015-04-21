@@ -35,6 +35,8 @@
 #ifndef CLIENT_EVENTS_H
 #define CLIENT_EVENTS_H
 
-void client_msg_send(const char * const barejid, const char * const msg);
+void client_send_msg(const char * const barejid, const char * const msg);
+void client_send_muc_msg(const char * const roomjid, const char * const msg);
+void client_send_priv_msg(const char * const fulljid, const char * const msg);
 
 #endif

@@ -43,7 +43,7 @@
 #endif
 
 void
-client_msg_send(const char * const barejid, const char * const msg)
+client_send_msg(const char * const barejid, const char * const msg)
 {
     char *id = NULL;
 
@@ -83,4 +83,17 @@ client_msg_send(const char * const barejid, const char * const msg)
 #endif
 
     free(id);
+}
+
+void
+client_send_muc_msg(const char * const roomjid, const char * const msg)
+{
+    message_send_groupchat(roomjid, msg);
+}
+
+void
+client_send_priv_msg(const char * const fulljid, const char * const msg)
+{
+    message_send_private(fulljid, msg);
+    ui_outgoing_private_msg(fulljid, msg);
 }
