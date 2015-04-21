@@ -42,6 +42,68 @@
 #include "otr/otr.h"
 #endif
 
+jabber_conn_status_t
+client_connect_jid(const char * const jid, const char * const altdomain, const int port)
+{
+    cons_show("Connecting as %s", jid);
+    char *passwd = ui_ask_password();
+    jabber_conn_status_t conn_status = jabber_connect_with_details(jid, passwd, altdomain, port);
+    free(passwd);
+
+    return conn_status;
+}
+
+gboolean
+client_connect_account(ProfAccount *account, jabber_conn_status_t *conn_status)
+{
+    if (account->eval_password) {
+
+        // Evaluate as shell command to retrieve password
+        GString *cmd = g_string_new("");
+        g_string_append_printf(cmd, "%s 2>/dev/null", account->eval_password);
+
+        FILE *stream = popen(cmd->str, "r");
+        g_string_free(cmd, TRUE);
+        if (stream) {
+            // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
+            account->password = g_malloc(READ_BUF_SIZE);
+            if (!account->password) {
+                log_error("Failed to allocate enough memory to read eval_password output");
+                cons_show("Error evaluating password, see logs for details.");
+                return FALSE;
+            }
+            account->password = fgets(account->password, READ_BUF_SIZE, stream);
+            pclose(stream);
+            if (!account->password) {
+                log_error("No result from eval_password.");
+                cons_show("Error evaluating password, see logs for details.");
+                return FALSE;
+            }
+
+            // strip trailing newline
+            if (g_str_has_suffix(account->password, "\n")) {
+                account->password[strlen(account->password)-1] = '\0';
+            }
+        } else {
+            log_error("popen failed when running eval_password.");
+            cons_show("Error evaluating password, see logs for details.");
+            return FALSE;
+        }
+
+    } else if (!account->password) {
+        account->password = ui_ask_password();
+    }
+
+    char *jid = account_create_full_jid(account);
+    cons_show("Connecting with account %s as %s", account->name, jid);
+    free(jid);
+
+    *conn_status = jabber_connect_with_account(account);
+    account_free(account);
+
+    return TRUE;
+}
+
 void
 client_send_msg(const char * const barejid, const char * const msg)
 {
