@@ -81,8 +81,6 @@ extern GHashTable *commands;
 gboolean
 cmd_execute_default(const char * inp)
 {
-    jabber_conn_status_t status = jabber_get_connection_status();
-
     // handle escaped commands - treat as normal message
     if (g_str_has_prefix(inp, "//")) {
         inp++;
@@ -94,46 +92,40 @@ cmd_execute_default(const char * inp)
         return TRUE;
     }
 
-    win_type_t win_type = ui_current_win_type();
-    switch (win_type)
+    // handle non commands in non chat windows
+    ProfWin *current = wins_get_current();
+    if (current->type != WIN_CHAT && current->type != WIN_MUC && current->type != WIN_PRIVATE) {
+        cons_show("Unknown command: %s", inp);
+        return TRUE;
+    }
+
+    jabber_conn_status_t status = jabber_get_connection_status();
+    if (status != JABBER_CONNECTED) {
+        ui_current_print_line("You are not currently connected.");
+        return TRUE;
+    }
+
+    switch (current->type) {
+    case WIN_CHAT:
     {
-        case WIN_MUC:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                ProfMucWin *mucwin = wins_get_current_muc();
-                message_send_groupchat(mucwin->roomjid, inp);
-            }
-            break;
-
-        case WIN_CHAT:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                ProfWin *current = wins_get_current();
-                ProfChatWin *chatwin = (ProfChatWin*)current;
-                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-                client_msg_send(chatwin->barejid, inp);
-            }
-            break;
-
-        case WIN_PRIVATE:
-            if (status != JABBER_CONNECTED) {
-                ui_current_print_line("You are not currently connected.");
-            } else {
-                ProfPrivateWin *privatewin = wins_get_current_private();
-                message_send_private(privatewin->fulljid, inp);
-                ui_outgoing_private_msg(privatewin->fulljid, inp);
-            }
-            break;
-
-        case WIN_CONSOLE:
-        case WIN_XML:
-            cons_show("Unknown command: %s", inp);
-            break;
-
-        default:
-            break;
+        ProfChatWin *chatwin = wins_get_current_chat();
+        client_send_msg(chatwin->barejid, inp);
+        break;
+    }
+    case WIN_PRIVATE:
+    {
+        ProfPrivateWin *privatewin = wins_get_current_private();
+        client_send_priv_msg(privatewin->fulljid, inp);
+        break;
+    }
+    case WIN_MUC:
+    {
+        ProfMucWin *mucwin = wins_get_current_muc();
+        client_send_muc_msg(mucwin->roomjid, inp);
+        break;
+    }
+    default:
+        break;
     }
 
     return TRUE;
@@ -1322,6 +1314,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
+    // send private message when in MUC room
     if (win_type == WIN_MUC) {
         ProfMucWin *mucwin = wins_get_current_muc();
         if (muc_roster_contains_nick(mucwin->roomjid, usr)) {
@@ -1329,9 +1322,8 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, "/");
             g_string_append(full_jid, usr);
 
-            if (msg != NULL) {
-                message_send_private(full_jid->str, msg);
-                ui_outgoing_private_msg(full_jid->str, msg);
+            if (msg) {
+                client_send_priv_msg(full_jid->str, msg);
             } else {
                 ui_new_private_win(full_jid->str);
             }
@@ -1344,6 +1336,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
 
         return TRUE;
 
+    // send chat message
     } else {
         char *barejid = roster_barejid_from_name(usr);
         if (barejid == NULL) {
@@ -1351,7 +1344,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
 
         if (msg) {
-            client_msg_send(barejid, msg);
+            client_send_msg(barejid, msg);
             return TRUE;
         } else {
             ui_new_chat_win(barejid);
@@ -3159,20 +3152,19 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
     case WIN_CHAT:
     {
         ProfChatWin *chatwin = wins_get_current_chat();
-        client_msg_send(chatwin->barejid, tiny);
+        client_send_msg(chatwin->barejid, tiny);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = wins_get_current_private();
-        message_send_private(privatewin->fulljid, tiny);
-        ui_outgoing_private_msg(privatewin->fulljid, tiny);
+        client_send_priv_msg(privatewin->fulljid, tiny);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin *mucwin = wins_get_current_muc();
-        message_send_groupchat(mucwin->roomjid, tiny);
+        client_send_muc_msg(mucwin->roomjid, tiny);
         break;
     }
     default:
