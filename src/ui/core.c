@@ -417,11 +417,6 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
     if (chatwin == NULL) {
         ProfWin *window = wins_new_chat(barejid);
         chatwin = (ProfChatWin*)window;
-#ifdef HAVE_LIBOTR
-        if (otr_is_secure(barejid)) {
-            chatwin->is_otr = TRUE;
-        }
-#endif
         win_created = TRUE;
     }
 
