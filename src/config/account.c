@@ -34,12 +34,14 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <glib.h>
 
 #include "jid.h"
 #include "config/account.h"
 #include "common.h"
+#include "log.h"
 
 ProfAccount*
 account_new(const gchar * const name, const gchar * const jid,
@@ -159,6 +161,44 @@ account_create_full_jid(ProfAccount *account)
     } else {
         return strdup(account->jid);
     }
+}
+
+gboolean
+account_eval_password(ProfAccount *account)
+{
+    assert(account != NULL);
+    assert(account->eval_password != NULL);
+
+    // Evaluate as shell command to retrieve password
+    GString *cmd = g_string_new("");
+    g_string_append_printf(cmd, "%s 2>/dev/null", account->eval_password);
+
+    FILE *stream = popen(cmd->str, "r");
+    g_string_free(cmd, TRUE);
+    if (stream) {
+        // Limit to READ_BUF_SIZE bytes to prevent overflows in the case of a poorly chosen command
+        account->password = g_malloc(READ_BUF_SIZE);
+        if (!account->password) {
+            log_error("Failed to allocate enough memory to read eval_password output");
+            return FALSE;
+        }
+        account->password = fgets(account->password, READ_BUF_SIZE, stream);
+        pclose(stream);
+        if (!account->password) {
+            log_error("No result from eval_password.");
+            return FALSE;
+        }
+
+        // strip trailing newline
+        if (g_str_has_suffix(account->password, "\n")) {
+            account->password[strlen(account->password)-1] = '\0';
+        }
+    } else {
+        log_error("popen failed when running eval_password.");
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 void
