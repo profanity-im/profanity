@@ -69,9 +69,8 @@ ProfAccount* account_new(const gchar * const name, const gchar * const jid,
     const gchar * const muc_service, const gchar * const muc_nick,
     const gchar * const otr_policy, GList *otr_manual, GList *otr_opportunistic,
     GList *otr_always);
-
 char* account_create_full_jid(ProfAccount *account);
-
+gboolean account_eval_password(ProfAccount *account);
 void account_free(ProfAccount *account);
 
 #endif

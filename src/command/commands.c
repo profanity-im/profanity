@@ -203,17 +203,42 @@ cmd_connect(gchar **args, struct cmd_help_t help)
     char *jid;
     g_free(def);
 
+    // connect with account
     ProfAccount *account = accounts_get_account(lower);
     if (account) {
-        jid = account_create_full_jid(account);
-        gboolean res = client_connect_account(account, &conn_status);
-        if (!res) {
-            g_free(lower);
-            return TRUE;
+        // use password if set
+        if (account->password) {
+            conn_status = client_connect_account(account);
+
+        // use eval_password if set
+        } else if (account->eval_password) {
+            gboolean res = account_eval_password(account);
+            if (res) {
+                conn_status = client_connect_account(account);
+                free(account->password);
+                account->password = NULL;
+            } else {
+                cons_show("Error evaluating password, see logs for details.");
+                g_free(lower);
+                return TRUE;
+            }
+
+        // no account password setting, prompt
+        } else {
+            account->password = ui_ask_password();
+            conn_status = client_connect_account(account);
+            free(account->password);
+            account->password = NULL;
         }
+
+        jid = account_create_full_jid(account);
+
+    // connect with JID
     } else {
         jid = strdup(lower);
-        conn_status = client_connect_jid(jid, altdomain, port);
+        char *passwd = ui_ask_password();
+        conn_status = client_connect_jid(jid, passwd, altdomain, port);
+        free(passwd);
     }
 
     if (conn_status == JABBER_DISCONNECTED) {
