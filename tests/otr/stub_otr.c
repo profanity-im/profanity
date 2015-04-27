@@ -41,6 +41,7 @@ char* otr_start_query(void)
 
 void otr_poll(void) {}
 void otr_on_connect(ProfAccount *account) {}
+void otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message) {}
 
 void otr_keygen(ProfAccount *account)
 {
@@ -53,7 +54,7 @@ gboolean otr_key_loaded(void)
 }
 
 char* otr_tag_message(const char * const msg)
-{ 
+{
     return NULL;
 }
 

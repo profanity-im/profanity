@@ -46,7 +46,6 @@
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
-#include <libotr/proto.h>
 #endif
 
 #include "ui/ui.h"
@@ -321,45 +320,7 @@ void
 srv_incoming_message(char *barejid, char *resource, char *message)
 {
 #ifdef HAVE_LIBOTR
-    gboolean was_decrypted = FALSE;
-    char *otr_message;
-
-    prof_otrpolicy_t policy = otr_get_policy(barejid);
-    char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
-
-    //check for OTR whitespace (opportunistic or always)
-    if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
-        if (whitespace_base) {
-            if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
-                // Remove whitespace pattern for proper display in UI
-                // Handle both BASE+TAGV1/2(16+8) and BASE+TAGV1+TAGV2(16+8+8)
-                int tag_length	=	24;
-                if (strstr(message, OTRL_MESSAGE_TAG_V2) && strstr(message, OTRL_MESSAGE_TAG_V1)) {
-                    tag_length = 32;
-                }
-                memmove(whitespace_base, whitespace_base+tag_length, tag_length);
-                char *otr_query_message = otr_start_query();
-                cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send_chat_encrypted(barejid, otr_query_message);
-            }
-        }
-    }
-    otr_message = otr_decrypt_message(barejid, message, &was_decrypted);
-
-    // internal OTR message
-    if (otr_message == NULL) {
-        return;
-    }
-
-    if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
-        char *otr_query_message = otr_start_query();
-        cons_show("Attempting to start OTR session...");
-        message_send_chat_encrypted(barejid, otr_query_message);
-    }
-
-    ui_incoming_msg(barejid, resource, otr_message, NULL);
-    chat_log_otr_msg_in(barejid, otr_message, was_decrypted);
-    otr_free_message(otr_message);
+    otr_on_message_recv(barejid, resource, message);
 #else
     ui_incoming_msg(barejid, resource, message, NULL);
     chat_log_msg_in(barejid, message);

@@ -270,6 +270,50 @@ otr_on_connect(ProfAccount *account)
 }
 
 void
+otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message)
+{
+    gboolean was_decrypted = FALSE;
+    char *decrypted;
+
+    prof_otrpolicy_t policy = otr_get_policy(barejid);
+    char *whitespace_base = strstr(message, OTRL_MESSAGE_TAG_BASE);
+
+    //check for OTR whitespace (opportunistic or always)
+    if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
+        if (whitespace_base) {
+            if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
+                // Remove whitespace pattern for proper display in UI
+                // Handle both BASE+TAGV1/2(16+8) and BASE+TAGV1+TAGV2(16+8+8)
+                int tag_length = 24;
+                if (strstr(message, OTRL_MESSAGE_TAG_V2) && strstr(message, OTRL_MESSAGE_TAG_V1)) {
+                    tag_length = 32;
+                }
+                memmove(whitespace_base, whitespace_base+tag_length, tag_length);
+                char *otr_query_message = otr_start_query();
+                cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
+                message_send_chat_encrypted(barejid, otr_query_message);
+            }
+        }
+    }
+    decrypted = otr_decrypt_message(barejid, message, &was_decrypted);
+
+    // internal OTR message
+    if (decrypted == NULL) {
+        return;
+    }
+
+    if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
+        char *otr_query_message = otr_start_query();
+        cons_show("Attempting to start OTR session...");
+        message_send_chat_encrypted(barejid, otr_query_message);
+    }
+
+    ui_incoming_msg(barejid, resource, decrypted, NULL);
+    chat_log_otr_msg_in(barejid, decrypted, was_decrypted);
+    otr_free_message(decrypted);
+}
+
+void
 otr_keygen(ProfAccount *account)
 {
     if (data_loaded) {
