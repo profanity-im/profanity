@@ -314,6 +314,43 @@ otr_on_message_recv(const char * const barejid, const char * const resource, con
 }
 
 void
+otr_on_message_send(const char * const barejid, const char * const message)
+{
+    char *id = NULL;
+
+    prof_otrpolicy_t policy = otr_get_policy(barejid);
+
+    if (otr_is_secure(barejid)) {
+        char *encrypted = otr_encrypt_message(barejid, message);
+        if (encrypted != NULL) {
+            id = message_send_chat_encrypted(barejid, encrypted);
+            chat_log_otr_msg_out(barejid, message);
+            ui_outgoing_chat_msg(barejid, message, id);
+            otr_free_message(encrypted);
+        } else {
+            cons_show_error("Failed to encrypt and send message.");
+        }
+
+    } else if (policy == PROF_OTRPOLICY_ALWAYS) {
+        cons_show_error("Failed to send message. Please check OTR policy");
+
+    } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
+        char *otr_tagged_msg = otr_tag_message(message);
+        id = message_send_chat_encrypted(barejid, otr_tagged_msg);
+        ui_outgoing_chat_msg(barejid, message, id);
+        chat_log_msg_out(barejid, message);
+        free(otr_tagged_msg);
+
+    } else {
+        id = message_send_chat(barejid, message);
+        ui_outgoing_chat_msg(barejid, message, id);
+        chat_log_msg_out(barejid, message);
+    }
+
+    free(id);
+}
+
+void
 otr_keygen(ProfAccount *account)
 {
     if (data_loaded) {
