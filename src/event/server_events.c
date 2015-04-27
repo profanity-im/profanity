@@ -322,7 +322,7 @@ srv_incoming_message(char *barejid, char *resource, char *message)
 {
 #ifdef HAVE_LIBOTR
     gboolean was_decrypted = FALSE;
-    char *newmessage;
+    char *otr_message;
 
     prof_otrpolicy_t policy = otr_get_policy(barejid);
     char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
@@ -344,10 +344,10 @@ srv_incoming_message(char *barejid, char *resource, char *message)
             }
         }
     }
-    newmessage = otr_decrypt_message(barejid, message, &was_decrypted);
+    otr_message = otr_decrypt_message(barejid, message, &was_decrypted);
 
     // internal OTR message
-    if (newmessage == NULL) {
+    if (otr_message == NULL) {
         return;
     }
 
@@ -357,9 +357,9 @@ srv_incoming_message(char *barejid, char *resource, char *message)
         message_send_chat_encrypted(barejid, otr_query_message);
     }
 
-    ui_incoming_msg(barejid, resource, newmessage, NULL);
-    chat_log_otr_msg_in(barejid, newmessage, was_decrypted);
-    otr_free_message(newmessage);
+    ui_incoming_msg(barejid, resource, otr_message, NULL);
+    chat_log_otr_msg_in(barejid, otr_message, was_decrypted);
+    otr_free_message(otr_message);
 #else
     ui_incoming_msg(barejid, resource, message, NULL);
     chat_log_msg_in(barejid, message);
