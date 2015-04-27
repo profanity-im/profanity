@@ -49,7 +49,6 @@
 
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
-#include <libotr/proto.h>
 #endif
 
 #include "ui/ui.h"
@@ -332,57 +331,12 @@ srv_carbon(char *barejid, char *message)
 void
 srv_incoming_message(char *barejid, char *resource, char *message)
 {
-    char *plugin_message = NULL;
-
 #ifdef PROF_HAVE_LIBOTR
-    gboolean was_decrypted = FALSE;
-    char *newmessage;
-
-    prof_otrpolicy_t policy = otr_get_policy(barejid);
-    char *whitespace_base = strstr(message,OTRL_MESSAGE_TAG_BASE);
-
-    //check for OTR whitespace (opportunistic or always)
-    if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
-        if (whitespace_base) {
-            if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
-                // Remove whitespace pattern for proper display in UI
-                // Handle both BASE+TAGV1/2(16+8) and BASE+TAGV1+TAGV2(16+8+8)
-                int tag_length	=	24;
-                if (strstr(message, OTRL_MESSAGE_TAG_V2) && strstr(message, OTRL_MESSAGE_TAG_V1)) {
-                    tag_length = 32;
-                }
-                memmove(whitespace_base, whitespace_base+tag_length, tag_length);
-                char *otr_query_message = otr_start_query();
-                cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
-                message_send_chat_encrypted(barejid, otr_query_message);
-            }
-        }
-    }
-    newmessage = otr_decrypt_message(barejid, message, &was_decrypted);
-
-    // internal OTR message
-    if (newmessage == NULL) {
-        return;
-    }
-
-    if (policy == PROF_OTRPOLICY_ALWAYS && !was_decrypted && !whitespace_base) {
-        char *otr_query_message = otr_start_query();
-        cons_show("Attempting to start OTR session...");
-        message_send_chat_encrypted(barejid, otr_query_message);
-    }
-
-    plugin_message = plugins_pre_chat_message_display(barejid, newmessage);
-    ui_incoming_msg(barejid, resource, plugin_message, NULL);
-    plugins_post_chat_message_display(barejid, plugin_message);
-    chat_log_otr_msg_in(barejid, newmessage, was_decrypted);
-    otr_free_message(newmessage);
+    otr_on_message_recv(barejid, resource, message);
 #else
-    plugin_message = plugins_pre_chat_message_display(barejid, newmessage);
-    ui_incoming_msg(barejid, resource, plugin_message, NULL);
-    plugins_post_chat_message_display(barejid, plugin_message);
+    ui_incoming_msg(barejid, resource, newmessage, NULL);
     chat_log_msg_in(barejid, newmessage);
 #endif
-    free(plugin_message);
 }
 
 void
@@ -398,11 +352,8 @@ srv_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp)
 void
 srv_delayed_message(char *barejid, char *message, GTimeVal tv_stamp)
 {
-    char *new_message = plugins_pre_chat_message_display(barejid, message);
-    ui_incoming_msg(barejid, NULL, new_message, &tv_stamp);
-    plugins_post_chat_message_display(barejid, new_message);
+    ui_incoming_msg(barejid, NULL, message, &tv_stamp);
     chat_log_msg_in_delayed(barejid, message, &tv_stamp);
-    free(new_message);
 }
 
 void

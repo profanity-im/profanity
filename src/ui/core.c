@@ -394,6 +394,8 @@ ui_message_receipt(const char * const barejid, const char * const id)
 void
 ui_incoming_msg(const char * const barejid, const char * const resource, const char * const message, GTimeVal *tv_stamp)
 {
+    char *plugin_message = plugins_pre_chat_message_display(barejid, message);
+
     gboolean win_created = FALSE;
     GString *user = g_string_new("");
 
@@ -426,7 +428,7 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming_message(window, tv_stamp, user->str, message);
+        win_print_incoming_message(window, tv_stamp, user->str, plugin_message);
         title_bar_set_typing(FALSE);
         status_bar_active(num);
 
@@ -452,7 +454,7 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
             }
         }
 
-        win_print_incoming_message(window, tv_stamp, user->str, message);
+        win_print_incoming_message(window, tv_stamp, user->str, plugin_message);
     }
 
     int ui_index = num;
@@ -468,7 +470,7 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
         gboolean is_current = wins_is_current(window);
         if ( !is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_MESSAGE_CURRENT)) ) {
             if (prefs_get_boolean(PREF_NOTIFY_MESSAGE_TEXT)) {
-                notify_message(user->str, ui_index, message);
+                notify_message(user->str, ui_index, plugin_message);
             } else {
                 notify_message(user->str, ui_index, NULL);
             }
@@ -476,6 +478,9 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
     }
 
     g_string_free(user, TRUE);
+
+    plugins_post_chat_message_display(barejid, plugin_message);
+    free(plugin_message);
 }
 
 void
