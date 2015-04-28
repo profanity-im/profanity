@@ -1,5 +1,5 @@
 /*
- * client_events.c
+ * ui_events.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,55 +32,10 @@
  *
  */
 
-#include <glib.h>
+#ifndef UI_EVENTS_H
+#define UI_EVENTS_H
 
-#include "config.h"
-#include "log.h"
-#include "ui/ui.h"
-#include "xmpp/xmpp.h"
-#ifdef HAVE_LIBOTR
-#include "otr/otr.h"
+void ui_ev_focus_win(ProfWin *win);
+void ui_ev_new_chat_win(const char * const barejid);
+
 #endif
-
-jabber_conn_status_t
-cl_ev_connect_jid(const char * const jid, const char * const passwd, const char * const altdomain, const int port)
-{
-    cons_show("Connecting as %s", jid);
-    return jabber_connect_with_details(jid, passwd, altdomain, port);
-}
-
-jabber_conn_status_t
-cl_ev_connect_account(ProfAccount *account)
-{
-    char *jid = account_create_full_jid(account);
-    cons_show("Connecting with account %s as %s", account->name, jid);
-    free(jid);
-
-    return jabber_connect_with_account(account);
-}
-
-void
-cl_ev_send_msg(const char * const barejid, const char * const msg)
-{
-#ifdef HAVE_LIBOTR
-    otr_on_message_send(barejid, msg);
-#else
-    char *id = message_send_chat(barejid, msg);
-    chat_log_msg_out(barejid, msg);
-    ui_outgoing_chat_msg(barejid, msg, id);
-    free(id);
-#endif
-}
-
-void
-cl_ev_send_muc_msg(const char * const roomjid, const char * const msg)
-{
-    message_send_groupchat(roomjid, msg);
-}
-
-void
-cl_ev_send_priv_msg(const char * const fulljid, const char * const msg)
-{
-    message_send_private(fulljid, msg);
-    ui_outgoing_private_msg(fulljid, msg);
-}

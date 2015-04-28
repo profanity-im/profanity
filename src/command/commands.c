@@ -66,6 +66,7 @@
 #include "ui/ui.h"
 #include "ui/windows.h"
 #include "event/client_events.h"
+#include "event/ui_events.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
