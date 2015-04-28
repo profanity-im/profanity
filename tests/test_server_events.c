@@ -21,7 +21,7 @@ void console_doesnt_show_online_presence_when_set_none(void **state)
     roster_add("test1@server", "bob", NULL, "both", FALSE);
     Resource *resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
 
-    srv_contact_online("test1@server", resource, NULL);
+    sv_ev_contact_online("test1@server", resource, NULL);
 
     roster_clear();
 }
@@ -38,7 +38,7 @@ void console_shows_online_presence_when_set_online(void **state)
     expect_memory(cons_show_contact_online, resource, resource, sizeof(resource));
     expect_value(cons_show_contact_online, last_activity, NULL);
 
-    srv_contact_online("test1@server", resource, NULL);
+    sv_ev_contact_online("test1@server", resource, NULL);
 
     roster_clear();
 }
@@ -55,7 +55,7 @@ void console_shows_online_presence_when_set_all(void **state)
     expect_memory(cons_show_contact_online, resource, resource, sizeof(resource));
     expect_value(cons_show_contact_online, last_activity, NULL);
 
-    srv_contact_online("test1@server", resource, NULL);
+    sv_ev_contact_online("test1@server", resource, NULL);
 
     roster_clear();
 }
@@ -67,7 +67,7 @@ void console_doesnt_show_dnd_presence_when_set_none(void **state)
     roster_add("test1@server", "bob", NULL, "both", FALSE);
     Resource *resource = resource_new("resource", RESOURCE_DND, NULL, 10);
 
-    srv_contact_online("test1@server", resource, NULL);
+    sv_ev_contact_online("test1@server", resource, NULL);
 
     roster_clear();
 }
@@ -79,7 +79,7 @@ void console_doesnt_show_dnd_presence_when_set_online(void **state)
     roster_add("test1@server", "bob", NULL, "both", FALSE);
     Resource *resource = resource_new("resource", RESOURCE_DND, NULL, 10);
 
-    srv_contact_online("test1@server", resource, NULL);
+    sv_ev_contact_online("test1@server", resource, NULL);
 
     roster_clear();
 }
@@ -96,7 +96,7 @@ void console_shows_dnd_presence_when_set_all(void **state)
     expect_memory(cons_show_contact_online, resource, resource, sizeof(resource));
     expect_value(cons_show_contact_online, last_activity, NULL);
 
-    srv_contact_online("test1@server", resource, NULL);
+    sv_ev_contact_online("test1@server", resource, NULL);
 
     roster_clear();
 }
@@ -109,7 +109,7 @@ void handle_message_error_when_no_recipient(void **state)
 
     expect_string(ui_handle_error, err_msg, err_msg);
 
-    srv_message_error(from, type, err_msg);
+    sv_ev_message_error(from, type, err_msg);
 }
 
 void handle_message_error_when_recipient_cancel(void **state)
@@ -121,7 +121,7 @@ void handle_message_error_when_recipient_cancel(void **state)
     prefs_set_boolean(PREF_STATES, FALSE);
     chat_sessions_init();
 
-    srv_message_error(from, type, err_msg);
+    sv_ev_message_error(from, type, err_msg);
 }
 
 void handle_message_error_when_recipient_cancel_disables_chat_session(void **state)
@@ -135,7 +135,7 @@ void handle_message_error_when_recipient_cancel_disables_chat_session(void **sta
     chat_sessions_init();
     chat_session_recipient_active(barejid, resource, FALSE);
 
-    srv_message_error(barejid, type, err_msg);
+    sv_ev_message_error(barejid, type, err_msg);
     ChatSession *session = chat_session_get(barejid);
 
     assert_null(session);
@@ -151,7 +151,7 @@ void handle_message_error_when_recipient_and_no_type(void **state)
     expect_string(ui_handle_recipient_error, recipient, from);
     expect_string(ui_handle_recipient_error, err_msg, err_msg);
 
-    srv_message_error(from, type, err_msg);
+    sv_ev_message_error(from, type, err_msg);
 }
 
 void handle_presence_error_when_no_recipient(void **state)
@@ -162,7 +162,7 @@ void handle_presence_error_when_no_recipient(void **state)
 
     expect_string(ui_handle_error, err_msg, err_msg);
 
-    srv_presence_error(from, type, err_msg);
+    sv_ev_presence_error(from, type, err_msg);
 }
 
 void handle_presence_error_when_from_recipient(void **state)
@@ -174,7 +174,7 @@ void handle_presence_error_when_from_recipient(void **state)
     expect_string(ui_handle_recipient_error, recipient, from);
     expect_string(ui_handle_recipient_error, err_msg, err_msg);
 
-    srv_presence_error(from, type, err_msg);
+    sv_ev_presence_error(from, type, err_msg);
 }
 
 void handle_offline_removes_chat_session(void **state)
@@ -187,7 +187,7 @@ void handle_offline_removes_chat_session(void **state)
     Resource *resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
     roster_update_presence(barejid, resourcep, NULL);
     chat_session_recipient_active(barejid, resource, FALSE);
-    srv_contact_offline(barejid, resource, NULL);
+    sv_ev_contact_offline(barejid, resource, NULL);
     ChatSession *session = chat_session_get(barejid);
 
     assert_null(session);
@@ -203,7 +203,7 @@ void lost_connection_clears_chat_sessions(void **state)
     chat_session_recipient_active("steve@server.org", "mobile", FALSE);
     expect_any_cons_show_error();
 
-    srv_lost_connection();
+    sv_ev_lost_connection();
 
     ChatSession *session1 = chat_session_get("bob@server.org");
     ChatSession *session2 = chat_session_get("steve@server.org");

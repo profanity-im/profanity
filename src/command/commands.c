@@ -67,6 +67,7 @@
 #include "ui/ui.h"
 #include "ui/windows.h"
 #include "event/client_events.h"
+#include "event/ui_events.h"
 
 static void _update_presence(const resource_presence_t presence,
     const char * const show, gchar **args);
@@ -117,19 +118,19 @@ cmd_execute_default(const char * inp)
     case WIN_CHAT:
     {
         ProfChatWin *chatwin = wins_get_current_chat();
-        client_send_msg(chatwin->barejid, inp);
+        cl_ev_send_msg(chatwin->barejid, inp);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = wins_get_current_private();
-        client_send_priv_msg(privatewin->fulljid, inp);
+        cl_ev_send_priv_msg(privatewin->fulljid, inp);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin *mucwin = wins_get_current_muc();
-        client_send_muc_msg(mucwin->roomjid, inp);
+        cl_ev_send_muc_msg(mucwin->roomjid, inp);
         break;
     }
     default:
@@ -216,13 +217,13 @@ cmd_connect(gchar **args, struct cmd_help_t help)
     if (account) {
         // use password if set
         if (account->password) {
-            conn_status = client_connect_account(account);
+            conn_status = cl_ev_connect_account(account);
 
         // use eval_password if set
         } else if (account->eval_password) {
             gboolean res = account_eval_password(account);
             if (res) {
-                conn_status = client_connect_account(account);
+                conn_status = cl_ev_connect_account(account);
                 free(account->password);
                 account->password = NULL;
             } else {
@@ -234,7 +235,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
         // no account password setting, prompt
         } else {
             account->password = ui_ask_password();
-            conn_status = client_connect_account(account);
+            conn_status = cl_ev_connect_account(account);
             free(account->password);
             account->password = NULL;
         }
@@ -245,7 +246,7 @@ cmd_connect(gchar **args, struct cmd_help_t help)
     } else {
         jid = strdup(lower);
         char *passwd = ui_ask_password();
-        conn_status = client_connect_jid(jid, passwd, altdomain, port);
+        conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port);
         free(passwd);
     }
 
@@ -1314,7 +1315,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, usr);
 
             if (msg) {
-                client_send_priv_msg(full_jid->str, msg);
+                cl_ev_send_priv_msg(full_jid->str, msg);
             } else {
                 ui_new_private_win(full_jid->str);
             }
@@ -1335,14 +1336,14 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         }
 
         if (msg) {
-            client_send_msg(barejid, msg);
+            cl_ev_send_msg(barejid, msg);
             return TRUE;
         } else {
             ProfWin *window = (ProfWin*)wins_get_chat(barejid);
             if (window) {
-                client_focus_win(window);
+                ui_ev_focus_win(window);
             } else {
-                client_new_chat_win(barejid);
+                ui_ev_new_chat_win(barejid);
             }
 #ifdef PROF_HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -3148,19 +3149,19 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
     case WIN_CHAT:
     {
         ProfChatWin *chatwin = wins_get_current_chat();
-        client_send_msg(chatwin->barejid, tiny);
+        cl_ev_send_msg(chatwin->barejid, tiny);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = wins_get_current_private();
-        client_send_priv_msg(privatewin->fulljid, tiny);
+        cl_ev_send_priv_msg(privatewin->fulljid, tiny);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin *mucwin = wins_get_current_muc();
-        client_send_muc_msg(mucwin->roomjid, tiny);
+        cl_ev_send_muc_msg(mucwin->roomjid, tiny);
         break;
     }
     default:
@@ -4199,9 +4200,9 @@ cmd_otr(gchar **args, struct cmd_help_t help)
 
             ProfWin *window = (ProfWin*)wins_get_chat(barejid);
             if (window) {
-                client_focus_win(window);
+                ui_ev_focus_win(window);
             } else {
-                client_new_chat_win(barejid);
+                ui_ev_new_chat_win(barejid);
             }
 
             if (ui_current_win_is_otr()) {

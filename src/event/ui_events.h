@@ -1,5 +1,5 @@
 /*
- * client_events.h
+ * ui_events.h
  *
  * Copyright (C) 2012 - 2015 James Booth <boothj5@gmail.com>
  *
@@ -32,14 +32,10 @@
  *
  */
 
-#ifndef CLIENT_EVENTS_H
-#define CLIENT_EVENTS_H
+#ifndef UI_EVENTS_H
+#define UI_EVENTS_H
 
-jabber_conn_status_t cl_ev_connect_jid(const char * const jid, const char * const passwd, const char * const altdomain, const int port);
-jabber_conn_status_t cl_ev_connect_account(ProfAccount *account);
-
-void cl_ev_send_msg(const char * const barejid, const char * const msg);
-void cl_ev_send_muc_msg(const char * const roomjid, const char * const msg);
-void cl_ev_send_priv_msg(const char * const fulljid, const char * const msg);
+void ui_ev_focus_win(ProfWin *win);
+void ui_ev_new_chat_win(const char * const barejid);
 
 #endif
