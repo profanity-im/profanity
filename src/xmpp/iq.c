@@ -515,7 +515,7 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
                 if (errtype != NULL) {
                     if (strcmp(errtype, "cancel") == 0) {
                         log_warning("Server ping (id=%s) error type 'cancel', disabling autoping.", id);
-                        srv_autoping_cancel();
+                        sv_ev_autoping_cancel();
                         xmpp_timed_handler_delete(conn, _ping_timed_handler);
                     }
                 }
@@ -739,7 +739,7 @@ _enable_carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     char *type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_enable_carbons_error(error_message);
+        sv_ev_enable_carbons_error(error_message);
         log_debug("Error enabling carbons: %s", error_message);
     } else {
         log_debug("Message carbons enabled.");
@@ -754,7 +754,7 @@ _disable_carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_disable_carbons_error(error_message);
+        sv_ev_disable_carbons_error(error_message);
         log_debug("Error disabling carbons: %s", error_message);
     } else {
         log_debug("Message carbons disabled.");
@@ -774,7 +774,7 @@ _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_ping_error_result(from, error_message);
+        sv_ev_ping_error_result(from, error_message);
         free(error_message);
         g_date_time_unref(sent);
         return 0;
@@ -788,7 +788,7 @@ _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     g_date_time_unref(sent);
     g_date_time_unref(now);
 
-    srv_ping_result(from, elapsed_millis);
+    sv_ev_ping_result(from, elapsed_millis);
 
     return 0;
 }
@@ -865,7 +865,7 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         presence = string_from_resource_presence(resource->presence);
     }
 
-    srv_software_version_result(jid, presence, name_str, version_str, os_str);
+    sv_ev_software_version_result(jid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
 
@@ -1062,7 +1062,7 @@ _destroy_room_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     if (from == NULL) {
         log_error("No from attribute for IQ destroy room result");
     } else {
-        srv_room_destroy(from);
+        sv_ev_room_destroy(from);
     }
 
     return 0;
@@ -1085,40 +1085,40 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_room_configuration_form_error(from, error_message);
+        sv_ev_room_configuration_form_error(from, error_message);
         free(error_message);
         return 0;
     }
 
     if (from == NULL) {
         log_warning("No from attribute for IQ config request result");
-        srv_room_configuration_form_error(from, "No from attribute for room cofig response.");
+        sv_ev_room_configuration_form_error(from, "No from attribute for room cofig response.");
         return 0;
     }
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     if (query == NULL) {
         log_warning("No query element found parsing room config response");
-        srv_room_configuration_form_error(from, "No query element found parsing room config response");
+        sv_ev_room_configuration_form_error(from, "No query element found parsing room config response");
         return 0;
     }
 
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
     if (x == NULL) {
         log_warning("No x element found with %s namespace parsing room config response", STANZA_NS_DATA);
-        srv_room_configuration_form_error(from, "No form configuration options available");
+        sv_ev_room_configuration_form_error(from, "No form configuration options available");
         return 0;
     }
 
     char *form_type = xmpp_stanza_get_attribute(x, STANZA_ATTR_TYPE);
     if (g_strcmp0(form_type, "form") != 0) {
         log_warning("x element not of type 'form' parsing room config response");
-        srv_room_configuration_form_error(from, "Form not of type 'form' parsing room config response.");
+        sv_ev_room_configuration_form_error(from, "Form not of type 'form' parsing room config response.");
         return 0;
     }
 
     DataForm *form = form_create(x);
-    srv_room_configure(from, form);
+    sv_ev_room_configure(from, form);
 
     return 0;
 }
@@ -1140,7 +1140,7 @@ static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_s
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
+        sv_ev_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
         free(error_message);
     }
 
@@ -1168,7 +1168,7 @@ static int _room_role_set_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_room_role_set_error(from, role_set->item, role_set->privilege, error_message);
+        sv_ev_room_role_set_error(from, role_set->item, role_set->privilege, error_message);
         free(error_message);
     }
 
@@ -1196,7 +1196,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_room_affiliation_list_result_error(from, affiliation, error_message);
+        sv_ev_room_affiliation_list_result_error(from, affiliation, error_message);
         free(error_message);
         free(affiliation);
         return 0;
@@ -1218,7 +1218,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * 
         }
     }
 
-    srv_room_affiliation_list(from, affiliation, jids);
+    sv_ev_room_affiliation_list(from, affiliation, jids);
     free(affiliation);
     g_slist_free(jids);
 
@@ -1242,7 +1242,7 @@ _room_role_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const s
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_room_role_list_result_error(from, role, error_message);
+        sv_ev_room_role_list_result_error(from, role, error_message);
         free(error_message);
         free(role);
         return 0;
@@ -1264,7 +1264,7 @@ _room_role_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const s
         }
     }
 
-    srv_room_role_list(from, role, nicks);
+    sv_ev_room_role_list(from, role, nicks);
     free(role);
     g_slist_free(nicks);
 
@@ -1288,12 +1288,12 @@ _room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_room_config_submit_result_error(from, error_message);
+        sv_ev_room_config_submit_result_error(from, error_message);
         free(error_message);
         return 0;
     }
 
-    srv_room_config_submit_result(from);
+    sv_ev_room_config_submit_result(from);
 
     return 0;
 }
@@ -1315,7 +1315,7 @@ _room_kick_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_room_kick_result_error(from, nick, error_message);
+        sv_ev_room_kick_result_error(from, nick, error_message);
         free(error_message);
         free(nick);
         return 0;
@@ -1359,7 +1359,7 @@ _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         if (cb_data->display) {
             char *error_message = stanza_get_error_message(stanza);
-            srv_room_info_error(cb_data->room, error_message);
+            sv_ev_room_info_error(cb_data->room, error_message);
             free(error_message);
         }
         free(cb_data->room);
@@ -1411,7 +1411,7 @@ _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
             child = xmpp_stanza_get_next(child);
         }
 
-        srv_room_disco_info(cb_data->room, identities, features, cb_data->display);
+        sv_ev_room_disco_info(cb_data->room, identities, features, cb_data->display);
 
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
@@ -1439,7 +1439,7 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        srv_disco_info_error(from, error_message);
+        sv_ev_disco_info_error(from, error_message);
         free(error_message);
         return 0;
     }
@@ -1488,7 +1488,7 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
             child = xmpp_stanza_get_next(child);
         }
 
-        srv_disco_info(from, identities, features);
+        sv_ev_disco_info(from, identities, features);
 
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
@@ -1536,9 +1536,9 @@ _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     }
 
     if (g_strcmp0(id, "confreq") == 0) {
-        srv_room_list(items, from);
+        sv_ev_room_list(items, from);
     } else if (g_strcmp0(id, "discoitemsreq") == 0) {
-        srv_disco_items(items, from);
+        sv_ev_disco_items(items, from);
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);

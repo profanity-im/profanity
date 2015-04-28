@@ -37,93 +37,93 @@
 
 #include "xmpp/xmpp.h"
 
-void srv_login_account_success(char *account_name);
-void srv_lost_connection(void);
-void srv_failed_login(void);
-void srv_software_version_result(const char * const jid, const char * const  presence,
+void sv_ev_login_account_success(char *account_name);
+void sv_ev_lost_connection(void);
+void sv_ev_failed_login(void);
+void sv_ev_software_version_result(const char * const jid, const char * const  presence,
     const char * const name, const char * const version, const char * const os);
-void srv_disco_info(const char *from, GSList *identities, GSList *features);
-void srv_disco_info_error(const char * const from, const char * const error);
-void srv_room_list(GSList *rooms, const char *conference_node);
-void srv_disco_items(GSList *items, const char *jid);
-void srv_room_invite(jabber_invite_t invite_type,
+void sv_ev_disco_info(const char *from, GSList *identities, GSList *features);
+void sv_ev_disco_info_error(const char * const from, const char * const error);
+void sv_ev_room_list(GSList *rooms, const char *conference_node);
+void sv_ev_disco_items(GSList *items, const char *jid);
+void sv_ev_room_invite(jabber_invite_t invite_type,
     const char * const invitor, const char * const room,
     const char * const reason, const char * const password);
-void srv_room_broadcast(const char *const room_jid,
+void sv_ev_room_broadcast(const char *const room_jid,
     const char * const message);
-void srv_room_subject(const char * const room, const char * const nick, const char * const subject);
-void srv_room_history(const char * const room_jid, const char * const nick,
+void sv_ev_room_subject(const char * const room, const char * const nick, const char * const subject);
+void sv_ev_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
-void srv_room_message(const char * const room_jid, const char * const nick,
+void sv_ev_room_message(const char * const room_jid, const char * const nick,
     const char * const message);
-void srv_room_join_error(const char * const room, const char * const err);
-void srv_room_info_error(const char * const room, const char * const error);
-void srv_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display);
-void srv_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
+void sv_ev_room_join_error(const char * const room, const char * const err);
+void sv_ev_room_info_error(const char * const room, const char * const error);
+void sv_ev_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display);
+void sv_ev_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
     const char * const error);
-void srv_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids);
-void srv_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
+void sv_ev_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids);
+void sv_ev_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
     const char * const error);
-void srv_room_role_list_result_error(const char * const from, const char * const role, const char * const error);
-void srv_room_role_list(const char * const from, const char * const role, GSList *nicks);
-void srv_room_role_set_error(const char * const room, const char * const nick, const char * const role,
+void sv_ev_room_role_list_result_error(const char * const from, const char * const role, const char * const error);
+void sv_ev_room_role_list(const char * const from, const char * const role, GSList *nicks);
+void sv_ev_room_role_set_error(const char * const room, const char * const nick, const char * const role,
     const char * const error);
-void srv_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
-void srv_incoming_message(char *barejid, char *resource, char *message);
-void srv_incoming_private_message(char *fulljid, char *message);
-void srv_delayed_message(char *fulljid, char *message, GTimeVal tv_stamp);
-void srv_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp);
-void srv_typing(char *barejid, char *resource);
-void srv_paused(char *barejid, char *resource);
-void srv_inactive(char *barejid, char *resource);
-void srv_activity(char *barejid, char *resource, gboolean send_states);
-void srv_gone(const char * const barejid, const char * const resource);
-void srv_subscription(const char *from, jabber_subscr_t type);
-void srv_message_receipt(char *barejid, char *id);
-void srv_contact_offline(char *contact, char *resource, char *status);
-void srv_contact_online(char *contact, Resource *resource,
+void sv_ev_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
+void sv_ev_incoming_message(char *barejid, char *resource, char *message);
+void sv_ev_incoming_private_message(char *fulljid, char *message);
+void sv_ev_delayed_message(char *fulljid, char *message, GTimeVal tv_stamp);
+void sv_ev_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp);
+void sv_ev_typing(char *barejid, char *resource);
+void sv_ev_paused(char *barejid, char *resource);
+void sv_ev_inactive(char *barejid, char *resource);
+void sv_ev_activity(char *barejid, char *resource, gboolean send_states);
+void sv_ev_gone(const char * const barejid, const char * const resource);
+void sv_ev_subscription(const char *from, jabber_subscr_t type);
+void sv_ev_message_receipt(char *barejid, char *id);
+void sv_ev_contact_offline(char *contact, char *resource, char *status);
+void sv_ev_contact_online(char *contact, Resource *resource,
     GDateTime *last_activity);
-void srv_leave_room(const char * const room);
-void srv_room_destroy(const char * const room);
-void srv_room_occupant_offline(const char * const room, const char * const nick,
+void sv_ev_leave_room(const char * const room);
+void sv_ev_room_destroy(const char * const room);
+void sv_ev_room_occupant_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status);
-void srv_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
+void sv_ev_room_destroyed(const char * const room, const char * const new_jid, const char * const password,
     const char * const reason);
-void srv_room_kicked(const char * const room, const char * const actor, const char * const reason);
-void srv_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
+void sv_ev_room_kicked(const char * const room, const char * const actor, const char * const reason);
+void sv_ev_room_occupent_kicked(const char * const room, const char * const nick, const char * const actor,
     const char * const reason);
-void srv_room_banned(const char * const room, const char * const actor, const char * const reason);
-void srv_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
+void sv_ev_room_banned(const char * const room, const char * const actor, const char * const reason);
+void sv_ev_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
     const char * const reason);
-void srv_group_add(const char * const contact,
+void sv_ev_group_add(const char * const contact,
     const char * const group);
-void srv_group_remove(const char * const contact,
+void sv_ev_group_remove(const char * const contact,
     const char * const group);
-void srv_roster_remove(const char * const barejid);
-void srv_roster_add(const char * const barejid, const char * const name);
-void srv_autoping_cancel(void);
-void srv_carbon(char *barejid, char *message);
-void srv_message_error(const char * const from, const char * const type,
+void sv_ev_roster_remove(const char * const barejid);
+void sv_ev_roster_add(const char * const barejid, const char * const name);
+void sv_ev_autoping_cancel(void);
+void sv_ev_carbon(char *barejid, char *message);
+void sv_ev_message_error(const char * const from, const char * const type,
     const char * const err_msg);
-void srv_presence_error(const char *from, const char * const type,
+void sv_ev_presence_error(const char *from, const char * const type,
     const char *err_msg);
-void srv_xmpp_stanza(const char * const msg);
-void srv_ping_result(const char * const from, int millis);
-void srv_ping_error_result(const char * const from, const char * const error);
-void srv_room_configure(const char * const room, DataForm *form);
-void srv_room_configuration_form_error(const char * const from, const char * const message);
-void srv_room_config_submit_result(const char * const room);
-void srv_room_config_submit_result_error(const char * const room, const char * const message);
-void srv_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
+void sv_ev_xmpp_stanza(const char * const msg);
+void sv_ev_ping_result(const char * const from, int millis);
+void sv_ev_ping_error_result(const char * const from, const char * const error);
+void sv_ev_room_configure(const char * const room, DataForm *form);
+void sv_ev_room_configuration_form_error(const char * const from, const char * const message);
+void sv_ev_room_config_submit_result(const char * const room);
+void sv_ev_room_config_submit_result_error(const char * const room, const char * const message);
+void sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const jid, const char * const show, const char * const status);
-void srv_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
+void sv_ev_muc_occupant_online(const char * const room, const char * const nick, const char * const jid,
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const show_str, const char * const status_str);
-void srv_roster_update(const char * const barejid, const char * const name,
+void sv_ev_roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out);
-void srv_roster_received(void);
-void srv_enable_carbons_error(const char * const error);
-void srv_disable_carbons_error(const char * const error);
+void sv_ev_roster_received(void);
+void sv_ev_enable_carbons_error(const char * const error);
+void sv_ev_disable_carbons_error(const char * const error);
 
 #endif
