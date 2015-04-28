@@ -35,14 +35,11 @@
 #ifndef CLIENT_EVENTS_H
 #define CLIENT_EVENTS_H
 
-jabber_conn_status_t client_connect_jid(const char * const jid, const char * const passwd, const char * const altdomain, const int port);
-jabber_conn_status_t client_connect_account(ProfAccount *account);
+jabber_conn_status_t cl_ev_connect_jid(const char * const jid, const char * const passwd, const char * const altdomain, const int port);
+jabber_conn_status_t cl_ev_connect_account(ProfAccount *account);
 
-void client_send_msg(const char * const barejid, const char * const msg);
-void client_send_muc_msg(const char * const roomjid, const char * const msg);
-void client_send_priv_msg(const char * const fulljid, const char * const msg);
-
-void client_focus_win(ProfWin *win);
-void client_new_chat_win(const char * const barejid);
+void cl_ev_send_msg(const char * const barejid, const char * const msg);
+void cl_ev_send_muc_msg(const char * const roomjid, const char * const msg);
+void cl_ev_send_priv_msg(const char * const fulljid, const char * const msg);
 
 #endif
