@@ -69,8 +69,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
     prof_otrsendres_t res = otr_on_message_send(chatwin->barejid, msg);
     if (res != PROF_OTRSUCCESS) {
         char *errmsg = otr_senderror_str(res);
-        // TODO reference passed window
-        ui_current_error_line(errmsg);
+        ui_win_error_line((ProfWin*)chatwin, errmsg);
     }
 #else
     char *id = message_send_chat(chatwin->barejid, msg);

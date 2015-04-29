@@ -1297,6 +1297,12 @@ ui_current_print_formatted_line(const char show_char, int attrs, const char * co
 }
 
 void
+ui_win_error_line(ProfWin *window, const char * const msg)
+{
+    win_print(window, '-', NULL, 0, THEME_ERROR, "", msg);
+}
+
+void
 ui_current_error_line(const char * const msg)
 {
     ProfWin *current = wins_get_current();
