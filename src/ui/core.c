@@ -1401,13 +1401,19 @@ ui_new_chat_win(const char * const barejid)
     ProfWin *window = wins_new_chat(barejid);
     ProfChatWin *chatwin = (ProfChatWin *)window;
 
+#ifdef HAVE_LIBOTR
+    if (otr_is_secure(barejid)) {
+        chatwin->is_otr = TRUE;
+    }
+#endif
+
     if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
         _win_show_history(chatwin, barejid);
     }
 
     // if the contact is offline, show a message
     PContact contact = roster_get_contact(barejid);
-    if (contact != NULL) {
+    if (contact) {
         if (strcmp(p_contact_presence(contact), "offline") == 0) {
             const char * const show = p_contact_presence(contact);
             const char * const status = p_contact_status(contact);
@@ -1421,37 +1427,13 @@ ui_new_chat_win(const char * const barejid)
 void
 ui_outgoing_chat_msg(const char * const barejid, const char * const message, char *id)
 {
-    PContact contact = roster_get_contact(barejid);
     ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    int num = 0;
 
     // create new window
-    if (window == NULL) {
-        window = wins_new_chat(barejid);
-#ifdef HAVE_LIBOTR
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        if (otr_is_secure(barejid)) {
-            chatwin->is_otr = TRUE;
-        }
-#endif
-        num = wins_get_num(window);
-
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(chatwin, barejid);
-        }
-
-        if (contact != NULL) {
-            if (strcmp(p_contact_presence(contact), "offline") == 0) {
-                const char *show = p_contact_presence(contact);
-                const char *status = p_contact_status(contact);
-                win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-            }
-        }
-
-    // use existing window
-    } else {
-        num = wins_get_num(window);
+    if (!window) {
+        window = ui_new_chat_win(barejid);
     }
+
     ProfChatWin *chatwin = (ProfChatWin*)window;
     chat_state_active(chatwin->state);
 
@@ -1460,47 +1442,27 @@ ui_outgoing_chat_msg(const char * const barejid, const char * const message, cha
     } else {
         win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     }
+
+    int num = wins_get_num(window);
     ui_switch_win_num(num);
 }
 
 void
 ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message)
 {
-    PContact contact = roster_get_contact(barejid);
     ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    int num = 0;
 
     // create new window
-    if (window == NULL) {
-        window = wins_new_chat(barejid);
-#ifdef HAVE_LIBOTR
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        if (otr_is_secure(barejid)) {
-            chatwin->is_otr = TRUE;
-        }
-#endif
-        num = wins_get_num(window);
-
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(chatwin, barejid);
-        }
-
-        if (contact != NULL) {
-            if (strcmp(p_contact_presence(contact), "offline") == 0) {
-                const char *show = p_contact_presence(contact);
-                const char *status = p_contact_status(contact);
-                win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-            }
-        }
-
-    // use existing window
-    } else {
-        num = wins_get_num(window);
+    if (!window) {
+        window = ui_new_chat_win(barejid);
     }
+
     ProfChatWin *chatwin = (ProfChatWin*)window;
     chat_state_active(chatwin->state);
 
     win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
+
+    int num = wins_get_num(window);
     status_bar_active(num);
 }
 
