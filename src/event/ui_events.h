@@ -36,6 +36,6 @@
 #define UI_EVENTS_H
 
 void ui_ev_focus_win(ProfWin *win);
-ProfWin* ui_ev_new_chat_win(const char * const barejid);
+ProfChatWin* ui_ev_new_chat_win(const char * const barejid);
 
 #endif

@@ -88,7 +88,7 @@ void ui_handle_otr_error(const char * const barejid, const char * const message)
 unsigned long ui_get_idle_time(void);
 void ui_reset_idle_time(void);
 void ui_new_private_win(const char * const fulljid);
-ProfWin* ui_new_chat_win(const char * const barejid);
+ProfChatWin* ui_new_chat_win(const char * const barejid);
 void ui_print_system_msg_from_recipient(const char * const barejid, const char *message);
 gint ui_unread(void);
 void ui_close_connected_win(int index);

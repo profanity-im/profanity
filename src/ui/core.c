@@ -1395,7 +1395,7 @@ ui_open_xmlconsole_win(void)
     }
 }
 
-ProfWin*
+ProfChatWin*
 ui_new_chat_win(const char * const barejid)
 {
     ProfWin *window = wins_new_chat(barejid);
@@ -1421,7 +1421,7 @@ ui_new_chat_win(const char * const barejid)
         }
     }
 
-    return window;
+    return chatwin;
 }
 
 void
@@ -1429,40 +1429,28 @@ ui_outgoing_chat_msg(const char * const barejid, const char * const message, cha
 {
     ProfWin *window = (ProfWin*)wins_get_chat(barejid);
 
-    // create new window
-    if (!window) {
-        window = ui_new_chat_win(barejid);
-    }
-
-    ProfChatWin *chatwin = (ProfChatWin*)window;
-    chat_state_active(chatwin->state);
-
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
         win_print_with_receipt(window, '-', NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
         win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     }
-
-    int num = wins_get_num(window);
-    ui_switch_win_num(num);
 }
 
 void
 ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message)
 {
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
+    ProfChatWin *chatwin = wins_get_chat(barejid);
 
     // create new window
-    if (!window) {
-        window = ui_new_chat_win(barejid);
+    if (!chatwin) {
+        chatwin = ui_new_chat_win(barejid);
     }
 
-    ProfChatWin *chatwin = (ProfChatWin*)window;
     chat_state_active(chatwin->state);
 
-    win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
+    win_print((ProfWin*)chatwin, '-', NULL, 0, THEME_TEXT_ME, "me", message);
 
-    int num = wins_get_num(window);
+    int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }
 
