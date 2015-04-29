@@ -1332,11 +1332,10 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             return TRUE;
         } else {
             ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-            if (window) {
-                ui_ev_focus_win(window);
-            } else {
-                ui_ev_new_chat_win(barejid);
+            if (!window) {
+                window = ui_ev_new_chat_win(barejid);
             }
+            ui_ev_focus_win(window);
 
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
@@ -4171,11 +4170,10 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             }
 
             ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-            if (window) {
-                ui_ev_focus_win(window);
-            } else {
-                ui_ev_new_chat_win(barejid);
+            if (!window) {
+                window = ui_ev_new_chat_win(barejid);
             }
+            ui_ev_focus_win(window);
 
             if (ui_current_win_is_otr()) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
