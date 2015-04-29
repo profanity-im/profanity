@@ -88,7 +88,7 @@ static Display *display;
 static GTimer *ui_idle_time;
 
 //static void _win_handle_switch(const wint_t ch);
-static void _win_show_history(int win_index, const char * const contact);
+static void _win_show_history(ProfChatWin *chatwin, const char * const contact);
 static void _ui_draw_term_title(void);
 
 void
@@ -441,7 +441,7 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
 
         chatwin->unread++;
         if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(num, barejid);
+            _win_show_history(chatwin, barejid);
         }
 
         // show users status first, when receiving message via delayed delivery
@@ -501,19 +501,14 @@ ui_incoming_private_msg(const char * const fulljid, const char * const message, 
 
     // not currently viewing chat window with sender
     } else {
+        privatewin->unread++;
         status_bar_new(num);
         cons_show_incoming_message(display_from, num);
+        win_print_incoming_message(window, tv_stamp, display_from, message);
 
         if (prefs_get_boolean(PREF_FLASH)) {
             flash();
         }
-
-        privatewin->unread++;
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(num, fulljid);
-        }
-
-        win_print_incoming_message(window, tv_stamp, display_from, message);
     }
 
     int ui_index = num;
@@ -1365,30 +1360,6 @@ ui_recipient_gone(const char * const barejid, const char * const resource)
     }
 }
 
-ProfWin*
-ui_new_chat_win(const char * const barejid)
-{
-    ProfWin* window = wins_new_chat(barejid);
-
-    int num = wins_get_num(window);
-
-    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-        _win_show_history(num, barejid);
-    }
-
-    // if the contact is offline, show a message
-    PContact contact = roster_get_contact(barejid);
-    if (contact != NULL) {
-        if (strcmp(p_contact_presence(contact), "offline") == 0) {
-            const char * const show = p_contact_presence(contact);
-            const char * const status = p_contact_status(contact);
-            win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-        }
-    }
-
-    return window;
-}
-
 void
 ui_new_private_win(const char * const fulljid)
 {
@@ -1424,89 +1395,62 @@ ui_open_xmlconsole_win(void)
     }
 }
 
+ProfChatWin*
+ui_new_chat_win(const char * const barejid)
+{
+    ProfWin *window = wins_new_chat(barejid);
+    ProfChatWin *chatwin = (ProfChatWin *)window;
+
+#ifdef HAVE_LIBOTR
+    if (otr_is_secure(barejid)) {
+        chatwin->is_otr = TRUE;
+    }
+#endif
+
+    if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+        _win_show_history(chatwin, barejid);
+    }
+
+    // if the contact is offline, show a message
+    PContact contact = roster_get_contact(barejid);
+    if (contact) {
+        if (strcmp(p_contact_presence(contact), "offline") == 0) {
+            const char * const show = p_contact_presence(contact);
+            const char * const status = p_contact_status(contact);
+            win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
+        }
+    }
+
+    return chatwin;
+}
+
 void
 ui_outgoing_chat_msg(const char * const barejid, const char * const message, char *id)
 {
-    PContact contact = roster_get_contact(barejid);
     ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    int num = 0;
-
-    // create new window
-    if (window == NULL) {
-        window = wins_new_chat(barejid);
-#ifdef HAVE_LIBOTR
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        if (otr_is_secure(barejid)) {
-            chatwin->is_otr = TRUE;
-        }
-#endif
-        num = wins_get_num(window);
-
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(num, barejid);
-        }
-
-        if (contact != NULL) {
-            if (strcmp(p_contact_presence(contact), "offline") == 0) {
-                const char *show = p_contact_presence(contact);
-                const char *status = p_contact_status(contact);
-                win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-            }
-        }
-
-    // use existing window
-    } else {
-        num = wins_get_num(window);
-    }
-    ProfChatWin *chatwin = (ProfChatWin*)window;
-    chat_state_active(chatwin->state);
 
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
         win_print_with_receipt(window, '-', NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
         win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     }
-    ui_switch_win_num(num);
 }
 
 void
 ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message)
 {
-    PContact contact = roster_get_contact(barejid);
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-    int num = 0;
+    ProfChatWin *chatwin = wins_get_chat(barejid);
 
     // create new window
-    if (window == NULL) {
-        window = wins_new_chat(barejid);
-#ifdef HAVE_LIBOTR
-        ProfChatWin *chatwin = (ProfChatWin*)window;
-        if (otr_is_secure(barejid)) {
-            chatwin->is_otr = TRUE;
-        }
-#endif
-        num = wins_get_num(window);
-
-        if (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
-            _win_show_history(num, barejid);
-        }
-
-        if (contact != NULL) {
-            if (strcmp(p_contact_presence(contact), "offline") == 0) {
-                const char *show = p_contact_presence(contact);
-                const char *status = p_contact_status(contact);
-                win_show_status_string(window, barejid, show, status, NULL, "--", "offline");
-            }
-        }
-
-    // use existing window
-    } else {
-        num = wins_get_num(window);
+    if (!chatwin) {
+        chatwin = ui_new_chat_win(barejid);
     }
-    ProfChatWin *chatwin = (ProfChatWin*)window;
+
     chat_state_active(chatwin->state);
 
-    win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
+    win_print((ProfWin*)chatwin, '-', NULL, 0, THEME_TEXT_ME, "me", message);
+
+    int num = wins_get_num((ProfWin*)chatwin);
     status_bar_active(num);
 }
 
@@ -3003,39 +2947,34 @@ ui_hide_roster(void)
 }
 
 static void
-_win_show_history(int win_index, const char * const contact)
+_win_show_history(ProfChatWin *chatwin, const char * const contact)
 {
-    ProfWin *window = wins_get_by_num(win_index);
-    if (window->type == WIN_CHAT) {
-        ProfChatWin *chatwin = (ProfChatWin*) window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        if (!chatwin->history_shown) {
-            Jid *jid = jid_create(jabber_get_fulljid());
-            GSList *history = chat_log_get_previous(jid->barejid, contact);
-            jid_destroy(jid);
-            GSList *curr = history;
-            while (curr != NULL) {
-                char *line = curr->data;
-                // entry
-                if (line[2] == ':') {
-                    char hh[3]; memcpy(hh, &line[0], 2); hh[2] = '\0'; int ihh = atoi(hh);
-                    char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
-                    char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
-                    GDateTime *time = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
-                    GTimeVal tv;
-                    g_date_time_to_timeval(time, &tv);
-                    win_print(window, '-', &tv, NO_COLOUR_DATE, 0, "", curr->data+11);
-                    g_date_time_unref(time);
-                // header
-                } else {
-                    win_print(window, '-', NULL, 0, 0, "", curr->data);
-                }
-                curr = g_slist_next(curr);
+    if (!chatwin->history_shown) {
+        Jid *jid = jid_create(jabber_get_fulljid());
+        GSList *history = chat_log_get_previous(jid->barejid, contact);
+        jid_destroy(jid);
+        GSList *curr = history;
+        while (curr != NULL) {
+            char *line = curr->data;
+            // entry
+            if (line[2] == ':') {
+                char hh[3]; memcpy(hh, &line[0], 2); hh[2] = '\0'; int ihh = atoi(hh);
+                char mm[3]; memcpy(mm, &line[3], 2); mm[2] = '\0'; int imm = atoi(mm);
+                char ss[3]; memcpy(ss, &line[6], 2); ss[2] = '\0'; int iss = atoi(ss);
+                GDateTime *time = g_date_time_new_local(2000, 1, 1, ihh, imm, iss);
+                GTimeVal tv;
+                g_date_time_to_timeval(time, &tv);
+                win_print((ProfWin*)chatwin, '-', &tv, NO_COLOUR_DATE, 0, "", curr->data+11);
+                g_date_time_unref(time);
+            // header
+            } else {
+                win_print((ProfWin*)chatwin, '-', NULL, 0, 0, "", curr->data);
             }
-            chatwin->history_shown = TRUE;
-
-            g_slist_free_full(history, free);
+            curr = g_slist_next(curr);
         }
+        chatwin->history_shown = TRUE;
+
+        g_slist_free_full(history, free);
     }
 }
 

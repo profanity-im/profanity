@@ -46,6 +46,12 @@ typedef enum {
     PROF_OTRPOLICY_ALWAYS
 } prof_otrpolicy_t;
 
+typedef enum {
+    PROF_OTRENCFAIL,
+    PROF_OTRPOLICYFAIL,
+    PROF_OTRSUCCESS
+} prof_otrsendres_t;
+
 OtrlUserState otr_userstate(void);
 OtrlMessageAppOps* otr_messageops(void);
 GHashTable* otr_smpinitators(void);
@@ -58,7 +64,7 @@ void otr_poll(void);
 void otr_on_connect(ProfAccount *account);
 
 void otr_on_message_recv(const char * const barejid, const char * const resource, const char * const message);
-void otr_on_message_send(const char * const barejid, const char * const message);
+prof_otrsendres_t otr_on_message_send(const char * const barejid, const char * const message);
 
 void otr_keygen(ProfAccount *account);
 
@@ -87,5 +93,7 @@ char * otr_decrypt_message(const char * const from, const char * const message,
 void otr_free_message(char *message);
 
 prof_otrpolicy_t otr_get_policy(const char * const recipient);
+
+char* otr_senderror_str(prof_otrsendres_t res);
 
 #endif

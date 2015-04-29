@@ -113,7 +113,7 @@ cmd_execute_default(const char * inp)
     case WIN_CHAT:
     {
         ProfChatWin *chatwin = wins_get_current_chat();
-        cl_ev_send_msg(chatwin->barejid, inp);
+        cl_ev_send_msg(chatwin, inp);
         break;
     }
     case WIN_PRIVATE:
@@ -1338,24 +1338,23 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             barejid = usr;
         }
 
-        if (msg) {
-            cl_ev_send_msg(barejid, msg);
-            return TRUE;
-        } else {
-            ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-            if (window) {
-                ui_ev_focus_win(window);
-            } else {
-                ui_ev_new_chat_win(barejid);
-            }
+        ProfChatWin *chatwin = wins_get_chat(barejid);
+        if (!chatwin) {
+            chatwin = ui_ev_new_chat_win(barejid);
+        }
+        ui_ev_focus_win((ProfWin*)chatwin);
 
+        if (msg) {
+            cl_ev_send_msg(chatwin, msg);
+        } else {
 #ifdef HAVE_LIBOTR
             if (otr_is_secure(barejid)) {
                 ui_gone_secure(barejid, otr_is_trusted(barejid));
             }
 #endif
-            return TRUE;
         }
+
+        return TRUE;
     }
 }
 
@@ -3153,7 +3152,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
     case WIN_CHAT:
     {
         ProfChatWin *chatwin = wins_get_current_chat();
-        cl_ev_send_msg(chatwin->barejid, tiny);
+        cl_ev_send_msg(chatwin, tiny);
         break;
     }
     case WIN_PRIVATE:
@@ -4236,12 +4235,11 @@ cmd_otr(gchar **args, struct cmd_help_t help)
                 barejid = contact;
             }
 
-            ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-            if (window) {
-                ui_ev_focus_win(window);
-            } else {
-                ui_ev_new_chat_win(barejid);
+            ProfChatWin *chatwin = wins_get_chat(barejid);
+            if (!chatwin) {
+                chatwin = ui_ev_new_chat_win(barejid);
             }
+            ui_ev_focus_win((ProfWin*)chatwin);
 
             if (ui_current_win_is_otr()) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
