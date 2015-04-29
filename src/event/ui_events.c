@@ -40,9 +40,8 @@ ui_ev_focus_win(ProfWin *win)
     ui_switch_win(win);
 }
 
-void
+ProfChatWin*
 ui_ev_new_chat_win(const char * const barejid)
 {
-    ProfWin *win = ui_new_chat_win(barejid);
-    ui_switch_win(win);
+    return ui_new_chat_win(barejid);
 }

@@ -37,6 +37,7 @@
 #include "config.h"
 #include "log.h"
 #include "ui/ui.h"
+#include "ui/windows.h"
 #include "xmpp/xmpp.h"
 #ifdef PROF_HAVE_LIBOTR
 #include "otr/otr.h"
@@ -61,20 +62,27 @@ cl_ev_connect_account(ProfAccount *account)
 }
 
 void
-cl_ev_send_msg(const char * const barejid, const char * const msg)
+cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 {
-    char *plugin_msg = plugins_pre_chat_message_send(barejid, msg);
+    chat_state_active(chatwin->state);
+    
+    char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
 
 #ifdef PROF_HAVE_LIBOTR
-    otr_on_message_send(barejid, plugin_msg);
+    prof_otrsendres_t res = otr_on_message_send(chatwin->barejid, plugin_msg);
+    if (res != PROF_OTRSUCCESS) {
+        char *errmsg = otr_senderror_str(res);
+        // TODO reference passed window
+        ui_current_error_line(errmsg);
+    }
 #else
-    char *id = message_send_chat(barejid, plugin_msg);
-    chat_log_msg_out(barejid, plugin_msg);
-    ui_outgoing_chat_msg(barejid, plugin_msg, id);
+    char *id = message_send_chat(chatwin->barejid, plugin_msg);
+    chat_log_msg_out(chatwin->barejid, plugin_msg);
+    ui_outgoing_chat_msg(chatwin->barejid, plugin_msg, id);
     free(id);
 #endif
 
-    plugins_post_chat_message_send(barejid, plugin_msg);
+    plugins_post_chat_message_send(chatwin->barejid, plugin_msg);
     free(plugin_msg);
 }
 
