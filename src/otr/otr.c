@@ -322,7 +322,7 @@ otr_on_message_send(const char * const barejid, const char * const message)
 
     if (otr_is_secure(barejid)) {
         char *encrypted = otr_encrypt_message(barejid, message);
-        if (encrypted != NULL) {
+        if (encrypted) {
             id = message_send_chat_encrypted(barejid, encrypted);
             chat_log_otr_msg_out(barejid, message);
             ui_outgoing_chat_msg(barejid, message, id);
@@ -332,7 +332,7 @@ otr_on_message_send(const char * const barejid, const char * const message)
         }
 
     } else if (policy == PROF_OTRPOLICY_ALWAYS) {
-        cons_show_error("Failed to send message. Please check OTR policy");
+        cons_show_error("Failed to send message. OTR policy set to: always");
 
     } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         char *otr_tagged_msg = otr_tag_message(message);
