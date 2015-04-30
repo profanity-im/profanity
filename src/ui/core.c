@@ -868,6 +868,7 @@ ui_win_has_unsaved_form(int num)
 gboolean
 ui_switch_win(ProfWin *win)
 {
+    assert(win != NULL);
     int num = wins_get_num(win);
     return ui_switch_win_num(num);
 }
