@@ -1342,7 +1342,9 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         if (!chatwin) {
             chatwin = ui_ev_new_chat_win(barejid);
         }
-        ui_ev_focus_win((ProfWin*)chatwin);
+        if (!wins_is_current((ProfWin*)chatwin)) {
+            ui_ev_focus_win((ProfWin*)chatwin);
+        }
 
         if (msg) {
             cl_ev_send_msg(chatwin, msg);
@@ -3191,7 +3193,7 @@ cmd_close(gchar **args, struct cmd_help_t help)
     int count = 0;
 
     if (args[0] == NULL) {
-        index = ui_current_win_index();
+        index = wins_get_current_num();
     } else if (strcmp(args[0], "all") == 0) {
         count = ui_close_all_wins();
         if (count == 0) {
@@ -3226,19 +3228,15 @@ cmd_close(gchar **args, struct cmd_help_t help)
         return TRUE;
     }
 
-    if (!ui_win_exists(index)) {
+    ProfWin *window = wins_get_by_num(index);
+    if (!window) {
         cons_show("Window is not open.");
         return TRUE;
     }
 
     // check for unsaved form
     if (ui_win_has_unsaved_form(index)) {
-        ProfWin *window = wins_get_current();
-        if (wins_is_current(window)) {
-            ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
-        } else {
-            cons_show("Cannot close form window with unsaved changes, use /form submit or /form cancel");
-        }
+        ui_current_print_line("You have unsaved changes, use /form submit or /form cancel");
         return TRUE;
     }
 
@@ -3259,7 +3257,7 @@ cmd_leave(gchar **args, struct cmd_help_t help)
 {
     jabber_conn_status_t conn_status = jabber_get_connection_status();
     win_type_t win_type = ui_current_win_type();
-    int index = ui_current_win_index();
+    int index = wins_get_current_num();
 
     if (win_type != WIN_MUC) {
         cons_show("You can only use the /leave command in a chat room.");
@@ -4239,7 +4237,9 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             if (!chatwin) {
                 chatwin = ui_ev_new_chat_win(barejid);
             }
-            ui_ev_focus_win((ProfWin*)chatwin);
+            if (!wins_is_current((ProfWin*)chatwin)) {
+                ui_ev_focus_win((ProfWin*)chatwin);
+            }
 
             if (ui_current_win_is_otr()) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
