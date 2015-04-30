@@ -44,6 +44,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "ui/ui.h"
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/connection.h"
@@ -399,7 +400,10 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         }
 
         log_info("Error joining room: %s, reason: %s", fulljid->barejid, error_cond);
-        sv_ev_room_join_error(fulljid->barejid, error_cond);
+        if (muc_active(fulljid->barejid)) {
+            muc_leave(fulljid->barejid);
+        }
+        ui_handle_room_join_error(fulljid->barejid, error_cond);
         jid_destroy(fulljid);
         return 1;
     }
@@ -427,7 +431,11 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    sv_ev_presence_error(from, type, err_msg);
+    if (from != NULL) {
+        ui_handle_recipient_error(from, err_msg);
+    } else {
+        ui_handle_error(err_msg);
+    }
 
     free(err_msg);
 

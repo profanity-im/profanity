@@ -40,12 +40,6 @@
 void sv_ev_login_account_success(char *account_name);
 void sv_ev_lost_connection(void);
 void sv_ev_failed_login(void);
-void sv_ev_software_version_result(const char * const jid, const char * const  presence,
-    const char * const name, const char * const version, const char * const os);
-void sv_ev_disco_info(const char *from, GSList *identities, GSList *features);
-void sv_ev_disco_info_error(const char * const from, const char * const error);
-void sv_ev_room_list(GSList *rooms, const char *conference_node);
-void sv_ev_disco_items(GSList *items, const char *jid);
 void sv_ev_room_invite(jabber_invite_t invite_type,
     const char * const invitor, const char * const room,
     const char * const reason, const char * const password);
@@ -56,19 +50,6 @@ void sv_ev_room_history(const char * const room_jid, const char * const nick,
     GTimeVal tv_stamp, const char * const message);
 void sv_ev_room_message(const char * const room_jid, const char * const nick,
     const char * const message);
-void sv_ev_room_join_error(const char * const room, const char * const err);
-void sv_ev_room_info_error(const char * const room, const char * const error);
-void sv_ev_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display);
-void sv_ev_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
-    const char * const error);
-void sv_ev_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids);
-void sv_ev_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
-    const char * const error);
-void sv_ev_room_role_list_result_error(const char * const from, const char * const role, const char * const error);
-void sv_ev_room_role_list(const char * const from, const char * const role, GSList *nicks);
-void sv_ev_room_role_set_error(const char * const room, const char * const nick, const char * const role,
-    const char * const error);
-void sv_ev_room_kick_result_error(const char * const room, const char * const nick, const char * const error);
 void sv_ev_incoming_message(char *barejid, char *resource, char *message);
 void sv_ev_incoming_private_message(char *fulljid, char *message);
 void sv_ev_delayed_message(char *fulljid, char *message, GTimeVal tv_stamp);
@@ -95,25 +76,8 @@ void sv_ev_room_occupent_kicked(const char * const room, const char * const nick
 void sv_ev_room_banned(const char * const room, const char * const actor, const char * const reason);
 void sv_ev_room_occupent_banned(const char * const room, const char * const nick, const char * const actor,
     const char * const reason);
-void sv_ev_group_add(const char * const contact,
-    const char * const group);
-void sv_ev_group_remove(const char * const contact,
-    const char * const group);
-void sv_ev_roster_remove(const char * const barejid);
-void sv_ev_roster_add(const char * const barejid, const char * const name);
-void sv_ev_autoping_cancel(void);
 void sv_ev_carbon(char *barejid, char *message);
-void sv_ev_message_error(const char * const from, const char * const type,
-    const char * const err_msg);
-void sv_ev_presence_error(const char *from, const char * const type,
-    const char *err_msg);
 void sv_ev_xmpp_stanza(const char * const msg);
-void sv_ev_ping_result(const char * const from, int millis);
-void sv_ev_ping_error_result(const char * const from, const char * const error);
-void sv_ev_room_configure(const char * const room, DataForm *form);
-void sv_ev_room_configuration_form_error(const char * const from, const char * const message);
-void sv_ev_room_config_submit_result(const char * const room);
-void sv_ev_room_config_submit_result_error(const char * const room, const char * const message);
 void sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean config_required,
     const char * const role, const char * const affiliation, const char * const actor, const char * const reason,
     const char * const jid, const char * const show, const char * const status);
@@ -123,7 +87,5 @@ void sv_ev_muc_occupant_online(const char * const room, const char * const nick,
 void sv_ev_roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out);
 void sv_ev_roster_received(void);
-void sv_ev_enable_carbons_error(const char * const error);
-void sv_ev_disable_carbons_error(const char * const error);
 
 #endif

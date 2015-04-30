@@ -42,6 +42,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "ui/ui.h"
 #include "event/server_events.h"
 #include "xmpp/connection.h"
 #include "xmpp/message.h"
@@ -329,7 +330,16 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    sv_ev_message_error(jid, type, err_msg);
+    if (!jid) {
+        ui_handle_error(err_msg);
+    } else if (type && (strcmp(type, "cancel") == 0)) {
+        log_info("Recipient %s not found: %s", jid, err_msg);
+        Jid *jidp = jid_create(jid);
+        chat_session_remove(jidp->barejid);
+        jid_destroy(jidp);
+    } else {
+        ui_handle_recipient_error(jid, err_msg);
+    }
 
     free(err_msg);
 
