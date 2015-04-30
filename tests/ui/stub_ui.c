@@ -64,17 +64,7 @@ GSList* ui_get_chat_recipients(void)
     return NULL;
 }
 
-gboolean ui_switch_win(ProfWin *win)
-{
-    return FALSE;
-}
-
-gboolean ui_switch_win_num(const int i)
-{
-    check_expected(i);
-    return (gboolean)mock();
-    return FALSE;
-}
+void ui_switch_win(ProfWin *win) {}
 
 void ui_next_win(void) {}
 void ui_previous_win(void) {}
