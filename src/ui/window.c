@@ -239,6 +239,8 @@ win_create_plugin(const char * const tag)
 
     new_win->tag = strdup(tag);
 
+    new_win->memcheck = PROFPLUGINWIN_MEMCHECK;
+
     return &new_win->super;
 }
 
