@@ -733,10 +733,16 @@ gboolean
 cmd_win(gchar **args, struct cmd_help_t help)
 {
     int num = atoi(args[0]);
-    gboolean switched = ui_switch_win_num(num);
-    if (switched == FALSE) {
+
+    ProfWin *window = wins_get_by_num(num);
+    if (!window) {
         cons_show("Window %d does not exist.", num);
+    } else {
+        if (!wins_is_current(window)) {
+            ui_ev_focus_win(window);
+        }
     }
+
     return TRUE;
 }
 
@@ -2464,12 +2470,11 @@ cmd_form(gchar **args, struct cmd_help_t help)
             cmd_autocomplete_remove_form_fields(confwin->form);
         }
         wins_close_current();
-        ProfWin *current = (ProfWin*)wins_get_muc(confwin->roomjid);
-        if (current == NULL) {
-            current = wins_get_console();
+        ProfWin *new_current = (ProfWin*)wins_get_muc(confwin->roomjid);
+        if (!new_current) {
+            new_current = wins_get_console();
         }
-        int num = wins_get_num(current);
-        ui_switch_win_num(num);
+        ui_ev_focus_win(new_current);
     }
 
     return TRUE;
@@ -2775,9 +2780,8 @@ cmd_room(gchar **args, struct cmd_help_t help)
     if (g_strcmp0(args[0], "config") == 0) {
         ProfMucConfWin *confwin = wins_get_muc_conf(mucwin->roomjid);
 
-        if (confwin != NULL) {
-            num = wins_get_num(window);
-            ui_switch_win_num(num);
+        if (confwin) {
+            ui_ev_focus_win((ProfWin*)confwin);
         } else {
             iq_request_room_config_form(mucwin->roomjid);
         }

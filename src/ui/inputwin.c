@@ -63,6 +63,7 @@
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
 #include "ui/windows.h"
+#include "event/ui_events.h"
 #include "xmpp/xmpp.h"
 
 static WINDOW *inp_win;
@@ -449,73 +450,84 @@ _inp_rl_tab_handler(int count, int key)
     return 0;
 }
 
+static void
+_go_to_win(int i)
+{
+    ProfWin *window = wins_get_by_num(i);
+    if (window) {
+        if (!wins_is_current(window)) {
+            ui_ev_focus_win(window);
+        }
+    }
+}
+
 static int
 _inp_rl_win1_handler(int count, int key)
 {
-    ui_switch_win_num(1);
+    _go_to_win(1);
     return 0;
 }
 
 static int
 _inp_rl_win2_handler(int count, int key)
 {
-    ui_switch_win_num(2);
+    _go_to_win(2);
     return 0;
 }
 
 static int
 _inp_rl_win3_handler(int count, int key)
 {
-    ui_switch_win_num(3);
+    _go_to_win(3);
     return 0;
 }
 
 static int
 _inp_rl_win4_handler(int count, int key)
 {
-    ui_switch_win_num(4);
+    _go_to_win(4);
     return 0;
 }
 
 static int
 _inp_rl_win5_handler(int count, int key)
 {
-    ui_switch_win_num(5);
+    _go_to_win(5);
     return 0;
 }
 
 static int
 _inp_rl_win6_handler(int count, int key)
 {
-    ui_switch_win_num(6);
+    _go_to_win(6);
     return 0;
 }
 
 static int
 _inp_rl_win7_handler(int count, int key)
 {
-    ui_switch_win_num(7);
+    _go_to_win(7);
     return 0;
 }
 
 static int
 _inp_rl_win8_handler(int count, int key)
 {
-    ui_switch_win_num(8);
+    _go_to_win(8);
     return 0;
 }
 
 static int
 _inp_rl_win9_handler(int count, int key)
 {
-    ui_switch_win_num(9);
+    _go_to_win(9);
     return 0;
 }
 
 static int
 _inp_rl_win0_handler(int count, int key)
 {
-    ui_switch_win_num(0);
+    _go_to_win(0);
     return 0;
 }
 
