@@ -98,7 +98,6 @@ int ui_close_read_wins(void);
 // current window actions
 void ui_clear_current(void);
 win_type_t ui_current_win_type(void);
-int ui_current_win_index(void);
 gboolean ui_current_win_is_otr(void);
 
 ProfChatWin *ui_get_current_chat(void);
@@ -110,7 +109,6 @@ void ui_win_error_line(ProfWin *window, const char * const msg);
 
 win_type_t ui_win_type(int index);
 void ui_close_win(int index);
-gboolean ui_win_exists(int index);
 int ui_win_unread(int index);
 char * ui_ask_password(void);
 

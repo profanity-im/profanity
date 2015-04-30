@@ -135,11 +135,6 @@ win_type_t ui_current_win_type(void)
     return (win_type_t)mock();
 }
 
-int ui_current_win_index(void)
-{
-    return 0;
-}
-
 gboolean ui_current_win_is_otr(void)
 {
     return (gboolean)mock();
@@ -180,10 +175,6 @@ win_type_t ui_win_type(int index)
 }
 
 void ui_close_win(int index) {}
-gboolean ui_win_exists(int index)
-{
-    return FALSE;
-}
 
 int ui_win_unread(int index)
 {

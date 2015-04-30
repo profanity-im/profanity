@@ -282,13 +282,6 @@ ui_load_colours(void)
 }
 
 gboolean
-ui_win_exists(int index)
-{
-    ProfWin *window = wins_get_by_num(index);
-    return (window != NULL);
-}
-
-gboolean
 ui_xmlconsole_exists(void)
 {
     ProfXMLWin *xmlwin = wins_get_xmlconsole();
@@ -882,7 +875,8 @@ ui_switch_win(ProfWin *win)
 gboolean
 ui_switch_win_num(const int i)
 {
-    if (ui_win_exists(i)) {
+    ProfWin *window = wins_get_by_num(i);
+    if (window) {
         ProfWin *old_current = wins_get_current();
         if (old_current->type == WIN_MUC_CONFIG) {
             ProfMucConfWin *confwin = (ProfMucConfWin*)old_current;
@@ -1255,12 +1249,6 @@ ui_current_win_is_otr(void)
     } else {
         return FALSE;
     }
-}
-
-int
-ui_current_win_index(void)
-{
-    return wins_get_current_num();
 }
 
 win_type_t
