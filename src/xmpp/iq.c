@@ -47,6 +47,7 @@
 #include "log.h"
 #include "muc.h"
 #include "profanity.h"
+#include "ui/ui.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "xmpp/capabilities.h"
@@ -515,7 +516,8 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
                 if (errtype != NULL) {
                     if (strcmp(errtype, "cancel") == 0) {
                         log_warning("Server ping (id=%s) error type 'cancel', disabling autoping.", id);
-                        sv_ev_autoping_cancel();
+                        prefs_set_autoping(0);
+                        cons_show_error("Server ping not supported, autoping disabled.");
                         xmpp_timed_handler_delete(conn, _ping_timed_handler);
                     }
                 }
@@ -739,7 +741,7 @@ _enable_carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, 
     char *type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_enable_carbons_error(error_message);
+        cons_show_error("Server error enabling message carbons: %s", error_message);
         log_debug("Error enabling carbons: %s", error_message);
     } else {
         log_debug("Message carbons enabled.");
@@ -754,7 +756,7 @@ _disable_carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_disable_carbons_error(error_message);
+        cons_show_error("Server error disabling message carbons: %s", error_message);
         log_debug("Error disabling carbons: %s", error_message);
     } else {
         log_debug("Message carbons disabled.");
@@ -774,7 +776,12 @@ _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_ping_error_result(from, error_message);
+        if (!error_message) {
+            cons_show_error("Error returned from pinging %s.", from);
+        } else {
+            cons_show_error("Error returned from pinging %s: %s.", from, error_message);
+        }
+
         free(error_message);
         g_date_time_unref(sent);
         return 0;
@@ -788,7 +795,11 @@ _manual_pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     g_date_time_unref(sent);
     g_date_time_unref(now);
 
-    sv_ev_ping_result(from, elapsed_millis);
+    if (from == NULL) {
+        cons_show("Ping response from server: %dms.", elapsed_millis);
+    } else {
+        cons_show("Ping response from %s: %dms.", from, elapsed_millis);
+    }
 
     return 0;
 }
@@ -865,7 +876,7 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
         presence = string_from_resource_presence(resource->presence);
     }
 
-    sv_ev_software_version_result(jid, presence, name_str, version_str, os_str);
+    cons_show_software_version(jid, presence, name_str, version_str, os_str);
 
     jid_destroy(jidp);
 
@@ -1085,40 +1096,40 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_room_configuration_form_error(from, error_message);
+        ui_handle_room_configuration_form_error(from, error_message);
         free(error_message);
         return 0;
     }
 
     if (from == NULL) {
         log_warning("No from attribute for IQ config request result");
-        sv_ev_room_configuration_form_error(from, "No from attribute for room cofig response.");
+        ui_handle_room_configuration_form_error(from, "No from attribute for room cofig response.");
         return 0;
     }
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     if (query == NULL) {
         log_warning("No query element found parsing room config response");
-        sv_ev_room_configuration_form_error(from, "No query element found parsing room config response");
+        ui_handle_room_configuration_form_error(from, "No query element found parsing room config response");
         return 0;
     }
 
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
     if (x == NULL) {
         log_warning("No x element found with %s namespace parsing room config response", STANZA_NS_DATA);
-        sv_ev_room_configuration_form_error(from, "No form configuration options available");
+        ui_handle_room_configuration_form_error(from, "No form configuration options available");
         return 0;
     }
 
     char *form_type = xmpp_stanza_get_attribute(x, STANZA_ATTR_TYPE);
     if (g_strcmp0(form_type, "form") != 0) {
         log_warning("x element not of type 'form' parsing room config response");
-        sv_ev_room_configuration_form_error(from, "Form not of type 'form' parsing room config response.");
+        ui_handle_room_configuration_form_error(from, "Form not of type 'form' parsing room config response.");
         return 0;
     }
 
     DataForm *form = form_create(x);
-    sv_ev_room_configure(from, form);
+    ui_handle_room_configuration(from, form);
 
     return 0;
 }
@@ -1140,7 +1151,8 @@ static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_s
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
+        log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation_set->privilege, from, affiliation_set->item, error_message);
+        ui_handle_room_affiliation_set_error(from, affiliation_set->item, affiliation_set->privilege, error_message);
         free(error_message);
     }
 
@@ -1168,7 +1180,8 @@ static int _room_role_set_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_room_role_set_error(from, role_set->item, role_set->privilege, error_message);
+        log_debug("Error setting role %s list for room %s, user %s: %s", role_set->privilege, from, role_set->item, error_message);
+        ui_handle_room_role_set_error(from, role_set->item, role_set->privilege, error_message);
         free(error_message);
     }
 
@@ -1196,7 +1209,8 @@ _room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * 
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_room_affiliation_list_result_error(from, affiliation, error_message);
+        log_debug("Error retrieving %s list for room %s: %s", affiliation, from, error_message);
+        ui_handle_room_affiliation_list_error(from, affiliation, error_message);
         free(error_message);
         free(affiliation);
         return 0;
@@ -1218,7 +1232,8 @@ _room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * 
         }
     }
 
-    sv_ev_room_affiliation_list(from, affiliation, jids);
+    muc_jid_autocomplete_add_all(from, jids);
+    ui_handle_room_affiliation_list(from, affiliation, jids);
     free(affiliation);
     g_slist_free(jids);
 
@@ -1242,7 +1257,8 @@ _room_role_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const s
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_room_role_list_result_error(from, role, error_message);
+        log_debug("Error retrieving %s list for room %s: %s", role, from, error_message);
+        ui_handle_room_role_list_error(from, role, error_message);
         free(error_message);
         free(role);
         return 0;
@@ -1264,7 +1280,7 @@ _room_role_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const s
         }
     }
 
-    sv_ev_room_role_list(from, role, nicks);
+    ui_handle_room_role_list(from, role, nicks);
     free(role);
     g_slist_free(nicks);
 
@@ -1288,12 +1304,12 @@ _room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_room_config_submit_result_error(from, error_message);
+        ui_handle_room_config_submit_result_error(from, error_message);
         free(error_message);
         return 0;
     }
 
-    sv_ev_room_config_submit_result(from);
+    ui_handle_room_config_submit_result(from);
 
     return 0;
 }
@@ -1315,7 +1331,7 @@ _room_kick_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_room_kick_result_error(from, nick, error_message);
+        ui_handle_room_kick_error(from, nick, error_message);
         free(error_message);
         free(nick);
         return 0;
@@ -1359,7 +1375,7 @@ _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         if (cb_data->display) {
             char *error_message = stanza_get_error_message(stanza);
-            sv_ev_room_info_error(cb_data->room, error_message);
+            ui_handle_room_info_error(cb_data->room, error_message);
             free(error_message);
         }
         free(cb_data->room);
@@ -1411,7 +1427,10 @@ _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
             child = xmpp_stanza_get_next(child);
         }
 
-        sv_ev_room_disco_info(cb_data->room, identities, features, cb_data->display);
+        muc_set_features(cb_data->room, features);
+        if (cb_data->display) {
+            ui_show_room_disco_info(cb_data->room, identities, features);
+        }
 
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
@@ -1439,7 +1458,11 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
     // handle error responses
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char *error_message = stanza_get_error_message(stanza);
-        sv_ev_disco_info_error(from, error_message);
+        if (from) {
+            cons_show_error("Service discovery failed for %s: %s", from, error_message);
+        } else {
+            cons_show_error("Service discovery failed: %s", error_message);
+        }
         free(error_message);
         return 0;
     }
@@ -1488,7 +1511,7 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
             child = xmpp_stanza_get_next(child);
         }
 
-        sv_ev_disco_info(from, identities, features);
+        cons_show_disco_info(from, identities, features);
 
         g_slist_free_full(features, free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
@@ -1536,9 +1559,9 @@ _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     }
 
     if (g_strcmp0(id, "confreq") == 0) {
-        sv_ev_room_list(items, from);
+        cons_show_room_list(items, from);
     } else if (g_strcmp0(id, "discoitemsreq") == 0) {
-        sv_ev_disco_items(items, from);
+        cons_show_disco_items(items, from);
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
