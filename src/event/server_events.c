@@ -51,51 +51,6 @@
 #include "ui/ui.h"
 
 void
-sv_ev_room_join_error(const char * const room, const char * const err)
-{
-    if (muc_active(room)) {
-        muc_leave(room);
-    }
-    ui_handle_room_join_error(room, err);
-}
-
-// handle presence stanza errors
-void
-sv_ev_presence_error(const char *from, const char * const type,
-    const char *err_msg)
-{
-    // handle error from recipient
-    if (from != NULL) {
-        ui_handle_recipient_error(from, err_msg);
-
-    // handle errors from no recipient
-    } else {
-        ui_handle_error(err_msg);
-    }
-}
-
-// handle message stanza errors
-void
-sv_ev_message_error(const char * const jid, const char * const type,
-    const char * const err_msg)
-{
-    // handle errors from no recipient
-    if (jid == NULL) {
-        ui_handle_error(err_msg);
-
-    // handle recipient not found ('from' contains a value and type is 'cancel')
-    } else if (type != NULL && (strcmp(type, "cancel") == 0)) {
-        log_info("Recipient %s not found: %s", jid, err_msg);
-        Jid *jidp = jid_create(jid);
-        chat_session_remove(jidp->barejid);
-
-    // handle any other error from recipient
-    } else {
-        ui_handle_recipient_error(jid, err_msg);
-    }
-}
-
-void
 sv_ev_login_account_success(char *account_name)
 {
     ProfAccount *account = accounts_get_account(account_name);
@@ -145,112 +100,6 @@ sv_ev_failed_login(void)
 {
     cons_show_error("Login failed.");
     log_info("Login failed");
-}
-
-void
-sv_ev_software_version_result(const char * const jid, const char * const  presence,
-    const char * const name, const char * const version, const char * const os)
-{
-    cons_show_software_version(jid, presence, name, version, os);
-}
-
-void
-sv_ev_disco_info(const char *from, GSList *identities, GSList *features)
-{
-    cons_show_disco_info(from, identities, features);
-}
-
-void
-sv_ev_room_disco_info(const char * const room, GSList *identities, GSList *features, gboolean display)
-{
-    muc_set_features(room, features);
-    if (display) {
-        ui_show_room_disco_info(room, identities, features);
-    }
-}
-
-void
-sv_ev_disco_info_error(const char * const from, const char * const error)
-{
-    if (from) {
-        cons_show_error("Service discovery failed for %s: %s", from, error);
-    } else {
-        cons_show_error("Service discovery failed: %s", error);
-    }
-}
-
-void
-sv_ev_enable_carbons_error(const char * const error)
-{
-    cons_show_error("Server error enabling message carbons: %s", error);
-}
-
-void
-sv_ev_disable_carbons_error(const char * const error)
-{
-    cons_show_error("Server error disabling message carbons: %s", error);
-}
-
-void
-sv_ev_room_info_error(const char * const room, const char * const error)
-{
-    ui_handle_room_info_error(room, error);
-}
-
-void
-sv_ev_room_list(GSList *rooms, const char *conference_node)
-{
-    cons_show_room_list(rooms, conference_node);
-}
-
-void
-sv_ev_room_affiliation_list_result_error(const char * const room, const char * const affiliation,
-    const char * const error)
-{
-    log_debug("Error retrieving %s list for room %s: %s", affiliation, room, error);
-    ui_handle_room_affiliation_list_error(room, affiliation, error);
-}
-
-void
-sv_ev_room_affiliation_list(const char * const room, const char * const affiliation, GSList *jids)
-{
-    muc_jid_autocomplete_add_all(room, jids);
-    ui_handle_room_affiliation_list(room, affiliation, jids);
-}
-
-void
-sv_ev_room_role_set_error(const char * const room, const char * const nick, const char * const role,
-    const char * const error)
-{
-    log_debug("Error setting role %s list for room %s, user %s: %s", role, room, nick, error);
-    ui_handle_room_role_set_error(room, nick, role, error);
-}
-
-void
-sv_ev_room_role_list_result_error(const char * const room, const char * const role, const char * const error)
-{
-    log_debug("Error retrieving %s list for room %s: %s", role, room, error);
-    ui_handle_room_role_list_error(room, role, error);
-}
-
-void
-sv_ev_room_role_list(const char * const room, const char * const role, GSList *nicks)
-{
-    ui_handle_room_role_list(room, role, nicks);
-}
-
-void
-sv_ev_room_affiliation_set_error(const char * const room, const char * const jid, const char * const affiliation,
-    const char * const error)
-{
-    log_debug("Error setting affiliation %s list for room %s, user %s: %s", affiliation, room, jid, error);
-    ui_handle_room_affiliation_set_error(room, jid, affiliation, error);
-}
-
-void
-sv_ev_disco_items(GSList *items, const char *jid)
-{
-    cons_show_disco_items(items, jid);
 }
 
 void
@@ -510,36 +359,6 @@ sv_ev_room_banned(const char * const room, const char * const actor, const char 
 }
 
 void
-sv_ev_room_configure(const char * const room, DataForm *form)
-{
-    ui_handle_room_configuration(room, form);
-}
-
-void
-sv_ev_room_configuration_form_error(const char * const room, const char * const message)
-{
-    ui_handle_room_configuration_form_error(room, message);
-}
-
-void
-sv_ev_room_config_submit_result(const char * const room)
-{
-    ui_handle_room_config_submit_result(room);
-}
-
-void
-sv_ev_room_config_submit_result_error(const char * const room, const char * const message)
-{
-    ui_handle_room_config_submit_result_error(room, message);
-}
-
-void
-sv_ev_room_kick_result_error(const char * const room, const char * const nick, const char * const error)
-{
-    ui_handle_room_kick_error(room, nick, error);
-}
-
-void
 sv_ev_room_occupant_offline(const char * const room, const char * const nick,
     const char * const show, const char * const status)
 {
@@ -572,32 +391,6 @@ sv_ev_room_occupent_banned(const char * const room, const char * const nick, con
 }
 
 void
-sv_ev_group_add(const char * const contact,
-    const char * const group)
-{
-    ui_group_added(contact, group);
-}
-
-void
-sv_ev_group_remove(const char * const contact,
-    const char * const group)
-{
-    ui_group_removed(contact, group);
-}
-
-void
-sv_ev_roster_remove(const char * const barejid)
-{
-    ui_roster_remove(barejid);
-}
-
-void
-sv_ev_roster_add(const char * const barejid, const char * const name)
-{
-    ui_roster_add(barejid, name);
-}
-
-void
 sv_ev_roster_update(const char * const barejid, const char * const name,
     GSList *groups, const char * const subscription, gboolean pending_out)
 {
@@ -606,36 +399,9 @@ sv_ev_roster_update(const char * const barejid, const char * const name,
 }
 
 void
-sv_ev_autoping_cancel(void)
-{
-    prefs_set_autoping(0);
-    cons_show_error("Server ping not supported, autoping disabled.");
-}
-
-void
 sv_ev_xmpp_stanza(const char * const msg)
 {
     ui_handle_stanza(msg);
-}
-
-void
-sv_ev_ping_result(const char * const from, int millis)
-{
-    if (from == NULL) {
-        cons_show("Ping response from server: %dms.", millis);
-    } else {
-        cons_show("Ping response from %s: %dms.", from, millis);
-    }
-}
-
-void
-sv_ev_ping_error_result(const char * const from, const char * const error)
-{
-    if (error == NULL) {
-        cons_show_error("Error returned from pinging %s.", from);
-    } else {
-        cons_show_error("Error returned from pinging %s: %s.", from, error);
-    }
 }
 
 void
