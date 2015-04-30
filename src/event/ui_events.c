@@ -33,11 +33,14 @@
  */
 
 #include "ui/ui.h"
+#include "ui/windows.h"
 
 void
 ui_ev_focus_win(ProfWin *win)
 {
-    ui_switch_win(win);
+    if (!wins_is_current(win)) {
+        ui_switch_win(win);
+    }
 }
 
 ProfChatWin*

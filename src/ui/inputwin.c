@@ -455,9 +455,7 @@ _go_to_win(int i)
 {
     ProfWin *window = wins_get_by_num(i);
     if (window) {
-        if (!wins_is_current(window)) {
-            ui_ev_focus_win(window);
-        }
+        ui_ev_focus_win(window);
     }
 }
 
@@ -534,14 +532,20 @@ _inp_rl_win0_handler(int count, int key)
 static int
 _inp_rl_altleft_handler(int count, int key)
 {
-    ui_previous_win();
+    ProfWin *window = wins_get_previous();
+    if (window) {
+        ui_ev_focus_win(window);
+    }
     return 0;
 }
 
 static int
 _inp_rl_altright_handler(int count, int key)
 {
-    ui_next_win();
+    ProfWin *window = wins_get_next();
+    if (window) {
+        ui_ev_focus_win(window);
+    }
     return 0;
 }
 

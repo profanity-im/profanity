@@ -60,8 +60,6 @@ void ui_redraw(void);
 void ui_resize(void);
 GSList* ui_get_chat_recipients(void);
 void ui_switch_win(ProfWin *window);
-void ui_next_win(void);
-void ui_previous_win(void);
 void ui_sigwinch_handler(int sig);
 
 void ui_gone_secure(const char * const barejid, gboolean trusted);

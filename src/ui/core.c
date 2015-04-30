@@ -74,6 +74,7 @@
 #include "ui/window.h"
 #include "ui/windows.h"
 #include "xmpp/xmpp.h"
+#include "event/ui_events.h"
 
 static char *win_title;
 
@@ -894,64 +895,6 @@ ui_switch_win(ProfWin *window)
 }
 
 void
-ui_previous_win(void)
-{
-    ProfWin *old_current = wins_get_current();
-    if (old_current->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)old_current;
-        cmd_autocomplete_remove_form_fields(confwin->form);
-    }
-
-    ProfWin *new_current = wins_get_previous();
-    if (new_current->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)new_current;
-        cmd_autocomplete_add_form_fields(confwin->form);
-    }
-
-    int i = wins_get_num(new_current);
-    wins_set_current_by_num(i);
-
-    if (i == 1) {
-        title_bar_console();
-        status_bar_current(1);
-        status_bar_active(1);
-    } else {
-        title_bar_switch();
-        status_bar_current(i);
-        status_bar_active(i);
-    }
-}
-
-void
-ui_next_win(void)
-{
-    ProfWin *old_current = wins_get_current();
-    if (old_current->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)old_current;
-        cmd_autocomplete_remove_form_fields(confwin->form);
-    }
-
-    ProfWin *new_current = wins_get_next();
-    if (new_current->type == WIN_MUC_CONFIG) {
-        ProfMucConfWin *confwin = (ProfMucConfWin*)new_current;
-        cmd_autocomplete_add_form_fields(confwin->form);
-    }
-
-    int i = wins_get_num(new_current);
-    wins_set_current_by_num(i);
-
-    if (i == 1) {
-        title_bar_console();
-        status_bar_current(1);
-        status_bar_active(1);
-    } else {
-        title_bar_switch();
-        status_bar_current(i);
-        status_bar_active(i);
-    }
-}
-
-void
 ui_gone_secure(const char * const barejid, gboolean trusted)
 {
     ProfWin *window = NULL;
@@ -1348,14 +1291,14 @@ ui_new_private_win(const char * const fulljid)
     if (!window) {
         window = wins_new_private(fulljid);
     }
-    ui_switch_win(window);
+    ui_ev_focus_win(window);
 }
 
 void
 ui_create_xmlconsole_win(void)
 {
     ProfWin *window = wins_new_xmlconsole();
-    ui_switch_win(window);
+    ui_ev_focus_win(window);
 }
 
 void
@@ -1363,7 +1306,7 @@ ui_open_xmlconsole_win(void)
 {
     ProfXMLWin *xmlwin = wins_get_xmlconsole();
     if (xmlwin) {
-        ui_switch_win((ProfWin*)xmlwin);
+        ui_ev_focus_win((ProfWin*)xmlwin);
     }
 }
 
@@ -1435,7 +1378,7 @@ ui_outgoing_private_msg(const char * const fulljid, const char * const message)
     }
 
     win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
-    ui_switch_win(window);
+    ui_ev_focus_win(window);
 }
 
 void
@@ -1462,7 +1405,7 @@ ui_room_join(const char * const roomjid, gboolean focus)
 
 
     if (focus) {
-        ui_switch_win(window);
+        ui_ev_focus_win(window);
     } else {
         int num = wins_get_num(window);
         status_bar_active(num);
@@ -1476,7 +1419,7 @@ void
 ui_switch_to_room(const char * const roomjid)
 {
     ProfWin *window = (ProfWin*)wins_get_muc(roomjid);
-    ui_switch_win(window);
+    ui_ev_focus_win(window);
 }
 
 void
@@ -2648,7 +2591,7 @@ ui_handle_room_configuration(const char * const roomjid, DataForm *form)
     ProfMucConfWin *confwin = (ProfMucConfWin*)window;
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
 
-    ui_switch_win(window);
+    ui_ev_focus_win(window);
     ui_show_form(confwin);
 
     win_print(window, '-', NULL, 0, 0, "", "");
@@ -2703,11 +2646,11 @@ ui_handle_room_config_submit_result(const char * const roomjid)
         }
 
         if (muc_window) {
-            ui_switch_win((ProfWin*)muc_window);
+            ui_ev_focus_win((ProfWin*)muc_window);
             win_print(muc_window, '!', NULL, 0, THEME_ROOMINFO, "", "Room configuration successful");
         } else {
             ProfWin *console = wins_get_console();
-            ui_switch_win(console);
+            ui_ev_focus_win(console);
             cons_show("Room configuration successful: %s", roomjid);
         }
     } else {

@@ -66,9 +66,6 @@ GSList* ui_get_chat_recipients(void)
 
 void ui_switch_win(ProfWin *win) {}
 
-void ui_next_win(void) {}
-void ui_previous_win(void) {}
-
 void ui_gone_secure(const char * const barejid, gboolean trusted) {}
 void ui_gone_insecure(const char * const barejid) {}
 void ui_trust(const char * const barejid) {}
