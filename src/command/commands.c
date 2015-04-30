@@ -727,9 +727,7 @@ cmd_win(gchar **args, struct cmd_help_t help)
     if (!window) {
         cons_show("Window %d does not exist.", num);
     } else {
-        if (!wins_is_current(window)) {
-            ui_ev_focus_win(window);
-        }
+        ui_ev_focus_win(window);
     }
 
     return TRUE;
@@ -1337,9 +1335,7 @@ cmd_msg(gchar **args, struct cmd_help_t help)
         if (!chatwin) {
             chatwin = ui_ev_new_chat_win(barejid);
         }
-        if (!wins_is_current((ProfWin*)chatwin)) {
-            ui_ev_focus_win((ProfWin*)chatwin);
-        }
+        ui_ev_focus_win((ProfWin*)chatwin);
 
         if (msg) {
             cl_ev_send_msg(chatwin, msg);
@@ -4175,9 +4171,7 @@ cmd_otr(gchar **args, struct cmd_help_t help)
             if (!chatwin) {
                 chatwin = ui_ev_new_chat_win(barejid);
             }
-            if (!wins_is_current((ProfWin*)chatwin)) {
-                ui_ev_focus_win((ProfWin*)chatwin);
-            }
+            ui_ev_focus_win((ProfWin*)chatwin);
 
             if (ui_current_win_is_otr()) {
                 ui_current_print_formatted_line('!', 0, "You are already in an OTR session.");
