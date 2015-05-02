@@ -313,43 +313,43 @@ otr_on_message_recv(const char * const barejid, const char * const resource, con
     otr_free_message(decrypted);
 }
 
-prof_otrsendres_t
-otr_on_message_send(const char * const barejid, const char * const message)
+void
+otr_on_message_send(ProfChatWin *chatwin, const char * const message)
 {
     char *id = NULL;
 
-    prof_otrpolicy_t policy = otr_get_policy(barejid);
+    prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
 
-    if (otr_is_secure(barejid)) {
-        char *encrypted = otr_encrypt_message(barejid, message);
+    if (otr_is_secure(chatwin->barejid)) {
+        char *encrypted = otr_encrypt_message(chatwin->barejid, message);
         if (encrypted) {
-            id = message_send_chat_encrypted(barejid, encrypted);
-            chat_log_otr_msg_out(barejid, message);
-            ui_outgoing_chat_msg(barejid, message, id);
+            id = message_send_chat_encrypted(chatwin->barejid, encrypted);
+            chat_log_otr_msg_out(chatwin->barejid, message);
+            ui_outgoing_chat_msg(chatwin->barejid, message, id);
             otr_free_message(encrypted);
         } else {
-            return PROF_OTRENCFAIL;
+            ui_win_error_line((ProfWin*)chatwin, "Failed to encrypt and send message.");
+            return;
         }
 
     } else if (policy == PROF_OTRPOLICY_ALWAYS) {
-        return PROF_OTRPOLICYFAIL;
+        ui_win_error_line((ProfWin*)chatwin, "Failed to send message. OTR policy set to: always");
+        return;
 
     } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         char *otr_tagged_msg = otr_tag_message(message);
-        id = message_send_chat_encrypted(barejid, otr_tagged_msg);
-        ui_outgoing_chat_msg(barejid, message, id);
-        chat_log_msg_out(barejid, message);
+        id = message_send_chat_encrypted(chatwin->barejid, otr_tagged_msg);
+        ui_outgoing_chat_msg(chatwin->barejid, message, id);
+        chat_log_msg_out(chatwin->barejid, message);
         free(otr_tagged_msg);
 
     } else {
-        id = message_send_chat(barejid, message);
-        ui_outgoing_chat_msg(barejid, message, id);
-        chat_log_msg_out(barejid, message);
+        id = message_send_chat(chatwin->barejid, message);
+        ui_outgoing_chat_msg(chatwin->barejid, message, id);
+        chat_log_msg_out(chatwin->barejid, message);
     }
 
     free(id);
-
-    return PROF_OTRSUCCESS;
 }
 
 void
@@ -740,16 +740,6 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
     } else {
         *was_decrypted = FALSE;
         return strdup(message);
-    }
-}
-
-char*
-otr_senderror_str(prof_otrsendres_t res)
-{
-    switch (res) {
-    case PROF_OTRENCFAIL:    return "Failed to encrypt and send message.";
-    case PROF_OTRPOLICYFAIL: return "Failed to send message. OTR policy set to: always";
-    default:                 return "Unknown OTR error.";
     }
 }
 
