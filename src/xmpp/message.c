@@ -399,20 +399,10 @@ static int
 _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *xns_conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
-    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    char *room = NULL;
-    char *invitor = NULL;
-    char *reason = NULL;
-    char *password = NULL;
 
+    char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     if (!from) {
         log_warning("Message received with no from attribute, ignoring");
-        return 1;
-    }
-
-    // XEP-0249
-    room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
-    if (!room) {
         return 1;
     }
 
@@ -420,13 +410,17 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void
     if (!jidp) {
         return 1;
     }
-    invitor = jidp->barejid;
 
-    reason = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_REASON);
-    password = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_PASSWORD);
+    // XEP-0249
+    char *room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
+    if (!room) {
+        return 1;
+    }
 
-    sv_ev_room_invite(INVITE_DIRECT, invitor, room, reason, password);
+    char *reason = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_REASON);
+    char *password = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_PASSWORD);
 
+    sv_ev_room_invite(INVITE_DIRECT, jidp->barejid, room, reason, password);
     jid_destroy(jidp);
 
     return 1;
@@ -445,13 +439,17 @@ _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * 
 
     // XEP-0158
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-    if (body) {
-        char *message = xmpp_stanza_get_text(body);
-        if (message) {
-            sv_ev_room_broadcast(from, message);
-            xmpp_free(ctx, message);
-        }
+    if (!body) {
+        return 1;
     }
+
+    char *message = xmpp_stanza_get_text(body);
+    if (!message) {
+        return 1;
+    }
+
+    sv_ev_room_broadcast(from, message);
+    xmpp_free(ctx, message);
 
     return 1;
 }
@@ -478,13 +476,19 @@ _groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void 
     // handle room broadcasts
     if (!jid->resourcepart) {
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-        if (body) {
-            message = xmpp_stanza_get_text(body);
-            if (message) {
-                sv_ev_room_broadcast(room_jid, message);
-                xmpp_free(ctx, message);
-            }
+        if (!body) {
+            jid_destroy(jid);
+            return 1;
         }
+
+        message = xmpp_stanza_get_text(body);
+        if (!message) {
+            jid_destroy(jid);
+            return 1;
+        }
+
+        sv_ev_room_broadcast(room_jid, message);
+        xmpp_free(ctx, message);
 
         jid_destroy(jid);
         return 1;
@@ -503,24 +507,30 @@ _groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void 
         return 1;
     }
 
-    // determine if the notifications happened whilst offline
-    GTimeVal tv_stamp;
-    gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
 
     // check for and deal with message
-    if (body) {
-        message = xmpp_stanza_get_text(body);
-        if (message) {
-            if (delayed) {
-                sv_ev_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
-            } else {
-                sv_ev_room_message(jid->barejid, jid->resourcepart, message);
-            }
-            xmpp_free(ctx, message);
-        }
+    if (!body) {
+        jid_destroy(jid);
+        return 1;
     }
 
+    message = xmpp_stanza_get_text(body);
+    if (!message) {
+        jid_destroy(jid);
+        return 1;
+    }
+
+    // determine if the notifications happened whilst offline
+    GTimeVal tv_stamp;
+    gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
+    if (delayed) {
+        sv_ev_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
+    } else {
+        sv_ev_room_message(jid->barejid, jid->resourcepart, message);
+    }
+
+    xmpp_free(ctx, message);
     jid_destroy(jid);
 
     return 1;
