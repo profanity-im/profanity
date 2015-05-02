@@ -53,18 +53,12 @@
 
 #define HANDLE(ns, type, func) xmpp_handler_add(conn, func, ns, STANZA_NAME_MESSAGE, type, ctx)
 
-static int _groupchat_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _chat_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _muc_user_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _conference_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _captcha_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
-static int _message_error_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata);
+static int _groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 message_add_handlers(void)
@@ -273,7 +267,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     char *type = NULL;
-    if (error_stanza != NULL) {
+    if (error_stanza) {
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
     }
 
@@ -281,15 +275,15 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *err_msg = stanza_get_error_message(stanza);
 
     GString *log_msg = g_string_new("message stanza error received");
-    if (id != NULL) {
+    if (id) {
         g_string_append(log_msg, " id=");
         g_string_append(log_msg, id);
     }
-    if (jid != NULL) {
+    if (jid) {
         g_string_append(log_msg, " from=");
         g_string_append(log_msg, jid);
     }
-    if (type != NULL) {
+    if (type) {
         g_string_append(log_msg, " type=");
         g_string_append(log_msg, type);
     }
@@ -324,46 +318,48 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_t *xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     char *room = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (room == NULL) {
+    if (!room) {
         log_warning("Message received with no from attribute, ignoring");
         return 1;
     }
 
     // XEP-0045
     xmpp_stanza_t *invite = xmpp_stanza_get_child_by_name(xns_muc_user, STANZA_NAME_INVITE);
-    if (invite != NULL) {
-        char *invitor_jid = xmpp_stanza_get_attribute(invite, STANZA_ATTR_FROM);
-        if (invitor_jid == NULL) {
-            log_warning("Chat room invite received with no from attribute");
-            return 1;
-        }
+    if (!invite) {
+        return 1;
+    }
 
-        Jid *jidp = jid_create(invitor_jid);
-        if (jidp == NULL) {
-            return 1;
-        }
-        char *invitor = jidp->barejid;
+    char *invitor_jid = xmpp_stanza_get_attribute(invite, STANZA_ATTR_FROM);
+    if (!invitor_jid) {
+        log_warning("Chat room invite received with no from attribute");
+        return 1;
+    }
 
-        char *reason = NULL;
-        xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(invite, STANZA_NAME_REASON);
-        if (reason_st != NULL) {
-            reason = xmpp_stanza_get_text(reason_st);
-        }
+    Jid *jidp = jid_create(invitor_jid);
+    if (!jidp) {
+        return 1;
+    }
+    char *invitor = jidp->barejid;
 
-        char *password = NULL;
-        xmpp_stanza_t *password_st = xmpp_stanza_get_child_by_name(xns_muc_user, STANZA_NAME_PASSWORD);
-        if (password_st) {
-            password = xmpp_stanza_get_text(password_st);
-        }
+    char *reason = NULL;
+    xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_name(invite, STANZA_NAME_REASON);
+    if (reason_st) {
+        reason = xmpp_stanza_get_text(reason_st);
+    }
 
-        sv_ev_room_invite(INVITE_MEDIATED, invitor, room, reason, password);
-        jid_destroy(jidp);
-        if (reason) {
-            xmpp_free(ctx, reason);
-        }
-        if (password) {
-            xmpp_free(ctx, password);
-        }
+    char *password = NULL;
+    xmpp_stanza_t *password_st = xmpp_stanza_get_child_by_name(xns_muc_user, STANZA_NAME_PASSWORD);
+    if (password_st) {
+        password = xmpp_stanza_get_text(password_st);
+    }
+
+    sv_ev_room_invite(INVITE_MEDIATED, invitor, room, reason, password);
+    jid_destroy(jidp);
+    if (reason) {
+        xmpp_free(ctx, reason);
+    }
+    if (password) {
+        xmpp_free(ctx, password);
     }
 
     return 1;
@@ -380,19 +376,19 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *reason = NULL;
     char *password = NULL;
 
-    if (from == NULL) {
+    if (!from) {
         log_warning("Message received with no from attribute, ignoring");
         return 1;
     }
 
     // XEP-0249
     room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
-    if (room == NULL) {
+    if (!room) {
         return 1;
     }
 
     Jid *jidp = jid_create(from);
-    if (jidp == NULL) {
+    if (!jidp) {
         return 1;
     }
     invitor = jidp->barejid;
@@ -414,16 +410,16 @@ _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (from == NULL) {
+    if (!from) {
         log_warning("Message received with no from attribute, ignoring");
         return 1;
     }
 
     // XEP-0158
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-    if (body != NULL) {
+    if (body) {
         char *message = xmpp_stanza_get_text(body);
-        if (message != NULL) {
+        if (message) {
             sv_ev_room_broadcast(from, message);
             xmpp_free(ctx, message);
         }
@@ -443,7 +439,7 @@ _groupchat_handler(xmpp_conn_t * const conn,
 
     // handle room subject
     xmpp_stanza_t *subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
-    if (subject != NULL) {
+    if (subject) {
         message = xmpp_stanza_get_text(subject);
         sv_ev_room_subject(jid->barejid, jid->resourcepart, message);
         xmpp_free(ctx, message);
@@ -453,11 +449,11 @@ _groupchat_handler(xmpp_conn_t * const conn,
     }
 
     // handle room broadcasts
-    if (jid->resourcepart == NULL) {
+    if (!jid->resourcepart) {
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-        if (body != NULL) {
+        if (body) {
             message = xmpp_stanza_get_text(body);
-            if (message != NULL) {
+            if (message) {
                 sv_ev_room_broadcast(room_jid, message);
                 xmpp_free(ctx, message);
             }
@@ -486,9 +482,9 @@ _groupchat_handler(xmpp_conn_t * const conn,
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
 
     // check for and deal with message
-    if (body != NULL) {
+    if (body) {
         message = xmpp_stanza_get_text(body);
-        if (message != NULL) {
+        if (message) {
             if (delayed) {
                 sv_ev_room_history(jid->barejid, jid->resourcepart, tv_stamp, message);
             } else {
@@ -556,7 +552,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     // check if carbon message
     xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
-    if(carbons) {
+    if (carbons) {
         char *name = xmpp_stanza_get_name(carbons);
         if ((g_strcmp0(name, "received") == 0) || (g_strcmp0(name, "sent")) == 0){
             xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
@@ -568,9 +564,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
             gchar *from = xmpp_stanza_get_attribute(message, STANZA_ATTR_FROM);
 
             // happens when receive a carbon of a self sent message
-            if(to == NULL) {
-                to = from;
-            }
+            if (!to) to = from;
 
             Jid *jid_from = jid_create(from);
             Jid *jid_to = jid_create(to);
@@ -578,9 +572,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
             // check for and deal with message
             xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
-            if (body != NULL) {
+            if (body) {
                 char *message = xmpp_stanza_get_text(body);
-                if (message != NULL) {
+                if (message) {
                     // if we are the recipient, treat as standard incoming message
                     if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
                         sv_ev_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
@@ -621,9 +615,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-        if (body != NULL) {
+        if (body) {
             char *message = xmpp_stanza_get_text(body);
-            if (message != NULL) {
+            if (message) {
                 if (delayed) {
                     sv_ev_delayed_private_message(jid->str, message, tv_stamp);
                 } else {
@@ -645,9 +639,9 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         // check for and deal with message
         xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-        if (body != NULL) {
+        if (body) {
             char *message = xmpp_stanza_get_text(body);
-            if (message != NULL) {
+            if (message) {
                 if (delayed) {
                     sv_ev_delayed_message(jid->barejid, message, tv_stamp);
                 } else {
