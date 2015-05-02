@@ -65,15 +65,11 @@ void
 cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 {
     chat_state_active(chatwin->state);
-    
+
     char *plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
 
 #ifdef PROF_HAVE_LIBOTR
-    prof_otrsendres_t res = otr_on_message_send(chatwin->barejid, plugin_msg);
-    if (res != PROF_OTRSUCCESS) {
-        char *errmsg = otr_senderror_str(res);
-        ui_win_error_line((ProfWin*)chatwin, errmsg);
-    }
+    otr_on_message_send(chatwin, plugin_msg);
 #else
     char *id = message_send_chat(chatwin->barejid, plugin_msg);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
