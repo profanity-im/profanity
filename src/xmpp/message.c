@@ -59,6 +59,7 @@ static int _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
 static int _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
+static int _receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 message_add_handlers(void)
@@ -72,6 +73,7 @@ message_add_handlers(void)
     HANDLE(STANZA_NS_MUC_USER,   NULL,                   _muc_user_handler);
     HANDLE(STANZA_NS_CONFERENCE, NULL,                   _conference_handler);
     HANDLE(STANZA_NS_CAPTCHA,    NULL,                   _captcha_handler);
+    HANDLE(STANZA_NS_RECEIPTS,   NULL,                   _receipt_received_handler);
 }
 
 char *
@@ -260,8 +262,7 @@ message_send_gone(const char * const jid)
 }
 
 static int
-_message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     char *id = xmpp_stanza_get_id(stanza);
     char *jid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -311,8 +312,7 @@ _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_stanza_t *xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
@@ -366,8 +366,7 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *xns_conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -404,8 +403,7 @@ _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -429,8 +427,7 @@ _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 }
 
 static int
-_groupchat_handler(xmpp_conn_t * const conn,
-    xmpp_stanza_t * const stanza, void * const userdata)
+_groupchat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_ctx_t *ctx = connection_get_ctx();
     char *message = NULL;
@@ -523,31 +520,38 @@ _message_send_receipt(const char * const fulljid, const char * const message_id)
 }
 
 static int
-_chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
-    void * const userdata)
+_receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
+{
+    xmpp_stanza_t *receipt = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
+    char *name = xmpp_stanza_get_name(receipt);
+    if (g_strcmp0(name, "received") != 0) {
+        return 1;
+    }
+
+    char *id = xmpp_stanza_get_attribute(receipt, STANZA_ATTR_ID);
+    if (!id) {
+        return 1;
+    }
+
+    char *fulljid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!fulljid) {
+        return 1;
+    }
+
+    Jid *jidp = jid_create(fulljid);
+    sv_ev_message_receipt(jidp->barejid, id);
+    jid_destroy(jidp);
+
+    return 1;
+}
+
+static int
+_chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     // ignore if type not chat or absent
     char *type = xmpp_stanza_get_type(stanza);
     if (!(g_strcmp0(type, "chat") == 0 || type == NULL)) {
         return 1;
-    }
-
-    // check if message receipt
-    xmpp_stanza_t *receipt = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
-    if (receipt) {
-        char *name = xmpp_stanza_get_name(receipt);
-        if (g_strcmp0(name, "received") == 0) {
-            char *id = xmpp_stanza_get_attribute(receipt, STANZA_ATTR_ID);
-            if (id) {
-                char *fulljid = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-                if (fulljid) {
-                    Jid *jidp = jid_create(fulljid);
-                    sv_ev_message_receipt(jidp->barejid, id);
-                    jid_destroy(jidp);
-                    return 1;
-                }
-            }
-        }
     }
 
     // check if carbon message
