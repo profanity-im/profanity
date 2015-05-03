@@ -42,6 +42,7 @@
 #include "contact.h"
 #include "jid.h"
 #include "tools/autocomplete.h"
+#include "config/preferences.h"
 
 // nicknames
 static Autocomplete name_ac;
@@ -114,6 +115,33 @@ roster_get_contact(const char * const barejid)
     g_free(barejidlower);
 
     return contact;
+}
+
+char *
+roster_get_msg_display_name(const char * const barejid, const char * const resource)
+{
+    GString *result = g_string_new("");
+
+    PContact contact = roster_get_contact(barejid);
+    if (contact != NULL) {
+        if (p_contact_name(contact) != NULL) {
+            g_string_append(result, p_contact_name(contact));
+        } else {
+            g_string_append(result, barejid);
+        }
+    } else {
+        g_string_append(result, barejid);
+    }
+
+    if (resource && prefs_get_boolean(PREF_RESOURCE_MESSAGE)) {
+        g_string_append(result, "/");
+        g_string_append(result, resource);
+    }
+
+    char *result_str = result->str;
+    g_string_free(result, FALSE);
+
+    return result_str;
 }
 
 gboolean
