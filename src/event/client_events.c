@@ -73,7 +73,7 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 #else
     char *id = message_send_chat(chatwin->barejid, plugin_msg);
     chat_log_msg_out(chatwin->barejid, plugin_msg);
-    ui_outgoing_chat_msg(chatwin->barejid, plugin_msg, id);
+    ui_outgoing_chat_msg(chatwin, plugin_msg, id);
     free(id);
 #endif
 
