@@ -585,6 +585,30 @@ _receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     return 1;
 }
 
+void _private_chat_handler(xmpp_stanza_t * const stanza, const char * const fulljid)
+{
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+    if (!body) {
+        return;
+    }
+
+    char *message = xmpp_stanza_get_text(body);
+    if (!message) {
+        return;
+    }
+
+    GTimeVal tv_stamp;
+    gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
+    if (delayed) {
+        sv_ev_delayed_private_message(fulljid, message, tv_stamp);
+    } else {
+        sv_ev_incoming_private_message(fulljid, message);
+    }
+
+    xmpp_ctx_t *ctx = connection_get_ctx();
+    xmpp_free(ctx, message);
+}
+
 static int
 _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
@@ -646,102 +670,83 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
         return 1;
     }
 
-    xmpp_ctx_t *ctx = connection_get_ctx();
     gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-
     Jid *jid = jid_create(from);
 
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
-        // determine if the notifications happened whilst offline
-        GTimeVal tv_stamp;
-        gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
-
-        // check for and deal with message
-        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-        if (body) {
-            char *message = xmpp_stanza_get_text(body);
-            if (message) {
-                if (delayed) {
-                    sv_ev_delayed_private_message(jid->str, message, tv_stamp);
-                } else {
-                    sv_ev_incoming_private_message(jid->str, message);
-                }
-                xmpp_free(ctx, message);
-            }
-        }
-
-        jid_destroy(jid);
-        return 1;
-
-    // standard chat message, use jid without resource
-    } else {
-        // determine if the notifications happened whilst offline
-        GTimeVal tv_stamp;
-        gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
-        char *id = xmpp_stanza_get_id(stanza);
-
-        // check for and deal with message
-        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
-        if (body) {
-            char *message = xmpp_stanza_get_text(body);
-            if (message) {
-                if (delayed) {
-                    sv_ev_delayed_message(jid->barejid, message, tv_stamp);
-                } else {
-#ifdef HAVE_LIBGPGME
-                    gboolean handled = FALSE;
-                    xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
-                    if (x) {
-                        char *enc_message = xmpp_stanza_get_text(x);
-                        char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
-                        if (decrypted) {
-                            sv_ev_incoming_message(jid->barejid, jid->resourcepart, decrypted);
-                            handled = TRUE;
-                        }
-                    }
-                    if (!handled) {
-                        sv_ev_incoming_message(jid->barejid, jid->resourcepart, message);
-                    }
-#else
-                    sv_ev_incoming_message(jid->barejid, jid->resourcepart, message);
-#endif
-                }
-                if (id && prefs_get_boolean(PREF_RECEIPTS_SEND)) {
-                    xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
-                    if (receipts) {
-                        char *receipts_name = xmpp_stanza_get_name(receipts);
-                        if (g_strcmp0(receipts_name, "request") == 0) {
-                            _message_send_receipt(jid->fulljid, id);
-                        }
-                    }
-                }
-                xmpp_free(ctx, message);
-            }
-        }
-
-        // handle chat sessions and states
-        if (!delayed && jid->resourcepart) {
-            gboolean gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
-            gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
-            gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
-            gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
-            if (gone) {
-                sv_ev_gone(jid->barejid, jid->resourcepart);
-            } else if (typing) {
-                sv_ev_typing(jid->barejid, jid->resourcepart);
-            } else if (paused) {
-                sv_ev_paused(jid->barejid, jid->resourcepart);
-            } else if (inactive) {
-                sv_ev_inactive(jid->barejid, jid->resourcepart);
-            } else if (stanza_contains_chat_state(stanza)) {
-                sv_ev_activity(jid->barejid, jid->resourcepart, TRUE);
-            } else {
-                sv_ev_activity(jid->barejid, jid->resourcepart, FALSE);
-            }
-        }
-
-        jid_destroy(jid);
+        _private_chat_handler(stanza, jid->fulljid);
         return 1;
     }
+
+    // standard chat message, use jid without resource
+    GTimeVal tv_stamp;
+    gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
+
+    xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
+    if (body) {
+        char *message = xmpp_stanza_get_text(body);
+        if (message) {
+            if (delayed) {
+                sv_ev_delayed_message(jid->barejid, message, tv_stamp);
+            } else {
+#ifdef HAVE_LIBGPGME
+                gboolean handled = FALSE;
+                xmpp_stanza_t *x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_ENCRYPTED);
+                if (x) {
+                    char *enc_message = xmpp_stanza_get_text(x);
+                    char *decrypted = p_gpg_decrypt(jid->barejid, enc_message);
+                    if (decrypted) {
+                        sv_ev_incoming_message(jid->barejid, jid->resourcepart, decrypted);
+                        handled = TRUE;
+                    }
+                }
+                if (!handled) {
+                    sv_ev_incoming_message(jid->barejid, jid->resourcepart, message);
+                }
+#else
+                sv_ev_incoming_message(jid->barejid, jid->resourcepart, message);
+#endif
+            }
+
+            // send receipt if configured
+            char *id = xmpp_stanza_get_id(stanza);
+            if (id && prefs_get_boolean(PREF_RECEIPTS_SEND)) {
+                xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
+                if (receipts) {
+                    char *receipts_name = xmpp_stanza_get_name(receipts);
+                    if (g_strcmp0(receipts_name, "request") == 0) {
+                        _message_send_receipt(jid->fulljid, id);
+                    }
+                }
+            }
+
+            xmpp_ctx_t *ctx = connection_get_ctx();
+            xmpp_free(ctx, message);
+        }
+    }
+
+    // handle chat sessions and states
+    if (!delayed && jid->resourcepart) {
+        gboolean gone = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_GONE) != NULL;
+        gboolean typing = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_COMPOSING) != NULL;
+        gboolean paused = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_PAUSED) != NULL;
+        gboolean inactive = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_INACTIVE) != NULL;
+        if (gone) {
+            sv_ev_gone(jid->barejid, jid->resourcepart);
+        } else if (typing) {
+            sv_ev_typing(jid->barejid, jid->resourcepart);
+        } else if (paused) {
+            sv_ev_paused(jid->barejid, jid->resourcepart);
+        } else if (inactive) {
+            sv_ev_inactive(jid->barejid, jid->resourcepart);
+        } else if (stanza_contains_chat_state(stanza)) {
+            sv_ev_activity(jid->barejid, jid->resourcepart, TRUE);
+        } else {
+            sv_ev_activity(jid->barejid, jid->resourcepart, FALSE);
+        }
+    }
+
+    jid_destroy(jid);
+    return 1;
 }
