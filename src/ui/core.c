@@ -433,13 +433,13 @@ ui_incoming_msg(const char * const barejid, const char * const resource, const c
         win_print_incoming_message(window, tv_stamp, display_name, message);
     }
 
+    if (prefs_get_boolean(PREF_BEEP)) {
+        beep();
+    }
+
     int ui_index = num;
     if (ui_index == 10) {
         ui_index = 0;
-    }
-
-    if (prefs_get_boolean(PREF_BEEP)) {
-        beep();
     }
 
     if (prefs_get_boolean(PREF_NOTIFY_MESSAGE)) {
@@ -1329,14 +1329,12 @@ ui_new_chat_win(const char * const barejid)
 }
 
 void
-ui_outgoing_chat_msg(const char * const barejid, const char * const message, char *id)
+ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id)
 {
-    ProfWin *window = (ProfWin*)wins_get_chat(barejid);
-
     if (prefs_get_boolean(PREF_RECEIPTS_REQUEST) && id) {
-        win_print_with_receipt(window, '-', NULL, 0, THEME_TEXT_ME, "me", message, id);
+        win_print_with_receipt((ProfWin*)chatwin, '-', NULL, 0, THEME_TEXT_ME, "me", message, id);
     } else {
-        win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
+        win_print((ProfWin*)chatwin, '-', NULL, 0, THEME_TEXT_ME, "me", message);
     }
 }
 

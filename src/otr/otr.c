@@ -325,7 +325,7 @@ otr_on_message_send(ProfChatWin *chatwin, const char * const message)
         if (encrypted) {
             id = message_send_chat_encrypted(chatwin->barejid, encrypted);
             chat_log_otr_msg_out(chatwin->barejid, message);
-            ui_outgoing_chat_msg(chatwin->barejid, message, id);
+            ui_outgoing_chat_msg(chatwin, message, id);
             otr_free_message(encrypted);
         } else {
             ui_win_error_line((ProfWin*)chatwin, "Failed to encrypt and send message.");
@@ -339,13 +339,13 @@ otr_on_message_send(ProfChatWin *chatwin, const char * const message)
     } else if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         char *otr_tagged_msg = otr_tag_message(message);
         id = message_send_chat_encrypted(chatwin->barejid, otr_tagged_msg);
-        ui_outgoing_chat_msg(chatwin->barejid, message, id);
+        ui_outgoing_chat_msg(chatwin, message, id);
         chat_log_msg_out(chatwin->barejid, message);
         free(otr_tagged_msg);
 
     } else {
         id = message_send_chat(chatwin->barejid, message);
-        ui_outgoing_chat_msg(chatwin->barejid, message, id);
+        ui_outgoing_chat_msg(chatwin, message, id);
         chat_log_msg_out(chatwin->barejid, message);
     }
 
