@@ -154,7 +154,7 @@ sv_ev_room_message(const char * const room_jid, const char * const nick,
 }
 
 void
-sv_ev_incoming_private_message(char *fulljid, char *message)
+sv_ev_incoming_private_message(const char * const fulljid, char *message)
 {
     ui_incoming_private_msg(fulljid, message, NULL);
 }
@@ -177,7 +177,7 @@ sv_ev_incoming_message(char *barejid, char *resource, char *message)
 }
 
 void
-sv_ev_delayed_private_message(char *fulljid, char *message, GTimeVal tv_stamp)
+sv_ev_delayed_private_message(const char * const fulljid, char *message, GTimeVal tv_stamp)
 {
     ui_incoming_private_msg(fulljid, message, &tv_stamp);
 }
