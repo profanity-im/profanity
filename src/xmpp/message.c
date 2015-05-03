@@ -585,7 +585,36 @@ _receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     return 1;
 }
 
-void _private_chat_handler(xmpp_stanza_t * const stanza, const char * const fulljid)
+void
+_receipt_request_handler(xmpp_stanza_t * const stanza)
+{
+    if (!prefs_get_boolean(PREF_RECEIPTS_SEND)) {
+        return;
+    }
+
+    char *id = xmpp_stanza_get_id(stanza);
+    if (!id) {
+        return;
+    }
+
+    xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
+    if (!receipts) {
+        return;
+    }
+
+    char *receipts_name = xmpp_stanza_get_name(receipts);
+    if (g_strcmp0(receipts_name, "request") != 0) {
+        return;
+    }
+
+    gchar *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    Jid *jid = jid_create(from);
+    _message_send_receipt(jid->fulljid, id);
+    jid_destroy(jid);
+}
+
+void
+_private_chat_handler(xmpp_stanza_t * const stanza, const char * const fulljid)
 {
     xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
     if (!body) {
@@ -709,17 +738,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
 #endif
             }
 
-            // send receipt if configured
-            char *id = xmpp_stanza_get_id(stanza);
-            if (id && prefs_get_boolean(PREF_RECEIPTS_SEND)) {
-                xmpp_stanza_t *receipts = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
-                if (receipts) {
-                    char *receipts_name = xmpp_stanza_get_name(receipts);
-                    if (g_strcmp0(receipts_name, "request") == 0) {
-                        _message_send_receipt(jid->fulljid, id);
-                    }
-                }
-            }
+            _receipt_request_handler(stanza);
 
             xmpp_ctx_t *ctx = connection_get_ctx();
             xmpp_free(ctx, message);
