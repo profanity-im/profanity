@@ -618,7 +618,12 @@ ui_handle_login_account_success(ProfAccount *account)
     contact_presence_t contact_presence = contact_presence_from_resource_presence(resource_presence);
     cons_show_login_success(account);
     title_bar_set_presence(contact_presence);
-    status_bar_print_message(account->jid);
+
+    GString *fulljid = g_string_new(account->jid);
+    g_string_append(fulljid, "/");
+    g_string_append(fulljid, account->resource);
+    status_bar_print_message(fulljid->str);
+    g_string_free(fulljid, TRUE);
     status_bar_update_virtual();
 }
 
