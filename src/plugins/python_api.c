@@ -159,7 +159,7 @@ static PyObject *
 python_api_get_current_recipient(PyObject *self, PyObject *args)
 {
     char *recipient = api_get_current_recipient();
-    if (recipient != NULL) {
+    if (recipient) {
         return Py_BuildValue("s", recipient);
     } else {
         return Py_BuildValue("");
@@ -170,7 +170,7 @@ static PyObject *
 python_api_get_current_muc(PyObject *self, PyObject *args)
 {
     char *room = api_get_current_muc();
-    if (room != NULL) {
+    if (room) {
         return Py_BuildValue("s", room);
     } else {
         return Py_BuildValue("");
