@@ -64,9 +64,9 @@ autocompleters_complete(const char * const input)
 
     GList *keys = g_hash_table_get_keys(autocompleters);
     GList *curr = keys;
-    while (curr != NULL) {
+    while (curr) {
         result = autocomplete_param_with_ac(input, curr->data, g_hash_table_lookup(autocompleters, curr->data), TRUE);
-        if (result != NULL) {
+        if (result) {
             return result;
         }
         curr = g_list_next(curr);
@@ -80,7 +80,7 @@ autocompleters_reset(void)
 {
     GList *acs = g_hash_table_get_values(autocompleters);
     GList *curr = acs;
-    while (curr != NULL) {
+    while (curr) {
         autocomplete_reset(curr->data);
         curr = g_list_next(curr);
     }
