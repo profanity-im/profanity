@@ -74,7 +74,7 @@ bookmark_request(void)
 
     autocomplete_free(bookmark_ac);
     bookmark_ac = autocomplete_new();
-    if (bookmark_list != NULL) {
+    if (bookmark_list) {
         g_list_free_full(bookmark_list, _bookmark_item_destroy);
         bookmark_list = NULL;
     }
@@ -96,12 +96,12 @@ bookmark_add(const char *jid, const char *nick, const char *password, const char
     } else {
         Bookmark *item = malloc(sizeof(*item));
         item->jid = strdup(jid);
-        if (nick != NULL) {
+        if (nick) {
             item->nick = strdup(nick);
         } else {
             item->nick = NULL;
         }
-        if (password != NULL) {
+        if (password) {
             item->password = strdup(password);
         } else {
             item->password = NULL;
@@ -136,15 +136,15 @@ bookmark_update(const char *jid, const char *nick, const char *password, const c
         return FALSE;
     } else {
         Bookmark *bm = found->data;
-        if (nick != NULL) {
+        if (nick) {
             free(bm->nick);
             bm->nick = strdup(nick);
         }
-        if (password != NULL) {
+        if (password) {
             free(bm->password);
             bm->password = strdup(password);
         }
-        if (autojoin_str != NULL) {
+        if (autojoin_str) {
             if (g_strcmp0(autojoin_str, "on") == 0) {
                 bm->autojoin = TRUE;
             } else if (g_strcmp0(autojoin_str, "off") == 0) {
@@ -228,7 +228,7 @@ bookmark_find(const char * const search_str)
 void
 bookmark_autocomplete_reset(void)
 {
-    if (bookmark_ac != NULL) {
+    if (bookmark_ac) {
         autocomplete_reset(bookmark_ac);
     }
 }
@@ -413,14 +413,14 @@ _send_bookmarks(void)
     xmpp_stanza_set_ns(storage, "storage:bookmarks");
 
     GList *curr = bookmark_list;
-    while (curr != NULL) {
+    while (curr) {
         Bookmark *bookmark = curr->data;
         xmpp_stanza_t *conference = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(conference, STANZA_NAME_CONFERENCE);
         xmpp_stanza_set_attribute(conference, STANZA_ATTR_JID, bookmark->jid);
 
         Jid *jidp = jid_create(bookmark->jid);
-        if (jidp->localpart != NULL) {
+        if (jidp->localpart) {
             xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
         }
         jid_destroy(jidp);
@@ -431,7 +431,7 @@ _send_bookmarks(void)
             xmpp_stanza_set_attribute(conference, STANZA_ATTR_AUTOJOIN, "false");
         }
 
-        if (bookmark->nick != NULL) {
+        if (bookmark->nick) {
             xmpp_stanza_t *nick_st = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(nick_st, STANZA_NAME_NICK);
             xmpp_stanza_t *nick_text = xmpp_stanza_new(ctx);
@@ -443,7 +443,7 @@ _send_bookmarks(void)
             xmpp_stanza_release(nick_st);
         }
 
-        if (bookmark->password != NULL) {
+        if (bookmark->password) {
             xmpp_stanza_t *password_st = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(password_st, STANZA_NAME_PASSWORD);
             xmpp_stanza_t *password_text = xmpp_stanza_new(ctx);
