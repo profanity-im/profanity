@@ -147,9 +147,9 @@ accounts_add(const char *account_name, const char *altdomain, const int port)
     const char *barejid = account_name;
     const char *resource = "profanity";
     Jid *jid = jid_create(account_name);
-    if (jid != NULL) {
+    if (jid) {
         barejid = jid->barejid;
-        if (jid->resourcepart != NULL) {
+        if (jid->resourcepart) {
             resource = jid->resourcepart;
         }
     }
@@ -159,7 +159,7 @@ accounts_add(const char *account_name, const char *altdomain, const int port)
         g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
         g_key_file_set_string(accounts, account_name, "jid", barejid);
         g_key_file_set_string(accounts, account_name, "resource", resource);
-        if (altdomain != NULL) {
+        if (altdomain) {
             g_key_file_set_string(accounts, account_name, "server", altdomain);
         }
         if (port != 0) {
@@ -252,7 +252,7 @@ accounts_get_account(const char * const name)
         gsize length;
         GList *otr_manual = NULL;
         gchar **manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
-        if (manual != NULL) {
+        if (manual) {
             int i = 0;
             for (i = 0; i < length; i++) {
                 otr_manual = g_list_append(otr_manual, strdup(manual[i]));
@@ -262,7 +262,7 @@ accounts_get_account(const char * const name)
 
         GList *otr_opportunistic = NULL;
         gchar **opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
-        if (opportunistic != NULL) {
+        if (opportunistic) {
             int i = 0;
             for (i = 0; i < length; i++) {
                 otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
@@ -272,7 +272,7 @@ accounts_get_account(const char * const name)
 
         GList *otr_always = NULL;
         gchar **always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
-        if (always != NULL) {
+        if (always) {
             int i = 0;
             for (i = 0; i < length; i++) {
                 otr_always = g_list_append(otr_always, strdup(always[i]));
@@ -356,7 +356,7 @@ accounts_rename(const char * const account_name, const char * const new_name)
     int i;
     for (i = 0; i < ARRAY_SIZE(string_keys); i++) {
         char *value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
-        if (value != NULL) {
+        if (value) {
             g_key_file_set_string(accounts, new_name, string_keys[i], value);
             g_free(value);
         }
@@ -386,10 +386,10 @@ void
 accounts_set_jid(const char * const account_name, const char * const value)
 {
     Jid *jid = jid_create(value);
-    if (jid != NULL) {
+    if (jid) {
         if (accounts_account_exists(account_name)) {
             g_key_file_set_string(accounts, account_name, "jid", jid->barejid);
-            if (jid->resourcepart != NULL) {
+            if (jid->resourcepart) {
                 g_key_file_set_string(accounts, account_name, "resource", jid->resourcepart);
             }
 
@@ -509,7 +509,7 @@ accounts_add_otr_policy(const char * const account_name, const char * const cont
         GList *glist = NULL;
 
         // list found
-        if (list != NULL) {
+        if (list) {
             int i = 0;
             for (i = 0; i < length; i++) {
                 // item already in list, exit function
@@ -529,7 +529,7 @@ accounts_add_otr_policy(const char * const account_name, const char * const cont
             const gchar* new_list[g_list_length(glist)+1];
             GList *curr = glist;
             i = 0;
-            while (curr != NULL) {
+            while (curr) {
                 new_list[i++] = strdup(curr->data);
                 curr = g_list_next(curr);
             }
@@ -572,7 +572,7 @@ _remove_from_list(GKeyFile *accounts, const char * const account_name, const cha
     gsize length;
     gchar **list = g_key_file_get_string_list(accounts, account_name, key, &length, NULL);
 
-    if (list != NULL) {
+    if (list) {
         int i = 0;
         GList *glist = NULL;
         gboolean deleted = FALSE;
@@ -595,7 +595,7 @@ _remove_from_list(GKeyFile *accounts, const char * const account_name, const cha
                 const gchar* new_list[g_list_length(glist)+1];
                 GList *curr = glist;
                 i = 0;
-                while (curr != NULL) {
+                while (curr) {
                     new_list[i++] = strdup(curr->data);
                     curr = g_list_next(curr);
                 }
@@ -766,7 +766,7 @@ accounts_get_last_presence(const char * const account_name)
         result = RESOURCE_ONLINE;
     }
 
-    if (setting != NULL) {
+    if (setting) {
         g_free(setting);
     }
     return result;
@@ -796,7 +796,7 @@ accounts_get_login_presence(const char * const account_name)
         result = RESOURCE_ONLINE;
     }
 
-    if (setting != NULL) {
+    if (setting) {
         g_free(setting);
     }
     return result;
@@ -809,9 +809,9 @@ _fix_legacy_accounts(const char * const account_name)
     const char *barejid = account_name;
     const char *resource = "profanity";
     Jid *jid = jid_create(account_name);
-    if (jid != NULL) {
+    if (jid) {
         barejid = jid->barejid;
-        if (jid->resourcepart != NULL) {
+        if (jid->resourcepart) {
             resource = jid->resourcepart;
         }
     }
