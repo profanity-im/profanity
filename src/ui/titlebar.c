@@ -80,7 +80,7 @@ title_bar_update_virtual(void)
 {
     ProfWin *window = wins_get_current();
     if (window->type != WIN_CONSOLE) {
-        if (typing_elapsed != NULL) {
+        if (typing_elapsed) {
             gdouble seconds = g_timer_elapsed(typing_elapsed, NULL);
 
             if (seconds >= 10) {
@@ -128,7 +128,7 @@ title_bar_set_presence(contact_presence_t presence)
 void
 title_bar_switch(void)
 {
-    if (typing_elapsed != NULL) {
+    if (typing_elapsed) {
         g_timer_destroy(typing_elapsed);
         typing_elapsed = NULL;
         typing = FALSE;
@@ -141,7 +141,7 @@ void
 title_bar_set_typing(gboolean is_typing)
 {
     if (is_typing) {
-        if (typing_elapsed != NULL) {
+        if (typing_elapsed) {
             g_timer_start(typing_elapsed);
         } else {
             typing_elapsed = g_timer_new();
