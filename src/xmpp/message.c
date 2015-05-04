@@ -61,7 +61,6 @@ static int _conference_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const s
 static int _captcha_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _message_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 static int _receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
-static int _carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata);
 
 void
 message_add_handlers(void)
@@ -76,7 +75,6 @@ message_add_handlers(void)
     HANDLE(STANZA_NS_CONFERENCE, NULL,                   _conference_handler);
     HANDLE(STANZA_NS_CAPTCHA,    NULL,                   _captcha_handler);
     HANDLE(STANZA_NS_RECEIPTS,   NULL,                   _receipt_received_handler);
-    HANDLE(STANZA_NS_CARBONS,    NULL,                   _carbons_handler);
 }
 
 char *
@@ -562,48 +560,6 @@ _message_send_receipt(const char * const fulljid, const char * const message_id)
 }
 
 static int
-_carbons_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
-{
-    xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
-    char *name = xmpp_stanza_get_name(carbons);
-    if ((g_strcmp0(name, "received") == 0) || (g_strcmp0(name, "sent")) == 0){
-        xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
-        xmpp_stanza_t *message = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
-
-        gchar *to = xmpp_stanza_get_attribute(message, STANZA_ATTR_TO);
-        gchar *from = xmpp_stanza_get_attribute(message, STANZA_ATTR_FROM);
-
-        // carbon of a self sent message
-        if (!to) to = from;
-
-        Jid *jid_from = jid_create(from);
-        Jid *jid_to = jid_create(to);
-        Jid *my_jid = jid_create(jabber_get_fulljid());
-
-        xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
-        if (body) {
-            char *message = xmpp_stanza_get_text(body);
-            if (message) {
-                if (g_strcmp0(my_jid->barejid, jid_to->barejid) == 0) {
-                    sv_ev_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
-                } else {
-                    sv_ev_carbon(jid_to->barejid, message);
-                }
-
-                xmpp_ctx_t *ctx = connection_get_ctx();
-                xmpp_free(ctx, message);
-            }
-        }
-
-        jid_destroy(jid_from);
-        jid_destroy(jid_to);
-        jid_destroy(my_jid);
-    }
-
-    return 1;
-}
-
-static int
 _receipt_received_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
     xmpp_stanza_t *receipt = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
@@ -685,18 +641,61 @@ _private_chat_handler(xmpp_stanza_t * const stanza, const char * const fulljid)
 static int
 _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * const userdata)
 {
+    // ignore if type not chat or absent
+    char *type = xmpp_stanza_get_type(stanza);
+    if (!(g_strcmp0(type, "chat") == 0 || type == NULL)) {
+        return 1;
+    }
+
+    // check if carbon message
+    xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
+    if (carbons) {
+        char *name = xmpp_stanza_get_name(carbons);
+        if ((g_strcmp0(name, "received") == 0) || (g_strcmp0(name, "sent")) == 0){
+            xmpp_stanza_t *forwarded = xmpp_stanza_get_child_by_ns(carbons, STANZA_NS_FORWARD);
+            xmpp_stanza_t *message = xmpp_stanza_get_child_by_name(forwarded, STANZA_NAME_MESSAGE);
+
+            xmpp_ctx_t *ctx = connection_get_ctx();
+
+            gchar *to = xmpp_stanza_get_attribute(message, STANZA_ATTR_TO);
+            gchar *from = xmpp_stanza_get_attribute(message, STANZA_ATTR_FROM);
+
+            // happens when receive a carbon of a self sent message
+            if (!to) to = from;
+
+            Jid *jid_from = jid_create(from);
+            Jid *jid_to = jid_create(to);
+            Jid *my_jid = jid_create(jabber_get_fulljid());
+
+            // check for and deal with message
+            xmpp_stanza_t *body = xmpp_stanza_get_child_by_name(message, STANZA_NAME_BODY);
+            if (body) {
+                char *message = xmpp_stanza_get_text(body);
+                if (message) {
+                    // if we are the recipient, treat as standard incoming message
+                    if(g_strcmp0(my_jid->barejid, jid_to->barejid) == 0){
+                        sv_ev_incoming_message(jid_from->barejid, jid_from->resourcepart, message);
+                    }
+                    // else treat as a sent message
+                    else{
+                        sv_ev_carbon(jid_to->barejid, message);
+                    }
+                    xmpp_free(ctx, message);
+                }
+            }
+
+            jid_destroy(jid_from);
+            jid_destroy(jid_to);
+            jid_destroy(my_jid);
+            return 1;
+        }
+    }
+
     // ignore handled namespaces
     xmpp_stanza_t *conf = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
     xmpp_stanza_t *mucuser = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     xmpp_stanza_t *captcha = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CAPTCHA);
-    xmpp_stanza_t *carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
-    if (conf || mucuser || captcha || carbons) {
-        return 1;
-    }
-
-    // ignore if type not chat or absent
-    char *type = xmpp_stanza_get_type(stanza);
-    if (!(g_strcmp0(type, "chat") == 0 || type == NULL)) {
+    if (conf || mucuser || captcha) {
         return 1;
     }
 
@@ -709,6 +708,7 @@ _chat_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void * con
         return 1;
     }
 
+    // standard chat message, use jid without resource
     GTimeVal tv_stamp;
     gboolean delayed = stanza_get_delay(stanza, &tv_stamp);
 
