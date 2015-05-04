@@ -55,7 +55,7 @@ api_cons_alert(void)
 void
 api_cons_show(const char * const message)
 {
-    if (message != NULL) {
+    if (message) {
         cons_show("%s", message);
     }
 }
