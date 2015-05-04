@@ -57,19 +57,19 @@ account_new(const gchar * const name, const gchar * const jid,
 
     new_account->name = strdup(name);
 
-    if (jid != NULL) {
+    if (jid) {
         new_account->jid = strdup(jid);
     } else {
         new_account->jid = strdup(name);
     }
 
-    if (password != NULL) {
+    if (password) {
         new_account->password = strdup(password);
     } else {
         new_account->password = NULL;
     }
 
-    if (eval_password != NULL) {
+    if (eval_password) {
         new_account->eval_password = strdup(eval_password);
     } else {
         new_account->eval_password = NULL;
@@ -77,13 +77,13 @@ account_new(const gchar * const name, const gchar * const jid,
 
     new_account->enabled = enabled;
 
-    if (server != NULL) {
+    if (server) {
         new_account->server = strdup(server);
     } else {
         new_account->server = NULL;
     }
 
-    if (resource != NULL) {
+    if (resource) {
         new_account->resource = strdup(resource);
     } else {
         new_account->resource = NULL;
@@ -134,7 +134,7 @@ account_new(const gchar * const name, const gchar * const jid,
         new_account->muc_nick = strdup(muc_nick);
     }
 
-    if (otr_policy != NULL) {
+    if (otr_policy) {
         new_account->otr_policy = strdup(otr_policy);
     } else {
         new_account->otr_policy = NULL;
@@ -150,7 +150,7 @@ account_new(const gchar * const name, const gchar * const jid,
 char *
 account_create_full_jid(ProfAccount *account)
 {
-    if (account->resource != NULL) {
+    if (account->resource) {
         return create_fulljid(account->jid, account->resource);
     } else {
         return strdup(account->jid);
@@ -198,7 +198,7 @@ account_eval_password(ProfAccount *account)
 void
 account_free(ProfAccount *account)
 {
-    if (account != NULL) {
+    if (account) {
         free(account->name);
         free(account->jid);
         free(account->password);
