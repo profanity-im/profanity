@@ -287,7 +287,7 @@ prof_getline(FILE *stream)
 
         result = (char *)realloc(s, s_size + buf_size);
         if (result == NULL) {
-            if (s != NULL) {
+            if (s) {
                 free(s);
                 s = NULL;
             }
@@ -325,7 +325,7 @@ release_get_latest()
     curl_easy_perform(handle);
     curl_easy_cleanup(handle);
 
-    if (output.buffer != NULL) {
+    if (output.buffer) {
         output.buffer[output.size++] = '\0';
         return output.buffer;
     } else {
@@ -432,10 +432,10 @@ gchar *
 xdg_get_config_home(void)
 {
     gchar *xdg_config_home = getenv("XDG_CONFIG_HOME");
-    if (xdg_config_home != NULL)
+    if (xdg_config_home)
         g_strstrip(xdg_config_home);
 
-    if ((xdg_config_home != NULL) && (strcmp(xdg_config_home, "") != 0)) {
+    if (xdg_config_home && (strcmp(xdg_config_home, "") != 0)) {
         return strdup(xdg_config_home);
     } else {
         GString *default_path = g_string_new(getenv("HOME"));
@@ -451,10 +451,10 @@ gchar *
 xdg_get_data_home(void)
 {
     gchar *xdg_data_home = getenv("XDG_DATA_HOME");
-    if (xdg_data_home != NULL)
+    if (xdg_data_home)
         g_strstrip(xdg_data_home);
 
-    if ((xdg_data_home != NULL) && (strcmp(xdg_data_home, "") != 0)) {
+    if (xdg_data_home && (strcmp(xdg_data_home, "") != 0)) {
         return strdup(xdg_data_home);
     } else {
         GString *default_path = g_string_new(getenv("HOME"));
@@ -474,7 +474,7 @@ create_unique_id(char *prefix)
     GString *result_str = g_string_new("");
 
     unique_id++;
-    if (prefix != NULL) {
+    if (prefix) {
         g_string_printf(result_str, "prof_%s_%lu", prefix, unique_id);
     } else {
         g_string_printf(result_str, "prof_%lu", unique_id);
@@ -543,7 +543,7 @@ get_next_available_win_num(GList *used)
         curr = sorted;
         // skip console
         curr = g_list_next(curr);
-        while (curr != NULL) {
+        while (curr) {
             int curr_num = GPOINTER_TO_INT(curr->data);
 
             if (((last_num != 9) && ((last_num + 1) != curr_num)) ||
@@ -622,14 +622,14 @@ strip_arg_quotes(const char * const input)
     char *unquoted = strdup(input);
 
     // Remove starting quote if it exists
-    if(strchr(unquoted, '"') != NULL) {
+    if(strchr(unquoted, '"')) {
         if(strchr(unquoted, ' ') + 1 == strchr(unquoted, '"')) {
             memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
         }
     }
 
     // Remove ending quote if it exists
-    if(strchr(unquoted, '"') != NULL) {
+    if(strchr(unquoted, '"')) {
         if(strchr(unquoted, '\0') - 1 == strchr(unquoted, '"')) {
             memmove(strchr(unquoted, '"'), strchr(unquoted, '"')+1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
         }
