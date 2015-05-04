@@ -74,7 +74,7 @@ tinyurl_get(char *url)
 
     g_string_free(full_url, TRUE);
 
-    if (output.buffer != NULL) {
+    if (output.buffer) {
         output.buffer[output.size++] = '\0';
         return output.buffer;
     } else {
