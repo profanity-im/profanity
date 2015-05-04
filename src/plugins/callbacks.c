@@ -72,7 +72,7 @@ callbacks_add_window_handler(const char *tag, PluginWindowCallback *window_callb
 void *
 callbacks_get_window_handler(const char *tag)
 {
-    if (p_window_callbacks != NULL) {
+    if (p_window_callbacks) {
         return g_hash_table_lookup(p_window_callbacks, tag);
     } else {
         return NULL;
@@ -85,7 +85,7 @@ plugins_run_command(const char * const input)
     gchar **split = g_strsplit(input, " ", -1);
 
     GSList *p_command = p_commands;
-    while (p_command != NULL) {
+    while (p_command) {
         PluginCommand *command = p_command->data;
         if (g_strcmp0(split[0], command->command_name) == 0) {
             gboolean result;
@@ -111,7 +111,7 @@ plugins_run_timed(void)
 {
     GSList *p_timed_function = p_timed_functions;
 
-    while (p_timed_function != NULL) {
+    while (p_timed_function) {
         PluginTimedFunction *timed_function = p_timed_function->data;
         gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
 
