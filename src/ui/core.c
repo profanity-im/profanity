@@ -1273,14 +1273,11 @@ ui_recipient_gone(const char * const barejid, const char * const resource)
     }
 }
 
-void
+ProfPrivateWin*
 ui_new_private_win(const char * const fulljid)
 {
-    ProfWin *window = (ProfWin*)wins_get_private(fulljid);
-    if (!window) {
-        window = wins_new_private(fulljid);
-    }
-    ui_ev_focus_win(window);
+    ProfWin *window = wins_new_private(fulljid);
+    return (ProfPrivateWin*)window;
 }
 
 void
@@ -1357,15 +1354,9 @@ ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const messa
 }
 
 void
-ui_outgoing_private_msg(const char * const fulljid, const char * const message)
+ui_outgoing_private_msg(ProfPrivateWin *privwin, const char * const message)
 {
-    ProfWin *window = (ProfWin*)wins_get_private(fulljid);
-    if (!window) {
-        window = wins_new_private(fulljid);
-    }
-
-    win_print(window, '-', NULL, 0, THEME_TEXT_ME, "me", message);
-    ui_ev_focus_win(window);
+    win_print((ProfWin*)privwin, '-', NULL, 0, THEME_TEXT_ME, "me", message);
 }
 
 void

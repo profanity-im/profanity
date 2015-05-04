@@ -82,8 +82,8 @@ cl_ev_send_muc_msg(ProfMucWin *mucwin, const char * const msg)
 }
 
 void
-cl_ev_send_priv_msg(const char * const fulljid, const char * const msg)
+cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char * const msg)
 {
-    message_send_private(fulljid, msg);
-    ui_outgoing_private_msg(fulljid, msg);
+    message_send_private(privwin->fulljid, msg);
+    ui_outgoing_private_msg(privwin, msg);
 }
