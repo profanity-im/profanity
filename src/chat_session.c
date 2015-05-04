@@ -64,7 +64,7 @@ _chat_session_new(const char * const barejid, const char * const resource,
 static void
 _chat_session_free(ChatSession *session)
 {
-    if (session != NULL) {
+    if (session) {
         free(session->barejid);
         free(session->resource);
         free(session);
@@ -81,7 +81,7 @@ chat_sessions_init(void)
 void
 chat_sessions_clear(void)
 {
-    if (sessions != NULL)
+    if (sessions)
         g_hash_table_remove_all(sessions);
 }
 
