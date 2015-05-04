@@ -93,7 +93,7 @@ python_plugin_create(const char * const filename)
     gchar *module_name = g_strndup(filename, strlen(filename) - 3);
     PyObject *p_module = PyImport_ImportModule(module_name);
     python_check_error();
-    if (p_module != NULL) {
+    if (p_module) {
         ProfPlugin *plugin = malloc(sizeof(ProfPlugin));
         plugin->name = strdup(module_name);
         plugin->lang = LANG_PYTHON;
