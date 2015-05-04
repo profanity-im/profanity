@@ -719,7 +719,7 @@ ui_close_connected_win(int index)
             ProfChatWin *chatwin = (ProfChatWin*) window;
             assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 #ifdef PROF_HAVE_LIBOTR
-            if (chatwin->is_otr) {
+            if (chatwin->enc_mode == PROF_ENC_OTR) {
                 otr_end_session(chatwin->barejid);
             }
 #endif
@@ -901,7 +901,7 @@ ui_gone_secure(const char * const barejid, gboolean trusted)
         chatwin = (ProfChatWin*)window;
     }
 
-    chatwin->is_otr = TRUE;
+    chatwin->enc_mode = PROF_ENC_OTR;
     chatwin->is_trusted = trusted;
     if (trusted) {
         win_print(window, '!', NULL, 0, THEME_OTR_STARTED_TRUSTED, "", "OTR session started (trusted).");
@@ -929,7 +929,7 @@ ui_gone_insecure(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        chatwin->is_otr = FALSE;
+        chatwin->enc_mode = PROF_ENC_NONE;
         chatwin->is_trusted = FALSE;
 
         ProfWin *window = (ProfWin*)chatwin;
@@ -1048,7 +1048,7 @@ ui_trust(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        chatwin->is_otr = TRUE;
+        chatwin->enc_mode = PROF_ENC_OTR;
         chatwin->is_trusted = TRUE;
 
         ProfWin *window = (ProfWin*)chatwin;
@@ -1064,7 +1064,7 @@ ui_untrust(const char * const barejid)
 {
     ProfChatWin *chatwin = wins_get_chat(barejid);
     if (chatwin) {
-        chatwin->is_otr = TRUE;
+        chatwin->enc_mode = PROF_ENC_OTR;
         chatwin->is_trusted = FALSE;
 
         ProfWin *window = (ProfWin*)chatwin;
@@ -1169,7 +1169,7 @@ ui_current_win_is_otr(void)
     if (current->type == WIN_CHAT) {
         ProfChatWin *chatwin = (ProfChatWin*)current;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        return chatwin->is_otr;
+        return chatwin->enc_mode == PROF_ENC_OTR;
     } else {
         return FALSE;
     }
@@ -1309,7 +1309,7 @@ ui_new_chat_win(const char * const barejid)
 
 #ifdef PROF_HAVE_LIBOTR
     if (otr_is_secure(barejid)) {
-        chatwin->is_otr = TRUE;
+        chatwin->enc_mode = PROF_ENC_OTR;
     }
 #endif
 
