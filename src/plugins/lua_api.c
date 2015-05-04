@@ -151,7 +151,7 @@ lua_api_get_current_recipient(lua_State *L)
 {
     const char *recipient = api_get_current_recipient();
 
-    if (recipient != NULL) {
+    if (recipient) {
         lua_pushstring(L, recipient);
     } else {
         lua_pushnil(L);
@@ -165,7 +165,7 @@ lua_api_get_current_muc(lua_State *L)
 {
     const char *room = api_get_current_muc();
 
-    if (room != NULL) {
+    if (room) {
         lua_pushstring(L, room);
     } else {
         lua_pushnil(L);
