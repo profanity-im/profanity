@@ -1672,35 +1672,39 @@ cmd_autocomplete_add(char *value)
 void
 cmd_autocomplete_add_form_fields(DataForm *form)
 {
-    if (form) {
-        GSList *fields = autocomplete_create_list(form->tag_ac);
-        GSList *curr_field = fields;
-        while (curr_field) {
-            GString *field_str = g_string_new("/");
-            g_string_append(field_str, curr_field->data);
-            cmd_autocomplete_add(field_str->str);
-            g_string_free(field_str, TRUE);
-            curr_field = g_slist_next(curr_field);
-        }
-        g_slist_free_full(fields, free);
+    if (form == NULL) {
+        return;
     }
+
+    GSList *fields = autocomplete_create_list(form->tag_ac);
+    GSList *curr_field = fields;
+    while (curr_field) {
+        GString *field_str = g_string_new("/");
+        g_string_append(field_str, curr_field->data);
+        cmd_autocomplete_add(field_str->str);
+        g_string_free(field_str, TRUE);
+        curr_field = g_slist_next(curr_field);
+    }
+    g_slist_free_full(fields, free);
 }
 
 void
 cmd_autocomplete_remove_form_fields(DataForm *form)
 {
-    if (form) {
-        GSList *fields = autocomplete_create_list(form->tag_ac);
-        GSList *curr_field = fields;
-        while (curr_field) {
-            GString *field_str = g_string_new("/");
-            g_string_append(field_str, curr_field->data);
-            cmd_autocomplete_remove(field_str->str);
-            g_string_free(field_str, TRUE);
-            curr_field = g_slist_next(curr_field);
-        }
-        g_slist_free_full(fields, free);
+    if (form == NULL) {
+        return;
     }
+
+    GSList *fields = autocomplete_create_list(form->tag_ac);
+    GSList *curr_field = fields;
+    while (curr_field) {
+        GString *field_str = g_string_new("/");
+        g_string_append(field_str, curr_field->data);
+        cmd_autocomplete_remove(field_str->str);
+        g_string_free(field_str, TRUE);
+        curr_field = g_slist_next(curr_field);
+    }
+    g_slist_free_full(fields, free);
 }
 
 void
