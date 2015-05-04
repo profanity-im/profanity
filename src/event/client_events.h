@@ -40,6 +40,6 @@ jabber_conn_status_t cl_ev_connect_account(ProfAccount *account);
 
 void cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg);
 void cl_ev_send_muc_msg(ProfMucWin *mucwin, const char * const msg);
-void cl_ev_send_priv_msg(const char * const fulljid, const char * const msg);
+void cl_ev_send_priv_msg(ProfPrivateWin *privwin, const char * const msg);
 
 #endif

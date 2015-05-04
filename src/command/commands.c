@@ -124,7 +124,7 @@ cmd_execute_default(const char * inp)
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = wins_get_current_private();
-        cl_ev_send_priv_msg(privatewin->fulljid, inp);
+        cl_ev_send_priv_msg(privatewin, inp);
         break;
     }
     case WIN_MUC:
@@ -1318,10 +1318,14 @@ cmd_msg(gchar **args, struct cmd_help_t help)
             g_string_append(full_jid, "/");
             g_string_append(full_jid, usr);
 
+            ProfPrivateWin *privwin = wins_get_private(full_jid->str);
+            if (!privwin) {
+                privwin = ui_ev_new_private_win(full_jid->str);
+            }
+            ui_ev_focus_win((ProfWin*)privwin);
+
             if (msg) {
-                cl_ev_send_priv_msg(full_jid->str, msg);
-            } else {
-                ui_new_private_win(full_jid->str);
+                cl_ev_send_priv_msg(privwin, msg);
             }
 
             g_string_free(full_jid, TRUE);
@@ -3157,7 +3161,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
     case WIN_PRIVATE:
     {
         ProfPrivateWin *privatewin = wins_get_current_private();
-        cl_ev_send_priv_msg(privatewin->fulljid, tiny);
+        cl_ev_send_priv_msg(privatewin, tiny);
         break;
     }
     case WIN_MUC:
