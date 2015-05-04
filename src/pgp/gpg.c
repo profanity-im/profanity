@@ -222,7 +222,7 @@ p_gpg_sign(const char * const str, const char * const fp)
 
     size_t len = 0;
     char *signed_str = gpgme_data_release_and_get_mem(signed_data, &len);
-    if (signed_str != NULL) {
+    if (signed_str) {
         signed_str[len] = 0;
         result = _remove_header_footer(signed_str, PGP_SIGNATURE_FOOTER);
     }
