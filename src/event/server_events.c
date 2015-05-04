@@ -63,9 +63,9 @@ sv_ev_login_account_success(char *account_name)
 
     // attempt to rejoin rooms with passwords
     GList *curr = muc_rooms();
-    while (curr != NULL) {
+    while (curr) {
         char *password = muc_password(curr->data);
-        if (password != NULL) {
+        if (password) {
             char *nick = muc_nick(curr->data);
             presence_join_room(curr->data, nick, password);
         }
@@ -271,7 +271,7 @@ sv_ev_contact_offline(char *barejid, char *resource, char *status)
 {
     gboolean updated = roster_contact_offline(barejid, resource, status);
 
-    if (resource != NULL && updated) {
+    if (resource && updated) {
         ui_contact_offline(barejid, resource, status);
     }
 
@@ -289,7 +289,7 @@ sv_ev_contact_online(char *barejid, Resource *resource,
         char *show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
         char *show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
         PContact contact = roster_get_contact(barejid);
-        if (p_contact_subscription(contact) != NULL) {
+        if (p_contact_subscription(contact)) {
             if (strcmp(p_contact_subscription(contact), "none") != 0) {
 
                 // show in console if "all"
@@ -441,14 +441,14 @@ sv_ev_muc_self_online(const char * const room, const char * const nick, gboolean
         }
 
         char *subject = muc_subject(room);
-        if (subject != NULL) {
+        if (subject) {
             ui_room_subject(room, NULL, subject);
         }
 
         GList *pending_broadcasts = muc_pending_broadcasts(room);
-        if (pending_broadcasts != NULL) {
+        if (pending_broadcasts) {
             GList *curr = pending_broadcasts;
-            while (curr != NULL) {
+            while (curr) {
                 ui_room_broadcast(room, curr->data);
                 curr = g_list_next(curr);
             }
