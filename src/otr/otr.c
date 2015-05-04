@@ -179,7 +179,7 @@ otr_init(void)
 void
 otr_shutdown(void)
 {
-    if (jid != NULL) {
+    if (jid) {
         free(jid);
     }
 }
@@ -193,7 +193,7 @@ otr_poll(void)
 void
 otr_on_connect(ProfAccount *account)
 {
-    if (jid != NULL) {
+    if (jid) {
         free(jid);
     }
     jid = strdup(account->jid);
@@ -360,7 +360,7 @@ otr_keygen(ProfAccount *account)
         return;
     }
 
-    if (jid != NULL) {
+    if (jid) {
         free(jid);
     }
     jid = strdup(account->jid);
@@ -516,7 +516,7 @@ otr_trust(const char * const recipient)
     }
 
     if (context->active_fingerprint) {
-        if (context->active_fingerprint->trust != NULL) {
+        if (context->active_fingerprint->trust) {
             free(context->active_fingerprint->trust);
         }
         context->active_fingerprint->trust = strdup("trusted");
@@ -540,7 +540,7 @@ otr_untrust(const char * const recipient)
     }
 
     if (context->active_fingerprint) {
-        if (context->active_fingerprint->trust != NULL) {
+        if (context->active_fingerprint->trust) {
             free(context->active_fingerprint->trust);
         }
         context->active_fingerprint->trust = NULL;
@@ -629,7 +629,7 @@ otr_get_their_fingerprint(const char * const recipient)
 {
     ConnContext *context = otrlib_context_find(user_state, recipient, jid);
 
-    if (context != NULL) {
+    if (context) {
         Fingerprint *fingerprint = context->active_fingerprint;
         char readable[45];
         otrl_privkey_hash_to_human(readable, fingerprint->fingerprint);
@@ -658,7 +658,7 @@ otr_get_policy(const char * const recipient)
     }
 
     // check default account setting
-    if (account->otr_policy != NULL) {
+    if (account->otr_policy) {
         prof_otrpolicy_t result;
         if (g_strcmp0(account->otr_policy, "manual") == 0) {
             result = PROF_OTRPOLICY_MANUAL;
@@ -720,7 +720,7 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
         OtrlTLV *tlv = otrl_tlv_find(tlvs, OTRL_TLV_DISCONNECTED);
         if (tlv) {
 
-            if (context != NULL) {
+            if (context) {
                 otrl_context_force_plaintext(context);
                 ui_gone_insecure(from);
             }
@@ -732,7 +732,7 @@ otr_decrypt_message(const char * const from, const char * const message, gboolea
         return NULL;
 
     // message was decrypted, return to user
-    } else if (decrypted != NULL) {
+    } else if (decrypted) {
         *was_decrypted = TRUE;
         return decrypted;
 

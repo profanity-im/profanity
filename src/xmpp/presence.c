@@ -174,7 +174,7 @@ presence_sub_request_exists(const char * const bare_jid)
     GSList *requests_p = autocomplete_create_list(sub_requests_ac);
     GSList *requests = requests_p;
 
-    while (requests != NULL) {
+    while (requests) {
         if (strcmp(requests->data, bare_jid) == 0) {
             result = TRUE;
             break;
@@ -182,7 +182,7 @@ presence_sub_request_exists(const char * const bare_jid)
         requests = g_slist_next(requests);
     }
 
-    if (requests_p != NULL) {
+    if (requests_p) {
         g_slist_free_full(requests_p, free);
     }
 
@@ -204,7 +204,7 @@ presence_update(const resource_presence_t presence_type, const char * const msg,
         return;
     }
 
-    if (msg != NULL) {
+    if (msg) {
         log_debug("Updating presence: %s, \"%s\"",
             string_from_resource_presence(presence_type), msg);
     } else {
@@ -273,11 +273,11 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
     GList *rooms_p = muc_rooms();
     GList *rooms = rooms_p;
 
-    while (rooms != NULL) {
+    while (rooms) {
         const char *room = rooms->data;
         const char *nick = muc_nick(room);
 
-        if (nick != NULL) {
+        if (nick) {
             char *full_room_jid = create_fulljid(room, nick);
 
             xmpp_stanza_set_attribute(presence, STANZA_ATTR_TO, full_room_jid);
@@ -289,7 +289,7 @@ _send_room_presence(xmpp_conn_t *conn, xmpp_stanza_t *presence)
         rooms = g_list_next(rooms);
     }
 
-    if (rooms_p != NULL) {
+    if (rooms_p) {
         g_list_free(rooms_p);
     }
 }
@@ -361,7 +361,7 @@ presence_leave_chat_room(const char * const room_jid)
     xmpp_conn_t *conn = connection_get_conn();
     char *nick = muc_nick(room_jid);
 
-    if (nick != NULL) {
+    if (nick) {
         xmpp_stanza_t *presence = stanza_create_room_leave_presence(ctx, room_jid,
             nick);
         xmpp_send(conn, presence);
@@ -378,11 +378,11 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_t *error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
     xmpp_stanza_t *x = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_X);
     char *xmlns = NULL;
-    if (x != NULL) {
+    if (x) {
         xmlns = xmpp_stanza_get_ns(x);
     }
     char *type = NULL;
-    if (error_stanza != NULL) {
+    if (error_stanza) {
         type = xmpp_stanza_get_attribute(error_stanza, STANZA_ATTR_TYPE);
     }
 
@@ -392,7 +392,7 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
         char *error_cond = NULL;
         xmpp_stanza_t *reason_st = xmpp_stanza_get_child_by_ns(error_stanza, STANZA_NS_STANZAS);
-        if (reason_st != NULL) {
+        if (reason_st) {
             error_cond = xmpp_stanza_get_name(reason_st);
         }
         if (error_cond == NULL) {
@@ -412,15 +412,15 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     char *err_msg = stanza_get_error_message(stanza);
 
     GString *log_msg = g_string_new("presence stanza error received");
-    if (id != NULL) {
+    if (id) {
         g_string_append(log_msg, " id=");
         g_string_append(log_msg, id);
     }
-    if (from != NULL) {
+    if (from) {
         g_string_append(log_msg, " from=");
         g_string_append(log_msg, from);
     }
-    if (type != NULL) {
+    if (type) {
         g_string_append(log_msg, " type=");
         g_string_append(log_msg, type);
     }
@@ -431,7 +431,7 @@ _presence_error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     g_string_free(log_msg, TRUE);
 
-    if (from != NULL) {
+    if (from) {
         ui_handle_recipient_error(from, err_msg);
     } else {
         ui_handle_error(err_msg);
@@ -514,7 +514,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
     char *status_str = stanza_get_status(stanza, NULL);
 
     if (strcmp(my_jid->barejid, from_jid->barejid) !=0) {
-        if (from_jid->resourcepart != NULL) {
+        if (from_jid->resourcepart) {
             sv_ev_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
 
         // hack for servers that do not send full jid with unavailable presence
@@ -522,7 +522,7 @@ _unavailable_handler(xmpp_conn_t * const conn,
             sv_ev_contact_offline(from_jid->barejid, "__prof_default", status_str);
         }
     } else {
-        if (from_jid->resourcepart != NULL) {
+        if (from_jid->resourcepart) {
             connection_remove_available_resource(from_jid->resourcepart);
         }
     }
@@ -656,7 +656,7 @@ _send_caps_request(char *node, char *caps_key, char *id, char *from)
     xmpp_ctx_t *ctx = connection_get_ctx();
     xmpp_conn_t *conn = connection_get_conn();
 
-    if (node != NULL) {
+    if (node) {
         log_debug("Node string: %s.", node);
         if (!caps_contains(caps_key)) {
             log_debug("Capabilities not cached for '%s', sending discovery IQ.", from);
@@ -732,14 +732,14 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                     free(reason);
 
                 // kicked from room
-                } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
+                } else if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
                     sv_ev_room_kicked(room, actor, reason);
                     free(reason);
 
                 // banned from room
-                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
+                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
                     sv_ev_room_banned(room, actor, reason);
@@ -777,14 +777,14 @@ _muc_user_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza, void *
                 GSList *status_codes = stanza_get_status_codes_by_ns(stanza, STANZA_NS_MUC_USER);
 
                 // kicked from room
-                if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0) != NULL) {
+                if (g_slist_find_custom(status_codes, "307", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
                     sv_ev_room_occupent_kicked(room, nick, actor, reason);
                     free(reason);
 
                 // banned from room
-                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0) != NULL) {
+                } else if (g_slist_find_custom(status_codes, "301", (GCompareFunc)g_strcmp0)) {
                     char *actor = stanza_get_actor(stanza);
                     char *reason = stanza_get_reason(stanza);
                     sv_ev_room_occupent_banned(room, nick, actor, reason);

@@ -476,7 +476,7 @@ _error_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     char *error_msg = stanza_get_error_message(stanza);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ error handler fired, id: %s, error: %s", id, error_msg);
         log_error("IQ error received, id: %s, error: %s", id, error_msg);
     } else {
@@ -496,13 +496,13 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
     char *id = xmpp_stanza_get_id(stanza);
     char *type = xmpp_stanza_get_type(stanza);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ pong handler fired, id: %s.", id);
     } else {
         log_debug("IQ pong handler fired.");
     }
 
-    if (id != NULL && type != NULL) {
+    if (id && type) {
         // show warning if error
         if (strcmp(type, STANZA_TYPE_ERROR) == 0) {
             char *error_msg = stanza_get_error_message(stanza);
@@ -511,9 +511,9 @@ _pong_handler(xmpp_conn_t *const conn, xmpp_stanza_t * const stanza,
 
             // turn off autoping if error type is 'cancel'
             xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
-            if (error != NULL) {
+            if (error) {
                 char *errtype = xmpp_stanza_get_type(error);
-                if (errtype != NULL) {
+                if (errtype) {
                     if (strcmp(errtype, "cancel") == 0) {
                         log_warning("Server ping (id=%s) error type 'cancel', disabling autoping.", id);
                         prefs_set_autoping(0);
@@ -830,7 +830,7 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 {
     char *id = xmpp_stanza_get_id(stanza);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ version result handler fired, id: %s.", id);
     } else {
         log_debug("IQ version result handler fired.");
@@ -855,13 +855,13 @@ _version_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_t *version = xmpp_stanza_get_child_by_name(query, "version");
     xmpp_stanza_t *os = xmpp_stanza_get_child_by_name(query, "os");
 
-    if (name != NULL) {
+    if (name) {
         name_str = xmpp_stanza_get_text(name);
     }
-    if (version != NULL) {
+    if (version) {
         version_str = xmpp_stanza_get_text(version);
     }
-    if (os != NULL) {
+    if (os) {
         os_str = xmpp_stanza_get_text(os);
     }
 
@@ -892,7 +892,7 @@ _ping_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *to = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_TO);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ ping get handler fired, id: %s.", id);
     } else {
         log_debug("IQ ping get handler fired.");
@@ -908,7 +908,7 @@ _ping_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     xmpp_stanza_set_attribute(pong, STANZA_ATTR_FROM, to);
     xmpp_stanza_set_attribute(pong, STANZA_ATTR_TYPE, STANZA_TYPE_RESULT);
 
-    if (id != NULL) {
+    if (id) {
         xmpp_stanza_set_attribute(pong, STANZA_ATTR_ID, id);
     }
 
@@ -926,16 +926,16 @@ _version_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ version get handler fired, id: %s.", id);
     } else {
         log_debug("IQ version get handler fired.");
     }
 
-    if (from != NULL) {
+    if (from) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(response, STANZA_NAME_IQ);
-        if (id != NULL) {
+        if (id) {
             xmpp_stanza_set_id(response, id);
         }
         xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
@@ -994,13 +994,13 @@ _disco_items_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ disco items get handler fired, id: %s.", id);
     } else {
         log_debug("IQ disco items get handler fired.");
     }
 
-    if (from != NULL) {
+    if (from) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(response, STANZA_NAME_IQ);
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
@@ -1031,20 +1031,20 @@ _disco_info_get_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
 
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ disco info get handler fired, id: %s.", id);
     } else {
         log_debug("IQ disco info get handler fired.");
     }
 
-    if (from != NULL) {
+    if (from) {
         xmpp_stanza_t *response = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(response, STANZA_NAME_IQ);
         xmpp_stanza_set_id(response, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_attribute(response, STANZA_ATTR_TO, from);
         xmpp_stanza_set_type(response, STANZA_TYPE_RESULT);
         xmpp_stanza_t *query = caps_create_query_response_stanza(ctx);
-        if (node_str != NULL) {
+        if (node_str) {
             xmpp_stanza_set_attribute(query, STANZA_ATTR_NODE, node_str);
         }
         xmpp_stanza_add_child(response, query);
@@ -1063,7 +1063,7 @@ _destroy_room_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
 {
     const char *id = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_ID);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ destroy room result handler fired, id: %s.", id);
     } else {
         log_debug("IQ destroy room result handler fired.");
@@ -1087,7 +1087,7 @@ _room_config_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza,
     const char *type = xmpp_stanza_get_type(stanza);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ room config handler fired, id: %s.", id);
     } else {
         log_debug("IQ room config handler fired.");
@@ -1142,7 +1142,7 @@ static int _room_affiliation_set_result_handler(xmpp_conn_t * const conn, xmpp_s
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     struct privilege_set_t *affiliation_set = (struct privilege_set_t *)userdata;
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ affiliation set handler fired, id: %s.", id);
     } else {
         log_debug("IQ affiliation set handler fired.");
@@ -1171,7 +1171,7 @@ static int _room_role_set_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     struct privilege_set_t *role_set = (struct privilege_set_t *)userdata;
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ role set handler fired, id: %s.", id);
     } else {
         log_debug("IQ role set handler fired.");
@@ -1200,7 +1200,7 @@ _room_affiliation_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * 
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *affiliation = (char *)userdata;
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ affiliation list result handler fired, id: %s.", id);
     } else {
         log_debug("IQ affiliation list result handler fired.");
@@ -1248,7 +1248,7 @@ _room_role_list_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const s
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *role = (char *)userdata;
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ role list result handler fired, id: %s.", id);
     } else {
         log_debug("IQ role list result handler fired.");
@@ -1295,7 +1295,7 @@ _room_config_submit_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
     const char *type = xmpp_stanza_get_type(stanza);
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ room config submit handler fired, id: %s.", id);
     } else {
         log_debug("IQ room config submit handler fired.");
@@ -1322,7 +1322,7 @@ _room_kick_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
     const char *from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     char *nick = (char *)userdata;
 
-    if (id != NULL) {
+    if (id) {
         log_debug("IQ kick result handler fired, id: %s.", id);
     } else {
         log_debug("IQ kick result handler fired.");
@@ -1345,7 +1345,7 @@ _room_kick_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stanza
 static void
 _identity_destroy(DiscoIdentity *identity)
 {
-    if (identity != NULL) {
+    if (identity) {
         free(identity->name);
         free(identity->type);
         free(identity->category);
@@ -1356,7 +1356,7 @@ _identity_destroy(DiscoIdentity *identity)
 static void
 _item_destroy(DiscoItem *item)
 {
-    if (item != NULL) {
+    if (item) {
         free(item->jid);
         free(item->name);
         free(item);
@@ -1385,15 +1385,15 @@ _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
-    if (query != NULL) {
+    if (query) {
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
         GSList *identities = NULL;
         GSList *features = NULL;
-        while (child != NULL) {
+        while (child) {
             const char *stanza_name = xmpp_stanza_get_name(child);
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
-                if (var != NULL) {
+                if (var) {
                     features = g_slist_append(features, strdup(var));
                 }
             } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
@@ -1401,20 +1401,20 @@ _room_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
                 const char *type = xmpp_stanza_get_attribute(child, STANZA_ATTR_TYPE);
                 const char *category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
 
-                if ((name != NULL) || (category != NULL) || (type != NULL)) {
+                if (name || category || type) {
                     DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
 
-                    if (name != NULL) {
+                    if (name) {
                         identity->name = strdup(name);
                     } else {
                         identity->name = NULL;
                     }
-                    if (category != NULL) {
+                    if (category) {
                         identity->category = strdup(category);
                     } else {
                         identity->category = NULL;
                     }
-                    if (type != NULL) {
+                    if (type) {
                         identity->type = strdup(type);
                     } else {
                         identity->type = NULL;
@@ -1469,15 +1469,15 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
 
     xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
-    if (query != NULL) {
+    if (query) {
         xmpp_stanza_t *child = xmpp_stanza_get_children(query);
         GSList *identities = NULL;
         GSList *features = NULL;
-        while (child != NULL) {
+        while (child) {
             const char *stanza_name = xmpp_stanza_get_name(child);
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char *var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
-                if (var != NULL) {
+                if (var) {
                     features = g_slist_append(features, strdup(var));
                 }
             } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
@@ -1485,20 +1485,20 @@ _disco_info_response_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const sta
                 const char *type = xmpp_stanza_get_attribute(child, STANZA_ATTR_TYPE);
                 const char *category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
 
-                if ((name != NULL) || (category != NULL) || (type != NULL)) {
+                if (name || category || type) {
                     DiscoIdentity *identity = malloc(sizeof(struct disco_identity_t));
 
-                    if (name != NULL) {
+                    if (name) {
                         identity->name = strdup(name);
                     } else {
                         identity->name = NULL;
                     }
-                    if (category != NULL) {
+                    if (category) {
                         identity->category = strdup(category);
                     } else {
                         identity->category = NULL;
                     }
-                    if (type != NULL) {
+                    if (type) {
                         identity->type = strdup(type);
                     } else {
                         identity->type = NULL;
@@ -1534,17 +1534,17 @@ _disco_items_result_handler(xmpp_conn_t * const conn, xmpp_stanza_t * const stan
         log_debug("Response to query: %s", id);
         xmpp_stanza_t *query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
 
-        if (query != NULL) {
+        if (query) {
             xmpp_stanza_t *child = xmpp_stanza_get_children(query);
-            while (child != NULL) {
+            while (child) {
                 const char *stanza_name = xmpp_stanza_get_name(child);
-                if ((stanza_name != NULL) && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+                if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
                     const char *item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
-                    if (item_jid != NULL) {
+                    if (item_jid) {
                         DiscoItem *item = malloc(sizeof(struct disco_item_t));
                         item->jid = strdup(item_jid);
                         const char *item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-                        if (item_name != NULL) {
+                        if (item_name) {
                             item->name = strdup(item_name);
                         } else {
                             item->name = NULL;

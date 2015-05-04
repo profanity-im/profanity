@@ -89,7 +89,7 @@ notify_invite(const char * const from, const char * const room,
     g_string_append(message, from);
     g_string_append(message, "\nto: ");
     g_string_append(message, room);
-    if (reason != NULL) {
+    if (reason) {
         g_string_append_printf(message, "\n\"%s\"", reason);
     }
 
@@ -103,7 +103,7 @@ notify_message(const char * const handle, int win, const char * const text)
 {
     GString *message = g_string_new("");
     g_string_append_printf(message, "%s (win %d)", handle, win);
-    if (text != NULL) {
+    if (text) {
         g_string_append_printf(message, "\n%s", text);
     }
 
@@ -117,7 +117,7 @@ notify_room_message(const char * const handle, const char * const room, int win,
 {
     GString *message = g_string_new("");
     g_string_append_printf(message, "%s in %s (win %d)", handle, room, win);
-    if (text != NULL) {
+    if (text) {
         g_string_append_printf(message, "\n%s", text);
     }
 
@@ -274,7 +274,7 @@ _notify(const char * const message, int timeout,
         app_id = "com.googlecode.iterm2";
     }
 
-    if (app_id != NULL) {
+    if (app_id) {
         g_string_append(notify_command, " -sender ");
         g_string_append(notify_command, app_id);
     }

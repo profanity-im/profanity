@@ -115,14 +115,14 @@ prof_handle_idle(void)
         GSList *recipients = ui_get_chat_recipients();
         GSList *curr = recipients;
 
-        while (curr != NULL) {
+        while (curr) {
             char *barejid = curr->data;
             ProfChatWin *chatwin = wins_get_chat(barejid);
             chat_state_handle_idle(chatwin->barejid, chatwin->state);
             curr = g_slist_next(curr);
         }
 
-        if (recipients != NULL) {
+        if (recipients) {
             g_slist_free(recipients);
         }
     }
