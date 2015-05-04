@@ -91,7 +91,11 @@ unsigned long ui_get_idle_time(void)
 }
 
 void ui_reset_idle_time(void) {}
-void ui_new_private_win(const char * const fulljid) {}
+ProfPrivateWin* ui_new_private_win(const char * const fulljid)
+{
+    return NULL;
+}
+
 ProfChatWin* ui_new_chat_win(const char * const barejid)
 {
     return NULL;
@@ -192,7 +196,7 @@ void ui_recipient_gone(const char * const barejid, const char * const resource) 
 
 void ui_outgoing_chat_msg(ProfChatWin *chatwin, const char * const message, char *id) {}
 void ui_outgoing_chat_msg_carbon(const char * const barejid, const char * const message) {}
-void ui_outgoing_private_msg(const char * const fulljid, const char * const message) {}
+void ui_outgoing_private_msg(ProfPrivateWin *privwin, const char * const message) {}
 
 void ui_room_join(const char * const roomjid, gboolean focus) {}
 void ui_switch_to_room(const char * const roomjid) {}
