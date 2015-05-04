@@ -126,8 +126,8 @@ cons_show_typing(const char * const barejid)
     ProfWin *console = wins_get_console();
     const char * display_usr = NULL;
     PContact contact = roster_get_contact(barejid);
-    if (contact != NULL) {
-        if (p_contact_name(contact) != NULL) {
+    if (contact) {
+        if (p_contact_name(contact)) {
             display_usr = p_contact_name(contact);
         } else {
             display_usr = barejid;
@@ -200,7 +200,7 @@ cons_check_version(gboolean not_available_msg)
     ProfWin *console = wins_get_console();
     char *latest_release = release_get_latest();
 
-    if (latest_release != NULL) {
+    if (latest_release) {
         gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
 
         if (relase_valid) {
@@ -247,7 +247,7 @@ cons_show_wins(void)
     GSList *window_strings = wins_create_summary();
 
     GSList *curr = window_strings;
-    while (curr != NULL) {
+    while (curr) {
         win_println(console, curr->data);
         curr = g_slist_next(curr);
     }
@@ -265,7 +265,7 @@ cons_show_room_invites(GSList *invites)
         cons_show("No outstanding chat room invites.");
     } else {
         cons_show("Chat room invites, use /join or /decline commands:");
-        while (invites != NULL) {
+        while (invites) {
             cons_show("  %s", invites->data);
             invites = g_slist_next(invites);
         }
@@ -298,48 +298,48 @@ cons_show_caps(const char * const fulljid, resource_presence_t presence)
         win_print(console, '-', NULL, NO_DATE, 0, "", ":");
 
         // show identity
-        if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+        if (caps->category || caps->type || caps->name) {
             win_print(console, '-', NULL, NO_EOL, 0, "", "Identity: ");
-            if (caps->name != NULL) {
+            if (caps->name) {
                 win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                if ((caps->category != NULL) || (caps->type != NULL)) {
+                if (caps->category || caps->type) {
                     win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->type != NULL) {
+            if (caps->type) {
                 win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                if (caps->category != NULL) {
+                if (caps->category) {
                     win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                 }
             }
-            if (caps->category != NULL) {
+            if (caps->category) {
                 win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
             }
             win_newline(console);
         }
-        if (caps->software != NULL) {
+        if (caps->software) {
             win_vprint(console, '-', NULL, NO_EOL, 0, "", "Software: %s", caps->software);
         }
-        if (caps->software_version != NULL) {
+        if (caps->software_version) {
             win_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
         }
-        if ((caps->software != NULL) || (caps->software_version != NULL)) {
+        if (caps->software || caps->software_version) {
             win_newline(console);
         }
-        if (caps->os != NULL) {
+        if (caps->os) {
             win_vprint(console, '-', NULL, NO_EOL, 0, "", "OS: %s", caps->os);
         }
-        if (caps->os_version != NULL) {
+        if (caps->os_version) {
             win_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
         }
-        if ((caps->os != NULL) || (caps->os_version != NULL)) {
+        if (caps->os || caps->os_version) {
             win_newline(console);
         }
 
-        if (caps->features != NULL) {
+        if (caps->features) {
             win_println(console, "Features:");
             GSList *feature = caps->features;
-            while (feature != NULL) {
+            while (feature) {
                 win_vprint(console, '-', NULL, 0, 0, "", " %s", feature->data);
                 feature = g_slist_next(feature);
             }
@@ -358,19 +358,19 @@ cons_show_software_version(const char * const jid, const char * const  presence,
     const char * const name, const char * const version, const char * const os)
 {
     ProfWin *console = wins_get_console();
-    if ((name != NULL) || (version != NULL) || (os != NULL)) {
+    if (name || version || os) {
         cons_show("");
         theme_item_t presence_colour = theme_main_presence_attrs(presence);
         win_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "%s", jid);
         win_print(console, '-', NULL, NO_DATE, 0, "", ":");
     }
-    if (name != NULL) {
+    if (name) {
         cons_show("Name    : %s", name);
     }
-    if (version != NULL) {
+    if (version) {
         cons_show("Version : %s", version);
     }
-    if (os != NULL) {
+    if (os) {
         cons_show("OS      : %s", os);
     }
 
@@ -386,7 +386,7 @@ cons_show_received_subs(void)
     } else {
         cons_show("Outstanding subscription requests from:",
             g_slist_length(received));
-        while (received != NULL) {
+        while (received) {
             cons_show("  %s", received->data);
             received = g_slist_next(received);
         }
@@ -404,7 +404,7 @@ cons_show_sent_subs(void)
         PContact contact = NULL;
         cons_show("Awaiting subscription responses from:");
         GSList *curr = contacts;
-        while (curr != NULL) {
+        while (curr) {
             contact = (PContact) curr->data;
             if (p_contact_pending_out(contact)) {
                 cons_show("  %s", p_contact_barejid(contact));
@@ -422,12 +422,12 @@ void
 cons_show_room_list(GSList *rooms, const char * const conference_node)
 {
     ProfWin *console = wins_get_console();
-    if ((rooms != NULL) && (g_slist_length(rooms) > 0)) {
+    if (rooms && (g_slist_length(rooms) > 0)) {
         cons_show("Chat rooms at %s:", conference_node);
-        while (rooms != NULL) {
+        while (rooms) {
             DiscoItem *room = rooms->data;
             win_vprint(console, '-', NULL, NO_EOL, 0, "", "  %s", room->jid);
-            if (room->name != NULL) {
+            if (room->name) {
                 win_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", (%s)", room->name);
             }
             win_newline(console);
@@ -452,7 +452,7 @@ cons_show_bookmarks(const GList *list)
         cons_show("");
         cons_show("Bookmarks:");
 
-        while (list != NULL) {
+        while (list) {
             Bookmark *item = list->data;
 
             theme_item_t presence_colour = THEME_TEXT;
@@ -461,18 +461,18 @@ cons_show_bookmarks(const GList *list)
                 presence_colour = THEME_ONLINE;
             }
             win_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s", item->jid);
-            if (item->nick != NULL) {
+            if (item->nick) {
                 win_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", "/%s", item->nick);
             }
             if (item->autojoin) {
                 win_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (autojoin)");
             }
-            if (item->password != NULL) {
+            if (item->password) {
                 win_print(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (private)");
             }
             if (muc_active(item->jid)) {
                 ProfWin *roomwin = (ProfWin*)wins_get_muc(item->jid);
-                if (roomwin != NULL) {
+                if (roomwin) {
                     int num = wins_get_num(roomwin);
                     win_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", " (%d)", num);
                 }
@@ -487,26 +487,26 @@ cons_show_bookmarks(const GList *list)
 void
 cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
 {
-    if (((identities != NULL) && (g_slist_length(identities) > 0)) ||
-        ((features != NULL) && (g_slist_length(features) > 0))) {
+    if ((identities && (g_slist_length(identities) > 0)) ||
+        (features && (g_slist_length(features) > 0))) {
         cons_show("");
         cons_show("Service disovery info for %s", jid);
 
-        if (identities != NULL) {
+        if (identities) {
             cons_show("  Identities");
         }
-        while (identities != NULL) {
+        while (identities) {
             DiscoIdentity *identity = identities->data;  // anme trpe, cat
             GString *identity_str = g_string_new("    ");
-            if (identity->name != NULL) {
+            if (identity->name) {
                 identity_str = g_string_append(identity_str, identity->name);
                 identity_str = g_string_append(identity_str, " ");
             }
-            if (identity->type != NULL) {
+            if (identity->type) {
                 identity_str = g_string_append(identity_str, identity->type);
                 identity_str = g_string_append(identity_str, " ");
             }
-            if (identity->category != NULL) {
+            if (identity->category) {
                 identity_str = g_string_append(identity_str, identity->category);
             }
             cons_show(identity_str->str);
@@ -514,10 +514,10 @@ cons_show_disco_info(const char *jid, GSList *identities, GSList *features)
             identities = g_slist_next(identities);
         }
 
-        if (features != NULL) {
+        if (features) {
             cons_show("  Features:");
         }
-        while (features != NULL) {
+        while (features) {
             cons_show("    %s", features->data);
             features = g_slist_next(features);
         }
@@ -530,13 +530,13 @@ void
 cons_show_disco_items(GSList *items, const char * const jid)
 {
     ProfWin *console = wins_get_console();
-    if ((items != NULL) && (g_slist_length(items) > 0)) {
+    if (items && (g_slist_length(items) > 0)) {
         cons_show("");
         cons_show("Service discovery items for %s:", jid);
-        while (items != NULL) {
+        while (items) {
             DiscoItem *item = items->data;
             win_vprint(console, '-', NULL, NO_EOL, 0, "", "  %s", item->jid);
-            if (item->name != NULL) {
+            if (item->name) {
                 win_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", (%s)", item->name);
             }
             win_vprint(console, '-', NULL, NO_DATE, 0, "", "");
@@ -556,7 +556,7 @@ cons_show_status(const char * const barejid)
     ProfWin *console = wins_get_console();
     PContact pcontact = roster_get_contact(barejid);
 
-    if (pcontact != NULL) {
+    if (pcontact) {
         win_show_contact(console, pcontact);
     } else {
         cons_show("No such contact \"%s\" in roster.", barejid);
@@ -571,8 +571,8 @@ cons_show_room_invite(const char * const invitor, const char * const room,
 {
     char *display_from = NULL;
     PContact contact = roster_get_contact(invitor);
-    if (contact != NULL) {
-        if (p_contact_name(contact) != NULL) {
+    if (contact) {
+        if (p_contact_name(contact)) {
             display_from = strdup(p_contact_name(contact));
         } else {
             display_from = strdup(invitor);
@@ -586,7 +586,7 @@ cons_show_room_invite(const char * const invitor, const char * const room,
     cons_show("  From   : %s", display_from);
     cons_show("  Room   : %s", room);
 
-    if (reason != NULL) {
+    if (reason) {
         cons_show("  Message: %s", reason);
     }
 
@@ -673,9 +673,9 @@ cons_show_account(ProfAccount *account)
     if (g_list_length(account->otr_manual) > 0) {
         GString *manual = g_string_new("OTR manual        : ");
         GList *curr = account->otr_manual;
-        while (curr != NULL) {
+        while (curr) {
             g_string_append(manual, curr->data);
-            if (curr->next != NULL) {
+            if (curr->next) {
                 g_string_append(manual, ", ");
             }
             curr = curr->next;
@@ -686,9 +686,9 @@ cons_show_account(ProfAccount *account)
     if (g_list_length(account->otr_opportunistic) > 0) {
         GString *opportunistic = g_string_new("OTR opportunistic : ");
         GList *curr = account->otr_opportunistic;
-        while (curr != NULL) {
+        while (curr) {
             g_string_append(opportunistic, curr->data);
-            if (curr->next != NULL) {
+            if (curr->next) {
                 g_string_append(opportunistic, ", ");
             }
             curr = curr->next;
@@ -699,9 +699,9 @@ cons_show_account(ProfAccount *account)
     if (g_list_length(account->otr_always) > 0) {
         GString *always = g_string_new("OTR always        : ");
         GList *curr = account->otr_always;
-        while (curr != NULL) {
+        while (curr) {
             g_string_append(always, curr->data);
-            if (curr->next != NULL) {
+            if (curr->next) {
                 g_string_append(always, ", ");
             }
             curr = curr->next;
@@ -720,11 +720,11 @@ cons_show_account(ProfAccount *account)
         GList *ordered_resources = NULL;
 
         GList *curr = resources;
-        if (curr != NULL) {
+        if (curr) {
             win_println(console, "Resources:");
 
             // sort in order of availability
-            while (curr != NULL) {
+            while (curr) {
                 Resource *resource = curr->data;
                 ordered_resources = g_list_insert_sorted(ordered_resources,
                     resource, (GCompareFunc)resource_compare_availability);
@@ -735,13 +735,13 @@ cons_show_account(ProfAccount *account)
         g_list_free(resources);
 
         curr = ordered_resources;
-        while (curr != NULL) {
+        while (curr) {
             Resource *resource = curr->data;
             const char *resource_presence = string_from_resource_presence(resource->presence);
             theme_item_t presence_colour = theme_main_presence_attrs(resource_presence);
             win_vprint(console, '-', NULL, NO_EOL, presence_colour, "", "  %s (%d), %s", resource->name, resource->priority, resource_presence);
 
-            if (resource->status != NULL) {
+            if (resource->status) {
                 win_vprint(console, '-', NULL, NO_DATE | NO_EOL, presence_colour, "", ", \"%s\"", resource->status);
             }
             win_vprint(console, '-', NULL, NO_DATE, 0, "", "");
@@ -749,43 +749,43 @@ cons_show_account(ProfAccount *account)
             Capabilities *caps = caps_lookup(jidp->fulljid);
             jid_destroy(jidp);
 
-            if (caps != NULL) {
+            if (caps) {
                 // show identity
-                if ((caps->category != NULL) || (caps->type != NULL) || (caps->name != NULL)) {
+                if (caps->category || caps->type || caps->name) {
                     win_print(console, '-', NULL, NO_EOL, 0, "", "    Identity: ");
-                    if (caps->name != NULL) {
+                    if (caps->name) {
                         win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->name);
-                        if ((caps->category != NULL) || (caps->type != NULL)) {
+                        if (caps->category || caps->type) {
                             win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
-                    if (caps->type != NULL) {
+                    if (caps->type) {
                         win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->type);
-                        if (caps->category != NULL) {
+                        if (caps->category) {
                             win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", " ");
                         }
                     }
-                    if (caps->category != NULL) {
+                    if (caps->category) {
                         win_print(console, '-', NULL, NO_DATE | NO_EOL, 0, "", caps->category);
                     }
                     win_newline(console);
                 }
-                if (caps->software != NULL) {
+                if (caps->software) {
                     win_vprint(console, '-', NULL, NO_EOL, 0, "", "    Software: %s", caps->software);
                 }
-                if (caps->software_version != NULL) {
+                if (caps->software_version) {
                     win_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->software_version);
                 }
-                if ((caps->software != NULL) || (caps->software_version != NULL)) {
+                if (caps->software || caps->software_version) {
                     win_newline(console);
                 }
-                if (caps->os != NULL) {
+                if (caps->os) {
                     win_vprint(console, '-', NULL, NO_EOL, 0, "", "    OS: %s", caps->os);
                 }
-                if (caps->os_version != NULL) {
+                if (caps->os_version) {
                     win_vprint(console, '-', NULL, NO_DATE | NO_EOL, 0, "", ", %s", caps->os_version);
                 }
-                if ((caps->os != NULL) || (caps->os_version != NULL)) {
+                if (caps->os || caps->os_version) {
                     win_newline(console);
                 }
                 caps_destroy(caps);
@@ -808,10 +808,10 @@ cons_show_aliases(GList *aliases)
     }
 
     GList *curr = aliases;
-    if (curr != NULL) {
+    if (curr) {
         cons_show("Command aliases:");
     }
-    while (curr != NULL) {
+    while (curr) {
         ProfAlias *alias = curr->data;
         cons_show("  /%s -> %s", alias->name, alias->value);
         curr = g_list_next(curr);
@@ -919,7 +919,7 @@ void
 cons_autoconnect_setting(void)
 {
     char *pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
-    if (pref_connect_account != NULL)
+    if (pref_connect_account)
         cons_show("Autoconnect (/autoconnect)      : %s", pref_connect_account);
     else
         cons_show("Autoconnect (/autoconnect)      : OFF");
@@ -1412,7 +1412,7 @@ cons_show_themes(GSList *themes)
         cons_show("No available themes.");
     } else {
         cons_show("Available themes:");
-        while (themes != NULL) {
+        while (themes) {
             cons_show(themes->data);
             themes = g_slist_next(themes);
         }
@@ -1484,7 +1484,7 @@ cons_show_roster_group(const char * const group, GSList *list)
 {
     cons_show("");
 
-    if (list != NULL) {
+    if (list) {
         cons_show("%s:", group);
     } else {
         cons_show("No group named %s exists.", group);
@@ -1628,7 +1628,7 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
         PContact contact = curr->data;
         GString *title = g_string_new("  ");
         title = g_string_append(title, p_contact_barejid(contact));
-        if (p_contact_name(contact) != NULL) {
+        if (p_contact_name(contact)) {
             title = g_string_append(title, " (");
             title = g_string_append(title, p_contact_name(contact));
             title = g_string_append(title, ")");
@@ -1670,11 +1670,11 @@ _show_roster_contacts(GSList *list, gboolean show_groups)
 
         if (show_groups) {
             GSList *groups = p_contact_groups(contact);
-            if (groups != NULL) {
+            if (groups) {
                 GString *groups_str = g_string_new(" - ");
-                while (groups != NULL) {
+                while (groups) {
                     g_string_append(groups_str, groups->data);
-                    if (g_slist_next(groups) != NULL) {
+                    if (g_slist_next(groups)) {
                         g_string_append(groups_str, ", ");
                     }
                     groups = g_slist_next(groups);
