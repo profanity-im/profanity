@@ -2056,7 +2056,7 @@ _cmd_complete_parameters(const char * const input)
     g_hash_table_destroy(ac_funcs);
 
     result = plugins_autocomplete(input);
-    if (result != NULL) {
+    if (result) {
         if (result) {
             return result;
         }

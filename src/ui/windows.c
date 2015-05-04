@@ -172,7 +172,7 @@ wins_get_plugin(const char * const tag)
     GList *values = g_hash_table_get_values(windows);
     GList *curr = values;
 
-    while (curr != NULL) {
+    while (curr) {
         ProfWin *window = curr->data;
         if (window->type == WIN_PLUGIN) {
             ProfPluginWin *pluginwin = (ProfPluginWin*)window;

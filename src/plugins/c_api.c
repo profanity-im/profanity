@@ -62,7 +62,7 @@ c_api_cons_alert(void)
 static void
 c_api_cons_show(const char * const message)
 {
-    if (message != NULL) {
+    if (message) {
         api_cons_show(message);
     }
 }

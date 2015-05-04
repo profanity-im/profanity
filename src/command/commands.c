@@ -4068,7 +4068,7 @@ cmd_plugins(gchar **args, struct cmd_help_t help)
         cons_show("No plugins installed.");
     } else {
         cons_show("Installed plugins:");
-        while (curr != NULL) {
+        while (curr) {
             ProfPlugin *plugin = curr->data;
             char *lang = plugins_get_lang_string(plugin);
             cons_show("  %s (%s)", plugin->name, lang);
