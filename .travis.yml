@@ -23,4 +23,4 @@ install:
     - cd ../..
     - rm -rf cmocka-1.0.0
     - ./bootstrap.sh
-script: ./configure --enable-ruby-plugins --enable-python-plugins --enable-c-plugins --disable-lua-plugins && make && make check
+script: ./configure --disable-ruby-plugins --enable-python-plugins --enable-c-plugins --disable-lua-plugins && make && make check

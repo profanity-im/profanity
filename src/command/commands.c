@@ -130,7 +130,7 @@ cmd_execute_default(const char * inp)
     case WIN_MUC:
     {
         ProfMucWin *mucwin = wins_get_current_muc();
-        cl_ev_send_muc_msg(mucwin->roomjid, inp);
+        cl_ev_send_muc_msg(mucwin, inp);
         break;
     }
     default:
@@ -3163,7 +3163,7 @@ cmd_tiny(gchar **args, struct cmd_help_t help)
     case WIN_MUC:
     {
         ProfMucWin *mucwin = wins_get_current_muc();
-        cl_ev_send_muc_msg(mucwin->roomjid, tiny);
+        cl_ev_send_muc_msg(mucwin, tiny);
         break;
     }
     default:

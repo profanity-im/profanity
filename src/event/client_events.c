@@ -82,13 +82,13 @@ cl_ev_send_msg(ProfChatWin *chatwin, const char * const msg)
 }
 
 void
-cl_ev_send_muc_msg(const char * const roomjid, const char * const msg)
+cl_ev_send_muc_msg(ProfMucWin *mucwin, const char * const msg)
 {
-    char *plugin_msg = plugins_pre_room_message_send(roomjid, msg);
+    char *plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
 
-    message_send_groupchat(roomjid, msg);
+    message_send_groupchat(mucwin->roomjid, plugin_msg);
 
-    plugins_post_room_message_send(roomjid, plugin_msg);
+    plugins_post_room_message_send(mucwin->roomjid, plugin_msg);
     free(plugin_msg);
 }
 
