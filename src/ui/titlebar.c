@@ -252,7 +252,7 @@ _show_privacy(ProfChatWin *chatwin)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
 
-    if (!chatwin->is_otr) {
+    if (chatwin->enc_mode == PROF_ENC_NONE) {
         if (prefs_get_boolean(PREF_OTR_WARN)) {
             int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
             wprintw(win, " ");
